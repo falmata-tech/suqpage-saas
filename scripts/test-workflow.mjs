@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
 const workflow = fs.readFileSync(".github/workflows/quality.yml", "utf8");
@@ -41,4 +42,27 @@ for (const [action, tag] of [
 
 assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
-console.log("GitHub release, browser, container, Node baseline, and action pinning contracts passed.");
+assert.equal(packageJson.scripts.typecheck, "next typegen && tsc --noEmit");
+assert.equal(packageJson.engines.node, ">=22.16.0");
+
+const status = () => {
+  const result = spawnSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr || "Could not inspect Git status");
+  return result.stdout;
+};
+const beforeTypegen = status();
+const typegen = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "typegen"], { encoding: "utf8" });
+assert.equal(typegen.status, 0, typegen.stderr || typegen.stdout || "Next.js type generation failed");
+assert.equal(status(), beforeTypegen, "Next.js type generation must not change tracked worktree status");
+assert.equal(
+  spawnSync("git", ["check-ignore", "-q", "next-env.d.ts"]).status,
+  0,
+  "next-env.d.ts must be ignored as generated framework output",
+);
+assert.notEqual(
+  spawnSync("git", ["ls-files", "--error-unmatch", "next-env.d.ts"]).status,
+  0,
+  "next-env.d.ts must not be tracked",
+);
+
+console.log("GitHub gates, Node baseline, action pinning, and generated type contracts passed.");
