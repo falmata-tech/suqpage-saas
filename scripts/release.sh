@@ -7,6 +7,9 @@ node scripts/validate-specs.mjs
 printf '\n=== Production build ===\n'
 NEXT_TELEMETRY_DISABLED=1 node node_modules/next/dist/bin/next build
 
+printf '\n=== Output-file trace privacy validation ===\n'
+node scripts/test-build-trace.mjs
+
 printf '\n=== Production HTTP smoke tests ===\n'
 node scripts/http-smoke.mjs
 

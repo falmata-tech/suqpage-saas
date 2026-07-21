@@ -100,6 +100,7 @@ try {
     `if(!origins.includes('suqpage.test')||!origins.includes('${proxyOrigin}')||origins.some((origin)=>origin.includes('*')))process.exit(1);`,
   ].join("");
   run(["run", "--rm", image, "node", "-e", originProbe]);
+  run(["run", "--rm", image, "npm", "run", "test:trace"]);
 
   run(["volume", "create", volume], { capture: true });
   const environment = [

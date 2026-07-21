@@ -88,7 +88,7 @@ export async function saveUploadedImage(file: FormDataEntryValue | null, existin
 export function resolveMediaFile(filename: string) {
   if (!/^[a-z0-9-]+-[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(filename)) return null;
   const root = mediaRoot();
-  const full = path.resolve(root, filename);
+  const full = path.resolve(/* turbopackIgnore: true */ root, filename);
   if (!full.startsWith(`${root}${path.sep}`)) return null;
   return full;
 }

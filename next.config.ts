@@ -44,6 +44,29 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  outputFileTracingExcludes: {
+    "/*": [
+      "./.env*",
+      "./.git/**/*",
+      "./.local/**/*",
+      "./backups/**/*",
+      "./data/**/*",
+      "./public/uploads/runtime/**/*",
+      "./test-results/**/*",
+      "./playwright-report/**/*",
+      "./app/**/*",
+      "./docs/**/*",
+      "./lib/**/*",
+      "./scripts/**/*",
+      "./showroom-sdk/**/*",
+      "./specs/**/*",
+      "./public/**/*",
+      "./*.md",
+      "./Dockerfile",
+      "./docker-compose.yml",
+      "./package-lock.json",
+    ],
+  },
   async headers() { return [{ source: "/(.*)", headers: securityHeaders }]; },
 };
 export default nextConfig;

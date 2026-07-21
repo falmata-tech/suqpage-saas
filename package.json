@@ -18,6 +18,7 @@
     "test:http": "node scripts/http-smoke.mjs",
     "test:acceptance": "node scripts/acceptance-runner.mjs",
     "test:container": "node scripts/test-container.mjs",
+    "test:trace": "node scripts/test-build-trace.mjs",
     "test:operations": "node scripts/test-operations.mjs",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",

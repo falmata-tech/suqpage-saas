@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const workflow = fs.readFileSync(".github/workflows/quality.yml", "utf8");
 const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
 
 function job(name, nextName) {
   const start = workflow.indexOf(`  ${name}:\n`);
@@ -42,6 +43,8 @@ for (const [action, tag] of [
 
 assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
+assert.equal(packageJson.scripts["test:trace"], "node scripts/test-build-trace.mjs");
+assert.match(releaseScript, /node scripts\/test-build-trace\.mjs/, "Release must reject private output-file traces");
 assert.equal(packageJson.scripts.typecheck, "next typegen && tsc --noEmit");
 assert.equal(packageJson.engines.node, ">=22.16.0");
 
