@@ -1,0 +1,29 @@
+# Source-control and local tooling state
+.git
+.github
+.agents
+.codex
+.vscode
+
+# Dependencies and framework/test output are rebuilt inside the image
+node_modules
+.next
+out
+test-results
+playwright-report
+*.tsbuildinfo
+*.log
+
+# Environment files and generated credentials
+.env
+.env.*
+!.env.example
+.local
+
+# Persistent runtime/customer state must never enter the build context
+data
+backups
+public/uploads/runtime
+
+# Local operating-system files
+.DS_Store

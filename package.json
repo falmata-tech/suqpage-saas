@@ -17,6 +17,7 @@
     "test:adapters": "tsx scripts/test-adapters.ts",
     "test:http": "node scripts/http-smoke.mjs",
     "test:acceptance": "node scripts/acceptance-runner.mjs",
+    "test:container": "node scripts/test-container.mjs",
     "test:operations": "node scripts/test-operations.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",

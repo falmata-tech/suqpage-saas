@@ -81,6 +81,12 @@ To verify migration idempotence plus database/media backup and restore:
 npm run test:operations
 ```
 
+To build and exercise the production image with disposable Docker resources:
+
+```bash
+npm run test:container
+```
+
 ## Production environment
 
 Create a production `.env` with absolute persistent paths:
@@ -140,7 +146,10 @@ Old uploads stored under `public/uploads/runtime` should be re-uploaded through 
 
 ## Docker deployment
 
-Set `NEXT_PUBLIC_APP_URL` and `PRIVACY_SALT` in a `.env` file, then initialize the persistent volume:
+Set `NEXT_PUBLIC_APP_URL`, any exact `SUQPAGE_SERVER_ACTION_ORIGINS`, and
+`PRIVACY_SALT` in a `.env` file. The URL and trusted origins are supplied to both
+the build and runtime because Next.js compiles Server Action origin policy into
+the production artifact. Then initialize the persistent volume:
 
 ```bash
 docker compose build
