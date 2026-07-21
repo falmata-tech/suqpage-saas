@@ -16,6 +16,8 @@
 - [ ] Configure HTTPS and proxy forwarding.
 - [ ] Create a backup and perform a test restore.
 - [ ] Confirm `/api/health` is monitored.
+- [ ] Require pull requests plus the `core`, `browser`, and `container` GitHub
+      checks on `main`; block force-pushes and branch deletion.
 - [ ] Confirm the real privacy and operating terms are acceptable for the launch jurisdiction.
 
 ## Pilot operations
