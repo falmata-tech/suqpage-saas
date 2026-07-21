@@ -124,4 +124,4 @@ const credentialText=["SuqPage temporary local credentials","Change every passwo
 fs.writeFileSync(credentialPath,credentialText,{mode:0o600});
 console.log(`SuqPage database created at ${dbPath}`);
 console.log(`Temporary credentials written to ${credentialPath}`);
-console.log(credentialText);
+if (process.env.SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT !== "1") console.log(credentialText);

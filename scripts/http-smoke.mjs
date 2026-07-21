@@ -23,6 +23,7 @@ const env = {
   SUQPAGE_DB_PATH: path.join(root, 'app.db'),
   SUQPAGE_MEDIA_ROOT: path.join(root, 'media'),
   SUQPAGE_CREDENTIAL_PATH: path.join(root, 'seed-credentials.txt'),
+  SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1',
   PRIVACY_SALT: 'http-test-privacy-salt-long-enough',
   NEXT_PUBLIC_APP_URL: baseUrl,
   PORT: String(port),

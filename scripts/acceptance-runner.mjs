@@ -28,14 +28,25 @@ const env = {
   SUQPAGE_TEST_BASE_URL: baseURL,
   SUQPAGE_TEST_CREDENTIALS: credentialsPath,
   SUQPAGE_TEST_DB: path.join(root, "acceptance.db"),
+  SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
 };
 
-function run(command, args) {
-  const result = spawnSync(command, args, { cwd: process.cwd(), env, stdio: "inherit" });
-  if (result.status !== 0) throw new Error(`${command} exited with ${result.status}`);
+function run(command, args, { capture = false } = {}) {
+  const result = spawnSync(command, args, {
+    cwd: process.cwd(),
+    env,
+    ...(capture ? { encoding: "utf8" } : { stdio: "inherit" }),
+  });
+  if (result.status !== 0) {
+    if (capture && result.stderr) process.stderr.write(result.stderr);
+    throw new Error(`${command} exited with ${result.status}`);
+  }
+  return capture ? result.stdout : "";
 }
 
-run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"]);
+const setupOutput = run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"], { capture: true });
+if (/^(?:ADMIN|OWNER) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
+for (const line of setupOutput.split("\n").filter((value) => value.startsWith("SuqPage database") || value.startsWith("Temporary credentials"))) console.log(line);
 run(process.execPath, ["node_modules/next/dist/bin/next", "build"]);
 
 const app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port)], {

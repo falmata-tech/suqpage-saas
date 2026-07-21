@@ -1,6 +1,17 @@
 import { test, expect, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import { DatabaseSync } from "node:sqlite";
+import path from "node:path";
+
+type AcceptanceProbe = "inquiryByCustomer" | "productStockByName" | "deliveryByAddress";
+const readAcceptanceRow = (probe: AcceptanceProbe, value: string) =>
+  JSON.parse(
+    execFileSync(
+      process.execPath,
+      [path.join(process.cwd(), "scripts/acceptance-db-probe.mjs"), process.env.SUQPAGE_TEST_DB!, probe, value],
+      { encoding: "utf8" },
+    ),
+  ) as Record<string, unknown> | null;
 
 const credentials = fs.readFileSync(process.env.SUQPAGE_TEST_CREDENTIALS!, "utf8");
 const passwordFor = (email: string) => {
@@ -81,9 +92,7 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await page.getByPlaceholder("Delivery area or another question").fill("Acceptance test inquiry");
   await page.getByRole("button", { name: "Share / copy" }).click();
   await expect(page.getByText("Message", { exact: true })).toBeVisible();
-  const db = new DatabaseSync(process.env.SUQPAGE_TEST_DB!, { readOnly: true });
-  const saved = db.prepare("SELECT status,contact FROM inquiries WHERE customer_name=? ORDER BY id DESC LIMIT 1").get("Browser Tester");
-  db.close();
+  const saved = readAcceptanceRow("inquiryByCustomer", "Browser Tester");
   expect(saved).toEqual({ status: "new", contact: "251900123456" });
   expect(errors).toEqual([]);
 });
@@ -174,11 +183,9 @@ test("owner catalog, inquiry, delivery, and role isolation workflows persist", a
   await page.locator('input[name="deliveryAddress"]').fill("Acceptance destination");
   await page.getByRole("button", { name: "Submit to Malikt Board" }).click();
   await expect(page.getByText(/submitted to the mock Malikt Board/)).toBeVisible();
-  const db = new DatabaseSync(process.env.SUQPAGE_TEST_DB!, { readOnly: true });
-  expect(db.prepare("SELECT stock_count FROM products WHERE name='Acceptance Scarf'").get()).toEqual({ stock_count: 3 });
-  expect(db.prepare("SELECT status FROM inquiries WHERE customer_name='Browser Tester' ORDER BY id DESC LIMIT 1").get()).toEqual({ status: "confirmed" });
-  expect(db.prepare("SELECT status FROM delivery_requests WHERE delivery_address='Acceptance destination'").get()).toEqual({ status: "submitted" });
-  db.close();
+  expect(readAcceptanceRow("productStockByName", "Acceptance Scarf")).toEqual({ stock_count: 3 });
+  expect(readAcceptanceRow("inquiryByCustomer", "Browser Tester")).toMatchObject({ status: "confirmed" });
+  expect(readAcceptanceRow("deliveryByAddress", "Acceptance destination")).toEqual({ status: "submitted" });
   expect(errors).toEqual([]);
 });
 
