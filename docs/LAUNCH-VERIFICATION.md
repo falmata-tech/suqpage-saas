@@ -1,7 +1,7 @@
 # SuqPage SaaS MVP — Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-07-20
+**Verification date:** 2026-07-21
 **Reviewed input:** the uploaded SuqPage SaaS MVP and independent launch audit
 
 ## Verdict
@@ -20,6 +20,7 @@ This approval has two explicit boundaries:
 The final `npm run release` completed successfully and ran:
 
 - Next.js production build
+- output-file trace privacy validation
 - production HTTP smoke tests
 - TypeScript validation
 - four-renderer integration validation
@@ -27,6 +28,26 @@ The final `npm run release` completed successfully and ran:
 - production dependency audit
 
 **Dependency audit:** 0 vulnerabilities.
+
+## Delivery hardening evidence
+
+DEP-002 was completed from a clean tracked worktree on Node 22.16 or newer:
+
+- `npm ci` reproduced the locked install with 0 reported vulnerabilities.
+- `npm run check` and `npm run test:operations` passed.
+- the production browser suite passed all five public, mobile, administrator,
+  owner, API, authorization, validation, health, and security-header scenarios.
+- `npm run release` compiled without the previous unbounded trace warning and
+  validated 27 output-file traces with no private runtime paths.
+- `npm run test:container` used a 12.06 kB Docker context and passed exact
+  Server Action origin, non-root runtime, credential-log, preflight, health,
+  trace-privacy, and cleanup assertions.
+- generated Next.js declarations remained ignored and development/type
+  generation did not dirty tracked Git state.
+
+GitHub must run the committed workflow after push. A repository administrator
+must then require its `core`, `browser`, and `container` checks and block branch
+deletion and force-push before merge protection is considered active.
 
 ## Production HTTP evidence
 

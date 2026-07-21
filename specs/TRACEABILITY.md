@@ -12,7 +12,7 @@ Evidence must be reproducible; avoid transient chat claims.
 | Backup, restore, migration, release, CI acceptance | FE_BASE | BE_BASE | DEP-001 | `scripts/migrate.ts`, `scripts/backup.ts`, `scripts/restore.ts`, `scripts/release.sh`, `scripts/acceptance-runner.mjs`, `scripts/acceptance-db-probe.mjs` | `scripts/test-operations.mjs`, `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` | done |
 | Accessible forms and modal focus | FE-002 | — | — | `app/**`, `components/showroom/ShowroomApp.tsx` | `tests/acceptance/app.spec.ts` (production browser label/focus audit) | done |
 | Login and adapter failure boundaries | — | BE-002 | — | `app/actions.ts`, `app/api/malikt/requests/route.ts`, `lib/notifications.ts` | `scripts/test-adapters.ts`, `tests/acceptance/app.spec.ts`, `scripts/release.sh` | done |
-| Reproducible delivery and repository hygiene | — | — | DEP-002 | Planned: Docker context, release/CI, generated types, proxy origins, media tracing | Planned: `scripts/test-container.mjs`, `scripts/test-workflow.mjs`, release and acceptance gates | ready |
+| Reproducible delivery and repository hygiene | — | — | DEP-002 | `.dockerignore`, `Dockerfile`, `compose.yaml`, `.github/workflows/quality.yml`, `next.config.ts`, `lib/config.ts`, `lib/media.ts`, `scripts/release.sh` | `scripts/test-container.mjs`, `scripts/test-workflow.mjs`, `scripts/test-build-trace.mjs`, `scripts/test-operations.mjs`, `tests/acceptance/app.spec.ts`, `npm run release` | done |
 
 `baseline` means existing behavior is tested but should receive dedicated feature
 specs before a material behavior change.

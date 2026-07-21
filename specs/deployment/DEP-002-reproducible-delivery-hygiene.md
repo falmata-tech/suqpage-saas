@@ -1,7 +1,7 @@
 ---
 id: DEP-002
 title: Reproducible delivery and repository hygiene
-status: in_progress
+status: done
 related: [DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
 last_updated: 2026-07-21
@@ -180,4 +180,25 @@ never target production resources.
 
 ## Completion evidence
 
-Filled only when `status: done` after every mapped gate passes.
+Evidence: verified on 2026-07-21 from a clean tracked worktree:
+
+- `npm ci` completed from the lockfile with 0 reported vulnerabilities.
+- `npm run check` passed specification, workflow-contract, generated-type,
+  TypeScript, design, security, and adapter validation.
+- `npm run test:operations` passed migration, integrity, backup, and restore
+  coverage.
+- Node 22.16 ran `scripts/acceptance-runner.mjs`; all five production browser
+  scenarios passed across public, mobile, administrator, owner, API,
+  authorization, validation, health, and security-header behavior.
+- `npm run release` passed the production build without the previous unbounded
+  trace warning, validated 27 output-file traces with no private runtime paths,
+  passed HTTP smoke tests and reported 0 production vulnerabilities.
+- `npm run test:container` built from a 12.06 kB context, revalidated all 27
+  traces inside the image, and passed exact-origin, non-root preflight, health,
+  credential-log, and cleanup assertions.
+- Running type generation and development startup left tracked Git state clean.
+
+The implementation and automated evidence are complete. The `core`, `browser`,
+and `container` checks must still be enabled as required merge checks by a
+repository administrator after this branch is pushed and the workflows pass on
+GitHub; that remote rollout does not alter this code-level completion claim.
