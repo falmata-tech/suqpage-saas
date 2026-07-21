@@ -4,7 +4,7 @@ title: Single-instance SQLite controlled pilot
 status: accepted
 date: 2026-07-20
 deciders: [SuqPage]
-related: [BE_BASE, DEP_BASE]
+related: [BE_BASE, DEP_BASE, DEP-002]
 ---
 
 # ADR-0002 — Single-instance SQLite controlled pilot

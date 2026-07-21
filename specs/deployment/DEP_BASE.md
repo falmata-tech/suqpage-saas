@@ -2,9 +2,9 @@
 id: DEP_BASE
 title: Deployment and operations base architecture
 status: done
-related: [FE_BASE, BE_BASE, ADR-0002]
+related: [FE_BASE, BE_BASE, DEP-002, ADR-0002]
 owners: [operations, security]
-last_updated: 2026-07-20
+last_updated: 2026-07-21
 ---
 
 # Deployment and operations base architecture

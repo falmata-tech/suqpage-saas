@@ -1,0 +1,183 @@
+---
+id: DEP-002
+title: Reproducible delivery and repository hygiene
+status: ready
+related: [DEP_BASE, ADR-0002, ADR-0003]
+owners: [operations, security]
+last_updated: 2026-07-21
+change_level: L3
+---
+
+# DEP-002 — Reproducible delivery and repository hygiene
+
+## Problem and outcome
+
+The controlled pilot currently passes its application gates, but local Docker
+contexts can include private/generated state, CI does not invoke the complete
+release contract or container path, production proxy origins can be omitted at
+build time, and generated Next.js declarations can dirty task-scoped work.
+
+Operators and contributors need one reproducible path from clean checkout to a
+credential-safe, proxy-aware, non-root container while preserving the existing
+four-tenant application behavior and single-instance pilot boundary.
+
+## Scope
+
+### In scope
+
+- Exclude secrets, credentials, databases, backups, uploads, Git metadata, local
+  dependencies, framework output, and test artifacts from Docker build context.
+- Make the release script the canonical CI core gate and retain independent
+  operations, browser, and container evidence.
+- Build, seed, start, health-check, and clean up an isolated non-root container
+  without printing generated credential values.
+- Require exact production Server Action origins to be available while Next.js
+  configuration is built, including documented reverse-proxy deployments.
+- Treat `next-env.d.ts` as generated output and generate framework types before
+  standalone TypeScript checks without dirtying Git.
+- Use Node 22.16 or newer consistently in documentation, package metadata, and
+  CI evidence.
+- Bound or explicitly document the media-route output-file trace without
+  weakening persistent media isolation.
+- Define the GitHub checks a repository administrator must require before merge.
+
+### Non-goals
+
+- UI, tenant, authentication, catalog, inquiry, delivery, or schema behavior.
+- Dependency upgrades unrelated to a demonstrated delivery defect.
+- A public cloud rollout, multiple application instances, PostgreSQL, object
+  storage, or a live Malikt Board integration.
+- Broad trusted-origin wildcards or copying runtime media into the application
+  image.
+
+## Domain language and invariants
+
+- **Release contract:** the named spec, type, design, security, adapter, HTTP,
+  build, and dependency gates executed by `npm run release`.
+- **Build context:** files sent to the container builder; ignored Git state is
+  private unless explicitly allowlisted for the image.
+- **Trusted origin:** an exact hostname accepted for a Server Action request;
+  broad production wildcards are prohibited.
+- **Generated declaration:** framework-owned type output that is reproduced by
+  `next typegen`, `next dev`, or `next build` and is not source authority.
+- Local and CI automation never logs credential values or persists temporary
+  customer/runtime data in repository paths or public artifacts.
+- The final image runs as `suqpage`, uses one persistent volume, and refuses
+  unsafe production configuration before serving traffic.
+
+## Contracts
+
+- `npm run release` remains the single core release contract. CI invokes it
+  rather than maintaining a partial duplicate.
+- CI additionally invokes operations, Chromium acceptance, and an isolated
+  container smoke command in separate bounded jobs.
+- The container smoke command creates unique temporary resources, suppresses
+  setup credential rows, verifies the runtime user and `/api/health`, and removes
+  only resources it created even after failure.
+- Production image builds receive `NEXT_PUBLIC_APP_URL` and optional exact
+  `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
+  configuration must contain the expected host and no wildcard.
+- Type checking generates Next.js declarations first. Running development and
+  production generation leaves tracked files unchanged.
+- Required GitHub merge checks are `core`, `browser`, and `container`; enforcing
+  repository rules is an explicit administrator operation outside a code commit.
+
+## Scenarios
+
+```gherkin
+Scenario: Private local state is excluded from a normal Docker build
+  GIVEN a contributor has ignored credentials, databases, backups, dependencies, and generated output
+  WHEN Docker builds from the repository root
+  THEN those paths are absent from the build context and final image
+  AND the application image still builds successfully
+
+Scenario: CI and local release use the same core contract
+  GIVEN a clean locked dependency installation
+  WHEN the GitHub core job runs
+  THEN it invokes the complete release contract including production HTTP smoke tests
+  AND operations, browser, and container workflows retain independent evidence
+
+Scenario: Isolated container proves the production runtime
+  GIVEN a freshly built image and a temporary persistent volume
+  WHEN automated setup and startup run with safe production configuration
+  THEN generated credential values are absent from logs
+  AND preflight succeeds as the non-root application user
+  AND the health endpoint reports ok
+  AND automation cleans only its temporary resources
+
+Scenario: Exact proxy origin is compiled into production configuration
+  GIVEN an HTTPS canonical URL and optional exact trusted proxy hosts
+  WHEN the production artifact is built
+  THEN its Server Action origin configuration contains those exact hosts
+  AND contains no unrestricted wildcard
+
+Scenario: Framework type generation does not create task drift
+  GIVEN a clean tracked worktree
+  WHEN type generation, development startup, and production build run
+  THEN TypeScript has the required Next.js declarations
+  AND no generated declaration becomes a tracked modification
+
+Scenario: Media tracing remains bounded
+  GIVEN uploaded media lives outside static application output
+  WHEN a production build traces the media route
+  THEN the build does not trace the whole repository unintentionally
+  AND configured persistent media remains available at runtime
+```
+
+## Quality impact
+
+- Security and tenant isolation: no domain authorization changes; build and CI
+  paths must not collect tenant/runtime data or credentials.
+- Privacy and data retention: temporary Docker data is isolated and removed;
+  credential values are prohibited from logs and artifacts.
+- Accessibility and responsive behavior: unchanged; browser acceptance prevents
+  regressions.
+- Localization and merchant-entered values: unchanged.
+- Performance and limits: container/build jobs have explicit timeouts; tracing
+  must remain inside necessary source/runtime paths.
+- Failure recovery and idempotency: cleanup is failure-safe and targets only
+  uniquely named temporary resources; no production volume is reused or removed.
+
+## Observability
+
+CI reports named gate outcomes, container health, non-sensitive runtime user and
+image metadata, and bounded failure artifacts. It never reports passwords,
+credential-file contents, customer contact data, database contents, provider
+tokens, or environment secrets.
+
+## Test plan
+
+| Criterion | Level | Test path or planned ID |
+|---|---|---|
+| Docker context excludes private/generated state | integration | `scripts/test-container.mjs` and `.dockerignore` assertions |
+| CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
+| Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
+| Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
+| Generated declarations leave Git clean | contract | `scripts/test-workflow.mjs` |
+| Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
+| Existing application behavior remains intact | acceptance | `tests/acceptance/app.spec.ts` |
+
+## Rollout and rollback
+
+Land independently reviewable documentation, Docker, CI, generated-type, and
+tracing commits. Enable required GitHub checks only after they pass on the target
+branch. No database migration or customer-data change is involved.
+
+Rollback reverts the affected configuration/script commit. Do not remove a
+required GitHub check until the corresponding rollback commit passes the
+remaining release and browser gates. Container tests use disposable volumes and
+never target production resources.
+
+## Readiness checklist
+
+- [x] Scope and non-goals agreed
+- [x] Related specs linked reciprocally
+- [x] Contracts and invariants explicit
+- [x] Positive and negative scenarios present
+- [x] Quality impacts evaluated
+- [x] Test plan maps every acceptance criterion
+- [x] Rollout/rollback decided
+
+## Completion evidence
+
+Filled only when `status: done` after every mapped gate passes.

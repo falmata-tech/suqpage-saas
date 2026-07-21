@@ -4,7 +4,7 @@ title: Specs precede material behavior changes
 status: accepted
 date: 2026-07-20
 deciders: [SuqPage]
-related: [FE_BASE, BE_BASE, DEP_BASE]
+related: [FE_BASE, BE_BASE, DEP-002]
 ---
 
 # ADR-0003 — Specs precede material behavior changes
