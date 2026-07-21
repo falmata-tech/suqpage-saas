@@ -1,0 +1,39 @@
+name: Specification or change request
+description: Define an outcome before implementation begins
+title: "[SPEC] "
+labels: [spec]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and affected user
+      description: Describe the current problem and evidence, not a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired observable outcome
+    validations:
+      required: true
+  - type: textarea
+    id: scenarios
+    attributes:
+      label: Important scenarios and failures
+      description: Include GIVEN/WHEN/THEN when possible.
+    validations:
+      required: true
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Potentially affected areas
+      options:
+        - label: Public or dashboard UI
+        - label: API, domain, or persistence
+        - label: Tenant isolation, auth, privacy, or security
+        - label: Deployment, migration, provider, or operations
+        - label: Accessibility, mobile, or localization
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints, non-goals, and rollout concerns
