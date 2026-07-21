@@ -1,0 +1,185 @@
+"use server";
+
+import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
+import { createDeliveryRequest } from "@/lib/deliveries";
+import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
+import { saveUploadedImage } from "@/lib/media";
+import { consumeRateLimit, resetRateLimit } from "@/lib/rate-limit";
+import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
+
+const text = (fd:FormData,key:string,max=500) => cleanText(fd.get(key),max);
+const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt(text(fd,key,30),10); return Number.isFinite(value)?value:fallback; };
+const slugify = (value:string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,80) || `item-${Date.now()}`;
+const designKeys = new Set(["alhaya","usashopet","novatech","homevibe"]);
+const statuses = new Set(["active","draft","suspended"]);
+const strongPassword = (value:string) => value.length >= 12 && value.length <= 128 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /[0-9]/.test(value);
+
+function go(path:string,params:Record<string,string|number|undefined>={}): never {
+  const query=new URLSearchParams();
+  Object.entries(params).forEach(([key,value])=>{if(value!==undefined)query.set(key,String(value))});
+  redirect(`${path}${query.size?`?${query}`:""}`);
+}
+
+async function authorizedBusinessId(requested:number) {
+  const user=await requireUser();
+  if(user.role==="owner"&&user.business_id!==requested)throw new Error("Not authorized for this business.");
+  if(!getBusinessById(requested))throw new Error("Business not found.");
+  return {businessId:requested,user};
+}
+
+function validateRelationship(businessId:number,collectionId:number|null,categoryId:number|null) {
+  if(collectionId&&!getDb().prepare("SELECT id FROM collections WHERE id=? AND business_id=?").get(collectionId,businessId))throw new Error("Collection does not belong to this business.");
+  if(categoryId&&!getDb().prepare("SELECT id FROM categories WHERE id=? AND business_id=?").get(categoryId,businessId))throw new Error("Category does not belong to this business.");
+}
+
+export async function loginAction(formData:FormData) {
+  const email=text(formData,"email",160).toLowerCase();
+  const password=String(formData.get("password")||"");
+  const identity=await currentRequestIdentity();
+  const rate=consumeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
+  if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
+  const user=getUserByEmail(email);
+  if(!user||password.length>200||!bcrypt.compareSync(password,user.password_hash)){
+    audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
+    go("/login",{error:"Invalid email or password."});
+  }
+  resetRateLimit(`login:${identity.ipHash}:${email}`);
+  await setSession(user.id);
+  audit("auth.login_success",{userId:user.id,businessId:user.business_id,ipHash:identity.ipHash});
+  redirect(user.must_change_password?"/dashboard/account?required=1":"/dashboard");
+}
+
+export async function logoutAction(){const user=await requireUser({allowTemporaryPassword:true});audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
+
+export async function changePasswordAction(formData:FormData){
+  const user=await requireUser({allowTemporaryPassword:true});
+  const current=String(formData.get("currentPassword")||"");
+  const password=String(formData.get("newPassword")||"");
+  const confirm=String(formData.get("confirmPassword")||"");
+  const stored=getDb().prepare("SELECT password_hash FROM users WHERE id=?").get(user.id) as any;
+  if(!stored||!bcrypt.compareSync(current,stored.password_hash))go("/dashboard/account",{error:"Current password is incorrect."});
+  if(!strongPassword(password))go("/dashboard/account",{error:"Use at least 12 characters with upper-case, lower-case, and a number."});
+  if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
+  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?").run(bcrypt.hashSync(password,12),user.id);
+  revokeAllUserSessions(user.id);
+  await setSession(user.id);
+  audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
+  go("/dashboard/account",{saved:1});
+}
+
+export async function updateBusinessAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));
+  const existing=getBusinessById(businessId)!;
+  try{
+    const logoPath=await saveUploadedImage(formData.get("logo"),existing.logo_path,"logo");
+    const heroImage=await saveUploadedImage(formData.get("heroImage"),existing.hero_image_path,"hero");
+    const favicon=await saveUploadedImage(formData.get("favicon"),existing.favicon_path,"favicon");
+    getDb().prepare(`UPDATE businesses SET name=?,tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`).run(
+      text(formData,"name",100),text(formData,"tagline",180),text(formData,"description",1200),logoPath,text(formData,"heroTitle",180),text(formData,"heroSubtitle",300),heroImage,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
+    );
+    audit("business.updated",{userId:user.id,businessId});
+  }catch(error){go("/dashboard/settings",{business:businessId,error:error instanceof Error?error.message:"Could not save settings."});}
+  revalidatePath("/");revalidatePath(`/@${existing.handle}`);revalidatePath("/dashboard/settings");
+  go("/dashboard/settings",{business:businessId,saved:1});
+}
+
+export async function adminCreateBusinessAction(formData:FormData){
+  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const name=text(formData,"name",100),handle=slugify(text(formData,"handle",80)),designKey=text(formData,"designKey",40),ownerName=text(formData,"ownerName",100),email=text(formData,"email",160).toLowerCase(),password=String(formData.get("temporaryPassword")||"");
+  if(!name||!handle||!designKeys.has(designKey)||!ownerName||!/^\S+@\S+\.\S+$/.test(email)||!strongPassword(password))go("/dashboard/admin",{error:"Complete every field and use a 12+ character temporary password with upper-case, lower-case, and a number."});
+  let businessId:number;
+  try{
+    businessId=inTransaction(()=>{
+      const result=getDb().prepare("INSERT INTO businesses(handle,name,design_key,status,site_title) VALUES(?,?,?,'draft',?)").run(handle,name,designKey,name);
+      const id=Number(result.lastInsertRowid);
+      getDb().prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,?,?,'owner',?,1)").run(email,bcrypt.hashSync(password,12),ownerName,id);
+      return id;
+    });
+  }catch(error){go("/dashboard/admin",{error:error instanceof Error?error.message:"Could not create business."});}
+  audit("admin.business_created",{userId:user.id,businessId,detail:{handle,email}});
+  go("/dashboard",{business:businessId,created:1});
+}
+
+export async function adminUpdateBusinessAction(formData:FormData){
+  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const businessId=int(formData,"businessId"),status=text(formData,"status",20),designKey=text(formData,"designKey",40);
+  if(!statuses.has(status)||!designKeys.has(designKey)||!getBusinessById(businessId))go("/dashboard/admin",{error:"Invalid business settings."});
+  getDb().prepare("UPDATE businesses SET status=?,design_key=? WHERE id=?").run(status,designKey,businessId);
+  audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status,designKey}});
+  revalidatePath("/");go("/dashboard/admin",{saved:1});
+}
+
+export async function adminResetPasswordAction(formData:FormData){
+  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
+  const target=getDb().prepare("SELECT id,business_id FROM users WHERE id=? AND role='owner'").get(userId) as any;
+  if(!target||!strongPassword(password))go("/dashboard/admin",{error:"Choose an owner and use a 12+ character password with upper-case, lower-case, and a number."});
+  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(bcrypt.hashSync(password,12),userId);
+  revokeAllUserSessions(userId);audit("admin.owner_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
+  go("/dashboard/admin",{saved:"password"});
+}
+
+export async function createCollectionAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100);if(!name)go("/dashboard/catalog",{business:businessId,error:"Collection name is required."});
+  try{getDb().prepare("INSERT INTO collections(business_id,name,slug,description,sort_order,is_active) VALUES(?,?,?,?,?,1)").run(businessId,name,slugify(text(formData,"slug",80)||name),text(formData,"description",500),int(formData,"sortOrder"));audit("collection.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create collection."});}
+  revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"collection"});
+}
+
+export async function updateCollectionAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"collectionId"),name=text(formData,"name",100);
+  const existing=getDb().prepare("SELECT id FROM collections WHERE id=? AND business_id=?").get(id,businessId);if(!existing)throw new Error("Collection not found.");
+  getDb().prepare("UPDATE collections SET name=?,slug=?,description=?,sort_order=?,is_active=? WHERE id=? AND business_id=?").run(name,slugify(text(formData,"slug",80)||name),text(formData,"description",500),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId);audit("collection.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"collection"});
+}
+
+export async function deleteCollectionAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"collectionId");
+  inTransaction(()=>{getDb().prepare("UPDATE products SET collection_id=NULL WHERE business_id=? AND collection_id=?").run(businessId,id);getDb().prepare("UPDATE categories SET collection_id=NULL WHERE business_id=? AND collection_id=?").run(businessId,id);getDb().prepare("DELETE FROM collections WHERE id=? AND business_id=?").run(id,businessId);});audit("collection.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
+}
+
+export async function createCategoryAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100),collectionId=int(formData,"collectionId")||null;validateRelationship(businessId,collectionId,null);
+  try{getDb().prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,?,?,?,?,1)").run(businessId,collectionId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"));audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
+  revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
+}
+
+export async function updateCategoryAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId"),collectionId=int(formData,"collectionId")||null,name=text(formData,"name",100);validateRelationship(businessId,collectionId,null);
+  if(!getDb().prepare("SELECT id FROM categories WHERE id=? AND business_id=?").get(id,businessId))throw new Error("Category not found.");
+  getDb().prepare("UPDATE categories SET collection_id=?,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?").run(collectionId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId);audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
+}
+
+export async function deleteCategoryAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId");inTransaction(()=>{getDb().prepare("UPDATE products SET category_id=NULL WHERE business_id=? AND category_id=?").run(businessId,id);getDb().prepare("DELETE FROM categories WHERE id=? AND business_id=?").run(id,businessId);});audit("category.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
+}
+
+function replaceOptions(productId:number,stockCount:number,formData:FormData){
+  getDb().prepare("DELETE FROM option_groups WHERE product_id=?").run(productId);const group=getDb().prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)"),value=getDb().prepare("INSERT INTO option_values(option_group_id,value,stock_count) VALUES(?,?,?)");const names=new Set<string>();
+  for(let i=1;i<=4;i++){const name=text(formData,`optionName${i}`,80),values=[...new Set(text(formData,`optionValues${i}`,1200).split(/[\n,]/).map(v=>v.trim()).filter(Boolean))].slice(0,50);if(!name&&!values.length)continue;if(!name||!values.length)throw new Error(`Option group ${i} needs a name and at least one value.`);if(names.has(name.toLowerCase()))throw new Error("Option group names must be unique.");names.add(name.toLowerCase());const groupId=Number(group.run(productId,name,i-1).lastInsertRowid);values.forEach(v=>value.run(groupId,v.slice(0,100),stockCount));}
+}
+
+export async function createProductAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",140),collectionId=int(formData,"collectionId")||null,categoryId=int(formData,"categoryId")||null;validateRelationship(businessId,collectionId,categoryId);
+  try{const imagePath=await saveUploadedImage(formData.get("image"),"","product");const stock=Math.max(0,Math.min(100000,int(formData,"stockCount"))),rawAvailability=text(formData,"availability",30)||"available",availability=stock===0&&["available","limited"].includes(rawAvailability)?"unavailable":rawAvailability;const productId=inTransaction(()=>{const result=getDb().prepare("INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,stock_count,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)").run(businessId,collectionId,categoryId,name,slugify(text(formData,"slug",80)||name),text(formData,"eyebrow",100),text(formData,"description",3000),imagePath,availability,stock,formData.get("isPublished")?1:0,int(formData,"sortOrder"));const id=Number(result.lastInsertRowid);replaceOptions(id,stock,formData);return id;});audit("product.created",{userId:user.id,businessId,detail:{productId,name}});}catch(error){go("/dashboard/products/new",{business:businessId,error:error instanceof Error?error.message:"Could not create product."});}
+  const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");go("/dashboard/products",{business:businessId,saved:"created"});
+}
+
+export async function updateProductAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const productId=int(formData,"productId"),existing=getDb().prepare("SELECT * FROM products WHERE id=? AND business_id=?").get(productId,businessId) as any;if(!existing)throw new Error("Product not found.");const collectionId=int(formData,"collectionId")||null,categoryId=int(formData,"categoryId")||null;validateRelationship(businessId,collectionId,categoryId);
+  try{const imagePath=await saveUploadedImage(formData.get("image"),existing.image_path,"product"),stock=Math.max(0,Math.min(100000,int(formData,"stockCount"))),rawAvailability=text(formData,"availability",30)||"available",availability=stock===0&&["available","limited"].includes(rawAvailability)?"unavailable":rawAvailability,name=text(formData,"name",140);inTransaction(()=>{getDb().prepare("UPDATE products SET collection_id=?,category_id=?,name=?,slug=?,eyebrow=?,description=?,image_path=?,availability=?,stock_count=?,is_published=?,sort_order=? WHERE id=? AND business_id=?").run(collectionId,categoryId,name,slugify(text(formData,"slug",80)||name),text(formData,"eyebrow",100),text(formData,"description",3000),imagePath,availability,stock,formData.get("isPublished")?1:0,int(formData,"sortOrder"),productId,businessId);replaceOptions(productId,stock,formData);});audit("product.updated",{userId:user.id,businessId,detail:{productId}});}catch(error){go(`/dashboard/products/${productId}`,{business:businessId,error:error instanceof Error?error.message:"Could not update product."});}
+  const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");go(`/dashboard/products/${productId}`,{business:businessId,saved:1});
+}
+
+export async function deleteProductAction(formData:FormData){const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const productId=int(formData,"productId");getDb().prepare("DELETE FROM products WHERE id=? AND business_id=?").run(productId,businessId);audit("product.deleted",{userId:user.id,businessId,detail:{productId}});const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");}
+
+export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1});}
+
+export async function createDeliveryRequestAction(formData:FormData){
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));
+  let result:{externalRequestId:string};
+  try{result=createDeliveryRequest({businessId,inquiryId:int(formData,"inquiryId")||null,customerName:text(formData,"customerName",80),phone:text(formData,"phone",40),pickupAddress:text(formData,"pickupAddress",300),deliveryAddress:text(formData,"deliveryAddress",300),packageCount:int(formData,"packageCount",1),note:text(formData,"note",1000),companyIds:formData.getAll("companyIds"),idempotencyKey:crypto.randomUUID()},user.business_id,user.role==="admin");}catch(error){go("/dashboard/deliveries",{business:businessId,error:error instanceof Error?error.message:"Could not create delivery request."});}
+  audit("delivery.created",{userId:user.id,businessId,detail:result});revalidatePath("/dashboard/deliveries");revalidatePath("/dashboard/inquiries");go("/dashboard/deliveries",{business:businessId,created:result.externalRequestId});
+}

@@ -1,0 +1,14 @@
+{
+  "key": "replace-with-design-key",
+  "name": "Client Showroom Name",
+  "version": 1,
+  "features": {
+    "dynamicCatalog": true,
+    "search": true,
+    "categories": true,
+    "productOptions": true,
+    "inquiryCart": true,
+    "socialRouting": true,
+    "deliveryRequests": false
+  }
+}

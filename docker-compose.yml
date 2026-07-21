@@ -1,0 +1,24 @@
+services:
+  suqpage:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      SUQPAGE_DB_PATH: /data/suqpage.db
+      SUQPAGE_MEDIA_ROOT: /data/media
+      SUQPAGE_BACKUP_ROOT: /data/backups
+      PRIVACY_SALT: ${PRIVACY_SALT}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      NOTIFICATION_FROM_EMAIL: ${NOTIFICATION_FROM_EMAIL:-}
+    volumes:
+      - suqpage_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  suqpage_data:

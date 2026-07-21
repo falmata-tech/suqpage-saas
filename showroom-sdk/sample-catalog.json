@@ -1,0 +1,22 @@
+{
+  "business": {
+    "handle": "clienthandle",
+    "name": "Client Name",
+    "design_key": "client-design-v1",
+    "logo_path": "/media/logo.png",
+    "hero_title": "A custom client headline",
+    "hero_subtitle": "Content comes from the SuqPage business record.",
+    "hero_image_path": "/media/hero.jpg"
+  },
+  "collections": [{ "id": 1, "name": "Main Collection" }],
+  "categories": [{ "id": 1, "name": "Category" }],
+  "products": [{
+    "id": 1,
+    "name": "Merchant-entered Product Name",
+    "description": "Dynamic description",
+    "image_path": "/media/product.jpg",
+    "availability": "available",
+    "stock_count": 8,
+    "option_groups": [{ "name": "Color", "values": [{ "value": "Original Color Name" }] }]
+  }]
+}

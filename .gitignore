@@ -1,0 +1,23 @@
+# Dependencies and Next.js output
+node_modules/
+.next/
+out/
+
+# Local environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Runtime data and generated credentials
+data/
+.local/
+backups/
+public/uploads/runtime/
+
+# Logs and local tooling
+*.log
+.DS_Store
+*.tsbuildinfo
+test-results/
+playwright-report/

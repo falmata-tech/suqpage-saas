@@ -1,0 +1,75 @@
+import { getBusinessById, getDb, inTransaction } from "./db";
+import { notifyNewInquiry } from "./notifications";
+import { consumeRateLimit } from "./rate-limit";
+import { cleanText } from "./security";
+
+const METHODS = new Set(["whatsapp","telegram","tiktok","share","phone","email"]);
+
+type RawItem = { productId?: unknown; quantity?: unknown; options?: unknown };
+export type InquiryInput = { businessId?: unknown; customerName?: unknown; contact?: unknown; contactMethod?: unknown; note?: unknown; items?: unknown; idempotencyKey?: unknown; website?: unknown };
+
+export class InquiryError extends Error {
+  constructor(message: string, public status = 400, public retryAfter = 0) { super(message); }
+}
+
+export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
+  if (cleanText(input.website, 100)) return { inquiryId: null, duplicate: false, trapped: true };
+  const businessId = Number(input.businessId);
+  const business = Number.isInteger(businessId) ? getBusinessById(businessId) : undefined;
+  if (!business || business.status !== "active") throw new InquiryError("Business not found.", 404);
+
+  const rate = consumeRateLimit(`inquiry:${businessId}:${ipHash}`, 10, 10 * 60 * 1000, 30 * 60 * 1000);
+  if (!rate.allowed) throw new InquiryError("Too many inquiry attempts. Please try again later.", 429, rate.retryAfterSeconds);
+
+  const customerName = cleanText(input.customerName, 80);
+  const contact = cleanText(input.contact, 120);
+  const note = cleanText(input.note, 1000);
+  const contactMethod = cleanText(input.contactMethod, 20).toLowerCase() || "phone";
+  const idempotencyKey = cleanText(input.idempotencyKey, 100);
+  const rawItems = Array.isArray(input.items) ? input.items as RawItem[] : [];
+  if (customerName.length < 1 || contact.length < 3) throw new InquiryError("Name and contact are required.");
+  if (!METHODS.has(contactMethod)) throw new InquiryError("Invalid contact method.");
+  if (rawItems.length < 1 || rawItems.length > 20) throw new InquiryError("An inquiry must contain between 1 and 20 items.");
+  if (!/^[a-zA-Z0-9_-]{10,100}$/.test(idempotencyKey)) throw new InquiryError("A valid inquiry key is required.");
+
+  const existing = getDb().prepare("SELECT id FROM inquiries WHERE business_id=? AND idempotency_key=?").get(businessId, idempotencyKey) as any;
+  if (existing) return { inquiryId: Number(existing.id), duplicate: true, trapped: false };
+
+  const productStmt = getDb().prepare("SELECT * FROM products WHERE id=? AND business_id=? AND is_published=1");
+  const groupStmt = getDb().prepare("SELECT id,name FROM option_groups WHERE product_id=? ORDER BY position,id");
+  const valueStmt = getDb().prepare("SELECT value FROM option_values WHERE option_group_id=?");
+  const validated = rawItems.map((raw) => {
+    const productId = Number(raw.productId);
+    const quantity = Number(raw.quantity);
+    if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw new InquiryError("Invalid product quantity.");
+    const product = productStmt.get(productId, businessId) as any;
+    if (!product || !["available","limited"].includes(product.availability) || Number(product.stock_count) < 1) throw new InquiryError("A selected product is not available.");
+    if (quantity > Math.min(20, Number(product.stock_count))) throw new InquiryError(`Requested quantity exceeds availability for ${product.name}.`);
+    const options = raw.options && typeof raw.options === "object" && !Array.isArray(raw.options) ? raw.options as Record<string, unknown> : {};
+    const groups = groupStmt.all(productId) as Array<{ id:number; name:string }>;
+    const normalized: Record<string,string> = {};
+    const allowedNames = new Set(groups.map((group) => group.name));
+    for (const key of Object.keys(options)) if (!allowedNames.has(key)) throw new InquiryError(`Invalid option for ${product.name}.`);
+    for (const group of groups) {
+      const selected = cleanText(options[group.name], 100);
+      const values = new Set((valueStmt.all(group.id) as Array<{value:string}>).map((item) => item.value));
+      if (!selected || !values.has(selected)) throw new InquiryError(`Choose a valid ${group.name} for ${product.name}.`);
+      normalized[group.name] = selected;
+    }
+    return { productId, quantity, name: String(product.name), options: normalized };
+  });
+
+  const inquiryId = inTransaction(() => {
+    const db = getDb();
+    const result = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,source,idempotency_key,ip_hash,updated_at) VALUES(?,?,?,?,?,'new','showroom',?,?,CURRENT_TIMESTAMP)").run(
+      businessId, customerName, contact, contactMethod, note, idempotencyKey, ipHash,
+    );
+    const id = Number(result.lastInsertRowid);
+    const insertItem = db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,options_json) VALUES(?,?,?,?,?)");
+    for (const item of validated) insertItem.run(id, item.productId, item.name, item.quantity, JSON.stringify(item.options));
+    return id;
+  });
+
+  await notifyNewInquiry(business, inquiryId, customerName);
+  return { inquiryId, duplicate: false, trapped: false };
+}

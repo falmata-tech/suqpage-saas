@@ -1,0 +1,50 @@
+{
+  "name": "suqpage-saas-mvp",
+  "version": "1.0.0-mvp-launch",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "start:next": "next start",
+    "start": "tsx scripts/preflight.ts && next start",
+    "setup": "tsx scripts/setup.ts",
+    "reset": "tsx scripts/setup.ts --reset",
+    "migrate": "tsx scripts/migrate.ts",
+    "backup": "tsx scripts/backup.ts",
+    "restore": "tsx scripts/restore.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-security.ts",
+    "test:adapters": "tsx scripts/test-adapters.ts",
+    "test:http": "node scripts/http-smoke.mjs",
+    "test:acceptance": "node scripts/acceptance-runner.mjs",
+    "test:operations": "node scripts/test-operations.mjs",
+    "validate:designs": "tsx scripts/validate-designs.ts",
+    "validate:specs": "node scripts/validate-specs.mjs",
+    "specs:list": "node scripts/list-specs.mjs",
+    "check": "npm run validate:specs && npm run typecheck && npm run validate:designs && npm test && npm run test:adapters",
+    "release": "bash scripts/release.sh"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "next": "16.2.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "sharp": "0.34.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    }
+  }
+}

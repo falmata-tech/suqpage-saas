@@ -1,0 +1,14 @@
+import fs from "node:fs";
+import { assertProductionConfiguration, databasePath, mediaRoot } from "../lib/config";
+import { getDb } from "../lib/db";
+assertProductionConfiguration();
+const db=getDb();
+const integrity=db.prepare("PRAGMA integrity_check").get() as Record<string,string>;
+if(!Object.values(integrity).includes("ok"))throw new Error(`Database integrity check failed: ${JSON.stringify(integrity)}`);
+const admins=(db.prepare("SELECT COUNT(*) total FROM users WHERE role='admin'").get() as any).total;
+if(!admins)throw new Error("At least one administrator account is required.");
+const temporary=(db.prepare("SELECT COUNT(*) total FROM users WHERE must_change_password=1").get() as any).total;
+console.log(`Preflight passed. Database: ${databasePath()}`);
+console.log(`Media: ${mediaRoot()}`);
+if(temporary)console.warn(`Warning: ${temporary} account(s) still use a temporary password.`);
+fs.accessSync(databasePath(),fs.constants.R_OK|fs.constants.W_OK);
