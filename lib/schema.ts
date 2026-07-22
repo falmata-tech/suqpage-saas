@@ -278,6 +278,9 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE UNIQUE INDEX IF NOT EXISTS request_client_idempotency_unique
       ON service_requests(submitted_by_user_id,idempotency_key)
       WHERE submitter_kind='client' AND idempotency_key IS NOT NULL AND idempotency_key != '';
+    CREATE UNIQUE INDEX IF NOT EXISTS request_manager_idempotency_unique
+      ON service_requests(submitted_by_user_id,idempotency_key)
+      WHERE submitter_kind='manager' AND idempotency_key IS NOT NULL AND idempotency_key != '';
     CREATE INDEX IF NOT EXISTS request_status_created_idx ON service_requests(status, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_business_created_idx ON service_requests(business_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_assignee_created_idx ON service_requests(assigned_user_id, created_at DESC);
@@ -373,4 +376,5 @@ export function migrateDatabase(db: DatabaseSync) {
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(2);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(3);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(4);
+  db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(5);
 }

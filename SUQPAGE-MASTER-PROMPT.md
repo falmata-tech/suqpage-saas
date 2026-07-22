@@ -594,8 +594,8 @@ A public customer does not require an account. The customer can:
 
 The additive access-profile layer now distinguishes platform administrator,
 legacy owner, invited client, team member, and operations manager. Invited
-client enforcement is active; staff/manager provisioning and assignment UI
-remain part of the managed-service transition below.
+client enforcement, individual staff provisioning, and request assignment are
+active as part of the managed-service transition below.
 
 ### Managed-service transition — invitation and client request workspace active
 
@@ -609,7 +609,7 @@ Current verified behavior:
   contact details, one short message, and consent. Public leads have no upload
   capability and cannot self-register.
 - Public interests use random references, idempotency, bounded JSON,
-  privacy-preserving rate limits, events, and additive schema migrations 2–4.
+  privacy-preserving rate limits, events, and additive schema migrations 2–5.
   HTTP and database boundaries both prohibit attachments on public leads.
 - Platform administrators have a private operations queue for reviewing the
   immutable original interest message and moving it through early review
@@ -628,6 +628,17 @@ Current verified behavior:
   instruction with up to ten private sanitized JPEG, PNG, or WebP references of
   at most 5 MB each. Requests are tenant-bound, idempotent, and visible in the
   client’s request history.
+- Platform administrators can provision individual operations-manager and team-
+  member accounts with a temporary password that must be changed on first use.
+  Shared staff credentials and public staff registration are not supported.
+- Operations managers can review all requests, accept and invite prospects,
+  submit an onboarding or change request on behalf of a prospect or invited
+  client, and assign or reassign requests to team members. On-behalf private
+  images use the same bounded and sanitized storage contract as client uploads.
+- Team members see only assigned requests and the associated read-only business
+  and live-showroom context. Assignment changes add or remove that scope
+  atomically. Team members cannot invite clients, submit on behalf, assign work,
+  or use the current live catalog, settings, design, inquiry, or delivery forms.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
 - Existing owner permissions and live showroom behavior remain unchanged during
@@ -635,10 +646,9 @@ Current verified behavior:
 
 Accepted behavior still to implement:
 
-- Assigned team members structure requests and prepare private revisions.
-- Operations managers may submit on behalf of clients, accept/invite prospects,
-  assign work, and publish only the exact revision the client approved.
-- Platform administrators retain explicit system authority.
+- Assigned team members structure requests in versioned private revisions.
+- Clients review private revisions and approve or reject them with history.
+- Operations managers publish only the exact revision the client approved.
 - Existing live showrooms remain unchanged until client approval and authorized
   publication; previous published state remains recoverable.
 - Automated invitation delivery by email or WhatsApp remains planned, not

@@ -44,8 +44,8 @@ export function createClientInvitation(raw: CreateInvitationInput, options: { no
   const expiresAt = now + INVITATION_LIFETIME_MS;
 
   const result = inTransaction(() => {
-    const request = getDb().prepare("SELECT id,request_type,submitter_kind,status,business_id FROM service_requests WHERE id=?").get(requestId) as { id:number; request_type:string; submitter_kind:string; status:string; business_id:number|null } | undefined;
-    if (!request || request.request_type !== "onboarding" || request.submitter_kind !== "public" || !["submitted", "under_review", "needs_information", "approved_for_work"].includes(request.status)) {
+    const request = getDb().prepare("SELECT id,request_type,submitter_kind,status,business_id,represented_client_user_id FROM service_requests WHERE id=?").get(requestId) as { id:number; request_type:string; submitter_kind:string; status:string; business_id:number|null; represented_client_user_id:number|null } | undefined;
+    if (!request || request.request_type !== "onboarding" || !["public","manager"].includes(request.submitter_kind) || request.represented_client_user_id || !["submitted", "under_review", "needs_information", "approved_for_work"].includes(request.status)) {
       throw new InvitationError("This onboarding request is not available for invitation.", "conflict");
     }
     if (getDb().prepare("SELECT 1 FROM users WHERE lower(email)=lower(?)").get(email)) {

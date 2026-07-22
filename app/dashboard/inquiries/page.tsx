@@ -1,4 +1,5 @@
 import DashboardShell from "@/components/DashboardShell";
+import { redirect } from "next/navigation";
 import { updateInquiryStatusAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import { isClient } from "@/lib/capabilities";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string}> }) {
   const user = await requireUser();
+  if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
   const business = resolveBusiness(user, query.business);
   if (!business) return null;

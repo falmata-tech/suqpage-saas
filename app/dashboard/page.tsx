@@ -5,6 +5,7 @@ import { hasCapability, isClient } from "@/lib/capabilities";
 import { getAllBusinesses, getCatalogByBusinessId, listDeliveryRequests, listInquiries } from "@/lib/db";
 import { resolveBusiness } from "@/lib/dashboard";
 import { listClientRequests } from "@/lib/request-sqlite";
+import { listAssignedBusinesses } from "@/lib/staff-operations";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +13,19 @@ export default async function Dashboard({ searchParams }: { searchParams:Promise
   const user = await requireUser();
   const params = await searchParams;
   const business = resolveBusiness(user, params.business);
+  if (user.access_role === "team_member" && !business) {
+    const assignedBusinesses = listAssignedBusinesses(user.id);
+    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Assigned businesses</h1><p>Only businesses connected to your active request assignments appear here.</p></div><Link className="btn" href="/dashboard/requests">Assigned requests</Link></div>{assignedBusinesses.length ? <div className="showroom-grid">{assignedBusinesses.map((tenant)=><Link className="showroom-card" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><div><span className={`badge ${tenant.status}`}>{tenant.status}</span><h3>{tenant.name}</h3><p>@{tenant.handle}</p><strong>Open read-only context →</strong></div></Link>)}</div> : <div className="empty-state">No business or request is assigned to you.</div>}</DashboardShell>;
+  }
   if (hasCapability(user, "operations:manage") && !business) {
     const businesses = getAllBusinesses();
-    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Businesses</h1><p>Choose a tenant to manage its showroom and workflow.</p></div></div><div className="showroom-grid">{businesses.map((tenant) => <Link className="showroom-card" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><div><span className={`badge ${tenant.status}`}>{tenant.status}</span><h3>{tenant.name}</h3><p>@{tenant.handle} · {tenant.design_key}</p><strong>Open workspace →</strong></div></Link>)}</div></DashboardShell>;
+    const platformAdmin = hasCapability(user,"platform:admin");
+    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Businesses</h1><p>{platformAdmin ? "Choose a tenant to manage its showroom and workflow." : "Choose a tenant to review its live context and request activity."}</p></div></div><div className="showroom-grid">{businesses.map((tenant) => <Link className="showroom-card" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><div><span className={`badge ${tenant.status}`}>{tenant.status}</span><h3>{tenant.name}</h3><p>@{tenant.handle} · {tenant.design_key}</p><strong>{platformAdmin ? "Open workspace" : "Review context"} →</strong></div></Link>)}</div></DashboardShell>;
   }
   if (!business) return null;
+  if (user.access_role === "team_member") {
+    return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><span className="eyebrow">Assigned context</span><h1>{business.name}</h1><p>Review the live showroom for context. Content changes must wait for the versioned revision workspace and client approval.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">View live showroom</Link></div><section className="panel"><h2>Work from the assigned request</h2><p>This workspace intentionally has no live catalog, product, settings, design, inquiry, or delivery controls.</p><Link className="btn brand" href="/dashboard/requests">Open assigned requests</Link></section></DashboardShell>;
+  }
   const inquiries = listInquiries(business.id);
   const deliveries = listDeliveryRequests(business.id);
   if (isClient(user)) {

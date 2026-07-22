@@ -51,6 +51,18 @@ async function loginAndChangePassword(page: Page, email: string, nextPassword: s
   await page.getByRole("button", { name: "Change password" }).click();
   await expect(page.getByText("Password updated")).toBeVisible();
 }
+async function loginAndChangeKnownPassword(page: Page, email:string, temporaryPassword:string, nextPassword:string) {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(temporaryPassword);
+  await page.getByRole("button",{name:"Sign in"}).click();
+  await expect(page).toHaveURL(/\/dashboard\/account\?required=1/);
+  await page.getByLabel("Current password").fill(temporaryPassword);
+  await page.getByLabel("New password",{exact:true}).fill(nextPassword);
+  await page.getByLabel("Confirm new password").fill(nextPassword);
+  await page.getByRole("button",{name:"Change password"}).click();
+  await expect(page.getByText("Password updated")).toBeVisible();
+}
 
 test("prospect submits an interest request without public uploads", async ({ page }) => {
   const errors = monitor(page);
@@ -153,12 +165,27 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   expect(invitationUrl).toMatch(/^https:\/\/suqpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
   await page.goto("/dashboard/admin");
   await expectVisibleControlsNamed(page);
-  await page.locator('input[name="name"]').fill("Acceptance Flowers");
-  await page.locator('input[name="handle"]').fill("acceptanceflowers");
-  await page.locator('input[name="ownerName"]').fill("Flower Owner");
-  await page.locator('input[name="email"]').fill("flowers@example.test");
-  await page.locator('input[name="temporaryPassword"]').first().fill("FlowerOwner123!");
-  await page.getByRole("button", { name: "Create tenant" }).click();
+  let staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.getByLabel("Name").fill("Acceptance Operations");
+  await staffPanel.getByLabel("Email").fill("operations@example.test");
+  await staffPanel.getByLabel("Access role").selectOption("operations_manager");
+  await staffPanel.getByLabel("Temporary password").fill("OperationsTemp123!");
+  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
+  await expect(page.getByText("Acceptance Operations")).toBeVisible();
+  staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.getByLabel("Name").fill("Acceptance Team");
+  await staffPanel.getByLabel("Email").fill("team@example.test");
+  await staffPanel.getByLabel("Access role").selectOption("team_member");
+  await staffPanel.getByLabel("Temporary password").fill("TeamMemberTemp123!");
+  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
+  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  const legacyTenantPanel=page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Create legacy owner tenant"})});
+  await legacyTenantPanel.getByLabel("Business name").fill("Acceptance Flowers");
+  await legacyTenantPanel.getByLabel("Handle").fill("acceptanceflowers");
+  await legacyTenantPanel.getByLabel("Owner name").fill("Flower Owner");
+  await legacyTenantPanel.getByLabel("Owner email").fill("flowers@example.test");
+  await legacyTenantPanel.getByLabel("Temporary password").fill("FlowerOwner123!");
+  await legacyTenantPanel.getByRole("button", { name: "Create tenant" }).click();
   await expect(page.getByRole("heading", { name: "Acceptance Flowers" })).toBeVisible();
   expect((await page.request.get("/@acceptanceflowers")).status()).toBe(404);
   await page.goto("/preview/@acceptanceflowers");
@@ -195,6 +222,46 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   const deniedMutation = await page.request.post("/api/malikt/requests", { headers:{ Origin:origin, Cookie:`suqpage_session=${clientSession!.value}` }, data:{ businessId:5, customerName:"Denied", phone:"12345", pickupAddress:"A", deliveryAddress:"B", packageCount:1, companyIds:[1], idempotencyKey:"denied_client_123456" } });
   expect(deniedMutation.status()).toBe(403);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
+});
+
+test("operations manager records on behalf and team member sees only assigned work", async ({page}) => {
+  const errors=monitor(page);
+  await loginAndChangeKnownPassword(page,"operations@example.test","OperationsTemp123!","OperationsReady123!");
+  await page.goto("/dashboard/requests");
+  await expect(page.getByRole("link",{name:"Record on behalf"}).first()).toBeVisible();
+  await expect(page.getByRole("link",{name:"SaaS administration"})).toHaveCount(0);
+  await page.getByRole("link",{name:"Record on behalf"}).first().click();
+  await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
+  await page.getByLabel(/Existing managed client/).selectOption({label:"Acceptance Market · Acceptance Client · acceptance-client@example.test"});
+  await page.getByLabel("Request type").selectOption("change");
+  await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and featured collection for review.");
+  await page.getByLabel(/Private reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
+  await page.getByRole("button",{name:"Record request for client"}).click();
+  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
+  await expect(page.getByText("SuqPage for client")).toBeVisible();
+  const assignedRequestUrl=page.url();
+  await page.getByLabel("Assigned team member").selectOption({label:"Acceptance Team · team@example.test"});
+  await page.getByRole("button",{name:"Save assignment"}).click();
+  await expect(page.getByText("Assignment updated.")).toBeVisible();
+  await page.goto("/dashboard/catalog?business=5");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginAndChangeKnownPassword(page,"team@example.test","TeamMemberTemp123!","TeamMemberReady123!");
+  await page.goto("/dashboard/requests");
+  await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
+  await expect(page.getByRole("link",{name:"Record on behalf"})).toHaveCount(0);
+  await page.goto(assignedRequestUrl);
+  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  await page.getByLabel("Status").selectOption("under_review");
+  await page.getByRole("button",{name:"Update status"}).click();
+  await expect(page.getByText("Request status updated.")).toBeVisible();
+  await expect(page.getByText("Team assignment")).toHaveCount(0);
+  await page.goto("/dashboard/requests/on-behalf");
+  await expect(page).toHaveURL(/\/dashboard\/requests$/);
+  await page.goto("/dashboard/settings?business=5");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  expect(errors.filter((error)=>!error.includes("404"))).toEqual([]);
 });
 
 test("owner catalog, inquiry, delivery, and role isolation workflows persist", async ({ page }) => {

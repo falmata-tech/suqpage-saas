@@ -84,6 +84,21 @@ publish only the exact client-approved revision.
 - Redemption atomically marks the invitation accepted, creates one client
   account bound to the invitation business/request, and cannot be replayed.
 - Role checks use explicit capabilities. Interface hiding has no authority.
+- Staff provisioning is platform-administrator-only. The compatibility value in
+  `users.role` grants no authority; the effective access profile is required for
+  every staff operation.
+- Operations managers can read all requests, create on-behalf requests, accept
+  prospects, invite clients, and assign team members. They cannot use legacy
+  live catalog/settings mutations or approve as a client.
+- A team member can read and transition only an assigned request. Assignment and
+  reassignment update request ownership and business-view scope atomically;
+  obsolete business scope is removed only when no other active assignment needs
+  it. Team members cannot invite, assign, submit on behalf, or mutate live
+  catalog/settings/design data.
+- Manager on-behalf intake accepts the same bounded private image contract as an
+  authenticated client. Existing-client requests bind to the selected client
+  and business; prospect onboarding captures bounded contact/business data and
+  creates no account by itself.
 - Assignment, request transition, clarification, approval, rejection,
   publication, rollback, and privileged reads write audit events with safe
   identifiers.
@@ -127,6 +142,12 @@ Scenario: Normal team member submits on behalf
   WHEN they call an on-behalf onboarding or change operation directly
   THEN authorization is denied
   AND no request or prospect is created
+
+Scenario: Reassignment updates least-privilege scope
+  GIVEN a request for tenant A assigned to team member one
+  WHEN a manager reassigns it to team member two
+  THEN member two can read the request and tenant context
+  AND member one loses tenant A scope unless another active assignment requires it
 
 Scenario: Approved revision publishes atomically
   GIVEN the client approved the latest revision based on the current live version
@@ -209,6 +230,10 @@ Filled only when `status: done` after every mapped gate passes.
   Regeneration revokes unused predecessors, redemption is atomic/non-replayable,
   and the client profile cannot mutate catalog, settings, inquiries, or delivery
   requests.
-- Authenticated client requests are tenant-bound and idempotent with bounded,
-  sanitized private images. Staff assignment/on-behalf operations and revision
-  publication remain.
+- Migration 5 adds manager-request idempotency. Individual staff provisioning,
+  manager on-behalf intake, and request/business assignment scope are active;
+  reassignment removes obsolete scope when no other open assignment needs it.
+- Authenticated client and manager on-behalf requests are tenant-bound and
+  idempotent with bounded, sanitized private images. Team members can read and
+  transition only assigned requests and cannot mutate live business state.
+  Versioned revision approval/publication remains.

@@ -66,6 +66,18 @@ export function listClientRequests(user: SessionUser, limit = 100): OperationsRe
   `).all(user.business_id, user.id, user.id, Math.max(1, Math.min(100, limit))) as OperationsRequest[];
 }
 
+export function listAssignedRequests(userId: number, limit = 100): OperationsRequest[] {
+  return getDb().prepare(`
+    SELECT r.*,COUNT(a.id) attachment_count,b.name business_display_name,u.name assigned_user_name
+    FROM service_requests r
+    LEFT JOIN request_attachments a ON a.request_id=r.id
+    LEFT JOIN businesses b ON b.id=r.business_id
+    LEFT JOIN users u ON u.id=r.assigned_user_id
+    WHERE r.assigned_user_id=?
+    GROUP BY r.id ORDER BY r.created_at DESC,r.id DESC LIMIT ?
+  `).all(userId,Math.max(1,Math.min(100,limit))) as OperationsRequest[];
+}
+
 export function canAccessRequest(user: SessionUser, request: Pick<ServiceRequest,"business_id"|"represented_client_user_id"|"assigned_user_id">) {
   if (hasCapability(user, "operations:manage")) return true;
   if (user.access_role === "client") return Boolean(user.business_id && request.business_id === user.business_id && request.represented_client_user_id === user.id);

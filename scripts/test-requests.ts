@@ -10,7 +10,7 @@ async function main() {
   process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
   process.env.PRIVACY_SALT = "request-test-privacy-salt-long-enough";
 
-  const { getDb, closeDbForTests } = await import("../lib/db");
+  const { getDb, getUserById, closeDbForTests } = await import("../lib/db");
   const { FileRequestAttachmentStore, resolveRequestAttachment } = await import("../lib/request-media");
   const { SqliteRequestRepository, getRequestDetail, updateRequestStatus } = await import("../lib/request-sqlite");
   const { createPublicInterest } = await import("../lib/request-service");
@@ -18,7 +18,9 @@ async function main() {
   const { canManageBusiness, canViewBusiness } = await import("../lib/capabilities");
   const { createAuthenticatedClientRequest } = await import("../lib/client-request-service");
   const { createClientInvitation, getActiveInvitation, hashInvitationToken, InvitationError, redeemClientInvitation } = await import("../lib/invitations");
-  const { canAccessRequest, listClientRequests } = await import("../lib/request-sqlite");
+  const { canAccessRequest, listAssignedRequests, listClientRequests } = await import("../lib/request-sqlite");
+  const { createOnBehalfRequest } = await import("../lib/on-behalf-request-service");
+  const { assignRequestToTeamMember, createStaffAccount, listAssignedBusinesses, listManagedClients } = await import("../lib/staff-operations");
   const repository = new SqliteRequestRepository();
   const attachments = new FileRequestAttachmentStore();
   const allowedRate = { consume: () => ({ allowed: true, retryAfterSeconds: 0 }) };
@@ -103,13 +105,74 @@ async function main() {
     assert.equal(repeatedClientRequest.id,clientRequest.id);
     assert.equal(repeatedClientRequest.duplicate,true);
 
+    const managerAccount = createStaffAccount({name:"Operations Manager",email:"manager@example.test",password:"ManagerPassword123!",accessRole:"operations_manager"});
+    const teamOneAccount = createStaffAccount({name:"Team One",email:"team-one@example.test",password:"TeamPassword123!",accessRole:"team_member"});
+    const teamTwoAccount = createStaffAccount({name:"Team Two",email:"team-two@example.test",password:"TeamPassword123!",accessRole:"team_member"});
+    const manager = getUserById(managerAccount.userId)!;
+    const teamOne = getUserById(teamOneAccount.userId)!;
+    const teamTwo = getUserById(teamTwoAccount.userId)!;
+    assert.equal(manager.access_role,"operations_manager");
+    assert.equal(teamOne.access_role,"team_member");
+    assert.equal(canManageBusiness(manager,redeemed.businessId),false);
+    const managedClients = listManagedClients();
+    assert.equal(Object.getPrototypeOf(managedClients[0]),Object.prototype);
+    assert.equal(managedClients.some((managedClient)=>managedClient.id===client.id),true);
+
+    const managerForm = new FormData();
+    managerForm.set("clientUserId",String(client.id));
+    managerForm.set("requestType","change");
+    managerForm.set("requestText","The client asked SuqPage to prepare a new private hero and catalog arrangement.");
+    managerForm.set("idempotencyKey","manager_request_key_123456");
+    managerForm.append("images",new File([new Uint8Array(png)],"manager-reference.png",{type:"image/png"}));
+    const managerRequest = await createOnBehalfRequest(manager,managerForm);
+    const managerDetail = getRequestDetail(managerRequest.id)!;
+    assert.equal(managerDetail.submitter_kind,"manager");
+    assert.equal(managerDetail.represented_client_user_id,client.id);
+    assert.equal(managerDetail.business_id,client.business_id);
+    assert.equal(managerDetail.attachments.length,1);
+    assert.equal(canAccessRequest(client,managerDetail),true);
+    await assert.rejects(()=>createOnBehalfRequest(teamOne,managerForm),(error:unknown)=>error instanceof RequestError&&error.status===403);
+    const managerRepeated = await createOnBehalfRequest(manager,managerForm);
+    assert.equal(managerRepeated.id,managerRequest.id);
+    assert.equal(managerRepeated.duplicate,true);
+
+    assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
+    const assignedToOne = getRequestDetail(managerRequest.id)!;
+    assert.equal(canAccessRequest(teamOne,assignedToOne),true);
+    assert.equal(canAccessRequest(teamTwo,assignedToOne),false);
+    assert.equal(canViewBusiness(teamOne,redeemed.businessId,true),true);
+    assert.equal(canManageBusiness(teamOne,redeemed.businessId,true),false);
+    assert.equal(listAssignedRequests(teamOne.id).some((request)=>request.id===managerRequest.id),true);
+    assert.equal(listAssignedBusinesses(teamOne.id).some((business)=>business.id===redeemed.businessId),true);
+    assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
+    const assignedToTwo = getRequestDetail(managerRequest.id)!;
+    assert.equal(canAccessRequest(teamOne,assignedToTwo),false);
+    assert.equal(canAccessRequest(teamTwo,assignedToTwo),true);
+    assert.equal(listAssignedBusinesses(teamOne.id).length,0);
+    assert.equal(listAssignedBusinesses(teamTwo.id).some((business)=>business.id===redeemed.businessId),true);
+
+    const prospectForm = new FormData();
+    prospectForm.set("requestType","change");
+    prospectForm.set("contactName","Prospect Served");
+    prospectForm.set("contactValue","prospect-served@example.test");
+    prospectForm.set("businessName","Prospect Served Market");
+    prospectForm.set("requestText","Please record this first showroom request for the prospect on their behalf.");
+    prospectForm.set("idempotencyKey","manager_prospect_key_123456");
+    const prospectRequest = await createOnBehalfRequest(manager,prospectForm);
+    const prospectDetail = getRequestDetail(prospectRequest.id)!;
+    assert.equal(prospectDetail.request_type,"onboarding");
+    assert.equal(prospectDetail.business_id,null);
+    assert.equal(prospectDetail.represented_client_user_id,null);
+    const prospectInvitation = createClientInvitation({requestId:prospectRequest.id,clientName:"Prospect Served",email:"prospect-served@example.test",businessName:"Prospect Served Market",handle:"prospect-served-market",designKey:"novatech",actorUserId:manager.id},{now:3_000_000,token:"C".repeat(43)});
+    assert.equal(getActiveInvitation("C".repeat(43),3_000_001)?.business_id,prospectInvitation.businessId);
+
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "short" }, "ip-b", { repository, rateLimiter: allowedRate }), RequestError);
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_223456", requestText: "x".repeat(2_001) }, "ip-b2", { repository, rateLimiter: allowedRate }), RequestError);
     const deniedRate = { consume: () => ({ allowed: false, retryAfterSeconds: 300 }) };
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

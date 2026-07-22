@@ -5,16 +5,17 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { REVIEW_REQUEST_STATUSES, RequestError } from "@/lib/request-domain";
-import { updateRequestStatus } from "@/lib/request-sqlite";
+import { canAccessRequest, getRequestDetail, updateRequestStatus } from "@/lib/request-sqlite";
 import { audit, cleanText } from "@/lib/security";
 import type { ServiceRequestStatus } from "@/lib/types";
 
 export async function updateServiceRequestStatusAction(formData: FormData) {
   const user = await requireUser();
-  if (!hasCapability(user, "operations:manage")) throw new Error("Operations manager access required.");
   const requestId = Number.parseInt(cleanText(formData.get("requestId"), 20), 10);
   const status = cleanText(formData.get("status"), 40) as ServiceRequestStatus;
   if (!Number.isInteger(requestId) || !REVIEW_REQUEST_STATUSES.includes(status)) redirect("/dashboard/requests?error=invalid");
+  const request = getRequestDetail(requestId);
+  if (!request || !canAccessRequest(user,request) || user.access_role === "client") throw new Error("Assigned staff or operations manager access required.");
   try {
     const result = updateRequestStatus(requestId, status, user.id);
     if (!result) redirect("/dashboard/requests?error=missing");

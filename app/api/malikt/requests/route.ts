@@ -51,12 +51,12 @@ async function readBoundedJson(request: Request): Promise<Record<string, unknown
 export async function GET(request: Request) {
   const user = await apiUser();
   if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  if (user.access_role === "team_member") return NextResponse.json({ error:"Not found." }, { status:404 });
   const url = new URL(request.url);
   const requested = Number(url.searchParams.get("businessId") || 0);
   const businessId = hasCapability(user, "operations:manage") ? requested : user.business_id;
   if (!businessId) return NextResponse.json({ error: "businessId is required." }, { status: 400 });
-  const assigned = user.access_role === "team_member" && Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,businessId));
-  if (!canViewBusiness(user, businessId, assigned)) return NextResponse.json({ error:"Not found." }, { status:404 });
+  if (!canViewBusiness(user, businessId, false)) return NextResponse.json({ error:"Not found." }, { status:404 });
   const requests = getDb().prepare("SELECT * FROM delivery_requests WHERE business_id=? ORDER BY created_at DESC LIMIT 100").all(businessId);
   return NextResponse.json({ requests }, { headers: { "Cache-Control": "no-store" } });
 }
@@ -68,8 +68,7 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     const body = await readBoundedJson(request);
     const businessId = Number(body.businessId);
-    const assigned = user.access_role === "team_member" && Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,businessId));
-    if (!canManageBusiness(user, businessId, assigned)) return NextResponse.json({ error:"Not authorized." }, { status:403 });
+    if (!canManageBusiness(user, businessId, false)) return NextResponse.json({ error:"Not authorized." }, { status:403 });
     const result = createDeliveryRequest({
       businessId, inquiryId: body.inquiryId ? Number(body.inquiryId) : null,
       customerName: body.customerName, phone: body.phone, pickupAddress: body.pickupAddress,

@@ -4,7 +4,7 @@ import { canManageBusiness, canViewBusiness, hasCapability } from "./capabilitie
 import type { SessionUser } from "./types";
 
 export function resolveBusiness(user: SessionUser, requested?: string | number | null) {
-  const id = hasCapability(user, "operations:manage") ? Number(requested || 0) : user.business_id;
+  const id = hasCapability(user, "operations:manage") || user.access_role === "team_member" ? Number(requested || 0) : user.business_id;
   if (!id) return null;
   const assigned = user.access_role === "team_member" && Boolean(getAssignedBusiness(user.id, id));
   if (!canViewBusiness(user, id, assigned)) redirect("/dashboard");

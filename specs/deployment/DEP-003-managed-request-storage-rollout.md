@@ -71,6 +71,11 @@ workspace.
 - Pre-cutover checks count accounts by target role, assignments, open requests,
   and active sessions. Cutover revokes affected sessions and runs permission
   acceptance tests before public continuation.
+- Staff accounts are provisioned individually with temporary passwords and
+  explicit access profiles. Seed/setup scripts do not create shared staff
+  credentials, and credentials never enter logs, artifacts, or backups.
+- Staff/profile/assignment schema remains additive during the pilot; disabling a
+  staff profile or assignment does not rewrite legacy owner rows.
 
 ## Scenarios
 
@@ -167,8 +172,11 @@ Filled only when `status: done` after every mapped gate passes.
 - Schema migration 4 additively stores effective access profiles and only hashed
   invitation tokens with lifecycle/expiry metadata; raw tokens are never
   persisted or included in backups.
+- Schema migration 5 adds a partial uniqueness constraint for manager-submitted
+  request idempotency without rewriting existing request or account rows.
 - Sanitized request images use random keys below the persistent private media
   root, outside the public/build tree.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private
-  attachment files survive backup and restore. New invited clients use the
-  restrictive profile while the legacy-owner cutover remains disabled.
+  attachment files survive backup and restore. New invited clients and
+  individually provisioned staff use explicit restrictive profiles; assignments
+  remain additive while the legacy-owner cutover remains disabled.

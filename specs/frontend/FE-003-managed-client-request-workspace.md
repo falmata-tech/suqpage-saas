@@ -76,6 +76,19 @@ private and no showroom change becomes public without client approval.
   unavailable for a stale or superseded revision.
 - Only manager/admin interfaces expose prospect acceptance, on-behalf intake,
   assignment, invitation, or publication controls.
+- Platform administrators provision individual operations-manager and team-member
+  accounts with temporary passwords. Staff cannot self-register, and every new
+  staff account must change its password before entering a workspace.
+- Operations managers see the full request queue and may submit an onboarding
+  request for a prospect or an onboarding/change request for an existing client.
+  A manager-created request visibly identifies SuqPage as the submitter.
+- Assignment selects one team member and, when the request has a business,
+  grants that member request/business view scope. Reassignment removes obsolete
+  business scope when the member has no other active request for that business.
+- Team-member navigation exposes assigned requests and read-only business/live
+  preview context only. It does not expose current catalog/settings/design
+  forms, because those mutate live state; staff content editing begins only in
+  the versioned revision workspace.
 - Operations navigation is hierarchical: queue rows open a request detail;
   request detail links back to the queue; invitation/client/request detail
   screens provide a visible breadcrumb and a back action with a deterministic
@@ -121,6 +134,12 @@ Scenario: Assigned team member prepares work
   WHEN they open the operations workspace
   THEN they can review and prepare only assigned work
   AND cannot publish, onboard, invite, or create an on-behalf request
+
+Scenario: Staff account is provisioned explicitly
+  GIVEN a platform administrator
+  WHEN they create an operations-manager or team-member account
+  THEN a temporary-password account with that exact capability profile exists
+  AND the staff member must change the password before workspace access
 
 Scenario: Client approves a private preview
   GIVEN a live showroom and a proposed revision for one request
@@ -199,7 +218,12 @@ Filled only when `status: done` after every mapped gate passes.
 - Clients can submit bounded unstructured onboarding/change requests with up to
   ten private sanitized images. Nested request, invitation, and request-create
   screens include breadcrumbs and deterministic Back behavior.
+- Platform administrators can provision individual operations-manager and team-
+  member accounts that require a first-login password change. Operations
+  managers can record private requests for existing clients or prospects and
+  assign them; team members see only their assigned queue and read-only business
+  context.
 - `tests/acceptance/app.spec.ts` proves operator invitation, account redemption,
-  the restricted navigation, private image request, and direct management/API
-  denial in a production build. Assigned-team queues, manager on-behalf intake,
-  and versioned preview decisions remain.
+  manager on-behalf intake, assignment, the restricted role navigation, private
+  images, and direct management/API denial in a production build. Versioned
+  preview decisions and approved publication remain.
