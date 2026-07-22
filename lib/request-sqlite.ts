@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { getDb, inTransaction } from "./db";
-import { isReviewTransitionAllowed, RequestError, type PublicInterestInput } from "./request-domain";
+import { classifyShowroomRequest, isReviewTransitionAllowed, RequestError, type PublicInterestInput } from "./request-domain";
 import type { PublicRequestRecord, RequestRepository } from "./request-ports";
 import { hasCapability } from "./capabilities";
 import type { RequestAttachment, RequestEvent, ServiceRequest, ServiceRequestStatus, SessionUser } from "./types";
@@ -78,6 +78,16 @@ export function listAssignedRequests(userId: number, limit = 100): OperationsReq
   `).all(userId,Math.max(1,Math.min(100,limit))) as OperationsRequest[];
 }
 
+export function requestTypeForBusiness(businessId: number) {
+  const state = getDb().prepare(`
+    SELECT b.status,b.content_version contentVersion,
+      (SELECT COUNT(*) FROM published_catalog_versions v WHERE v.business_id=b.id) retainedVersions
+    FROM businesses b WHERE b.id=?
+  `).get(businessId) as {status:"active"|"draft"|"suspended";contentVersion:number;retainedVersions:number}|undefined;
+  if (!state) throw new RequestError("Business not found.",404);
+  return classifyShowroomRequest(state);
+}
+
 export function canAccessRequest(user: SessionUser, request: Pick<ServiceRequest,"business_id"|"represented_client_user_id"|"assigned_user_id">) {
   if (hasCapability(user, "operations:manage")) return true;
   if (user.access_role === "client") return Boolean(user.business_id && request.business_id === user.business_id && request.represented_client_user_id === user.id);
@@ -95,8 +105,31 @@ export function getRequestDetail(id: number): RequestDetail | undefined {
   `).get(id) as RequestDetail | undefined;
   if (!request) return undefined;
   request.attachments = getDb().prepare("SELECT * FROM request_attachments WHERE request_id=? ORDER BY id").all(id) as RequestAttachment[];
-  request.events = getDb().prepare("SELECT * FROM request_events WHERE request_id=? ORDER BY created_at,id").all(id) as RequestEvent[];
+  request.events = getDb().prepare(`
+    SELECT e.*,u.name actor_name,p.access_role actor_access_role
+    FROM request_events e
+    LEFT JOIN users u ON u.id=e.actor_user_id
+    LEFT JOIN user_access_profiles p ON p.user_id=u.id
+    WHERE e.request_id=? ORDER BY e.created_at,e.id
+  `).all(id) as RequestEvent[];
   return request;
+}
+
+export function addRequestClarification(user: SessionUser, requestId: number, rawMessage: unknown) {
+  const message = String(rawMessage ?? "").trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
+  if (message.length < 1 || message.length > 2_000) throw new RequestError("Clarification messages must be 1–2,000 characters.");
+  return inTransaction(() => {
+    const request = getRequestDetail(requestId);
+    if (!request || !canAccessRequest(user, request)) throw new RequestError("Request not found.",404);
+    if (["published","completed","rejected","cancelled"].includes(request.status)) throw new RequestError("This request no longer accepts clarification messages.",409);
+    const client = user.access_role === "client";
+    let nextStatus = request.status;
+    if (client && request.status === "needs_information") nextStatus = "under_review";
+    if (!client && ["submitted","under_review","in_progress"].includes(request.status)) nextStatus = "needs_information";
+    getDb().prepare("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,?)").run(requestId,user.id,client?"client_clarification":"staff_clarification",message);
+    if (nextStatus !== request.status) getDb().prepare("UPDATE service_requests SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(nextStatus,requestId);
+    return { businessId:request.business_id, status:nextStatus, messageLength:message.length };
+  });
 }
 
 export function getRequestAttachment(requestId: number, attachmentId: number) {

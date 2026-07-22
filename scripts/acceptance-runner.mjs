@@ -65,7 +65,7 @@ async function stop() {
 try {
   fs.writeFileSync(tsconfigPath, `${JSON.stringify({ extends: "./tsconfig.json", include: ["next-env.d.ts", "**/*.ts", "**/*.tsx"] }, null, 2)}\n`, { flag: "wx" });
   const setupOutput = run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"], { capture: true });
-  if (/^(?:ADMIN|OWNER) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
+  if (/^(?:ADMIN|CLIENT) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
   for (const line of setupOutput.split("\n").filter((value) => value.startsWith("SuqPage database") || value.startsWith("Temporary credentials"))) console.log(line);
   run(process.execPath, ["node_modules/next/dist/bin/next", "build"]);
 

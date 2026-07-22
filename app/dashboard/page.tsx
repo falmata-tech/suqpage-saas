@@ -2,7 +2,7 @@ import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
 import { requireUser } from "@/lib/auth";
 import { hasCapability, isClient } from "@/lib/capabilities";
-import { getAllBusinesses, getCatalogByBusinessId, listDeliveryRequests, listInquiries } from "@/lib/db";
+import { getAllBusinesses, listDeliveryRequests, listInquiries } from "@/lib/db";
 import { resolveBusiness } from "@/lib/dashboard";
 import { listClientRequests } from "@/lib/request-sqlite";
 import { listAssignedBusinesses } from "@/lib/staff-operations";
@@ -36,11 +36,12 @@ export default async function Dashboard({ searchParams }: { searchParams:Promise
       <section className="panel client-next"><h2>Simple by design</h2><p>You do not need to manage products, collections, colors, categories, settings, or design tools. Tell SuqPage what you want changed; the team prepares a private preview, and nothing goes live without your approval.</p><div className="hero-actions"><Link className="btn brand" href="/dashboard/requests/new">Start a new request</Link><Link className="btn secondary" href={`/preview/@${business.handle}`}>Open private showroom preview</Link></div></section>
     </DashboardShell>;
   }
-  const catalog = getCatalogByBusinessId(business.id, true)!;
-  const available = catalog.products.filter((product) => product.availability === "available" && product.is_published).length;
-  return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><h1>{business.name}</h1><p>Dynamic catalog and customer workflow overview.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">Preview showroom</Link></div>
-    <div className="cards"><div className="metric"><span>Products</span><strong>{catalog.products.length}</strong></div><div className="metric"><span>Available</span><strong>{available}</strong></div><div className="metric"><span>Inquiries</span><strong>{inquiries.length}</strong></div><div className="metric"><span>Deliveries</span><strong>{deliveries.length}</strong></div></div>
-    <section className="panel"><h2>Managed showroom</h2><p>The showroom design is a custom renderer. Products, collections, options, availability, inquiries and delivery requests come from SuqPage’s shared data layer.</p></section>
-    <section className="panel"><h2>Recent inquiries</h2>{inquiries.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>Customer</th><th>Contact</th><th>Items</th><th>Status</th><th>Received</th></tr></thead><tbody>{inquiries.slice(0,5).map((inquiry) => <tr key={inquiry.id}><td>{inquiry.customer_name}</td><td>{inquiry.contact}</td><td>{inquiry.item_count}</td><td><span className={`badge ${inquiry.status}`}>{inquiry.status}</span></td><td>{new Date(inquiry.created_at).toLocaleString()}</td></tr>)}</tbody></table></div> : <div className="empty-state">No inquiries yet.</div>}</section>
-  </DashboardShell>;
+  if (hasCapability(user, "operations:manage")) {
+    return <DashboardShell user={user} business={business}>
+      <div className="dashboard-head"><div><span className="eyebrow">Operations workspace</span><h1>{business.name}</h1><p>Review customer activity and coordinate managed-service work without changing live showroom content directly.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">View showroom</Link></div>
+      <div className="cards"><Link className="metric" href="/dashboard/requests"><span>Managed requests</span><strong>Open</strong><small>Review, assign, and prepare revisions</small></Link><Link className="metric" href={`/dashboard/inquiries?business=${business.id}`}><span>Customer inquiries</span><strong>{inquiries.length}</strong><small>Update inquiry status</small></Link><Link className="metric" href={`/dashboard/deliveries?business=${business.id}`}><span>Deliveries</span><strong>{deliveries.length}</strong><small>Create and follow delivery activity</small></Link></div>
+      <section className="panel"><h2>Controlled publication</h2><p>Business settings, design, collections, and products are changed only inside a request revision. The client reviews the private preview before an approved revision can be published.</p><div className="hero-actions"><Link className="btn brand" href="/dashboard/requests">Open managed requests</Link><Link className="btn secondary" href="/dashboard/requests/on-behalf">Submit on behalf of client</Link></div></section>
+    </DashboardShell>;
+  }
+  return null;
 }

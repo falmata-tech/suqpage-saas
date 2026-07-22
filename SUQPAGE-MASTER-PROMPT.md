@@ -506,10 +506,10 @@ Do not rename it `Malik Board`, `MaliktBoard`, or another form unless a route or
 
 Current MVP behavior:
 
-- a business owner opens a confirmed customer inquiry;
-- the owner initiates a delivery request on the customer’s behalf;
-- the owner enters essential pickup and delivery details;
-- the owner chooses one or more supported delivery companies;
+- an operations manager opens a confirmed customer inquiry;
+- the operations manager initiates a delivery request on the customer’s behalf;
+- the operations manager enters essential pickup and delivery details;
+- the operations manager chooses one or more supported delivery companies;
 - SuqPage submits the request through a secured local adapter;
 - the dashboard tracks a simplified delivery status.
 
@@ -552,33 +552,43 @@ When the real Malikt Board API becomes available, add:
 
 The administrator can:
 
-- create and manage businesses;
-- create or reset owner accounts;
-- assign handles;
-- assign renderer/design keys;
-- publish, draft, or suspend showrooms;
+- accept public interests and invite clients;
+- create a draft client workspace and invitation without requiring a prior
+  public interest or service request;
+- reset client passwords and revoke their sessions;
+- provision individual operations-manager and team-member accounts;
+- manage request assignment and customer operations;
+- publish only an exact client-approved revision;
+- suspend or restore an established showroom without editing its content;
 - preview draft showrooms securely;
-- manage supported delivery companies;
 - inspect operational status;
-- manage tenant-level configuration.
+- roll back to a retained publication as a new content version.
 
-### Business owner
+### Client
 
-A business owner can manage only their own tenant:
+A client has a minimal workspace bound to one business. The client can:
 
-- business settings;
-- social contacts;
-- metadata and favicon;
-- collections;
-- categories;
-- products;
-- product images;
-- up to four option groups;
-- availability and stock;
-- inquiries;
-- inquiry statuses;
-- delivery requests;
-- account password.
+- submit an unstructured first-showroom or change request with private reference
+  images after invitation;
+- read and reply to attributable clarification messages;
+- see their own request history;
+- review an exact private showroom revision and approve or reject it;
+- view customer inquiries and delivery activity without mutating them;
+- view their showroom and manage their account password.
+
+Clients cannot directly edit business settings, design, collections, products,
+options, stock, or publication state. They cannot update inquiry status or
+create deliveries.
+
+### Operations manager and team member
+
+Operations managers can create or invite clients, record requests on their
+behalf, review and assign work, ask clarifying questions, manage inquiry and
+delivery activity, publish approved revisions, and perform retained-version
+rollback. Team members see only assigned requests and their associated
+read-only business context; they can ask clarifying questions and prepare
+private revisions but cannot invite, assign, publish, or perform customer
+operations.
 
 ### Public customer
 
@@ -592,16 +602,10 @@ A public customer does not require an account. The customer can:
 - submit an inquiry;
 - continue to a social messaging destination.
 
-The additive access-profile layer now distinguishes platform administrator,
-legacy owner, invited client, team member, and operations manager. Invited
-client enforcement, individual staff provisioning, and request assignment are
-active as part of the managed-service transition below.
+The access-profile layer distinguishes platform administrator, client, team
+member, and operations manager. Every account has an explicit profile.
 
-### Managed-service transition — versioned client-approved publication active
-
-The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` will replace
-direct client catalog/settings/design administration only after the complete
-replacement workflow passes its rollout gates.
+### Managed service — versioned client-approved publication
 
 Current verified behavior:
 
@@ -609,7 +613,7 @@ Current verified behavior:
   contact details, one short message, and consent. Public leads have no upload
   capability and cannot self-register.
 - Public interests use random references, idempotency, bounded JSON,
-  privacy-preserving rate limits, events, and additive schema migrations 2–5.
+  privacy-preserving rate limits, events, and additive schema migrations.
   HTTP and database boundaries both prohibit attachments on public leads.
 - Platform administrators have a private operations queue for reviewing the
   immutable original interest message and moving it through early review
@@ -618,23 +622,27 @@ Current verified behavior:
   draft business, and generate a random single-use invitation that expires
   after 72 hours. Only the token hash persists; the raw manual-delivery link is
   shown once, and replacing it revokes older unused invitations.
+- Authorized operators can also create a private draft business and invitation
+  directly for a referred client without fabricating a public lead or request.
 - Invitation redemption atomically creates one business-bound client account
   with the restricted client access profile and cannot be replayed.
 - Invited clients have a minimal private workspace for requests, read-only
   customer inquiries, read-only delivery activity, showroom preview, and
   account security. Catalog, product, business-setting, design, delivery-create,
   and inquiry-status mutations are hidden and denied on the server.
-- Authenticated clients can submit a 10–10,000 character onboarding/change
-  instruction with up to ten private sanitized JPEG, PNG, or WebP references of
-  at most 5 MB each. Requests are tenant-bound, idempotent, and visible in the
-  client’s request history.
+- Authenticated clients can submit a 10–10,000 character instruction with up to
+  ten private sanitized JPEG, PNG, or WebP references of at most 5 MB each.
+  The server derives first-showroom versus change request from retained
+  publication state; the browser cannot choose or forge it. Requests are
+  tenant-bound, idempotent, and visible in the client’s request history.
 - Platform administrators can provision individual operations-manager and team-
   member accounts with a temporary password that must be changed on first use.
   Shared staff credentials and public staff registration are not supported.
-- Operations managers can review all requests, accept and invite prospects,
-  submit an onboarding or change request on behalf of a prospect or invited
-  client, and assign or reassign requests to team members. On-behalf private
-  images use the same bounded and sanitized storage contract as client uploads.
+- Operations managers can review all requests, create client workspaces, accept
+  and invite prospects, submit a request on behalf of a prospect or client, and
+  assign or reassign work. They can also update inquiry status and create
+  delivery requests. On-behalf request type is server-derived for existing
+  clients, and private images use the client upload contract.
 - Team members see only assigned requests and the associated read-only business
   and live-showroom context. Assignment changes add or remove that scope
   atomically. Team members cannot invite clients, submit on behalf, assign work,
@@ -652,27 +660,26 @@ Current verified behavior:
 - Prior published snapshots are retained. Authorized operational rollback
   republishes a retained snapshot as a new monotonic content version rather than
   erasing publication history.
+- Clients and authorized staff can exchange attributable clarification messages
+  without rewriting the immutable original instruction. A staff question moves
+  eligible work to needs-information; a client reply resumes review. Clients
+  see staff authors as the SuqPage team while internal views retain attribution.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
 - Authenticated workspace navigation keeps each actor in the role-appropriate
   dashboard. The public site is a separate, explicit link, and an authenticated
   visit to the login route returns to the dashboard instead of showing a second
   sign-in form.
-- Existing owner permissions and live showroom behavior remain unchanged during
-  this additive stage.
+- The four example business accounts and every former compatibility owner are
+  restricted clients. Migration 7 preserves businesses, catalog data,
+  inquiries, deliveries, requests, and publication history while converting
+  access profiles, allowing request-free invitations, and revoking affected
+  sessions. No legacy-owner role or direct live-content workflow remains.
 
 Accepted behavior still to implement:
 
-- Attributable client/staff clarification messages supplement the immutable
-  original instruction without rewriting it.
-- The controlled legacy-owner permission cutover is performed only after its
-  backup, session-revocation, rollback, and pilot acceptance checkpoint.
 - Automated invitation delivery by email or WhatsApp remains planned, not
   claimed; the controlled pilot uses manual secure delivery.
-
-Until the remaining cutover is implemented and verified, the current
-administrator and legacy business-owner capabilities in this document remain
-active for compatibility tenants.
 
 ---
 
@@ -826,7 +833,8 @@ Security requirements are product requirements, not optional cleanup.
 
 ### Tenant isolation
 
-- Every owner mutation must be scoped to the owner’s business.
+- Every request, revision, customer-operation read, and mutation must be scoped
+  by the actor’s explicit role and authorized business/request relationship.
 - Validate every referenced collection, category, product, inquiry, and delivery record belongs to the same tenant.
 - Keep database constraints or triggers as defense in depth.
 - Add tests for cross-tenant reads and writes.
@@ -847,7 +855,8 @@ Security requirements are product requirements, not optional cleanup.
 
 - Delivery requests and customer data are private.
 - Require authenticated access.
-- Scope owners to their own tenant.
+- Require customer-operations authority for delivery creation and scope every
+  read to an authorized tenant.
 - Do not expose an all-tenant public endpoint.
 - Validate the inquiry belongs to the business.
 - Use idempotency and audit logging.
@@ -987,46 +996,38 @@ Prices are not required for every SuqPage catalog. The platform’s main goal is
 
 ---
 
-## 21. Admin and owner workflow expectations
+## 21. Managed client workflow expectations
 
 ### Administrator onboarding checklist
 
 When adding a new client:
 
-1. Create the business record.
-2. Reserve a unique handle.
-3. create a unique owner account.
-4. Generate a unique temporary password.
-5. Require password change.
-6. Assign a custom design key.
-7. Configure business metadata and favicon.
-8. Add verified social contacts only.
-9. Add collections and categories.
-10. Import or create products.
-11. Configure availability and option groups.
-12. Preview the draft showroom.
-13. Test inquiry submission.
-14. Test social routing.
-15. Test owner dashboard isolation.
-16. Publish only after approval.
+1. Accept a public expression of interest or create a client workspace directly
+   for a referred client.
+2. Reserve a unique handle and choose the starting custom renderer.
+3. Deliver the displayed-once invitation securely; do not create a public
+   request merely to provision access.
+4. Let the client set a strong password and submit their first detailed request
+   with any private references.
+5. Assign an individual team member and resolve clarifications in the request
+   thread.
+6. Prepare settings, contacts, catalog, options, stock, images, and design
+   choices inside a bounded private revision.
+7. Test the exact private preview, inquiry behavior, social routing, tenant
+   isolation, and mobile layout.
+8. Obtain the client’s approval for that exact revision.
+9. Publish through the operations-manager action only; never copy draft data
+   into live rows manually.
+10. Retain the prior version for auditable rollback and use operations tools for
+    later inquiry and delivery activity.
 
-### Business-owner workflow
+### Client workflow
 
-The owner should be able to perform normal catalog changes without editing code:
-
-- add and update products;
-- upload verified images;
-- set collection and category;
-- add up to four option groups;
-- set stock and availability;
-- publish or hide products;
-- change business contacts;
-- review inquiries;
-- update inquiry status;
-- initiate a delivery request;
-- change password.
-
-A custom visual redesign may still require SuqPage’s design team or an AI-assisted design workflow.
+The client writes requests and responds to SuqPage rather than editing catalog
+forms. The client can follow requests, clarification, inquiries, deliveries,
+private previews, approvals, and account security. A request for a business with
+no retained publication is a first-showroom request; after publication it is a
+change request. The server decides this classification.
 
 ---
 
@@ -1058,10 +1059,10 @@ Required verification areas:
 - authentication;
 - forced password change;
 - session revocation;
-- admin and owner permissions;
+- administrator, client, operations-manager, and assigned-team permissions;
 - cross-tenant denial;
 - active/draft/suspended visibility;
-- product CRUD;
+- revision-based product, settings, design, option, stock, and image changes;
 - collection/category integrity;
 - option validation;
 - stock and availability behavior;

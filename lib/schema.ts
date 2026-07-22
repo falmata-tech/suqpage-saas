@@ -222,13 +222,13 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE TABLE IF NOT EXISTS user_access_profiles (
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       access_role TEXT NOT NULL CHECK(access_role IN (
-        'platform_admin','legacy_owner','client','team_member','operations_manager'
+        'platform_admin','client','team_member','operations_manager'
       )),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS client_invitations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      request_id INTEGER REFERENCES service_requests(id) ON DELETE CASCADE,
       business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
       email TEXT NOT NULL,
       name TEXT NOT NULL,
@@ -418,4 +418,61 @@ export function migrateDatabase(db: DatabaseSync) {
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(4);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(5);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(6);
+
+  const cutoverApplied = db.prepare("SELECT 1 FROM schema_migrations WHERE version=7").get();
+  if (!cutoverApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE user_access_profiles_v7 (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          access_role TEXT NOT NULL CHECK(access_role IN (
+            'platform_admin','client','team_member','operations_manager'
+          )),
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        INSERT INTO user_access_profiles_v7(user_id,access_role,created_at)
+        SELECT user_id,CASE WHEN access_role='legacy_owner' THEN 'client' ELSE access_role END,created_at
+        FROM user_access_profiles;
+        INSERT OR IGNORE INTO user_access_profiles_v7(user_id,access_role)
+        SELECT id,CASE WHEN role='admin' THEN 'platform_admin' ELSE 'client' END FROM users;
+
+        CREATE TABLE client_invitations_v7 (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          request_id INTEGER REFERENCES service_requests(id) ON DELETE CASCADE,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          email TEXT NOT NULL,
+          name TEXT NOT NULL,
+          token_hash TEXT UNIQUE NOT NULL,
+          expires_at INTEGER NOT NULL,
+          accepted_at INTEGER,
+          accepted_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          revoked_at INTEGER,
+          created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          created_at INTEGER NOT NULL
+        );
+        INSERT INTO client_invitations_v7
+        SELECT * FROM client_invitations;
+
+        DROP TABLE client_invitations;
+        ALTER TABLE client_invitations_v7 RENAME TO client_invitations;
+        DROP TABLE user_access_profiles;
+        ALTER TABLE user_access_profiles_v7 RENAME TO user_access_profiles;
+        CREATE INDEX invitation_request_idx ON client_invitations(request_id,created_at DESC);
+        CREATE INDEX invitation_expiry_idx ON client_invitations(expires_at);
+      `);
+      db.prepare(`
+        UPDATE sessions SET revoked_at=?
+        WHERE revoked_at IS NULL AND user_id IN (
+          SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+          WHERE u.role='owner' AND p.access_role='client'
+        )
+      `).run(Date.now());
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(7)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

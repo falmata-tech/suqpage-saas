@@ -19,20 +19,22 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   outcome before starting an unrelated feature.
 - Roadmap entries link to specs rather than duplicating acceptance criteria.
 
-## Now — make the controlled pilot trustworthy
-
-### Managed client request operations
+## Completed foundation — managed client request operations
 
 - Outcome: clients submit onboarding/change requests and approve private
   previews while assigned SuqPage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
-- Delivery order: attachment-free public interest and operations queue;
-  invitation plus authenticated client requests; revision preview and approval;
-  then permission cutover after replacement workflows pass.
-- Exit criteria: request/attachment privacy, tenant/staff isolation, mandatory
-  client approval, atomic publication/rollback, migration/restore, and all L3
-  gates pass before direct client catalog/settings/design access is removed.
+- Delivered: attachment-free public interest, direct or lead-based invitations,
+  authenticated client requests, server-derived request type, attributable
+  clarifications, assigned staff, revision preview and approval, controlled
+  customer operations, atomic publication/rollback, and migration 7 permission
+  cutover.
+- Evidence: `FE-003`, `BE-003`, and `DEP-003` are done with request, revision,
+  migration/restore, release, container, and seven-scenario production browser
+  coverage on 2026-07-22.
+
+## Now — make the controlled pilot trustworthy
 
 ### Reproducible delivery and repository hygiene
 

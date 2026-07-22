@@ -95,16 +95,18 @@ seedCatalog("homevibe", "Home Edit", ["Cleaning","Kitchen","Coffee","Lighting"],
 const generatedCredentials: Array<{ role:string; business:string; email:string; password:string }> = [];
 const generatePassword = () => crypto.randomBytes(18).toString("base64url");
 const addUser = db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,?,?,?,?,1)");
-function seedUser(role:string,business:string,email:string,name:string,businessId:number|null){
+const addAccessProfile = db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)");
+function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client",business:string,email:string,name:string,businessId:number|null){
   const password=generatePassword();
-  addUser.run(email,bcrypt.hashSync(password,12),name,role,businessId);
-  generatedCredentials.push({role,business,email,password});
+  const userId = Number(addUser.run(email,bcrypt.hashSync(password,12),name,role,businessId).lastInsertRowid);
+  addAccessProfile.run(userId,accessRole);
+  generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : "CLIENT",business,email,password});
 }
-seedUser("admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
-seedUser("owner","Al Haya Brand",process.env.SEED_ALHAYA_EMAIL||"alhaya@suqpage.local","Al Haya Owner",seeded.get("alhayabrand")!);
-seedUser("owner","USAshopET",process.env.SEED_USASHOPET_EMAIL||"usashopet@suqpage.local","USAshopET Owner",seeded.get("usashopet")!);
-seedUser("owner","NovaTech",process.env.SEED_NOVATECH_EMAIL||"novatech@suqpage.local","NovaTech Owner",seeded.get("novatech")!);
-seedUser("owner","HomeVibe",process.env.SEED_HOMEVIBE_EMAIL||"homevibe@suqpage.local","HomeVibe Owner",seeded.get("homevibe")!);
+seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
+seedUser("owner","client","Al Haya Brand",process.env.SEED_ALHAYA_EMAIL||"alhaya@suqpage.local","Al Haya Client",seeded.get("alhayabrand")!);
+seedUser("owner","client","USAshopET",process.env.SEED_USASHOPET_EMAIL||"usashopet@suqpage.local","USAshopET Client",seeded.get("usashopet")!);
+seedUser("owner","client","NovaTech",process.env.SEED_NOVATECH_EMAIL||"novatech@suqpage.local","NovaTech Client",seeded.get("novatech")!);
+seedUser("owner","client","HomeVibe",process.env.SEED_HOMEVIBE_EMAIL||"homevibe@suqpage.local","HomeVibe Client",seeded.get("homevibe")!);
 
 const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_area) VALUES(?,?,?)");
 [["Malikt Express","malikt-express","Addis Ababa and surrounding areas"],["Addis Courier","addis-courier","Addis Ababa"],["Swift Delivery","swift-delivery","Major Ethiopian cities"],["CityDrop","citydrop","Same-day urban delivery"]].forEach((c) => addCompany.run(...c));

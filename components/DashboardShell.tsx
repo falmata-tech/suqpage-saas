@@ -9,7 +9,6 @@ export default function DashboardShell({ user, business, children }: { user:Sess
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
-  const legacyManagement = platformAdmin || user.access_role === "legacy_owner";
   return <div className="dashboard">
     <aside className="sidebar">
       <Link className="brand" href={`/dashboard${query}`}>◆ SuqPage</Link>
@@ -22,18 +21,11 @@ export default function DashboardShell({ user, business, children }: { user:Sess
           <Link href={`/dashboard/deliveries${query}`}>Delivery activity</Link>
           <Link href={`/preview/@${business.handle}`}>Preview / review</Link>
         </> : null}
-        {legacyManagement && business ? <>
-          <Link href={`/dashboard/catalog${query}`}>Collections &amp; categories</Link>
-          <Link href={`/dashboard/products${query}`}>Products</Link>
-          <Link href={`/dashboard/inquiries${query}`}>Inquiries</Link>
-          <Link href={`/dashboard/deliveries${query}`}>Delivery requests</Link>
-          <Link href={`/dashboard/settings${query}`}>Business settings</Link>
-          <Link href={`/dashboard/design-sdk${query}`}>Design SDK</Link>
-          <Link href={`/preview/@${business.handle}`} target="_blank">Preview showroom ↗</Link>
-        </> : null}
-        {(teamMember || user.access_role === "operations_manager") && business ? <Link href={`/preview/@${business.handle}`}>Live showroom context</Link> : null}
+        {operations && business ? <><Link href={`/dashboard/inquiries${query}`}>Customer inquiries</Link><Link href={`/dashboard/deliveries${query}`}>Delivery operations</Link><Link href={`/preview/@${business.handle}`} target="_blank">Showroom context ↗</Link></> : null}
+        {teamMember && business ? <Link href={`/preview/@${business.handle}`}>Live showroom context</Link> : null}
         {operations ? <Link href="/dashboard/requests">Client requests</Link> : null}
         {operations ? <Link href="/dashboard/requests/on-behalf">Record on behalf</Link> : null}
+        {operations ? <Link href="/dashboard/clients/new">Create client workspace</Link> : null}
         {teamMember ? <Link href="/dashboard/requests">Assigned requests</Link> : null}
         {platformAdmin ? <><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link></> : null}
         <Link href="/dashboard/account">Account security</Link>

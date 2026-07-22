@@ -7,7 +7,7 @@ export type StaffRole = Extract<AccessRole, "team_member" | "operations_manager"
 export type StaffAccount = {
   id:number; email:string; name:string; access_role:StaffRole; must_change_password:number;
 };
-export type ManagedClient = { id:number; email:string; name:string; business_id:number; business_name:string };
+export type ManagedClient = { id:number; email:string; name:string; business_id:number; business_name:string; request_type:"onboarding"|"change" };
 
 export class StaffOperationError extends Error {}
 
@@ -28,18 +28,22 @@ export function listTeamMembers(): StaffAccount[] {
 
 export function listManagedClients(): ManagedClient[] {
   const rows = getDb().prepare(`
-    SELECT u.id,u.email,u.name,u.business_id,b.name business_name
+    SELECT u.id,u.email,u.name,u.business_id,b.name business_name,
+      CASE WHEN b.status='draft' AND b.content_version=1
+        AND NOT EXISTS(SELECT 1 FROM published_catalog_versions v WHERE v.business_id=b.id)
+        THEN 'onboarding' ELSE 'change' END request_type
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
     JOIN businesses b ON b.id=u.business_id
     WHERE p.access_role='client'
     ORDER BY b.name,u.name
   `).all() as ManagedClient[];
-  return rows.map(({ id, email, name, business_id, business_name }) => ({
+  return rows.map(({ id, email, name, business_id, business_name, request_type }) => ({
     id,
     email,
     name,
     business_id,
     business_name,
+    request_type,
   }));
 }
 

@@ -1,7 +1,7 @@
 ---
 id: DEP-003
 title: Managed request storage and safe permission rollout
-status: in_progress
+status: done
 related: [FE-003, BE-003, ADR-0002, ADR-0004]
 owners: [operations, security]
 last_updated: 2026-07-22
@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 Request attachments, pre-account contact data, invitations, content revisions,
-and a later role cutover must survive deployment, backup, restore, and rollback
+and the completed role cutover must survive deployment, backup, restore, and rollback
 without entering application images, logs, public paths, or another tenant's
 workspace.
 
@@ -27,7 +27,8 @@ workspace.
 - Backup, restore, integrity, retention/deletion, orphan cleanup, and capacity
   behavior for request data and attachments.
 - Bounded notification/invitation adapter failures without losing requests.
-- Staged role cutover with backup, session revocation, verification, and rollback.
+- Versioned full role cutover with backup, session revocation, verification, and
+  rollback, including request-free invitations and explicit profiles.
 - Single-instance SQLite pilot deployment and container volume compatibility.
 
 ### Non-goals
@@ -35,7 +36,8 @@ workspace.
 - Object storage, multiple app instances, antivirus claims, passwordless
   delivery, automated WhatsApp, or broad self-service onboarding.
 - Including mutable request attachments or tokens in images/artifacts.
-- Destructive removal of existing owner data during the additive increments.
+- Deleting businesses, catalogs, inquiries, deliveries, request history, or
+  account identities during permission cutover.
 
 ## Domain language and invariants
 
@@ -71,11 +73,15 @@ workspace.
 - Pre-cutover checks count accounts by target role, assignments, open requests,
   and active sessions. Cutover revokes affected sessions and runs permission
   acceptance tests before public continuation.
+- Migration 7 preserves all business/catalog/customer data, converts every
+  owner effective profile to `client`, inserts any missing explicit profiles,
+  permits invitation rows without a request, and revokes converted sessions.
+  Its schema no longer permits a new `legacy_owner` profile.
 - Staff accounts are provisioned individually with temporary passwords and
   explicit access profiles. Seed/setup scripts do not create shared staff
   credentials, and credentials never enter logs, artifacts, or backups.
-- Staff/profile/assignment schema remains additive during the pilot; disabling a
-  staff profile or assignment does not rewrite legacy owner rows.
+- Staff/profile/assignment scope remains explicit after cutover; disabling a
+  staff profile or assignment never grants fallback business authority.
 - Revision migration is additive: it adds a monotonic business content version,
   immutable decision/publication metadata, and retained published snapshots.
   Existing canonical rows remain version 1 until the first managed publication.
@@ -109,6 +115,18 @@ Scenario: Client permission cutover is controlled
   THEN their existing sessions are revoked
   AND catalog/settings/design mutations are denied
   AND request, inquiry, delivery, preview, and account workflows remain available
+
+Scenario: Existing example showrooms survive cutover
+  GIVEN four active example businesses with owner accounts and live catalog data
+  WHEN migration 7 converts those accounts
+  THEN all four public showrooms and catalog/customer rows remain unchanged
+  AND each account receives the restricted client workspace after reauthentication
+
+Scenario: Request-free invitation survives backup and restore
+  GIVEN a draft client workspace invitation with no service request
+  WHEN database backup and restore complete
+  THEN the hashed invitation lifecycle remains valid
+  AND no placeholder request or public attachment is introduced
 
 Scenario: Revision publication recovery survives restore
   GIVEN a published managed revision and its retained prior version
@@ -146,7 +164,7 @@ images, customer data, and revision payloads from logs/artifacts.
 | Private upload/read limits and authorization | security/HTTP | `scripts/test-requests.ts`, `scripts/http-smoke.mjs` |
 | Notification bounded failure/idempotency | adapter | `scripts/test-adapters.ts`, `scripts/test-requests.ts` |
 | Request attachment backup/restore | operations | `scripts/test-operations.mjs` |
-| Permission cutover/session revocation/rollback | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/requests.spec.ts` |
+| Permission cutover/session revocation/rollback | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Container persistent-path compatibility | deployment | `scripts/test-container.mjs` |
 
 ## Rollout and rollback
@@ -155,9 +173,11 @@ images, customer data, and revision payloads from logs/artifacts.
 2. Verify migration, private storage, backup/restore, and staff accounts.
 3. Enable public intake, client requests, and operations review for pilot users.
 4. Enable revision preview/approval/publication and prove live-version isolation.
-5. Create the cutover checkpoint, migrate accounts/permissions, revoke sessions,
-   and run browser/security gates.
-6. Roll back permissions from the checkpoint if any client workflow fails;
+5. Create the cutover checkpoint, migrate all owner accounts to clients,
+   generalize invitations, revoke sessions, and remove legacy authority.
+6. Run all four-client browser/security/operations gates; roll back the complete
+   release from the checkpoint if any replacement workflow fails.
+7. Roll back permissions from the checkpoint if any client workflow fails;
    disable new intake without deleting committed request data when necessary.
 
 No horizontal scaling occurs while SQLite and local attachments remain.
@@ -176,7 +196,10 @@ No horizontal scaling occurs while SQLite and local attachments remain.
 
 Filled only when `status: done` after every mapped gate passes.
 
-### Verified additive increment
+Evidence: verified locally on 2026-07-22 by the mapped migration,
+backup/restore, release, container, and production-browser gates below.
+
+### Verified managed-service rollout
 
 - Schema migration 2 is additive and idempotent.
 - Schema migration 3 adds a database invariant forbidding attachments on public
@@ -194,5 +217,15 @@ Filled only when `status: done` after every mapped gate passes.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private
   attachment files plus revision/version rows survive backup and restore. New
   invited clients and individually provisioned staff use explicit restrictive
-  profiles; assignments remain additive while the legacy-owner cutover remains
-  disabled.
+  profiles.
+- Migration 7 rebuilds the access-profile constraint, converts former
+  compatibility owners to clients, makes invitation request linkage optional,
+  and revokes affected sessions without changing businesses, catalog rows, or
+  publication data.
+- `scripts/test-operations.mjs` reconstructs a version-6 compatibility database,
+  runs the cutover, proves the four example tenants and products remain intact,
+  verifies session revocation and the removed role constraint, then proves
+  request, attachment, revision, and publication backup/restore integrity.
+- `npm run release`, `npm run test:operations`, the production browser suite,
+  and the production container gate are the completion gates for this rollout;
+  local results are recorded in traceability after they pass.

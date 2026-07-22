@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
-import { canManageBusiness, canViewBusiness, hasCapability } from "@/lib/capabilities";
+import { canOperateBusiness, canViewBusiness, hasCapability } from "@/lib/capabilities";
 import { createDeliveryRequest, DeliveryError } from "@/lib/deliveries";
 import { getDb } from "@/lib/db";
 import { assertSameOrigin, audit, currentRequestIdentity } from "@/lib/security";
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     const body = await readBoundedJson(request);
     const businessId = Number(body.businessId);
-    if (!canManageBusiness(user, businessId, false)) return NextResponse.json({ error:"Not authorized." }, { status:403 });
+    if (!canOperateBusiness(user, businessId)) return NextResponse.json({ error:"Not authorized." }, { status:403 });
     const result = createDeliveryRequest({
       businessId, inquiryId: body.inquiryId ? Number(body.inquiryId) : null,
       customerName: body.customerName, phone: body.phone, pickupAddress: body.pickupAddress,

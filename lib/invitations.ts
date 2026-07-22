@@ -19,7 +19,7 @@ const normalizeHandle = (value: unknown) => clean(value, 80).toLowerCase().repla
 export const hashInvitationToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
 export type CreateInvitationInput = {
-  requestId: number;
+  requestId: number | null;
   clientName: string;
   email: string;
   businessName: string;
@@ -29,13 +29,13 @@ export type CreateInvitationInput = {
 };
 
 export function createClientInvitation(raw: CreateInvitationInput, options: { now?: number; token?: string } = {}) {
-  const requestId = Number(raw.requestId);
+  const requestId = raw.requestId === null ? null : Number(raw.requestId);
   const clientName = clean(raw.clientName, 100);
   const email = normalizeEmail(raw.email);
   const businessName = clean(raw.businessName, 120);
   const handle = normalizeHandle(raw.handle);
   const designKey = clean(raw.designKey, 40);
-  if (!Number.isInteger(requestId) || !clientName || !businessName || !handle || !/^\S+@\S+\.\S+$/.test(email) || !DESIGNS.has(designKey)) {
+  if ((requestId !== null && !Number.isInteger(requestId)) || !clientName || !businessName || !handle || !/^\S+@\S+\.\S+$/.test(email) || !DESIGNS.has(designKey)) {
     throw new InvitationError("Complete the client, business, handle, email, and design fields.");
   }
   const token = options.token || crypto.randomBytes(32).toString("base64url");
@@ -44,14 +44,14 @@ export function createClientInvitation(raw: CreateInvitationInput, options: { no
   const expiresAt = now + INVITATION_LIFETIME_MS;
 
   const result = inTransaction(() => {
-    const request = getDb().prepare("SELECT id,request_type,submitter_kind,status,business_id,represented_client_user_id FROM service_requests WHERE id=?").get(requestId) as { id:number; request_type:string; submitter_kind:string; status:string; business_id:number|null; represented_client_user_id:number|null } | undefined;
-    if (!request || request.request_type !== "onboarding" || !["public","manager"].includes(request.submitter_kind) || request.represented_client_user_id || !["submitted", "under_review", "needs_information", "approved_for_work"].includes(request.status)) {
-      throw new InvitationError("This onboarding request is not available for invitation.", "conflict");
-    }
     if (getDb().prepare("SELECT 1 FROM users WHERE lower(email)=lower(?)").get(email)) {
       throw new InvitationError("An account already uses that email.", "conflict");
     }
-    let businessId = request.business_id;
+    const request = requestId === null ? undefined : getDb().prepare("SELECT id,request_type,submitter_kind,status,business_id,represented_client_user_id FROM service_requests WHERE id=?").get(requestId) as { id:number; request_type:string; submitter_kind:string; status:string; business_id:number|null; represented_client_user_id:number|null } | undefined;
+    if (requestId !== null && (!request || request.request_type !== "onboarding" || !["public","manager"].includes(request.submitter_kind) || request.represented_client_user_id || !["submitted", "under_review", "needs_information", "approved_for_work"].includes(request.status))) {
+      throw new InvitationError("This onboarding request is not available for invitation.", "conflict");
+    }
+    let businessId = request?.business_id ?? null;
     if (businessId) {
       const updated = getDb().prepare("UPDATE businesses SET handle=?,name=?,design_key=?,site_title=? WHERE id=? AND status='draft'").run(handle, businessName, designKey, businessName, businessId);
       if (updated.changes !== 1) throw new InvitationError("Only a draft business can receive a replacement invitation.", "conflict");
@@ -59,13 +59,15 @@ export function createClientInvitation(raw: CreateInvitationInput, options: { no
       const inserted = getDb().prepare("INSERT INTO businesses(handle,name,design_key,status,site_title) VALUES(?,?,?,'draft',?)").run(handle, businessName, designKey, businessName);
       businessId = Number(inserted.lastInsertRowid);
     }
-    getDb().prepare("UPDATE client_invitations SET revoked_at=? WHERE request_id=? AND accepted_at IS NULL AND revoked_at IS NULL").run(now, requestId);
+    getDb().prepare("UPDATE client_invitations SET revoked_at=? WHERE business_id=? AND accepted_at IS NULL AND revoked_at IS NULL").run(now, businessId);
     const invitation = getDb().prepare(`
       INSERT INTO client_invitations(request_id,business_id,email,name,token_hash,expires_at,created_by_user_id,created_at)
       VALUES(?,?,?,?,?,?,?,?)
     `).run(requestId, businessId, email, clientName, hashInvitationToken(token), expiresAt, raw.actorUserId, now);
-    getDb().prepare("UPDATE service_requests SET business_id=?,status='approved_for_work',updated_at=CURRENT_TIMESTAMP WHERE id=?").run(businessId, requestId);
-    getDb().prepare("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'72-hour manual invitation created')").run(requestId, raw.actorUserId, "invitation_created");
+    if (requestId !== null) {
+      getDb().prepare("UPDATE service_requests SET business_id=?,status='approved_for_work',updated_at=CURRENT_TIMESTAMP WHERE id=?").run(businessId, requestId);
+      getDb().prepare("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'72-hour manual invitation created')").run(requestId, raw.actorUserId, "invitation_created");
+    }
     return { invitationId: Number(invitation.lastInsertRowid), businessId };
   });
   return { ...result, token, expiresAt };
@@ -106,8 +108,10 @@ export function redeemClientInvitation(raw: { token:string; name:string; passwor
     getDb().prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(userId);
     const accepted = getDb().prepare("UPDATE client_invitations SET accepted_at=?,accepted_user_id=? WHERE id=? AND accepted_at IS NULL AND revoked_at IS NULL").run(now, userId, invitation.id);
     if (accepted.changes !== 1) throw new InvitationError("This invitation is no longer available.", "replayed");
-    getDb().prepare("UPDATE service_requests SET represented_client_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(userId, invitation.request_id);
-    getDb().prepare("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'client account established')").run(invitation.request_id, userId, "invitation_accepted");
+    if (invitation.request_id !== null) {
+      getDb().prepare("UPDATE service_requests SET represented_client_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(userId, invitation.request_id);
+      getDb().prepare("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'client account established')").run(invitation.request_id, userId, "invitation_accepted");
+    }
     return { userId, businessId: invitation.business_id, requestId: invitation.request_id };
   });
 }

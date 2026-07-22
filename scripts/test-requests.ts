@@ -12,7 +12,7 @@ async function main() {
 
   const { getDb, getUserById, closeDbForTests } = await import("../lib/db");
   const { FileRequestAttachmentStore, resolveRequestAttachment } = await import("../lib/request-media");
-  const { SqliteRequestRepository, getRequestDetail, updateRequestStatus } = await import("../lib/request-sqlite");
+  const { addRequestClarification, SqliteRequestRepository, getRequestDetail, updateRequestStatus } = await import("../lib/request-sqlite");
   const { createPublicInterest } = await import("../lib/request-service");
   const { RequestError } = await import("../lib/request-domain");
   const { canManageBusiness, canViewBusiness } = await import("../lib/capabilities");
@@ -93,6 +93,7 @@ async function main() {
     clientForm.append("images",new File([new Uint8Array(png)],"summer-reference.png",{type:"image/png"}));
     const clientRequest = await createAuthenticatedClientRequest(client,clientForm);
     const clientDetail = getRequestDetail(clientRequest.id)!;
+    assert.equal(clientDetail.request_type,"onboarding");
     assert.equal(clientDetail.attachments.length,1);
     assert.equal(canAccessRequest(client,clientDetail),true);
     assert.equal(listClientRequests(client).some((request)=>request.id===clientRequest.id),true);
@@ -114,6 +115,19 @@ async function main() {
     assert.equal(manager.access_role,"operations_manager");
     assert.equal(teamOne.access_role,"team_member");
     assert.equal(canManageBusiness(manager,redeemed.businessId),false);
+
+    const directToken = "D".repeat(43);
+    const directInvitation = createClientInvitation({requestId:null,clientName:"Direct Client",email:"direct@example.test",businessName:"Direct Market",handle:"direct-market",designKey:"alhaya",actorUserId:manager.id},{now:2_000_000,token:directToken});
+    assert.equal(getActiveInvitation(directToken,2_000_001)?.request_id,null);
+    const directRedemption = redeemClientInvitation({token:directToken,name:"Direct Client",password:"DirectClient123!"},2_000_100);
+    assert.equal(directRedemption.requestId,null);
+    const directClient = getUserById(directRedemption.userId)!;
+    const directForm = new FormData();
+    directForm.set("requestType","change");
+    directForm.set("requestText","Please prepare our first showroom from this complete business brief.");
+    directForm.set("idempotencyKey","direct_client_key_123456");
+    const directRequest = await createAuthenticatedClientRequest(directClient,directForm);
+    assert.equal(getRequestDetail(directRequest.id)?.request_type,"onboarding");
     const managedClients = listManagedClients();
     assert.equal(Object.getPrototypeOf(managedClients[0]),Object.prototype);
     assert.equal(managedClients.some((managedClient)=>managedClient.id===client.id),true);
@@ -135,6 +149,16 @@ async function main() {
     const managerRepeated = await createOnBehalfRequest(manager,managerForm);
     assert.equal(managerRepeated.id,managerRequest.id);
     assert.equal(managerRepeated.duplicate,true);
+
+    const staffClarification = addRequestClarification(manager,managerRequest.id,"Which hero message should the team prioritize?");
+    assert.equal(staffClarification.status,"needs_information");
+    assert.equal(getRequestDetail(managerRequest.id)?.status,"needs_information");
+    assert.throws(()=>addRequestClarification(otherClient,managerRequest.id,"I should not see this."),RequestError);
+    const clientClarification = addRequestClarification(client,managerRequest.id,"Please prioritize our handmade origin story.");
+    assert.equal(clientClarification.status,"under_review");
+    const clarificationEvents = getRequestDetail(managerRequest.id)!.events.filter((event)=>event.event_type.endsWith("_clarification"));
+    assert.deepEqual(clarificationEvents.map((event)=>event.actor_access_role),["operations_manager","client"]);
+    assert.deepEqual(clarificationEvents.map((event)=>event.detail),["Which hero message should the team prioritize?","Please prioritize our handmade origin story."]);
 
     assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
     const assignedToOne = getRequestDetail(managerRequest.id)!;
@@ -172,7 +196,7 @@ async function main() {
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

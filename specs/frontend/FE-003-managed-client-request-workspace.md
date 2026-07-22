@@ -1,7 +1,7 @@
 ---
 id: FE-003
 title: Managed client request and review workspace
-status: in_progress
+status: done
 related: [BE-003, DEP-003, ADR-0004]
 owners: [product, frontend]
 last_updated: 2026-07-22
@@ -32,8 +32,14 @@ private and no showroom change becomes public without client approval.
 - Existing client inquiry, delivery, and account-security access.
 - Assigned team-member work queues and manager-wide operations queue.
 - Manager-only onboarding/change submission on behalf of a prospect or client.
+- Manager/admin creation of a draft client workspace and single-use invitation
+  without requiring a public interest or an existing service request.
+- Attributable client/staff clarification messages on each request.
+- Operations-manager inquiry status and delivery initiation tools, while client
+  inquiry and delivery views remain read-only.
 - Clear attribution when SuqPage submits a request for a client.
 - Separate private draft and public/live showroom states.
+- Complete removal of legacy-owner navigation and direct live-content editing.
 
 ### Non-goals
 
@@ -41,8 +47,8 @@ private and no showroom change becomes public without client approval.
 - Passwordless login, automated WhatsApp delivery, payment, checkout, or a
   generic visual page builder.
 - Automatic conversion of client text or images into published catalog data.
-- Removing current owner controls before the complete replacement workflow is
-  verified and migrated.
+- Direct live catalog/settings/design editing by any client or routine staff
+  role; all content changes use a request revision and client approval.
 
 ## Domain language and invariants
 
@@ -52,6 +58,10 @@ private and no showroom change becomes public without client approval.
   request.
 - **Proposed revision:** server-validated staff work available only in preview.
 - **Published revision:** the version served by the public showroom.
+- **New showroom request:** a request for a draft business that has never had a
+  published showroom.
+- **Showroom change request:** a request for a business with established
+  published/live history.
 - Clients see only their business and pre-account requests proven through their
   accepted invitation.
 - Team members see only assigned work. Manager and administrator capabilities
@@ -69,6 +79,13 @@ private and no showroom change becomes public without client approval.
   submission is not acceptance or publication.
 - A client account exposes Requests, Customer inquiries, Delivery activity,
   Preview/review, and Account security only.
+- Authorized operations staff can create a draft client workspace without a
+  prior lead. The client still establishes their own password through the same
+  displayed-once invitation contract and may submit the first detailed request
+  only after authentication.
+- Request type is explanatory, not client-selectable: the UI shows New showroom
+  for a never-published draft and Showroom change after publication/live
+  history; the server derives the same value independently.
 - Staff-created requests visibly state that SuqPage submitted them for the
   client; internal staff identity is not exposed beyond what operations policy
   permits.
@@ -93,6 +110,11 @@ private and no showroom change becomes public without client approval.
 - Operations managers see the full request queue and may submit an onboarding
   request for a prospect or an onboarding/change request for an existing client.
   A manager-created request visibly identifies SuqPage as the submitter.
+- Operations managers process customer-inquiry status and initiate delivery
+  work for a selected business. Clients see the same activity read-only.
+- Every request detail provides a bounded clarification composer and an
+  attributable thread. Clients see their own messages and a generic SuqPage
+  team identity; internal staff retain named attribution for audit/workflow.
 - Assignment selects one team member and, when the request has a business,
   grants that member request/business view scope. Reassignment removes obsolete
   business scope when the member has no other active request for that business.
@@ -109,6 +131,9 @@ private and no showroom change becomes public without client approval.
   clearly labeled Public site link opens the public experience.
 - The invitation acceptance screen explains the business being joined, expiry,
   and account setup without exposing internal request/contact data.
+- Platform administration creates staff, resets client temporary passwords,
+  suspends/restores public availability, and links into client provisioning. It
+  has no legacy-owner creation or direct live catalog/settings/design controls.
 
 ## Scenarios
 
@@ -148,6 +173,31 @@ Scenario: Manager submits on behalf of a client
   WHEN the manager records the client's change request
   THEN the client sees it as submitted for them by SuqPage
   AND a normal team member never sees the on-behalf control
+
+Scenario: Manager creates a client workspace without a lead
+  GIVEN an operations manager has a referred client with no public submission
+  WHEN the manager creates a draft business invitation
+  THEN no service request is fabricated
+  AND the invited client can authenticate and submit a new-showroom request
+
+Scenario: Request type follows publication state
+  GIVEN one client has a never-published draft and another has a live showroom
+  WHEN each submits a request
+  THEN the first request is labeled onboarding/new showroom
+  AND the second is labeled change/showroom change
+  AND neither client can override the classification
+
+Scenario: Client and staff clarify a request
+  GIVEN an accessible request needs more information
+  WHEN staff asks a bounded question and the client responds
+  THEN both messages append without changing the original instruction
+  AND each actor sees the permitted attribution and updated request state
+
+Scenario: Operations handles customer activity
+  GIVEN an operations manager selects a client business
+  WHEN they update an inquiry or initiate a delivery request
+  THEN the operation is available and audited
+  AND the client sees the resulting activity without mutation controls
 
 Scenario: Assigned team member prepares work
   GIVEN a team member assigned to one request
@@ -219,10 +269,11 @@ attachment contents, access tokens, or customer inquiry details.
 
 ## Rollout and rollback
 
-Ship public/client intake and staff review additively. Keep current owner controls
-until preview/publication and account migration pass. Roll back additive UI/API
-without deleting request data; permission cutover has a separate backup,
-session-revocation, and rollback checkpoint under `DEP-003`.
+Ship the replacement workflows before applying the permission migration in the
+same release candidate. The cutover preserves all four example showrooms,
+converts their accounts to clients, and removes legacy live-edit navigation and
+authority after backup/session-revocation gates pass. Rollback uses the explicit
+checkpoint under `DEP-003`; request and revision data are never deleted.
 
 ## Readiness checklist
 
@@ -238,7 +289,10 @@ session-revocation, and rollback checkpoint under `DEP-003`.
 
 Filled only when `status: done` after every mapped gate passes.
 
-### Verified additive increment
+Evidence: verified locally on 2026-07-22 by the mapped unit, integration, and
+production-browser tests below.
+
+### Verified managed-service implementation
 
 - Public expression-of-interest form and bounded JSON API are active with no
   file input, upload handling, or self-sign-up path.
@@ -247,9 +301,12 @@ Filled only when `status: done` after every mapped gate passes.
 - Operators can create a displayed-once 72-hour invitation; accepted clients
   receive a restricted workspace with request history, read-only inquiry and
   delivery activity, preview, and account security.
-- Clients can submit bounded unstructured onboarding/change requests with up to
-  ten private sanitized images. Nested request, invitation, and request-create
-  screens include breadcrumbs and deterministic Back behavior.
+- Operators can also create a draft client workspace and displayed-once
+  invitation without a prior lead or fabricated service request.
+- Clients can submit bounded unstructured requests with up to ten private
+  sanitized images. The server derives first-showroom versus change type from
+  publication state. Nested request, invitation, and request-create screens
+  include breadcrumbs and deterministic Back behavior.
 - Platform administrators can provision individual operations-manager and team-
   member accounts that require a first-login password change. Operations
   managers can record private requests for existing clients or prospects and
@@ -264,4 +321,12 @@ Filled only when `status: done` after every mapped gate passes.
   breadcrumbs return to the request hierarchy.
 - `tests/acceptance/app.spec.ts` proves staff draft/save/submit, exact client
   approval, manager publication, and the changed public showroom in a production
-  build. Clarification messaging and the legacy-owner cutover remain.
+  build.
+- Clients and authorized staff exchange attributable clarifications without
+  rewriting the original request; client views protect internal staff identity.
+- Migration 7 converts every former compatibility owner, including all four
+  examples, to the same restricted client workspace. Direct live settings,
+  catalog, design, inquiry-status, and delivery-create client controls are gone.
+- The seven-scenario production browser suite passed on 2026-07-22 and covers
+  every role, direct and lead-based invitations, clarification, authorization,
+  client approval, publication, customer operations, public UX, and API headers.

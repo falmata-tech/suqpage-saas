@@ -1,4 +1,4 @@
-import type { ServiceRequestStatus } from "./types";
+import type { ServiceRequestStatus, ServiceRequestType } from "./types";
 
 export const MAX_REQUEST_TEXT = 10_000;
 export const MAX_PUBLIC_INTEREST_TEXT = 2_000;
@@ -24,6 +24,10 @@ const REVIEW_TRANSITIONS: Record<ServiceRequestStatus, ReadonlySet<ServiceReques
 
 export function isReviewTransitionAllowed(from: ServiceRequestStatus, to: ServiceRequestStatus) {
   return from === to || REVIEW_TRANSITIONS[from].has(to);
+}
+
+export function classifyShowroomRequest(state: { status:"active"|"draft"|"suspended"; contentVersion:number; retainedVersions:number }): ServiceRequestType {
+  return state.status === "draft" && state.contentVersion === 1 && state.retainedVersions === 0 ? "onboarding" : "change";
 }
 
 export type PublicInterestInput = {

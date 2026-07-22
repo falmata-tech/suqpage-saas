@@ -11,8 +11,8 @@ related: [FE-003, BE-003, DEP-003, ADR-0001, ADR-0002]
 
 ## Context
 
-The current controlled pilot gives business owners direct catalog, settings,
-inquiry, and delivery controls. SuqPage is moving to a managed-service model in
+Before this decision, the controlled pilot gave business owners direct catalog,
+settings, inquiry, and delivery controls. SuqPage moved to a managed-service model in
 which clients describe onboarding or changes in their own words and authorized
 staff translate those requests into canonical business data and custom designs.
 
@@ -31,8 +31,8 @@ ownership.
   exact proposed revision.
 - Staff access must be individual, tenant-scoped, capability-enforced, and
   auditable.
-- The four-client SQLite pilot must gain the workflow additively without a risky
-  all-at-once role cutover.
+- The four-client SQLite pilot must preserve showroom data while converging on
+  one managed-service permission model.
 
 ## Considered options
 
@@ -48,18 +48,20 @@ ownership.
 
 Adopt option 3.
 
-- A public prospect can submit an onboarding request without an account. After
-  acceptance, the client receives a normal invited account for the first
-  release; passwordless access remains future work.
+- A public prospect can submit an attachment-free expression of interest without
+  an account. After acceptance, the client receives an invited account;
+  authorized staff may also create a client workspace directly for a referral.
+  Passwordless access remains future work.
 - Clients can submit and track requests, answer clarifications, use their
   inquiry/delivery workspace, preview proposed revisions, and approve or reject
   them. They do not directly manage business settings, catalog structure,
-  products, options, design, or publication after the permission cutover.
+  products, options, design, or publication.
 - Team members work only on assigned tenants/requests and cannot onboard or
   submit on behalf of clients, manage roles, approve as the client, or publish.
-- Operations managers can view the operations queue, submit onboarding/change
-  requests on behalf of clients, accept prospects, invite clients, assign staff,
-  and publish a client-approved revision.
+- Operations managers can view the operations queue, submit requests on behalf
+  of clients, create client workspaces, accept prospects, invite clients, assign
+  staff, manage inquiry/delivery activity, and publish a client-approved
+  revision. The server derives request type for existing clients.
 - Platform administrators retain explicit system-wide authority.
 - The original request is immutable business input. Only server-validated staff
   work becomes a proposed content revision; unstructured text or AI output never
@@ -69,9 +71,19 @@ Adopt option 3.
   version. Any change after approval invalidates approval. A manager or
   administrator publishes the latest approved revision atomically and retains
   the previous version for rollback.
-- Rollout is additive: intake and operations review ship before existing owner
-  mutation authority is removed. Permission cutover occurs only after the
-  replacement client workspace and publication workflow pass their gates.
+- Migration 7 converts all example and compatibility-owner profiles to clients,
+  revokes their sessions, and removes legacy live mutation rather than retaining
+  a second product model.
+
+## Cutover amendment — 2026-07-22
+
+The four current tenants are example clients, not external compatibility
+customers. SuqPage therefore completes the planned cutover now: authorized
+staff can create a client workspace without a lead, request type is derived from
+publication state, operations managers replace owner inquiry/delivery actions,
+and no account retains direct live catalog/settings/design authority. This
+amendment narrows compatibility debt without changing the versioned-publication
+architecture selected above.
 
 ## Consequences
 

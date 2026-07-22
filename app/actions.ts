@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
-import { canManageBusiness, hasCapability } from "@/lib/capabilities";
+import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
 import { createDeliveryRequest } from "@/lib/deliveries";
 import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
 import { saveUploadedImage } from "@/lib/media";
@@ -16,8 +16,7 @@ import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 const text = (fd:FormData,key:string,max=500) => cleanText(fd.get(key),max);
 const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt(text(fd,key,30),10); return Number.isFinite(value)?value:fallback; };
 const slugify = (value:string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,80) || `item-${Date.now()}`;
-const designKeys = new Set(["alhaya","usashopet","novatech","homevibe"]);
-const statuses = new Set(["active","draft","suspended"]);
+const operationalStatuses = new Set(["active","suspended"]);
 
 function go(path:string,params:Record<string,string|number|undefined>={}): never {
   const query=new URLSearchParams();
@@ -29,6 +28,13 @@ async function authorizedBusinessId(requested:number) {
   const user=await requireUser();
   const assigned=user.access_role==="team_member"&&Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,requested));
   if(!canManageBusiness(user,requested,assigned))throw new Error("Not authorized for this business.");
+  if(!getBusinessById(requested))throw new Error("Business not found.");
+  return {businessId:requested,user};
+}
+
+async function authorizedOperationsBusinessId(requested:number) {
+  const user=await requireUser();
+  if(!canOperateBusiness(user,requested))throw new Error("Operations manager access required.");
   if(!getBusinessById(requested))throw new Error("Business not found.");
   return {businessId:requested,user};
 }
@@ -89,39 +95,22 @@ export async function updateBusinessAction(formData:FormData){
   go("/dashboard/settings",{business:businessId,saved:1});
 }
 
-export async function adminCreateBusinessAction(formData:FormData){
-  const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
-  const name=text(formData,"name",100),handle=slugify(text(formData,"handle",80)),designKey=text(formData,"designKey",40),ownerName=text(formData,"ownerName",100),email=text(formData,"email",160).toLowerCase(),password=String(formData.get("temporaryPassword")||"");
-  if(!name||!handle||!designKeys.has(designKey)||!ownerName||!/^\S+@\S+\.\S+$/.test(email)||!isStrongPassword(password))go("/dashboard/admin",{error:"Complete every field and use a 12+ character temporary password with upper-case, lower-case, and a number."});
-  let businessId:number;
-  try{
-    businessId=inTransaction(()=>{
-      const result=getDb().prepare("INSERT INTO businesses(handle,name,design_key,status,site_title) VALUES(?,?,?,'draft',?)").run(handle,name,designKey,name);
-      const id=Number(result.lastInsertRowid);
-      getDb().prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,?,?,'owner',?,1)").run(email,bcrypt.hashSync(password,12),ownerName,id);
-      return id;
-    });
-  }catch(error){go("/dashboard/admin",{error:error instanceof Error?error.message:"Could not create business."});}
-  audit("admin.business_created",{userId:user.id,businessId,detail:{handle,email}});
-  go("/dashboard",{business:businessId,created:1});
-}
-
 export async function adminUpdateBusinessAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
-  const businessId=int(formData,"businessId"),status=text(formData,"status",20),designKey=text(formData,"designKey",40);
-  if(!statuses.has(status)||!designKeys.has(designKey)||!getBusinessById(businessId))go("/dashboard/admin",{error:"Invalid business settings."});
-  getDb().prepare("UPDATE businesses SET status=?,design_key=? WHERE id=?").run(status,designKey,businessId);
-  audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status,designKey}});
+  const businessId=int(formData,"businessId"),status=text(formData,"status",20),business=getBusinessById(businessId);
+  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin",{error:"Only an established showroom can be suspended or restored."});
+  getDb().prepare("UPDATE businesses SET status=? WHERE id=?").run(status,businessId);
+  audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
   revalidatePath("/");go("/dashboard/admin",{saved:1});
 }
 
-export async function adminResetPasswordAction(formData:FormData){
+export async function adminResetClientPasswordAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
-  const target=getDb().prepare("SELECT u.id,u.business_id FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND u.role='owner' AND COALESCE(p.access_role,'legacy_owner')='legacy_owner'").get(userId) as any;
-  if(!target||!isStrongPassword(password))go("/dashboard/admin",{error:"Choose an owner and use a 12+ character password with upper-case, lower-case, and a number."});
+  const target=getDb().prepare("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'").get(userId) as any;
+  if(!target||!isStrongPassword(password))go("/dashboard/admin",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(bcrypt.hashSync(password,12),userId);
-  revokeAllUserSessions(userId);audit("admin.owner_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
+  revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
   go("/dashboard/admin",{saved:"password"});
 }
 
@@ -177,10 +166,10 @@ export async function updateProductAction(formData:FormData){
 
 export async function deleteProductAction(formData:FormData){const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const productId=int(formData,"productId");getDb().prepare("DELETE FROM products WHERE id=? AND business_id=?").run(productId,businessId);audit("product.deleted",{userId:user.id,businessId,detail:{productId}});const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");}
 
-export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1});}
+export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1});}
 
 export async function createDeliveryRequestAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));
+  const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));
   let result:{externalRequestId:string};
   try{result=createDeliveryRequest({businessId,inquiryId:int(formData,"inquiryId")||null,customerName:text(formData,"customerName",80),phone:text(formData,"phone",40),pickupAddress:text(formData,"pickupAddress",300),deliveryAddress:text(formData,"deliveryAddress",300),packageCount:int(formData,"packageCount",1),note:text(formData,"note",1000),companyIds:formData.getAll("companyIds"),idempotencyKey:crypto.randomUUID()},user.business_id,hasCapability(user,"operations:manage"));}catch(error){go("/dashboard/deliveries",{business:businessId,error:error instanceof Error?error.message:"Could not create delivery request."});}
   audit("delivery.created",{userId:user.id,businessId,detail:result});revalidatePath("/dashboard/deliveries");revalidatePath("/dashboard/inquiries");go("/dashboard/deliveries",{business:businessId,created:result.externalRequestId});

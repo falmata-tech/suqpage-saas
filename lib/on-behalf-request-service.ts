@@ -3,6 +3,7 @@ import { hasCapability } from "./capabilities";
 import { getDb, inTransaction } from "./db";
 import { FileRequestAttachmentStore } from "./request-media";
 import { MAX_REQUEST_IMAGES, MAX_REQUEST_TEXT, RequestError } from "./request-domain";
+import { requestTypeForBusiness } from "./request-sqlite";
 import type { StoredRequestImage } from "./request-ports";
 import type { ServiceRequestType, SessionUser } from "./types";
 
@@ -12,10 +13,8 @@ const clean = (value: unknown, max: number) => String(value ?? "").trim().replac
 export async function createOnBehalfRequest(user: SessionUser, formData: FormData) {
   if (!hasCapability(user, "operations:manage")) throw new RequestError("Operations manager access is required.", 403);
   const clientUserId = Number.parseInt(clean(formData.get("clientUserId"), 20), 10) || null;
-  const requestedType = clean(formData.get("requestType"), 20) as ServiceRequestType;
   const requestText = clean(formData.get("requestText"), MAX_REQUEST_TEXT + 1);
   const idempotencyKey = clean(formData.get("idempotencyKey"), 100);
-  if (!["onboarding", "change"].includes(requestedType)) throw new RequestError("Choose a valid request type.");
   if (requestText.length < 10 || requestText.length > MAX_REQUEST_TEXT) throw new RequestError(`Describe the request in 10–${MAX_REQUEST_TEXT.toLocaleString("en-US")} characters.`);
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new RequestError("The request session is invalid. Refresh and try again.");
   const duplicate = getDb().prepare("SELECT id,public_ref FROM service_requests WHERE submitted_by_user_id=? AND submitter_kind='manager' AND idempotency_key=?").get(user.id,idempotencyKey) as {id:number;public_ref:string}|undefined;
@@ -26,7 +25,7 @@ export async function createOnBehalfRequest(user: SessionUser, formData: FormDat
   let contactName: string;
   let contactValue: string;
   let businessName: string;
-  let requestType = requestedType;
+  let requestType: ServiceRequestType = "onboarding";
   if (clientUserId) {
     const client = getDb().prepare(`
       SELECT u.id,u.name,u.email,u.business_id,b.name business_name
@@ -37,11 +36,11 @@ export async function createOnBehalfRequest(user: SessionUser, formData: FormDat
     if (!client) throw new RequestError("Choose a valid managed client.");
     representedClientUserId = client.id;
     businessId = client.business_id;
+    requestType = requestTypeForBusiness(client.business_id);
     contactName = client.name;
     contactValue = client.email;
     businessName = client.business_name;
   } else {
-    requestType = "onboarding";
     contactName = clean(formData.get("contactName"), 100);
     contactValue = clean(formData.get("contactValue"), 160);
     businessName = clean(formData.get("businessName"), 120);

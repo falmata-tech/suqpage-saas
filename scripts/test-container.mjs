@@ -27,7 +27,7 @@ const requiredIgnores = [
 function safeOutput(value) {
   return String(value || "")
     .split("\n")
-    .map((line) => (/^(ADMIN|OWNER) \|/.test(line) ? "[credential row redacted]" : line))
+    .map((line) => (/^(ADMIN|CLIENT) \|/.test(line) ? "[credential row redacted]" : line))
     .join("\n");
 }
 
@@ -119,7 +119,7 @@ try {
     image,
     "npm", "run", "setup", "--", "--reset",
   ], { capture: true });
-  assert(!/^(ADMIN|OWNER) \|/m.test(setup.stdout), "Container setup exposed generated credential values");
+  assert(!/^(ADMIN|CLIENT) \|/m.test(setup.stdout), "Container setup exposed generated credential values");
 
   run([
     "run", "-d", "--name", app,
@@ -146,7 +146,7 @@ try {
   }
   const logs = run(["logs", app], { capture: true, allowFailure: true });
   const combinedLogs = `${logs.stdout || ""}\n${logs.stderr || ""}`;
-  assert(!/^(ADMIN|OWNER) \|/m.test(combinedLogs), "Container logs exposed generated credential values");
+  assert(!/^(ADMIN|CLIENT) \|/m.test(combinedLogs), "Container logs exposed generated credential values");
   assert.match(combinedLogs, /Preflight passed\./, "Production preflight did not complete in the container");
   assert(healthy, `Container health did not become ready\n${safeOutput(combinedLogs)}`);
 

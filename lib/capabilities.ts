@@ -3,13 +3,12 @@ import type { AccessRole, SessionUser } from "./types";
 export type Capability =
   | "platform:admin"
   | "operations:manage"
-  | "business:manage"
+  | "customer-operations:manage"
   | "client:workspace";
 
 const grants: Record<AccessRole, ReadonlySet<Capability>> = {
-  platform_admin: new Set(["platform:admin", "operations:manage", "business:manage"]),
-  operations_manager: new Set(["operations:manage"]),
-  legacy_owner: new Set(["business:manage"]),
+  platform_admin: new Set(["platform:admin", "operations:manage", "customer-operations:manage"]),
+  operations_manager: new Set(["operations:manage", "customer-operations:manage"]),
   team_member: new Set(),
   client: new Set(["client:workspace"]),
 };
@@ -25,8 +24,12 @@ export function canViewBusiness(user: SessionUser, businessId: number, assigned 
 }
 
 export function canManageBusiness(user: SessionUser, businessId: number, _assigned = false) {
-  if (hasCapability(user, "platform:admin")) return true;
-  return user.access_role === "legacy_owner" && user.business_id === businessId;
+  void user; void businessId;
+  return false;
+}
+
+export function canOperateBusiness(user: SessionUser, businessId: number) {
+  return businessId > 0 && hasCapability(user, "customer-operations:manage");
 }
 
 export function isClient(user: SessionUser) {

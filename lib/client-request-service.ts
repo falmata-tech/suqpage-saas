@@ -3,16 +3,16 @@ import { getDb, inTransaction } from "./db";
 import { FileRequestAttachmentStore } from "./request-media";
 import { MAX_REQUEST_IMAGES, MAX_REQUEST_TEXT, RequestError } from "./request-domain";
 import type { StoredRequestImage } from "./request-ports";
-import type { ServiceRequestType, SessionUser } from "./types";
+import { requestTypeForBusiness } from "./request-sqlite";
+import type { SessionUser } from "./types";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function createAuthenticatedClientRequest(user: SessionUser, formData: FormData) {
   if (user.access_role !== "client" || !user.business_id) throw new RequestError("Client workspace access is required.", 403);
-  const requestType = String(formData.get("requestType") || "change") as ServiceRequestType;
+  const requestType = requestTypeForBusiness(user.business_id);
   const requestText = String(formData.get("requestText") || "").trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
   const idempotencyKey = String(formData.get("idempotencyKey") || "").trim();
-  if (!new Set<ServiceRequestType>(["onboarding", "change"]).has(requestType)) throw new RequestError("Choose a valid request type.");
   if (requestText.length < 10 || requestText.length > MAX_REQUEST_TEXT) throw new RequestError(`Describe the request in 10–${MAX_REQUEST_TEXT.toLocaleString("en-US")} characters.`);
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new RequestError("The request session is invalid. Refresh and try again.");
   const duplicate = getDb().prepare("SELECT id,public_ref FROM service_requests WHERE submitted_by_user_id=? AND submitter_kind='client' AND idempotency_key=?").get(user.id, idempotencyKey) as {id:number;public_ref:string}|undefined;

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { REVIEW_REQUEST_STATUSES, RequestError } from "@/lib/request-domain";
-import { canAccessRequest, getRequestDetail, updateRequestStatus } from "@/lib/request-sqlite";
+import { addRequestClarification, canAccessRequest, getRequestDetail, updateRequestStatus } from "@/lib/request-sqlite";
 import { audit, cleanText } from "@/lib/security";
 import type { ServiceRequestStatus } from "@/lib/types";
 
@@ -27,4 +27,19 @@ export async function updateServiceRequestStatusAction(formData: FormData) {
   revalidatePath("/dashboard/requests");
   revalidatePath(`/dashboard/requests/${requestId}`);
   redirect(`/dashboard/requests/${requestId}?saved=1`);
+}
+
+export async function addRequestClarificationAction(formData: FormData) {
+  const user = await requireUser();
+  const requestId = Number.parseInt(cleanText(formData.get("requestId"),20),10);
+  if (!Number.isInteger(requestId)) redirect("/dashboard/requests?error=invalid");
+  try {
+    const result = addRequestClarification(user,requestId,formData.get("message"));
+    audit("service_request.clarification_added", { userId:user.id, businessId:result.businessId, detail:{ requestId, messageLength:result.messageLength, status:result.status } });
+  } catch (error) {
+    redirect(`/dashboard/requests/${requestId}?error=${error instanceof RequestError ? "clarification" : "unknown"}`);
+  }
+  revalidatePath("/dashboard/requests");
+  revalidatePath(`/dashboard/requests/${requestId}`);
+  redirect(`/dashboard/requests/${requestId}?clarified=1`);
 }

@@ -1,7 +1,7 @@
 ---
 id: BE-003
 title: Managed request, permission, and publication security
-status: in_progress
+status: done
 related: [FE-003, DEP-003, ADR-0004]
 owners: [backend, security]
 last_updated: 2026-07-22
@@ -29,7 +29,8 @@ publish only the exact client-approved revision.
 - Client, team-member, operations-manager, and administrator authorization.
 - Canonical revision validation, optimistic base-version conflict detection,
   atomic publication, audit, and rollback metadata.
-- Additive migration from current admin/owner roles before later client cutover.
+- Client provisioning without a lead, clarification events, operational
+  inquiry/delivery authority, and complete owner-to-client permission cutover.
 
 ### Non-goals
 
@@ -49,6 +50,8 @@ publish only the exact client-approved revision.
 - The original instruction, original submitter, represented client/prospect,
   creation time, and attachment associations are immutable.
 - Clarifications and status transitions append attributable events.
+- Request type is derived from durable business publication state; browser input
+  never decides whether work is onboarding or a change.
 - Public submission uses idempotency and privacy-preserving rate limits.
 - A team member needs an active assignment for every private read/write.
 - A manager may create on behalf, accept/invite, and assign. Only a manager or
@@ -79,6 +82,9 @@ publish only the exact client-approved revision.
   identifier, contact, token, or attachment path.
 - Invitation tokens are random, single-use, stored hashed, expire, and are
   revoked after acceptance or account/security changes.
+- An invitation may reference an accepted public/on-behalf onboarding request or
+  no request at all. A request-free invitation creates no placeholder request;
+  redemption binds only the client and draft business until detailed intake.
 - For the controlled pilot, an administrator or operations manager accepts the
   prospect, creates/links a draft business, and generates a 72-hour invitation
   URL displayed once for manual secure delivery. Regeneration revokes every
@@ -87,9 +93,9 @@ publish only the exact client-approved revision.
 - Redemption atomically marks the invitation accepted, creates one client
   account bound to the invitation business/request, and cannot be replayed.
 - Role checks use explicit capabilities. Interface hiding has no authority.
-- Staff provisioning is platform-administrator-only. The compatibility value in
-  `users.role` grants no authority; the effective access profile is required for
-  every staff operation.
+- Staff provisioning is platform-administrator-only. The structural value in
+  `users.role` grants no authority; every user has an explicit effective access
+  profile and `legacy_owner` is not a valid post-cutover profile.
 - Operations managers can read all requests, create on-behalf requests, accept
   prospects, invite clients, and assign team members. They cannot use legacy
   live catalog/settings mutations or approve as a client.
@@ -102,6 +108,16 @@ publish only the exact client-approved revision.
   authenticated client. Existing-client requests bind to the selected client
   and business; prospect onboarding captures bounded contact/business data and
   creates no account by itself.
+- Client and existing-client manager intake ignore any submitted request type
+  and derive onboarding only for a never-published draft business; active,
+  suspended, previously published, or versioned businesses derive change.
+- Clarifications are 1–2,000 characters, stored as immutable request events,
+  tenant/assignment authorized, and safely attributed. Staff questions move
+  active work to `needs_information`; a client response returns it to
+  `under_review` without rewriting the original request.
+- `operations:manage` authorizes tenant-selected inquiry status and delivery
+  initiation through dedicated operational checks. It does not authorize live
+  business/catalog/design mutation.
 - Assignment, request transition, clarification, approval, rejection,
   publication, rollback, and privileged reads write audit events with safe
   identifiers.
@@ -129,6 +145,9 @@ publish only the exact client-approved revision.
 - Operational rollback never decrements the content version. An authorized
   manager republishes a retained prior snapshot as a new content version and the
   rollback is audited; it is recovery authority, not client approval for new work.
+- Platform administrators may suspend an active showroom and restore that same
+  showroom operationally, but cannot activate a never-published draft or change
+  its renderer outside an approved revision.
 
 ## Scenarios
 
@@ -156,6 +175,24 @@ Scenario: Invitation is redeemed once
   WHEN the intended client establishes a valid password
   THEN one client account is bound to the invitation business and request
   AND replay, expiry, or a superseded token creates no account
+
+Scenario: Request-free client invitation is redeemed once
+  GIVEN an authorized manager created a draft workspace without a lead
+  WHEN the client redeems its invitation
+  THEN one client account is bound to the draft business
+  AND no service request exists until the client or manager submits instructions
+
+Scenario: Client cannot forge request classification
+  GIVEN a client business with no published showroom
+  WHEN the client submits a browser field claiming the request is a change
+  THEN the stored request type is onboarding
+  AND a live business submitted as onboarding is stored as change
+
+Scenario: Legacy live mutation is denied after cutover
+  GIVEN any migrated client, team member, operations manager, or administrator
+  WHEN they call a former live catalog/settings/design mutation directly
+  THEN authorization is denied
+  AND canonical showroom state changes only through approved publication
 
 Scenario: Unassigned staff access is denied
   GIVEN a normal team member without an assignment
@@ -235,16 +272,18 @@ contents, invitation tokens, or customer data.
 | Client tenant and staff assignment isolation | security | `scripts/test-requests.ts` |
 | Manager-only on-behalf/invite/assign/publish | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Exact approval, stale conflict, atomic publish, rollback | integration | `scripts/test-revisions.ts` |
-| Existing inquiry/delivery isolation remains | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
+| Operations inquiry/delivery authority and client read-only isolation | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
+| Request-free invitations and inferred request type | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
+| Clarification authorization and immutability | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
-Use additive tables/columns and dual-capability compatibility first. Back up and
-test restore before role cutover. Existing owner sessions are revoked when an
-account becomes a client. Rollback before cutover disables request routes while
-retaining data. Rollback after cutover restores the previous permission mapping
-only from an approved migration checkpoint; published content rollback uses the
-retained prior revision.
+Back up and test restore before the version-7 role cutover. The migration assigns
+explicit profiles to every account, converts every owner profile to client,
+generalizes invitations without fabricating requests, and revokes converted
+sessions. Legacy creation and live-mutation authority are removed in the same
+release. Rollback restores the checkpoint as a unit; published content rollback
+continues to use retained versions.
 
 ## Readiness checklist
 
@@ -260,7 +299,10 @@ retained prior revision.
 
 Filled only when `status: done` after every mapped gate passes.
 
-### Verified additive increment
+Evidence: verified locally on 2026-07-22 by the mapped security, request,
+revision, migration, and production-browser tests below.
+
+### Verified managed-service implementation
 
 - Request, attachment, event, and assignment tables plus application/storage
   ports are active.
@@ -285,4 +327,20 @@ Filled only when `status: done` after every mapped gate passes.
 - `scripts/test-revisions.ts` proves submitted immutability, rejection without
   live drift, cross-role denial, stale-base conflict, exact approved publication,
   private-image promotion, canonical replacement, retained versions, and
-  monotonic rollback. Clarification messaging and permission cutover remain.
+  monotonic rollback.
+- Request creation derives onboarding versus change from authoritative business
+  and retained-publication state; forged browser fields have no effect.
+- Request-free invitations bind a new draft tenant to a restricted client when
+  redeemed without creating fictional intake data.
+- Clarification events retain internal actor attribution, enforce request scope,
+  preserve the original instruction, and apply needs-information/resume-review
+  transitions.
+- Customer inquiry and delivery mutations require customer-operations authority.
+  Clients and team members are denied; platform and operations managers are
+  covered through browser/API tests.
+- Migration 7 removes `legacy_owner` from the allowed profile contract, maps
+  existing profiles to client, and revokes their sessions. Direct live-content
+  authorization returns false for every role; revision publication remains the
+  only content authority.
+- `npm run check`, `npm run test:operations`, and all seven production browser
+  acceptance scenarios passed locally on 2026-07-22.
