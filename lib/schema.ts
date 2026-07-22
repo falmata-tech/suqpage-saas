@@ -240,6 +240,37 @@ export function migrateDatabase(db: DatabaseSync) {
       created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
       created_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS content_revisions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+      revision_number INTEGER NOT NULL CHECK(revision_number > 0),
+      base_content_version INTEGER NOT NULL CHECK(base_content_version > 0),
+      status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','awaiting_review','approved','rejected','published','superseded')),
+      snapshot_json TEXT NOT NULL,
+      summary TEXT NOT NULL DEFAULT '',
+      created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+      submitted_at TEXT,
+      decided_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      decision_comment TEXT NOT NULL DEFAULT '',
+      decided_at TEXT,
+      published_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      published_at TEXT,
+      published_content_version INTEGER,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(request_id,revision_number)
+    );
+    CREATE TABLE IF NOT EXISTS published_catalog_versions (
+      business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+      content_version INTEGER NOT NULL CHECK(content_version > 0),
+      snapshot_json TEXT NOT NULL,
+      source_revision_id INTEGER REFERENCES content_revisions(id) ON DELETE SET NULL,
+      change_kind TEXT NOT NULL CHECK(change_kind IN ('baseline','publication','rollback')),
+      actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(business_id,content_version)
+    );
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version INTEGER PRIMARY KEY,
       applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -249,6 +280,7 @@ export function migrateDatabase(db: DatabaseSync) {
   addColumn(db, "businesses", "site_title TEXT DEFAULT ''");
   addColumn(db, "businesses", "site_description TEXT DEFAULT ''");
   addColumn(db, "businesses", "favicon_path TEXT DEFAULT ''");
+  addColumn(db, "businesses", "content_version INTEGER NOT NULL DEFAULT 1");
   const existingUserColumns = columns(db, "users");
   const addedMustChange = !existingUserColumns.has("must_change_password");
   addColumn(db, "users", "must_change_password INTEGER NOT NULL DEFAULT 0");
@@ -287,6 +319,14 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS request_event_request_idx ON request_events(request_id, created_at, id);
     CREATE INDEX IF NOT EXISTS invitation_request_idx ON client_invitations(request_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS invitation_expiry_idx ON client_invitations(expires_at);
+    CREATE INDEX IF NOT EXISTS revision_request_number_idx ON content_revisions(request_id,revision_number DESC);
+    CREATE INDEX IF NOT EXISTS revision_business_status_idx ON content_revisions(business_id,status,created_at DESC);
+    CREATE TRIGGER IF NOT EXISTS submitted_revision_content_immutable
+    BEFORE UPDATE OF snapshot_json,summary,base_content_version ON content_revisions
+    WHEN OLD.status != 'draft'
+    BEGIN
+      SELECT RAISE(ABORT, 'submitted revision content is immutable');
+    END;
     CREATE TRIGGER IF NOT EXISTS public_request_attachment_denied
     BEFORE INSERT ON request_attachments
     WHEN EXISTS (SELECT 1 FROM service_requests WHERE id=NEW.request_id AND submitter_kind='public')
@@ -377,4 +417,5 @@ export function migrateDatabase(db: DatabaseSync) {
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(3);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(4);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(5);
+  db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(6);
 }

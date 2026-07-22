@@ -172,7 +172,7 @@ async function main() {
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

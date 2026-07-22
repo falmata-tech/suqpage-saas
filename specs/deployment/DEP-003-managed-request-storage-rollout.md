@@ -76,6 +76,12 @@ workspace.
   credentials, and credentials never enter logs, artifacts, or backups.
 - Staff/profile/assignment schema remains additive during the pilot; disabling a
   staff profile or assignment does not rewrite legacy owner rows.
+- Revision migration is additive: it adds a monotonic business content version,
+  immutable decision/publication metadata, and retained published snapshots.
+  Existing canonical rows remain version 1 until the first managed publication.
+- Revision JSON is stored in SQLite and therefore covered by the database
+  backup. Private image references remain covered by request-attachment backup;
+  published copies remain covered by catalog-media backup.
 
 ## Scenarios
 
@@ -103,6 +109,12 @@ Scenario: Client permission cutover is controlled
   THEN their existing sessions are revoked
   AND catalog/settings/design mutations are denied
   AND request, inquiry, delivery, preview, and account workflows remain available
+
+Scenario: Revision publication recovery survives restore
+  GIVEN a published managed revision and its retained prior version
+  WHEN the database, catalog media, and private attachment backup is restored
+  THEN both version snapshots and referenced media pass integrity checks
+  AND an authorized operator can identify the current and rollback versions
 ```
 
 ## Quality impact
@@ -174,9 +186,13 @@ Filled only when `status: done` after every mapped gate passes.
   persisted or included in backups.
 - Schema migration 5 adds a partial uniqueness constraint for manager-submitted
   request idempotency without rewriting existing request or account rows.
+- Schema migration 6 additively stores monotonic business content versions,
+  bounded revision snapshots, immutable decision/publication metadata, and
+  retained published versions.
 - Sanitized request images use random keys below the persistent private media
   root, outside the public/build tree.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private
-  attachment files survive backup and restore. New invited clients and
-  individually provisioned staff use explicit restrictive profiles; assignments
-  remain additive while the legacy-owner cutover remains disabled.
+  attachment files plus revision/version rows survive backup and restore. New
+  invited clients and individually provisioned staff use explicit restrictive
+  profiles; assignments remain additive while the legacy-owner cutover remains
+  disabled.

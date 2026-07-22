@@ -28,6 +28,9 @@ node node_modules/tsx/dist/cli.mjs scripts/test-adapters.ts
 printf '\n=== Managed request integration tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-requests.ts
 
+printf '\n=== Revision publication integration tests ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-revisions.ts
+
 printf '\n=== Production dependency audit ===\n'
 npm audit --omit=dev --audit-level=moderate
 

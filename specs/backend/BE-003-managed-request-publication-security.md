@@ -58,6 +58,9 @@ publish only the exact client-approved revision.
   approve as the client; managers submitting on behalf still require final
   client approval.
 - Editing or replacing an approved revision clears approval.
+- Draft revisions may be replaced before review; a revision becomes immutable
+  when submitted for client review. Later edits create a new monotonically
+  numbered revision and supersede any older actionable preview.
 - Revision preview is private. Canonical public queries read only the published
   business/catalog version.
 - Publication validates all business/catalog/option/media invariants and commits
@@ -104,6 +107,28 @@ publish only the exact client-approved revision.
   identifiers.
 - Publication rejects a stale `base_content_version`; staff must rebase and
   obtain new client approval.
+- Revision snapshot schema version 1 contains only bounded business presentation
+  and contact fields, one supported design key, collections, categories,
+  products, availability/stock, and up to four option groups. Opaque snapshot
+  keys express internal relationships; database IDs supplied by a browser have
+  no authority.
+- A snapshot contains at most 100 collections, 200 categories, 500 products,
+  four option groups and 50 values per product group, and 1 MiB serialized JSON.
+  Slugs, relationships, stock, supported design keys, and image references are
+  validated before draft persistence and again before publication.
+- Revision image references may use current same-tenant catalog media or an
+  attachment belonging to the same request. Preview resolves private references
+  through the authorized attachment adapter. Publication sanitizes/stages new
+  public media before the database transaction and removes staged files on a
+  rejected transaction; unreferenced crash remnants are safe orphans eligible
+  for reconciliation.
+- `businesses.content_version` is monotonic. Publication atomically replaces the
+  canonical business/catalog rows, increments that version, stores the exact
+  published snapshot, marks the revision/request published, and appends events.
+  Existing inquiry item snapshots remain intact when old product IDs are retired.
+- Operational rollback never decrements the content version. An authorized
+  manager republishes a retained prior snapshot as a new content version and the
+  rollback is audited; it is recovery authority, not client approval for new work.
 
 ## Scenarios
 
@@ -160,6 +185,24 @@ Scenario: Approved revision becomes stale
   WHEN publication is attempted
   THEN publication is rejected without partial catalog changes
   AND a new preview and client approval are required
+
+Scenario: Submitted revision is immutable
+  GIVEN revision 2 is awaiting client review
+  WHEN assigned staff attempt to replace revision 2 content
+  THEN the write is denied
+  AND revision 2 content and decision state remain unchanged
+
+Scenario: Client rejects exact revision
+  GIVEN an awaiting-review revision for the client's own business
+  WHEN the represented client rejects it with a bounded comment
+  THEN the immutable decision and comment are recorded once
+  AND no canonical business or catalog row changes
+
+Scenario: Previous published content is rolled back safely
+  GIVEN an authorized manager and a retained earlier published snapshot
+  WHEN the manager performs operational rollback
+  THEN that snapshot is validated and published as a new content version
+  AND the intervening version remains retained for audit and recovery
 ```
 
 ## Quality impact
@@ -236,4 +279,10 @@ Filled only when `status: done` after every mapped gate passes.
 - Authenticated client and manager on-behalf requests are tenant-bound and
   idempotent with bounded, sanitized private images. Team members can read and
   transition only assigned requests and cannot mutate live business state.
-  Versioned revision approval/publication remains.
+- Migration 6 adds content versions, immutable numbered revisions, and retained
+  published snapshots. Revision payloads are bounded and validated against
+  request/tenant image ownership before save and publication.
+- `scripts/test-revisions.ts` proves submitted immutability, rejection without
+  live drift, cross-role denial, stale-base conflict, exact approved publication,
+  private-image promotion, canonical replacement, retained versions, and
+  monotonic rollback. Clarification messaging and permission cutover remain.

@@ -74,6 +74,17 @@ private and no showroom change becomes public without client approval.
   permits.
 - Preview identifies the exact revision and request. Approve/reject actions are
   unavailable for a stale or superseded revision.
+- The staff revision editor uses labeled structured sections for business
+  presentation/contact fields, collections, categories, products, availability,
+  stock, and up to four option groups. It is not a raw JSON or generic page-
+  builder interface.
+- Staff may reuse an existing tenant image or select one of the request's
+  private reference images for revision image fields. A private reference does
+  not become public merely because it appears in a preview.
+- Saving changes affects only a mutable draft. Sending for review freezes that
+  numbered revision; further work creates a new numbered revision.
+- Client rejection requires a comment. Approval and rejection identify the
+  exact revision, remain visible in request history, and cannot be repeated.
 - Only manager/admin interfaces expose prospect acceptance, on-behalf intake,
   assignment, invitation, or publication controls.
 - Platform administrators provision individual operations-manager and team-member
@@ -152,6 +163,18 @@ Scenario: Client rejects a private preview
   WHEN the client rejects it with comments
   THEN nothing is published
   AND the request returns to staff with the rejection history preserved
+
+Scenario: Staff edits a submitted revision
+  GIVEN a numbered revision already sent for client review
+  WHEN assigned staff need to change its structured content
+  THEN the submitted revision remains immutable
+  AND staff create a newer draft revision with its own preview and decision
+
+Scenario: Manager publishes the exact approved preview
+  GIVEN a client-approved revision with no newer revision or live-version drift
+  WHEN an operations manager publishes it
+  THEN the public showroom renders the approved structured content
+  AND the request identifies the published revision and content version
 ```
 
 ## Quality impact
@@ -182,8 +205,8 @@ attachment contents, access tokens, or customer inquiry details.
 | Public interest UX and upload denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/http-smoke.mjs`, `scripts/test-requests.ts` |
 | Client tenant isolation and request history | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/test-requests.ts` |
 | Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/test-requests.ts` |
-| Preview approval/rejection without live drift | acceptance | `tests/acceptance/requests.spec.ts` |
-| Accessibility and mobile safety | browser | `tests/acceptance/requests.spec.ts` |
+| Preview approval/rejection without live drift | acceptance | `tests/acceptance/app.spec.ts`, `scripts/test-revisions.ts` |
+| Accessibility and mobile safety | browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -225,5 +248,11 @@ Filled only when `status: done` after every mapped gate passes.
   context.
 - `tests/acceptance/app.spec.ts` proves operator invitation, account redemption,
   manager on-behalf intake, assignment, the restricted role navigation, private
-  images, and direct management/API denial in a production build. Versioned
-  preview decisions and approved publication remain.
+  images, and direct management/API denial in a production build.
+- Assigned staff use a labeled structured revision editor. Clients review and
+  approve an exact numbered private showroom preview; operations managers then
+  publish that approved snapshot. Preview cart/inquiry actions are disabled and
+  breadcrumbs return to the request hierarchy.
+- `tests/acceptance/app.spec.ts` proves staff draft/save/submit, exact client
+  approval, manager publication, and the changed public showroom in a production
+  build. Clarification messaging and the legacy-owner cutover remain.

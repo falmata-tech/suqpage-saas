@@ -34,6 +34,9 @@ try {
   const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001',?,?,'change','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private authenticated request during backup and restore.','client',?,'operations-backup-key','private-hash')").run(owner.business_id,owner.id,owner.id).lastInsertRowid);
   db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1);
   db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','authenticated client request')").run(requestId);
+  const revisionSnapshot = JSON.stringify({ schemaVersion:1, business:{name:"Backup Business",designKey:"novatech",tagline:"",description:"",logoRef:"",heroTitle:"Backup preview",heroSubtitle:"",heroImageRef:"",contactEmail:"",whatsapp:"",telegram:"",tiktok:"",siteTitle:"Backup Business",siteDescription:"",faviconRef:""}, collections:[], categories:[], products:[] });
+  const revisionId = Number(db.prepare("INSERT INTO content_revisions(request_id,business_id,revision_number,base_content_version,status,snapshot_json,summary,created_by_user_id,submitted_at) VALUES(?,?,1,1,'awaiting_review',?,'Backup revision',?,CURRENT_TIMESTAMP)").run(requestId,owner.business_id,revisionSnapshot,owner.id).lastInsertRowid);
+  db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,source_revision_id,change_kind,actor_user_id) VALUES(?,1,?,?,'baseline',?)").run(owner.business_id,revisionSnapshot,revisionId,owner.id);
   db.close();
   run("scripts/backup.ts");
   const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));
@@ -42,6 +45,7 @@ try {
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
   db.exec("DELETE FROM businesses");
   db.close();
   fs.rmSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true, force: true });
@@ -52,10 +56,12 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM request_attachments").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM published_catalog_versions").get().count, 1);
   db.close();
   assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");
   assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "utf8"), "private request attachment");
-  console.log("Migration, database integrity, request attachment backup, and restore tests passed.");
+  console.log("Migration, database integrity, request attachment/revision backup, and restore tests passed.");
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

@@ -597,7 +597,7 @@ legacy owner, invited client, team member, and operations manager. Invited
 client enforcement, individual staff provisioning, and request assignment are
 active as part of the managed-service transition below.
 
-### Managed-service transition — invitation and client request workspace active
+### Managed-service transition — versioned client-approved publication active
 
 The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` will replace
 direct client catalog/settings/design administration only after the complete
@@ -639,6 +639,19 @@ Current verified behavior:
   and live-showroom context. Assignment changes add or remove that scope
   atomically. Team members cannot invite clients, submit on behalf, assign work,
   or use the current live catalog, settings, design, inquiry, or delivery forms.
+- Assigned staff prepare bounded structured business/catalog snapshots in a
+  labeled private revision editor. Drafts do not mutate live rows; submitted
+  numbered revisions are immutable and later changes create a newer revision.
+- Invited clients can open the exact private showroom preview for their request
+  and approve it or reject it with comments. Superseded previews cannot receive
+  a decision, and preview inquiry/cart actions are disabled.
+- Operations managers can publish only the latest client-approved revision when
+  its base content version still matches live state. Publication revalidates the
+  snapshot, promotes selected private references, atomically replaces canonical
+  catalog data, activates the showroom, and increments its content version.
+- Prior published snapshots are retained. Authorized operational rollback
+  republishes a retained snapshot as a new monotonic content version rather than
+  erasing publication history.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
 - Existing owner permissions and live showroom behavior remain unchanged during
@@ -646,16 +659,16 @@ Current verified behavior:
 
 Accepted behavior still to implement:
 
-- Assigned team members structure requests in versioned private revisions.
-- Clients review private revisions and approve or reject them with history.
-- Operations managers publish only the exact revision the client approved.
-- Existing live showrooms remain unchanged until client approval and authorized
-  publication; previous published state remains recoverable.
+- Attributable client/staff clarification messages supplement the immutable
+  original instruction without rewriting it.
+- The controlled legacy-owner permission cutover is performed only after its
+  backup, session-revocation, rollback, and pilot acceptance checkpoint.
 - Automated invitation delivery by email or WhatsApp remains planned, not
   claimed; the controlled pilot uses manual secure delivery.
 
-Until the remaining specs are implemented and verified, the current
-administrator and business-owner capabilities in this document remain active.
+Until the remaining cutover is implemented and verified, the current
+administrator and legacy business-owner capabilities in this document remain
+active for compatibility tenants.
 
 ---
 

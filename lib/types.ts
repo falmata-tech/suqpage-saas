@@ -2,7 +2,7 @@ export type Business = {
   id: number; handle: string; name: string; design_key: string; tagline: string; description: string;
   logo_path: string; hero_title: string; hero_subtitle: string; hero_image_path: string;
   contact_email: string; whatsapp: string; telegram: string; tiktok: string;
-  status: "active" | "draft" | "suspended"; site_title: string; site_description: string; favicon_path: string;
+  status: "active" | "draft" | "suspended"; site_title: string; site_description: string; favicon_path: string; content_version:number;
 };
 export type Collection = { id:number; business_id:number; name:string; slug:string; description:string; sort_order:number; is_active:number };
 export type Category = { id:number; business_id:number; collection_id:number|null; name:string; slug:string; sort_order:number; is_active:number };
@@ -41,4 +41,13 @@ export type ClientInvitation = {
   id:number; request_id:number; business_id:number; email:string; name:string;
   token_hash:string; expires_at:number; accepted_at:number|null; accepted_user_id:number|null;
   revoked_at:number|null; created_by_user_id:number; created_at:number;
+};
+export type ContentRevisionStatus = "draft"|"awaiting_review"|"approved"|"rejected"|"published"|"superseded";
+export type ContentRevision = {
+  id:number; request_id:number; business_id:number; revision_number:number;
+  base_content_version:number; status:ContentRevisionStatus; snapshot_json:string;
+  summary:string; created_by_user_id:number; submitted_at:string|null;
+  decided_by_user_id:number|null; decision_comment:string; decided_at:string|null;
+  published_by_user_id:number|null; published_at:string|null;
+  published_content_version:number|null; created_at:string; updated_at:string;
 };

@@ -63,6 +63,7 @@ async function loginAndChangeKnownPassword(page: Page, email:string, temporaryPa
   await page.getByRole("button",{name:"Change password"}).click();
   await expect(page.getByText("Password updated")).toBeVisible();
 }
+async function loginWithKnownPassword(page:Page,email:string,password:string){await page.goto("/login");await page.getByLabel("Email").fill(email);await page.getByLabel("Password").fill(password);await page.getByRole("button",{name:"Sign in"}).click();await expect(page).toHaveURL(/\/dashboard$/);}
 
 test("prospect submits an interest request without public uploads", async ({ page }) => {
   const errors = monitor(page);
@@ -257,6 +258,39 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.getByRole("button",{name:"Update status"}).click();
   await expect(page.getByText("Request status updated.")).toBeVisible();
   await expect(page.getByText("Team assignment")).toHaveCount(0);
+  await page.getByRole("button",{name:"Prepare first revision"}).click();
+  await expect(page.getByRole("heading",{name:"Prepare revision 1"})).toBeVisible();
+  await expectVisibleControlsNamed(page);
+  await page.getByLabel("What changed for the client?").fill("A revised hero prepared from the client’s private reference.");
+  await page.getByLabel("Hero title").fill("Acceptance approved showroom");
+  await page.getByLabel("Hero image").selectOption({index:1});
+  await page.getByRole("button",{name:"Save private draft"}).click();
+  await expect(page.getByText("Private draft saved.")).toBeVisible();
+  await page.getByRole("button",{name:"Send revision for client review"}).click();
+  await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
+  await expect(page.getByText("Revision sent for client review.")).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
+  await page.goto(assignedRequestUrl);
+  await page.getByRole("link",{name:"View preview"}).click();
+  await expect(page.getByRole("button",{name:"Approve this exact revision"})).toBeVisible();
+  await page.getByRole("button",{name:"Approve this exact revision"}).click();
+  await expect(page.getByText("Your approve decision was recorded")).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto(assignedRequestUrl);
+  await page.getByRole("link",{name:"View preview"}).click();
+  await page.getByRole("button",{name:"Publish approved revision"}).click();
+  await expect(page.getByText("The approved revision is now live.")).toBeVisible();
+  await page.goto("/@acceptance-market");
+  await expect(page.getByRole("heading",{name:"Acceptance approved showroom"})).toBeVisible();
+  await page.goto(assignedRequestUrl);
+  await page.goto("/dashboard/requests/on-behalf");
+  await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+  await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
   await page.goto("/dashboard/requests/on-behalf");
   await expect(page).toHaveURL(/\/dashboard\/requests$/);
   await page.goto("/dashboard/settings?business=5");

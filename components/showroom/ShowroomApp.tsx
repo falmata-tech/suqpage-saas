@@ -73,8 +73,8 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
   }
 }
 
-export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
-  const storageKey = `suqpage-cart:${catalog.business.handle}`;
+export default function ShowroomApp({ catalog, previewMode = false }: { catalog: Catalog; previewMode?: boolean }) {
+  const storageKey = `suqpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -101,6 +101,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
   );
 
   useEffect(() => {
+    if(previewMode){setCart([]);return;}
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as Array<{
         productId: number;
@@ -122,9 +123,10 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
         }),
       );
     } catch {}
-  }, [storageKey, catalog.products]);
+  }, [storageKey, catalog.products, previewMode]);
 
   useEffect(() => {
+    if(previewMode)return;
     try {
       localStorage.setItem(
         storageKey,
@@ -137,7 +139,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
         ),
       );
     } catch {}
-  }, [cart, storageKey]);
+  }, [cart, storageKey, previewMode]);
 
   useEffect(() => {
     if (!selected) return;
@@ -173,6 +175,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
     setSelected(product);
   };
   const add = (product: Product, options: Record<string, string> = {}) => {
+    if(previewMode){setSelected(null);show("Private preview only — customer inquiries remain on the live showroom.");return;}
     if (!["available", "limited"].includes(product.availability) || product.stock_count < 1) {
       show("This product is not currently available.");
       return;
@@ -214,6 +217,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
     addProduct: (product) => (product.option_groups?.length ? openProduct(product) : add(product)),
     cartCount: cart.reduce((count, line) => count + line.quantity, 0),
     openCart: () => {
+      if(previewMode){show("Private preview only — the inquiry cart is disabled.");return;}
       drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setDrawer(true);
     },
