@@ -39,6 +39,9 @@ four-tenant application behavior and single-instance pilot boundary.
   CI evidence.
 - Bound or explicitly document the media-route output-file trace without
   weakening persistent media isolation.
+- Isolate each browser-acceptance production build from the normal `.next`
+  directory and from concurrent acceptance runs so a build cannot replace
+  chunks underneath a running test or development server.
 - Reject a production dependency graph containing a known high-severity native
   image-processing vulnerability.
 - Define the GitHub checks a repository administrator must require before merge.
@@ -80,7 +83,11 @@ four-tenant application behavior and single-instance pilot boundary.
   `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
   configuration must contain the expected host and no wildcard.
 - Type checking generates Next.js declarations first. Running development and
-  production generation leaves tracked files unchanged.
+  production generation leaves tracked files unchanged. Type checking discards
+  only stale generated development-route declarations before regenerating its
+  authoritative route types.
+- Browser acceptance uses a unique ignored build-output directory per run and
+  removes only that directory during failure-safe cleanup.
 - The installed dependency graph contains one supported `sharp` version at or
   above the first version patched for current libvips advisories; Next.js must
   not retain a vulnerable optional nested copy.
@@ -118,9 +125,17 @@ Scenario: Exact proxy origin is compiled into production configuration
 
 Scenario: Framework type generation does not create task drift
   GIVEN a clean tracked worktree
-  WHEN type generation, development startup, and production build run
+  AND an earlier interrupted development process left partial generated route types
+  WHEN type checking, development startup, and production build run
   THEN TypeScript has the required Next.js declarations
+  AND stale generated development declarations cannot break the source check
   AND no generated declaration becomes a tracked modification
+
+Scenario: Browser acceptance cannot corrupt another Next.js runtime
+  GIVEN a development server, release build, or another browser run shares the repository
+  WHEN browser acceptance builds and starts its production test server
+  THEN it uses a unique ignored output directory for that run
+  AND cleanup cannot delete or replace another runtime's compiled chunks
 
 Scenario: Media tracing remains bounded
   GIVEN uploaded media lives outside static application output
@@ -165,7 +180,8 @@ tokens, or environment secrets.
 | CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
 | Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
-| Generated declarations leave Git clean | contract | `scripts/test-workflow.mjs` |
+| Generated declarations leave Git clean and stale dev types are bounded | contract | `scripts/typecheck.mjs`, `scripts/test-workflow.mjs` |
+| Acceptance build output is unique, ignored, and safely cleaned | contract/browser | `scripts/test-workflow.mjs`, `scripts/acceptance-runner.mjs` |
 | Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
 | Native image dependency is patched without a nested vulnerable copy | security/dependency | `npm ls sharp --all`, `scripts/test-security.ts`, `npm audit --omit=dev` |
 | Existing application behavior remains intact | acceptance | `tests/acceptance/app.spec.ts` |
@@ -239,3 +255,20 @@ GitHub Actions run `29889083549` then passed the `core`, `browser`, and
 `container` jobs on commit `3edb2d3`, including the release audit, operations,
 five browser scenarios, and production container. This replacement remote
 evidence returns the spec to `done`.
+
+Local regression evidence on 2026-07-22 after the authenticated-navigation
+defect audit:
+
+- A seven-scenario production browser run initially reproduced compiled chunk
+  replacement in the shared `.next` directory, producing login-route 500s and
+  cascading authentication failures rather than authorization redirects.
+- The acceptance build was moved to a unique ignored output directory with
+  run-scoped failure-safe cleanup. The repeated production browser run passed
+  all seven public, mobile, administrator, client, operations-manager, team-
+  member, legacy-owner, API, authorization, and security-header scenarios.
+- Type checking now removes only stale generated `.next/dev/types` before route
+  regeneration; workflow-contract validation and standalone type checking pass
+  after an interrupted dev process had left an invalid generated validator.
+- `npm run release` passed the final production build, 39-trace privacy check,
+  HTTP smoke, TypeScript, design, security, adapter, request, revision,
+  publication/rollback, and zero-vulnerability dependency gates.

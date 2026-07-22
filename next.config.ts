@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
+const distDir = process.env.SUQPAGE_NEXT_DIST_DIR || ".next";
+if (distDir !== ".next" && !/^\.next-acceptance\/suqpage-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
+  throw new Error("SUQPAGE_NEXT_DIST_DIR must identify a generated SuqPage acceptance directory");
+}
+const tsconfigPath = process.env.SUQPAGE_NEXT_TSCONFIG || "tsconfig.json";
+if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-suqpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
+  throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated SuqPage acceptance config");
+}
 const configuredOrigins = (process.env.SUQPAGE_SERVER_ACTION_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""))
@@ -43,6 +51,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  distDir,
+  typescript: { tsconfigPath },
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
   outputFileTracingExcludes: {

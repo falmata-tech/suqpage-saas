@@ -5,6 +5,8 @@ import fs from "node:fs";
 const workflow = fs.readFileSync(".github/workflows/quality.yml", "utf8");
 const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
+const acceptanceRunner = fs.readFileSync("scripts/acceptance-runner.mjs", "utf8");
+const typecheckScript = fs.readFileSync("scripts/typecheck.mjs", "utf8");
 
 function job(name, nextName) {
   const start = workflow.indexOf(`  ${name}:\n`);
@@ -45,8 +47,24 @@ assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
 assert.equal(packageJson.scripts["test:trace"], "node scripts/test-build-trace.mjs");
 assert.match(releaseScript, /node scripts\/test-build-trace\.mjs/, "Release must reject private output-file traces");
-assert.equal(packageJson.scripts.typecheck, "next typegen && tsc --noEmit");
+assert.equal(packageJson.scripts.typecheck, "node scripts/typecheck.mjs");
 assert.equal(packageJson.engines.node, ">=22.16.0");
+assert.match(typecheckScript, /path\.join\(process\.cwd\(\), "\.next", "dev", "types"\)/, "Typecheck cleanup must remain scoped to generated dev types");
+assert.match(typecheckScript, /next\/dist\/bin\/next", "typegen"/, "Typecheck must regenerate framework route types");
+assert.match(acceptanceRunner, /SUQPAGE_NEXT_DIST_DIR: distDir/, "Acceptance must use its isolated Next.js output");
+assert.match(acceptanceRunner, /SUQPAGE_NEXT_TSCONFIG: tsconfigName/, "Acceptance must isolate generated TypeScript configuration");
+assert.match(acceptanceRunner, /fs\.rmSync\(buildOutputPath/, "Acceptance must clean only its isolated Next.js output");
+assert.match(acceptanceRunner, /fs\.rmSync\(tsconfigPath/, "Acceptance must clean its generated TypeScript configuration");
+assert.equal(
+  spawnSync("git", ["check-ignore", "-q", ".next-acceptance/example/BUILD_ID"]).status,
+  0,
+  "Acceptance build output must be ignored",
+);
+assert.equal(
+  spawnSync("git", ["check-ignore", "-q", ".acceptance-tsconfig-example.json"]).status,
+  0,
+  "Acceptance TypeScript configuration must be ignored",
+);
 
 const status = () => {
   const result = spawnSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], { encoding: "utf8" });

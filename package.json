@@ -12,7 +12,7 @@
     "migrate": "tsx scripts/migrate.ts",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "node scripts/typecheck.mjs",
     "test": "tsx scripts/test-security.ts",
     "test:adapters": "tsx scripts/test-adapters.ts",
     "test:http": "node scripts/http-smoke.mjs",
