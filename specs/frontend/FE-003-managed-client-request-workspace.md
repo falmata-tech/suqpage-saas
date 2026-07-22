@@ -1,7 +1,7 @@
 ---
 id: FE-003
 title: Managed client request and review workspace
-status: ready
+status: in_progress
 related: [BE-003, DEP-003, ADR-0004]
 owners: [product, frontend]
 last_updated: 2026-07-22
@@ -140,7 +140,7 @@ attachment contents, access tokens, or customer inquiry details.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Public onboarding and bounded attachment UX | acceptance | `tests/acceptance/requests.spec.ts` |
+| Public onboarding and bounded attachment UX | acceptance | `tests/acceptance/app.spec.ts` |
 | Client tenant isolation and request history | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
 | Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
 | Preview approval/rejection without live drift | acceptance | `tests/acceptance/requests.spec.ts` |
@@ -166,3 +166,11 @@ session-revocation, and rollback checkpoint under `DEP-003`.
 ## Completion evidence
 
 Filled only when `status: done` after every mapped gate passes.
+
+### Verified additive increment
+
+- Public onboarding form and bounded multipart API are active.
+- Administrators can review original instructions and authorized private images,
+  and can move requests only through pre-preview review statuses.
+- Browser evidence is in `tests/acceptance/app.spec.ts`; client history,
+  assigned-team queues, manager on-behalf intake, and preview decisions remain.

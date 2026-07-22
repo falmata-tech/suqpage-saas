@@ -168,6 +168,57 @@ export function migrateDatabase(db: DatabaseSync) {
       ip_hash TEXT DEFAULT '',
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS service_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      public_ref TEXT UNIQUE NOT NULL,
+      business_id INTEGER REFERENCES businesses(id) ON DELETE SET NULL,
+      represented_client_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      request_type TEXT NOT NULL CHECK(request_type IN ('onboarding','change')),
+      status TEXT NOT NULL DEFAULT 'submitted' CHECK(status IN (
+        'submitted','under_review','needs_information','approved_for_work',
+        'in_progress','client_review','client_approved','published','completed',
+        'rejected','cancelled'
+      )),
+      contact_name TEXT NOT NULL,
+      contact_value TEXT NOT NULL,
+      business_name TEXT DEFAULT '',
+      request_text TEXT NOT NULL,
+      submitter_kind TEXT NOT NULL CHECK(submitter_kind IN ('public','client','manager')),
+      submitted_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      idempotency_key TEXT,
+      ip_hash TEXT DEFAULT '',
+      notification_state TEXT NOT NULL DEFAULT 'pending' CHECK(notification_state IN ('pending','sent','failed','not_required')),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS request_attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      storage_key TEXT UNIQUE NOT NULL,
+      original_name TEXT NOT NULL,
+      mime_type TEXT NOT NULL CHECK(mime_type IN ('image/jpeg','image/png','image/webp')),
+      byte_size INTEGER NOT NULL CHECK(byte_size BETWEEN 1 AND 5242880),
+      width INTEGER NOT NULL CHECK(width BETWEEN 1 AND 20000),
+      height INTEGER NOT NULL CHECK(height BETWEEN 1 AND 20000),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS request_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      event_type TEXT NOT NULL,
+      detail TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS staff_business_assignments (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+      assigned_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(user_id,business_id)
+    );
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version INTEGER PRIMARY KEY,
       applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -200,6 +251,13 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions(expires_at);
     CREATE INDEX IF NOT EXISTS inquiry_business_created_idx ON inquiries(business_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS delivery_business_created_idx ON delivery_requests(business_id, created_at DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS request_public_idempotency_unique
+      ON service_requests(ip_hash,idempotency_key)
+      WHERE submitter_kind='public' AND idempotency_key IS NOT NULL AND idempotency_key != '';
+    CREATE INDEX IF NOT EXISTS request_status_created_idx ON service_requests(status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS request_business_created_idx ON service_requests(business_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS request_assignee_created_idx ON service_requests(assigned_user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS request_event_request_idx ON request_events(request_id, created_at, id);
 
     CREATE TRIGGER IF NOT EXISTS category_collection_same_business_insert
     BEFORE INSERT ON categories WHEN NEW.collection_id IS NOT NULL
@@ -268,4 +326,5 @@ export function migrateDatabase(db: DatabaseSync) {
   `);
 
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(1);
+  db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(2);
 }

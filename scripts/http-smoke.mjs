@@ -149,6 +149,27 @@ try {
     401,
   );
 
+  const requestPayload = () => {
+    const form = new FormData();
+    form.set('contactName', 'HTTP Prospect');
+    form.set('contactValue', 'http-prospect@example.test');
+    form.set('businessName', 'HTTP Market');
+    form.set('requestText', 'Please create a private showroom from this HTTP test request.');
+    form.set('idempotencyKey', 'http-request-key-0001');
+    form.set('consent', 'on');
+    form.set('images', new File([fs.readFileSync(path.join(process.cwd(), 'public/uploads/seed/suqpage/icon.png'))], 'reference.png', { type: 'image/png' }));
+    return form;
+  };
+  const requestCreated = await fetch(`${baseUrl}/api/requests`, { method: 'POST', body: requestPayload() });
+  assert.equal(requestCreated.status, 201);
+  assert.match((await requestCreated.json()).reference, /^REQ-[A-F0-9]{12}$/);
+  const requestDuplicate = await fetch(`${baseUrl}/api/requests`, { method: 'POST', body: requestPayload() });
+  assert.equal(requestDuplicate.status, 200);
+  assert.equal((await requestDuplicate.json()).duplicate, true);
+  assert.equal((await fetch(`${baseUrl}/api/requests/1/attachments/1`)).status, 404);
+  const crossOrigin = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { origin: 'https://attacker.example', 'x-forwarded-host': 'attacker.example' }, body: requestPayload() });
+  assert.equal(crossOrigin.status, 403);
+
   const forged = await fetch(`${baseUrl}/api/inquiries`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

@@ -3,7 +3,8 @@ import path from "node:path";
 
 export function databasePath(){return path.resolve(/* turbopackIgnore: true */ process.env.SUQPAGE_DB_PATH||path.join(/* turbopackIgnore: true */ process.cwd(),"data","suqpage.db"))}
 export function mediaRoot(){return path.resolve(/* turbopackIgnore: true */ process.env.SUQPAGE_MEDIA_ROOT||path.join(/* turbopackIgnore: true */ process.cwd(),"data","media"))}
-export function ensureRuntimeDirectories(){fs.mkdirSync(path.dirname(databasePath()),{recursive:true});fs.mkdirSync(mediaRoot(),{recursive:true})}
+export function requestAttachmentRoot(){return path.resolve(/* turbopackIgnore: true */ mediaRoot(),"requests")}
+export function ensureRuntimeDirectories(){fs.mkdirSync(path.dirname(databasePath()),{recursive:true});fs.mkdirSync(mediaRoot(),{recursive:true});fs.mkdirSync(requestAttachmentRoot(),{recursive:true})}
 export function assertProductionConfiguration(){
   if(process.env.NODE_ENV!=="production")return;
   const url=process.env.NEXT_PUBLIC_APP_URL||"";

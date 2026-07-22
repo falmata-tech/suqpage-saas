@@ -1,7 +1,7 @@
 ---
 id: DEP-003
 title: Managed request storage and safe permission rollout
-status: ready
+status: in_progress
 related: [FE-003, BE-003, ADR-0002, ADR-0004]
 owners: [operations, security]
 last_updated: 2026-07-22
@@ -151,3 +151,11 @@ No horizontal scaling occurs while SQLite and local attachments remain.
 ## Completion evidence
 
 Filled only when `status: done` after every mapped gate passes.
+
+### Verified additive increment
+
+- Schema migration 2 is additive and idempotent.
+- Sanitized request images use random keys below the persistent private media
+  root, outside the public/build tree.
+- `scripts/test-operations.mjs` proves request rows, events, metadata, and private
+  attachment files survive backup and restore. Role cutover remains disabled.

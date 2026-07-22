@@ -38,7 +38,7 @@ Primary domain:
 suqpage.com
 ```
 
-Primary public contact form destination:
+Primary support contact:
 
 ```text
 falmata.dawano@gmail.com
@@ -142,7 +142,8 @@ The landing page should include:
 - actual client showroom previews;
 - a searchable showroom directory;
 - category filter buttons;
-- a minimal client-contact form;
+- a low-friction private onboarding request with contact details, one
+  unstructured instruction field, consent, and optional reference images;
 - professional copy with no development-stage disclaimers.
 
 ### 5.3 Public copy must look finished
@@ -463,30 +464,31 @@ Default behavior:
 
 ---
 
-## 11. Client contact form
+## 11. Public onboarding request
 
-The SuqPage landing page must have a simple business-contact form.
+The SuqPage landing page must lead prospects to a simple private onboarding
+request. No account is required for the first request.
 
-Keep it intentionally small. Minimum useful fields:
+Keep it intentionally small. Required inputs and limits are controlled by
+`FE-003`, `BE-003`, and `DEP-003`:
 
-- first name;
+- name;
 - WhatsApp, phone, or email;
 - optional business name;
-- optional short description of what the person sells.
-
-Current FormSubmit recipient:
-
-```text
-falmata.dawano@gmail.com
-```
+- one unstructured instruction of 20–10,000 characters;
+- processing consent;
+- zero to ten optional sanitized JPEG, PNG, or WebP reference images.
 
 Requirements:
 
-- use a professional custom success page;
+- persist the request inside SuqPage with a random public reference and
+  idempotency;
+- explain that receipt is not acceptance or publication;
 - do not expose internal development wording;
-- preserve spam-resistance options supported by the form provider;
-- remember that FormSubmit may require one-time email activation;
-- do not falsely claim delivery until activation has been confirmed.
+- use bounded input, a honeypot, privacy-preserving rate limits, private image
+  storage, and explicit-origin checks;
+- never expose contact details, instructions, attachment identifiers, or
+  storage paths through the public reference.
 
 ---
 
@@ -588,17 +590,34 @@ A public customer does not require an account. The customer can:
 - submit an inquiry;
 - continue to a social messaging destination.
 
-Staff accounts and broader role-based permissions are future work unless explicitly requested.
+Fine-grained staff and manager roles are part of the accepted managed-service
+transition below but are not active in the current additive increment.
 
-### Planned managed-service transition — not yet implemented
+### Managed-service transition — additive intake active
 
-The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` replaces
+The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` will replace
 direct client catalog/settings/design administration only after the complete
 replacement workflow passes its rollout gates.
 
-- Prospects submit initial onboarding instructions and verified images without
-  an account. Accepted clients receive an invited account for a minimal request,
-  inquiry, delivery, preview, and account-security workspace.
+Current verified behavior:
+
+- Prospects can submit a private initial onboarding request without an account,
+  with contact details, one unstructured instruction, consent, and up to ten
+  sanitized JPEG/PNG/WebP reference images.
+- Requests use random public references, idempotency, bounded multipart input,
+  privacy-preserving rate limits, private persistent attachment storage, events,
+  and additive schema migration 2.
+- Platform administrators have a private operations queue for reviewing the
+  immutable original request and attachments and moving it through early review
+  statuses. They cannot mark it client-approved or published from this queue.
+- Existing owner permissions and live showroom behavior remain unchanged during
+  this additive stage. Request data and attachments are covered by backup and
+  restore tests.
+
+Accepted behavior still to implement:
+
+- Accepted clients receive an invited account for a minimal request, inquiry,
+  delivery, preview, and account-security workspace.
 - Clients submit unstructured change requests but never write canonical catalog
   or design data directly.
 - Assigned team members structure requests and prepare private revisions.
@@ -608,9 +627,8 @@ replacement workflow passes its rollout gates.
 - Existing live showrooms remain unchanged until client approval and authorized
   publication; previous published state remains recoverable.
 
-Until those specs are implemented and verified, the current administrator and
-business-owner capabilities in this document remain the description of actual
-application behavior.
+Until the remaining specs are implemented and verified, the current
+administrator and business-owner capabilities in this document remain active.
 
 ---
 

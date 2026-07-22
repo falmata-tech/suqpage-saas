@@ -1,7 +1,7 @@
 ---
 id: BE-003
 title: Managed request, permission, and publication security
-status: ready
+status: in_progress
 related: [FE-003, DEP-003, ADR-0004]
 owners: [backend, security]
 last_updated: 2026-07-22
@@ -149,7 +149,7 @@ contents, invitation tokens, or customer data.
 | Request lifecycle and immutable original | domain/integration | `scripts/test-requests.ts` |
 | Public idempotency, limits, and rate behavior | HTTP/security | `scripts/http-smoke.mjs`, `scripts/test-requests.ts` |
 | Client tenant and staff assignment isolation | security | `scripts/test-requests.ts` |
-| Manager-only on-behalf/invite/assign/publish | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/requests.spec.ts` |
+| Manager-only on-behalf/invite/assign/publish | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Exact approval, stale conflict, atomic publish, rollback | integration | `scripts/test-revisions.ts` |
 | Existing inquiry/delivery isolation remains | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 
@@ -175,3 +175,12 @@ retained prior revision.
 ## Completion evidence
 
 Filled only when `status: done` after every mapped gate passes.
+
+### Verified additive increment
+
+- Request, attachment, event, and assignment tables plus application/storage
+  ports are active.
+- Public creation is idempotent, privacy-rate-limited, bounded, image-sanitized,
+  and returns only a random reference.
+- Private attachment reads are administrator-only and return 404 to anonymous or
+  unauthorized callers. Later role capabilities and revision publication remain.

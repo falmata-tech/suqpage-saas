@@ -8,7 +8,7 @@ export default function DashboardShell({user,business,children}:{user:SessionUse
     <Link href={`/dashboard${q}`}>Overview</Link>
     {business&&<><Link href={`/dashboard/catalog${q}`}>Collections & categories</Link><Link href={`/dashboard/products${q}`}>Products</Link><Link href={`/dashboard/inquiries${q}`}>Inquiries</Link><Link href={`/dashboard/deliveries${q}`}>Delivery requests</Link><Link href={`/dashboard/settings${q}`}>Business settings</Link><Link href={`/dashboard/design-sdk${q}`}>Design SDK</Link><Link href={`/preview/@${business.handle}`} target="_blank">Preview showroom ↗</Link></>}
     <Link href="/dashboard/account">Account security</Link>
-    {user.role==="admin"&&<><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link></>}
+    {user.role==="admin"&&<><Link href="/dashboard/requests">Client requests</Link><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link></>}
     <form action={logoutAction}><button type="submit">Sign out</button></form>
   </nav></aside><main className="main">{user.must_change_password?<div className="error" style={{marginBottom:20}}>Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div>:null}{children}</main></div>;
 }

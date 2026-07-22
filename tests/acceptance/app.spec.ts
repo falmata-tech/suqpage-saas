@@ -52,6 +52,25 @@ async function loginAndChangePassword(page: Page, email: string, nextPassword: s
   await expect(page.getByText("Password updated")).toBeVisible();
 }
 
+test("prospect submits one private onboarding request with an image", async ({ page }) => {
+  const errors = monitor(page);
+  await page.goto("/request");
+  await expectVisibleControlsNamed(page);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tell us what you need");
+  await page.getByLabel("Your name").fill("Acceptance Prospect");
+  await page.getByLabel("Email, phone, or WhatsApp").fill("prospect@example.test");
+  await page.getByLabel(/Business name/).fill("Acceptance Market");
+  await page.getByLabel("Tell us everything you need").fill("Please build a warm, simple showroom for our handmade home products.");
+  await page.getByLabel(/Reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
+  await page.getByLabel(/SuqPage may use/).check();
+  await page.getByRole("button", { name: "Send private request" }).click();
+  await expect(page.getByRole("status")).toContainText(/REQ-[A-F0-9]{12}/);
+  await expect(page.getByRole("status")).toContainText("Nothing has been accepted, designed, or published yet");
+  expect((await page.request.get("/api/requests/1/attachments/1")).status()).toBe(404);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
+});
+
 test("public discovery, four showrooms, cart, and persisted inquiry", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/");
@@ -116,6 +135,16 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
   await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");
+  await page.goto("/dashboard/requests");
+  await expect(page.getByText("Acceptance Market")).toBeVisible();
+  await page.getByRole("link", { name: /REQ-/ }).click();
+  await expect(page.getByText("prospect@example.test")).toBeVisible();
+  await expect(page.locator(".request-image-grid img")).toHaveCount(1);
+  await expect.poll(() => page.locator(".request-image-grid img").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  await page.getByLabel("Status").selectOption("under_review");
+  await page.getByRole("button", { name: "Update status" }).click();
+  await expect(page.getByText("Request status updated")).toBeVisible();
+  await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
   await page.goto("/dashboard/admin");
   await expectVisibleControlsNamed(page);
   await page.locator('input[name="name"]').fill("Acceptance Flowers");

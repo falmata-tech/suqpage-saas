@@ -29,6 +29,7 @@ const env = {
   SUQPAGE_TEST_CREDENTIALS: credentialsPath,
   SUQPAGE_TEST_DB: path.join(root, "acceptance.db"),
   SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
+  SUQPAGE_SERVER_ACTION_ORIGINS: baseURL,
 };
 
 function run(command, args, { capture = false } = {}) {

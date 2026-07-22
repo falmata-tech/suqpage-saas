@@ -35,10 +35,12 @@ DEP-002 was completed from a clean tracked worktree on Node 22.16 or newer:
 
 - `npm ci` reproduced the locked install with 0 reported vulnerabilities.
 - `npm run check` and `npm run test:operations` passed.
-- the production browser suite passed all five public, mobile, administrator,
+- the production browser suite passed all six public, mobile, administrator,
   owner, API, authorization, validation, health, and security-header scenarios.
-- `npm run release` compiled without the previous unbounded trace warning and
-  validated 27 output-file traces with no private runtime paths.
+- `npm run release` compiled successfully and validated 32 output-file traces
+  with no private runtime paths. Next.js still emits a non-blocking dynamic
+  runtime-media tracing warning; explicit tracing exclusions and the privacy
+  validation prevent runtime customer data from entering the build output.
 - `npm run test:container` used a 12.06 kB Docker context and passed exact
   Server Action origin, non-root runtime, credential-log, preflight, health,
   trace-privacy, and cleanup assertions.
@@ -67,6 +69,10 @@ The application was started with `next start` using an isolated database and med
 - valid canonical inquiry: HTTP 201
 - repeated inquiry with the same idempotency key: deduplicated
 - repeated abuse attempts: HTTP 429
+- public onboarding request: HTTP 201 with a random reference
+- repeat onboarding submit: deduplicated
+- cross-origin onboarding submit: HTTP 403
+- unauthenticated private request attachment: HTTP 404
 
 ## Critical audit remediations
 
@@ -111,6 +117,7 @@ Results:
 - restored database integrity: `ok`
 - four businesses recovered
 - media file recovered
+- managed request row, event, attachment metadata, and private attachment file recovered
 
 ## Deployment requirements
 
@@ -123,7 +130,7 @@ Before opening the site publicly:
 5. Run `npm run release` on the deployment machine.
 6. Change every temporary or migrated password.
 7. Enter each business’s real WhatsApp, Telegram, TikTok, and notification email.
-8. Activate FormSubmit delivery to `falmata.dawano@gmail.com`.
+8. Submit and review one private onboarding request, including an image.
 9. Keep only approved businesses active.
 10. Create a backup and perform a restore test.
 

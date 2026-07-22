@@ -26,12 +26,21 @@ try {
   run("scripts/migrate.ts");
   fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
   fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "media restore proof");
+  fs.mkdirSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests"), { recursive: true });
+  const requestStorageKey = "11111111-1111-4111-8111-111111111111.png";
+  fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "private request attachment");
+  let db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001','onboarding','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private request during backup and restore.','public','operations-backup-key','private-hash')").run().lastInsertRowid);
+  db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1);
+  db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','public onboarding')").run(requestId);
+  db.close();
   run("scripts/backup.ts");
   const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));
 
-  let db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  db = new DatabaseSync(env.SUQPAGE_DB_PATH);
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
   db.exec("DELETE FROM businesses");
   db.close();
   fs.rmSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true, force: true });
@@ -40,9 +49,12 @@ try {
   db = new DatabaseSync(env.SUQPAGE_DB_PATH, { readOnly: true });
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM request_attachments").get().count, 1);
   db.close();
   assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");
-  console.log("Migration, database integrity, backup, and restore tests passed.");
+  assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "utf8"), "private request attachment");
+  console.log("Migration, database integrity, request attachment backup, and restore tests passed.");
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

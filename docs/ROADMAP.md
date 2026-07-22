@@ -64,7 +64,8 @@ being listed here; it must first be promoted to **Now** and specified.
 
 - Managed PostgreSQL and object storage before multiple instances or broad
   self-service onboarding.
-- Staff roles and finer-grained operational permissions.
+- Post-pilot refinements to the staff roles and operational permissions being
+  introduced under the current managed-request initiative.
 - A real Malikt Board adapter and callback/reconciliation contract.
 - Expanded public localization based on validated pilot demand.
 
