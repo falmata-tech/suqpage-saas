@@ -65,6 +65,9 @@ workspace.
   integrity manifest; restore validates all three.
 - Invitation/notification delivery uses an adapter with safe failure category,
   bounded retry, no secret/contact logging, and an operator-visible resend path.
+- Pilot invitation delivery is manual: the raw 72-hour token is returned only
+  once to the authorized operator and is never stored, logged, backed up, or
+  shown again. Only its hash and lifecycle metadata persist.
 - Pre-cutover checks count accounts by target role, assignments, open requests,
   and active sessions. Cutover revokes affected sessions and runs permission
   acceptance tests before public continuation.

@@ -76,6 +76,13 @@ publish only the exact client-approved revision.
   identifier, contact, token, or attachment path.
 - Invitation tokens are random, single-use, stored hashed, expire, and are
   revoked after acceptance or account/security changes.
+- For the controlled pilot, an administrator or operations manager accepts the
+  prospect, creates/links a draft business, and generates a 72-hour invitation
+  URL displayed once for manual secure delivery. Regeneration revokes every
+  earlier unaccepted invitation for that request. No email/WhatsApp send is
+  claimed.
+- Redemption atomically marks the invitation accepted, creates one client
+  account bound to the invitation business/request, and cannot be replayed.
 - Role checks use explicit capabilities. Interface hiding has no authority.
 - Assignment, request transition, clarification, approval, rejection,
   publication, rollback, and privileged reads write audit events with safe
@@ -103,6 +110,12 @@ Scenario: Cross-tenant client access is denied
   WHEN the client reads, comments, previews, approves, or attaches to that request
   THEN the operation is denied
   AND tenant B state is unchanged
+
+Scenario: Invitation is redeemed once
+  GIVEN a current unexpired invitation for an accepted prospect
+  WHEN the intended client establishes a valid password
+  THEN one client account is bound to the invitation business and request
+  AND replay, expiry, or a superseded token creates no account
 
 Scenario: Unassigned staff access is denied
   GIVEN a normal team member without an assignment

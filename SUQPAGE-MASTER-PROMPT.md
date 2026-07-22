@@ -621,6 +621,12 @@ Accepted behavior still to implement:
 - Accepted clients receive an invited account for a minimal request, inquiry,
   delivery, preview, and account-security workspace. Only authenticated invited
   clients can submit detailed instructions and reference images.
+- The controlled pilot uses a single-use 72-hour invitation link shown once to
+  the authorized operator for manual secure delivery. Regeneration invalidates
+  older links; automated email/WhatsApp delivery remains planned, not claimed.
+- Queue, request, invitation, preview, and client-detail screens use visible
+  breadcrumbs and Back navigation with a deterministic parent fallback so a
+  copied deep link never strands the user.
 - Clients submit unstructured change requests but never write canonical catalog
   or design data directly.
 - Assigned team members structure requests and prepare private revisions.

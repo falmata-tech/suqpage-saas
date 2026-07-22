@@ -76,6 +76,12 @@ private and no showroom change becomes public without client approval.
   unavailable for a stale or superseded revision.
 - Only manager/admin interfaces expose prospect acceptance, on-behalf intake,
   assignment, invitation, or publication controls.
+- Operations navigation is hierarchical: queue rows open a request detail;
+  request detail links back to the queue; invitation/client/request detail
+  screens provide a visible breadcrumb and a back action with a deterministic
+  parent fallback when browser history is unavailable.
+- The invitation acceptance screen explains the business being joined, expiry,
+  and account setup without exposing internal request/contact data.
 
 ## Scenarios
 
@@ -97,6 +103,12 @@ Scenario: Client requests a catalog change
   WHEN they submit instructions and images
   THEN the request is linked to only their business
   AND it appears in their request history
+
+Scenario: Operator follows and reverses a deep link
+  GIVEN an operator opens a request or invitation screen from a copied URL
+  WHEN the screen renders without prior browser history
+  THEN a visible breadcrumb identifies its parent workspace
+  AND Back returns to that deterministic parent rather than stranding the user
 
 Scenario: Manager submits on behalf of a client
   GIVEN an operations manager and a selected client
