@@ -1,4 +1,4 @@
-import type { PublicOnboardingInput, RequestImageInput } from "./request-domain";
+import type { PublicInterestInput, RequestImageInput } from "./request-domain";
 
 export type StoredRequestImage = {
   buffer: Buffer;
@@ -17,7 +17,7 @@ export type PublicRequestRecord = {
 
 export interface RequestRepository {
   findPublicDuplicate(ipHash: string, idempotencyKey: string): PublicRequestRecord | undefined;
-  createPublicOnboarding(input: PublicOnboardingInput, ipHash: string, images: StoredRequestImage[]): PublicRequestRecord;
+  createPublicInterest(input: PublicInterestInput, ipHash: string): PublicRequestRecord;
 }
 
 export interface RequestAttachmentStore {

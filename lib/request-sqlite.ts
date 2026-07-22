@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { getDb, inTransaction } from "./db";
-import { isReviewTransitionAllowed, RequestError, type PublicOnboardingInput } from "./request-domain";
-import type { PublicRequestRecord, RequestRepository, StoredRequestImage } from "./request-ports";
+import { isReviewTransitionAllowed, RequestError, type PublicInterestInput } from "./request-domain";
+import type { PublicRequestRecord, RequestRepository } from "./request-ports";
 import type { RequestAttachment, RequestEvent, ServiceRequest, ServiceRequestStatus } from "./types";
 
 export type OperationsRequest = ServiceRequest & {
@@ -23,7 +23,7 @@ export class SqliteRequestRepository implements RequestRepository {
     return found ? { id: found.id, publicRef: found.public_ref } : undefined;
   }
 
-  createPublicOnboarding(input: PublicOnboardingInput, ipHash: string, images: StoredRequestImage[]): PublicRequestRecord {
+  createPublicInterest(input: PublicInterestInput, ipHash: string): PublicRequestRecord {
     return inTransaction(() => {
       const publicRef = `REQ-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
       const result = getDb().prepare(`
@@ -33,12 +33,7 @@ export class SqliteRequestRepository implements RequestRepository {
         ) VALUES(?,'onboarding','submitted',?,?,?,?, 'public',?,?,'not_required')
       `).run(publicRef, input.contactName, input.contactValue, input.businessName, input.requestText, input.idempotencyKey, ipHash);
       const id = Number(result.lastInsertRowid);
-      const addAttachment = getDb().prepare(`
-        INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height)
-        VALUES(?,?,?,?,?,?,?)
-      `);
-      for (const image of images) addAttachment.run(id, image.storageKey, image.originalName, image.mime, image.buffer.length, image.width, image.height);
-      getDb().prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','public onboarding')").run(id);
+      getDb().prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','public interest')").run(id);
       return { id, publicRef };
     });
   }

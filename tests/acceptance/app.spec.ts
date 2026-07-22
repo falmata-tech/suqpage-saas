@@ -52,21 +52,22 @@ async function loginAndChangePassword(page: Page, email: string, nextPassword: s
   await expect(page.getByText("Password updated")).toBeVisible();
 }
 
-test("prospect submits one private onboarding request with an image", async ({ page }) => {
+test("prospect submits an interest request without public uploads", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/request");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tell us what you need");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Introduce your business");
   await page.getByLabel("Your name").fill("Acceptance Prospect");
   await page.getByLabel("Email, phone, or WhatsApp").fill("prospect@example.test");
   await page.getByLabel(/Business name/).fill("Acceptance Market");
-  await page.getByLabel("Tell us everything you need").fill("Please build a warm, simple showroom for our handmade home products.");
-  await page.getByLabel(/Reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
+  await page.getByLabel("What are you interested in?").fill("I am interested in a showroom for our handmade home products.");
+  await expect(page.locator('input[type="file"]')).toHaveCount(0);
   await page.getByLabel(/SuqPage may use/).check();
-  await page.getByRole("button", { name: "Send private request" }).click();
+  await page.getByRole("button", { name: "Tell SuqPage I’m interested" }).click();
   await expect(page.getByRole("status")).toContainText(/REQ-[A-F0-9]{12}/);
   await expect(page.getByRole("status")).toContainText("Nothing has been accepted, designed, or published yet");
-  expect((await page.request.get("/api/requests/1/attachments/1")).status()).toBe(404);
+  const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png")) } } });
+  expect(publicUpload.status()).toBe(415);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
@@ -139,8 +140,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByText("Acceptance Market")).toBeVisible();
   await page.getByRole("link", { name: /REQ-/ }).click();
   await expect(page.getByText("prospect@example.test")).toBeVisible();
-  await expect(page.locator(".request-image-grid img")).toHaveCount(1);
-  await expect.poll(() => page.locator(".request-image-grid img").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator(".request-image-grid img")).toHaveCount(0);
   await page.getByLabel("Status").selectOption("under_review");
   await page.getByRole("button", { name: "Update status" }).click();
   await expect(page.getByText("Request status updated")).toBeVisible();

@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-Unstructured onboarding/change requests, pre-account contacts, attachments,
+Unstructured onboarding/change requests, pre-account contacts, authenticated attachments,
 staff assignments, and draft publication introduce private data and new
 privileged actions. The backend must preserve the original request, enforce
 least privilege, keep proposed content separate from live catalog authority, and
@@ -68,8 +68,9 @@ publish only the exact client-approved revision.
 - Application ports remain independent of Next.js/HTTP/SQLite: request
   persistence, attachment storage, notification, invitation delivery, revision
   persistence, and publication transaction.
-- Server input is schema-validated and bounded before persistence or image
-  decoding. Attachment storage receives only verified/sanitized bytes and
+- Server input is schema-validated and bounded before persistence. The public
+  interest adapter accepts JSON only and has no attachment-storage dependency.
+  Authenticated attachment storage receives only verified/sanitized bytes and
   server-generated keys.
 - Public response contains a random non-sequential reference, never a database
   identifier, contact, token, or attachment path.
@@ -85,11 +86,17 @@ publish only the exact client-approved revision.
 ## Scenarios
 
 ```gherkin
-Scenario: Public onboarding is committed safely
-  GIVEN bounded valid input and verified images
+Scenario: Public interest is committed safely
+  GIVEN bounded valid contact details and an interest message
   WHEN an unauthenticated prospect submits with a new idempotency key
-  THEN one request and its attachments are committed
+  THEN one attachment-free onboarding lead is committed
   AND notification failure cannot roll back or duplicate the request
+
+Scenario: Public attachment is denied at every boundary
+  GIVEN an unauthenticated prospect
+  WHEN they submit multipart content or an attachment for a public lead
+  THEN the HTTP adapter rejects it
+  AND the database invariant rejects any attempted public attachment row
 
 Scenario: Cross-tenant client access is denied
   GIVEN a client for tenant A and a request for tenant B
@@ -180,7 +187,7 @@ Filled only when `status: done` after every mapped gate passes.
 
 - Request, attachment, event, and assignment tables plus application/storage
   ports are active.
-- Public creation is idempotent, privacy-rate-limited, bounded, image-sanitized,
-  and returns only a random reference.
+- Public creation is idempotent, privacy-rate-limited, bounded JSON, returns only
+  a random reference, and cannot create attachment rows or files.
 - Private attachment reads are administrator-only and return 404 to anonymous or
   unauthorized callers. Later role capabilities and revision publication remain.

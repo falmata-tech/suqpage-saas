@@ -30,9 +30,10 @@ try {
   const requestStorageKey = "11111111-1111-4111-8111-111111111111.png";
   fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "private request attachment");
   let db = new DatabaseSync(env.SUQPAGE_DB_PATH);
-  const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001','onboarding','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private request during backup and restore.','public','operations-backup-key','private-hash')").run().lastInsertRowid);
+  const owner = db.prepare("SELECT id,business_id FROM users WHERE role='owner' ORDER BY id LIMIT 1").get();
+  const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001',?,?,'change','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private authenticated request during backup and restore.','client',?,'operations-backup-key','private-hash')").run(owner.business_id,owner.id,owner.id).lastInsertRowid);
   db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1);
-  db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','public onboarding')").run(requestId);
+  db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','authenticated client request')").run(requestId);
   db.close();
   run("scripts/backup.ts");
   const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));

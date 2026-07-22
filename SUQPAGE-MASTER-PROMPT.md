@@ -142,8 +142,8 @@ The landing page should include:
 - actual client showroom previews;
 - a searchable showroom directory;
 - category filter buttons;
-- a low-friction private onboarding request with contact details, one
-  unstructured instruction field, consent, and optional reference images;
+- a low-friction expression-of-interest form with contact details, one short
+  message, consent, no file uploads, and no self-sign-up;
 - professional copy with no development-stage disclaimers.
 
 ### 5.3 Public copy must look finished
@@ -464,10 +464,10 @@ Default behavior:
 
 ---
 
-## 11. Public onboarding request
+## 11. Public expression of interest
 
 The SuqPage landing page must lead prospects to a simple private onboarding
-request. No account is required for the first request.
+interest form. No account is required, created, or self-registered at this step.
 
 Keep it intentionally small. Required inputs and limits are controlled by
 `FE-003`, `BE-003`, and `DEP-003`:
@@ -475,9 +475,9 @@ Keep it intentionally small. Required inputs and limits are controlled by
 - name;
 - WhatsApp, phone, or email;
 - optional business name;
-- one unstructured instruction of 20–10,000 characters;
+- one short interest message of 10–2,000 characters;
 - processing consent;
-- zero to ten optional sanitized JPEG, PNG, or WebP reference images.
+- no file or image inputs.
 
 Requirements:
 
@@ -485,8 +485,10 @@ Requirements:
   idempotency;
 - explain that receipt is not acceptance or publication;
 - do not expose internal development wording;
-- use bounded input, a honeypot, privacy-preserving rate limits, private image
-  storage, and explicit-origin checks;
+- use bounded JSON input, a honeypot, privacy-preserving rate limits, and
+  explicit-origin checks;
+- reject multipart/file submissions before decoding or storage, and enforce at
+  the database level that public interest records cannot have attachments;
 - never expose contact details, instructions, attachment identifiers, or
   storage paths through the public reference.
 
@@ -601,14 +603,14 @@ replacement workflow passes its rollout gates.
 
 Current verified behavior:
 
-- Prospects can submit a private initial onboarding request without an account,
-  with contact details, one unstructured instruction, consent, and up to ten
-  sanitized JPEG/PNG/WebP reference images.
-- Requests use random public references, idempotency, bounded multipart input,
-  privacy-preserving rate limits, private persistent attachment storage, events,
-  and additive schema migration 2.
+- Prospects can submit an expression of interest without an account using
+  contact details, one short message, and consent. Public leads have no upload
+  capability and cannot self-register.
+- Public interests use random references, idempotency, bounded JSON,
+  privacy-preserving rate limits, events, and additive schema migrations 2–3.
+  HTTP and database boundaries both prohibit attachments on public leads.
 - Platform administrators have a private operations queue for reviewing the
-  immutable original request and attachments and moving it through early review
+  immutable original interest message and moving it through early review
   statuses. They cannot mark it client-approved or published from this queue.
 - Existing owner permissions and live showroom behavior remain unchanged during
   this additive stage. Request data and attachments are covered by backup and
@@ -617,7 +619,8 @@ Current verified behavior:
 Accepted behavior still to implement:
 
 - Accepted clients receive an invited account for a minimal request, inquiry,
-  delivery, preview, and account-security workspace.
+  delivery, preview, and account-security workspace. Only authenticated invited
+  clients can submit detailed instructions and reference images.
 - Clients submit unstructured change requests but never write canonical catalog
   or design data directly.
 - Assigned team members structure requests and prepare private revisions.

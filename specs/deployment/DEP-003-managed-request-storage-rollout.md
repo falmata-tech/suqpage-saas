@@ -50,9 +50,13 @@ workspace.
 
 ## Contracts
 
-- Up to ten request images, each at most 5 MB and 20 megapixels; only decoded
-  JPEG/PNG/WebP is stored after metadata-removing re-encoding.
-- Multipart/request limits reject oversized input before unbounded buffering.
+- The public interest endpoint accepts bounded JSON only and never initializes
+  attachment writes; multipart/file input is rejected before decoding or storage.
+- Authenticated client requests may contain up to ten images, each at most 5 MB
+  and 20 megapixels; only decoded JPEG/PNG/WebP is stored after
+  metadata-removing re-encoding.
+- Authenticated multipart/request limits reject oversized input before
+  unbounded buffering.
 - Storage keys are random and original filenames are private metadata, never URL
   authority.
 - Authorized attachment reads set exact content type, `nosniff`, private cache
@@ -69,7 +73,7 @@ workspace.
 
 ```gherkin
 Scenario: Request attachment stays private
-  GIVEN an accepted sanitized request image
+  GIVEN an authenticated client request with an accepted sanitized image
   WHEN an unauthenticated or unauthorized actor requests its identifier
   THEN no attachment content or private metadata is disclosed
 
@@ -155,6 +159,8 @@ Filled only when `status: done` after every mapped gate passes.
 ### Verified additive increment
 
 - Schema migration 2 is additive and idempotent.
+- Schema migration 3 adds a database invariant forbidding attachments on public
+  interest records.
 - Sanitized request images use random keys below the persistent private media
   root, outside the public/build tree.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private

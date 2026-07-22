@@ -258,6 +258,24 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS request_business_created_idx ON service_requests(business_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_assignee_created_idx ON service_requests(assigned_user_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_event_request_idx ON request_events(request_id, created_at, id);
+    CREATE TRIGGER IF NOT EXISTS public_request_attachment_denied
+    BEFORE INSERT ON request_attachments
+    WHEN EXISTS (SELECT 1 FROM service_requests WHERE id=NEW.request_id AND submitter_kind='public')
+    BEGIN
+      SELECT RAISE(ABORT, 'public interest requests cannot have attachments');
+    END;
+    CREATE TRIGGER IF NOT EXISTS public_request_attachment_move_denied
+    BEFORE UPDATE OF request_id ON request_attachments
+    WHEN EXISTS (SELECT 1 FROM service_requests WHERE id=NEW.request_id AND submitter_kind='public')
+    BEGIN
+      SELECT RAISE(ABORT, 'public interest requests cannot have attachments');
+    END;
+    CREATE TRIGGER IF NOT EXISTS attached_request_cannot_become_public
+    BEFORE UPDATE OF submitter_kind ON service_requests
+    WHEN NEW.submitter_kind='public' AND EXISTS (SELECT 1 FROM request_attachments WHERE request_id=NEW.id)
+    BEGIN
+      SELECT RAISE(ABORT, 'requests with attachments cannot become public interests');
+    END;
 
     CREATE TRIGGER IF NOT EXISTS category_collection_same_business_insert
     BEFORE INSERT ON categories WHEN NEW.collection_id IS NOT NULL
@@ -327,4 +345,5 @@ export function migrateDatabase(db: DatabaseSync) {
 
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(1);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(2);
+  db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(3);
 }

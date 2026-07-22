@@ -69,10 +69,10 @@ The application was started with `next start` using an isolated database and med
 - valid canonical inquiry: HTTP 201
 - repeated inquiry with the same idempotency key: deduplicated
 - repeated abuse attempts: HTTP 429
-- public onboarding request: HTTP 201 with a random reference
-- repeat onboarding submit: deduplicated
-- cross-origin onboarding submit: HTTP 403
-- unauthenticated private request attachment: HTTP 404
+- public expression of interest: HTTP 201 with a random reference
+- repeat interest submit: deduplicated
+- cross-origin interest submit: HTTP 403
+- public multipart/image submit: HTTP 415 with zero attachment rows
 
 ## Critical audit remediations
 
@@ -117,7 +117,7 @@ Results:
 - restored database integrity: `ok`
 - four businesses recovered
 - media file recovered
-- managed request row, event, attachment metadata, and private attachment file recovered
+- authenticated managed-request row, event, attachment metadata, and private attachment file recovered
 
 ## Deployment requirements
 

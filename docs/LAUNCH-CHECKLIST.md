@@ -12,8 +12,8 @@
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.
 - [ ] Confirm only approved businesses are `active`; keep unfinished showrooms `draft`.
-- [ ] Submit a private onboarding request with an image and confirm an
-      administrator can review it while an unauthenticated caller receives 404.
+- [ ] Submit a public expression of interest and confirm an administrator can
+      review it with zero attachments; confirm public multipart upload is rejected.
 - [ ] Configure HTTPS and proxy forwarding.
 - [ ] Create a backup and perform a test restore.
 - [ ] Confirm `/api/health` is monitored.

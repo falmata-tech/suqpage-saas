@@ -1,6 +1,7 @@
 import type { ServiceRequestStatus } from "./types";
 
 export const MAX_REQUEST_TEXT = 10_000;
+export const MAX_PUBLIC_INTEREST_TEXT = 2_000;
 export const MAX_REQUEST_IMAGES = 10;
 export const REQUEST_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
   "submitted", "under_review", "needs_information", "approved_for_work",
@@ -25,7 +26,7 @@ export function isReviewTransitionAllowed(from: ServiceRequestStatus, to: Servic
   return from === to || REVIEW_TRANSITIONS[from].has(to);
 }
 
-export type PublicOnboardingInput = {
+export type PublicInterestInput = {
   contactName: string;
   contactValue: string;
   businessName: string;
@@ -50,7 +51,7 @@ function text(value: unknown) {
   return String(value ?? "").trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
 }
 
-export function parsePublicOnboardingInput(raw: Record<string, unknown>): PublicOnboardingInput {
+export function parsePublicInterestInput(raw: Record<string, unknown>): PublicInterestInput {
   const contactName = text(raw.contactName);
   const contactValue = text(raw.contactValue);
   const businessName = text(raw.businessName);
@@ -63,8 +64,8 @@ export function parsePublicOnboardingInput(raw: Record<string, unknown>): Public
   if (contactValue.length < 5) throw new RequestError("Enter a usable email, phone, or WhatsApp contact.");
   if (contactValue.length > 160) throw new RequestError("Your contact must be 160 characters or fewer.");
   if (businessName.length > 120) throw new RequestError("The business name must be 120 characters or fewer.");
-  if (requestText.length < 20) throw new RequestError("Tell us a little more about the showroom or changes you need.");
-  if (requestText.length > MAX_REQUEST_TEXT) throw new RequestError(`Keep the request to ${MAX_REQUEST_TEXT.toLocaleString("en-US")} characters or fewer.`);
+  if (requestText.length < 10) throw new RequestError("Tell us briefly what kind of showroom you are interested in.");
+  if (requestText.length > MAX_PUBLIC_INTEREST_TEXT) throw new RequestError(`Keep the interest message to ${MAX_PUBLIC_INTEREST_TEXT.toLocaleString("en-US")} characters or fewer.`);
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new RequestError("The request session is invalid. Refresh and try again.");
   if (!consent) throw new RequestError("Confirm that SuqPage may use this information to review your request.");
   return { contactName, contactValue, businessName, requestText, idempotencyKey, consent };

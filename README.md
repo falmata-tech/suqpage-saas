@@ -129,7 +129,7 @@ Before opening the site publicly:
 
 1. Sign in with each temporary account and change its password.
 2. Configure real business notification emails and social contacts.
-3. Submit a private onboarding request and confirm it appears in the administrator operations queue with any reference images.
+3. Submit a public expression of interest and confirm it appears in the administrator operations queue without attachments or account creation.
 4. Put the server behind an HTTPS reverse proxy.
 5. Create and verify an initial backup.
 
@@ -195,11 +195,12 @@ Dashboard uploads:
 - store outside the Next.js static build
 - serve through `/media/<generated-file>` with `nosniff`
 
-Initial showroom requests use `/request` and are stored by SuqPage rather than a
-third-party form service. They accept one free-form instruction plus up to ten
-optional sanitized images. Request images remain below the persistent media root
-and are served only through an authenticated private route; they are never
-placed under `public/` or returned by the public request reference.
+The public `/request` form is an attachment-free expression of interest stored
+by SuqPage rather than a third-party form service. It cannot create an account
+or accept multipart/file input. After SuqPage accepts a prospect and sends an
+invitation, the planned authenticated client request form may accept up to ten
+sanitized images. Those private images remain below the persistent media root
+and are served only through an authorized route.
 
 ## Mock Malikt Board adapter
 

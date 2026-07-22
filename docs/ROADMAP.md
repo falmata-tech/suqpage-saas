@@ -27,8 +27,9 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   previews while assigned SuqPage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
-- Delivery order: additive intake and operations queue; revision preview and
-  approval; then permission cutover after replacement workflows pass.
+- Delivery order: attachment-free public interest and operations queue;
+  invitation plus authenticated client requests; revision preview and approval;
+  then permission cutover after replacement workflows pass.
 - Exit criteria: request/attachment privacy, tenant/staff isolation, mandatory
   client approval, atomic publication/rollback, migration/restore, and all L3
   gates pass before direct client catalog/settings/design access is removed.

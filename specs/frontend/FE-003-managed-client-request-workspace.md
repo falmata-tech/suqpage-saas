@@ -24,8 +24,8 @@ private and no showroom change becomes public without client approval.
 
 ### In scope
 
-- Public first-time onboarding intake with contact details, one unstructured
-  request field, and up to ten verified image attachments.
+- Public expression-of-interest intake with contact details and one short
+  unstructured message. It has no upload or self-sign-up capability.
 - Authenticated client change requests and request history.
 - Client clarification responses, status, private preview, approve, and reject
   with comments.
@@ -60,9 +60,11 @@ private and no showroom change becomes public without client approval.
 
 ## Contracts
 
-- Public intake requires name, a usable email/phone/WhatsApp contact, request
-  text of 20–10,000 characters, consent, and a stable idempotency key.
-- It accepts zero to ten JPEG, PNG, or WebP files, each no larger than 5 MB.
+- Public intake requires name, a usable email/phone/WhatsApp contact, an interest
+  message of 10–2,000 characters, consent, and a stable idempotency key.
+- Public intake accepts no files. Detailed instructions and up to ten JPEG, PNG,
+  or WebP reference images become available only after SuqPage accepts the lead,
+  creates an account, and the invited client authenticates.
 - The success state returns a non-secret public reference and explains that
   submission is not acceptance or publication.
 - A client account exposes Requests, Customer inquiries, Delivery activity,
@@ -78,11 +80,17 @@ private and no showroom change becomes public without client approval.
 ## Scenarios
 
 ```gherkin
-Scenario: Prospect submits an initial showroom request
+Scenario: Prospect expresses interest without an account
   GIVEN a prospect without an account or business
-  WHEN they submit valid contact, instructions, consent, and verified images
-  THEN SuqPage stores one private onboarding request
-  AND shows a reference without exposing the attachments or internal queue
+  WHEN they submit valid contact, a short interest message, and consent
+  THEN SuqPage stores one private onboarding lead with no attachments
+  AND shows a reference without creating an account or exposing the internal queue
+
+Scenario: Prospect attempts a public upload
+  GIVEN a prospect without an invited account
+  WHEN they send a file to the public interest endpoint
+  THEN the request is rejected before file decoding or storage
+  AND no attachment row or media object is created
 
 Scenario: Client requests a catalog change
   GIVEN an authenticated client
@@ -140,7 +148,7 @@ attachment contents, access tokens, or customer inquiry details.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Public onboarding and bounded attachment UX | acceptance | `tests/acceptance/app.spec.ts` |
+| Public interest UX and upload denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/http-smoke.mjs`, `scripts/test-requests.ts` |
 | Client tenant isolation and request history | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
 | Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
 | Preview approval/rejection without live drift | acceptance | `tests/acceptance/requests.spec.ts` |
@@ -169,8 +177,9 @@ Filled only when `status: done` after every mapped gate passes.
 
 ### Verified additive increment
 
-- Public onboarding form and bounded multipart API are active.
-- Administrators can review original instructions and authorized private images,
-  and can move requests only through pre-preview review statuses.
+- Public expression-of-interest form and bounded JSON API are active with no
+  file input, upload handling, or self-sign-up path.
+- Administrators can review the original interest message and move it only
+  through pre-preview review statuses.
 - Browser evidence is in `tests/acceptance/app.spec.ts`; client history,
   assigned-team queues, manager on-behalf intake, and preview decisions remain.
