@@ -4,7 +4,7 @@ title: Authentication and external adapter failure boundaries
 status: done
 related: []
 owners: [backend, security]
-last_updated: 2026-07-20
+last_updated: 2026-07-22
 change_level: L2
 ---
 
@@ -19,6 +19,10 @@ without leaking internal error details or delaying committed inquiries indefinit
 ## Contracts and invariants
 
 - A successful login clears the rate-limit record for that identity/email key.
+- A valid authenticated user who visits `/login` is redirected to the dashboard
+  (or required password-change page) instead of being shown another login form.
+- Protected routes remain fail-closed for missing, expired, or revoked sessions;
+  interface links never grant authority.
 - Failed attempts remain persistently limited and return the existing generic
   credential error.
 - Delivery API request bodies are bounded before JSON parsing.
@@ -33,6 +37,12 @@ Scenario: Repeated legitimate sign-in
   GIVEN a valid account below the failure threshold
   WHEN the account signs in successfully multiple times
   THEN successful sign-ins do not accumulate toward a lockout
+
+Scenario: Signed-in user reaches the login route
+  GIVEN a valid authenticated session
+  WHEN the browser navigates directly to the login route
+  THEN the user returns to the authenticated dashboard
+  AND no second sign-in form is shown
 
 Scenario: Oversized authenticated delivery request
   GIVEN an authenticated owner

@@ -104,6 +104,9 @@ private and no showroom change becomes public without client approval.
   request detail links back to the queue; invitation/client/request detail
   screens provide a visible breadcrumb and a back action with a deterministic
   parent fallback when browser history is unavailable.
+- Inside an authenticated workspace, the SuqPage brand returns to that actor's
+  dashboard context rather than silently exiting to the public site. A separate
+  clearly labeled Public site link opens the public experience.
 - The invitation acceptance screen explains the business being joined, expiry,
   and account setup without exposing internal request/contact data.
 
@@ -133,6 +136,12 @@ Scenario: Operator follows and reverses a deep link
   WHEN the screen renders without prior browser history
   THEN a visible breadcrumb identifies its parent workspace
   AND Back returns to that deterministic parent rather than stranding the user
+
+Scenario: Authenticated user follows workspace navigation
+  GIVEN a valid authenticated session in a dashboard
+  WHEN the user activates the SuqPage brand or another permitted workspace menu
+  THEN the destination remains authenticated and role-appropriate
+  AND public-site navigation is exposed separately and explicitly
 
 Scenario: Manager submits on behalf of a client
   GIVEN an operations manager and a selected client

@@ -654,6 +654,10 @@ Current verified behavior:
   erasing publication history.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
+- Authenticated workspace navigation keeps each actor in the role-appropriate
+  dashboard. The public site is a separate, explicit link, and an authenticated
+  visit to the login route returns to the dashboard instead of showing a second
+  sign-in form.
 - Existing owner permissions and live showroom behavior remain unchanged during
   this additive stage.
 

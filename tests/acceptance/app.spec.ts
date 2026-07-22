@@ -149,6 +149,13 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
   await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { name: "Private workspace" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "◆ SuqPage" })).toHaveAttribute("href", "/dashboard");
+  await expect(page.getByRole("link", { name: "Public site ↗" })).toHaveAttribute("target", "_blank");
+  await page.getByRole("link", { name: "◆ SuqPage" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/dashboard/requests");
   await expect(page.getByText("Acceptance Market")).toBeVisible();
   await page.getByRole("link", { name: /REQ-/ }).click();

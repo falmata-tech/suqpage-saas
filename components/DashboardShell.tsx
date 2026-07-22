@@ -12,7 +12,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
   const legacyManagement = platformAdmin || user.access_role === "legacy_owner";
   return <div className="dashboard">
     <aside className="sidebar">
-      <Link className="brand" href="/">◆ SuqPage</Link>
+      <Link className="brand" href={`/dashboard${query}`}>◆ SuqPage</Link>
       <div className="sidebar-identity">{user.name}<br/>{business ? business.name : platformAdmin ? "Platform administration" : operations ? "Operations workspace" : teamMember ? "Assigned work" : "Private workspace"}</div>
       <nav className="side-nav" aria-label="Dashboard">
         <Link href={`/dashboard${query}`}>Overview</Link>
@@ -37,6 +37,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
         {teamMember ? <Link href="/dashboard/requests">Assigned requests</Link> : null}
         {platformAdmin ? <><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link></> : null}
         <Link href="/dashboard/account">Account security</Link>
+        <Link href="/" target="_blank" rel="noreferrer">Public site ↗</Link>
         <form action={logoutAction}><button type="submit">Sign out</button></form>
       </nav>
     </aside>
