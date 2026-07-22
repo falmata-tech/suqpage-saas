@@ -20,7 +20,9 @@ silently change product behavior to match convenient code.
 1. Classify the request: explanation, defect, feature, security, operations, or
    architecture.
 2. Find the controlling specs with `npm run specs:list` or the traceability map.
-3. For a behavior change, create or update specs before production code.
+3. For a behavior change, create or update specs before production code and
+   identify every section of `SUQPAGE-MASTER-PROMPT.md` whose statement of
+   current product behavior will be affected.
 4. Confirm Definition of Ready in `specs/README.md`.
 5. Write a short implementation plan linked to spec IDs and acceptance criteria.
 6. Make the smallest coherent change. Preserve tenant isolation and custom
@@ -29,7 +31,9 @@ silently change product behavior to match convenient code.
    integrity fixes require regression tests.
 8. Run `npm run check`; use `npm run release` for release-affecting changes and
    `npm run test:acceptance` for user workflows.
-9. Update spec status, traceability, ADRs, and operational documentation.
+9. Update spec status, traceability, ADRs, operational documentation, and every
+   affected master-prompt section so they describe the verified implementation
+   rather than the previous or merely planned behavior.
 10. Review and commit only the files belonging to the current task, following
     the task-isolation rules below.
 11. Report evidence, commit hash, limitations, mocks, and remaining rollout
@@ -82,6 +86,11 @@ security, data, or deployment choice remains unresolved.
   recorded in `specs/TRACEABILITY.md`.
 - Changed behavior without a changed spec is drift. Changed specs without tests
   are incomplete.
+- The master prompt is a living statement of current product reality, not a
+  changelog. Planned behavior must be labeled as planned and linked to its draft
+  spec or roadmap outcome; it becomes current behavior only after implementation
+  and mapped evidence pass. Preserve history in Git, immutable spec IDs, and
+  ADRs rather than retaining obsolete narrative in the master prompt.
 
 ## Guardrails against drift and wasted work
 

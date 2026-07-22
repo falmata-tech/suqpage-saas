@@ -44,6 +44,9 @@ docs/adr/          accepted architectural decisions
 - Unit/integration/browser/operations tests appropriate to change level pass.
 - Tenant isolation and negative paths are covered when relevant.
 - Documentation, metadata, migrations, and operator steps are current.
+- A completed change to product roles, capabilities, workflow, terminology, or
+  deployment boundaries is reflected in `SUQPAGE-MASTER-PROMPT.md`; future
+  behavior remains explicitly labeled and linked to a draft spec or roadmap.
 - Observability and safe failure behavior exist where applicable.
 - Rollback is possible and documented for deployment/data changes.
 - `npm run validate:specs` and the applicable repository gates pass.
@@ -76,7 +79,10 @@ input/output table is clearer.
 5. Implement against acceptance criteria, not prose memory.
 6. Add test identifiers or paths under `test_plan`.
 7. Record completion evidence in `TRACEABILITY.md` and set `done`.
-8. Stage explicit task files, run the staged-scope check, review the staged diff,
+8. Reconcile affected master-prompt statements with the verified behavior;
+   preserve decision history in Git and ADRs rather than as an embedded
+   master-prompt changelog.
+9. Stage explicit task files, run the staged-scope check, review the staged diff,
    and create the task commit after all applicable gates pass.
 
 Run:

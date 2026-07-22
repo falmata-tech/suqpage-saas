@@ -1051,6 +1051,24 @@ When given a new SuqPage task:
 11. Run the release checks.
 12. State clearly what is complete, what is mocked, and what remains outside the MVP boundary.
 
+### 24.1 Keep this product contract synchronized
+
+This file is a living statement of SuqPage's current product reality. Every
+completed feature or change to roles, capabilities, workflow, terminology,
+security, data, or deployment boundaries must update all affected sections in
+the same task that records passing evidence.
+
+Do not use this file as a chronological changelog. Git history records what
+changed, immutable feature specs record accepted behavior and evidence, and ADRs
+record consequential decisions and their rationale. Remove obsolete current-
+behavior statements instead of retaining them for history.
+
+When an approved direction is not implemented yet, label it explicitly as a
+target or planned behavior and link it to its draft spec or roadmap outcome. Do
+not describe planned behavior as available, and do not rewrite implemented
+behavior out of this file until its replacement has passed the required tests
+and rollout gates.
+
 ---
 
 ## 25. Product north star
