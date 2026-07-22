@@ -592,10 +592,12 @@ A public customer does not require an account. The customer can:
 - submit an inquiry;
 - continue to a social messaging destination.
 
-Fine-grained staff and manager roles are part of the accepted managed-service
-transition below but are not active in the current additive increment.
+The additive access-profile layer now distinguishes platform administrator,
+legacy owner, invited client, team member, and operations manager. Invited
+client enforcement is active; staff/manager provisioning and assignment UI
+remain part of the managed-service transition below.
 
-### Managed-service transition — additive intake active
+### Managed-service transition — invitation and client request workspace active
 
 The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` will replace
 direct client catalog/settings/design administration only after the complete
@@ -607,34 +609,40 @@ Current verified behavior:
   contact details, one short message, and consent. Public leads have no upload
   capability and cannot self-register.
 - Public interests use random references, idempotency, bounded JSON,
-  privacy-preserving rate limits, events, and additive schema migrations 2–3.
+  privacy-preserving rate limits, events, and additive schema migrations 2–4.
   HTTP and database boundaries both prohibit attachments on public leads.
 - Platform administrators have a private operations queue for reviewing the
   immutable original interest message and moving it through early review
   statuses. They cannot mark it client-approved or published from this queue.
+- Authorized operators can accept a public onboarding lead, create or link its
+  draft business, and generate a random single-use invitation that expires
+  after 72 hours. Only the token hash persists; the raw manual-delivery link is
+  shown once, and replacing it revokes older unused invitations.
+- Invitation redemption atomically creates one business-bound client account
+  with the restricted client access profile and cannot be replayed.
+- Invited clients have a minimal private workspace for requests, read-only
+  customer inquiries, read-only delivery activity, showroom preview, and
+  account security. Catalog, product, business-setting, design, delivery-create,
+  and inquiry-status mutations are hidden and denied on the server.
+- Authenticated clients can submit a 10–10,000 character onboarding/change
+  instruction with up to ten private sanitized JPEG, PNG, or WebP references of
+  at most 5 MB each. Requests are tenant-bound, idempotent, and visible in the
+  client’s request history.
+- Request, invitation, and new-request screens provide breadcrumbs and a Back
+  action with a deterministic parent fallback.
 - Existing owner permissions and live showroom behavior remain unchanged during
-  this additive stage. Request data and attachments are covered by backup and
-  restore tests.
+  this additive stage.
 
 Accepted behavior still to implement:
 
-- Accepted clients receive an invited account for a minimal request, inquiry,
-  delivery, preview, and account-security workspace. Only authenticated invited
-  clients can submit detailed instructions and reference images.
-- The controlled pilot uses a single-use 72-hour invitation link shown once to
-  the authorized operator for manual secure delivery. Regeneration invalidates
-  older links; automated email/WhatsApp delivery remains planned, not claimed.
-- Queue, request, invitation, preview, and client-detail screens use visible
-  breadcrumbs and Back navigation with a deterministic parent fallback so a
-  copied deep link never strands the user.
-- Clients submit unstructured change requests but never write canonical catalog
-  or design data directly.
 - Assigned team members structure requests and prepare private revisions.
 - Operations managers may submit on behalf of clients, accept/invite prospects,
   assign work, and publish only the exact revision the client approved.
 - Platform administrators retain explicit system authority.
 - Existing live showrooms remain unchanged until client approval and authorized
   publication; previous published state remains recoverable.
+- Automated invitation delivery by email or WhatsApp remains planned, not
+  claimed; the controlled pilot uses manual secure delivery.
 
 Until the remaining specs are implemented and verified, the current
 administrator and business-owner capabilities in this document remain active.

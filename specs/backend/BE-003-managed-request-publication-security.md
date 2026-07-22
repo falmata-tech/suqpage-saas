@@ -202,5 +202,13 @@ Filled only when `status: done` after every mapped gate passes.
   ports are active.
 - Public creation is idempotent, privacy-rate-limited, bounded JSON, returns only
   a random reference, and cannot create attachment rows or files.
-- Private attachment reads are administrator-only and return 404 to anonymous or
-  unauthorized callers. Later role capabilities and revision publication remain.
+- Private attachment reads are operations-authorized and return 404 to anonymous
+  or unauthorized callers; invited clients can read only attachments on their
+  own represented requests.
+- Migration 4 adds access profiles and hashed invitation lifecycle records.
+  Regeneration revokes unused predecessors, redemption is atomic/non-replayable,
+  and the client profile cannot mutate catalog, settings, inquiries, or delivery
+  requests.
+- Authenticated client requests are tenant-bound and idempotent with bounded,
+  sanitized private images. Staff assignment/on-behalf operations and revision
+  publication remain.

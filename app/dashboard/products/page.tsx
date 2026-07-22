@@ -2,7 +2,7 @@ import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
 import { deleteProductAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
-import { resolveBusiness } from "@/lib/dashboard";
+import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
 import { getCatalogByBusinessId } from "@/lib/db";
 
 export const dynamic="force-dynamic";

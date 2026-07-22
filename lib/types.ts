@@ -10,7 +10,11 @@ export type OptionGroup = { id:number; product_id:number; name:string; position:
 export type OptionValue = { id:number; option_group_id:number; value:string; stock_count:number };
 export type Product = { id:number; business_id:number; collection_id:number|null; category_id:number|null; name:string; slug:string; eyebrow:string; description:string; image_path:string; availability:"available"|"limited"|"unavailable"|"coming_soon"; stock_count:number; is_published:number; sort_order:number; collection_name?:string; category_name?:string; option_groups?:OptionGroup[] };
 export type Catalog = { business:Business; collections:Collection[]; categories:Category[]; products:Product[] };
-export type SessionUser = { id:number; email:string; name:string; role:"admin"|"owner"; business_id:number|null; must_change_password:number };
+export type AccessRole = "platform_admin" | "legacy_owner" | "client" | "team_member" | "operations_manager";
+export type SessionUser = {
+  id:number; email:string; name:string; role:"admin"|"owner"; access_role:AccessRole;
+  business_id:number|null; must_change_password:number;
+};
 export type ServiceRequestType = "onboarding" | "change";
 export type ServiceRequestStatus =
   | "submitted" | "under_review" | "needs_information" | "approved_for_work"
@@ -32,4 +36,9 @@ export type RequestAttachment = {
 export type RequestEvent = {
   id:number; request_id:number; actor_user_id:number|null; event_type:string;
   detail:string; created_at:string;
+};
+export type ClientInvitation = {
+  id:number; request_id:number; business_id:number; email:string; name:string;
+  token_hash:string; expires_at:number; accepted_at:number|null; accepted_user_id:number|null;
+  revoked_at:number|null; created_by_user_id:number; created_at:number;
 };

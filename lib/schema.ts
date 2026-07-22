@@ -219,6 +219,27 @@ export function migrateDatabase(db: DatabaseSync) {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY(user_id,business_id)
     );
+    CREATE TABLE IF NOT EXISTS user_access_profiles (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      access_role TEXT NOT NULL CHECK(access_role IN (
+        'platform_admin','legacy_owner','client','team_member','operations_manager'
+      )),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS client_invitations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+      email TEXT NOT NULL,
+      name TEXT NOT NULL,
+      token_hash TEXT UNIQUE NOT NULL,
+      expires_at INTEGER NOT NULL,
+      accepted_at INTEGER,
+      accepted_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      revoked_at INTEGER,
+      created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+      created_at INTEGER NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version INTEGER PRIMARY KEY,
       applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -254,10 +275,15 @@ export function migrateDatabase(db: DatabaseSync) {
     CREATE UNIQUE INDEX IF NOT EXISTS request_public_idempotency_unique
       ON service_requests(ip_hash,idempotency_key)
       WHERE submitter_kind='public' AND idempotency_key IS NOT NULL AND idempotency_key != '';
+    CREATE UNIQUE INDEX IF NOT EXISTS request_client_idempotency_unique
+      ON service_requests(submitted_by_user_id,idempotency_key)
+      WHERE submitter_kind='client' AND idempotency_key IS NOT NULL AND idempotency_key != '';
     CREATE INDEX IF NOT EXISTS request_status_created_idx ON service_requests(status, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_business_created_idx ON service_requests(business_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_assignee_created_idx ON service_requests(assigned_user_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS request_event_request_idx ON request_events(request_id, created_at, id);
+    CREATE INDEX IF NOT EXISTS invitation_request_idx ON client_invitations(request_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS invitation_expiry_idx ON client_invitations(expires_at);
     CREATE TRIGGER IF NOT EXISTS public_request_attachment_denied
     BEFORE INSERT ON request_attachments
     WHEN EXISTS (SELECT 1 FROM service_requests WHERE id=NEW.request_id AND submitter_kind='public')
@@ -346,4 +372,5 @@ export function migrateDatabase(db: DatabaseSync) {
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(1);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(2);
   db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(3);
+  db.prepare("INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)").run(4);
 }

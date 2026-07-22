@@ -15,6 +15,10 @@ async function main() {
   const { SqliteRequestRepository, getRequestDetail, updateRequestStatus } = await import("../lib/request-sqlite");
   const { createPublicInterest } = await import("../lib/request-service");
   const { RequestError } = await import("../lib/request-domain");
+  const { canManageBusiness, canViewBusiness } = await import("../lib/capabilities");
+  const { createAuthenticatedClientRequest } = await import("../lib/client-request-service");
+  const { createClientInvitation, getActiveInvitation, hashInvitationToken, InvitationError, redeemClientInvitation } = await import("../lib/invitations");
+  const { canAccessRequest, listClientRequests } = await import("../lib/request-sqlite");
   const repository = new SqliteRequestRepository();
   const attachments = new FileRequestAttachmentStore();
   const allowedRate = { consume: () => ({ allowed: true, retryAfterSeconds: 0 }) };
@@ -61,13 +65,51 @@ async function main() {
     assert.throws(() => updateRequestStatus(first.id, "published", adminId), RequestError);
     assert.equal(getRequestDetail(first.id)?.events.length, 2);
 
+    const firstToken = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const secondToken = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+    const invitation = createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_000, token:firstToken });
+    assert.equal(getActiveInvitation(firstToken,1_000_001)?.business_name,"Amina Market");
+    const storedInvitation = getDb().prepare("SELECT token_hash FROM client_invitations WHERE id=?").get(invitation.invitationId) as {token_hash:string};
+    assert.equal(storedInvitation.token_hash,hashInvitationToken(firstToken));
+    assert.notEqual(storedInvitation.token_hash,firstToken);
+    createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_100, token:secondToken });
+    assert.equal(getActiveInvitation(firstToken,1_000_101),undefined);
+    assert.ok(getActiveInvitation(secondToken,1_000_101));
+    const redeemed = redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_200);
+    const client = getDb().prepare(`SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?`).get(redeemed.userId) as any;
+    assert.equal(client.access_role,"client");
+    assert.equal(client.must_change_password,0);
+    assert.equal(canViewBusiness(client,redeemed.businessId),true);
+    assert.equal(canManageBusiness(client,redeemed.businessId),false);
+    assert.throws(()=>redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_201),InvitationError);
+    assert.equal((getDb().prepare("SELECT COUNT(*) count FROM users WHERE lower(email)='amina@example.test'").get() as {count:number}).count,1);
+
+    const clientForm = new FormData();
+    clientForm.set("requestType","change");
+    clientForm.set("requestText","Please replace the hero image and add the new summer collection.");
+    clientForm.set("idempotencyKey","client_request_key_123456");
+    clientForm.append("images",new File([new Uint8Array(png)],"summer-reference.png",{type:"image/png"}));
+    const clientRequest = await createAuthenticatedClientRequest(client,clientForm);
+    const clientDetail = getRequestDetail(clientRequest.id)!;
+    assert.equal(clientDetail.attachments.length,1);
+    assert.equal(canAccessRequest(client,clientDetail),true);
+    assert.equal(listClientRequests(client).some((request)=>request.id===clientRequest.id),true);
+    const otherClient = {...client,id:client.id+100,business_id:redeemed.businessId+100};
+    assert.equal(canAccessRequest(otherClient,clientDetail),false);
+    const sameBusinessOtherClient = {...client,id:client.id+101};
+    assert.equal(canAccessRequest(sameBusinessOtherClient,clientDetail),false);
+    assert.equal(listClientRequests(sameBusinessOtherClient).some((request)=>request.id===clientRequest.id),false);
+    const repeatedClientRequest = await createAuthenticatedClientRequest(client,clientForm);
+    assert.equal(repeatedClientRequest.id,clientRequest.id);
+    assert.equal(repeatedClientRequest.duplicate,true);
+
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "short" }, "ip-b", { repository, rateLimiter: allowedRate }), RequestError);
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_223456", requestText: "x".repeat(2_001) }, "ip-b2", { repository, rateLimiter: allowedRate }), RequestError);
     const deniedRate = { consume: () => ({ allowed: false, retryAfterSeconds: 300 }) };
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

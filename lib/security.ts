@@ -33,7 +33,19 @@ export async function currentRequestIdentity() {
 export function assertSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return;
-  if (origin.replace(/\/$/, "") !== appUrl()) throw new Error("Invalid request origin.");
+  let normalized: string;
+  try { normalized = new URL(origin).origin; } catch { throw new Error("Invalid request origin."); }
+  const allowed = new Set<string>();
+  for (const candidate of [request.url, appUrl(), ...(process.env.SUQPAGE_SERVER_ACTION_ORIGINS || "").split(",")]) {
+    const value = candidate.trim();
+    if (!value) continue;
+    try { allowed.add(new URL(value).origin); }
+    catch {
+      const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
+      try { allowed.add(new URL(`${scheme}://${value.replace(/\/$/, "")}`).origin); } catch {}
+    }
+  }
+  if (!allowed.has(normalized)) throw new Error("Invalid request origin.");
 }
 
 export function audit(action: string, options: { userId?: number | null; businessId?: number | null; detail?: unknown; ipHash?: string } = {}) {

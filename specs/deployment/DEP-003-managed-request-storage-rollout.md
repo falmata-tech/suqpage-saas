@@ -164,7 +164,11 @@ Filled only when `status: done` after every mapped gate passes.
 - Schema migration 2 is additive and idempotent.
 - Schema migration 3 adds a database invariant forbidding attachments on public
   interest records.
+- Schema migration 4 additively stores effective access profiles and only hashed
+  invitation tokens with lifecycle/expiry metadata; raw tokens are never
+  persisted or included in backups.
 - Sanitized request images use random keys below the persistent private media
   root, outside the public/build tree.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private
-  attachment files survive backup and restore. Role cutover remains disabled.
+  attachment files survive backup and restore. New invited clients use the
+  restrictive profile while the legacy-owner cutover remains disabled.

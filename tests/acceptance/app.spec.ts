@@ -145,6 +145,12 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.getByRole("button", { name: "Update status" }).click();
   await expect(page.getByText("Request status updated")).toBeVisible();
   await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
+  await page.getByLabel("Client email").fill("acceptance-client@example.test");
+  await page.getByLabel("Showroom handle").fill("acceptance-market");
+  await page.getByRole("button", { name: "Accept lead and create invitation" }).click();
+  await expect(page.getByText("Invitation created.")).toBeVisible();
+  const invitationUrl = await page.getByLabel("Single-use invitation link").inputValue();
+  expect(invitationUrl).toMatch(/^https:\/\/suqpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
   await page.goto("/dashboard/admin");
   await expectVisibleControlsNamed(page);
   await page.locator('input[name="name"]').fill("Acceptance Flowers");
@@ -165,6 +171,29 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
   }
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.goto(new URL(invitationUrl).pathname);
+  await expect(page.getByRole("heading", { name: "Join Acceptance Market" })).toBeVisible();
+  await page.getByLabel("Your name").fill("Acceptance Client");
+  await page.getByLabel("Password", { exact:true }).fill("InvitedClient123!");
+  await page.getByLabel("Confirm password").fill("InvitedClient123!");
+  await page.getByRole("button", { name: "Create private workspace" }).click();
+  await expect(page.getByText("Client workspace", { exact:true })).toBeVisible();
+  await expect(page.getByRole("link", { name:"Collections & categories" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name:"Business settings" })).toHaveCount(0);
+  await page.getByRole("link", { name:"Make a request" }).click();
+  await expect(page.getByRole("heading", { name:"Tell us what you need" })).toBeVisible();
+  await page.getByLabel("Your request").fill("Please use this reference to update the private showroom hero and featured collection.");
+  await page.getByLabel(/Reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
+  await page.getByRole("button", { name:"Send request to SuqPage" }).click();
+  await expect(page.getByRole("heading", { name:/REQ-/ })).toBeVisible();
+  await expect(page.locator(".request-image-grid img")).toHaveCount(1);
+  await page.goto("/dashboard/settings");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  const clientSession = (await page.context().cookies()).find((cookie) => cookie.name === "suqpage_session");
+  const origin = await page.evaluate(() => location.origin);
+  const deniedMutation = await page.request.post("/api/malikt/requests", { headers:{ Origin:origin, Cookie:`suqpage_session=${clientSession!.value}` }, data:{ businessId:5, customerName:"Denied", phone:"12345", pickupAddress:"A", deliveryAddress:"B", packageCount:1, companyIds:[1], idempotencyKey:"denied_client_123456" } });
+  expect(deniedMutation.status()).toBe(403);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { canManageBusiness, canViewBusiness, hasCapability } from "@/lib/capabilities";
 import { createDeliveryRequest, DeliveryError } from "@/lib/deliveries";
 import { getDb } from "@/lib/db";
 import { assertSameOrigin, audit, currentRequestIdentity } from "@/lib/security";
@@ -52,8 +53,10 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   const url = new URL(request.url);
   const requested = Number(url.searchParams.get("businessId") || 0);
-  const businessId = user.role === "owner" ? user.business_id : requested;
+  const businessId = hasCapability(user, "operations:manage") ? requested : user.business_id;
   if (!businessId) return NextResponse.json({ error: "businessId is required." }, { status: 400 });
+  const assigned = user.access_role === "team_member" && Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,businessId));
+  if (!canViewBusiness(user, businessId, assigned)) return NextResponse.json({ error:"Not found." }, { status:404 });
   const requests = getDb().prepare("SELECT * FROM delivery_requests WHERE business_id=? ORDER BY created_at DESC LIMIT 100").all(businessId);
   return NextResponse.json({ requests }, { headers: { "Cache-Control": "no-store" } });
 }
@@ -64,14 +67,17 @@ export async function POST(request: Request) {
     const user = await apiUser();
     if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     const body = await readBoundedJson(request);
+    const businessId = Number(body.businessId);
+    const assigned = user.access_role === "team_member" && Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,businessId));
+    if (!canManageBusiness(user, businessId, assigned)) return NextResponse.json({ error:"Not authorized." }, { status:403 });
     const result = createDeliveryRequest({
-      businessId: Number(body.businessId), inquiryId: body.inquiryId ? Number(body.inquiryId) : null,
+      businessId, inquiryId: body.inquiryId ? Number(body.inquiryId) : null,
       customerName: body.customerName, phone: body.phone, pickupAddress: body.pickupAddress,
       deliveryAddress: body.deliveryAddress, packageCount: body.packageCount, note: body.note,
       companyIds: Array.isArray(body.companyIds) ? body.companyIds : [], idempotencyKey: body.idempotencyKey,
-    }, user.business_id, user.role === "admin");
+    }, user.business_id, hasCapability(user, "operations:manage"));
     const identity = await currentRequestIdentity();
-    audit("api.delivery.created", { userId:user.id, businessId:Number(body.businessId), detail:result, ipHash:identity.ipHash });
+    audit("api.delivery.created", { userId:user.id, businessId, detail:result, ipHash:identity.ipHash });
     return NextResponse.json(result, { status: result.duplicate ? 200 : 201 });
   } catch (error) {
     if (error instanceof RequestBodyError) return NextResponse.json({ error:error.message }, { status:error.status });

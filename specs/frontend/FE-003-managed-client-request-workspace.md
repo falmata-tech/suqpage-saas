@@ -161,8 +161,8 @@ attachment contents, access tokens, or customer inquiry details.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Public interest UX and upload denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/http-smoke.mjs`, `scripts/test-requests.ts` |
-| Client tenant isolation and request history | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
-| Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/requests.spec.ts`, `scripts/test-requests.ts` |
+| Client tenant isolation and request history | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/test-requests.ts` |
+| Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/test-requests.ts` |
 | Preview approval/rejection without live drift | acceptance | `tests/acceptance/requests.spec.ts` |
 | Accessibility and mobile safety | browser | `tests/acceptance/requests.spec.ts` |
 
@@ -193,5 +193,13 @@ Filled only when `status: done` after every mapped gate passes.
   file input, upload handling, or self-sign-up path.
 - Administrators can review the original interest message and move it only
   through pre-preview review statuses.
-- Browser evidence is in `tests/acceptance/app.spec.ts`; client history,
-  assigned-team queues, manager on-behalf intake, and preview decisions remain.
+- Operators can create a displayed-once 72-hour invitation; accepted clients
+  receive a restricted workspace with request history, read-only inquiry and
+  delivery activity, preview, and account security.
+- Clients can submit bounded unstructured onboarding/change requests with up to
+  ten private sanitized images. Nested request, invitation, and request-create
+  screens include breadcrumbs and deterministic Back behavior.
+- `tests/acceptance/app.spec.ts` proves operator invitation, account redemption,
+  the restricted navigation, private image request, and direct management/API
+  denial in a production build. Assigned-team queues, manager on-behalf intake,
+  and versioned preview decisions remain.

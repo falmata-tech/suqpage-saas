@@ -5,9 +5,11 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
+import { canManageBusiness, hasCapability } from "@/lib/capabilities";
 import { createDeliveryRequest } from "@/lib/deliveries";
 import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
 import { saveUploadedImage } from "@/lib/media";
+import { isStrongPassword } from "@/lib/passwords";
 import { consumeRateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 
@@ -16,7 +18,6 @@ const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt
 const slugify = (value:string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,80) || `item-${Date.now()}`;
 const designKeys = new Set(["alhaya","usashopet","novatech","homevibe"]);
 const statuses = new Set(["active","draft","suspended"]);
-const strongPassword = (value:string) => value.length >= 12 && value.length <= 128 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /[0-9]/.test(value);
 
 function go(path:string,params:Record<string,string|number|undefined>={}): never {
   const query=new URLSearchParams();
@@ -26,7 +27,8 @@ function go(path:string,params:Record<string,string|number|undefined>={}): never
 
 async function authorizedBusinessId(requested:number) {
   const user=await requireUser();
-  if(user.role==="owner"&&user.business_id!==requested)throw new Error("Not authorized for this business.");
+  const assigned=user.access_role==="team_member"&&Boolean(getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(user.id,requested));
+  if(!canManageBusiness(user,requested,assigned))throw new Error("Not authorized for this business.");
   if(!getBusinessById(requested))throw new Error("Business not found.");
   return {businessId:requested,user};
 }
@@ -62,7 +64,7 @@ export async function changePasswordAction(formData:FormData){
   const confirm=String(formData.get("confirmPassword")||"");
   const stored=getDb().prepare("SELECT password_hash FROM users WHERE id=?").get(user.id) as any;
   if(!stored||!bcrypt.compareSync(current,stored.password_hash))go("/dashboard/account",{error:"Current password is incorrect."});
-  if(!strongPassword(password))go("/dashboard/account",{error:"Use at least 12 characters with upper-case, lower-case, and a number."});
+  if(!isStrongPassword(password))go("/dashboard/account",{error:"Use at least 12 characters with upper-case, lower-case, and a number."});
   if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?").run(bcrypt.hashSync(password,12),user.id);
   revokeAllUserSessions(user.id);
@@ -88,9 +90,9 @@ export async function updateBusinessAction(formData:FormData){
 }
 
 export async function adminCreateBusinessAction(formData:FormData){
-  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const name=text(formData,"name",100),handle=slugify(text(formData,"handle",80)),designKey=text(formData,"designKey",40),ownerName=text(formData,"ownerName",100),email=text(formData,"email",160).toLowerCase(),password=String(formData.get("temporaryPassword")||"");
-  if(!name||!handle||!designKeys.has(designKey)||!ownerName||!/^\S+@\S+\.\S+$/.test(email)||!strongPassword(password))go("/dashboard/admin",{error:"Complete every field and use a 12+ character temporary password with upper-case, lower-case, and a number."});
+  if(!name||!handle||!designKeys.has(designKey)||!ownerName||!/^\S+@\S+\.\S+$/.test(email)||!isStrongPassword(password))go("/dashboard/admin",{error:"Complete every field and use a 12+ character temporary password with upper-case, lower-case, and a number."});
   let businessId:number;
   try{
     businessId=inTransaction(()=>{
@@ -105,7 +107,7 @@ export async function adminCreateBusinessAction(formData:FormData){
 }
 
 export async function adminUpdateBusinessAction(formData:FormData){
-  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const businessId=int(formData,"businessId"),status=text(formData,"status",20),designKey=text(formData,"designKey",40);
   if(!statuses.has(status)||!designKeys.has(designKey)||!getBusinessById(businessId))go("/dashboard/admin",{error:"Invalid business settings."});
   getDb().prepare("UPDATE businesses SET status=?,design_key=? WHERE id=?").run(status,designKey,businessId);
@@ -114,10 +116,10 @@ export async function adminUpdateBusinessAction(formData:FormData){
 }
 
 export async function adminResetPasswordAction(formData:FormData){
-  const user=await requireUser();if(user.role!=="admin")throw new Error("Administrator access required.");
+  const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
-  const target=getDb().prepare("SELECT id,business_id FROM users WHERE id=? AND role='owner'").get(userId) as any;
-  if(!target||!strongPassword(password))go("/dashboard/admin",{error:"Choose an owner and use a 12+ character password with upper-case, lower-case, and a number."});
+  const target=getDb().prepare("SELECT u.id,u.business_id FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND u.role='owner' AND COALESCE(p.access_role,'legacy_owner')='legacy_owner'").get(userId) as any;
+  if(!target||!isStrongPassword(password))go("/dashboard/admin",{error:"Choose an owner and use a 12+ character password with upper-case, lower-case, and a number."});
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(bcrypt.hashSync(password,12),userId);
   revokeAllUserSessions(userId);audit("admin.owner_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
   go("/dashboard/admin",{saved:"password"});
@@ -180,6 +182,6 @@ export async function updateInquiryStatusAction(formData:FormData){const {busine
 export async function createDeliveryRequestAction(formData:FormData){
   const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));
   let result:{externalRequestId:string};
-  try{result=createDeliveryRequest({businessId,inquiryId:int(formData,"inquiryId")||null,customerName:text(formData,"customerName",80),phone:text(formData,"phone",40),pickupAddress:text(formData,"pickupAddress",300),deliveryAddress:text(formData,"deliveryAddress",300),packageCount:int(formData,"packageCount",1),note:text(formData,"note",1000),companyIds:formData.getAll("companyIds"),idempotencyKey:crypto.randomUUID()},user.business_id,user.role==="admin");}catch(error){go("/dashboard/deliveries",{business:businessId,error:error instanceof Error?error.message:"Could not create delivery request."});}
+  try{result=createDeliveryRequest({businessId,inquiryId:int(formData,"inquiryId")||null,customerName:text(formData,"customerName",80),phone:text(formData,"phone",40),pickupAddress:text(formData,"pickupAddress",300),deliveryAddress:text(formData,"deliveryAddress",300),packageCount:int(formData,"packageCount",1),note:text(formData,"note",1000),companyIds:formData.getAll("companyIds"),idempotencyKey:crypto.randomUUID()},user.business_id,hasCapability(user,"operations:manage"));}catch(error){go("/dashboard/deliveries",{business:businessId,error:error instanceof Error?error.message:"Could not create delivery request."});}
   audit("delivery.created",{userId:user.id,businessId,detail:result});revalidatePath("/dashboard/deliveries");revalidatePath("/dashboard/inquiries");go("/dashboard/deliveries",{business:businessId,created:result.externalRequestId});
 }
