@@ -590,6 +590,28 @@ A public customer does not require an account. The customer can:
 
 Staff accounts and broader role-based permissions are future work unless explicitly requested.
 
+### Planned managed-service transition — not yet implemented
+
+The accepted target in `ADR-0004`, `FE-003`, `BE-003`, and `DEP-003` replaces
+direct client catalog/settings/design administration only after the complete
+replacement workflow passes its rollout gates.
+
+- Prospects submit initial onboarding instructions and verified images without
+  an account. Accepted clients receive an invited account for a minimal request,
+  inquiry, delivery, preview, and account-security workspace.
+- Clients submit unstructured change requests but never write canonical catalog
+  or design data directly.
+- Assigned team members structure requests and prepare private revisions.
+- Operations managers may submit on behalf of clients, accept/invite prospects,
+  assign work, and publish only the exact revision the client approved.
+- Platform administrators retain explicit system authority.
+- Existing live showrooms remain unchanged until client approval and authorized
+  publication; previous published state remains recoverable.
+
+Until those specs are implemented and verified, the current administrator and
+business-owner capabilities in this document remain the description of actual
+application behavior.
+
 ---
 
 ## 14. Custom showroom integration contract

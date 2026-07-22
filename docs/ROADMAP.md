@@ -21,6 +21,18 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 
 ## Now — make the controlled pilot trustworthy
 
+### Managed client request operations
+
+- Outcome: clients submit onboarding/change requests and approve private
+  previews while assigned SuqPage staff structure content and managers control
+  onboarding and publication.
+- Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
+- Delivery order: additive intake and operations queue; revision preview and
+  approval; then permission cutover after replacement workflows pass.
+- Exit criteria: request/attachment privacy, tenant/staff isolation, mandatory
+  client approval, atomic publication/rollback, migration/restore, and all L3
+  gates pass before direct client catalog/settings/design access is removed.
+
 ### Reproducible delivery and repository hygiene
 
 - Outcome: local, CI, container, and proxy-aware production paths enforce the
