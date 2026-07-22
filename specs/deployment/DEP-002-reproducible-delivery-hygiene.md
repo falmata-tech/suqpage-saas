@@ -1,10 +1,10 @@
 ---
 id: DEP-002
 title: Reproducible delivery and repository hygiene
-status: done
+status: in_progress
 related: [DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
-last_updated: 2026-07-21
+last_updated: 2026-07-22
 change_level: L3
 ---
 
@@ -39,6 +39,8 @@ four-tenant application behavior and single-instance pilot boundary.
   CI evidence.
 - Bound or explicitly document the media-route output-file trace without
   weakening persistent media isolation.
+- Reject a production dependency graph containing a known high-severity native
+  image-processing vulnerability.
 - Define the GitHub checks a repository administrator must require before merge.
 
 ### Non-goals
@@ -79,6 +81,9 @@ four-tenant application behavior and single-instance pilot boundary.
   configuration must contain the expected host and no wildcard.
 - Type checking generates Next.js declarations first. Running development and
   production generation leaves tracked files unchanged.
+- The installed dependency graph contains one supported `sharp` version at or
+  above the first version patched for current libvips advisories; Next.js must
+  not retain a vulnerable optional nested copy.
 - Required GitHub merge checks are `core`, `browser`, and `container`; enforcing
   repository rules is an explicit administrator operation outside a code commit.
 
@@ -122,6 +127,13 @@ Scenario: Media tracing remains bounded
   WHEN a production build traces the media route
   THEN the build does not trace the whole repository unintentionally
   AND configured persistent media remains available at runtime
+
+Scenario: A new native image advisory blocks release
+  GIVEN the production dependency audit reports a high-severity sharp or libvips advisory
+  WHEN a patched sharp version is installed
+  THEN the dependency graph contains no vulnerable nested sharp copy
+  AND upload decoding and sanitization regression tests pass
+  AND the production dependency audit reports no vulnerability
 ```
 
 ## Quality impact
@@ -155,6 +167,7 @@ tokens, or environment secrets.
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
 | Generated declarations leave Git clean | contract | `scripts/test-workflow.mjs` |
 | Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
+| Native image dependency is patched without a nested vulnerable copy | security/dependency | `npm ls sharp --all`, `scripts/test-security.ts`, `npm audit --omit=dev` |
 | Existing application behavior remains intact | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -202,3 +215,25 @@ The implementation and automated evidence are complete. The `core`, `browser`,
 and `container` checks must still be enabled as required merge checks by a
 repository administrator after this branch is pushed and the workflows pass on
 GitHub; that remote rollout does not alter this code-level completion claim.
+
+On 2026-07-22, GitHub Actions run `29888487193` passed the browser and container
+jobs but returned this spec to `in_progress` after the core release audit found
+new advisory `GHSA-f88m-g3jw-g9cj` in `sharp@0.34.5`. The advisory was published
+after the preceding evidence was recorded. Completion requires a patched single
+version dependency graph and a replacement remote run with all three jobs
+passing.
+
+Local remediation evidence on 2026-07-22:
+
+- A clean `npm ci` installed one deduplicated `sharp@0.35.3` runtime with
+  libvips 8.18.3; Next.js resolved the same overridden version and no vulnerable
+  nested Sharp copy.
+- `npm audit --omit=dev` and the release production audit reported 0
+  vulnerabilities.
+- The image decode, validation, sanitization, and persistence regression passed
+  against the patched runtime through `scripts/test-security.ts`.
+- `npm run check`, `npm run release`, `npm run test:operations`, all five Node
+  22.16 browser acceptance scenarios, and `npm run test:container` passed.
+
+The replacement GitHub Actions run remains required before this spec returns to
+`done`.
