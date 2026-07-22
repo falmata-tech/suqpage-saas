@@ -1,7 +1,7 @@
 # SuqPage SaaS MVP — Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-07-21
+**Verification date:** 2026-07-22
 **Reviewed input:** the uploaded SuqPage SaaS MVP and independent launch audit
 
 ## Verdict
@@ -44,10 +44,14 @@ DEP-002 was completed from a clean tracked worktree on Node 22.16 or newer:
   trace-privacy, and cleanup assertions.
 - generated Next.js declarations remained ignored and development/type
   generation did not dirty tracked Git state.
+- after advisory `GHSA-f88m-g3jw-g9cj` was published, `sharp` was updated to
+  0.35.3 with libvips 8.18.3; the graph contains one patched Sharp version and
+  image sanitization regression tests pass.
 
-GitHub must run the committed workflow after push. A repository administrator
-must then require its `core`, `browser`, and `container` checks and block branch
-deletion and force-push before merge protection is considered active.
+GitHub Actions run `29889083549` passed its `core`, `browser`, and `container`
+jobs on the dependency-remediation commit. A repository administrator must
+still require those checks and block branch deletion and force-push before merge
+protection is considered active.
 
 ## Production HTTP evidence
 

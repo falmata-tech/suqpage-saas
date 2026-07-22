@@ -1,7 +1,7 @@
 ---
 id: DEP-002
 title: Reproducible delivery and repository hygiene
-status: in_progress
+status: done
 related: [DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
 last_updated: 2026-07-22
@@ -235,5 +235,7 @@ Local remediation evidence on 2026-07-22:
 - `npm run check`, `npm run release`, `npm run test:operations`, all five Node
   22.16 browser acceptance scenarios, and `npm run test:container` passed.
 
-The replacement GitHub Actions run remains required before this spec returns to
-`done`.
+GitHub Actions run `29889083549` then passed the `core`, `browser`, and
+`container` jobs on commit `3edb2d3`, including the release audit, operations,
+five browser scenarios, and production container. This replacement remote
+evidence returns the spec to `done`.
