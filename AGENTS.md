@@ -34,6 +34,14 @@ silently change product behavior to match convenient code.
     the task-isolation rules below.
 11. Report evidence, commit hash, limitations, mocks, and remaining rollout
     steps.
+12. After a major change is pushed and every required remote check passes,
+    compact the working context before starting unrelated work. Preserve durable
+    decisions and evidence in the controlling spec, ADR, traceability, or
+    operational document, then retain a concise handoff containing the current
+    objective, commit and workflow-run IDs, verified gates, unresolved limits,
+    running processes, and next authorized step. Do not preserve chat
+    transcripts, raw test logs, credentials, customer data, secrets, or other
+    transient noise in the repository.
 
 No implementation begins from a vague request when a material product,
 security, data, or deployment choice remains unresolved.
@@ -87,6 +95,9 @@ security, data, or deployment choice remains unresolved.
   gate. Do not repeatedly read or print large files without a reason.
 - Keep context compact: cite paths and spec IDs, summarize discoveries, and
   preserve an explicit plan and decision log.
+- Context compaction is a completion step, not a substitute for evidence. Do it
+  only after requested remote publication is confirmed and required checks are
+  terminal; never use a compact summary to claim an unverified result.
 - Never mark work complete based only on compilation or visual appearance.
 - Never weaken a check merely to make a failing gate pass. Fix the defect or
   update an incorrect contract with documented evidence.
