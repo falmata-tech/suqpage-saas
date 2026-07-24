@@ -1,7 +1,7 @@
 ---
 id: FE-008
 title: Simple client and staff product upkeep
-status: in_progress
+status: done
 related: [FE-001, FE-003, FE-007, BE-009, DEP-008, ADR-0006]
 owners: [product, frontend]
 last_updated: 2026-07-24
@@ -172,12 +172,12 @@ complete command payloads.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Client list/create/edit and live result | production browser | `tests/acceptance/product-upkeep.spec.ts` |
-| Mobile, labels, focus, preview, and Back behavior | production browser | `tests/acceptance/product-upkeep.spec.ts` |
-| Client/team/manager scope and structural denial | security/browser | `scripts/test-product-upkeep.ts`, `scripts/test-security.ts`, `tests/acceptance/product-upkeep.spec.ts` |
+| Client list/create/edit and live result | production browser | `tests/acceptance/app.spec.ts` |
+| Mobile, labels, focus, preview, and Back behavior | production browser | `tests/acceptance/app.spec.ts` |
+| Client/team/manager scope and structural denial | security/browser | `scripts/test-product-upkeep.ts`, `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 | Media replacement/removal and failure cleanup | media/security | `scripts/test-product-upkeep.ts`, `scripts/test-security.ts` |
-| Stale-version conflict and retained history | integration/browser | `scripts/test-product-upkeep.ts`, `scripts/test-revisions.ts`, `tests/acceptance/product-upkeep.spec.ts` |
-| No inventory-count UI or behavior | contract/browser | `scripts/test-stockless-catalog.ts`, `tests/acceptance/product-upkeep.spec.ts` |
+| Stale-version conflict and retained history | integration/browser | `scripts/test-product-upkeep.ts`, `scripts/test-revisions.ts`, `tests/acceptance/app.spec.ts` |
+| No inventory-count UI or behavior | contract/browser | `scripts/test-stockless-catalog.ts`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -197,7 +197,17 @@ published versions are reconciled rather than overwritten.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Filled only after implementation and every mapped gate pass. This ready spec
-does not claim that clients or staff can currently perform basic product upkeep.
+Evidence: verified locally on 2026-07-24.
+
+- `components/ProductForm.tsx`, `components/ProductUpkeepList.tsx`,
+  `app/dashboard/products/**`, `components/DashboardShell.tsx`, and
+  `app/dashboard/page.tsx` implement established-showroom routing, search,
+  live summary preview, filtered structure choices, breadcrumbs, client/staff
+  attribution, responsive cards, and protected-field omission.
+- `tests/acceptance/app.spec.ts` passed all seven production-browser journeys on
+  2026-07-24, including client, assigned team member, operations manager,
+  administrator, draft-client denial, mobile overflow, and live version results.
+- `npm run check`, `npm run release`, and `npm run test:container` passed on
+  2026-07-24.

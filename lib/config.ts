@@ -3,7 +3,9 @@ import path from "node:path";
 
 export function databasePath(){return path.resolve(/* turbopackIgnore: true */ process.env.SUQPAGE_DB_PATH||path.join(/* turbopackIgnore: true */ process.cwd(),"data","suqpage.db"))}
 export function mediaRoot(){return path.resolve(/* turbopackIgnore: true */ process.env.SUQPAGE_MEDIA_ROOT||path.join(/* turbopackIgnore: true */ process.cwd(),"data","media"))}
+export function backupRoot(){return path.resolve(/* turbopackIgnore: true */ process.env.SUQPAGE_BACKUP_ROOT||path.join(/* turbopackIgnore: true */ process.cwd(),"backups"))}
 export function requestAttachmentRoot(){return path.resolve(/* turbopackIgnore: true */ mediaRoot(),"requests")}
+export function productUpkeepEnabled(){return process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED!=="0"}
 export function ensureRuntimeDirectories(){fs.mkdirSync(path.dirname(databasePath()),{recursive:true});fs.mkdirSync(mediaRoot(),{recursive:true});fs.mkdirSync(requestAttachmentRoot(),{recursive:true})}
 export function assertProductionConfiguration(){
   if(process.env.NODE_ENV!=="production")return;

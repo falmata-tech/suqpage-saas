@@ -8,8 +8,11 @@ import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/
 import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
 import { createDeliveryRequest } from "@/lib/deliveries";
 import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
-import { saveUploadedImage } from "@/lib/media";
+import { saveUploadedImage, stageUploadedImage } from "@/lib/media";
 import { isStrongPassword } from "@/lib/passwords";
+import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
+import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
+import { sqliteProductUpkeepPort } from "@/lib/product-upkeep-sqlite";
 import { consumeRateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 
@@ -147,24 +150,63 @@ export async function deleteCategoryAction(formData:FormData){
   const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId");inTransaction(()=>{getDb().prepare("UPDATE products SET category_id=NULL WHERE business_id=? AND category_id=?").run(businessId,id);getDb().prepare("DELETE FROM categories WHERE id=? AND business_id=?").run(id,businessId);});audit("category.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
 }
 
-function replaceOptions(productId:number,formData:FormData){
-  getDb().prepare("DELETE FROM option_groups WHERE product_id=?").run(productId);const group=getDb().prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)"),value=getDb().prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)");const names=new Set<string>();
-  for(let i=1;i<=4;i++){const name=text(formData,`optionName${i}`,80),values=[...new Set(text(formData,`optionValues${i}`,1200).split(/[\n,]/).map(v=>v.trim()).filter(Boolean))].slice(0,50);if(!name&&!values.length)continue;if(!name||!values.length)throw new Error(`Option group ${i} needs a name and at least one value.`);if(names.has(name.toLowerCase()))throw new Error("Option group names must be unique.");names.add(name.toLowerCase());const groupId=Number(group.run(productId,name,i-1).lastInsertRowid);values.forEach(v=>value.run(groupId,v.slice(0,100)));}
-}
+const productFormFields = new Set([
+  "businessId",
+  "productId",
+  "kind",
+  "expectedContentVersion",
+  "idempotencyKey",
+  "name",
+  "description",
+  "availability",
+  "collectionId",
+  "categoryId",
+  "removeImage",
+  "image",
+  "serviceNote",
+]);
 
-export async function createProductAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",140),collectionId=int(formData,"collectionId")||null,categoryId=int(formData,"categoryId")||null;validateRelationship(businessId,collectionId,categoryId);
-  try{const imagePath=await saveUploadedImage(formData.get("image"),"","product");const availability=text(formData,"availability",30)||"available";const productId=inTransaction(()=>{const result=getDb().prepare("INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,?)").run(businessId,collectionId,categoryId,name,slugify(text(formData,"slug",80)||name),text(formData,"eyebrow",100),text(formData,"description",3000),imagePath,availability,formData.get("isPublished")?1:0,int(formData,"sortOrder"));const id=Number(result.lastInsertRowid);replaceOptions(id,formData);return id;});audit("product.created",{userId:user.id,businessId,detail:{productId,name}});}catch(error){go("/dashboard/products/new",{business:businessId,error:error instanceof Error?error.message:"Could not create product."});}
-  const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");go("/dashboard/products",{business:businessId,saved:"created"});
+export async function basicProductUpkeepAction(formData:FormData){
+  const user=await requireUser();
+  const businessId=int(formData,"businessId");
+  const productId=int(formData,"productId")||null;
+  const returnPath=productId?`/dashboard/products/${productId}`:"/dashboard/products/new";
+  let result:{productId:number;contentVersion:number};
+  try{
+    const unsupported=[...formData.keys()].filter(key=>!productFormFields.has(key)&&!key.startsWith("$ACTION_"));
+    if(unsupported.length)throw new ProductUpkeepError("The product form contains unsupported fields.");
+    const file=formData.get("image");
+    const hasFile=file instanceof File&&file.size>0;
+    const removeImage=Boolean(formData.get("removeImage"));
+    if(hasFile&&removeImage)throw new ProductUpkeepError("Choose either a replacement image or remove the current image.");
+    const staged=await stageUploadedImage(file,"product");
+    result=executeBasicProductUpkeep(sqliteProductUpkeepPort,user,{
+      kind:text(formData,"kind",20),
+      businessId,
+      productId,
+      expectedContentVersion:int(formData,"expectedContentVersion"),
+      idempotencyKey:text(formData,"idempotencyKey",100),
+      name:text(formData,"name",140),
+      description:text(formData,"description",3000),
+      availability:text(formData,"availability",30),
+      collectionId:int(formData,"collectionId")||null,
+      categoryId:int(formData,"categoryId")||null,
+      imageAction:hasFile?"replace":removeImage?"remove":"keep",
+      serviceNote:text(formData,"serviceNote",300),
+    },staged);
+  }catch(error){
+    go(returnPath,{
+      business:businessId||undefined,
+      error:error instanceof Error?error.message:"Could not save product.",
+    });
+  }
+  const business=getBusinessById(businessId)!;
+  revalidatePath(`/@${business.handle}`);
+  revalidatePath(`/preview/@${business.handle}`);
+  revalidatePath("/dashboard/products");
+  revalidatePath(`/dashboard/products/${result.productId}`);
+  go(`/dashboard/products/${result.productId}`,{business:businessId,saved:1,version:result.contentVersion});
 }
-
-export async function updateProductAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const productId=int(formData,"productId"),existing=getDb().prepare("SELECT * FROM products WHERE id=? AND business_id=?").get(productId,businessId) as any;if(!existing)throw new Error("Product not found.");const collectionId=int(formData,"collectionId")||null,categoryId=int(formData,"categoryId")||null;validateRelationship(businessId,collectionId,categoryId);
-  try{const imagePath=await saveUploadedImage(formData.get("image"),existing.image_path,"product"),availability=text(formData,"availability",30)||"available",name=text(formData,"name",140);inTransaction(()=>{getDb().prepare("UPDATE products SET collection_id=?,category_id=?,name=?,slug=?,eyebrow=?,description=?,image_path=?,availability=?,is_published=?,sort_order=? WHERE id=? AND business_id=?").run(collectionId,categoryId,name,slugify(text(formData,"slug",80)||name),text(formData,"eyebrow",100),text(formData,"description",3000),imagePath,availability,formData.get("isPublished")?1:0,int(formData,"sortOrder"),productId,businessId);replaceOptions(productId,formData);});audit("product.updated",{userId:user.id,businessId,detail:{productId}});}catch(error){go(`/dashboard/products/${productId}`,{business:businessId,error:error instanceof Error?error.message:"Could not update product."});}
-  const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");go(`/dashboard/products/${productId}`,{business:businessId,saved:1});
-}
-
-export async function deleteProductAction(formData:FormData){const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const productId=int(formData,"productId");getDb().prepare("DELETE FROM products WHERE id=? AND business_id=?").run(productId,businessId);audit("product.deleted",{userId:user.id,businessId,detail:{productId}});const business=getBusinessById(businessId)!;revalidatePath(`/@${business.handle}`);revalidatePath("/dashboard/products");}
 
 export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1});}
 

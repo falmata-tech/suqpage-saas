@@ -58,16 +58,16 @@ categories. Full contact values and notes must not be general log fields.
   idempotency, media, delivery isolation.
 - `scripts/http-smoke.mjs`: HTTP forged/valid/duplicate/rate-limit behavior.
 - `tests/acceptance/app.spec.ts`: browser persistence and owner visibility.
-- Evidence: security, HTTP, browser, type, build, and audit gates passed
-  2026-07-20.
+- Evidence: security, HTTP, all-role browser, type, build, migration/restore, and
+  audit gates passed 2026-07-24.
 
 ## Rollout and rollback
 
-Additive/idempotent migration only within the pilot. Back up before schema
-changes; rollback requires schema compatibility or verified database restore.
+Migrations are idempotent within the pilot. Any table rebuild requires a stopped
+single instance, a matching integrity-checked backup no older than 24 hours,
+explicit one-command approval, and adequate disk. Rollback requires schema
+compatibility or verified database/media restore.
 
-`BE-009` and `DEP-008` define a ready but unimplemented replacement for the
-current stock-dependent eligibility rule: availability remains canonical,
-requested quantity remains bounded intent, and no active inventory count
-survives the controlled cutover. Until their mapped evidence passes, the
-verified current rule above remains runtime truth.
+`BE-009` and `DEP-008` now define the implemented eligibility rule:
+availability is canonical, requested quantity is bounded intent from 1–20, and
+no active inventory count is stored or consulted.

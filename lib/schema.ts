@@ -17,7 +17,26 @@ function addColumn(db: DatabaseSync, table: string, definition: string) {
   }
 }
 
-export function migrateDatabase(db: DatabaseSync) {
+export type MigrationOptions = {
+  assertDestructiveMigrationCheckpoint?: (label: string) => void;
+};
+
+function requireDestructiveMigrationCheckpoint(
+  options: MigrationOptions,
+  label: string,
+) {
+  if (!options.assertDestructiveMigrationCheckpoint) {
+    throw new Error(
+      `${label} requires a stopped single-instance deployment, npm run backup, and the approved npm run migrate command.`,
+    );
+  }
+  options.assertDestructiveMigrationCheckpoint(label);
+}
+
+export function migrateDatabase(
+  db: DatabaseSync,
+  options: MigrationOptions = {},
+) {
   db.exec(`
     PRAGMA foreign_keys = ON;
     PRAGMA journal_mode = WAL;
@@ -269,7 +288,7 @@ export function migrateDatabase(db: DatabaseSync) {
       content_version INTEGER NOT NULL CHECK(content_version > 0),
       snapshot_json TEXT NOT NULL,
       source_revision_id INTEGER REFERENCES content_revisions(id) ON DELETE SET NULL,
-      change_kind TEXT NOT NULL CHECK(change_kind IN ('baseline','publication','rollback')),
+      change_kind TEXT NOT NULL CHECK(change_kind IN ('baseline','publication','rollback','product_upkeep')),
       actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY(business_id,content_version)
@@ -588,6 +607,12 @@ export function migrateDatabase(db: DatabaseSync) {
     .prepare("SELECT 1 FROM schema_migrations WHERE version=9")
     .get();
   if (!stocklessCutoverApplied) {
+    if (columns(db, "products").has("stock_count")) {
+      requireDestructiveMigrationCheckpoint(
+        options,
+        "Stockless catalog migration",
+      );
+    }
     db.exec("PRAGMA foreign_keys = OFF");
     try {
       db.exec("BEGIN IMMEDIATE");
@@ -688,6 +713,84 @@ export function migrateDatabase(db: DatabaseSync) {
         throw new Error("Stockless migration failed foreign-key validation.");
       }
       db.prepare("INSERT INTO schema_migrations(version) VALUES(9)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    } finally {
+      db.exec("PRAGMA foreign_keys = ON");
+    }
+  }
+
+  const productUpkeepApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=10")
+    .get();
+  if (!productUpkeepApplied) {
+    const versionTable = db
+      .prepare(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='published_catalog_versions'",
+      )
+      .get() as { sql: string } | undefined;
+    const needsHistoryRebuild = !versionTable?.sql.includes("product_upkeep");
+    if (needsHistoryRebuild) {
+      requireDestructiveMigrationCheckpoint(
+        options,
+        "Product-upkeep history migration",
+      );
+    }
+    db.exec("PRAGMA foreign_keys = OFF");
+    try {
+      db.exec("BEGIN IMMEDIATE");
+      if (needsHistoryRebuild) {
+        db.exec(`
+          CREATE TABLE published_catalog_versions_v10 (
+            business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+            content_version INTEGER NOT NULL CHECK(content_version > 0),
+            snapshot_json TEXT NOT NULL,
+            source_revision_id INTEGER REFERENCES content_revisions(id) ON DELETE SET NULL,
+            change_kind TEXT NOT NULL CHECK(change_kind IN (
+              'baseline','publication','rollback','product_upkeep'
+            )),
+            actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY(business_id,content_version)
+          );
+          INSERT INTO published_catalog_versions_v10(
+            business_id,content_version,snapshot_json,source_revision_id,
+            change_kind,actor_user_id,created_at
+          )
+          SELECT
+            business_id,content_version,snapshot_json,source_revision_id,
+            change_kind,actor_user_id,created_at
+          FROM published_catalog_versions;
+          DROP TABLE published_catalog_versions;
+          ALTER TABLE published_catalog_versions_v10
+            RENAME TO published_catalog_versions;
+        `);
+      }
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS product_upkeep_commands (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          idempotency_key TEXT NOT NULL,
+          payload_hash TEXT NOT NULL,
+          actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          result_product_id INTEGER NOT NULL,
+          result_content_version INTEGER NOT NULL,
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(business_id,idempotency_key),
+          FOREIGN KEY(business_id,result_content_version)
+            REFERENCES published_catalog_versions(business_id,content_version)
+            ON DELETE CASCADE
+        );
+      `);
+      const foreignKeyFailures = db.prepare("PRAGMA foreign_key_check").all();
+      if (foreignKeyFailures.length) {
+        throw new Error(
+          "Product-upkeep migration failed foreign-key validation.",
+        );
+      }
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(10)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

@@ -1,7 +1,7 @@
 ---
 id: DEP-008
 title: Stockless product-upkeep migration and rollout
-status: in_progress
+status: done
 related: [DEP-001, DEP-003, DEP-007, FE-008, BE-008, BE-009, ADR-0006]
 owners: [operations, security, product]
 last_updated: 2026-07-24
@@ -164,7 +164,7 @@ contacts, credentials, or backup contents.
 | No active stock contract remains | contract/security | `scripts/test-stockless-catalog.ts`, `scripts/test-security.ts` |
 | Legacy snapshot upgrade and stockless republish | revision/integration | `scripts/test-stockless-catalog.ts`, `scripts/test-revisions.ts` |
 | Availability-only inquiry behavior | HTTP/security | `scripts/http-smoke.mjs`, `scripts/test-security.ts` |
-| All product-upkeep roles and negative paths | production browser | `tests/acceptance/product-upkeep.spec.ts` |
+| All product-upkeep roles and negative paths | production browser | `tests/acceptance/app.spec.ts` |
 | Complete release admission | release/container | `npm run check`, `npm run release`, `npm run test:operations`, `npm run test:acceptance`, `npm run test:container` |
 
 ## Rollout and rollback
@@ -198,7 +198,24 @@ code.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Filled only after implementation, explicit migration approval, and every mapped
-gate pass. This ready spec does not authorize an automatic production migration.
+Evidence: verified locally on 2026-07-24.
+
+- Revision schema v3, schema migrations 9–10, setup baselines, portable
+  fixtures, inquiry logic, and active UI/contracts are stockless. The admission
+  scan allows legacy inventory names only in the bounded v1/v2 recovery reader
+  and migration fixture.
+- Existing-table rebuild tests refuse an unapproved migration, then pass only
+  with a matching recent hashed checkpoint. `npm run backup` no longer opens
+  the migrating application adapter; it verifies source/copy integrity and
+  foreign keys before recording the checkpoint.
+- `scripts/test-stockless-catalog.ts`, `scripts/test-product-upkeep.ts`,
+  `scripts/test-operations.mjs`, `npm run check`, `npm run release`,
+  `npm run test:acceptance` (7 passed), and `npm run test:container` passed on
+  2026-07-24. Production dependency audit reported zero vulnerabilities and 41
+  output traces contained no private runtime paths.
+- The four local example clients are initialized with retained schema-v3
+  baselines and the controlled test database is at migration 10. No external
+  production rollout is claimed; an older deployed database must follow the
+  stopped-instance backup/approval command in `README.md`.

@@ -4,8 +4,18 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
+import { catalogToRevisionSnapshot } from "../lib/revision-domain";
 import { migrateDatabase } from "../lib/schema";
 import { curatedManifestForLegacyDesign, type LegacyShowroomDesignKey } from "../lib/showroom-manifests";
+import type {
+  Business,
+  Catalog,
+  Category,
+  Collection,
+  OptionGroup,
+  OptionValue,
+  Product,
+} from "../lib/types";
 
 const dbPath = databasePath();
 if (process.argv.includes("--reset")) {
@@ -104,6 +114,49 @@ seedCatalog("homevibe", "Home Edit", ["Cleaning","Kitchen","Coffee","Lighting"],
   {name:"Vitamix Ascent X5",slug:"vitamix-ascent-x5",category:"Kitchen",eyebrow:"Countertop performance",description:"A high-performance blender for smoothies, soups and prep.",image:"/uploads/seed/homevibe/vitamix-ascent-x5.svg",options:[{name:"Color",values:["Brushed Stainless","Graphite"]}]},
   {name:"Philips Hue Play Gradient Lightstrip",slug:"philips-hue-gradient",category:"Lighting",eyebrow:"Ambient lighting",description:"A gradient lightstrip for immersive room lighting.",image:"/uploads/seed/homevibe/philips-hue-gradient.svg",options:[{name:"Screen size",values:["55 inch","65 inch","75 inch"]}]}
 ]);
+
+const seededGroupQuery = db.prepare(
+  "SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id",
+);
+const seededValueQuery = db.prepare(
+  "SELECT * FROM option_values WHERE option_group_id=? ORDER BY id",
+);
+const retainBaseline = db.prepare(
+  "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind) VALUES(?,1,?,'baseline')",
+);
+for (const businessId of seeded.values()) {
+  const business = db
+    .prepare("SELECT * FROM businesses WHERE id=?")
+    .get(businessId) as unknown as Business;
+  const collections = db
+    .prepare("SELECT * FROM collections WHERE business_id=? ORDER BY sort_order,name")
+    .all(businessId) as unknown as Collection[];
+  const categories = db
+    .prepare("SELECT * FROM categories WHERE business_id=? ORDER BY sort_order,name")
+    .all(businessId) as unknown as Category[];
+  const products = db
+    .prepare(
+      `SELECT p.*,c.name collection_name,cat.name category_name
+       FROM products p
+       LEFT JOIN collections c ON c.id=p.collection_id
+       LEFT JOIN categories cat ON cat.id=p.category_id
+       WHERE p.business_id=? ORDER BY p.sort_order,p.name`,
+    )
+    .all(businessId) as unknown as Product[];
+  for (const product of products) {
+    product.option_groups = (
+      seededGroupQuery.all(product.id) as unknown as OptionGroup[]
+    ).map((group) => ({
+      ...group,
+      values: seededValueQuery.all(group.id) as unknown as OptionValue[],
+    }));
+  }
+  const catalog: Catalog = { business, collections, categories, products };
+  retainBaseline.run(
+    businessId,
+    JSON.stringify(catalogToRevisionSnapshot(catalog)),
+  );
+}
 
 
 const generatedCredentials: Array<{ role:string; business:string; email:string; password:string }> = [];

@@ -19,6 +19,12 @@ node node_modules/typescript/bin/tsc --noEmit
 printf '\n=== Showroom integration validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/validate-designs.ts
 
+printf '\n=== Stockless catalog and recovery validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-stockless-catalog.ts
+
+printf '\n=== Versioned product upkeep validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-product-upkeep.ts
+
 printf '\n=== Security integration tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-security.ts
 

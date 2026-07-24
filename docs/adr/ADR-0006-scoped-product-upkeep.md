@@ -19,9 +19,9 @@ availability change frequently. Sending every small correction through the
 full request, staff revision, client approval, and manager publication cycle
 adds cost without protecting a structural or visual decision.
 
-The current product model also stores numeric stock and uses it to constrain
-inquiries. SuqPage is an inquiry showroom, not an inventory system; keeping a
-count implies operational accuracy the platform does not maintain.
+The prior product model stored numeric stock and used it to constrain inquiries.
+SuqPage is an inquiry showroom, not an inventory system; keeping a count implied
+operational accuracy the platform does not maintain.
 
 ## Decision drivers
 
@@ -81,9 +81,9 @@ Adopt option 3.
   are discarded on upgrade. Immutable historical records follow retention
   policy rather than being destructively rewritten merely to remove an obsolete
   field.
-- `FE-008`, `BE-009`, and `DEP-008` are planned behavior until their mapped
-  evidence passes. ADR-0004 continues to describe current runtime authority in
-  the meantime and remains controlling for everything outside this exception.
+- `FE-008`, `BE-009`, and `DEP-008` now carry the mapped implementation
+  evidence. ADR-0004 remains controlling for everything outside this narrow
+  exception.
 
 ## Consequences
 
@@ -110,7 +110,7 @@ Adopt option 3.
 
 ## Verification
 
-`FE-008`, `BE-009`, and `DEP-008` define UI, authorization/domain, migration,
+`FE-008`, `BE-009`, and `DEP-008` record UI, authorization/domain, migration,
 security, inquiry, media, browser, release, backup, and rollback evidence.
 `FE-003`/`BE-003` continue to prove managed requests and full publication;
 `BE-007` continues to prove exact versioning and stale conflict. The planned

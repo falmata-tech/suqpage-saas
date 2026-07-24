@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -9,10 +10,13 @@ import {
   upgradeRevisionSnapshotToV3,
 } from "../lib/revision-domain";
 import { migrateDatabase } from "../lib/schema";
+import { assertDestructiveMigrationCheckpoint } from "../lib/migration-checkpoint";
 import { curatedManifestForLegacyDesign } from "../lib/showroom-manifests";
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-stockless-"));
 const databasePath = path.join(root, "stockless.db");
+process.env.SUQPAGE_DB_PATH = databasePath;
+process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
 const db = new DatabaseSync(databasePath);
 
 const tableColumns = (table: string) =>
@@ -21,7 +25,7 @@ const tableColumns = (table: string) =>
   );
 
 try {
-  migrateDatabase(db);
+  migrateDatabase(db, { assertDestructiveMigrationCheckpoint });
   assert.equal(tableColumns("products").includes("stock_count"), false);
   assert.equal(tableColumns("option_values").includes("stock_count"), false);
 
@@ -179,7 +183,36 @@ try {
   assert.equal(tableColumns("products").includes("stock_count"), true);
   assert.equal(tableColumns("option_values").includes("stock_count"), true);
 
-  migrateDatabase(db);
+  assert.throws(
+    () => migrateDatabase(db),
+    /requires a stopped single-instance deployment/,
+  );
+  db.exec("PRAGMA wal_checkpoint(FULL)");
+  const checkpoint = path.join(
+    process.env.SUQPAGE_BACKUP_ROOT,
+    "stockless-checkpoint",
+  );
+  fs.mkdirSync(checkpoint, { recursive: true });
+  const checkpointDatabase = path.join(checkpoint, "suqpage.db");
+  fs.copyFileSync(databasePath, checkpointDatabase);
+  const databaseBytes = fs.statSync(checkpointDatabase).size;
+  const databaseSha256 = crypto
+    .createHash("sha256")
+    .update(fs.readFileSync(checkpointDatabase))
+    .digest("hex");
+  fs.writeFileSync(
+    path.join(checkpoint, "backup.json"),
+    JSON.stringify({
+      createdAt: new Date().toISOString(),
+      sourceDatabase: databasePath,
+      integrity: "ok",
+      foreignKeyFailures: 0,
+      databaseBytes,
+      databaseSha256,
+    }),
+  );
+  process.env.SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS = "1";
+  migrateDatabase(db, { assertDestructiveMigrationCheckpoint });
   assert.equal(tableColumns("products").includes("stock_count"), false);
   assert.equal(tableColumns("option_values").includes("stock_count"), false);
   assert.deepEqual(
@@ -304,6 +337,48 @@ try {
       }),
     (error: unknown) =>
       error instanceof RevisionError && /unsupported field/i.test(error.message),
+  );
+
+  const activeRoots = ["app", "components", "lib", "showroom-sdk"];
+  const legacyLines = new Map<string, RegExp[]>([
+    [
+      "lib/revision-domain.ts",
+      [
+        /schemaVersion < 3 .*\["stockCount"\]/,
+        /schemaVersion < 3 && value\.stockCount/,
+        /integer\(value\.stockCount/,
+      ],
+    ],
+    [
+      "lib/schema.ts",
+      [/columns\(db, "products"\)\.has\("stock_count"\)/],
+    ],
+  ]);
+  const inventoryPattern = /\bstock_count\b|\bstockCount\b|\bstock\s+count\b/i;
+  const violations: string[] = [];
+  const inspect = (relative: string) => {
+    const fullPath = path.join(process.cwd(), relative);
+    for (const entry of fs.readdirSync(fullPath, { withFileTypes: true })) {
+      const child = path.posix.join(relative, entry.name);
+      if (entry.isDirectory()) inspect(child);
+      else if (/\.(?:ts|tsx|json)$/.test(entry.name)) {
+        fs.readFileSync(path.join(process.cwd(), child), "utf8")
+          .split("\n")
+          .forEach((line, index) => {
+            if (!inventoryPattern.test(line)) return;
+            const allowed = legacyLines
+              .get(child)
+              ?.some((pattern) => pattern.test(line));
+            if (!allowed) violations.push(`${child}:${index + 1}`);
+          });
+      }
+    }
+  };
+  activeRoots.forEach(inspect);
+  assert.deepEqual(
+    violations,
+    [],
+    `Active stock contracts remain: ${violations.join(", ")}`,
   );
 
   console.log(

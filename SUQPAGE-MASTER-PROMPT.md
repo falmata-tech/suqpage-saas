@@ -16,7 +16,7 @@ Do not treat SuqPage as a generic website builder or a conventional ecommerce pl
 
 The central principle is:
 
-> **SuqPage controls the smart catalog, inquiry, customer-capture, inventory, and delivery workflows. Each client showroom controls its own visual experience.**
+> **SuqPage controls the smart catalog, availability, inquiry, customer-capture, and delivery workflows. Each client showroom controls its own visual experience.**
 
 When a user gives an explicit instruction that conflicts with an older preference in this file, follow the newest explicit instruction, but preserve security, tenant isolation, and data integrity.
 
@@ -314,7 +314,6 @@ Business
         └── Product
             ├── Images
             ├── Availability
-            ├── Stock count
             └── Up to four option groups
                 └── Option values
 ```
@@ -341,11 +340,12 @@ Rules:
 3. Option values are merchant-entered data.
 4. Product names, brands, colors, sizes, model numbers, specifications, and option values must not be automatically translated.
 5. Interface labels may be translated.
-6. Do not claim exact variant-combination inventory unless a true variant matrix has been implemented.
-7. The current controlled MVP primarily uses product-level stock and availability.
-8. Availability must be internally consistent with stock.
-9. Unavailable or coming-soon products must not be treated as normally purchasable or inquiry-ready unless the UI explicitly supports a waitlist-style inquiry.
-10. Customer-requested quantity must be validated against limits and available stock.
+6. Do not claim, store, or imply exact product or variant inventory.
+7. Descriptive availability is the only current product-status authority.
+8. Unavailable or coming-soon products are not inquiry-ready unless a future
+   waitlist-style workflow explicitly supports them.
+9. Customer-requested quantity is bounded inquiry intent from 1 through 20. It
+   is not compared with, reserved from, or deducted from inventory.
 
 Supported availability states:
 
@@ -356,13 +356,10 @@ unavailable
 coming_soon
 ```
 
-The statements above describe the currently implemented stock-dependent MVP.
-`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` define the ready planned cutover
-to an availability-only product model. After that cutover, no active product,
-option, UI, recipe, snapshot writer, database table, or inquiry decision carries
-an inventory count. Customer quantity remains bounded inquiry intent and is not
-compared with or deducted from stock. Historical v1/v2 stock fields remain only
-as ignored recovery input until their normal retention ends.
+This availability-only model is current verified behavior. No active product,
+option, UI, snapshot writer, database table, or inquiry decision carries an
+inventory count. Historical v1/v2 stock fields are accepted only as ignored
+recovery input and are discarded when upgraded to revision schema v3.
 
 ---
 
@@ -607,28 +604,22 @@ A client has a minimal workspace bound to one business. The client can:
 - see their own request history;
 - review an exact private showroom revision and approve or reject it;
 - view customer inquiries and delivery activity without mutating them;
+- after first publication, use **My products** to create products and maintain
+  their name, description, primary image, descriptive availability, and
+  compatible existing collection/category placement;
 - view their showroom and manage their account password.
 
-Clients cannot directly edit business settings, design, collections, products,
-options, stock, or publication state. They cannot update inquiry status or
-create deliveries.
-
-This is current runtime behavior. The ready planned exception under `FE-008`,
-`BE-009`, `DEP-008`, and `ADR-0006` adds **My products** after a client's first
-showroom is published. A client may create a product or edit its name,
-description, one primary managed image, descriptive availability, and assignment
-to compatible collections/categories that already belong to that business.
-They still cannot create or restructure collections/categories, edit options or
-ordering, delete/unpublish structurally, change settings/design/page content,
-access the AI studio, or publish a complete showroom revision.
+Clients cannot directly edit business settings, design, collections, categories,
+options, ordering, slugs, structural publication state, or complete showroom
+revisions. They cannot delete/unpublish products structurally, update inquiry
+status, or create deliveries.
 
 Assigned team members receive that same narrow product-upkeep authority for
 assigned businesses so SuqPage can provide extra customer service. Operations
 managers and administrators can perform it within their explicit scope. Each
 basic update publishes a retained new content version with actor attribution
 and stale-version protection; full structural and visual work continues through
-private revision, exact client approval, and manager publication. This exception
-is planned and is not available until its mapped evidence passes.
+private revision, exact client approval, and manager publication.
 
 ### Operations manager and team member
 
@@ -679,8 +670,11 @@ Current verified behavior:
   with the restricted client access profile and cannot be replayed.
 - Invited clients have a minimal private workspace for requests, read-only
   customer inquiries, read-only delivery activity, showroom preview, and
-  account security. Catalog, product, business-setting, design, delivery-create,
-  and inquiry-status mutations are hidden and denied on the server.
+  account security. Before first publication, product upkeep is hidden and a
+  deep link returns to the first-showroom request. After publication, only the
+  bounded **My products** fields are available; structural catalog,
+  business-setting, design, delivery-create, and inquiry-status mutations remain
+  hidden and denied on the server.
 - Authenticated clients can submit a 10–10,000 character instruction with up to
   ten private sanitized JPEG, PNG, or WebP references of at most 5 MB each.
   The server derives first-showroom versus change request from retained
@@ -694,10 +688,12 @@ Current verified behavior:
   assign or reassign work. They can also update inquiry status and create
   delivery requests. On-behalf request type is server-derived for existing
   clients, and private images use the client upload contract.
-- Team members see only assigned requests and the associated read-only business
-  and live-showroom context. Assignment changes add or remove that scope
-  atomically. Team members cannot invite clients, submit on behalf, assign work,
-  or use the current live catalog, settings, design, inquiry, or delivery forms.
+- Team members see only assigned requests and associated business/showroom
+  context. Assignment changes add or remove that scope atomically. For an
+  established assigned showroom they may perform the same bounded product
+  upkeep with a required customer-service note. They cannot invite clients,
+  submit on behalf, assign work, restructure the catalog, or use settings,
+  design, inquiry-status, or delivery-create forms.
 - Platform administrators, operations managers, and team members can open the
   staff-only component laboratory. It uses synthetic fixture content, exposes no
   tenant/customer data, and has no revision, AI-provider, or publication action.
@@ -765,7 +761,6 @@ SuqPage owns:
 - products;
 - option groups;
 - availability;
-- stock;
 - inquiry state;
 - inquiry persistence;
 - social routing;
@@ -1162,7 +1157,8 @@ When adding a new client:
    with any private references.
 5. Assign an individual team member and resolve clarifications in the request
    thread.
-6. Prepare settings, contacts, catalog, options, stock, images, and design
+6. Prepare settings, contacts, catalog, options, descriptive availability,
+   images, and design
    choices inside a bounded private revision.
 7. Test the exact private preview, inquiry behavior, social routing, tenant
    isolation, and mobile layout.
@@ -1172,27 +1168,22 @@ When adding a new client:
 10. Retain the prior version for auditable rollback and use operations tools for
     later inquiry and delivery activity.
 
-The checklist above describes the current stock-dependent revision workflow.
-After the planned stockless cutover, step 6 uses descriptive availability and
-contains no inventory count.
-
 ### Client workflow
 
-The client writes requests and responds to SuqPage rather than editing catalog
-forms. The client can follow requests, clarification, inquiries, deliveries,
-private previews, approvals, and account security. A request for a business with
-no retained publication is a first-showroom request; after publication it is a
-change request. The server decides this classification.
+The client uses requests for first-showroom, structural, option, setting, and
+visual-design work. The client can follow requests, clarification, inquiries,
+deliveries, private previews, approvals, and account security. A request for a
+business with no retained publication is a first-showroom request; after
+publication it is a change request. The server decides this classification.
 
-The ready next client exception is intentionally narrow. After first
-publication, **My products** lets the client create a product or maintain its
+After first publication, **My products** lets the client create a product or maintain its
 name, description, primary managed image, availability, and assignment to
 existing compatible collection/category choices. The same bounded workflow is
 available to assigned team members acting for the client with staff attribution.
 It publishes a retained new content version and makes older-base staff work
 stale. It does not expose structure creation, options, ordering, deletion,
 design, settings, page content, recipe tools, or complete-showroom publication.
-`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` remain planned until verified.
+`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` control this verified exception.
 
 ### Current composition assembly and planned AI import
 
@@ -1251,10 +1242,11 @@ Required verification areas:
 - administrator, client, operations-manager, and assigned-team permissions;
 - cross-tenant denial;
 - active/draft/suspended visibility;
-- revision-based product, settings, design, option, stock, and image changes;
+- revision-based settings, design, option, structure, and image changes;
+- versioned basic product upkeep for every authorized role;
 - collection/category integrity;
 - option validation;
-- stock and availability behavior;
+- availability-only inquiry behavior and absence of active inventory counts;
 - image upload validation and serving;
 - public inquiry submission;
 - idempotency;

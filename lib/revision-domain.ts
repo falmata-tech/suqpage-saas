@@ -442,11 +442,15 @@ export function upgradeRevisionSnapshotToV2(
 ): RevisionSnapshotV2 {
   const snapshot = parseRevisionSnapshot(snapshotInput);
   if (snapshot.schemaVersion === 2) return snapshot;
+  const designManifest =
+    snapshot.schemaVersion === 3
+      ? snapshot.designManifest
+      : resolveDesignManifest(snapshot.business.designKey);
   return parseRevisionSnapshot({
     ...snapshot,
     schemaVersion: 2,
     business: { ...snapshot.business, designKey: "composition" },
-    designManifest: resolveDesignManifest(snapshot.business.designKey),
+    designManifest,
   }) as RevisionSnapshotV2;
 }
 

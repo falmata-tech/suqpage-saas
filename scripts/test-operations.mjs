@@ -80,6 +80,7 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses WHERE design_key='composition' AND design_manifest_json!=''").get().count,preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=8").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=9").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=10").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('products') WHERE name='stock_count'").get().count,0);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('option_values') WHERE name='stock_count'").get().count,0);
   assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);
@@ -99,7 +100,8 @@ try {
   const designManifest = JSON.parse(db.prepare("SELECT design_manifest_json FROM businesses WHERE id=?").get(owner.business_id).design_manifest_json);
   const revisionSnapshot = JSON.stringify({ schemaVersion:2, business:{name:"Backup Business",designKey:"composition",tagline:"",description:"",logoRef:"",heroTitle:"Backup preview",heroSubtitle:"",heroImageRef:"",contactEmail:"",whatsapp:"",telegram:"",tiktok:"",siteTitle:"Backup Business",siteDescription:"",faviconRef:""}, designManifest, collections:[], categories:[], products:[] });
   const revisionId = Number(db.prepare("INSERT INTO content_revisions(request_id,business_id,revision_number,base_content_version,status,snapshot_json,summary,created_by_user_id,submitted_at) VALUES(?,?,1,1,'awaiting_review',?,'Backup revision',?,CURRENT_TIMESTAMP)").run(requestId,owner.business_id,revisionSnapshot,owner.id).lastInsertRowid);
-  db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,source_revision_id,change_kind,actor_user_id) VALUES(?,1,?,?,'baseline',?)").run(owner.business_id,revisionSnapshot,revisionId,owner.id);
+  db.prepare("UPDATE published_catalog_versions SET source_revision_id=?,actor_user_id=? WHERE business_id=? AND content_version=1").run(revisionId,owner.id,owner.business_id);
+  const retainedVersionCount = db.prepare("SELECT COUNT(*) count FROM published_catalog_versions").get().count;
   db.close();
   run("scripts/backup.ts");
   const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));
@@ -120,7 +122,7 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM request_attachments").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM published_catalog_versions").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM published_catalog_versions").get().count, retainedVersionCount);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM client_invitations WHERE request_id IS NULL AND token_hash='backup-invitation-hash'").get().count, 1);
   db.close();
   assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");

@@ -1,9 +1,72 @@
 import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
-import { deleteProductAction } from "@/app/actions";
+import ProductUpkeepList from "@/components/ProductUpkeepList";
 import { requireUser } from "@/lib/auth";
-import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
+import { resolveProductBusiness } from "@/lib/dashboard";
 import { getCatalogByBusinessId } from "@/lib/db";
 
-export const dynamic="force-dynamic";
-export default async function ProductsPage({searchParams}:{searchParams:Promise<{business?:string;saved?:string;error?:string}>}){const user=await requireUser();const p=await searchParams;const business=resolveBusiness(user,p.business);if(!business)return null;const catalog=getCatalogByBusinessId(business.id,true)!;return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><h1>Products</h1><p>Names and merchant-entered values remain exactly as entered.</p></div><Link className="btn brand" href={`/dashboard/products/new?business=${business.id}`}>Add product</Link></div>{p.saved&&<p className="notice">Product saved and the showroom cache was refreshed.</p>}{p.error&&<p className="error">{p.error}</p>}<section className="panel"><div className="table-wrap"><table className="data-table"><thead><tr><th>Product</th><th>Category</th><th>Availability</th><th>Published</th><th></th></tr></thead><tbody>{catalog.products.map(product=><tr key={product.id}><td><div style={{display:"flex",gap:12,alignItems:"center"}}>{product.image_path?<img src={product.image_path} alt="" style={{width:58,height:58,objectFit:"cover",borderRadius:10,border:"1px solid var(--line)"}}/>:null}<div><strong>{product.name}</strong><br/><small>{product.option_groups?.length||0} option groups</small></div></div></td><td>{product.category_name||"—"}</td><td><span className={`badge ${product.availability}`}>{product.availability.replace("_"," ")}</span></td><td>{product.is_published?"Yes":"No"}</td><td><div className="inline-actions"><Link className="small-btn" href={`/dashboard/products/${product.id}?business=${business.id}`}>Edit</Link><form action={deleteProductAction}><input type="hidden" name="businessId" value={business.id}/><input type="hidden" name="productId" value={product.id}/><button className="small-btn danger">Delete</button></form></div></td></tr>)}</tbody></table></div></section></DashboardShell>}
+export const dynamic = "force-dynamic";
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    business?: string;
+    saved?: string;
+    error?: string;
+  }>;
+}) {
+  const user = await requireUser();
+  const query = await searchParams;
+  const business = resolveProductBusiness(user, query.business);
+  if (!business) return null;
+  const catalog = getCatalogByBusinessId(business.id, true)!;
+  return (
+    <DashboardShell user={user} business={business}>
+      <div className="navigation-trail">
+        <nav aria-label="Breadcrumb">
+          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+          <span aria-hidden="true">/</span>
+          <span>My products</span>
+        </nav>
+      </div>
+      <div className="dashboard-head">
+        <div>
+          <p className="eyebrow">Simple product upkeep</p>
+          <h1>My products</h1>
+          <p>
+            Keep names, descriptions, images, availability, and placement
+            current without opening the showroom design system.
+          </p>
+        </div>
+        <Link
+          className="btn brand"
+          href={`/dashboard/products/new?business=${business.id}`}
+        >
+          Add product
+        </Link>
+      </div>
+      {query.saved ? (
+        <p className="notice">Product published in a retained showroom version.</p>
+      ) : null}
+      {query.error ? <p className="error">{query.error}</p> : null}
+      {catalog.products.length ? (
+        <ProductUpkeepList
+          products={catalog.products}
+          businessId={business.id}
+        />
+      ) : (
+        <section className="empty-state">
+          <h2>No products yet</h2>
+          <p>Add the first product to this established showroom.</p>
+          <Link
+            className="btn brand"
+            href={`/dashboard/products/new?business=${business.id}`}
+          >
+            Add first product
+          </Link>
+        </section>
+      )}
+    </DashboardShell>
+  );
+}

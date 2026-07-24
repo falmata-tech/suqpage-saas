@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/app/actions";
 import { hasCapability, isClient } from "@/lib/capabilities";
+import { hasRetainedPublication } from "@/lib/db";
 import type { Business, SessionUser } from "@/lib/types";
 
 export default function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
@@ -9,12 +10,18 @@ export default function DashboardShell({ user, business, children }: { user:Sess
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
+  const established = business
+    ? hasRetainedPublication(business.id)
+    : false;
   return <div className="dashboard">
     <aside className="sidebar">
       <Link className="brand" href={`/dashboard${query}`}>◆ SuqPage</Link>
       <div className="sidebar-identity">{user.name}<br/>{business ? business.name : platformAdmin ? "Platform administration" : operations ? "Operations workspace" : teamMember ? "Assigned work" : "Private workspace"}</div>
       <nav className="side-nav" aria-label="Dashboard">
         <Link href={`/dashboard${query}`}>Overview</Link>
+        {business && established && hasCapability(user, "basic-product:maintain") ? (
+          <Link href={`/dashboard/products${query}`}>My products</Link>
+        ) : null}
         {client && business ? <>
           <Link href="/dashboard/requests">Requests</Link>
           <Link href={`/dashboard/inquiries${query}`}>Customer inquiries</Link>

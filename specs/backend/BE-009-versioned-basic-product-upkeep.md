@@ -1,7 +1,7 @@
 ---
 id: BE-009
 title: Tenant-scoped versioned product upkeep
-status: in_progress
+status: done
 related: [BE-001, BE-003, BE-007, BE-008, FE-007, FE-008, DEP-008, ADR-0006]
 owners: [product, backend, security]
 last_updated: 2026-07-24
@@ -184,7 +184,7 @@ snapshots, client contacts, or credentials.
 | Image staging/replacement/removal and retained references | media/security | `scripts/test-product-upkeep.ts`, `scripts/test-security.ts` |
 | Stockless active contracts and legacy snapshot upgrade | contract/migration | `scripts/test-stockless-catalog.ts`, `scripts/test-operations.mjs` |
 | Availability-only inquiry eligibility | API/security | `scripts/test-stockless-catalog.ts`, `scripts/http-smoke.mjs`, `scripts/test-security.ts` |
-| Complete role workflow | production browser | `tests/acceptance/product-upkeep.spec.ts` |
+| Complete role workflow | production browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -205,8 +205,20 @@ restore and are never silently overwritten.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Filled only after implementation and every mapped gate pass. This ready spec
-does not claim that the active catalog is stockless or that basic product
-mutation is currently authorized.
+Evidence: verified locally on 2026-07-24.
+
+- `lib/product-upkeep-domain.ts`, `lib/product-upkeep.ts`,
+  `lib/product-upkeep-sqlite.ts`, `lib/capabilities.ts`, `lib/media.ts`,
+  `app/actions.ts`, and schema migration 10 implement the pure use-case port,
+  strict command allowlist, role/assignment scope, compatible structure reload,
+  managed image staging, idempotency, optimistic version conflict, exact
+  one-product mutation, retained publication, audit, and emergency disable
+  control.
+- `scripts/test-product-upkeep.ts` passed client/team/manager/admin scope,
+  cross-tenant and unsupported structure denial, protected-field preservation,
+  stale/idempotency behavior, image cleanup/retention, migration-10 rebuild, and
+  disable-control evidence on 2026-07-24.
+- `scripts/test-security.ts`, `scripts/test-revisions.ts`, the seven Playwright
+  journeys, `npm run check`, and `npm run release` passed on 2026-07-24.

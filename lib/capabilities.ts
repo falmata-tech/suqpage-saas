@@ -4,14 +4,15 @@ export type Capability =
   | "platform:admin"
   | "operations:manage"
   | "customer-operations:manage"
+  | "basic-product:maintain"
   | "client:workspace"
   | "design-bank:view";
 
 const grants: Record<AccessRole, ReadonlySet<Capability>> = {
-  platform_admin: new Set(["platform:admin", "operations:manage", "customer-operations:manage", "design-bank:view"]),
-  operations_manager: new Set(["operations:manage", "customer-operations:manage", "design-bank:view"]),
-  team_member: new Set(["design-bank:view"]),
-  client: new Set(["client:workspace"]),
+  platform_admin: new Set(["platform:admin", "operations:manage", "customer-operations:manage", "basic-product:maintain", "design-bank:view"]),
+  operations_manager: new Set(["operations:manage", "customer-operations:manage", "basic-product:maintain", "design-bank:view"]),
+  team_member: new Set(["basic-product:maintain", "design-bank:view"]),
+  client: new Set(["basic-product:maintain", "client:workspace"]),
 };
 
 export function hasCapability(user: SessionUser, capability: Capability) {
@@ -27,6 +28,20 @@ export function canViewBusiness(user: SessionUser, businessId: number, assigned 
 export function canManageBusiness(user: SessionUser, businessId: number, _assigned = false) {
   void user; void businessId;
   return false;
+}
+
+export function canMaintainBasicProducts(
+  user: SessionUser,
+  businessId: number,
+  assigned = false,
+) {
+  if (!hasCapability(user, "basic-product:maintain") || businessId < 1) return false;
+  if (user.access_role === "client") return user.business_id === businessId;
+  if (user.access_role === "team_member") return assigned;
+  return (
+    user.access_role === "operations_manager" ||
+    user.access_role === "platform_admin"
+  );
 }
 
 export function canOperateBusiness(user: SessionUser, businessId: number) {

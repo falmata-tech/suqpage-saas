@@ -53,6 +53,16 @@ export function getBusinessById(id: number): Business | undefined {
   return found ? row<Business>(found) : undefined;
 }
 
+export function hasRetainedPublication(businessId: number) {
+  return Boolean(
+    getDb()
+      .prepare(
+        "SELECT 1 FROM published_catalog_versions WHERE business_id=? LIMIT 1",
+      )
+      .get(businessId),
+  );
+}
+
 export function getAllBusinesses(): Business[] {
   return rows<Business>(getDb().prepare("SELECT * FROM businesses ORDER BY name").all());
 }

@@ -8,6 +8,11 @@ export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGE_PIXELS = 20_000_000;
 export type VerifiedImage = { ext: "jpg" | "png" | "webp"; mime: "image/jpeg" | "image/png" | "image/webp"; width?: number; height?: number };
 export type PreparedImage = { buffer: Buffer; ext: VerifiedImage["ext"]; mime: VerifiedImage["mime"]; width: number; height: number };
+export type StagedImage = {
+  imageRef: string;
+  digest: string;
+  discard: () => void;
+};
 
 function jpegDimensions(buffer: Buffer) {
   let offset = 2;
@@ -83,12 +88,26 @@ export async function prepareUploadedImage(buffer: Buffer, claimedType: string):
 
 export async function saveUploadedImage(file: FormDataEntryValue | null, existing = "", prefix = "product") {
   if (!(file instanceof File) || file.size === 0) return existing;
+  const staged = await stageUploadedImage(file, prefix);
+  return staged!.imageRef;
+}
+
+export async function stageUploadedImage(
+  file: FormDataEntryValue | null,
+  prefix = "product",
+): Promise<StagedImage | null> {
+  if (!(file instanceof File) || file.size === 0) return null;
   const buffer = Buffer.from(await file.arrayBuffer());
   const prepared = await prepareUploadedImage(buffer, file.type);
   fs.mkdirSync(mediaRoot(), { recursive: true });
   const filename = `${prefix}-${crypto.randomUUID()}.${prepared.ext}`;
-  fs.writeFileSync(path.join(mediaRoot(), filename), prepared.buffer, { flag: "wx", mode: 0o640 });
-  return `/media/${filename}`;
+  const fullPath = path.join(mediaRoot(), filename);
+  fs.writeFileSync(fullPath, prepared.buffer, { flag: "wx", mode: 0o640 });
+  return {
+    imageRef: `/media/${filename}`,
+    digest: crypto.createHash("sha256").update(prepared.buffer).digest("hex"),
+    discard: () => fs.rmSync(fullPath, { force: true }),
+  };
 }
 
 export function resolveMediaFile(filename: string) {
