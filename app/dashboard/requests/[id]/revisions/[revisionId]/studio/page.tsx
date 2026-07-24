@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { getBusinessById } from "@/lib/db";
 import { buildShowroomRecipeBrief } from "@/lib/showroom-recipe-service";
 import { ShowroomRecipeError } from "@/lib/showroom-recipe-domain";
+import { recipeStudioEnabled } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,9 @@ export default async function RecipeStudioPage({
   const query = await searchParams;
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
+  if (!recipeStudioEnabled()) {
+    redirect(`/dashboard/requests/${requestId}/revisions/${revisionId}/edit`);
+  }
   let data: ReturnType<typeof buildShowroomRecipeBrief>;
   try {
     data = buildShowroomRecipeBrief(user, revisionId);

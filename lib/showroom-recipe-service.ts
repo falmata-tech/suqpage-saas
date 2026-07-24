@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { recipeStudioEnabled } from "./config";
 import { canAccessRequest, getRequestDetail } from "./request-sqlite";
 import {
   getBusinessById,
@@ -38,6 +39,12 @@ const opaque = (prefix: string, requestId: number, value: string) =>
     .slice(0, 20)}`;
 
 function workspace(user: SessionUser, revisionId: number) {
+  if (!recipeStudioEnabled()) {
+    throw new ShowroomRecipeError(
+      [{ category: "tenant_asset", path: "$", message: "Recipe studio is temporarily unavailable." }],
+      404,
+    );
+  }
   const revision = getContentRevision(revisionId);
   if (!revision) {
     throw new ShowroomRecipeError(

@@ -118,6 +118,8 @@ NOTIFICATION_FROM_EMAIL=SuqPage <notifications@suqpage.com>
 Production startup refuses non-HTTPS app URLs and non-persistent database/media configuration.
 Set `SUQPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
 basic product writes while leaving requests and showrooms available.
+Set `SUQPAGE_RECIPE_STUDIO_ENABLED=0` to deny recipe export/import and route
+new or existing private drafts through the retained administrative editor.
 
 ## New production installation
 

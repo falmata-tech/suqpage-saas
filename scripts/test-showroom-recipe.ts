@@ -5,6 +5,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 async function main() {
+  process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-recipe-"));
   process.env.SUQPAGE_DB_PATH = path.join(root, "recipe.db");
   process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
@@ -175,6 +176,13 @@ async function main() {
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
+    process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "0";
+    assert.throws(
+      () => buildShowroomRecipeBrief(manager, draft.id),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError && error.status === 404,
+    );
+    process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
     assert.equal(
       db.prepare("SELECT COUNT(*) count FROM content_revisions").get()?.count,
       1,

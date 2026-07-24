@@ -202,6 +202,8 @@ approved restore; it is never silently overwritten.
 Implementation checkpoint: additive recipe metadata/media migrations, release
 gate admission, private staff studio routes, verified-image persistence,
 backup/restore row coverage, and the manual import boundary are implemented.
+`SUQPAGE_RECIPE_STUDIO_ENABLED=0` denies the recipe application boundary and
+returns new staff drafts to the retained administrative editor.
 The standard check, production release, 7/7 browser acceptance, container
 privacy/build, and operations restore gates pass for this checkpoint.
 Controlled provider/CSP work remains open. This ready spec does not authorize a
