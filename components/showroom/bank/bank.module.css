@@ -1244,6 +1244,285 @@
   border: 1px solid var(--bank-accent-soft);
 }
 
+/* Bank 1.2 candidate: bounded art direction, with no new runtime dependency. */
+.section[data-reveal="soft-clip"] {
+  animation-name: bank-soft-clip;
+}
+
+.section[data-reveal="staggered"] > * {
+  animation: bank-item-rise var(--bank-motion-duration) var(--bank-motion-ease) both;
+}
+
+.section[data-reveal="staggered"] > :nth-child(2) {
+  animation-delay: 90ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section[data-interaction="edge-trace"] button:hover,
+  .section[data-interaction="edge-trace"] .productCard:hover {
+    border-color: var(--bank-accent);
+    box-shadow: inset 0 0 0 1px var(--bank-accent);
+  }
+
+  .section[data-interaction="tactile-press"] button:hover,
+  .section[data-interaction="tactile-press"] .productCard:hover {
+    transform: translateY(-3px) rotate(-0.35deg);
+    box-shadow: 7px 8px 0 color-mix(in srgb, var(--bank-accent) 25%, transparent);
+  }
+}
+
+.header[data-variant="floating-capsule"] {
+  margin: 12px;
+  border: 1px solid color-mix(in srgb, var(--bank-line) 75%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--bank-ink) 12%, transparent);
+}
+
+.header[data-variant="technical-marquee"] {
+  border-block: 2px solid var(--bank-ink);
+  background:
+    linear-gradient(90deg, transparent 49.8%, var(--bank-line) 50%, transparent 50.2%),
+    var(--bank-surface);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.hero[data-variant="beauty-orbit"] {
+  background:
+    radial-gradient(circle at 18% 24%, var(--bank-accent-soft), transparent 34%),
+    var(--bank-bg);
+}
+
+.hero[data-variant="beauty-orbit"] .heroVisual {
+  margin: clamp(18px, 4vw, 44px);
+  border: 1px solid var(--bank-line);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 16px color-mix(in srgb, var(--bank-surface) 58%, transparent),
+    0 28px 70px color-mix(in srgb, var(--bank-accent) 24%, transparent);
+}
+
+.hero[data-variant="textile-swatch"] .heroVisual {
+  margin: 24px;
+  transform: rotate(1.4deg);
+  border: 10px solid var(--bank-surface);
+  border-radius: 2px;
+  box-shadow:
+    -18px 18px 0 var(--bank-accent-soft),
+    12px -12px 0 color-mix(in srgb, var(--bank-accent) 35%, transparent);
+}
+
+.hero[data-variant="textile-swatch"] .heroTexture {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 8px, color-mix(in srgb, var(--bank-line) 80%, transparent) 9px 10px),
+    linear-gradient(145deg, var(--bank-accent-soft), var(--bank-surface));
+}
+
+.hero[data-variant="technology-cinematic"] {
+  border-block: 1px solid var(--bank-line);
+  background:
+    linear-gradient(125deg, color-mix(in srgb, var(--bank-accent) 14%, transparent), transparent 38%),
+    var(--bank-bg);
+}
+
+.hero[data-variant="technology-cinematic"] .heroVisual {
+  margin: 18px;
+  clip-path: polygon(9% 0, 100% 0, 100% 88%, 91% 100%, 0 100%, 0 12%);
+}
+
+.hero[data-variant="technology-cinematic"] .heroCopy h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: -0.065em;
+}
+
+.hero[data-variant="room-scene"] {
+  grid-template-columns: 0.7fr 1.3fr;
+}
+
+.hero[data-variant="room-scene"] .heroVisual {
+  margin: 16px 16px 16px 0;
+  border-radius: 48% 48% 4px 4px;
+  box-shadow: inset 0 -36px 0 color-mix(in srgb, var(--bank-ink) 8%, transparent);
+}
+
+.hero[data-variant="ingredient-monograph"] .heroVisual {
+  margin: 28px;
+  border-radius: 50% 50% 8px 8px;
+}
+
+.hero[data-variant="ingredient-monograph"] .heroCopy::after {
+  width: 64px;
+  margin-top: 26px;
+  border-top: 1px solid var(--bank-accent);
+  color: var(--bank-muted);
+  font-size: 0.65rem;
+  content: "ORIGIN · MATERIAL · PROCESS";
+}
+
+.navigation[data-variant="visual-chapters"] .categoryNav button {
+  min-width: 150px;
+  flex: 1 0 150px;
+  border-radius: 0 28px 0 0;
+  padding: 18px 14px;
+  background: var(--bank-surface);
+}
+
+.navigation[data-variant="material-index"] .categoryNav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.navigation[data-variant="material-index"] .categoryNav button {
+  justify-content: space-between;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.content[data-variant="lookbook-chapter"] {
+  min-height: 390px;
+  align-items: end;
+  background:
+    linear-gradient(110deg, transparent 55%, var(--bank-accent-soft) 55%),
+    var(--bank-bg);
+}
+
+.content[data-variant="lookbook-chapter"] .contentHeading h2 {
+  font-size: clamp(2.4rem, 7vw, 5rem);
+}
+
+.content[data-variant="exploded-feature"] .contentBody li,
+.trust[data-variant="specification-matrix"] .trustGrid article {
+  border: 1px solid var(--bank-line);
+  border-radius: 2px;
+  padding: 14px;
+  background: var(--bank-surface);
+}
+
+.content[data-variant="ritual-steps"] {
+  grid-template-columns: 1fr;
+}
+
+.content[data-variant="ritual-steps"] .contentBody ol {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.content[data-variant="ritual-steps"] .contentBody li {
+  display: block;
+  border-top: 0;
+  border-radius: 50% 50% var(--bank-radius) var(--bank-radius);
+  padding: 30px 16px 18px;
+  background: var(--bank-accent-soft);
+}
+
+.content[data-variant="swatch-story"] {
+  border-block: 1px solid var(--bank-line);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 42px, color-mix(in srgb, var(--bank-accent-soft) 48%, transparent) 42px 84px),
+    var(--bank-bg);
+}
+
+.content[data-variant="controlled-film"] {
+  min-height: 360px;
+  place-items: end start;
+  background:
+    radial-gradient(circle at 76% 40%, var(--bank-accent) 0 5%, transparent 5.5%),
+    linear-gradient(130deg, var(--bank-ink), color-mix(in srgb, var(--bank-ink) 72%, var(--bank-accent)));
+  color: var(--bank-surface);
+}
+
+.content[data-variant="controlled-film"] .contentBody {
+  color: var(--bank-accent-soft);
+}
+
+.catalog[data-variant="beauty-swatch"] .productCard {
+  border-radius: 48% 48% var(--bank-radius) var(--bank-radius);
+  padding-top: 8px;
+}
+
+.catalog[data-variant="beauty-swatch"] .productPlaceholder,
+.catalog[data-variant="beauty-swatch"] .productImage {
+  border-radius: 50% 50% 22% 22%;
+}
+
+.catalog[data-variant="technology-spec"] .productGrid {
+  gap: 1px;
+  padding: 1px;
+  background: var(--bank-line);
+}
+
+.catalog[data-variant="technology-spec"] .productCard {
+  border: 0;
+  border-radius: 0;
+}
+
+.catalog[data-variant="technology-spec"] .productCopy h3 {
+  font-family: Arial, Helvetica, sans-serif;
+  text-transform: uppercase;
+}
+
+.catalog[data-variant="textile-stack"] .productCard:nth-child(3n + 1) {
+  transform: rotate(-0.7deg);
+}
+
+.catalog[data-variant="textile-stack"] .productCard:nth-child(3n + 2) {
+  transform: translateY(12px) rotate(0.7deg);
+}
+
+.catalog[data-variant="room-set"] .productGrid {
+  grid-template-columns: 1.35fr 0.65fr 0.65fr;
+  grid-auto-flow: dense;
+}
+
+.catalog[data-variant="room-set"] .productCard:first-child {
+  grid-row: span 2;
+}
+
+.trust[data-variant="material-passport"] {
+  border: 1px solid var(--bank-line);
+  background:
+    linear-gradient(90deg, var(--bank-accent-soft) 0 8px, transparent 8px),
+    var(--bank-surface);
+}
+
+.trust[data-variant="ingredient-ledger"] .trustGrid article {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.callToAction[data-variant="magazine-close"] {
+  min-height: 280px;
+  background:
+    linear-gradient(120deg, transparent 58%, var(--bank-accent) 58%),
+    var(--bank-accent-soft);
+}
+
+.callToAction[data-variant="technical-brief"] {
+  border: 2px solid var(--bank-ink);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 39px, color-mix(in srgb, var(--bank-line) 38%, transparent) 40px),
+    var(--bank-bg);
+}
+
+.footer[data-variant="magazine-masthead"] {
+  min-height: 260px;
+  align-items: end;
+}
+
+.footer[data-variant="magazine-masthead"] .brandMark {
+  font-size: clamp(1.8rem, 6vw, 4rem);
+}
+
+.footer[data-variant="technical-directory"] {
+  border-top: 4px solid var(--bank-accent);
+  background:
+    linear-gradient(90deg, transparent 49.8%, color-mix(in srgb, var(--bank-line) 28%, transparent) 50%, transparent 50.2%),
+    var(--bank-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 @keyframes bank-enter-balanced {
   from {
     opacity: 0.25;
@@ -1252,6 +1531,20 @@
 
   to {
     opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bank-soft-clip {
+  from {
+    opacity: 0.35;
+    clip-path: inset(8% 0 0 0 round var(--bank-radius));
+    transform: translateY(calc(var(--bank-motion-distance) * 0.7));
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 0);
     transform: translateY(0);
   }
 }
@@ -1438,6 +1731,11 @@
     gap: 8px;
   }
 
+  .header[data-variant="floating-capsule"] {
+    margin: 8px;
+    border-radius: 20px;
+  }
+
   .headerTagline {
     display: none;
   }
@@ -1480,8 +1778,18 @@
   }
 
   .hero[data-variant="product-spotlight"] .heroVisual,
-  .hero[data-variant="editorial-collage"] .heroVisual {
+  .hero[data-variant="editorial-collage"] .heroVisual,
+  .hero[data-variant="beauty-orbit"] .heroVisual,
+  .hero[data-variant="textile-swatch"] .heroVisual,
+  .hero[data-variant="technology-cinematic"] .heroVisual,
+  .hero[data-variant="room-scene"] .heroVisual,
+  .hero[data-variant="ingredient-monograph"] .heroVisual {
     margin: 12px;
+  }
+
+  .hero[data-variant="textile-swatch"] .heroVisual {
+    transform: none;
+    box-shadow: 8px 8px 0 var(--bank-accent-soft);
   }
 
   .hero[data-variant="provenance"] .heroVisual {
@@ -1502,8 +1810,16 @@
     grid-template-columns: 1fr;
   }
 
+  .navigation[data-variant="material-index"] .categoryNav {
+    grid-template-columns: 1fr;
+  }
+
   .content {
     gap: 18px;
+  }
+
+  .content[data-variant="ritual-steps"] .contentBody ol {
+    grid-template-columns: 1fr;
   }
 
   .catalogControls {
@@ -1525,6 +1841,18 @@
 
   .catalog[data-variant="feature-tiles"] .productCard:first-child {
     grid-column: auto;
+  }
+
+  .catalog[data-variant="room-set"] .productGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog[data-variant="room-set"] .productCard:first-child {
+    grid-row: auto;
+  }
+
+  .catalog[data-variant="textile-stack"] .productCard:nth-child(n) {
+    transform: none;
   }
 
   .catalog[data-variant="horizontal-shelf"] .productGrid {

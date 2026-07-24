@@ -6,6 +6,10 @@ import {
   type ShowroomComponentBank,
   type ShowroomSlot,
 } from "@/lib/showroom-composition";
+import type {
+  ShowroomComponentBankV2,
+  ShowroomComponentDefinitionV2,
+} from "@/lib/showroom-composition-v2";
 import {
   DEFAULT_SHOWROOM_EXPERIENCE,
   SHOWROOM_DECORATIVE_DEPTHS,
@@ -30,6 +34,15 @@ const slotLabels: Record<ShowroomSlot, string> = {
   call_to_action: "Calls to action",
   footer: "Footers",
 };
+
+function hasTypedContentMedia(
+  definition: ShowroomComponentBank["components"][number] | ShowroomComponentDefinitionV2,
+): definition is ShowroomComponentDefinitionV2 {
+  return (
+    "contentMediaSlots" in definition &&
+    Array.isArray(definition.contentMediaSlots)
+  );
+}
 
 const laboratoryFixture = {
   business: {
@@ -123,7 +136,7 @@ export default function DesignBankLaboratory({
   bank,
   combinationFloor,
 }: {
-  bank: ShowroomComponentBank;
+  bank: ShowroomComponentBank | ShowroomComponentBankV2;
   combinationFloor: number;
 }) {
   const [slot, setSlot] = useState<ShowroomSlot | "all">("all");
@@ -287,6 +300,18 @@ export default function DesignBankLaboratory({
         {definitions.map((definition) => {
           const Renderer = SHOWROOM_BANK_REGISTRY[definition.id];
           if (!Renderer) return null;
+          const previewProperties = Object.fromEntries(
+            definition.properties
+              .filter((property) => property.required)
+              .map((property) => [
+                property.key,
+                property.type === "enum"
+                  ? property.values[0]
+                  : property.type === "boolean"
+                    ? false
+                    : property.min,
+              ]),
+          );
           return (
             <article className={styles.componentCard} key={definition.id}>
               <header className={styles.componentMeta}>
@@ -320,6 +345,15 @@ export default function DesignBankLaboratory({
                 ) : (
                   <small>No section-specific media required.</small>
                 )}
+                {hasTypedContentMedia(definition) && definition.contentMediaSlots.length ? (
+                  <div className={styles.experienceBadges} aria-label="Typed content media contract">
+                    {definition.contentMediaSlots.map((mediaSlot) => (
+                      <span key={mediaSlot.key}>
+                        Typed {mediaSlot.label} · {mediaSlot.required ? "required" : "optional"} · {mediaSlot.acceptedKinds.join("/")}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </header>
               <div
                 className={styles.previewFrame}
@@ -331,6 +365,7 @@ export default function DesignBankLaboratory({
                     context={context}
                     definition={definition}
                     experience={experience}
+                    properties={previewProperties}
                   />
                 </div>
               </div>

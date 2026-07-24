@@ -3,8 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   SHOWROOM_BANK_BASE_COMBINATION_FLOOR,
+  SHOWROOM_BANK_1_2_COMBINATION_FLOOR,
   SHOWROOM_BANK_COMPONENT_SEEDS,
   SHOWROOM_COMPONENT_BANK,
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
 } from "../lib/showroom-bank-release";
 import { SHOWROOM_BANK_TOKEN_STYLES } from "../components/showroom/bank/tokens";
 import { SHOWROOM_SLOTS, type ShowroomSlot } from "../lib/showroom-composition";
@@ -29,6 +31,36 @@ assert.equal(Object.isFrozen(SHOWROOM_COMPONENT_BANK.components), true);
 assert.equal(Object.isFrozen(SHOWROOM_COMPONENT_BANK.components[0]), true);
 assert.equal(Object.isFrozen(SHOWROOM_COMPONENT_BANK.components[0].bindings), true);
 assert.equal(Object.isFrozen(SHOWROOM_COMPONENT_BANK.tokenPacks), true);
+assert.equal(SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release, "showroom-bank@1.2.0");
+assert.ok(SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.length >= 66);
+assert.ok(SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.length >= 18);
+assert.ok(SHOWROOM_BANK_1_2_COMBINATION_FLOOR >= 90_000);
+assert.equal(Object.isFrozen(SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE), true);
+
+for (const retained of SHOWROOM_COMPONENT_BANK.components) {
+  const candidate = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.find(
+    (component) => component.id === retained.id,
+  );
+  assert.ok(candidate, `${retained.id} must remain in bank 1.2`);
+  const { acceptedContentTypes: _, contentMediaSlots: __, ...retainedContract } = candidate;
+  assert.deepEqual(
+    retainedContract,
+    retained,
+    `${retained.id} must retain its exact bank-1.1 contract`,
+  );
+}
+
+for (const component of SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.slice(
+  SHOWROOM_COMPONENT_BANK.components.length,
+)) {
+  assert.ok(component.properties.some((property) => property.key === "reveal_style"));
+  assert.ok(component.properties.some((property) => property.key === "interaction_style"));
+}
+const film = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.find(
+  (component) => component.id === "content.controlled-film@1",
+);
+assert.deepEqual(film?.acceptedContentTypes, ["video"]);
+assert.deepEqual(film?.contentMediaSlots[0]?.acceptedKinds, ["video"]);
 
 for (const slot of SHOWROOM_SLOTS) {
   const definitions = SHOWROOM_COMPONENT_BANK.components.filter(
@@ -75,7 +107,7 @@ const registrySource = fs.readFileSync(
 const registryIds = [
   ...registrySource.matchAll(/^\s+"([^"]+@[1-9][0-9]*)": Bank[A-Za-z]+Section,/gm),
 ].map((match) => match[1]);
-const componentIds = SHOWROOM_COMPONENT_BANK.components.map(
+const componentIds = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.map(
   (component) => component.id,
 );
 assert.deepEqual(
@@ -85,7 +117,7 @@ assert.deepEqual(
 );
 assert.equal(new Set(registryIds).size, registryIds.length);
 
-const tokenIds = SHOWROOM_COMPONENT_BANK.tokenPacks.map((token) => token.id);
+const tokenIds = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.map((token) => token.id);
 assert.deepEqual(
   Object.keys(SHOWROOM_BANK_TOKEN_STYLES).sort(),
   [...tokenIds].sort(),
@@ -142,8 +174,8 @@ assert.match(cssSource, /\.section\s*\{/);
 assert.match(cssSource, /@media \(max-width: 480px\)/);
 
 const combinedDescriptions = [
-  ...SHOWROOM_COMPONENT_BANK.components.map((entry) => entry.description),
-  ...SHOWROOM_COMPONENT_BANK.tokenPacks.map((entry) => entry.description),
+  ...SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.map((entry) => entry.description),
+  ...SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.map((entry) => entry.description),
 ].join(" ");
 for (const industry of [
   "agriculture",
@@ -180,4 +212,10 @@ console.log(
     `${SHOWROOM_COMPONENT_BANK.components.length} components, ` +
     `${SHOWROOM_COMPONENT_BANK.tokenPacks.length} token systems, ` +
     `${SHOWROOM_BANK_BASE_COMBINATION_FLOOR} base combinations.`,
+);
+console.log(
+  `Candidate ${SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release}: ` +
+    `${SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.length} components, ` +
+    `${SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.length} token systems, ` +
+    `${SHOWROOM_BANK_1_2_COMBINATION_FLOOR} required-slot combinations.`,
 );

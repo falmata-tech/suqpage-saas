@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/showroom-proposal-v2.schema.json",
+  "title": "SuqPage typed-content showroom design proposal",
+  "description": "Portable syntactic guidance. The server verifies the exact bank release, content compatibility, media, tenant, revision, and publication authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "bankRelease", "tokenPack", "rationale", "questions", "warnings", "sections"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "bankRelease": { "type": "string", "pattern": "^showroom-bank@[1-9][0-9]*(\\.[0-9]+){0,2}$", "maxLength": 80 },
+    "tokenPack": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$", "maxLength": 80 },
+    "rationale": { "type": "string", "maxLength": 2000 },
+    "questions": { "type": "array", "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
+    "warnings": { "type": "array", "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 500 } },
+    "sections": { "type": "array", "minItems": 1, "maxItems": 24, "items": { "$ref": "#/$defs/section" } }
+  },
+  "$defs": {
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "component", "properties", "bindings", "contentBlockKey"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$", "maxLength": 80 },
+        "component": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*@[1-9][0-9]*$", "maxLength": 100 },
+        "properties": { "type": "object", "maxProperties": 24, "additionalProperties": { "$ref": "showroom-proposal.schema.json#/$defs/primitive" } },
+        "bindings": { "type": "object", "maxProperties": 16, "additionalProperties": { "$ref": "showroom-proposal.schema.json#/$defs/bindingSource" } },
+        "contentBlockKey": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$", "maxLength": 80 }
+          ]
+        }
+      }
+    }
+  }
+}

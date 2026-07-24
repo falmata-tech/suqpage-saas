@@ -120,7 +120,12 @@ v4 data; compatible readers remain until explicit retirement.
 
 ## Completion evidence
 
-Checkpoint: the additive release registry is present with bank 1.1 as the only
-admitted release and no default/write change. Focused renderer/composition/bank
-tests and type checking pass. V4 persistence, bank 1.2, provider/CSP, operations,
-browser, and rollout evidence remain.
+Checkpoint: the additive release registry still admits only bank 1.1, with no
+default/write change. A frozen bank-1.2 candidate now meets the planned numeric
+floor with 67 components, 18 token systems, and 98,280 required-slot
+combinations; it is exposed only in the permissioned synthetic laboratory.
+Static bank/experience/compatibility gates, the complete release, all seven
+production-browser scenarios, and the isolated container privacy/build gate
+pass. V4 persistence/rendering, provider/CSP, operations migration/restore,
+320-pixel and pairwise visual admission, remote checks, and rollout evidence
+remain.

@@ -1,7 +1,7 @@
 ---
 id: FE-009
 title: Creative showroom bank and focused v4 studio
-status: ready
+status: in_progress
 related: [FE-004, FE-005, FE-006, FE-007, BE-005, BE-006, BE-007, BE-008, BE-010, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
 last_updated: 2026-07-24
@@ -136,4 +136,13 @@ mobile gates pass. Rollback disables v4 creation/focused controls and keeps bank
 
 ## Completion evidence
 
-Filled only after implementation and mapped gates pass.
+Checkpoint: the permissioned synthetic laboratory now exposes a non-default
+bank-1.2 candidate with 67 static registry-backed components, 18 scoped token
+systems, 98,280 required-slot combinations, and bounded reveal/interaction
+properties. New variants cover every planned industry direction plus a
+controlled-film placeholder contract. Static bank/experience checks, the
+complete release, all seven production-browser scenarios (including 390-pixel
+overflow, touch targets, and reduced motion), and the container privacy/build
+gate pass. Typed v4 rendering, focused controls, controlled provider rendering,
+320-pixel/pairwise visual admission, operations restore, and remote rollout
+gates remain; the candidate is intentionally absent from the runtime resolver.

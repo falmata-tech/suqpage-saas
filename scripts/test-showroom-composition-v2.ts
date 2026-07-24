@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import {
   ShowroomCompositionError,
   parseShowroomComponentBank,
@@ -29,6 +30,12 @@ const bankInput = {
   components: SHOWROOM_COMPONENT_BANK_1_1.components.map((component) => ({
     ...component,
     acceptedContentTypes: [...acceptedBySlot[component.slot]],
+    contentMediaSlots:
+      component.slot === "hero"
+        ? [{ key: "hero_image", label: "Hero image", required: false, acceptedKinds: ["image"], minItems: 0, maxItems: 1, aspectRatio: "landscape" }]
+        : component.slot === "content" || component.slot === "trust"
+          ? [{ key: "story_image", label: "Story image", required: false, acceptedKinds: ["image"], minItems: 0, maxItems: 1, aspectRatio: "any" }]
+          : [],
   })),
 };
 const bank = parseShowroomComponentBankV2(bankInput);
@@ -100,8 +107,36 @@ expectCode(
   () => parseShowroomDesignProposalV2(proposal, bank, { ...content, blocks: [...content.blocks, { ...content.blocks[1], key: "unused-story" }] }),
   "orphan_content",
 );
+expectCode(
+  () => parseShowroomDesignProposalV2(proposal, bank, { ...content, blocks: content.blocks.map((block) => block.key === "opening" ? { ...block, media: [{ slotKey: "unsupported", assetKeys: ["asset_0123456789abcdefabcd"], altText: "A supplied image", caption: "" }] } : block) }),
+  "incompatible_content_media",
+);
 const malformedBank = structuredClone(bankInput) as unknown as ShowroomComponentBankV2;
 delete (malformedBank.components[0] as Partial<ShowroomComponentBankV2["components"][number]>).acceptedContentTypes;
 expectCode(() => parseShowroomComponentBankV2(malformedBank), "invalid_content_types");
+
+for (const schemaPath of [
+  "showroom-sdk/component-bank-v2.schema.json",
+  "showroom-sdk/showroom-proposal-v2.schema.json",
+]) {
+  const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8")) as {
+    $schema?: string;
+    additionalProperties?: boolean;
+  };
+  assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+  assert.equal(schema.additionalProperties, false);
+}
+const bankSchemaSource = fs.readFileSync(
+  "showroom-sdk/component-bank-v2.schema.json",
+  "utf8",
+);
+assert.match(bankSchemaSource, /acceptedContentTypes/);
+assert.match(bankSchemaSource, /contentMediaSlots/);
+assert.match(bankSchemaSource, /component-bank\.schema\.json#\/\$defs\/property/);
+const designSchemaSource = fs.readFileSync(
+  "showroom-sdk/showroom-proposal-v2.schema.json",
+  "utf8",
+);
+assert.match(designSchemaSource, /contentBlockKey/);
 
 console.log("Additive design-v2 component compatibility, exact block assignment, and bank-v1 isolation passed.");

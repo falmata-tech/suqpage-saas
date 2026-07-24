@@ -157,19 +157,24 @@ idempotent, remain private, and preserve the existing client-approval and
 manager-publication path. Components now declare image media-slot requirements,
 and recipes may use only request-scoped opaque asset keys. Remote image URLs,
 embed markup, arbitrary providers, inventory, and cross-tenant assets are
-rejected. Typed section-content blocks, focused post-import controls, controlled
-YouTube admission/rendering remain planned completion work. The implemented
+rejected. A strict six-type content-block parser, additive design-v2 validator,
+and portable v2 schemas now exist, but revision-v4 persistence, focused
+post-import controls, and controlled YouTube admission/rendering remain planned
+completion work. The implemented
 checkpoint passes the standard check, production release, seven-role browser
 acceptance, container privacy/build, and operations restore gates; the feature
 specs remain `ready`, not `done`, because their broader content/provider scope
 is still open.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
-planned implementation is additive: revision v4/content-schema v2/design-schema
-v2 and `showroom-bank@1.2.0` will coexist with retained v1-v3 revisions and the
-immutable bank 1.1 release. The target is at least 66 reviewed components and
-18 token systems with stronger textile, beauty, technology, furniture,
-ingredient, artisan, industrial, and wholesale art direction. Bounded reveals
+implementation is additive: revision v4/content-schema v2/design-schema v2 and
+`showroom-bank@1.2.0` will coexist with retained v1-v3 revisions and the
+immutable bank 1.1 release. A non-default, synthetic-laboratory candidate now
+contains 67 reviewed components, 18 token systems, and 98,280 required-slot
+combinations with stronger textile, beauty, technology, furniture, ingredient,
+artisan, industrial, and wholesale art direction. It is not accepted by the
+runtime release resolver and cannot render a client showroom until remaining
+v4, media, browser, operations, and publication gates pass. Bounded reveals
 and interactions must be CSS-first, mobile-safe, static without support, and
 disabled by reduced-motion preference; arbitrary code, copied trade dress,
 autoplay, parallax, and scroll-jacking remain prohibited.
@@ -1227,9 +1232,11 @@ open until their typed-block, provider, focused-control, browser, and rollout
 evidence is complete. The component laboratory remains synthetic and cannot
 itself alter a tenant revision.
 `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007` define the promoted additive
-revision-v4 and bank-1.2 release. Old schema/bank readers remain exact; new
-writes do not become default until multi-release, mobile, accessibility,
-provider/CSP, operations, publication, and rollback gates pass.
+revision-v4 and bank-1.2 release. The strict typed-block/design-v2 contracts and
+non-default bank candidate are implemented for synthetic laboratory review.
+Old schema/bank readers remain exact; new writes do not become default until
+multi-release rendering, mobile, accessibility, provider/CSP, operations,
+publication, and rollback gates pass.
 
 ---
 

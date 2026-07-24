@@ -20,8 +20,19 @@ import {
 export const SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2 = 2;
 export const SHOWROOM_DESIGN_SCHEMA_VERSION_V2 = 2;
 
+export type ShowroomContentMediaSlotDefinition = {
+  key: string;
+  label: string;
+  required: boolean;
+  acceptedKinds: Array<"image" | "video">;
+  minItems: number;
+  maxItems: number;
+  aspectRatio: "any" | "landscape" | "portrait" | "square";
+};
+
 export type ShowroomComponentDefinitionV2 = ShowroomComponentDefinition & {
   acceptedContentTypes: ShowroomContentBlockType[];
+  contentMediaSlots: ShowroomContentMediaSlotDefinition[];
 };
 
 export type ShowroomComponentBankV2 = Omit<
@@ -126,12 +137,83 @@ function contentTypes(input: unknown, componentId: unknown) {
   return values;
 }
 
+const contentMediaKeyPattern = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
+
+function contentMediaSlots(
+  input: unknown,
+  componentId: unknown,
+): ShowroomContentMediaSlotDefinition[] {
+  if (!Array.isArray(input) || input.length > 8) {
+    return fail(
+      `Component ${String(componentId)} has invalid content-media slots.`,
+      "invalid_content_media_slots",
+    );
+  }
+  const slots = input.map((entry, index) => {
+    const slot = record(entry, `Content-media slot ${index + 1}`, [
+      "key",
+      "label",
+      "required",
+      "acceptedKinds",
+      "minItems",
+      "maxItems",
+      "aspectRatio",
+    ]);
+    if (
+      typeof slot.key !== "string" ||
+      slot.key.length > 80 ||
+      !contentMediaKeyPattern.test(slot.key) ||
+      typeof slot.label !== "string" ||
+      !slot.label.trim() ||
+      slot.label.length > 100 ||
+      typeof slot.required !== "boolean" ||
+      !Array.isArray(slot.acceptedKinds) ||
+      !slot.acceptedKinds.length ||
+      slot.acceptedKinds.length > 2 ||
+      slot.acceptedKinds.some((kind) => kind !== "image" && kind !== "video") ||
+      new Set(slot.acceptedKinds).size !== slot.acceptedKinds.length ||
+      !Number.isInteger(slot.minItems) ||
+      !Number.isInteger(slot.maxItems) ||
+      Number(slot.minItems) < 0 ||
+      Number(slot.maxItems) > 12 ||
+      Number(slot.minItems) > Number(slot.maxItems) ||
+      (slot.required && Number(slot.minItems) < 1) ||
+      (!slot.required && Number(slot.minItems) !== 0) ||
+      !["any", "landscape", "portrait", "square"].includes(
+        String(slot.aspectRatio),
+      )
+    ) {
+      return fail(
+        `Component ${String(componentId)} has an invalid content-media slot.`,
+        "invalid_content_media_slot",
+      );
+    }
+    return {
+      key: slot.key,
+      label: slot.label.trim(),
+      required: slot.required,
+      acceptedKinds: slot.acceptedKinds as Array<"image" | "video">,
+      minItems: Number(slot.minItems),
+      maxItems: Number(slot.maxItems),
+      aspectRatio: slot.aspectRatio as ShowroomContentMediaSlotDefinition["aspectRatio"],
+    };
+  });
+  if (new Set(slots.map((slot) => slot.key)).size !== slots.length) {
+    fail(
+      `Component ${String(componentId)} repeats a content-media slot.`,
+      "duplicate_content_media_slot",
+    );
+  }
+  return slots;
+}
+
 function toV1Bank(bank: ShowroomComponentBankV2): ShowroomComponentBank {
   return {
     ...bank,
     schemaVersion: SHOWROOM_COMPOSITION_SCHEMA_VERSION,
-    components: bank.components.map(({ acceptedContentTypes: _, ...component }) =>
-      component
+    components: bank.components.map(
+      ({ acceptedContentTypes: _, contentMediaSlots: __, ...component }) =>
+        component,
     ),
   };
 }
@@ -164,14 +246,25 @@ export function parseShowroomComponentBankV2(
       "bindings",
       "mediaSlots",
       "acceptedContentTypes",
+      "contentMediaSlots",
     ]);
-    return contentTypes(component.acceptedContentTypes, component.id);
+    return {
+      acceptedContentTypes: contentTypes(
+        component.acceptedContentTypes,
+        component.id,
+      ),
+      contentMediaSlots: contentMediaSlots(component.contentMediaSlots, component.id),
+    };
   });
   const v1Bank = parseShowroomComponentBank({
     ...raw,
     schemaVersion: SHOWROOM_COMPOSITION_SCHEMA_VERSION,
     components: raw.components.map((entry) => {
-      const { acceptedContentTypes: _, ...component } = entry as Record<string, unknown>;
+      const {
+        acceptedContentTypes: _,
+        contentMediaSlots: __,
+        ...component
+      } = entry as Record<string, unknown>;
       return component;
     }),
   });
@@ -180,7 +273,8 @@ export function parseShowroomComponentBankV2(
     schemaVersion: SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2,
     components: v1Bank.components.map((component, index) => ({
       ...component,
-      acceptedContentTypes: compatibility[index],
+      acceptedContentTypes: compatibility[index].acceptedContentTypes,
+      contentMediaSlots: compatibility[index].contentMediaSlots,
     })),
   };
 }
@@ -256,6 +350,30 @@ export function parseShowroomDesignProposalV2(
           `Component ${component.id} and content block are incompatible.`,
           "incompatible_content",
         );
+      }
+      const slotByKey = new Map(
+        component.contentMediaSlots.map((slot) => [slot.key, slot]),
+      );
+      for (const media of block.media) {
+        const slot = slotByKey.get(media.slotKey);
+        if (
+          !slot ||
+          media.assetKeys.length < slot.minItems ||
+          media.assetKeys.length > slot.maxItems
+        ) {
+          return fail(
+            `Component ${component.id} cannot accept the assigned media slot.`,
+            "incompatible_content_media",
+          );
+        }
+      }
+      for (const slot of component.contentMediaSlots) {
+        if (slot.required && !block.media.some((media) => media.slotKey === slot.key)) {
+          return fail(
+            `Component ${component.id} requires content media slot ${slot.key}.`,
+            "missing_content_media",
+          );
+        }
       }
     }
     return { ...section, contentBlockKey };

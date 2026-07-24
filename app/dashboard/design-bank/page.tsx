@@ -3,8 +3,8 @@ import DashboardShell from "@/components/DashboardShell";
 import DesignBankLaboratory from "@/components/showroom/bank/DesignBankLaboratory";
 import { requireUser } from "@/lib/auth";
 import {
-  SHOWROOM_BANK_BASE_COMBINATION_FLOOR,
-  SHOWROOM_COMPONENT_BANK,
+  SHOWROOM_BANK_1_2_COMBINATION_FLOOR,
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
 } from "@/lib/showroom-bank-release";
 import { hasCapability } from "@/lib/capabilities";
 
@@ -20,15 +20,15 @@ export default async function DesignBankPage() {
           <span className="eyebrow">Internal design system</span>
           <h1>Showroom component bank</h1>
           <p>
-            Review release {SHOWROOM_COMPONENT_BANK.release}. These previews use
-            synthetic fixture content and cannot change a tenant or publish a
-            showroom.
+            Review candidate release {SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release}.
+            These previews use synthetic fixture content and cannot change a
+            tenant, become the runtime default, or publish a showroom.
           </p>
         </div>
       </div>
       <DesignBankLaboratory
-        bank={SHOWROOM_COMPONENT_BANK}
-        combinationFloor={SHOWROOM_BANK_BASE_COMBINATION_FLOOR}
+        bank={SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE}
+        combinationFloor={SHOWROOM_BANK_1_2_COMBINATION_FLOOR}
       />
     </DashboardShell>
   );

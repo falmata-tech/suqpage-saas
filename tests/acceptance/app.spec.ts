@@ -175,19 +175,19 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole("link", { name: "Design component bank" }).click();
   await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
-  await expect(page.getByText("42", { exact: true }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Heroes 8" }).click();
-  await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(8);
+  await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Heroes 13" }).click();
+  await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(13);
   await page.getByLabel("Preview token system").selectOption("industrial-steel");
   await page.getByLabel("Motion intensity").selectOption("expressive");
   await page.getByLabel("Decorative depth").selectOption("signature");
   await page.getByRole("button", { name: "Mobile · 390 px" }).click();
-  await page.getByRole("button", { name: "All 42" }).click();
-  await expect(page.locator('[data-preview-device="mobile"]')).toHaveCount(42);
-  await expect(page.locator('[data-motion="expressive"]')).toHaveCount(42);
-  await expect(page.locator('[data-decoration="signature"]')).toHaveCount(42);
+  await page.getByRole("button", { name: "All 67" }).click();
+  await expect(page.locator('[data-preview-device="mobile"]')).toHaveCount(67);
+  await expect(page.locator('[data-motion="expressive"]')).toHaveCount(67);
+  await expect(page.locator('[data-decoration="signature"]')).toHaveCount(67);
   const mobileCanvases = page.locator('[data-preview-device="mobile"] > div');
-  await expect(mobileCanvases).toHaveCount(42);
+  await expect(mobileCanvases).toHaveCount(67);
   expect(
     await mobileCanvases.evaluateAll((canvases) =>
       canvases.every(

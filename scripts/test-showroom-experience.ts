@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
   SHOWROOM_COMPONENT_BANK,
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
 } from "../lib/showroom-bank-release";
 import {
   DEFAULT_SHOWROOM_EXPERIENCE,
@@ -33,7 +34,7 @@ assert.deepEqual(DEFAULT_SHOWROOM_EXPERIENCE, {
 });
 assert.equal(Object.isFrozen(DEFAULT_SHOWROOM_EXPERIENCE), true);
 
-for (const component of SHOWROOM_COMPONENT_BANK.components) {
+for (const component of SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components) {
   const motion = component.properties.find(
     (property) => property.key === "motion_intensity",
   );
@@ -54,6 +55,31 @@ for (const component of SHOWROOM_COMPONENT_BANK.components) {
     required: true,
     values: [...SHOWROOM_DECORATIVE_DEPTHS],
   });
+}
+
+for (const component of SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.slice(
+  SHOWROOM_COMPONENT_BANK.components.length,
+)) {
+  assert.deepEqual(
+    component.properties.find((property) => property.key === "reveal_style"),
+    {
+      key: "reveal_style",
+      label: "Entrance treatment",
+      type: "enum",
+      required: true,
+      values: ["fade-rise", "soft-clip", "staggered"],
+    },
+  );
+  assert.deepEqual(
+    component.properties.find((property) => property.key === "interaction_style"),
+    {
+      key: "interaction_style",
+      label: "Touch and pointer treatment",
+      type: "enum",
+      required: true,
+      values: ["quiet-lift", "edge-trace", "tactile-press"],
+    },
+  );
 }
 
 for (const token of Object.values(SHOWROOM_BANK_TOKEN_STYLES)) {
@@ -167,6 +193,14 @@ assert.match(cssSource, /min-height:\s*44px/);
 assert.match(cssSource, /scroll-snap-type:\s*inline/);
 assert.match(cssSource, /@media \(hover: hover\) and \(pointer: fine\)/);
 assert.match(cssSource, /env\(safe-area-inset-bottom\)/);
+assert.match(cssSource, /data-reveal="soft-clip"/);
+assert.match(cssSource, /data-interaction="tactile-press"/);
+assert.match(cssSource, /data-variant="beauty-orbit"/);
+assert.match(cssSource, /data-variant="textile-swatch"/);
+assert.match(cssSource, /data-variant="technology-cinematic"/);
+assert.match(cssSource, /data-variant="room-scene"/);
+assert.match(cssSource, /data-variant="ingredient-monograph"/);
+assert.match(cssSource, /@keyframes bank-soft-clip/);
 assert.doesNotMatch(cssSource, /position\s*:\s*fixed/i);
 assert.doesNotMatch(cssSource, /:global/);
 
@@ -186,5 +220,7 @@ for (const label of [
 
 console.log(
   `Showroom experience admitted for ${SHOWROOM_COMPONENT_BANK.components.length} ` +
-    `components and ${SHOWROOM_COMPONENT_BANK.tokenPacks.length} token systems.`,
+    `components and ${SHOWROOM_COMPONENT_BANK.tokenPacks.length} token systems; ` +
+    `candidate creativity checked for ${SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.length} ` +
+    `components and ${SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.length} token systems.`,
 );

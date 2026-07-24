@@ -8,6 +8,11 @@ import {
   type ShowroomSlot,
 } from "./showroom-composition";
 import {
+  parseShowroomComponentBankV2,
+  type ShowroomComponentDefinitionV2,
+  type ShowroomContentMediaSlotDefinition,
+} from "./showroom-composition-v2";
+import {
   SHOWROOM_DECORATIVE_DEPTHS,
   SHOWROOM_MOTION_INTENSITIES,
 } from "./showroom-experience";
@@ -89,6 +94,22 @@ const decorativeDepthProperty: ShowroomPropertyDefinition = {
   type: "enum",
   required: true,
   values: [...SHOWROOM_DECORATIVE_DEPTHS],
+};
+
+const revealStyleProperty: ShowroomPropertyDefinition = {
+  key: "reveal_style",
+  label: "Entrance treatment",
+  type: "enum",
+  required: true,
+  values: ["fade-rise", "soft-clip", "staggered"],
+};
+
+const interactionStyleProperty: ShowroomPropertyDefinition = {
+  key: "interaction_style",
+  label: "Touch and pointer treatment",
+  type: "enum",
+  required: true,
+  values: ["quiet-lift", "edge-trace", "tactile-press"],
 };
 
 const brandBindings: ShowroomBindingDefinition[] = [
@@ -530,6 +551,50 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
   ],
 } as const satisfies Record<ShowroomSlot, readonly ComponentSeed[]>;
 
+export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
+  header: [
+    { id: "header.floating-capsule@1", name: "Floating capsule header", description: "A polished floating command bar for beauty, textile, furniture, and design-led product showrooms." },
+    { id: "header.technical-marquee@1", name: "Technical marquee header", description: "A crisp indexed identity bar for technology, manufacturing, wholesale, and specification-led catalogs." },
+  ],
+  hero: [
+    { id: "hero.beauty-orbit@1", name: "Beauty orbit hero", description: "A sculptural cosmetic composition with soft orbital layers and a calm product-first beauty rhythm." },
+    { id: "hero.textile-swatch@1", name: "Textile swatch hero", description: "A tactile layered opening for textiles, fashion, upholstery, rugs, and material-rich artisan work." },
+    { id: "hero.technology-cinematic@1", name: "Technology cinematic hero", description: "A high-contrast cinematic stage for technology, instruments, equipment, and precise product launches." },
+    { id: "hero.room-scene@1", name: "Room scene hero", description: "An immersive room-inspired opening for furniture, lighting, interiors, decor, and architectural products." },
+    { id: "hero.ingredient-monograph@1", name: "Ingredient monograph hero", description: "An editorial ingredient study for coffee, honey, food, botanical beauty, agriculture, and provenance-led goods." },
+  ],
+  navigation: [
+    { id: "navigation.visual-chapters@1", name: "Visual chapter navigation", description: "A magazine-like chapter rail for fashion, beauty, furniture, food, and collection-led discovery." },
+    { id: "navigation.material-index@1", name: "Material index navigation", description: "A precise material and category index for textiles, furniture, ingredients, manufacturing, and wholesale." },
+  ],
+  content: [
+    { id: "content.lookbook-chapter@1", name: "Lookbook chapter", description: "An expressive editorial chapter for textile, fashion, beauty, artisan, and lifestyle storytelling." },
+    { id: "content.exploded-feature@1", name: "Exploded feature", description: "A layered feature breakdown for technology, furniture construction, equipment, and engineered products." },
+    { id: "content.ritual-steps@1", name: "Ritual steps", description: "A refined sequence for beauty routines, coffee preparation, food use, care, and customer education." },
+    { id: "content.swatch-story@1", name: "Swatch story", description: "A tactile color and material narrative for textiles, finishes, cosmetics, ceramics, and interior products." },
+    { id: "content.controlled-film@1", name: "Controlled film chapter", description: "A reviewed video chapter for process, product demonstrations, craft, technology, and manufacturing stories." },
+  ],
+  catalog: [
+    { id: "catalog.beauty-swatch@1", name: "Beauty swatch catalog", description: "Soft sculptural product cards for cosmetics, fragrance, wellness, personal care, and colorful small goods." },
+    { id: "catalog.technology-spec@1", name: "Technology specification catalog", description: "Crisp technical cards for devices, equipment, parts, manufacturing, and comparison-oriented product ranges." },
+    { id: "catalog.textile-stack@1", name: "Textile stack catalog", description: "Layered material cards for textiles, apparel, rugs, upholstery, artisan work, and finish-rich products." },
+    { id: "catalog.room-set@1", name: "Room set catalog", description: "Scene-inspired product groupings for furniture, lighting, homeware, decor, and interior collections." },
+  ],
+  trust: [
+    { id: "trust.material-passport@1", name: "Material passport", description: "A structured material facts panel for textiles, furniture, construction, artisan, and industrial products." },
+    { id: "trust.ingredient-ledger@1", name: "Ingredient ledger", description: "A careful supplied-facts ledger for food, coffee, honey, agriculture, botanical beauty, and wellness." },
+    { id: "trust.specification-matrix@1", name: "Specification matrix", description: "A high-clarity facts matrix for technology, manufacturing, wholesale, equipment, and trade catalogs." },
+  ],
+  call_to_action: [
+    { id: "call-to-action.magazine-close@1", name: "Magazine close", description: "An editorial inquiry invitation for fashion, beauty, furniture, artisan, food, and lifestyle brands." },
+    { id: "call-to-action.technical-brief@1", name: "Technical brief invitation", description: "A focused project and product inquiry close for technology, manufacturing, wholesale, and trade." },
+  ],
+  footer: [
+    { id: "footer.magazine-masthead@1", name: "Magazine masthead footer", description: "A memorable editorial close for textile, beauty, furniture, artisan, food, and collection-rich showrooms." },
+    { id: "footer.technical-directory@1", name: "Technical directory footer", description: "A disciplined indexed close for technology, manufacturing, distribution, import, and wholesale catalogs." },
+  ],
+} as const satisfies Record<ShowroomSlot, readonly ComponentSeed[]>;
+
 const components = [
   ...definitions(
     "header",
@@ -616,6 +681,84 @@ export const SHOWROOM_COMPONENT_BANK_1_1 = deepFreeze(
     ],
   }),
 );
+
+const creativeProperties = (properties: ShowroomPropertyDefinition[]) => [
+  ...properties,
+  revealStyleProperty,
+  interactionStyleProperty,
+];
+
+const candidateComponents = [
+  ...SHOWROOM_COMPONENT_BANK_1_1.components,
+  ...definitions("header", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.header, creativeProperties([densityProperty, showTaglineProperty]), brandBindings, ["inquiry_cart_trigger"]),
+  ...definitions("hero", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.hero, creativeProperties([alignmentProperty, heroHeightProperty]), heroBindings),
+  ...definitions("navigation", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.navigation, creativeProperties([densityProperty]), navigationBindings, ["category_filter"]),
+  ...definitions("content", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.content, creativeProperties([alignmentProperty]), storyBindings),
+  ...definitions("catalog", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.catalog, creativeProperties([columnsProperty, showSearchProperty, showFiltersProperty]), catalogBindings, ["catalog_search", "category_filter", "product_detail", "add_to_inquiry"]),
+  ...definitions("trust", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.trust, creativeProperties([columnsProperty]), storyBindings),
+  ...definitions("call_to_action", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.call_to_action, creativeProperties([alignmentProperty]), contactBindings),
+  ...definitions("footer", SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS.footer, creativeProperties([columnsProperty, showTaglineProperty]), [...contactBindings, ...navigationBindings]),
+];
+
+function acceptedContentTypes(
+  component: ShowroomComponentDefinition,
+): ShowroomComponentDefinitionV2["acceptedContentTypes"] {
+  if (component.id === "content.controlled-film@1") return ["video"];
+  if (component.slot === "hero") return ["hero"];
+  if (component.slot === "content") return ["story", "highlights", "information"];
+  if (component.slot === "trust") return ["information", "highlights"];
+  if (component.slot === "call_to_action") return ["call_to_action"];
+  return [];
+}
+
+function contentMediaSlots(
+  component: ShowroomComponentDefinition,
+): ShowroomContentMediaSlotDefinition[] {
+  if (component.id === "content.controlled-film@1") {
+    return [{ key: "video", label: "Controlled video", required: true, acceptedKinds: ["video"], minItems: 1, maxItems: 1, aspectRatio: "landscape" }];
+  }
+  if (component.slot === "hero") {
+    return [{ key: "hero_image", label: "Hero image", required: false, acceptedKinds: ["image"], minItems: 0, maxItems: 1, aspectRatio: "landscape" }];
+  }
+  if (component.slot === "content" || component.slot === "trust") {
+    return [{ key: "story_image", label: "Story image", required: false, acceptedKinds: ["image"], minItems: 0, maxItems: 1, aspectRatio: "any" }];
+  }
+  return [];
+}
+
+const candidateTokenPacks = [
+  ...SHOWROOM_COMPONENT_BANK_1_1.tokenPacks,
+  { id: "silk-atelier", name: "Silk atelier", description: "Luminous textile neutrals and saturated thread accents for fashion, fabric, artisan, and upholstery showrooms." },
+  { id: "cosmetic-laboratory", name: "Cosmetic laboratory", description: "Clean cosmetic whites with botanical and chromatic accents for beauty, wellness, fragrance, and personal care." },
+  { id: "chrome-future", name: "Chrome future", description: "Deep graphite, cool metal, and electric signal color for technology, equipment, and engineered product showrooms." },
+  { id: "paper-gallery", name: "Paper gallery", description: "Warm editorial paper and ink tones for furniture, artisan, collection, food, and design-led product stories." },
+  { id: "mineral-spa", name: "Mineral spa", description: "Stone, water, and mineral hues for wellness, botanical beauty, ceramics, interiors, and calm premium goods." },
+];
+
+export const SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE = deepFreeze(
+  parseShowroomComponentBankV2({
+    schemaVersion: 2,
+    release: "showroom-bank@1.2.0",
+    components: candidateComponents.map((component) => ({
+      ...component,
+      acceptedContentTypes: acceptedContentTypes(component),
+      contentMediaSlots: contentMediaSlots(component),
+    })),
+    tokenPacks: candidateTokenPacks,
+    requiredSlots: ["header", "hero", "catalog", "footer"],
+    requiredCapabilities: ["catalog_search", "category_filter", "product_detail", "add_to_inquiry", "inquiry_cart_trigger"],
+  }),
+);
+
+export const SHOWROOM_BANK_1_2_COMBINATION_FLOOR =
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.requiredSlots.reduce(
+    (total, slot) =>
+      total *
+      SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.filter(
+        (component) => component.slot === slot,
+      ).length,
+    SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.length,
+  );
 
 export const SHOWROOM_COMPONENT_BANK = SHOWROOM_COMPONENT_BANK_1_1;
 

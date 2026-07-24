@@ -125,6 +125,8 @@ rendering resolve the pinned release and fail closed for unknown releases. The
 six strict typed blocks now have a pure server parser and portable schema with
 bounded copy, items, media, keys, and unsafe-input denial. An additive design-v2
 parser wraps the unchanged v1 validator and enforces exact one-time compatible
-block assignment using bank-v2 compatibility metadata. Revision-v4 storage,
-the admitted bank-1.2 export/renderers, provider admission, and focused commands
-remain.
+block assignment and named content-media slot counts using bank-v2 compatibility
+metadata. Portable bank/design-v2 schemas and a frozen 67-component bank-1.2
+candidate are available to the synthetic laboratory only. Revision-v4 storage,
+typed rendering, runtime bank-1.2 admission, provider admission, and focused
+commands remain.

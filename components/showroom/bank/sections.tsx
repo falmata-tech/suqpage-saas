@@ -58,6 +58,16 @@ function SectionRoot({
       }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
+      data-reveal={
+        typeof properties?.reveal_style === "string"
+          ? properties.reveal_style
+          : undefined
+      }
+      data-interaction={
+        typeof properties?.interaction_style === "string"
+          ? properties.interaction_style
+          : undefined
+      }
       aria-label={label}
       style={style}
     >
@@ -113,6 +123,16 @@ export function BankHeaderSection({
       }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
+      data-reveal={
+        typeof properties?.reveal_style === "string"
+          ? properties.reveal_style
+          : undefined
+      }
+      data-interaction={
+        typeof properties?.interaction_style === "string"
+          ? properties.interaction_style
+          : undefined
+      }
       aria-label={`${definition.name} preview`}
     >
       <BrandMark context={context} />
@@ -429,6 +449,16 @@ const ctaCopy: Record<string, { eyebrow: string; title: string; button: string }
     title: "Share the product specifications or project needs you are considering.",
     button: "Start a conversation",
   },
+  "magazine-close": {
+    eyebrow: "Continue the story",
+    title: "Bring the pieces that caught your eye into one conversation.",
+    button: "Build your inquiry",
+  },
+  "technical-brief": {
+    eyebrow: "Project brief",
+    title: "Share the products and requirements your project needs.",
+    button: "Prepare a brief",
+  },
 };
 
 export function BankCallToActionSection({
@@ -477,6 +507,16 @@ export function BankFooterSection({
       }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
+      data-reveal={
+        typeof properties?.reveal_style === "string"
+          ? properties.reveal_style
+          : undefined
+      }
+      data-interaction={
+        typeof properties?.interaction_style === "string"
+          ? properties.interaction_style
+          : undefined
+      }
       aria-label={`${definition.name} preview`}
     >
       <div>
