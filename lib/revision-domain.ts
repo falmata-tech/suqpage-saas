@@ -155,9 +155,9 @@ function onlyKeys(
   }
 }
 
-function parseContent(
+export function parseRevisionContent(
   raw: Record<string, unknown>,
-  schemaVersion: 1 | 2 | 3,
+  schemaVersion: 1 | 2 | 3 | 4,
 ): RevisionContent {
   if (typeof raw.business !== "object" || !raw.business) {
     throw new RevisionError("The revision schema is invalid.");
@@ -420,7 +420,7 @@ export function parseRevisionSnapshot(input: unknown): RevisionSnapshot {
         ],
     "Revision snapshot",
   );
-  const content = parseContent(raw, schemaVersion);
+  const content = parseRevisionContent(raw, schemaVersion);
   if (schemaVersion === 1) {
     return { schemaVersion: 1, ...content };
   }

@@ -34,6 +34,9 @@ node node_modules/tsx/dist/cli.mjs scripts/test-showroom-content-blocks.ts
 printf '\n=== Additive design-v2 compatibility validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-showroom-composition-v2.ts
 
+printf '\n=== Additive revision-v4 domain validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-revision-v4.ts
+
 printf '\n=== Controlled YouTube provider normalization ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-youtube-provider.ts
 

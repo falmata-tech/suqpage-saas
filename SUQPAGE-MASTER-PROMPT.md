@@ -1241,6 +1241,11 @@ non-default bank candidate are implemented for synthetic laboratory review.
 Old schema/bank readers remain exact; new writes do not become default until
 multi-release rendering, mobile, accessibility, provider/CSP, operations,
 publication, and rollback gates pass.
+The separate revision-v4 domain parser is implemented: it enforces the existing
+1 MiB snapshot limit, strict catalog content, six typed content blocks, exact
+design-v2 compatibility, and an explicitly supplied reviewed bank. It does not
+change the v1-v3 reader, database writer, runtime resolver, or publication path;
+those persistence and rendering steps remain planned under the same specs.
 
 ---
 

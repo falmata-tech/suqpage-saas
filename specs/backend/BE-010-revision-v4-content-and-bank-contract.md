@@ -134,3 +134,9 @@ HTTPS watch/share hosts, rejects playlists/shorts/embed markup and lookalikes,
 Authorized private-draft admission is default-off, reuses request authorization,
 stores only the normalized ID behind a random opaque key, deduplicates per
 request, and exports neither the raw URL nor provider ID.
+The isolated revision-v4 domain parser now composes strict catalog content,
+managed typed blocks, and design-v2 validation against an explicitly supplied
+reviewed bank while retaining the 1 MiB limit and rejecting unknown fields.
+It is part of `npm run check` and `npm run release`; database writes, runtime
+rendering, publication, and old-reader changes are intentionally not included in
+this checkpoint.

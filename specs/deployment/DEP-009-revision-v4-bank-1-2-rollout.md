@@ -134,3 +134,7 @@ The YouTube normalizer and request-scoped persistence adapter are implemented
 without network access. Admission is independently disabled by default through
 `SUQPAGE_YOUTUBE_ADMISSION_ENABLED=0`; stored exports expose only opaque asset
 keys. CSP enablement and browser rendering remain disabled and unclaimed.
+The additive revision-v4 domain document is now validated independently of the
+retained v1-v3 reader and is included in local/release gates. No database row,
+default writer, release-registry entry, CSP directive, or public renderer was
+changed by this parser checkpoint.
