@@ -5,11 +5,13 @@ accepted target in `ADR-0005` is a versioned bank of reviewed components and
 strict, non-executable AI design proposals.
 
 The files `component-bank.schema.json` and `showroom-proposal.schema.json`
-describe the syntactic foundation for that target. SuqPage does **not** yet have
-a composition renderer, proposal import screen, component-bank release, or
-external AI provider integration. A JSON document that matches the portable
-schema is not authorized for preview, persistence, or publication until later
-server-side semantic, tenant, revision, and compatibility validation exists.
+describe the syntactic foundation for that target. SuqPage now has the reviewed
+repository release `showroom-bank@1.0.0` and a staff-only visual laboratory. It
+does **not** yet have a public composition renderer, proposal import screen,
+revision-schema integration, client-content mapper, or external AI provider
+integration. A JSON document that matches the portable schema is not authorized
+for preview, persistence, or publication until later server-side semantic,
+tenant, revision, provenance, and compatibility validation exists.
 
 Use `ShowroomTemplate.tsx`, `design-manifest.json`, and `sample-catalog.json` only
 for the current reviewed-code workflow described below.
@@ -48,6 +50,10 @@ After the later roadmap phases are implemented, an external AI tool will receive
 a sanitized component-bank package and return only a proposal matching
 `showroom-proposal.schema.json`. It will not return executable tenant code,
 receive database credentials, write a revision, or publish a showroom.
+
+Authorized staff can currently inspect the admitted components and token systems
+at `/dashboard/design-bank`. The laboratory uses synthetic fixture content and
+is not an AI export, tenant preview, or publication tool.
 
 The authoritative delivery sequence and remaining gates are in
 `docs/SHOWROOM-COMPOSITION-ROADMAP.md`.

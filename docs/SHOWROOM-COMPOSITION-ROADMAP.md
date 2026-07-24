@@ -40,6 +40,9 @@ and combinations fail deterministically without changing runtime behavior.
 
 ### 2. Curated bank and visual laboratory
 
+Status: completed and verified on 2026-07-24 by `FE-004`, `BE-005`, and
+`DEP-004`.
+
 - Extract or create a small orthogonal set of headers, heroes, navigation,
   catalog grids, trust/story sections, calls to action, and footers.
 - Define scoped styling, shared platform callbacks, responsive behavior,
@@ -49,6 +52,15 @@ and combinations fail deterministically without changing runtime behavior.
 
 Exit: every admitted component has reviewed code, metadata, fixtures, responsive
 screenshots, accessibility evidence, and compatibility constraints.
+
+Current release evidence: `showroom-bank@1.0.0` contains 42 component variants
+across all eight slots, 13 scoped token systems, exact static-registry parity,
+and 12,480 required-slot combinations. The authenticated laboratory renders
+every component using bounded synthetic content. Desktop and 390-pixel
+screenshots were reviewed locally without committing generated artifacts.
+Automated screenshot-baseline infrastructure remains a later enhancement;
+current evidence is source isolation, contract tests, production build, visual
+review, and browser acceptance.
 
 ### 3. Backward-compatible revision schema and composition renderer
 

@@ -138,8 +138,12 @@ Never refactor the four showrooms into a single visually generic renderer.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components
 and bounded tokens as declarative JSON, while SuqPage validates and renders it.
-The composition renderer, bank implementations, revision persistence, and
-staff import workflow remain planned until their later specs and evidence pass.
+The current `showroom-bank@1.0.0` release contains 42 reviewed component
+variants across eight section families and 13 cross-industry token systems.
+Authorized staff can inspect every component in a synthetic, read-only visual
+laboratory. The public composition renderer, revision persistence, AI proposal
+import, and client-content mapping remain planned until their later specs and
+evidence pass.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -597,7 +601,8 @@ delivery activity, publish approved revisions, and perform retained-version
 rollback. Team members see only assigned requests and their associated
 read-only business context; they can ask clarifying questions and prepare
 private revisions but cannot invite, assign, publish, or perform customer
-operations.
+operations. Platform administrators, operations managers, and team members can
+view the internal showroom component laboratory; clients cannot.
 
 ### Public customer
 
@@ -656,6 +661,10 @@ Current verified behavior:
   and live-showroom context. Assignment changes add or remove that scope
   atomically. Team members cannot invite clients, submit on behalf, assign work,
   or use the current live catalog, settings, design, inquiry, or delivery forms.
+- Platform administrators, operations managers, and team members can open the
+  staff-only component laboratory. It uses synthetic fixture content, exposes no
+  tenant/customer data, and has no revision, AI-provider, or publication action.
+  Clients and anonymous visitors cannot access it.
 - Assigned staff prepare bounded structured business/catalog snapshots in a
   labeled private revision editor. Drafts do not mutate live rows; submitted
   numbered revisions are immutable and later changes create a newer revision.
@@ -770,16 +779,31 @@ AI design workflow:
 9. Publish only after visual and functional review.
 10. Keep the previous design version available for rollback when practical.
 
-### Planned constrained component-bank workflow
+### Constrained component-bank foundation and planned workflow
 
-The accepted future default is a deterministic showroom composition system,
-not runtime execution of tenant-specific AI code. Its completed foundation is
-defined by `BE-004` and `ADR-0005`; the remaining delivery sequence is recorded
-in `docs/SHOWROOM-COMPOSITION-ROADMAP.md` and is not yet production behavior.
+The accepted future default is a deterministic showroom composition system, not
+runtime execution of tenant-specific AI code. `BE-004`, `BE-005`, `FE-004`, and
+`DEP-004` establish the current repository bank and its staff-only visual
+laboratory. The remaining delivery sequence is recorded in
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md` and is not yet public composition
+behavior.
 
 - Approved component implementations, schemas, fixtures, examples,
   compatibility metadata, and tests enter immutable bank releases through the
   repository review and CI workflow.
+- `showroom-bank@1.0.0` currently admits 42 variants: five headers, eight heroes,
+  four navigation treatments, six story/content sections, six catalog
+  treatments, five information/trust sections, four calls to action, and four
+  footers. Thirteen token systems cover luxury, agriculture, honey/food, coffee,
+  artisan, botanical, furniture, manufacturing, makers, trade/importing,
+  beauty, technology, and vibrant retail directions.
+- Required-slot choices and tokens provide 12,480 validated base combinations
+  before optional navigation, content, trust, call-to-action, and bounded
+  component properties are counted. Combination volume never replaces visual,
+  accessibility, compatibility, factual, or client review.
+- The authenticated `/dashboard/design-bank` laboratory renders every admitted
+  component from local synthetic fixture data. It is a review/contact-sheet
+  surface, not a tenant preview, page builder, or publication path.
 - Customer content remains separate from component code. A future revision
   schema will bind canonical content to an exact design manifest and bank
   release for reproducible preview, publication, and rollback.
@@ -821,6 +845,7 @@ Important directories:
 ```text
 app/                  Next.js routes, pages, APIs, and dashboard
 components/           Shared UI and showroom application logic
+components/showroom/bank/  Reviewed component bank, registry, tokens, and laboratory
 lib/                  Authentication, database, security, media, inquiries, delivery
 showroom-sdk/         AI/manual custom-showroom integration package
 scripts/              Setup, migration, backup, restore, preflight, release tests
@@ -835,6 +860,7 @@ npm run reset
 npm run dev
 npm run typecheck
 npm run validate:designs
+npm run test:bank
 npm run test
 npm run build
 npm run test:http
@@ -1077,6 +1103,8 @@ first assembly as the normal path without removing a bounded recovery editor.
 This workflow is planned under `ADR-0005` and
 `docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the current structured revision editor
 remains authoritative until the later implementation and acceptance gates pass.
+Staff may currently use the component laboratory to compare the reviewed bank,
+but it cannot import a proposal or alter a revision.
 
 ---
 
@@ -1089,6 +1117,7 @@ Before packaging or deploying changes, run tests appropriate to the change, incl
 ```bash
 npm run typecheck
 npm run validate:designs
+npm run test:bank
 npm run test
 npm run build
 npm run test:http

@@ -46,6 +46,8 @@ for (const [action, tag] of [
 assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
 assert.equal(packageJson.scripts["test:trace"], "node scripts/test-build-trace.mjs");
+assert.equal(packageJson.scripts["test:bank"], "tsx scripts/test-showroom-bank.ts");
+assert.match(packageJson.scripts.check, /npm run test:bank/, "Standard check must admit the showroom bank");
 assert.match(releaseScript, /node scripts\/test-build-trace\.mjs/, "Release must reject private output-file traces");
 assert.equal(packageJson.scripts.typecheck, "node scripts/typecheck.mjs");
 assert.equal(packageJson.engines.node, ">=22.16.0");

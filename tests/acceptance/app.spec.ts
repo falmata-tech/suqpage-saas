@@ -156,6 +156,16 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByRole("link", { name: "Public site ↗" })).toHaveAttribute("target", "_blank");
   await page.getByRole("link", { name: "◆ SuqPage" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("link", { name: "Design component bank" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
+  await expect(page.getByText("42", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Heroes 8" }).click();
+  await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(8);
+  await page.getByLabel("Preview token system").selectOption("industrial-steel");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/dashboard/requests");
   await expect(page.getByText("Acceptance Market")).toBeVisible();
   await page.getByRole("link", { name: /REQ-/ }).click();
@@ -218,6 +228,9 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByText("Client workspace", { exact:true })).toBeVisible();
   await expect(page.getByRole("link", { name:"Collections & categories" })).toHaveCount(0);
   await expect(page.getByRole("link", { name:"Business settings" })).toHaveCount(0);
+  await page.goto("/dashboard/design-bank");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toHaveCount(0);
   await page.getByRole("link", { name:"Make a request" }).click();
   await expect(page.getByRole("heading", { name:"Request your first showroom" })).toBeVisible();
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
@@ -239,6 +252,8 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
 test("operations manager records on behalf and team member sees only assigned work", async ({page}) => {
   const errors=monitor(page);
   await loginAndChangeKnownPassword(page,"operations@example.test","OperationsTemp123!","OperationsReady123!");
+  await page.goto("/dashboard/design-bank");
+  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
   await page.goto("/dashboard?business=5");
   await expect(page.getByRole("link",{name:"Showroom context ↗"})).toHaveCount(1);
   await page.getByRole("link",{name:"Submit on behalf of client"}).click();
@@ -281,6 +296,8 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.getByRole("button",{name:"Sign out"}).click();
 
   await loginAndChangeKnownPassword(page,"team@example.test","TeamMemberTemp123!","TeamMemberReady123!");
+  await page.goto("/dashboard/design-bank");
+  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
   await page.goto("/dashboard/requests");
   await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
   await expect(page.getByRole("link",{name:"Record on behalf"})).toHaveCount(0);

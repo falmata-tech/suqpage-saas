@@ -4,12 +4,13 @@ export type Capability =
   | "platform:admin"
   | "operations:manage"
   | "customer-operations:manage"
-  | "client:workspace";
+  | "client:workspace"
+  | "design-bank:view";
 
 const grants: Record<AccessRole, ReadonlySet<Capability>> = {
-  platform_admin: new Set(["platform:admin", "operations:manage", "customer-operations:manage"]),
-  operations_manager: new Set(["operations:manage", "customer-operations:manage"]),
-  team_member: new Set(),
+  platform_admin: new Set(["platform:admin", "operations:manage", "customer-operations:manage", "design-bank:view"]),
+  operations_manager: new Set(["operations:manage", "customer-operations:manage", "design-bank:view"]),
+  team_member: new Set(["design-bank:view"]),
   client: new Set(["client:workspace"]),
 };
 
