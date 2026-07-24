@@ -21,7 +21,7 @@ The launch build addresses the independent audit blockers as follows.
 | Inventory inconsistency | Numeric inventory was removed. Availability controls inquiry eligibility; requested quantity is bounded intent from 1–20 and is never treated as stock. |
 | No notifications | Optional Resend email notification is available for business contact emails. |
 | Missing headers | CSP, HSTS, frame denial, nosniff, referrer and permissions policies are configured; powered-by header is disabled. |
-| Vulnerable Next.js/PostCSS patch levels | Next.js 16.2.11 and the PostCSS 8.5.12 override contain the current production-audit fixes; `npm audit --omit=dev` returns zero findings. |
+| Vulnerable Next.js/PostCSS patch levels | Next.js remains 16.2.11; the targeted PostCSS override is pinned to the first `GHSA-r28c-9q8g-f849`-patched release, 8.5.18, without accepting npm's breaking framework downgrade suggestion. The locked audit, release, seven browser scenarios, and container gate pass; replacement remote evidence remains required. |
 | No meaningful tests | Security integration and production HTTP smoke tests are included in `npm run release`. |
 | Cart lost on refresh | Per-showroom cart state persists in local storage. |
 | Duplicate inquiry saves | Client and server idempotency keys deduplicate repeated social-channel actions. |

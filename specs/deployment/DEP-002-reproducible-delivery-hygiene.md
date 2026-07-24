@@ -1,7 +1,7 @@
 ---
 id: DEP-002
 title: Reproducible delivery and repository hygiene
-status: done
+status: in_progress
 related: [BE-003, DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
 last_updated: 2026-07-24
@@ -47,6 +47,8 @@ four-tenant application behavior and single-instance pilot boundary.
   chunks underneath a running test or development server.
 - Reject a production dependency graph containing a known high-severity native
   image-processing vulnerability.
+- Reject a production dependency graph containing a PostCSS release vulnerable
+  to previous-source-map path traversal; retain the supported Next.js version.
 - Define the GitHub checks a repository administrator must require before merge.
 
 ### Non-goals
@@ -99,6 +101,9 @@ four-tenant application behavior and single-instance pilot boundary.
 - The installed dependency graph contains one supported `sharp` version at or
   above the first version patched for current libvips advisories; Next.js must
   not retain a vulnerable optional nested copy.
+- The Next.js PostCSS override is at or above 8.5.18, the first release patched
+  for `GHSA-r28c-9q8g-f849`; remediation must not accept npm's breaking
+  downgrade suggestion.
 - Required GitHub merge checks are `core`, `browser`, and `container`; enforcing
   repository rules is an explicit administrator operation outside a code commit.
 
@@ -163,6 +168,13 @@ Scenario: A new native image advisory blocks release
   THEN the dependency graph contains no vulnerable nested sharp copy
   AND upload decoding and sanitization regression tests pass
   AND the production dependency audit reports no vulnerability
+
+Scenario: A transitive CSS processor advisory blocks release
+  GIVEN the locked Next.js graph resolves PostCSS at a vulnerable version
+  WHEN the production dependency audit reports GHSA-r28c-9q8g-f849
+  THEN the exact PostCSS override is raised to the first compatible patched release
+  AND Next.js is not downgraded or replaced
+  AND the complete build, CSS, browser, and dependency gates pass
 ```
 
 ## Quality impact
@@ -199,6 +211,7 @@ tokens, or environment secrets.
 | Acceptance build output is unique, ignored, and safely cleaned | contract/browser | `scripts/test-workflow.mjs`, `scripts/acceptance-runner.mjs` |
 | Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
 | Native image dependency is patched without a nested vulnerable copy | security/dependency | `npm ls sharp --all`, `scripts/test-security.ts`, `npm audit --omit=dev` |
+| CSS processor dependency is patched without a framework downgrade | security/dependency | `npm ls postcss --all`, `npm audit --omit=dev`, `npm run build` |
 | Existing application behavior remains intact | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -305,3 +318,19 @@ Local exact-origin and trace regression evidence on 2026-07-24:
   production browser scenarios, and `npm run test:container` passed. The
   container verified exact compiled origins, 41 bounded output-file traces,
   non-root preflight, health, credential-safe logs, and failure-safe cleanup.
+
+New advisory checkpoint on 2026-07-24:
+
+- The release audit newly reported `GHSA-r28c-9q8g-f849` against the existing
+  `postcss@8.5.12` override. The advisory identifies 8.5.18 as the first patched
+  release. Local remediation raises only that override and explicitly rejects
+  npm's unsafe Next.js 9.3.3 downgrade suggestion.
+- `npm ci` reproduced the lock, `npm ls postcss --all` resolved only overridden
+  `postcss@8.5.18` beneath unchanged `next@16.2.11`, `npm audit --omit=dev`
+  reported zero vulnerabilities, and the production build passed.
+- The complete release passed its 42-trace privacy check, HTTP, type, domain,
+  security, adapter, request, revision, and zero-vulnerability audit gates; all
+  seven production-browser scenarios and the isolated non-root container gate
+  passed against the patched graph.
+- This spec remains `in_progress` only until replacement remote `core`,
+  `browser`, and `container` checks pass.
