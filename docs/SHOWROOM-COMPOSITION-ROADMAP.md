@@ -124,7 +124,12 @@ cross-tenant, hidden-field, media, and stale-version test passes.
 
 ### 4. Full AI showroom recipe import and focused staff studio
 
-Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
+Status: verified private checkpoint under `FE-007`, `BE-008`, and `DEP-007`.
+The portable schema, sanitized brief, verified-image registry, strict manual
+import, idempotent private draft, exact preview, client-review/publication path,
+and emergency disable are implemented. Typed section-content blocks, focused
+post-import controls, controlled YouTube support, and final spec completion
+remain planned; the three controlling specs therefore remain `ready`.
 
 #### 4.1 Portable content and recipe contracts
 

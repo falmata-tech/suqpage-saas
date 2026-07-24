@@ -34,6 +34,25 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   migration/restore, release, container, and seven-scenario production browser
   coverage on 2026-07-22.
 
+## Verified checkpoint — manual AI showroom recipes
+
+- Outcome: assigned staff can admit verified private images, export a sanitized
+  request-scoped AI brief, import a strict complete content/design recipe, and
+  move its exact private preview through client approval and controlled
+  publication without giving an external provider application authority.
+- Controlling specs: `FE-007`, `BE-008`, and `DEP-007` remain `ready` because
+  the broader initiative is not complete.
+- Delivered checkpoint: portable schemas, opaque image keys, strict provenance
+  and reconciliation, idempotent revision-v3 draft metadata, staff studio,
+  preview workflow, recovery navigation, and an emergency disable switch.
+- Evidence: commits `ef00c04` and `c67466d`; standard check, production release,
+  7/7 browser acceptance, container privacy/build, and operations restore gates
+  passed on 2026-07-24.
+- Remaining, not launch-blocking for the image-based pilot: typed section-content
+  blocks, focused post-import controls, and controlled YouTube support. These
+  require an explicitly promoted revision/component-bank release rather than an
+  unscoped pre-launch expansion.
+
 ## Now — make the controlled pilot trustworthy
 
 ### Reproducible delivery and repository hygiene
@@ -59,6 +78,9 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   behavior.
 - Define measurable pilot success and operational capacity before accepting a
   broader onboarding feature.
+- Use pilot evidence to decide whether the remaining `FE-007`/`BE-008`/`DEP-007`
+  typed-content, focused-control, and provider work should be promoted to
+  **Now** as one versioned release or split into smaller accepted outcomes.
 
 No product feature in this section is authorized for implementation merely by
 being listed here; it must first be promoted to **Now** and specified.
