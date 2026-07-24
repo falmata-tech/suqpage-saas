@@ -129,3 +129,7 @@ production-browser scenarios, and the isolated container privacy/build gate
 pass. V4 persistence/rendering, provider/CSP, operations migration/restore,
 320-pixel and pairwise visual admission, remote checks, and rollout evidence
 remain.
+
+The pure YouTube normalizer is also implemented and tested without network or
+persistence access. Provider storage, capability switching, CSP enablement, and
+browser rendering remain disabled and unclaimed.

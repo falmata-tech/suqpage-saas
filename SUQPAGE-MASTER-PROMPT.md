@@ -158,8 +158,10 @@ manager-publication path. Components now declare image media-slot requirements,
 and recipes may use only request-scoped opaque asset keys. Remote image URLs,
 embed markup, arbitrary providers, inventory, and cross-tenant assets are
 rejected. A strict six-type content-block parser, additive design-v2 validator,
-and portable v2 schemas now exist, but revision-v4 persistence, focused
-post-import controls, and controlled YouTube admission/rendering remain planned
+and portable v2 schemas now exist. Controlled YouTube watch/share URL
+normalization and privacy-enhanced embed derivation are implemented as a pure,
+network-free contract, but provider persistence, CSP-gated rendering,
+revision-v4 persistence, and focused post-import controls remain planned
 completion work. The implemented
 checkpoint passes the standard check, production release, seven-role browser
 acceptance, container privacy/build, and operations restore gates; the feature

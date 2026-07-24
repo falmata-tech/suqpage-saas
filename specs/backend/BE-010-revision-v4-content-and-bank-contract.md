@@ -101,7 +101,7 @@ Scenario: Unauthorized focused command is called directly
 |---|---|---|
 | Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-content-blocks.ts`, `scripts/test-showroom-recipe.ts` |
 | V3/v4 and bank 1.1/1.2 exact compatibility | integration | `scripts/test-showroom-composition-v2.ts`, planned v4 migration tests |
-| Provider normalization and unsafe-input denial | unit/security | `scripts/test-security.ts`, planned provider tests |
+| Provider normalization and unsafe-input denial | unit/security | `scripts/test-youtube-provider.ts`, `scripts/test-security.ts` |
 | Atomic authorized focused commands | integration/security | planned focused-command tests |
 | Exact preview/publication/rollback | integration/browser | `scripts/test-revisions.ts`, `tests/acceptance/app.spec.ts` |
 
@@ -128,5 +128,7 @@ parser wraps the unchanged v1 validator and enforces exact one-time compatible
 block assignment and named content-media slot counts using bank-v2 compatibility
 metadata. Portable bank/design-v2 schemas and a frozen 67-component bank-1.2
 candidate are available to the synthetic laboratory only. Revision-v4 storage,
-typed rendering, runtime bank-1.2 admission, provider admission, and focused
-commands remain.
+typed rendering, runtime bank-1.2 admission, provider persistence/CSP rendering,
+and focused commands remain. The pure provider boundary now accepts only exact
+HTTPS watch/share hosts, rejects playlists/shorts/embed markup and lookalikes,
+and derives only a fixed privacy-enhanced embed URL from a validated managed ID.
