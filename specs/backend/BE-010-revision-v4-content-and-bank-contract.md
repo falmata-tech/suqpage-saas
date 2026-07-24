@@ -140,3 +140,7 @@ reviewed bank while retaining the 1 MiB limit and rejecting unknown fields.
 It is part of `npm run check` and `npm run release`; database writes, runtime
 rendering, publication, and old-reader changes are intentionally not included in
 this checkpoint.
+Schema migration 13 now records and indexes the exact snapshot schema version on
+each revision, backfills it from validated retained JSON, checks parity, and
+makes the marker immutable after submission. Existing creation/import writers
+remain v3, so this migration alone cannot create or publish v4 data.

@@ -83,6 +83,7 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=10").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=11").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=12").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=13").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('products') WHERE name='stock_count'").get().count,0);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('option_values') WHERE name='stock_count'").get().count,0);
   assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);

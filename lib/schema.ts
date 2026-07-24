@@ -287,6 +287,7 @@ export function migrateDatabase(
       base_content_version INTEGER NOT NULL CHECK(base_content_version > 0),
       status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','awaiting_review','approved','rejected','published','superseded')),
       snapshot_json TEXT NOT NULL,
+      snapshot_schema_version INTEGER NOT NULL DEFAULT 3 CHECK(snapshot_schema_version IN (1,2,3,4)),
       summary TEXT NOT NULL DEFAULT '',
       recipe_import_hash TEXT,
       recipe_metadata_json TEXT,
@@ -886,6 +887,53 @@ export function migrateDatabase(
           ON recipe_media_assets(request_id,created_at,id);
       `);
       db.prepare("INSERT INTO schema_migrations(version) VALUES(12)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const revisionVersionMarkerApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=13")
+    .get();
+  if (!revisionVersionMarkerApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(
+        db,
+        "content_revisions",
+        "snapshot_schema_version INTEGER NOT NULL DEFAULT 3 CHECK(snapshot_schema_version IN (1,2,3,4))",
+      );
+      db.exec(`
+        UPDATE content_revisions
+        SET snapshot_schema_version=CAST(json_extract(snapshot_json,'$.schemaVersion') AS INTEGER)
+        WHERE json_extract(snapshot_json,'$.schemaVersion') IN (1,2,3,4);
+        DROP TRIGGER IF EXISTS submitted_revision_content_immutable;
+        CREATE TRIGGER submitted_revision_content_immutable
+        BEFORE UPDATE OF
+          snapshot_json,snapshot_schema_version,summary,base_content_version,
+          recipe_import_hash,recipe_metadata_json,recipe_imported_by_user_id,
+          recipe_imported_at
+        ON content_revisions
+        WHEN OLD.status != 'draft'
+        BEGIN
+          SELECT RAISE(ABORT, 'submitted revision content is immutable');
+        END;
+        CREATE INDEX IF NOT EXISTS revision_schema_version_idx
+          ON content_revisions(snapshot_schema_version,status);
+      `);
+      const invalid = db
+        .prepare(
+          `SELECT COUNT(*) count FROM content_revisions
+           WHERE snapshot_schema_version != CAST(json_extract(snapshot_json,'$.schemaVersion') AS INTEGER)
+              OR snapshot_schema_version NOT IN (1,2,3,4)`,
+        )
+        .get() as { count: number };
+      if (invalid.count) {
+        throw new Error("Revision schema-version markers do not match stored snapshots.");
+      }
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(13)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

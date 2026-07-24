@@ -138,3 +138,7 @@ The additive revision-v4 domain document is now validated independently of the
 retained v1-v3 reader and is included in local/release gates. No database row,
 default writer, release-registry entry, CSP directive, or public renderer was
 changed by this parser checkpoint.
+Migration 13 adds the non-destructive revision snapshot-version marker, verifies
+stored-marker parity, and extends submitted-revision immutability. Revision and
+backup/restore integration tests pass with the marker, while v4 rows and v4
+managed-file restore remain intentionally outside this checkpoint.

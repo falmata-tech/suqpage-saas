@@ -1246,6 +1246,10 @@ The separate revision-v4 domain parser is implemented: it enforces the existing
 design-v2 compatibility, and an explicitly supplied reviewed bank. It does not
 change the v1-v3 reader, database writer, runtime resolver, or publication path;
 those persistence and rendering steps remain planned under the same specs.
+Schema migration 13 adds an indexed, immutable revision snapshot-version marker
+and verifies it against each stored JSON document. Existing writers still create
+v3 rows; the marker prepares additive v4 persistence without rewriting retained
+snapshots or enabling v4 creation.
 
 ---
 

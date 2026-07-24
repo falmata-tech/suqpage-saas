@@ -46,6 +46,7 @@ export type ContentRevisionStatus = "draft"|"awaiting_review"|"approved"|"reject
 export type ContentRevision = {
   id:number; request_id:number; business_id:number; revision_number:number;
   base_content_version:number; status:ContentRevisionStatus; snapshot_json:string;
+  snapshot_schema_version:1|2|3|4;
   summary:string; recipe_import_hash:string|null; recipe_metadata_json:string|null;
   recipe_imported_by_user_id:number|null; recipe_imported_at:string|null;
   created_by_user_id:number; submitted_at:string|null;
