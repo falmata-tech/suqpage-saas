@@ -6,10 +6,13 @@ by accepted feature specs and becomes current only with mapped evidence.
 
 ## Outcome
 
-Turn an authenticated client's unstructured request and private references into
-a validated showroom proposal assembled from a reviewed component bank. Team
-members review the rendered result and exceptions; the client-review and
-manager-publication workflow remains the final authority.
+Turn an authenticated client's unstructured request, authorized current
+showroom content, source facts, and private asset references into one validated
+full-showroom recipe. External AI structures the dynamic catalog and page copy
+through a content schema and independently proposes a composition through the
+design schema. Team members review the rendered result and exceptions rather
+than manually entering every field; client review and manager publication
+remain the final authority.
 
 ## Durable boundaries
 
@@ -19,8 +22,13 @@ manager-publication workflow remains the final authority.
   tests are versioned in the repository.
 - A revision stores or references the exact immutable bank release and design
   manifest needed to reproduce its preview and publication.
-- Customer content remains separate from component code and retains source
-  provenance. Missing facts produce questions.
+- Customer content remains separate from component code and design. A versioned
+  content proposal supports dynamic catalog lists and typed hero, story,
+  highlight/trust, information, and call-to-action blocks. Factual/media fields
+  retain source provenance; missing facts produce questions.
+- One recipe envelope pins separately versioned content/design documents,
+  schema/bank releases, provenance, source reconciliation, questions, and
+  warnings. It never grants either document independent publication authority.
 - Former renderer keys and schema-v1 revisions are read-only recovery inputs.
   Current seeds, invitations, drafts, publications, and rollback writes are
   schema v2 and use the composition renderer.
@@ -85,20 +93,73 @@ Status: completed and verified on 2026-07-24 by `FE-006`, `BE-007`, and
 Exit evidence: private preview, exact approval, atomic publication, retained
 rollback, inquiry behavior, and fail-closed invalid-manifest behavior pass.
 
-### 4. Manual AI proposal import and staff exception workflow
+### 4. Full AI showroom recipe import and focused staff studio
 
-Status: next planned phase.
+Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
-- Export a sanitized brief containing the selected bank release, schemas,
-  examples, request facts, and authorized asset references.
-- Import strict JSON manually from the team's external AI account.
-- Validate syntax, semantics, compatibility, tenant/asset scope, factual
-  provenance, and revision limits before creating a draft.
-- Show preview, structured differences, questions, warnings, and focused
-  correction controls rather than making the large form the default workflow.
+#### 4.1 Portable content and recipe contracts
+
+- Add a strict portable content schema for business/meta/contact values,
+  dynamic collections, categories, products, option groups, availability,
+  stock, allowed media keys, and typed section-content blocks.
+- Keep the existing design proposal as a separately versioned schema and extend
+  component admission with compatible typed content contracts.
+- Add a small recipe-envelope schema that pins content/design versions, bank
+  release, provenance, expected/returned counts, stable-key reconciliation,
+  questions, warnings, and rationale.
+- Publish synthetic complete examples for no-catalog/service, small artisan, and
+  larger multi-collection showrooms. Examples demonstrate structure and
+  dynamic counts; they are not fixed templates or customer data.
+
+#### 4.2 Sanitized brief export
+
+- Export/copy one request-scoped package containing schemas, bank/component
+  metadata, synthetic examples, source facts, allowed opaque asset keys,
+  expected counts, and the exact base content version.
+- For a new showroom, request a complete desired content/design pair. For a
+  change, include the authorized current snapshot and require a complete
+  replacement recipe with retained stable keys and explicit removals.
+- Do not export credentials, database IDs, storage paths, unrelated tenant
+  data, customer inquiries, invitation/session data, or image bytes.
+
+#### 4.3 Strict manual import and cross-validation
+
+- Import JSON manually from the team's approved external AI account; SuqPage
+  performs no provider call in this phase.
+- Validate content, design, and envelope independently, then cross-validate
+  component/content-block types, bindings, asset scope, provenance,
+  completeness, item relationships, version limits, and stale base state.
+- Permit dynamic item counts through existing bounded maxima. Never silently
+  truncate, repair, invent, or drop catalog/content entries.
+- Treat AI marketing language as labeled draft copy. Contacts, stock,
+  availability, specifications, certifications, product facts, media, and
+  unexplained removals require attributable source evidence.
+
+#### 4.4 Candidate preview and focused correction
+
+- Show grouped validation paths, questions, warnings, count/difference summaries,
+  and the exact private candidate preview before persistence.
+- Make corrected re-import the normal content/catalog correction path.
+- Offer focused compatible controls for approved components, token packs,
+  motion, decoration, and content-block association. Do not turn the workflow
+  into another page of unrestricted forms.
+- Keep the existing structured editor as an administrative recovery surface
+  during rollout, not the routine staff production workflow.
+
+#### 4.5 Versioned revision and rollout
+
+- Persist valid candidates in revision schema v3 with separate exact content
+  and design documents plus minimum durable provenance/reconciliation.
+- Keep v2 as a read/upgrade recovery input during the controlled migration.
+- Preserve immutable submission, exact client approval, manager publication,
+  stale-version rejection, and retained monotonic rollback.
+- Enable one test request, then all roles and four example clients, before
+  making the recipe workspace the default.
 
 Exit: an assigned team member can move one real pilot request from sanitized
-brief to valid private preview without provider credentials or live mutation.
+brief to a complete valid private preview—dynamic catalog, all page copy,
+media assignments, and design—without provider credentials, manual per-item
+entry, live mutation, or publication authority.
 
 ### 5. Client review, publication, and four-client migration
 

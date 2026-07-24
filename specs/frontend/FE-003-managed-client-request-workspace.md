@@ -2,9 +2,9 @@
 id: FE-003
 title: Managed client request and review workspace
 status: done
-related: [BE-003, BE-007, DEP-003, FE-006, ADR-0004]
+related: [BE-003, BE-007, DEP-003, FE-006, FE-007, ADR-0004]
 owners: [product, frontend]
-last_updated: 2026-07-22
+last_updated: 2026-07-24
 change_level: L3
 ---
 

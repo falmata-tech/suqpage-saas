@@ -4,7 +4,7 @@ title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
 deciders: [SuqPage]
-related: [BE-004, BE-005, BE-006, BE-007, FE-004, FE-005, FE-006, DEP-004, DEP-005, DEP-006, ADR-0001, ADR-0004]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, FE-004, FE-005, FE-006, FE-007, DEP-004, DEP-005, DEP-006, DEP-007, ADR-0001, ADR-0004]
 ---
 
 # ADR-0005 — Constrained showroom composition instead of tenant-generated code
@@ -53,21 +53,34 @@ Adopt option 3 as the default future production path.
 
 - Approved component implementations, metadata, fixtures, visual examples, and
   tests live in the repository and enter through normal code review and CI.
-- A design proposal contains only an exact bank release, approved component
+- External AI returns a versioned showroom recipe containing two independently
+  valid documents: a complete content proposal and a design proposal. A small
+  recipe envelope pins their schema/bank versions, provenance, source
+  reconciliation, questions, and warnings.
+- The content proposal contains bounded business/meta/contact fields, dynamic
+  collections/categories/products/options, allowed media keys, and typed
+  section-content blocks for hero, story, highlights/trust, information, and
+  calls to action. The number of catalog entries is dynamic within application
+  limits and is never fixed by a template.
+- The design proposal contains only an exact bank release, approved component
   references, allowed token choices, bounded properties, and declared canonical
-  data bindings. It contains no executable code.
-- Customer content and a design manifest remain separate versioned concerns.
-  Combining them for preview does not bake private or tenant-specific facts into
-  component code.
+  data/content-block bindings. Neither document contains executable code.
+- Customer content and a design manifest remain separate versioned concerns,
+  cross-validated and combined only for a revision/preview. Private or
+  tenant-specific facts are never baked into component code.
 - External AI is advisory. It receives a sanitized, bounded package and returns
   JSON plus questions, warnings, and rationale. It receives no persistence,
   credentials, tenant-wide export, approval, or publication capability.
 - Server-side schema, semantic, compatibility, provenance, tenant, revision,
   and publication validation remain authoritative.
 - Missing factual information becomes a question. AI-generated marketing copy
-  may be proposed, but contact details, inventory, product claims,
-  certifications, availability, and specifications require an attributable
-  source.
+  may be proposed and labeled, but contact details, inventory, product claims,
+  certifications, availability, specifications, and media require an
+  attributable exported source.
+- First-showroom and change imports are complete desired snapshots, not
+  ambiguous patches. A change brief includes the authorized current snapshot;
+  retained stable keys, explicit removals, expected/returned counts, and source
+  reconciliation make omissions reviewable.
 - Initial operation will use manual export/import after the composition renderer
   and staff review experience exist. A direct provider adapter requires a later
   accepted spec, provider/privacy decision, bounded failures, and operational
@@ -89,7 +102,8 @@ recovery inputs, not selectable product modes.
 - AI can generate many combinations without injecting production code.
 - Immutable component and bank versions make previews, publication, rollback,
   and support reproducible.
-- Teams review a visual proposal and exceptions instead of starting with many
+- Teams review a complete content/design proposal and exceptions instead of
+  entering every item, collection, page-copy field, and design choice through
   disconnected forms.
 - Component defects can be fixed and tested centrally.
 - The external AI vendor can be changed without changing core showroom
@@ -97,9 +111,10 @@ recovery inputs, not selectable product modes.
 
 ### Negative / debt
 
-- SuqPage must build a curated component bank, compatibility model, composition
-  renderer, proposal import, preview/diff UI, visual regression suite, and
-  revision-schema compatibility before the model is operational.
+- SuqPage must build portable content/recipe schemas, typed section-content
+  contracts, provenance/reconciliation, recipe import, focused correction UI,
+  preview/diff behavior, revision-v3 compatibility, and additional release
+  evidence before the complete recipe workflow is operational.
 - Curating orthogonal components and useful examples is ongoing product work;
   quantity alone does not create a reliable bank.
 - Not every theoretically possible component combination can be exhaustively
@@ -118,4 +133,6 @@ containment, touch sizing, and reduced-motion behavior. `FE-006`, `BE-007`, and
 `DEP-006` prove schema-v2 persistence, deterministic public/private rendering,
 four-client migration, client-approved publication, rollback, recovery, and
 role/browser behavior. Private proposal-import authorization and provider
-privacy/failure boundaries remain later work.
+privacy/failure boundaries remain later work. `FE-007`, `BE-008`, and `DEP-007`
+define the ready manual full-recipe import/studio phase; they do not describe
+current implemented behavior until their mapped evidence passes.

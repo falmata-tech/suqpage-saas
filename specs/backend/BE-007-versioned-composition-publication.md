@@ -2,7 +2,7 @@
 id: BE-007
 title: Versioned composition revision and publication
 status: done
-related: [FE-003, FE-006, DEP-006, BE-003, BE-004, BE-005, BE-006, ADR-0004, ADR-0005]
+related: [FE-003, FE-006, DEP-006, BE-003, BE-004, BE-005, BE-006, BE-008, ADR-0004, ADR-0005]
 owners: [product, backend, security]
 last_updated: 2026-07-24
 change_level: L3

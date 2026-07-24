@@ -147,8 +147,10 @@ Authorized staff can inspect every component in a synthetic, read-only visual
 laboratory, including a true container-based 390-pixel phone preview. `FE-006`,
 `BE-007`, and `DEP-006` establish the current public/private composition
 renderer, revision-schema-v2 persistence, exact client-content mapping,
-publication, rollback, and four-example-client cutover. Manual AI proposal
-import and a focused staff composition studio remain planned.
+publication, rollback, and four-example-client cutover. `FE-007`, `BE-008`, and
+`DEP-007` define the ready next phase: manual import of a complete AI showroom
+recipe with separately validated dynamic content and design, followed by a
+focused staff studio. That workflow is planned and not currently implemented.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -818,19 +820,29 @@ remaining AI-assisted delivery sequence is recorded in
 - Customer content remains separate from component code. Revision schema v2
   binds canonical content to an exact validated design manifest and bank
   release for reproducible preview, publication, and rollback.
-- External AI returns only bounded declarative JSON containing approved
-  component references, allowed token choices, properties, bindings, questions,
-  warnings, and rationale. It receives no credentials, database access,
-  publication authority, or ability to register component code.
+- The currently implemented external-tool contract validates bounded design JSON
+  containing approved component references, allowed token choices, properties,
+  bindings, questions, warnings, and rationale. It receives no credentials,
+  database access, publication authority, or ability to register component code.
 - Portable JSON schemas guide external tools but never replace authoritative
   server-side schema, compatibility, provenance, tenant, revision, client-
   approval, and publication checks.
 - Missing customer facts produce questions. AI may suggest presentation and
   marketing copy, but it cannot invent contacts, stock, availability,
   certifications, specifications, product facts, or delivery claims.
-- The next operational composition phase will use a reviewed manual JSON
-  export/import workflow. A direct AI-provider adapter requires a later
-  accepted provider, privacy, failure, cost, and deployment contract.
+- The ready next operational phase uses a full showroom recipe with a separate
+  content proposal and design proposal inside a versioned envelope. Content
+  covers dynamic collections/categories/products/options, business/meta/contact
+  values, allowed media keys, and typed hero, story, highlights/trust,
+  information, and call-to-action blocks. Dynamic counts remain bounded, not
+  fixed by examples.
+- That planned phase exports a sanitized request/current-snapshot brief,
+  schemas, bank contract, source facts, allowed opaque asset keys, expected
+  counts, and complete synthetic examples. Staff manually import returned JSON,
+  inspect provenance/completeness and an exact private preview, and use focused
+  compatible corrections instead of routine per-field entry.
+- A direct AI-provider adapter still requires a later accepted provider,
+  privacy, failure, cost, and deployment contract.
 - All four example clients now use distinct schema-v2 compositions. The four
   former renderer keys and schema-v1 parser remain read-only recovery bridges
   for pre-cutover backups; no current seed, invitation, draft, publication, or
@@ -1130,11 +1142,15 @@ The current workflow stores an exact validated composition in each schema-v2
 revision and renders it consistently in private preview and public publication.
 The structured revision editor remains a bounded content-recovery surface; it
 shows the immutable composition identity instead of offering old renderer keys.
-The next target workflow is request, sanitized AI brief, strict proposal import,
-validation report, private preview, focused exception correction, client review,
-and controlled publication. Manual proposal import and the focused composition
-studio remain planned under `ADR-0005` and
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md`. The component laboratory remains
+The ready next target under `FE-007`, `BE-008`, and `DEP-007` is request,
+sanitized AI brief, strict full-recipe import, grouped content/design/
+provenance validation, count and difference reconciliation, private preview,
+focused exception correction, client review, and controlled publication.
+Routine staff should not enter every collection, category, item, hero field,
+story block, or design choice manually. A change recipe is a complete desired
+snapshot based on the authorized current version, not an ambiguous patch.
+Manual recipe import and the focused studio remain planned under `ADR-0005` and
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the component laboratory remains
 synthetic and cannot itself alter a tenant revision.
 
 ---

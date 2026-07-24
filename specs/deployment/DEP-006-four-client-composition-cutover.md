@@ -2,7 +2,7 @@
 id: DEP-006
 title: Four-client composition cutover and recovery
 status: done
-related: [FE-006, BE-007, DEP-001, DEP-003, DEP-004, DEP-005, ADR-0005]
+related: [FE-006, BE-007, DEP-001, DEP-003, DEP-004, DEP-005, DEP-007, ADR-0005]
 owners: [operations, security, product]
 last_updated: 2026-07-24
 change_level: L3
