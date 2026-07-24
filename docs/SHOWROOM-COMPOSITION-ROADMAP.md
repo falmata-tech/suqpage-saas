@@ -1,0 +1,117 @@
+# Showroom composition roadmap
+
+This roadmap sequences the accepted direction in `ADR-0005`. It is not a claim
+that the later capabilities are implemented. Observable behavior is controlled
+by accepted feature specs and becomes current only with mapped evidence.
+
+## Outcome
+
+Turn an authenticated client's unstructured request and private references into
+a validated showroom proposal assembled from a reviewed component bank. Team
+members review the rendered result and exceptions; the client-review and
+manager-publication workflow remains the final authority.
+
+## Durable boundaries
+
+- External AI proposes declarative JSON; it never supplies executable tenant
+  code or writes SuqPage persistence.
+- Component code, schemas, fixtures, screenshots, compatibility metadata, and
+  tests are versioned in the repository.
+- A revision stores or references the exact immutable bank release and design
+  manifest needed to reproduce its preview and publication.
+- Customer content remains separate from component code and retains source
+  provenance. Missing facts produce questions.
+- Existing renderer keys and schema-v1 revisions remain readable until a tested
+  migration and rollback path explicitly retires them.
+
+## Delivery sequence
+
+### 1. Contract foundation — BE-004
+
+Status: completed and verified on 2026-07-24.
+
+- Define and test bounded component-bank and design-proposal contracts.
+- Publish portable syntactic JSON schemas for external-tool guidance.
+- Keep the contract pure: no database, files, network, renderer registration,
+  or customer content.
+
+Exit: invalid releases, components, properties, bindings, capabilities, slots,
+and combinations fail deterministically without changing runtime behavior.
+
+### 2. Curated bank and visual laboratory
+
+- Extract or create a small orthogonal set of headers, heroes, navigation,
+  catalog grids, trust/story sections, calls to action, and footers.
+- Define scoped styling, shared platform callbacks, responsive behavior,
+  accessibility requirements, fixtures, and visual examples.
+- Build an authenticated staff gallery/contact sheet and automated component
+  contract tests.
+
+Exit: every admitted component has reviewed code, metadata, fixtures, responsive
+screenshots, accessibility evidence, and compatibility constraints.
+
+### 3. Backward-compatible revision schema and composition renderer
+
+- Add revision schema v2 with a separate `designManifest`.
+- Continue parsing and rendering schema-v1 revisions and the four current design
+  keys.
+- Render approved components deterministically; forbid dynamic import paths,
+  raw markup, arbitrary style values, and component-owned persistence.
+
+Exit: one example showroom reaches functional and visual parity through the new
+renderer while all existing publications and rollback snapshots still work.
+
+### 4. Manual AI proposal import and staff exception workflow
+
+- Export a sanitized brief containing the selected bank release, schemas,
+  examples, request facts, and authorized asset references.
+- Import strict JSON manually from the team's external AI account.
+- Validate syntax, semantics, compatibility, tenant/asset scope, factual
+  provenance, and revision limits before creating a draft.
+- Show preview, structured differences, questions, warnings, and focused
+  correction controls rather than making the large form the default workflow.
+
+Exit: an assigned team member can move one real pilot request from sanitized
+brief to valid private preview without provider credentials or live mutation.
+
+### 5. Client review, publication, and gradual migration
+
+- Reuse exact revision submission, client approval/rejection, stale-version
+  checks, atomic publication, and retained rollback.
+- Browser-test visitor, client, assigned team member, operations manager, and
+  administrator paths.
+- Migrate the remaining example showrooms only after parity and rollback
+  evidence.
+
+Exit: the bank becomes the default production path without removing a working
+legacy renderer prematurely.
+
+### 6. Optional provider adapter
+
+- Select a provider only after reviewing retention, training, regional,
+  credential, private-image, and deletion terms.
+- Add a narrow adapter with bounded input/output, timeout, retry, redaction,
+  audit, idempotency, and operator-visible failure behavior.
+- Keep manual import as a recovery path and never grant the provider publication
+  authority.
+
+Exit: an accepted L3 spec and ADR amendment prove provider security,
+observability, cost controls, and rollback.
+
+## Bank admission rule
+
+A component enters an available bank release only when its implementation,
+schema, examples, isolation checks, accessibility behavior, responsive visual
+evidence, performance budget, compatibility constraints, and required
+smart-showroom callbacks all pass. AI-generated component ideas follow this same
+repository review process; they are never admitted by a tenant proposal.
+
+## Business measures
+
+- Minutes from accepted request to first private preview.
+- Staff correction minutes per proposal.
+- Percentage of proposals accepted without structural correction.
+- Component reuse rate and bank coverage.
+- Client review cycles before approval.
+- Post-publication defect and rollback rate.
+- Cost per proposal and component-maintenance cost.

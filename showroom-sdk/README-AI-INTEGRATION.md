@@ -1,6 +1,18 @@
-# SuqPage Custom Showroom Integration Contract
+# SuqPage Showroom Integration Contract
 
-Use this package when a designer or AI generates a new client showroom.
+The current production path uses separately reviewed showroom renderer code. The
+accepted target in `ADR-0005` is a versioned bank of reviewed components and
+strict, non-executable AI design proposals.
+
+The files `component-bank.schema.json` and `showroom-proposal.schema.json`
+describe the syntactic foundation for that target. SuqPage does **not** yet have
+a composition renderer, proposal import screen, component-bank release, or
+external AI provider integration. A JSON document that matches the portable
+schema is not authorized for preview, persistence, or publication until later
+server-side semantic, tenant, revision, and compatibility validation exists.
+
+Use `ShowroomTemplate.tsx`, `design-manifest.json`, and `sample-catalog.json` only
+for the current reviewed-code workflow described below.
 
 ## Non-negotiable boundaries
 
@@ -14,13 +26,28 @@ Use this package when a designer or AI generates a new client showroom.
 8. Keep a visible inquiry-cart trigger.
 9. Return a manifest describing the design key and supported features.
 
-## AI workflow
+## Current reviewed-code workflow
 
 1. Copy `ShowroomTemplate.tsx`, `design-manifest.json` and `sample-catalog.json` into a separate design workspace.
 2. Ask the AI to redesign every visual section while preserving the integration props and event callbacks.
-3. Copy the returned renderer into `components/showroom/designs.tsx` or its own folder.
-4. Register the business `design_key` in `ShowroomApp.tsx`.
-5. Run `npm run validate:designs` and `npm run build`.
-6. Preview the design using real tenant data before publishing.
+3. Treat all returned code as untrusted proposed source: review it, remove
+   external dependencies and tenant-specific hard-coding, and add tests.
+4. Copy the reviewed renderer into `components/showroom/designs.tsx` or its own
+   folder.
+5. Register the business `design_key` in `ShowroomApp.tsx`.
+6. Run `npm run validate:designs`, `npm run check`, and the applicable release
+   and production-browser gates.
+7. Preview the exact revision using authorized tenant data and publish only
+   after client approval.
 
 The four included tenants demonstrate the pattern: Al Haya, USAshopET, NovaTech and HomeVibe each use a separately coded renderer while sharing SuqPage's smart workflow.
+
+## Planned constrained-composition workflow
+
+After the later roadmap phases are implemented, an external AI tool will receive
+a sanitized component-bank package and return only a proposal matching
+`showroom-proposal.schema.json`. It will not return executable tenant code,
+receive database credentials, write a revision, or publish a showroom.
+
+The authoritative delivery sequence and remaining gates are in
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md`.

@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/showroom-proposal.schema.json",
+  "title": "SuqPage non-executable showroom design proposal",
+  "description": "Syntactic guidance only. SuqPage server-side bank, compatibility, tenant, revision, and publication validation remains authoritative.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "bankRelease",
+    "tokenPack",
+    "rationale",
+    "questions",
+    "warnings",
+    "sections"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "bankRelease": {
+      "type": "string",
+      "pattern": "^showroom-bank@[1-9][0-9]*(\\.[0-9]+){0,2}$",
+      "maxLength": 80
+    },
+    "tokenPack": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "rationale": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "questions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    }
+  },
+  "$defs": {
+    "primitive": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 60
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 1000
+        }
+      ]
+    },
+    "bindingSource": {
+      "enum": [
+        "business.name",
+        "business.tagline",
+        "business.description",
+        "business.logo",
+        "business.hero_title",
+        "business.hero_subtitle",
+        "business.hero_image",
+        "business.contact_methods",
+        "catalog.collections",
+        "catalog.categories",
+        "catalog.products",
+        "catalog.featured_products"
+      ]
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "component",
+        "properties",
+        "bindings"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+          "maxLength": 80
+        },
+        "component": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*@[1-9][0-9]*$",
+          "maxLength": 100
+        },
+        "properties": {
+          "type": "object",
+          "maxProperties": 24,
+          "additionalProperties": {
+            "$ref": "#/$defs/primitive"
+          }
+        },
+        "bindings": {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": {
+            "$ref": "#/$defs/bindingSource"
+          }
+        }
+      }
+    }
+  }
+}

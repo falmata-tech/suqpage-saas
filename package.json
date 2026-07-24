@@ -22,11 +22,12 @@
     "test:operations": "node scripts/test-operations.mjs",
     "test:requests": "tsx scripts/test-requests.ts",
     "test:revisions": "tsx scripts/test-revisions.ts",
+    "test:compositions": "tsx scripts/test-showroom-composition.ts",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
+    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {

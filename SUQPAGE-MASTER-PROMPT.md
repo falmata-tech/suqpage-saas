@@ -105,9 +105,13 @@ Use the terms **inquiry**, **inquiry cart**, **customer inquiry**, and **deliver
 
 ## 5. Non-negotiable design philosophy
 
-### 5.1 Every client showroom is manually designed
+### 5.1 Every client showroom is deliberately designed
 
 Client pages are not generated from one generic layout with different colors.
+The current four showrooms are separately coded renderers. A future composition
+path may assemble a client-specific design from a curated bank of independently
+reviewed components, but component reuse must not collapse distinct brand
+identity into one theme.
 
 Each client may have a separately coded Next.js renderer with its own:
 
@@ -130,7 +134,12 @@ Each client may have a separately coded Next.js renderer with its own:
 
 Shared behavior is acceptable. Shared visual identity is not.
 
-Never refactor the four showrooms into a single visually generic renderer unless the user explicitly requests that change.
+Never refactor the four showrooms into a single visually generic renderer.
+`ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
+external AI may propose an exact combination of approved, versioned components
+and bounded tokens as declarative JSON, while SuqPage validates and renders it.
+The composition renderer, bank implementations, revision persistence, and
+staff import workflow remain planned until their later specs and evidence pass.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -761,6 +770,36 @@ AI design workflow:
 9. Publish only after visual and functional review.
 10. Keep the previous design version available for rollback when practical.
 
+### Planned constrained component-bank workflow
+
+The accepted future default is a deterministic showroom composition system,
+not runtime execution of tenant-specific AI code. Its completed foundation is
+defined by `BE-004` and `ADR-0005`; the remaining delivery sequence is recorded
+in `docs/SHOWROOM-COMPOSITION-ROADMAP.md` and is not yet production behavior.
+
+- Approved component implementations, schemas, fixtures, examples,
+  compatibility metadata, and tests enter immutable bank releases through the
+  repository review and CI workflow.
+- Customer content remains separate from component code. A future revision
+  schema will bind canonical content to an exact design manifest and bank
+  release for reproducible preview, publication, and rollback.
+- External AI returns only bounded declarative JSON containing approved
+  component references, allowed token choices, properties, bindings, questions,
+  warnings, and rationale. It receives no credentials, database access,
+  publication authority, or ability to register component code.
+- Portable JSON schemas guide external tools but never replace authoritative
+  server-side schema, compatibility, provenance, tenant, revision, client-
+  approval, and publication checks.
+- Missing customer facts produce questions. AI may suggest presentation and
+  marketing copy, but it cannot invent contacts, stock, availability,
+  certifications, specifications, product facts, or delivery claims.
+- The first operational release will use a reviewed manual JSON export/import
+  workflow. A direct AI-provider adapter requires a later accepted provider,
+  privacy, failure, cost, and deployment contract.
+- The existing four renderers remain supported until a backward-compatible
+  revision schema, deterministic renderer, visual parity, browser acceptance,
+  and rollback evidence permit gradual migration.
+
 ---
 
 ## 15. Current technical architecture
@@ -1029,6 +1068,16 @@ private previews, approvals, and account security. A request for a business with
 no retained publication is a first-showroom request; after publication it is a
 change request. The server decides this classification.
 
+### Planned AI-assisted staff assembly
+
+The target staff workflow is request, sanitized AI brief, strict proposal
+import, validation report, private preview, focused exception correction, client
+review, and controlled publication. It is intended to replace repetitive form-
+first assembly as the normal path without removing a bounded recovery editor.
+This workflow is planned under `ADR-0005` and
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the current structured revision editor
+remains authoritative until the later implementation and acceptance gates pass.
+
 ---
 
 ## 22. Testing and definition of done
@@ -1160,6 +1209,14 @@ and rollout gates.
 
 Every SuqPage change should move the product toward this experience:
 
-> A social seller receives a beautiful, unmistakably custom digital showroom. The seller can update products and availability without asking a developer. A customer can quickly discover products, select exact options, create one complete inquiry, and reach the seller through the customer’s preferred messaging app. The seller retains the inquiry, follows up, and can initiate delivery through Malikt Board after confirmation—without SuqPage forcing either party into a full ecommerce checkout.
+> A social seller receives a beautiful, unmistakably custom digital showroom
+> without learning a complex site builder. The client describes the business
+> and requested changes in their own words; SuqPage staff turn those instructions
+> into a private, validated proposal, obtain approval for the exact preview, and
+> publish it safely. A customer can quickly discover products, select exact
+> options, create one complete inquiry, and reach the seller through the
+> customer’s preferred messaging app. SuqPage operations retains the inquiry,
+> follows up, and can initiate delivery through Malikt Board after confirmation—
+> without forcing either party into a full ecommerce checkout.
 
 Protect that experience.
