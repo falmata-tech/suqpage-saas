@@ -2,7 +2,7 @@
 id: FE-003
 title: Managed client request and review workspace
 status: done
-related: [BE-003, BE-007, DEP-003, FE-006, FE-007, ADR-0004]
+related: [BE-003, BE-007, DEP-003, FE-006, FE-007, FE-008, ADR-0004, ADR-0006]
 owners: [product, frontend]
 last_updated: 2026-07-24
 change_level: L3
@@ -49,6 +49,12 @@ private and no showroom change becomes public without client approval.
 - Automatic conversion of client text or images into published catalog data.
 - Direct live catalog/settings/design editing by any client or routine staff
   role; all content changes use a request revision and client approval.
+
+These non-goals describe the verified managed-service cutover. `FE-008`,
+`BE-009`, `DEP-008`, and `ADR-0006` define a ready but unimplemented narrow
+exception for versioned basic product upkeep after first publication. They do
+not restore broad catalog, structure, option, settings, design, or full-
+publication authority.
 
 ## Domain language and invariants
 

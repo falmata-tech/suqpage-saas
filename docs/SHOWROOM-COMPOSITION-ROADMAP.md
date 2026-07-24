@@ -32,6 +32,9 @@ remain the final authority.
 - Images and supported external media are admitted manually before export.
   Components declare typed media slots; AI recipes may assign only the opaque
   keys in the exported media manifest and can never introduce a URL or embed.
+- The next active product contract is availability-only. A bounded product-
+  upkeep path lets clients and authorized staff maintain routine product facts
+  without granting catalog-structure or design authority.
 - Former renderer keys and schema-v1 revisions are read-only recovery inputs.
   Current seeds, invitations, drafts, publications, and rollback writes are
   schema v2 and use the composition renderer.
@@ -96,6 +99,29 @@ Status: completed and verified on 2026-07-24 by `FE-006`, `BE-007`, and
 Exit evidence: private preview, exact approval, atomic publication, retained
 rollback, inquiry behavior, and fail-closed invalid-manifest behavior pass.
 
+### 3.5 Stockless basic product upkeep
+
+Status: ready under `FE-008`, `BE-009`, `DEP-008`, and `ADR-0006`.
+
+- Replace numeric product/option inventory with descriptive availability across
+  domain, storage, inquiries, snapshots, fixtures, UI, and portable schemas.
+- Add one narrow versioned command for a client to create a product or edit its
+  name, description, primary image, availability, and assignment to existing
+  compatible collection/category choices.
+- Give assigned team members the same customer-service command for assigned
+  businesses with explicit staff attribution; managers/administrators use their
+  broader tenant scope.
+- Preserve monotonic retained versions and reject stale commands. Full drafts
+  based on an older live version must be rebased.
+- Do not expose collection/category creation, options, ordering, structural
+  deletion/unpublish, page content, settings, design, or complete publication.
+- Coordinate one stockless revision-v3 contract with the recipe phase. V1/v2
+  readers discard legacy inventory only at the recovery boundary.
+
+Exit: all four example clients can complete mobile basic product upkeep without
+seeing an inventory field or protected structure/design controls, while every
+cross-tenant, hidden-field, media, and stale-version test passes.
+
 ### 4. Full AI showroom recipe import and focused staff studio
 
 Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
@@ -104,7 +130,8 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
 - Add a strict portable content schema for business/meta/contact values,
   dynamic collections, categories, products, option groups, availability,
-  stock, allowed media keys, and typed section-content blocks.
+  allowed media keys, and typed section-content blocks. Numeric inventory fields
+  are prohibited.
 - Keep the existing design proposal as a separately versioned schema and extend
   component admission with compatible typed content and media-slot contracts:
   allowed kind, required/optional state, count, and aspect-ratio guidance.
@@ -144,9 +171,10 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
   version limits, and stale base state.
 - Permit dynamic item counts through existing bounded maxima. Never silently
   truncate, repair, invent, or drop catalog/content entries.
-- Treat AI marketing language as labeled draft copy. Contacts, stock,
-  availability, specifications, certifications, product facts, media, and
-  unexplained removals require attributable source evidence.
+- Treat AI marketing language as labeled draft copy. Contacts, availability,
+  specifications, certifications, product facts, media, and unexplained removals
+  require attributable source evidence. Inventory counts are rejected rather
+  than treated as source facts.
 
 #### 4.4 Candidate preview and focused correction
 
@@ -166,6 +194,8 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
 - Persist valid candidates in revision schema v3 with separate exact content
   and design documents plus minimum durable provenance/reconciliation.
+- Share the identical stockless v3 content contract admitted by DEP-008; neither
+  product upkeep nor recipe import may release a conflicting v3 schema.
 - Keep v2 as a read/upgrade recovery input during the controlled migration.
 - Preserve immutable submission, exact client approval, manager publication,
   stale-version rejection, and retained monotonic rollback.

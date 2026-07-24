@@ -2,7 +2,7 @@
 id: DEP-003
 title: Managed request storage and safe permission rollout
 status: done
-related: [FE-003, BE-003, DEP-006, DEP-007, ADR-0002, ADR-0004]
+related: [FE-003, BE-003, DEP-006, DEP-007, DEP-008, ADR-0002, ADR-0004]
 owners: [operations, security]
 last_updated: 2026-07-24
 change_level: L3

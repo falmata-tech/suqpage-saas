@@ -356,6 +356,14 @@ unavailable
 coming_soon
 ```
 
+The statements above describe the currently implemented stock-dependent MVP.
+`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` define the ready planned cutover
+to an availability-only product model. After that cutover, no active product,
+option, UI, recipe, snapshot writer, database table, or inquiry decision carries
+an inventory count. Customer quantity remains bounded inquiry intent and is not
+compared with or deducted from stock. Historical v1/v2 stock fields remain only
+as ignored recovery input until their normal retention ends.
+
 ---
 
 ## 8. Inquiry-cart workflow
@@ -605,6 +613,23 @@ Clients cannot directly edit business settings, design, collections, products,
 options, stock, or publication state. They cannot update inquiry status or
 create deliveries.
 
+This is current runtime behavior. The ready planned exception under `FE-008`,
+`BE-009`, `DEP-008`, and `ADR-0006` adds **My products** after a client's first
+showroom is published. A client may create a product or edit its name,
+description, one primary managed image, descriptive availability, and assignment
+to compatible collections/categories that already belong to that business.
+They still cannot create or restructure collections/categories, edit options or
+ordering, delete/unpublish structurally, change settings/design/page content,
+access the AI studio, or publish a complete showroom revision.
+
+Assigned team members receive that same narrow product-upkeep authority for
+assigned businesses so SuqPage can provide extra customer service. Operations
+managers and administrators can perform it within their explicit scope. Each
+basic update publishes a retained new content version with actor attribution
+and stale-version protection; full structural and visual work continues through
+private revision, exact client approval, and manager publication. This exception
+is planned and is not available until its mapped evidence passes.
+
 ### Operations manager and team member
 
 Operations managers can create or invite clients, record requests on their
@@ -833,14 +858,15 @@ remaining AI-assisted delivery sequence is recorded in
   server-side schema, compatibility, provenance, tenant, revision, client-
   approval, and publication checks.
 - Missing customer facts produce questions. AI may suggest presentation and
-  marketing copy, but it cannot invent contacts, stock, availability,
+  marketing copy, but it cannot invent contacts, availability,
   certifications, specifications, product facts, or delivery claims.
 - The ready next operational phase uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
   covers dynamic collections/categories/products/options, business/meta/contact
   values, allowed media keys, and typed hero, story, highlights/trust,
-  information, and call-to-action blocks. Dynamic counts remain bounded, not
-  fixed by examples.
+  information, and call-to-action blocks. Product availability is descriptive;
+  numeric product/option inventory is prohibited. Dynamic catalog counts remain
+  bounded, not fixed by examples.
 - That planned phase exports a sanitized request/current-snapshot brief,
   schemas, bank contract, source facts, allowed opaque asset keys, expected
   counts, and complete synthetic examples. Staff manually import returned JSON,
@@ -1146,6 +1172,10 @@ When adding a new client:
 10. Retain the prior version for auditable rollback and use operations tools for
     later inquiry and delivery activity.
 
+The checklist above describes the current stock-dependent revision workflow.
+After the planned stockless cutover, step 6 uses descriptive availability and
+contains no inventory count.
+
 ### Client workflow
 
 The client writes requests and responds to SuqPage rather than editing catalog
@@ -1153,6 +1183,16 @@ forms. The client can follow requests, clarification, inquiries, deliveries,
 private previews, approvals, and account security. A request for a business with
 no retained publication is a first-showroom request; after publication it is a
 change request. The server decides this classification.
+
+The ready next client exception is intentionally narrow. After first
+publication, **My products** lets the client create a product or maintain its
+name, description, primary managed image, availability, and assignment to
+existing compatible collection/category choices. The same bounded workflow is
+available to assigned team members acting for the client with staff attribution.
+It publishes a retained new content version and makes older-base staff work
+stale. It does not expose structure creation, options, ordering, deletion,
+design, settings, page content, recipe tools, or complete-showroom publication.
+`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` remain planned until verified.
 
 ### Current composition assembly and planned AI import
 

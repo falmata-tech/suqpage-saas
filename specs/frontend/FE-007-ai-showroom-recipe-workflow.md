@@ -2,7 +2,7 @@
 id: FE-007
 title: AI showroom recipe import and focused staff studio
 status: ready
-related: [FE-003, FE-006, BE-008, DEP-007, ADR-0005]
+related: [FE-003, FE-006, FE-008, BE-008, BE-009, DEP-007, ADR-0005, ADR-0006]
 owners: [product, frontend, design]
 last_updated: 2026-07-24
 change_level: L3
@@ -64,8 +64,8 @@ choice.
 ## Domain language and invariants
 
 - A **content proposal** contains business identity/presentation, typed section
-  content, collections, categories, products, options, availability, stock, and
-  allowed media-reference keys.
+  content, collections, categories, products, options, availability, and
+  allowed media-reference keys. It contains no inventory count.
 - A **design proposal** contains the exact bank release, token pack, reviewed
   sections, bounded properties, motion/decorative settings, and bindings.
 - A **showroom recipe** is a versioned envelope pairing one content proposal
@@ -90,6 +90,9 @@ choice.
 - For a first showroom, the AI returns a complete desired content proposal. For
   a change request, the brief includes the authorized current snapshot and the
   AI returns a complete replacement proposal, not an ambiguous patch.
+- The portable/current product contract is availability-only. Recipe examples,
+  forms, diffs, and returned JSON contain no product or option stock count;
+  requested inquiry quantity remains separate customer intent.
 - Product, collection, category, option, and section-content lists are dynamic
   within backend limits; the UI never assumes a fixed item count.
 - Before export, staff can label and review admitted media. Verified image files
@@ -167,6 +170,12 @@ Scenario: Client attempts studio access
   WHEN they navigate directly to a recipe export, import, validation, or studio route
   THEN access is denied
   AND no private brief, AI response, or other tenant data is exposed
+
+Scenario: Recipe proposes inventory counts
+  GIVEN the stockless content schema and an external AI response
+  WHEN the response includes product stock, option stock, or inventory quantity
+  THEN import identifies the unknown prohibited fields
+  AND no candidate or active inventory state is created
 ```
 
 ## Quality impact

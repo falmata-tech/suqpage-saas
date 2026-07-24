@@ -2,7 +2,7 @@
 id: BE-003
 title: Managed request, permission, and publication security
 status: done
-related: [FE-003, BE-007, BE-008, DEP-002, DEP-003, ADR-0004]
+related: [FE-003, BE-007, BE-008, BE-009, DEP-002, DEP-003, ADR-0004, ADR-0006]
 owners: [backend, security]
 last_updated: 2026-07-24
 change_level: L3
@@ -38,6 +38,11 @@ publish only the exact client-approved revision.
 - Editing current live catalog rows while work is pending approval.
 - Passwordless authentication or external workflow engines.
 - Broad staff access without tenant/request assignment.
+
+`BE-009` and `ADR-0006` define a ready but unimplemented, field-allowlisted
+product-upkeep exception to the current live-mutation denial. The complete
+request/revision authority in this spec remains unchanged for structural,
+option, settings, design, deletion, and full-showroom work.
 
 ## Domain language and invariants
 

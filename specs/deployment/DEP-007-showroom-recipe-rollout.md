@@ -2,7 +2,7 @@
 id: DEP-007
 title: Showroom recipe schema and studio rollout
 status: ready
-related: [FE-007, BE-008, DEP-003, DEP-004, DEP-006, ADR-0005]
+related: [FE-007, BE-008, DEP-003, DEP-004, DEP-006, DEP-008, ADR-0005, ADR-0006]
 owners: [operations, security, product]
 last_updated: 2026-07-24
 change_level: L3
@@ -29,6 +29,8 @@ showrooms remain recoverable throughout the transition.
   backup, integrity, idempotency, and restore evidence.
 - V2 read/upgrade compatibility while all new recipe candidates/writes become
   v3 after cutover.
+- One stockless revision-v3 content contract coordinated with DEP-008; recipe
+  schemas, examples, and writes contain availability but no inventory count.
 - Feature/capability rollout to assigned team members, operations managers, and
   administrators only.
 - Production-browser evidence for brief export, recipe import, validation,
@@ -80,6 +82,8 @@ showrooms remain recoverable throughout the transition.
 - Migration starts from an integrity-clean backup, is transactional/idempotent,
   preserves tenant/request/revision/publication/inquiry/delivery authority, and
   records only safe schema/count evidence.
+- DEP-007 and DEP-008 schema/parity gates must agree on the exact revision-v3
+  content contract before either rollout writes v3.
 - Rollout first enables one test request per staff role, then the four example
   clients, before making recipe import the default staff path.
 - Release requires `npm run check`, operations backup/restore, production build,
@@ -106,6 +110,12 @@ Scenario: Revision-v3 migration succeeds
   WHEN the controlled migration runs
   THEN retained content/design values and all authority/history remain intact
   AND new recipe candidates are written only in v3
+
+Scenario: Recipe and product-upkeep releases disagree on v3
+  GIVEN DEP-007 and DEP-008 propose different revision-v3 content contracts
+  WHEN schema parity admission runs
+  THEN both write paths remain disabled
+  AND no ambiguous v3 revision or migration is released
 
 Scenario: Recipe rollout regresses a current workflow
   GIVEN a failing request role, preview, approval, publication, inquiry, mobile, backup, or rollback check
@@ -162,8 +172,10 @@ recipe JSON, source facts, private asset keys, contacts, prompts, or credentials
 ## Rollout and rollback
 
 1. Land pure schemas/parsers, synthetic examples, and check admission.
-2. Add private candidate storage and v2-reader/v3-writer compatibility.
-3. Back up and migrate isolated/test data; prove restore and idempotency.
+2. Add private candidate storage and the same stockless v2-reader/v3-writer
+   compatibility admitted by DEP-008.
+3. Back up and migrate isolated/test data; prove stockless preservation,
+   restore, and idempotency.
 4. Enable export/import and focused studio for one assigned test request.
 5. Exercise every staff/client role and all four example clients.
 6. Make recipe import the default staff path only after all release gates pass.

@@ -2,7 +2,7 @@
 id: BE-008
 title: Validated full-showroom recipe import
 status: ready
-related: [FE-007, BE-003, BE-004, BE-007, DEP-007, ADR-0005]
+related: [FE-007, BE-003, BE-004, BE-007, BE-009, DEP-007, DEP-008, ADR-0005, ADR-0006]
 owners: [product, backend, security]
 last_updated: 2026-07-24
 change_level: L3
@@ -29,7 +29,7 @@ authority, access tenant persistence, or publish.
 
 - `ShowroomContentProposal` schema/parser for business/meta/contact fields,
   typed section-content blocks, collections, categories, products, options,
-  availability/stock, and opaque media references.
+  availability, and opaque media references. Numeric inventory is absent.
 - A separately versioned `ShowroomDesignProposal` schema/parser for approved
   bank composition.
 - A small `ShowroomRecipeEnvelope` schema/parser pairing exact content/design
@@ -54,7 +54,7 @@ authority, access tenant persistence, or publish.
   markup/styles/URLs, direct database access, or automatic publication.
 - Trusting JSON Schema as semantic, factual, tenant, media, or authorization
   proof.
-- Variant-combination stock, pricing, payment, or ecommerce checkout.
+- Product/variant inventory, pricing, payment, or ecommerce checkout.
 - Partial AI patches whose omitted entries have ambiguous delete/retain meaning.
 
 ## Domain language and invariants
@@ -64,7 +64,7 @@ authority, access tenant persistence, or publish.
 - **Source fact** is attributable to the client request/clarification, an
   authorized current snapshot, an authorized asset, or an explicit staff input.
 - **AI draft copy** is proposed presentation language, not authority for
-  contacts, stock, availability, product specifications, certifications,
+  contacts, availability, product specifications, certifications,
   materials, origin, delivery, pricing, or other factual claims.
 - **Stable key** is a recipe-local opaque relationship key. It is never a
   database ID or storage path.
@@ -90,6 +90,9 @@ authority, access tenant persistence, or publish.
   option groups and 50 values per group, and 24 typed section-content blocks,
   subject to one bounded serialized recipe limit. Counts may be zero through
   their maxima and are never fixed by the UI or examples.
+- Product content has descriptive availability only. `stock`, `stockCount`,
+  `stock_count`, option inventory, and equivalent numeric inventory fields are
+  unknown/prohibited. Requested inquiry quantity is not recipe content.
 - Typed section-content contracts cover hero, story/editorial, highlights,
   trust/information, and call-to-action copy/media. Component-bank definitions
   declare compatible content types; a design section requiring content points
@@ -140,6 +143,9 @@ authority, access tenant persistence, or publish.
   the minimum durable recipe provenance/reconciliation metadata needed for
   client review and audit. V2 remains a read/upgrade recovery input during the
   controlled rollout.
+- `BE-009`, `DEP-007`, and `DEP-008` admit one identical stockless revision-v3
+  content contract. Legacy v1/v2 inventory fields are discarded only at the
+  recovery reader and never enter a v3 write.
 - The application ports are independent of Next.js, SQLite, filesystem, and AI
   providers: brief reader, recipe candidate repository, authorized asset
   resolver, revision writer, and audit/event sink.
@@ -160,10 +166,16 @@ Scenario: AI structures a dynamic catalog
   AND no fixed example count or manual per-item form is required
 
 Scenario: AI invents a factual claim
-  GIVEN no exported source supports a product specification, certification, stock value, or contact
+  GIVEN no exported source supports a product specification, certification, availability, or contact
   WHEN the recipe marks that value as a source fact or omits provenance
   THEN import fails with a safe provenance error
   AND the value cannot enter a revision candidate
+
+Scenario: AI includes an inventory count
+  GIVEN the portable content schema has no numeric inventory field
+  WHEN a recipe includes product stock, option stock, or equivalent inventory data
+  THEN strict parsing rejects the unknown field
+  AND no inventory value enters a candidate, canonical row, or retained v3 snapshot
 
 Scenario: Content and design disagree
   GIVEN a design section references a missing or incompatible content block or media key

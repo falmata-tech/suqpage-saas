@@ -4,7 +4,7 @@ title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
 deciders: [SuqPage]
-related: [BE-004, BE-005, BE-006, BE-007, BE-008, FE-004, FE-005, FE-006, FE-007, DEP-004, DEP-005, DEP-006, DEP-007, ADR-0001, ADR-0004]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-009, FE-004, FE-005, FE-006, FE-007, FE-008, DEP-004, DEP-005, DEP-006, DEP-007, DEP-008, ADR-0001, ADR-0004, ADR-0006]
 ---
 
 # ADR-0005 — Constrained showroom composition instead of tenant-generated code
@@ -88,9 +88,12 @@ Adopt option 3 as the default future production path.
 - Server-side schema, semantic, compatibility, provenance, tenant, revision,
   and publication validation remain authoritative.
 - Missing factual information becomes a question. AI-generated marketing copy
-  may be proposed and labeled, but contact details, inventory, product claims,
+  may be proposed and labeled, but contact details, product claims,
   certifications, availability, specifications, and media require an
   attributable exported source.
+- The next product/recipe model is availability-only under ADR-0006. Numeric
+  inventory is not an accepted source fact or content field and will be
+  rejected if returned by an external tool.
 - First-showroom and change imports are complete desired snapshots, not
   ambiguous patches. A change brief includes the authorized current snapshot;
   retained stable keys, explicit removals, expected/returned counts, and source

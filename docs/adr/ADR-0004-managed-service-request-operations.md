@@ -4,7 +4,7 @@ title: Managed-service requests and versioned publication
 status: accepted
 date: 2026-07-22
 deciders: [SuqPage]
-related: [FE-003, BE-003, DEP-003, ADR-0001, ADR-0002]
+related: [FE-003, BE-003, DEP-003, ADR-0001, ADR-0002, ADR-0006]
 ---
 
 # ADR-0004 — Managed-service requests and versioned publication
@@ -112,3 +112,9 @@ architecture selected above.
 request/attachment security tests; revision approval/concurrency/rollback tests;
 production browser workflows; migration/backup/restore; `npm run release`; and
 container verification.
+
+`ADR-0006` accepts a narrower future exception for versioned basic product
+upkeep after first publication. Until `FE-008`, `BE-009`, and `DEP-008` reach
+done with mapped evidence, this ADR's verified no-direct-product-edit runtime
+behavior remains current. The exception does not supersede managed requests,
+client approval, or manager publication for structural and visual work.

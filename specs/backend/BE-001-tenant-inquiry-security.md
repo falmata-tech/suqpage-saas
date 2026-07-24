@@ -2,9 +2,9 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-001, DEP-001]
+related: [FE-001, DEP-001, BE-009]
 owners: [backend, security]
-last_updated: 2026-07-20
+last_updated: 2026-07-24
 change_level: L2
 ---
 
@@ -65,3 +65,9 @@ categories. Full contact values and notes must not be general log fields.
 
 Additive/idempotent migration only within the pilot. Back up before schema
 changes; rollback requires schema compatibility or verified database restore.
+
+`BE-009` and `DEP-008` define a ready but unimplemented replacement for the
+current stock-dependent eligibility rule: availability remains canonical,
+requested quantity remains bounded intent, and no active inventory count
+survives the controlled cutover. Until their mapped evidence passes, the
+verified current rule above remains runtime truth.
