@@ -2,9 +2,9 @@
 id: DEP-002
 title: Reproducible delivery and repository hygiene
 status: done
-related: [DEP_BASE, ADR-0002, ADR-0003]
+related: [BE-003, DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
-last_updated: 2026-07-22
+last_updated: 2026-07-24
 change_level: L3
 ---
 
@@ -33,6 +33,9 @@ four-tenant application behavior and single-instance pilot boundary.
   without printing generated credential values.
 - Require exact production Server Action origins to be available while Next.js
   configuration is built, including documented reverse-proxy deployments.
+- Derive Next.js Server Action origins and custom authenticated mutation origins
+  from one exact-host contract so development proxies cannot drift between
+  framework and application security layers.
 - Treat `next-env.d.ts` as generated output and generate framework types before
   standalone TypeScript checks without dirtying Git.
 - Use Node 22.16 or newer consistently in documentation, package metadata, and
@@ -82,6 +85,11 @@ four-tenant application behavior and single-instance pilot boundary.
 - Production image builds receive `NEXT_PUBLIC_APP_URL` and optional exact
   `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
   configuration must contain the expected host and no wildcard.
+- One pure trusted-origin contract supplies both Next.js configuration and
+  custom mutation guards. Development adds only exact localhost origins and the
+  current Codespace's HTTPS forwarding origins for supported ports; production
+  adds only the canonical and explicitly configured origins. Neither path trusts
+  a forwarded host header or admits a wildcard.
 - Type checking generates Next.js declarations first. Running development and
   production generation leaves tracked files unchanged. Type checking discards
   only stale generated development-route declarations before regenerating its
@@ -122,6 +130,12 @@ Scenario: Exact proxy origin is compiled into production configuration
   WHEN the production artifact is built
   THEN its Server Action origin configuration contains those exact hosts
   AND contains no unrestricted wildcard
+
+Scenario: Development origin policies cannot drift
+  GIVEN the application runs through the current Codespace HTTPS forwarding host
+  WHEN Next.js and a custom authenticated mutation validate the browser origin
+  THEN both derive the same exact host from the shared contract
+  AND a sibling port, lookalike hostname, wildcard, or forwarded-host claim cannot expand trust
 
 Scenario: Framework type generation does not create task drift
   GIVEN a clean tracked worktree
@@ -180,6 +194,7 @@ tokens, or environment secrets.
 | CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
 | Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
+| Shared exact development origin policy | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |
 | Generated declarations leave Git clean and stale dev types are bounded | contract | `scripts/typecheck.mjs`, `scripts/test-workflow.mjs` |
 | Acceptance build output is unique, ignored, and safely cleaned | contract/browser | `scripts/test-workflow.mjs`, `scripts/acceptance-runner.mjs` |
 | Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
@@ -272,3 +287,21 @@ defect audit:
 - `npm run release` passed the final production build, 39-trace privacy check,
   HTTP smoke, TypeScript, design, security, adapter, request, revision,
   publication/rollback, and zero-vulnerability dependency gates.
+
+Local exact-origin and trace regression evidence on 2026-07-24:
+
+- One pure origin policy now supplies exact hosts to Next.js and normalized
+  origins to custom mutation adapters. Security regression coverage rejects
+  wildcard, lookalike, unsupported-port, forwarded-host, and production
+  Codespace trust expansion.
+- The request-attachment filesystem path is explicitly excluded from Turbopack
+  static tracing. The production build completed without the unbounded-project
+  trace warning, and the trace gate rejects `next.config.ts` if it reappears in
+  a route manifest.
+- Interrupted `.next-acceptance` output and generated acceptance TypeScript
+  configuration are excluded from Docker context. The isolated context fell
+  from the observed 41.07 MB to 29.14 kB.
+- `npm run check`, `npm run release`, `npm run test:operations`, all seven
+  production browser scenarios, and `npm run test:container` passed. The
+  container verified exact compiled origins, 41 bounded output-file traces,
+  non-root preflight, health, credential-safe logs, and failure-safe cleanup.

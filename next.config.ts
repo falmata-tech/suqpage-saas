@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { trustedOriginPolicy } from "./lib/trusted-origins";
 
 const isDev = process.env.NODE_ENV !== "production";
 const distDir = process.env.SUQPAGE_NEXT_DIST_DIR || ".next";
@@ -9,22 +10,7 @@ const tsconfigPath = process.env.SUQPAGE_NEXT_TSCONFIG || "tsconfig.json";
 if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-suqpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
   throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated SuqPage acceptance config");
 }
-const configuredOrigins = (process.env.SUQPAGE_SERVER_ACTION_ORIGINS || "")
-  .split(",")
-  .map((origin) => origin.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""))
-  .filter(Boolean);
-const canonicalOrigin = (() => {
-  try { return process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).host : ""; }
-  catch { return ""; }
-})();
-const codespaceOrigins = process.env.CODESPACE_NAME && process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN
-  ? [3000, 3001].map((port) => `${process.env.CODESPACE_NAME}-${port}.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`)
-  : [];
-const serverActionOrigins = [...new Set([
-  ...configuredOrigins,
-  ...(canonicalOrigin ? [canonicalOrigin] : []),
-  ...(isDev ? ["localhost:3000", "localhost:3001", "127.0.0.1:3000", "127.0.0.1:3001", ...codespaceOrigins] : []),
-])];
+const serverActionOrigins = trustedOriginPolicy(process.env).serverActionHosts;
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,

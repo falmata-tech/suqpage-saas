@@ -14,6 +14,8 @@ const requiredIgnores = [
   ".git",
   "node_modules",
   ".next",
+  ".next-acceptance",
+  ".acceptance-tsconfig-*.json",
   "test-results",
   "playwright-report",
   ".env",

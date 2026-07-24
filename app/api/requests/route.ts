@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { appUrl } from "@/lib/app-url";
 import { PublicRequestRateLimiter } from "@/lib/request-rate-limit";
 import { createPublicInterest } from "@/lib/request-service";
 import { RequestError } from "@/lib/request-domain";
 import { SqliteRequestRepository } from "@/lib/request-sqlite";
-import { hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
+import { assertSameOrigin, hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
 
 export const runtime = "nodejs";
 const MAX_PUBLIC_BODY_BYTES = 16 * 1024;
@@ -31,18 +30,7 @@ async function readBoundedBody(request: Request) {
 }
 
 function assertRequestOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return;
-  try { new URL(origin); } catch { throw new RequestError("Invalid request origin.", 403); }
-  const allowed = new Set([new URL(request.url).origin, new URL(appUrl()).origin]);
-  for (const configured of (process.env.SUQPAGE_SERVER_ACTION_ORIGINS || "").split(",").map((value) => value.trim()).filter(Boolean)) {
-    if (/^https?:\/\//i.test(configured)) allowed.add(new URL(configured).origin);
-    else allowed.add(`${process.env.NODE_ENV === "production" ? "https" : "http"}://${configured.replace(/\/$/, "")}`);
-  }
-  if (process.env.NODE_ENV !== "production" && process.env.CODESPACE_NAME && process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN) {
-    for (const port of [3000, 3001]) allowed.add(`https://${process.env.CODESPACE_NAME}-${port}.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`);
-  }
-  if (!allowed.has(origin)) throw new RequestError("Invalid request origin.", 403);
+  try { assertSameOrigin(request); } catch { throw new RequestError("Invalid request origin.", 403); }
 }
 
 export async function POST(request: Request) {

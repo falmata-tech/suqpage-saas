@@ -20,7 +20,7 @@ export class FileRequestAttachmentStore implements RequestAttachmentStore {
     }
     const storageKey = `${crypto.randomUUID()}.${prepared.ext}`;
     fs.mkdirSync(requestAttachmentRoot(), { recursive: true });
-    fs.writeFileSync(path.join(requestAttachmentRoot(), storageKey), prepared.buffer, { flag: "wx", mode: 0o640 });
+    fs.writeFileSync(path.join(/* turbopackIgnore: true */ requestAttachmentRoot(), storageKey), prepared.buffer, { flag: "wx", mode: 0o640 });
     return { ...prepared, storageKey, originalName: safeOriginalName(input.originalName) };
   }
 

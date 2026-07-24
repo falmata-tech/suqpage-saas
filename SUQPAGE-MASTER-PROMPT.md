@@ -960,6 +960,12 @@ Security requirements are product requirements, not optional cleanup.
 
 ### Privacy and operations
 
+- Next.js Server Actions and custom browser mutation APIs derive trusted origins
+  from one exact-origin policy. Development admits only the request/canonical
+  origins, explicitly configured origins, localhost, and the current
+  Codespaces HTTPS forwarding hosts; production admits only request/canonical
+  and explicitly configured origins. Never expand trust from a forwarded-host
+  header, hostname lookalike, or wildcard.
 - Do not log full customer contact information unnecessarily.
 - Keep `.env`, database files, credential files, uploads, and backups out of Git and distributable ZIPs.
 - Maintain privacy and terms pages when customer data is collected.

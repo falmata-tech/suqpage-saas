@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { headers } from "next/headers";
-import { appUrl } from "./app-url";
 import { getDb } from "./db";
+import { trustedOriginPolicy } from "./trusted-origins";
 
 function privacySalt() {
   const value = process.env.PRIVACY_SALT;
@@ -35,16 +35,8 @@ export function assertSameOrigin(request: Request) {
   if (!origin) return;
   let normalized: string;
   try { normalized = new URL(origin).origin; } catch { throw new Error("Invalid request origin."); }
-  const allowed = new Set<string>();
-  for (const candidate of [request.url, appUrl(), ...(process.env.SUQPAGE_SERVER_ACTION_ORIGINS || "").split(",")]) {
-    const value = candidate.trim();
-    if (!value) continue;
-    try { allowed.add(new URL(value).origin); }
-    catch {
-      const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
-      try { allowed.add(new URL(`${scheme}://${value.replace(/\/$/, "")}`).origin); } catch {}
-    }
-  }
+  const allowed = new Set(trustedOriginPolicy(process.env).mutationOrigins);
+  try { allowed.add(new URL(request.url).origin); } catch { throw new Error("Invalid request origin."); }
   if (!allowed.has(normalized)) throw new Error("Invalid request origin.");
 }
 

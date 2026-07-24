@@ -2,9 +2,9 @@
 id: BE-003
 title: Managed request, permission, and publication security
 status: done
-related: [FE-003, BE-007, DEP-003, ADR-0004]
+related: [FE-003, BE-007, DEP-002, DEP-003, ADR-0004]
 owners: [backend, security]
-last_updated: 2026-07-22
+last_updated: 2026-07-24
 change_level: L3
 ---
 
@@ -78,6 +78,11 @@ publish only the exact client-approved revision.
   interest adapter accepts JSON only and has no attachment-storage dependency.
   Authenticated attachment storage receives only verified/sanitized bytes and
   server-generated keys.
+- Authenticated browser mutation adapters accept an `Origin` only when its
+  normalized origin exactly matches the request URL, canonical application URL,
+  an explicitly configured trusted origin, or an exact development origin
+  derived for the current local/Codespaces runtime. Forwarded host headers do
+  not expand that trust, and wildcards or hostname lookalikes are never accepted.
 - Public response contains a random non-sequential reference, never a database
   identifier, contact, token, or attachment path.
 - Invitation tokens are random, single-use, stored hashed, expire, and are
@@ -205,6 +210,12 @@ Scenario: Normal team member submits on behalf
   THEN authorization is denied
   AND no request or prospect is created
 
+Scenario: Codespaces manager submits on behalf
+  GIVEN an operations manager uses the exact HTTPS forwarding origin for the current Codespace
+  WHEN they submit an authenticated on-behalf request
+  THEN the mutation origin check accepts the request
+  AND sibling ports, hostname lookalikes, and attacker-controlled forwarded headers remain denied
+
 Scenario: Reassignment updates least-privilege scope
   GIVEN a request for tenant A assigned to team member one
   WHEN a manager reassigns it to team member two
@@ -271,6 +282,7 @@ contents, invitation tokens, or customer data.
 | Public idempotency, limits, and rate behavior | HTTP/security | `scripts/http-smoke.mjs`, `scripts/test-requests.ts` |
 | Client tenant and staff assignment isolation | security | `scripts/test-requests.ts` |
 | Manager-only on-behalf/invite/assign/publish | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
+| Exact custom-mutation origins including current Codespaces | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |
 | Exact approval, stale conflict, atomic publish, rollback | integration | `scripts/test-revisions.ts` |
 | Operations inquiry/delivery authority and client read-only isolation | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 | Request-free invitations and inferred request type | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
@@ -344,3 +356,21 @@ revision, migration, and production-browser tests below.
   only content authority.
 - `npm run check`, `npm run test:operations`, and all seven production browser
   acceptance scenarios passed locally on 2026-07-22.
+
+### Codespaces origin regression evidence
+
+Verified locally on 2026-07-24:
+
+- `scripts/test-security.ts` accepted only the exact current Codespace HTTPS
+  origins for supported development ports and rejected an unsupported port,
+  suffix-lookalike hostname, wildcard entry, forged forwarded-host header, and
+  every Codespace origin under the production policy.
+- `npm run check` passed the complete specification, type, design, security,
+  request, revision, composition, and migration contract.
+- `npm run release` passed the clean production build, bounded 41-trace privacy
+  check, HTTP/API smoke tests, and zero-vulnerability production audit.
+- All seven production browser scenarios passed, including operations-manager
+  on-behalf intake and assigned-team-member isolation.
+- `npm run test:operations` and `npm run test:container` passed database
+  recovery, exact build-time origin, non-root runtime, health, and cleanup
+  checks.
