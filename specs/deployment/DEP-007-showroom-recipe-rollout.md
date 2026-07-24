@@ -2,7 +2,7 @@
 id: DEP-007
 title: Showroom recipe schema and studio rollout
 status: ready
-related: [FE-007, BE-008, DEP-003, DEP-004, DEP-006, DEP-008, ADR-0005, ADR-0006]
+related: [FE-007, FE-009, BE-008, BE-010, DEP-003, DEP-004, DEP-006, DEP-008, DEP-009, ADR-0005, ADR-0006, ADR-0007]
 owners: [operations, security, product]
 last_updated: 2026-07-24
 change_level: L3

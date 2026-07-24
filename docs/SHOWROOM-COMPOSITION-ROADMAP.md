@@ -130,6 +130,9 @@ import, idempotent private draft, exact preview, client-review/publication path,
 and emergency disable are implemented. Typed section-content blocks, focused
 post-import controls, controlled YouTube support, and final spec completion
 remain planned; the three controlling specs therefore remain `ready`.
+The product owner promoted completion plus a creative bank expansion to **Now**
+under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. Bank 1.1 and revision v3
+remain immutable while additive v4/bank-1.2 work proceeds.
 
 #### 4.1 Portable content and recipe contracts
 

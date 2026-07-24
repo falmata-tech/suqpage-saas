@@ -2,7 +2,7 @@
 id: BE-004
 title: Validated showroom composition contract
 status: done
-related: [BE-005, BE-006, BE-007, BE-008, FE-006, ADR-0005]
+related: [BE-005, BE-006, BE-007, BE-008, BE-010, FE-006, ADR-0005, ADR-0007]
 owners: [product, backend, security]
 last_updated: 2026-07-24
 change_level: L1

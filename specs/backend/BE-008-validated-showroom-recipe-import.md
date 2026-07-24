@@ -2,7 +2,7 @@
 id: BE-008
 title: Validated full-showroom recipe import
 status: ready
-related: [FE-007, BE-003, BE-004, BE-007, BE-009, DEP-007, DEP-008, ADR-0005, ADR-0006]
+related: [FE-007, FE-009, BE-003, BE-004, BE-007, BE-009, BE-010, DEP-007, DEP-008, DEP-009, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, backend, security]
 last_updated: 2026-07-24
 change_level: L3

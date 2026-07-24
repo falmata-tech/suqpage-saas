@@ -163,6 +163,16 @@ checkpoint passes the standard check, production release, seven-role browser
 acceptance, container privacy/build, and operations restore gates; the feature
 specs remain `ready`, not `done`, because their broader content/provider scope
 is still open.
+The product owner has promoted that completion work and a creative expansion to
+the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
+planned implementation is additive: revision v4/content-schema v2/design-schema
+v2 and `showroom-bank@1.2.0` will coexist with retained v1-v3 revisions and the
+immutable bank 1.1 release. The target is at least 66 reviewed components and
+18 token systems with stronger textile, beauty, technology, furniture,
+ingredient, artisan, industrial, and wholesale art direction. Bounded reveals
+and interactions must be CSS-first, mobile-safe, static without support, and
+disabled by reduced-motion preference; arbitrary code, copied trade dress,
+autoplay, parallax, and scroll-jacking remain prohibited.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -1216,6 +1226,10 @@ private checkpoint under `ADR-0005`; `FE-007`, `BE-008`, and `DEP-007` remain
 open until their typed-block, provider, focused-control, browser, and rollout
 evidence is complete. The component laboratory remains synthetic and cannot
 itself alter a tenant revision.
+`FE-009`, `BE-010`, `DEP-009`, and `ADR-0007` define the promoted additive
+revision-v4 and bank-1.2 release. Old schema/bank readers remain exact; new
+writes do not become default until multi-release, mobile, accessibility,
+provider/CSP, operations, publication, and rollback gates pass.
 
 ---
 

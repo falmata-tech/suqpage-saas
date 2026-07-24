@@ -2,7 +2,7 @@
 id: DEP-005
 title: Mobile showroom experience admission gate
 status: done
-related: [FE-005, FE-006, BE-006, DEP-004, DEP-006, BE-005]
+related: [FE-005, FE-006, FE-009, BE-006, BE-010, DEP-004, DEP-006, DEP-009, BE-005, ADR-0007]
 owners: [operations, frontend, accessibility]
 last_updated: 2026-07-24
 change_level: L2

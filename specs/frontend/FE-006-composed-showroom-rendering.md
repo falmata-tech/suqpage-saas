@@ -2,7 +2,7 @@
 id: FE-006
 title: Deterministic composed showroom rendering
 status: done
-related: [BE-007, DEP-004, DEP-005, DEP-006, FE-001, FE-003, FE-005, FE-007, BE-004, BE-005, BE-006, ADR-0005]
+related: [BE-007, DEP-004, DEP-005, DEP-006, FE-001, FE-003, FE-005, FE-007, FE-009, BE-004, BE-005, BE-006, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
 last_updated: 2026-07-24
 change_level: L3

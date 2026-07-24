@@ -55,6 +55,20 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 
 ## Now — make the controlled pilot trustworthy
 
+### Complete typed recipes and creative bank 1.2
+
+- Outcome: finish the promoted `FE-007`/`BE-008`/`DEP-007` recipe initiative
+  through additive revision v4, typed section content, controlled YouTube, and
+  focused corrections; release a materially richer mobile-first component bank
+  without changing retained bank-1.1 showrooms.
+- Controlling specs and decision: `FE-007`, `BE-008`, `DEP-007`, `FE-009`,
+  `BE-010`, `DEP-009`, and `ADR-0007`.
+- Sequence: reproduce the recorded studio deep-link defect; land dual readers
+  and release resolver; add v4 typed content; add controlled provider/focused
+  commands; admit bank 1.2; migrate only new drafts after full gates.
+- Non-goals: arbitrary tenant code, copied trade dress, animation dependencies,
+  autoplay/parallax, checkout, pricing, stock, or weakening client approval.
+
 ### Reproducible delivery and repository hygiene
 
 - Outcome: local, CI, container, and proxy-aware production paths enforce the
@@ -78,9 +92,6 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   behavior.
 - Define measurable pilot success and operational capacity before accepting a
   broader onboarding feature.
-- Use pilot evidence to decide whether the remaining `FE-007`/`BE-008`/`DEP-007`
-  typed-content, focused-control, and provider work should be promoted to
-  **Now** as one versioned release or split into smaller accepted outcomes.
 
 No product feature in this section is authorized for implementation merely by
 being listed here; it must first be promoted to **Now** and specified.

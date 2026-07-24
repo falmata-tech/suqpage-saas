@@ -4,7 +4,7 @@ title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
 deciders: [SuqPage]
-related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-009, FE-004, FE-005, FE-006, FE-007, FE-008, DEP-004, DEP-005, DEP-006, DEP-007, DEP-008, ADR-0001, ADR-0004, ADR-0006]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-009, BE-010, FE-004, FE-005, FE-006, FE-007, FE-008, FE-009, DEP-004, DEP-005, DEP-006, DEP-007, DEP-008, DEP-009, ADR-0001, ADR-0004, ADR-0006, ADR-0007]
 ---
 
 # ADR-0005 — Constrained showroom composition instead of tenant-generated code

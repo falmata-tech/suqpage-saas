@@ -2,7 +2,7 @@
 id: DEP-004
 title: Showroom bank admission and release gate
 status: done
-related: [FE-004, FE-005, FE-006, BE-005, DEP-005, DEP-006, DEP-007, ADR-0005]
+related: [FE-004, FE-005, FE-006, FE-009, BE-005, BE-010, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
 owners: [operations, frontend, security]
 last_updated: 2026-07-24
 change_level: L2

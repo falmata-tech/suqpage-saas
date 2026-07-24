@@ -1,0 +1,122 @@
+---
+id: BE-010
+title: Revision v4 typed content and multi-release bank contract
+status: ready
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, FE-007, FE-009, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
+owners: [backend, security, product]
+last_updated: 2026-07-24
+change_level: L3
+---
+
+# BE-010 — Revision v4 typed content and multi-release bank contract
+
+## Problem and outcome
+
+Typed page content, provider media, focused corrections, and bank 1.2 cannot be
+added by mutating revision v3 or the bank 1.1 contract. The backend needs one
+additive v4 domain boundary that preserves all retained releases.
+
+## Scope and invariants
+
+- Revision v4 with content-schema v2 and design-schema v2; v1-v3 remain
+  read/recovery inputs and are never rewritten implicitly.
+- Strict discriminated blocks: `hero`, `story`, `highlights`, `information`,
+  `call_to_action`, and `video`; at most 24 blocks with stable unique keys.
+- Bounded block copy, ordered items, accessible labels, and named media-slot
+  assignments using request-scoped opaque keys only.
+- Exact multi-release resolver for immutable bank 1.1 and 1.2 definitions.
+- Typed focused-correction commands over authorized mutable private v4 drafts.
+- Controlled YouTube admission from recognized HTTPS watch/share URLs into one
+  canonical 11-character provider ID and opaque media key.
+
+## Contracts
+
+- Content and design parsers reject unknown fields, markup, controls, raw URLs,
+  duplicate keys, incompatible block/component pairs, invalid media kind/count/
+  aspect, stale bases, unresolved questions, and unsupported releases.
+- V4 provenance covers factual and media-bearing block fields; AI draft copy
+  never becomes authority for contacts, product facts, claims, or provider media.
+- Design-schema v2 sections reference at most one compatible content-block key;
+  catalog/navigation/header/footer components may use canonical bindings without
+  inventing a page block.
+- A release registry returns only statically imported reviewed banks. Existing
+  bank-1.1 proposals parse/render exactly as before; unknown releases fail closed.
+- Focused commands allow: replace compatible component, select admitted token,
+  change bounded experience properties, edit one typed block, or assign/remove
+  optional compatible media. They reauthorize and revalidate atomically and
+  record actor plus safe diff metadata.
+- YouTube parsing accepts `youtube.com/watch?v=ID` and `youtu.be/ID` over HTTPS,
+  discards unrelated parameters, rejects playlists/shorts/embed markup/arbitrary
+  hosts, and stores no recipe-controlled URL. Rendering receives only
+  `youtube:ID` after exact validation.
+- No focused command or recipe import can submit, approve, publish, mutate live
+  catalog state, or access another request/tenant.
+
+## Scenarios
+
+```gherkin
+Scenario: V4 recipe binds typed content
+  GIVEN an authorized brief with typed blocks and admitted assets
+  WHEN staff imports compatible content-schema-v2 and design-schema-v2 documents
+  THEN one private revision-v4 candidate is stored and rendered deterministically
+  AND retained v3 and bank-1.1 revisions are unchanged
+
+Scenario: Old retained revision is rendered after bank 1.2 release
+  GIVEN a published v3 revision pinned to showroom-bank@1.1.0
+  WHEN bank 1.2 becomes the new-draft default
+  THEN the retained revision resolves bank 1.1 exactly
+  AND preview, rollback, and public rendering do not drift
+
+Scenario: Untrusted provider input is supplied
+  GIVEN a remote image, arbitrary video host, iframe, or malformed YouTube URL
+  WHEN media admission or recipe parsing runs
+  THEN it is rejected before network fetch or rendering
+  AND CSP and persistence remain unchanged
+
+Scenario: Unauthorized focused command is called directly
+  GIVEN a client, unassigned staff actor, submitted revision, or another tenant
+  WHEN the actor sends an otherwise valid correction
+  THEN access is denied before content disclosure or persistence
+```
+
+## Quality impact
+
+- Preserve the 1 MiB recipe limit, existing dynamic catalog limits, 24 blocks,
+  bounded block items/media, and safe validation issue counts.
+- Security/tenant isolation: every port is actor/request scoped and pure parsers
+  own no persistence or provider authority.
+- Accessibility/responsive behavior: content contracts require accessible media
+  text and compatible components own mobile rendering.
+- Failure recovery/idempotency: retained versions, atomic commands, hashes, and
+  exact bank pins preserve retries and rollback.
+
+## Observability
+
+- Record only actor/safe IDs, schema/bank versions, command category, hash,
+  counts, and outcome; never raw content, asset keys, URLs, or provider prompts.
+
+## Test plan
+
+| Criterion | Level | Test path or planned ID |
+|---|---|---|
+| Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-recipe.ts` |
+| V3/v4 and bank 1.1/1.2 exact compatibility | integration | planned v4 migration/resolver tests |
+| Provider normalization and unsafe-input denial | unit/security | `scripts/test-security.ts`, planned provider tests |
+| Atomic authorized focused commands | integration/security | planned focused-command tests |
+| Exact preview/publication/rollback | integration/browser | `scripts/test-revisions.ts`, `tests/acceptance/app.spec.ts` |
+
+## Rollout and rollback
+
+DEP-009 controls migrations, default writers, CSP, and rollback. V4 writes stay
+disabled until bank 1.2 and provider/browser gates pass.
+
+## Readiness checklist
+
+- [x] Durable versions and compatibility explicit
+- [x] Typed block/provider/command contracts explicit
+- [x] Authorization and failure scenarios present
+- [x] Limits, observability, tests, and rollback planned
+
+## Completion evidence
+
+Filled only after implementation and mapped gates pass.

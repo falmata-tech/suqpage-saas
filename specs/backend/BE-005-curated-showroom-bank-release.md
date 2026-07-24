@@ -2,7 +2,7 @@
 id: BE-005
 title: Curated cross-industry showroom bank release
 status: done
-related: [FE-004, FE-005, FE-006, DEP-004, DEP-005, BE-004, BE-006, BE-007, ADR-0005]
+related: [FE-004, FE-005, FE-006, FE-009, DEP-004, DEP-005, DEP-009, BE-004, BE-006, BE-007, BE-010, ADR-0005, ADR-0007]
 owners: [product, frontend, backend, design]
 last_updated: 2026-07-24
 change_level: L2
