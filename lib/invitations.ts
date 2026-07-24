@@ -2,10 +2,13 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { getDb, inTransaction } from "./db";
 import { isStrongPassword } from "./passwords";
+import {
+  curatedManifestForLegacyDesign,
+  isLegacyShowroomDesignKey,
+} from "./showroom-manifests";
 import type { ClientInvitation } from "./types";
 
 export const INVITATION_LIFETIME_MS = 72 * 60 * 60 * 1000;
-const DESIGNS = new Set(["alhaya", "usashopet", "novatech", "homevibe"]);
 
 export class InvitationError extends Error {
   constructor(message: string, public code: "invalid" | "expired" | "replayed" | "conflict" = "invalid") {
@@ -35,9 +38,12 @@ export function createClientInvitation(raw: CreateInvitationInput, options: { no
   const businessName = clean(raw.businessName, 120);
   const handle = normalizeHandle(raw.handle);
   const designKey = clean(raw.designKey, 40);
-  if ((requestId !== null && !Number.isInteger(requestId)) || !clientName || !businessName || !handle || !/^\S+@\S+\.\S+$/.test(email) || !DESIGNS.has(designKey)) {
+  if ((requestId !== null && !Number.isInteger(requestId)) || !clientName || !businessName || !handle || !/^\S+@\S+\.\S+$/.test(email) || !isLegacyShowroomDesignKey(designKey)) {
     throw new InvitationError("Complete the client, business, handle, email, and design fields.");
   }
+  const designManifestJson = JSON.stringify(
+    curatedManifestForLegacyDesign(designKey),
+  );
   const token = options.token || crypto.randomBytes(32).toString("base64url");
   if (!/^[A-Za-z0-9_-]{40,100}$/.test(token)) throw new InvitationError("Could not create a secure invitation.");
   const now = options.now ?? Date.now();
@@ -53,10 +59,10 @@ export function createClientInvitation(raw: CreateInvitationInput, options: { no
     }
     let businessId = request?.business_id ?? null;
     if (businessId) {
-      const updated = getDb().prepare("UPDATE businesses SET handle=?,name=?,design_key=?,site_title=? WHERE id=? AND status='draft'").run(handle, businessName, designKey, businessName, businessId);
+      const updated = getDb().prepare("UPDATE businesses SET handle=?,name=?,design_key='composition',design_manifest_json=?,site_title=? WHERE id=? AND status='draft'").run(handle, businessName, designManifestJson, businessName, businessId);
       if (updated.changes !== 1) throw new InvitationError("Only a draft business can receive a replacement invitation.", "conflict");
     } else {
-      const inserted = getDb().prepare("INSERT INTO businesses(handle,name,design_key,status,site_title) VALUES(?,?,?,'draft',?)").run(handle, businessName, designKey, businessName);
+      const inserted = getDb().prepare("INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,site_title) VALUES(?,?,'composition',?,'draft',?)").run(handle, businessName, designManifestJson, businessName);
       businessId = Number(inserted.lastInsertRowid);
     }
     getDb().prepare("UPDATE client_invitations SET revoked_at=? WHERE business_id=? AND accepted_at IS NULL AND revoked_at IS NULL").run(now, businessId);

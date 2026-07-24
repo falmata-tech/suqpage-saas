@@ -1,5 +1,5 @@
 export type Business = {
-  id: number; handle: string; name: string; design_key: string; tagline: string; description: string;
+  id: number; handle: string; name: string; design_key: string; design_manifest_json:string; tagline: string; description: string;
   logo_path: string; hero_title: string; hero_subtitle: string; hero_image_path: string;
   contact_email: string; whatsapp: string; telegram: string; tiktok: string;
   status: "active" | "draft" | "suspended"; site_title: string; site_description: string; favicon_path: string; content_version:number;

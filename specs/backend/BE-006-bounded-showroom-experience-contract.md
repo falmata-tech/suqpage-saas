@@ -2,7 +2,7 @@
 id: BE-006
 title: Bounded showroom experience contract
 status: done
-related: [FE-005, DEP-005, BE-004, BE-005, ADR-0005]
+related: [FE-005, FE-006, BE-007, DEP-005, BE-004, BE-005, ADR-0005]
 owners: [product, backend, frontend, security]
 last_updated: 2026-07-24
 change_level: L1

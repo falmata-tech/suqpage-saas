@@ -4,7 +4,7 @@ title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
 deciders: [SuqPage]
-related: [BE-004, BE-005, BE-006, FE-004, FE-005, DEP-004, DEP-005, ADR-0001, ADR-0004]
+related: [BE-004, BE-005, BE-006, BE-007, FE-004, FE-005, FE-006, DEP-004, DEP-005, DEP-006, ADR-0001, ADR-0004]
 ---
 
 # ADR-0005 — Constrained showroom composition instead of tenant-generated code
@@ -72,9 +72,15 @@ Adopt option 3 as the default future production path.
   and staff review experience exist. A direct provider adapter requires a later
   accepted spec, provider/privacy decision, bounded failures, and operational
   evidence.
-- Existing custom renderers remain supported during migration. One-off custom
-  code may remain an explicitly reviewed premium exception, not the routine
-  tenant production path.
+- Existing custom renderers remain readable during migration and recovery.
+  One-off custom code may remain an explicitly reviewed premium exception, not
+  the routine tenant production path.
+
+The 2026-07-24 implementation completed the four-example-client cutover under
+`FE-006`, `BE-007`, and `DEP-006`. All normal seeds, invitations, revision
+writes, publications, and rollbacks now use schema v2 and the composition
+renderer. Schema v1 and the former four renderer keys are temporary read-only
+recovery inputs, not selectable product modes.
 
 ## Consequences
 
@@ -108,8 +114,8 @@ Adopt option 3 as the default future production path.
 `BE-004` proves the side-effect-free bank/proposal contract. `BE-005`, `BE-006`,
 `FE-004`, `FE-005`, `DEP-004`, and `DEP-005` prove repository-only component
 admission, the staff laboratory, bounded visual experience settings, phone
-containment, touch sizing, and reduced-motion behavior. Later linked frontend,
-backend, and deployment specs must still prove schema-v2 compatibility,
-deterministic public rendering, private import authorization, client-approved
-publication, rollback, and provider privacy/failure boundaries before those
-capabilities are described as current.
+containment, touch sizing, and reduced-motion behavior. `FE-006`, `BE-007`, and
+`DEP-006` prove schema-v2 persistence, deterministic public/private rendering,
+four-client migration, client-approved publication, rollback, recovery, and
+role/browser behavior. Private proposal-import authorization and provider
+privacy/failure boundaries remain later work.

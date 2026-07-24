@@ -21,8 +21,9 @@ manager-publication workflow remains the final authority.
   manifest needed to reproduce its preview and publication.
 - Customer content remains separate from component code and retains source
   provenance. Missing facts produce questions.
-- Existing renderer keys and schema-v1 revisions remain readable until a tested
-  migration and rollback path explicitly retires them.
+- Former renderer keys and schema-v1 revisions are read-only recovery inputs.
+  Current seeds, invitations, drafts, publications, and rollback writes are
+  schema v2 and use the composition renderer.
 
 ## Delivery sequence
 
@@ -68,18 +69,25 @@ screenshot-baseline infrastructure remains a later enhancement; current
 evidence is source isolation, contract tests, production build, visual review,
 and browser acceptance.
 
-### 3. Backward-compatible revision schema and composition renderer
+### 3. Revision schema v2 and composition renderer
 
-- Add revision schema v2 with a separate `designManifest`.
-- Continue parsing and rendering schema-v1 revisions and the four current design
-  keys.
-- Render approved components deterministically; forbid dynamic import paths,
-  raw markup, arbitrary style values, and component-owned persistence.
+Status: completed and verified on 2026-07-24 by `FE-006`, `BE-007`, and
+`DEP-006`.
 
-Exit: one example showroom reaches functional and visual parity through the new
-renderer while all existing publications and rollback snapshots still work.
+- Revision schema v2 stores canonical content separately from the exact
+  validated `designManifest`.
+- New drafts, publications, retained baselines, and rollback writes are v2-only.
+- The interpreter resolves only the static bank registry and forbids dynamic
+  imports, raw markup, arbitrary style values, and component-owned persistence.
+- Schema-v1 snapshots and former design keys can be upgraded only through the
+  migration/recovery boundary.
+
+Exit evidence: private preview, exact approval, atomic publication, retained
+rollback, inquiry behavior, and fail-closed invalid-manifest behavior pass.
 
 ### 4. Manual AI proposal import and staff exception workflow
+
+Status: next planned phase.
 
 - Export a sanitized brief containing the selected bank release, schemas,
   examples, request facts, and authorized asset references.
@@ -92,17 +100,24 @@ renderer while all existing publications and rollback snapshots still work.
 Exit: an assigned team member can move one real pilot request from sanitized
 brief to valid private preview without provider credentials or live mutation.
 
-### 5. Client review, publication, and gradual migration
+### 5. Client review, publication, and four-client migration
+
+Status: completed and verified on 2026-07-24 by `FE-006`, `BE-007`, and
+`DEP-006`. The migration was intentionally completed before manual AI import
+because all four current tenants are test clients and the product owner chose a
+fresh cutover rather than visual parity with obsolete renderers.
 
 - Reuse exact revision submission, client approval/rejection, stale-version
   checks, atomic publication, and retained rollback.
 - Browser-test visitor, client, assigned team member, operations manager, and
   administrator paths.
-- Migrate the remaining example showrooms only after parity and rollback
-  evidence.
+- All four example showrooms use distinct curated compositions and retain their
+  handles, catalog content, client access, requests, inquiries, deliveries,
+  content versions, and retained revision history.
 
-Exit: the bank becomes the default production path without removing a working
-legacy renderer prematurely.
+Exit: the bank is the default production path. Former renderers remain only as
+a temporary read-only recovery path for pre-cutover backups until the recovery
+window and removal criteria are handled in a later scoped change.
 
 ### 6. Optional provider adapter
 

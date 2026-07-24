@@ -58,6 +58,15 @@ try {
     CREATE INDEX invitation_request_idx ON client_invitations(request_id,created_at DESC);
     CREATE INDEX invitation_expiry_idx ON client_invitations(expires_at);
     DELETE FROM schema_migrations WHERE version=7;
+    DELETE FROM schema_migrations WHERE version=8;
+    UPDATE businesses SET
+      design_key=CASE handle
+        WHEN 'alhayabrand' THEN 'alhaya'
+        WHEN 'usashopet' THEN 'usashopet'
+        WHEN 'novatech' THEN 'novatech'
+        WHEN 'homevibe' THEN 'homevibe'
+      END,
+      design_manifest_json='';
     PRAGMA foreign_keys=ON;
   `);
   db.prepare("INSERT INTO sessions(token_hash,user_id,expires_at,created_at,last_seen_at) VALUES('cutover-session',?,?,?,?)").run(preCutoverClient.id,Date.now()+60_000,Date.now(),Date.now());
@@ -68,6 +77,8 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM products").get().count,preCutover.products);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM user_access_profiles WHERE access_role='client'").get().count,preCutover.clients);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM sessions WHERE token_hash='cutover-session' AND revoked_at IS NOT NULL").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses WHERE design_key='composition' AND design_manifest_json!=''").get().count,preCutover.businesses);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=8").get().count,1);
   assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);
   db.close();
   fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
@@ -82,7 +93,8 @@ try {
   const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001',?,?,'change','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private authenticated request during backup and restore.','client',?,'operations-backup-key','private-hash')").run(owner.business_id,owner.id,owner.id).lastInsertRowid);
   db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1);
   db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','authenticated client request')").run(requestId);
-  const revisionSnapshot = JSON.stringify({ schemaVersion:1, business:{name:"Backup Business",designKey:"novatech",tagline:"",description:"",logoRef:"",heroTitle:"Backup preview",heroSubtitle:"",heroImageRef:"",contactEmail:"",whatsapp:"",telegram:"",tiktok:"",siteTitle:"Backup Business",siteDescription:"",faviconRef:""}, collections:[], categories:[], products:[] });
+  const designManifest = JSON.parse(db.prepare("SELECT design_manifest_json FROM businesses WHERE id=?").get(owner.business_id).design_manifest_json);
+  const revisionSnapshot = JSON.stringify({ schemaVersion:2, business:{name:"Backup Business",designKey:"composition",tagline:"",description:"",logoRef:"",heroTitle:"Backup preview",heroSubtitle:"",heroImageRef:"",contactEmail:"",whatsapp:"",telegram:"",tiktok:"",siteTitle:"Backup Business",siteDescription:"",faviconRef:""}, designManifest, collections:[], categories:[], products:[] });
   const revisionId = Number(db.prepare("INSERT INTO content_revisions(request_id,business_id,revision_number,base_content_version,status,snapshot_json,summary,created_by_user_id,submitted_at) VALUES(?,?,1,1,'awaiting_review',?,'Backup revision',?,CURRENT_TIMESTAMP)").run(requestId,owner.business_id,revisionSnapshot,owner.id).lastInsertRowid);
   db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,source_revision_id,change_kind,actor_user_id) VALUES(?,1,?,?,'baseline',?)").run(owner.business_id,revisionSnapshot,revisionId,owner.id);
   db.close();

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import styles from "./bank.module.css";
 import type {
   BankPresentationContext,
@@ -22,21 +22,44 @@ function SectionRoot({
   variant,
   label,
   experience,
+  properties,
   children,
 }: {
   slot: string;
   variant: string;
   label: string;
   experience: BankSectionRendererProps["experience"];
+  properties?: BankSectionRendererProps["properties"];
   children: ReactNode;
 }) {
+  const style = {
+    "--bank-section-columns":
+      typeof properties?.columns === "number"
+        ? String(properties.columns)
+        : undefined,
+    "--bank-hero-height":
+      typeof properties?.height === "number"
+        ? `${properties.height}px`
+        : undefined,
+  } as CSSProperties;
   return (
     <section
       className={`${styles.section} ${styles[slot] || ""}`}
       data-variant={variant}
+      data-density={
+        typeof properties?.density === "string"
+          ? properties.density
+          : undefined
+      }
+      data-alignment={
+        typeof properties?.alignment === "string"
+          ? properties.alignment
+          : undefined
+      }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
       aria-label={label}
+      style={style}
     >
       {children}
     </section>
@@ -56,9 +79,17 @@ function ProductVisual({ product }: { product: BankProductView }) {
 function BrandMark({ context }: { context: BankPresentationContext }) {
   return (
     <span className={styles.brandMark}>
-      <span className={styles.brandGlyph} aria-hidden="true">
-        {context.business.name.slice(0, 1)}
-      </span>
+      {context.business.logoRef ? (
+        <img
+          className={styles.brandLogo}
+          src={context.business.logoRef}
+          alt=""
+        />
+      ) : (
+        <span className={styles.brandGlyph} aria-hidden="true">
+          {context.business.name.slice(0, 1)}
+        </span>
+      )}
       <span>{context.business.name}</span>
     </span>
   );
@@ -68,18 +99,26 @@ export function BankHeaderSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
     <header
       className={`${styles.section} ${styles.header}`}
       data-variant={variant}
+      data-density={
+        typeof properties?.density === "string"
+          ? properties.density
+          : undefined
+      }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
       aria-label={`${definition.name} preview`}
     >
       <BrandMark context={context} />
-      <span className={styles.headerTagline}>{context.business.tagline}</span>
+      {properties?.show_tagline !== false ? (
+        <span className={styles.headerTagline}>{context.business.tagline}</span>
+      ) : null}
       <nav className={styles.headerNav} aria-label="Showroom preview">
         <button type="button" onClick={() => context.onCategoryChange("all")}>
           Catalog
@@ -96,6 +135,7 @@ export function BankHeroSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const featured = context.products.slice(0, 3);
@@ -105,6 +145,7 @@ export function BankHeroSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div className={styles.heroCopy}>
         <span className={styles.kicker}>{context.business.tagline}</span>
@@ -141,6 +182,7 @@ export function BankNavigationSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const items = context.categories.length
@@ -152,6 +194,7 @@ export function BankNavigationSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div className={styles.navigationLabel}>Browse the catalog</div>
       <nav className={styles.categoryNav} aria-label="Product categories">
@@ -182,6 +225,7 @@ export function BankContentSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const statements = context.collections.slice(0, 3);
@@ -191,6 +235,7 @@ export function BankContentSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div className={styles.contentHeading}>
         <span className={styles.kicker}>{definition.name}</span>
@@ -214,36 +259,48 @@ export function BankContentSection({
   );
 }
 
-function CatalogControls({ context }: { context: BankPresentationContext }) {
+function CatalogControls({
+  context,
+  showSearch,
+  showFilters,
+}: {
+  context: BankPresentationContext;
+  showSearch: boolean;
+  showFilters: boolean;
+}) {
   return (
     <div className={styles.catalogControls}>
-      <label>
-        <span>Search products</span>
-        <input
-          value={context.query}
-          onChange={(event) => context.onQueryChange(event.target.value)}
-          placeholder="Search the catalog"
-        />
-      </label>
-      <div className={styles.catalogFilters} aria-label="Catalog filters">
-        <button
-          type="button"
-          aria-pressed={context.selectedCategory === "all"}
-          onClick={() => context.onCategoryChange("all")}
-        >
-          All
-        </button>
-        {context.categories.slice(0, 4).map((category) => (
+      {showSearch ? (
+        <label>
+          <span>Search products</span>
+          <input
+            value={context.query}
+            onChange={(event) => context.onQueryChange(event.target.value)}
+            placeholder="Search the catalog"
+          />
+        </label>
+      ) : null}
+      {showFilters ? (
+        <div className={styles.catalogFilters} aria-label="Catalog filters">
           <button
             type="button"
-            key={category.key}
-            aria-pressed={context.selectedCategory === category.key}
-            onClick={() => context.onCategoryChange(category.key)}
+            aria-pressed={context.selectedCategory === "all"}
+            onClick={() => context.onCategoryChange("all")}
           >
-            {category.name}
+            All
           </button>
-        ))}
-      </div>
+          {context.categories.slice(0, 4).map((category) => (
+            <button
+              type="button"
+              key={category.key}
+              aria-pressed={context.selectedCategory === category.key}
+              onClick={() => context.onCategoryChange(category.key)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -252,6 +309,7 @@ export function BankCatalogSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const normalizedQuery = context.query.trim().toLowerCase();
@@ -268,17 +326,22 @@ export function BankCatalogSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div className={styles.catalogHeading}>
         <div>
           <span className={styles.kicker}>Product showroom</span>
           <h2>Explore {context.business.name}</h2>
         </div>
-        <CatalogControls context={context} />
+        <CatalogControls
+          context={context}
+          showSearch={properties?.show_search !== false}
+          showFilters={properties?.show_filters !== false}
+        />
       </div>
       <div className={styles.productGrid}>
         {products.slice(0, 6).map((product) => (
-          <article className={styles.productCard} key={product.key}>
+          <article className={`${styles.productCard} sr-card`} key={product.key}>
             <button
               type="button"
               className={styles.productOpen}
@@ -313,6 +376,7 @@ export function BankTrustSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const facts = [
@@ -326,6 +390,7 @@ export function BankTrustSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div className={styles.trustIntro}>
         <span className={styles.kicker}>{definition.name}</span>
@@ -370,6 +435,7 @@ export function BankCallToActionSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const copy = ctaCopy[variant] || ctaCopy.inquiry;
@@ -379,6 +445,7 @@ export function BankCallToActionSection({
       variant={variant}
       label={`${definition.name} preview`}
       experience={experience}
+      properties={properties}
     >
       <div>
         <span className={styles.kicker}>{copy.eyebrow}</span>
@@ -396,19 +463,27 @@ export function BankFooterSection({
   context,
   definition,
   experience,
+  properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
     <footer
       className={`${styles.section} ${styles.footer}`}
       data-variant={variant}
+      data-alignment={
+        typeof properties?.alignment === "string"
+          ? properties.alignment
+          : undefined
+      }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
       aria-label={`${definition.name} preview`}
     >
       <div>
         <BrandMark context={context} />
-        <p>{context.business.tagline}</p>
+        {properties?.show_tagline !== false ? (
+          <p>{context.business.tagline}</p>
+        ) : null}
       </div>
       <nav aria-label="Footer catalog">
         {context.collections.slice(0, 4).map((collection) => (

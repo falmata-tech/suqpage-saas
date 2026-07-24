@@ -10,7 +10,7 @@ export default function CreateClientWorkspaceForm() {
   return <form action={action} className="panel form-grid">
     <div className="field full"><label htmlFor="workspace-business-name">Business name</label><input id="workspace-business-name" name="businessName" required maxLength={120}/></div>
     <div className="field"><label htmlFor="workspace-handle">Showroom handle</label><input id="workspace-handle" name="handle" required maxLength={80} placeholder="business-name"/></div>
-    <div className="field"><label htmlFor="workspace-design">Starting design</label><select id="workspace-design" name="designKey" defaultValue="novatech"><option value="alhaya">Al Haya</option><option value="usashopet">USAshopET</option><option value="novatech">NovaTech</option><option value="homevibe">HomeVibe</option></select></div>
+    <div className="field"><label htmlFor="workspace-design">Starting composition style</label><select id="workspace-design" name="designKey" defaultValue="novatech"><option value="alhaya">Quiet editorial</option><option value="usashopet">Beauty editorial</option><option value="novatech">Precision product</option><option value="homevibe">Warm material</option></select></div>
     <div className="field"><label htmlFor="workspace-client-name">Client name</label><input id="workspace-client-name" name="clientName" required maxLength={100}/></div>
     <div className="field"><label htmlFor="workspace-client-email">Client email</label><input id="workspace-client-email" name="email" type="email" required maxLength={160}/></div>
     <div className="field full"><small>This creates a private draft workspace, not a request or public showroom. The client submits detailed instructions after accepting the invitation.</small></div>

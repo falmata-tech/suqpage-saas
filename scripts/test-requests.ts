@@ -189,6 +189,9 @@ async function main() {
     assert.equal(prospectDetail.represented_client_user_id,null);
     const prospectInvitation = createClientInvitation({requestId:prospectRequest.id,clientName:"Prospect Served",email:"prospect-served@example.test",businessName:"Prospect Served Market",handle:"prospect-served-market",designKey:"novatech",actorUserId:manager.id},{now:3_000_000,token:"C".repeat(43)});
     assert.equal(getActiveInvitation("C".repeat(43),3_000_001)?.business_id,prospectInvitation.businessId);
+    const prospectBusiness=getDb().prepare("SELECT design_key,design_manifest_json FROM businesses WHERE id=?").get(prospectInvitation.businessId) as {design_key:string;design_manifest_json:string};
+    assert.equal(prospectBusiness.design_key,"composition");
+    assert.equal(JSON.parse(prospectBusiness.design_manifest_json).tokenPack,"technology-mono");
 
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "short" }, "ip-b", { repository, rateLimiter: allowedRate }), RequestError);
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_223456", requestText: "x".repeat(2_001) }, "ip-b2", { repository, rateLimiter: allowedRate }), RequestError);
@@ -196,7 +199,7 @@ async function main() {
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

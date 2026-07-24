@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
+import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import "./showrooms.css";
 
 type CartLine = { product: Product; quantity: number; options: Record<string, string> };
@@ -228,11 +230,28 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     novatech: NovaTechDesign,
     homevibe: HomeVibeDesign,
   } as const;
-  const Design = registry[catalog.business.design_key as keyof typeof registry] || NovaTechDesign;
+  const legacyDesign =
+    registry[catalog.business.design_key as keyof typeof registry];
+  const LegacyDesign = legacyDesign;
+  let compositionManifest = null;
+  if (catalog.business.design_key === "composition") {
+    try {
+      compositionManifest = parsePublishedDesignManifest(
+        catalog.business.design_manifest_json,
+      );
+    } catch {}
+  }
 
   return (
     <div className={`runtime-root theme-${catalog.business.design_key}`}>
-      <Design {...designProps} />
+      {compositionManifest ? (
+        <CompositionShowroom {...designProps} manifest={compositionManifest} />
+      ) : LegacyDesign ? (
+        // Temporary read-only recovery path for pre-migration database backups.
+        <LegacyDesign {...designProps} />
+      ) : (
+        <InvalidComposition />
+      )}
       {selected && (
         <div
           ref={productDialog}

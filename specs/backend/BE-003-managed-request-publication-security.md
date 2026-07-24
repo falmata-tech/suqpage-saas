@@ -2,7 +2,7 @@
 id: BE-003
 title: Managed request, permission, and publication security
 status: done
-related: [FE-003, DEP-003, ADR-0004]
+related: [FE-003, BE-007, DEP-003, ADR-0004]
 owners: [backend, security]
 last_updated: 2026-07-22
 change_level: L3

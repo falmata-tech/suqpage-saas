@@ -11,7 +11,7 @@ export default function InviteProspectForm({ requestId, businessName, clientName
     <input type="hidden" name="requestId" value={requestId}/>
     <div className="field full"><label htmlFor="invite-business-name">Business name</label><input id="invite-business-name" name="businessName" defaultValue={businessName} required maxLength={100}/></div>
     <div className="field"><label htmlFor="invite-handle">Showroom handle</label><input id="invite-handle" name="handle" defaultValue={businessName.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")} required maxLength={80}/></div>
-    <div className="field"><label htmlFor="invite-design">Starting design</label><select id="invite-design" name="designKey" defaultValue="novatech"><option value="alhaya">Al Haya</option><option value="usashopet">USAshopET</option><option value="novatech">NovaTech</option><option value="homevibe">HomeVibe</option></select></div>
+    <div className="field"><label htmlFor="invite-design">Starting composition style</label><select id="invite-design" name="designKey" defaultValue="novatech"><option value="alhaya">Quiet editorial</option><option value="usashopet">Beauty editorial</option><option value="novatech">Precision product</option><option value="homevibe">Warm material</option></select></div>
     <div className="field"><label htmlFor="invite-name">Client name</label><input id="invite-name" name="clientName" defaultValue={clientName} required maxLength={100}/></div>
     <div className="field"><label htmlFor="invite-email">Client email</label><input id="invite-email" name="email" type="email" defaultValue={email.includes("@") ? email : ""} required maxLength={160}/></div>
     {state.error && <p className="error field full" role="alert">{state.error}</p>}

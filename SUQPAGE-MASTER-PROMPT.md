@@ -107,13 +107,13 @@ Use the terms **inquiry**, **inquiry cart**, **customer inquiry**, and **deliver
 
 ### 5.1 Every client showroom is deliberately designed
 
-Client pages are not generated from one generic layout with different colors.
-The current four showrooms are separately coded renderers. A future composition
-path may assemble a client-specific design from a curated bank of independently
-reviewed components, but component reuse must not collapse distinct brand
-identity into one theme.
+Client pages are not one generic layout with different colors. The current
+default is a deterministic composition assembled from independently reviewed
+components, an exact token system, bounded motion and decoration, declared
+content bindings, and client-specific section choices. Component reuse must not
+collapse distinct brand identity into one theme.
 
-Each client may have a separately coded Next.js renderer with its own:
+Each client composition can have its own:
 
 - logo;
 - typography;
@@ -134,7 +134,7 @@ Each client may have a separately coded Next.js renderer with its own:
 
 Shared behavior is acceptable. Shared visual identity is not.
 
-Never refactor the four showrooms into a single visually generic renderer.
+Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components
 and bounded tokens as declarative JSON, while SuqPage validates and renders it.
@@ -144,9 +144,11 @@ Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
 `clean`, `subtle`, or `signature` decorative depth. Those settings are CSS-only,
 scoped, reduced-motion safe, and cannot carry arbitrary code or style values.
 Authorized staff can inspect every component in a synthetic, read-only visual
-laboratory, including a true container-based 390-pixel phone preview. The public
-composition renderer, revision persistence, AI proposal import, and client-
-content mapping remain planned until their later specs and evidence pass.
+laboratory, including a true container-based 390-pixel phone preview. `FE-006`,
+`BE-007`, and `DEP-006` establish the current public/private composition
+renderer, revision-schema-v2 persistence, exact client-content mapping,
+publication, rollback, and four-example-client cutover. Manual AI proposal
+import and a focused staff composition studio remain planned.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -782,14 +784,14 @@ AI design workflow:
 9. Publish only after visual and functional review.
 10. Keep the previous design version available for rollback when practical.
 
-### Constrained component-bank foundation and planned workflow
+### Constrained component-bank production system and planned AI workflow
 
-The accepted future default is a deterministic showroom composition system, not
-runtime execution of tenant-specific AI code. `BE-004`, `BE-005`, `FE-004`, and
-`DEP-004` establish the current repository bank and its staff-only visual
-laboratory. The remaining delivery sequence is recorded in
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md` and is not yet public composition
-behavior.
+The current default is a deterministic showroom composition system, not runtime
+execution of tenant-specific AI code. `BE-004` through `BE-007`, `FE-004`
+through `FE-006`, and `DEP-004` through `DEP-006` establish the bank,
+laboratory, schema-v2 persistence, renderer, and controlled cutover. The
+remaining AI-assisted delivery sequence is recorded in
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md`.
 
 - Approved component implementations, schemas, fixtures, examples,
   compatibility metadata, and tests enter immutable bank releases through the
@@ -813,8 +815,8 @@ behavior.
   controls, native swipe rails where appropriate, safe-area-aware spacing, and
   no hover dependency; the user agent's reduced-motion preference always
   disables nonessential movement.
-- Customer content remains separate from component code. A future revision
-  schema will bind canonical content to an exact design manifest and bank
+- Customer content remains separate from component code. Revision schema v2
+  binds canonical content to an exact validated design manifest and bank
   release for reproducible preview, publication, and rollback.
 - External AI returns only bounded declarative JSON containing approved
   component references, allowed token choices, properties, bindings, questions,
@@ -826,12 +828,13 @@ behavior.
 - Missing customer facts produce questions. AI may suggest presentation and
   marketing copy, but it cannot invent contacts, stock, availability,
   certifications, specifications, product facts, or delivery claims.
-- The first operational release will use a reviewed manual JSON export/import
-  workflow. A direct AI-provider adapter requires a later accepted provider,
-  privacy, failure, cost, and deployment contract.
-- The existing four renderers remain supported until a backward-compatible
-  revision schema, deterministic renderer, visual parity, browser acceptance,
-  and rollback evidence permit gradual migration.
+- The next operational composition phase will use a reviewed manual JSON
+  export/import workflow. A direct AI-provider adapter requires a later
+  accepted provider, privacy, failure, cost, and deployment contract.
+- All four example clients now use distinct schema-v2 compositions. The four
+  former renderer keys and schema-v1 parser remain read-only recovery bridges
+  for pre-cutover backups; no current seed, invitation, draft, publication, or
+  rollback writer creates v1 or selects a former renderer.
 
 ---
 
@@ -1090,7 +1093,7 @@ When adding a new client:
 
 1. Accept a public expression of interest or create a client workspace directly
    for a referred client.
-2. Reserve a unique handle and choose the starting custom renderer.
+2. Reserve a unique handle and choose a starting reviewed composition style.
 3. Deliver the displayed-once invitation securely; do not create a public
    request merely to provision access.
 4. Let the client set a strong password and submit their first detailed request
@@ -1115,17 +1118,18 @@ private previews, approvals, and account security. A request for a business with
 no retained publication is a first-showroom request; after publication it is a
 change request. The server decides this classification.
 
-### Planned AI-assisted staff assembly
+### Current composition assembly and planned AI import
 
-The target staff workflow is request, sanitized AI brief, strict proposal
-import, validation report, private preview, focused exception correction, client
-review, and controlled publication. It is intended to replace repetitive form-
-first assembly as the normal path without removing a bounded recovery editor.
-This workflow is planned under `ADR-0005` and
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the current structured revision editor
-remains authoritative until the later implementation and acceptance gates pass.
-Staff may currently use the component laboratory to compare the reviewed bank,
-but it cannot import a proposal or alter a revision.
+The current workflow stores an exact validated composition in each schema-v2
+revision and renders it consistently in private preview and public publication.
+The structured revision editor remains a bounded content-recovery surface; it
+shows the immutable composition identity instead of offering old renderer keys.
+The next target workflow is request, sanitized AI brief, strict proposal import,
+validation report, private preview, focused exception correction, client review,
+and controlled publication. Manual proposal import and the focused composition
+studio remain planned under `ADR-0005` and
+`docs/SHOWROOM-COMPOSITION-ROADMAP.md`. The component laboratory remains
+synthetic and cannot itself alter a tenant revision.
 
 ---
 

@@ -93,15 +93,21 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(page.getByText("Search by name or select a category")).toBeVisible();
   await page.getByRole("button", { name: "All businesses" }).click();
   await expect(page.locator(".showroom-card")).toHaveCount(4);
+  const compositionSignatures = new Set<string>();
   for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
+    await expect(page.locator('[data-bank-release="showroom-bank@1.1.0"]')).toBeVisible();
     await expect(page.locator(".sr-card").first()).toBeVisible();
+    compositionSignatures.add(
+      await page.locator("[data-token-pack]").getAttribute("data-token-pack") || "",
+    );
     await expectVisibleControlsNamed(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
+  expect(compositionSignatures.size).toBe(4);
   await page.goto("/@alhayabrand");
-  const productOpener = page.locator(".sr-card").first().getByRole("button", { name: "View piece" });
+  const productOpener = page.locator(".sr-card").first().getByRole("button", { name: /^View / });
   await productOpener.click();
   await expect(page.getByRole("dialog").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Close product" })).toBeFocused();
@@ -111,7 +117,7 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(productOpener).toBeFocused();
   await productOpener.click();
   await page.getByRole("button", { name: "Add selected item" }).click();
-  const drawerOpener = page.getByRole("button", { name: /Inquiry · 1/ });
+  const drawerOpener = page.getByRole("button", { name: /Inquiry.*1/ }).first();
   await drawerOpener.click();
   await expect(page.getByRole("button", { name: "Close inquiry" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
@@ -134,12 +140,12 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/@usashopet");
-  await page.getByPlaceholder("Search products").fill("CeraVe");
+  await page.getByLabel("Search products").fill("CeraVe");
   await expect(page.locator(".sr-card")).toHaveCount(1);
-  await page.locator(".sr-card").first().getByRole("button", { name: "Details" }).click();
+  await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await page.reload();
-  await page.getByRole("button", { name: /Bag 1/ }).click();
+  await page.getByRole("button", { name: /Inquiry.*1/ }).first().click();
   await page.getByRole("button", { name: "Increase quantity" }).click();
   await expect(page.locator(".qty strong")).toHaveText("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

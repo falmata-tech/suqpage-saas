@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
 import { migrateDatabase } from "../lib/schema";
+import { curatedManifestForLegacyDesign, type LegacyShowroomDesignKey } from "../lib/showroom-manifests";
 
 const dbPath = databasePath();
 if (process.argv.includes("--reset")) {
@@ -21,7 +22,7 @@ if (count > 0) {
   process.exit(0);
 }
 
-const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,status) VALUES(@handle,@name,@design_key,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,'active')`);
+const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,'active')`);
 const addCollection = db.prepare("INSERT INTO collections(business_id,name,slug,description,sort_order) VALUES(?,?,?,?,?)");
 const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
 const addProduct = db.prepare(`INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,stock_count,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,1,?)`);
@@ -29,14 +30,27 @@ const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position)
 const addValue = db.prepare("INSERT INTO option_values(option_group_id,value,stock_count) VALUES(?,?,?)");
 
 const businesses = [
-  { handle:"alhayabrand", name:"Al Haya Brand", design_key:"alhaya", tagline:"Modest essentials, presented with grace.", description:"A refined collection of niqabs, hijabs, abayas and jilbabs.", logo_path:"/uploads/seed/alhaya/logo.png", hero_title:"Quiet elegance for every day.", hero_subtitle:"Explore thoughtfully selected modest wear and send one clear inquiry.", hero_image_path:"/uploads/seed/alhaya/hero-featured.jpg", contact_email:"", whatsapp:"", telegram:"AlHayaModest", tiktok:"alhayabrand" },
-  { handle:"usashopet", name:"USAshopET", design_key:"usashopet", tagline:"Beauty and wellness sourced from the U.S.", description:"Skincare, wellness and personal-care favorites.", logo_path:"/uploads/seed/usashopet/logo.png", hero_title:"Your U.S. beauty shelf, closer to home.", hero_subtitle:"Browse trusted personal-care essentials and ask about several products at once.", hero_image_path:"/uploads/seed/usashopet/hero.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"usashopet" },
-  { handle:"novatech", name:"NovaTech", design_key:"novatech", tagline:"Flagship technology, curated without compromise.", description:"Category-defining devices for work, creativity and everyday life.", logo_path:"/uploads/seed/novatech/logo.png", hero_title:"The next generation is here.", hero_subtitle:"Flagship devices, precise product conversations and human confirmation.", hero_image_path:"/uploads/seed/novatech/iphone-17-pro.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" },
-  { handle:"homevibe", name:"HomeVibe", design_key:"homevibe", tagline:"Objects that make home feel considered.", description:"Recognizable appliances and home essentials selected room by room.", logo_path:"/uploads/seed/homevibe/logo.svg", hero_title:"A calmer, smarter home.", hero_subtitle:"Discover useful design, trusted appliances and pieces worth living with.", hero_image_path:"/uploads/seed/homevibe/dyson-v16.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" }
-];
+  { handle:"alhayabrand", name:"Al Haya Brand", sourceDesign:"alhaya", tagline:"Modest essentials, presented with grace.", description:"A refined collection of niqabs, hijabs, abayas and jilbabs.", logo_path:"/uploads/seed/alhaya/logo.png", hero_title:"Quiet elegance for every day.", hero_subtitle:"Explore thoughtfully selected modest wear and send one clear inquiry.", hero_image_path:"/uploads/seed/alhaya/hero-featured.jpg", contact_email:"", whatsapp:"", telegram:"AlHayaModest", tiktok:"alhayabrand" },
+  { handle:"usashopet", name:"USAshopET", sourceDesign:"usashopet", tagline:"Beauty and wellness sourced from the U.S.", description:"Skincare, wellness and personal-care favorites.", logo_path:"/uploads/seed/usashopet/logo.png", hero_title:"Your U.S. beauty shelf, closer to home.", hero_subtitle:"Browse trusted personal-care essentials and ask about several products at once.", hero_image_path:"/uploads/seed/usashopet/hero.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"usashopet" },
+  { handle:"novatech", name:"NovaTech", sourceDesign:"novatech", tagline:"Flagship technology, curated without compromise.", description:"Category-defining devices for work, creativity and everyday life.", logo_path:"/uploads/seed/novatech/logo.png", hero_title:"The next generation is here.", hero_subtitle:"Flagship devices, precise product conversations and human confirmation.", hero_image_path:"/uploads/seed/novatech/iphone-17-pro.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" },
+  { handle:"homevibe", name:"HomeVibe", sourceDesign:"homevibe", tagline:"Objects that make home feel considered.", description:"Recognizable appliances and home essentials selected room by room.", logo_path:"/uploads/seed/homevibe/logo.svg", hero_title:"A calmer, smarter home.", hero_subtitle:"Discover useful design, trusted appliances and pieces worth living with.", hero_image_path:"/uploads/seed/homevibe/dyson-v16.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" }
+] satisfies Array<Record<string,string> & { sourceDesign:LegacyShowroomDesignKey }>;
 
 const seeded = new Map<string, number>();
-for (const business of businesses) seeded.set(business.handle, Number(addBusiness.run(business).lastInsertRowid));
+for (const business of businesses) {
+  const { sourceDesign, ...businessValues } = business;
+  seeded.set(
+    business.handle,
+    Number(
+      addBusiness.run({
+        ...businessValues,
+        design_manifest_json: JSON.stringify(
+          curatedManifestForLegacyDesign(sourceDesign),
+        ),
+      }).lastInsertRowid,
+    ),
+  );
+}
 
 function seedCatalog(handle: string, collectionName: string, categoryNames: string[], products: any[]) {
   const businessId = seeded.get(handle)!;

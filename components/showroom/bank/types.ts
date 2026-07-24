@@ -1,6 +1,7 @@
 import type { CSSProperties, ComponentType } from "react";
 import type {
   ShowroomComponentDefinition,
+  ShowroomPrimitive,
   ShowroomSlot,
 } from "@/lib/showroom-composition";
 import type { ShowroomExperienceSettings } from "@/lib/showroom-experience";
@@ -67,6 +68,7 @@ export type BankSectionRendererProps = {
   context: BankPresentationContext;
   definition: ShowroomComponentDefinition;
   experience: ShowroomExperienceSettings;
+  properties?: Record<string, ShowroomPrimitive>;
 };
 
 export type BankSectionRenderer = ComponentType<BankSectionRendererProps>;

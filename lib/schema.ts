@@ -1,4 +1,9 @@
 import type { DatabaseSync } from "node:sqlite";
+import {
+  parseRevisionSnapshot,
+  upgradeRevisionSnapshotToV2,
+} from "./revision-domain";
+import { resolveDesignManifest } from "./showroom-manifests";
 
 function columns(db: DatabaseSync, table: string) {
   return new Set((db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>).map((row) => row.name));
@@ -469,6 +474,111 @@ export function migrateDatabase(db: DatabaseSync) {
         )
       `).run(Date.now());
       db.prepare("INSERT INTO schema_migrations(version) VALUES(7)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const compositionCutoverApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=8")
+    .get();
+  if (!compositionCutoverApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(
+        db,
+        "businesses",
+        "design_manifest_json TEXT NOT NULL DEFAULT ''",
+      );
+      const businesses = db
+        .prepare(
+          "SELECT id,design_key,design_manifest_json FROM businesses ORDER BY id",
+        )
+        .all() as Array<{
+        id: number;
+        design_key: string;
+        design_manifest_json: string;
+      }>;
+      const updateBusiness = db.prepare(
+        "UPDATE businesses SET design_key='composition',design_manifest_json=? WHERE id=?",
+      );
+      for (const business of businesses) {
+        let existingManifest: unknown;
+        if (business.design_key === "composition") {
+          try {
+            existingManifest = JSON.parse(business.design_manifest_json);
+          } catch {
+            throw new Error(
+              `Business ${business.id} has an invalid composition manifest.`,
+            );
+          }
+        }
+        const manifest = resolveDesignManifest(
+          business.design_key,
+          existingManifest,
+        );
+        updateBusiness.run(JSON.stringify(manifest), business.id);
+      }
+
+      db.exec("DROP TRIGGER IF EXISTS submitted_revision_content_immutable");
+      const revisionRows = db
+        .prepare("SELECT id,snapshot_json FROM content_revisions ORDER BY id")
+        .all() as Array<{ id: number; snapshot_json: string }>;
+      const updateRevision = db.prepare(
+        "UPDATE content_revisions SET snapshot_json=? WHERE id=?",
+      );
+      for (const revision of revisionRows) {
+        updateRevision.run(
+          JSON.stringify(upgradeRevisionSnapshotToV2(revision.snapshot_json)),
+          revision.id,
+        );
+      }
+      const publishedRows = db
+        .prepare(
+          "SELECT business_id,content_version,snapshot_json FROM published_catalog_versions ORDER BY business_id,content_version",
+        )
+        .all() as Array<{
+        business_id: number;
+        content_version: number;
+        snapshot_json: string;
+      }>;
+      const updatePublished = db.prepare(
+        "UPDATE published_catalog_versions SET snapshot_json=? WHERE business_id=? AND content_version=?",
+      );
+      for (const published of publishedRows) {
+        updatePublished.run(
+          JSON.stringify(upgradeRevisionSnapshotToV2(published.snapshot_json)),
+          published.business_id,
+          published.content_version,
+        );
+      }
+      for (const revision of db
+        .prepare("SELECT snapshot_json FROM content_revisions")
+        .all() as Array<{ snapshot_json: string }>) {
+        if (parseRevisionSnapshot(revision.snapshot_json).schemaVersion !== 2) {
+          throw new Error("A content revision did not migrate to schema version 2.");
+        }
+      }
+      for (const published of db
+        .prepare("SELECT snapshot_json FROM published_catalog_versions")
+        .all() as Array<{ snapshot_json: string }>) {
+        if (parseRevisionSnapshot(published.snapshot_json).schemaVersion !== 2) {
+          throw new Error(
+            "A retained publication did not migrate to schema version 2.",
+          );
+        }
+      }
+      db.exec(`
+        CREATE TRIGGER submitted_revision_content_immutable
+        BEFORE UPDATE OF snapshot_json,summary,base_content_version ON content_revisions
+        WHEN OLD.status != 'draft'
+        BEGIN
+          SELECT RAISE(ABORT, 'submitted revision content is immutable');
+        END;
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(8)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
