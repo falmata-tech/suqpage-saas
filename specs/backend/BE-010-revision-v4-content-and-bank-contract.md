@@ -100,7 +100,7 @@ Scenario: Unauthorized focused command is called directly
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-content-blocks.ts`, `scripts/test-showroom-recipe.ts` |
-| V3/v4 and bank 1.1/1.2 exact compatibility | integration | planned v4 migration/resolver tests |
+| V3/v4 and bank 1.1/1.2 exact compatibility | integration | `scripts/test-showroom-composition-v2.ts`, planned v4 migration tests |
 | Provider normalization and unsafe-input denial | unit/security | `scripts/test-security.ts`, planned provider tests |
 | Atomic authorized focused commands | integration/security | planned focused-command tests |
 | Exact preview/publication/rollback | integration/browser | `scripts/test-revisions.ts`, `tests/acceptance/app.spec.ts` |
@@ -123,5 +123,8 @@ Checkpoint: the exact release resolver is implemented with bank 1.1 as the only
 available/default immutable release. Published-manifest parsing and composed
 rendering resolve the pinned release and fail closed for unknown releases. The
 six strict typed blocks now have a pure server parser and portable schema with
-bounded copy, items, media, keys, and unsafe-input denial. Revision-v4 storage
-and design binding, bank 1.2, provider admission, and focused commands remain.
+bounded copy, items, media, keys, and unsafe-input denial. An additive design-v2
+parser wraps the unchanged v1 validator and enforces exact one-time compatible
+block assignment using bank-v2 compatibility metadata. Revision-v4 storage,
+the admitted bank-1.2 export/renderers, provider admission, and focused commands
+remain.

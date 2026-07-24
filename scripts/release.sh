@@ -31,6 +31,9 @@ node node_modules/tsx/dist/cli.mjs scripts/test-showroom-recipe.ts
 printf '\n=== Typed showroom content-block validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-showroom-content-blocks.ts
 
+printf '\n=== Additive design-v2 compatibility validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-showroom-composition-v2.ts
+
 printf '\n=== Security integration tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-security.ts
 
