@@ -241,7 +241,7 @@ and controlled YouTube media remain open. The implemented checkpoint passes the
 focused gate and 7/7 production-browser acceptance scenarios. The spec
 therefore remains `ready`; this checkpoint is not full completion evidence.
 
-## Open defect evidence
+## Studio deep-link defect follow-up
 
 - On 2026-07-24, a platform administrator reached an unexpected 404 at a newly
   created Codespaces studio deep link (`/dashboard/requests/{requestId}/revisions/{revisionId}/studio`).
@@ -249,7 +249,10 @@ therefore remains `ready`; this checkpoint is not full completion evidence.
   matched the business content version, and the same brief built successfully
   through the application service for the platform-admin actor.
 - A temporary diagnostic route edit was removed because it neither reproduced
-  nor fixed the cause. No defect implementation is retained or claimed.
-- Before UI enhancement work changes this route, reproduce the browser/session
-  path, identify the failing contract, add a regression scenario, and commit the
-  smallest verified fix separately.
+  nor fixed the cause. No production-code fix is retained or claimed.
+- Production-browser acceptance now explicitly covers a platform administrator
+  recording a request for an existing seeded client, creating its first draft,
+  following the redirect to the studio, and seeing its recovery navigation.
+- The isolated production suite passes 7/7 with that regression. The original
+  transient Codespaces occurrence has no reproducible application defect; if it
+  recurs, retain the request/session/server evidence before changing the route.

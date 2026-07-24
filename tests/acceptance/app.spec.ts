@@ -273,6 +273,18 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   expect((await page.request.get("/@acceptanceflowers")).status()).toBe(404);
   await page.goto("/preview/@acceptanceflowers");
   await expect(page.locator(".showroom")).toBeVisible();
+  await page.goto("/dashboard/requests/on-behalf");
+  await page.getByLabel(/Existing managed client/).selectOption({
+    label: "Al Haya Brand · Al Haya Client · alhaya@suqpage.local",
+  });
+  await page.getByLabel("Client’s instruction").fill(
+    "Please prepare a more expressive private showroom direction for administrator review.",
+  );
+  await page.getByRole("button", { name: "Record request for client" }).click();
+  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
+  await page.getByRole("button", { name: "Prepare first recipe" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom recipe studio" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Administrative recovery editor" })).toBeVisible();
   await page.goto("/dashboard");
   for (let attempt = 0; attempt < 6; attempt += 1) {
     await page.getByRole("button", { name: "Sign out" }).click();
