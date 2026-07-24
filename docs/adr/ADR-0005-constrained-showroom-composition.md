@@ -68,9 +68,23 @@ Adopt option 3 as the default future production path.
 - Customer content and a design manifest remain separate versioned concerns,
   cross-validated and combined only for a revision/preview. Private or
   tenant-specific facts are never baked into component code.
+- Media is admitted manually before brief export. Request attachments,
+  authorized same-tenant managed images, new verified image uploads, and
+  allowlisted provider links become request-scoped descriptors with opaque
+  keys. Component definitions declare named typed media slots; content blocks
+  may bind only admitted keys that satisfy each slot's kind, count, and aspect
+  contract.
+- Initial linked-video support normalizes a recognized YouTube URL into a
+  canonical provider ID rendered by a reviewed controlled component. Recipes
+  cannot introduce remote-image URLs, raw iframe/embed markup, provider scripts,
+  arbitrary URL parameters, or another request's or tenant's media.
 - External AI is advisory. It receives a sanitized, bounded package and returns
   JSON plus questions, warnings, and rationale. It receives no persistence,
   credentials, tenant-wide export, approval, or publication capability.
+- The exported media manifest contains safe descriptors, not storage paths or
+  file bytes. When image understanding is useful, staff manually supplies the
+  same approved files to the external AI conversation; SuqPage performs no
+  automatic media transfer in the manual phase.
 - Server-side schema, semantic, compatibility, provenance, tenant, revision,
   and publication validation remain authoritative.
 - Missing factual information becomes a question. AI-generated marketing copy
@@ -108,6 +122,8 @@ recovery inputs, not selectable product modes.
 - Component defects can be fixed and tested centrally.
 - The external AI vendor can be changed without changing core showroom
   authority.
+- Real media remains reusable and securely managed while AI can still choose
+  useful placement across compatible components.
 
 ### Negative / debt
 
@@ -123,6 +139,9 @@ recovery inputs, not selectable product modes.
 - The existing renderer-generation SDK must remain clearly labeled as the
   current reviewed-code path until it is replaced; it cannot silently become an
   automated publication path.
+- Media intake requires a request-scoped registry, provider-specific
+  normalization, component slot metadata, accessibility/rights review,
+  controlled rendering, narrow CSP behavior, and paired database/file backup.
 
 ## Verification
 
@@ -134,5 +153,7 @@ containment, touch sizing, and reduced-motion behavior. `FE-006`, `BE-007`, and
 four-client migration, client-approved publication, rollback, recovery, and
 role/browser behavior. Private proposal-import authorization and provider
 privacy/failure boundaries remain later work. `FE-007`, `BE-008`, and `DEP-007`
-define the ready manual full-recipe import/studio phase; they do not describe
-current implemented behavior until their mapped evidence passes.
+define the ready manual full-recipe import/studio phase, including manual media
+admission, opaque media-slot assignment, controlled YouTube rendering, and
+media privacy/operations evidence. They do not describe current implemented
+behavior until their mapped evidence passes.

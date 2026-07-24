@@ -35,6 +35,9 @@ choice.
   synthetic/authorized complete examples.
 - Paste or JSON-file import of one recipe containing separately versioned
   content and design documents.
+- Manual media intake before brief export: request attachments, same-tenant
+  existing media, new verified image uploads, and allowlisted provider links
+  such as YouTube become labeled opaque asset keys.
 - A validation report grouped into content, design, cross-document,
   provenance/completeness, and tenant/asset errors.
 - A candidate private preview using the client's imported dynamic content and
@@ -53,6 +56,8 @@ choice.
   integration, arbitrary code/CSS/HTML, or automatic publication.
 - Treating AI-created facts as merchant authority.
 - Uploading private image bytes to an external provider from SuqPage.
+- AI-created image URLs, arbitrary remote-image hotlinks, raw iframe/embed HTML,
+  or unrestricted video providers.
 - Removing client approval, stale-version checks, manager publication, or
   retained rollback.
 
@@ -68,6 +73,11 @@ choice.
   reconciliation. The two documents remain separately inspectable and valid.
 - A **focused correction** changes only a reviewed bounded choice. It never
   exposes raw CSS, markup, code, database IDs, or unrestricted style values.
+- A **media asset** is a manually admitted image or provider link with an opaque
+  key, kind, label, source/provenance, usage-rights acknowledgement, and safe
+  rendering metadata. AI can assign its key but cannot create the asset.
+- A **media slot** is a component-declared requirement such as one hero image,
+  an optional story image, a gallery of bounded images, or one supported video.
 - Imported data is a private candidate until server validation, staff review,
   client approval, and authorized publication all complete.
 
@@ -82,6 +92,23 @@ choice.
   AI returns a complete replacement proposal, not an ambiguous patch.
 - Product, collection, category, option, and section-content lists are dynamic
   within backend limits; the UI never assumes a fixed item count.
+- Before export, staff can label and review admitted media. Verified image files
+  show dimensions/aspect ratio and a thumbnail; supported provider links show
+  their normalized provider/type and title. The UI never accepts embed code.
+- The brief's media manifest contains opaque keys and safe descriptors. If the
+  external AI needs visual understanding, staff manually supplies the same
+  approved images in that separate conversation; SuqPage does not transmit them.
+- The design bank and focused studio display each component's required/optional
+  media slots, accepted media kinds, count, and aspect-ratio guidance.
+- Content blocks assign admitted asset keys to named media slots. Required slots
+  block a valid candidate when empty or incompatible; optional slots may remain
+  empty without placeholders.
+- Initial external-link support is a manually entered YouTube URL normalized by
+  the server into a controlled video asset. Preview uses a reviewed video
+  component, never recipe-provided iframe markup or query parameters.
+- Staff review descriptive alt text, captions, video titles, and usage rights
+  before client review. AI may draft descriptive text, but it remains labeled
+  until staff accepts it.
 - The content schema supports typed hero, story, highlight/trust, information,
   and call-to-action blocks in addition to business metadata and catalog data.
 - The UI never silently repairs, drops, or invents imported entries. Errors
@@ -123,6 +150,18 @@ Scenario: Staff uses a focused design exception
   THEN only compatible bank choices are offered
   AND the resulting content/design pair is revalidated before preview
 
+Scenario: Staff assigns manually admitted media
+  GIVEN staff uploaded verified images and added a supported YouTube link before exporting the brief
+  WHEN the AI recipe assigns their opaque keys to compatible hero, story, gallery, or video slots
+  THEN the exact media appears in the private candidate preview
+  AND staff did not paste file paths, iframe HTML, or remote image URLs into the recipe
+
+Scenario: Required section media is missing
+  GIVEN a selected hero component requires one image
+  WHEN the returned content proposal omits that media slot or assigns a video or incompatible aspect
+  THEN validation identifies the exact missing or incompatible slot
+  AND client review and publication remain unavailable
+
 Scenario: Client attempts studio access
   GIVEN an authenticated client
   WHEN they navigate directly to a recipe export, import, validation, or studio route
@@ -135,7 +174,8 @@ Scenario: Client attempts studio access
 - Security and tenant isolation: server-authorized request scope owns every
   brief, asset key, import, preview, and save; interface hiding is not authority.
 - Privacy and data retention: exports are minimal and explicit; no automatic
-  provider transfer or private image-byte export occurs.
+  provider transfer or private image-byte export occurs; staff explicitly
+  acknowledges rights for manually admitted media.
 - Accessibility and responsive behavior: validation paths, diffs, preview
   controls, and correction inputs are labeled and operable at 320 pixels.
 - Localization and merchant-entered values: supplied names/options remain exact;
@@ -160,6 +200,7 @@ request text, contacts, product copy, private media, or provider conversations.
 | Grouped validation and no silent repair | component/browser | `tests/acceptance/recipe.spec.ts` |
 | Dynamic item counts and exact preview | integration/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/recipe.spec.ts` |
 | Focused compatible corrections | component/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/recipe.spec.ts` |
+| Manual image/provider intake and media-slot assignment | security/browser | `scripts/test-showroom-recipe.ts`, `scripts/test-security.ts`, `tests/acceptance/recipe.spec.ts` |
 | Client/cross-tenant denial | security/browser | `scripts/test-security.ts`, `tests/acceptance/recipe.spec.ts` |
 | Mobile, labels, focus, and Back behavior | browser | `tests/acceptance/recipe.spec.ts` |
 

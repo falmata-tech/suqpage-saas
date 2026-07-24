@@ -35,6 +35,8 @@ showrooms remain recoverable throughout the transition.
   exact preview, client decision, manager publication, and retained rollback.
 - Safe export/download headers and explicit operator guidance for manually using
   an approved external AI account.
+- Controlled image/provider-media configuration, CSP/privacy behavior, and
+  backup/restore coverage for recipe media descriptors and managed files.
 
 ### Non-goals
 
@@ -64,6 +66,17 @@ showrooms remain recoverable throughout the transition.
 - Export responses are authenticated, non-cacheable, attachment-disposition
   controlled, and bounded; generic logs and error trackers receive no payload
   bodies.
+- Managed recipe images remain inside the existing persistent media/backup
+  boundary. Synthetic CI fixtures never contain client images; restore evidence
+  proves media registry rows and managed files remain paired.
+- Initial YouTube rendering uses a reviewed provider-specific component,
+  privacy-enhanced canonical embed origin, lazy/user-initiated loading, bounded
+  title/ID, no autoplay by default, and the narrow CSP/frame policy required for
+  that origin only. Arbitrary frames, scripts, trackers, and providers remain
+  denied.
+- Operators must confirm media usage rights and manually supply any approved
+  private images to the external AI conversation. SuqPage does not upload image
+  bytes or provider links to an AI service in the manual phase.
 - Migration starts from an integrity-clean backup, is transactional/idempotent,
   preserves tenant/request/revision/publication/inquiry/delivery authority, and
   records only safe schema/count evidence.
@@ -99,6 +112,12 @@ Scenario: Recipe rollout regresses a current workflow
   WHEN the release admission runs
   THEN rollout exits non-zero
   AND recipe import is not enabled as the default staff workflow
+
+Scenario: Unsupported external media is proposed
+  GIVEN a recipe or operator supplies an unapproved provider, raw embed, or remote image URL
+  WHEN security and release admission run
+  THEN the value is rejected and CSP remains narrow
+  AND no provider script or unverified image enters the build, preview, or publication
 
 Scenario: Operator rolls back recipe capability
   GIVEN import or studio behavior is unsafe after deployment
@@ -136,6 +155,7 @@ recipe JSON, source facts, private asset keys, contacts, prompts, or credentials
 | No private/export data in source, logs, traces, artifacts | security/container | `scripts/test-security.ts`, `scripts/test-build-trace.mjs`, `scripts/test-container.mjs` |
 | V2/v3 migration, backup, restore, idempotency | operations | `scripts/test-operations.mjs`, `scripts/test-showroom-recipe.ts` |
 | Staff capability and tenant isolation | security/browser | `scripts/test-requests.ts`, `tests/acceptance/recipe.spec.ts` |
+| Media persistence, provider allowlist, CSP, and privacy | security/operations/browser | `scripts/test-security.ts`, `scripts/test-operations.mjs`, `tests/acceptance/recipe.spec.ts` |
 | Export/import/preview/approval/publication/rollback | production browser | `tests/acceptance/recipe.spec.ts` |
 | Complete release admission | release | `npm run check`, `npm run release`, `npm run test:operations`, `npm run test:acceptance`, `npm run test:container` |
 

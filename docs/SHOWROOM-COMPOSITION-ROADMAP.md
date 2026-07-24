@@ -29,6 +29,9 @@ remain the final authority.
 - One recipe envelope pins separately versioned content/design documents,
   schema/bank releases, provenance, source reconciliation, questions, and
   warnings. It never grants either document independent publication authority.
+- Images and supported external media are admitted manually before export.
+  Components declare typed media slots; AI recipes may assign only the opaque
+  keys in the exported media manifest and can never introduce a URL or embed.
 - Former renderer keys and schema-v1 revisions are read-only recovery inputs.
   Current seeds, invitations, drafts, publications, and rollback writes are
   schema v2 and use the composition renderer.
@@ -103,7 +106,8 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
   dynamic collections, categories, products, option groups, availability,
   stock, allowed media keys, and typed section-content blocks.
 - Keep the existing design proposal as a separately versioned schema and extend
-  component admission with compatible typed content contracts.
+  component admission with compatible typed content and media-slot contracts:
+  allowed kind, required/optional state, count, and aspect-ratio guidance.
 - Add a small recipe-envelope schema that pins content/design versions, bank
   release, provenance, expected/returned counts, stable-key reconciliation,
   questions, warnings, and rationale.
@@ -113,22 +117,31 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
 #### 4.2 Sanitized brief export
 
+- Before export, staff manually admit and label request attachments,
+  same-tenant media, new verified JPEG/PNG/WebP uploads, and allowlisted provider
+  links. Initial external-video support normalizes a recognized YouTube URL into
+  one controlled provider asset; raw embed HTML and arbitrary URLs are invalid.
 - Export/copy one request-scoped package containing schemas, bank/component
-  metadata, synthetic examples, source facts, allowed opaque asset keys,
+  metadata including media slots, synthetic examples, source facts, an opaque
+  media manifest with safe labels/kinds/dimensions/aspect/provider metadata,
   expected counts, and the exact base content version.
 - For a new showroom, request a complete desired content/design pair. For a
   change, include the authorized current snapshot and require a complete
   replacement recipe with retained stable keys and explicit removals.
 - Do not export credentials, database IDs, storage paths, unrelated tenant
   data, customer inquiries, invitation/session data, or image bytes.
+- If the external AI needs to inspect images, staff manually supplies the same
+  approved files in that conversation. SuqPage performs no automatic media
+  transfer to the AI provider.
 
 #### 4.3 Strict manual import and cross-validation
 
 - Import JSON manually from the team's approved external AI account; SuqPage
   performs no provider call in this phase.
 - Validate content, design, and envelope independently, then cross-validate
-  component/content-block types, bindings, asset scope, provenance,
-  completeness, item relationships, version limits, and stale base state.
+  component/content-block types, bindings, required/optional media slots, media
+  kind/count/aspect, asset scope, provenance, completeness, item relationships,
+  version limits, and stale base state.
 - Permit dynamic item counts through existing bounded maxima. Never silently
   truncate, repair, invent, or drop catalog/content entries.
 - Treat AI marketing language as labeled draft copy. Contacts, stock,
@@ -139,6 +152,9 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
 - Show grouped validation paths, questions, warnings, count/difference summaries,
   and the exact private candidate preview before persistence.
+- Show a media intake/assignment view with thumbnails or normalized provider
+  cards, slot requirements, descriptive alt/caption/title review, and usage-
+  rights acknowledgement. AI decides placement only among admitted assets.
 - Make corrected re-import the normal content/catalog correction path.
 - Offer focused compatible controls for approved components, token packs,
   motion, decoration, and content-block association. Do not turn the workflow
@@ -158,8 +174,9 @@ Status: ready next phase under `FE-007`, `BE-008`, and `DEP-007`.
 
 Exit: an assigned team member can move one real pilot request from sanitized
 brief to a complete valid private preview—dynamic catalog, all page copy,
-media assignments, and design—without provider credentials, manual per-item
-entry, live mutation, or publication authority.
+manually admitted image/video assignments, and design—without provider
+credentials, manual per-item entry, raw embeds, live mutation, or publication
+authority.
 
 ### 5. Client review, publication, and four-client migration
 

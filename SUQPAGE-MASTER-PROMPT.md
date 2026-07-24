@@ -150,7 +150,12 @@ renderer, revision-schema-v2 persistence, exact client-content mapping,
 publication, rollback, and four-example-client cutover. `FE-007`, `BE-008`, and
 `DEP-007` define the ready next phase: manual import of a complete AI showroom
 recipe with separately validated dynamic content and design, followed by a
-focused staff studio. That workflow is planned and not currently implemented.
+focused staff studio. In that planned phase, staff manually admit request
+attachments, authorized same-tenant images, new verified image uploads, and
+supported provider links before export. Components declare typed media slots,
+and AI may place only the opaque asset keys in the exported request-scoped media
+manifest. It cannot introduce remote image URLs, embed markup, or arbitrary
+providers. That workflow is planned and not currently implemented.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -841,6 +846,19 @@ remaining AI-assisted delivery sequence is recorded in
   counts, and complete synthetic examples. Staff manually import returned JSON,
   inspect provenance/completeness and an exact private preview, and use focused
   compatible corrections instead of routine per-field entry.
+- Media remains a separately admitted source, not AI authority. Staff label and
+  approve request attachments, same-tenant managed images, new verified image
+  uploads, and supported provider links before export. The brief contains only
+  opaque media keys and safe descriptors; staff may manually show approved
+  files to the external AI when useful, but SuqPage does not transmit them.
+- Each component declares named required/optional media slots, permitted kinds,
+  bounded counts, and aspect guidance. Content blocks assign admitted keys to
+  those slots. Missing or incompatible required media blocks candidate/client
+  review rather than producing a guessed placeholder.
+- Initial linked-video support is a manually entered YouTube link normalized
+  into a canonical provider asset and rendered by a reviewed, privacy-conscious
+  component. Recipes cannot supply raw iframe/embed markup, arbitrary query
+  parameters, provider scripts, remote-image hotlinks, or unapproved URLs.
 - A direct AI-provider adapter still requires a later accepted provider,
   privacy, failure, cost, and deployment contract.
 - All four example clients now use distinct schema-v2 compositions. The four
@@ -1149,6 +1167,12 @@ focused exception correction, client review, and controlled publication.
 Routine staff should not enter every collection, category, item, hero field,
 story block, or design choice manually. A change recipe is a complete desired
 snapshot based on the authorized current version, not an ambiguous patch.
+Staff still manually admit the client's real images and supported media links
+once. The recipe then assigns their opaque keys to typed component media slots;
+it cannot create URLs, embeds, or cross-tenant asset references. Missing
+required media, incompatible slot assignments, and unreviewed descriptive text
+remain visible blockers. If the external AI needs image understanding, staff
+manually supplies only the approved files in that external conversation.
 Manual recipe import and the focused studio remain planned under `ADR-0005` and
 `docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the component laboratory remains
 synthetic and cannot itself alter a tenant revision.
