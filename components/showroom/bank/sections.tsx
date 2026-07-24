@@ -21,17 +21,21 @@ function SectionRoot({
   slot,
   variant,
   label,
+  experience,
   children,
 }: {
   slot: string;
   variant: string;
   label: string;
+  experience: BankSectionRendererProps["experience"];
   children: ReactNode;
 }) {
   return (
     <section
       className={`${styles.section} ${styles[slot] || ""}`}
       data-variant={variant}
+      data-motion={experience.motionIntensity}
+      data-decoration={experience.decorativeDepth}
       aria-label={label}
     >
       {children}
@@ -63,12 +67,15 @@ function BrandMark({ context }: { context: BankPresentationContext }) {
 export function BankHeaderSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
     <header
       className={`${styles.section} ${styles.header}`}
       data-variant={variant}
+      data-motion={experience.motionIntensity}
+      data-decoration={experience.decorativeDepth}
       aria-label={`${definition.name} preview`}
     >
       <BrandMark context={context} />
@@ -88,11 +95,17 @@ export function BankHeaderSection({
 export function BankHeroSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const featured = context.products.slice(0, 3);
   return (
-    <SectionRoot slot="hero" variant={variant} label={`${definition.name} preview`}>
+    <SectionRoot
+      slot="hero"
+      variant={variant}
+      label={`${definition.name} preview`}
+      experience={experience}
+    >
       <div className={styles.heroCopy}>
         <span className={styles.kicker}>{context.business.tagline}</span>
         <h2>{context.business.heroTitle}</h2>
@@ -127,6 +140,7 @@ export function BankHeroSection({
 export function BankNavigationSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const items = context.categories.length
@@ -137,6 +151,7 @@ export function BankNavigationSection({
       slot="navigation"
       variant={variant}
       label={`${definition.name} preview`}
+      experience={experience}
     >
       <div className={styles.navigationLabel}>Browse the catalog</div>
       <nav className={styles.categoryNav} aria-label="Product categories">
@@ -166,11 +181,17 @@ export function BankNavigationSection({
 export function BankContentSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const statements = context.collections.slice(0, 3);
   return (
-    <SectionRoot slot="content" variant={variant} label={`${definition.name} preview`}>
+    <SectionRoot
+      slot="content"
+      variant={variant}
+      label={`${definition.name} preview`}
+      experience={experience}
+    >
       <div className={styles.contentHeading}>
         <span className={styles.kicker}>{definition.name}</span>
         <h2>{context.business.name}</h2>
@@ -230,6 +251,7 @@ function CatalogControls({ context }: { context: BankPresentationContext }) {
 export function BankCatalogSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const normalizedQuery = context.query.trim().toLowerCase();
@@ -241,7 +263,12 @@ export function BankCatalogSection({
         .includes(normalizedQuery),
   );
   return (
-    <SectionRoot slot="catalog" variant={variant} label={`${definition.name} preview`}>
+    <SectionRoot
+      slot="catalog"
+      variant={variant}
+      label={`${definition.name} preview`}
+      experience={experience}
+    >
       <div className={styles.catalogHeading}>
         <div>
           <span className={styles.kicker}>Product showroom</span>
@@ -285,6 +312,7 @@ export function BankCatalogSection({
 export function BankTrustSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const facts = [
@@ -293,7 +321,12 @@ export function BankTrustSection({
     context.business.contactLabel,
   ].filter((entry): entry is string => Boolean(entry));
   return (
-    <SectionRoot slot="trust" variant={variant} label={`${definition.name} preview`}>
+    <SectionRoot
+      slot="trust"
+      variant={variant}
+      label={`${definition.name} preview`}
+      experience={experience}
+    >
       <div className={styles.trustIntro}>
         <span className={styles.kicker}>{definition.name}</span>
         <h2>Information from {context.business.name}</h2>
@@ -336,6 +369,7 @@ const ctaCopy: Record<string, { eyebrow: string; title: string; button: string }
 export function BankCallToActionSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const copy = ctaCopy[variant] || ctaCopy.inquiry;
@@ -344,6 +378,7 @@ export function BankCallToActionSection({
       slot="callToAction"
       variant={variant}
       label={`${definition.name} preview`}
+      experience={experience}
     >
       <div>
         <span className={styles.kicker}>{copy.eyebrow}</span>
@@ -360,12 +395,15 @@ export function BankCallToActionSection({
 export function BankFooterSection({
   context,
   definition,
+  experience,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
     <footer
       className={`${styles.section} ${styles.footer}`}
       data-variant={variant}
+      data-motion={experience.motionIntensity}
+      data-decoration={experience.decorativeDepth}
       aria-label={`${definition.name} preview`}
     >
       <div>

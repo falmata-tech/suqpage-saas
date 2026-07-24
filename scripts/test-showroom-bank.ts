@@ -20,7 +20,7 @@ const minimumCoverage: Record<ShowroomSlot, number> = {
   footer: 4,
 };
 
-assert.equal(SHOWROOM_COMPONENT_BANK.release, "showroom-bank@1.0.0");
+assert.equal(SHOWROOM_COMPONENT_BANK.release, "showroom-bank@1.1.0");
 assert.equal(SHOWROOM_COMPONENT_BANK.components.length, 42);
 assert.ok(SHOWROOM_COMPONENT_BANK.tokenPacks.length >= 12);
 assert.ok(SHOWROOM_BANK_BASE_COMBINATION_FLOOR >= 10_000);
@@ -102,6 +102,10 @@ for (const token of Object.values(SHOWROOM_BANK_TOKEN_STYLES)) {
     "--bank-line",
     "--bank-radius",
     "--bank-display",
+    "--bank-motion-duration",
+    "--bank-motion-distance",
+    "--bank-motion-ease",
+    "--bank-decoration-size",
   ]) {
     assert.equal(
       typeof (token.variables as Record<string, string>)[variable],

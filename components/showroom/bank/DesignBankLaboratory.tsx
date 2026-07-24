@@ -6,6 +6,15 @@ import {
   type ShowroomComponentBank,
   type ShowroomSlot,
 } from "@/lib/showroom-composition";
+import {
+  DEFAULT_SHOWROOM_EXPERIENCE,
+  SHOWROOM_DECORATIVE_DEPTHS,
+  SHOWROOM_MOTION_INTENSITIES,
+  SHOWROOM_PREVIEW_DEVICES,
+  type ShowroomDecorativeDepth,
+  type ShowroomMotionIntensity,
+  type ShowroomPreviewDevice,
+} from "@/lib/showroom-experience";
 import { SHOWROOM_BANK_REGISTRY } from "./registry";
 import styles from "./bank.module.css";
 import { SHOWROOM_BANK_TOKEN_STYLES, type ShowroomBankTokenId } from "./tokens";
@@ -120,6 +129,16 @@ export default function DesignBankLaboratory({
   const [slot, setSlot] = useState<ShowroomSlot | "all">("all");
   const [tokenId, setTokenId] =
     useState<ShowroomBankTokenId>("harvest-earth");
+  const [motionIntensity, setMotionIntensity] =
+    useState<ShowroomMotionIntensity>(
+      DEFAULT_SHOWROOM_EXPERIENCE.motionIntensity,
+    );
+  const [decorativeDepth, setDecorativeDepth] =
+    useState<ShowroomDecorativeDepth>(
+      DEFAULT_SHOWROOM_EXPERIENCE.decorativeDepth,
+    );
+  const [previewDevice, setPreviewDevice] =
+    useState<ShowroomPreviewDevice>("responsive");
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [notice, setNotice] = useState(
@@ -147,6 +166,7 @@ export default function DesignBankLaboratory({
     onOpenCart: () =>
       setNotice("Tested the inquiry trigger. The laboratory has no inquiry storage."),
   };
+  const experience = { motionIntensity, decorativeDepth };
 
   return (
     <div className={styles.laboratory}>
@@ -170,7 +190,7 @@ export default function DesignBankLaboratory({
       </div>
 
       <div className={styles.labControls}>
-        <div>
+        <div className={styles.familyControl}>
           <span className="eyebrow">Filter component family</span>
           <div className={styles.slotFilters} aria-label="Component family filter">
             <button
@@ -212,6 +232,51 @@ export default function DesignBankLaboratory({
             ))}
           </select>
         </label>
+        <label className={styles.tokenSelect}>
+          Motion intensity
+          <select
+            value={motionIntensity}
+            onChange={(event) =>
+              setMotionIntensity(event.target.value as ShowroomMotionIntensity)
+            }
+          >
+            {SHOWROOM_MOTION_INTENSITIES.map((entry) => (
+              <option value={entry} key={entry}>
+                {entry[0].toUpperCase() + entry.slice(1)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.tokenSelect}>
+          Decorative depth
+          <select
+            value={decorativeDepth}
+            onChange={(event) =>
+              setDecorativeDepth(event.target.value as ShowroomDecorativeDepth)
+            }
+          >
+            {SHOWROOM_DECORATIVE_DEPTHS.map((entry) => (
+              <option value={entry} key={entry}>
+                {entry[0].toUpperCase() + entry.slice(1)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset className={styles.deviceControl}>
+          <legend>Preview width</legend>
+          <div>
+            {SHOWROOM_PREVIEW_DEVICES.map((entry) => (
+              <button
+                type="button"
+                key={entry}
+                aria-pressed={previewDevice === entry}
+                onClick={() => setPreviewDevice(entry)}
+              >
+                {entry === "mobile" ? "Mobile · 390 px" : "Responsive"}
+              </button>
+            ))}
+          </div>
+        </fieldset>
       </div>
 
       <div className={styles.labNotice} role="status" aria-live="polite">
@@ -233,13 +298,23 @@ export default function DesignBankLaboratory({
                 </div>
                 <code>{definition.id}</code>
                 <p>{definition.description}</p>
+                <div className={styles.experienceBadges} aria-label="Experience guarantees">
+                  <span>Mobile first</span>
+                  <span>Touch ready</span>
+                  <span>Reduced motion safe</span>
+                </div>
               </header>
               <div
                 className={styles.previewFrame}
+                data-preview-device={previewDevice}
                 style={token.variables as CSSProperties}
               >
                 <div className={styles.previewCanvas}>
-                  <Renderer context={context} definition={definition} />
+                  <Renderer
+                    context={context}
+                    definition={definition}
+                    experience={experience}
+                  />
                 </div>
               </div>
             </article>

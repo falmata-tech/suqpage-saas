@@ -2,7 +2,7 @@
 id: FE-004
 title: Cross-industry showroom component laboratory
 status: done
-related: [BE-005, DEP-004, ADR-0005]
+related: [BE-005, DEP-004, FE-005, ADR-0005]
 owners: [product, frontend, design]
 last_updated: 2026-07-24
 change_level: L2

@@ -2,7 +2,7 @@
 id: BE-005
 title: Curated cross-industry showroom bank release
 status: done
-related: [FE-004, DEP-004, BE-004, ADR-0005]
+related: [FE-004, FE-005, DEP-004, DEP-005, BE-004, BE-006, ADR-0005]
 owners: [product, frontend, backend, design]
 last_updated: 2026-07-24
 change_level: L2
@@ -23,7 +23,7 @@ businesses.
 
 ### In scope
 
-- One parsed `showroom-bank@1.0.0` release backed by reviewed repository
+- One parsed `showroom-bank@1.1.0` release backed by reviewed repository
   components and token definitions.
 - At least 40 components across all eight BE-004 slots and at least 12
   cross-industry token systems.
@@ -159,7 +159,7 @@ unchanged.
 
 Evidence: verified locally on 2026-07-24.
 
-- `showroom-bank@1.0.0` parses through the BE-004 semantic contract with 42
+- `showroom-bank@1.1.0` parses through the BE-004 semantic contract with 42
   components: 5 headers, 8 heroes, 4 navigation, 6 content, 6 catalog, 5 trust,
   4 call-to-action, and 4 footer variants.
 - Thirteen scoped token systems cover the specified consumer, producer, maker,

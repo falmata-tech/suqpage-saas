@@ -138,12 +138,15 @@ Never refactor the four showrooms into a single visually generic renderer.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components
 and bounded tokens as declarative JSON, while SuqPage validates and renders it.
-The current `showroom-bank@1.0.0` release contains 42 reviewed component
+The current `showroom-bank@1.1.0` release contains 42 reviewed component
 variants across eight section families and 13 cross-industry token systems.
+Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
+`clean`, `subtle`, or `signature` decorative depth. Those settings are CSS-only,
+scoped, reduced-motion safe, and cannot carry arbitrary code or style values.
 Authorized staff can inspect every component in a synthetic, read-only visual
-laboratory. The public composition renderer, revision persistence, AI proposal
-import, and client-content mapping remain planned until their later specs and
-evidence pass.
+laboratory, including a true container-based 390-pixel phone preview. The public
+composition renderer, revision persistence, AI proposal import, and client-
+content mapping remain planned until their later specs and evidence pass.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -791,7 +794,7 @@ behavior.
 - Approved component implementations, schemas, fixtures, examples,
   compatibility metadata, and tests enter immutable bank releases through the
   repository review and CI workflow.
-- `showroom-bank@1.0.0` currently admits 42 variants: five headers, eight heroes,
+- `showroom-bank@1.1.0` currently admits 42 variants: five headers, eight heroes,
   four navigation treatments, six story/content sections, six catalog
   treatments, five information/trust sections, four calls to action, and four
   footers. Thirteen token systems cover luxury, agriculture, honey/food, coffee,
@@ -804,6 +807,12 @@ behavior.
 - The authenticated `/dashboard/design-bank` laboratory renders every admitted
   component from local synthetic fixture data. It is a review/contact-sheet
   surface, not a tenant preview, page builder, or publication path.
+- Every admitted component has required bounded motion-intensity and decorative-
+  depth properties. The laboratory can compare those settings and force a
+  container-based 390-pixel phone layout. Phone layouts use touch-sized
+  controls, native swipe rails where appropriate, safe-area-aware spacing, and
+  no hover dependency; the user agent's reduced-motion preference always
+  disables nonessential movement.
 - Customer content remains separate from component code. A future revision
   schema will bind canonical content to an exact design manifest and bank
   release for reproducible preview, publication, and rollback.
@@ -861,6 +870,7 @@ npm run dev
 npm run typecheck
 npm run validate:designs
 npm run test:bank
+npm run test:experience
 npm run test
 npm run build
 npm run test:http
@@ -1042,6 +1052,17 @@ Minimum expectations:
 - business-specific page title, description, canonical URL, and social preview;
 - no blank-tab navigation.
 
+Component-bank phone admission additionally requires:
+
+- complete operation at 320–390 CSS pixels;
+- controls with at least a 44 CSS-pixel touch block size;
+- container-responsive layouts so embedded phone previews exercise real phone
+  behavior;
+- native scrolling and snapping for deliberate horizontal rails;
+- no information or action that depends on hover;
+- `prefers-reduced-motion` authority over all nonessential animation;
+- scoped decorative layers that cannot cover or capture interaction.
+
 For client sites, visual polish must not come at the expense of inquiry completion.
 
 ---
@@ -1153,6 +1174,8 @@ Required verification areas:
 - backup and restore;
 - all four showrooms;
 - mobile responsive layout;
+- every bank component in the 390-pixel laboratory preview, including bounded
+  motion, decorative depth, touch targets, and reduced-motion behavior;
 - metadata and favicons;
 - no broken local assets;
 - no JavaScript or server errors;

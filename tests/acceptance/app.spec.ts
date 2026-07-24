@@ -143,6 +143,17 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await page.getByRole("button", { name: "Increase quantity" }).click();
   await expect(page.locator(".qty strong")).toHaveText("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 700 });
+  for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
+    await page.goto(`/@${handle}`);
+    await expect(page.locator(".showroom")).toBeVisible();
+    await expect(page.locator(".sr-card").first()).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+  }
   expect(errors).toEqual([]);
 });
 
@@ -162,9 +173,45 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.getByRole("button", { name: "Heroes 8" }).click();
   await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(8);
   await page.getByLabel("Preview token system").selectOption("industrial-steel");
+  await page.getByLabel("Motion intensity").selectOption("expressive");
+  await page.getByLabel("Decorative depth").selectOption("signature");
+  await page.getByRole("button", { name: "Mobile · 390 px" }).click();
+  await page.getByRole("button", { name: "All 42" }).click();
+  await expect(page.locator('[data-preview-device="mobile"]')).toHaveCount(42);
+  await expect(page.locator('[data-motion="expressive"]')).toHaveCount(42);
+  await expect(page.locator('[data-decoration="signature"]')).toHaveCount(42);
+  const mobileCanvases = page.locator('[data-preview-device="mobile"] > div');
+  await expect(mobileCanvases).toHaveCount(42);
+  expect(
+    await mobileCanvases.evaluateAll((canvases) =>
+      canvases.every(
+        (canvas) => canvas.scrollWidth <= canvas.clientWidth,
+      ),
+    ),
+  ).toBe(true);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const undersizedTargets = await page
+    .locator('[data-preview-device="mobile"] button, [data-preview-device="mobile"] input')
+    .evaluateAll((targets) =>
+      targets.flatMap((target) => {
+        const rect = target.getBoundingClientRect();
+        if (!rect.width || !rect.height) return [];
+        return rect.height < 43.5
+          ? [`${target.tagName.toLowerCase()}:${target.textContent?.trim() || target.getAttribute("aria-label")}`]
+          : [];
+      }),
+    );
+  expect(undersizedTargets).toEqual([]);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(
+    await page.locator('[data-motion="expressive"]').first().evaluate(
+      (section) => getComputedStyle(section).animationName,
+    ),
+  ).toBe("none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 1280, height: 720 });
+  await page.getByRole("button", { name: "Responsive" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/dashboard/requests");
   await expect(page.getByText("Acceptance Market")).toBeVisible();

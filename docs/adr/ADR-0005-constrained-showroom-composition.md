@@ -4,7 +4,7 @@ title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
 deciders: [SuqPage]
-related: [BE-004, ADR-0001, ADR-0004]
+related: [BE-004, BE-005, BE-006, FE-004, FE-005, DEP-004, DEP-005, ADR-0001, ADR-0004]
 ---
 
 # ADR-0005 — Constrained showroom composition instead of tenant-generated code
@@ -105,9 +105,11 @@ Adopt option 3 as the default future production path.
 
 ## Verification
 
-`BE-004` proves the side-effect-free bank/proposal contract. Later linked
-frontend, backend, and deployment specs must prove repository-only component
-admission, schema-v2 compatibility, deterministic rendering, visual and
-accessibility isolation, private import authorization, client-approved
+`BE-004` proves the side-effect-free bank/proposal contract. `BE-005`, `BE-006`,
+`FE-004`, `FE-005`, `DEP-004`, and `DEP-005` prove repository-only component
+admission, the staff laboratory, bounded visual experience settings, phone
+containment, touch sizing, and reduced-motion behavior. Later linked frontend,
+backend, and deployment specs must still prove schema-v2 compatibility,
+deterministic public rendering, private import authorization, client-approved
 publication, rollback, and provider privacy/failure boundaries before those
 capabilities are described as current.

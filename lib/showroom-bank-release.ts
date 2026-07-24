@@ -6,6 +6,10 @@ import {
   type ShowroomPropertyDefinition,
   type ShowroomSlot,
 } from "./showroom-composition";
+import {
+  SHOWROOM_DECORATIVE_DEPTHS,
+  SHOWROOM_MOTION_INTENSITIES,
+} from "./showroom-experience";
 
 type ComponentSeed = {
   id: string;
@@ -68,6 +72,22 @@ const showFiltersProperty: ShowroomPropertyDefinition = {
   label: "Show category filters",
   type: "boolean",
   required: false,
+};
+
+const motionIntensityProperty: ShowroomPropertyDefinition = {
+  key: "motion_intensity",
+  label: "Motion intensity",
+  type: "enum",
+  required: true,
+  values: [...SHOWROOM_MOTION_INTENSITIES],
+};
+
+const decorativeDepthProperty: ShowroomPropertyDefinition = {
+  key: "decorative_depth",
+  label: "Decorative depth",
+  type: "enum",
+  required: true,
+  values: [...SHOWROOM_DECORATIVE_DEPTHS],
 };
 
 const brandBindings: ShowroomBindingDefinition[] = [
@@ -210,7 +230,14 @@ function definitions(
     repeatable: slot === "content" || slot === "trust",
     providesCapabilities: [...providesCapabilities],
     incompatibleWith: [],
-    properties: properties.map((entry) => ({ ...entry })),
+    properties: [
+      motionIntensityProperty,
+      decorativeDepthProperty,
+      ...properties,
+    ].map((entry) => ({
+      ...entry,
+      ...(entry.type === "enum" ? { values: [...entry.values] } : {}),
+    })),
     bindings: bindings.map((entry) => ({
       ...entry,
       allowedSources: [...entry.allowedSources],
@@ -530,7 +557,7 @@ const tokenPacks = [
 export const SHOWROOM_COMPONENT_BANK = deepFreeze(
   parseShowroomComponentBank({
     schemaVersion: 1,
-    release: "showroom-bank@1.0.0",
+    release: "showroom-bank@1.1.0",
     components,
     tokenPacks,
     requiredSlots: ["header", "hero", "catalog", "footer"],

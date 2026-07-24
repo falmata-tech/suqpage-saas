@@ -24,16 +24,17 @@
     "test:revisions": "tsx scripts/test-revisions.ts",
     "test:compositions": "tsx scripts/test-showroom-composition.ts",
     "test:bank": "tsx scripts/test-showroom-bank.ts",
+    "test:experience": "tsx scripts/test-showroom-experience.ts",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:bank && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
+    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:bank && npm run test:experience && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "next": "16.2.10",
+    "next": "16.2.11",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sharp": "0.35.3"
@@ -51,7 +52,7 @@
   },
   "overrides": {
     "next": {
-      "postcss": "8.5.10",
+      "postcss": "8.5.12",
       "sharp": "0.35.3"
     }
   }

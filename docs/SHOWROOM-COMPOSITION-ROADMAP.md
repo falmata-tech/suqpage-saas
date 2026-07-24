@@ -53,14 +53,20 @@ Status: completed and verified on 2026-07-24 by `FE-004`, `BE-005`, and
 Exit: every admitted component has reviewed code, metadata, fixtures, responsive
 screenshots, accessibility evidence, and compatibility constraints.
 
-Current release evidence: `showroom-bank@1.0.0` contains 42 component variants
+Current release evidence: `showroom-bank@1.1.0` contains 42 component variants
 across all eight slots, 13 scoped token systems, exact static-registry parity,
-and 12,480 required-slot combinations. The authenticated laboratory renders
-every component using bounded synthetic content. Desktop and 390-pixel
-screenshots were reviewed locally without committing generated artifacts.
-Automated screenshot-baseline infrastructure remains a later enhancement;
-current evidence is source isolation, contract tests, production build, visual
-review, and browser acceptance.
+and 12,480 required-slot combinations. `BE-006`, `FE-005`, and `DEP-005` add
+required bounded motion and decorative properties to every component, scoped
+CSS-only experience primitives, touch-first behavior, container-based
+390-pixel previews, and reduced-motion enforcement. The authenticated
+laboratory renders every component using bounded synthetic content. Desktop
+and 390-pixel screenshots were reviewed locally without committing generated
+artifacts. Production-browser acceptance checks every component canvas for
+overflow and every visible bank input/button for 44-pixel touch height, while
+the four current public renderers remain covered at 320 pixels. Automated
+screenshot-baseline infrastructure remains a later enhancement; current
+evidence is source isolation, contract tests, production build, visual review,
+and browser acceptance.
 
 ### 3. Backward-compatible revision schema and composition renderer
 

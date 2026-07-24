@@ -1,6 +1,30 @@
 import type { BankTokenStyle } from "./types";
 
-export const SHOWROOM_BANK_TOKEN_STYLES = {
+const sharedExperienceVariables = {
+  "--bank-motion-duration": "560ms",
+  "--bank-motion-distance": "18px",
+  "--bank-motion-ease": "cubic-bezier(0.22, 1, 0.36, 1)",
+  "--bank-decoration-size": "180px",
+} as const;
+
+function withExperienceVariables<T extends Record<string, BankTokenStyle>>(
+  tokens: T,
+): T {
+  return Object.fromEntries(
+    Object.entries(tokens).map(([id, token]) => [
+      id,
+      {
+        ...token,
+        variables: {
+          ...token.variables,
+          ...sharedExperienceVariables,
+        },
+      },
+    ]),
+  ) as unknown as T;
+}
+
+export const SHOWROOM_BANK_TOKEN_STYLES = withExperienceVariables({
   "linen-luxury": {
     id: "linen-luxury",
     label: "Linen luxury",
@@ -196,6 +220,6 @@ export const SHOWROOM_BANK_TOKEN_STYLES = {
       "--bank-display": "Arial, Helvetica, sans-serif",
     },
   },
-} as const satisfies Record<string, BankTokenStyle>;
+} as const satisfies Record<string, BankTokenStyle>);
 
 export type ShowroomBankTokenId = keyof typeof SHOWROOM_BANK_TOKEN_STYLES;

@@ -21,7 +21,7 @@ The launch build addresses the independent audit blockers as follows.
 | Inventory inconsistency | Zero stock automatically becomes unavailable; unavailable/coming-soon products cannot be submitted; quantities are stock-limited. |
 | No notifications | Optional Resend email notification is available for business contact emails. |
 | Missing headers | CSP, HSTS, frame denial, nosniff, referrer and permissions policies are configured; powered-by header is disabled. |
-| Vulnerable PostCSS | npm override installs PostCSS 8.5.10 inside Next.js; production dependency audit returns zero findings. |
+| Vulnerable Next.js/PostCSS patch levels | Next.js 16.2.11 and the PostCSS 8.5.12 override contain the current production-audit fixes; `npm audit --omit=dev` returns zero findings. |
 | No meaningful tests | Security integration and production HTTP smoke tests are included in `npm run release`. |
 | Cart lost on refresh | Per-showroom cart state persists in local storage. |
 | Duplicate inquiry saves | Client and server idempotency keys deduplicate repeated social-channel actions. |
