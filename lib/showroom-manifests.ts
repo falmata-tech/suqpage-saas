@@ -3,7 +3,10 @@ import {
   type ShowroomDesignProposal,
   type ShowroomPrimitive,
 } from "./showroom-composition";
-import { SHOWROOM_COMPONENT_BANK } from "./showroom-bank-release";
+import {
+  SHOWROOM_COMPONENT_BANK,
+  resolveShowroomComponentBank,
+} from "./showroom-bank-release";
 import type {
   ShowroomDecorativeDepth,
   ShowroomMotionIntensity,
@@ -180,7 +183,22 @@ export function isLegacyShowroomDesignKey(
 export function parsePublishedDesignManifest(
   input: unknown,
 ): ShowroomDesignProposal {
-  return parseShowroomDesignProposal(input, SHOWROOM_COMPONENT_BANK);
+  let candidate: unknown = input;
+  if (typeof input === "string") {
+    try {
+      candidate = JSON.parse(input);
+    } catch {
+      candidate = input;
+    }
+  }
+  const release =
+    candidate && typeof candidate === "object" && !Array.isArray(candidate)
+      ? (candidate as Record<string, unknown>).bankRelease
+      : undefined;
+  return parseShowroomDesignProposal(
+    input,
+    resolveShowroomComponentBank(release),
+  );
 }
 
 export function curatedManifestForLegacyDesign(

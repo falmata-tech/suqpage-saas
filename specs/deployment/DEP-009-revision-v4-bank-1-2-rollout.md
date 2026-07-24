@@ -1,7 +1,7 @@
 ---
 id: DEP-009
 title: Revision v4 and showroom bank 1.2 controlled rollout
-status: ready
+status: in_progress
 related: [DEP-004, DEP-005, DEP-006, DEP-007, FE-007, FE-009, BE-005, BE-006, BE-007, BE-008, BE-010, ADR-0005, ADR-0007]
 owners: [operations, security, product]
 last_updated: 2026-07-24
@@ -120,4 +120,7 @@ v4 data; compatible readers remain until explicit retirement.
 
 ## Completion evidence
 
-Filled only after all staged rollout and release gates pass.
+Checkpoint: the additive release registry is present with bank 1.1 as the only
+admitted release and no default/write change. Focused renderer/composition/bank
+tests and type checking pass. V4 persistence, bank 1.2, provider/CSP, operations,
+browser, and rollout evidence remain.

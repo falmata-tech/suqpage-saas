@@ -600,7 +600,7 @@ const tokenPacks = [
   ["vibrant-market", "Vibrant market", "Energetic retail color for broad catalogs and social-first product brands."],
 ].map(([id, name, description]) => ({ id, name, description }));
 
-export const SHOWROOM_COMPONENT_BANK = deepFreeze(
+export const SHOWROOM_COMPONENT_BANK_1_1 = deepFreeze(
   parseShowroomComponentBank({
     schemaVersion: 1,
     release: "showroom-bank@1.1.0",
@@ -616,6 +616,25 @@ export const SHOWROOM_COMPONENT_BANK = deepFreeze(
     ],
   }),
 );
+
+export const SHOWROOM_COMPONENT_BANK = SHOWROOM_COMPONENT_BANK_1_1;
+
+const SHOWROOM_BANK_RELEASES = Object.freeze({
+  [SHOWROOM_COMPONENT_BANK_1_1.release]: SHOWROOM_COMPONENT_BANK_1_1,
+});
+
+export type SupportedShowroomBankRelease = keyof typeof SHOWROOM_BANK_RELEASES;
+
+export function resolveShowroomComponentBank(release: unknown) {
+  if (typeof release !== "string" || !(release in SHOWROOM_BANK_RELEASES)) {
+    throw new Error("The showroom component-bank release is not supported.");
+  }
+  return SHOWROOM_BANK_RELEASES[release as SupportedShowroomBankRelease];
+}
+
+export function listShowroomComponentBanks() {
+  return Object.freeze(Object.values(SHOWROOM_BANK_RELEASES));
+}
 
 export const SHOWROOM_BANK_BASE_COMBINATION_FLOOR =
   SHOWROOM_COMPONENT_BANK.requiredSlots.reduce(

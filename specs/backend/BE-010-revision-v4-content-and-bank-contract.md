@@ -1,7 +1,7 @@
 ---
 id: BE-010
 title: Revision v4 typed content and multi-release bank contract
-status: ready
+status: in_progress
 related: [BE-004, BE-005, BE-006, BE-007, BE-008, FE-007, FE-009, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
 owners: [backend, security, product]
 last_updated: 2026-07-24
@@ -119,4 +119,7 @@ disabled until bank 1.2 and provider/browser gates pass.
 
 ## Completion evidence
 
-Filled only after implementation and mapped gates pass.
+Checkpoint: the exact release resolver is implemented with bank 1.1 as the only
+available/default immutable release. Published-manifest parsing and composed
+rendering resolve the pinned release and fail closed for unknown releases.
+Revision v4, bank 1.2, typed blocks, provider media, and focused commands remain.

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { SHOWROOM_COMPONENT_BANK } from "../lib/showroom-bank-release";
+import {
+  SHOWROOM_COMPONENT_BANK,
+  SHOWROOM_COMPONENT_BANK_1_1,
+  listShowroomComponentBanks,
+  resolveShowroomComponentBank,
+} from "../lib/showroom-bank-release";
 import {
   LEGACY_SHOWROOM_DESIGN_KEYS,
   curatedManifestForLegacyDesign,
@@ -19,6 +24,14 @@ const appSource = fs.readFileSync(
 const registrySource = fs.readFileSync(
   path.join(process.cwd(), "components/showroom/bank/registry.tsx"),
   "utf8",
+);
+
+assert.equal(SHOWROOM_COMPONENT_BANK, SHOWROOM_COMPONENT_BANK_1_1);
+assert.equal(resolveShowroomComponentBank("showroom-bank@1.1.0"), SHOWROOM_COMPONENT_BANK_1_1);
+assert.deepEqual(listShowroomComponentBanks(), [SHOWROOM_COMPONENT_BANK_1_1]);
+assert.throws(
+  () => resolveShowroomComponentBank("showroom-bank@1.2.0"),
+  /not supported/,
 );
 
 for (const designKey of LEGACY_SHOWROOM_DESIGN_KEYS) {

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { SHOWROOM_COMPONENT_BANK } from "@/lib/showroom-bank-release";
+import { resolveShowroomComponentBank } from "@/lib/showroom-bank-release";
 import type { ShowroomDesignProposal } from "@/lib/showroom-composition";
 import type {
   ShowroomDecorativeDepth,
@@ -13,13 +13,6 @@ import styles from "./bank.module.css";
 import { SHOWROOM_BANK_REGISTRY } from "./registry";
 import { SHOWROOM_BANK_TOKEN_STYLES } from "./tokens";
 import type { BankPresentationContext, BankProductView } from "./types";
-
-const definitionById = new Map(
-  SHOWROOM_COMPONENT_BANK.components.map((definition) => [
-    definition.id,
-    definition,
-  ]),
-);
 
 function contactLabel(props: DesignProps): string {
   const business = props.catalog.business;
@@ -45,6 +38,15 @@ export function CompositionShowroom({
   manifest,
   ...props
 }: DesignProps & { manifest: ShowroomDesignProposal }) {
+  let bank;
+  try {
+    bank = resolveShowroomComponentBank(manifest.bankRelease);
+  } catch {
+    return <InvalidComposition />;
+  }
+  const definitionById = new Map(
+    bank.components.map((definition) => [definition.id, definition]),
+  );
   const productByKey = new Map(
     props.catalog.products.map((product) => [String(product.id), product]),
   );
