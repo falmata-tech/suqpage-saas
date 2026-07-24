@@ -240,3 +240,16 @@ are implemented. Focused post-import controls, typed section-content blocks,
 and controlled YouTube media remain open. The implemented checkpoint passes the
 focused gate and 7/7 production-browser acceptance scenarios. The spec
 therefore remains `ready`; this checkpoint is not full completion evidence.
+
+## Open defect evidence
+
+- On 2026-07-24, a platform administrator reached an unexpected 404 at a newly
+  created Codespaces studio deep link (`/dashboard/requests/{requestId}/revisions/{revisionId}/studio`).
+- Read-only inspection confirmed the request/revision existed, remained a draft,
+  matched the business content version, and the same brief built successfully
+  through the application service for the platform-admin actor.
+- A temporary diagnostic route edit was removed because it neither reproduced
+  nor fixed the cause. No defect implementation is retained or claimed.
+- Before UI enhancement work changes this route, reproduce the browser/session
+  path, identify the failing contract, add a regression scenario, and commit the
+  smallest verified fix separately.
