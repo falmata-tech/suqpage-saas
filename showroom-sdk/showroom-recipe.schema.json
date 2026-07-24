@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/showroom-recipe.schema.json",
+  "title": "SuqPage complete showroom recipe envelope",
+  "description": "One complete replacement content-and-design proposal. Server authorization, provenance, asset, reconciliation, and semantic validation remain authoritative.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "baseContentVersion", "content", "design", "summary",
+    "rationale", "questions", "warnings", "declaredRemovals", "provenance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "baseContentVersion": { "type": "integer", "minimum": 1 },
+    "content": { "$ref": "showroom-content.schema.json" },
+    "design": { "$ref": "showroom-proposal.schema.json" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "rationale": { "type": "string", "maxLength": 2000 },
+    "questions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+    },
+    "declaredRemovals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collections", "categories", "products"],
+      "properties": {
+        "collections": { "$ref": "#/$defs/keyList100" },
+        "categories": { "$ref": "#/$defs/keyList200" },
+        "products": { "$ref": "#/$defs/keyList500" }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "maxItems": 4000,
+      "items": { "$ref": "#/$defs/provenance" }
+    }
+  },
+  "$defs": {
+    "key": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$" },
+    "keyList100": {
+      "type": "array", "maxItems": 100, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/key" }
+    },
+    "keyList200": {
+      "type": "array", "maxItems": 200, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/key" }
+    },
+    "keyList500": {
+      "type": "array", "maxItems": 500, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/key" }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sourceKey", "kind"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "sourceKey": {
+          "type": "string",
+          "pattern": "^source_[a-f0-9]{20}$",
+          "maxLength": 100
+        },
+        "kind": { "enum": ["source_fact", "ai_draft"] }
+      }
+    }
+  }
+}

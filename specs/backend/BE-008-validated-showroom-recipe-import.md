@@ -265,5 +265,10 @@ v2/v3 revisions remain immutable and retained.
 
 ## Completion evidence
 
-Filled only after implementation and every mapped gate pass. This ready spec
-does not claim that content-schema export, recipe import, or revision v3 exists.
+Implementation checkpoint: portable content/recipe schemas, strict dynamic
+catalog parsing, provenance/reconciliation, opaque verified-image scope,
+request authorization, idempotent private import, and revision-v3 recipe
+metadata persistence are implemented and covered by the focused recipe gate.
+Typed section-content blocks, controlled YouTube admission/rendering, and the
+remaining mapped browser/security evidence are still open. The spec remains
+`ready` and is not yet complete.

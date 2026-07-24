@@ -164,9 +164,9 @@ recipe JSON, source facts, private asset keys, contacts, prompts, or credentials
 | Schema/parser/example parity | contract | `scripts/test-showroom-recipe.ts` |
 | No private/export data in source, logs, traces, artifacts | security/container | `scripts/test-security.ts`, `scripts/test-build-trace.mjs`, `scripts/test-container.mjs` |
 | V2/v3 migration, backup, restore, idempotency | operations | `scripts/test-operations.mjs`, `scripts/test-showroom-recipe.ts` |
-| Staff capability and tenant isolation | security/browser | `scripts/test-requests.ts`, `tests/acceptance/recipe.spec.ts` |
-| Media persistence, provider allowlist, CSP, and privacy | security/operations/browser | `scripts/test-security.ts`, `scripts/test-operations.mjs`, `tests/acceptance/recipe.spec.ts` |
-| Export/import/preview/approval/publication/rollback | production browser | `tests/acceptance/recipe.spec.ts` |
+| Staff capability and tenant isolation | security/browser | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
+| Media persistence, provider allowlist, CSP, and privacy | security/operations/browser | `scripts/test-security.ts`, `scripts/test-operations.mjs`, `tests/acceptance/app.spec.ts` |
+| Export/import/preview/approval/publication/rollback | production browser | `tests/acceptance/app.spec.ts` |
 | Complete release admission | release | `npm run check`, `npm run release`, `npm run test:operations`, `npm run test:acceptance`, `npm run test:container` |
 
 ## Rollout and rollback
@@ -199,5 +199,10 @@ approved restore; it is never silently overwritten.
 
 ## Completion evidence
 
-Filled only after implementation and every mapped gate pass. This ready spec
-does not authorize a production migration, external provider, push, or rollout.
+Implementation checkpoint: additive recipe metadata/media migrations, release
+gate admission, private staff studio routes, verified-image persistence,
+backup/restore row coverage, and the manual import boundary are implemented.
+The standard check, production release, 7/7 browser acceptance, container
+privacy/build, and operations restore gates pass for this checkpoint.
+Controlled provider/CSP work remains open. This ready spec does not authorize a
+production migration, push, or rollout and is not complete.

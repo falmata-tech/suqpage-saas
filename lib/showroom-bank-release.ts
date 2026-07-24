@@ -4,6 +4,7 @@ import {
   type ShowroomCapability,
   type ShowroomComponentDefinition,
   type ShowroomPropertyDefinition,
+  type ShowroomMediaSlotDefinition,
   type ShowroomSlot,
 } from "./showroom-composition";
 import {
@@ -223,6 +224,50 @@ function definitions(
   bindings: ShowroomBindingDefinition[],
   providesCapabilities: ShowroomCapability[] = [],
 ): ShowroomComponentDefinition[] {
+  const mediaSlots = (seed: ComponentSeed): ShowroomMediaSlotDefinition[] => {
+    if (slot === "header") {
+      return [{
+        key: "logo",
+        label: "Brand logo",
+        source: "business.logo",
+        required: false,
+        acceptedKinds: ["image"],
+        minItems: 0,
+        maxItems: 1,
+        aspectRatio: "any",
+      }];
+    }
+    if (slot === "hero") {
+      return [{
+        key: "hero_image",
+        label: "Hero image",
+        source: "business.hero_image",
+        required: [
+          "hero.editorial-collage@1",
+          "hero.material-detail@1",
+          "hero.collection-mosaic@1",
+          "hero.provenance@1",
+        ].includes(seed.id),
+        acceptedKinds: ["image"],
+        minItems: 0,
+        maxItems: 1,
+        aspectRatio: "landscape",
+      }];
+    }
+    if (slot === "content" || slot === "trust") {
+      return [{
+        key: "story_image",
+        label: "Story image",
+        source: "business.hero_image",
+        required: false,
+        acceptedKinds: ["image"],
+        minItems: 0,
+        maxItems: 1,
+        aspectRatio: "landscape",
+      }];
+    }
+    return [];
+  };
   return seeds.map((seed) => ({
     ...seed,
     slot,
@@ -242,6 +287,7 @@ function definitions(
       ...entry,
       allowedSources: [...entry.allowedSources],
     })),
+    mediaSlots: mediaSlots(seed),
   }));
 }
 

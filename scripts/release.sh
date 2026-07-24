@@ -25,6 +25,9 @@ node node_modules/tsx/dist/cli.mjs scripts/test-stockless-catalog.ts
 printf '\n=== Versioned product upkeep validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-product-upkeep.ts
 
+printf '\n=== Showroom recipe validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-showroom-recipe.ts
+
 printf '\n=== Security integration tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-security.ts
 

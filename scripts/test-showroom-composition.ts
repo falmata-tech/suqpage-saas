@@ -49,6 +49,7 @@ const bankFixture = {
           allowedSources: ["business.logo"],
         },
       ],
+      mediaSlots: [],
     },
     {
       id: "hero.split@1",
@@ -94,6 +95,18 @@ const bankFixture = {
           label: "Hero image",
           required: true,
           allowedSources: ["business.hero_image"],
+        },
+      ],
+      mediaSlots: [
+        {
+          key: "hero_image",
+          label: "Hero image",
+          source: "business.hero_image",
+          required: true,
+          acceptedKinds: ["image"],
+          minItems: 1,
+          maxItems: 1,
+          aspectRatio: "landscape",
         },
       ],
     },
@@ -142,6 +155,7 @@ const bankFixture = {
           allowedSources: ["catalog.categories"],
         },
       ],
+      mediaSlots: [],
     },
     {
       id: "content.story@1",
@@ -161,6 +175,7 @@ const bankFixture = {
           allowedSources: ["business.description"],
         },
       ],
+      mediaSlots: [],
     },
     {
       id: "trust.credentials@1",
@@ -180,6 +195,7 @@ const bankFixture = {
           allowedSources: ["business.description"],
         },
       ],
+      mediaSlots: [],
     },
     {
       id: "footer.contact@1",
@@ -199,6 +215,7 @@ const bankFixture = {
           allowedSources: ["business.contact_methods"],
         },
       ],
+      mediaSlots: [],
     },
   ],
   tokenPacks: [

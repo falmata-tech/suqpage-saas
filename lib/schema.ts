@@ -225,6 +225,23 @@ export function migrateDatabase(
       height INTEGER NOT NULL CHECK(height BETWEEN 1 AND 20000),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS recipe_media_assets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+      asset_key TEXT UNIQUE NOT NULL,
+      kind TEXT NOT NULL CHECK(kind IN ('image','youtube')),
+      label TEXT NOT NULL,
+      request_attachment_id INTEGER UNIQUE REFERENCES request_attachments(id) ON DELETE CASCADE,
+      provider_id TEXT,
+      rights_acknowledged INTEGER NOT NULL CHECK(rights_acknowledged=1),
+      added_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CHECK(
+        (kind='image' AND request_attachment_id IS NOT NULL AND provider_id IS NULL)
+        OR
+        (kind='youtube' AND request_attachment_id IS NULL AND provider_id IS NOT NULL)
+      )
+    );
     CREATE TABLE IF NOT EXISTS request_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
@@ -271,6 +288,10 @@ export function migrateDatabase(
       status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','awaiting_review','approved','rejected','published','superseded')),
       snapshot_json TEXT NOT NULL,
       summary TEXT NOT NULL DEFAULT '',
+      recipe_import_hash TEXT,
+      recipe_metadata_json TEXT,
+      recipe_imported_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      recipe_imported_at TEXT,
       created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
       submitted_at TEXT,
       decided_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -314,6 +335,14 @@ export function migrateDatabase(
   addColumn(db, "inquiries", "ip_hash TEXT DEFAULT ''");
   addColumn(db, "inquiries", "updated_at TEXT");
   addColumn(db, "delivery_requests", "idempotency_key TEXT");
+  addColumn(db, "content_revisions", "recipe_import_hash TEXT");
+  addColumn(db, "content_revisions", "recipe_metadata_json TEXT");
+  addColumn(
+    db,
+    "content_revisions",
+    "recipe_imported_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL",
+  );
+  addColumn(db, "content_revisions", "recipe_imported_at TEXT");
 
   db.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS inquiry_idempotency_unique
@@ -797,6 +826,70 @@ export function migrateDatabase(
       throw error;
     } finally {
       db.exec("PRAGMA foreign_keys = ON");
+    }
+  }
+
+  const recipeMetadataApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=11")
+    .get();
+  if (!recipeMetadataApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        DROP TRIGGER IF EXISTS submitted_revision_content_immutable;
+        CREATE TRIGGER submitted_revision_content_immutable
+        BEFORE UPDATE OF
+          snapshot_json,summary,base_content_version,recipe_import_hash,
+          recipe_metadata_json,recipe_imported_by_user_id,recipe_imported_at
+        ON content_revisions
+        WHEN OLD.status != 'draft'
+        BEGIN
+          SELECT RAISE(ABORT, 'submitted revision content is immutable');
+        END;
+        CREATE UNIQUE INDEX IF NOT EXISTS revision_recipe_import_unique
+          ON content_revisions(request_id,recipe_import_hash)
+          WHERE recipe_import_hash IS NOT NULL AND recipe_import_hash != '';
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(11)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const recipeMediaApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=12")
+    .get();
+  if (!recipeMediaApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS recipe_media_assets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+          asset_key TEXT UNIQUE NOT NULL,
+          kind TEXT NOT NULL CHECK(kind IN ('image','youtube')),
+          label TEXT NOT NULL,
+          request_attachment_id INTEGER UNIQUE REFERENCES request_attachments(id) ON DELETE CASCADE,
+          provider_id TEXT,
+          rights_acknowledged INTEGER NOT NULL CHECK(rights_acknowledged=1),
+          added_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CHECK(
+            (kind='image' AND request_attachment_id IS NOT NULL AND provider_id IS NULL)
+            OR
+            (kind='youtube' AND request_attachment_id IS NULL AND provider_id IS NOT NULL)
+          )
+        );
+        CREATE INDEX IF NOT EXISTS recipe_media_request_idx
+          ON recipe_media_assets(request_id,created_at,id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(12)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
     }
   }
 }

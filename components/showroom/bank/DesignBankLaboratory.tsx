@@ -303,6 +303,23 @@ export default function DesignBankLaboratory({
                   <span>Touch ready</span>
                   <span>Reduced motion safe</span>
                 </div>
+                {definition.mediaSlots.length ? (
+                  <div
+                    className={styles.experienceBadges}
+                    aria-label="Media slot contract"
+                  >
+                    {definition.mediaSlots.map((mediaSlot) => (
+                      <span key={mediaSlot.key}>
+                        {mediaSlot.label} ·{" "}
+                        {mediaSlot.required ? "required" : "optional"} ·{" "}
+                        {mediaSlot.acceptedKinds.join("/")} ·{" "}
+                        {mediaSlot.aspectRatio}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <small>No section-specific media required.</small>
+                )}
               </header>
               <div
                 className={styles.previewFrame}

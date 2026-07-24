@@ -205,13 +205,13 @@ request text, contacts, product copy, private media, or provider conversations.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Brief export and recipe import workflow | browser | `tests/acceptance/recipe.spec.ts` |
-| Grouped validation and no silent repair | component/browser | `tests/acceptance/recipe.spec.ts` |
-| Dynamic item counts and exact preview | integration/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/recipe.spec.ts` |
-| Focused compatible corrections | component/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/recipe.spec.ts` |
-| Manual image/provider intake and media-slot assignment | security/browser | `scripts/test-showroom-recipe.ts`, `scripts/test-security.ts`, `tests/acceptance/recipe.spec.ts` |
-| Client/cross-tenant denial | security/browser | `scripts/test-security.ts`, `tests/acceptance/recipe.spec.ts` |
-| Mobile, labels, focus, and Back behavior | browser | `tests/acceptance/recipe.spec.ts` |
+| Brief export and recipe import workflow | browser | `tests/acceptance/app.spec.ts` |
+| Grouped validation and no silent repair | component/browser | `tests/acceptance/app.spec.ts` |
+| Dynamic item counts and exact preview | integration/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/app.spec.ts` |
+| Focused compatible corrections | component/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/app.spec.ts` |
+| Manual image/provider intake and media-slot assignment | security/browser | `scripts/test-showroom-recipe.ts`, `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
+| Client/cross-tenant denial | security/browser | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
+| Mobile, labels, focus, and Back behavior | browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -233,6 +233,10 @@ publishes, deletes, or rewrites client content.
 
 ## Completion evidence
 
-Filled only after implementation and every mapped gate pass. This ready spec is
-planned behavior and is not a claim that recipe import or the focused studio is
-currently available.
+Implementation checkpoint: the assigned-staff studio, sanitized brief,
+verified-image admission, strict recipe import, grouped validation, idempotent
+private revision persistence, diff summary, preview, and recovery navigation
+are implemented. Focused post-import controls, typed section-content blocks,
+and controlled YouTube media remain open. The implemented checkpoint passes the
+focused gate and 7/7 production-browser acceptance scenarios. The spec
+therefore remains `ready`; this checkpoint is not full completion evidence.

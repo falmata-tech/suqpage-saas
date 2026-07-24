@@ -86,6 +86,17 @@ export type ShowroomBindingDefinition = {
   allowedSources: ShowroomBindingSource[];
 };
 
+export type ShowroomMediaSlotDefinition = {
+  key: string;
+  label: string;
+  source: ShowroomBindingSource;
+  required: boolean;
+  acceptedKinds: Array<"image" | "video">;
+  minItems: number;
+  maxItems: number;
+  aspectRatio: "any" | "landscape" | "portrait" | "square";
+};
+
 export type ShowroomComponentDefinition = {
   id: string;
   name: string;
@@ -97,6 +108,7 @@ export type ShowroomComponentDefinition = {
   incompatibleWith: string[];
   properties: ShowroomPropertyDefinition[];
   bindings: ShowroomBindingDefinition[];
+  mediaSlots: ShowroomMediaSlotDefinition[];
 };
 
 export type ShowroomTokenPackDefinition = {
@@ -366,6 +378,51 @@ function parseBindingDefinition(
   };
 }
 
+function parseMediaSlotDefinition(
+  input: unknown,
+  componentId: string,
+): ShowroomMediaSlotDefinition {
+  const raw = record(input, `Media slot for ${componentId}`, [
+    "key",
+    "label",
+    "source",
+    "required",
+    "acceptedKinds",
+    "minItems",
+    "maxItems",
+    "aspectRatio",
+  ]);
+  const key = identifier(raw.key, `Media-slot key for ${componentId}`, 50);
+  const acceptedKinds = unique(
+    list(raw.acceptedKinds, `Accepted media for ${key}`, 2).map((entry) =>
+      enumValue(entry, `Accepted media for ${key}`, ["image", "video"] as const),
+    ),
+    `Accepted media for ${key}`,
+  );
+  if (!acceptedKinds.length) {
+    fail(`Media slot ${key} needs an accepted kind.`, "invalid_media_slot");
+  }
+  const minItems = integerValue(raw.minItems, `Minimum media for ${key}`, 0, 10);
+  const maxItems = integerValue(raw.maxItems, `Maximum media for ${key}`, 1, 10);
+  if (minItems > maxItems) {
+    fail(`Media slot ${key} has an invalid count range.`, "invalid_media_slot");
+  }
+  return {
+    key,
+    label: textValue(raw.label, `Media-slot label ${key}`, 100),
+    source: enumValue(raw.source, `Media source for ${key}`, SHOWROOM_BINDING_SOURCES),
+    required: booleanValue(raw.required, `Media-slot required flag ${key}`),
+    acceptedKinds,
+    minItems,
+    maxItems,
+    aspectRatio: enumValue(
+      raw.aspectRatio,
+      `Media aspect ratio for ${key}`,
+      ["any", "landscape", "portrait", "square"] as const,
+    ),
+  };
+}
+
 function parseComponentDefinition(input: unknown): ShowroomComponentDefinition {
   const raw = record(input, "Component definition", [
     "id",
@@ -378,6 +435,7 @@ function parseComponentDefinition(input: unknown): ShowroomComponentDefinition {
     "incompatibleWith",
     "properties",
     "bindings",
+    "mediaSlots",
   ]);
   const id = textValue(raw.id, "Component ID", 100);
   if (!versionedComponentPattern.test(id)) {
@@ -405,6 +463,13 @@ function parseComponentDefinition(input: unknown): ShowroomComponentDefinition {
     bindings.map((entry) => entry.key),
     `Binding keys for ${id}`,
   );
+  const mediaSlots = list(raw.mediaSlots, `Media slots for ${id}`, 8).map(
+    (entry) => parseMediaSlotDefinition(entry, id),
+  );
+  unique(
+    mediaSlots.map((entry) => entry.key),
+    `Media-slot keys for ${id}`,
+  );
   return {
     id,
     name: textValue(raw.name, `Component name ${id}`, 100),
@@ -431,6 +496,7 @@ function parseComponentDefinition(input: unknown): ShowroomComponentDefinition {
     ),
     properties,
     bindings,
+    mediaSlots,
   };
 }
 

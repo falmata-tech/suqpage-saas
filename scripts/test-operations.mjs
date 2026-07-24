@@ -81,6 +81,8 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=8").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=9").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=10").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=11").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=12").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('products') WHERE name='stock_count'").get().count,0);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('option_values') WHERE name='stock_count'").get().count,0);
   assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);
@@ -95,7 +97,8 @@ try {
   const admin = db.prepare("SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='platform_admin' LIMIT 1").get();
   db.prepare("INSERT INTO client_invitations(request_id,business_id,email,name,token_hash,expires_at,created_by_user_id,created_at) VALUES(NULL,?,'backup-invite@example.test','Backup Invite','backup-invitation-hash',?,?,?)").run(owner.business_id,Date.now()+60_000,admin.id,Date.now());
   const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001',?,?,'change','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private authenticated request during backup and restore.','client',?,'operations-backup-key','private-hash')").run(owner.business_id,owner.id,owner.id).lastInsertRowid);
-  db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1);
+  const requestAttachmentId = Number(db.prepare("INSERT INTO request_attachments(request_id,storage_key,original_name,mime_type,byte_size,width,height) VALUES(?,?,?,?,?,?,?)").run(requestId,requestStorageKey,"private.png","image/png",26,1,1).lastInsertRowid);
+  db.prepare("INSERT INTO recipe_media_assets(request_id,asset_key,kind,label,request_attachment_id,rights_acknowledged,added_by_user_id) VALUES(?,'asset_11111111111111111111','image','Backup recipe image',?,1,?)").run(requestId,requestAttachmentId,admin.id);
   db.prepare("INSERT INTO request_events(request_id,event_type,detail) VALUES(?,'submitted','authenticated client request')").run(requestId);
   const designManifest = JSON.parse(db.prepare("SELECT design_manifest_json FROM businesses WHERE id=?").get(owner.business_id).design_manifest_json);
   const revisionSnapshot = JSON.stringify({ schemaVersion:2, business:{name:"Backup Business",designKey:"composition",tagline:"",description:"",logoRef:"",heroTitle:"Backup preview",heroSubtitle:"",heroImageRef:"",contactEmail:"",whatsapp:"",telegram:"",tiktok:"",siteTitle:"Backup Business",siteDescription:"",faviconRef:""}, designManifest, collections:[], categories:[], products:[] });
@@ -121,6 +124,7 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM request_attachments").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM recipe_media_assets").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM published_catalog_versions").get().count, retainedVersionCount);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM client_invitations WHERE request_id IS NULL AND token_hash='backup-invitation-hash'").get().count, 1);

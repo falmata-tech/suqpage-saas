@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/showroom-content.schema.json",
+  "title": "SuqPage stockless showroom content proposal",
+  "description": "Portable syntactic guidance. The SuqPage server parser, source, tenant, asset, and relationship checks remain authoritative.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "business", "collections", "categories", "products"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "business": { "$ref": "#/$defs/business" },
+    "collections": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "categories": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/category" }
+    },
+    "products": {
+      "type": "array",
+      "maxItems": 500,
+      "items": { "$ref": "#/$defs/product" }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,80}$"
+    },
+    "nullableKey": {
+      "oneOf": [{ "$ref": "#/$defs/key" }, { "type": "null" }]
+    },
+    "imageKey": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:asset_[a-f0-9]{20})?$"
+    },
+    "business": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "designKey", "tagline", "description", "logoRef", "heroTitle",
+        "heroSubtitle", "heroImageRef", "contactEmail", "whatsapp", "telegram",
+        "tiktok", "siteTitle", "siteDescription", "faviconRef"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "designKey": { "const": "composition" },
+        "tagline": { "type": "string", "maxLength": 180 },
+        "description": { "type": "string", "maxLength": 1200 },
+        "logoRef": { "$ref": "#/$defs/imageKey" },
+        "heroTitle": { "type": "string", "maxLength": 180 },
+        "heroSubtitle": { "type": "string", "maxLength": 300 },
+        "heroImageRef": { "$ref": "#/$defs/imageKey" },
+        "contactEmail": { "type": "string", "maxLength": 160 },
+        "whatsapp": { "type": "string", "maxLength": 40 },
+        "telegram": { "type": "string", "maxLength": 80 },
+        "tiktok": { "type": "string", "maxLength": 80 },
+        "siteTitle": { "type": "string", "maxLength": 120 },
+        "siteDescription": { "type": "string", "maxLength": 240 },
+        "faviconRef": { "$ref": "#/$defs/imageKey" }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name", "slug", "description", "sortOrder", "active"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "slug": { "type": "string", "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 500 },
+        "sortOrder": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+        "active": { "type": "boolean" }
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "collectionKey", "name", "slug", "sortOrder", "active"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "collectionKey": { "$ref": "#/$defs/nullableKey" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "slug": { "type": "string", "maxLength": 80 },
+        "sortOrder": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+        "active": { "type": "boolean" }
+      }
+    },
+    "optionGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "values"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key", "collectionKey", "categoryKey", "name", "slug", "eyebrow",
+        "description", "imageRef", "availability", "published", "sortOrder",
+        "optionGroups"
+      ],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "collectionKey": { "$ref": "#/$defs/nullableKey" },
+        "categoryKey": { "$ref": "#/$defs/nullableKey" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "slug": { "type": "string", "maxLength": 80 },
+        "eyebrow": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 3000 },
+        "imageRef": { "$ref": "#/$defs/imageKey" },
+        "availability": {
+          "enum": ["available", "limited", "unavailable", "coming_soon"]
+        },
+        "published": { "type": "boolean" },
+        "sortOrder": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+        "optionGroups": {
+          "type": "array",
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/optionGroup" }
+        }
+      }
+    }
+  }
+}

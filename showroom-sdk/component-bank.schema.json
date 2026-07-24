@@ -276,6 +276,38 @@
         }
       }
     },
+    "mediaSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "source",
+        "required",
+        "acceptedKinds",
+        "minItems",
+        "maxItems",
+        "aspectRatio"
+      ],
+      "properties": {
+        "key": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "source": { "$ref": "#/$defs/bindingSource" },
+        "required": { "type": "boolean" },
+        "acceptedKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["image", "video"] }
+        },
+        "minItems": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "aspectRatio": {
+          "enum": ["any", "landscape", "portrait", "square"]
+        }
+      }
+    },
     "component": {
       "type": "object",
       "additionalProperties": false,
@@ -289,7 +321,8 @@
         "providesCapabilities",
         "incompatibleWith",
         "properties",
-        "bindings"
+        "bindings",
+        "mediaSlots"
       ],
       "properties": {
         "id": {
@@ -347,6 +380,13 @@
           "maxItems": 16,
           "items": {
             "$ref": "#/$defs/binding"
+          }
+        },
+        "mediaSlots": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/mediaSlot"
           }
         }
       }

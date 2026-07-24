@@ -147,15 +147,22 @@ Authorized staff can inspect every component in a synthetic, read-only visual
 laboratory, including a true container-based 390-pixel phone preview. `FE-006`,
 `BE-007`, and `DEP-006` establish the current public/private composition
 renderer, revision-schema-v2 persistence, exact client-content mapping,
-publication, rollback, and four-example-client cutover. `FE-007`, `BE-008`, and
-`DEP-007` define the ready next phase: manual import of a complete AI showroom
-recipe with separately validated dynamic content and design, followed by a
-focused staff studio. In that planned phase, staff manually admit request
-attachments, authorized same-tenant images, new verified image uploads, and
-supported provider links before export. Components declare typed media slots,
-and AI may place only the opaque asset keys in the exported request-scoped media
-manifest. It cannot introduce remote image URLs, embed markup, or arbitrary
-providers. That workflow is planned and not currently implemented.
+publication, rollback, and four-example-client cutover. The implementation
+checkpoint under `FE-007`, `BE-008`, and `DEP-007` adds a permission-scoped
+staff recipe studio: staff can admit verified images, export a sanitized brief
+with portable schemas/current content/component-bank rules, import a strict
+combined content/design recipe, inspect safe validation failures and count
+differences, and open the resulting private revision preview. Imports are
+idempotent, remain private, and preserve the existing client-approval and
+manager-publication path. Components now declare image media-slot requirements,
+and recipes may use only request-scoped opaque asset keys. Remote image URLs,
+embed markup, arbitrary providers, inventory, and cross-tenant assets are
+rejected. Typed section-content blocks, focused post-import controls, controlled
+YouTube admission/rendering remain planned completion work. The implemented
+checkpoint passes the standard check, production release, seven-role browser
+acceptance, container privacy/build, and operations restore gates; the feature
+specs remain `ready`, not `done`, because their broader content/provider scope
+is still open.
 
 ### 5.2 SuqPage must have its own platform identity
 
@@ -855,18 +862,18 @@ remaining AI-assisted delivery sequence is recorded in
 - Missing customer facts produce questions. AI may suggest presentation and
   marketing copy, but it cannot invent contacts, availability,
   certifications, specifications, product facts, or delivery claims.
-- The ready next operational phase uses a full showroom recipe with a separate
+- The current implementation checkpoint uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
-  covers dynamic collections/categories/products/options, business/meta/contact
-  values, allowed media keys, and typed hero, story, highlights/trust,
-  information, and call-to-action blocks. Product availability is descriptive;
-  numeric product/option inventory is prohibited. Dynamic catalog counts remain
-  bounded, not fixed by examples.
-- That planned phase exports a sanitized request/current-snapshot brief,
+  currently covers dynamic collections/categories/products/options,
+  business/meta/contact values, and allowed image keys. Product availability is
+  descriptive; numeric product/option inventory is prohibited. Dynamic catalog
+  counts remain bounded, not fixed by examples. Typed hero, story,
+  highlights/trust, information, and call-to-action blocks remain planned.
+- The checkpoint exports a sanitized request/current-snapshot brief,
   schemas, bank contract, source facts, allowed opaque asset keys, expected
   counts, and complete synthetic examples. Staff manually import returned JSON,
-  inspect provenance/completeness and an exact private preview, and use focused
-  compatible corrections instead of routine per-field entry.
+  inspect provenance/completeness and an exact private preview. Re-import is the
+  normal correction path; focused compatible correction controls remain planned.
 - Media remains a separately admitted source, not AI authority. Staff label and
   approve request attachments, same-tenant managed images, new verified image
   uploads, and supported provider links before export. The brief contains only
@@ -1204,9 +1211,11 @@ it cannot create URLs, embeds, or cross-tenant asset references. Missing
 required media, incompatible slot assignments, and unreviewed descriptive text
 remain visible blockers. If the external AI needs image understanding, staff
 manually supplies only the approved files in that external conversation.
-Manual recipe import and the focused studio remain planned under `ADR-0005` and
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md`; the component laboratory remains
-synthetic and cannot itself alter a tenant revision.
+Manual recipe import and its focused staff workspace are implemented as a
+private checkpoint under `ADR-0005`; `FE-007`, `BE-008`, and `DEP-007` remain
+open until their typed-block, provider, focused-control, browser, and rollout
+evidence is complete. The component laboratory remains synthetic and cannot
+itself alter a tenant revision.
 
 ---
 
