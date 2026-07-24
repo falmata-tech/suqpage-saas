@@ -7,6 +7,7 @@ export function backupRoot(){return path.resolve(/* turbopackIgnore: true */ pro
 export function requestAttachmentRoot(){return path.resolve(/* turbopackIgnore: true */ mediaRoot(),"requests")}
 export function productUpkeepEnabled(){return process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED!=="0"}
 export function recipeStudioEnabled(){return process.env.SUQPAGE_RECIPE_STUDIO_ENABLED!=="0"}
+export function controlledYouTubeAdmissionEnabled(){return process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED==="1"}
 export function ensureRuntimeDirectories(){fs.mkdirSync(path.dirname(databasePath()),{recursive:true});fs.mkdirSync(mediaRoot(),{recursive:true});fs.mkdirSync(requestAttachmentRoot(),{recursive:true})}
 export function assertProductionConfiguration(){
   if(process.env.NODE_ENV!=="production")return;

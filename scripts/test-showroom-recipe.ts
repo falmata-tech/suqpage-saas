@@ -6,6 +6,7 @@ import sharp from "sharp";
 
 async function main() {
   process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
+  process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "1";
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-recipe-"));
   process.env.SUQPAGE_DB_PATH = path.join(root, "recipe.db");
   process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
@@ -16,6 +17,7 @@ async function main() {
     );
     const {
       admitRecipeImage,
+      admitRecipeYouTube,
       buildShowroomRecipeBrief,
       importShowroomRecipe,
     } = await import("../lib/showroom-recipe-service");
@@ -103,11 +105,78 @@ async function main() {
       true,
     );
     assert.match(admitted.assetKey, /^asset_[a-f0-9]{20}$/);
+    assert.throws(
+      () =>
+        admitRecipeYouTube(
+          team,
+          draft.id,
+          "https://youtube.example/watch?v=dQw4w9WgXcQ",
+          "Approved process film",
+          true,
+        ),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        error.issues[0]?.path === "$.media.url",
+    );
+    assert.throws(
+      () =>
+        admitRecipeYouTube(
+          team,
+          draft.id,
+          "https://youtu.be/dQw4w9WgXcQ",
+          "Approved process film",
+          false,
+        ),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        error.issues[0]?.path === "$.media.rights",
+    );
+    assert.throws(
+      () =>
+        admitRecipeYouTube(
+          outsider,
+          draft.id,
+          "https://youtu.be/dQw4w9WgXcQ",
+          "Approved process film",
+          true,
+        ),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError && error.status === 404,
+    );
+    const video = admitRecipeYouTube(
+      team,
+      draft.id,
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=12",
+      "Approved process film",
+      true,
+    );
+    assert.match(video.assetKey, /^asset_[a-f0-9]{20}$/);
+    assert.equal(video.duplicate, false);
+    assert.deepEqual(
+      admitRecipeYouTube(
+        team,
+        draft.id,
+        "https://youtu.be/dQw4w9WgXcQ?si=discarded",
+        "Duplicate process film",
+        true,
+      ),
+      { ...video, duplicate: true },
+    );
     const exported = buildShowroomRecipeBrief(team, draft.id);
     const serializedBrief = JSON.stringify(exported.brief);
     assert.equal(serializedBrief.includes("password_hash"), false);
     assert.equal(serializedBrief.includes("session"), false);
-    assert.equal(exported.brief.mediaManifest.length, 1);
+    assert.equal(exported.brief.mediaManifest.length, 2);
+    assert.equal(
+      exported.brief.mediaManifest.some(
+        (entry) =>
+          entry.kind === "video" &&
+          entry.source === "controlled_youtube" &&
+          entry.key === video.assetKey,
+      ),
+      true,
+    );
+    assert.equal(serializedBrief.includes("dQw4w9WgXcQ"), false);
     assert.equal(
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,
@@ -183,6 +252,19 @@ async function main() {
         error instanceof ShowroomRecipeError && error.status === 404,
     );
     process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
+    process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
+    assert.throws(
+      () =>
+        admitRecipeYouTube(
+          team,
+          draft.id,
+          "https://youtu.be/dQw4w9WgXcQ",
+          "Approved process film",
+          true,
+        ),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError && error.status === 404,
+    );
     assert.equal(
       db.prepare("SELECT COUNT(*) count FROM content_revisions").get()?.count,
       1,

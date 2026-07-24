@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { recipeStudioEnabled } from "./config";
+import { controlledYouTubeAdmissionEnabled, recipeStudioEnabled } from "./config";
 import { canAccessRequest, getRequestDetail } from "./request-sqlite";
 import {
   getBusinessById,
@@ -27,6 +27,10 @@ import {
   type ValidatedShowroomRecipe,
 } from "./showroom-recipe-domain";
 import type { SessionUser } from "./types";
+import {
+  ControlledYouTubeError,
+  normalizeControlledYouTubeUrl,
+} from "./youtube-provider";
 import showroomContentSchema from "../showroom-sdk/showroom-content.schema.json";
 import showroomDesignSchema from "../showroom-sdk/showroom-proposal.schema.json";
 import showroomRecipeSchema from "../showroom-sdk/showroom-recipe.schema.json";
@@ -108,9 +112,9 @@ function assetMaps(
   const opaqueToActual = new Map<string, string>();
   const descriptors: Array<{
     key: string;
-    kind: "image";
+    kind: "image" | "video";
     label: string;
-    source: "current_showroom" | "request_attachment";
+    source: "current_showroom" | "request_attachment" | "controlled_youtube";
     width?: number;
     height?: number;
     rightsAcknowledged?: boolean;
@@ -167,7 +171,44 @@ function assetMaps(
       height: attachment.height,
     });
   }
+  const providers = getDb()
+    .prepare(
+      "SELECT asset_key,label,provider_id FROM recipe_media_assets WHERE request_id=? AND kind='youtube' ORDER BY id",
+    )
+    .all(requestId) as Array<{
+    asset_key: string;
+    label: string;
+    provider_id: string;
+  }>;
+  for (const provider of providers) {
+    const ref = `youtube:${provider.provider_id}`;
+    actualToOpaque.set(ref, provider.asset_key);
+    opaqueToActual.set(provider.asset_key, ref);
+    descriptors.push({
+      key: provider.asset_key,
+      kind: "video",
+      label: provider.label,
+      source: "controlled_youtube",
+      rightsAcknowledged: true,
+    });
+    details.set(ref, { kind: "video" });
+  }
   return { actualToOpaque, opaqueToActual, descriptors, details };
+}
+
+function mediaLabel(input: unknown, kind: "image" | "video") {
+  const label = String(input ?? "")
+    .trim()
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .slice(0, 120);
+  if (!label || /(?:<\/?[a-z][^>]*>|javascript:|data:|https?:\/\/)/i.test(label)) {
+    throw new ShowroomRecipeError([{
+      category: "tenant_asset",
+      path: "$.media.label",
+      message: `Add a short safe staff label for this ${kind}.`,
+    }]);
+  }
+  return label;
 }
 
 export async function admitRecipeImage(
@@ -192,17 +233,7 @@ export async function admitRecipeImage(
       message: "Choose a JPEG, PNG, or WebP image.",
     }]);
   }
-  const label = String(labelInput ?? "")
-    .trim()
-    .replace(/[\u0000-\u001F\u007F]/g, "")
-    .slice(0, 120);
-  if (!label) {
-    throw new ShowroomRecipeError([{
-      category: "tenant_asset",
-      path: "$.media.label",
-      message: "Add a short staff label for this image.",
-    }]);
-  }
+  const label = mediaLabel(labelInput, "image");
   const store = new FileRequestAttachmentStore();
   const stored = await store.save({
     originalName: file.name,
@@ -249,6 +280,68 @@ export async function admitRecipeImage(
     store.remove([stored.storageKey]);
     throw error;
   }
+}
+
+export function admitRecipeYouTube(
+  user: SessionUser,
+  revisionId: number,
+  urlInput: unknown,
+  labelInput: unknown,
+  rightsAcknowledged: boolean,
+) {
+  if (!controlledYouTubeAdmissionEnabled()) {
+    throw new ShowroomRecipeError(
+      [{ category: "tenant_asset", path: "$.media", message: "Controlled video admission is unavailable." }],
+      404,
+    );
+  }
+  const state = workspace(user, revisionId);
+  if (!rightsAcknowledged) {
+    throw new ShowroomRecipeError([{
+      category: "tenant_asset",
+      path: "$.media.rights",
+      message: "Confirm that SuqPage may use this video for the client showroom.",
+    }]);
+  }
+  const label = mediaLabel(labelInput, "video");
+  let providerId: string;
+  try {
+    providerId = normalizeControlledYouTubeUrl(urlInput).providerId;
+  } catch (error) {
+    throw new ShowroomRecipeError([{
+      category: "tenant_asset",
+      path: "$.media.url",
+      message:
+        error instanceof ControlledYouTubeError
+          ? error.message
+          : "Enter a supported YouTube URL.",
+    }]);
+  }
+  return inTransaction(() => {
+    const existing = getDb()
+      .prepare(
+        "SELECT asset_key FROM recipe_media_assets WHERE request_id=? AND kind='youtube' AND provider_id=? LIMIT 1",
+      )
+      .get(state.request.id, providerId) as { asset_key: string } | undefined;
+    if (existing) {
+      return {
+        requestId: state.request.id,
+        revisionId,
+        assetKey: existing.asset_key,
+        duplicate: true,
+      };
+    }
+    const assetKey = `asset_${crypto.randomBytes(10).toString("hex")}`;
+    getDb()
+      .prepare(
+        `INSERT INTO recipe_media_assets(
+          request_id,asset_key,kind,label,provider_id,
+          rights_acknowledged,added_by_user_id
+        ) VALUES(?,?,'youtube',?,?,1,?)`,
+      )
+      .run(state.request.id, assetKey, label, providerId, user.id);
+    return { requestId: state.request.id, revisionId, assetKey, duplicate: false };
+  });
 }
 
 function sourceManifest(requestId: number, request: NonNullable<ReturnType<typeof getRequestDetail>>) {

@@ -146,3 +146,8 @@ overflow, touch targets, and reduced motion), and the container privacy/build
 gate pass. Typed v4 rendering, focused controls, controlled provider rendering,
 320-pixel/pairwise visual admission, operations restore, and remote rollout
 gates remain; the candidate is intentionally absent from the runtime resolver.
+
+The existing private recipe studio also has a controlled-video admission form
+only when the separate provider-admission capability is enabled. It accepts no
+iframe or arbitrary provider input and does not imply that video rendering is
+enabled.

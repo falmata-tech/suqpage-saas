@@ -120,6 +120,9 @@ Set `SUQPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
 basic product writes while leaving requests and showrooms available.
 Set `SUQPAGE_RECIPE_STUDIO_ENABLED=0` to deny recipe export/import and route
 new or existing private drafts through the retained administrative editor.
+Controlled YouTube admission is disabled by default. Set
+`SUQPAGE_YOUTUBE_ADMISSION_ENABLED=1` only after the DEP-009 provider gate is
+approved; this enables private normalized-ID admission, not public rendering.
 
 ## New production installation
 

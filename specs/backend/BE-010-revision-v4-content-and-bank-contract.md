@@ -128,7 +128,9 @@ parser wraps the unchanged v1 validator and enforces exact one-time compatible
 block assignment and named content-media slot counts using bank-v2 compatibility
 metadata. Portable bank/design-v2 schemas and a frozen 67-component bank-1.2
 candidate are available to the synthetic laboratory only. Revision-v4 storage,
-typed rendering, runtime bank-1.2 admission, provider persistence/CSP rendering,
-and focused commands remain. The pure provider boundary now accepts only exact
+typed rendering, runtime bank-1.2 admission, provider CSP rendering, and focused
+commands remain. The provider boundary now accepts only exact
 HTTPS watch/share hosts, rejects playlists/shorts/embed markup and lookalikes,
-and derives only a fixed privacy-enhanced embed URL from a validated managed ID.
+Authorized private-draft admission is default-off, reuses request authorization,
+stores only the normalized ID behind a random opaque key, deduplicates per
+request, and exports neither the raw URL nor provider ID.

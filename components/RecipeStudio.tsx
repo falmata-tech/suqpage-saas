@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   admitRecipeImageAction,
+  admitRecipeYouTubeAction,
   importShowroomRecipeAction,
 } from "@/app/revision-actions";
 
@@ -11,11 +12,13 @@ export default function RecipeStudio({
   revisionId,
   brief,
   initialRecipe,
+  youtubeEnabled,
 }: {
   requestId: number;
   revisionId: number;
   brief: string;
   initialRecipe: string;
+  youtubeEnabled: boolean;
 }) {
   const [recipe, setRecipe] = useState("");
   const [copied, setCopied] = useState(false);
@@ -74,6 +77,34 @@ export default function RecipeStudio({
             <button className="btn secondary">Verify and add media</button>
           </div>
         </form>
+        {youtubeEnabled ? (
+          <form action={admitRecipeYouTubeAction} className="form-grid">
+            <input type="hidden" name="requestId" value={requestId} />
+            <input type="hidden" name="revisionId" value={revisionId} />
+            <div className="field full">
+              <h3>Add one controlled YouTube video</h3>
+              <p>
+                Use a standard HTTPS YouTube watch or share link. SuqPage stores
+                only the normalized video ID and gives the AI an opaque key.
+              </p>
+            </div>
+            <div className="field">
+              <label htmlFor="recipe-youtube-label">Staff label</label>
+              <input id="recipe-youtube-label" name="youtubeLabel" required maxLength={120} placeholder="Example: Approved workshop process film" />
+            </div>
+            <div className="field">
+              <label htmlFor="recipe-youtube-url">YouTube watch or share URL</label>
+              <input id="recipe-youtube-url" name="youtubeUrl" type="url" required maxLength={500} placeholder="https://www.youtube.com/watch?v=…" />
+            </div>
+            <label className="check-field full">
+              <input type="checkbox" name="youtubeRights" required />
+              I confirm this video is authorized for this client showroom.
+            </label>
+            <div className="field full">
+              <button className="btn secondary">Validate and add video</button>
+            </div>
+          </form>
+        ) : null}
       </section>
       <section className="panel recipe-step">
         <span className="step-number">1</span>

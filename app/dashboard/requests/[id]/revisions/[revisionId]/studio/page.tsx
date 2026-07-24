@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { getBusinessById } from "@/lib/db";
 import { buildShowroomRecipeBrief } from "@/lib/showroom-recipe-service";
 import { ShowroomRecipeError } from "@/lib/showroom-recipe-domain";
-import { recipeStudioEnabled } from "@/lib/config";
+import { controlledYouTubeAdmissionEnabled, recipeStudioEnabled } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -80,8 +80,8 @@ export default async function RecipeStudioPage({
       ) : null}
       {query.media ? (
         <p className="notice">
-          Private image verified and admitted. Export a fresh brief to include
-          its opaque asset key.
+          Private {query.media === "youtube" ? "video" : "image"} verified and
+          admitted. Export a fresh brief to include its opaque asset key.
         </p>
       ) : null}
       <RecipeStudio
@@ -89,6 +89,7 @@ export default async function RecipeStudioPage({
         revisionId={revisionId}
         brief={JSON.stringify(data.brief, null, 2)}
         initialRecipe={JSON.stringify(data.brief.completeExample, null, 2)}
+        youtubeEnabled={controlledYouTubeAdmissionEnabled()}
       />
     </DashboardShell>
   );
