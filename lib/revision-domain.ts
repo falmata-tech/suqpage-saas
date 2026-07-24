@@ -6,7 +6,7 @@ import {
 import type { ShowroomDesignProposal } from "./showroom-composition";
 import type { Business, Catalog, Category, Collection, Product } from "./types";
 
-export const REVISION_SCHEMA_VERSION = 2;
+export const REVISION_SCHEMA_VERSION = 3;
 export const MAX_REVISION_BYTES = 1024 * 1024;
 
 const availability = new Set([
@@ -68,7 +68,6 @@ export type RevisionProduct = {
   description: string;
   imageRef: string;
   availability: Product["availability"];
-  stockCount: number;
   published: boolean;
   sortOrder: number;
   optionGroups: RevisionOptionGroup[];
@@ -90,7 +89,15 @@ export type RevisionSnapshotV2 = RevisionContent & {
   designManifest: ShowroomDesignProposal;
 };
 
-export type RevisionSnapshot = RevisionSnapshotV1 | RevisionSnapshotV2;
+export type RevisionSnapshotV3 = RevisionContent & {
+  schemaVersion: 3;
+  designManifest: ShowroomDesignProposal;
+};
+
+export type RevisionSnapshot =
+  | RevisionSnapshotV1
+  | RevisionSnapshotV2
+  | RevisionSnapshotV3;
 
 export class RevisionError extends Error {
   constructor(
@@ -148,7 +155,10 @@ function onlyKeys(
   }
 }
 
-function parseContent(raw: Record<string, unknown>, schemaVersion: 1 | 2): RevisionContent {
+function parseContent(
+  raw: Record<string, unknown>,
+  schemaVersion: 1 | 2 | 3,
+): RevisionContent {
   if (typeof raw.business !== "object" || !raw.business) {
     throw new RevisionError("The revision schema is invalid.");
   }
@@ -177,12 +187,12 @@ function parseContent(raw: Record<string, unknown>, schemaVersion: 1 | 2): Revis
   const designKey = clean(sourceBusiness.designKey, 40);
   if (
     (schemaVersion === 1 && !isLegacyShowroomDesignKey(designKey)) ||
-    (schemaVersion === 2 && designKey !== "composition")
+    (schemaVersion !== 1 && designKey !== "composition")
   ) {
     throw new RevisionError(
       schemaVersion === 1
         ? "The legacy showroom design is not supported."
-        : "Schema-v2 revisions must use the composition renderer.",
+        : "Composed revisions must use the composition renderer.",
     );
   }
   const name = clean(sourceBusiness.name, 100);
@@ -292,10 +302,10 @@ function parseContent(raw: Record<string, unknown>, schemaVersion: 1 | 2): Revis
         "description",
         "imageRef",
         "availability",
-        "stockCount",
         "published",
         "sortOrder",
         "optionGroups",
+        ...(schemaVersion < 3 ? ["stockCount"] : []),
       ],
       "Revision product",
     );
@@ -340,7 +350,9 @@ function parseContent(raw: Record<string, unknown>, schemaVersion: 1 | 2): Revis
     if (!availability.has(productAvailability)) {
       throw new RevisionError("Choose a valid product availability.");
     }
-    const stockCount = integer(value.stockCount, 0, 100000);
+    if (schemaVersion < 3 && value.stockCount !== undefined) {
+      integer(value.stockCount, 0, 100000);
+    }
     return {
       key: key(value.key),
       collectionKey,
@@ -350,12 +362,7 @@ function parseContent(raw: Record<string, unknown>, schemaVersion: 1 | 2): Revis
       eyebrow: clean(value.eyebrow, 100),
       description: clean(value.description, 3000),
       imageRef: image(value.imageRef),
-      availability:
-        stockCount === 0 &&
-        ["available", "limited"].includes(productAvailability)
-          ? ("unavailable" as const)
-          : productAvailability,
-      stockCount,
+      availability: productAvailability,
       published: Boolean(value.published),
       sortOrder: integer(value.sortOrder, -100000, 100000),
       optionGroups,
@@ -390,7 +397,12 @@ export function parseRevisionSnapshot(input: unknown): RevisionSnapshot {
   } catch {
     throw new RevisionError("The revision data is invalid.");
   }
-  if (!raw || (raw.schemaVersion !== 1 && raw.schemaVersion !== 2)) {
+  if (
+    !raw ||
+    (raw.schemaVersion !== 1 &&
+      raw.schemaVersion !== 2 &&
+      raw.schemaVersion !== 3)
+  ) {
     throw new RevisionError("The revision schema is invalid.");
   }
   const schemaVersion = raw.schemaVersion;
@@ -419,7 +431,7 @@ export function parseRevisionSnapshot(input: unknown): RevisionSnapshot {
     throw new RevisionError("The revision design manifest is invalid.");
   }
   return {
-    schemaVersion: REVISION_SCHEMA_VERSION,
+    schemaVersion,
     ...content,
     designManifest,
   };
@@ -446,7 +458,32 @@ export function requireRevisionSnapshotV2(input: unknown): RevisionSnapshotV2 {
   return snapshot;
 }
 
-export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV2 {
+export function upgradeRevisionSnapshotToV3(
+  snapshotInput: unknown,
+): RevisionSnapshotV3 {
+  const snapshot = parseRevisionSnapshot(snapshotInput);
+  if (snapshot.schemaVersion === 3) return snapshot;
+  const designManifest =
+    snapshot.schemaVersion === 2
+      ? snapshot.designManifest
+      : resolveDesignManifest(snapshot.business.designKey);
+  return parseRevisionSnapshot({
+    ...snapshot,
+    schemaVersion: 3,
+    business: { ...snapshot.business, designKey: "composition" },
+    designManifest,
+  }) as RevisionSnapshotV3;
+}
+
+export function requireRevisionSnapshotV3(input: unknown): RevisionSnapshotV3 {
+  const snapshot = parseRevisionSnapshot(input);
+  if (snapshot.schemaVersion !== 3) {
+    throw new RevisionError("New revision writes require schema version 3.");
+  }
+  return snapshot;
+}
+
+export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 {
   const collectionKey = (id: number) => `collection-${id}`;
   const categoryKey = (id: number) => `category-${id}`;
   let storedManifest: unknown;
@@ -516,7 +553,6 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV2 
       description: item.description,
       imageRef: item.image_path,
       availability: item.availability,
-      stockCount: item.stock_count,
       published: Boolean(item.is_published),
       sortOrder: item.sort_order,
       optionGroups: (item.option_groups || []).map((group) => ({
@@ -524,7 +560,7 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV2 
         values: group.values.map((entry) => entry.value),
       })),
     })),
-  }) as RevisionSnapshotV2;
+  }) as RevisionSnapshotV3;
 }
 
 export function snapshotToCatalog(
@@ -533,9 +569,9 @@ export function snapshotToCatalog(
   resolveImage = (value: string) => value,
 ): Catalog {
   const snapshot =
-    snapshotInput.schemaVersion === 2
+    snapshotInput.schemaVersion === 3
       ? snapshotInput
-      : upgradeRevisionSnapshotToV2(snapshotInput);
+      : upgradeRevisionSnapshotToV3(snapshotInput);
   const collectionIds = new Map(
     snapshot.collections.map((item, index) => [item.key, index + 1]),
   );
@@ -577,7 +613,6 @@ export function snapshotToCatalog(
     description: item.description,
     image_path: resolveImage(item.imageRef),
     availability: item.availability,
-    stock_count: item.stockCount,
     is_published: item.published ? 1 : 0,
     sort_order: item.sortOrder,
     collection_name: item.collectionKey
@@ -596,7 +631,6 @@ export function snapshotToCatalog(
         id: valueIndex + 1,
         option_group_id: groupIndex + 1,
         value,
-        stock_count: item.stockCount,
       })),
     })),
   }));

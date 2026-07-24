@@ -16,7 +16,6 @@
     "description": "Dynamic description",
     "image_path": "/media/product.jpg",
     "availability": "available",
-    "stock_count": 8,
     "option_groups": [{ "name": "Color", "values": [{ "value": "Original Color Name" }] }]
   }]
 }

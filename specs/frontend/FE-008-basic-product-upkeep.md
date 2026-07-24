@@ -1,7 +1,7 @@
 ---
 id: FE-008
 title: Simple client and staff product upkeep
-status: ready
+status: in_progress
 related: [FE-001, FE-003, FE-007, BE-009, DEP-008, ADR-0006]
 owners: [product, frontend]
 last_updated: 2026-07-24

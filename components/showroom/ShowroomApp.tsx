@@ -117,7 +117,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
             ? [
                 {
                   product,
-                  quantity: Math.max(1, Math.min(Number(line.quantity) || 1, Math.max(1, product.stock_count))),
+                  quantity: Math.max(1, Math.min(Number(line.quantity) || 1, 20)),
                   options: line.options || {},
                 },
               ]
@@ -178,7 +178,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
   };
   const add = (product: Product, options: Record<string, string> = {}) => {
     if(previewMode){setSelected(null);show("Private preview only — customer inquiries remain on the live showroom.");return;}
-    if (!["available", "limited"].includes(product.availability) || product.stock_count < 1) {
+    if (!["available", "limited"].includes(product.availability)) {
       show("This product is not currently available.");
       return;
     }
@@ -190,7 +190,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       if (index < 0) return [...current, { product, quantity: 1, options }];
       return current.map((line, lineIndex) =>
         lineIndex === index
-          ? { ...line, quantity: Math.min(product.stock_count, 20, line.quantity + 1) }
+          ? { ...line, quantity: Math.min(20, line.quantity + 1) }
           : line,
       );
     });
@@ -202,7 +202,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       current
         .map((line, lineIndex) =>
           lineIndex === index
-            ? { ...line, quantity: Math.min(line.product.stock_count, 20, line.quantity + delta) }
+            ? { ...line, quantity: Math.min(20, line.quantity + delta) }
             : line,
         )
         .filter((line) => line.quantity > 0),
@@ -271,10 +271,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
                 <span className="eyebrow">{selected.eyebrow}</span>
                 <h2 style={{ fontSize: "2.5rem", letterSpacing: "-.05em" }}>{selected.name}</h2>
                 <p style={{ lineHeight: 1.7 }}>{selected.description}</p>
-                <p>
-                  <strong>Availability:</strong> {statusText[selected.availability]} · <strong>Count:</strong>{" "}
-                  {selected.stock_count}
-                </p>
+                <p><strong>Availability:</strong> {statusText[selected.availability]}</p>
                 {selected.option_groups?.map((group) => (
                   <label className="option-set" key={group.id}>
                     <strong>{group.name}</strong>
@@ -292,7 +289,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
                 ))}
                 <button
                   className="sr-cart-trigger"
-                  disabled={!["available", "limited"].includes(selected.availability) || selected.stock_count < 1}
+                  disabled={!["available", "limited"].includes(selected.availability)}
                   onClick={() => add(selected, selections)}
                 >
                   Add selected item

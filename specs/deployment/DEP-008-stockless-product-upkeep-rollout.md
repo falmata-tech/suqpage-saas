@@ -1,7 +1,7 @@
 ---
 id: DEP-008
 title: Stockless product-upkeep migration and rollout
-status: ready
+status: in_progress
 related: [DEP-001, DEP-003, DEP-007, FE-008, BE-008, BE-009, ADR-0006]
 owners: [operations, security, product]
 last_updated: 2026-07-24

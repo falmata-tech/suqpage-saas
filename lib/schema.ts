@@ -81,7 +81,6 @@ export function migrateDatabase(db: DatabaseSync) {
       description TEXT DEFAULT '',
       image_path TEXT DEFAULT '',
       availability TEXT NOT NULL DEFAULT 'available' CHECK(availability IN ('available','limited','unavailable','coming_soon')),
-      stock_count INTEGER NOT NULL DEFAULT 0 CHECK(stock_count >= 0),
       is_published INTEGER NOT NULL DEFAULT 1 CHECK(is_published IN (0,1)),
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -98,7 +97,6 @@ export function migrateDatabase(db: DatabaseSync) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       option_group_id INTEGER NOT NULL REFERENCES option_groups(id) ON DELETE CASCADE,
       value TEXT NOT NULL,
-      stock_count INTEGER NOT NULL DEFAULT 0 CHECK(stock_count >= 0),
       UNIQUE(option_group_id, value)
     );
     CREATE TABLE IF NOT EXISTS inquiries (
@@ -583,6 +581,119 @@ export function migrateDatabase(db: DatabaseSync) {
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
+    }
+  }
+
+  const stocklessCutoverApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=9")
+    .get();
+  if (!stocklessCutoverApplied) {
+    db.exec("PRAGMA foreign_keys = OFF");
+    try {
+      db.exec("BEGIN IMMEDIATE");
+      if (columns(db, "products").has("stock_count")) {
+        db.exec(`
+          DROP TRIGGER IF EXISTS product_collection_same_business_insert;
+          DROP TRIGGER IF EXISTS product_collection_same_business_update;
+          DROP TRIGGER IF EXISTS product_category_same_business_insert;
+          DROP TRIGGER IF EXISTS product_category_same_business_update;
+          DROP TRIGGER IF EXISTS inquiry_item_same_business_insert;
+
+          CREATE TABLE products_v9 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+            collection_id INTEGER REFERENCES collections(id) ON DELETE SET NULL,
+            category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL,
+            eyebrow TEXT DEFAULT '',
+            description TEXT DEFAULT '',
+            image_path TEXT DEFAULT '',
+            availability TEXT NOT NULL DEFAULT 'available'
+              CHECK(availability IN ('available','limited','unavailable','coming_soon')),
+            is_published INTEGER NOT NULL DEFAULT 1 CHECK(is_published IN (0,1)),
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(business_id, slug)
+          );
+          INSERT INTO products_v9(
+            id,business_id,collection_id,category_id,name,slug,eyebrow,
+            description,image_path,availability,is_published,sort_order,created_at
+          )
+          SELECT
+            id,business_id,collection_id,category_id,name,slug,eyebrow,
+            description,image_path,availability,is_published,sort_order,created_at
+          FROM products;
+
+          CREATE TABLE option_values_v9 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            option_group_id INTEGER NOT NULL REFERENCES option_groups(id) ON DELETE CASCADE,
+            value TEXT NOT NULL,
+            UNIQUE(option_group_id, value)
+          );
+          INSERT INTO option_values_v9(id,option_group_id,value)
+          SELECT id,option_group_id,value FROM option_values;
+
+          DROP TABLE option_values;
+          DROP TABLE products;
+          ALTER TABLE products_v9 RENAME TO products;
+          ALTER TABLE option_values_v9 RENAME TO option_values;
+
+          CREATE TRIGGER product_collection_same_business_insert
+          BEFORE INSERT ON products WHEN NEW.collection_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM collections
+              WHERE id=NEW.collection_id AND business_id=NEW.business_id
+            ) THEN RAISE(ABORT, 'collection does not belong to business') END;
+          END;
+          CREATE TRIGGER product_collection_same_business_update
+          BEFORE UPDATE OF collection_id,business_id ON products
+          WHEN NEW.collection_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM collections
+              WHERE id=NEW.collection_id AND business_id=NEW.business_id
+            ) THEN RAISE(ABORT, 'collection does not belong to business') END;
+          END;
+          CREATE TRIGGER product_category_same_business_insert
+          BEFORE INSERT ON products WHEN NEW.category_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM categories
+              WHERE id=NEW.category_id AND business_id=NEW.business_id
+            ) THEN RAISE(ABORT, 'category does not belong to business') END;
+          END;
+          CREATE TRIGGER product_category_same_business_update
+          BEFORE UPDATE OF category_id,business_id ON products
+          WHEN NEW.category_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM categories
+              WHERE id=NEW.category_id AND business_id=NEW.business_id
+            ) THEN RAISE(ABORT, 'category does not belong to business') END;
+          END;
+          CREATE TRIGGER inquiry_item_same_business_insert
+          BEFORE INSERT ON inquiry_items WHEN NEW.product_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM inquiries i JOIN products p ON p.id=NEW.product_id
+              WHERE i.id=NEW.inquiry_id AND i.business_id=p.business_id
+            ) THEN RAISE(ABORT, 'product does not belong to inquiry business') END;
+          END;
+        `);
+      }
+      const foreignKeyFailures = db.prepare("PRAGMA foreign_key_check").all();
+      if (foreignKeyFailures.length) {
+        throw new Error("Stockless migration failed foreign-key validation.");
+      }
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(9)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    } finally {
+      db.exec("PRAGMA foreign_keys = ON");
     }
   }
 }

@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-type AcceptanceProbe = "inquiryByCustomer" | "productStockByName" | "deliveryByAddress";
+type AcceptanceProbe = "inquiryByCustomer" | "deliveryByAddress";
 const readAcceptanceRow = (probe: AcceptanceProbe, value: string) =>
   JSON.parse(
     execFileSync(

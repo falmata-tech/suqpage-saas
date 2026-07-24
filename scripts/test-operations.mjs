@@ -79,6 +79,9 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM sessions WHERE token_hash='cutover-session' AND revoked_at IS NOT NULL").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses WHERE design_key='composition' AND design_manifest_json!=''").get().count,preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=8").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=9").get().count,1);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('products') WHERE name='stock_count'").get().count,0);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('option_values') WHERE name='stock_count'").get().count,0);
   assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);
   db.close();
   fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
