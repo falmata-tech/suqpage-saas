@@ -183,14 +183,20 @@ async function main() {
     );
     const recipe = structuredClone(exported.brief.completeExample);
     recipe.summary = "Validated imported showroom recipe.";
+    recipe.content.business.heroTitle = "Recipe-approved public hero";
     recipe.content.business.heroImageRef = admitted.assetKey;
-    recipe.design.sections[1].component = "hero.material-detail@1";
+    recipe.design.sections[1].component = "hero.room-scene@1";
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
-    assert.equal(imported.difference.designSections.after, 8);
+    assert.equal(imported.difference.designSections.after, 9);
     assert.equal(
       getContentRevision(draft.id)?.summary,
       "Validated imported showroom recipe.",
+    );
+    assert.equal(
+      JSON.parse(getContentRevision(draft.id)!.snapshot_json).contentBlocks.blocks
+        .find((block: { key: string }) => block.key === "hero-main").title,
+      "Recipe-approved public hero",
     );
     assert.match(getContentRevision(draft.id)?.recipe_import_hash || "", /^[a-f0-9]{64}$/);
     assert.equal(importShowroomRecipe(team, draft.id, recipe).duplicate, true);

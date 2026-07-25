@@ -18,6 +18,7 @@ const csp = [
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self'",
+  "frame-src 'self' https://www.youtube-nocookie.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",

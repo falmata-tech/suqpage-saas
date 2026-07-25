@@ -9,15 +9,14 @@ import {
 } from "./db";
 import { FileRequestAttachmentStore } from "./request-media";
 import {
-  catalogToRevisionSnapshot,
-  requireRevisionSnapshotV3,
-  type RevisionSnapshotV3,
-} from "./revision-domain";
+  requireRevisionSnapshotV4,
+  type RevisionSnapshotV4,
+} from "./revision-v4-domain";
 import {
   getContentRevision,
   saveRecipeDraftRevision,
 } from "./revision-service";
-import { SHOWROOM_COMPONENT_BANK } from "./showroom-bank-release";
+import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import {
   SHOWROOM_CONTENT_SCHEMA_VERSION,
   SHOWROOM_RECIPE_SCHEMA_VERSION,
@@ -101,7 +100,7 @@ function workspace(user: SessionUser, revisionId: number) {
 
 function assetMaps(
   requestId: number,
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   attachments: ReturnType<typeof getRequestDetail> extends infer T
     ? T extends { attachments: infer A }
       ? A
@@ -141,6 +140,13 @@ function assetMaps(
     ["Current browser icon", snapshot.business.faviconRef],
     ...snapshot.products.map(
       (product) => [`Current product · ${product.name}`, product.imageRef],
+    ),
+    ...snapshot.contentBlocks.blocks.flatMap((block) =>
+      block.media.flatMap((media) =>
+        media.assetKeys.map(
+          (assetKey) => [`Current block · ${block.title}`, assetKey] as [string, string],
+        ),
+      ),
     ),
   ] as Array<[string, string]>;
   for (const [label, ref] of current) {
@@ -382,7 +388,7 @@ function sourceManifest(requestId: number, request: NonNullable<ReturnType<typeo
 }
 
 function mapSnapshotAssets(
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   map: ReadonlyMap<string, string>,
 ) {
   const replace = (value: string) => (value ? map.get(value) || value : "");
@@ -398,10 +404,20 @@ function mapSnapshotAssets(
       ...product,
       imageRef: replace(product.imageRef),
     })),
+    contentBlocks: {
+      ...snapshot.contentBlocks,
+      blocks: snapshot.contentBlocks.blocks.map((block) => ({
+        ...block,
+        media: block.media.map((media) => ({
+          ...media,
+          assetKeys: media.assetKeys.map(replace),
+        })),
+      })),
+    },
   };
 }
 
-function relationshipKeyMaps(requestId: number, snapshot: RevisionSnapshotV3) {
+function relationshipKeyMaps(requestId: number, snapshot: RevisionSnapshotV4) {
   const actualToOpaque = new Map<string, string>();
   const opaqueToActual = new Map<string, string>();
   for (const [kind, keys] of [
@@ -419,7 +435,7 @@ function relationshipKeyMaps(requestId: number, snapshot: RevisionSnapshotV3) {
 }
 
 function mapSnapshotRelationshipKeys(
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   map: ReadonlyMap<string, string>,
 ) {
   const replace = (value: string | null) =>
@@ -445,7 +461,7 @@ function mapSnapshotRelationshipKeys(
 }
 
 function factProvenance(
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   sourceKey: string,
 ): RecipeProvenance[] {
   const paths = ["$.content.business.name"];
@@ -463,7 +479,7 @@ function factProvenance(
 }
 
 function exampleRecipe(
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   sourceKey: string,
 ) {
   const { designManifest, schemaVersion: _schemaVersion, ...content } = snapshot;
@@ -489,7 +505,10 @@ export function buildShowroomRecipeBrief(
   revisionId: number,
 ) {
   const state = workspace(user, revisionId);
-  const snapshot = requireRevisionSnapshotV3(state.revision.snapshot_json);
+  const snapshot = requireRevisionSnapshotV4(
+    state.revision.snapshot_json,
+    SHOWROOM_COMPONENT_BANK_LATEST,
+  );
   const assets = assetMaps(state.request.id, snapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, snapshot);
   const sources = sourceManifest(state.request.id, state.request);
@@ -521,7 +540,7 @@ export function buildShowroomRecipeBrief(
         design: showroomDesignSchema,
         recipe: showroomRecipeSchema,
       },
-      componentBank: SHOWROOM_COMPONENT_BANK,
+      componentBank: SHOWROOM_COMPONENT_BANK_LATEST,
       sourceFacts: sources.sources,
       mediaManifest: assets.descriptors,
       currentContent: portableSnapshot,
@@ -567,6 +586,17 @@ function normalizeImportedAssets(
       product.imageRef = replace(product.imageRef);
     }
   }
+  const blocks = (content?.contentBlocks as Record<string, unknown> | undefined)?.blocks;
+  if (Array.isArray(blocks)) {
+    for (const block of blocks as Array<Record<string, unknown>>) {
+      if (!Array.isArray(block.media)) continue;
+      for (const media of block.media as Array<Record<string, unknown>>) {
+        if (Array.isArray(media.assetKeys)) {
+          media.assetKeys = media.assetKeys.map(replace);
+        }
+      }
+    }
+  }
   const replaceKey = (value: unknown) =>
     typeof value === "string" && value
       ? relationshipKeys.get(value) || value
@@ -600,13 +630,76 @@ function normalizeImportedAssets(
   return parsed;
 }
 
+function synchronizeBusinessHeroContentBlock(
+  input: unknown,
+  baseSnapshot: RevisionSnapshotV4,
+) {
+  if (!input || typeof input !== "object") return input;
+  const recipe = input as Record<string, unknown>;
+  const content = recipe.content as Record<string, unknown> | undefined;
+  const business = content?.business as Record<string, unknown> | undefined;
+  const contentBlocks = content?.contentBlocks as Record<string, unknown> | undefined;
+  const blocks = contentBlocks?.blocks;
+  if (!business || !Array.isArray(blocks)) return input;
+
+  const heroBlock = (blocks as Array<Record<string, unknown>>).find(
+    (block) => block.key === "hero-main",
+  ) || (blocks as Array<Record<string, unknown>>).find(
+    (block) => block.type === "hero",
+  );
+  const baseHeroBlock = baseSnapshot.contentBlocks.blocks.find(
+    (block) => block.key === heroBlock?.key,
+  ) || baseSnapshot.contentBlocks.blocks.find((block) => block.type === "hero");
+  if (!heroBlock || !baseHeroBlock) return input;
+
+  const syncText = (
+    blockField: "kicker" | "title" | "body",
+    businessField: "tagline" | "heroTitle" | "heroSubtitle",
+  ) => {
+    const next = business[businessField];
+    if (typeof next !== "string") return;
+    const current = heroBlock[blockField];
+    if (typeof current === "string" && current !== next) {
+      heroBlock[blockField] = next;
+    }
+  };
+  syncText("kicker", "tagline");
+  syncText("title", "heroTitle");
+  syncText("body", "heroSubtitle");
+
+  const heroImageRef = business.heroImageRef;
+  if (
+    typeof heroImageRef === "string" &&
+    Array.isArray(heroBlock.media)
+  ) {
+    const media = (heroBlock.media as Array<Record<string, unknown>>).find(
+      (entry) => entry.slotKey === "hero_image",
+    );
+    const baseMedia = baseHeroBlock.media.find(
+      (entry) => entry.slotKey === "hero_image",
+    );
+    if (
+      media &&
+      Array.isArray(media.assetKeys) &&
+      baseMedia &&
+      JSON.stringify(media.assetKeys) !== JSON.stringify([heroImageRef])
+    ) {
+      media.assetKeys = heroImageRef ? [heroImageRef] : [];
+    }
+  }
+  return input;
+}
+
 export function importShowroomRecipe(
   user: SessionUser,
   revisionId: number,
   input: unknown,
 ): ValidatedShowroomRecipe {
   const state = workspace(user, revisionId);
-  const baseSnapshot = requireRevisionSnapshotV3(state.revision.snapshot_json);
+  const baseSnapshot = requireRevisionSnapshotV4(
+    state.revision.snapshot_json,
+    SHOWROOM_COMPONENT_BANK_LATEST,
+  );
   const assets = assetMaps(state.request.id, baseSnapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, baseSnapshot);
   const sources = sourceManifest(state.request.id, state.request);
@@ -615,6 +708,7 @@ export function importShowroomRecipe(
     assets.opaqueToActual,
     relationships.opaqueToActual,
   );
+  synchronizeBusinessHeroContentBlock(normalized, baseSnapshot);
   const validated = validateShowroomRecipe(normalized, {
     baseContentVersion: state.revision.base_content_version,
     baseSnapshot,

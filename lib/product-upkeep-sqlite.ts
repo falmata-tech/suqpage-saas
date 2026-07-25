@@ -15,10 +15,9 @@ import type {
   BasicProductUpkeepPort,
   ProductUpkeepResult,
 } from "./product-upkeep";
-import {
-  catalogToRevisionSnapshot,
-  requireRevisionSnapshotV3,
-} from "./revision-domain";
+import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
+import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
+import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { audit } from "./security";
 import type { Category, Collection, SessionUser } from "./types";
 
@@ -155,7 +154,7 @@ function validateProspectiveSnapshot(
   if (!catalog) {
     throw new ProductUpkeepError("Business catalog not found.", 404, "not_found");
   }
-  const snapshot = catalogToRevisionSnapshot(catalog);
+  const snapshot = catalogToRevisionSnapshotV4(catalog);
   const collectionKey = command.collectionId
     ? `collection-${command.collectionId}`
     : null;
@@ -197,7 +196,7 @@ function validateProspectiveSnapshot(
       availability: command.availability,
     });
   }
-  requireRevisionSnapshotV3(snapshot);
+  requireRevisionSnapshotV4(snapshot, SHOWROOM_COMPONENT_BANK_LATEST);
 }
 
 export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
@@ -266,7 +265,7 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
         .run(
           command.businessId,
           business.content_version,
-          JSON.stringify(catalogToRevisionSnapshot(currentCatalog)),
+          JSON.stringify(catalogToRevisionSnapshotV4(currentCatalog)),
           user.id,
         );
 
@@ -341,7 +340,7 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
         );
       }
       const finalCatalog = getCatalogByBusinessId(command.businessId, true)!;
-      const finalSnapshot = catalogToRevisionSnapshot(finalCatalog);
+      const finalSnapshot = catalogToRevisionSnapshotV4(finalCatalog);
       getDb()
         .prepare(
           "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,?,?,'product_upkeep',?)",

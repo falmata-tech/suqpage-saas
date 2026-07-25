@@ -4,7 +4,7 @@ title: Revision v4 and showroom bank 1.2 controlled rollout
 status: in_progress
 related: [DEP-004, DEP-005, DEP-006, DEP-007, FE-007, FE-009, BE-005, BE-006, BE-007, BE-008, BE-010, ADR-0005, ADR-0007]
 owners: [operations, security, product]
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 change_level: L3
 ---
 
@@ -21,6 +21,9 @@ creative bank without rewriting retained revisions or widening trusted input.
 
 - Additive/idempotent schema migration for v4 recipe metadata and normalized
   provider assets; no destructive v1-v3 or bank-1.1 rewrite.
+- Reset-only development cutover for the current disposable local seed
+  database. This cutover may make v4 and bank 1.2 the default for reset-created
+  rows without preserving obsolete prototype snapshots.
 - Release registry packages immutable bank 1.1 and 1.2; new v4 drafts pin 1.2
   only after admission while retained revisions resolve their original bank.
 - Narrow CSP `frame-src` only to the privacy-enhanced YouTube origin when the
@@ -32,6 +35,9 @@ creative bank without rewriting retained revisions or widening trusted input.
 
 - Destructive migration, provider API calls, arbitrary origins, removal of old
   readers, automatic production rollout, or committing private visual artifacts.
+- Treating reset-only development cutover as a production data migration
+  pattern. Future major feature switches must explicitly confirm whether
+  existing data is important before choosing reset versus migration.
 
 ## Admission gates
 
@@ -100,6 +106,18 @@ copy, images, provider conversations, or credentials.
 
 ## Rollout and rollback
 
+Reset-only development cutover path for the current repository state:
+
+1. Preserve tenant isolation, auth, inquiry, media, request, approval,
+   publication, and rollback behavior.
+2. Make reset-created businesses, baseline publications, and new drafts use v4
+   typed content and bank 1.2 by default.
+3. Run `npm run reset` rather than migrating disposable prototype rows.
+4. Remove compatibility code only when no current reset-created workflow or
+   test requires it.
+
+Production/data-preserving path:
+
 1. Land dual readers/resolver and synthetic fixtures without changing defaults.
 2. Add v4/provider persistence and prove backup/restore on isolated data.
 3. Admit bank 1.2 in the laboratory and production-browser fixtures.
@@ -124,20 +142,23 @@ Checkpoint: the additive release registry still admits only bank 1.1, with no
 default/write change. A frozen bank-1.2 candidate now meets the planned numeric
 floor with 67 components, 18 token systems, and 98,280 required-slot
 combinations; it is exposed only in the permissioned synthetic laboratory.
-Static bank/experience/compatibility gates, the complete release, all seven
+Static bank/experience/compatibility gates, the complete release, all eight
 production-browser scenarios, and the isolated container privacy/build gate
-pass. V4 persistence/rendering, provider/CSP, operations migration/restore,
-320-pixel and pairwise visual admission, remote checks, and rollout evidence
-remain.
+pass. V4 persistence/rendering, local reset-default writes, provider/CSP
+browser proof, and focused private-draft controls are implemented. Operations
+migration/restore, 320-pixel and pairwise visual admission, remote checks, and
+production rollout evidence remain.
 
 The YouTube normalizer and request-scoped persistence adapter are implemented
 without network access. Admission is independently disabled by default through
 `SUQPAGE_YOUTUBE_ADMISSION_ENABLED=0`; stored exports expose only opaque asset
-keys. CSP enablement and browser rendering remain disabled and unclaimed.
+keys. CSP enablement and browser rendering are covered by the production-like
+acceptance scenario for the privacy-enhanced `youtube-nocookie.com` iframe.
 The additive revision-v4 domain document is now validated independently of the
-retained v1-v3 reader and is included in local/release gates. No database row,
-default writer, release-registry entry, CSP directive, or public renderer was
-changed by this parser checkpoint.
+retained v1-v3 reader and is included in local/release gates. The reset-only
+development cutover updates default local writers and renderers; production
+deployment still needs explicit data-preserving or reset-approved rollout
+evidence.
 Migration 13 adds the non-destructive revision snapshot-version marker, verifies
 stored-marker parity, and extends submitted-revision immutability. Revision and
 backup/restore integration tests pass with the marker, while v4 rows and v4

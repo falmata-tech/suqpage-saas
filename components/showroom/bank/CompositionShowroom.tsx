@@ -3,6 +3,8 @@
 import type { CSSProperties } from "react";
 import { resolveShowroomComponentBank } from "@/lib/showroom-bank-release";
 import type { ShowroomDesignProposal } from "@/lib/showroom-composition";
+import type { ShowroomDesignProposalV2 } from "@/lib/showroom-composition-v2";
+import type { ShowroomContentBlocksDocument } from "@/lib/showroom-content-blocks";
 import type {
   ShowroomDecorativeDepth,
   ShowroomMotionIntensity,
@@ -36,8 +38,12 @@ function toBankProduct(product: Product): BankProductView {
 
 export function CompositionShowroom({
   manifest,
+  contentBlocks,
   ...props
-}: DesignProps & { manifest: ShowroomDesignProposal }) {
+}: DesignProps & {
+  manifest: ShowroomDesignProposal | ShowroomDesignProposalV2;
+  contentBlocks?: ShowroomContentBlocksDocument;
+}) {
   let bank;
   try {
     bank = resolveShowroomComponentBank(manifest.bankRelease);
@@ -114,11 +120,18 @@ export function CompositionShowroom({
         const definition = definitionById.get(section.component);
         const Renderer = SHOWROOM_BANK_REGISTRY[section.component];
         if (!definition || !Renderer) return null;
+        const contentBlock =
+          "contentBlockKey" in section && section.contentBlockKey
+            ? contentBlocks?.blocks.find(
+                (block) => block.key === section.contentBlockKey,
+              )
+            : undefined;
         return (
           <Renderer
             key={section.key}
             context={context}
             definition={definition}
+            contentBlock={contentBlock}
             experience={{
               motionIntensity: section.properties
                 .motion_intensity as ShowroomMotionIntensity,

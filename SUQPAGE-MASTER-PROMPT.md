@@ -163,12 +163,13 @@ normalization and privacy-enhanced embed derivation are implemented as a
 network-free contract. Authorized staff may enable a separate, default-off
 admission capability that stores only normalized provider IDs and exports
 request-scoped opaque keys; raw URLs are never stored or exported. CSP-gated
-rendering, revision-v4 persistence, and focused post-import controls remain
-planned completion work. The implemented
-checkpoint passes the standard check, production release, seven-role browser
-acceptance, container privacy/build, and operations restore gates; the feature
-specs remain `ready`, not `done`, because their broader content/provider scope
-is still open.
+rendering, revision-v4 persistence, typed content blocks, and focused
+post-import controls are implemented locally under the promoted v4/bank-1.2
+work. The implemented checkpoint passes the standard check, production release,
+eight production-browser acceptance scenarios, container privacy/build, and
+operations restore gates; the feature specs remain open because pairwise visual
+admission, remote checks, and production/data-preserving rollout evidence are
+still open.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
 implementation is additive: revision v4/content-schema v2/design-schema v2 and
@@ -887,12 +888,15 @@ remaining AI-assisted delivery sequence is recorded in
   business/meta/contact values, and allowed image keys. Product availability is
   descriptive; numeric product/option inventory is prohibited. Dynamic catalog
   counts remain bounded, not fixed by examples. Typed hero, story,
-  highlights/trust, information, and call-to-action blocks remain planned.
+  highlights/trust, information, call-to-action, and video-capable blocks are
+  implemented in revision v4/bank 1.2.
 - The checkpoint exports a sanitized request/current-snapshot brief,
   schemas, bank contract, source facts, allowed opaque asset keys, expected
   counts, and complete synthetic examples. Staff manually import returned JSON,
-  inspect provenance/completeness and an exact private preview. Re-import is the
-  normal correction path; focused compatible correction controls remain planned.
+  inspect provenance/completeness and an exact private preview. Re-import
+  remains available, and authorized staff can use focused v4 controls for token
+  systems, compatible section swaps, bounded section properties, content blocks,
+  media assignments, and catalog details on editable private drafts.
 - Media remains a separately admitted source, not AI authority. Staff label and
   approve request attachments, same-tenant managed images, new verified image
   uploads, and supported provider links before export. The brief contains only
@@ -1232,24 +1236,34 @@ remain visible blockers. If the external AI needs image understanding, staff
 manually supplies only the approved files in that external conversation.
 Manual recipe import and its focused staff workspace are implemented as a
 private checkpoint under `ADR-0005`; `FE-007`, `BE-008`, and `DEP-007` remain
-open until their typed-block, provider, focused-control, browser, and rollout
-evidence is complete. The component laboratory remains synthetic and cannot
-itself alter a tenant revision.
+open until remaining rollout evidence is complete. The component laboratory
+remains synthetic and cannot itself alter a tenant revision.
 `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007` define the promoted additive
-revision-v4 and bank-1.2 release. The strict typed-block/design-v2 contracts and
-non-default bank candidate are implemented for synthetic laboratory review.
-Old schema/bank readers remain exact; new writes do not become default until
-multi-release rendering, mobile, accessibility, provider/CSP, operations,
-publication, and rollback gates pass.
+revision-v4 and bank-1.2 release. The strict typed-block/design-v2 contracts,
+local reset default writers, focused controls, controlled provider rendering,
+and bank-1.2 runtime path are implemented. Old schema/bank readers remain
+exact; production rollout still requires remote checks and a data-preserving
+or explicitly reset-approved deployment plan.
 The separate revision-v4 domain parser is implemented: it enforces the existing
 1 MiB snapshot limit, strict catalog content, six typed content blocks, exact
-design-v2 compatibility, and an explicitly supplied reviewed bank. It does not
-change the v1-v3 reader, database writer, runtime resolver, or publication path;
-those persistence and rendering steps remain planned under the same specs.
-Schema migration 13 adds an indexed, immutable revision snapshot-version marker
-and verifies it against each stored JSON document. Existing writers still create
-v3 rows; the marker prepares additive v4 persistence without rewriting retained
-snapshots or enabling v4 creation.
+design-v2 compatibility, and an explicitly supplied reviewed bank. It remains
+additive to the v1-v3 reader while local reset-created seeds, drafts, imports,
+publication, rollback, product-upkeep baselines, and public/private rendering
+now use revision v4 and `showroom-bank@1.2.0`.
+Schema migrations 13 and 14 add the immutable revision snapshot-version marker
+and persisted business content-block storage used by bank-1.2 rendering.
+
+Current development exception: on 2026-07-25 the product owner confirmed that
+the local four-client database and seeded tenant data are not real customer data
+and do not need preservation. For this repository state, SuqPage may finish the
+v4/bank-1.2 feature through a reset-only cutover: reset-created showrooms,
+drafts, recipe imports, previews, and publications can move directly to
+revision v4, content-schema v2, design-schema v2, and `showroom-bank@1.2.0`.
+This exception preserves security, tenant isolation, media validation, inquiry
+safety, client approval, and operations publication. It does not apply to future
+production or data-important migrations; before any later major feature switch,
+ask whether the existing data must be preserved and use the careful staged
+migration/backup/rollback path when it does.
 
 ---
 

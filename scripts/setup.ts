@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
-import { catalogToRevisionSnapshot } from "../lib/revision-domain";
+import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { migrateDatabase } from "../lib/schema";
 import { curatedManifestForLegacyDesign, type LegacyShowroomDesignKey } from "../lib/showroom-manifests";
 import type {
@@ -124,6 +124,9 @@ const seededValueQuery = db.prepare(
 const retainBaseline = db.prepare(
   "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind) VALUES(?,1,?,'baseline')",
 );
+const updatePublishedComposition = db.prepare(
+  "UPDATE businesses SET design_manifest_json=?,content_blocks_json=? WHERE id=?",
+);
 for (const businessId of seeded.values()) {
   const business = db
     .prepare("SELECT * FROM businesses WHERE id=?")
@@ -152,9 +155,17 @@ for (const businessId of seeded.values()) {
     }));
   }
   const catalog: Catalog = { business, collections, categories, products };
+  const snapshot = catalogToRevisionSnapshotV4(catalog);
+  updatePublishedComposition.run(
+    JSON.stringify(snapshot.designManifest),
+    JSON.stringify(snapshot.contentBlocks),
+    businessId,
+  );
+  catalog.business.design_manifest_json = JSON.stringify(snapshot.designManifest);
+  catalog.business.content_blocks_json = JSON.stringify(snapshot.contentBlocks);
   retainBaseline.run(
     businessId,
-    JSON.stringify(catalogToRevisionSnapshot(catalog)),
+    JSON.stringify(snapshot),
   );
 }
 

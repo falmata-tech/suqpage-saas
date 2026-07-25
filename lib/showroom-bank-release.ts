@@ -8,6 +8,7 @@ import {
   type ShowroomSlot,
 } from "./showroom-composition";
 import {
+  componentBankV2AsV1,
   parseShowroomComponentBankV2,
   type ShowroomComponentDefinitionV2,
   type ShowroomContentMediaSlotDefinition,
@@ -761,9 +762,19 @@ export const SHOWROOM_BANK_1_2_COMBINATION_FLOOR =
   );
 
 export const SHOWROOM_COMPONENT_BANK = SHOWROOM_COMPONENT_BANK_1_1;
+export const SHOWROOM_COMPONENT_BANK_LATEST =
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE;
 
 const SHOWROOM_BANK_RELEASES = Object.freeze({
   [SHOWROOM_COMPONENT_BANK_1_1.release]: SHOWROOM_COMPONENT_BANK_1_1,
+  [SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release]: componentBankV2AsV1(
+    SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  ),
+});
+
+const SHOWROOM_BANK_RELEASES_V2 = Object.freeze({
+  [SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release]:
+    SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
 });
 
 export type SupportedShowroomBankRelease = keyof typeof SHOWROOM_BANK_RELEASES;
@@ -773,6 +784,15 @@ export function resolveShowroomComponentBank(release: unknown) {
     throw new Error("The showroom component-bank release is not supported.");
   }
   return SHOWROOM_BANK_RELEASES[release as SupportedShowroomBankRelease];
+}
+
+export function resolveShowroomComponentBankV2(release: unknown) {
+  if (typeof release !== "string" || !(release in SHOWROOM_BANK_RELEASES_V2)) {
+    throw new Error("The showroom component-bank release is not supported.");
+  }
+  return SHOWROOM_BANK_RELEASES_V2[
+    release as keyof typeof SHOWROOM_BANK_RELEASES_V2
+  ];
 }
 
 export function listShowroomComponentBanks() {

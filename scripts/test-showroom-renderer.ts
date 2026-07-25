@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   SHOWROOM_COMPONENT_BANK,
   SHOWROOM_COMPONENT_BANK_1_1,
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
   listShowroomComponentBanks,
   resolveShowroomComponentBank,
 } from "../lib/showroom-bank-release";
@@ -28,10 +29,13 @@ const registrySource = fs.readFileSync(
 
 assert.equal(SHOWROOM_COMPONENT_BANK, SHOWROOM_COMPONENT_BANK_1_1);
 assert.equal(resolveShowroomComponentBank("showroom-bank@1.1.0"), SHOWROOM_COMPONENT_BANK_1_1);
-assert.deepEqual(listShowroomComponentBanks(), [SHOWROOM_COMPONENT_BANK_1_1]);
-assert.throws(
-  () => resolveShowroomComponentBank("showroom-bank@1.2.0"),
-  /not supported/,
+assert.equal(
+  resolveShowroomComponentBank("showroom-bank@1.2.0").release,
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release,
+);
+assert.deepEqual(
+  listShowroomComponentBanks().map((bank) => bank.release),
+  ["showroom-bank@1.1.0", "showroom-bank@1.2.0"],
 );
 
 for (const designKey of LEGACY_SHOWROOM_DESIGN_KEYS) {

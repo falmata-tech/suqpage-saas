@@ -43,6 +43,28 @@ place would make retained previews and rollback non-reproducible.
   animation dependency or scroll listener; static fallback and
   `prefers-reduced-motion` are mandatory.
 
+## 2026-07-25 Reset-only development amendment
+
+The current local four-client dataset is seed/prototype data, not production
+customer data. The product owner has explicitly approved finishing the v4 and
+bank-1.2 work through a reset-only development cutover instead of preserving
+every staged compatibility path for the disposable local database.
+
+For this cutover only:
+
+- new seeded data, new drafts, and reset-created publications may use revision
+  v4, content-schema v2, design-schema v2, and `showroom-bank@1.2.0` directly;
+- the local/operator path may require `npm run reset` rather than migrating old
+  prototype rows into the new shape;
+- code that existed only to keep obsolete fake seed snapshots live may be
+  removed after tests prove the v4 path covers the controlled pilot workflows.
+
+This amendment does not weaken SuqPage's production migration rule. Before any
+future major feature switch where deployed/customer data may matter, operators
+and agents must explicitly confirm whether the existing data must be preserved.
+If it must be preserved, the original additive migration, backup, restore,
+rollback, and retained-reader discipline applies.
+
 ## Consequences
 
 - Retained previews, publication, and rollback stay reproducible.

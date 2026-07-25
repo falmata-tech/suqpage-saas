@@ -48,6 +48,7 @@ export function migrateDatabase(
       handle TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
       design_key TEXT NOT NULL,
+      content_blocks_json TEXT NOT NULL DEFAULT '{"schemaVersion":1,"blocks":[]}',
       tagline TEXT DEFAULT '',
       description TEXT DEFAULT '',
       logo_path TEXT DEFAULT '',
@@ -934,6 +935,25 @@ export function migrateDatabase(
         throw new Error("Revision schema-version markers do not match stored snapshots.");
       }
       db.prepare("INSERT INTO schema_migrations(version) VALUES(13)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const publishedContentBlocksApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=14")
+    .get();
+  if (!publishedContentBlocksApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(
+        db,
+        "businesses",
+        "content_blocks_json TEXT NOT NULL DEFAULT '{\"schemaVersion\":1,\"blocks\":[]}'",
+      );
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(14)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

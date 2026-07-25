@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
 import styles from "./bank.module.css";
 import type {
   BankPresentationContext,
@@ -86,6 +87,43 @@ function ProductVisual({ product }: { product: BankProductView }) {
   );
 }
 
+function mediaAsset(
+  block: BankSectionRendererProps["contentBlock"],
+  slotKey?: string,
+) {
+  const media = slotKey
+    ? block?.media.find((entry) => entry.slotKey === slotKey)
+    : block?.media[0];
+  return media?.assetKeys[0] || "";
+}
+
+function blockItems(block: BankSectionRendererProps["contentBlock"]) {
+  if (!block || !("items" in block)) return [];
+  return block.items;
+}
+
+function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"] }) {
+  const asset = mediaAsset(block, "video");
+  if (!asset) return null;
+  let src = "";
+  try {
+    src = privacyEnhancedYouTubeEmbedUrl(asset);
+  } catch {
+    return null;
+  }
+  return (
+    <div className={styles.videoFrame}>
+      <iframe
+        src={src}
+        title={block?.title || "Showroom video"}
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    </div>
+  );
+}
+
 function BrandMark({ context }: { context: BankPresentationContext }) {
   return (
     <span className={styles.brandMark}>
@@ -154,11 +192,13 @@ export function BankHeaderSection({
 export function BankHeroSection({
   context,
   definition,
+  contentBlock,
   experience,
   properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const featured = context.products.slice(0, 3);
+  const heroImage = mediaAsset(contentBlock, "hero_image") || context.business.heroImageRef;
   return (
     <SectionRoot
       slot="hero"
@@ -168,16 +208,16 @@ export function BankHeroSection({
       properties={properties}
     >
       <div className={styles.heroCopy}>
-        <span className={styles.kicker}>{context.business.tagline}</span>
-        <h2>{context.business.heroTitle}</h2>
-        <p>{context.business.heroSubtitle}</p>
+        <span className={styles.kicker}>{contentBlock?.kicker || context.business.tagline}</span>
+        <h2>{contentBlock?.title || context.business.heroTitle}</h2>
+        <p>{contentBlock?.body || context.business.heroSubtitle}</p>
         <button type="button" onClick={() => context.onCategoryChange("all")}>
           Explore products
         </button>
       </div>
       <div className={styles.heroVisual} aria-label="Featured product presentation">
-        {context.business.heroImageRef ? (
-          <img src={context.business.heroImageRef} alt="" />
+        {heroImage ? (
+          <img src={heroImage} alt="" />
         ) : (
           <div className={styles.heroTexture} aria-hidden="true" />
         )}
@@ -244,11 +284,43 @@ export function BankNavigationSection({
 export function BankContentSection({
   context,
   definition,
+  contentBlock,
   experience,
   properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  const statements = context.collections.slice(0, 3);
+  const statements = blockItems(contentBlock).length
+    ? blockItems(contentBlock).map((item) =>
+        "label" in item
+          ? { title: item.label, body: item.value }
+          : { title: item.title, body: item.body },
+      )
+    : context.collections.slice(0, 3).map((statement) => ({
+        title: statement.name,
+        body: statement.description,
+      }));
+  const storyImage = mediaAsset(contentBlock, "story_image");
+  if (contentBlock?.type === "video") {
+    return (
+      <SectionRoot
+        slot="content"
+        variant={variant}
+        label={`${definition.name} preview`}
+        experience={experience}
+        properties={properties}
+      >
+        <div className={styles.contentHeading}>
+          <span className={styles.kicker}>{contentBlock.kicker || definition.name}</span>
+          <h2>{contentBlock.title}</h2>
+          <p>{contentBlock.body}</p>
+        </div>
+        <div className={styles.contentBody}>
+          <VideoFrame block={contentBlock} />
+          {contentBlock.transcript ? <p>{contentBlock.transcript}</p> : null}
+        </div>
+      </SectionRoot>
+    );
+  }
   return (
     <SectionRoot
       slot="content"
@@ -258,18 +330,19 @@ export function BankContentSection({
       properties={properties}
     >
       <div className={styles.contentHeading}>
-        <span className={styles.kicker}>{definition.name}</span>
-        <h2>{context.business.name}</h2>
+        <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
+        <h2>{contentBlock?.title || context.business.name}</h2>
       </div>
       <div className={styles.contentBody}>
-        <p>{context.business.description}</p>
+        {storyImage ? <img className={styles.storyImage} src={storyImage} alt="" /> : null}
+        <p>{contentBlock?.body || context.business.description}</p>
         <ol>
           {statements.map((statement, index) => (
-            <li key={statement.key}>
+            <li key={`${statement.title}-${index}`}>
               <span>{String(index + 1).padStart(2, "0")}</span>
               <div>
-                <strong>{statement.name}</strong>
-                <p>{statement.description}</p>
+                <strong>{statement.title}</strong>
+                <p>{statement.body}</p>
               </div>
             </li>
           ))}
@@ -395,15 +468,20 @@ export function BankCatalogSection({
 export function BankTrustSection({
   context,
   definition,
+  contentBlock,
   experience,
   properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  const facts = [
-    context.business.description,
-    context.collections[0]?.description,
-    context.business.contactLabel,
-  ].filter((entry): entry is string => Boolean(entry));
+  const facts = blockItems(contentBlock).length
+    ? blockItems(contentBlock).map((item) =>
+        "label" in item ? `${item.label}: ${item.value}` : `${item.title}: ${item.body}`,
+      )
+    : [
+        context.business.description,
+        context.collections[0]?.description,
+        context.business.contactLabel,
+      ].filter((entry): entry is string => Boolean(entry));
   return (
     <SectionRoot
       slot="trust"
@@ -413,8 +491,9 @@ export function BankTrustSection({
       properties={properties}
     >
       <div className={styles.trustIntro}>
-        <span className={styles.kicker}>{definition.name}</span>
-        <h2>Information from {context.business.name}</h2>
+        <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
+        <h2>{contentBlock?.title || `Information from ${context.business.name}`}</h2>
+        {contentBlock?.body ? <p>{contentBlock.body}</p> : null}
       </div>
       <div className={styles.trustGrid}>
         {facts.map((fact, index) => (
@@ -464,11 +543,14 @@ const ctaCopy: Record<string, { eyebrow: string; title: string; button: string }
 export function BankCallToActionSection({
   context,
   definition,
+  contentBlock,
   experience,
   properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const copy = ctaCopy[variant] || ctaCopy.inquiry;
+  const button =
+    contentBlock?.type === "call_to_action" ? contentBlock.actionLabel : copy.button;
   return (
     <SectionRoot
       slot="callToAction"
@@ -478,12 +560,12 @@ export function BankCallToActionSection({
       properties={properties}
     >
       <div>
-        <span className={styles.kicker}>{copy.eyebrow}</span>
-        <h2>{copy.title}</h2>
-        <p>{context.business.contactLabel}</p>
+        <span className={styles.kicker}>{contentBlock?.kicker || copy.eyebrow}</span>
+        <h2>{contentBlock?.title || copy.title}</h2>
+        <p>{contentBlock?.body || context.business.contactLabel}</p>
       </div>
       <button type="button" onClick={context.onOpenCart}>
-        {copy.button}
+        {button}
       </button>
     </SectionRoot>
   );

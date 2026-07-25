@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
+import { parseShowroomDesignProposalV2 } from "@/lib/showroom-composition-v2";
+import { parseShowroomContentBlocks } from "@/lib/showroom-content-blocks";
 import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
@@ -234,18 +237,35 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     registry[catalog.business.design_key as keyof typeof registry];
   const LegacyDesign = legacyDesign;
   let compositionManifest = null;
+  let compositionContentBlocks = undefined;
   if (catalog.business.design_key === "composition") {
     try {
-      compositionManifest = parsePublishedDesignManifest(
-        catalog.business.design_manifest_json,
-      );
+      const manifestInput = JSON.parse(catalog.business.design_manifest_json);
+      if (manifestInput?.schemaVersion === 2) {
+        compositionContentBlocks = parseShowroomContentBlocks(
+          JSON.parse(catalog.business.content_blocks_json),
+          "managed",
+        );
+        compositionManifest = parseShowroomDesignProposalV2(
+          manifestInput,
+          SHOWROOM_COMPONENT_BANK_LATEST,
+          compositionContentBlocks,
+          "managed",
+        );
+      } else {
+        compositionManifest = parsePublishedDesignManifest(manifestInput);
+      }
     } catch {}
   }
 
   return (
     <div className={`runtime-root theme-${catalog.business.design_key}`}>
       {compositionManifest ? (
-        <CompositionShowroom {...designProps} manifest={compositionManifest} />
+        <CompositionShowroom
+          {...designProps}
+          manifest={compositionManifest}
+          contentBlocks={compositionContentBlocks}
+        />
       ) : LegacyDesign ? (
         // Temporary read-only recovery path for pre-migration database backups.
         <LegacyDesign {...designProps} />

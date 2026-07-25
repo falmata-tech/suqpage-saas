@@ -48,10 +48,10 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 - Evidence: commits `ef00c04` and `c67466d`; standard check, production release,
   7/7 browser acceptance, container privacy/build, and operations restore gates
   passed on 2026-07-24.
-- Remaining, not launch-blocking for the image-based pilot: typed section-content
-  blocks, focused post-import controls, and controlled YouTube support. These
-  require an explicitly promoted revision/component-bank release rather than an
-  unscoped pre-launch expansion.
+- Promoted follow-up delivered locally on 2026-07-25: typed section-content
+  blocks, focused v4 correction controls, controlled YouTube rendering, and
+  CSP/browser proof now live under the revision-v4/bank-1.2 reset-only
+  development cutover.
 
 ## Now — make the controlled pilot trustworthy
 
@@ -63,11 +63,21 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   without changing retained bank-1.1 showrooms.
 - Controlling specs and decision: `FE-007`, `BE-008`, `DEP-007`, `FE-009`,
   `BE-010`, `DEP-009`, and `ADR-0007`.
-- Sequence: reproduce the recorded studio deep-link defect; land dual readers
-  and release resolver; add v4 typed content; add controlled provider/focused
-  commands; admit bank 1.2; migrate only new drafts after full gates.
+- Current delivery mode: the present local database and four seeded tenants are
+  disposable prototype data. The product owner approved a reset-only development
+  cutover on 2026-07-25 so v4 and bank 1.2 can become the default through
+  `npm run reset` instead of carrying every compatibility layer needed for a
+  production data-preserving migration.
+- Sequence: document the reset-only boundary; make new seeds, drafts, recipe
+  imports, previews, and publications use v4 typed content and bank 1.2; add
+  controlled provider/focused commands; keep remaining rollout evidence focused
+  on pairwise/320-pixel browser coverage, restore operations, remote checks, and
+  production data-preserving or reset-approved deployment.
 - Non-goals: arbitrary tenant code, copied trade dress, animation dependencies,
   autoplay/parallax, checkout, pricing, stock, or weakening client approval.
+- Future production/data-important feature switches must first ask whether the
+  existing data must be preserved. If yes, use the staged migration and rollback
+  path rather than this reset-only shortcut.
 
 ### Reproducible delivery and repository hygiene
 

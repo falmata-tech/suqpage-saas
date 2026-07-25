@@ -4,7 +4,7 @@ title: Revision v4 typed content and multi-release bank contract
 status: in_progress
 related: [BE-004, BE-005, BE-006, BE-007, BE-008, FE-007, FE-009, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
 owners: [backend, security, product]
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 change_level: L3
 ---
 
@@ -20,6 +20,9 @@ additive v4 domain boundary that preserves all retained releases.
 
 - Revision v4 with content-schema v2 and design-schema v2; v1-v3 remain
   read/recovery inputs and are never rewritten implicitly.
+- For the current disposable local seed database, reset-created rows may move
+  directly to v4/bank 1.2. Future production or data-important cutovers must ask
+  whether retained data matters and use the staged additive path when it does.
 - Strict discriminated blocks: `hero`, `story`, `highlights`, `information`,
   `call_to_action`, and `video`; at most 24 blocks with stable unique keys.
 - Bounded block copy, ordered items, accessible labels, and named media-slot
@@ -108,7 +111,9 @@ Scenario: Unauthorized focused command is called directly
 ## Rollout and rollback
 
 DEP-009 controls migrations, default writers, CSP, and rollback. V4 writes stay
-disabled until bank 1.2 and provider/browser gates pass.
+disabled until bank 1.2 and provider/browser gates pass, except for the
+explicit reset-only development cutover approved for the current disposable
+seed data.
 
 ## Readiness checklist
 
@@ -127,11 +132,12 @@ bounded copy, items, media, keys, and unsafe-input denial. An additive design-v2
 parser wraps the unchanged v1 validator and enforces exact one-time compatible
 block assignment and named content-media slot counts using bank-v2 compatibility
 metadata. Portable bank/design-v2 schemas and a frozen 67-component bank-1.2
-candidate are available to the synthetic laboratory only. Revision-v4 storage,
-typed rendering, runtime bank-1.2 admission, provider CSP rendering, and focused
-commands remain. The provider boundary now accepts only exact
-HTTPS watch/share hosts, rejects playlists/shorts/embed markup and lookalikes,
-Authorized private-draft admission is default-off, reuses request authorization,
+candidate are available to the synthetic laboratory. Revision-v4 storage,
+typed rendering, local reset-default bank-1.2 admission, provider CSP rendering,
+and focused private-draft controls are implemented. The provider boundary now
+accepts only exact HTTPS watch/share hosts and rejects playlists, shorts, embed
+markup, and lookalikes. Authorized private-draft admission is default-off,
+reuses request authorization,
 stores only the normalized ID behind a random opaque key, deduplicates per
 request, and exports neither the raw URL nor provider ID.
 The isolated revision-v4 domain parser now composes strict catalog content,

@@ -1,10 +1,12 @@
 import crypto from "node:crypto";
+import type { RevisionSnapshotV3 } from "./revision-domain";
 import {
-  requireRevisionSnapshotV3,
-  type RevisionSnapshotV3,
-} from "./revision-domain";
-import { SHOWROOM_COMPONENT_BANK } from "./showroom-bank-release";
-import { parseShowroomDesignProposal } from "./showroom-composition";
+  requireRevisionSnapshotV4,
+  type RevisionSnapshotV4,
+} from "./revision-v4-domain";
+import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
+import { parseShowroomDesignProposalV2 } from "./showroom-composition-v2";
+import type { ShowroomContentBlocksDocument } from "./showroom-content-blocks";
 
 export const SHOWROOM_RECIPE_SCHEMA_VERSION = 1;
 export const SHOWROOM_CONTENT_SCHEMA_VERSION = 1;
@@ -48,8 +50,9 @@ export type ShowroomRecipeEnvelope = {
     collections: RevisionSnapshotV3["collections"];
     categories: RevisionSnapshotV3["categories"];
     products: RevisionSnapshotV3["products"];
+    contentBlocks: ShowroomContentBlocksDocument;
   };
-  design: RevisionSnapshotV3["designManifest"];
+  design: RevisionSnapshotV4["designManifest"];
   summary: string;
   rationale: string;
   questions: string[];
@@ -64,7 +67,7 @@ export type ShowroomRecipeEnvelope = {
 
 export type RecipeValidationContext = {
   baseContentVersion: number;
-  baseSnapshot: RevisionSnapshotV3;
+  baseSnapshot: RevisionSnapshotV4;
   allowedAssetKeys: ReadonlySet<string>;
   allowedSourceKeys: ReadonlySet<string>;
   assetDetails: ReadonlyMap<
@@ -82,7 +85,7 @@ export type RecipeDifference = {
 
 export type ValidatedShowroomRecipe = {
   recipe: ShowroomRecipeEnvelope;
-  snapshot: RevisionSnapshotV3;
+  snapshot: RevisionSnapshotV4;
   importHash: string;
   difference: RecipeDifference;
   duplicate?: boolean;
@@ -209,6 +212,7 @@ function parseEnvelope(input: unknown): ShowroomRecipeEnvelope {
     "collections",
     "categories",
     "products",
+    "contentBlocks",
   ]);
   if (content.schemaVersion !== SHOWROOM_CONTENT_SCHEMA_VERSION) {
     issue("content", "$.content.schemaVersion", "The content schema version is not supported.");
@@ -251,8 +255,9 @@ function parseEnvelope(input: unknown): ShowroomRecipeEnvelope {
       collections: content.collections as RevisionSnapshotV3["collections"],
       categories: content.categories as RevisionSnapshotV3["categories"],
       products: content.products as RevisionSnapshotV3["products"],
+      contentBlocks: content.contentBlocks as ShowroomContentBlocksDocument,
     },
-    design: raw.design as RevisionSnapshotV3["designManifest"],
+    design: raw.design as RevisionSnapshotV4["designManifest"],
     summary: text(raw.summary, "$.summary", 500, true),
     rationale: text(raw.rationale, "$.rationale", 2000),
     questions: textList(raw.questions, "$.questions", 20),
@@ -302,7 +307,7 @@ function requireDeclaredRemovals(
   }
 }
 
-function requiredFactPaths(snapshot: RevisionSnapshotV3) {
+function requiredFactPaths(snapshot: RevisionSnapshotV4) {
   const paths = ["$.content.business.name"];
   for (const field of ["contactEmail", "whatsapp", "telegram", "tiktok"] as const) {
     if (snapshot.business[field]) paths.push(`$.content.business.${field}`);
@@ -347,7 +352,7 @@ function contentPathExists(
 }
 
 function mediaSourceValue(
-  snapshot: RevisionSnapshotV3,
+  snapshot: RevisionSnapshotV4,
   source: string,
 ) {
   if (source === "business.logo") return snapshot.business.logoRef;
@@ -382,11 +387,13 @@ export function validateShowroomRecipe(
       409,
     );
   }
-  let design: RevisionSnapshotV3["designManifest"];
+  let design: RevisionSnapshotV4["designManifest"];
   try {
-    design = parseShowroomDesignProposal(
+    design = parseShowroomDesignProposalV2(
       recipe.design,
-      SHOWROOM_COMPONENT_BANK,
+      SHOWROOM_COMPONENT_BANK_LATEST,
+      recipe.content.contentBlocks,
+      "managed",
     );
   } catch (error) {
     issue(
@@ -395,16 +402,17 @@ export function validateShowroomRecipe(
       error instanceof Error ? error.message : "The design proposal is invalid.",
     );
   }
-  let snapshot: RevisionSnapshotV3;
+  let snapshot: RevisionSnapshotV4;
   try {
-    snapshot = requireRevisionSnapshotV3({
-      schemaVersion: 3,
+    snapshot = requireRevisionSnapshotV4({
+      schemaVersion: 4,
       business: recipe.content.business,
       collections: recipe.content.collections,
       categories: recipe.content.categories,
       products: recipe.content.products,
+      contentBlocks: recipe.content.contentBlocks,
       designManifest: design,
-    });
+    }, SHOWROOM_COMPONENT_BANK_LATEST);
   } catch (error) {
     issue(
       "content",
@@ -417,6 +425,9 @@ export function validateShowroomRecipe(
     snapshot.business.heroImageRef,
     snapshot.business.faviconRef,
     ...snapshot.products.map((product) => product.imageRef),
+    ...snapshot.contentBlocks.blocks.flatMap((block) =>
+      block.media.flatMap((media) => media.assetKeys),
+    ),
   ].filter(Boolean);
   const unknownAsset = imageRefs.find(
     (assetKey) => !context.allowedAssetKeys.has(assetKey),
@@ -429,7 +440,7 @@ export function validateShowroomRecipe(
     );
   }
   const componentById = new Map(
-    SHOWROOM_COMPONENT_BANK.components.map((component) => [
+    SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
       component.id,
       component,
     ]),

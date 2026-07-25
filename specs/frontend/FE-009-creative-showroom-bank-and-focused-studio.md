@@ -4,7 +4,7 @@ title: Creative showroom bank and focused v4 studio
 status: in_progress
 related: [FE-004, FE-005, FE-006, FE-007, BE-005, BE-006, BE-007, BE-008, BE-010, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 change_level: L3
 ---
 
@@ -125,6 +125,12 @@ DEP-009 enables bank 1.2 only for v4 private drafts after old-release parity and
 mobile gates pass. Rollback disables v4 creation/focused controls and keeps bank
 1.1 plus retained v1-v3 revisions readable.
 
+For the current disposable seed dataset, the product owner approved a reset-only
+development cutover. In that mode, reset-created showrooms and drafts may use
+bank 1.2 by default after local gates pass. This does not authorize a
+data-preserving production migration or future shortcut without first confirming
+whether existing data must be retained.
+
 ## Readiness checklist
 
 - [x] Scope and non-goals agreed
@@ -141,13 +147,15 @@ bank-1.2 candidate with 67 static registry-backed components, 18 scoped token
 systems, 98,280 required-slot combinations, and bounded reveal/interaction
 properties. New variants cover every planned industry direction plus a
 controlled-film placeholder contract. Static bank/experience checks, the
-complete release, all seven production-browser scenarios (including 390-pixel
-overflow, touch targets, and reduced motion), and the container privacy/build
-gate pass. Typed v4 rendering, focused controls, controlled provider rendering,
-320-pixel/pairwise visual admission, operations restore, and remote rollout
-gates remain; the candidate is intentionally absent from the runtime resolver.
+complete release, all eight production-browser scenarios (including 390-pixel
+overflow, touch targets, reduced motion, focused publication, and controlled
+provider-video CSP), and the container privacy/build gate pass. Typed v4
+rendering, local reset-default bank 1.2 writes, focused private-draft controls,
+and controlled provider rendering are implemented. 320-pixel/pairwise visual
+admission, operations restore evidence, remote checks, and production rollout
+gates remain.
 
 The existing private recipe studio also has a controlled-video admission form
 only when the separate provider-admission capability is enabled. It accepts no
-iframe or arbitrary provider input and does not imply that video rendering is
-enabled.
+iframe or arbitrary provider input; approved YouTube IDs render through the
+privacy-enhanced nocookie iframe path with a narrow CSP frame allowlist.

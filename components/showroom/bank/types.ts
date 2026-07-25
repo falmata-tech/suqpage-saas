@@ -4,6 +4,7 @@ import type {
   ShowroomPrimitive,
   ShowroomSlot,
 } from "@/lib/showroom-composition";
+import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomExperienceSettings } from "@/lib/showroom-experience";
 
 export type BankAvailability =
@@ -67,6 +68,7 @@ export type BankTokenStyle = {
 export type BankSectionRendererProps = {
   context: BankPresentationContext;
   definition: ShowroomComponentDefinition;
+  contentBlock?: ShowroomContentBlock;
   experience: ShowroomExperienceSettings;
   properties?: Record<string, ShowroomPrimitive>;
 };

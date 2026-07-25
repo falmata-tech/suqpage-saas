@@ -283,6 +283,7 @@ export function parseShowroomDesignProposalV2(
   input: unknown,
   bankInput: unknown,
   contentInput: unknown,
+  contentMode: "opaque" | "managed" = "opaque",
 ): ShowroomDesignProposalV2 {
   const raw = parsedInput(input, MAX_SHOWROOM_PROPOSAL_BYTES);
   if (raw.schemaVersion !== SHOWROOM_DESIGN_SCHEMA_VERSION_V2) {
@@ -292,7 +293,7 @@ export function parseShowroomDesignProposalV2(
     return fail("Proposal sections must be a list.", "invalid_list");
   }
   const bank = parseShowroomComponentBankV2(bankInput);
-  const content = parseShowroomContentBlocks(contentInput);
+  const content = parseShowroomContentBlocks(contentInput, contentMode);
   const contentKeys = new Map(content.blocks.map((block) => [block.key, block]));
   const requestedContentKeys: Array<string | null> = raw.sections.map(
     (entry, index) => {

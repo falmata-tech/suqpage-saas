@@ -79,6 +79,7 @@ export function parseRevisionSnapshotV4(
       raw.designManifest,
       bank,
       contentBlocks,
+      "managed",
     );
   } catch (error) {
     throw new RevisionError(

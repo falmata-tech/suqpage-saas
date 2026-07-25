@@ -19,6 +19,14 @@ const passwordFor = (email: string) => {
   if (!line) throw new Error(`No seeded credential for ${email}`);
   return line.split("|").at(-1)!.trim();
 };
+const installControlledVideoFixture = (handle = "alhayabrand") =>
+  JSON.parse(
+    execFileSync(
+      process.execPath,
+      [path.join(process.cwd(), "scripts/acceptance-video-fixture.mjs"), process.env.SUQPAGE_TEST_DB!, handle],
+      { encoding: "utf8" },
+    ),
+  ) as { handle: string; updated: boolean };
 function monitor(page: Page) {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(`page: ${error.message}`));
@@ -97,7 +105,7 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
-    await expect(page.locator('[data-bank-release="showroom-bank@1.1.0"]')).toBeVisible();
+    await expect(page.locator('[data-bank-release="showroom-bank@1.2.0"]')).toBeVisible();
     await expect(page.locator(".sr-card").first()).toBeVisible();
     compositionSignatures.add(
       await page.locator("[data-token-pack]").getAttribute("data-token-pack") || "",
@@ -529,4 +537,21 @@ test("API authorization, validation, health, and security headers", async ({ req
   const home = await request.get("/");
   expect(home.headers()["x-frame-options"]).toBe("DENY");
   expect(home.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
+  expect(home.headers()["content-security-policy"]).toContain("frame-src 'self' https://www.youtube-nocookie.com");
+  expect(home.headers()["content-security-policy"]).not.toContain("youtube.com ");
+});
+
+test("controlled provider video uses narrow CSP and privacy-enhanced browser embed", async ({ page, request }) => {
+  expect(installControlledVideoFixture()).toEqual({ handle: "alhayabrand", updated: true });
+  const response = await request.get("/@alhayabrand");
+  const csp = response.headers()["content-security-policy"];
+  expect(csp).toContain("frame-src 'self' https://www.youtube-nocookie.com");
+  expect(csp).not.toContain("https://www.youtube.com");
+  await page.goto("/@alhayabrand");
+  const frame = page.locator('iframe[title="Approved process film"]');
+  await expect(frame).toBeVisible();
+  await expect(frame).toHaveAttribute("loading", "lazy");
+  await expect(frame).toHaveAttribute("allow", /encrypted-media/);
+  await expect(frame).toHaveAttribute("src", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  expect(await page.locator('iframe[src*="youtube.com/embed"]').count()).toBe(0);
 });

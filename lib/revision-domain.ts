@@ -567,13 +567,21 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
   }) as RevisionSnapshotV3;
 }
 
+type RevisionSnapshotForCatalog =
+  | RevisionSnapshot
+  | (Omit<RevisionSnapshotV3, "schemaVersion" | "designManifest"> & {
+      schemaVersion: 4;
+      designManifest: unknown;
+      contentBlocks?: unknown;
+    });
+
 export function snapshotToCatalog(
-  snapshotInput: RevisionSnapshot,
+  snapshotInput: RevisionSnapshotForCatalog,
   business: Business,
   resolveImage = (value: string) => value,
 ): Catalog {
   const snapshot =
-    snapshotInput.schemaVersion === 3
+    snapshotInput.schemaVersion === 3 || snapshotInput.schemaVersion === 4
       ? snapshotInput
       : upgradeRevisionSnapshotToV3(snapshotInput);
   const collectionIds = new Map(
@@ -644,6 +652,10 @@ export function snapshotToCatalog(
       name: snapshot.business.name,
       design_key: "composition",
       design_manifest_json: JSON.stringify(snapshot.designManifest),
+      content_blocks_json:
+        snapshot.schemaVersion === 4
+          ? JSON.stringify(snapshot.contentBlocks)
+          : business.content_blocks_json,
       tagline: snapshot.business.tagline,
       description: snapshot.business.description,
       logo_path: resolveImage(snapshot.business.logoRef),
