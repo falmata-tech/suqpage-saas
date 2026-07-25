@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
+import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import "./showrooms.css";
 
 type CartLine = { product: Product; quantity: number; options: Record<string, string> };
@@ -73,8 +75,8 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
   }
 }
 
-export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
-  const storageKey = `suqpage-cart:${catalog.business.handle}`;
+export default function ShowroomApp({ catalog, previewMode = false }: { catalog: Catalog; previewMode?: boolean }) {
+  const storageKey = `suqpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -101,6 +103,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
   );
 
   useEffect(() => {
+    if(previewMode){setCart([]);return;}
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as Array<{
         productId: number;
@@ -114,7 +117,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
             ? [
                 {
                   product,
-                  quantity: Math.max(1, Math.min(Number(line.quantity) || 1, Math.max(1, product.stock_count))),
+                  quantity: Math.max(1, Math.min(Number(line.quantity) || 1, 20)),
                   options: line.options || {},
                 },
               ]
@@ -122,9 +125,10 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
         }),
       );
     } catch {}
-  }, [storageKey, catalog.products]);
+  }, [storageKey, catalog.products, previewMode]);
 
   useEffect(() => {
+    if(previewMode)return;
     try {
       localStorage.setItem(
         storageKey,
@@ -137,7 +141,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
         ),
       );
     } catch {}
-  }, [cart, storageKey]);
+  }, [cart, storageKey, previewMode]);
 
   useEffect(() => {
     if (!selected) return;
@@ -173,7 +177,8 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
     setSelected(product);
   };
   const add = (product: Product, options: Record<string, string> = {}) => {
-    if (!["available", "limited"].includes(product.availability) || product.stock_count < 1) {
+    if(previewMode){setSelected(null);show("Private preview only — customer inquiries remain on the live showroom.");return;}
+    if (!["available", "limited"].includes(product.availability)) {
       show("This product is not currently available.");
       return;
     }
@@ -185,7 +190,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
       if (index < 0) return [...current, { product, quantity: 1, options }];
       return current.map((line, lineIndex) =>
         lineIndex === index
-          ? { ...line, quantity: Math.min(product.stock_count, 20, line.quantity + 1) }
+          ? { ...line, quantity: Math.min(20, line.quantity + 1) }
           : line,
       );
     });
@@ -197,7 +202,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
       current
         .map((line, lineIndex) =>
           lineIndex === index
-            ? { ...line, quantity: Math.min(line.product.stock_count, 20, line.quantity + delta) }
+            ? { ...line, quantity: Math.min(20, line.quantity + delta) }
             : line,
         )
         .filter((line) => line.quantity > 0),
@@ -214,6 +219,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
     addProduct: (product) => (product.option_groups?.length ? openProduct(product) : add(product)),
     cartCount: cart.reduce((count, line) => count + line.quantity, 0),
     openCart: () => {
+      if(previewMode){show("Private preview only — the inquiry cart is disabled.");return;}
       drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setDrawer(true);
     },
@@ -224,11 +230,28 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
     novatech: NovaTechDesign,
     homevibe: HomeVibeDesign,
   } as const;
-  const Design = registry[catalog.business.design_key as keyof typeof registry] || NovaTechDesign;
+  const legacyDesign =
+    registry[catalog.business.design_key as keyof typeof registry];
+  const LegacyDesign = legacyDesign;
+  let compositionManifest = null;
+  if (catalog.business.design_key === "composition") {
+    try {
+      compositionManifest = parsePublishedDesignManifest(
+        catalog.business.design_manifest_json,
+      );
+    } catch {}
+  }
 
   return (
     <div className={`runtime-root theme-${catalog.business.design_key}`}>
-      <Design {...designProps} />
+      {compositionManifest ? (
+        <CompositionShowroom {...designProps} manifest={compositionManifest} />
+      ) : LegacyDesign ? (
+        // Temporary read-only recovery path for pre-migration database backups.
+        <LegacyDesign {...designProps} />
+      ) : (
+        <InvalidComposition />
+      )}
       {selected && (
         <div
           ref={productDialog}
@@ -248,10 +271,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
                 <span className="eyebrow">{selected.eyebrow}</span>
                 <h2 style={{ fontSize: "2.5rem", letterSpacing: "-.05em" }}>{selected.name}</h2>
                 <p style={{ lineHeight: 1.7 }}>{selected.description}</p>
-                <p>
-                  <strong>Availability:</strong> {statusText[selected.availability]} · <strong>Count:</strong>{" "}
-                  {selected.stock_count}
-                </p>
+                <p><strong>Availability:</strong> {statusText[selected.availability]}</p>
                 {selected.option_groups?.map((group) => (
                   <label className="option-set" key={group.id}>
                     <strong>{group.name}</strong>
@@ -269,7 +289,7 @@ export default function ShowroomApp({ catalog }: { catalog: Catalog }) {
                 ))}
                 <button
                   className="sr-cart-trigger"
-                  disabled={!["available", "limited"].includes(selected.availability) || selected.stock_count < 1}
+                  disabled={!["available", "limited"].includes(selected.availability)}
                   onClick={() => add(selected, selections)}
                 >
                   Add selected item

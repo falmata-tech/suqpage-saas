@@ -2,9 +2,9 @@
 id: FE-001
 title: Public showroom discovery and inquiry experience
 status: done
-related: [BE-001, DEP-001]
+related: [BE-001, DEP-001, FE-006, FE-008]
 owners: [product, frontend]
-last_updated: 2026-07-20
+last_updated: 2026-07-24
 change_level: L2
 ---
 
@@ -18,7 +18,7 @@ social app successfully opening.
 
 ## Scope and non-goals
 
-Includes intentional directory discovery, four custom renderers, product search,
+Includes intentional directory discovery, four distinct composed showrooms, product search,
 option selection, cart persistence, minimal contact capture, saved inquiry, and
 social/native/manual fallback. Excludes payment, checkout, pricing guarantees,
 variant-combination inventory, and automatic fulfillment.

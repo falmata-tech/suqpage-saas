@@ -1,2 +1,56 @@
-import DashboardShell from "@/components/DashboardShell";import ProductForm from "@/components/ProductForm";import {createProductAction} from "@/app/actions";import {requireUser} from "@/lib/auth";import {resolveBusiness} from "@/lib/dashboard";import {getCatalogByBusinessId} from "@/lib/db";
-export const dynamic="force-dynamic";export default async function NewProduct({searchParams}:{searchParams:Promise<{business?:string;error?:string}>}){const user=await requireUser();const p=await searchParams;const business=resolveBusiness(user,p.business);if(!business)return null;const catalog=getCatalogByBusinessId(business.id,true)!;return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><h1>Add product</h1><p>The custom showroom will render this data automatically.</p></div></div>{p.error&&<p className="error">{p.error}</p>}<ProductForm catalog={catalog} action={createProductAction} businessId={business.id}/></DashboardShell>}
+import crypto from "node:crypto";
+import Link from "next/link";
+import DashboardShell from "@/components/DashboardShell";
+import ProductForm from "@/components/ProductForm";
+import { basicProductUpkeepAction } from "@/app/actions";
+import { requireUser } from "@/lib/auth";
+import { resolveProductBusiness } from "@/lib/dashboard";
+import { getCatalogByBusinessId } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+export default async function NewProduct({
+  searchParams,
+}: {
+  searchParams: Promise<{ business?: string; error?: string }>;
+}) {
+  const user = await requireUser();
+  const query = await searchParams;
+  const business = resolveProductBusiness(user, query.business);
+  if (!business) return null;
+  const catalog = getCatalogByBusinessId(business.id, true)!;
+  return (
+    <DashboardShell user={user} business={business}>
+      <div className="navigation-trail">
+        <nav aria-label="Breadcrumb">
+          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+          <span aria-hidden="true">/</span>
+          <Link href={`/dashboard/products?business=${business.id}`}>
+            My products
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span>Add product</span>
+        </nav>
+      </div>
+      <div className="dashboard-head">
+        <div>
+          <p className="eyebrow">Basic upkeep</p>
+          <h1>Add a product</h1>
+          <p>
+            Add the customer-facing essentials. The existing showroom design
+            handles presentation automatically.
+          </p>
+        </div>
+      </div>
+      {query.error ? <p className="error">{query.error}</p> : null}
+      <ProductForm
+        catalog={catalog}
+        action={basicProductUpkeepAction}
+        businessId={business.id}
+        contentVersion={business.content_version}
+        idempotencyKey={crypto.randomUUID()}
+        staffMode={user.access_role !== "client"}
+      />
+    </DashboardShell>
+  );
+}

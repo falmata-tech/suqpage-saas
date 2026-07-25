@@ -1,6 +1,8 @@
 # Dependencies and Next.js output
 node_modules/
 .next/
+.next-acceptance/
+.acceptance-tsconfig-*.json
 out/
 next-env.d.ts
 

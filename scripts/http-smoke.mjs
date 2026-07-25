@@ -149,6 +149,26 @@ try {
     401,
   );
 
+  const requestPayload = {
+    contactName: 'HTTP Prospect', contactValue: 'http-prospect@example.test', businessName: 'HTTP Market',
+    requestText: 'I am interested in a managed SuqPage showroom.', idempotencyKey: 'http-request-key-0001', consent: true,
+  };
+  const requestCreated = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
+  assert.equal(requestCreated.status, 201);
+  assert.match((await requestCreated.json()).reference, /^REQ-[A-F0-9]{12}$/);
+  const requestDuplicate = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
+  assert.equal(requestDuplicate.status, 200);
+  assert.equal((await requestDuplicate.json()).duplicate, true);
+  const publicUpload = new FormData();
+  publicUpload.set('contactName', 'Upload Attempt');
+  publicUpload.set('images', new File([fs.readFileSync(path.join(process.cwd(), 'public/uploads/seed/suqpage/icon.png'))], 'blocked.png', { type: 'image/png' }));
+  assert.equal((await fetch(`${baseUrl}/api/requests`, { method: 'POST', body: publicUpload })).status, 415);
+  const requestDb = new DatabaseSync(env.SUQPAGE_DB_PATH, { readOnly: true });
+  assert.equal(requestDb.prepare("SELECT COUNT(*) count FROM request_attachments a JOIN service_requests r ON r.id=a.request_id WHERE r.submitter_kind='public'").get().count, 0);
+  requestDb.close();
+  const crossOrigin = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { origin: 'https://attacker.example', 'x-forwarded-host': 'attacker.example', 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
+  assert.equal(crossOrigin.status, 403);
+
   const forged = await fetch(`${baseUrl}/api/inquiries`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

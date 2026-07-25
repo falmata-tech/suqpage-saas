@@ -12,7 +12,8 @@
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.
 - [ ] Confirm only approved businesses are `active`; keep unfinished showrooms `draft`.
-- [ ] Activate FormSubmit delivery to `falmata.dawano@gmail.com`.
+- [ ] Submit a public expression of interest and confirm an administrator can
+      review it with zero attachments; confirm public multipart upload is rejected.
 - [ ] Configure HTTPS and proxy forwarding.
 - [ ] Create a backup and perform a test restore.
 - [ ] Confirm `/api/health` is monitored.
@@ -23,6 +24,7 @@
 ## Pilot operations
 
 - [ ] Review new inquiries daily.
+- [ ] Review new onboarding and change requests daily.
 - [ ] Back up the database and media at least daily.
 - [ ] Monitor failed login and abuse entries in `audit_logs`.
 - [ ] Keep the application to one running instance.

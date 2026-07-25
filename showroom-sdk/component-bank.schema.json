@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/component-bank.schema.json",
+  "title": "SuqPage showroom component-bank release",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "release",
+    "components",
+    "tokenPacks",
+    "requiredSlots",
+    "requiredCapabilities"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "release": {
+      "type": "string",
+      "pattern": "^showroom-bank@[1-9][0-9]*(\\.[0-9]+){0,2}$",
+      "maxLength": 80
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "tokenPacks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/tokenPack"
+      }
+    },
+    "requiredSlots": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/slot"
+      }
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "const": "product_detail"
+          }
+        },
+        {
+          "contains": {
+            "const": "add_to_inquiry"
+          }
+        },
+        {
+          "contains": {
+            "const": "inquiry_cart_trigger"
+          }
+        }
+      ],
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "slot": {
+      "enum": [
+        "header",
+        "hero",
+        "navigation",
+        "content",
+        "catalog",
+        "trust",
+        "call_to_action",
+        "footer"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "catalog_search",
+        "category_filter",
+        "product_detail",
+        "add_to_inquiry",
+        "inquiry_cart_trigger"
+      ]
+    },
+    "bindingSource": {
+      "enum": [
+        "business.name",
+        "business.tagline",
+        "business.description",
+        "business.logo",
+        "business.hero_title",
+        "business.hero_subtitle",
+        "business.hero_image",
+        "business.contact_methods",
+        "catalog.collections",
+        "catalog.categories",
+        "catalog.products",
+        "catalog.featured_products"
+      ]
+    },
+    "tokenPack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "property": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "label",
+            "type",
+            "required",
+            "values"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/identifier"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "type": {
+              "const": "enum"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "label",
+            "type",
+            "required"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/identifier"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "type": {
+              "const": "boolean"
+            },
+            "required": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "label",
+            "type",
+            "required",
+            "min",
+            "max"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/identifier"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "type": {
+              "const": "integer"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "min": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            "max": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000
+            }
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "required",
+        "allowedSources"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/identifier"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "allowedSources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/bindingSource"
+          }
+        }
+      }
+    },
+    "mediaSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "source",
+        "required",
+        "acceptedKinds",
+        "minItems",
+        "maxItems",
+        "aspectRatio"
+      ],
+      "properties": {
+        "key": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "source": { "$ref": "#/$defs/bindingSource" },
+        "required": { "type": "boolean" },
+        "acceptedKinds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["image", "video"] }
+        },
+        "minItems": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "aspectRatio": {
+          "enum": ["any", "landscape", "portrait", "square"]
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "slot",
+        "codeReference",
+        "repeatable",
+        "providesCapabilities",
+        "incompatibleWith",
+        "properties",
+        "bindings",
+        "mediaSlots"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*@[1-9][0-9]*$",
+          "maxLength": 100
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "slot": {
+          "$ref": "#/$defs/slot"
+        },
+        "codeReference": {
+          "type": "string",
+          "pattern": "^components/showroom/bank/[A-Za-z0-9._/-]+\\.(?:ts|tsx)$",
+          "maxLength": 200
+        },
+        "repeatable": {
+          "type": "boolean"
+        },
+        "providesCapabilities": {
+          "type": "array",
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/capability"
+          }
+        },
+        "incompatibleWith": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "properties": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "$ref": "#/$defs/property"
+          }
+        },
+        "bindings": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/binding"
+          }
+        },
+        "mediaSlots": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/mediaSlot"
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,9 +4,15 @@ import path from "node:path";
 import sharp from "sharp";
 import { mediaRoot } from "./config";
 
-const MAX_BYTES = 5 * 1024 * 1024;
-const MAX_PIXELS = 20_000_000;
-type VerifiedImage = { ext: "jpg" | "png" | "webp"; mime: string; width?: number; height?: number };
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_IMAGE_PIXELS = 20_000_000;
+export type VerifiedImage = { ext: "jpg" | "png" | "webp"; mime: "image/jpeg" | "image/png" | "image/webp"; width?: number; height?: number };
+export type PreparedImage = { buffer: Buffer; ext: VerifiedImage["ext"]; mime: VerifiedImage["mime"]; width: number; height: number };
+export type StagedImage = {
+  imageRef: string;
+  digest: string;
+  discard: () => void;
+};
 
 function jpegDimensions(buffer: Buffer) {
   let offset = 2;
@@ -48,19 +54,19 @@ export function verifyImage(buffer: Buffer, claimedType: string): VerifiedImage 
   }
   if (!verified) throw new Error("Only valid JPEG, PNG, and WebP images are accepted.");
   if (claimedType && claimedType !== verified.mime) throw new Error("The uploaded file type does not match its contents.");
-  if (verified.width && verified.height && verified.width * verified.height > MAX_PIXELS) throw new Error("Image dimensions are too large.");
+  if (verified.width && verified.height && verified.width * verified.height > MAX_IMAGE_PIXELS) throw new Error("Image dimensions are too large.");
   return verified;
 }
 
 async function decodeAndSanitize(buffer: Buffer, verified: VerifiedImage) {
   const source = sharp(buffer, {
     failOn: "warning",
-    limitInputPixels: MAX_PIXELS,
+    limitInputPixels: MAX_IMAGE_PIXELS,
     animated: false,
   });
   const metadata = await source.metadata();
   if (!metadata.width || !metadata.height) throw new Error("The image could not be decoded.");
-  if (metadata.width * metadata.height > MAX_PIXELS) throw new Error("Image dimensions are too large.");
+  if (metadata.width * metadata.height > MAX_IMAGE_PIXELS) throw new Error("Image dimensions are too large.");
   if ((metadata.pages || 1) > 1) throw new Error("Animated images are not supported.");
 
   const normalized = source.rotate();
@@ -69,20 +75,39 @@ async function decodeAndSanitize(buffer: Buffer, verified: VerifiedImage) {
   else if (verified.ext === "png") output = await normalized.png({ compressionLevel: 9 }).toBuffer();
   else output = await normalized.webp({ quality: 88 }).toBuffer();
 
-  if (output.length > MAX_BYTES) throw new Error("The processed image is larger than 5 MB.");
-  return output;
+  if (output.length > MAX_IMAGE_BYTES) throw new Error("The processed image is larger than 5 MB.");
+  return { buffer: output, width: metadata.width, height: metadata.height };
+}
+
+export async function prepareUploadedImage(buffer: Buffer, claimedType: string): Promise<PreparedImage> {
+  if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) throw new Error("Images must be 5 MB or smaller.");
+  const verified = verifyImage(buffer, claimedType);
+  const sanitized = await decodeAndSanitize(buffer, verified);
+  return { ...sanitized, ext: verified.ext, mime: verified.mime };
 }
 
 export async function saveUploadedImage(file: FormDataEntryValue | null, existing = "", prefix = "product") {
   if (!(file instanceof File) || file.size === 0) return existing;
-  if (file.size > MAX_BYTES) throw new Error("Images must be 5 MB or smaller.");
+  const staged = await stageUploadedImage(file, prefix);
+  return staged!.imageRef;
+}
+
+export async function stageUploadedImage(
+  file: FormDataEntryValue | null,
+  prefix = "product",
+): Promise<StagedImage | null> {
+  if (!(file instanceof File) || file.size === 0) return null;
   const buffer = Buffer.from(await file.arrayBuffer());
-  const verified = verifyImage(buffer, file.type);
-  const sanitized = await decodeAndSanitize(buffer, verified);
+  const prepared = await prepareUploadedImage(buffer, file.type);
   fs.mkdirSync(mediaRoot(), { recursive: true });
-  const filename = `${prefix}-${crypto.randomUUID()}.${verified.ext}`;
-  fs.writeFileSync(path.join(mediaRoot(), filename), sanitized, { flag: "wx", mode: 0o640 });
-  return `/media/${filename}`;
+  const filename = `${prefix}-${crypto.randomUUID()}.${prepared.ext}`;
+  const fullPath = path.join(mediaRoot(), filename);
+  fs.writeFileSync(fullPath, prepared.buffer, { flag: "wx", mode: 0o640 });
+  return {
+    imageRef: `/media/${filename}`,
+    digest: crypto.createHash("sha256").update(prepared.buffer).digest("hex"),
+    discard: () => fs.rmSync(fullPath, { force: true }),
+  };
 }
 
 export function resolveMediaFile(filename: string) {

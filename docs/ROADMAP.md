@@ -19,7 +19,55 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   outcome before starting an unrelated feature.
 - Roadmap entries link to specs rather than duplicating acceptance criteria.
 
+## Completed foundation — managed client request operations
+
+- Outcome: clients submit onboarding/change requests and approve private
+  previews while assigned SuqPage staff structure content and managers control
+  onboarding and publication.
+- Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
+- Delivered: attachment-free public interest, direct or lead-based invitations,
+  authenticated client requests, server-derived request type, attributable
+  clarifications, assigned staff, revision preview and approval, controlled
+  customer operations, atomic publication/rollback, and migration 7 permission
+  cutover.
+- Evidence: `FE-003`, `BE-003`, and `DEP-003` are done with request, revision,
+  migration/restore, release, container, and seven-scenario production browser
+  coverage on 2026-07-22.
+
+## Verified checkpoint — manual AI showroom recipes
+
+- Outcome: assigned staff can admit verified private images, export a sanitized
+  request-scoped AI brief, import a strict complete content/design recipe, and
+  move its exact private preview through client approval and controlled
+  publication without giving an external provider application authority.
+- Controlling specs: `FE-007`, `BE-008`, and `DEP-007` remain `ready` because
+  the broader initiative is not complete.
+- Delivered checkpoint: portable schemas, opaque image keys, strict provenance
+  and reconciliation, idempotent revision-v3 draft metadata, staff studio,
+  preview workflow, recovery navigation, and an emergency disable switch.
+- Evidence: commits `ef00c04` and `c67466d`; standard check, production release,
+  7/7 browser acceptance, container privacy/build, and operations restore gates
+  passed on 2026-07-24.
+- Remaining, not launch-blocking for the image-based pilot: typed section-content
+  blocks, focused post-import controls, and controlled YouTube support. These
+  require an explicitly promoted revision/component-bank release rather than an
+  unscoped pre-launch expansion.
+
 ## Now — make the controlled pilot trustworthy
+
+### Complete typed recipes and creative bank 1.2
+
+- Outcome: finish the promoted `FE-007`/`BE-008`/`DEP-007` recipe initiative
+  through additive revision v4, typed section content, controlled YouTube, and
+  focused corrections; release a materially richer mobile-first component bank
+  without changing retained bank-1.1 showrooms.
+- Controlling specs and decision: `FE-007`, `BE-008`, `DEP-007`, `FE-009`,
+  `BE-010`, `DEP-009`, and `ADR-0007`.
+- Sequence: reproduce the recorded studio deep-link defect; land dual readers
+  and release resolver; add v4 typed content; add controlled provider/focused
+  commands; admit bank 1.2; migrate only new drafts after full gates.
+- Non-goals: arbitrary tenant code, copied trade dress, animation dependencies,
+  autoplay/parallax, checkout, pricing, stock, or weakening client approval.
 
 ### Reproducible delivery and repository hygiene
 
@@ -52,7 +100,8 @@ being listed here; it must first be promoted to **Now** and specified.
 
 - Managed PostgreSQL and object storage before multiple instances or broad
   self-service onboarding.
-- Staff roles and finer-grained operational permissions.
+- Post-pilot refinements to the staff roles and operational permissions being
+  introduced under the current managed-request initiative.
 - A real Malikt Board adapter and callback/reconciliation contract.
 - Expanded public localization based on validated pilot demand.
 

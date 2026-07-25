@@ -53,6 +53,16 @@ export function getBusinessById(id: number): Business | undefined {
   return found ? row<Business>(found) : undefined;
 }
 
+export function hasRetainedPublication(businessId: number) {
+  return Boolean(
+    getDb()
+      .prepare(
+        "SELECT 1 FROM published_catalog_versions WHERE business_id=? LIMIT 1",
+      )
+      .get(businessId),
+  );
+}
+
 export function getAllBusinesses(): Business[] {
   return rows<Business>(getDb().prepare("SELECT * FROM businesses ORDER BY name").all());
 }
@@ -89,12 +99,21 @@ export function getCatalogByHandle(handle: string): Catalog | undefined {
 }
 
 export function getUserByEmail(email: string): (SessionUser & { password_hash: string }) | undefined {
-  const found = getDb().prepare("SELECT id,email,name,role,business_id,password_hash,must_change_password FROM users WHERE lower(email)=lower(?)").get(email);
+  const found = getDb().prepare(`
+    SELECT u.id,u.email,u.name,u.role,u.business_id,u.password_hash,u.must_change_password,
+      COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
+    FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id
+    WHERE lower(u.email)=lower(?)
+  `).get(email);
   return found ? row<SessionUser & { password_hash: string }>(found) : undefined;
 }
 
 export function getUserById(id: number): SessionUser | undefined {
-  const found = getDb().prepare("SELECT id,email,name,role,business_id,must_change_password FROM users WHERE id=?").get(id);
+  const found = getDb().prepare(`
+    SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,
+      COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
+    FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?
+  `).get(id);
   return found ? row<SessionUser>(found) : undefined;
 }
 

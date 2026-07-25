@@ -1,18 +1,55 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { databasePath, mediaRoot } from "../lib/config";
-import { getDb } from "../lib/db";
+import { DatabaseSync } from "node:sqlite";
+import { backupRoot, databasePath, mediaRoot } from "../lib/config";
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 const destination = path.resolve(
-  process.env.SUQPAGE_BACKUP_ROOT || path.join(process.cwd(), "backups"),
+  backupRoot(),
   stamp,
 );
 fs.mkdirSync(destination, { recursive: true, mode: 0o700 });
-getDb().exec("PRAGMA wal_checkpoint(FULL)");
+if (!fs.existsSync(databasePath())) {
+  throw new Error("Database not found. Nothing can be backed up.");
+}
+const source = new DatabaseSync(databasePath());
+const integrity = source.prepare("PRAGMA integrity_check").get() as Record<
+  string,
+  string
+>;
+if (!Object.values(integrity).includes("ok")) {
+  source.close();
+  throw new Error("Database integrity check failed. Backup was not created.");
+}
+const foreignKeyFailures = source.prepare("PRAGMA foreign_key_check").all();
+if (foreignKeyFailures.length) {
+  source.close();
+  throw new Error("Database foreign-key check failed. Backup was not created.");
+}
+source.exec("PRAGMA wal_checkpoint(FULL)");
+source.close();
 const databaseBackup = path.join(destination, "suqpage.db");
 fs.copyFileSync(databasePath(), databaseBackup);
 try { fs.chmodSync(databaseBackup, 0o600); } catch {}
+const databaseBytes = fs.statSync(databaseBackup).size;
+const databaseSha256 = crypto
+  .createHash("sha256")
+  .update(fs.readFileSync(databaseBackup))
+  .digest("hex");
+const copied = new DatabaseSync(databaseBackup, { readOnly: true });
+const copiedIntegrity = copied.prepare("PRAGMA integrity_check").get() as Record<
+  string,
+  string
+>;
+const copiedForeignKeys = copied.prepare("PRAGMA foreign_key_check").all();
+copied.close();
+if (
+  !Object.values(copiedIntegrity).includes("ok") ||
+  copiedForeignKeys.length
+) {
+  throw new Error("Copied database failed backup verification.");
+}
 if (fs.existsSync(mediaRoot())) {
   fs.cpSync(mediaRoot(), path.join(destination, "media"), { recursive: true });
 }
@@ -22,8 +59,12 @@ fs.writeFileSync(
   JSON.stringify(
     {
       createdAt: new Date().toISOString(),
-      database: databasePath(),
+      sourceDatabase: databasePath(),
       media: mediaRoot(),
+      integrity: "ok",
+      foreignKeyFailures: 0,
+      databaseBytes,
+      databaseSha256,
     },
     null,
     2,

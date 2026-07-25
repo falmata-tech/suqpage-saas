@@ -43,8 +43,7 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
     const quantity = Number(raw.quantity);
     if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw new InquiryError("Invalid product quantity.");
     const product = productStmt.get(productId, businessId) as any;
-    if (!product || !["available","limited"].includes(product.availability) || Number(product.stock_count) < 1) throw new InquiryError("A selected product is not available.");
-    if (quantity > Math.min(20, Number(product.stock_count))) throw new InquiryError(`Requested quantity exceeds availability for ${product.name}.`);
+    if (!product || !["available","limited"].includes(product.availability)) throw new InquiryError("A selected product is not available.");
     const options = raw.options && typeof raw.options === "object" && !Array.isArray(raw.options) ? raw.options as Record<string, unknown> : {};
     const groups = groupStmt.all(productId) as Array<{ id:number; name:string }>;
     const normalized: Record<string,string> = {};

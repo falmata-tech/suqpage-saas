@@ -1,6 +1,248 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Catalog, Product } from "@/lib/types";
 
-export default function ProductForm({ catalog, product, action, businessId }: { catalog: Catalog; product?: Product; action: (formData:FormData)=>void|Promise<void>; businessId:number }) {
- const groups=product?.option_groups||[];
- return <form action={action} className="panel form-grid" encType="multipart/form-data"><input type="hidden" name="businessId" value={businessId}/>{product&&<input type="hidden" name="productId" value={product.id}/>}<div className="field"><label>Product name</label><input aria-label="Product name" name="name" required defaultValue={product?.name}/></div><div className="field"><label>Eyebrow / short label</label><input aria-label="Eyebrow or short label" name="eyebrow" defaultValue={product?.eyebrow}/></div><div className="field"><label>Collection</label><select aria-label="Collection" name="collectionId" defaultValue={product?.collection_id||""}><option value="">Unassigned</option>{catalog.collections.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div><div className="field"><label>Category</label><select aria-label="Category" name="categoryId" defaultValue={product?.category_id||""}><option value="">Unassigned</option>{catalog.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div><div className="field full"><label>Description</label><textarea aria-label="Description" name="description" required defaultValue={product?.description}/></div><div className="field"><label>Availability</label><select aria-label="Availability" name="availability" defaultValue={product?.availability||"available"}><option value="available">Available</option><option value="limited">Limited availability</option><option value="unavailable">Unavailable</option><option value="coming_soon">Coming soon</option></select></div><div className="field"><label>Overall stock count</label><input aria-label="Overall stock count" type="number" min="0" name="stockCount" defaultValue={product?.stock_count??0}/></div><div className="field"><label>Sort order</label><input aria-label="Sort order" type="number" name="sortOrder" defaultValue={product?.sort_order??0}/></div><div className="field"><label>Product image</label><input aria-label="Product image" type="file" name="image" accept="image/jpeg,image/png,image/webp"/>{product?.image_path&&<small>Current: {product.image_path}</small>}</div><div className="field full"><label style={{display:"flex",gap:8,alignItems:"center"}}><input type="checkbox" name="isPublished" defaultChecked={product?!!product.is_published:true}/> Publish in showroom</label></div><div className="field full"><h3>Option groups <small style={{fontWeight:400,color:"var(--muted)"}}>Up to four. Values can be separated by commas or new lines.</small></h3></div>{[0,1,2,3].map(i=><div className="option-editor full" key={i}><strong>Option group {i+1}</strong><div className="option-row"><div className="field"><label>Name</label><input aria-label="Option group name" name={`optionName${i+1}`} defaultValue={groups[i]?.name||""} placeholder={i===0?"Color":i===1?"Size":"Specification"}/></div><div className="field"><label>Values</label><textarea aria-label="Option group values" name={`optionValues${i+1}`} defaultValue={groups[i]?.values.map(v=>v.value).join(", ")||""} placeholder="Black, White, Blue"/></div></div></div>)}<div className="field full"><button className="btn brand">{product?"Save product":"Create product"}</button></div></form>
+export default function ProductForm({
+  catalog,
+  product,
+  action,
+  businessId,
+  contentVersion,
+  idempotencyKey,
+  staffMode,
+}: {
+  catalog: Catalog;
+  product?: Product;
+  action: (formData: FormData) => void | Promise<void>;
+  businessId: number;
+  contentVersion: number;
+  idempotencyKey: string;
+  staffMode: boolean;
+}) {
+  const [collectionId, setCollectionId] = useState(
+    String(product?.collection_id || ""),
+  );
+  const [name, setName] = useState(product?.name || "");
+  const [description, setDescription] = useState(product?.description || "");
+  const [availability, setAvailability] = useState(
+    product?.availability || "available",
+  );
+  const [imagePreview, setImagePreview] = useState(product?.image_path || "");
+  const [removeImage, setRemoveImage] = useState(false);
+  const imageInput = useRef<HTMLInputElement>(null);
+  const temporaryImageUrl = useRef<string | null>(null);
+  useEffect(
+    () => () => {
+      if (temporaryImageUrl.current) {
+        URL.revokeObjectURL(temporaryImageUrl.current);
+      }
+    },
+    [],
+  );
+  const availableCategories = useMemo(
+    () =>
+      catalog.categories.filter(
+        (category) =>
+          category.collection_id === null ||
+          String(category.collection_id) === collectionId,
+      ),
+    [catalog.categories, collectionId],
+  );
+  const currentCategoryIsCompatible = availableCategories.some(
+    (category) => category.id === product?.category_id,
+  );
+
+  return (
+    <form action={action} className="panel form-grid product-upkeep-form">
+      <input type="hidden" name="businessId" value={businessId} />
+      <input
+        type="hidden"
+        name="expectedContentVersion"
+        value={contentVersion}
+      />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <input type="hidden" name="kind" value={product ? "update" : "create"} />
+      {product ? (
+        <input type="hidden" name="productId" value={product.id} />
+      ) : null}
+
+      <div className="field full">
+        <label htmlFor="product-name">Product name</label>
+        <input
+          id="product-name"
+          name="name"
+          required
+          maxLength={140}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          autoComplete="off"
+        />
+        <small>Shown exactly as entered in the showroom.</small>
+      </div>
+
+      <div className="field full">
+        <label htmlFor="product-description">Description</label>
+        <textarea
+          id="product-description"
+          name="description"
+          required
+          maxLength={3000}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-availability">Availability</label>
+        <select
+          id="product-availability"
+          name="availability"
+          value={availability}
+          onChange={(event) =>
+            setAvailability(
+              event.target.value as Product["availability"],
+            )
+          }
+        >
+          <option value="available">Available</option>
+          <option value="limited">Limited availability</option>
+          <option value="unavailable">Unavailable</option>
+          <option value="coming_soon">Coming soon</option>
+        </select>
+        <small>No inventory count is stored.</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-collection">Collection</label>
+        <select
+          id="product-collection"
+          name="collectionId"
+          value={collectionId}
+          onChange={(event) => setCollectionId(event.target.value)}
+        >
+          <option value="">Unassigned</option>
+          {catalog.collections.map((collection) => (
+            <option key={collection.id} value={collection.id}>
+              {collection.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-category">Category</label>
+        <select
+          id="product-category"
+          name="categoryId"
+          defaultValue={
+            currentCategoryIsCompatible ? product?.category_id || "" : ""
+          }
+          key={`${collectionId}-${currentCategoryIsCompatible}`}
+        >
+          <option value="">Unassigned</option>
+          {availableCategories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        <small>Only compatible existing categories are shown.</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-image">Primary image</label>
+        <input
+          id="product-image"
+          ref={imageInput}
+          type="file"
+          name="image"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={(event) => {
+            if (temporaryImageUrl.current) {
+              URL.revokeObjectURL(temporaryImageUrl.current);
+              temporaryImageUrl.current = null;
+            }
+            const file = event.target.files?.[0];
+            if (file) {
+              temporaryImageUrl.current = URL.createObjectURL(file);
+              setImagePreview(temporaryImageUrl.current);
+              setRemoveImage(false);
+            } else {
+              setImagePreview(product?.image_path || "");
+            }
+          }}
+        />
+        <small>JPEG, PNG, or WebP; up to 5 MB.</small>
+      </div>
+
+      {product?.image_path ? (
+        <div className="field full product-current-media">
+          <img src={product.image_path} alt="" />
+          <label className="check-field">
+            <input
+              type="checkbox"
+              name="removeImage"
+              checked={removeImage}
+              onChange={(event) => {
+                setRemoveImage(event.target.checked);
+                if (event.target.checked && imageInput.current) {
+                  imageInput.current.value = "";
+                  setImagePreview("");
+                } else {
+                  setImagePreview(product.image_path);
+                }
+              }}
+            />
+            Remove the current image without replacing it
+          </label>
+        </div>
+      ) : null}
+
+      {staffMode ? (
+        <div className="field full">
+          <label htmlFor="service-note">Customer-service note</label>
+          <input
+            id="service-note"
+            name="serviceNote"
+            required
+            maxLength={300}
+            placeholder="Example: Updated for the client during a support call"
+          />
+          <small>This records why a team member changed client content.</small>
+        </div>
+      ) : null}
+
+      <aside className="field full product-upkeep-preview" aria-live="polite">
+        <div className="product-upkeep-preview-image">
+          {!removeImage && imagePreview ? (
+            <img src={imagePreview} alt="" />
+          ) : (
+            <span aria-hidden="true">◇</span>
+          )}
+        </div>
+        <div>
+          <span className={`badge ${availability}`}>
+            {availability.replace("_", " ")}
+          </span>
+          <strong>{name || "Product name preview"}</strong>
+          <p>{description || "The product description will appear here."}</p>
+        </div>
+      </aside>
+
+      <div className="field full product-upkeep-explainer">
+        <strong>This publishes only this product update.</strong>
+        <span>
+          Design, options, order, collections, categories, and business settings
+          stay protected. A retained showroom version is created automatically.
+        </span>
+      </div>
+
+      <div className="field full">
+        <button className="btn brand" type="submit">
+          {product ? "Save and publish product" : "Add and publish product"}
+        </button>
+      </div>
+    </form>
+  );
 }

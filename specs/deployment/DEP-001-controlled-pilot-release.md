@@ -2,9 +2,9 @@
 id: DEP-001
 title: Controlled pilot release and recovery
 status: done
-related: [FE-001, BE-001, ADR-0002]
+related: [FE-001, BE-001, DEP-006, DEP-008, ADR-0002]
 owners: [operations, security]
-last_updated: 2026-07-21
+last_updated: 2026-07-24
 change_level: L3
 ---
 

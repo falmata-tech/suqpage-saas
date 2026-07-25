@@ -64,4 +64,5 @@ Customer contact details must not enter general logs or monitoring labels.
 
 Production startup refuses non-HTTPS configuration, missing persistent paths, or
 weak privacy salt. Temporary-password accounts, mock integration status, backup
-freshness, and FormSubmit/notification activation are explicit operator checks.
+freshness, managed-request queue review, and configured notification delivery
+are explicit operator checks.

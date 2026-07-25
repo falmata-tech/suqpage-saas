@@ -1,22 +1,48 @@
 import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
 import { requireUser } from "@/lib/auth";
-import { getAllBusinesses, getCatalogByBusinessId, listDeliveryRequests, listInquiries } from "@/lib/db";
+import { hasCapability, isClient } from "@/lib/capabilities";
+import { getAllBusinesses, hasRetainedPublication, listDeliveryRequests, listInquiries } from "@/lib/db";
 import { resolveBusiness } from "@/lib/dashboard";
+import { listClientRequests } from "@/lib/request-sqlite";
+import { listAssignedBusinesses } from "@/lib/staff-operations";
 
 export const dynamic = "force-dynamic";
-export default async function Dashboard({ searchParams }: { searchParams: Promise<{ business?: string }> }) {
-  const user = await requireUser(); const params = await searchParams; const business = resolveBusiness(user,params.business);
-  if (user.role === "admin" && !business) {
+
+export default async function Dashboard({ searchParams }: { searchParams:Promise<{business?:string}> }) {
+  const user = await requireUser();
+  const params = await searchParams;
+  const business = resolveBusiness(user, params.business);
+  if (user.access_role === "team_member" && !business) {
+    const assignedBusinesses = listAssignedBusinesses(user.id);
+    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Assigned businesses</h1><p>Only businesses connected to your active request assignments appear here.</p></div><Link className="btn" href="/dashboard/requests">Assigned requests</Link></div>{assignedBusinesses.length ? <div className="showroom-grid">{assignedBusinesses.map((tenant)=><Link className="showroom-card" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><div><span className={`badge ${tenant.status}`}>{tenant.status}</span><h3>{tenant.name}</h3><p>@{tenant.handle}</p><strong>Open read-only context →</strong></div></Link>)}</div> : <div className="empty-state">No business or request is assigned to you.</div>}</DashboardShell>;
+  }
+  if (hasCapability(user, "operations:manage") && !business) {
     const businesses = getAllBusinesses();
-    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Businesses</h1><p>Choose a tenant to manage its dynamic showroom and workflow.</p></div></div><div className="showroom-grid">{businesses.map(b=><Link className="showroom-card" href={`/dashboard?business=${b.id}`} key={b.id}><div><span className={`badge ${b.status}`}>{b.status}</span><h3>{b.name}</h3><p>@{b.handle} · {b.design_key}</p><strong>Manage tenant →</strong></div></Link>)}</div></DashboardShell>;
+    const platformAdmin = hasCapability(user,"platform:admin");
+    return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Businesses</h1><p>{platformAdmin ? "Choose a tenant to manage its showroom and workflow." : "Choose a tenant to review its live context and request activity."}</p></div></div><div className="showroom-grid">{businesses.map((tenant) => <Link className="showroom-card" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><div><span className={`badge ${tenant.status}`}>{tenant.status}</span><h3>{tenant.name}</h3><p>@{tenant.handle} · {tenant.design_key}</p><strong>{platformAdmin ? "Open workspace" : "Review context"} →</strong></div></Link>)}</div></DashboardShell>;
   }
   if (!business) return null;
-  const catalog = getCatalogByBusinessId(business.id,true)!; const inquiries = listInquiries(business.id); const deliveries = listDeliveryRequests(business.id);
-  const available = catalog.products.filter(p=>p.availability==="available" && p.is_published).length;
-  return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><h1>{business.name}</h1><p>Dynamic catalog and customer workflow overview.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">Preview showroom</Link></div>
-    <div className="cards"><div className="metric"><span>Products</span><strong>{catalog.products.length}</strong></div><div className="metric"><span>Available</span><strong>{available}</strong></div><div className="metric"><span>Inquiries</span><strong>{inquiries.length}</strong></div><div className="metric"><span>Deliveries</span><strong>{deliveries.length}</strong></div></div>
-    <section className="panel"><h2>How this MVP works</h2><p>The showroom design is a custom renderer. Products, collections, options, availability, inquiries and delivery requests come from SuqPage’s shared data layer.</p><div className="notice">Edit a product or add a new one, then reopen the public showroom. The custom page updates without changing its design code.</div></section>
-    <section className="panel"><h2>Recent inquiries</h2>{inquiries.length?<div className="table-wrap"><table className="data-table"><thead><tr><th>Customer</th><th>Contact</th><th>Items</th><th>Status</th><th>Received</th></tr></thead><tbody>{inquiries.slice(0,5).map(i=><tr key={i.id}><td>{i.customer_name}</td><td>{i.contact}</td><td>{i.item_count}</td><td><span className={`badge ${i.status}`}>{i.status}</span></td><td>{new Date(i.created_at).toLocaleString()}</td></tr>)}</tbody></table></div>:<div className="empty-state">No inquiries yet.</div>}</section>
-  </DashboardShell>;
+  const established = hasRetainedPublication(business.id);
+  if (user.access_role === "team_member") {
+    return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><span className="eyebrow">Assigned context</span><h1>{business.name}</h1><p>Prepare client-approved showroom revisions{established ? ", or provide basic product upkeep when the client asks for direct customer service" : ""}.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">View live showroom</Link></div><section className="panel"><h2>Work within your assignment</h2><p>Settings, design, collections, categories, and full showroom publication stay inside the request/revision workflow.{established ? " Basic product details can be maintained with a recorded service note." : " Product upkeep becomes available after the first showroom publication."}</p><div className="hero-actions"><Link className="btn brand" href="/dashboard/requests">Open assigned requests</Link>{established ? <Link className="btn secondary" href={`/dashboard/products?business=${business.id}`}>Maintain products</Link> : null}</div></section></DashboardShell>;
+  }
+  const inquiries = listInquiries(business.id);
+  const deliveries = listDeliveryRequests(business.id);
+  if (isClient(user)) {
+    const requests = listClientRequests(user);
+    return <DashboardShell user={user} business={business}>
+      <div className="dashboard-head"><div><span className="eyebrow">Client workspace</span><h1>Welcome to {business.name}</h1><p>Send requests in your own words and follow the work SuqPage manages for you.</p></div><Link className="btn brand" href="/dashboard/requests/new">Make a request</Link></div>
+      <div className="cards client-metrics"><Link className="metric" href="/dashboard/requests"><span>Requests</span><strong>{requests.length}</strong><small>View request history</small></Link><Link className="metric" href={`/dashboard/inquiries?business=${business.id}`}><span>Customer inquiries</span><strong>{inquiries.length}</strong><small>View showroom activity</small></Link><Link className="metric" href={`/dashboard/deliveries?business=${business.id}`}><span>Deliveries</span><strong>{deliveries.length}</strong><small>Follow delivery activity</small></Link></div>
+      <section className="panel client-next"><h2>Simple by design</h2><p>{established ? "Use My products for quick name, description, image, availability, and existing placement updates. " : "Your first showroom starts with one request in your own words. "}For collections, categories, options, settings, or visual design, send a request and approve the team’s private preview before publication.</p><div className="hero-actions">{established ? <Link className="btn brand" href={`/dashboard/products?business=${business.id}`}>Maintain products</Link> : <Link className="btn brand" href="/dashboard/requests/new">Request your first showroom</Link>}<Link className="btn secondary" href="/dashboard/requests/new">{established ? "Request a larger change" : "Open request form"}</Link><Link className="btn secondary" href={`/preview/@${business.handle}`}>Open private showroom preview</Link></div></section>
+    </DashboardShell>;
+  }
+  if (hasCapability(user, "operations:manage")) {
+    return <DashboardShell user={user} business={business}>
+      <div className="dashboard-head"><div><span className="eyebrow">Operations workspace</span><h1>{business.name}</h1><p>Review customer activity and coordinate managed-service work without changing live showroom content directly.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">View showroom</Link></div>
+      <div className="cards"><Link className="metric" href="/dashboard/requests"><span>Managed requests</span><strong>Open</strong><small>Review, assign, and prepare revisions</small></Link><Link className="metric" href={`/dashboard/inquiries?business=${business.id}`}><span>Customer inquiries</span><strong>{inquiries.length}</strong><small>Update inquiry status</small></Link><Link className="metric" href={`/dashboard/deliveries?business=${business.id}`}><span>Deliveries</span><strong>{deliveries.length}</strong><small>Create and follow delivery activity</small></Link></div>
+      <section className="panel"><h2>Controlled publication</h2><p>Business settings, design, collections, categories, and full showroom changes stay inside an approved request revision.{established ? " Basic product upkeep is separately versioned and records your customer-service attribution." : " Basic product upkeep unlocks after the first showroom publication."}</p><div className="hero-actions"><Link className="btn brand" href="/dashboard/requests">Open managed requests</Link>{established ? <Link className="btn secondary" href={`/dashboard/products?business=${business.id}`}>Maintain products</Link> : null}<Link className="btn secondary" href="/dashboard/requests/on-behalf">Submit on behalf of client</Link></div></section>
+    </DashboardShell>;
+  }
+  return null;
 }

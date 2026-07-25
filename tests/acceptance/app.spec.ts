@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-type AcceptanceProbe = "inquiryByCustomer" | "productStockByName" | "deliveryByAddress";
+type AcceptanceProbe = "inquiryByCustomer" | "deliveryByAddress";
 const readAcceptanceRow = (probe: AcceptanceProbe, value: string) =>
   JSON.parse(
     execFileSync(
@@ -51,6 +51,39 @@ async function loginAndChangePassword(page: Page, email: string, nextPassword: s
   await page.getByRole("button", { name: "Change password" }).click();
   await expect(page.getByText("Password updated")).toBeVisible();
 }
+async function loginAndChangeKnownPassword(page: Page, email:string, temporaryPassword:string, nextPassword:string) {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(temporaryPassword);
+  await page.getByRole("button",{name:"Sign in"}).click();
+  await expect(page).toHaveURL(/\/dashboard\/account\?required=1/);
+  await page.getByLabel("Current password").fill(temporaryPassword);
+  await page.getByLabel("New password",{exact:true}).fill(nextPassword);
+  await page.getByLabel("Confirm new password").fill(nextPassword);
+  await page.getByRole("button",{name:"Change password"}).click();
+  await expect(page.getByText("Password updated")).toBeVisible();
+}
+async function loginWithKnownPassword(page:Page,email:string,password:string){await page.goto("/login");await page.getByLabel("Email").fill(email);await page.getByLabel("Password").fill(password);await page.getByRole("button",{name:"Sign in"}).click();await expect(page).toHaveURL(/\/dashboard$/);}
+
+test("prospect submits an interest request without public uploads", async ({ page }) => {
+  const errors = monitor(page);
+  await page.goto("/request");
+  await expectVisibleControlsNamed(page);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Introduce your business");
+  await page.getByLabel("Your name").fill("Acceptance Prospect");
+  await page.getByLabel("Email, phone, or WhatsApp").fill("prospect@example.test");
+  await page.getByLabel(/Business name/).fill("Acceptance Market");
+  await page.getByLabel("What are you interested in?").fill("I am interested in a showroom for our handmade home products.");
+  await expect(page.locator('input[type="file"]')).toHaveCount(0);
+  await page.getByLabel(/SuqPage may use/).check();
+  await page.getByRole("button", { name: "Tell SuqPage I’m interested" }).click();
+  await expect(page.getByRole("status")).toContainText(/REQ-[A-F0-9]{12}/);
+  await expect(page.getByRole("status")).toContainText("Nothing has been accepted, designed, or published yet");
+  const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png")) } } });
+  expect(publicUpload.status()).toBe(415);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
+});
 
 test("public discovery, four showrooms, cart, and persisted inquiry", async ({ page }) => {
   const errors = monitor(page);
@@ -60,15 +93,21 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(page.getByText("Search by name or select a category")).toBeVisible();
   await page.getByRole("button", { name: "All businesses" }).click();
   await expect(page.locator(".showroom-card")).toHaveCount(4);
+  const compositionSignatures = new Set<string>();
   for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
+    await expect(page.locator('[data-bank-release="showroom-bank@1.1.0"]')).toBeVisible();
     await expect(page.locator(".sr-card").first()).toBeVisible();
+    compositionSignatures.add(
+      await page.locator("[data-token-pack]").getAttribute("data-token-pack") || "",
+    );
     await expectVisibleControlsNamed(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
+  expect(compositionSignatures.size).toBe(4);
   await page.goto("/@alhayabrand");
-  const productOpener = page.locator(".sr-card").first().getByRole("button", { name: "View piece" });
+  const productOpener = page.locator(".sr-card").first().getByRole("button", { name: /^View / });
   await productOpener.click();
   await expect(page.getByRole("dialog").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Close product" })).toBeFocused();
@@ -78,7 +117,7 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(productOpener).toBeFocused();
   await productOpener.click();
   await page.getByRole("button", { name: "Add selected item" }).click();
-  const drawerOpener = page.getByRole("button", { name: /Inquiry · 1/ });
+  const drawerOpener = page.getByRole("button", { name: /Inquiry.*1/ }).first();
   await drawerOpener.click();
   await expect(page.getByRole("button", { name: "Close inquiry" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
@@ -101,33 +140,151 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/@usashopet");
-  await page.getByPlaceholder("Search products").fill("CeraVe");
+  await page.getByLabel("Search products").fill("CeraVe");
   await expect(page.locator(".sr-card")).toHaveCount(1);
-  await page.locator(".sr-card").first().getByRole("button", { name: "Details" }).click();
+  await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await page.reload();
-  await page.getByRole("button", { name: /Bag 1/ }).click();
+  await page.getByRole("button", { name: /Inquiry.*1/ }).first().click();
   await page.getByRole("button", { name: "Increase quantity" }).click();
   await expect(page.locator(".qty strong")).toHaveText("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 700 });
+  for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
+    await page.goto(`/@${handle}`);
+    await expect(page.locator(".showroom")).toBeVisible();
+    await expect(page.locator(".sr-card").first()).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+  }
   expect(errors).toEqual([]);
 });
 
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
   await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { name: "Private workspace" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "◆ SuqPage" })).toHaveAttribute("href", "/dashboard");
+  await expect(page.getByRole("link", { name: "Public site ↗" })).toHaveAttribute("target", "_blank");
+  await page.getByRole("link", { name: "◆ SuqPage" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("link", { name: "Design component bank" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
+  await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Heroes 13" }).click();
+  await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(13);
+  await page.getByLabel("Preview token system").selectOption("industrial-steel");
+  await page.getByLabel("Motion intensity").selectOption("expressive");
+  await page.getByLabel("Decorative depth").selectOption("signature");
+  await page.getByRole("button", { name: "Mobile · 390 px" }).click();
+  await page.getByRole("button", { name: "All 67" }).click();
+  await expect(page.locator('[data-preview-device="mobile"]')).toHaveCount(67);
+  await expect(page.locator('[data-motion="expressive"]')).toHaveCount(67);
+  await expect(page.locator('[data-decoration="signature"]')).toHaveCount(67);
+  const mobileCanvases = page.locator('[data-preview-device="mobile"] > div');
+  await expect(mobileCanvases).toHaveCount(67);
+  expect(
+    await mobileCanvases.evaluateAll((canvases) =>
+      canvases.every(
+        (canvas) => canvas.scrollWidth <= canvas.clientWidth,
+      ),
+    ),
+  ).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const undersizedTargets = await page
+    .locator('[data-preview-device="mobile"] button, [data-preview-device="mobile"] input')
+    .evaluateAll((targets) =>
+      targets.flatMap((target) => {
+        const rect = target.getBoundingClientRect();
+        if (!rect.width || !rect.height) return [];
+        return rect.height < 43.5
+          ? [`${target.tagName.toLowerCase()}:${target.textContent?.trim() || target.getAttribute("aria-label")}`]
+          : [];
+      }),
+    );
+  expect(undersizedTargets).toEqual([]);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(
+    await page.locator('[data-motion="expressive"]').first().evaluate(
+      (section) => getComputedStyle(section).animationName,
+    ),
+  ).toBe("none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.getByRole("button", { name: "Responsive" }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.goto("/dashboard/products?business=1");
+  await expect(page.getByRole("heading",{name:"My products"})).toBeVisible();
+  await page.getByRole("link",{name:"Edit basic details"}).first().click();
+  await expect(page.getByLabel("Customer-service note")).toBeVisible();
+  await expect(page.getByLabel("Sort order")).toHaveCount(0);
+  await expect(page.getByLabel("Publish in showroom")).toHaveCount(0);
+  await page.getByLabel("Description").fill("Administrator-verified browser upkeep description.");
+  await page.getByLabel("Customer-service note").fill("Verified basic upkeep before the client demo.");
+  await page.getByRole("button",{name:"Save and publish product"}).click();
+  await expect(page.getByText(/Product published successfully as showroom version/)).toBeVisible();
+  await page.goto("/dashboard/requests");
+  await expect(page.getByText("Acceptance Market")).toBeVisible();
+  await page.getByRole("link", { name: /REQ-/ }).click();
+  await expect(page.getByText("prospect@example.test")).toBeVisible();
+  await expect(page.locator(".request-image-grid img")).toHaveCount(0);
+  await page.getByLabel("Status").selectOption("under_review");
+  await page.getByRole("button", { name: "Update status" }).click();
+  await expect(page.getByText("Request status updated")).toBeVisible();
+  await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
+  await page.getByLabel("Client email").fill("acceptance-client@example.test");
+  await page.getByLabel("Showroom handle").fill("acceptance-market");
+  await page.getByRole("button", { name: "Accept lead and create invitation" }).click();
+  await expect(page.getByText("Invitation created.")).toBeVisible();
+  const invitationUrl = await page.getByLabel("Single-use invitation link").inputValue();
+  expect(invitationUrl).toMatch(/^https:\/\/suqpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
   await page.goto("/dashboard/admin");
   await expectVisibleControlsNamed(page);
-  await page.locator('input[name="name"]').fill("Acceptance Flowers");
-  await page.locator('input[name="handle"]').fill("acceptanceflowers");
-  await page.locator('input[name="ownerName"]').fill("Flower Owner");
-  await page.locator('input[name="email"]').fill("flowers@example.test");
-  await page.locator('input[name="temporaryPassword"]').first().fill("FlowerOwner123!");
-  await page.getByRole("button", { name: "Create tenant" }).click();
-  await expect(page.getByRole("heading", { name: "Acceptance Flowers" })).toBeVisible();
+  let staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.getByLabel("Name").fill("Acceptance Operations");
+  await staffPanel.getByLabel("Email").fill("operations@example.test");
+  await staffPanel.getByLabel("Access role").selectOption("operations_manager");
+  await staffPanel.getByLabel("Temporary password").fill("OperationsTemp123!");
+  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
+  await expect(page.getByText("Acceptance Operations")).toBeVisible();
+  staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.getByLabel("Name").fill("Acceptance Team");
+  await staffPanel.getByLabel("Email").fill("team@example.test");
+  await staffPanel.getByLabel("Access role").selectOption("team_member");
+  await staffPanel.getByLabel("Temporary password").fill("TeamMemberTemp123!");
+  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
+  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  await page.getByRole("link",{name:"Create client workspace"}).first().click();
+  await expect(page.getByRole("heading",{name:"Create a client workspace"})).toBeVisible();
+  await expectVisibleControlsNamed(page);
+  await page.getByLabel("Business name").fill("Acceptance Flowers");
+  await page.getByLabel("Showroom handle").fill("acceptanceflowers");
+  await page.getByLabel("Client name").fill("Flower Client");
+  await page.getByLabel("Client email").fill("flowers@example.test");
+  await page.getByRole("button", { name: "Create client workspace and invitation" }).click();
+  await expect(page.getByText("Client workspace created.")).toBeVisible();
+  await expect(page.getByLabel("Single-use client workspace invitation")).toHaveValue(/^https:\/\/suqpage\.test\/invite\//);
   expect((await page.request.get("/@acceptanceflowers")).status()).toBe(404);
   await page.goto("/preview/@acceptanceflowers");
   await expect(page.locator(".showroom")).toBeVisible();
+  await page.goto("/dashboard/requests/on-behalf");
+  await page.getByLabel(/Existing managed client/).selectOption({
+    label: "Al Haya Brand · Al Haya Client · alhaya@suqpage.local",
+  });
+  await page.getByLabel("Client’s instruction").fill(
+    "Please prepare a more expressive private showroom direction for administrator review.",
+  );
+  await page.getByRole("button", { name: "Record request for client" }).click();
+  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
+  await page.getByRole("button", { name: "Prepare first recipe" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom recipe studio" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Administrative recovery editor" })).toBeVisible();
   await page.goto("/dashboard");
   for (let attempt = 0; attempt < 6; attempt += 1) {
     await page.getByRole("button", { name: "Sign out" }).click();
@@ -136,31 +293,203 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
   }
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.goto(new URL(invitationUrl).pathname);
+  await expect(page.getByRole("heading", { name: "Join Acceptance Market" })).toBeVisible();
+  await page.getByLabel("Your name").fill("Acceptance Client");
+  await page.getByLabel("Password", { exact:true }).fill("InvitedClient123!");
+  await page.getByLabel("Confirm password").fill("InvitedClient123!");
+  await page.getByRole("button", { name: "Create private workspace" }).click();
+  await expect(page.getByText("Client workspace", { exact:true })).toBeVisible();
+  await expect(page.getByRole("link", { name:"Collections & categories" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name:"Business settings" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name:"My products" })).toHaveCount(0);
+  await page.goto("/dashboard/products");
+  await expect(page).toHaveURL(/\/dashboard\/requests\/new/);
+  await page.goto("/dashboard/design-bank");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toHaveCount(0);
+  await page.getByRole("link", { name:"Make a request" }).click();
+  await expect(page.getByRole("heading", { name:"Request your first showroom" })).toBeVisible();
+  await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
+  await expect(page.getByLabel("Request type")).toHaveCount(0);
+  await page.getByLabel("Your request").fill("Please use this reference to update the private showroom hero and featured collection.");
+  await page.getByLabel(/Reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
+  await page.getByRole("button", { name:"Send request to SuqPage" }).click();
+  await expect(page.getByRole("heading", { name:/REQ-/ })).toBeVisible();
+  await expect(page.locator(".request-image-grid img")).toHaveCount(1);
+  await page.goto("/dashboard/settings");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  const clientSession = (await page.context().cookies()).find((cookie) => cookie.name === "suqpage_session");
+  const origin = await page.evaluate(() => location.origin);
+  const deniedMutation = await page.request.post("/api/malikt/requests", { headers:{ Origin:origin, Cookie:`suqpage_session=${clientSession!.value}` }, data:{ businessId:5, customerName:"Denied", phone:"12345", pickupAddress:"A", deliveryAddress:"B", packageCount:1, companyIds:[1], idempotencyKey:"denied_client_123456" } });
+  expect(deniedMutation.status()).toBe(403);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("owner catalog, inquiry, delivery, and role isolation workflows persist", async ({ page }) => {
+test("operations manager records on behalf and team member sees only assigned work", async ({page}) => {
+  const errors=monitor(page);
+  await loginAndChangeKnownPassword(page,"operations@example.test","OperationsTemp123!","OperationsReady123!");
+  await page.goto("/dashboard/design-bank");
+  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
+  await page.goto("/dashboard?business=5");
+  await expect(page.getByRole("link",{name:"Showroom context ↗"})).toHaveCount(1);
+  await page.getByRole("link",{name:"Submit on behalf of client"}).click();
+  await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
+  await page.goto("/dashboard/requests");
+  await expect(page.getByRole("link",{name:"Record on behalf"}).first()).toBeVisible();
+  await expect(page.getByRole("link",{name:"SaaS administration"})).toHaveCount(0);
+  await page.getByRole("link",{name:"Record on behalf"}).first().click();
+  await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
+  await page.getByLabel(/Existing managed client/).selectOption({label:"Acceptance Market · Acceptance Client · acceptance-client@example.test"});
+  await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
+  await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and featured collection for review.");
+  await page.getByLabel(/Private reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
+  await page.getByRole("button",{name:"Record request for client"}).click();
+  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
+  await expect(page.getByText("SuqPage for client")).toBeVisible();
+  const assignedRequestUrl=page.url();
+  await page.getByLabel("Ask or answer a clarification").fill("Which hero message should the team prioritize?");
+  await page.getByRole("button",{name:"Add clarification"}).click();
+  await expect(page.getByText("Clarification message added.")).toBeVisible();
+  await expect(page.getByText("Which hero message should the team prioritize?")).toBeVisible();
+  await expect(page.locator(".dashboard-head .badge")).toHaveText("needs information");
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
+  await page.goto(assignedRequestUrl);
+  await expect(page.getByText("SuqPage team",{exact:true})).toBeVisible();
+  await page.getByLabel("Reply to SuqPage").fill("Please prioritize our handmade origin story.");
+  await page.getByRole("button",{name:"Add clarification"}).click();
+  await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto(assignedRequestUrl);
+  await page.getByLabel("Assigned team member").selectOption({label:"Acceptance Team · team@example.test"});
+  await page.getByRole("button",{name:"Save assignment"}).click();
+  await expect(page.getByText("Assignment updated.")).toBeVisible();
+  await page.goto("/dashboard/catalog?business=5");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginAndChangeKnownPassword(page,"team@example.test","TeamMemberTemp123!","TeamMemberReady123!");
+  await page.goto("/dashboard/design-bank");
+  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
+  await page.goto("/dashboard/requests");
+  await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
+  await expect(page.getByRole("link",{name:"Record on behalf"})).toHaveCount(0);
+  await page.goto(assignedRequestUrl);
+  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  await page.getByLabel("Status").selectOption("under_review");
+  await page.getByRole("button",{name:"Update status"}).click();
+  await expect(page.getByText("Request status updated.")).toBeVisible();
+  await expect(page.getByText("Team assignment")).toHaveCount(0);
+  await page.getByRole("button",{name:"Prepare first recipe"}).click();
+  await expect(page.getByRole("heading",{name:"Showroom recipe studio"})).toBeVisible();
+  const recipeStudioUrl=page.url();
+  await expectVisibleControlsNamed(page);
+  await page.getByText("Show complete valid recipe example").click();
+  const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
+  recipe.summary="A revised hero prepared from the client’s private reference.";
+  recipe.content.business.heroTitle="Acceptance approved showroom";
+  await page.getByLabel("Showroom recipe JSON").fill(JSON.stringify(recipe));
+  await page.getByRole("button",{name:"Validate and open private preview"}).click();
+  await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Validated recipe difference"})).toBeVisible();
+  await page.getByRole("button",{name:"Send revision for client review"}).click();
+  await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
+  await expect(page.getByText("Revision sent for client review.")).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
+  const deniedStudio=await page.goto(recipeStudioUrl);
+  expect(deniedStudio?.status()).toBe(404);
+  await page.goto(assignedRequestUrl);
+  await page.getByRole("link",{name:"View preview"}).click();
+  await expect(page.getByRole("button",{name:"Approve this exact revision"})).toBeVisible();
+  await page.getByRole("button",{name:"Approve this exact revision"}).click();
+  await expect(page.getByText("Your approve decision was recorded")).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto(assignedRequestUrl);
+  await page.getByRole("link",{name:"View preview"}).click();
+  await page.getByRole("button",{name:"Publish approved revision"}).click();
+  await expect(page.getByText("The approved revision is now live.")).toBeVisible();
+  await page.goto("/@acceptance-market");
+  await expect(page.getByRole("heading",{name:"Acceptance approved showroom"})).toBeVisible();
+  await page.goto(assignedRequestUrl);
+  await page.goto("/dashboard/requests/on-behalf");
+  await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
+  await page.getByRole("button",{name:"Sign out"}).click();
+  await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
+  await page.goto("/dashboard/requests/on-behalf");
+  await expect(page).toHaveURL(/\/dashboard\/requests$/);
+  await page.goto("/dashboard/settings?business=5");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/dashboard/products?business=5");
+  await expect(page.getByRole("heading",{name:"My products"})).toBeVisible();
+  await page.getByRole("link",{name:"Add product"}).first().click();
+  await page.getByLabel("Product name").fill("Team assisted product");
+  await page.getByLabel("Description").fill("Created by assigned staff after the first showroom publication.");
+  await page.getByLabel("Availability").selectOption("coming_soon");
+  await page.getByLabel("Customer-service note").fill("The client asked the assigned team member to add this product.");
+  await page.getByRole("button",{name:"Add and publish product"}).click();
+  await expect(page.getByText(/Product published successfully as showroom version/)).toBeVisible();
+  const teamProductUrl=page.url();
+  await page.getByRole("button",{name:"Sign out"}).click();
+  await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto(teamProductUrl);
+  await page.getByLabel("Availability").selectOption("available");
+  await page.getByLabel("Customer-service note").fill("Operations confirmed availability with the client.");
+  await page.getByRole("button",{name:"Save and publish product"}).click();
+  await expect(page.getByText(/Product published successfully as showroom version/)).toBeVisible();
+  expect(errors.filter((error)=>!error.includes("404"))).toEqual([]);
+});
+
+test("seeded client is restricted while operations manages customer activity", async ({ page }) => {
   const errors = monitor(page);
-  await loginAndChangePassword(page, "alhaya@suqpage.local", "OwnerAcceptance123!");
+  await loginAndChangePassword(page, "alhaya@suqpage.local", "ClientAcceptance123!");
+  await page.goto("/dashboard");
+  await expect(page.getByText("Client workspace",{exact:true})).toBeVisible();
   await page.goto("/dashboard/admin");
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/dashboard/settings");
-  await expectVisibleControlsNamed(page);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/dashboard/catalog");
-  await expectVisibleControlsNamed(page);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/dashboard/products/new");
-  await expectVisibleControlsNamed(page);
-  await page.locator('input[name="name"]').fill("Acceptance Scarf");
-  await page.locator('textarea[name="description"]').fill("Created through the browser acceptance suite.");
-  await page.locator('input[name="stockCount"]').fill("3");
-  await page.getByPlaceholder("Color").fill("Finish");
-  await page.getByPlaceholder("Black, White, Blue").first().fill("Ivory, Onyx");
-  await page.getByRole("button", { name: "Create product" }).click();
-  await expect(page.getByText("Acceptance Scarf")).toBeVisible();
-  await page.goto("/@alhayabrand");
-  await page.getByPlaceholder("Search products").fill("Acceptance Scarf");
-  await expect(page.getByRole("heading", { name: "Acceptance Scarf" })).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Add a product"})).toBeVisible();
+  await expect(page.getByLabel("Customer-service note")).toHaveCount(0);
+  await expect(page.getByLabel("Option group name")).toHaveCount(0);
+  await expect(page.getByRole("button",{name:/Delete/})).toHaveCount(0);
+  await page.getByLabel("Product name").fill("Client browser product");
+  await page.getByLabel("Description").fill("A client-managed product created in the simplified workflow.");
+  await page.getByLabel("Availability").selectOption("limited");
+  await page.getByLabel("Collection").selectOption({index:1});
+  await page.getByLabel("Category").selectOption({index:1});
+  await page.getByRole("button",{name:"Add and publish product"}).click();
+  await expect(page.getByText(/Product published successfully as showroom version/)).toBeVisible();
+  await page.goto("/dashboard/products");
+  await expect(page.getByRole("heading",{name:"My products"})).toBeVisible();
+  await page.getByLabel("Find a product").fill("Client browser");
+  await expect(page.getByRole("heading",{name:"Client browser product"})).toBeVisible();
+  await expect(page.getByText(/Showing 1 of/)).toBeVisible();
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({width:1280,height:720});
+  await page.goto("/dashboard/requests/new");
+  await expect(page.getByText("Showroom change request",{exact:true})).toBeVisible();
+  await expect(page.getByLabel("Request type")).toHaveCount(0);
   await page.goto("/dashboard/inquiries");
+  await expectVisibleControlsNamed(page);
+  await expect(page.getByRole("button",{name:"Update"})).toHaveCount(0);
+  await expect(page.getByRole("link",{name:"Create delivery"})).toHaveCount(0);
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto("/dashboard/inquiries?business=1");
   await expectVisibleControlsNamed(page);
   const row = page.locator("section.panel").filter({ hasText: "Browser Tester" });
   await row.getByRole("combobox").selectOption("confirmed");
@@ -183,7 +512,6 @@ test("owner catalog, inquiry, delivery, and role isolation workflows persist", a
   await page.locator('input[name="deliveryAddress"]').fill("Acceptance destination");
   await page.getByRole("button", { name: "Submit to Malikt Board" }).click();
   await expect(page.getByText(/submitted to the mock Malikt Board/)).toBeVisible();
-  expect(readAcceptanceRow("productStockByName", "Acceptance Scarf")).toEqual({ stock_count: 3 });
   expect(readAcceptanceRow("inquiryByCustomer", "Browser Tester")).toMatchObject({ status: "confirmed" });
   expect(readAcceptanceRow("deliveryByAddress", "Acceptance destination")).toEqual({ status: "submitted" });
   expect(errors).toEqual([]);

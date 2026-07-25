@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { headers } from "next/headers";
-import { appUrl } from "./app-url";
 import { getDb } from "./db";
+import { trustedOriginPolicy } from "./trusted-origins";
 
 function privacySalt() {
   const value = process.env.PRIVACY_SALT;
@@ -33,7 +33,11 @@ export async function currentRequestIdentity() {
 export function assertSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return;
-  if (origin.replace(/\/$/, "") !== appUrl()) throw new Error("Invalid request origin.");
+  let normalized: string;
+  try { normalized = new URL(origin).origin; } catch { throw new Error("Invalid request origin."); }
+  const allowed = new Set(trustedOriginPolicy(process.env).mutationOrigins);
+  try { allowed.add(new URL(request.url).origin); } catch { throw new Error("Invalid request origin."); }
+  if (!allowed.has(normalized)) throw new Error("Invalid request origin.");
 }
 
 export function audit(action: string, options: { userId?: number | null; businessId?: number | null; detail?: unknown; ipHash?: string } = {}) {

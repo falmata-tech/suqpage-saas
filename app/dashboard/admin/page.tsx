@@ -1,8 +1,246 @@
-import DashboardShell from "@/components/DashboardShell";
-import { adminCreateBusinessAction, adminResetPasswordAction, adminUpdateBusinessAction } from "@/app/actions";
-import { requireUser } from "@/lib/auth";
-import { getAllBusinesses, getDb } from "@/lib/db";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-export const dynamic="force-dynamic";
-const designs=["alhaya","usashopet","novatech","homevibe"];
-export default async function Admin({searchParams}:{searchParams:Promise<{error?:string;saved?:string}>}){const user=await requireUser();if(user.role!=="admin")redirect("/dashboard");const p=await searchParams;const businesses=getAllBusinesses();const owners=getDb().prepare("SELECT id,email,name,business_id,must_change_password FROM users WHERE role='owner' ORDER BY name").all() as any[];return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>SaaS administration</h1><p>Onboard businesses, assign a custom renderer, publish showrooms and manage owner access.</p></div></div>{p.error&&<p className="error">{p.error}</p>}{p.saved&&<p className="notice">Administrative change saved.</p>}<div className="split"><section className="panel"><h2>Create business and owner</h2><form action={adminCreateBusinessAction} className="form-grid"><div className="field"><label>Business name</label><input aria-label="Business name" name="name" required/></div><div className="field"><label>Handle</label><input aria-label="Handle" name="handle" required placeholder="businessname"/></div><div className="field"><label>Design renderer</label><select aria-label="Design renderer" name="designKey">{designs.map(d=><option key={d}>{d}</option>)}</select></div><div className="field"><label>Owner name</label><input aria-label="Owner name" name="ownerName" required/></div><div className="field"><label>Owner email</label><input aria-label="Owner email" type="email" name="email" required/></div><div className="field"><label>Temporary password</label><input aria-label="Temporary password" type="password" name="temporaryPassword" minLength={12} required/></div><div className="field full"><small>The showroom starts as draft. Give the password securely; the owner must change it at first sign-in.</small></div><div className="field full"><button className="btn brand">Create tenant</button></div></form></section><section className="panel"><h2>Reset owner password</h2><form action={adminResetPasswordAction} className="form-grid"><div className="field full"><label>Owner</label><select aria-label="Owner" name="userId">{owners.map(o=><option key={o.id} value={o.id}>{o.name} · {o.email}</option>)}</select></div><div className="field full"><label>New temporary password</label><input aria-label="Temporary password" type="password" name="temporaryPassword" minLength={12} required/></div><div className="field full"><button className="btn">Reset and revoke sessions</button></div></form></section></div><section className="panel"><h2>Businesses</h2><div className="table-wrap"><table className="data-table"><thead><tr><th>Business</th><th>Owner</th><th>Renderer</th><th>Status</th><th>Save</th></tr></thead><tbody>{businesses.map(b=>{const owner=owners.find(o=>o.business_id===b.id);return <tr key={b.id}><td><strong>{b.name}</strong><br/><small>@{b.handle}</small></td><td>{owner?.email||"No owner"}{owner?.must_change_password?<><br/><small>Temporary password</small></>:null}</td><td colSpan={3}><form action={adminUpdateBusinessAction} className="inline-actions"><input type="hidden" name="businessId" value={b.id}/><select aria-label="Design renderer" name="designKey" defaultValue={b.design_key}>{designs.map(d=><option key={d}>{d}</option>)}</select><select aria-label="Business status" name="status" defaultValue={b.status}><option value="draft">draft</option><option value="active">active</option><option value="suspended">suspended</option></select><button className="small-btn">Save</button></form></td></tr>})}</tbody></table></div></section></DashboardShell>}
+import {
+  adminResetClientPasswordAction,
+  adminUpdateBusinessAction,
+} from "@/app/actions";
+import { createStaffAccountAction } from "@/app/staff-actions";
+import DashboardShell from "@/components/DashboardShell";
+import { requireUser } from "@/lib/auth";
+import { hasCapability } from "@/lib/capabilities";
+import { getAllBusinesses } from "@/lib/db";
+import { listManagedClients, listStaffAccounts } from "@/lib/staff-operations";
+
+export const dynamic = "force-dynamic";
+
+export default async function Admin({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; saved?: string }>;
+}) {
+  const user = await requireUser();
+  if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
+
+  const query = await searchParams;
+  const businesses = getAllBusinesses();
+  const clients = listManagedClients();
+  const staff = listStaffAccounts();
+
+  return (
+    <DashboardShell user={user} business={null}>
+      <div className="dashboard-head">
+        <div>
+          <h1>SaaS administration</h1>
+          <p>
+            Manage client access, staff accounts, and operational availability.
+            Showroom content changes move through approved revisions.
+          </p>
+        </div>
+        <Link className="btn brand" href="/dashboard/clients/new">
+          Create client workspace
+        </Link>
+      </div>
+      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.saved ? <p className="notice">Administrative change saved.</p> : null}
+
+      <section className="panel">
+        <div className="dashboard-head">
+          <div>
+            <h2>Client access</h2>
+            <p>
+              Client workspaces may be created before a request is submitted.
+              Invitation links are shown once when the workspace is created.
+            </p>
+          </div>
+          <Link className="btn" href="/dashboard/clients/new">
+            New client workspace
+          </Link>
+        </div>
+        {clients.length ? (
+          <form action={adminResetClientPasswordAction} className="form-grid">
+            <div className="field full">
+              <label htmlFor="admin-client">Client</label>
+              <select id="admin-client" name="userId">
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.name} · {client.email} · {client.business_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field full">
+              <label htmlFor="admin-temporary-password">
+                New temporary password
+              </label>
+              <input
+                id="admin-temporary-password"
+                type="password"
+                name="temporaryPassword"
+                minLength={12}
+                required
+              />
+            </div>
+            <div className="field full">
+              <small>
+                Resetting a password revokes the client&apos;s active sessions and
+                requires a password change at the next sign-in.
+              </small>
+            </div>
+            <div className="field full">
+              <button className="btn">Reset client password</button>
+            </div>
+          </form>
+        ) : (
+          <div className="empty-state">No client accounts yet.</div>
+        )}
+      </section>
+
+      <section className="panel">
+        <div className="dashboard-head">
+          <div>
+            <h2>Staff access</h2>
+            <p>
+              Provision individual operations and assigned-team accounts.
+              Shared staff credentials are not supported.
+            </p>
+          </div>
+        </div>
+        <div className="split">
+          <form action={createStaffAccountAction} className="form-grid">
+            <div className="field">
+              <label htmlFor="staff-name">Name</label>
+              <input id="staff-name" name="name" required maxLength={100} />
+            </div>
+            <div className="field">
+              <label htmlFor="staff-email">Email</label>
+              <input
+                id="staff-email"
+                name="email"
+                type="email"
+                required
+                maxLength={160}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="staff-role">Access role</label>
+              <select id="staff-role" name="accessRole">
+                <option value="team_member">Team member</option>
+                <option value="operations_manager">Operations manager</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="staff-password">Temporary password</label>
+              <input
+                id="staff-password"
+                name="temporaryPassword"
+                type="password"
+                minLength={12}
+                required
+              />
+            </div>
+            <div className="field full">
+              <small>
+                The staff member must change this password at first sign-in.
+              </small>
+            </div>
+            <div className="field full">
+              <button className="btn brand">Create staff account</button>
+            </div>
+          </form>
+          <div>
+            {staff.length ? (
+              <div className="request-card-list">
+                {staff.map((member) => (
+                  <div className="staff-card" key={member.id}>
+                    <div>
+                      <strong>{member.name}</strong>
+                      <span>{member.email}</span>
+                    </div>
+                    <span className="badge">
+                      {member.access_role.replaceAll("_", " ")}
+                    </span>
+                    <small>
+                      {member.must_change_password
+                        ? "Temporary password"
+                        : "Active sign-in"}
+                    </small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">No staff accounts yet.</div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <h2>Businesses</h2>
+        <p>
+          Draft showrooms become active only through an approved publication.
+          Established showrooms may be suspended or restored without changing
+          their content.
+        </p>
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>Client</th>
+                <th>Publication</th>
+              </tr>
+            </thead>
+            <tbody>
+              {businesses.map((business) => {
+                const client = clients.find(
+                  (candidate) => candidate.business_id === business.id,
+                );
+                return (
+                  <tr key={business.id}>
+                    <td>
+                      <strong>{business.name}</strong>
+                      <br />
+                      <small>
+                        @{business.handle} · {business.design_key}
+                      </small>
+                    </td>
+                    <td>{client?.email ?? "Invitation pending"}</td>
+                    <td>
+                      {business.status === "draft" ? (
+                        <div>
+                          <span className="badge draft">draft</span>
+                          <br />
+                          <small>Requires an approved revision to publish.</small>
+                        </div>
+                      ) : (
+                        <form
+                          action={adminUpdateBusinessAction}
+                          className="inline-actions"
+                        >
+                          <input
+                            type="hidden"
+                            name="businessId"
+                            value={business.id}
+                          />
+                          <select
+                            aria-label={`${business.name} operational status`}
+                            name="status"
+                            defaultValue={business.status}
+                          >
+                            <option value="active">active</option>
+                            <option value="suspended">suspended</option>
+                          </select>
+                          <button className="small-btn">Save</button>
+                        </form>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </DashboardShell>
+  );
+}

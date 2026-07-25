@@ -8,6 +8,8 @@
 # Dependencies and framework/test output are rebuilt inside the image
 node_modules
 .next
+.next-acceptance
+.acceptance-tsconfig-*.json
 out
 test-results
 playwright-report

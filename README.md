@@ -1,6 +1,6 @@
 # SuqPage SaaS MVP — Controlled Launch Build
 
-SuqPage is a multi-tenant Next.js application for manually designed client showrooms. Each client keeps a custom renderer while SuqPage supplies dynamic catalogs, product options, stock and availability, saved inquiries, social handoff, and mock Malikt Board delivery requests.
+SuqPage is a multi-tenant Next.js application for manually designed client showrooms. Each client keeps a custom renderer while SuqPage supplies managed onboarding requests, dynamic catalogs, product options, descriptive availability, saved inquiries, social handoff, and mock Malikt Board delivery requests.
 
 ## Engineering workflow
 
@@ -63,9 +63,11 @@ This performs:
 - TypeScript validation
 - showroom integration validation
 - security and tenant-isolation tests
+- stockless schema/recovery and versioned product-upkeep tests
 - production build
 - production HTTP smoke tests
 - dependency vulnerability audit
+- managed-request integration and production HTTP checks
 
 For real Chromium acceptance tests covering public, administrator, and owner
 workflows with an isolated temporary database, install the browser once and run:
@@ -114,6 +116,13 @@ NOTIFICATION_FROM_EMAIL=SuqPage <notifications@suqpage.com>
 ```
 
 Production startup refuses non-HTTPS app URLs and non-persistent database/media configuration.
+Set `SUQPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
+basic product writes while leaving requests and showrooms available.
+Set `SUQPAGE_RECIPE_STUDIO_ENABLED=0` to deny recipe export/import and route
+new or existing private drafts through the retained administrative editor.
+Controlled YouTube admission is disabled by default. Set
+`SUQPAGE_YOUTUBE_ADMISSION_ENABLED=1` only after the DEP-009 provider gate is
+approved; this enables private normalized-ID admission, not public rendering.
 
 ## New production installation
 
@@ -128,19 +137,30 @@ Before opening the site publicly:
 
 1. Sign in with each temporary account and change its password.
 2. Configure real business notification emails and social contacts.
-3. Confirm the FormSubmit activation email sent to `falmata.dawano@gmail.com` after the first landing-page form submission.
+3. Submit a public expression of interest and confirm it appears in the administrator operations queue without attachments or account creation.
 4. Put the server behind an HTTPS reverse proxy.
 5. Create and verify an initial backup.
 
 ## Upgrade from the audited prototype
 
-Copy the previous database to the configured `SUQPAGE_DB_PATH`, then run:
+Copy the previous database to the configured `SUQPAGE_DB_PATH`. For an existing
+database whose product/history tables require a destructive rebuild, stop every
+application instance, create a verified checkpoint, and approve that one
+migration command:
 
 ```bash
-npm run migrate
+npm run backup
+SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS=1 npm run migrate
+npm run release
 ```
 
-The migration preserves businesses, products and inquiries, adds the new security tables and constraints, and forces every existing account to change its password. An administrator should reset all old shared passwords before public launch.
+Do not leave `SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS` in the persistent
+environment. Migration refuses a checkpoint older than 24 hours, a backup for a
+different database, an integrity/foreign-key failure, changed source bytes, or
+insufficient disk. The migration preserves businesses, products, availability,
+inquiries, relationships, and retained history while removing obsolete numeric
+inventory columns and adding product-upkeep history. An administrator should
+reset all old shared passwords before public launch.
 
 Old uploads stored under `public/uploads/runtime` should be re-uploaded through the dashboard so they are validated and stored under the persistent `/media/` route.
 
@@ -170,7 +190,11 @@ npm run backup
 npm run restore -- --from=/absolute/path/to/backups/<timestamp>
 ```
 
-Stop the application before restoring. Test restoration before relying on a backup policy.
+The backup command reads the database without invoking application migrations,
+checkpoints WAL, verifies integrity and foreign keys before and after copying,
+and records a source hash used by destructive-migration admission. Stop the
+application before backup for a destructive upgrade and before any restore.
+Test restoration before relying on a backup policy.
 
 ## Social contact formats
 
@@ -193,6 +217,25 @@ Dashboard uploads:
 - generate server-controlled filenames
 - store outside the Next.js static build
 - serve through `/media/<generated-file>` with `nosniff`
+
+The public `/request` form is an attachment-free expression of interest stored
+by SuqPage rather than a third-party form service. It cannot create an account
+or accept multipart/file input. After SuqPage accepts a prospect and sends an
+invitation, the authenticated client request form accepts up to ten
+sanitized images. Those private images remain below the persistent media root
+and are served only through an authorized route.
+
+## Basic product upkeep
+
+After the first showroom publication, clients see **My products**. They may add
+a product or maintain its exact name, description, primary managed image,
+descriptive availability, and compatible existing collection/category
+placement. Assigned team members, operations managers, and administrators use
+the same narrow flow with customer-service attribution. Every save creates a
+retained monotonic showroom version; stale forms fail instead of overwriting
+newer revisions. Collection/category creation, options, ordering, slugs,
+structural deletion/unpublish, settings, design, and full publication remain in
+the request/revision workflow.
 
 ## Mock Malikt Board adapter
 

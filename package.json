@@ -12,7 +12,7 @@
     "migrate": "tsx scripts/migrate.ts",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "node scripts/typecheck.mjs",
     "test": "tsx scripts/test-security.ts",
     "test:adapters": "tsx scripts/test-adapters.ts",
     "test:http": "node scripts/http-smoke.mjs",
@@ -20,16 +20,30 @@
     "test:container": "node scripts/test-container.mjs",
     "test:trace": "node scripts/test-build-trace.mjs",
     "test:operations": "node scripts/test-operations.mjs",
+    "test:requests": "tsx scripts/test-requests.ts",
+    "test:revisions": "tsx scripts/test-revisions.ts",
+    "test:compositions": "tsx scripts/test-showroom-composition.ts",
+    "test:bank": "tsx scripts/test-showroom-bank.ts",
+    "test:experience": "tsx scripts/test-showroom-experience.ts",
+    "test:showroom-migration": "tsx scripts/test-showroom-migration.ts",
+    "test:stockless": "tsx scripts/test-stockless-catalog.ts",
+    "test:product-upkeep": "tsx scripts/test-product-upkeep.ts",
+    "test:recipe": "tsx scripts/test-showroom-recipe.ts",
+    "test:content-blocks": "tsx scripts/test-showroom-content-blocks.ts",
+    "test:composition-v2": "tsx scripts/test-showroom-composition-v2.ts",
+    "test:revision-v4": "tsx scripts/test-revision-v4.ts",
+    "test:youtube-provider": "tsx scripts/test-youtube-provider.ts",
+    "test:showroom-renderer": "tsx scripts/test-showroom-renderer.ts",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm test && npm run test:adapters",
+    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:showroom-migration && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "next": "16.2.10",
+    "next": "16.2.11",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sharp": "0.35.3"
@@ -47,7 +61,7 @@
   },
   "overrides": {
     "next": {
-      "postcss": "8.5.10",
+      "postcss": "8.5.18",
       "sharp": "0.35.3"
     }
   }

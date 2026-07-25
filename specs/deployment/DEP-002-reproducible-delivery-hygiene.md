@@ -1,10 +1,10 @@
 ---
 id: DEP-002
 title: Reproducible delivery and repository hygiene
-status: done
-related: [DEP_BASE, ADR-0002, ADR-0003]
+status: in_progress
+related: [BE-003, DEP_BASE, ADR-0002, ADR-0003]
 owners: [operations, security]
-last_updated: 2026-07-22
+last_updated: 2026-07-24
 change_level: L3
 ---
 
@@ -33,14 +33,22 @@ four-tenant application behavior and single-instance pilot boundary.
   without printing generated credential values.
 - Require exact production Server Action origins to be available while Next.js
   configuration is built, including documented reverse-proxy deployments.
+- Derive Next.js Server Action origins and custom authenticated mutation origins
+  from one exact-host contract so development proxies cannot drift between
+  framework and application security layers.
 - Treat `next-env.d.ts` as generated output and generate framework types before
   standalone TypeScript checks without dirtying Git.
 - Use Node 22.16 or newer consistently in documentation, package metadata, and
   CI evidence.
 - Bound or explicitly document the media-route output-file trace without
   weakening persistent media isolation.
+- Isolate each browser-acceptance production build from the normal `.next`
+  directory and from concurrent acceptance runs so a build cannot replace
+  chunks underneath a running test or development server.
 - Reject a production dependency graph containing a known high-severity native
   image-processing vulnerability.
+- Reject a production dependency graph containing a PostCSS release vulnerable
+  to previous-source-map path traversal; retain the supported Next.js version.
 - Define the GitHub checks a repository administrator must require before merge.
 
 ### Non-goals
@@ -79,11 +87,23 @@ four-tenant application behavior and single-instance pilot boundary.
 - Production image builds receive `NEXT_PUBLIC_APP_URL` and optional exact
   `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
   configuration must contain the expected host and no wildcard.
+- One pure trusted-origin contract supplies both Next.js configuration and
+  custom mutation guards. Development adds only exact localhost origins and the
+  current Codespace's HTTPS forwarding origins for supported ports; production
+  adds only the canonical and explicitly configured origins. Neither path trusts
+  a forwarded host header or admits a wildcard.
 - Type checking generates Next.js declarations first. Running development and
-  production generation leaves tracked files unchanged.
+  production generation leaves tracked files unchanged. Type checking discards
+  only stale generated development-route declarations before regenerating its
+  authoritative route types.
+- Browser acceptance uses a unique ignored build-output directory per run and
+  removes only that directory during failure-safe cleanup.
 - The installed dependency graph contains one supported `sharp` version at or
   above the first version patched for current libvips advisories; Next.js must
   not retain a vulnerable optional nested copy.
+- The Next.js PostCSS override is at or above 8.5.18, the first release patched
+  for `GHSA-r28c-9q8g-f849`; remediation must not accept npm's breaking
+  downgrade suggestion.
 - Required GitHub merge checks are `core`, `browser`, and `container`; enforcing
   repository rules is an explicit administrator operation outside a code commit.
 
@@ -116,11 +136,25 @@ Scenario: Exact proxy origin is compiled into production configuration
   THEN its Server Action origin configuration contains those exact hosts
   AND contains no unrestricted wildcard
 
+Scenario: Development origin policies cannot drift
+  GIVEN the application runs through the current Codespace HTTPS forwarding host
+  WHEN Next.js and a custom authenticated mutation validate the browser origin
+  THEN both derive the same exact host from the shared contract
+  AND a sibling port, lookalike hostname, wildcard, or forwarded-host claim cannot expand trust
+
 Scenario: Framework type generation does not create task drift
   GIVEN a clean tracked worktree
-  WHEN type generation, development startup, and production build run
+  AND an earlier interrupted development process left partial generated route types
+  WHEN type checking, development startup, and production build run
   THEN TypeScript has the required Next.js declarations
+  AND stale generated development declarations cannot break the source check
   AND no generated declaration becomes a tracked modification
+
+Scenario: Browser acceptance cannot corrupt another Next.js runtime
+  GIVEN a development server, release build, or another browser run shares the repository
+  WHEN browser acceptance builds and starts its production test server
+  THEN it uses a unique ignored output directory for that run
+  AND cleanup cannot delete or replace another runtime's compiled chunks
 
 Scenario: Media tracing remains bounded
   GIVEN uploaded media lives outside static application output
@@ -134,6 +168,13 @@ Scenario: A new native image advisory blocks release
   THEN the dependency graph contains no vulnerable nested sharp copy
   AND upload decoding and sanitization regression tests pass
   AND the production dependency audit reports no vulnerability
+
+Scenario: A transitive CSS processor advisory blocks release
+  GIVEN the locked Next.js graph resolves PostCSS at a vulnerable version
+  WHEN the production dependency audit reports GHSA-r28c-9q8g-f849
+  THEN the exact PostCSS override is raised to the first compatible patched release
+  AND Next.js is not downgraded or replaced
+  AND the complete build, CSS, browser, and dependency gates pass
 ```
 
 ## Quality impact
@@ -165,9 +206,12 @@ tokens, or environment secrets.
 | CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
 | Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
-| Generated declarations leave Git clean | contract | `scripts/test-workflow.mjs` |
+| Shared exact development origin policy | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |
+| Generated declarations leave Git clean and stale dev types are bounded | contract | `scripts/typecheck.mjs`, `scripts/test-workflow.mjs` |
+| Acceptance build output is unique, ignored, and safely cleaned | contract/browser | `scripts/test-workflow.mjs`, `scripts/acceptance-runner.mjs` |
 | Media route remains functional with bounded trace | build/HTTP | `npm run build`, `scripts/http-smoke.mjs` |
 | Native image dependency is patched without a nested vulnerable copy | security/dependency | `npm ls sharp --all`, `scripts/test-security.ts`, `npm audit --omit=dev` |
+| CSS processor dependency is patched without a framework downgrade | security/dependency | `npm ls postcss --all`, `npm audit --omit=dev`, `npm run build` |
 | Existing application behavior remains intact | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -239,3 +283,54 @@ GitHub Actions run `29889083549` then passed the `core`, `browser`, and
 `container` jobs on commit `3edb2d3`, including the release audit, operations,
 five browser scenarios, and production container. This replacement remote
 evidence returns the spec to `done`.
+
+Local regression evidence on 2026-07-22 after the authenticated-navigation
+defect audit:
+
+- A seven-scenario production browser run initially reproduced compiled chunk
+  replacement in the shared `.next` directory, producing login-route 500s and
+  cascading authentication failures rather than authorization redirects.
+- The acceptance build was moved to a unique ignored output directory with
+  run-scoped failure-safe cleanup. The repeated production browser run passed
+  all seven public, mobile, administrator, client, operations-manager, team-
+  member, legacy-owner, API, authorization, and security-header scenarios.
+- Type checking now removes only stale generated `.next/dev/types` before route
+  regeneration; workflow-contract validation and standalone type checking pass
+  after an interrupted dev process had left an invalid generated validator.
+- `npm run release` passed the final production build, 39-trace privacy check,
+  HTTP smoke, TypeScript, design, security, adapter, request, revision,
+  publication/rollback, and zero-vulnerability dependency gates.
+
+Local exact-origin and trace regression evidence on 2026-07-24:
+
+- One pure origin policy now supplies exact hosts to Next.js and normalized
+  origins to custom mutation adapters. Security regression coverage rejects
+  wildcard, lookalike, unsupported-port, forwarded-host, and production
+  Codespace trust expansion.
+- The request-attachment filesystem path is explicitly excluded from Turbopack
+  static tracing. The production build completed without the unbounded-project
+  trace warning, and the trace gate rejects `next.config.ts` if it reappears in
+  a route manifest.
+- Interrupted `.next-acceptance` output and generated acceptance TypeScript
+  configuration are excluded from Docker context. The isolated context fell
+  from the observed 41.07 MB to 29.14 kB.
+- `npm run check`, `npm run release`, `npm run test:operations`, all seven
+  production browser scenarios, and `npm run test:container` passed. The
+  container verified exact compiled origins, 41 bounded output-file traces,
+  non-root preflight, health, credential-safe logs, and failure-safe cleanup.
+
+New advisory checkpoint on 2026-07-24:
+
+- The release audit newly reported `GHSA-r28c-9q8g-f849` against the existing
+  `postcss@8.5.12` override. The advisory identifies 8.5.18 as the first patched
+  release. Local remediation raises only that override and explicitly rejects
+  npm's unsafe Next.js 9.3.3 downgrade suggestion.
+- `npm ci` reproduced the lock, `npm ls postcss --all` resolved only overridden
+  `postcss@8.5.18` beneath unchanged `next@16.2.11`, `npm audit --omit=dev`
+  reported zero vulnerabilities, and the production build passed.
+- The complete release passed its 42-trace privacy check, HTTP, type, domain,
+  security, adapter, request, revision, and zero-vulnerability audit gates; all
+  seven production-browser scenarios and the isolated non-root container gate
+  passed against the patched graph.
+- This spec remains `in_progress` only until replacement remote `core`,
+  `browser`, and `container` checks pass.

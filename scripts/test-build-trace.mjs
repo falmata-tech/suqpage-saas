@@ -17,7 +17,7 @@ function walk(directory) {
 walk(nextRoot);
 assert(manifests.length > 0, "Production build did not emit output-file trace manifests");
 
-const forbidden = /^(?:\.env(?:$|\.)|\.git(?:\/|$)|\.local(?:\/|$)|app(?:\/|$)|backups(?:\/|$)|data(?:\/|$)|docs(?:\/|$)|lib(?:\/|$)|public(?:\/|$)|scripts(?:\/|$)|showroom-sdk(?:\/|$)|specs(?:\/|$)|test-results(?:\/|$)|playwright-report(?:\/|$)|.*\.md$|Dockerfile$|docker-compose\.yml$|package-lock\.json$)/i;
+const forbidden = /^(?:\.env(?:$|\.)|\.git(?:\/|$)|\.local(?:\/|$)|app(?:\/|$)|backups(?:\/|$)|data(?:\/|$)|docs(?:\/|$)|lib(?:\/|$)|public(?:\/|$)|scripts(?:\/|$)|showroom-sdk(?:\/|$)|specs(?:\/|$)|test-results(?:\/|$)|playwright-report(?:\/|$)|.*\.md$|Dockerfile$|docker-compose\.yml$|next\.config\.ts$|package-lock\.json$)/i;
 const findings = [];
 for (const manifest of manifests) {
   const trace = JSON.parse(fs.readFileSync(manifest, "utf8"));
