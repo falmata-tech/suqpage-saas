@@ -55,6 +55,23 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 
 ## Now — make the controlled pilot trustworthy
 
+### Build the mobile daily Bazaar map
+
+- Outcome: make the Daily Bazaar a real public discovery surface centered on a
+  mobile-friendly visual floor, stable booth placement, booth previews, and a
+  complete Bazaar List fallback that always leads visitors into permanent
+  `/@handle` showrooms.
+- Controlling specs: `FE-010`, `BE-011`, and `DEP-010`.
+- Current delivery mode: the Bazaar map is promoted ahead of the broader public
+  homepage redesign. The route and data foundation ship first; homepage
+  promotion follows only after mobile browser evidence passes.
+- Sequence: add the active Bazaar and booth contract, build `/bazaar` as the
+  first surface, prove 320/390-pixel map/list usability, then integrate the
+  homepage callout and larger All Showrooms work.
+- Non-goals: checkout marketplace behavior, paid sponsorship auctions, separate
+  booth pages, WebGL/3D/game-engine map rendering, and replacing permanent
+  showroom identity.
+
 ### Complete typed recipes and creative bank 1.2
 
 - Outcome: finish the promoted `FE-007`/`BE-008`/`DEP-007` recipe initiative

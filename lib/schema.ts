@@ -960,4 +960,79 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const bazaarApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=15")
+    .get();
+  if (!bazaarApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS bazaar_themes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          slug TEXT UNIQUE NOT NULL,
+          weekday INTEGER NOT NULL CHECK(weekday BETWEEN 0 AND 6),
+          industry_keys_json TEXT NOT NULL DEFAULT '[]',
+          icon TEXT DEFAULT '',
+          timezone TEXT NOT NULL DEFAULT 'Africa/Addis_Ababa',
+          active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)),
+          starts_at_time TEXT NOT NULL DEFAULT '04:00',
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS bazaar_occurrences (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          theme_id INTEGER NOT NULL REFERENCES bazaar_themes(id) ON DELETE CASCADE,
+          bazaar_date TEXT NOT NULL,
+          starts_at TEXT NOT NULL,
+          ends_at TEXT NOT NULL,
+          timezone TEXT NOT NULL,
+          status TEXT NOT NULL CHECK(status IN ('scheduled','live','ended','cancelled')),
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(theme_id,bazaar_date)
+        );
+        CREATE TABLE IF NOT EXISTS bazaar_booth_profiles (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          industry_keys_json TEXT NOT NULL DEFAULT '[]',
+          booth_image_path TEXT DEFAULT '',
+          fallback_style TEXT DEFAULT '',
+          is_featured INTEGER NOT NULL DEFAULT 0 CHECK(is_featured IN (0,1)),
+          is_excluded INTEGER NOT NULL DEFAULT 0 CHECK(is_excluded IN (0,1)),
+          approved_at TEXT,
+          approved_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS bazaar_booths (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          occurrence_id INTEGER NOT NULL REFERENCES bazaar_occurrences(id) ON DELETE CASCADE,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          x INTEGER NOT NULL CHECK(x >= 0),
+          y INTEGER NOT NULL CHECK(y >= 0),
+          width INTEGER NOT NULL CHECK(width BETWEEN 80 AND 360),
+          height INTEGER NOT NULL CHECK(height BETWEEN 60 AND 240),
+          floor_section TEXT DEFAULT '',
+          featured INTEGER NOT NULL DEFAULT 0 CHECK(featured IN (0,1)),
+          status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','excluded')),
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(occurrence_id,business_id)
+        );
+        CREATE INDEX IF NOT EXISTS bazaar_theme_weekday_idx
+          ON bazaar_themes(active,weekday,slug);
+        CREATE INDEX IF NOT EXISTS bazaar_occurrence_status_idx
+          ON bazaar_occurrences(status,bazaar_date,theme_id);
+        CREATE INDEX IF NOT EXISTS bazaar_booth_occurrence_idx
+          ON bazaar_booths(occurrence_id,status,featured,business_id);
+        CREATE INDEX IF NOT EXISTS bazaar_profile_flags_idx
+          ON bazaar_booth_profiles(is_excluded,is_featured,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(15)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

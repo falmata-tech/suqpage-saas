@@ -2,7 +2,7 @@
 id: DEP-002
 title: Reproducible delivery and repository hygiene
 status: in_progress
-related: [BE-003, DEP_BASE, ADR-0002, ADR-0003]
+related: [BE-003, DEP_BASE, ADR-0002, ADR-0003, DEP-010]
 owners: [operations, security]
 last_updated: 2026-07-24
 change_level: L3

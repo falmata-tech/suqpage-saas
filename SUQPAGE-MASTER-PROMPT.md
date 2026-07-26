@@ -84,6 +84,9 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - an inquiry management dashboard;
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
+- a public discovery surface where eligible businesses can appear in a themed
+  Daily Bazaar while every booth leads back to the business's permanent
+  `/@handle` showroom;
 - a controlled four-client MVP that can later grow into broader SaaS onboarding.
 
 ### SuqPage is not
@@ -95,7 +98,8 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - an ERP;
 - a tax engine;
 - an automatic order-fulfillment system;
-- a marketplace that mixes every seller into one shared storefront;
+- a checkout marketplace or shared storefront that replaces each business's
+  permanent showroom identity;
 - an excuse to make every client page look like the SuqPage landing page;
 - an AI product merely because AI may help generate custom designs.
 

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { migrateDatabase } from "../lib/schema";
@@ -168,6 +169,8 @@ for (const businessId of seeded.values()) {
     JSON.stringify(snapshot),
   );
 }
+
+seedDefaultBazaarConfig(db);
 
 
 const generatedCredentials: Array<{ role:string; business:string; email:string; password:string }> = [];

@@ -171,6 +171,29 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
+test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ page }) => {
+  const errors = monitor(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/bazaar");
+  await expect(page.getByRole("heading", { name: "Move through today's Bazaar." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toContainText("Community Market");
+  await expect(page.getByText("4 booths on the floor")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Select .* booth/ })).toHaveCount(4);
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await page.getByRole("button", { name: "Zoom out" }).click();
+  await page.getByRole("button", { name: "Reset Bazaar view" }).click();
+  await page.getByRole("button", { name: "Select NovaTech booth" }).click();
+  await expect(page.getByLabel("NovaTech booth preview")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@novatech");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.getByRole("tab", { name: "Bazaar List" }).click();
+  await expect(page.locator(".bazaar-list-card")).toHaveCount(4);
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(4);
+  await page.setViewportSize({ width: 320, height: 700 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
   await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");

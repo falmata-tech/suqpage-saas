@@ -38,6 +38,7 @@ const env = {
   SUQPAGE_SERVER_ACTION_ORIGINS: baseURL,
   SUQPAGE_NEXT_DIST_DIR: distDir,
   SUQPAGE_NEXT_TSCONFIG: tsconfigName,
+  SUQPAGE_BAZAAR_NOW: "2026-07-26T10:00:00.000Z",
 };
 
 function run(command, args, { capture = false } = {}) {

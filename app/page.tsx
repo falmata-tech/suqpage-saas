@@ -16,7 +16,7 @@ export default function Home() {
   return <>
     <header className="topbar"><div className="container" style={{display:"flex",alignItems:"center",width:"100%"}}>
       <Link href="/" className="brand"><Image src="/uploads/seed/suqpage/icon.png" alt="" width={34} height={34}/>SuqPage</Link>
-      <nav className="nav"><a href="#showrooms">Showrooms</a><Link href="/request">Request a showroom</Link><Link className="btn secondary" href="/login">Client login</Link></nav>
+      <nav className="nav"><Link href="/bazaar">Bazaar</Link><a href="#showrooms">Showrooms</a><Link href="/request">Request a showroom</Link><Link className="btn secondary" href="/login">Login</Link></nav>
     </div></header>
     <main>
       <section className="landing-hero"><div className="container"><span className="eyebrow">A smarter digital showroom</span><h1>Your products. Your identity. One clear conversation.</h1><p>SuqPage gives social sellers a professionally designed showroom, a structured inquiry cart and a practical workflow for turning customer interest into delivery requests.</p><div className="hero-actions"><a className="btn brand" href="#showrooms">Find a showroom</a><Link className="btn secondary" href="/request">Build your showroom</Link></div></div></section>
