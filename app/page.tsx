@@ -3,6 +3,7 @@ import Link from "next/link";
 import BazaarMap from "@/components/BazaarMap";
 import FeaturedShowrooms from "@/components/FeaturedShowrooms";
 import ShowroomDirectory, { type ShowroomDirectoryEntry } from "@/components/ShowroomDirectory";
+import SuqPageBrand from "@/components/SuqPageBrand";
 import { listBazaarAdminState } from "@/lib/bazaar";
 import { getAllBusinesses, getCatalogByBusinessId } from "@/lib/db";
 import { buildHomepageFeaturedPool } from "@/lib/marketplace-home";
@@ -59,10 +60,7 @@ export default function Home() {
     <div className="marketplace-home">
       <header className="marketplace-header">
         <div className="market-container marketplace-nav-shell">
-          <Link href="/" className="marketplace-brand" aria-label="SuqPage home">
-            <Image src="/uploads/seed/suqpage/icon.png" alt="" width={38} height={38} priority />
-            <span>SuqPage</span>
-          </Link>
+          <SuqPageBrand className="marketplace-brand" />
           <nav className="marketplace-desktop-nav" aria-label="Public navigation">
             <a href="#bazaar">Bazaar</a>
             <a href="#showrooms">All Showrooms</a>
@@ -169,7 +167,7 @@ export default function Home() {
 
       <footer className="market-footer">
         <div className="market-container">
-          <Link href="/" className="marketplace-brand"><Image src="/uploads/seed/suqpage/icon.png" alt="" width={32} height={32} /><span>SuqPage</span></Link>
+          <SuqPageBrand className="marketplace-brand" />
           <nav aria-label="Footer navigation"><a href="#bazaar">Bazaar</a><a href="#showrooms">All Showrooms</a><Link href="/request">Get a Showroom</Link><Link href="/login">Login</Link></nav>
           <div><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 SuqPage</span></div>
         </div>

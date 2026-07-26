@@ -204,7 +204,7 @@ assert.match(routeSource, /hasCapability\(user, "design-bank:view"\)/);
 assert.match(routeSource, /redirect\("\/dashboard"\)/);
 assert.match(routeSource, /DesignBankLaboratory/);
 const shellSource = fs.readFileSync("components/DashboardShell.tsx", "utf8");
-assert.match(shellSource, /href="\/dashboard\/design-bank"/);
+assert.match(shellSource, /(?:href=|href:\s*)"\/dashboard\/design-bank"/);
 assert.match(shellSource, /hasCapability\(user, "design-bank:view"\)/);
 
 console.log(

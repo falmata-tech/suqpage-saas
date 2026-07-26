@@ -774,6 +774,16 @@ Current verified behavior:
   dashboard. The public site is a separate, explicit link, and an authenticated
   visit to the login route returns to the dashboard instead of showing a second
   sign-in form.
+- Platform-owned homepage, Bazaar, intake, login, legal, favicon, and workspace
+  surfaces use one SuqPage mark and wordmark without replacing any tenant's
+  showroom identity. Authenticated navigation groups role-permitted work in a
+  neutral desktop sidebar and exposes the same destinations in a focus-contained
+  mobile drawer rather than a clipped horizontal link strip.
+- Clients see a revision preview action only after that exact revision is sent
+  for review. A staff-only draft is described as being prepared, and client
+  request history replaces internal assignment IDs, raw status-transition
+  syntax, revision metadata, and unknown workflow detail with customer-safe
+  progress descriptions. Authorized staff retain complete operational detail.
 - The four example business accounts and every former compatibility owner are
   restricted clients. Migration 7 preserves businesses, catalog data,
   inquiries, deliveries, requests, and publication history while converting

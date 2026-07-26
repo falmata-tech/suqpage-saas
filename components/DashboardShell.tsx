@@ -1,46 +1,64 @@
 import Link from "next/link";
-import { logoutAction } from "@/app/actions";
+import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
 import { hasCapability, isClient } from "@/lib/capabilities";
 import { hasRetainedPublication } from "@/lib/db";
 import type { Business, SessionUser } from "@/lib/types";
 
+const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
+  const visible = items.filter((item): item is WorkspaceNavItem => Boolean(item));
+  return visible.length ? { label, items: visible } : null;
+};
+
 export default function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
   const query = business ? `?business=${business.id}` : "";
+  const dashboardHref = `/dashboard${query}`;
   const client = isClient(user);
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
-  const established = business
-    ? hasRetainedPublication(business.id)
-    : false;
+  const established = business ? hasRetainedPublication(business.id) : false;
+  const canMaintainProducts = Boolean(business && established && hasCapability(user, "basic-product:maintain"));
+  const identityContext = business
+    ? business.name
+    : platformAdmin
+      ? "Platform administration"
+      : operations
+        ? "Operations workspace"
+        : teamMember
+          ? "Assigned work"
+          : "Private workspace";
+
+  const groups = [
+    group("Workspace", [
+      { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : operations ? "Businesses" : "Overview" },
+      operations && business ? { href: "/dashboard", label: "Switch business" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "My products" } : null,
+      client ? { href: "/dashboard/requests", label: "Requests" } : null,
+      client && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
+      client && business ? { href: `/dashboard/deliveries${query}`, label: "Delivery activity" } : null,
+      client && business ? { href: `/preview/@${business.handle}`, label: "Preview / review" } : null,
+      teamMember ? { href: "/dashboard/requests", label: "Assigned requests" } : null,
+      teamMember && business ? { href: `/preview/@${business.handle}`, label: "Live showroom context" } : null,
+    ]),
+    group("Client work", [
+      operations ? { href: "/dashboard/requests", label: "Client requests" } : null,
+      operations ? { href: "/dashboard/requests/on-behalf", label: "Record on behalf" } : null,
+      operations ? { href: "/dashboard/clients/new", label: "Create client workspace" } : null,
+      operations && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
+      operations && business ? { href: `/dashboard/deliveries${query}`, label: "Delivery operations" } : null,
+      operations && business ? { href: `/preview/@${business.handle}`, label: "Showroom context", external: true } : null,
+    ]),
+    group("Design tools", [
+      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Component bank" } : null,
+    ]),
+    group("Administration", [
+      platformAdmin ? { href: "/dashboard/admin", label: "Platform administration" } : null,
+      platformAdmin ? { href: "/dashboard/admin/bazaar", label: "Bazaar controls" } : null,
+    ]),
+  ].filter((item): item is WorkspaceNavGroup => Boolean(item));
+
   return <div className="dashboard">
-    <aside className="sidebar">
-      <Link className="brand" href={`/dashboard${query}`}>◆ SuqPage</Link>
-      <div className="sidebar-identity">{user.name}<br/>{business ? business.name : platformAdmin ? "Platform administration" : operations ? "Operations workspace" : teamMember ? "Assigned work" : "Private workspace"}</div>
-      <nav className="side-nav" aria-label="Dashboard">
-        <Link href={`/dashboard${query}`}>Overview</Link>
-        {business && established && hasCapability(user, "basic-product:maintain") ? (
-          <Link href={`/dashboard/products${query}`}>My products</Link>
-        ) : null}
-        {client && business ? <>
-          <Link href="/dashboard/requests">Requests</Link>
-          <Link href={`/dashboard/inquiries${query}`}>Customer inquiries</Link>
-          <Link href={`/dashboard/deliveries${query}`}>Delivery activity</Link>
-          <Link href={`/preview/@${business.handle}`}>Preview / review</Link>
-        </> : null}
-        {operations && business ? <><Link href={`/dashboard/inquiries${query}`}>Customer inquiries</Link><Link href={`/dashboard/deliveries${query}`}>Delivery operations</Link><Link href={`/preview/@${business.handle}`} target="_blank">Showroom context ↗</Link></> : null}
-        {teamMember && business ? <Link href={`/preview/@${business.handle}`}>Live showroom context</Link> : null}
-        {operations ? <Link href="/dashboard/requests">Client requests</Link> : null}
-        {operations ? <Link href="/dashboard/requests/on-behalf">Record on behalf</Link> : null}
-        {operations ? <Link href="/dashboard/clients/new">Create client workspace</Link> : null}
-        {teamMember ? <Link href="/dashboard/requests">Assigned requests</Link> : null}
-        {hasCapability(user, "design-bank:view") ? <Link href="/dashboard/design-bank">Design component bank</Link> : null}
-        {platformAdmin ? <><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link><Link href="/dashboard/admin/bazaar">Bazaar controls</Link></> : null}
-        <Link href="/dashboard/account">Account security</Link>
-        <Link href="/" target="_blank" rel="noreferrer">Public site ↗</Link>
-        <form action={logoutAction}><button type="submit">Sign out</button></form>
-      </nav>
-    </aside>
+    <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={identityContext} groups={groups} />
     <main className="main">{user.must_change_password ? <div className="error temporary-password">Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div> : null}{children}</main>
   </div>;
 }

@@ -21,6 +21,7 @@ async function main() {
   const { canAccessRequest, listAssignedRequests, listClientRequests } = await import("../lib/request-sqlite");
   const { createOnBehalfRequest } = await import("../lib/on-behalf-request-service");
   const { assignRequestToTeamMember, createStaffAccount, listAssignedBusinesses, listManagedClients } = await import("../lib/staff-operations");
+  const { presentRequestEvent } = await import("../lib/request-presentation");
   const repository = new SqliteRequestRepository();
   const attachments = new FileRequestAttachmentStore();
   const allowedRate = { consume: () => ({ allowed: true, retryAfterSeconds: 0 }) };
@@ -168,6 +169,27 @@ async function main() {
     assert.equal(canManageBusiness(teamOne,redeemed.businessId,true),false);
     assert.equal(listAssignedRequests(teamOne.id).some((request)=>request.id===managerRequest.id),true);
     assert.equal(listAssignedBusinesses(teamOne.id).some((business)=>business.id===redeemed.businessId),true);
+    const assignmentEvent = assignedToOne.events.find((event)=>event.event_type==="assigned")!;
+    assert.match(assignmentEvent.detail,/^team_member:\d+$/);
+    assert.deepEqual(presentRequestEvent(assignmentEvent,true),{
+      label:"Team assigned",
+      detail:"A SuqPage team member was assigned to this request.",
+    });
+    assert.deepEqual(presentRequestEvent(assignmentEvent,false),{
+      label:"Assigned",
+      detail:assignmentEvent.detail,
+    });
+    assert.deepEqual(presentRequestEvent({event_type:"status_changed",detail:"submitted->under_review"},true),{
+      label:"Status updated",
+      detail:"Request status changed to Under review.",
+    });
+    assert.deepEqual(presentRequestEvent({event_type:"revision_submitted",detail:"revision:3"},true),{
+      label:"Preview ready",
+      detail:"Revision 3 was sent for your review.",
+    });
+    const unknownClientEvent = presentRequestEvent({event_type:"internal_test",detail:"staff:42;storage:secret"},true);
+    assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"SuqPage recorded progress on this request."});
+    assert.doesNotMatch(`${unknownClientEvent.label} ${unknownClientEvent.detail}`,/42|secret|staff:/);
     assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
     const assignedToTwo = getRequestDetail(managerRequest.id)!;
     assert.equal(canAccessRequest(teamOne,assignedToTwo),false);

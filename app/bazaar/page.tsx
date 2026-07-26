@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import BazaarMap from "@/components/BazaarMap";
+import SuqPageBrand from "@/components/SuqPageBrand";
 import { getCurrentBazaar } from "@/lib/bazaar";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +16,7 @@ export default function BazaarPage() {
     <>
       <header className="topbar">
         <div className="container" style={{ display: "flex", alignItems: "center", width: "100%" }}>
-          <Link href="/" className="brand">
-            <Image src="/uploads/seed/suqpage/icon.png" alt="" width={34} height={34} />
-            SuqPage
-          </Link>
+          <SuqPageBrand />
           <nav className="nav" aria-label="Public navigation">
             <Link href="/bazaar">Bazaar</Link>
             <Link href="/#showrooms">All Showrooms</Link>

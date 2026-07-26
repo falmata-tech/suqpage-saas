@@ -254,15 +254,26 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
   expect(errors).toEqual([]);
 });
 
+test("platform surfaces share the SuqPage identity", async ({ page }) => {
+  const errors = monitor(page);
+  for (const pathName of ["/", "/bazaar", "/request", "/login", "/privacy", "/terms"]) {
+    await page.goto(pathName);
+    const brand = page.locator('.suqpage-brand img[src="/brand/suqpage-mark.svg"]').first();
+    await expect(brand).toBeVisible();
+    await expect(brand.locator("..")).toHaveAccessibleName("SuqPage home");
+  }
+  expect(errors).toEqual([]);
+});
+
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
   await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");
   await page.goto("/login");
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Private workspace" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "◆ SuqPage" })).toHaveAttribute("href", "/dashboard");
-  await expect(page.getByRole("link", { name: "Public site ↗" })).toHaveAttribute("target", "_blank");
-  await page.getByRole("link", { name: "◆ SuqPage" }).click();
+  await expect(page.getByRole("link", { name: "SuqPage home" })).toHaveAttribute("href", "/dashboard");
+  await expect(page.getByRole("link", { name: "Public site", exact: true })).toHaveAttribute("target", "_blank");
+  await page.getByRole("link", { name: "SuqPage home" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole("link", { name: "Bazaar controls" }).click();
   await expect(page.getByRole("heading", { name: "Bazaar controls" })).toBeVisible();
@@ -274,7 +285,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.getByRole("button", { name: "Select NovaTech booth" }).click();
   await expect(page.getByLabel("NovaTech booth preview").getByText("Featured")).toBeVisible();
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Design component bank" }).click();
+  await page.getByRole("link", { name: "Component bank" }).click();
   await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
   await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Heroes 13" }).click();
@@ -360,7 +371,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await staffPanel.getByLabel("Access role").selectOption("team_member");
   await staffPanel.getByLabel("Temporary password").fill("TeamMemberTemp123!");
   await staffPanel.getByRole("button",{name:"Create staff account"}).click();
-  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  await expect(page.getByRole("main").getByText("Acceptance Team",{exact:true})).toBeVisible();
   await page.getByRole("link",{name:"Create client workspace"}).first().click();
   await expect(page.getByRole("heading",{name:"Create a client workspace"})).toBeVisible();
   await expectVisibleControlsNamed(page);
@@ -434,7 +445,7 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.goto("/dashboard/design-bank");
   await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
   await page.goto("/dashboard?business=5");
-  await expect(page.getByRole("link",{name:"Showroom context ↗"})).toHaveCount(1);
+  await expect(page.getByRole("link",{name:"Showroom context",exact:true})).toHaveCount(1);
   await page.getByRole("link",{name:"Submit on behalf of client"}).click();
   await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
   await page.goto("/dashboard/requests");
@@ -481,7 +492,7 @@ test("operations manager records on behalf and team member sees only assigned wo
   await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
   await expect(page.getByRole("link",{name:"Record on behalf"})).toHaveCount(0);
   await page.goto(assignedRequestUrl);
-  await expect(page.getByText("Acceptance Team",{exact:true})).toBeVisible();
+  await expect(page.getByRole("main").getByText("Acceptance Team",{exact:true})).toBeVisible();
   await page.getByLabel("Status").selectOption("under_review");
   await page.getByRole("button",{name:"Update status"}).click();
   await expect(page.getByText("Request status updated.")).toBeVisible();
@@ -490,6 +501,19 @@ test("operations manager records on behalf and team member sees only assigned wo
   await expect(page.getByRole("heading",{name:"Showroom recipe studio"})).toBeVisible();
   const recipeStudioUrl=page.url();
   await expectVisibleControlsNamed(page);
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
+  await page.goto(assignedRequestUrl);
+  await expect(page.getByText("SuqPage is preparing this revision.")).toBeVisible();
+  await expect(page.getByRole("link",{name:"View preview"})).toHaveCount(0);
+  await expect(page.getByText("Team assigned",{exact:true})).toBeVisible();
+  await expect(page.getByText(/team_member:\d+/)).toHaveCount(0);
+  await expect(page.getByText("Acceptance Team",{exact:true})).toHaveCount(0);
+  await page.getByRole("button",{name:"Sign out"}).click();
+
+  await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
+  await page.goto(recipeStudioUrl);
   await page.getByText("Show complete valid recipe example").click();
   const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
   recipe.summary="A revised hero prepared from the client’s private reference.";
@@ -579,6 +603,24 @@ test("seeded client is restricted while operations manages customer activity", a
   await expect(page.getByText(/Showing 1 of/)).toBeVisible();
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const menuButton = page.getByRole("button",{name:"Open workspace menu"});
+  await expect(menuButton).toBeVisible();
+  await menuButton.click();
+  const workspaceMenu = page.getByRole("dialog",{name:"Workspace menu"});
+  await expect(workspaceMenu).toBeVisible();
+  await expect(page.getByRole("button",{name:"Close workspace menu"})).toBeFocused();
+  await expect(workspaceMenu.getByRole("link",{name:"Requests",exact:true})).toBeVisible();
+  await expect(workspaceMenu.getByRole("link",{name:"Customer inquiries"})).toBeVisible();
+  await expect(workspaceMenu.getByRole("link",{name:"Delivery activity"})).toBeVisible();
+  await expect(workspaceMenu.getByRole("link",{name:"Account security"})).toBeVisible();
+  const smallWorkspaceTargets = await workspaceMenu.locator("a, button").evaluateAll((targets) => targets.flatMap((target) => {
+    const rect=target.getBoundingClientRect();
+    return rect.width&&rect.height<43.5?[`${target.tagName.toLowerCase()}:${target.textContent?.trim()||target.getAttribute("aria-label")}`]:[];
+  }));
+  expect(smallWorkspaceTargets).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(workspaceMenu).toHaveCount(0);
+  await expect(menuButton).toBeFocused();
   await page.setViewportSize({width:1280,height:720});
   await page.goto("/dashboard/requests/new");
   await expect(page.getByText("Showroom change request",{exact:true})).toBeVisible();

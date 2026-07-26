@@ -2,9 +2,9 @@
 id: FE-003
 title: Managed client request and review workspace
 status: done
-related: [BE-003, BE-007, DEP-003, FE-006, FE-007, FE-008, ADR-0004, ADR-0006]
+related: [BE-003, BE-007, DEP-003, FE-006, FE-007, FE-008, FE-013, ADR-0004, ADR-0006]
 owners: [product, frontend]
-last_updated: 2026-07-24
+last_updated: 2026-07-26
 change_level: L3
 ---
 
@@ -135,6 +135,16 @@ publication authority.
 - Inside an authenticated workspace, the SuqPage brand returns to that actor's
   dashboard context rather than silently exiting to the public site. A separate
   clearly labeled Public site link opens the public experience.
+- Role-appropriate destinations remain reachable through a grouped desktop
+  navigation and an operable mobile menu. The mobile shell does not rely on a
+  clipped or horizontally scrolling copy of the desktop navigation.
+- A client sees a preview action only after the exact revision has been sent for
+  review. Draft revisions remain visible as work in preparation but never link
+  a client to a route they cannot open.
+- Client request history presents customer-safe event labels and descriptions.
+  It never renders internal user IDs, storage identifiers, raw transition
+  syntax, or staff-only workflow details; authorized staff retain the complete
+  operational history.
 - The invitation acceptance screen explains the business being joined, expiry,
   and account setup without exposing internal request/contact data.
 - Platform administration creates staff, resets client temporary passwords,
@@ -173,6 +183,18 @@ Scenario: Authenticated user follows workspace navigation
   WHEN the user activates the SuqPage brand or another permitted workspace menu
   THEN the destination remains authenticated and role-appropriate
   AND public-site navigation is exposed separately and explicitly
+
+Scenario: Authenticated user opens the workspace on mobile
+  GIVEN a valid authenticated session at a narrow viewport
+  WHEN the user opens the workspace menu
+  THEN every role-permitted destination is reachable without horizontal overflow
+  AND closing or following the menu restores the page interaction context
+
+Scenario: Client follows private revision progress
+  GIVEN a client request has a staff-only draft revision
+  WHEN the client opens the request detail
+  THEN the draft is described as work in preparation without a preview action
+  AND request history contains no internal identifier or raw workflow syntax
 
 Scenario: Manager submits on behalf of a client
   GIVEN an operations manager and a selected client
@@ -272,6 +294,7 @@ attachment contents, access tokens, or customer inquiry details.
 | Staff/manager control visibility and denial | acceptance/security | `tests/acceptance/app.spec.ts`, `scripts/test-requests.ts` |
 | Preview approval/rejection without live drift | acceptance | `tests/acceptance/app.spec.ts`, `scripts/test-revisions.ts` |
 | Accessibility and mobile safety | browser | `tests/acceptance/app.spec.ts` |
+| Client-safe draft and event presentation | focused/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -295,8 +318,10 @@ checkpoint under `DEP-003`; request and revision data are never deleted.
 
 Filled only when `status: done` after every mapped gate passes.
 
-Evidence: verified locally on 2026-07-22 by the mapped unit, integration, and
-production-browser tests below.
+Evidence: existing managed-service behavior was verified locally on 2026-07-22. The
+workspace-navigation and client-safe presentation corrections were verified on
+2026-07-26 by `npm run test:requests`, `npm run check`, and the ten-scenario
+`npm run test:acceptance` production-browser suite.
 
 ### Verified managed-service implementation
 
@@ -330,6 +355,13 @@ production-browser tests below.
   build.
 - Clients and authorized staff exchange attributable clarifications without
   rewriting the original request; client views protect internal staff identity.
+- Client request detail no longer offers an inaccessible preview action for a
+  staff-only draft. Client history converts assignment IDs, status-transition
+  syntax, revision metadata, and unknown internal events into bounded customer-
+  safe descriptions while staff retain the complete operational detail.
+- Role-appropriate navigation is grouped on desktop and available through a
+  focus-contained mobile drawer with Escape, focus restoration, 44-pixel
+  targets, and 320/390-pixel overflow evidence under `FE-013`.
 - Migration 7 converts every former compatibility owner, including all four
   examples, to the same restricted client workspace. Direct live settings,
   catalog, design, inquiry-status, and delivery-create client controls are gone.
