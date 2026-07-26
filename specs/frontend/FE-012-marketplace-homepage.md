@@ -24,18 +24,19 @@ benefit.
 ### In scope
 
 - A compact public header with desktop navigation and an accessible mobile menu.
-- A photographic maker hero with showroom-first copy, two actions, four compact
-  benefits, and a secondary live-Bazaar card.
+- A photographic maker hero with showroom-first copy, one merchant action, four
+  compact product benefits, and a secondary live-Bazaar card.
 - A seven-day schedule rail directly below the hero with the server-selected day
   clearly highlighted.
 - A visually prominent All Showrooms section above the Bazaar with search,
-  category, industry, sort, and permanent-showroom links.
+  industry pills, restrained sorting, five-result pagination, and permanent
+  showroom links.
 - A rich, code-rendered Bazaar floor backed by the existing server-owned current
   Bazaar view, including balanced centered storefront rows, responsive floor
   fitting, restrained mall tiles, simple corridors, map/list controls, booth
   references, booth selection, and showroom links.
-- A separate featured-business rail, compact five-step process band, merchant
-  conversion panel, and complete public footer.
+- A separate auto-advancing featured-business rail and a visually distinct,
+  full-width merchant closing panel followed by a complete public footer.
 - Approved, project-owned maker and storefront imagery that carries the visual
   hierarchy shown in the reference mockup without turning the floor into a
   fixed marketplace photograph or duplicating tenant content.
@@ -54,7 +55,8 @@ benefit.
 - The daily Bazaar is included discovery; it is not checkout and normal
   participation is not presented as paid placement.
 - Featured businesses are visually and semantically separate from ordinary
-  Bazaar participation.
+  Bazaar participation. Until administrative curation is needed, every active
+  public showroom belongs to the featured pool, which is capped at 20 entries.
 - Every business card and booth preview links to its authoritative `/@handle`.
 - Public business and Bazaar data comes from existing active server records.
 
@@ -64,19 +66,31 @@ benefit.
   Bazaar view; client components may filter or change display mode but do not
   determine eligibility.
 - The desktop composition follows the approved order: header, hero, weekly
-  schedule, All Showrooms, today's Bazaar, featured businesses, process, final
-  CTA, footer.
+  schedule, All Showrooms, today's Bazaar, featured businesses, final CTA,
+  footer. There is no separate process section or How it works action.
 - Desktop content uses the available viewport deliberately and presents showroom
   cards as a compact horizontal marketplace rail rather than full-page previews.
 - At 320px and 390px, controls wrap or scroll intentionally, key copy remains
   readable, interactive targets remain usable, and the document has no
   horizontal overflow.
+- The directory exposes one filtering vocabulary: horizontally scrollable
+  Industry pills headed by **All industries**. It does not expose category
+  filters, a duplicate reset/navigation row, or a category selector.
+- Directory search includes business, handle, product, and industry terms. Each
+  page renders at most five cards; changing search or Industry resets to page
+  one, and pagination appears only when the matching count exceeds five.
 - Desktop showroom results use stable auto-filled tracks so filtering to one or
   two businesses never stretches a card across the available section width.
 - The color system uses one platform accent plus semantic status colors; schedule
   marks, filters, callouts, and map furniture must not create a busy rainbow.
-- **How SuqPage works** reads as one full-width ordered process followed by a
-  compact action row, not a small process squeezed beside a competing CTA card.
+- The hero's compact benefit row carries the useful product explanation without
+  duplicating it in a separate process band, especially on mobile.
+- The featured pool contains at most 20 active public showrooms. Up to five are
+  visible at once, the rail advances left on a bounded interval and loops, and
+  automatic movement pauses for hover, keyboard focus, document visibility,
+  and reduced-motion preference.
+- The final merchant CTA is a larger, visually distinct closing band rather than
+  a repeat of the featured section.
 - Generated storefront media is assigned only to its seeded showroom profile and
   contains no factual text claims; future showrooms use their approved booth
   media or an intentional grounded storefront fallback.
@@ -96,14 +110,22 @@ Scenario: Visitor browses the complete marketplace composition
   WHEN the visitor moves through the page
   THEN showroom cards use compact visual previews and permanent showroom links
   AND the Bazaar provides map and list views backed by the same current booths
-  AND featured placement is presented separately below the Bazaar
-  AND the process and merchant conversion sections remain concise
+  AND up to five directory results appear per page beneath one Industry pill row
+  AND featured businesses rotate separately below the Bazaar
+  AND a distinct merchant conversion band provides the final page action
+
+Scenario: Visitor refines a large showroom directory
+  GIVEN more than five active public showrooms
+  WHEN the visitor searches, chooses an Industry, or changes pages
+  THEN no more than five matching showroom cards render at once
+  AND search or Industry changes return the visitor to the first result page
+  AND category controls and duplicate all-business navigation are absent
 
 Scenario: Visitor uses the homepage on a narrow mobile device
   GIVEN a viewport between 320 and 390 CSS pixels wide
   WHEN the visitor opens and interacts with the homepage
   THEN navigation remains available through a compact menu
-  AND schedule, showroom, and featured rails remain usable
+  AND schedule, showroom pagination, and the featured rail remain usable
   AND map controls and booth previews remain reachable
   AND the document has no horizontal overflow
 
@@ -139,7 +161,9 @@ visitor contact values, tenant-private content, or raw media-storage paths.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Product hierarchy and complete section order | acceptance | `tests/acceptance/app.spec.ts` homepage scenario |
+| Product hierarchy and simplified section order | acceptance | `tests/acceptance/app.spec.ts` homepage scenario |
+| Industry-only filtering and five-result pagination | focused/acceptance | homepage domain and acceptance scenarios |
+| Featured pool cap, loop policy, and reduced motion | focused/acceptance | homepage domain and acceptance scenarios |
 | Desktop marketplace density and reference alignment | manual/browser | Playwright screenshot at 1440px |
 | Mobile menu, rails, map access, and no overflow | acceptance/manual | `tests/acceptance/app.spec.ts` at 390px and 320px |
 | No empty media sources or browser errors | acceptance | `tests/acceptance/app.spec.ts` console monitor |
@@ -166,30 +190,33 @@ Implemented and verified on 2026-07-26.
 
 Evidence:
 
-- The public homepage now follows the approved marketplace composition with a
-  photographic maker hero, server-owned daily Bazaar callout and schedule,
-  searchable compact showroom rail, dynamically sized code-rendered Bazaar
-  floor and directory, grounded storefronts, separate featured-placement state,
-  five-step process, CTA, and public footer.
+- The public homepage now combines a photographic showroom-first hero,
+  server-owned daily Bazaar callout and schedule, Industry-only showroom
+  discovery, the dynamic Bazaar map/list, a rotating featured rail, a distinct
+  merchant closing band, and the public footer. The superseded process section,
+  How it works links, category controls, and duplicate directory actions are
+  absent.
 - Project-owned generated artwork is stored at
   `public/landing/maker-workshop-hero.jpg` and the four seeded facade files in
   `public/landing/booths/`. The mall floor is CSS-rendered and contains no booth
   geometry or tenant claims. Future tenants without approved media receive a
   structural storefront fallback rather than an invented product photograph.
-- Desktop showroom cards use persistent auto-filled tracks and a 280px maximum,
-  so one filtered result remains compact. Schedule marks and benefit icons use
-  the platform accent, and How SuqPage works is a full-width ordered process
-  followed by a compact action row.
+- `lib/marketplace-home.ts` enforces a five-result directory page and a 20-entry
+  featured pool. Search and Industry changes return to page one; pagination is
+  conditional. The featured rail advances every 4.5 seconds, loops through a
+  duplicate visual track, remains touch-scrollable, and pauses for hover, focus,
+  hidden documents, and reduced-motion preference.
+- Desktop showroom cards retain a 280px maximum, so sparse filtered results stay
+  compact. The closing band uses a separate dark surface and larger message,
+  while the hero's four compact benefits retain the useful product explanation.
 - Manual Playwright screenshots were reviewed at 1440px and 390px against the
   approved reference. Browser geometry checks proved document width equals the
   viewport width at both 390px and 320px and storefront thresholds meet their
   generated corridor.
-- `npm run test:acceptance` passed 9/9 against a clean production build and
-  temporary database, including homepage hierarchy, mobile menu, media/console,
-  overflow, filtered-card width, mall-map references, and List View assertions.
+- `npm run test:marketplace-home` passed pagination boundaries and featured-pool
+  limits. `npm run test:acceptance` passed 9/9 against a clean production build
+  and temporary database, including Industry-only controls, the five-card
+  boundary, timed featured movement, simplified hierarchy, mobile overflow,
+  mall-map references, and all existing stateful workflows.
 - `npm run check` passed the complete local quality, domain, security, adapter,
-  revision, recipe, provider-video, and Bazaar gate.
-
-Known limitation: the featured rail correctly remains an explicit placement
-callout when no business has been administratively marked featured; it does not
-invent promoted businesses to imitate the reference image.
+  revision, recipe, provider-video, Bazaar, and homepage gate.

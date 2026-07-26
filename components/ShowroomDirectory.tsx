@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { paginateHomepageEntries } from "@/lib/marketplace-home";
 
 export type ShowroomDirectoryEntry = {
   id: number;
@@ -11,20 +12,15 @@ export type ShowroomDirectoryEntry = {
   tagline: string;
   imageUrl: string;
   industry: string;
-  category: string;
   searchText: string;
 };
 
 export default function ShowroomDirectory({ entries }: { entries: ShowroomDirectoryEntry[] }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
   const [industry, setIndustry] = useState("all");
   const [sort, setSort] = useState("name");
+  const [page, setPage] = useState(1);
 
-  const categoryOptions = useMemo(
-    () => [...new Set(entries.map((entry) => entry.category).filter(Boolean))],
-    [entries],
-  );
   const industryOptions = useMemo(
     () => [...new Set(entries.map((entry) => entry.industry).filter(Boolean))],
     [entries],
@@ -32,7 +28,6 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
   const results = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return entries
-      .filter((entry) => category === "all" || entry.category === category)
       .filter((entry) => industry === "all" || entry.industry === industry)
       .filter((entry) => !normalizedQuery || entry.searchText.includes(normalizedQuery))
       .sort((left, right) => (
@@ -40,13 +35,12 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
           ? left.handle.localeCompare(right.handle)
           : left.name.localeCompare(right.name)
       ));
-  }, [category, entries, industry, query, sort]);
+  }, [entries, industry, query, sort]);
+  const paginated = paginateHomepageEntries(results, page);
 
-  function resetDirectory() {
-    setCategory("all");
-    setIndustry("all");
-    setQuery("");
-    setSort("name");
+  function selectIndustry(value: string) {
+    setIndustry(value);
+    setPage(1);
   }
 
   return (
@@ -57,26 +51,15 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
           <span className="directory-search-icon" aria-hidden="true" />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
             placeholder="Search by name, /@handle, product..."
             aria-label="Search showrooms"
           />
         </label>
-        <div className="directory-selects">
-          <label>
-            <span className="sr-only">Category</span>
-            <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Category selector">
-              <option value="all">All Categories</option>
-              {categoryOptions.map((label) => <option key={label} value={label}>{label}</option>)}
-            </select>
-          </label>
-          <label>
-            <span className="sr-only">Industry</span>
-            <select value={industry} onChange={(event) => setIndustry(event.target.value)} aria-label="Industry selector">
-              <option value="all">All Industries</option>
-              {industryOptions.map((label) => <option key={label} value={label}>{label}</option>)}
-            </select>
-          </label>
+        <div className="directory-sort">
           <label>
             <span className="sr-only">Sort</span>
             <select value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort selector">
@@ -84,18 +67,17 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
               <option value="handle">Sort by handle</option>
             </select>
           </label>
-          <button type="button" className="directory-reset" onClick={resetDirectory}>View all showrooms</button>
         </div>
       </div>
 
-      <div className="directory-filters" aria-label="Showroom category filters">
-        <button type="button" className={category === "all" && industry === "all" && !query ? "active" : ""} onClick={resetDirectory}>All businesses</button>
-        {categoryOptions.map((label) => (
+      <div className="directory-filters" aria-label="Showroom industry filters">
+        <button type="button" className={industry === "all" ? "active" : ""} onClick={() => selectIndustry("all")}>All industries</button>
+        {industryOptions.map((label) => (
           <button
             type="button"
             key={label}
-            className={category === label ? "active" : ""}
-            onClick={() => setCategory(category === label ? "all" : label)}
+            className={industry === label ? "active" : ""}
+            onClick={() => selectIndustry(label)}
           >
             {label}
           </button>
@@ -103,26 +85,35 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
       </div>
 
       {results.length ? (
-        <div className="showroom-rail" id="showroom-results">
-          {results.map((entry) => (
-            <Link key={entry.id} className="market-showroom-card" href={`/@${entry.handle}`}>
-              <div className="market-showroom-media">
-                {entry.imageUrl ? (
-                  <Image src={entry.imageUrl} alt="" width={640} height={400} sizes="(max-width: 720px) 78vw, 280px" />
-                ) : (
-                  <span className="market-media-fallback" aria-hidden="true">{entry.name.slice(0, 1)}</span>
-                )}
-              </div>
-              <div className="market-showroom-copy">
-                <span className="market-card-industry">{entry.industry}</span>
-                <h3>{entry.name}</h3>
-                <strong>/@{entry.handle}</strong>
-                <p>{entry.tagline}</p>
-                <span className="market-card-link">Open showroom <span aria-hidden="true">→</span></span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="showroom-rail" id="showroom-results" aria-live="polite">
+            {paginated.entries.map((entry) => (
+              <Link key={entry.id} className="market-showroom-card" href={`/@${entry.handle}`}>
+                <div className="market-showroom-media">
+                  {entry.imageUrl ? (
+                    <Image src={entry.imageUrl} alt="" width={640} height={400} sizes="(max-width: 720px) 78vw, 280px" />
+                  ) : (
+                    <span className="market-media-fallback" aria-hidden="true">{entry.name.slice(0, 1)}</span>
+                  )}
+                </div>
+                <div className="market-showroom-copy">
+                  <span className="market-card-industry">{entry.industry}</span>
+                  <h3>{entry.name}</h3>
+                  <strong>/@{entry.handle}</strong>
+                  <p>{entry.tagline}</p>
+                  <span className="market-card-link">Open showroom <span aria-hidden="true">→</span></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          {paginated.totalPages > 1 && (
+            <nav className="showroom-pagination" aria-label="Showroom pages">
+              <button type="button" aria-label="Previous showroom page" title="Previous page" disabled={paginated.page === 1} onClick={() => setPage(paginated.page - 1)}>‹</button>
+              <span>Page {paginated.page} of {paginated.totalPages}</span>
+              <button type="button" aria-label="Next showroom page" title="Next page" disabled={paginated.page === paginated.totalPages} onClick={() => setPage(paginated.page + 1)}>›</button>
+            </nav>
+          )}
+        </>
       ) : (
         <div className="directory-empty">No showrooms match that search.</div>
       )}

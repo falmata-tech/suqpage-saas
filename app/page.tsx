@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import BazaarMap from "@/components/BazaarMap";
+import FeaturedShowrooms from "@/components/FeaturedShowrooms";
 import ShowroomDirectory, { type ShowroomDirectoryEntry } from "@/components/ShowroomDirectory";
 import { listBazaarAdminState } from "@/lib/bazaar";
 import { getAllBusinesses, getCatalogByBusinessId } from "@/lib/db";
+import { buildHomepageFeaturedPool } from "@/lib/marketplace-home";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +31,6 @@ export default function Home() {
     const catalog = getCatalogByBusinessId(business.id);
     const profile = profilesByBusinessId.get(business.id);
     const industry = profile?.industryLabel || "Community Market";
-    const category = catalog?.categories[0]?.name || catalog?.collections[0]?.name || industry;
     const searchable = [
       business.name,
       business.handle,
@@ -49,11 +50,10 @@ export default function Home() {
       tagline: business.tagline,
       imageUrl: business.hero_image_path || business.logo_path || "",
       industry,
-      category,
       searchText: searchable,
     };
   });
-  const featuredEntries = directoryEntries.filter((entry) => profilesByBusinessId.get(entry.id)?.featured);
+  const featuredEntries = buildHomepageFeaturedPool(directoryEntries);
 
   return (
     <div className="marketplace-home">
@@ -66,7 +66,6 @@ export default function Home() {
           <nav className="marketplace-desktop-nav" aria-label="Public navigation">
             <a href="#bazaar">Bazaar</a>
             <a href="#showrooms">All Showrooms</a>
-            <a href="#how-it-works">About SuqPage</a>
             <Link className="market-nav-cta" href="/request">Get a Showroom</Link>
             <Link className="market-login" href="/login"><span className="login-icon" aria-hidden="true" /> Login</Link>
           </nav>
@@ -75,7 +74,6 @@ export default function Home() {
             <nav aria-label="Mobile public navigation">
               <a href="#bazaar">Bazaar</a>
               <a href="#showrooms">All Showrooms</a>
-              <a href="#how-it-works">About SuqPage</a>
               <Link href="/request">Get a Showroom</Link>
               <Link href="/login">Login</Link>
             </nav>
@@ -100,7 +98,6 @@ export default function Home() {
               <p>For artisans, growers, producers, and small manufacturers. Show what you sell, explain your process, receive customer inquiries, and share your own /@handle.</p>
               <div className="market-hero-actions">
                 <Link className="market-primary-action" href="/request">Get your SuqPage showroom <span aria-hidden="true">→</span></Link>
-                <a className="market-secondary-action" href="#how-it-works">How it works <span className="play-icon" aria-hidden="true" /></a>
               </div>
               <div className="market-benefits" aria-label="Showroom benefits">
                 <span><i aria-hidden="true">@</i>Your own<br />/@handle</span>
@@ -138,9 +135,8 @@ export default function Home() {
             <div className="market-section-heading">
               <div>
                 <h2 id="showrooms-title">All Showrooms</h2>
-                <p>Every business on SuqPage. Search by name, /@handle, product, category, or industry.</p>
+                <p>Find businesses by name, /@handle, product, or industry.</p>
               </div>
-              <a className="market-heading-link" href="#showroom-results">View all showrooms <span aria-hidden="true">›</span></a>
             </div>
             <ShowroomDirectory entries={directoryEntries} />
           </section>
@@ -152,45 +148,21 @@ export default function Home() {
           <section className="market-section market-featured" aria-labelledby="featured-title">
             <div className="market-section-heading">
               <div>
-                <h2 id="featured-title">Featured businesses <span>— extra visibility</span></h2>
+                <span className="market-kicker">Across SuqPage</span>
+                <h2 id="featured-title">Featured showrooms</h2>
+                <p>A rotating look at businesses you can explore right now.</p>
               </div>
-              <Link className="market-heading-link" href="/request">Learn about featured placement <span aria-hidden="true">›</span></Link>
             </div>
-            {featuredEntries.length ? (
-              <div className="featured-rail">
-                {featuredEntries.map((entry) => (
-                  <Link href={`/@${entry.handle}`} className="featured-card" key={entry.id}>
-                    <div className="featured-media">
-                      {entry.imageUrl ? <Image src={entry.imageUrl} alt="" width={520} height={280} sizes="260px" /> : <span className="market-media-fallback">{entry.name.slice(0, 1)}</span>}
-                      <span>Featured</span>
-                    </div>
-                    <div><strong>{entry.name}</strong><span>/@{entry.handle}</span><small>{entry.industry}</small></div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="featured-empty">
-                <div><span className="market-kicker">Featured placement</span><h3>Extra visibility, clearly labeled.</h3><p>Featured campaigns are separate from the weekly Bazaar included with every showroom.</p></div>
-                <Link className="market-primary-action" href="/request">Ask about featured placement <span aria-hidden="true">→</span></Link>
-              </div>
-            )}
+            <FeaturedShowrooms entries={featuredEntries} />
           </section>
 
-          <section className="market-section market-how" id="how-it-works" aria-labelledby="how-title">
-            <div className="market-how-main">
-              <h2 id="how-title">How SuqPage works</h2>
-              <ol>
-                <li><span>1</span><div><strong>Get your showroom</strong><p>Create your /@handle showroom.</p></div></li>
-                <li><span>2</span><div><strong>Showcase your work</strong><p>Add products and process.</p></div></li>
-                <li><span>3</span><div><strong>Get inquiries</strong><p>Customers send clear requests.</p></div></li>
-                <li><span>4</span><div><strong>Join weekly Bazaars</strong><p>Appear on your industry day.</p></div></li>
-                <li><span>5</span><div><strong>Grow your business</strong><p>Share and build visibility.</p></div></li>
-              </ol>
+          <section className="market-closing" aria-labelledby="market-closing-title">
+            <div>
+              <span className="market-kicker">Your business, clearly presented</span>
+              <h2 id="market-closing-title">Ready to give your business a showroom of its own?</h2>
+              <p>Tell us what you sell and how customers reach you. We&apos;ll help shape it into a polished SuqPage showroom.</p>
             </div>
-            <aside className="market-final-cta">
-              <h2>Ready for your own showroom?</h2>
-              <Link className="market-primary-action" href="/request">Get your showroom <span aria-hidden="true">→</span></Link>
-            </aside>
+            <Link className="market-closing-action" href="/request">Tell us about your business <span aria-hidden="true">→</span></Link>
           </section>
         </div>
       </main>
@@ -198,7 +170,7 @@ export default function Home() {
       <footer className="market-footer">
         <div className="market-container">
           <Link href="/" className="marketplace-brand"><Image src="/uploads/seed/suqpage/icon.png" alt="" width={32} height={32} /><span>SuqPage</span></Link>
-          <nav aria-label="Footer navigation"><a href="#bazaar">Bazaar</a><a href="#showrooms">All Showrooms</a><a href="#how-it-works">About SuqPage</a><Link href="/request">Get a Showroom</Link><Link href="/login">Login</Link></nav>
+          <nav aria-label="Footer navigation"><a href="#bazaar">Bazaar</a><a href="#showrooms">All Showrooms</a><Link href="/request">Get a Showroom</Link><Link href="/login">Login</Link></nav>
           <div><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 SuqPage</span></div>
         </div>
       </footer>

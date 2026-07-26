@@ -195,7 +195,11 @@ mobile-first marketplace surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-012` defines the current visual composition: a
 photographic maker hero leads with the permanent `/@handle` showroom product;
 today's Bazaar is a secondary callout; the server-owned weekly schedule and a
-searchable, filterable All Showrooms rail appear before a dynamic Bazaar map/list.
+searchable, Industry-filtered All Showrooms directory appears before a dynamic
+Bazaar map/list. The directory renders at most five matching showrooms per page,
+uses one horizontally scrollable Industry pill row instead of category controls
+or duplicate all-business navigation, and resets pagination when search or
+Industry changes.
 The map derives bounded floor dimensions from current participation, grounds up
 to 48 storefronts against code-rendered corridors, balances automatic booths in
 centered near-square rows, fits the initial view to the available viewport, and
@@ -203,13 +207,15 @@ keeps every additional participant available in Bazaar List. Its project-owned
 storefront facades sit on a restrained CSS-rendered mall floor with neutral
 tiles, thin edges, simple corridors, and no decorative lounge or furniture.
 Floor booths expose consistent `R{row}-{number}` references across Map View,
-preview, directory, and List View. Featured placement, the compact five-step
-process, final merchant CTA, and complete public footer follow below. Tenant
-cards and booths use active public tenant data and link to the authoritative
-showroom. Platform artwork is decorative and makes no tenant-specific product
-claim. The featured area renders only administratively flagged campaigns and
-otherwise presents an honest placement callout. Desktop showroom result cards
-remain compact when filters reduce the result count.
+preview, directory, and List View. A rotating featured pool and a visually
+distinct final merchant CTA follow below. The useful product explanation lives
+in the hero's four compact benefit items; there is no separate How SuqPage works
+section or action. Tenant cards and booths use active public tenant data and link
+to the authoritative showroom. Platform artwork is decorative and makes no
+tenant-specific product claim. For the current small marketplace, every active
+public showroom enters the featured pool, capped at 20; up to five appear at once
+and the rail advances on a bounded loop with pause and reduced-motion safeguards.
+Desktop showroom result cards remain compact when filters reduce the result count.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file
@@ -530,12 +536,13 @@ SuqPage’s directory must scale without dumping every tenant onto the page by d
 
 Default behavior:
 
-- do not show all results immediately;
-- show results after the visitor types a query or selects a category;
-- include category filter buttons for visitors who do not realize text search is available;
-- include an intentional **All businesses** option for visitors who explicitly want the complete directory;
+- show no more than five active public showrooms on the current page;
+- provide search plus simple Industry pills, beginning with **All industries**;
+- do not expose category filters or duplicate all-business/reset navigation;
+- reset to page one when search or Industry changes;
+- show previous/next pagination only when more than five records match;
 - do not let result panels cover filter controls;
-- support business name, handle, category, and relevant description search;
+- support business name, handle, product, industry, and relevant description search;
 - ensure mobile usability and keyboard accessibility.
 
 ---
