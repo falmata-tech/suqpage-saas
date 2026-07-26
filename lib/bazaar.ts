@@ -100,6 +100,7 @@ export type BazaarBoothView = {
   width: number;
   height: number;
   floorRow: number | null;
+  boothReference: string | null;
   onFloor: boolean;
   featured: boolean;
   status: "active" | "excluded";
@@ -467,10 +468,11 @@ function boothRows(db: DatabaseSync, occurrenceId: number) {
   `).all(occurrenceId) as BazaarBoothRow[];
 }
 
-function toBoothView(row: BazaarBoothRow, onFloor: boolean): BazaarBoothView {
+function toBoothView(row: BazaarBoothRow, onFloor: boolean, floor: CurrentBazaarView["floor"]): BazaarBoothView {
   const keys = jsonArray(row.industry_keys_json);
   const primaryKey = keys[0] || "community";
   const floorRowMatch = /^row-(\d+)$/.exec(row.floor_section);
+  const corridorRow = floor.corridors.find((corridor) => row.y + row.height === corridor.y)?.row;
   return {
     id: row.booth_id,
     businessId: row.id,
@@ -485,11 +487,24 @@ function toBoothView(row: BazaarBoothRow, onFloor: boolean): BazaarBoothView {
     y: row.y,
     width: row.width,
     height: row.height,
-    floorRow: onFloor ? Number(floorRowMatch?.[1] || 1) : null,
+    floorRow: onFloor ? Number(floorRowMatch?.[1] || corridorRow || 1) : null,
+    boothReference: null,
     onFloor,
     featured: Boolean(row.featured || row.is_featured),
     status: row.booth_status,
   };
+}
+
+function assignBoothReferences(booths: BazaarBoothView[]) {
+  const references = new Map<number, string>();
+  const floorRows = [...new Set(booths.flatMap((booth) => booth.floorRow === null ? [] : [booth.floorRow]))].sort((a, b) => a - b);
+  for (const floorRow of floorRows) {
+    booths
+      .filter((booth) => booth.floorRow === floorRow)
+      .sort((left, right) => left.x - right.x || left.name.localeCompare(right.name))
+      .forEach((booth, index) => references.set(booth.id, `R${floorRow}-${String(index + 1).padStart(2, "0")}`));
+  }
+  return booths.map((booth) => ({ ...booth, boothReference: references.get(booth.id) || null }));
 }
 
 export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView {
@@ -513,7 +528,7 @@ export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView
   const occurrence = ensureOccurrence(db, theme, date);
   const rows = boothRows(db, occurrence.id);
   const floor = floorGeometry(rows.length);
-  const booths = rows.map((row, index) => toBoothView(row, index < floor.visibleBoothCount));
+  const booths = assignBoothReferences(rows.map((row, index) => toBoothView(row, index < floor.visibleBoothCount, floor)));
   return {
     occurrenceId: occurrence.id,
     themeName: theme.name,

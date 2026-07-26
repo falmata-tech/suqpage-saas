@@ -33,9 +33,13 @@ fallback backed by server-owned Bazaar data.
   pans or zooms.
 - Grounded storefront facades aligned to corridor edges; booth cards must not
   float over a static marketplace photograph.
-- Warm, weathered outdoor-bazaar paving and a clearly bounded masonry perimeter
-  replace neutral gray canvas or road-like lane treatments without introducing
-  fixed floor artwork or fixed booth positions.
+- The current presentation is a restrained contemporary mall directory: a
+  lightly tiled neutral floor, thin perimeter, simple row corridors, and no
+  lounge or decorative furniture. Surface treatment must not compete with
+  storefront names, controls, or wayfinding.
+- Every visual-floor booth has a stable occurrence reference in `R{row}-{number}`
+  form, ordered left-to-right within its computed row. The same reference is
+  visible on the storefront, preview, directory, and List View.
 - A maximum of 48 storefronts on the interactive floor, with every additional
   eligible participant retained in Bazaar List.
 - Booth tiles derived from active public showrooms and stable server positions.
@@ -79,6 +83,7 @@ fallback backed by server-owned Bazaar data.
 - The component must not query SQLite or infer eligibility in the browser.
 - Controls expose accessible names: zoom in, zoom out, reset Bazaar view, open
   Bazaar List, close booth preview, and enter showroom.
+- Public mode labels are **Map View** and **List View**.
 - Selected view may persist for the browser session, but server data remains
   authoritative after refresh.
 
@@ -126,6 +131,12 @@ Scenario: Automatic layout remains compact across participant counts
   THEN square counts use 2x2, 3x3, or 4x4 arrangements
   AND incomplete final rows are horizontally centered
   AND the browser initially fits the balanced floor to its available width
+
+Scenario: A visitor refers to a booth consistently
+  GIVEN an active storefront appears in row 2 as the first storefront from the left
+  WHEN the visitor checks Map View, the directory, the preview, or List View
+  THEN the booth reference is `R2-01` in every surface
+  AND references remain unique within the occurrence
 ```
 
 ## Quality impact
@@ -159,6 +170,7 @@ raw media paths.
 | No-media grounded storefront fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Dynamic dimensions, grounded corridor rows, and 48-booth floor cap | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Balanced square counts, centered incomplete rows, and responsive initial fit | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
+| Stable row/booth references across map, preview, directory, and list | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Draft/suspended businesses excluded | integration/security | `scripts/test-bazaar.ts`, `scripts/test-security.ts` |
 
 ## Rollout and rollback
@@ -188,9 +200,11 @@ participant data as grounded storefront rows and corridors, displays at most 48
 storefronts, and keeps every participant available in Bazaar List.
 
 The automatic floor was refined the same day to use near-square column counts,
-center incomplete final rows, fit its initial scale to the measured viewport,
-and render project-owned old-market paving inside a warm masonry perimeter.
-Previews now open only after selection so they cannot obstruct mobile booths.
+center incomplete final rows, and fit its initial scale to the measured viewport.
+Its current visual treatment is a restrained mall directory with neutral CSS
+tiles, thin edges, simple row corridors, no lounge/furniture props, and derived
+`R{row}-{number}` references. Previews open only after selection so they cannot
+obstruct mobile booths.
 
 Evidence:
 
@@ -202,7 +216,8 @@ Evidence:
   and seven list-only participants.
 - `npm run test:acceptance` passed 9/9, including the mobile Bazaar map/list
   scenario at 390px and 320px and browser geometry proving each storefront
-  meets its corridor.
+  meets its corridor. Browser evidence also proves Map View/List View labels and
+  reference consistency from storefront to preview and list.
 - `npm run check`
 
 Known limitation: the public visual floor is intentionally capped at 48

@@ -32,8 +32,8 @@ benefit.
   category, industry, sort, and permanent-showroom links.
 - A rich, code-rendered Bazaar floor backed by the existing server-owned current
   Bazaar view, including balanced centered storefront rows, responsive floor
-  fitting, warm old-market paving, bounded masonry edges, dynamic corridors,
-  map/list controls, booth selection, and showroom links.
+  fitting, restrained mall tiles, simple corridors, map/list controls, booth
+  references, booth selection, and showroom links.
 - A separate featured-business rail, compact five-step process band, merchant
   conversion panel, and complete public footer.
 - Approved, project-owned maker and storefront imagery that carries the visual
@@ -71,6 +71,12 @@ benefit.
 - At 320px and 390px, controls wrap or scroll intentionally, key copy remains
   readable, interactive targets remain usable, and the document has no
   horizontal overflow.
+- Desktop showroom results use stable auto-filled tracks so filtering to one or
+  two businesses never stretches a card across the available section width.
+- The color system uses one platform accent plus semantic status colors; schedule
+  marks, filters, callouts, and map furniture must not create a busy rainbow.
+- **How SuqPage works** reads as one full-width ordered process followed by a
+  compact action row, not a small process squeezed beside a competing CTA card.
 - Generated storefront media is assigned only to its seeded showroom profile and
   contains no factual text claims; future showrooms use their approved booth
   media or an intentional grounded storefront fallback.
@@ -167,17 +173,20 @@ Evidence:
   five-step process, CTA, and public footer.
 - Project-owned generated artwork is stored at
   `public/landing/maker-workshop-hero.jpg` and the four seeded facade files in
-  `public/landing/booths/`. The repeatable old-market floor texture is stored at
-  `public/landing/bazaar-paving.jpg`; it contains no booth geometry or tenant
-  claims. Future tenants without approved media receive a structural storefront
-  fallback rather than an invented product photograph.
+  `public/landing/booths/`. The mall floor is CSS-rendered and contains no booth
+  geometry or tenant claims. Future tenants without approved media receive a
+  structural storefront fallback rather than an invented product photograph.
+- Desktop showroom cards use persistent auto-filled tracks and a 280px maximum,
+  so one filtered result remains compact. Schedule marks and benefit icons use
+  the platform accent, and How SuqPage works is a full-width ordered process
+  followed by a compact action row.
 - Manual Playwright screenshots were reviewed at 1440px and 390px against the
   approved reference. Browser geometry checks proved document width equals the
   viewport width at both 390px and 320px and storefront thresholds meet their
   generated corridor.
 - `npm run test:acceptance` passed 9/9 against a clean production build and
   temporary database, including homepage hierarchy, mobile menu, media/console,
-  and overflow assertions.
+  overflow, filtered-card width, mall-map references, and List View assertions.
 - `npm run check` passed the complete local quality, domain, security, adapter,
   revision, recipe, provider-video, and Bazaar gate.
 

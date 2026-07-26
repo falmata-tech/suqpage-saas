@@ -116,15 +116,15 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
         <div>
           <span className="eyebrow">Live now</span>
           <h2 id="bazaar-title">Today&apos;s Bazaar: {bazaar.themeName}</h2>
-          <p>Changes daily at 4:00 AM in {bazaar.timezone}. Drag the floor or use Bazaar List.</p>
+          <p>Changes daily at 4:00 AM in {bazaar.timezone}. Drag the floor or use List View.</p>
           <p className="bazaar-floor-summary">
             {bazaar.floor.visibleBoothCount} storefront{bazaar.floor.visibleBoothCount === 1 ? "" : "s"} across {bazaar.floor.rows} market row{bazaar.floor.rows === 1 ? "" : "s"}.
-            {listOnlyCount > 0 ? ` ${listOnlyCount} more available in Bazaar List.` : ""}
+            {listOnlyCount > 0 ? ` ${listOnlyCount} more available in List View.` : ""}
           </p>
         </div>
         <div className="bazaar-tabs" role="tablist" aria-label="Bazaar view">
-          <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Bazaar View</button>
-          <button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>Bazaar List</button>
+          <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Map View</button>
+          <button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>List View</button>
           {embedded ? <Link className="bazaar-all-link" href="/#showrooms">View all showrooms</Link> : null}
         </div>
       </div>
@@ -161,11 +161,7 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
                   style={{ left: 30, top: corridor.y, width: bazaar.floor.width - 60, height: corridor.height }}
                   aria-hidden="true"
                 >
-                  <span className="bazaar-corridor-label">Market Walk {corridor.row}</span>
-                  <span className="bazaar-planter bazaar-planter-one" />
-                  <span className="bazaar-planter bazaar-planter-two" />
-                  <span className="bazaar-bench" />
-                  {corridor.row === 1 ? <span className="bazaar-corridor-lounge">Bazaar Lounge</span> : null}
+                  <span className="bazaar-corridor-label">Row {corridor.row}</span>
                 </div>
               ))}
               {floorBooths.map((booth) => (
@@ -180,13 +176,14 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
                   onClick={() => setSelectedId(booth.id)}
                 >
                   <BoothMedia booth={booth} />
+                  {booth.boothReference ? <span className="bazaar-booth-number">{booth.boothReference}</span> : null}
                   <span className="bazaar-booth-sign">{booth.name}</span>
                   <span className="bazaar-booth-threshold" aria-hidden="true" />
                 </button>
               ))}
             </div>
           </div>
-          <p className="bazaar-drag-note">Drag to explore the Bazaar floor.</p>
+          <p className="bazaar-drag-note">Drag to explore the map.</p>
           {selected ? <BoothPreview booth={selected} onClose={() => setSelectedId(null)} /> : null}
           {embedded ? <BazaarDirectory booths={bazaar.booths} selectedId={selectedId} onSelect={setSelectedId} /> : null}
         </div>
@@ -207,9 +204,9 @@ function BazaarDirectory({
   onSelect: (id: number) => void;
 }) {
   return (
-    <aside className="bazaar-map-directory" aria-label={`Bazaar Directory (${booths.length})`}>
+    <aside className="bazaar-map-directory" aria-label={`Map Directory (${booths.length})`}>
       <div className="bazaar-map-directory-head">
-        <strong>Bazaar Directory ({booths.length})</strong>
+        <strong>Map Directory ({booths.length})</strong>
         <span aria-hidden="true">×</span>
       </div>
       <div className="bazaar-map-directory-list">
@@ -223,7 +220,7 @@ function BazaarDirectory({
             <BoothMedia booth={booth} />
             <span>
               <strong>{booth.name}</strong>
-              <small>@{booth.handle}</small>
+              <small>{booth.boothReference ? `${booth.boothReference} · ` : ""}@{booth.handle}</small>
               <small>{booth.industryLabel}</small>
             </span>
             <span aria-hidden="true">›</span>
@@ -255,6 +252,7 @@ function BoothPreview({ booth, onClose }: { booth: BazaarBoothView; onClose: () 
       <button type="button" className="bazaar-preview-close" aria-label="Close booth preview" onClick={onClose}>Close</button>
       <BoothMedia booth={booth} />
       <div>
+        {booth.boothReference ? <span className="bazaar-reference">{booth.boothReference}</span> : null}
         <span className="eyebrow">{booth.featured ? "Featured" : booth.industryLabel}</span>
         <h3>{booth.name}</h3>
         <p className="bazaar-handle">@{booth.handle}</p>
@@ -267,11 +265,12 @@ function BoothPreview({ booth, onClose }: { booth: BazaarBoothView; onClose: () 
 
 function BazaarList({ booths }: { booths: BazaarBoothView[] }) {
   return (
-    <div className="bazaar-list" aria-label="Bazaar List">
+    <div className="bazaar-list" aria-label="List View">
       {booths.map((booth) => (
         <article key={booth.id} className="bazaar-list-card">
           <BoothMedia booth={booth} />
           <div>
+            {booth.boothReference ? <span className="bazaar-reference">{booth.boothReference}</span> : null}
             <span className="eyebrow">{booth.featured ? "Featured" : booth.industryLabel}</span>
             <h3>{booth.name}</h3>
             <p className="bazaar-handle">@{booth.handle}</p>

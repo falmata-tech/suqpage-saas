@@ -102,11 +102,19 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(page.getByRole("heading", { name: "All Showrooms" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toBeVisible();
   await expect(page.getByRole("tablist", { name: "Bazaar view" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Map View" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "List View" })).toBeVisible();
+  await expect(page.locator(".bazaar-booth-number")).toHaveCount(4);
+  await expect(page.getByLabel(/Map Directory/).getByText(/R1-01/)).toBeVisible();
   await expect(page.getByRole("heading", { name: /Featured businesses/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toBeVisible();
   await expect(page.locator(".market-hero-image")).toBeVisible();
   await page.getByRole("button", { name: "All businesses" }).click();
   await expect(page.locator(".market-showroom-card")).toHaveCount(4);
+  await page.getByRole("button", { name: "Niqabs", exact: true }).click();
+  await expect(page.locator(".market-showroom-card")).toHaveCount(1);
+  expect(await page.locator(".market-showroom-card").evaluate((card) => card.getBoundingClientRect().width)).toBeLessThanOrEqual(280);
+  await page.getByRole("button", { name: "All businesses" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByLabel("Open public navigation").click();
@@ -194,6 +202,7 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
   await expect(page.getByText("4 booths on the floor")).toBeVisible();
   await expect(page.getByRole("button", { name: /Select .* booth/ })).toHaveCount(4);
   await expect(page.locator(".bazaar-booth-grounded")).toHaveCount(4);
+  await expect(page.locator(".bazaar-booth-number")).toHaveCount(4);
   await expect(page.locator(".bazaar-corridor")).toHaveCount(2);
   await expect(page.locator(".bazaar-floor-visual")).toHaveCount(0);
   const storefrontsMeetCorridor = await page.locator(".bazaar-map-viewport").evaluate((viewport) => {
@@ -217,13 +226,18 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
   await page.getByRole("button", { name: "Zoom in" }).click();
   await page.getByRole("button", { name: "Zoom out" }).click();
   await page.getByRole("button", { name: "Reset Bazaar view" }).click();
-  await page.getByRole("button", { name: "Select NovaTech booth" }).click();
+  const novaBooth = page.getByRole("button", { name: "Select NovaTech booth" });
+  const novaReference = await novaBooth.locator(".bazaar-booth-number").textContent();
+  expect(novaReference).toMatch(/^R\d+-\d{2}$/);
+  await novaBooth.click();
   await expect(page.getByLabel("NovaTech booth preview")).toBeVisible();
+  await expect(page.getByLabel("NovaTech booth preview").locator(".bazaar-reference")).toHaveText(novaReference || "");
   await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@novatech");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.getByRole("tab", { name: "Bazaar List" }).click();
+  await page.getByRole("tab", { name: "List View" }).click();
   await expect(page.locator(".bazaar-list-card")).toHaveCount(4);
   await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(4);
+  await expect(page.locator(".bazaar-list-card").filter({ hasText: "NovaTech" }).locator(".bazaar-reference")).toHaveText(novaReference || "");
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(errors).toEqual([]);

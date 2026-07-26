@@ -188,7 +188,7 @@ export default function Home() {
               </ol>
             </div>
             <aside className="market-final-cta">
-              <h2>Join makers and businesses growing with SuqPage.</h2>
+              <h2>Ready for your own showroom?</h2>
               <Link className="market-primary-action" href="/request">Get your showroom <span aria-hidden="true">→</span></Link>
             </aside>
           </section>

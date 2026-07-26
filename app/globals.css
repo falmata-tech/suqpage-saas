@@ -76,8 +76,6 @@
 .bazaar-corridor{position:absolute;z-index:1;overflow:hidden;border-top:7px solid #8d989f;border-bottom:7px solid #737f86;background-color:#d6dadd;background-image:linear-gradient(90deg,#b9c0c4 1px,transparent 1px),linear-gradient(#b9c0c4 1px,transparent 1px);background-size:48px 48px;box-shadow:inset 0 14px 24px #ffffff70,inset 0 -10px 18px #53606a1f}
 .bazaar-corridor:before{content:"";position:absolute;left:24px;right:24px;top:50%;height:2px;background:repeating-linear-gradient(90deg,#ffffffcc 0 34px,transparent 34px 58px)}
 .bazaar-corridor-label{position:absolute;left:16px;bottom:13px;border:1px solid #8d979d;border-radius:4px;background:#f8fafbdb;padding:5px 8px;color:#4f5b62;font-size:.65rem;font-weight:900}
-.bazaar-corridor-lounge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:132px;border:1px solid #a28f61;border-radius:6px;background:#fff8d9e8;padding:13px 20px;color:#72571a;text-align:center;font-size:.75rem;font-weight:950;box-shadow:0 5px 0 #8e7c5640}
-.bazaar-planter{position:absolute;top:24px;width:34px;height:34px;border:5px solid #55636a;border-radius:5px;background:#5d8b64;box-shadow:inset 0 0 0 5px #8eb184}.bazaar-planter:after{content:"";position:absolute;left:8px;top:-14px;width:8px;height:18px;border-radius:5px;background:#386b47;box-shadow:-7px 5px 0 #477c53,7px 5px 0 #477c53}.bazaar-planter-one{left:24%}.bazaar-planter-two{right:24%}.bazaar-bench{position:absolute;right:12%;bottom:24px;width:82px;height:18px;border:4px solid #59636a;border-radius:4px;background:#9a7659;box-shadow:0 8px 0 -5px #59636a}
 .bazaar-booth.bazaar-booth-grounded{z-index:3;display:block;overflow:visible;border:1px solid #3f474d;border-radius:5px;background:#20262a;padding:0;color:#fff;text-align:left;box-shadow:0 5px 0 #59636a,0 8px 12px #24313a24;transition:filter .16s ease,outline-color .16s ease}
 .bazaar-booth.bazaar-booth-grounded:hover{filter:brightness(1.06)}
 .bazaar-booth.bazaar-booth-grounded>img,.bazaar-booth.bazaar-booth-grounded>.bazaar-booth-fallback{width:100%;height:100%;border-radius:4px;object-fit:cover}
@@ -89,15 +87,25 @@
 @media(max-width:420px){.bazaar-booth.bazaar-booth-grounded{padding:0}.bazaar-booth.bazaar-booth-grounded>img,.bazaar-booth.bazaar-booth-grounded>.bazaar-booth-fallback{height:100%}.bazaar-booth-sign{font-size:.65rem!important}.bazaar-corridor-lounge{min-width:112px;padding:10px 14px}}
 @media(prefers-reduced-motion:reduce){.bazaar-booth.bazaar-booth-grounded{transition:none}}
 
-/* Warm outdoor-market surface; geometry remains server-owned and dynamic. */
-.bazaar-map-shell{background:#735b43}
-.bazaar-map-viewport,.marketplace-home .bazaar-map-viewport{background-color:#80664a;background-image:linear-gradient(#4b321fb8,#4b321fb8),url('/landing/bazaar-paving.jpg');background-repeat:repeat;background-size:100% 100%,360px 360px}
-.bazaar-floor{box-sizing:border-box;overflow:hidden;border:14px solid #755035;border-radius:10px;background-color:#d9b57f;background-image:linear-gradient(#f7e1ba26,#8c5f3b1f),url('/landing/bazaar-paving.jpg');background-repeat:repeat;background-size:100% 100%,450px 450px;box-shadow:0 0 0 4px #c79d66,0 20px 44px #38271973,inset 0 0 38px #6b45273d}
-.bazaar-floor:before{inset:0;z-index:4;border:8px solid #b88955;border-radius:3px;background:transparent;box-shadow:inset 0 0 0 3px #5f402b,inset 0 0 28px #5a391d52}
-.bazaar-corridor{border-top:7px solid #765037;border-bottom:7px solid #765037;background-color:#ead4a8d9;background-image:linear-gradient(#fff3d53d,#9f704224),url('/landing/bazaar-paving.jpg');background-size:100% 100%,330px 330px;box-shadow:inset 0 7px 0 #c99b63,inset 0 -7px 0 #c99b63,0 7px 16px #62412430}
-.bazaar-corridor:before{left:20px;right:20px;top:50%;height:12px;transform:translateY(-50%);border-top:1px solid #70462e80;border-bottom:1px solid #70462e80;background:repeating-linear-gradient(90deg,#864f3d99 0 16px,#d4aa6c99 16px 32px,#f1d49e99 32px 48px);opacity:.72}
-.bazaar-corridor-label{left:14px;bottom:12px;border-color:#7c573a;border-radius:3px;background:#f5e3bfe8;color:#624127;box-shadow:0 2px 0 #7650373d}
-.bazaar-corridor-lounge{display:grid;width:120px;height:72px;min-width:0;place-items:center;border:4px double #8b6240;border-radius:50%;background:#f5ddb0eb;padding:8px;color:#684522;box-shadow:0 5px 0 #79543552,0 9px 18px #68452538}
-.bazaar-planter{border-color:#6e4b33;background:#61774f;box-shadow:inset 0 0 0 5px #9aaa72,0 4px 0 #5e3e2a}.bazaar-bench{border-color:#65452f;background:#a66f43;box-shadow:0 8px 0 -5px #65452f}
-.bazaar-booth.bazaar-booth-grounded{border-color:#533a2a;box-shadow:0 5px 0 #6f4d34,0 9px 13px #47301f52}
-.bazaar-booth-threshold{border-color:#6d4d36;background:linear-gradient(#d5b581,#8d6748);box-shadow:0 3px 0 #62432e}
+/* Restrained mall directory; geometry remains server-owned and dynamic. */
+.bazaar-map-shell{background:#f3f5f8}
+.bazaar-map-viewport,.marketplace-home .bazaar-map-viewport{background-color:#eef1f5;background-image:linear-gradient(90deg,#dde2e9 1px,transparent 1px),linear-gradient(#dde2e9 1px,transparent 1px);background-size:56px 56px}
+.bazaar-floor{box-sizing:border-box;overflow:hidden;border:1px solid #bcc4d0;border-radius:4px;background-color:#e9edf2;background-image:linear-gradient(90deg,#d3d9e2 1px,transparent 1px),linear-gradient(#d3d9e2 1px,transparent 1px);background-size:48px 48px;box-shadow:0 8px 24px #2632471a}
+.bazaar-floor:before{display:none}
+.bazaar-corridor{border-top:1px solid #b8c1cd;border-bottom:1px solid #b8c1cd;background:#f7f8faad;box-shadow:none}
+.bazaar-corridor:before{left:22px;right:22px;top:50%;height:1px;transform:none;border:0;background:#cbd2dc;opacity:1}
+.bazaar-corridor-label{left:14px;bottom:12px;border-color:#c7ced8;border-radius:3px;background:#fff;color:#4b5567;box-shadow:none}
+.bazaar-booth.bazaar-booth-grounded{border-color:#596270;border-radius:4px;box-shadow:0 3px 0 #9aa2ad,0 7px 14px #26324724}
+.bazaar-booth-threshold{border-color:#8c95a1;background:#c9ced5;box-shadow:0 2px 0 #858e99}
+.bazaar-booth.bazaar-booth-grounded.selected{outline-color:#5a3ee6}.bazaar-booth-number{position:absolute!important;z-index:4;left:7px;bottom:7px;display:block!important;height:auto!important;border:1px solid #cbd2dc;border-radius:3px;background:#fffffff2;padding:3px 5px;color:#252c3a;font-size:.58rem!important;font-weight:950!important;line-height:1!important;box-shadow:0 2px 5px #17203320}
+.bazaar-reference{display:inline-flex;margin:0 6px 4px 0;border:1px solid #d7dce4;border-radius:3px;background:#f4f5f7;padding:4px 6px;color:#394255;font-size:.62rem;font-weight:900;line-height:1}
+
+/* Quiet platform palette and stable content density. */
+.marketplace-home{--market-ink:#171b2c;--market-muted:#60697a;--market-line:#e2e5eb;--market-purple:#573be5;--market-soft:#f7f8fa}
+.market-theme-mark{border-radius:6px;background:#ece9ff;color:var(--market-purple)}
+.market-benefits i,.market-benefits>span:nth-child(2) i,.market-benefits>span:nth-child(3) i,.market-benefits>span:nth-child(4) i,.market-schedule-mark,.market-schedule-sparkle .market-schedule-mark,.market-schedule-leaf .market-schedule-mark,.market-schedule-gear .market-schedule-mark,.market-schedule-home .market-schedule-mark,.market-schedule-shirt .market-schedule-mark,.market-schedule-star .market-schedule-mark{background:#efedff;color:var(--market-purple)}
+.market-directory .directory-filters button.active{border-color:var(--market-purple);background:var(--market-purple)}
+.featured-empty{border-color:#e0e3e9;background:#fff}.featured-media>span:last-child{background:#efeaff;color:#4b32c7}
+.market-how{display:block;overflow:visible}.market-how-main h2{margin-bottom:12px}.market-how-main ol{gap:0;border-top:1px solid var(--market-line);border-bottom:1px solid var(--market-line)}.market-how-main li{padding:16px 14px;border-right:1px solid var(--market-line)}.market-how-main li:last-child{border-right:0}.market-how-main li>span{border:1px solid #d9d5fa;background:#fff}.market-how-main strong{font-size:.76rem}.market-how-main p{font-size:.68rem}.market-final-cta{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:16px;border:0;border-radius:0;background:transparent;padding:0}.market-final-cta h2{margin:0;font-size:1rem}.market-final-cta .market-primary-action{width:auto}
+@media(min-width:721px){.showroom-rail{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}.market-showroom-card{max-width:280px}}
+@media(max-width:720px){.market-how-main li{width:170px;padding:14px 12px}.market-final-cta{display:grid}.market-final-cta .market-primary-action{width:100%}}

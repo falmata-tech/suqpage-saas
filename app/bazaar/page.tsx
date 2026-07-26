@@ -41,7 +41,7 @@ export default function BazaarPage() {
               <h2>{bazaar.themeName}</h2>
               <p>
                 {bazaar.floor.visibleBoothCount} {bazaar.floor.visibleBoothCount === 1 ? "booth" : "booths"} on the floor
-                {bazaar.floor.totalBoothCount > bazaar.floor.visibleBoothCount ? ` · ${bazaar.floor.totalBoothCount} in Bazaar List` : ""}
+                {bazaar.floor.totalBoothCount > bazaar.floor.visibleBoothCount ? ` · ${bazaar.floor.totalBoothCount} in List View` : ""}
               </p>
             </div>
           </div>

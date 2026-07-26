@@ -200,13 +200,16 @@ The map derives bounded floor dimensions from current participation, grounds up
 to 48 storefronts against code-rendered corridors, balances automatic booths in
 centered near-square rows, fits the initial view to the available viewport, and
 keeps every additional participant available in Bazaar List. Its project-owned
-weathered paving texture repeats beneath any computed geometry and contains no
-fixed booth layout or tenant claim. Featured placement, the compact five-step
+storefront facades sit on a restrained CSS-rendered mall floor with neutral
+tiles, thin edges, simple corridors, and no decorative lounge or furniture.
+Floor booths expose consistent `R{row}-{number}` references across Map View,
+preview, directory, and List View. Featured placement, the compact five-step
 process, final merchant CTA, and complete public footer follow below. Tenant
 cards and booths use active public tenant data and link to the authoritative
 showroom. Platform artwork is decorative and makes no tenant-specific product
 claim. The featured area renders only administratively flagged campaigns and
-otherwise presents an honest placement callout.
+otherwise presents an honest placement callout. Desktop showroom result cards
+remain compact when filters reduce the result count.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file

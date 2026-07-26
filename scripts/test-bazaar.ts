@@ -120,6 +120,10 @@ async function main() {
     "/landing/booths/alhayabrand-storefront.jpg",
   );
   assert.equal(first.booths.every((booth) => booth.onFloor), true);
+  assert.deepEqual(
+    first.booths.map((booth) => booth.boothReference).sort(),
+    ["R1-01", "R1-02", "R2-01", "R2-02"],
+  );
   assert.equal(
     first.booths.every((booth) => booth.y + booth.height === first.floor.corridors[(booth.floorRow || 1) - 1].y),
     true,
@@ -159,6 +163,10 @@ async function main() {
   const firstRowLeft = Math.min(...fiveBooths.booths.filter((booth) => booth.floorRow === 1).map((booth) => booth.x));
   const finalRowLeft = Math.min(...fiveBooths.booths.filter((booth) => booth.floorRow === 2).map((booth) => booth.x));
   assert.equal(finalRowLeft > firstRowLeft, true);
+  assert.deepEqual(
+    fiveBooths.booths.filter((booth) => booth.floorRow === 2).map((booth) => booth.boothReference).sort(),
+    ["R2-01", "R2-02"],
+  );
   db.prepare("UPDATE businesses SET status='draft' WHERE handle='homevibe'").run();
   getCurrentBazaar({ db, now: sunday });
 
@@ -273,6 +281,8 @@ async function main() {
   assert.equal(capped.floor.rows, 7);
   assert.equal(capped.booths.filter((booth) => booth.onFloor).length, 48);
   assert.equal(capped.booths.filter((booth) => !booth.onFloor).length, 7);
+  assert.equal(new Set(capped.booths.filter((booth) => booth.onFloor).map((booth) => booth.boothReference)).size, 48);
+  assert.equal(capped.booths.filter((booth) => !booth.onFloor).every((booth) => booth.boothReference === null), true);
   assert.equal(
     capped.booths.filter((booth) => booth.onFloor && booth.id !== boothId)
       .every((booth) => booth.y + booth.height === capped.floor.corridors[(booth.floorRow || 1) - 1].y),

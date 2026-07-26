@@ -29,8 +29,12 @@ showrooms, inquiries, managed requests, or the controlled single-instance pilot.
 - Cache and stale-state invalidation policy for daily rollover.
 - Bounded dynamic floor verification at small, medium, and maximum visual booth
   counts, with no more than 48 storefront nodes rendered on the floor.
-- Responsive-fit verification and project-owned repeatable paving media that
-  changes surface treatment without encoding booth count or placement.
+- Responsive-fit verification and CSS-rendered neutral tiling that changes
+  surface treatment without encoding booth count or placement.
+- Visual verification that neutral mall tiles, thin edges, and simple corridors
+  remain legible at desktop and mobile sizes without lounge/furniture props.
+- Browser verification that booth references match across Map View, preview,
+  directory, and List View.
 - Complete Bazaar List verification when eligible participation exceeds the
   visual floor cap.
 - Rollback boundary for code and additive data.
@@ -155,7 +159,8 @@ Evidence:
   3+2 arrangements; maximum evidence uses seven balanced rows.
 - `npm run test:acceptance` passed 9/9, including mobile corridor-grounding and
   document-overflow checks at 390px and 320px, responsive initial floor fitting,
-  and unobstructed booth selection.
+  unobstructed booth selection, Map View/List View labels, matching booth
+  references, and bounded filtered showroom-card width.
 - `npm run check`
 
 Known limitation: no remote checks, production backup/restore run, or scheduled

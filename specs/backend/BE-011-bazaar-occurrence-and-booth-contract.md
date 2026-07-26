@@ -35,6 +35,10 @@ showroom as the authoritative destination.
 - Automatic column count is the ceiling of the square root of the visible booth
   count, bounded by the visual maximum. Each incomplete row is centered inside
   the same computed floor width.
+- Each floor booth receives a derived occurrence reference in `R{row}-{number}`
+  format. Numbers are assigned left-to-right per row, remain unique in the
+  returned occurrence view, and are not tenant identity or persisted showroom
+  data.
 - Complete list participation even when eligible businesses exceed the visual
   floor cap.
 - Booth preview data derived from business, catalog/category, hero, logo, and
@@ -103,6 +107,12 @@ type CurrentBazaarView = {
   };
   booths: BazaarBoothView[];
 };
+
+type BazaarBoothView = {
+  floorRow: number | null;
+  boothReference: string | null;
+  onFloor: boolean;
+};
 ```
 
 Database changes are additive and idempotent. Names may adapt to existing SQLite
@@ -147,6 +157,12 @@ Scenario: Square participant counts produce square automatic layouts
   WHEN floor geometry is computed
   THEN the floor uses 2, 3, or 4 columns respectively
   AND every incomplete final row is centered within the floor
+
+Scenario: Booth references follow computed placement
+  GIVEN active floor booths have deterministic row and x coordinates
+  WHEN the current Bazaar view is created
+  THEN each floor booth receives a unique row/booth reference ordered by x
+  AND list-only participants receive no misleading floor reference
 ```
 
 ## Quality impact
@@ -179,6 +195,7 @@ Never log private request content, contact details, or raw uploaded file bytes.
 | Deterministic dynamic placement bounds and no-media fallback | unit/integration | `scripts/test-bazaar.ts` |
 | Visual cap preserves complete list participation | integration | `scripts/test-bazaar.ts` |
 | Near-square columns and centered incomplete rows | integration | `scripts/test-bazaar.ts` |
+| Unique derived row/booth references | integration | `scripts/test-bazaar.ts` |
 | Current Bazaar unavailable state | integration | `scripts/test-bazaar.ts` |
 
 ## Rollout and rollback
@@ -208,6 +225,9 @@ refresh, featured priority, and a 48-storefront visual cap.
 
 Automatic geometry uses the bounded ceiling square root for its column count,
 centers incomplete rows, and remains deterministic across occurrence refreshes.
+The returned floor view derives unique left-to-right `R{row}-{number}` references
+without changing persisted showroom identity or assigning references to
+list-only overflow participants.
 
 Evidence:
 
@@ -215,7 +235,8 @@ Evidence:
 - `npm run typecheck`
 - `npm run test:bazaar` passed automatic reflow, grounded manual placement,
   invalid floating placement rejection, centered 2x2 and 3+2 arrangements, and
-  the 55-participant cap scenario.
+  the 55-participant cap scenario with 48 unique floor references and seven
+  reference-free list-only participants.
 - `npm run test:acceptance` passed 9/9.
 - `npm run check`
 
