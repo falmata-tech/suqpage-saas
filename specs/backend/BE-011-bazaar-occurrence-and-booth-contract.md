@@ -29,6 +29,11 @@ showroom as the authoritative destination.
 - Eligible showroom selection from active public businesses only.
 - Deterministic booth placement persisted or resolved consistently per
   occurrence.
+- Dynamic floor geometry derived from the bounded visual booth count, with
+  grounded storefront rows, an attached corridor for every row, and a 48-booth
+  visual cap.
+- Complete list participation even when eligible businesses exceed the visual
+  floor cap.
 - Booth preview data derived from business, catalog/category, hero, logo, and
   approved booth profile fields.
 - Basic featured priority and exclusion fields sufficient for the first map.
@@ -56,7 +61,12 @@ showroom as the authoritative destination.
 - Rerunning generation for the same occurrence must not duplicate booths.
 - Active booth data must never include draft or suspended businesses.
 - A booth may be excluded without changing the underlying showroom status.
-- Coordinates are bounded positive numbers inside the configured floor.
+- Automatic coordinates are bounded positive numbers inside the computed floor.
+- Automatic placements may reflow when participation changes; a booth moved by
+  an administrator is explicitly marked manual, remains attached to a corridor
+  edge, and is not silently reflowed.
+- At most 48 booths are marked for the visual floor; all remaining active booths
+  remain present in the authoritative Bazaar List view.
 
 ## Contracts
 
@@ -79,7 +89,15 @@ type CurrentBazaarView = {
   startsAt: string;
   endsAt: string;
   timezone: string;
-  floor: { width: number; height: number };
+  floor: {
+    width: number;
+    height: number;
+    columns: number;
+    rows: number;
+    visibleBoothCount: number;
+    totalBoothCount: number;
+    maxBooths: 48;
+  };
   booths: BazaarBoothView[];
 };
 ```
@@ -113,6 +131,13 @@ Scenario: No theme is configured for today
   WHEN current Bazaar data is requested
   THEN the response is unavailable or empty with a safe public message
   AND no stale occurrence is presented as live
+
+Scenario: Eligible count exceeds the visual floor cap
+  GIVEN more than 48 active businesses are eligible for today's Bazaar
+  WHEN current Bazaar data is requested
+  THEN exactly 48 booths are marked for floor rendering
+  AND every eligible business remains in the Bazaar List payload
+  AND computed floor dimensions remain within the configured maximum geometry
 ```
 
 ## Quality impact
@@ -142,7 +167,8 @@ Never log private request content, contact details, or raw uploaded file bytes.
 |---|---|---|
 | Idempotent occurrence and booth generation | integration | `scripts/test-bazaar.ts` |
 | Active-only public data and exclusion handling | security/integration | `scripts/test-bazaar.ts`, `scripts/test-security.ts` |
-| Deterministic placement bounds and no-media fallback | unit/integration | `scripts/test-bazaar.ts` |
+| Deterministic dynamic placement bounds and no-media fallback | unit/integration | `scripts/test-bazaar.ts` |
+| Visual cap preserves complete list participation | integration | `scripts/test-bazaar.ts` |
 | Current Bazaar unavailable state | integration | `scripts/test-bazaar.ts` |
 
 ## Rollout and rollback
@@ -166,18 +192,18 @@ inquiry, or revision workflows and may remain unused.
 
 Implemented on 2026-07-26 with additive schema migration 15, `lib/bazaar.ts`,
 default theme/profile seeding, active occurrence resolution, idempotent booth
-generation, stable coordinates, active-only public booth data, no-media fallback
-tokens, exclusion refresh, and featured priority.
+generation, participant-count-derived floor geometry, corridor-grounded
+coordinates, active-only public booth data, no-media fallback tokens, exclusion
+refresh, featured priority, and a 48-storefront visual cap.
 
 Evidence:
 
 - `npm run validate:specs`
 - `npm run typecheck`
-- `npm run test:bazaar`
+- `npm run test:bazaar` passed automatic reflow, grounded manual placement,
+  invalid floating placement rejection, and the 55-participant cap scenario.
 - `npm run test:acceptance` passed 9/9.
 - `npm run check`
 
-Known limitation: public data is backed by SQLite/default config only. A future
-admin workflow must provide editable theme mapping, booth image approval,
-manual movement, and featured-placement scheduling before production promotion
-of paid visibility.
+Known limitation: public data is backed by SQLite/default config only. External
+media approval and paid-placement providers remain outside this local contract.

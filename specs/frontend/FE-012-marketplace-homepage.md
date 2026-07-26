@@ -30,12 +30,14 @@ benefit.
   clearly highlighted.
 - A visually prominent All Showrooms section above the Bazaar with search,
   category, industry, sort, and permanent-showroom links.
-- A rich Bazaar floor presentation backed by the existing server-owned current
-  Bazaar view, including map/list controls, booth selection, and showroom links.
+- A rich, code-rendered Bazaar floor backed by the existing server-owned current
+  Bazaar view, including dynamic corridors, grounded storefronts, map/list
+  controls, booth selection, and showroom links.
 - A separate featured-business rail, compact five-step process band, merchant
   conversion panel, and complete public footer.
-- Approved, project-owned maker and Bazaar imagery that carries the visual
-  hierarchy shown in the reference mockup without duplicating tenant content.
+- Approved, project-owned maker and storefront imagery that carries the visual
+  hierarchy shown in the reference mockup without turning the floor into a
+  fixed marketplace photograph or duplicating tenant content.
 
 ### Non-goals
 
@@ -68,8 +70,9 @@ benefit.
 - At 320px and 390px, controls wrap or scroll intentionally, key copy remains
   readable, interactive targets remain usable, and the document has no
   horizontal overflow.
-- Generated decorative marketplace media contains no factual product claims;
-  tenant-specific cards and booth links continue to use tenant-owned media.
+- Generated storefront media is assigned only to its seeded showroom profile and
+  contains no factual text claims; future showrooms use their approved booth
+  media or an intentional grounded storefront fallback.
 
 ## Scenarios
 
@@ -158,14 +161,17 @@ Evidence:
 
 - The public homepage now follows the approved marketplace composition with a
   photographic maker hero, server-owned daily Bazaar callout and schedule,
-  searchable compact showroom rail, image-backed Bazaar floor and directory,
-  separate featured-placement state, five-step process, CTA, and public footer.
+  searchable compact showroom rail, dynamically sized code-rendered Bazaar
+  floor and directory, grounded storefronts, separate featured-placement state,
+  five-step process, CTA, and public footer.
 - Project-owned generated artwork is stored at
-  `public/landing/maker-workshop-hero.jpg` and
-  `public/landing/bazaar-floor.jpg`; tenant cards continue to use tenant media.
-- Manual Playwright screenshots were reviewed at 1440x1000 and 390x844 against
-  the approved reference. Browser geometry checks proved document width equals
-  viewport width at both 390px and 320px.
+  `public/landing/maker-workshop-hero.jpg` and the four seeded facade files in
+  `public/landing/booths/`; future tenants without approved media receive a
+  structural storefront fallback rather than an invented product photograph.
+- Manual Playwright screenshots were reviewed at 1440px and 390px against the
+  approved reference. Browser geometry checks proved document width equals the
+  viewport width at both 390px and 320px and storefront thresholds meet their
+  generated corridor.
 - `npm run test:acceptance` passed 9/9 against a clean production build and
   temporary database, including homepage hierarchy, mobile menu, media/console,
   and overflow assertions.

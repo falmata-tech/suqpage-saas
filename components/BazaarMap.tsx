@@ -8,8 +8,11 @@ type Point = { x: number; y: number };
 
 export default function BazaarMap({ bazaar, embedded = false }: { bazaar: CurrentBazaarView; embedded?: boolean }) {
   const [view, setView] = useState<"map" | "list">("map");
-  const initialScale = embedded ? 1.05 : 0.74;
-  const initialOffset = embedded ? { x: -18, y: 0 } : { x: -80, y: -20 };
+  const initialScale = Math.max(0.5, Math.min(1.05, (embedded ? 1160 : 980) / bazaar.floor.width));
+  const viewportHeight = Math.round(
+    Math.max(embedded ? 420 : 460, Math.min(embedded ? 620 : 640, bazaar.floor.height * initialScale)),
+  );
+  const initialOffset = embedded ? { x: 0, y: 0 } : { x: 18, y: 8 };
   const [scale, setScale] = useState(initialScale);
   const [offset, setOffset] = useState<Point>(initialOffset);
   const [selectedId, setSelectedId] = useState<number | null>(bazaar.booths[0]?.id || null);
@@ -28,6 +31,8 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
     () => bazaar.booths.find((booth) => booth.id === selectedId) || bazaar.booths[0] || null,
     [bazaar.booths, selectedId],
   );
+  const floorBooths = useMemo(() => bazaar.booths.filter((booth) => booth.onFloor), [bazaar.booths]);
+  const listOnlyCount = bazaar.floor.totalBoothCount - bazaar.floor.visibleBoothCount;
 
   function zoomBy(delta: number) {
     setScale((value) => Math.max(0.5, Math.min(1.35, Number((value + delta).toFixed(2)))));
@@ -87,6 +92,10 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
           <span className="eyebrow">Live now</span>
           <h2 id="bazaar-title">Today&apos;s Bazaar: {bazaar.themeName}</h2>
           <p>Changes daily at 4:00 AM in {bazaar.timezone}. Drag the floor or use Bazaar List.</p>
+          <p className="bazaar-floor-summary">
+            {bazaar.floor.visibleBoothCount} storefront{bazaar.floor.visibleBoothCount === 1 ? "" : "s"} across {bazaar.floor.rows} market row{bazaar.floor.rows === 1 ? "" : "s"}.
+            {listOnlyCount > 0 ? ` ${listOnlyCount} more available in Bazaar List.` : ""}
+          </p>
         </div>
         <div className="bazaar-tabs" role="tablist" aria-label="Bazaar view">
           <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Bazaar View</button>
@@ -104,6 +113,7 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
           </div>
           <div
             className="bazaar-map-viewport"
+            style={{ height: viewportHeight, minHeight: viewportHeight }}
             aria-label="Draggable Bazaar floor"
             onPointerDown={startDrag}
             onPointerMove={moveDrag}
@@ -111,19 +121,32 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
             onPointerCancel={stopDrag}
           >
             <div
-              className="bazaar-floor bazaar-floor-visual"
+              className="bazaar-floor"
               style={{
                 width: bazaar.floor.width,
                 height: bazaar.floor.height,
                 transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
               }}
             >
-              <div className="bazaar-lounge">Bazaar Lounge</div>
-              {bazaar.booths.map((booth) => (
+              {bazaar.floor.corridors.map((corridor) => (
+                <div
+                  key={corridor.row}
+                  className="bazaar-corridor"
+                  style={{ left: 30, top: corridor.y, width: bazaar.floor.width - 60, height: corridor.height }}
+                  aria-hidden="true"
+                >
+                  <span className="bazaar-corridor-label">Market Walk {corridor.row}</span>
+                  <span className="bazaar-planter bazaar-planter-one" />
+                  <span className="bazaar-planter bazaar-planter-two" />
+                  <span className="bazaar-bench" />
+                  {corridor.row === 1 ? <span className="bazaar-corridor-lounge">Bazaar Lounge</span> : null}
+                </div>
+              ))}
+              {floorBooths.map((booth) => (
                 <button
                   key={booth.id}
                   type="button"
-                  className={`bazaar-booth${selectedId === booth.id ? " selected" : ""}${booth.featured ? " featured" : ""}`}
+                  className={`bazaar-booth bazaar-booth-grounded${selectedId === booth.id ? " selected" : ""}${booth.featured ? " featured" : ""}`}
                   style={{ left: booth.x, top: booth.y, width: booth.width, height: booth.height }}
                   data-fallback={booth.fallbackToken}
                   aria-label={`Select ${booth.name} booth`}
@@ -131,7 +154,8 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
                   onClick={() => setSelectedId(booth.id)}
                 >
                   <BoothMedia booth={booth} />
-                  <span>{booth.name}</span>
+                  <span className="bazaar-booth-sign">{booth.name}</span>
+                  <span className="bazaar-booth-threshold" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -187,7 +211,14 @@ function BazaarDirectory({
 
 function BoothMedia({ booth }: { booth: BazaarBoothView }) {
   if (!booth.imageUrl) {
-    return <span className="bazaar-booth-fallback" aria-hidden="true">{booth.name.slice(0, 1).toUpperCase()}</span>;
+    return (
+      <span className={`bazaar-booth-fallback fallback-${booth.fallbackToken}`} aria-hidden="true">
+        <span className="fallback-fascia" />
+        <span className="fallback-window" />
+        <span className="fallback-door" />
+        <span className="fallback-initial">{booth.name.slice(0, 1).toUpperCase()}</span>
+      </span>
+    );
   }
   return <img src={booth.imageUrl} alt="" loading="lazy" />;
 }

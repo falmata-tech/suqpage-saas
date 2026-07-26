@@ -105,16 +105,16 @@ export default async function BazaarAdminPage({
                     </form>
                   </td>
                   <td>
-                    {profile.booth ? (
+                    {profile.booth?.onFloor ? (
                       <form action={updateBazaarBoothPlacementAction} className="bazaar-placement-form">
                         <input type="hidden" name="boothId" value={profile.booth.id} />
                         <div className="field">
                           <label htmlFor={`booth-x-${profile.booth.id}`}>X</label>
-                          <input id={`booth-x-${profile.booth.id}`} name="x" type="number" min="0" max="1110" defaultValue={profile.booth.x} required />
+                          <input id={`booth-x-${profile.booth.id}`} name="x" type="number" min="0" max={Math.max(0, state.current.floor.width - profile.booth.width)} defaultValue={profile.booth.x} required />
                         </div>
                         <div className="field">
                           <label htmlFor={`booth-y-${profile.booth.id}`}>Y</label>
-                          <input id={`booth-y-${profile.booth.id}`} name="y" type="number" min="0" max="748" defaultValue={profile.booth.y} required />
+                          <input id={`booth-y-${profile.booth.id}`} name="y" type="number" min="0" max={Math.max(0, state.current.floor.height - profile.booth.height)} defaultValue={profile.booth.y} required />
                         </div>
                         <div className="field">
                           <label htmlFor={`booth-width-${profile.booth.id}`}>Width</label>
@@ -127,7 +127,7 @@ export default async function BazaarAdminPage({
                         <button className="small-btn">Save placement</button>
                       </form>
                     ) : (
-                      <div className="empty-state">Not on today&apos;s floor.</div>
+                      <div className="empty-state">Not on today&apos;s visual floor. The business remains available in Bazaar List when eligible.</div>
                     )}
                   </td>
                 </tr>

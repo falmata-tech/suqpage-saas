@@ -39,7 +39,10 @@ export default function BazaarPage() {
             <div className="bazaar-live-card">
               <span className={`badge ${bazaar.status === "live" ? "active" : "limited"}`}>{bazaar.status === "live" ? "Live now" : bazaar.status}</span>
               <h2>{bazaar.themeName}</h2>
-              <p>{bazaar.booths.length} {bazaar.booths.length === 1 ? "booth" : "booths"} on the floor</p>
+              <p>
+                {bazaar.floor.visibleBoothCount} {bazaar.floor.visibleBoothCount === 1 ? "booth" : "booths"} on the floor
+                {bazaar.floor.totalBoothCount > bazaar.floor.visibleBoothCount ? ` · ${bazaar.floor.totalBoothCount} in Bazaar List` : ""}
+              </p>
             </div>
           </div>
         </section>

@@ -27,6 +27,10 @@ showrooms, inquiries, managed requests, or the controlled single-instance pilot.
 - Manual generation path for the current single-instance pilot.
 - Public `/bazaar` smoke and mobile browser evidence before homepage promotion.
 - Cache and stale-state invalidation policy for daily rollover.
+- Bounded dynamic floor verification at small, medium, and maximum visual booth
+  counts, with no more than 48 storefront nodes rendered on the floor.
+- Complete Bazaar List verification when eligible participation exceeds the
+  visual floor cap.
 - Rollback boundary for code and additive data.
 
 ### Non-goals
@@ -91,7 +95,8 @@ Scenario: Public homepage is not promoted too early
 - Localization and merchant-entered values: rollout does not require changing
   existing merchant-entered content.
 - Performance and limits: production promotion requires bundle/build evidence
-  and no WebGL/large animation dependency.
+  and no WebGL/large animation dependency. The interactive floor renders at most
+  48 storefronts while the semantic list remains complete.
 - Failure recovery and idempotency: generation and migrations are rerunnable;
   rollback leaves existing features unaffected.
 
@@ -109,6 +114,7 @@ evidence.
 | Additive migration and rollback boundary | operations | `scripts/test-operations.mjs`, `scripts/test-bazaar.ts` |
 | Manual/lazy rollover idempotency | integration | `scripts/test-bazaar.ts` |
 | Public mobile route evidence | acceptance | `tests/acceptance/app.spec.ts` |
+| Dynamic geometry and visual floor cap | integration/acceptance | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Existing check gate remains green | release | `npm run check` |
 
 ## Rollout and rollback
@@ -141,8 +147,11 @@ Evidence:
 
 - `npm run validate:specs`
 - `npm run typecheck`
-- `npm run test:bazaar`
-- `npm run test:acceptance` passed 9/9.
+- `npm run test:bazaar` passed small and maximum visual-floor geometry, the
+  48-storefront cap, seven list-only overflow participants, and grounded
+  automatic/manual placement.
+- `npm run test:acceptance` passed 9/9, including mobile corridor-grounding and
+  document-overflow checks at 390px and 320px.
 - `npm run check`
 
 Known limitation: no remote checks, production backup/restore run, or scheduled

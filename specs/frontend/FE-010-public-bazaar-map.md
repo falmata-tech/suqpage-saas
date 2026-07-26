@@ -25,6 +25,12 @@ fallback backed by server-owned Bazaar data.
 - Public `/bazaar` route showing the server-determined active Bazaar.
 - Mobile-first Bazaar floor that can be panned, zoomed with controls, reset, and
   explored without WebGL, 3D engines, or game engines.
+- A code-rendered floor whose width, storefront rows, corridors, and height grow
+  deterministically with the number of participating businesses.
+- Grounded storefront facades aligned to corridor edges; booth cards must not
+  float over a static marketplace photograph.
+- A maximum of 48 storefronts on the interactive floor, with every additional
+  eligible participant retained in Bazaar List.
 - Booth tiles derived from active public showrooms and stable server positions.
 - Booth preview overlay or bottom sheet with business name, handle, industry,
   hero image or fallback treatment, short description, and **Enter showroom**.
@@ -58,9 +64,11 @@ fallback backed by server-owned Bazaar data.
 - `/bazaar` renders initial active Bazaar data server-side.
 - The map client component receives a bounded view model:
   - occurrence ID, theme name, live/empty/error status, timezone note;
-  - floor dimensions;
+  - floor dimensions, row/column counts, total participant count, visible
+    floor count, and floor cap;
   - booths with ID, coordinates, dimensions, featured flag, handle, display
-    fields, category/industry label, image URL or fallback token.
+    fields, category/industry label, storefront image URL or fallback token,
+    floor row, and whether the booth belongs on the floor.
 - The component must not query SQLite or infer eligibility in the browser.
 - Controls expose accessible names: zoom in, zoom out, reset Bazaar view, open
   Bazaar List, close booth preview, and enter showroom.
@@ -95,6 +103,15 @@ Scenario: Map interaction is not usable
   WHEN the visitor switches to list mode
   THEN all current Bazaar participants remain discoverable
   AND showroom links remain available
+
+Scenario: Participation changes the floor without unbounded rendering
+  GIVEN today's Bazaar has a varying number of eligible businesses
+  WHEN the server builds the current floor
+  THEN floor dimensions and corridor rows grow deterministically with the
+  visible booth count
+  AND each visible storefront is attached to a corridor edge
+  AND no more than 48 storefronts render on the floor
+  AND Bazaar List still contains every eligible participant
 ```
 
 ## Quality impact
@@ -125,7 +142,8 @@ raw media paths.
 |---|---|---|
 | Mobile map pan/zoom/select at 390px and 320px without overflow | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
 | Bazaar List contains all active booths and keyboard links | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
-| No-media booth fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
+| No-media grounded storefront fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
+| Dynamic dimensions, grounded corridor rows, and 48-booth floor cap | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Draft/suspended businesses excluded | integration/security | `scripts/test-bazaar.ts`, `scripts/test-security.ts` |
 
 ## Rollout and rollback
@@ -150,18 +168,22 @@ additive and inert unless used by the deployed code.
 Implemented on 2026-07-26 with `/bazaar`, the homepage live Bazaar section,
 weekly schedule, hero Bazaar callout, `components/BazaarMap.tsx`, mobile map
 controls, booth preview, Bazaar List fallback, homepage Bazaar navigation, and
-deterministic acceptance clock support.
+deterministic acceptance clock support. The floor now grows from server-owned
+participant data as grounded storefront rows and corridors, displays at most 48
+storefronts, and keeps every participant available in Bazaar List.
 
 Evidence:
 
 - `npm run validate:specs`
 - `npm run typecheck`
-- `npm run test:bazaar`
+- `npm run test:bazaar` passed dynamic one-row and six-row geometry, corridor
+  grounding, manual-placement persistence, and a 55-participant case with 48
+  storefronts on the floor and seven list-only participants.
 - `npm run test:acceptance` passed 9/9, including the mobile Bazaar map/list
-  scenario at 390px and 320px.
+  scenario at 390px and 320px and browser geometry proving each storefront
+  meets its corridor.
 - `npm run check`
 
-Known limitation: this slice uses seeded/default Bazaar configuration and data
-fields for exclusion/featured placement. A dedicated dashboard UI for
-administrator theme mapping, manual booth movement, and promotion scheduling is
-a follow-up feature.
+Known limitation: the public visual floor is intentionally capped at 48
+storefronts for bounded browser work. Additional participating businesses remain
+fully available in Bazaar List rather than receiving a floor storefront.

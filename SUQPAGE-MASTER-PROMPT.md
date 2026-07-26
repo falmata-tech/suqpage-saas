@@ -195,13 +195,15 @@ mobile-first marketplace surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-012` defines the current visual composition: a
 photographic maker hero leads with the permanent `/@handle` showroom product;
 today's Bazaar is a secondary callout; the server-owned weekly schedule and a
-searchable, filterable All Showrooms rail appear before an image-backed Bazaar
-map/list; and featured placement, the compact five-step process, final merchant
-CTA, and complete public footer follow below. Tenant cards and booths use active
-public tenant data and link to the authoritative showroom. Platform artwork is
-decorative and makes no tenant-specific product claim. The featured area renders
-only administratively flagged campaigns and otherwise presents an honest
-placement callout.
+searchable, filterable All Showrooms rail appear before a dynamic Bazaar map/list.
+The map derives bounded floor dimensions from current participation, grounds up
+to 48 storefronts against code-rendered corridors, and keeps every additional
+participant available in Bazaar List. Featured placement, the compact five-step
+process, final merchant CTA, and complete public footer follow below. Tenant
+cards and booths use active public tenant data and link to the authoritative
+showroom. Platform artwork is decorative and makes no tenant-specific product
+claim. The featured area renders only administratively flagged campaigns and
+otherwise presents an honest placement callout.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file

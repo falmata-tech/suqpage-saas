@@ -2,10 +2,22 @@ import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
 
 const DEFAULT_TIMEZONE = process.env.SUQPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
-const FLOOR_WIDTH = 1280;
-const FLOOR_HEIGHT = 860;
-const BOOTH_WIDTH = 170;
-const BOOTH_HEIGHT = 112;
+const MIN_FLOOR_WIDTH = 1040;
+const FLOOR_PADDING = 70;
+const MAX_FLOOR_COLUMNS = 8;
+const MAX_FLOOR_BOOTHS = 48;
+const BOOTH_WIDTH = 200;
+const BOOTH_HEIGHT = 150;
+const BOOTH_GAP = 44;
+const CORRIDOR_HEIGHT = 180;
+const ROW_GAP = 64;
+
+const SEEDED_STOREFRONT_IMAGES: Record<string, string> = {
+  alhayabrand: "/landing/booths/alhayabrand-storefront.jpg",
+  usashopet: "/landing/booths/usashopet-storefront.jpg",
+  novatech: "/landing/booths/novatech-storefront.jpg",
+  homevibe: "/landing/booths/homevibe-storefront.jpg",
+};
 
 const INDUSTRY_LABELS: Record<string, string> = {
   electronics: "Electronics & Appliances",
@@ -87,6 +99,8 @@ export type BazaarBoothView = {
   y: number;
   width: number;
   height: number;
+  floorRow: number | null;
+  onFloor: boolean;
   featured: boolean;
   status: "active" | "excluded";
 };
@@ -99,7 +113,16 @@ export type CurrentBazaarView = {
   startsAt: string;
   endsAt: string;
   timezone: string;
-  floor: { width: number; height: number };
+  floor: {
+    width: number;
+    height: number;
+    columns: number;
+    rows: number;
+    visibleBoothCount: number;
+    totalBoothCount: number;
+    maxBooths: number;
+    corridors: Array<{ row: number; y: number; height: number }>;
+  };
   booths: BazaarBoothView[];
 };
 
@@ -239,6 +262,30 @@ function fallbackStyleForIndustry(keys: string[]) {
     : "market";
 }
 
+function floorGeometry(totalBoothCount: number): CurrentBazaarView["floor"] {
+  const visibleBoothCount = Math.min(totalBoothCount, MAX_FLOOR_BOOTHS);
+  const columns = Math.min(MAX_FLOOR_COLUMNS, Math.max(3, visibleBoothCount || 3));
+  const rows = Math.max(1, Math.ceil(visibleBoothCount / columns));
+  const contentWidth = columns * BOOTH_WIDTH + (columns - 1) * BOOTH_GAP;
+  const width = Math.max(MIN_FLOOR_WIDTH, FLOOR_PADDING * 2 + contentWidth);
+  const rowPitch = BOOTH_HEIGHT + CORRIDOR_HEIGHT + ROW_GAP;
+  const height = FLOOR_PADDING * 2 + rows * (BOOTH_HEIGHT + CORRIDOR_HEIGHT) + (rows - 1) * ROW_GAP;
+  return {
+    width,
+    height,
+    columns,
+    rows,
+    visibleBoothCount,
+    totalBoothCount,
+    maxBooths: MAX_FLOOR_BOOTHS,
+    corridors: Array.from({ length: rows }, (_, index) => ({
+      row: index + 1,
+      y: FLOOR_PADDING + index * rowPitch + BOOTH_HEIGHT,
+      height: CORRIDOR_HEIGHT,
+    })),
+  };
+}
+
 export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
   const insertTheme = db.prepare(`
     INSERT OR IGNORE INTO bazaar_themes(
@@ -266,12 +313,20 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
   `);
   for (const business of businesses) {
     const industryKeys = defaultIndustryKeysForBusiness(business.handle);
+    const boothImagePath = SEEDED_STOREFRONT_IMAGES[business.handle] || business.hero_image_path || "";
     insertProfile.run(
       business.id,
       JSON.stringify(industryKeys),
-      business.hero_image_path || "",
+      boothImagePath,
       fallbackStyleForIndustry(industryKeys),
     );
+    if (SEEDED_STOREFRONT_IMAGES[business.handle]) {
+      db.prepare(`
+        UPDATE bazaar_booth_profiles
+        SET booth_image_path=?,updated_at=CURRENT_TIMESTAMP
+        WHERE business_id=? AND (booth_image_path IS NULL OR booth_image_path='' OR booth_image_path=?)
+      `).run(boothImagePath, business.id, business.hero_image_path || "");
+    }
   }
 }
 
@@ -290,15 +345,20 @@ function intersects(left: string[], right: string[]) {
   return left.some((value) => rightSet.has(value));
 }
 
-function coordinatesFor(index: number) {
-  const columns = 5;
-  const col = index % columns;
-  const row = Math.floor(index / columns);
+function coordinatesFor(index: number, floor: CurrentBazaarView["floor"]) {
+  if (index >= floor.visibleBoothCount) {
+    return { x: 0, y: 0, width: BOOTH_WIDTH, height: BOOTH_HEIGHT, floorSection: "list-only" };
+  }
+  const col = index % floor.columns;
+  const row = Math.floor(index / floor.columns);
+  const contentWidth = floor.columns * BOOTH_WIDTH + (floor.columns - 1) * BOOTH_GAP;
+  const left = Math.round((floor.width - contentWidth) / 2);
   return {
-    x: 70 + col * 230,
-    y: 76 + row * 168,
+    x: left + col * (BOOTH_WIDTH + BOOTH_GAP),
+    y: FLOOR_PADDING + row * (BOOTH_HEIGHT + CORRIDOR_HEIGHT + ROW_GAP),
     width: BOOTH_WIDTH,
     height: BOOTH_HEIGHT,
+    floorSection: `row-${row + 1}`,
   };
 }
 
@@ -347,11 +407,19 @@ function ensureOccurrence(db: DatabaseSync, theme: BazaarThemeRow, bazaarDate: s
     `);
     const reactivateBooth = db.prepare(`
       UPDATE bazaar_booths
-      SET featured=?,status='active',updated_at=CURRENT_TIMESTAMP
+      SET featured=?,status='active',
+        x=CASE WHEN floor_section='manual' THEN x ELSE ? END,
+        y=CASE WHEN floor_section='manual' THEN y ELSE ? END,
+        width=CASE WHEN floor_section='manual' THEN width ELSE ? END,
+        height=CASE WHEN floor_section='manual' THEN height ELSE ? END,
+        floor_section=CASE WHEN floor_section='manual' THEN floor_section ELSE ? END,
+        updated_at=CURRENT_TIMESTAMP
       WHERE occurrence_id=? AND business_id=?
     `);
-    eligibleBusinesses(db, theme).forEach((business, index) => {
-      const coords = coordinatesFor(index);
+    const eligible = eligibleBusinesses(db, theme);
+    const floor = floorGeometry(eligible.length);
+    eligible.forEach((business, index) => {
+      const coords = coordinatesFor(index, floor);
       insertBooth.run(
         occurrence.id,
         business.id,
@@ -359,10 +427,19 @@ function ensureOccurrence(db: DatabaseSync, theme: BazaarThemeRow, bazaarDate: s
         coords.y,
         coords.width,
         coords.height,
-        index < 5 ? "front-walk" : "market-lane",
+        coords.floorSection,
         business.is_featured ? 1 : 0,
       );
-      reactivateBooth.run(business.is_featured ? 1 : 0, occurrence.id, business.id);
+      reactivateBooth.run(
+        business.is_featured ? 1 : 0,
+        coords.x,
+        coords.y,
+        coords.width,
+        coords.height,
+        coords.floorSection,
+        occurrence.id,
+        business.id,
+      );
     });
     db.exec("COMMIT");
     return { id: occurrence.id, ...window };
@@ -383,13 +460,15 @@ function boothRows(db: DatabaseSync, occurrenceId: number) {
     JOIN businesses b ON b.id=bb.business_id
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
     WHERE bb.occurrence_id=? AND bb.status='active' AND b.status='active'
-    ORDER BY bb.featured DESC,bb.y,bb.x,b.name
+    ORDER BY CASE WHEN bb.floor_section='list-only' THEN 1 ELSE 0 END,
+      bb.featured DESC,bb.y,bb.x,b.name
   `).all(occurrenceId) as BazaarBoothRow[];
 }
 
-function toBoothView(row: BazaarBoothRow): BazaarBoothView {
+function toBoothView(row: BazaarBoothRow, onFloor: boolean): BazaarBoothView {
   const keys = jsonArray(row.industry_keys_json);
   const primaryKey = keys[0] || "community";
+  const floorRowMatch = /^row-(\d+)$/.exec(row.floor_section);
   return {
     id: row.booth_id,
     businessId: row.id,
@@ -404,6 +483,8 @@ function toBoothView(row: BazaarBoothRow): BazaarBoothView {
     y: row.y,
     width: row.width,
     height: row.height,
+    floorRow: onFloor ? Number(floorRowMatch?.[1] || 1) : null,
+    onFloor,
     featured: Boolean(row.featured || row.is_featured),
     status: row.booth_status,
   };
@@ -423,12 +504,14 @@ export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView
       startsAt: "",
       endsAt: "",
       timezone: DEFAULT_TIMEZONE,
-      floor: { width: FLOOR_WIDTH, height: FLOOR_HEIGHT },
+      floor: floorGeometry(0),
       booths: [],
     };
   }
   const occurrence = ensureOccurrence(db, theme, date);
-  const booths = boothRows(db, occurrence.id).map(toBoothView);
+  const rows = boothRows(db, occurrence.id);
+  const floor = floorGeometry(rows.length);
+  const booths = rows.map((row, index) => toBoothView(row, index < floor.visibleBoothCount));
   return {
     occurrenceId: occurrence.id,
     themeName: theme.name,
@@ -437,7 +520,7 @@ export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView
     startsAt: occurrence.startsAt,
     endsAt: occurrence.endsAt,
     timezone: theme.timezone || DEFAULT_TIMEZONE,
-    floor: { width: FLOOR_WIDTH, height: FLOOR_HEIGHT },
+    floor,
     booths,
   };
 }
@@ -571,12 +654,17 @@ export function updateBazaarBoothPlacement(input: {
   const y = requireInteger(input.y, "Y coordinate");
   const width = requireInteger(input.width, "Width");
   const height = requireInteger(input.height, "Height");
-  if (x < 0 || y < 0 || width < 80 || height < 60 || width > 360 || height > 240 || x + width > FLOOR_WIDTH || y + height > FLOOR_HEIGHT) {
-    throw new BazaarAdminError("Booth coordinates must stay inside the Bazaar floor.", "out_of_bounds");
+  const booth = db.prepare("SELECT occurrence_id FROM bazaar_booths WHERE id=?").get(boothId) as { occurrence_id: number } | undefined;
+  if (!booth) throw new BazaarAdminError("Booth not found.", "not_found");
+  const count = (db.prepare("SELECT COUNT(*) count FROM bazaar_booths WHERE occurrence_id=? AND status='active'").get(booth.occurrence_id) as { count: number }).count;
+  const floor = floorGeometry(count);
+  const meetsCorridor = floor.corridors.some((corridor) => y + height === corridor.y);
+  if (x < 0 || y < 0 || width < 80 || height < 60 || width > 360 || height > 240 || x + width > floor.width || y + height > floor.height || !meetsCorridor) {
+    throw new BazaarAdminError("Booth coordinates must stay inside the Bazaar floor and meet a corridor edge.", "out_of_bounds");
   }
   const result = db.prepare(`
     UPDATE bazaar_booths
-    SET x=?,y=?,width=?,height=?,updated_at=CURRENT_TIMESTAMP
+    SET x=?,y=?,width=?,height=?,floor_section='manual',updated_at=CURRENT_TIMESTAMP
     WHERE id=?
   `).run(x, y, width, height, boothId);
   if (!result.changes) throw new BazaarAdminError("Booth not found.", "not_found");

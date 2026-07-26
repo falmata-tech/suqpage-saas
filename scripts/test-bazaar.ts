@@ -96,6 +96,12 @@ async function main() {
   const first = getCurrentBazaar({ db, now: sunday });
   assert.equal(first.status, "live");
   assert.equal(first.themeSlug, "community-market-special-event");
+  assert.equal(first.floor.totalBoothCount, 4);
+  assert.equal(first.floor.visibleBoothCount, 4);
+  assert.equal(first.floor.columns, 4);
+  assert.equal(first.floor.rows, 1);
+  assert.equal(first.floor.maxBooths, 48);
+  assert.equal(first.floor.corridors.length, 1);
   assert.deepEqual(
     first.booths.map((booth) => booth.name).sort(),
     ["Al Haya Brand", "Community Maker", "NovaTech", "USAshopET"],
@@ -108,6 +114,15 @@ async function main() {
   assert.equal(
     first.booths.find((booth) => booth.name === "Community Maker")?.fallbackToken,
     "market",
+  );
+  assert.equal(
+    first.booths.find((booth) => booth.handle === "alhayabrand")?.imageUrl,
+    "/landing/booths/alhayabrand-storefront.jpg",
+  );
+  assert.equal(first.booths.every((booth) => booth.onFloor), true);
+  assert.equal(
+    first.booths.every((booth) => booth.y + booth.height === first.floor.corridors[(booth.floorRow || 1) - 1].y),
+    true,
   );
 
   const stableCoordinates = first.booths.map((booth) => ({
@@ -205,14 +220,53 @@ async function main() {
   );
 
   const boothId = afterFeatured.booths[0].id;
-  updateBazaarBoothPlacement({ boothId, x: 120, y: 140, width: 190, height: 120 }, db);
+  updateBazaarBoothPlacement({ boothId, x: 120, y: 100, width: 190, height: 120 }, db);
   assert.deepEqual(
     { ...(db.prepare("SELECT x,y,width,height FROM bazaar_booths WHERE id=?").get(boothId) as { x: number; y: number; width: number; height: number }) },
-    { x: 120, y: 140, width: 190, height: 120 },
+    { x: 120, y: 100, width: 190, height: 120 },
+  );
+  const afterManualRefresh = getCurrentBazaar({ db, now: sunday });
+  assert.deepEqual(
+    { ...(db.prepare("SELECT x,y,width,height FROM bazaar_booths WHERE id=?").get(boothId) as { x: number; y: number; width: number; height: number }) },
+    { x: 120, y: 100, width: 190, height: 120 },
+  );
+  assert.equal(afterManualRefresh.booths.find((booth) => booth.id === boothId)?.onFloor, true);
+  assert.throws(
+    () => updateBazaarBoothPlacement({ boothId, x: -1, y: 100, width: 190, height: 120 }, db),
+    (error: unknown) => error instanceof BazaarAdminError && error.code === "out_of_bounds",
   );
   assert.throws(
-    () => updateBazaarBoothPlacement({ boothId, x: -1, y: 140, width: 190, height: 120 }, db),
+    () => updateBazaarBoothPlacement({ boothId, x: 120, y: 140, width: 190, height: 120 }, db),
     (error: unknown) => error instanceof BazaarAdminError && error.code === "out_of_bounds",
+  );
+
+  for (let index = 1; index <= 52; index += 1) {
+    insertBusiness.run(
+      `market-maker-${index}`,
+      `Market Maker ${index}`,
+      "composition",
+      "{}",
+      "Local work",
+      "Dynamic floor participant",
+      "Market work",
+      "Grounded storefront",
+      "",
+      "",
+      "active",
+    );
+  }
+  const capped = getCurrentBazaar({ db, now: sunday });
+  assert.equal(capped.booths.length, 55);
+  assert.equal(capped.floor.totalBoothCount, 55);
+  assert.equal(capped.floor.visibleBoothCount, 48);
+  assert.equal(capped.floor.columns, 8);
+  assert.equal(capped.floor.rows, 6);
+  assert.equal(capped.booths.filter((booth) => booth.onFloor).length, 48);
+  assert.equal(capped.booths.filter((booth) => !booth.onFloor).length, 7);
+  assert.equal(
+    capped.booths.filter((booth) => booth.onFloor && booth.id !== boothId)
+      .every((booth) => booth.y + booth.height === capped.floor.corridors[(booth.floorRow || 1) - 1].y),
+    true,
   );
 
   db.prepare("UPDATE bazaar_themes SET active=0").run();
