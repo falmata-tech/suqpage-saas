@@ -197,8 +197,11 @@ photographic maker hero leads with the permanent `/@handle` showroom product;
 today's Bazaar is a secondary callout; the server-owned weekly schedule and a
 searchable, filterable All Showrooms rail appear before a dynamic Bazaar map/list.
 The map derives bounded floor dimensions from current participation, grounds up
-to 48 storefronts against code-rendered corridors, and keeps every additional
-participant available in Bazaar List. Featured placement, the compact five-step
+to 48 storefronts against code-rendered corridors, balances automatic booths in
+centered near-square rows, fits the initial view to the available viewport, and
+keeps every additional participant available in Bazaar List. Its project-owned
+weathered paving texture repeats beneath any computed geometry and contains no
+fixed booth layout or tenant claim. Featured placement, the compact five-step
 process, final merchant CTA, and complete public footer follow below. Tenant
 cards and booths use active public tenant data and link to the authoritative
 showroom. Platform artwork is decorative and makes no tenant-specific product

@@ -2,15 +2,15 @@ import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
 
 const DEFAULT_TIMEZONE = process.env.SUQPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
-const MIN_FLOOR_WIDTH = 1040;
+const MIN_FLOOR_WIDTH = 720;
 const FLOOR_PADDING = 70;
 const MAX_FLOOR_COLUMNS = 8;
 const MAX_FLOOR_BOOTHS = 48;
 const BOOTH_WIDTH = 200;
 const BOOTH_HEIGHT = 150;
 const BOOTH_GAP = 44;
-const CORRIDOR_HEIGHT = 180;
-const ROW_GAP = 64;
+const CORRIDOR_HEIGHT = 132;
+const ROW_GAP = 42;
 
 const SEEDED_STOREFRONT_IMAGES: Record<string, string> = {
   alhayabrand: "/landing/booths/alhayabrand-storefront.jpg",
@@ -264,7 +264,7 @@ function fallbackStyleForIndustry(keys: string[]) {
 
 function floorGeometry(totalBoothCount: number): CurrentBazaarView["floor"] {
   const visibleBoothCount = Math.min(totalBoothCount, MAX_FLOOR_BOOTHS);
-  const columns = Math.min(MAX_FLOOR_COLUMNS, Math.max(3, visibleBoothCount || 3));
+  const columns = Math.min(MAX_FLOOR_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(visibleBoothCount || 1))));
   const rows = Math.max(1, Math.ceil(visibleBoothCount / columns));
   const contentWidth = columns * BOOTH_WIDTH + (columns - 1) * BOOTH_GAP;
   const width = Math.max(MIN_FLOOR_WIDTH, FLOOR_PADDING * 2 + contentWidth);
@@ -351,8 +351,10 @@ function coordinatesFor(index: number, floor: CurrentBazaarView["floor"]) {
   }
   const col = index % floor.columns;
   const row = Math.floor(index / floor.columns);
-  const contentWidth = floor.columns * BOOTH_WIDTH + (floor.columns - 1) * BOOTH_GAP;
-  const left = Math.round((floor.width - contentWidth) / 2);
+  const rowStartIndex = row * floor.columns;
+  const rowBoothCount = Math.min(floor.columns, floor.visibleBoothCount - rowStartIndex);
+  const rowContentWidth = rowBoothCount * BOOTH_WIDTH + (rowBoothCount - 1) * BOOTH_GAP;
+  const left = Math.round((floor.width - rowContentWidth) / 2);
   return {
     x: left + col * (BOOTH_WIDTH + BOOTH_GAP),
     y: FLOOR_PADDING + row * (BOOTH_HEIGHT + CORRIDOR_HEIGHT + ROW_GAP),

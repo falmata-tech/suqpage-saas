@@ -27,8 +27,15 @@ fallback backed by server-owned Bazaar data.
   explored without WebGL, 3D engines, or game engines.
 - A code-rendered floor whose width, storefront rows, corridors, and height grow
   deterministically with the number of participating businesses.
+- Automatic storefronts form a centered, near-square grid: complete square
+  counts use equal rows and columns, incomplete final rows remain centered, and
+  the visual floor fits itself to the available viewport before the visitor
+  pans or zooms.
 - Grounded storefront facades aligned to corridor edges; booth cards must not
   float over a static marketplace photograph.
+- Warm, weathered outdoor-bazaar paving and a clearly bounded masonry perimeter
+  replace neutral gray canvas or road-like lane treatments without introducing
+  fixed floor artwork or fixed booth positions.
 - A maximum of 48 storefronts on the interactive floor, with every additional
   eligible participant retained in Bazaar List.
 - Booth tiles derived from active public showrooms and stable server positions.
@@ -112,6 +119,13 @@ Scenario: Participation changes the floor without unbounded rendering
   AND each visible storefront is attached to a corridor edge
   AND no more than 48 storefronts render on the floor
   AND Bazaar List still contains every eligible participant
+
+Scenario: Automatic layout remains compact across participant counts
+  GIVEN today's visual floor has four, five, nine, or sixteen storefronts
+  WHEN automatic geometry is generated
+  THEN square counts use 2x2, 3x3, or 4x4 arrangements
+  AND incomplete final rows are horizontally centered
+  AND the browser initially fits the balanced floor to its available width
 ```
 
 ## Quality impact
@@ -144,6 +158,7 @@ raw media paths.
 | Bazaar List contains all active booths and keyboard links | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
 | No-media grounded storefront fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Dynamic dimensions, grounded corridor rows, and 48-booth floor cap | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
+| Balanced square counts, centered incomplete rows, and responsive initial fit | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Draft/suspended businesses excluded | integration/security | `scripts/test-bazaar.ts`, `scripts/test-security.ts` |
 
 ## Rollout and rollback
@@ -172,13 +187,19 @@ deterministic acceptance clock support. The floor now grows from server-owned
 participant data as grounded storefront rows and corridors, displays at most 48
 storefronts, and keeps every participant available in Bazaar List.
 
+The automatic floor was refined the same day to use near-square column counts,
+center incomplete final rows, fit its initial scale to the measured viewport,
+and render project-owned old-market paving inside a warm masonry perimeter.
+Previews now open only after selection so they cannot obstruct mobile booths.
+
 Evidence:
 
 - `npm run validate:specs`
 - `npm run typecheck`
-- `npm run test:bazaar` passed dynamic one-row and six-row geometry, corridor
-  grounding, manual-placement persistence, and a 55-participant case with 48
-  storefronts on the floor and seven list-only participants.
+- `npm run test:bazaar` passed dynamic small-count and seven-row geometry, corridor
+  grounding, centered 2x2 and 3+2 layouts, manual-placement persistence, and a
+  55-participant case with a 7x7 visual footprint, 48 storefronts on the floor,
+  and seven list-only participants.
 - `npm run test:acceptance` passed 9/9, including the mobile Bazaar map/list
   scenario at 390px and 320px and browser geometry proving each storefront
   meets its corridor.

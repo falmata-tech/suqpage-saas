@@ -5,18 +5,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BazaarBoothView, CurrentBazaarView } from "@/lib/bazaar";
 
 type Point = { x: number; y: number };
+const MIN_SCALE = 0.25;
+const MAX_SCALE = 1.35;
 
 export default function BazaarMap({ bazaar, embedded = false }: { bazaar: CurrentBazaarView; embedded?: boolean }) {
   const [view, setView] = useState<"map" | "list">("map");
   const initialScale = Math.max(0.5, Math.min(1.05, (embedded ? 1160 : 980) / bazaar.floor.width));
+  const [fitScale, setFitScale] = useState(initialScale);
   const viewportHeight = Math.round(
-    Math.max(embedded ? 420 : 460, Math.min(embedded ? 620 : 640, bazaar.floor.height * initialScale)),
+    Math.max(320, Math.min(embedded ? 620 : 640, bazaar.floor.height * fitScale + 16)),
   );
   const initialOffset = embedded ? { x: 0, y: 0 } : { x: 18, y: 8 };
   const [scale, setScale] = useState(initialScale);
   const [offset, setOffset] = useState<Point>(initialOffset);
-  const [selectedId, setSelectedId] = useState<number | null>(bazaar.booths[0]?.id || null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const viewport = useRef<HTMLDivElement | null>(null);
   const drag = useRef<{ pointerId: number; start: Point; origin: Point } | null>(null);
+  const visitorChangedView = useRef(false);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("suqpage-bazaar-view");
@@ -27,20 +32,40 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
     sessionStorage.setItem("suqpage-bazaar-view", view);
   }, [view]);
 
+  useEffect(() => {
+    const node = viewport.current;
+    if (!node) return;
+    const fitFloor = () => {
+      const nextScale = Math.max(MIN_SCALE, Math.min(1.05, (node.clientWidth - 20) / bazaar.floor.width));
+      setFitScale(nextScale);
+      if (!visitorChangedView.current) {
+        setScale(nextScale);
+        setOffset({ x: Math.max(8, Math.round((node.clientWidth - bazaar.floor.width * nextScale) / 2)), y: 8 });
+      }
+    };
+    fitFloor();
+    const observer = new ResizeObserver(fitFloor);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [bazaar.floor.width]);
+
   const selected = useMemo(
-    () => bazaar.booths.find((booth) => booth.id === selectedId) || bazaar.booths[0] || null,
+    () => selectedId === null ? null : bazaar.booths.find((booth) => booth.id === selectedId) || null,
     [bazaar.booths, selectedId],
   );
   const floorBooths = useMemo(() => bazaar.booths.filter((booth) => booth.onFloor), [bazaar.booths]);
   const listOnlyCount = bazaar.floor.totalBoothCount - bazaar.floor.visibleBoothCount;
 
   function zoomBy(delta: number) {
-    setScale((value) => Math.max(0.5, Math.min(1.35, Number((value + delta).toFixed(2)))));
+    visitorChangedView.current = true;
+    setScale((value) => Math.max(MIN_SCALE, Math.min(MAX_SCALE, Number((value + delta).toFixed(2)))));
   }
 
   function resetView() {
-    setScale(initialScale);
-    setOffset(initialOffset);
+    visitorChangedView.current = false;
+    setScale(fitScale);
+    const width = viewport.current?.clientWidth || bazaar.floor.width * fitScale;
+    setOffset({ x: Math.max(8, Math.round((width - bazaar.floor.width * fitScale) / 2)), y: 8 });
   }
 
   function startDrag(event: React.PointerEvent<HTMLDivElement>) {
@@ -112,6 +137,7 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
             <button type="button" aria-label="Reset Bazaar view" onClick={resetView}>Reset</button>
           </div>
           <div
+            ref={viewport}
             className="bazaar-map-viewport"
             style={{ height: viewportHeight, minHeight: viewportHeight }}
             aria-label="Draggable Bazaar floor"

@@ -98,10 +98,10 @@ async function main() {
   assert.equal(first.themeSlug, "community-market-special-event");
   assert.equal(first.floor.totalBoothCount, 4);
   assert.equal(first.floor.visibleBoothCount, 4);
-  assert.equal(first.floor.columns, 4);
-  assert.equal(first.floor.rows, 1);
+  assert.equal(first.floor.columns, 2);
+  assert.equal(first.floor.rows, 2);
   assert.equal(first.floor.maxBooths, 48);
-  assert.equal(first.floor.corridors.length, 1);
+  assert.equal(first.floor.corridors.length, 2);
   assert.deepEqual(
     first.booths.map((booth) => booth.name).sort(),
     ["Al Haya Brand", "Community Maker", "NovaTech", "USAshopET"],
@@ -151,6 +151,16 @@ async function main() {
     (db.prepare("SELECT COUNT(*) count FROM bazaar_booths").get() as { count: number }).count,
     first.booths.length,
   );
+
+  db.prepare("UPDATE businesses SET status='active' WHERE handle='homevibe'").run();
+  const fiveBooths = getCurrentBazaar({ db, now: sunday });
+  assert.equal(fiveBooths.floor.columns, 3);
+  assert.equal(fiveBooths.floor.rows, 2);
+  const firstRowLeft = Math.min(...fiveBooths.booths.filter((booth) => booth.floorRow === 1).map((booth) => booth.x));
+  const finalRowLeft = Math.min(...fiveBooths.booths.filter((booth) => booth.floorRow === 2).map((booth) => booth.x));
+  assert.equal(finalRowLeft > firstRowLeft, true);
+  db.prepare("UPDATE businesses SET status='draft' WHERE handle='homevibe'").run();
+  getCurrentBazaar({ db, now: sunday });
 
   db.prepare(`
     UPDATE bazaar_booth_profiles
@@ -259,8 +269,8 @@ async function main() {
   assert.equal(capped.booths.length, 55);
   assert.equal(capped.floor.totalBoothCount, 55);
   assert.equal(capped.floor.visibleBoothCount, 48);
-  assert.equal(capped.floor.columns, 8);
-  assert.equal(capped.floor.rows, 6);
+  assert.equal(capped.floor.columns, 7);
+  assert.equal(capped.floor.rows, 7);
   assert.equal(capped.booths.filter((booth) => booth.onFloor).length, 48);
   assert.equal(capped.booths.filter((booth) => !booth.onFloor).length, 7);
   assert.equal(

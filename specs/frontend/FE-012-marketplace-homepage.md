@@ -31,8 +31,9 @@ benefit.
 - A visually prominent All Showrooms section above the Bazaar with search,
   category, industry, sort, and permanent-showroom links.
 - A rich, code-rendered Bazaar floor backed by the existing server-owned current
-  Bazaar view, including dynamic corridors, grounded storefronts, map/list
-  controls, booth selection, and showroom links.
+  Bazaar view, including balanced centered storefront rows, responsive floor
+  fitting, warm old-market paving, bounded masonry edges, dynamic corridors,
+  map/list controls, booth selection, and showroom links.
 - A separate featured-business rail, compact five-step process band, merchant
   conversion panel, and complete public footer.
 - Approved, project-owned maker and storefront imagery that carries the visual
@@ -166,8 +167,10 @@ Evidence:
   five-step process, CTA, and public footer.
 - Project-owned generated artwork is stored at
   `public/landing/maker-workshop-hero.jpg` and the four seeded facade files in
-  `public/landing/booths/`; future tenants without approved media receive a
-  structural storefront fallback rather than an invented product photograph.
+  `public/landing/booths/`. The repeatable old-market floor texture is stored at
+  `public/landing/bazaar-paving.jpg`; it contains no booth geometry or tenant
+  claims. Future tenants without approved media receive a structural storefront
+  fallback rather than an invented product photograph.
 - Manual Playwright screenshots were reviewed at 1440px and 390px against the
   approved reference. Browser geometry checks proved document width equals the
   viewport width at both 390px and 320px and storefront thresholds meet their

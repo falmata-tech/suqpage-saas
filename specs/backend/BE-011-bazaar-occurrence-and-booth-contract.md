@@ -32,6 +32,9 @@ showroom as the authoritative destination.
 - Dynamic floor geometry derived from the bounded visual booth count, with
   grounded storefront rows, an attached corridor for every row, and a 48-booth
   visual cap.
+- Automatic column count is the ceiling of the square root of the visible booth
+  count, bounded by the visual maximum. Each incomplete row is centered inside
+  the same computed floor width.
 - Complete list participation even when eligible businesses exceed the visual
   floor cap.
 - Booth preview data derived from business, catalog/category, hero, logo, and
@@ -138,6 +141,12 @@ Scenario: Eligible count exceeds the visual floor cap
   THEN exactly 48 booths are marked for floor rendering
   AND every eligible business remains in the Bazaar List payload
   AND computed floor dimensions remain within the configured maximum geometry
+
+Scenario: Square participant counts produce square automatic layouts
+  GIVEN the visual floor contains four, nine, or sixteen booths
+  WHEN floor geometry is computed
+  THEN the floor uses 2, 3, or 4 columns respectively
+  AND every incomplete final row is centered within the floor
 ```
 
 ## Quality impact
@@ -169,6 +178,7 @@ Never log private request content, contact details, or raw uploaded file bytes.
 | Active-only public data and exclusion handling | security/integration | `scripts/test-bazaar.ts`, `scripts/test-security.ts` |
 | Deterministic dynamic placement bounds and no-media fallback | unit/integration | `scripts/test-bazaar.ts` |
 | Visual cap preserves complete list participation | integration | `scripts/test-bazaar.ts` |
+| Near-square columns and centered incomplete rows | integration | `scripts/test-bazaar.ts` |
 | Current Bazaar unavailable state | integration | `scripts/test-bazaar.ts` |
 
 ## Rollout and rollback
@@ -196,12 +206,16 @@ generation, participant-count-derived floor geometry, corridor-grounded
 coordinates, active-only public booth data, no-media fallback tokens, exclusion
 refresh, featured priority, and a 48-storefront visual cap.
 
+Automatic geometry uses the bounded ceiling square root for its column count,
+centers incomplete rows, and remains deterministic across occurrence refreshes.
+
 Evidence:
 
 - `npm run validate:specs`
 - `npm run typecheck`
 - `npm run test:bazaar` passed automatic reflow, grounded manual placement,
-  invalid floating placement rejection, and the 55-participant cap scenario.
+  invalid floating placement rejection, centered 2x2 and 3+2 arrangements, and
+  the 55-participant cap scenario.
 - `npm run test:acceptance` passed 9/9.
 - `npm run check`
 

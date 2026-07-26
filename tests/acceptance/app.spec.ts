@@ -194,16 +194,26 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
   await expect(page.getByText("4 booths on the floor")).toBeVisible();
   await expect(page.getByRole("button", { name: /Select .* booth/ })).toHaveCount(4);
   await expect(page.locator(".bazaar-booth-grounded")).toHaveCount(4);
-  await expect(page.locator(".bazaar-corridor")).toHaveCount(1);
+  await expect(page.locator(".bazaar-corridor")).toHaveCount(2);
   await expect(page.locator(".bazaar-floor-visual")).toHaveCount(0);
   const storefrontsMeetCorridor = await page.locator(".bazaar-map-viewport").evaluate((viewport) => {
-    const corridor = viewport.querySelector<HTMLElement>(".bazaar-corridor");
+    const corridors = [...viewport.querySelectorAll<HTMLElement>(".bazaar-corridor")];
     const storefronts = [...viewport.querySelectorAll<HTMLElement>(".bazaar-booth-grounded")];
-    if (!corridor || storefronts.length === 0) return false;
-    const corridorTop = corridor.getBoundingClientRect().top;
-    return storefronts.every((storefront) => Math.abs(storefront.getBoundingClientRect().bottom - corridorTop) < 2);
+    if (corridors.length === 0 || storefronts.length === 0) return false;
+    const corridorTops = corridors.map((corridor) => corridor.getBoundingClientRect().top);
+    return storefronts.every((storefront) => corridorTops.some((top) => Math.abs(storefront.getBoundingClientRect().bottom - top) < 2));
   });
   expect(storefrontsMeetCorridor).toBe(true);
+  const balancedFloorFitsMobile = await page.locator(".bazaar-map-viewport").evaluate((viewport) => {
+    const floor = viewport.querySelector<HTMLElement>(".bazaar-floor");
+    const storefronts = [...viewport.querySelectorAll<HTMLElement>(".bazaar-booth-grounded")];
+    if (!floor) return false;
+    const floorRect = floor.getBoundingClientRect();
+    const viewportRect = viewport.getBoundingClientRect();
+    const rowTops = new Set(storefronts.map((storefront) => Math.round(storefront.getBoundingClientRect().top)));
+    return floorRect.width <= viewportRect.width && floorRect.left >= viewportRect.left && rowTops.size === 2;
+  });
+  expect(balancedFloorFitsMobile).toBe(true);
   await page.getByRole("button", { name: "Zoom in" }).click();
   await page.getByRole("button", { name: "Zoom out" }).click();
   await page.getByRole("button", { name: "Reset Bazaar view" }).click();

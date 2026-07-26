@@ -88,3 +88,16 @@
 .bazaar-map-directory-list .bazaar-booth-fallback>span,.bazaar-list-card .bazaar-booth-fallback>span,.bazaar-preview>.bazaar-booth-fallback>span{position:absolute}
 @media(max-width:420px){.bazaar-booth.bazaar-booth-grounded{padding:0}.bazaar-booth.bazaar-booth-grounded>img,.bazaar-booth.bazaar-booth-grounded>.bazaar-booth-fallback{height:100%}.bazaar-booth-sign{font-size:.65rem!important}.bazaar-corridor-lounge{min-width:112px;padding:10px 14px}}
 @media(prefers-reduced-motion:reduce){.bazaar-booth.bazaar-booth-grounded{transition:none}}
+
+/* Warm outdoor-market surface; geometry remains server-owned and dynamic. */
+.bazaar-map-shell{background:#735b43}
+.bazaar-map-viewport,.marketplace-home .bazaar-map-viewport{background-color:#80664a;background-image:linear-gradient(#4b321fb8,#4b321fb8),url('/landing/bazaar-paving.jpg');background-repeat:repeat;background-size:100% 100%,360px 360px}
+.bazaar-floor{box-sizing:border-box;overflow:hidden;border:14px solid #755035;border-radius:10px;background-color:#d9b57f;background-image:linear-gradient(#f7e1ba26,#8c5f3b1f),url('/landing/bazaar-paving.jpg');background-repeat:repeat;background-size:100% 100%,450px 450px;box-shadow:0 0 0 4px #c79d66,0 20px 44px #38271973,inset 0 0 38px #6b45273d}
+.bazaar-floor:before{inset:0;z-index:4;border:8px solid #b88955;border-radius:3px;background:transparent;box-shadow:inset 0 0 0 3px #5f402b,inset 0 0 28px #5a391d52}
+.bazaar-corridor{border-top:7px solid #765037;border-bottom:7px solid #765037;background-color:#ead4a8d9;background-image:linear-gradient(#fff3d53d,#9f704224),url('/landing/bazaar-paving.jpg');background-size:100% 100%,330px 330px;box-shadow:inset 0 7px 0 #c99b63,inset 0 -7px 0 #c99b63,0 7px 16px #62412430}
+.bazaar-corridor:before{left:20px;right:20px;top:50%;height:12px;transform:translateY(-50%);border-top:1px solid #70462e80;border-bottom:1px solid #70462e80;background:repeating-linear-gradient(90deg,#864f3d99 0 16px,#d4aa6c99 16px 32px,#f1d49e99 32px 48px);opacity:.72}
+.bazaar-corridor-label{left:14px;bottom:12px;border-color:#7c573a;border-radius:3px;background:#f5e3bfe8;color:#624127;box-shadow:0 2px 0 #7650373d}
+.bazaar-corridor-lounge{display:grid;width:120px;height:72px;min-width:0;place-items:center;border:4px double #8b6240;border-radius:50%;background:#f5ddb0eb;padding:8px;color:#684522;box-shadow:0 5px 0 #79543552,0 9px 18px #68452538}
+.bazaar-planter{border-color:#6e4b33;background:#61774f;box-shadow:inset 0 0 0 5px #9aaa72,0 4px 0 #5e3e2a}.bazaar-bench{border-color:#65452f;background:#a66f43;box-shadow:0 8px 0 -5px #65452f}
+.bazaar-booth.bazaar-booth-grounded{border-color:#533a2a;box-shadow:0 5px 0 #6f4d34,0 9px 13px #47301f52}
+.bazaar-booth-threshold{border-color:#6d4d36;background:linear-gradient(#d5b581,#8d6748);box-shadow:0 3px 0 #62432e}
