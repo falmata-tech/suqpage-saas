@@ -103,6 +103,43 @@ export type CurrentBazaarView = {
   booths: BazaarBoothView[];
 };
 
+export type BazaarThemeAdminView = {
+  id: number;
+  name: string;
+  slug: string;
+  weekday: number;
+  industryKeys: string[];
+  icon: string;
+  timezone: string;
+  startsAtTime: string;
+  active: boolean;
+};
+
+export type BazaarProfileAdminView = {
+  businessId: number;
+  businessName: string;
+  handle: string;
+  status: string;
+  industryKeys: string[];
+  boothImagePath: string;
+  fallbackStyle: string;
+  featured: boolean;
+  excluded: boolean;
+  booth: BazaarBoothView | null;
+};
+
+export type BazaarAdminState = {
+  current: CurrentBazaarView;
+  themes: BazaarThemeAdminView[];
+  profiles: BazaarProfileAdminView[];
+};
+
+export class BazaarAdminError extends Error {
+  constructor(message: string, public readonly code: string) {
+    super(message);
+  }
+}
+
 type BazaarOptions = {
   db?: DatabaseSync;
   now?: Date;
@@ -118,6 +155,27 @@ function jsonArray(value: string | null | undefined): string[] {
   } catch {
     return [];
   }
+}
+
+function normalizeIndustryKeys(value: string | string[]) {
+  const entries = Array.isArray(value) ? value : value.split(",");
+  const keys = entries
+    .map((entry) => entry.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, ""))
+    .filter(Boolean);
+  return [...new Set(keys)];
+}
+
+function requireInteger(value: unknown, label: string) {
+  const number = typeof value === "number" ? value : Number.parseInt(String(value || ""), 10);
+  if (!Number.isInteger(number)) throw new BazaarAdminError(`${label} is invalid.`, "invalid_number");
+  return number;
+}
+
+function requireBoundedText(value: unknown, label: string, max: number, required = true) {
+  const text = String(value || "").trim();
+  if (required && !text) throw new BazaarAdminError(`${label} is required.`, "required");
+  if (text.length > max) throw new BazaarAdminError(`${label} is too long.`, "too_long");
+  return text;
 }
 
 function localDateParts(date: Date, timezone: string) {
@@ -381,4 +439,144 @@ export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView
     floor: { width: FLOOR_WIDTH, height: FLOOR_HEIGHT },
     booths,
   };
+}
+
+function themeAdmin(row: BazaarThemeRow & { active: number }): BazaarThemeAdminView {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    weekday: row.weekday,
+    industryKeys: jsonArray(row.industry_keys_json),
+    icon: row.icon,
+    timezone: row.timezone,
+    startsAtTime: row.starts_at_time,
+    active: Boolean(row.active),
+  };
+}
+
+export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminState {
+  const db = options.db || getDb();
+  seedDefaultBazaarConfig(db);
+  const current = getCurrentBazaar({ db, now: options.now });
+  const themes = (db.prepare("SELECT * FROM bazaar_themes ORDER BY weekday,id").all() as Array<BazaarThemeRow & { active: number }>)
+    .map(themeAdmin);
+  const boothByBusinessId = new Map(current.booths.map((booth) => [booth.businessId, booth]));
+  const profiles = db.prepare(`
+    SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
+      p.booth_image_path,p.fallback_style,p.is_featured,p.is_excluded
+    FROM businesses b
+    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
+    ORDER BY b.status='active' DESC,b.name,b.id
+  `).all() as Array<{
+    business_id: number;
+    name: string;
+    handle: string;
+    status: string;
+    industry_keys_json: string | null;
+    booth_image_path: string | null;
+    fallback_style: string | null;
+    is_featured: number | null;
+    is_excluded: number | null;
+  }>;
+  return {
+    current,
+    themes,
+    profiles: profiles.map((profile) => ({
+      businessId: profile.business_id,
+      businessName: profile.name,
+      handle: profile.handle,
+      status: profile.status,
+      industryKeys: jsonArray(profile.industry_keys_json),
+      boothImagePath: profile.booth_image_path || "",
+      fallbackStyle: profile.fallback_style || "market",
+      featured: Boolean(profile.is_featured),
+      excluded: Boolean(profile.is_excluded),
+      booth: boothByBusinessId.get(profile.business_id) || null,
+    })),
+  };
+}
+
+export function updateBazaarTheme(input: {
+  themeId: unknown;
+  name: unknown;
+  industryKeys: unknown;
+  timezone: unknown;
+  startsAtTime: unknown;
+  active: unknown;
+}, db: DatabaseSync = getDb()) {
+  const themeId = requireInteger(input.themeId, "Theme");
+  const name = requireBoundedText(input.name, "Theme name", 100);
+  const timezone = requireBoundedText(input.timezone, "Timezone", 80);
+  const startsAtTime = requireBoundedText(input.startsAtTime, "Start time", 5);
+  if (!/^\d{2}:\d{2}$/.test(startsAtTime)) throw new BazaarAdminError("Start time must use HH:MM.", "invalid_time");
+  const industryKeys = normalizeIndustryKeys(String(input.industryKeys || ""));
+  if (!industryKeys.length) throw new BazaarAdminError("At least one industry key is required.", "missing_industry");
+  const result = db.prepare(`
+    UPDATE bazaar_themes
+    SET name=?,industry_keys_json=?,timezone=?,starts_at_time=?,active=?,updated_at=CURRENT_TIMESTAMP
+    WHERE id=?
+  `).run(name, JSON.stringify(industryKeys), timezone, startsAtTime, input.active ? 1 : 0, themeId);
+  if (!result.changes) throw new BazaarAdminError("Theme not found.", "not_found");
+  return { themeId, changed: result.changes };
+}
+
+export function updateBazaarBoothProfile(input: {
+  businessId: unknown;
+  industryKeys: unknown;
+  boothImagePath: unknown;
+  fallbackStyle: unknown;
+  featured: unknown;
+  excluded: unknown;
+}, db: DatabaseSync = getDb()) {
+  const businessId = requireInteger(input.businessId, "Business");
+  const industryKeys = normalizeIndustryKeys(String(input.industryKeys || ""));
+  if (!industryKeys.length) throw new BazaarAdminError("At least one industry key is required.", "missing_industry");
+  const boothImagePath = requireBoundedText(input.boothImagePath, "Booth image path", 240, false);
+  if (boothImagePath && !boothImagePath.startsWith("/")) throw new BazaarAdminError("Booth image path must be a public app path.", "invalid_media_path");
+  const fallbackStyle = requireBoundedText(input.fallbackStyle, "Fallback style", 40, false) || fallbackStyleForIndustry(industryKeys);
+  const result = db.prepare(`
+    INSERT INTO bazaar_booth_profiles(
+      business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,is_excluded,approved_at,updated_at
+    ) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ON CONFLICT(business_id) DO UPDATE SET
+      industry_keys_json=excluded.industry_keys_json,
+      booth_image_path=excluded.booth_image_path,
+      fallback_style=excluded.fallback_style,
+      is_featured=excluded.is_featured,
+      is_excluded=excluded.is_excluded,
+      updated_at=CURRENT_TIMESTAMP
+  `).run(
+    businessId,
+    JSON.stringify(industryKeys),
+    boothImagePath,
+    fallbackStyle,
+    input.featured ? 1 : 0,
+    input.excluded ? 1 : 0,
+  );
+  return { businessId, changed: result.changes };
+}
+
+export function updateBazaarBoothPlacement(input: {
+  boothId: unknown;
+  x: unknown;
+  y: unknown;
+  width: unknown;
+  height: unknown;
+}, db: DatabaseSync = getDb()) {
+  const boothId = requireInteger(input.boothId, "Booth");
+  const x = requireInteger(input.x, "X coordinate");
+  const y = requireInteger(input.y, "Y coordinate");
+  const width = requireInteger(input.width, "Width");
+  const height = requireInteger(input.height, "Height");
+  if (x < 0 || y < 0 || width < 80 || height < 60 || width > 360 || height > 240 || x + width > FLOOR_WIDTH || y + height > FLOOR_HEIGHT) {
+    throw new BazaarAdminError("Booth coordinates must stay inside the Bazaar floor.", "out_of_bounds");
+  }
+  const result = db.prepare(`
+    UPDATE bazaar_booths
+    SET x=?,y=?,width=?,height=?,updated_at=CURRENT_TIMESTAMP
+    WHERE id=?
+  `).run(x, y, width, height, boothId);
+  if (!result.changes) throw new BazaarAdminError("Booth not found.", "not_found");
+  return { boothId, changed: result.changes };
 }

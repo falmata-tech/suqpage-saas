@@ -10,7 +10,14 @@ async function main() {
   process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
 
   const { closeDbForTests, getDb } = await import("../lib/db");
-  const { getCurrentBazaar } = await import("../lib/bazaar");
+  const {
+    BazaarAdminError,
+    getCurrentBazaar,
+    listBazaarAdminState,
+    updateBazaarBoothPlacement,
+    updateBazaarBoothProfile,
+    updateBazaarTheme,
+  } = await import("../lib/bazaar");
   const db = getDb();
 
   const insertBusiness = db.prepare(`
@@ -153,6 +160,60 @@ async function main() {
   const afterFeatured = getCurrentBazaar({ db, now: sunday });
   assert.equal(afterFeatured.booths[0].handle, "novatech");
   assert.equal(afterFeatured.booths[0].featured, true);
+
+  const adminState = listBazaarAdminState({ db, now: sunday });
+  assert.equal(adminState.themes.length, 7);
+  assert.equal(adminState.profiles.some((profile) => profile.handle === "novatech" && profile.featured), true);
+  const themeId = (
+    db.prepare("SELECT id FROM bazaar_themes WHERE slug='electronics-appliances'").get() as { id: number }
+  ).id;
+  updateBazaarTheme({
+    themeId,
+    name: "Electronics Discovery",
+    industryKeys: " electronics, machinery-tools, electronics ",
+    timezone: "Africa/Addis_Ababa",
+    startsAtTime: "04:00",
+    active: true,
+  }, db);
+  assert.deepEqual(
+    JSON.parse((db.prepare("SELECT industry_keys_json FROM bazaar_themes WHERE id=?").get(themeId) as { industry_keys_json: string }).industry_keys_json),
+    ["electronics", "machinery-tools"],
+  );
+  assert.throws(
+    () => updateBazaarTheme({ themeId, name: "", industryKeys: "", timezone: "Africa/Addis_Ababa", startsAtTime: "bad", active: true }, db),
+    (error: unknown) => error instanceof BazaarAdminError && error.code === "required",
+  );
+
+  const communityBusinessId = (
+    db.prepare("SELECT id FROM businesses WHERE handle='community-maker'").get() as { id: number }
+  ).id;
+  updateBazaarBoothProfile({
+    businessId: communityBusinessId,
+    industryKeys: "community, food-farming",
+    boothImagePath: "",
+    fallbackStyle: "market",
+    featured: true,
+    excluded: false,
+  }, db);
+  assert.equal(
+    (db.prepare("SELECT is_featured FROM bazaar_booth_profiles WHERE business_id=?").get(communityBusinessId) as { is_featured: number }).is_featured,
+    1,
+  );
+  assert.throws(
+    () => updateBazaarBoothProfile({ businessId: communityBusinessId, industryKeys: "community", boothImagePath: "https://remote.test/img.jpg", fallbackStyle: "market", featured: false, excluded: false }, db),
+    (error: unknown) => error instanceof BazaarAdminError && error.code === "invalid_media_path",
+  );
+
+  const boothId = afterFeatured.booths[0].id;
+  updateBazaarBoothPlacement({ boothId, x: 120, y: 140, width: 190, height: 120 }, db);
+  assert.deepEqual(
+    { ...(db.prepare("SELECT x,y,width,height FROM bazaar_booths WHERE id=?").get(boothId) as { x: number; y: number; width: number; height: number }) },
+    { x: 120, y: 140, width: 190, height: 120 },
+  );
+  assert.throws(
+    () => updateBazaarBoothPlacement({ boothId, x: -1, y: 140, width: 190, height: 120 }, db),
+    (error: unknown) => error instanceof BazaarAdminError && error.code === "out_of_bounds",
+  );
 
   db.prepare("UPDATE bazaar_themes SET active=0").run();
   const unavailable = getCurrentBazaar({ db, now: sunday });

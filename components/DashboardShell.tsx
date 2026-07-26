@@ -35,7 +35,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
         {operations ? <Link href="/dashboard/clients/new">Create client workspace</Link> : null}
         {teamMember ? <Link href="/dashboard/requests">Assigned requests</Link> : null}
         {hasCapability(user, "design-bank:view") ? <Link href="/dashboard/design-bank">Design component bank</Link> : null}
-        {platformAdmin ? <><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link></> : null}
+        {platformAdmin ? <><Link href="/dashboard">All businesses</Link><Link href="/dashboard/admin">SaaS administration</Link><Link href="/dashboard/admin/bazaar">Bazaar controls</Link></> : null}
         <Link href="/dashboard/account">Account security</Link>
         <Link href="/" target="_blank" rel="noreferrer">Public site ↗</Link>
         <form action={logoutAction}><button type="submit">Sign out</button></form>

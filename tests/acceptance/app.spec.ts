@@ -204,6 +204,16 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByRole("link", { name: "Public site ↗" })).toHaveAttribute("target", "_blank");
   await page.getByRole("link", { name: "◆ SuqPage" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("link", { name: "Bazaar controls" }).click();
+  await expect(page.getByRole("heading", { name: "Bazaar controls" })).toBeVisible();
+  const novaRow = page.getByRole("row").filter({ hasText: "NovaTech" }).first();
+  await novaRow.getByLabel("Featured").check();
+  await novaRow.getByRole("button", { name: "Save profile" }).click();
+  await expect(page.getByText("Bazaar controls saved.")).toBeVisible();
+  await page.goto("/bazaar");
+  await page.getByRole("button", { name: "Select NovaTech booth" }).click();
+  await expect(page.getByLabel("NovaTech booth preview").getByText("Featured")).toBeVisible();
+  await page.goto("/dashboard");
   await page.getByRole("link", { name: "Design component bank" }).click();
   await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
   await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
