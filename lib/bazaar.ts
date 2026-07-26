@@ -121,6 +121,7 @@ export type BazaarProfileAdminView = {
   handle: string;
   status: string;
   industryKeys: string[];
+  industryLabel: string;
   boothImagePath: string;
   fallbackStyle: string;
   featured: boolean;
@@ -488,6 +489,7 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
       handle: profile.handle,
       status: profile.status,
       industryKeys: jsonArray(profile.industry_keys_json),
+      industryLabel: INDUSTRY_LABELS[jsonArray(profile.industry_keys_json)[0] || "community"] || "Community Market",
       boothImagePath: profile.booth_image_path || "",
       fallbackStyle: profile.fallback_style || "market",
       featured: Boolean(profile.is_featured),

@@ -99,10 +99,22 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Your products");
   await expect(page.getByText("This week's Bazaar schedule")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "All Showrooms" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toBeVisible();
   await expect(page.getByRole("tablist", { name: "Bazaar view" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Featured businesses/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How SuqPage works" })).toBeVisible();
+  await expect(page.locator(".market-hero-image")).toBeVisible();
   await page.getByRole("button", { name: "All businesses" }).click();
-  await expect(page.locator(".showroom-card")).toHaveCount(4);
+  await expect(page.locator(".market-showroom-card")).toHaveCount(4);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByLabel("Open public navigation").click();
+  await expect(page.getByRole("navigation", { name: "Mobile public navigation" }).getByRole("link", { name: "Login" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 700 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 720 });
   const compositionSignatures = new Set<string>();
   for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
     await page.goto(`/@${handle}`);

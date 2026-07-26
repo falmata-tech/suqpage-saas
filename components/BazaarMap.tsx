@@ -6,10 +6,12 @@ import type { BazaarBoothView, CurrentBazaarView } from "@/lib/bazaar";
 
 type Point = { x: number; y: number };
 
-export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
+export default function BazaarMap({ bazaar, embedded = false }: { bazaar: CurrentBazaarView; embedded?: boolean }) {
   const [view, setView] = useState<"map" | "list">("map");
-  const [scale, setScale] = useState(0.74);
-  const [offset, setOffset] = useState<Point>({ x: -80, y: -20 });
+  const initialScale = embedded ? 1.05 : 0.74;
+  const initialOffset = embedded ? { x: -18, y: 0 } : { x: -80, y: -20 };
+  const [scale, setScale] = useState(initialScale);
+  const [offset, setOffset] = useState<Point>(initialOffset);
   const [selectedId, setSelectedId] = useState<number | null>(bazaar.booths[0]?.id || null);
   const drag = useRef<{ pointerId: number; start: Point; origin: Point } | null>(null);
 
@@ -32,8 +34,8 @@ export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
   }
 
   function resetView() {
-    setScale(0.74);
-    setOffset({ x: -80, y: -20 });
+    setScale(initialScale);
+    setOffset(initialOffset);
   }
 
   function startDrag(event: React.PointerEvent<HTMLDivElement>) {
@@ -79,8 +81,8 @@ export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
   }
 
   return (
-    <section className="bazaar-explorer" aria-labelledby="bazaar-title">
-      <div className="bazaar-section-head">
+    <section className={`bazaar-explorer${embedded ? " bazaar-explorer-embedded" : ""}`} aria-labelledby="bazaar-title">
+        <div className="bazaar-section-head">
         <div>
           <span className="eyebrow">Live now</span>
           <h2 id="bazaar-title">Today&apos;s Bazaar: {bazaar.themeName}</h2>
@@ -89,6 +91,7 @@ export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
         <div className="bazaar-tabs" role="tablist" aria-label="Bazaar view">
           <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Bazaar View</button>
           <button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>Bazaar List</button>
+          {embedded ? <Link className="bazaar-all-link" href="/#showrooms">View all showrooms</Link> : null}
         </div>
       </div>
 
@@ -108,7 +111,7 @@ export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
             onPointerCancel={stopDrag}
           >
             <div
-              className="bazaar-floor"
+              className="bazaar-floor bazaar-floor-visual"
               style={{
                 width: bazaar.floor.width,
                 height: bazaar.floor.height,
@@ -135,11 +138,50 @@ export default function BazaarMap({ bazaar }: { bazaar: CurrentBazaarView }) {
           </div>
           <p className="bazaar-drag-note">Drag to explore the Bazaar floor.</p>
           {selected ? <BoothPreview booth={selected} onClose={() => setSelectedId(null)} /> : null}
+          {embedded ? <BazaarDirectory booths={bazaar.booths} selectedId={selectedId} onSelect={setSelectedId} /> : null}
         </div>
       ) : (
         <BazaarList booths={bazaar.booths} />
       )}
     </section>
+  );
+}
+
+function BazaarDirectory({
+  booths,
+  selectedId,
+  onSelect,
+}: {
+  booths: BazaarBoothView[];
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+}) {
+  return (
+    <aside className="bazaar-map-directory" aria-label={`Bazaar Directory (${booths.length})`}>
+      <div className="bazaar-map-directory-head">
+        <strong>Bazaar Directory ({booths.length})</strong>
+        <span aria-hidden="true">×</span>
+      </div>
+      <div className="bazaar-map-directory-list">
+        {booths.map((booth) => (
+          <button
+            type="button"
+            key={booth.id}
+            className={selectedId === booth.id ? "active" : ""}
+            onClick={() => onSelect(booth.id)}
+          >
+            <BoothMedia booth={booth} />
+            <span>
+              <strong>{booth.name}</strong>
+              <small>@{booth.handle}</small>
+              <small>{booth.industryLabel}</small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </button>
+        ))}
+      </div>
+      <Link href="/#showrooms">View all showrooms <span aria-hidden="true">→</span></Link>
+    </aside>
   );
 }
 

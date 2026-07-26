@@ -2,7 +2,7 @@
 id: FE-010
 title: Public daily Bazaar mobile map
 status: done
-related: [FE-001, FE-011, BE-011, DEP-010]
+related: [FE-001, FE-011, FE-012, BE-011, DEP-010]
 owners: [product, frontend]
 last_updated: 2026-07-26
 change_level: L2

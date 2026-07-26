@@ -190,17 +190,24 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 ### 5.2 SuqPage must have its own platform identity
 
-The SuqPage landing page must not look like any client showroom. It should feel modern, polished, mobile-first, and easy to understand inside TikTok or other in-app browsers.
+The SuqPage landing page must not look like any client showroom. It is a polished,
+mobile-first marketplace surface designed to remain understandable inside TikTok
+and other in-app browsers. `FE-012` defines the current visual composition: a
+photographic maker hero leads with the permanent `/@handle` showroom product;
+today's Bazaar is a secondary callout; the server-owned weekly schedule and a
+searchable, filterable All Showrooms rail appear before an image-backed Bazaar
+map/list; and featured placement, the compact five-step process, final merchant
+CTA, and complete public footer follow below. Tenant cards and booths use active
+public tenant data and link to the authoritative showroom. Platform artwork is
+decorative and makes no tenant-specific product claim. The featured area renders
+only administratively flagged campaigns and otherwise presents an honest
+placement callout.
 
-The landing page should include:
-
-- a clear explanation of the value proposition;
-- actual client showroom previews;
-- a searchable showroom directory;
-- category filter buttons;
-- a low-friction expression-of-interest form with contact details, one short
-  message, consent, no file uploads, and no self-sign-up;
-- professional copy with no development-stage disclaimers.
+The homepage CTA links to the low-friction expression-of-interest flow. That
+flow collects contact details, one short message, and consent, with no file
+uploads or public self-sign-up. The homepage and request flow use professional
+copy with no development-stage disclaimers. The public composition is verified
+without horizontal document overflow at 320 and 390 CSS pixels.
 
 ### 5.3 Public copy must look finished
 
