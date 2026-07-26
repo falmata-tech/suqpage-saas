@@ -98,7 +98,9 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await page.goto("/");
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Your products");
-  await expect(page.getByText("Search by name or select a category")).toBeVisible();
+  await expect(page.getByText("This week's Bazaar schedule")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Bazaar view" })).toBeVisible();
   await page.getByRole("button", { name: "All businesses" }).click();
   await expect(page.locator(".showroom-card")).toHaveCount(4);
   const compositionSignatures = new Set<string>();

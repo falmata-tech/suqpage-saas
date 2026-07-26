@@ -147,9 +147,10 @@ additive and inert unless used by the deployed code.
 
 ## Completion evidence
 
-Implemented on 2026-07-26 with `/bazaar`, `components/BazaarMap.tsx`, mobile
-map controls, booth preview, Bazaar List fallback, homepage Bazaar navigation,
-and deterministic acceptance clock support.
+Implemented on 2026-07-26 with `/bazaar`, the homepage live Bazaar section,
+weekly schedule, hero Bazaar callout, `components/BazaarMap.tsx`, mobile map
+controls, booth preview, Bazaar List fallback, homepage Bazaar navigation, and
+deterministic acceptance clock support.
 
 Evidence:
 
