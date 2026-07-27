@@ -8,12 +8,15 @@ export type ShowroomVisualTone =
   | "playful"
   | "quiet";
 
-export type HeroMediaIntegration =
+export type SectionMediaIntegration =
+  | "ambient_overlay"
+  | "edge_fade"
   | "split_bleed"
-  | "soft_inset"
   | "editorial_overlap"
   | "product_stage"
   | "hidden";
+
+export type HeroMediaIntegration = SectionMediaIntegration;
 
 export type ShowroomDesignSystem = {
   id: string;
@@ -58,8 +61,8 @@ export type ShowroomDesignSystem = {
     fit: "cover";
     maxHeroHeight: 620;
     maxProductColumns: 3;
-    preferredHeroIntegration: Exclude<HeroMediaIntegration, "hidden">;
-    allowedHeroIntegrations: readonly HeroMediaIntegration[];
+    preferredHeroIntegration: Exclude<SectionMediaIntegration, "hidden">;
+    allowedHeroIntegrations: readonly SectionMediaIntegration[];
   };
   guidance: {
     archetypes: ShowroomArchetype[];
@@ -86,7 +89,7 @@ function designSystem(
       ? "split_bleed"
       : input.layout.sectionRhythm === "editorial_contrast"
         ? "editorial_overlap"
-        : "soft_inset");
+        : "edge_fade");
   return {
     ...input,
     spacing: {
@@ -104,8 +107,9 @@ function designSystem(
       maxProductColumns: 3,
       preferredHeroIntegration,
       allowedHeroIntegrations: [
+        "ambient_overlay",
+        "edge_fade",
         "split_bleed",
-        "soft_inset",
         "editorial_overlap",
         "product_stage",
         "hidden",

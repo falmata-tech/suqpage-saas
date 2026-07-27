@@ -597,6 +597,7 @@ export function buildShowroomRecipeBrief(
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Choose dynamic catalog and media counts. Put unresolved image destinations in mediaPlan and leave their content image reference empty.",
         "Choose one design system from designSystems before choosing a template or component. Match archetype, tone, density, typography, palette roles, section rhythm, and media behavior.",
+        "Choose mediaIntegration explicitly for every media-bearing hero or story section. Use ambient_overlay, edge_fade, split_bleed, editorial_overlap, product_stage, or hidden so factual images integrate with the section surface instead of appearing in bordered image blocks.",
         "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
         "Declare every intentionally removed stable key.",
       ],

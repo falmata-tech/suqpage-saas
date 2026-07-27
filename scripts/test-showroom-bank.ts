@@ -235,9 +235,11 @@ assert.match(cssSource, /@media \(max-width: 480px\)/);
 assert.doesNotMatch(cssSource, /\.heroProducts\b/);
 assert.doesNotMatch(cssSource, /border-radius:\s*(?:50%\s+50%|48%\s+48%|40%\s+40%|100px\s+0\s+100px)/);
 assert.match(cssSource, /\.hero\[data-media-integration="split_bleed"\]/);
-assert.match(cssSource, /\.hero\[data-media-integration="soft_inset"\]/);
+assert.match(cssSource, /\.hero\[data-media-integration="edge_fade"\]/);
+assert.match(cssSource, /\.hero\[data-media-integration="ambient_overlay"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="editorial_overlap"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="product_stage"\]/);
+assert.doesNotMatch(cssSource, /\.storyImage[\s\S]{0,180}border:\s*1px/);
 assert.match(
   cssSource,
   /\.catalogFilters button\[aria-pressed="true"\][\s\S]*?background:\s*var\(--bank-secondary\);[\s\S]*?color:\s*var\(--bank-on-secondary\);/,

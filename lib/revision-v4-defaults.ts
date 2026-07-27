@@ -15,7 +15,10 @@ import type {
   ShowroomComponentDefinitionV2,
   ShowroomDesignProposalV2,
 } from "./showroom-composition-v2";
-import { parseShowroomDesignProposalV2 } from "./showroom-composition-v2";
+import {
+  defaultMediaIntegrationForSection,
+  parseShowroomDesignProposalV2,
+} from "./showroom-composition-v2";
 import type {
   ShowroomBlockMedia,
   ShowroomContentBlock,
@@ -239,6 +242,10 @@ function section(
     key,
     component: componentId,
     contentBlockKey,
+    mediaIntegration: defaultMediaIntegrationForSection(
+      definition.slot,
+      definition.id,
+    ),
     properties: {
       ...requiredProperties(definition, profile),
       ...properties,

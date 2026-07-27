@@ -80,6 +80,25 @@ assert.deepEqual(
   parsed.sections.map((section) => section.contentBlockKey).filter(Boolean),
   ["opening", "story", "facts", "next"],
 );
+const parsedHero = parsed.sections.find((section) => section.contentBlockKey === "opening");
+const parsedStory = parsed.sections.find((section) => section.contentBlockKey === "story");
+assert.equal(parsedHero?.mediaIntegration, "editorial_overlap");
+assert.equal(parsedStory?.mediaIntegration, "edge_fade");
+
+const ambientProposal = {
+  ...proposal,
+  sections: proposal.sections.map((section) =>
+    section.contentBlockKey === "opening"
+      ? { ...section, mediaIntegration: "ambient_overlay" }
+      : section
+  ),
+};
+assert.equal(
+  parseShowroomDesignProposalV2(ambientProposal, bank, content).sections.find(
+    (section) => section.contentBlockKey === "opening",
+  )?.mediaIntegration,
+  "ambient_overlay",
+);
 
 function expectCode(callback: () => unknown, code: string) {
   assert.throws(
@@ -96,6 +115,38 @@ expectCode(
 expectCode(
   () => parseShowroomDesignProposalV2({ ...proposal, sections: proposal.sections.map((section, index) => index === heroIndex ? { ...section, contentBlockKey: null } : section) }, bank, content),
   "missing_content",
+);
+expectCode(
+  () =>
+    parseShowroomDesignProposalV2(
+      {
+        ...proposal,
+        sections: proposal.sections.map((section) =>
+          section.contentBlockKey === "opening"
+            ? { ...section, mediaIntegration: "picture_frame" }
+            : section,
+        ),
+      },
+      bank,
+      content,
+    ),
+  "invalid_media_integration",
+);
+expectCode(
+  () =>
+    parseShowroomDesignProposalV2(
+      {
+        ...proposal,
+        sections: proposal.sections.map((section, index) =>
+          index === 0
+            ? { ...section, mediaIntegration: "ambient_overlay" }
+            : section,
+        ),
+      },
+      bank,
+      content,
+    ),
+  "incompatible_media_integration",
 );
 const contentSection = proposal.sections.find((section) => section.contentBlockKey === "story");
 assert.ok(contentSection);
@@ -138,5 +189,7 @@ const designSchemaSource = fs.readFileSync(
   "utf8",
 );
 assert.match(designSchemaSource, /contentBlockKey/);
+assert.match(designSchemaSource, /mediaIntegration/);
+assert.match(designSchemaSource, /ambient_overlay/);
 
 console.log("Additive design-v2 component compatibility, exact block assignment, and bank-v1 isolation passed.");

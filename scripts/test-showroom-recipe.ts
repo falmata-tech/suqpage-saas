@@ -217,10 +217,22 @@ async function main() {
       "showroom-proposal-v2.schema.json",
     );
     assert.match(exported.brief.instructions[0], /do not normalize/i);
+    assert.ok(
+      exported.brief.instructions.some((instruction) =>
+        /Choose mediaIntegration explicitly/.test(instruction),
+      ),
+    );
     assert.equal(exported.brief.completeExample.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.contentBlocks.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.design.schemaVersion, 2);
+    assert.ok(
+      exported.brief.completeExample.design.sections
+        .filter((section) =>
+          ["hero-main", "brand-story"].includes(section.contentBlockKey || ""),
+        )
+        .every((section) => section.mediaIntegration),
+    );
     assert.equal(exported.brief.designSystems.length, 18);
     assert.equal(exported.brief.compositionGuidance.templates.length, 8);
     assert.equal(

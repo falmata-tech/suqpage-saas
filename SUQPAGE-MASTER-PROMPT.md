@@ -895,9 +895,14 @@ remaining AI-assisted delivery sequence is recorded in
   before individual variants are chosen. Machine-readable guidance declares
   no-media support, fallback treatments, catalog modes, business archetypes,
   recommended product/category counts, long-title and RTL support, mobile
-  behavior, fallback components, and hero-media integration. Heroes use
-  reviewed split-bleed, soft-inset, editorial-overlap, product-stage, or hidden
-  behavior rather than one universal bordered image frame. Deterministic
+  behavior, fallback components, and section-media integration. Design-v2
+  recipes let AI choose `ambient_overlay`, `edge_fade`, `split_bleed`,
+  `editorial_overlap`, `product_stage`, or `hidden` independently of the
+  component name. Hero and story imagery is borderless and connected to its
+  section surface; retained sections without the field receive a deterministic
+  integrated default. Product imagery remains proportionally bounded and flush
+  with its catalog card rather than becoming an arbitrary loose image block.
+  Deterministic
   composition fitness blocks duplicate navigation, standalone navigation
   combined with catalog filters, incompatible sparse catalogs, and more than
   two signature sections, while warning about unnecessary controls, repeated

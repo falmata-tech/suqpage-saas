@@ -4,7 +4,7 @@ title: Creative showroom bank and focused v4 studio
 status: in_progress
 related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-27
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -78,13 +78,18 @@ Research-derived patterns and exclusions are recorded in
   half-circle, or oversized asymmetric capsule. Text-bearing cards and sections
   use restrained corners, allow content-driven height, and never clip or hide
   copy at 320px, 390px, or desktop widths.
-- Split and media-led heroes use an explicit machine-readable integration
-  behavior (`split_bleed`, `soft_inset`, `editorial_overlap`,
-  `product_stage`, or `hidden`) instead of one universal bordered image frame.
-  The behavior keeps a stable responsive height and no factual-image overlay
-  controls. Product media uses declared aspect ratios and bounded grid tracks;
-  filtering or a small product count cannot stretch cards or images to fill an
-  arbitrary page width.
+- Every media-bearing hero or story section uses an explicit machine-readable
+  `mediaIntegration` behavior (`ambient_overlay`, `edge_fade`, `split_bleed`,
+  `editorial_overlap`, `product_stage`, or `hidden`) instead of a universal
+  bordered image frame. The AI may choose a compatible behavior independently
+  of the component name; retained design-v2 sections without the field receive
+  a deterministic integrated default.
+- Factual section imagery is borderless and visually connected to its semantic
+  section through edge fades, surface overlays, overlap, or cutout staging.
+  Copy remains readable without burning gradients into the source asset.
+  Product media stays bounded by declared aspect ratios and grid tracks for
+  catalog usability, but is flush with its card surface; filtering or a small
+  product count cannot stretch cards or images to fill arbitrary page width.
 - Focused controls show only server-computed compatible choices. Saving a
   correction updates only a private draft, produces a visible change summary,
   and never submits or publishes.
@@ -130,6 +135,18 @@ Scenario: A showroom receives a complete token direction
   THEN a distinct secondary family separates section roles and controls
   AND hero and product media retain bounded professional proportions
 
+Scenario: AI selects integrated section media
+  GIVEN an admitted hero or story image and a design-v2 section
+  WHEN the AI selects a compatible mediaIntegration treatment
+  THEN the renderer connects the image to the section surface without a bordered picture frame
+  AND desktop and phone layouts preserve readable copy and stable image proportions
+
+Scenario: A retained design omits media integration
+  GIVEN a valid retained design-v2 section created before mediaIntegration existed
+  WHEN the section renders through the current bank
+  THEN a deterministic integrated treatment is derived from its slot and component
+  AND the retained revision remains readable without schema rewriting
+
 Scenario: Incompatible creative choice is submitted directly
   GIVEN a typed block and component with incompatible contracts
   WHEN a caller bypasses the UI and submits the command
@@ -155,6 +172,7 @@ provider input, or screenshots containing client data.
 |---|---|---|
 | Bank coverage, registry parity, real variant contracts | contract/static | `scripts/test-showroom-bank.ts` |
 | Typed rendering and focused commands | integration/security | `scripts/test-showroom-recipe.ts`, planned focused-command test |
+| First-class media integration parsing, defaults, and unsafe-value denial | contract/unit | `scripts/test-showroom-composition-v2.ts`, `scripts/test-showroom-recipe.ts` |
 | 320/390 mobile, keyboard, reduced motion, exact preview | browser | `tests/acceptance/app.spec.ts` |
 | Cross-industry visual quality | manual admission | authenticated synthetic design laboratory review |
 

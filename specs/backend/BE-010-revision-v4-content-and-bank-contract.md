@@ -4,7 +4,7 @@ title: Revision v4 typed content and multi-release bank contract
 status: in_progress
 related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, FE-007, FE-009, FE-014, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [backend, security, product]
-last_updated: 2026-07-25
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -42,6 +42,11 @@ additive v4 domain boundary that preserves all retained releases.
 - Design-schema v2 sections reference at most one compatible content-block key;
   catalog/navigation/header/footer components may use canonical bindings without
   inventing a page block.
+- Design-schema v2 sections may declare one reviewed `mediaIntegration`
+  treatment independently of the selected component. Only media-bearing hero
+  and content sections may use a visible treatment; unsupported values and
+  incompatible slot/treatment pairs fail closed. Omitted values remain readable
+  through deterministic integrated defaults and do not rewrite retained data.
 - A release registry returns only statically imported reviewed banks. Existing
   bank-1.1 proposals parse/render exactly as before; unknown releases fail closed.
 - Focused commands allow: replace compatible component, select admitted token,
@@ -76,6 +81,12 @@ Scenario: Untrusted provider input is supplied
   THEN it is rejected before network fetch or rendering
   AND CSP and persistence remain unchanged
 
+Scenario: Recipe requests an unsupported image frame
+  GIVEN a design-v2 recipe with typed section media
+  WHEN its section requests an unknown or slot-incompatible mediaIntegration
+  THEN parsing rejects the complete recipe before persistence
+  AND no arbitrary CSS, class name, or image URL reaches the renderer
+
 Scenario: Unauthorized focused command is called directly
   GIVEN a client, unassigned staff actor, submitted revision, or another tenant
   WHEN the actor sends an otherwise valid correction
@@ -103,6 +114,7 @@ Scenario: Unauthorized focused command is called directly
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-content-blocks.ts`, `scripts/test-showroom-recipe.ts` |
+| Bounded section-media integration and retained defaults | contract/unit | `scripts/test-showroom-composition-v2.ts` |
 | V3/v4 and bank 1.1/1.2 exact compatibility | integration | `scripts/test-showroom-composition-v2.ts`, planned v4 migration tests |
 | Provider normalization and unsafe-input denial | unit/security | `scripts/test-youtube-provider.ts`, `scripts/test-security.ts` |
 | Atomic authorized focused commands | integration/security | planned focused-command tests |

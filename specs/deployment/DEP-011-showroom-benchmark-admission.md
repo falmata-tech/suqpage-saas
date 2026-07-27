@@ -109,7 +109,7 @@ Evidence: implemented and verified on 2026-07-27.
   were corrected from that review.
 - Benchmark, full-check, production build/HTTP smoke, and 10/10 acceptance
   evidence passed. Production/data-preserving rollout remains excluded.
-- The ten-showroom browser matrix proves `split_bleed`, `soft_inset`,
+- The ten-showroom browser matrix proves `split_bleed`, `edge_fade`,
   `editorial_overlap`, and `product_stage` hero behavior, one category-control
   owner, immediate selected-state contrast, bounded product media, and no
   horizontal overflow. Comparative desktop/mobile captures of all four v1

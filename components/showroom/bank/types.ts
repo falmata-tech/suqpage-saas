@@ -6,6 +6,7 @@ import type {
 } from "@/lib/showroom-composition";
 import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomExperienceSettings } from "@/lib/showroom-experience";
+import type { SectionMediaIntegration } from "@/lib/showroom-design-systems";
 
 export type BankAvailability =
   | "available"
@@ -71,6 +72,7 @@ export type BankSectionRendererProps = {
   contentBlock?: ShowroomContentBlock;
   experience: ShowroomExperienceSettings;
   properties?: Record<string, ShowroomPrimitive>;
+  mediaIntegration?: SectionMediaIntegration | null;
 };
 
 export type BankSectionRenderer = ComponentType<BankSectionRendererProps>;

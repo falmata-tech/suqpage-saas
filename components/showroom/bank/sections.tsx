@@ -201,11 +201,14 @@ export function BankHeroSection({
   contentBlock,
   experience,
   properties,
+  mediaIntegration: selectedMediaIntegration,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const heroImage = mediaAsset(contentBlock, "hero_image") || context.business.heroImageRef;
   const mediaIntegration =
-    heroMediaIntegrationForComponent(definition.id) || undefined;
+    selectedMediaIntegration ||
+    heroMediaIntegrationForComponent(definition.id) ||
+    undefined;
   return (
     <SectionRoot
       slot="hero"
@@ -283,6 +286,7 @@ export function BankContentSection({
   contentBlock,
   experience,
   properties,
+  mediaIntegration: selectedMediaIntegration,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const statements = blockItems(contentBlock).length
@@ -304,6 +308,7 @@ export function BankContentSection({
         label={`${definition.name} preview`}
         experience={experience}
         properties={properties}
+        mediaIntegration={selectedMediaIntegration || "edge_fade"}
       >
         <div className={styles.contentHeading}>
           <span className={styles.kicker}>{contentBlock.kicker || definition.name}</span>
@@ -324,13 +329,18 @@ export function BankContentSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      mediaIntegration={selectedMediaIntegration || "edge_fade"}
     >
       <div className={styles.contentHeading}>
         <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
         <h2>{contentBlock?.title || context.business.name}</h2>
       </div>
       <div className={styles.contentBody}>
-        {storyImage ? <img className={styles.storyImage} src={storyImage} alt="" /> : null}
+        {storyImage ? (
+          <div className={styles.storyVisual}>
+            <img className={styles.storyImage} src={storyImage} alt="" />
+          </div>
+        ) : null}
         <p>{contentBlock?.body || context.business.description}</p>
         <ol>
           {statements.map((statement, index) => (

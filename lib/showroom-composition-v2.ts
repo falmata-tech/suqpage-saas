@@ -9,7 +9,9 @@ import {
   type ShowroomComponentDefinition,
   type ShowroomDesignProposal,
   type ShowroomSection,
+  type ShowroomSlot,
 } from "./showroom-composition";
+import type { SectionMediaIntegration } from "./showroom-design-systems";
 import {
   SHOWROOM_CONTENT_BLOCK_TYPES,
   parseShowroomContentBlocks,
@@ -19,6 +21,14 @@ import {
 
 export const SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2 = 2;
 export const SHOWROOM_DESIGN_SCHEMA_VERSION_V2 = 2;
+export const SHOWROOM_SECTION_MEDIA_INTEGRATIONS = [
+  "ambient_overlay",
+  "edge_fade",
+  "split_bleed",
+  "editorial_overlap",
+  "product_stage",
+  "hidden",
+] as const satisfies readonly SectionMediaIntegration[];
 
 export type ShowroomContentMediaSlotDefinition = {
   key: string;
@@ -45,6 +55,7 @@ export type ShowroomComponentBankV2 = Omit<
 
 export type ShowroomSectionV2 = ShowroomSection & {
   contentBlockKey: string | null;
+  mediaIntegration?: SectionMediaIntegration | null;
 };
 
 export type ShowroomDesignProposalV2 = Omit<
@@ -58,6 +69,21 @@ export type ShowroomDesignProposalV2 = Omit<
 const fail = (message: string, code: string, status = 400): never => {
   throw new ShowroomCompositionError(message, code, status);
 };
+
+export function defaultMediaIntegrationForSection(
+  slot: ShowroomSlot,
+  componentId: string,
+): SectionMediaIntegration | null {
+  if (slot === "content") return "edge_fade";
+  if (slot !== "hero") return null;
+  if (/centered-statement/.test(componentId)) return "hidden";
+  if (/product-spotlight|beauty-orbit/.test(componentId)) return "product_stage";
+  if (/editorial-collage|textile-swatch/.test(componentId)) {
+    return "editorial_overlap";
+  }
+  if (/provenance|ingredient-monograph/.test(componentId)) return "edge_fade";
+  return "split_bleed";
+}
 
 function record(
   input: unknown,
@@ -295,7 +321,7 @@ export function parseShowroomDesignProposalV2(
   const bank = parseShowroomComponentBankV2(bankInput);
   const content = parseShowroomContentBlocks(contentInput, contentMode);
   const contentKeys = new Map(content.blocks.map((block) => [block.key, block]));
-  const requestedContentKeys: Array<string | null> = raw.sections.map(
+  const requestedSections = raw.sections.map(
     (entry, index) => {
       const section = record(entry, `Proposal section ${index + 1}`, [
         "key",
@@ -303,15 +329,35 @@ export function parseShowroomDesignProposalV2(
         "properties",
         "bindings",
         "contentBlockKey",
+        "mediaIntegration",
       ]);
-      if (section.contentBlockKey === null) return null;
-      if (typeof section.contentBlockKey !== "string") {
+      if (
+        section.contentBlockKey !== null &&
+        typeof section.contentBlockKey !== "string"
+      ) {
         return fail(
           `Proposal section ${index + 1} needs a contentBlockKey or null.`,
           "invalid_content_key",
         );
       }
-      return section.contentBlockKey;
+      if (
+        section.mediaIntegration !== undefined &&
+        section.mediaIntegration !== null &&
+        (typeof section.mediaIntegration !== "string" ||
+          !SHOWROOM_SECTION_MEDIA_INTEGRATIONS.includes(
+            section.mediaIntegration as SectionMediaIntegration,
+          ))
+      ) {
+        return fail(
+          `Proposal section ${index + 1} has an unsupported mediaIntegration.`,
+          "invalid_media_integration",
+        );
+      }
+      return {
+        contentBlockKey: section.contentBlockKey as string | null,
+        mediaIntegration:
+          section.mediaIntegration as SectionMediaIntegration | null | undefined,
+      };
     },
   );
   const proposalV1 = parseShowroomDesignProposal(
@@ -319,7 +365,11 @@ export function parseShowroomDesignProposalV2(
       ...raw,
       schemaVersion: SHOWROOM_COMPOSITION_SCHEMA_VERSION,
       sections: raw.sections.map((entry) => {
-        const { contentBlockKey: _, ...section } = entry as Record<string, unknown>;
+        const {
+          contentBlockKey: _,
+          mediaIntegration: __,
+          ...section
+        } = entry as Record<string, unknown>;
         return section;
       }),
     },
@@ -331,7 +381,20 @@ export function parseShowroomDesignProposalV2(
   const sections = proposalV1.sections.map((section, index) => {
     const component = componentById.get(section.component);
     if (!component) return fail("The design references an unknown component.", "unknown_component");
-    const contentBlockKey = requestedContentKeys[index];
+    const contentBlockKey = requestedSections[index].contentBlockKey;
+    const mediaIntegration =
+      requestedSections[index].mediaIntegration ??
+      defaultMediaIntegrationForSection(component.slot, component.id);
+    if (
+      mediaIntegration !== null &&
+      component.slot !== "hero" &&
+      component.slot !== "content"
+    ) {
+      return fail(
+        `Component ${component.id} cannot use section media integration.`,
+        "incompatible_media_integration",
+      );
+    }
     if (!component.acceptedContentTypes.length && contentBlockKey !== null) {
       return fail(
         `Component ${component.id} cannot consume a content block.`,
@@ -377,9 +440,11 @@ export function parseShowroomDesignProposalV2(
         }
       }
     }
-    return { ...section, contentBlockKey };
+    return { ...section, contentBlockKey, mediaIntegration };
   });
-  const used = requestedContentKeys.filter((key): key is string => key !== null);
+  const used = requestedSections
+    .map((section) => section.contentBlockKey)
+    .filter((key): key is string => key !== null);
   if (new Set(used).size !== used.length) {
     fail("A content block cannot be assigned more than once.", "duplicate_content_assignment");
   }

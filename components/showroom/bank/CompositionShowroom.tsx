@@ -139,6 +139,9 @@ export function CompositionShowroom({
                 .decorative_depth as ShowroomDecorativeDepth,
             }}
             properties={section.properties}
+            mediaIntegration={
+              "mediaIntegration" in section ? section.mediaIntegration : null
+            }
           />
         );
       })}

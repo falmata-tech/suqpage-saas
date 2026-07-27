@@ -30,6 +30,16 @@
             { "type": "null" },
             { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$", "maxLength": 80 }
           ]
+        },
+        "mediaIntegration": {
+          "description": "Reviewed section-media treatment. Omit for a deterministic integrated default.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "enum": ["ambient_overlay", "edge_fade", "split_bleed", "editorial_overlap", "product_stage", "hidden"]
+            }
+          ]
         }
       }
     }

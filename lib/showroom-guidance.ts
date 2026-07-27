@@ -1,6 +1,7 @@
 import type { RevisionSnapshotV4 } from "./revision-v4-domain";
 import type { ShowroomComponentDefinitionV2 } from "./showroom-composition-v2";
 import type { HeroMediaIntegration } from "./showroom-design-systems";
+import { defaultMediaIntegrationForSection } from "./showroom-composition-v2";
 
 export type ShowroomArchetype =
   | "artisan"
@@ -174,13 +175,7 @@ export function heroMediaIntegrationForComponent(
   componentId: string,
 ): HeroMediaIntegration | null {
   if (!componentId.startsWith("hero.")) return null;
-  if (/centered-statement/.test(componentId)) return "hidden";
-  if (/product-spotlight|beauty-orbit/.test(componentId)) return "product_stage";
-  if (/editorial-collage|textile-swatch/.test(componentId)) {
-    return "editorial_overlap";
-  }
-  if (/provenance|ingredient-monograph/.test(componentId)) return "soft_inset";
-  return "split_bleed";
+  return defaultMediaIntegrationForSection("hero", componentId);
 }
 
 export function guidanceForComponent(
