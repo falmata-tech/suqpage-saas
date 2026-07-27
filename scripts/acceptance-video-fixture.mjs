@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 
-const [, , databasePath, handle = "alhayabrand"] = process.argv;
+const [, , databasePath, handle = "selam-weave"] = process.argv;
 if (!databasePath) {
   console.error("Usage: acceptance-video-fixture.mjs <database> [handle]");
   process.exit(2);

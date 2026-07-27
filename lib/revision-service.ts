@@ -9,10 +9,16 @@ import { canAccessRequest, getRequestDetail } from "./request-sqlite";
 import { RevisionError, snapshotToCatalog } from "./revision-domain";
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import {
+  assignBlueprintSlot,
+  blueprintReadiness,
+  mediaPlanFromRecipeMetadata,
+} from "./showroom-blueprint";
+import {
   requireRevisionSnapshotV4,
   type RevisionSnapshotV4,
 } from "./revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
+import { evaluateCompositionFitness } from "./showroom-guidance";
 import { parseShowroomContentBlocks } from "./showroom-content-blocks";
 import type { ContentRevision, SessionUser } from "./types";
 
@@ -293,6 +299,79 @@ export function saveRecipeDraftRevision(
   return { revision: getContentRevision(revisionId)!, duplicate: false };
 }
 
+export function fulfillBlueprintMediaSlot(
+  user: SessionUser,
+  revisionId: number,
+  slotKey: string,
+  attachmentId: number,
+) {
+  const revision = getContentRevision(revisionId);
+  if (!revision) throw new RevisionError("Revision not found.", 404);
+  const request = requestForRevision(user, revision.request_id);
+  if (!staffCanWork(user, request)) {
+    throw new RevisionError("Assigned staff access is required.", 403);
+  }
+  if (revision.status !== "draft") {
+    throw new RevisionError("Submitted revisions cannot be edited.", 409);
+  }
+  const attachment = getDb()
+    .prepare(
+      "SELECT id,width,height FROM request_attachments WHERE id=? AND request_id=?",
+    )
+    .get(attachmentId, revision.request_id) as
+    | { id: number; width: number | null; height: number | null }
+    | undefined;
+  if (!attachment) {
+    throw new RevisionError("The verified image is unavailable.", 409);
+  }
+  const snapshot = requireRevisionSnapshotV4(
+    revision.snapshot_json,
+    SHOWROOM_COMPONENT_BANK_LATEST,
+  );
+  const mediaPlan = mediaPlanFromRecipeMetadata(
+    revision.recipe_metadata_json,
+    snapshot,
+  );
+  const slot = mediaPlan.find((item) => item.key === slotKey);
+  if (!slot) throw new RevisionError("The media-plan slot is unavailable.", 404);
+  const width = Number(attachment.width || 0);
+  const height = Number(attachment.height || 0);
+  const ratio = width && height ? width / height : 0;
+  const compatible =
+    slot.aspectRatio === "any" ||
+    !ratio ||
+    (slot.aspectRatio === "landscape" && ratio >= 1.2) ||
+    (slot.aspectRatio === "portrait" && ratio <= 0.83) ||
+    (slot.aspectRatio === "square" && ratio >= 0.8 && ratio <= 1.25);
+  if (!compatible) {
+    throw new RevisionError(
+      `Choose a ${slot.aspectRatio} image for ${slot.label}.`,
+      409,
+    );
+  }
+  const next = validatedV4ForRequest(
+    assignBlueprintSlot(
+      snapshot,
+      slot,
+      `request-attachment:${attachment.id}`,
+    ),
+    revision.request_id,
+    revision.business_id,
+  );
+  const result = getDb()
+    .prepare(
+      "UPDATE content_revisions SET snapshot_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='draft'",
+    )
+    .run(JSON.stringify(next), revision.id);
+  if (result.changes !== 1) {
+    throw new RevisionError("The draft changed while media was assigned.", 409);
+  }
+  return {
+    revision: getContentRevision(revision.id)!,
+    readiness: blueprintReadiness(next, mediaPlan),
+  };
+}
+
 export function submitRevisionForReview(
   user: SessionUser,
   revisionId: number,
@@ -306,7 +385,29 @@ export function submitRevisionForReview(
   if (revision.status !== "draft") {
     throw new RevisionError("Only a draft can be sent for review.", 409);
   }
-  validatedV4ForRequest(revision.snapshot_json, revision.request_id, revision.business_id);
+  const snapshot = validatedV4ForRequest(
+    revision.snapshot_json,
+    revision.request_id,
+    revision.business_id,
+  );
+  const readiness = blueprintReadiness(
+    snapshot,
+    mediaPlanFromRecipeMetadata(revision.recipe_metadata_json, snapshot),
+  );
+  if (!readiness.reviewReady) {
+    throw new RevisionError(
+      `${readiness.unresolvedRequired.length} required media slot${readiness.unresolvedRequired.length === 1 ? " is" : "s are"} still unresolved.`,
+      409,
+    );
+  }
+  const fitness = evaluateCompositionFitness(snapshot);
+  if (!fitness.allowed) {
+    throw new RevisionError(
+      fitness.issues.find((issue) => issue.severity === "error")?.message ||
+        "The showroom composition needs correction before review.",
+      409,
+    );
+  }
   return inTransaction(() => {
     getDb()
       .prepare(

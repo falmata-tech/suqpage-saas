@@ -7,6 +7,10 @@ import {
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { parseShowroomDesignProposalV2 } from "./showroom-composition-v2";
 import type { ShowroomContentBlocksDocument } from "./showroom-content-blocks";
+import {
+  parseBlueprintMediaPlan,
+  type BlueprintMediaSlot,
+} from "./showroom-blueprint";
 
 export const SHOWROOM_RECIPE_SCHEMA_VERSION = 1;
 export const SHOWROOM_CONTENT_SCHEMA_VERSION = 1;
@@ -57,6 +61,7 @@ export type ShowroomRecipeEnvelope = {
   rationale: string;
   questions: string[];
   warnings: string[];
+  mediaPlan: BlueprintMediaSlot[];
   declaredRemovals: {
     collections: string[];
     categories: string[];
@@ -194,6 +199,7 @@ function parseEnvelope(input: unknown): ShowroomRecipeEnvelope {
     "rationale",
     "questions",
     "warnings",
+    "mediaPlan",
     "declaredRemovals",
     "provenance",
   ]);
@@ -262,6 +268,7 @@ function parseEnvelope(input: unknown): ShowroomRecipeEnvelope {
     rationale: text(raw.rationale, "$.rationale", 2000),
     questions: textList(raw.questions, "$.questions", 20),
     warnings: textList(raw.warnings, "$.warnings", 20),
+    mediaPlan: (raw.mediaPlan ?? []) as BlueprintMediaSlot[],
     declaredRemovals: {
       collections: keyList(removals.collections, "$.declaredRemovals.collections", 100),
       categories: keyList(removals.categories, "$.declaredRemovals.categories", 200),
@@ -418,6 +425,17 @@ export function validateShowroomRecipe(
       "content",
       "$.content",
       error instanceof Error ? error.message : "The content proposal is invalid.",
+    );
+  }
+  try {
+    recipe.mediaPlan = parseBlueprintMediaPlan(recipe.mediaPlan, snapshot);
+  } catch (error) {
+    issue(
+      "cross_document",
+      error && typeof error === "object" && "path" in error
+        ? String(error.path)
+        : "$.mediaPlan",
+      error instanceof Error ? error.message : "The media plan is invalid.",
     );
   }
   const imageRefs = [

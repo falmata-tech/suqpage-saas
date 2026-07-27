@@ -155,6 +155,45 @@
   font-size: 0.9rem;
 }
 
+.templatePanel {
+  display: grid;
+  grid-template-columns: minmax(190px, 280px) 1fr;
+  align-items: start;
+  gap: 22px;
+  padding: 18px;
+  border: 1px solid #dfe4eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.templatePanel p {
+  margin: 5px 0 10px;
+  color: #657086;
+  font-size: 0.86rem;
+}
+
+.templateSequence,
+.guidanceGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.templateSequence span,
+.guidanceGrid span {
+  border: 1px solid #dfe4eb;
+  border-radius: 4px;
+  padding: 5px 7px;
+  background: #f8fafc;
+  color: #344054;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.guidanceGrid {
+  margin-top: 6px;
+}
+
 .componentGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1620,6 +1659,10 @@
 }
 
 @media (max-width: 760px) {
+  .templatePanel {
+    grid-template-columns: 1fr;
+  }
+
   .labSummary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1633,6 +1676,7 @@
   }
 
   .hero,
+  .hero[data-variant],
   .content,
   .trust {
     grid-template-columns: 1fr;
@@ -1714,6 +1758,7 @@
 
 @container bank-preview (max-width: 760px) {
   .hero,
+  .hero[data-variant],
   .content,
   .trust {
     grid-template-columns: 1fr;

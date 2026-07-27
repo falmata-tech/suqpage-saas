@@ -1,12 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import BazaarMap from "@/components/BazaarMap";
-import FeaturedShowrooms from "@/components/FeaturedShowrooms";
 import ShowroomDirectory, { type ShowroomDirectoryEntry } from "@/components/ShowroomDirectory";
 import SuqPageBrand from "@/components/SuqPageBrand";
 import { listBazaarAdminState } from "@/lib/bazaar";
 import { getAllBusinesses, getCatalogByBusinessId } from "@/lib/db";
-import { buildHomepageFeaturedPool } from "@/lib/marketplace-home";
 
 export const dynamic = "force-dynamic";
 
@@ -52,12 +50,12 @@ export default function Home() {
       imageUrl: business.hero_image_path || business.logo_path || "",
       industry,
       searchText: searchable,
+      featured: true,
     };
   });
-  const featuredEntries = buildHomepageFeaturedPool(directoryEntries);
 
   return (
-    <div className="marketplace-home">
+    <div className="marketplace-home" id="top">
       <header className="marketplace-header">
         <div className="market-container marketplace-nav-shell">
           <SuqPageBrand className="marketplace-brand" />
@@ -116,8 +114,26 @@ export default function Home() {
             </aside>
           </section>
 
+          <section className="market-section market-bazaar-section" id="bazaar">
+            <BazaarMap bazaar={bazaar} embedded />
+          </section>
+
+          <section className="market-section market-showrooms" id="showrooms" aria-labelledby="showrooms-title">
+            <div className="market-section-heading">
+              <div>
+                <span className="market-kicker">Permanent showrooms</span>
+                <h2 id="showrooms-title">Explore SuqPage</h2>
+                <p>Search every business once. Featured showrooms appear first without creating a second catalog.</p>
+              </div>
+            </div>
+            <ShowroomDirectory entries={directoryEntries} />
+          </section>
+
           <section className="market-schedule" aria-labelledby="schedule-title">
-            <h2 id="schedule-title">This week&apos;s bazaar schedule</h2>
+            <div className="market-schedule-heading">
+              <span className="market-kicker">Changes every morning</span>
+              <h2 id="schedule-title">This week&apos;s Bazaar</h2>
+            </div>
             <div className="market-schedule-rail">
               {schedule.map((theme) => (
                 <article key={theme.id} className={`market-schedule-card market-schedule-${theme.icon}${theme.slug === bazaar.themeSlug ? " active" : ""}`}>
@@ -127,31 +143,6 @@ export default function Home() {
                 </article>
               ))}
             </div>
-          </section>
-
-          <section className="market-section market-showrooms" id="showrooms" aria-labelledby="showrooms-title">
-            <div className="market-section-heading">
-              <div>
-                <h2 id="showrooms-title">All Showrooms</h2>
-                <p>Find businesses by name, /@handle, product, or industry.</p>
-              </div>
-            </div>
-            <ShowroomDirectory entries={directoryEntries} />
-          </section>
-
-          <section className="market-section market-bazaar-section" id="bazaar">
-            <BazaarMap bazaar={bazaar} embedded />
-          </section>
-
-          <section className="market-section market-featured" aria-labelledby="featured-title">
-            <div className="market-section-heading">
-              <div>
-                <span className="market-kicker">Across SuqPage</span>
-                <h2 id="featured-title">Featured showrooms</h2>
-                <p>A rotating look at businesses you can explore right now.</p>
-              </div>
-            </div>
-            <FeaturedShowrooms entries={featuredEntries} />
           </section>
 
           <section className="market-closing" aria-labelledby="market-closing-title">
@@ -164,6 +155,13 @@ export default function Home() {
           </section>
         </div>
       </main>
+
+      <nav className="market-mobile-tabs" aria-label="Marketplace navigation">
+        <a href="#top"><span aria-hidden="true">⌂</span>Home</a>
+        <a href="#bazaar"><span aria-hidden="true">⌖</span>Bazaar</a>
+        <a href="#showrooms"><span aria-hidden="true">▦</span>Showrooms</a>
+        <Link href="/login"><span aria-hidden="true">○</span>Account</Link>
+      </nav>
 
       <footer className="market-footer">
         <div className="market-container">

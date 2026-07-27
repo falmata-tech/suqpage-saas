@@ -13,6 +13,7 @@ export type ShowroomDirectoryEntry = {
   imageUrl: string;
   industry: string;
   searchText: string;
+  featured?: boolean;
 };
 
 export default function ShowroomDirectory({ entries }: { entries: ShowroomDirectoryEntry[] }) {
@@ -31,7 +32,9 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
       .filter((entry) => industry === "all" || entry.industry === industry)
       .filter((entry) => !normalizedQuery || entry.searchText.includes(normalizedQuery))
       .sort((left, right) => (
-        sort === "handle"
+        left.featured !== right.featured
+          ? Number(Boolean(right.featured)) - Number(Boolean(left.featured))
+          : sort === "handle"
           ? left.handle.localeCompare(right.handle)
           : left.name.localeCompare(right.name)
       ));
@@ -95,6 +98,7 @@ export default function ShowroomDirectory({ entries }: { entries: ShowroomDirect
                   ) : (
                     <span className="market-media-fallback" aria-hidden="true">{entry.name.slice(0, 1)}</span>
                   )}
+                  {entry.featured ? <span className="market-featured-label">Featured</span> : null}
                 </div>
                 <div className="market-showroom-copy">
                   <span className="market-card-industry">{entry.industry}</span>

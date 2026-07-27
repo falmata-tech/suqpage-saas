@@ -187,6 +187,7 @@ const cssSource = fs.readFileSync(
 );
 assert.match(cssSource, /container:\s*bank-preview\s*\/\s*inline-size/);
 assert.match(cssSource, /@container bank-preview \(max-width: 480px\)/);
+assert.match(cssSource, /\.hero\[data-variant\][\s\S]*grid-template-columns:\s*1fr/);
 assert.match(cssSource, /@media \(prefers-reduced-motion: reduce\)/);
 assert.match(cssSource, /animation-name:\s*none\s*!important/);
 assert.match(cssSource, /min-height:\s*44px/);

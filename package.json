@@ -36,11 +36,14 @@
     "test:bazaar": "tsx scripts/test-bazaar.ts",
     "test:marketplace-home": "tsx scripts/test-marketplace-home.ts",
     "test:showroom-renderer": "tsx scripts/test-showroom-renderer.ts",
+    "test:blueprint": "tsx scripts/test-showroom-blueprint.ts",
+    "test:fitness": "tsx scripts/test-showroom-fitness.ts",
+    "test:benchmarks": "tsx scripts/test-showroom-benchmarks.ts",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:bazaar && npm run test:marketplace-home && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:showroom-migration && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
+    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:bazaar && npm run test:marketplace-home && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:showroom-migration && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {

@@ -1,0 +1,122 @@
+---
+id: BE-013
+title: Showroom blueprint media plan and composition fitness
+status: done
+related: [FE-007, FE-009, FE-014, FE-015, BE-008, BE-010, BE-011, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007]
+owners: [product, backend, security]
+last_updated: 2026-07-27
+change_level: L3
+---
+
+# BE-013 - Showroom blueprint media plan and composition fitness
+
+## Problem and outcome
+
+The current recipe contract accepts only already-admitted media and the bank
+describes mostly generic optional image slots. The application needs a bounded
+blueprint state that can describe unresolved media work and evaluate whether a
+composition fits its business, catalog, content, and mobile constraints before
+client review.
+
+## Scope and invariants
+
+- Stable planned-media references for section and product image destinations.
+- Strict media-plan entries containing purpose, owner key, required state,
+  accepted kind, bounded count, aspect guidance, descriptive prompt, and
+  illustrative/factual classification.
+- Bank metadata for media policy, no-media fallbacks, recommended catalog
+  counts, catalog modes, business archetypes, style families, long-title/RTL
+  support, mobile behavior, and fallback component.
+- A static reviewed showroom-template registry that selects page sequence before
+  individual component variants.
+- A deterministic composition-fitness report with hard failures and warnings.
+- Separate `blueprint_valid`, `preview_ready`, and `review_ready` results.
+
+## Contracts
+
+- Planned references are accepted only in editable private v4 blueprint
+  validation. Submitted/publication parsers reject every unresolved required
+  planned reference.
+- Planned references contain no tenant storage path, external URL, database ID,
+  provider input, or executable value.
+- Slot fulfillment authorizes the actor/request, admits the image through the
+  existing media port, validates kind and dimensions, and replaces the exact
+  reference atomically.
+- Hard fitness failures include incompatible content/component binding, missing
+  required media at review time, unsupported media kind, duplicate category
+  navigation, more than two signature sections, and incompatible catalog count.
+- Warnings include unnecessary search/filter controls, repeated factual image
+  use, consecutive identical surface/geometry, repeated business description,
+  long-copy risk, and weak optional-media coverage.
+- Templates encode reviewed slot order, accepted archetypes/catalog modes,
+  preferred component families, and fallback behavior. They contain no tenant
+  facts or arbitrary markup.
+- Fitness scoring is deterministic and advisory except for explicit hard
+  failures. The AI cannot waive security, media, provenance, or publication
+  requirements.
+
+## Scenarios
+
+```gherkin
+Scenario: Valid blueprint contains planned media
+  GIVEN a private v4 recipe with bounded unresolved image destinations
+  WHEN the recipe is parsed in blueprint mode
+  THEN the content, design, media plan, and fitness report are returned
+  AND no planned reference is treated as an admitted tenant asset
+
+Scenario: Required media remains unresolved at review
+  GIVEN a valid private blueprint with a required planned hero image
+  WHEN staff request client submission
+  THEN review readiness fails at the exact slot path
+  AND the current public showroom remains unchanged
+
+Scenario: AI chooses an oversized catalog component
+  GIVEN a sparse three-product manufacturer catalog
+  WHEN the recipe selects a component whose reviewed range starts at eight products
+  THEN composition fitness reports an incompatible catalog-count failure
+  AND identifies the reviewed fallback component
+```
+
+## Quality impact
+
+- Security and tenant isolation: pure blueprint parsing has no persistence;
+  fulfillment uses the existing actor/request-scoped adapter.
+- Data integrity: immutable submitted revisions and live publication authority
+  remain unchanged.
+- Performance: limits remain at 24 blocks and existing catalog maxima; media-plan
+  and fitness issue counts are bounded.
+- Compatibility: retained v1-v4 snapshots and banks 1.1/1.2 remain readable.
+
+## Test plan
+
+| Criterion | Level | Test path or planned ID |
+|---|---|---|
+| Planned media parser and strict modes | domain/security | `scripts/test-showroom-blueprint.ts` |
+| Bank/template metadata parity | contract/static | `scripts/test-showroom-bank.ts` |
+| Fitness hard failures and warnings | domain | `scripts/test-showroom-fitness.ts` |
+| Slot authorization and atomic fulfillment | integration/security | `scripts/test-showroom-blueprint.ts`, `scripts/test-security.ts` |
+
+## Rollout and rollback
+
+Add the contract to private v4 drafts without rewriting retained snapshots.
+Disable blueprint creation/fulfillment to roll back while preserving exact
+recipe import, focused controls, and recovery editing.
+
+## Readiness checklist
+
+- [x] Strict private/public modes defined
+- [x] Metadata and fitness rules bounded
+- [x] Authorization and compatibility explicit
+- [x] Tests and rollback planned
+
+## Completion evidence
+
+Evidence: implemented and verified on 2026-07-27.
+
+- Strict media-plan parsing, exact destination assignment, request/tenant
+  authorization, required-slot review gating, eight templates,
+  machine-readable component guidance, and deterministic fitness are active.
+- Dense/technical catalog incompatibility remains blocking; ordinary sparse
+  retained catalogs receive a fallback warning to preserve compatibility.
+- Blueprint, fitness, recipe, security, revision, full-check, and 10/10
+  production-browser acceptance evidence passed.

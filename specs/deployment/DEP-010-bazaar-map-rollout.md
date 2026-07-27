@@ -2,7 +2,7 @@
 id: DEP-010
 title: Bazaar map rollout and operations
 status: done
-related: [FE-010, FE-011, FE-012, BE-011, BE-012, DEP-002]
+related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011]
 owners: [operations, security]
 last_updated: 2026-07-26
 change_level: L2

@@ -107,6 +107,58 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
   },
 };
 
+DEFAULT_PROFILES["selam-weave"] = { ...DEFAULT_PROFILES.alhayabrand };
+DEFAULT_PROFILES["afia-botanics"] = { ...DEFAULT_PROFILES.usashopet };
+DEFAULT_PROFILES["warka-furniture"] = { ...DEFAULT_PROFILES.homevibe };
+DEFAULT_PROFILES["nova-assembly"] = { ...DEFAULT_PROFILES.novatech };
+DEFAULT_PROFILES["addis-metalworks"] = {
+  ...DEFAULT_PROFILES.novatech,
+  tokenPack: "industrial-steel",
+  hero: "hero.industrial-spec@1",
+  story: "content.production-metrics@1",
+  catalog: "catalog.minimal-list@1",
+};
+DEFAULT_PROFILES["green-terrace-farm"] = {
+  ...DEFAULT_PROFILES.homevibe,
+  tokenPack: "harvest-earth",
+  hero: "hero.provenance@1",
+  story: "content.origin-story@1",
+  catalog: "catalog.horizontal-shelf@1",
+  trust: "trust.provenance-panel@1",
+};
+DEFAULT_PROFILES["blue-nile-apiary"] = {
+  ...DEFAULT_PROFILES.homevibe,
+  tokenPack: "honey-amber",
+  hero: "hero.ingredient-monograph@1",
+  story: "content.origin-story@1",
+  catalog: "catalog.collection-led@1",
+  trust: "trust.ingredient-ledger@1",
+};
+DEFAULT_PROFILES["rift-valley-mill"] = {
+  ...DEFAULT_PROFILES.homevibe,
+  tokenPack: "coffee-roast",
+  hero: "hero.ingredient-monograph@1",
+  story: "content.process-steps@1",
+  catalog: "catalog.collection-led@1",
+  trust: "trust.provenance-panel@1",
+};
+DEFAULT_PROFILES["entoto-ceramics"] = {
+  ...DEFAULT_PROFILES.homevibe,
+  tokenPack: "artisan-clay",
+  hero: "hero.material-detail@1",
+  story: "content.material-focus@1",
+  catalog: "catalog.editorial-grid@1",
+  trust: "trust.material-passport@1",
+};
+DEFAULT_PROFILES["koba-leather"] = {
+  ...DEFAULT_PROFILES.homevibe,
+  tokenPack: "maker-indigo",
+  hero: "hero.material-detail@1",
+  story: "content.process-steps@1",
+  catalog: "catalog.editorial-grid@1",
+  trust: "trust.material-passport@1",
+};
+
 const FALLBACK_PROFILE: DefaultProfile = {
   tokenPack: "paper-gallery",
   motion: "balanced",

@@ -7,7 +7,6 @@ import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { migrateDatabase } from "../lib/schema";
-import { curatedManifestForLegacyDesign, type LegacyShowroomDesignKey } from "../lib/showroom-manifests";
 import type {
   Business,
   Catalog,
@@ -41,23 +40,26 @@ const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position)
 const addValue = db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)");
 
 const businesses = [
-  { handle:"alhayabrand", name:"Al Haya Brand", sourceDesign:"alhaya", tagline:"Modest essentials, presented with grace.", description:"A refined collection of niqabs, hijabs, abayas and jilbabs.", logo_path:"/uploads/seed/alhaya/logo.png", hero_title:"Quiet elegance for every day.", hero_subtitle:"Explore thoughtfully selected modest wear and send one clear inquiry.", hero_image_path:"/uploads/seed/alhaya/hero-featured.jpg", contact_email:"", whatsapp:"", telegram:"AlHayaModest", tiktok:"alhayabrand" },
-  { handle:"usashopet", name:"USAshopET", sourceDesign:"usashopet", tagline:"Beauty and wellness sourced from the U.S.", description:"Skincare, wellness and personal-care favorites.", logo_path:"/uploads/seed/usashopet/logo.png", hero_title:"Your U.S. beauty shelf, closer to home.", hero_subtitle:"Browse trusted personal-care essentials and ask about several products at once.", hero_image_path:"/uploads/seed/usashopet/hero.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"usashopet" },
-  { handle:"novatech", name:"NovaTech", sourceDesign:"novatech", tagline:"Flagship technology, curated without compromise.", description:"Category-defining devices for work, creativity and everyday life.", logo_path:"/uploads/seed/novatech/logo.png", hero_title:"The next generation is here.", hero_subtitle:"Flagship devices, precise product conversations and human confirmation.", hero_image_path:"/uploads/seed/novatech/iphone-17-pro.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" },
-  { handle:"homevibe", name:"HomeVibe", sourceDesign:"homevibe", tagline:"Objects that make home feel considered.", description:"Recognizable appliances and home essentials selected room by room.", logo_path:"/uploads/seed/homevibe/logo.svg", hero_title:"A calmer, smarter home.", hero_subtitle:"Discover useful design, trusted appliances and pieces worth living with.", hero_image_path:"/uploads/seed/homevibe/dyson-v16.jpg", contact_email:"", whatsapp:"", telegram:"", tiktok:"" }
-] satisfies Array<Record<string,string> & { sourceDesign:LegacyShowroomDesignKey }>;
+  { handle:"selam-weave", name:"Selam Weave Studio", tagline:"Handwoven cloth for useful everyday rituals.", description:"A small textile atelier producing cotton wraps, table linens and practical woven goods in limited runs.", logo_path:"", hero_title:"Woven slowly. Made to be lived with.", hero_subtitle:"Explore hand-finished textiles, natural fibers and made-to-order color options.", hero_image_path:"/uploads/seed/benchmarks/selam-weave/hero.jpg", contact_email:"", whatsapp:"251911100101", telegram:"selamweave", tiktok:"" },
+  { handle:"afia-botanics", name:"Afia Botanics", tagline:"Simple botanical care, mixed in small batches.", description:"Plant-based cleansing and body-care products made with clearly presented ingredients and direct maker guidance.", logo_path:"", hero_title:"A clear ritual from leaf to jar.", hero_subtitle:"Browse small-batch soaps, oils and treatments, then ask the maker about fit and use.", hero_image_path:"/uploads/seed/benchmarks/afia-botanics/hero.jpg", contact_email:"hello@afia.local", whatsapp:"", telegram:"afiabotanics", tiktok:"" },
+  { handle:"warka-furniture", name:"Warka Furniture Works", tagline:"Contemporary furniture shaped by hand.", description:"A compact workshop making hardwood seating, tables and storage pieces for homes and small hospitality spaces.", logo_path:"", hero_title:"Furniture with an honest material story.", hero_subtitle:"See the joinery, dimensions and finish choices before starting a project inquiry.", hero_image_path:"/uploads/seed/benchmarks/warka-furniture/hero.jpg", contact_email:"", whatsapp:"251911100103", telegram:"", tiktok:"" },
+  { handle:"addis-metalworks", name:"Addis Metalworks", tagline:"Small-run fabrication with clear specifications.", description:"A production workshop for equipment frames, stainless work surfaces, racks and custom-cut metal parts.", logo_path:"", hero_title:"Built to the drawing. Ready for the floor.", hero_subtitle:"Review standard fabrications or send one RFQ for dimensions, finish and quantity.", hero_image_path:"/uploads/seed/benchmarks/addis-metalworks/hero.jpg", contact_email:"rfq@addismetal.local", whatsapp:"", telegram:"", tiktok:"" },
+  { handle:"green-terrace-farm", name:"Green Terrace Farm", tagline:"Seasonal produce from a working highland farm.", description:"Fresh greens, herbs and mixed harvest crates supplied according to the farm's current growing cycle.", logo_path:"", hero_title:"What is growing now, clearly presented.", hero_subtitle:"Browse the current harvest and ask about weekly household or kitchen supply.", hero_image_path:"/uploads/seed/benchmarks/green-terrace-farm/hero.jpg", contact_email:"", whatsapp:"251911100105", telegram:"", tiktok:"" },
+  { handle:"blue-nile-apiary", name:"Blue Nile Apiary", tagline:"Honey, comb and beeswax from responsibly kept hives.", description:"A small apiary offering raw honey, seasonal comb and useful beeswax goods with batch-by-batch availability.", logo_path:"", hero_title:"From active hives to a careful harvest.", hero_subtitle:"Discover the current honey character and ask about jars, gifts or wholesale quantities.", hero_image_path:"/uploads/seed/benchmarks/blue-nile-apiary/hero.jpg", contact_email:"", whatsapp:"", telegram:"bluenileapiary", tiktok:"" },
+  { handle:"rift-valley-mill", name:"Rift Valley Mill", tagline:"Local grains milled for homes and small bakeries.", description:"A clean small-scale mill producing teff flours, roasted barley blends and practical mixed-grain packs.", logo_path:"", hero_title:"Know the grain behind every bag.", hero_subtitle:"Compare grain types, milling styles and available pack formats in one clear catalog.", hero_image_path:"/uploads/seed/benchmarks/rift-valley-mill/hero.jpg", contact_email:"orders@riftmill.local", whatsapp:"", telegram:"", tiktok:"" },
+  { handle:"entoto-ceramics", name:"Entoto Ceramics", tagline:"Quiet tableware made in a working pottery studio.", description:"Wheel-thrown and hand-finished cups, bowls, vases and table pieces with natural glaze variation.", logo_path:"", hero_title:"Useful forms, shaped one at a time.", hero_subtitle:"Browse studio pieces and ask about sets, glaze variation or hospitality orders.", hero_image_path:"/uploads/seed/benchmarks/entoto-ceramics/hero.jpg", contact_email:"", whatsapp:"251911100108", telegram:"", tiktok:"" },
+  { handle:"koba-leather", name:"Koba Leather Workshop", tagline:"Durable leather goods cut and stitched by hand.", description:"A practical collection of work bags, wallets, rolls and satchels made in small production runs.", logo_path:"", hero_title:"Leather goods that show their construction.", hero_subtitle:"Inspect the forms, choose a finish and ask about personal or team orders.", hero_image_path:"/uploads/seed/benchmarks/koba-leather/hero.jpg", contact_email:"", whatsapp:"", telegram:"kobaleather", tiktok:"" },
+  { handle:"nova-assembly", name:"Nova Assembly Lab", tagline:"Electronics assembly, repair and custom power work.", description:"A small technical studio building power-control products, cable harnesses and repair solutions for local operators.", logo_path:"", hero_title:"Technical work explained before it is ordered.", hero_subtitle:"Review standard builds or describe the equipment, repair and connector requirements.", hero_image_path:"/uploads/seed/benchmarks/nova-assembly/hero.jpg", contact_email:"lab@novaassembly.local", whatsapp:"251911100110", telegram:"", tiktok:"" }
+] satisfies Array<Record<string,string>>;
 
 const seeded = new Map<string, number>();
 for (const business of businesses) {
-  const { sourceDesign, ...businessValues } = business;
   seeded.set(
     business.handle,
     Number(
       addBusiness.run({
-        ...businessValues,
-        design_manifest_json: JSON.stringify(
-          curatedManifestForLegacyDesign(sourceDesign),
-        ),
+        ...business,
+        design_manifest_json: "{}",
       }).lastInsertRowid,
     ),
   );
@@ -77,43 +79,86 @@ function seedCatalog(handle: string, collectionName: string, categoryNames: stri
   });
 }
 
-seedCatalog("alhayabrand", "Signature Collection", ["Niqabs","Hijabs","Abayas","Jilbabs"], [
-  {name:"Noor Collection",slug:"noor-collection",category:"Niqabs",eyebrow:"Five-piece niqab",description:"A versatile five-piece set with a flowing finish.",image:"/uploads/seed/alhaya/niqab-noor.jpg",options:[{name:"Color",values:["Deep Black","Chocolate","Pearl Grey","Sand Beige"]},{name:"Set",values:["Five-piece set"]}]},
-  {name:"Ayla Collection",slug:"ayla-collection",category:"Niqabs",eyebrow:"Soft layered niqab",description:"A softly structured niqab designed for comfortable daily wear.",image:"/uploads/seed/alhaya/niqab-ayla.jpg",options:[{name:"Color",values:["Forest Olive","Warm Sand","Dusty Mint"]}]},
-  {name:"Mariam Hijab",slug:"mariam-hijab",category:"Hijabs",eyebrow:"Everyday hijab",description:"A lightweight hijab with natural drape.",image:"/uploads/seed/alhaya/hijab-mariam.jpg",options:[{name:"Color",values:["Mocha","Cream","Mushroom"]},{name:"Size",values:["1m × 2m"]}]},
-  {name:"Safwa Abaya",slug:"safwa-abaya",category:"Abayas",eyebrow:"Refined abaya",description:"A clean silhouette with understated detailing.",image:"/uploads/seed/alhaya/abaya-safwa.jpg",options:[{name:"Color",values:["Midnight","Chocolate","Stone Grey"]},{name:"Size",values:["52","54","56","58"]}]},
-  {name:"Layan Jilbab",slug:"layan-jilbab",category:"Jilbabs",eyebrow:"Two-piece jilbab",description:"An easy, full-coverage set with a balanced drape.",image:"/uploads/seed/alhaya/jilbab-layan.jpg",options:[{name:"Color",values:["Olive","Midnight Navy","Warm Taupe"]},{name:"Size",values:["S/M","L/XL"]}]}
-]);
+type BenchmarkProduct = { name:string; category:string; eyebrow:string; description:string; image?:number; availability?:string };
+function benchmarkCatalog(handle:string, collection:string, categories:string[], products:BenchmarkProduct[]) {
+  seedCatalog(handle, collection, categories, products.map((product, index) => ({
+    ...product,
+    slug: product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    image: product.image ? `/uploads/seed/benchmarks/${handle}/product-${product.image}.jpg` : "",
+    options: [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+  })));
+}
 
-seedCatalog("usashopet", "Beauty Shelf", ["Skincare","Wellness","Hair","Body"], [
-  {name:"CeraVe Hydrating Facial Cleanser",slug:"cerave-hydrating-cleanser",category:"Skincare",eyebrow:"Gentle cleanse",description:"A daily cleanser for normal-to-dry skin.",image:"/uploads/seed/usashopet/gentle-cleanser.jpg",options:[{name:"Size",values:["8 oz","12 oz","16 oz"]}]},
-  {name:"TruSkin Vitamin C Facial Serum",slug:"truskin-vitamin-c",category:"Skincare",eyebrow:"Brightening serum",description:"A lightweight vitamin C serum for a simple morning routine.",image:"/uploads/seed/usashopet/vitamin-c.jpg",options:[{name:"Size",values:["1 fl oz"]}]},
-  {name:"Vital Proteins Collagen Peptides",slug:"vital-proteins-collagen",category:"Wellness",eyebrow:"Daily wellness",description:"Unflavored collagen peptides for drinks and recipes.",image:"/uploads/seed/usashopet/collagen.jpg",options:[{name:"Size",values:["10 oz","20 oz"]}]},
-  {name:"One A Day Women's Multivitamin",slug:"one-a-day-women",category:"Wellness",eyebrow:"Daily vitamins",description:"A familiar daily multivitamin option.",image:"/uploads/seed/usashopet/daily-vitamins.jpg",options:[{name:"Count",values:["100 tablets","200 tablets"]}]},
-  {name:"Mielle Rosemary Mint Scalp & Hair Strengthening Oil",slug:"mielle-rosemary-oil",category:"Hair",eyebrow:"Hair care",description:"A scalp and hair oil for a focused care routine.",image:"/uploads/seed/usashopet/hair-care.jpg",options:[{name:"Size",values:["2 fl oz"]}]},
-  {name:"e.l.f. Halo Glow Liquid Filter",slug:"elf-halo-glow",category:"Skincare",eyebrow:"Complexion",description:"A glow-enhancing complexion product.",image:"/uploads/seed/usashopet/makeup.jpg",options:[{name:"Shade",values:["1 Fair","2 Fair/Light","3 Light/Medium","4 Medium"]}]},
-  {name:"Sol de Janeiro Brazilian Bum Bum Cream",slug:"sol-de-janeiro-cream",category:"Body",eyebrow:"Body care",description:"A scented body cream with a rich texture.",image:"/uploads/seed/usashopet/body-care.jpg",options:[{name:"Size",values:["75 ml","240 ml"]}]},
-  {name:"Supergoop! Unseen Sunscreen SPF 40",slug:"supergoop-unseen",category:"Skincare",eyebrow:"Daily SPF",description:"An invisible-finish sunscreen primer.",image:"/uploads/seed/usashopet/sunscreen.jpg",options:[{name:"Size",values:["20 ml","50 ml"]}]}
+benchmarkCatalog("selam-weave","Woven Collection",["Wear","Table","Carry"],[
+  {name:"Indigo Kuta Shawl",category:"Wear",eyebrow:"Handwoven cotton",description:"A substantial indigo-and-ivory shawl with hand-finished fringe.",image:1},
+  {name:"Natural Cotton Wrap",category:"Wear",eyebrow:"Undyed weave",description:"A breathable wrap woven from natural cotton yarn.",image:2},
+  {name:"Indigo Table Linen",category:"Table",eyebrow:"Dining textile",description:"A woven table cloth with a restrained indigo border.",image:3},
+  {name:"Workshop Tote",category:"Carry",eyebrow:"Woven utility",description:"A structured cloth tote with reinforced woven handles.",image:4},
+  {name:"Custom Hospitality Runner",category:"Table",eyebrow:"Made to order",description:"A custom-length runner planned for cafes and guest spaces."},
 ]);
-
-seedCatalog("novatech", "Flagship Collection", ["Phones","Computers","Tablets","Wearables","Audio"], [
-  {name:"iPhone 17 Pro",slug:"iphone-17-pro",category:"Phones",eyebrow:"Apple flagship",description:"A professional flagship phone built around performance, camera capability and a refined pro experience.",image:"/uploads/seed/novatech/iphone-17-pro.jpg",options:[{name:"Color",values:["Silver","Deep Blue","Cosmic Orange"]},{name:"Storage",values:["256 GB","512 GB","1 TB"]},{name:"Region",values:["United States","Middle East"]}]},
-  {name:"Samsung Galaxy S26 Ultra",slug:"galaxy-s26-ultra",category:"Phones",eyebrow:"Samsung flagship",description:"A large-screen flagship with an advanced camera system and S Pen productivity.",image:"/uploads/seed/novatech/galaxy-s26-series.jpg",availability:"limited",options:[{name:"Color",values:["Titanium Black","Titanium Silver"]},{name:"Storage",values:["256 GB","512 GB","1 TB"]}]},
-  {name:"MacBook Pro 14-inch with M5",slug:"macbook-pro-m5",category:"Computers",eyebrow:"Pro computing",description:"A compact professional notebook for demanding creative and technical work.",image:"/uploads/seed/novatech/macbook-pro-m5.jpg",options:[{name:"Memory",values:["16 GB","24 GB","32 GB"]},{name:"Storage",values:["512 GB","1 TB","2 TB"]},{name:"Color",values:["Space Black","Silver"]}]},
-  {name:"iPad Pro with M5",slug:"ipad-pro-m5",category:"Tablets",eyebrow:"Portable studio",description:"A thin creative canvas for illustration, editing and mobile work.",image:"/uploads/seed/novatech/ipad-pro-m5.jpg",options:[{name:"Size",values:["11-inch","13-inch"]},{name:"Storage",values:["256 GB","512 GB","1 TB"]},{name:"Connectivity",values:["Wi‑Fi","Wi‑Fi + Cellular"]}]},
-  {name:"Apple Watch Ultra 3",slug:"apple-watch-ultra-3",category:"Wearables",eyebrow:"Adventure wearable",description:"A performance watch for training, travel and outdoor use.",image:"/uploads/seed/novatech/apple-watch-ultra-3.jpg",availability:"limited",options:[{name:"Band",values:["Alpine Loop","Trail Loop","Ocean Band"]},{name:"Band size",values:["Small","Medium","Large"]}]},
-  {name:"Sony WH-1000XM6",slug:"sony-wh-1000xm6",category:"Audio",eyebrow:"Premium audio",description:"Flagship wireless headphones with advanced noise cancellation.",image:"/uploads/seed/novatech/sony-wh-1000xm6.svg",options:[{name:"Color",values:["Black","Platinum Silver","Midnight Blue"]}]}
+benchmarkCatalog("afia-botanics","Daily Ritual",["Cleanse","Treat","Hair"],[
+  {name:"Garden Cleansing Bars",category:"Cleanse",eyebrow:"Cold-process soap",description:"A small set of botanical cleansing bars with clearly listed ingredients.",image:1},
+  {name:"Leaf & Seed Body Oil",category:"Treat",eyebrow:"Light body oil",description:"A simple amber-bottled oil blended for everyday body care.",image:2},
+  {name:"Mineral Clay Mask",category:"Treat",eyebrow:"Dry mask blend",description:"A dry clay and botanical powder mixed with water at use.",image:3},
+  {name:"Nourishing Hair Butter",category:"Hair",eyebrow:"Rich treatment",description:"A concentrated butter for protective styles and dry ends.",image:4},
 ]);
-
-seedCatalog("homevibe", "Home Edit", ["Cleaning","Kitchen","Coffee","Lighting"], [
-  {name:"Dyson V16 Piston Animal",slug:"dyson-v16",category:"Cleaning",eyebrow:"Whole-home cleaning",description:"A cordless vacuum designed for powerful everyday cleaning.",image:"/uploads/seed/homevibe/dyson-v16.jpg",options:[{name:"Finish",values:["Black/Copper"]},{name:"Bundle",values:["Standard","Pet home"]}]},
-  {name:"KitchenAid Artisan Series 5 Quart Tilt-Head Stand Mixer",slug:"kitchenaid-artisan",category:"Kitchen",eyebrow:"Kitchen icon",description:"A recognizable stand mixer for baking and everyday preparation.",image:"/uploads/seed/homevibe/kitchenaid-artisan.webp",options:[{name:"Color",values:["Empire Red","Matte Black","Milkshake","Contour Silver"]}]},
-  {name:"iRobot Roomba Max 705 Combo",slug:"roomba-max-705",category:"Cleaning",eyebrow:"Hands-off floor care",description:"Robot vacuum and mop support for busy homes.",image:"/uploads/seed/homevibe/roomba-max-705.webp",availability:"limited",options:[{name:"Dock",values:["AutoWash Dock"]}]},
-  {name:"Le Creuset Signature Round Dutch Oven",slug:"le-creuset-dutch-oven",category:"Kitchen",eyebrow:"Cookware classic",description:"Enameled cast iron made for slow cooking and table-ready serving.",image:"/uploads/seed/homevibe/le-creuset-dutch-oven.jpg",options:[{name:"Size",values:["5.5 qt","7.25 qt"]},{name:"Color",values:["Flame","Cerise","Marseille","White"]}]},
-  {name:"Ninja Crispi Air Fryer",slug:"ninja-crispi",category:"Kitchen",eyebrow:"Compact cooking",description:"A compact air-frying system for quick meals and reheating.",image:"/uploads/seed/homevibe/ninja-crispi.svg",options:[{name:"Color",values:["Stone","Sage","Blue"]}]},
-  {name:"Nespresso Vertuo Creatista",slug:"nespresso-vertuo-creatista",category:"Coffee",eyebrow:"Coffee ritual",description:"Vertuo coffee with integrated milk-texturing control.",image:"/uploads/seed/homevibe/nespresso-vertuo-creatista.svg",options:[{name:"Finish",values:["Stainless Steel"]}]},
-  {name:"Vitamix Ascent X5",slug:"vitamix-ascent-x5",category:"Kitchen",eyebrow:"Countertop performance",description:"A high-performance blender for smoothies, soups and prep.",image:"/uploads/seed/homevibe/vitamix-ascent-x5.svg",options:[{name:"Color",values:["Brushed Stainless","Graphite"]}]},
-  {name:"Philips Hue Play Gradient Lightstrip",slug:"philips-hue-gradient",category:"Lighting",eyebrow:"Ambient lighting",description:"A gradient lightstrip for immersive room lighting.",image:"/uploads/seed/homevibe/philips-hue-gradient.svg",options:[{name:"Screen size",values:["55 inch","65 inch","75 inch"]}]}
+benchmarkCatalog("warka-furniture","Workshop Editions",["Seating","Tables","Storage"],[
+  {name:"Low Woven Lounge Chair",category:"Seating",eyebrow:"Hardwood and cord",description:"A low lounge chair with a handwoven seat and visible joinery.",image:1},
+  {name:"Round Cross-Leg Table",category:"Tables",eyebrow:"Compact side table",description:"A small round table with a stable crossed hardwood base.",image:2},
+  {name:"Entry Bench",category:"Seating",eyebrow:"Woven bench",description:"A narrow bench for entries, bedrooms and hospitality spaces.",image:3},
+  {name:"Open Wall Shelf",category:"Storage",eyebrow:"Display storage",description:"An open hardwood shelf sized for useful everyday objects.",image:4},
+  {name:"Custom Dining Table",category:"Tables",eyebrow:"Project inquiry",description:"A made-to-order table specified by size, timber and finish."},
+  {name:"Hospitality Stool Set",category:"Seating",eyebrow:"Small production run",description:"A repeatable stool design for cafes and counters."},
+]);
+benchmarkCatalog("addis-metalworks","Fabrication Catalog",["Frames","Work Surfaces","Storage","Parts"],[
+  {name:"Powder-Coated Equipment Frame",category:"Frames",eyebrow:"Machine support",description:"A rigid fabricated frame prepared for equipment installation.",image:1},
+  {name:"Stainless Prep Table",category:"Work Surfaces",eyebrow:"Food-safe work surface",description:"A stainless work table with lower shelf and adjustable feet.",image:2},
+  {name:"Modular Storage Rack",category:"Storage",eyebrow:"Workshop storage",description:"A bolt-together rack for bins, tools and production materials.",image:3},
+  {name:"Precision Bracket Set",category:"Parts",eyebrow:"Cut and formed parts",description:"A configurable set of drilled and folded mounting brackets.",image:4},
+  {name:"Protective Equipment Guard",category:"Frames",eyebrow:"Custom fabrication",description:"A measured guard fabricated to an approved drawing."},
+  {name:"Mobile Tool Cart",category:"Storage",eyebrow:"Workshop utility",description:"A wheeled steel cart configured for tools and consumables."},
+  {name:"Sink Support Stand",category:"Work Surfaces",eyebrow:"Stainless support",description:"A fabricated stand prepared for a specified sink and plumbing layout."},
+  {name:"Short-Run Cut Parts",category:"Parts",eyebrow:"RFQ service",description:"A quoted batch of repeat metal parts from supplied dimensions."},
+]);
+benchmarkCatalog("green-terrace-farm","Current Harvest",["Greens","Herbs","Seasonal Crates"],[
+  {name:"Highland Greens Mix",category:"Greens",eyebrow:"Seasonal leaves",description:"A fresh mixed selection based on the current field harvest.",image:1},
+  {name:"Kitchen Herb Bunch",category:"Herbs",eyebrow:"Mixed herbs",description:"A practical bunch of aromatic herbs for home and kitchen use.",image:2},
+  {name:"Heirloom Tomato Mix",category:"Seasonal Crates",eyebrow:"Field tomatoes",description:"A mixed-color tomato selection available during its harvest window.",image:3,availability:"limited"},
+  {name:"Weekly Produce Crate",category:"Seasonal Crates",eyebrow:"Farm assortment",description:"A rotating crate of vegetables selected from the week's harvest.",image:4},
+  {name:"Cafe Greens Supply",category:"Greens",eyebrow:"Recurring inquiry",description:"A recurring greens inquiry sized for a small cafe or kitchen."},
+]);
+benchmarkCatalog("blue-nile-apiary","Hive Harvest",["Honey","Comb","Beeswax"],[
+  {name:"Seasonal Raw Honey",category:"Honey",eyebrow:"Current harvest",description:"Raw amber honey presented by season and available jar size.",image:1},
+  {name:"Cut Comb Honey",category:"Comb",eyebrow:"Whole comb",description:"Fresh comb honey cut and packed in limited seasonal quantities.",image:2,availability:"limited"},
+  {name:"Pure Beeswax Candles",category:"Beeswax",eyebrow:"Hive byproduct",description:"Simple hand-poured candles made from cleaned beeswax.",image:3},
+  {name:"Honey & Comb Gift Box",category:"Honey",eyebrow:"Small gift set",description:"A compact pairing of honey and comb for gifting.",image:4},
+]);
+benchmarkCatalog("rift-valley-mill","Mill Pantry",["Teff","Barley","Blends"],[
+  {name:"Ivory Teff Flour",category:"Teff",eyebrow:"Fine milled",description:"A finely milled ivory teff flour for household and bakery use.",image:1},
+  {name:"Brown Teff Flour",category:"Teff",eyebrow:"Whole grain",description:"Brown teff milled with a fuller grain character.",image:2},
+  {name:"Roasted Barley Blend",category:"Barley",eyebrow:"Roasted grain",description:"A roasted barley blend prepared for traditional and modern drinks.",image:3},
+  {name:"Mixed Grain Baking Pack",category:"Blends",eyebrow:"Practical blend",description:"A balanced grain blend for breads, pancakes and test batches.",image:4},
+]);
+benchmarkCatalog("entoto-ceramics","Studio Table",["Drinkware","Serveware","Objects"],[
+  {name:"Studio Coffee Set",category:"Drinkware",eyebrow:"Wheel-thrown set",description:"A small set of cups and saucers with natural glaze variation.",image:1},
+  {name:"Everyday Serving Bowl",category:"Serveware",eyebrow:"Wide bowl",description:"A useful serving bowl with a durable glazed interior.",image:2},
+  {name:"Textured Stem Vase",category:"Objects",eyebrow:"Carved surface",description:"A hand-finished vase with a softly carved vertical texture.",image:3},
+  {name:"Dinner Plate Set",category:"Serveware",eyebrow:"Table set",description:"A stackable plate set with a warm exposed rim.",image:4},
+  {name:"Custom Cafe Cup Run",category:"Drinkware",eyebrow:"Hospitality order",description:"A repeat cup form produced in an agreed glaze and quantity."},
+  {name:"Small Planter Pair",category:"Objects",eyebrow:"Studio object",description:"A paired planter format with drainage and glaze options."},
+]);
+benchmarkCatalog("koba-leather","Workshop Goods",["Bags","Small Goods","Tools"],[
+  {name:"Structured Work Tote",category:"Bags",eyebrow:"Daily carry",description:"A sturdy open tote with reinforced handles and an exterior pocket.",image:1},
+  {name:"Slim Card Wallet",category:"Small Goods",eyebrow:"Hand stitched",description:"A compact card wallet with visible edge finishing.",image:2},
+  {name:"Leather Tool Roll",category:"Tools",eyebrow:"Organized carry",description:"A roll-up organizer for small tools, brushes or studio equipment.",image:3},
+  {name:"Everyday Crossbody",category:"Bags",eyebrow:"Secure satchel",description:"A medium satchel with adjustable strap and covered closure.",image:4},
+]);
+benchmarkCatalog("nova-assembly","Technical Builds",["Power","Repair","Harnesses"],[
+  {name:"Rugged Solar Charge Controller",category:"Power",eyebrow:"Field power control",description:"A protected controller assembled for small off-grid systems.",image:1},
+  {name:"Compact Backup Power Box",category:"Power",eyebrow:"Configured power",description:"A portable backup enclosure configured to the approved load plan.",image:2},
+  {name:"Audio Amplifier Rebuild",category:"Repair",eyebrow:"Bench repair",description:"A diagnostic and rebuild service for compatible amplifier hardware.",image:3},
+  {name:"Custom Cable Harness Kit",category:"Harnesses",eyebrow:"Made to specification",description:"A labeled harness kit built to connector, length and routing requirements.",image:4},
+  {name:"Control Board Diagnostic",category:"Repair",eyebrow:"Technical service",description:"A documented diagnostic for an eligible control board or module."},
 ]);
 
 const seededGroupQuery = db.prepare(
@@ -184,17 +229,23 @@ function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client",busi
   generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : "CLIENT",business,email,password});
 }
 seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
-seedUser("owner","client","Al Haya Brand",process.env.SEED_ALHAYA_EMAIL||"alhaya@suqpage.local","Al Haya Client",seeded.get("alhayabrand")!);
-seedUser("owner","client","USAshopET",process.env.SEED_USASHOPET_EMAIL||"usashopet@suqpage.local","USAshopET Client",seeded.get("usashopet")!);
-seedUser("owner","client","NovaTech",process.env.SEED_NOVATECH_EMAIL||"novatech@suqpage.local","NovaTech Client",seeded.get("novatech")!);
-seedUser("owner","client","HomeVibe",process.env.SEED_HOMEVIBE_EMAIL||"homevibe@suqpage.local","HomeVibe Client",seeded.get("homevibe")!);
+for (const business of businesses) {
+  seedUser(
+    "owner",
+    "client",
+    business.name,
+    `${business.handle}@suqpage.local`,
+    `${business.name} Client`,
+    seeded.get(business.handle)!,
+  );
+}
 
 const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_area) VALUES(?,?,?)");
 [["Malikt Express","malikt-express","Addis Ababa and surrounding areas"],["Addis Courier","addis-courier","Addis Ababa"],["Swift Delivery","swift-delivery","Major Ethiopian cities"],["CityDrop","citydrop","Same-day urban delivery"]].forEach((c) => addCompany.run(...c));
 
 const inquiry = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,idempotency_key) VALUES(?,?,?,?,?,?,?)");
 const inquiryItem = db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,options_json) VALUES(?,?,?,?,?)");
-for (const [handle, customer] of [["alhayabrand","Hana"],["usashopet","Mimi"],["novatech","Samuel"],["homevibe","Rahel"]] as const) {
+for (const [handle, customer] of businesses.slice(0, 4).map((business, index) => [business.handle, ["Hana","Mimi","Samuel","Rahel"][index]] as const)) {
   const businessId = seeded.get(handle)!;
   const iid = Number(inquiry.run(businessId, customer, "251911000000", "whatsapp", "Seed inquiry for local testing.", "new", `seed-${handle}`).lastInsertRowid);
   const product = db.prepare("SELECT id,name FROM products WHERE business_id=? ORDER BY id LIMIT 1").get(businessId) as any;

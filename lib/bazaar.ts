@@ -249,6 +249,16 @@ function defaultIndustryKeysForBusiness(handle: string) {
     usashopet: ["beauty-wellness"],
     novatech: ["electronics", "machinery-tools"],
     homevibe: ["home-living"],
+    "selam-weave": ["fashion-textiles"],
+    "afia-botanics": ["beauty-wellness"],
+    "warka-furniture": ["home-living"],
+    "addis-metalworks": ["machinery-tools"],
+    "green-terrace-farm": ["food-farming"],
+    "blue-nile-apiary": ["food-farming"],
+    "rift-valley-mill": ["food-farming"],
+    "entoto-ceramics": ["home-living"],
+    "koba-leather": ["fashion-textiles"],
+    "nova-assembly": ["electronics", "machinery-tools"],
   };
   return keys[handle] || ["community"];
 }
@@ -310,7 +320,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
   const insertProfile = db.prepare(`
     INSERT OR IGNORE INTO bazaar_booth_profiles(
       business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,is_excluded,approved_at
-    ) VALUES(?,?,?,?,0,0,CURRENT_TIMESTAMP)
+    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP)
   `);
   for (const business of businesses) {
     const industryKeys = defaultIndustryKeysForBusiness(business.handle);

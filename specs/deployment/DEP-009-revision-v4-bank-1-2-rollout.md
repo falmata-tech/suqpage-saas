@@ -2,7 +2,7 @@
 id: DEP-009
 title: Revision v4 and showroom bank 1.2 controlled rollout
 status: in_progress
-related: [DEP-004, DEP-005, DEP-006, DEP-007, FE-007, FE-009, BE-005, BE-006, BE-007, BE-008, BE-010, ADR-0005, ADR-0007]
+related: [DEP-004, DEP-005, DEP-006, DEP-007, DEP-011, FE-007, FE-009, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, ADR-0005, ADR-0007]
 owners: [operations, security, product]
 last_updated: 2026-07-25
 change_level: L3

@@ -185,6 +185,7 @@ async function main() {
     "excluded",
   );
 
+  db.prepare("UPDATE bazaar_booth_profiles SET is_featured=0").run();
   db.prepare(`
     UPDATE bazaar_booth_profiles
     SET is_featured=1

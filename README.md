@@ -17,12 +17,18 @@ The full operating model is in `docs/engineering/SDD-PLAYBOOK.md`; architectural
 decisions are in `docs/adr/` and implementation/test evidence is mapped in
 `specs/TRACEABILITY.md`.
 
-## Included tenants
+## Included benchmark tenants
 
-- `@alhayabrand` — luxury modest fashion
-- `@usashopet` — U.S. beauty and wellness
-- `@novatech` — premium light flagship technology
-- `@homevibe` — editorial home and living
+- `@selam-weave` — textile atelier
+- `@afia-botanics` — small-batch botanical care
+- `@warka-furniture` — furniture workshop
+- `@addis-metalworks` — small-run fabrication and RFQ
+- `@green-terrace-farm` — seasonal farm
+- `@blue-nile-apiary` — honey and beeswax producer
+- `@rift-valley-mill` — grain mill
+- `@entoto-ceramics` — pottery studio
+- `@koba-leather` — leather workshop
+- `@nova-assembly` — electronics assembly and repair
 
 The visual pages remain separately designed. Products, collections, categories, options, inquiries and delivery workflows are database-backed.
 
@@ -42,7 +48,9 @@ npm run reset
 npm run dev
 ```
 
-`npm run reset` creates the four test tenants and generates a different temporary password for every account. Credentials are printed once and written to:
+`npm run reset` creates the ten fictional, disposable benchmark tenants and
+generates a different temporary password for every account. Credentials are
+printed once and written to:
 
 ```text
 .local/seed-credentials.txt
@@ -68,6 +76,7 @@ This performs:
 - production HTTP smoke tests
 - dependency vulnerability audit
 - managed-request integration and production HTTP checks
+- blueprint-media, composition-fitness, and ten-showroom benchmark checks
 
 For real Chromium acceptance tests covering public, administrator, and owner
 workflows with an isolated temporary database, install the browser once and run:
@@ -202,7 +211,7 @@ Enter these under **Dashboard → Business settings**:
 
 - WhatsApp: `251911234567`
 - Telegram: `AlHayaModest`
-- TikTok: `alhayabrand`
+- TikTok: `selamweave`
 
 WhatsApp and Telegram receive the structured inquiry in the destination link. TikTok opens the exact profile and uses copy/manual-message fallback because reliable public DM prefilling is unavailable.
 
@@ -224,6 +233,18 @@ or accept multipart/file input. After SuqPage accepts a prospect and sends an
 invitation, the authenticated client request form accepts up to ten
 sanitized images. Those private images remain below the persistent media root
 and are served only through an authorized route.
+
+## Blueprint recipe workflow
+
+Authenticated clients and operations staff describe the business type, catalog
+stage, photography stage, products, and desired outcome. They do not choose a
+page layout or fixed image count. Authorized staff use the recipe studio in
+five stages: **Brief**, **Blueprint**, **Media**, **Preview**, and **Review**.
+The AI recipe may choose bounded dynamic product and media counts and declare
+labeled unresolved media destinations. Staff fulfill those exact slots with
+verified request-scoped images. Required slots and hard composition-fitness
+issues block client review; optional slots use reviewed no-media treatments.
+The full revision form remains available only as advanced recovery.
 
 ## Basic product upkeep
 
@@ -260,4 +281,9 @@ The client renderer owns layout and styling. SuqPage owns catalog data, availabi
 
 ## MVP deployment boundary
 
-This build is suitable for a controlled four-client pilot on one persistent server. SQLite is configured with WAL, busy timeout, integrity checks, backups and migrations, but it is not a multi-instance database. Move to managed PostgreSQL and object storage before broad self-service SaaS onboarding or horizontal scaling.
+This build is suitable for a small controlled pilot on one persistent server.
+The ten included businesses are disposable local benchmarks, not a production
+capacity claim. SQLite is configured with WAL, busy timeout, integrity checks,
+backups and migrations, but it is not a multi-instance database. Move to managed
+PostgreSQL and object storage before broad self-service SaaS onboarding or
+horizontal scaling.

@@ -65,7 +65,7 @@ function MediaChoice({
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">No media</option>
+        <option value="">Use the reviewed no-media treatment</option>
         {visible.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}

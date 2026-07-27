@@ -2,7 +2,7 @@
 id: FE-007
 title: AI showroom recipe import and focused staff studio
 status: ready
-related: [FE-003, FE-006, FE-008, FE-009, BE-008, BE-009, BE-010, DEP-007, DEP-009, ADR-0005, ADR-0006, ADR-0007]
+related: [FE-003, FE-006, FE-008, FE-009, FE-014, BE-008, BE-009, BE-010, BE-013, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, frontend, design]
 last_updated: 2026-07-24
 change_level: L3

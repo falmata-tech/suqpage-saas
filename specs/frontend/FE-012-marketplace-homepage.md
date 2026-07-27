@@ -2,7 +2,7 @@
 id: FE-012
 title: Visual marketplace homepage
 status: done
-related: [FE-001, FE-010, FE-013, BE-011, DEP-010]
+related: [FE-001, FE-010, FE-013, FE-015, BE-011, DEP-010, DEP-011]
 owners: [product, frontend]
 last_updated: 2026-07-26
 change_level: L1

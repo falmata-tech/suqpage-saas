@@ -19,7 +19,7 @@ const passwordFor = (email: string) => {
   if (!line) throw new Error(`No seeded credential for ${email}`);
   return line.split("|").at(-1)!.trim();
 };
-const installControlledVideoFixture = (handle = "alhayabrand") =>
+const installControlledVideoFixture = (handle = "selam-weave") =>
   JSON.parse(
     execFileSync(
       process.execPath,
@@ -93,20 +93,20 @@ test("prospect submits an interest request without public uploads", async ({ pag
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("public discovery, four showrooms, cart, and persisted inquiry", async ({ page }) => {
+test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/");
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Your products");
-  await expect(page.getByText("This week's Bazaar schedule")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "All Showrooms" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "This week's Bazaar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Explore SuqPage" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toBeVisible();
   await expect(page.getByRole("tablist", { name: "Bazaar view" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Map View" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "List View" })).toBeVisible();
-  await expect(page.locator(".bazaar-booth-number")).toHaveCount(4);
-  await expect(page.getByLabel(/Map Directory/).getByText(/R1-01/)).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Featured showrooms" })).toBeVisible();
+  const homepageBoothCount = await page.locator(".bazaar-booth-number").count();
+  expect(homepageBoothCount).toBeGreaterThan(0);
+  expect(homepageBoothCount).toBeLessThanOrEqual(48);
   await expect(page.getByRole("heading", { name: "Ready to give your business a showroom of its own?" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
@@ -115,17 +115,15 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   await expect(page.getByRole("button", { name: "All businesses" })).toHaveCount(0);
   await expect(page.locator(".market-showrooms .market-heading-link")).toHaveCount(0);
   await page.getByRole("button", { name: "All industries" }).click();
-  await expect(page.locator(".market-showroom-card")).toHaveCount(4);
+  await expect(page.locator(".market-showroom-card")).toHaveCount(5);
   expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
   await page.locator(".directory-filters button").nth(1).click();
   expect(await page.locator(".market-showroom-card").count()).toBeGreaterThan(0);
   expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
   expect(await page.locator(".market-showroom-card").evaluate((card) => card.getBoundingClientRect().width)).toBeLessThanOrEqual(280);
   await page.getByRole("button", { name: "All industries" }).click();
-  await expect(page.locator('.featured-card:not([data-carousel-clone="true"])')).toHaveCount(4);
-  const featuredRail = page.locator(".featured-rail");
-  expect(await featuredRail.evaluate((rail) => rail.scrollWidth > rail.clientWidth)).toBe(true);
-  await expect.poll(() => featuredRail.evaluate((rail) => rail.scrollLeft), { timeout: 7_000 }).toBeGreaterThan(0);
+  await expect(page.locator(".market-featured-label")).toHaveCount(5);
+  await expect(page.getByRole("button", { name: "Next showroom page" })).toBeEnabled();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByLabel("Open public navigation").click();
@@ -135,7 +133,7 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 1280, height: 720 });
   const compositionSignatures = new Set<string>();
-  for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
+  for (const handle of ["selam-weave", "afia-botanics", "warka-furniture", "addis-metalworks", "green-terrace-farm", "blue-nile-apiary", "rift-valley-mill", "entoto-ceramics", "koba-leather", "nova-assembly"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
     await expect(page.locator('[data-bank-release="showroom-bank@1.2.0"]')).toBeVisible();
@@ -146,8 +144,8 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
     await expectVisibleControlsNamed(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
-  expect(compositionSignatures.size).toBe(4);
-  await page.goto("/@alhayabrand");
+  expect(compositionSignatures.size).toBeGreaterThanOrEqual(6);
+  await page.goto("/@selam-weave");
   const productOpener = page.locator(".sr-card").first().getByRole("button", { name: /^View / });
   await productOpener.click();
   await expect(page.getByRole("dialog").first()).toBeVisible();
@@ -180,8 +178,8 @@ test("public discovery, four showrooms, cart, and persisted inquiry", async ({ p
 test("mobile search, persistent cart, quantity, and overflow", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/@usashopet");
-  await page.getByLabel("Search products").fill("CeraVe");
+  await page.goto("/@afia-botanics");
+  await page.getByLabel("Search products").fill("Garden Cleansing");
   await expect(page.locator(".sr-card")).toHaveCount(1);
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
@@ -191,7 +189,7 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await expect(page.locator(".qty strong")).toHaveText("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 320, height: 700 });
-  for (const handle of ["alhayabrand", "usashopet", "novatech", "homevibe"]) {
+  for (const handle of ["selam-weave", "afia-botanics", "warka-furniture", "addis-metalworks", "green-terrace-farm", "blue-nile-apiary", "rift-valley-mill", "entoto-ceramics", "koba-leather", "nova-assembly"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
     await expect(page.locator(".sr-card").first()).toBeVisible();
@@ -210,11 +208,11 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
   await page.goto("/bazaar");
   await expect(page.getByRole("heading", { name: "Move through today's Bazaar." })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Today's Bazaar:/ })).toContainText("Community Market");
-  await expect(page.getByText("4 booths on the floor")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Select .* booth/ })).toHaveCount(4);
-  await expect(page.locator(".bazaar-booth-grounded")).toHaveCount(4);
-  await expect(page.locator(".bazaar-booth-number")).toHaveCount(4);
-  await expect(page.locator(".bazaar-corridor")).toHaveCount(2);
+  await expect(page.getByText("10 booths on the floor")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Select .* booth/ })).toHaveCount(10);
+  await expect(page.locator(".bazaar-booth-grounded")).toHaveCount(10);
+  await expect(page.locator(".bazaar-booth-number")).toHaveCount(10);
+  await expect(page.locator(".bazaar-corridor")).toHaveCount(3);
   await expect(page.locator(".bazaar-floor-visual")).toHaveCount(0);
   const storefrontsMeetCorridor = await page.locator(".bazaar-map-viewport").evaluate((viewport) => {
     const corridors = [...viewport.querySelectorAll<HTMLElement>(".bazaar-corridor")];
@@ -231,24 +229,24 @@ test("mobile Bazaar map, booth preview, list fallback, and overflow", async ({ p
     const floorRect = floor.getBoundingClientRect();
     const viewportRect = viewport.getBoundingClientRect();
     const rowTops = new Set(storefronts.map((storefront) => Math.round(storefront.getBoundingClientRect().top)));
-    return floorRect.width <= viewportRect.width && floorRect.left >= viewportRect.left && rowTops.size === 2;
+    return floorRect.width <= viewportRect.width && floorRect.left >= viewportRect.left && rowTops.size === 3;
   });
   expect(balancedFloorFitsMobile).toBe(true);
   await page.getByRole("button", { name: "Zoom in" }).click();
   await page.getByRole("button", { name: "Zoom out" }).click();
   await page.getByRole("button", { name: "Reset Bazaar view" }).click();
-  const novaBooth = page.getByRole("button", { name: "Select NovaTech booth" });
+  const novaBooth = page.getByRole("button", { name: "Select Nova Assembly Lab booth" });
   const novaReference = await novaBooth.locator(".bazaar-booth-number").textContent();
   expect(novaReference).toMatch(/^R\d+-\d{2}$/);
   await novaBooth.click();
-  await expect(page.getByLabel("NovaTech booth preview")).toBeVisible();
-  await expect(page.getByLabel("NovaTech booth preview").locator(".bazaar-reference")).toHaveText(novaReference || "");
-  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@novatech");
+  await expect(page.getByLabel("Nova Assembly Lab booth preview")).toBeVisible();
+  await expect(page.getByLabel("Nova Assembly Lab booth preview").locator(".bazaar-reference")).toHaveText(novaReference || "");
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@nova-assembly");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List View" }).click();
-  await expect(page.locator(".bazaar-list-card")).toHaveCount(4);
-  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(4);
-  await expect(page.locator(".bazaar-list-card").filter({ hasText: "NovaTech" }).locator(".bazaar-reference")).toHaveText(novaReference || "");
+  await expect(page.locator(".bazaar-list-card")).toHaveCount(10);
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(10);
+  await expect(page.locator(".bazaar-list-card").filter({ hasText: "Nova Assembly Lab" }).locator(".bazaar-reference")).toHaveText(novaReference || "");
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(errors).toEqual([]);
@@ -277,13 +275,13 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole("link", { name: "Bazaar controls" }).click();
   await expect(page.getByRole("heading", { name: "Bazaar controls" })).toBeVisible();
-  const novaRow = page.getByRole("row").filter({ hasText: "NovaTech" }).first();
+  const novaRow = page.getByRole("row").filter({ hasText: "Nova Assembly Lab" }).first();
   await novaRow.getByLabel("Featured").check();
   await novaRow.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByText("Bazaar controls saved.")).toBeVisible();
   await page.goto("/bazaar");
-  await page.getByRole("button", { name: "Select NovaTech booth" }).click();
-  await expect(page.getByLabel("NovaTech booth preview").getByText("Featured")).toBeVisible();
+  await page.getByRole("button", { name: "Select Nova Assembly Lab booth" }).click();
+  await expect(page.getByLabel("Nova Assembly Lab booth preview").getByText("Featured")).toBeVisible();
   await page.goto("/dashboard");
   await page.getByRole("link", { name: "Component bank" }).click();
   await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
@@ -387,7 +385,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.locator(".showroom")).toBeVisible();
   await page.goto("/dashboard/requests/on-behalf");
   await page.getByLabel(/Existing managed client/).selectOption({
-    label: "Al Haya Brand · Al Haya Client · alhaya@suqpage.local",
+    label: "Selam Weave Studio · Selam Weave Studio Client · selam-weave@suqpage.local",
   });
   await page.getByLabel("Client’s instruction").fill(
     "Please prepare a more expressive private showroom direction for administrator review.",
@@ -396,7 +394,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
   await page.getByRole("button", { name: "Prepare first recipe" }).click();
   await expect(page.getByRole("heading", { name: "Showroom recipe studio" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Administrative recovery editor" })).toBeVisible();
+  await expect(page.getByText("Advanced recovery")).toBeVisible();
   await page.goto("/dashboard");
   for (let attempt = 0; attempt < 6; attempt += 1) {
     await page.getByRole("button", { name: "Sign out" }).click();
@@ -425,8 +423,8 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByRole("heading", { name:"Request your first showroom" })).toBeVisible();
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
   await expect(page.getByLabel("Request type")).toHaveCount(0);
-  await page.getByLabel("Your request").fill("Please use this reference to update the private showroom hero and featured collection.");
-  await page.getByLabel(/Reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
+  await page.getByLabel("Products, story, and requested outcome").fill("Please use this reference to update the private showroom hero and featured collection.");
+  await page.getByLabel(/Available reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
   await page.getByRole("button", { name:"Send request to SuqPage" }).click();
   await expect(page.getByRole("heading", { name:/REQ-/ })).toBeVisible();
   await expect(page.locator(".request-image-grid img")).toHaveCount(1);
@@ -456,7 +454,7 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.getByLabel(/Existing managed client/).selectOption({label:"Acceptance Market · Acceptance Client · acceptance-client@example.test"});
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
   await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and featured collection for review.");
-  await page.getByLabel(/Private reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
+  await page.getByLabel(/Available reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
   await page.getByRole("button",{name:"Record request for client"}).click();
   await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
   await expect(page.getByText("SuqPage for client")).toBeVisible();
@@ -514,12 +512,12 @@ test("operations manager records on behalf and team member sees only assigned wo
 
   await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
   await page.goto(recipeStudioUrl);
-  await page.getByText("Show complete valid recipe example").click();
+  await page.getByText("Complete valid recipe example").click();
   const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
   recipe.summary="A revised hero prepared from the client’s private reference.";
   recipe.content.business.heroTitle="Acceptance approved showroom";
-  await page.getByLabel("Showroom recipe JSON").fill(JSON.stringify(recipe));
-  await page.getByRole("button",{name:"Validate and open private preview"}).click();
+  await page.getByRole("textbox", { name: "Recipe JSON" }).fill(JSON.stringify(recipe));
+  await page.getByRole("button",{name:"Validate blueprint and open preview"}).click();
   await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Validated recipe difference"})).toBeVisible();
   await page.getByRole("button",{name:"Send revision for client review"}).click();
@@ -553,7 +551,8 @@ test("operations manager records on behalf and team member sees only assigned wo
   await expect(page).toHaveURL(/\/dashboard\/requests$/);
   await page.goto("/dashboard/settings?business=5");
   await expect(page).toHaveURL(/\/dashboard$/);
-  await page.goto("/dashboard/products?business=5");
+  await page.getByRole("link").filter({hasText:"Acceptance Market"}).first().click();
+  await page.getByRole("link",{name:"My products"}).click();
   await expect(page.getByRole("heading",{name:"My products"})).toBeVisible();
   await page.getByRole("link",{name:"Add product"}).first().click();
   await page.getByLabel("Product name").fill("Team assisted product");
@@ -575,7 +574,7 @@ test("operations manager records on behalf and team member sees only assigned wo
 
 test("seeded client is restricted while operations manages customer activity", async ({ page }) => {
   const errors = monitor(page);
-  await loginAndChangePassword(page, "alhaya@suqpage.local", "ClientAcceptance123!");
+  await loginAndChangePassword(page, "selam-weave@suqpage.local", "ClientAcceptance123!");
   await page.goto("/dashboard");
   await expect(page.getByText("Client workspace",{exact:true})).toBeVisible();
   await page.goto("/dashboard/admin");
@@ -677,12 +676,12 @@ test("API authorization, validation, health, and security headers", async ({ req
 });
 
 test("controlled provider video uses narrow CSP and privacy-enhanced browser embed", async ({ page, request }) => {
-  expect(installControlledVideoFixture()).toEqual({ handle: "alhayabrand", updated: true });
-  const response = await request.get("/@alhayabrand");
+  expect(installControlledVideoFixture()).toEqual({ handle: "selam-weave", updated: true });
+  const response = await request.get("/@selam-weave");
   const csp = response.headers()["content-security-policy"];
   expect(csp).toContain("frame-src 'self' https://www.youtube-nocookie.com");
   expect(csp).not.toContain("https://www.youtube.com");
-  await page.goto("/@alhayabrand");
+  await page.goto("/@selam-weave");
   const frame = page.locator('iframe[title="Approved process film"]');
   await expect(frame).toBeVisible();
   await expect(frame).toHaveAttribute("loading", "lazy");

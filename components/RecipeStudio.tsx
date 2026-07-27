@@ -24,101 +24,39 @@ export default function RecipeStudio({
   const [copied, setCopied] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const download = (contents: string, name: string) => {
-    const url = URL.createObjectURL(
-      new Blob([contents], { type: "application/json" }),
-    );
+    const url = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
     link.download = name;
     link.click();
     URL.revokeObjectURL(url);
   };
+
   return (
     <div className="recipe-studio">
-      <section className="panel recipe-step">
-        <span className="step-number">0</span>
-        <form action={admitRecipeImageAction} className="form-grid">
-          <input type="hidden" name="requestId" value={requestId} />
-          <input type="hidden" name="revisionId" value={revisionId} />
-          <div className="field full">
-            <h2>Admit private media first</h2>
-            <p>
-              Client request images are already available. Add any additional
-              verified image before exporting so the AI can refer to its opaque
-              asset key without receiving a storage path.
-            </p>
-          </div>
-          <div className="field">
-            <label htmlFor="recipe-media-label">Staff label</label>
-            <input
-              id="recipe-media-label"
-              name="label"
-              required
-              maxLength={120}
-              placeholder="Example: Approved wide workshop hero"
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="recipe-media-file">JPEG, PNG, or WebP</label>
-            <input
-              id="recipe-media-file"
-              name="image"
-              type="file"
-              required
-              accept="image/jpeg,image/png,image/webp"
-            />
-          </div>
-          <label className="check-field full">
-            <input type="checkbox" name="rights" required />
-            I confirm this image is authorized for this client showroom and the
-            approved external AI conversation.
-          </label>
-          <div className="field full">
-            <button className="btn secondary">Verify and add media</button>
-          </div>
-        </form>
-        {youtubeEnabled ? (
-          <form action={admitRecipeYouTubeAction} className="form-grid">
-            <input type="hidden" name="requestId" value={requestId} />
-            <input type="hidden" name="revisionId" value={revisionId} />
-            <div className="field full">
-              <h3>Add one controlled YouTube video</h3>
-              <p>
-                Use a standard HTTPS YouTube watch or share link. SuqPage stores
-                only the normalized video ID and gives the AI an opaque key.
-              </p>
-            </div>
-            <div className="field">
-              <label htmlFor="recipe-youtube-label">Staff label</label>
-              <input id="recipe-youtube-label" name="youtubeLabel" required maxLength={120} placeholder="Example: Approved workshop process film" />
-            </div>
-            <div className="field">
-              <label htmlFor="recipe-youtube-url">YouTube watch or share URL</label>
-              <input id="recipe-youtube-url" name="youtubeUrl" type="url" required maxLength={500} placeholder="https://www.youtube.com/watch?v=…" />
-            </div>
-            <label className="check-field full">
-              <input type="checkbox" name="youtubeRights" required />
-              I confirm this video is authorized for this client showroom.
-            </label>
-            <div className="field full">
-              <button className="btn secondary">Validate and add video</button>
-            </div>
-          </form>
-        ) : null}
-      </section>
-      <section className="panel recipe-step">
+      <nav className="studio-progress" aria-label="Showroom production stages">
+        {["Brief", "Blueprint", "Media", "Preview", "Review"].map((label, index) => (
+          <a href={index === 2 ? "#media-plan" : `#studio-${index + 1}`} key={label}>
+            <span>{index + 1}</span>
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <section className="panel recipe-step" id="studio-1">
         <span className="step-number">1</span>
         <div>
-          <h2>Export the AI brief</h2>
+          <p className="eyebrow">Brief</p>
+          <h2>Give the AI the complete showroom contract</h2>
           <p>
-            This contains the exact component bank, current content, permitted
-            media keys, source facts, rules, and a complete valid example. It
-            contains no passwords, sessions, raw storage paths, or other tenants.
+            The brief includes the current content, dynamic limits, component
+            bank, source facts, and allowed private media descriptors. It
+            excludes credentials, storage paths, and other tenants.
           </p>
           <div className="inline-actions">
             <button
               type="button"
-              className="btn"
+              className="btn brand"
               onClick={async () => {
                 await navigator.clipboard.writeText(brief);
                 setCopied(true);
@@ -134,36 +72,27 @@ export default function RecipeStudio({
               Download brief
             </button>
           </div>
-        </div>
-      </section>
-      <section className="panel recipe-step">
-        <span className="step-number">2</span>
-        <div>
-          <h2>Work in the approved external AI account</h2>
-          <p>
-            Explain the desired showroom in normal language and provide this
-            brief. If the AI needs to see approved images, attach the same files
-            manually in that conversation. SuqPage sends nothing automatically.
-          </p>
-          <details>
-            <summary>Show complete valid recipe example</summary>
+          <details className="studio-details">
+            <summary>Complete valid recipe example</summary>
             <pre className="recipe-code">{initialRecipe}</pre>
           </details>
         </div>
       </section>
-      <section className="panel recipe-step">
-        <span className="step-number">3</span>
+
+      <section className="panel recipe-step" id="studio-2">
+        <span className="step-number">2</span>
         <form action={importShowroomRecipeAction} className="form-grid">
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="revisionId" value={revisionId} />
           <div className="field full">
-            <h2>Import the returned recipe</h2>
+            <p className="eyebrow">Blueprint</p>
+            <h2>Import the AI&apos;s complete plan</h2>
             <p>
-              Paste JSON or choose a JSON file. SuqPage rejects unsupported
-              fields, inventory, unsafe URLs, unknown assets, missing sources,
-              silent removals, and incompatible design combinations.
+              The AI can choose dynamic products, sections, and labeled image
+              destinations. Images that do not exist yet belong in the media
+              plan, so the layout can be reviewed before photography is ready.
             </p>
-            <label htmlFor="recipe-file">Choose JSON file</label>
+            <label htmlFor="recipe-file">Choose recipe JSON</label>
             <input
               ref={fileInput}
               id="recipe-file"
@@ -176,7 +105,7 @@ export default function RecipeStudio({
             />
           </div>
           <div className="field full">
-            <label htmlFor="showroom-recipe">Showroom recipe JSON</label>
+            <label htmlFor="showroom-recipe">Recipe JSON</label>
             <textarea
               id="showroom-recipe"
               name="recipe"
@@ -184,15 +113,60 @@ export default function RecipeStudio({
               value={recipe}
               onChange={(event) => setRecipe(event.target.value)}
               className="recipe-input"
-              placeholder='{"schemaVersion":1,...}'
+              placeholder='{"schemaVersion":1,"content":{...},"design":{...},"mediaPlan":[...]}'
             />
             <small>{new Blob([recipe]).size.toLocaleString()} bytes · maximum 1 MiB</small>
           </div>
           <div className="field full">
-            <button className="btn brand">Validate and open private preview</button>
+            <button className="btn brand">Validate blueprint and open preview</button>
           </div>
         </form>
       </section>
+
+      <details className="panel reference-media">
+        <summary>Add reference media before blueprinting</summary>
+        <p>
+          This is optional. Use it when the AI should assign an image that the
+          client has already approved; otherwise import the blueprint first and
+          fill its labeled slots below.
+        </p>
+        <form action={admitRecipeImageAction} className="form-grid">
+          <input type="hidden" name="requestId" value={requestId} />
+          <input type="hidden" name="revisionId" value={revisionId} />
+          <div className="field">
+            <label htmlFor="recipe-media-label">Reference label</label>
+            <input id="recipe-media-label" name="label" required maxLength={120} placeholder="Approved workshop photograph" />
+          </div>
+          <div className="field">
+            <label htmlFor="recipe-media-file">JPEG, PNG, or WebP</label>
+            <input id="recipe-media-file" name="image" type="file" required accept="image/jpeg,image/png,image/webp" />
+          </div>
+          <label className="check-field full">
+            <input type="checkbox" name="rights" required />
+            Authorized for this showroom and the approved AI conversation
+          </label>
+          <div className="field full"><button className="btn secondary">Verify reference image</button></div>
+        </form>
+        {youtubeEnabled ? (
+          <form action={admitRecipeYouTubeAction} className="form-grid">
+            <input type="hidden" name="requestId" value={requestId} />
+            <input type="hidden" name="revisionId" value={revisionId} />
+            <div className="field">
+              <label htmlFor="recipe-youtube-label">Video label</label>
+              <input id="recipe-youtube-label" name="youtubeLabel" required maxLength={120} />
+            </div>
+            <div className="field">
+              <label htmlFor="recipe-youtube-url">YouTube watch or share URL</label>
+              <input id="recipe-youtube-url" name="youtubeUrl" type="url" required maxLength={500} />
+            </div>
+            <label className="check-field full">
+              <input type="checkbox" name="youtubeRights" required />
+              Authorized for this showroom
+            </label>
+            <div className="field full"><button className="btn secondary">Validate video</button></div>
+          </form>
+        ) : null}
+      </details>
     </div>
   );
 }

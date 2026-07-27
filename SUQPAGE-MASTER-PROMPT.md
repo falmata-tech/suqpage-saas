@@ -47,10 +47,10 @@ falmata.dawano@gmail.com
 SuqPage gives each business a polished digital showroom at a handle-based route such as:
 
 ```text
-/@alhayabrand
-/@usashopet
-/@novatech
-/@homevibe
+/@selam-weave
+/@afia-botanics
+/@addis-metalworks
+/@green-terrace-farm
 ```
 
 The showroom is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
@@ -87,7 +87,8 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a public discovery surface where eligible businesses can appear in a themed
   Daily Bazaar while every booth leads back to the business's permanent
   `/@handle` showroom;
-- a controlled four-client MVP that can later grow into broader SaaS onboarding.
+- a controlled SaaS pilot with ten fictional local benchmark showrooms spanning
+  makers, producers, farms, workshops, and small manufacturers.
 
 ### SuqPage is not
 
@@ -142,8 +143,8 @@ Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components
 and bounded tokens as declarative JSON, while SuqPage validates and renders it.
-The current `showroom-bank@1.1.0` release contains 42 reviewed component
-variants across eight section families and 13 cross-industry token systems.
+The current `showroom-bank@1.2.0` release contains 67 reviewed component
+variants across eight section families and 18 cross-industry token systems.
 Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
 `clean`, `subtle`, or `signature` decorative depth. Those settings are CSS-only,
 scoped, reduced-motion safe, and cannot carry arbitrary code or style values.
@@ -169,21 +170,20 @@ admission capability that stores only normalized provider IDs and exports
 request-scoped opaque keys; raw URLs are never stored or exported. CSP-gated
 rendering, revision-v4 persistence, typed content blocks, and focused
 post-import controls are implemented locally under the promoted v4/bank-1.2
-work. The implemented checkpoint passes the standard check, production release,
-eight production-browser acceptance scenarios, container privacy/build, and
-operations restore gates; the feature specs remain open because pairwise visual
-admission, remote checks, and production/data-preserving rollout evidence are
-still open.
+work. The current local checkpoint passes the standard check and ten
+production-browser acceptance scenarios, including CSP/provider-video proof,
+the blueprint studio, client approval, and publication. `FE-014`, `BE-013`,
+`FE-015`, and `DEP-011` record the completed local blueprint, composition-
+fitness, marketplace, Bazaar, and ten-showroom benchmark scope. Remote checks
+and any production/data-preserving rollout remain separate future evidence.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
 implementation is additive: revision v4/content-schema v2/design-schema v2 and
-`showroom-bank@1.2.0` will coexist with retained v1-v3 revisions and the
-immutable bank 1.1 release. A non-default, synthetic-laboratory candidate now
+`showroom-bank@1.2.0` coexists with retained v1-v3 revisions and the immutable
+bank 1.1 release. The admitted synthetic laboratory
 contains 67 reviewed components, 18 token systems, and 98,280 required-slot
 combinations with stronger textile, beauty, technology, furniture, ingredient,
-artisan, industrial, and wholesale art direction. It is not accepted by the
-runtime release resolver and cannot render a client showroom until remaining
-v4, media, browser, operations, and publication gates pass. Bounded reveals
+artisan, industrial, and wholesale art direction. Bounded reveals
 and interactions must be CSS-first, mobile-safe, static without support, and
 disabled by reduced-motion preference; arbitrary code, copied trade dress,
 autoplay, parallax, and scroll-jacking remain prohibited.
@@ -192,11 +192,12 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The SuqPage landing page must not look like any client showroom. It is a polished,
 mobile-first marketplace surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-012` defines the current visual composition: a
-photographic maker hero leads with the permanent `/@handle` showroom product;
-today's Bazaar is a secondary callout; the server-owned weekly schedule and a
-searchable, Industry-filtered All Showrooms directory appears before a dynamic
-Bazaar map/list. The directory renders at most five matching showrooms per page,
+and other in-app browsers. `FE-015` defines the current visual composition: a
+photographic maker hero leads with the permanent `/@handle` showroom product
+and a compact live-Bazaar callout; the dynamic Bazaar map/list is the primary
+live module, followed by one searchable, Industry-filtered permanent-showroom
+directory and the server-owned weekly schedule. The directory renders at most
+five matching showrooms per page,
 uses one horizontally scrollable Industry pill row instead of category controls
 or duplicate all-business navigation, and resets pagination when search or
 Industry changes.
@@ -207,14 +208,15 @@ keeps every additional participant available in Bazaar List. Its project-owned
 storefront facades sit on a restrained CSS-rendered mall floor with neutral
 tiles, thin edges, simple corridors, and no decorative lounge or furniture.
 Floor booths expose consistent `R{row}-{number}` references across Map View,
-preview, directory, and List View. A rotating featured pool and a visually
-distinct final merchant CTA follow below. The useful product explanation lives
-in the hero's four compact benefit items; there is no separate How SuqPage works
-section or action. Tenant cards and booths use active public tenant data and link
+preview, and List View. Featured emphasis is integrated into the one paginated
+directory instead of repeating businesses in a second catalog. A visually
+distinct final merchant CTA closes the page. The useful product explanation
+lives in compact hero benefits; there is no separate How SuqPage works section
+or action. Tenant cards and booths use active public tenant data and link
 to the authoritative showroom. Platform artwork is decorative and makes no
 tenant-specific product claim. For the current small marketplace, every active
-public showroom enters the featured pool, capped at 20; up to five appear at once
-and the rail advances on a bounded loop with pause and reduced-motion safeguards.
+public showroom is currently marked featured, with the pool capped at 20 and at
+most five results rendered on a directory page.
 Desktop showroom result cards remain compact when filters reduce the result count.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
@@ -248,108 +250,36 @@ Do not label a client card “industry showroom” when the category, brand name
 
 ---
 
-## 6. Current seeded tenants and visual direction
+## 6. Current local benchmark tenants and visual direction
 
-The MVP includes four initial tenants. Internally they are seeded pilot tenants. Publicly they should be presented as normal businesses, not examples or fake companies.
+The disposable local environment contains ten fictional benchmark businesses.
+They exercise real product shapes and workflows without representing real
+clients or authoritative customer data:
 
-### 6.1 Al Haya Brand
+- Selam Weave Studio: textile atelier and made-to-order woven goods;
+- Afia Botanics: small-batch natural beauty production;
+- Warka Furniture Works: furniture workshop and hospitality projects;
+- Addis Metalworks: fabrication catalog and specification-led RFQ;
+- Green Terrace Farm: seasonal farm and recurring produce supply;
+- Blue Nile Apiary: honey, comb, beeswax, gifts, and wholesale inquiry;
+- Rift Valley Mill: household and bakery grain products;
+- Entoto Ceramics: studio tableware and hospitality production;
+- Koba Leather Workshop: bags, small goods, and practical tool carry;
+- Nova Assembly Lab: electronics assembly, diagnostics, repair, and power work.
 
-Business type:
+Their product counts, category counts, media coverage, token systems, page
+components, catalog modes, and mobile behaviors intentionally vary. Generated
+benchmark images are internally illustrative and are never evidence of a real
+merchant product. Public presentation uses normal finished business copy.
 
-```text
-Luxury modest fashion
-```
+These seeds may be replaced by `npm run reset` only because the product owner
+confirmed the local data is disposable. Any production or data-important
+environment requires an explicit preserve-or-reset decision, backup, rollback,
+and migration plan before a comparable change.
 
-Core categories may include:
-
-- niqab;
-- hijab;
-- jilbab;
-- abaya.
-
-Visual principles:
-
-- elegant and luxurious;
-- modest and soft;
-- mannequin or faceless product presentation rather than identifiable human models when that matches supplied assets;
-- strong fabric detail and product authenticity;
-- clear availability badges;
-- refined multilingual layout.
-
-Important data rules:
-
-- do not translate product names;
-- do not translate collection names;
-- do not translate color names;
-- preserve exact merchant-entered naming in every language.
-
-Known Telegram contact:
-
-```text
-AlHayaModest
-```
-
-### 6.2 USAshopET
-
-Business type:
-
-```text
-U.S. beauty, wellness, fragrance, skincare, and related imported products
-```
-
-Visual principles:
-
-- distinct U.S. beauty-retail personality;
-- bright, energetic, editorial, and product-forward;
-- must not reuse SuqPage’s palette or visual grammar;
-- avoid falling back to generic purple SaaS styling;
-- use its own logo, favicon, typography, and product-card composition.
-
-Product names and merchant-entered option values must remain unchanged across languages.
-
-### 6.3 NovaTech
-
-Business type:
-
-```text
-Premium flagship consumer technology
-```
-
-Visual principles:
-
-- premium, minimal, highly polished;
-- light mode by default;
-- clear, bright product presentation;
-- “flagship technology launch” quality;
-- visually impressive without copying another company’s protected assets or exact page;
-- must include a proper favicon and business-specific metadata.
-
-Catalog principles:
-
-- use recognizable flagship products that the business could credibly sell;
-- verify current product names and specifications against official manufacturer sources before updating time-sensitive catalog content;
-- do not invent model numbers or specifications;
-- do not translate product names, storage values, model numbers, colors, or specifications entered by the merchant.
-
-### 6.4 HomeVibe
-
-Business type:
-
-```text
-Home and living
-```
-
-Visual principles:
-
-- warm editorial style;
-- calm cream, clay, wood, and home-inspired atmosphere where appropriate;
-- serif-led or magazine-inspired typography where appropriate;
-- recognizable home products and room-based storytelling;
-- own logo and favicon;
-- robust, validated CSS with no malformed declarations or broken responsive layout;
-- must not resemble SuqPage, NovaTech, or USAshopET.
-
-Product names and merchant-entered values must remain unchanged.
+Merchant-entered product, collection, option, contact, availability,
+specification, and certification facts remain authoritative. AI may organize
+and present them but must not invent or silently translate them.
 
 ---
 
@@ -730,6 +660,10 @@ Current verified behavior:
   hidden and denied on the server.
 - Authenticated clients can submit a 10–10,000 character instruction with up to
   ten private sanitized JPEG, PNG, or WebP references of at most 5 MB each.
+  The intake captures business archetype, catalog stage, and photography stage
+  while leaving page structure and dynamic product/media counts to the
+  blueprint workflow. Missing photography becomes labeled recipe destinations,
+  not an unexplained “no images” state.
   The server derives first-showroom versus change request from retained
   publication state; the browser cannot choose or forge it. Requests are
   tenant-bound, idempotent, and visible in the client’s request history.
@@ -740,7 +674,8 @@ Current verified behavior:
   and invite prospects, submit a request on behalf of a prospect or client, and
   assign or reassign work. They can also update inquiry status and create
   delivery requests. On-behalf request type is server-derived for existing
-  clients, and private images use the client upload contract.
+  clients, and private images use the client upload contract. On-behalf intake
+  records the same business, catalog, and photography context as client intake.
 - Team members see only assigned requests and associated business/showroom
   context. Assignment changes add or remove that scope atomically. For an
   established assigned showroom they may perform the same bounded product
@@ -751,8 +686,10 @@ Current verified behavior:
   staff-only component laboratory. It uses synthetic fixture content, exposes no
   tenant/customer data, and has no revision, AI-provider, or publication action.
   Clients and anonymous visitors cannot access it.
-- Assigned staff prepare bounded structured business/catalog snapshots in a
-  labeled private revision editor. Drafts do not mutate live rows; submitted
+- Assigned staff prepare bounded structured business/catalog snapshots through
+  the staged recipe blueprint studio, fulfill exact labeled media destinations,
+  inspect deterministic composition fitness, and use the full private revision
+  form only as advanced recovery. Drafts do not mutate live rows; submitted
   numbered revisions are immutable and later changes create a newer revision.
 - Invited clients can open the exact private showroom preview for their request
   and approve it or reject it with comments. Superseded previews cannot receive
@@ -784,7 +721,7 @@ Current verified behavior:
   request history replaces internal assignment IDs, raw status-transition
   syntax, revision metadata, and unknown workflow detail with customer-safe
   progress descriptions. Authorized staff retain complete operational detail.
-- The four example business accounts and every former compatibility owner are
+- The ten benchmark business accounts and every former compatibility owner are
   restricted clients. Migration 7 preserves businesses, catalog data,
   inquiries, deliveries, requests, and publication history while converting
   access profiles, allowing request-free invitations, and revoking affected
@@ -886,13 +823,12 @@ remaining AI-assisted delivery sequence is recorded in
 - Approved component implementations, schemas, fixtures, examples,
   compatibility metadata, and tests enter immutable bank releases through the
   repository review and CI workflow.
-- `showroom-bank@1.1.0` currently admits 42 variants: five headers, eight heroes,
-  four navigation treatments, six story/content sections, six catalog
-  treatments, five information/trust sections, four calls to action, and four
-  footers. Thirteen token systems cover luxury, agriculture, honey/food, coffee,
-  artisan, botanical, furniture, manufacturing, makers, trade/importing,
-  beauty, technology, and vibrant retail directions.
-- Required-slot choices and tokens provide 12,480 validated base combinations
+- `showroom-bank@1.2.0` currently admits 67 variants across eight section
+  families. Eighteen token systems cover textile, agriculture, honey/food,
+  coffee, artisan, botanical, furniture, manufacturing, makers, wholesale,
+  beauty, technology, and other reviewed directions. Bank 1.1 remains immutable
+  and readable for retained revisions.
+- Required-slot choices and tokens provide 98,280 validated base combinations
   before optional navigation, content, trust, call-to-action, and bounded
   component properties are counted. Combination volume never replaces visual,
   accessibility, compatibility, factual, or client review.
@@ -918,7 +854,7 @@ remaining AI-assisted delivery sequence is recorded in
 - Missing customer facts produce questions. AI may suggest presentation and
   marketing copy, but it cannot invent contacts, availability,
   certifications, specifications, product facts, or delivery claims.
-- The current implementation checkpoint uses a full showroom recipe with a separate
+- The current implementation uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
   currently covers dynamic collections/categories/products/options,
   business/meta/contact values, and allowed image keys. Product availability is
@@ -926,29 +862,42 @@ remaining AI-assisted delivery sequence is recorded in
   counts remain bounded, not fixed by examples. Typed hero, story,
   highlights/trust, information, call-to-action, and video-capable blocks are
   implemented in revision v4/bank 1.2.
-- The checkpoint exports a sanitized request/current-snapshot brief,
+- The studio exports a sanitized request/current-snapshot brief,
   schemas, bank contract, source facts, allowed opaque asset keys, expected
   counts, and complete synthetic examples. Staff manually import returned JSON,
   inspect provenance/completeness and an exact private preview. Re-import
-  remains available, and authorized staff can use focused v4 controls for token
+  remains available through the staged Brief, Blueprint, Media, Preview, and
+  Review workflow. Authorized staff can use focused v4 controls for token
   systems, compatible section swaps, bounded section properties, content blocks,
   media assignments, and catalog details on editable private drafts.
-- Media remains a separately admitted source, not AI authority. Staff label and
-  approve request attachments, same-tenant managed images, new verified image
-  uploads, and supported provider links before export. The brief contains only
-  opaque media keys and safe descriptors; staff may manually show approved
-  files to the external AI when useful, but SuqPage does not transmit them.
+- Media remains a separately admitted source, not AI authority. A recipe may
+  first declare a bounded `mediaPlan` of exact business, product, or content-
+  block destinations with purpose, aspect, required state, alt text, and
+  factual/illustrative classification. Staff then fulfill labeled slots with
+  request-scoped verified images. The recipe and brief contain only stable
+  destination identifiers, opaque admitted keys, and safe descriptors; SuqPage
+  does not transmit private files to an external AI.
 - Each component declares named required/optional media slots, permitted kinds,
   bounded counts, and aspect guidance. Content blocks assign admitted keys to
   those slots. Missing or incompatible required media blocks candidate/client
-  review rather than producing a guessed placeholder.
+  review. Optional omissions use reviewed no-media treatments rather than
+  broken images, unexplained initials, or false photography claims.
+- Eight reviewed business-model templates provide coherent page sequences
+  before individual variants are chosen. Machine-readable guidance declares
+  no-media support, fallback treatments, catalog modes, business archetypes,
+  recommended product/category counts, long-title and RTL support, mobile
+  behavior, and fallback components. Deterministic composition fitness blocks
+  duplicate navigation, incompatible sparse catalogs, and more than two
+  signature sections, while warning about unnecessary controls, repeated
+  factual media, and intentional product-media fallbacks.
 - Initial linked-video support is a manually entered YouTube link normalized
   into a canonical provider asset and rendered by a reviewed, privacy-conscious
   component. Recipes cannot supply raw iframe/embed markup, arbitrary query
   parameters, provider scripts, remote-image hotlinks, or unapproved URLs.
 - A direct AI-provider adapter still requires a later accepted provider,
   privacy, failure, cost, and deployment contract.
-- All four example clients now use distinct schema-v2 compositions. The four
+- All ten local benchmark clients use distinct validated revision-v4/bank-1.2
+  compositions. The four
   former renderer keys and schema-v1 parser remain read-only recovery bridges
   for pre-cutover backups; no current seed, invitation, draft, publication, or
   rollback writer creates v1 or selects a former renderer.
@@ -1097,7 +1046,8 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
-The controlled MVP is intended for four initial clients on one persistent server or one persistent container.
+The controlled MVP is intended for a small managed client cohort on one
+persistent server or one persistent container.
 
 Current SQLite requirements:
 
@@ -1257,16 +1207,18 @@ The current workflow stores an exact validated composition in each schema-v2
 revision and renders it consistently in private preview and public publication.
 The structured revision editor remains a bounded content-recovery surface; it
 shows the immutable composition identity instead of offering old renderer keys.
-The ready next target under `FE-007`, `BE-008`, and `DEP-007` is request,
-sanitized AI brief, strict full-recipe import, grouped content/design/
-provenance validation, count and difference reconciliation, private preview,
-focused exception correction, client review, and controlled publication.
+The implemented workflow under `FE-007`, `FE-014`, `BE-008`, and `BE-013` is
+request, sanitized AI brief, strict full-recipe blueprint import, grouped
+content/design/provenance validation, composition fitness, labeled media-slot
+fulfillment, private preview, focused exception correction, client review, and
+controlled publication.
 Routine staff should not enter every collection, category, item, hero field,
 story block, or design choice manually. A change recipe is a complete desired
 snapshot based on the authorized current version, not an ambiguous patch.
-Staff still manually admit the client's real images and supported media links
-once. The recipe then assigns their opaque keys to typed component media slots;
-it cannot create URLs, embeds, or cross-tenant asset references. Missing
+Staff may admit available client images and supported media links before import,
+or fulfill exact labeled destinations after the blueprint chooses its dynamic
+composition. The recipe assigns opaque keys to typed component media slots; it
+cannot create URLs, embeds, or cross-tenant asset references. Missing
 required media, incompatible slot assignments, and unreviewed descriptive text
 remain visible blockers. If the external AI needs image understanding, staff
 manually supplies only the approved files in that external conversation.
@@ -1289,8 +1241,9 @@ now use revision v4 and `showroom-bank@1.2.0`.
 Schema migrations 13 and 14 add the immutable revision snapshot-version marker
 and persisted business content-block storage used by bank-1.2 rendering.
 
-Current development exception: on 2026-07-25 the product owner confirmed that
-the local four-client database and seeded tenant data are not real customer data
+Current development exception: on 2026-07-25 and again for the 2026-07-27
+benchmark replacement, the product owner confirmed that the local database and
+seeded tenant data are not real customer data
 and do not need preservation. For this repository state, SuqPage may finish the
 v4/bank-1.2 feature through a reset-only cutover: reset-created showrooms,
 drafts, recipe imports, previews, and publications can move directly to
@@ -1347,7 +1300,7 @@ Required verification areas:
 - dashboard inquiry visibility;
 - delivery API authentication and tenant scope;
 - backup and restore;
-- all four showrooms;
+- all ten benchmark showrooms;
 - mobile responsive layout;
 - every bank component in the 390-pixel laboratory preview, including bounded
   motion, decorative depth, touch targets, and reduced-motion behavior;

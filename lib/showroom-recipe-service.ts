@@ -17,6 +17,7 @@ import {
   saveRecipeDraftRevision,
 } from "./revision-service";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
+import { evaluateCompositionFitness } from "./showroom-guidance";
 import {
   SHOWROOM_CONTENT_SCHEMA_VERSION,
   SHOWROOM_RECIPE_SCHEMA_VERSION,
@@ -278,6 +279,7 @@ export async function admitRecipeImage(
         requestId: state.request.id,
         revisionId,
         assetKey,
+        attachmentId,
         width: stored.width,
         height: stored.height,
       };
@@ -495,6 +497,7 @@ function exampleRecipe(
     rationale: "Uses only reviewed component-bank choices and supplied facts.",
     questions: [],
     warnings: [],
+    mediaPlan: [],
     declaredRemovals: { collections: [], categories: [], products: [] },
     provenance: factProvenance(snapshot, sourceKey),
   };
@@ -549,6 +552,7 @@ export function buildShowroomRecipeBrief(
         "Use only source keys and media keys present in this brief.",
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
+        "Choose dynamic catalog and media counts. Put unresolved image destinations in mediaPlan and leave their content image reference empty.",
         "Declare every intentionally removed stable key.",
       ],
       completeExample: example,
@@ -736,6 +740,8 @@ export function importShowroomRecipe(
         sections: validated.difference.designSections.after,
       },
       warningCount: validated.recipe.warnings.length,
+      mediaPlan: validated.recipe.mediaPlan,
+      fitness: evaluateCompositionFitness(validated.snapshot),
     },
   );
   return { ...validated, duplicate: saved.duplicate };

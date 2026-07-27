@@ -23,6 +23,10 @@ import { SHOWROOM_BANK_REGISTRY } from "./registry";
 import styles from "./bank.module.css";
 import { SHOWROOM_BANK_TOKEN_STYLES, type ShowroomBankTokenId } from "./tokens";
 import type { BankPresentationContext } from "./types";
+import {
+  SHOWROOM_TEMPLATES,
+  guidanceForComponent,
+} from "@/lib/showroom-guidance";
 
 const slotLabels: Record<ShowroomSlot, string> = {
   header: "Headers",
@@ -152,12 +156,16 @@ export default function DesignBankLaboratory({
     );
   const [previewDevice, setPreviewDevice] =
     useState<ShowroomPreviewDevice>("responsive");
+  const [templateId, setTemplateId] = useState(SHOWROOM_TEMPLATES[0].id);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [notice, setNotice] = useState(
     "Preview controls are isolated and never create a customer inquiry.",
   );
   const token = SHOWROOM_BANK_TOKEN_STYLES[tokenId];
+  const template =
+    SHOWROOM_TEMPLATES.find((entry) => entry.id === templateId) ||
+    SHOWROOM_TEMPLATES[0];
   const definitions = useMemo(
     () =>
       slot === "all"
@@ -292,6 +300,32 @@ export default function DesignBankLaboratory({
         </fieldset>
       </div>
 
+      <section className={styles.templatePanel}>
+        <label className={styles.tokenSelect}>
+          Composition starting point
+          <select
+            value={templateId}
+            onChange={(event) => setTemplateId(event.target.value)}
+          >
+            {SHOWROOM_TEMPLATES.map((entry) => (
+              <option value={entry.id} key={entry.id}>{entry.name}</option>
+            ))}
+          </select>
+        </label>
+        <div>
+          <strong>{template.name}</strong>
+          <p>
+            {template.archetypes.join(", ").replaceAll("_", " ")} ·{" "}
+            {template.catalogModes.join(", ")} · {template.tokenPack}
+          </p>
+          <div className={styles.templateSequence}>
+            {template.components.map((component, index) => (
+              <span key={component}>{index + 1}. {component.split(".")[0]}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <div className={styles.labNotice} role="status" aria-live="polite">
         {notice}
       </div>
@@ -300,6 +334,9 @@ export default function DesignBankLaboratory({
         {definitions.map((definition) => {
           const Renderer = SHOWROOM_BANK_REGISTRY[definition.id];
           if (!Renderer) return null;
+          const guidance = hasTypedContentMedia(definition)
+            ? guidanceForComponent(definition)
+            : null;
           const previewProperties = Object.fromEntries(
             definition.properties
               .filter((property) => property.required)
@@ -352,6 +389,19 @@ export default function DesignBankLaboratory({
                         Typed {mediaSlot.label} · {mediaSlot.required ? "required" : "optional"} · {mediaSlot.acceptedKinds.join("/")}
                       </span>
                     ))}
+                  </div>
+                ) : null}
+                {guidance ? (
+                  <div className={styles.guidanceGrid} aria-label="Machine-readable selection guidance">
+                    <span>{guidance.requiresMedia ? "Media required" : "No-media ready"}</span>
+                    <span>Mobile: {guidance.mobileBehavior.replaceAll("_", " ")}</span>
+                    {guidance.recommendedProductCount ? (
+                      <span>
+                        Products: {guidance.recommendedProductCount.min}-
+                        {guidance.recommendedProductCount.max}
+                      </span>
+                    ) : null}
+                    <span>Fallbacks: {guidance.noMediaFallbacks.join(", ").replaceAll("_", " ")}</span>
                   </div>
                 ) : null}
               </header>

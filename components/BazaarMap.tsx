@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BazaarBoothView, CurrentBazaarView } from "@/lib/bazaar";
 
 type Point = { x: number; y: number };
-const MIN_SCALE = 0.25;
+const MIN_SCALE = 0.18;
 const MAX_SCALE = 1.35;
 
 export default function BazaarMap({ bazaar, embedded = false }: { bazaar: CurrentBazaarView; embedded?: boolean }) {
@@ -125,7 +125,6 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
         <div className="bazaar-tabs" role="tablist" aria-label="Bazaar view">
           <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Map View</button>
           <button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>List View</button>
-          {embedded ? <Link className="bazaar-all-link" href="/#showrooms">View all showrooms</Link> : null}
         </div>
       </div>
 
@@ -185,50 +184,11 @@ export default function BazaarMap({ bazaar, embedded = false }: { bazaar: Curren
           </div>
           <p className="bazaar-drag-note">Drag to explore the map.</p>
           {selected ? <BoothPreview booth={selected} onClose={() => setSelectedId(null)} /> : null}
-          {embedded ? <BazaarDirectory booths={bazaar.booths} selectedId={selectedId} onSelect={setSelectedId} /> : null}
         </div>
       ) : (
         <BazaarList booths={bazaar.booths} />
       )}
     </section>
-  );
-}
-
-function BazaarDirectory({
-  booths,
-  selectedId,
-  onSelect,
-}: {
-  booths: BazaarBoothView[];
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-}) {
-  return (
-    <aside className="bazaar-map-directory" aria-label={`Map Directory (${booths.length})`}>
-      <div className="bazaar-map-directory-head">
-        <strong>Map Directory ({booths.length})</strong>
-        <span aria-hidden="true">×</span>
-      </div>
-      <div className="bazaar-map-directory-list">
-        {booths.map((booth) => (
-          <button
-            type="button"
-            key={booth.id}
-            className={selectedId === booth.id ? "active" : ""}
-            onClick={() => onSelect(booth.id)}
-          >
-            <BoothMedia booth={booth} />
-            <span>
-              <strong>{booth.name}</strong>
-              <small>{booth.boothReference ? `${booth.boothReference} · ` : ""}@{booth.handle}</small>
-              <small>{booth.industryLabel}</small>
-            </span>
-            <span aria-hidden="true">›</span>
-          </button>
-        ))}
-      </div>
-      <Link href="/#showrooms">View all showrooms <span aria-hidden="true">→</span></Link>
-    </aside>
   );
 }
 

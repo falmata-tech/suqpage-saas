@@ -37,7 +37,7 @@ const setup = spawnSync(
 if (setup.status !== 0) process.exit(setup.status || 1);
 
 const db = new DatabaseSync(env.SUQPAGE_DB_PATH);
-db.prepare("UPDATE businesses SET status='draft' WHERE handle='homevibe'").run();
+db.prepare("UPDATE businesses SET status='draft' WHERE handle='koba-leather'").run();
 fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
 const mediaName = 'product-11111111-1111-4111-8111-111111111111.png';
 fs.writeFileSync(
@@ -49,12 +49,12 @@ fs.writeFileSync(
 );
 const product = db
   .prepare(
-    "SELECT p.id,p.business_id FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle='alhayabrand' ORDER BY p.id LIMIT 1",
+    "SELECT p.id,p.business_id FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle='selam-weave' ORDER BY p.id LIMIT 1",
   )
   .get();
 const other = db
   .prepare(
-    "SELECT p.id FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle='novatech' ORDER BY p.id LIMIT 1",
+    "SELECT p.id FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle='nova-assembly' ORDER BY p.id LIMIT 1",
   )
   .get();
 const groups = db
@@ -134,8 +134,8 @@ try {
     home.headers.get('content-security-policy') || '',
     /frame-ancestors 'none'/,
   );
-  assert.equal((await fetch(`${baseUrl}/@alhayabrand`)).status, 200);
-  assert.equal((await fetch(`${baseUrl}/@homevibe`)).status, 404);
+  assert.equal((await fetch(`${baseUrl}/@selam-weave`)).status, 200);
+  assert.equal((await fetch(`${baseUrl}/@koba-leather`)).status, 404);
   assert.equal((await fetch(`${baseUrl}/media/${mediaName}`)).status, 200);
   assert.equal((await fetch(`${baseUrl}/api/malikt/requests`)).status, 401);
   assert.equal(

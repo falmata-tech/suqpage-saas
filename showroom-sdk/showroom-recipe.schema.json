@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": [
     "schemaVersion", "baseContentVersion", "content", "design", "summary",
-    "rationale", "questions", "warnings", "declaredRemovals", "provenance"
+    "rationale", "questions", "warnings", "mediaPlan", "declaredRemovals", "provenance"
   ],
   "properties": {
     "schemaVersion": { "const": 1 },
@@ -25,6 +25,11 @@
       "type": "array",
       "maxItems": 20,
       "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+    },
+    "mediaPlan": {
+      "type": "array",
+      "maxItems": 160,
+      "items": { "$ref": "#/$defs/mediaPlanSlot" }
     },
     "declaredRemovals": {
       "type": "object",
@@ -68,6 +73,26 @@
           "maxLength": 100
         },
         "kind": { "enum": ["source_fact", "ai_draft"] }
+      }
+    },
+    "mediaPlanSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key", "ownerType", "ownerKey", "slotKey", "label", "purpose",
+        "required", "aspectRatio", "altText", "classification"
+      ],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "ownerType": { "enum": ["business", "product", "block"] },
+        "ownerKey": { "$ref": "#/$defs/key" },
+        "slotKey": { "$ref": "#/$defs/key" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "purpose": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "required": { "type": "boolean" },
+        "aspectRatio": { "enum": ["any", "landscape", "portrait", "square"] },
+        "altText": { "type": "string", "maxLength": 240 },
+        "classification": { "enum": ["factual", "illustrative"] }
       }
     }
   }
