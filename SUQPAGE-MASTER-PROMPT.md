@@ -886,6 +886,15 @@ remaining AI-assisted delivery sequence is recorded in
   request-scoped verified images. The recipe and brief contain only stable
   destination identifiers, opaque admitted keys, and safe descriptors; SuqPage
   does not transmit private files to an external AI.
+- The recipe brief enumerates currently valid media destinations with exact
+  owner type, opaque owner key, and slot key. Product photography destinations
+  use `product_image`; import normalizes that owner key together with the
+  corresponding product key. The complete example includes optional labeled
+  destinations for products whose image reference is empty instead of implying
+  that an empty media plan is required.
+- Every typed content block must bind to exactly one compatible design section.
+  The brief includes a block-assignment checklist, and validation identifies the
+  exact unassigned, duplicated, or unknown block key with a corrective action.
 - Each component declares named required/optional media slots, permitted kinds,
   bounded counts, and aspect guidance. Content blocks assign admitted keys to
   those slots. Missing or incompatible required media blocks candidate/client
@@ -902,6 +911,9 @@ remaining AI-assisted delivery sequence is recorded in
   section surface; retained sections without the field receive a deterministic
   integrated default. Product imagery remains proportionally bounded and flush
   with its catalog card rather than becoming an arbitrary loose image block.
+  Catalog-owned category browsing uses compact, touch-sized, horizontally
+  scrollable tabs with modest corners; it is one shared catalog control and
+  does not change shape merely because the AI selects another catalog variant.
   Deterministic
   composition fitness blocks duplicate navigation, standalone navigation
   combined with catalog filters, incompatible sparse catalogs, and more than

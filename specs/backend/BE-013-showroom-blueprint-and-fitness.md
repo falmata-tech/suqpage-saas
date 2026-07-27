@@ -39,6 +39,10 @@ client review.
   planned reference.
 - Planned references contain no tenant storage path, external URL, database ID,
   provider input, or executable value.
+- Recipe briefs enumerate exact currently valid portable destinations. Product
+  destinations use `ownerType: product`, the exported opaque product key, and
+  `slotKey: product_image`; import normalizes the media-plan owner key together
+  with the corresponding content relationship key.
 - Slot fulfillment authorizes the actor/request, admits the image through the
   existing media port, validates kind and dimensions, and replaces the exact
   reference atomically.
@@ -82,6 +86,12 @@ Scenario: AI duplicates category browsing
   WHEN its catalog section also enables category filters
   THEN composition fitness reports a duplicate-navigation hard failure
   AND the recipe must choose one control owner before review
+
+Scenario: Portable product media destination is imported
+  GIVEN a brief maps a product relationship to an opaque key
+  WHEN a recipe uses that exact key in both content and mediaPlan
+  THEN both references normalize to the same tenant-scoped product key
+  AND blueprint validation does not report a missing destination
 ```
 
 ## Quality impact
@@ -102,6 +112,7 @@ Scenario: AI duplicates category browsing
 | Bank/template metadata parity | contract/static | `scripts/test-showroom-bank.ts` |
 | Fitness hard failures and warnings | domain | `scripts/test-showroom-fitness.ts` |
 | Slot authorization and atomic fulfillment | integration/security | `scripts/test-showroom-blueprint.ts`, `scripts/test-security.ts` |
+| Portable destination normalization | integration/regression | `scripts/test-showroom-recipe.ts` |
 
 ## Rollout and rollback
 
@@ -130,3 +141,6 @@ Evidence: implemented and verified on 2026-07-27.
 - Composition guidance now gives every hero a machine-readable media-integration
   behavior and rejects a standalone category navigator combined with catalog
   filters before review.
+- Portable recipe briefs now expose exact media owner/slot triples, the schema
+  constrains business and product slot names, and recipe regression evidence
+  proves product media owner keys survive opaque-key normalization.

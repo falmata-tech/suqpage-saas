@@ -107,6 +107,20 @@ function expectCode(callback: () => unknown, code: string) {
   );
 }
 
+function expectCodeAndMessage(
+  callback: () => unknown,
+  code: string,
+  pattern: RegExp,
+) {
+  assert.throws(
+    callback,
+    (error: unknown) =>
+      error instanceof ShowroomCompositionError &&
+      error.code === code &&
+      pattern.test(error.message),
+  );
+}
+
 const heroIndex = parsed.sections.findIndex((section) => section.contentBlockKey === "opening");
 expectCode(
   () => parseShowroomDesignProposalV2({ ...proposal, sections: proposal.sections.map((section, index) => index === heroIndex ? { ...section, contentBlockKey: "story" } : section) }, bank, content),
@@ -150,13 +164,15 @@ expectCode(
 );
 const contentSection = proposal.sections.find((section) => section.contentBlockKey === "story");
 assert.ok(contentSection);
-expectCode(
+expectCodeAndMessage(
   () => parseShowroomDesignProposalV2({ ...proposal, sections: [...proposal.sections, { ...contentSection, key: "story-repeat" }] }, bank, content),
   "duplicate_content_assignment",
+  /"story" is assigned more than once/,
 );
-expectCode(
+expectCodeAndMessage(
   () => parseShowroomDesignProposalV2(proposal, bank, { ...content, blocks: [...content.blocks, { ...content.blocks[1], key: "unused-story" }] }),
   "orphan_content",
+  /"unused-story" is not assigned/,
 );
 expectCode(
   () => parseShowroomDesignProposalV2(proposal, bank, { ...content, blocks: content.blocks.map((block) => block.key === "opening" ? { ...block, media: [{ slotKey: "unsupported", assetKeys: ["asset_0123456789abcdefabcd"], altText: "A supplied image", caption: "" }] } : block) }),

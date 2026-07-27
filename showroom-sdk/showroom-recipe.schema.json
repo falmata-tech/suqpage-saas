@@ -78,6 +78,21 @@
     "mediaPlanSlot": {
       "type": "object",
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "ownerType": { "const": "business" } }, "required": ["ownerType"] },
+          "then": {
+            "properties": {
+              "ownerKey": { "const": "business" },
+              "slotKey": { "enum": ["logo", "hero_image", "favicon"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "ownerType": { "const": "product" } }, "required": ["ownerType"] },
+          "then": { "properties": { "slotKey": { "const": "product_image" } } }
+        }
+      ],
       "required": [
         "key", "ownerType", "ownerKey", "slotKey", "label", "purpose",
         "required", "aspectRatio", "altText", "classification"

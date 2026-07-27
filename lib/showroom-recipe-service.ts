@@ -521,7 +521,20 @@ function exampleRecipe(
     rationale: "Uses only reviewed component-bank choices and supplied facts.",
     questions: [],
     warnings: [],
-    mediaPlan: [],
+    mediaPlan: snapshot.products
+      .filter((product) => !product.imageRef)
+      .map((product) => ({
+        key: `media-${product.key}`,
+        ownerType: "product" as const,
+        ownerKey: product.key,
+        slotKey: "product_image",
+        label: `${product.name} photography`,
+        purpose: `Add an authorized factual image for ${product.name}.`,
+        required: false,
+        aspectRatio: "landscape" as const,
+        altText: product.name,
+        classification: "factual" as const,
+      })),
     declaredRemovals: { collections: [], categories: [], products: [] },
     provenance: factProvenance(snapshot, sourceKey),
   };
@@ -544,6 +557,43 @@ export function buildShowroomRecipeBrief(
     relationships.actualToOpaque,
   );
   const example = exampleRecipe(portableSnapshot, sources.currentKey);
+  const componentById = new Map(
+    SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
+      component.id,
+      component,
+    ]),
+  );
+  const blockAssignments = portableSnapshot.contentBlocks.blocks.map((block) => ({
+    blockKey: block.key,
+    blockType: block.type,
+    compatibleComponents: SHOWROOM_COMPONENT_BANK_LATEST.components
+      .filter((component) => component.acceptedContentTypes.includes(block.type))
+      .map((component) => component.id),
+  }));
+  const allowedMediaDestinations = [
+    { ownerType: "business", ownerKey: "business", slotKey: "logo", label: "Business logo" },
+    { ownerType: "business", ownerKey: "business", slotKey: "hero_image", label: "Business hero image" },
+    { ownerType: "business", ownerKey: "business", slotKey: "favicon", label: "Browser icon" },
+    ...portableSnapshot.products.map((product) => ({
+      ownerType: "product",
+      ownerKey: product.key,
+      slotKey: "product_image",
+      label: `${product.name} image`,
+    })),
+    ...portableSnapshot.designManifest.sections.flatMap((section) => {
+      if (!section.contentBlockKey) return [];
+      const component = componentById.get(section.component);
+      if (!component) return [];
+      return component.contentMediaSlots
+        .filter((slot) => slot.acceptedKinds.includes("image"))
+        .map((slot) => ({
+          ownerType: "block",
+          ownerKey: section.contentBlockKey!,
+          slotKey: slot.key,
+          label: slot.label,
+        }));
+    }),
+  ];
   example.baseContentVersion = state.revision.base_content_version;
   return {
     workspace: {
@@ -586,6 +636,8 @@ export function buildShowroomRecipeBrief(
           ]),
         ),
       },
+      blockAssignmentChecklist: blockAssignments,
+      allowedMediaDestinations,
       sourceFacts: sources.sources,
       mediaManifest: assets.descriptors,
       currentContent: portableSnapshot,
@@ -595,7 +647,8 @@ export function buildShowroomRecipeBrief(
         "Use only source keys and media keys present in this brief.",
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
-        "Choose dynamic catalog and media counts. Put unresolved image destinations in mediaPlan and leave their content image reference empty.",
+        "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
+        "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Choose one design system from designSystems before choosing a template or component. Match archetype, tone, density, typography, palette roles, section rhythm, and media behavior.",
         "Choose mediaIntegration explicitly for every media-bearing hero or story section. Use ambient_overlay, edge_fade, split_bleed, editorial_overlap, product_stage, or hidden so factual images integrate with the section surface instead of appearing in bordered image blocks.",
         "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
@@ -667,6 +720,13 @@ function normalizeImportedAssets(
       product.key = replaceKey(product.key);
       product.collectionKey = replaceKey(product.collectionKey);
       product.categoryKey = replaceKey(product.categoryKey);
+    }
+  }
+  if (Array.isArray(parsed.mediaPlan)) {
+    for (const slot of parsed.mediaPlan as Array<Record<string, unknown>>) {
+      if (slot.ownerType === "product") {
+        slot.ownerKey = replaceKey(slot.ownerKey);
+      }
     }
   }
   const removals = parsed.declaredRemovals as Record<string, unknown> | undefined;

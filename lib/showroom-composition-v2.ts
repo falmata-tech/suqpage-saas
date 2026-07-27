@@ -445,11 +445,26 @@ export function parseShowroomDesignProposalV2(
   const used = requestedSections
     .map((section) => section.contentBlockKey)
     .filter((key): key is string => key !== null);
-  if (new Set(used).size !== used.length) {
-    fail("A content block cannot be assigned more than once.", "duplicate_content_assignment");
+  const duplicate = used.find((key, index) => used.indexOf(key) !== index);
+  if (duplicate) {
+    fail(
+      `Content block "${duplicate}" is assigned more than once. Set exactly one section contentBlockKey to this key.`,
+      "duplicate_content_assignment",
+    );
   }
-  if (used.length !== content.blocks.length || used.some((key) => !contentKeys.has(key))) {
-    fail("Every typed content block must be assigned exactly once.", "orphan_content");
+  const unknown = used.find((key) => !contentKeys.has(key));
+  if (unknown) {
+    fail(
+      `Section contentBlockKey "${unknown}" does not match a typed content block.`,
+      "orphan_content",
+    );
+  }
+  const unassigned = content.blocks.find((block) => !used.includes(block.key));
+  if (unassigned) {
+    fail(
+      `Content block "${unassigned.key}" is not assigned. Set exactly one compatible section contentBlockKey to this key or remove the block from contentBlocks.`,
+      "orphan_content",
+    );
   }
   return { ...proposalV1, schemaVersion: 2, sections };
 }

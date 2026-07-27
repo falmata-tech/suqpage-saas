@@ -922,26 +922,38 @@
 
 .catalogFilters {
   display: flex;
-  gap: 5px;
+  gap: 2px;
   overflow: auto;
+  border-bottom: 1px solid var(--bank-line);
+  padding: 0 0 1px;
   overscroll-behavior-inline: contain;
   scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
 }
 
 .catalogFilters button {
   flex: 0 0 auto;
+  min-height: 44px;
+  max-width: min(240px, 70vw);
+  overflow: hidden;
   border: 0;
-  border-radius: 999px;
-  padding: 5px 8px;
-  background: var(--bank-accent-soft);
+  border-bottom: 3px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 9px 12px 8px;
+  background: transparent;
   color: var(--bank-ink);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   scroll-snap-align: start;
 }
 
 .catalogFilters button[aria-pressed="true"] {
-  background: var(--bank-secondary);
-  color: var(--bank-on-secondary);
+  border-bottom-color: var(--bank-secondary);
+  background: var(--bank-secondary-soft);
+  color: var(--bank-ink);
 }
 
 .productGrid {

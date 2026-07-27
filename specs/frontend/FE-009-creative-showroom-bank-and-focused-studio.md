@@ -74,6 +74,11 @@ Research-derived patterns and exclusions are recorded in
   section and catalog filters cannot be enabled together.
 - Selected navigation and filter controls use an explicit high-contrast
   foreground that does not depend on the token pack's surface color.
+- Catalog-owned category filters use a restrained tab/segment treatment with
+  stable 44-pixel touch height, modest corners, bounded labels, and horizontal
+  scrolling on narrow screens. They do not render as oversized bubbles, resize
+  with the result count, or imply that selecting another catalog component
+  changes the shared filter control.
 - Decorative geometry cannot shape a copy container into an arch, doorway,
   half-circle, or oversized asymmetric capsule. Text-bearing cards and sections
   use restrained corners, allow content-driven height, and never clip or hide
@@ -122,6 +127,12 @@ Scenario: AI proposes competing category navigation
   WHEN a recipe also includes a standalone category-navigation section
   THEN composition fitness rejects the recipe
   AND the preview cannot present duplicate category controls
+
+Scenario: Catalog owns category browsing
+  GIVEN a valid composition enables catalog filters without standalone navigation
+  WHEN categories render on desktop and at 320 or 390 CSS pixels
+  THEN the shared control appears as restrained stable tabs rather than oversized pills
+  AND long labels remain reachable without page overflow
 
 Scenario: Token and long copy meet a shaped component
   GIVEN any admitted token system and bounded long component copy
@@ -216,6 +227,11 @@ owner, restrained copy geometry, immediate selected-state contrast, four
 distinct hero integration modes, bounded product media, and no page overflow.
 Full pairwise visual admission, operations restore evidence, remote checks, and
 production rollout gates remain.
+
+Catalog-owned category filters now render as compact touch-sized tabs with
+bounded labels and narrow-screen horizontal scrolling instead of oversized
+pill shapes. Desktop and 390-pixel Addis Metalworks captures verify the shared
+control independently of catalog component choice.
 
 The existing private recipe studio also has a controlled-video admission form
 only when the separate provider-admission capability is enabled. It accepts no

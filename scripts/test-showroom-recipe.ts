@@ -216,16 +216,47 @@ async function main() {
       exported.brief.schemas.recipe.properties.design.$ref,
       "showroom-proposal-v2.schema.json",
     );
+    assert.ok(
+      exported.brief.schemas.recipe.$defs.mediaPlanSlot.allOf.some(
+        (condition) =>
+          condition.then?.properties?.slotKey?.const === "product_image",
+      ),
+    );
     assert.match(exported.brief.instructions[0], /do not normalize/i);
     assert.ok(
       exported.brief.instructions.some((instruction) =>
         /Choose mediaIntegration explicitly/.test(instruction),
       ),
     );
+    assert.ok(
+      exported.brief.instructions.some((instruction) =>
+        /Product images always use slotKey product_image/.test(instruction),
+      ),
+    );
+    assert.equal(
+      exported.brief.blockAssignmentChecklist.length,
+      exported.brief.completeExample.content.contentBlocks.blocks.length,
+    );
+    assert.ok(
+      exported.brief.blockAssignmentChecklist.every(
+        (entry) => entry.compatibleComponents.length > 0,
+      ),
+    );
+    const productDestination = exported.brief.allowedMediaDestinations.find(
+      (entry) => entry.ownerType === "product",
+    );
+    assert.ok(productDestination);
+    assert.equal(productDestination.slotKey, "product_image");
     assert.equal(exported.brief.completeExample.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.contentBlocks.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.design.schemaVersion, 2);
+    assert.equal(exported.brief.completeExample.mediaPlan.length, 1);
+    assert.equal(exported.brief.completeExample.mediaPlan[0].slotKey, "product_image");
+    assert.equal(
+      exported.brief.completeExample.mediaPlan[0].ownerKey,
+      productDestination.ownerKey,
+    );
     assert.ok(
       exported.brief.completeExample.design.sections
         .filter((section) =>
@@ -267,6 +298,15 @@ async function main() {
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
     assert.equal(imported.difference.designSections.after, 8);
+    assert.equal(imported.recipe.mediaPlan[0].slotKey, "product_image");
+    assert.equal(
+      imported.recipe.mediaPlan[0].ownerKey,
+      imported.snapshot.products[0].key,
+    );
+    assert.notEqual(
+      imported.recipe.mediaPlan[0].ownerKey,
+      productDestination.ownerKey,
+    );
     assert.equal(
       getContentRevision(draft.id)?.summary,
       "Validated imported showroom recipe.",
@@ -291,6 +331,7 @@ async function main() {
     );
     const silentRemoval = structuredClone(recipe);
     silentRemoval.content.products = [];
+    silentRemoval.mediaPlan = [];
     silentRemoval.provenance = silentRemoval.provenance.filter(
       (entry) => !entry.path.startsWith("$.content.products"),
     );

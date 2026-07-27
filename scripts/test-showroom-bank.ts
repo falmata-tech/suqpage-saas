@@ -242,7 +242,11 @@ assert.match(cssSource, /\.hero\[data-media-integration="product_stage"\]/);
 assert.doesNotMatch(cssSource, /\.storyImage[\s\S]{0,180}border:\s*1px/);
 assert.match(
   cssSource,
-  /\.catalogFilters button\[aria-pressed="true"\][\s\S]*?background:\s*var\(--bank-secondary\);[\s\S]*?color:\s*var\(--bank-on-secondary\);/,
+  /\.catalogFilters button\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?border-radius:\s*4px 4px 0 0;/,
+);
+assert.match(
+  cssSource,
+  /\.catalogFilters button\[aria-pressed="true"\][\s\S]*?border-bottom-color:\s*var\(--bank-secondary\);[\s\S]*?color:\s*var\(--bank-ink\);/,
 );
 const sectionSource = fs.readFileSync(
   "components/showroom/bank/sections.tsx",

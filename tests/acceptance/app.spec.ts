@@ -150,8 +150,9 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
     const mediaIntegration =
       (await heroSection.getAttribute("data-media-integration")) || "";
     expect([
+      "ambient_overlay",
+      "edge_fade",
       "split_bleed",
-      "soft_inset",
       "editorial_overlap",
       "product_stage",
       "hidden",

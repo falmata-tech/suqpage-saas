@@ -47,6 +47,9 @@ additive v4 domain boundary that preserves all retained releases.
   and content sections may use a visible treatment; unsupported values and
   incompatible slot/treatment pairs fail closed. Omitted values remain readable
   through deterministic integrated defaults and do not rewrite retained data.
+- Exact typed-block assignment errors identify the specific unassigned or
+  multiply assigned block key and the required correction. They never collapse
+  an actionable key mismatch into a generic whole-design error.
 - A release registry returns only statically imported reviewed banks. Existing
   bank-1.1 proposals parse/render exactly as before; unknown releases fail closed.
 - Focused commands allow: replace compatible component, select admitted token,
@@ -91,6 +94,12 @@ Scenario: Unauthorized focused command is called directly
   GIVEN a client, unassigned staff actor, submitted revision, or another tenant
   WHEN the actor sends an otherwise valid correction
   THEN access is denied before content disclosure or persistence
+
+Scenario: Typed block is not assigned
+  GIVEN a recipe contains a showroom-information block with no section reference
+  WHEN design-v2 validation checks exact assignment
+  THEN the issue identifies showroom-information as unassigned
+  AND tells the caller to assign it once or remove it from the content document
 ```
 
 ## Quality impact
@@ -158,6 +167,8 @@ reviewed bank while retaining the 1 MiB limit and rejecting unknown fields.
 It is part of `npm run check` and `npm run release`; database writes, runtime
 rendering, publication, and old-reader changes are intentionally not included in
 this checkpoint.
+Exact content-block assignment failures now identify the duplicated, unknown,
+or unassigned block key and state whether to bind it once or remove it.
 Schema migration 13 now records and indexes the exact snapshot schema version on
 each revision, backfills it from validated retained JSON, checks parity, and
 makes the marker immutable after submission. Existing creation/import writers

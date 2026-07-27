@@ -42,6 +42,10 @@ slots before client review.
 
 - AI chooses dynamic collection, category, product, section, and media-slot
   counts within BE-013 limits. No UI assumes a fixed catalog or image count.
+- The exported brief supplies a machine-readable list of currently valid media
+  destinations, including the exact owner type, opaque owner key, and slot key.
+  Its complete example must not imply that empty product image references
+  require an empty media plan.
 - An unresolved planned image uses a stable opaque slot reference and contains
   only safe presentation guidance. It is not an admitted asset or factual claim.
 - Private blueprint preview renders a labeled slot treatment instead of an empty
@@ -78,6 +82,12 @@ Scenario: Staff fulfills a product image slot
   AND its exact preview updates
   AND the readiness summary records the slot as complete
 
+Scenario: AI plans photography for a portable product key
+  GIVEN an exported brief contains a product with an empty image reference
+  WHEN the AI returns that brief's exact product destination using product_image
+  THEN import resolves the opaque owner key to the same normalized product
+  AND the Media step presents the labeled upload destination
+
 Scenario: An optional section image is omitted
   GIVEN a compatible component supports a reviewed no-media fallback
   WHEN staff leave its optional image slot unresolved
@@ -106,6 +116,7 @@ Scenario: Client attempts to use the media studio
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Blueprint and readiness states | domain/integration | `scripts/test-showroom-blueprint.ts` |
+| Portable destination guidance and opaque-key normalization | contract/integration | `scripts/test-showroom-recipe.ts` |
 | Slot upload and tenant denial | security/integration | `scripts/test-showroom-blueprint.ts`, `scripts/test-security.ts` |
 | Studio stages and advanced recovery | browser | `tests/acceptance/app.spec.ts` |
 | 320/390 labels, focus, and overflow | browser | `tests/acceptance/app.spec.ts` |
@@ -133,3 +144,6 @@ Evidence: implemented and verified on 2026-07-27.
   secondary recovery editor are implemented.
 - Blueprint, fitness, revision, security, full-check, and 10/10
   production-browser acceptance evidence passed.
+- Recipe briefs now enumerate exact portable media destinations and demonstrate
+  optional product photography plans for empty image references. Recipe
+  integration tests prove opaque media owner keys normalize with product keys.
