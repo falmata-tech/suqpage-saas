@@ -868,7 +868,11 @@ remaining AI-assisted delivery sequence is recorded in
   implemented in revision v4/bank 1.2.
 - The studio exports a sanitized request/current-snapshot brief with a named
   contract manifest, current schemas, bank contract, source facts, allowed
-  opaque asset keys, expected counts, and complete synthetic examples. Contract
+  opaque asset keys, expected counts, and one fixed client-independent synthetic
+  structural example. The example demonstrates nested relationships, options,
+  typed blocks, exact assignments, provenance, and unresolved media planning,
+  but its reserved example keys are not import authority and its content,
+  counts, component choices, and token choices must not be copied. Contract
   versions are independent and named: recipe/content/content-blocks remain
   version 1 while current design and component-bank schemas are version 2 and
   the component-bank release is separately `showroom-bank@1.2.0`. The brief
@@ -889,9 +893,9 @@ remaining AI-assisted delivery sequence is recorded in
 - The recipe brief enumerates currently valid media destinations with exact
   owner type, opaque owner key, and slot key. Product photography destinations
   use `product_image`; import normalizes that owner key together with the
-  corresponding product key. The complete example includes optional labeled
-  destinations for products whose image reference is empty instead of implying
-  that an empty media plan is required.
+  corresponding product key. The synthetic example includes an optional labeled
+  unresolved product destination to demonstrate the media-plan shape without
+  implying that a client media plan must be empty or that example keys are valid.
 - Every typed content block must bind to exactly one compatible design section.
   The brief includes a block-assignment checklist, and validation identifies the
   exact unassigned, duplicated, or unknown block key with a corrective action.

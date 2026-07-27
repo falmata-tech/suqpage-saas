@@ -32,7 +32,7 @@ choice.
 - Export/copy of a versioned sanitized brief containing the authoritative
   content schema, design schema, recipe envelope schema, current component-bank
   contract, allowed asset references, source facts, expected counts, and
-  synthetic/authorized complete examples.
+  one clearly labeled client-independent synthetic structural example.
 - Paste or JSON-file import of one recipe containing separately versioned
   content and design documents.
 - Manual media intake before brief export: request attachments, same-tenant
@@ -91,6 +91,11 @@ choice.
   explains that `recipe@1`, `content@1`, `content-blocks@1`, `design@2`,
   component-bank schema `@2`, design-systems `@1`, and the separately versioned
   bank release are compatible nested contracts rather than competing choices.
+- The complete example is synthetic, client-independent, and structural-only.
+  It demonstrates relationships, options, typed blocks, exact block assignment,
+  provenance, and unresolved media planning without copying the active client's
+  facts, counts, opaque keys, or design choices. The AI must derive the actual
+  recipe only from the current client inputs.
 - For a first showroom, the AI returns a complete desired content proposal. For
   a change request, the brief includes the authorized current snapshot and the
   AI returns a complete replacement proposal, not an ambiguous patch.
@@ -144,6 +149,13 @@ Scenario: Staff imports a complete change recipe
   WHEN the AI returns a full desired snapshot preserving retained stable keys
   THEN additions, removals, content changes, and design changes are explicit
   AND the existing public showroom remains unchanged
+
+Scenario: Staff exports a client-independent structural example
+  GIVEN recipe briefs are exported for unrelated clients
+  WHEN the complete example is inspected
+  THEN every brief contains the same explicitly synthetic reference business
+  AND it demonstrates difficult nested recipe structures
+  AND no active client fact, opaque key, source key, count, or design choice is copied into it
 
 Scenario: Imported recipe needs correction
   GIVEN a recipe has an invalid product relationship, unsupported component, missing source fact, or unknown asset key

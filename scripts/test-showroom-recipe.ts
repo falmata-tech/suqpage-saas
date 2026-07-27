@@ -233,9 +233,19 @@ async function main() {
         /Product images always use slotKey product_image/.test(instruction),
       ),
     );
+    assert.equal(exported.brief.examplePolicy.importable, false);
+    assert.match(exported.brief.instructions[1], /synthetic structural reference/i);
+    assert.equal(
+      exported.brief.completeExample.content.business.name,
+      "Reference Goods Studio",
+    );
+    assert.equal(
+      JSON.stringify(exported.brief.completeExample).includes("Recipe Test"),
+      false,
+    );
     assert.equal(
       exported.brief.blockAssignmentChecklist.length,
-      exported.brief.completeExample.content.contentBlocks.blocks.length,
+      exported.brief.currentContent.contentBlocks.blocks.length,
     );
     assert.ok(
       exported.brief.blockAssignmentChecklist.every(
@@ -251,12 +261,16 @@ async function main() {
     assert.equal(exported.brief.completeExample.content.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.contentBlocks.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.design.schemaVersion, 2);
-    assert.equal(exported.brief.completeExample.mediaPlan.length, 1);
-    assert.equal(exported.brief.completeExample.mediaPlan[0].slotKey, "product_image");
+    assert.equal(exported.brief.completeExample.content.collections.length, 1);
+    assert.equal(exported.brief.completeExample.content.categories.length, 2);
+    assert.equal(exported.brief.completeExample.content.products.length, 2);
     assert.equal(
-      exported.brief.completeExample.mediaPlan[0].ownerKey,
-      productDestination.ownerKey,
+      exported.brief.completeExample.content.products[0].optionGroups[0].values.length,
+      2,
     );
+    assert.equal(exported.brief.completeExample.mediaPlan.length, 2);
+    assert.equal(exported.brief.completeExample.mediaPlan[0].slotKey, "product_image");
+    assert.notEqual(exported.brief.completeExample.mediaPlan[0].ownerKey, productDestination.ownerKey);
     assert.ok(
       exported.brief.completeExample.design.sections
         .filter((section) =>
@@ -290,7 +304,53 @@ async function main() {
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,
     );
+    assert.throws(
+      () =>
+        importShowroomRecipe(
+          team,
+          draft.id,
+          structuredClone(exported.brief.completeExample),
+        ),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        ["provenance", "tenant_asset"].includes(error.issues[0]?.category),
+    );
     const recipe = structuredClone(exported.brief.completeExample);
+    const {
+      schemaVersion: _snapshotSchemaVersion,
+      designManifest,
+      ...currentContent
+    } = exported.brief.currentContent;
+    recipe.content = { schemaVersion: 1, ...currentContent };
+    recipe.design = designManifest;
+    const currentSource = exported.brief.sourceFacts.find(
+      (source) => source.kind === "current_showroom",
+    );
+    assert.ok(currentSource);
+    recipe.provenance = [
+      "$.content.business.name",
+      "$.content.products[0].name",
+      "$.content.products[0].description",
+      "$.content.products[0].availability",
+    ].map((path) => ({
+      path,
+      sourceKey: currentSource.key,
+      kind: "source_fact" as const,
+    }));
+    recipe.mediaPlan = [
+      {
+        key: "media-client-product",
+        ownerType: "product" as const,
+        ownerKey: productDestination.ownerKey,
+        slotKey: "product_image",
+        label: "Original product photography",
+        purpose: "Add authorized factual product photography.",
+        required: false,
+        aspectRatio: "landscape" as const,
+        altText: "Original product",
+        classification: "factual" as const,
+      },
+    ];
     recipe.summary = "Validated imported showroom recipe.";
     recipe.content.business.heroTitle = "Recipe-approved public hero";
     recipe.content.business.heroImageRef = admitted.assetKey;

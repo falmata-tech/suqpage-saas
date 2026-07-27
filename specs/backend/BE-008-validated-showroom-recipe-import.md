@@ -97,6 +97,10 @@ authority, access tenant persistence, or publish.
   required versions, references, and required nested documents must match the
   complete example and authoritative parsers; a legacy design schema cannot be
   exported under the current design contract.
+- The exported complete example is a fixed synthetic structural reference. It
+  uses reserved example relationship, source, and media keys that are not
+  authorized for import. Active client facts and permitted opaque keys remain
+  exclusively in the client-specific brief fields.
 - Content permits up to 100 collections, 200 categories, 500 products, four
   option groups and 50 values per group, and 24 typed section-content blocks,
   subject to one bounded serialized recipe limit. Counts may be zero through
@@ -175,6 +179,12 @@ Scenario: AI structures a dynamic catalog
   WHEN the AI returns all entries inside the content schema and limits
   THEN relationships, options, counts, provenance, and media keys are validated
   AND no fixed example count or manual per-item form is required
+
+Scenario: Brief example cannot impersonate client authority
+  GIVEN a sanitized brief contains a synthetic complete example
+  WHEN the example is copied without replacing its reserved source and media keys
+  THEN import rejects those keys as unauthorized
+  AND no synthetic example fact enters the client's revision
 
 Scenario: AI invents a factual claim
   GIVEN no exported source supports a product specification, certification, availability, or contact

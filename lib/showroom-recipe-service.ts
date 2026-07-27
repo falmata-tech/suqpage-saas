@@ -12,6 +12,7 @@ import {
   requireRevisionSnapshotV4,
   type RevisionSnapshotV4,
 } from "./revision-v4-domain";
+import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import {
   getContentRevision,
   saveRecipeDraftRevision,
@@ -36,7 +37,7 @@ import {
   type RecipeProvenance,
   type ValidatedShowroomRecipe,
 } from "./showroom-recipe-domain";
-import type { SessionUser } from "./types";
+import type { Catalog, SessionUser } from "./types";
 import {
   ControlledYouTubeError,
   normalizeControlledYouTubeUrl,
@@ -504,10 +505,114 @@ function factProvenance(
   return paths.map((path) => ({ path, sourceKey, kind: "source_fact" }));
 }
 
-function exampleRecipe(
-  snapshot: RevisionSnapshotV4,
-  sourceKey: string,
-) {
+const SYNTHETIC_SOURCE_KEY = "source_00000000000000000000";
+
+function syntheticReferenceCatalog(): Catalog {
+  return {
+    business: {
+      id: 9000,
+      handle: "structural-reference-only",
+      name: "Reference Goods Studio",
+      design_key: "composition",
+      design_manifest_json: "",
+      content_blocks_json: "",
+      tagline: "Synthetic structure, not client content",
+      description:
+        "An invented showroom used only to demonstrate the portable recipe contract.",
+      logo_path: "",
+      hero_title: "A complete example for structure only",
+      hero_subtitle:
+        "Replace every value, count, key, media choice, and design choice using the client brief.",
+      hero_image_path: "",
+      contact_email: "",
+      whatsapp: "",
+      telegram: "",
+      tiktok: "",
+      status: "draft",
+      site_title: "Reference Goods Studio",
+      site_description: "Synthetic showroom recipe reference.",
+      favicon_path: "",
+      content_version: 1,
+    },
+    collections: [
+      {
+        id: 9010,
+        business_id: 9000,
+        name: "Reference Collection",
+        slug: "reference-collection",
+        description: "Demonstrates a collection relationship.",
+        sort_order: 0,
+        is_active: 1,
+      },
+    ],
+    categories: [
+      {
+        id: 9020,
+        business_id: 9000,
+        collection_id: 9010,
+        name: "Reference Category",
+        slug: "reference-category",
+        sort_order: 0,
+        is_active: 1,
+      },
+      {
+        id: 9021,
+        business_id: 9000,
+        collection_id: 9010,
+        name: "Second Reference Category",
+        slug: "second-reference-category",
+        sort_order: 1,
+        is_active: 1,
+      },
+    ],
+    products: [
+      {
+        id: 9030,
+        business_id: 9000,
+        collection_id: 9010,
+        category_id: 9020,
+        name: "Reference Item One",
+        slug: "reference-item-one",
+        eyebrow: "Synthetic example",
+        description: "Demonstrates relationships, options, and descriptive availability.",
+        image_path: "",
+        availability: "available",
+        is_published: 1,
+        sort_order: 0,
+        option_groups: [
+          {
+            id: 9040,
+            product_id: 9030,
+            name: "Example option",
+            position: 0,
+            values: [
+              { id: 9050, option_group_id: 9040, value: "Option A" },
+              { id: 9051, option_group_id: 9040, value: "Option B" },
+            ],
+          },
+        ],
+      },
+      {
+        id: 9031,
+        business_id: 9000,
+        collection_id: 9010,
+        category_id: 9021,
+        name: "Reference Item Two",
+        slug: "reference-item-two",
+        eyebrow: "Synthetic example",
+        description: "Demonstrates a second category and a different availability state.",
+        image_path: "",
+        availability: "coming_soon",
+        is_published: 1,
+        sort_order: 1,
+        option_groups: [],
+      },
+    ],
+  };
+}
+
+function syntheticExampleRecipe() {
+  const snapshot = catalogToRevisionSnapshotV4(syntheticReferenceCatalog());
   const { designManifest, schemaVersion: _schemaVersion, ...content } = snapshot;
   return {
     schemaVersion: SHOWROOM_RECIPE_SCHEMA_VERSION,
@@ -517,8 +622,9 @@ function exampleRecipe(
       ...content,
     },
     design: designManifest,
-    summary: "Complete client-ready showroom proposal.",
-    rationale: "Uses only reviewed component-bank choices and supplied facts.",
+    summary: "Synthetic complete recipe demonstrating difficult contract structures.",
+    rationale:
+      "Structural reference only; derive all real values and design decisions from the client-specific brief.",
     questions: [],
     warnings: [],
     mediaPlan: snapshot.products
@@ -536,7 +642,7 @@ function exampleRecipe(
         classification: "factual" as const,
       })),
     declaredRemovals: { collections: [], categories: [], products: [] },
-    provenance: factProvenance(snapshot, sourceKey),
+    provenance: factProvenance(snapshot, SYNTHETIC_SOURCE_KEY),
   };
 }
 
@@ -556,7 +662,7 @@ export function buildShowroomRecipeBrief(
     mapSnapshotAssets(snapshot, assets.actualToOpaque),
     relationships.actualToOpaque,
   );
-  const example = exampleRecipe(portableSnapshot, sources.currentKey);
+  const example = syntheticExampleRecipe();
   const componentById = new Map(
     SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
       component.id,
@@ -643,6 +749,7 @@ export function buildShowroomRecipeBrief(
       currentContent: portableSnapshot,
       instructions: [
         "Treat each @version in contractManifest as belonging only to its named contract. Return recipe@1 containing content@1, content-blocks@1, and design@2; do not normalize or align independent version numbers.",
+        "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, component choices, or section order. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
         "Return one complete replacement recipe, never a partial patch.",
         "Use only source keys and media keys present in this brief.",
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
@@ -654,6 +761,17 @@ export function buildShowroomRecipeBrief(
         "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
         "Declare every intentionally removed stable key.",
       ],
+      examplePolicy: {
+        purpose: "synthetic_structural_reference",
+        importable: false,
+        copyOnly: "JSON shape and contract patterns",
+        replaceFromClientBrief: [
+          "all content values and counts",
+          "all relationship and block keys",
+          "all source and media keys",
+          "the token pack, components, properties, and section order",
+        ],
+      },
       completeExample: example,
     },
   };
