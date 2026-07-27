@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suqpage.com/schemas/showroom-design-system.schema.json",
+  "title": "SuqPage semantic showroom design-system guidance",
+  "description": "Machine-readable foundation guidance for choosing an admitted token pack before composing reviewed sections.",
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 32,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id", "label", "description", "colors", "typography", "shape",
+      "spacing", "layout", "media", "guidance"
+    ],
+    "properties": {
+      "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "maxLength": 80 },
+      "label": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+      "colors": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canvas", "surface", "text", "textMuted", "primary", "primarySoft",
+          "secondary", "secondarySoft", "onSecondary", "border"
+        ],
+        "properties": {
+          "canvas": { "$ref": "#/$defs/color" },
+          "surface": { "$ref": "#/$defs/color" },
+          "text": { "$ref": "#/$defs/color" },
+          "textMuted": { "$ref": "#/$defs/color" },
+          "primary": { "$ref": "#/$defs/color" },
+          "primarySoft": { "$ref": "#/$defs/color" },
+          "secondary": { "$ref": "#/$defs/color" },
+          "secondarySoft": { "$ref": "#/$defs/color" },
+          "onSecondary": { "$ref": "#/$defs/color" },
+          "border": { "$ref": "#/$defs/color" }
+        }
+      },
+      "typography": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["displayStack", "bodyStack", "displayRole", "scale"],
+        "properties": {
+          "displayStack": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "bodyStack": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "displayRole": { "enum": ["editorial_serif", "humanist_sans", "technical_sans"] },
+          "scale": { "enum": ["compact", "standard", "expressive"] }
+        }
+      },
+      "shape": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["radius", "treatment"],
+        "properties": {
+          "radius": { "type": "integer", "minimum": 0, "maximum": 8 },
+          "treatment": { "enum": ["square", "subtle"] }
+        }
+      },
+      "spacing": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["base", "scale", "sectionMobile", "sectionDesktop"],
+        "properties": {
+          "base": { "const": 4 },
+          "scale": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 12,
+            "items": { "type": "integer", "minimum": 0, "maximum": 160 }
+          },
+          "sectionMobile": { "type": "integer", "minimum": 24, "maximum": 120 },
+          "sectionDesktop": { "type": "integer", "minimum": 32, "maximum": 160 }
+        }
+      },
+      "layout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["containerMax", "density", "sectionRhythm"],
+        "properties": {
+          "containerMax": { "type": "integer", "minimum": 960, "maximum": 1440 },
+          "density": { "enum": ["compact", "comfortable", "spacious"] },
+          "sectionRhythm": { "enum": ["quiet_alternation", "editorial_contrast", "technical_bands"] }
+        }
+      },
+      "media": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "heroAspect", "productAspect", "fit", "maxHeroHeight",
+          "maxProductColumns", "preferredHeroIntegration", "allowedHeroIntegrations"
+        ],
+        "properties": {
+          "heroAspect": { "const": "16:10" },
+          "productAspect": { "const": "4:3" },
+          "fit": { "const": "cover" },
+          "maxHeroHeight": { "type": "integer", "minimum": 320, "maximum": 720 },
+          "maxProductColumns": { "type": "integer", "minimum": 1, "maximum": 4 },
+          "preferredHeroIntegration": { "$ref": "#/$defs/heroIntegration" },
+          "allowedHeroIntegrations": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/heroIntegration" }
+          }
+        }
+      },
+      "guidance": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["archetypes", "tones"],
+        "properties": {
+          "archetypes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "artisan", "farm", "natural_beauty", "furniture", "manufacturer",
+                "food_producer", "textile_atelier", "service_product_hybrid"
+              ]
+            }
+          },
+          "tones": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": ["editorial", "organic", "precise", "technical", "playful", "quiet"] }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "heroIntegration": {
+      "enum": [
+        "split_bleed", "soft_inset", "editorial_overlap", "product_stage", "hidden"
+      ]
+    }
+  }
+}

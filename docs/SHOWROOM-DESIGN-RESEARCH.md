@@ -1,8 +1,41 @@
 # Showroom bank 1.2 design research
 
-Research checkpoint: 2026-07-24. This document records transferable interaction
+Research checkpoints: 2026-07-24 and 2026-07-27. This document records transferable interaction
 and art-direction patterns, not layouts or trade dress to copy. Component-bank
-contracts remain authoritative under `FE-009`, `BE-010`, and `DEP-009`.
+contracts remain authoritative under `FE-009`, `BE-010`, `BE-013`, `DEP-009`,
+and `DEP-011`.
+
+## SuqPage v1 comparison
+
+Desktop and 390px full-page captures of the static v1 homepage and its four
+linked examples were reviewed on 2026-07-27:
+
+- [Al Haya](https://suqpage.com/@alhayabrand/) succeeds through one immersive
+  campaign image, a restrained green/gold palette, compact category discovery,
+  and unusually effective two-column mobile product cards. Its weaknesses are
+  repeated card actions and a 5,540px mobile page.
+- [NovaTech](https://suqpage.com/@novatech/) integrates the hero product
+  composition into the page background, uses a strong neutral/signal-blue
+  hierarchy, and changes grid proportions according to product importance. Its
+  mobile page reaches 7,676px and some secondary copy and controls become too
+  small.
+- [USAshopET](https://suqpage.com/@usashopet/) uses a real multi-role palette,
+  an illustrative hero collage, clear status labels, and a satisfying
+  contrasting close. Its repeated single-column mobile cards extend to 9,533px
+  and the many tinted card surfaces compete with product recognition.
+- [HomeVibe](https://suqpage.com/@homevibe/) has the strongest editorial
+  product hierarchy: overlapping hero media, an asymmetric catalog, and
+  full-width story bands prevent the page from reading as a uniform card grid.
+  Uneven cards and a 10,352px mobile page make repeated shopping inefficient.
+- The v1 homepage uses clear finished-showroom examples, but its 390px capture
+  measures 407px wide and therefore fails the current no-horizontal-overflow
+  contract.
+
+The transferable lesson is template-level art direction. Hero imagery may be
+split-bleed, softly inset on one edge, editorially overlapped, or blended as a
+product stage. Catalog density and image treatment must still be bounded, and
+mobile composition must shorten and reflow instead of merely stacking every
+desktop block.
 
 ## Observed patterns
 
@@ -39,6 +72,10 @@ contracts remain authoritative under `FE-009`, `BE-010`, and `DEP-009`.
 - Controlled delight: short mask/fade/lift/stagger reveals, restrained image
   zoom on deliberate focus/hover, subtle light/glow or border response, and
   static presentation when effects are unavailable.
+- Semantic foundation systems: named canvas, surface, text, primary, secondary,
+  on-color, border, typography, shape, spacing, layout, and media decisions.
+  The recipe brief selects this system before choosing a page template or
+  component variants.
 
 ## Rejected patterns
 

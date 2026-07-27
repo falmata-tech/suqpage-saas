@@ -40,4 +40,31 @@ const rejected = evaluateCompositionFitness(sparseDense);
 assert.equal(rejected.allowed, false);
 assert.ok(rejected.issues.some((issue) => issue.code === "catalog_too_sparse"));
 
+const duplicateControls = structuredClone(snapshot);
+const duplicateCatalog = duplicateControls.designManifest.sections.find((section) =>
+  section.component.startsWith("catalog."),
+);
+assert.ok(duplicateCatalog);
+duplicateCatalog.properties.show_filters = true;
+duplicateControls.designManifest.sections.splice(2, 0, {
+  key: "navigation-duplicate",
+  component: "navigation.category-pills@1",
+  contentBlockKey: null,
+  properties: {
+    density: "comfortable",
+    motion_intensity: "quiet",
+    decorative_depth: "clean",
+  },
+  bindings: {
+    categories: "catalog.categories",
+  },
+});
+const duplicateControlsResult = evaluateCompositionFitness(duplicateControls);
+assert.equal(duplicateControlsResult.allowed, false);
+assert.ok(
+  duplicateControlsResult.issues.some(
+    (issue) => issue.code === "duplicate_category_controls",
+  ),
+);
+
 console.log("Showroom templates, component guidance, and deterministic fitness passed.");

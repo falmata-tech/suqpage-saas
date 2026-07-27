@@ -42,6 +42,16 @@ Bazaar behavior before these features are considered complete.
 - Admission fails for browser errors, broken media, unexplained initials,
   horizontal overflow, overlapping controls, inaccessible interactions, or hard
   composition-fitness failures.
+- Each showroom must expose no more than one category-browsing control surface,
+  leave hero photography unobstructed, keep selected controls legible across
+  every admitted token pack, and render text-bearing geometry without arches,
+  doorway silhouettes, clipping, or measured text overflow.
+- Visual admission also rejects one-hue page treatment, unbounded product-card
+  growth, distorted product-media ratios, and hero images with uncontrolled
+  edges, universal picture-frame treatment, or overlays. The benchmark set must
+  prove multiple admitted hero-media integration behaviors at desktop and
+  mobile widths. Each benchmark must visibly use its semantic dominant and
+  secondary roles without weakening factual-image inspection.
 
 ## Scenarios
 
@@ -57,6 +67,12 @@ Scenario: Benchmark media or composition is defective
   WHEN the benchmark admission gate runs
   THEN the gate fails with the affected handle and criterion
   AND no production-readiness claim is made
+
+Scenario: Benchmark showroom duplicates navigation or clips shaped copy
+  GIVEN a generated benchmark recipe at desktop, 390px, or 320px
+  WHEN category controls, selected contrast, and text bounds are inspected
+  THEN exactly one category-browsing surface is present
+  AND no hero overlay, doorway geometry, clipped copy, or text overflow is admitted
 ```
 
 ## Test plan
@@ -66,7 +82,7 @@ Scenario: Benchmark media or composition is defective
 | Ten deterministic validated seeds | integration | `scripts/test-showroom-benchmarks.ts` |
 | Reset idempotency and no private leakage | operations/security | `npm run reset`, `scripts/test-security.ts` |
 | Homepage/Bazaar benchmark coverage | browser | `tests/acceptance/app.spec.ts` |
-| Showroom desktop/mobile matrix | browser/manual | benchmark Playwright screenshot runner |
+| Showroom desktop/mobile matrix, single navigation, contrast, and text fit | browser/automated/manual | `tests/acceptance/app.spec.ts`, benchmark Playwright screenshot runner |
 | Complete repository gates | release | `npm run check`, `npm run release`, `npm run test:acceptance` |
 
 ## Rollout and rollback
@@ -93,3 +109,8 @@ Evidence: implemented and verified on 2026-07-27.
   were corrected from that review.
 - Benchmark, full-check, production build/HTTP smoke, and 10/10 acceptance
   evidence passed. Production/data-preserving rollout remains excluded.
+- The ten-showroom browser matrix proves `split_bleed`, `soft_inset`,
+  `editorial_overlap`, and `product_stage` hero behavior, one category-control
+  owner, immediate selected-state contrast, bounded product media, and no
+  horizontal overflow. Comparative desktop/mobile captures of all four v1
+  static examples informed the admission rules without copying their layouts.

@@ -44,7 +44,8 @@ client review.
   reference atomically.
 - Hard fitness failures include incompatible content/component binding, missing
   required media at review time, unsupported media kind, duplicate category
-  navigation, more than two signature sections, and incompatible catalog count.
+  navigation, a standalone category navigator combined with catalog filters,
+  more than two signature sections, and incompatible catalog count.
 - Warnings include unnecessary search/filter controls, repeated factual image
   use, consecutive identical surface/geometry, repeated business description,
   long-copy risk, and weak optional-media coverage.
@@ -75,6 +76,12 @@ Scenario: AI chooses an oversized catalog component
   WHEN the recipe selects a component whose reviewed range starts at eight products
   THEN composition fitness reports an incompatible catalog-count failure
   AND identifies the reviewed fallback component
+
+Scenario: AI duplicates category browsing
+  GIVEN a composition with a standalone category-navigation section
+  WHEN its catalog section also enables category filters
+  THEN composition fitness reports a duplicate-navigation hard failure
+  AND the recipe must choose one control owner before review
 ```
 
 ## Quality impact
@@ -120,3 +127,6 @@ Evidence: implemented and verified on 2026-07-27.
   retained catalogs receive a fallback warning to preserve compatibility.
 - Blueprint, fitness, recipe, security, revision, full-check, and 10/10
   production-browser acceptance evidence passed.
+- Composition guidance now gives every hero a machine-readable media-integration
+  behavior and rejects a standalone category navigator combined with catalog
+  filters before review.

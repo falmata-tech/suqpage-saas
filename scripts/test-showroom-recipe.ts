@@ -177,6 +177,28 @@ async function main() {
       true,
     );
     assert.equal(serializedBrief.includes("dQw4w9WgXcQ"), false);
+    assert.equal(exported.brief.designSystems.length, 18);
+    assert.equal(exported.brief.compositionGuidance.templates.length, 8);
+    assert.equal(
+      Object.keys(exported.brief.compositionGuidance.components).length,
+      67,
+    );
+    assert.equal(
+      exported.brief.schemas.designSystem.items.properties.shape.properties.radius.maximum,
+      8,
+    );
+    assert.equal(
+      exported.brief.schemas.designSystem.items.properties.media.properties
+        .allowedHeroIntegrations.minItems,
+      2,
+    );
+    const heroIntegrations = new Set(
+      Object.entries(exported.brief.compositionGuidance.components)
+        .filter(([id]) => id.startsWith("hero."))
+        .map(([, guidance]) => guidance.heroMediaIntegration),
+    );
+    assert.ok(heroIntegrations.size >= 4);
+    assert.equal(heroIntegrations.has(null), false);
     assert.equal(
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,
@@ -188,7 +210,7 @@ async function main() {
     recipe.design.sections[1].component = "hero.room-scene@1";
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
-    assert.equal(imported.difference.designSections.after, 9);
+    assert.equal(imported.difference.designSections.after, 8);
     assert.equal(
       getContentRevision(draft.id)?.summary,
       "Validated imported showroom recipe.",

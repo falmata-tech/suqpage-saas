@@ -828,6 +828,10 @@ remaining AI-assisted delivery sequence is recorded in
   coffee, artisan, botanical, furniture, manufacturing, makers, wholesale,
   beauty, technology, and other reviewed directions. Bank 1.1 remains immutable
   and readable for retained revisions.
+- Those 18 systems are machine-readable semantic foundations, not color names
+  alone. Each declares canvas/surface/text, primary and distinct secondary
+  roles, on-color contrast, border, typography, spacing, shape, layout rhythm,
+  product-media bounds, and preferred/allowed hero-media integration.
 - Required-slot choices and tokens provide 98,280 validated base combinations
   before optional navigation, content, trust, call-to-action, and bounded
   component properties are counted. Combination volume never replaces visual,
@@ -886,9 +890,12 @@ remaining AI-assisted delivery sequence is recorded in
   before individual variants are chosen. Machine-readable guidance declares
   no-media support, fallback treatments, catalog modes, business archetypes,
   recommended product/category counts, long-title and RTL support, mobile
-  behavior, and fallback components. Deterministic composition fitness blocks
-  duplicate navigation, incompatible sparse catalogs, and more than two
-  signature sections, while warning about unnecessary controls, repeated
+  behavior, fallback components, and hero-media integration. Heroes use
+  reviewed split-bleed, soft-inset, editorial-overlap, product-stage, or hidden
+  behavior rather than one universal bordered image frame. Deterministic
+  composition fitness blocks duplicate navigation, standalone navigation
+  combined with catalog filters, incompatible sparse catalogs, and more than
+  two signature sections, while warning about unnecessary controls, repeated
   factual media, and intentional product-media fallbacks.
 - Initial linked-video support is a manually entered YouTube link normalized
   into a canonical provider asset and rendered by a reviewed, privacy-conscious

@@ -133,6 +133,7 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 1280, height: 720 });
   const compositionSignatures = new Set<string>();
+  const heroMediaIntegrations = new Set<string>();
   for (const handle of ["selam-weave", "afia-botanics", "warka-furniture", "addis-metalworks", "green-terrace-farm", "blue-nile-apiary", "rift-valley-mill", "entoto-ceramics", "koba-leather", "nova-assembly"]) {
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
@@ -141,10 +142,117 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
     compositionSignatures.add(
       await page.locator("[data-token-pack]").getAttribute("data-token-pack") || "",
     );
+    await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
+    await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
+    await expect(page.locator('[data-slot="hero"] button')).toHaveCount(0);
+    await expect(page.locator('a[href="#showroom-catalog"]').first()).toBeVisible();
+    const heroSection = page.locator('[data-slot="hero"]');
+    const mediaIntegration =
+      (await heroSection.getAttribute("data-media-integration")) || "";
+    expect([
+      "split_bleed",
+      "soft_inset",
+      "editorial_overlap",
+      "product_stage",
+      "hidden",
+    ]).toContain(mediaIntegration);
+    heroMediaIntegrations.add(mediaIntegration);
+    const heroMedia = page.locator('[data-slot="hero"] img').first();
+    const heroGeometry = await heroMedia.evaluate((image) => {
+      const bounds = image.parentElement!.getBoundingClientRect();
+      const style = getComputedStyle(image.parentElement!);
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        ratio: bounds.width / bounds.height,
+        borderWidth:
+          Number.parseFloat(style.borderLeftWidth) +
+          Number.parseFloat(style.borderRightWidth),
+      };
+    });
+    expect(heroGeometry.width).toBeGreaterThan(0);
+    expect(heroGeometry.height).toBeLessThanOrEqual(620);
+    expect(heroGeometry.borderWidth).toBe(0);
+    if (mediaIntegration !== "split_bleed") {
+      expect(heroGeometry.ratio).toBeGreaterThanOrEqual(1.58);
+      expect(heroGeometry.ratio).toBeLessThanOrEqual(1.62);
+    }
+    const catalog = page.locator('[data-slot="catalog"]');
+    const catalogVariant = await catalog.getAttribute("data-variant");
+    if (catalogVariant === "minimal-list") {
+      const thumbnail = await catalog.locator(".sr-card img").first().evaluate((image) => {
+          const bounds = image.getBoundingClientRect();
+          return {
+            width: bounds.width,
+            ratio: bounds.width / bounds.height,
+          };
+        });
+      expect(thumbnail.width).toBeLessThanOrEqual(112);
+      expect(thumbnail.ratio).toBeCloseTo(4 / 3, 2);
+    } else {
+      expect(
+        await catalog.locator(".sr-card").evaluateAll((cards) =>
+          cards.every((card) => card.getBoundingClientRect().width <= 420),
+        ),
+      ).toBe(true);
+      expect(
+        await catalog.locator(".sr-card img").evaluateAll((images) =>
+          images.every((image) => {
+            const bounds = image.getBoundingClientRect();
+            const ratio = bounds.width / bounds.height;
+            return ratio >= 1.32 && ratio <= 1.35;
+          }),
+        ),
+      ).toBe(true);
+    }
+    expect(
+      await page.locator("[data-slot]").evaluateAll((sections) => {
+        const surfaces = new Set(
+          sections.map((section) => getComputedStyle(section).backgroundColor),
+        );
+        return surfaces.size;
+      }),
+    ).toBeGreaterThanOrEqual(3);
+    const categoryButtons = page.locator('[aria-label="Catalog filters"] button');
+    await categoryButtons.nth(1).click();
+    expect(
+      await categoryButtons.nth(1).evaluate((button) => {
+        const style = getComputedStyle(button);
+        const rgb = (value: string) => {
+          const values =
+            value.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) ||
+            [0, 0, 0];
+          return value.startsWith("color(")
+            ? values.map((channel) => channel * 255)
+            : values;
+        };
+        const luminance = (value: string) => {
+          const channels = rgb(value).map((channel) => {
+            const normalized = channel / 255;
+            return normalized <= 0.04045
+              ? normalized / 12.92
+              : ((normalized + 0.055) / 1.055) ** 2.4;
+          });
+          return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+        };
+        const foreground = luminance(style.color);
+        const background = luminance(style.backgroundColor);
+        return (Math.max(foreground, background) + 0.05) /
+          (Math.min(foreground, background) + 0.05);
+      }),
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(
+      await page
+        .locator('[data-slot] h2, [data-slot] h3, [data-slot] p, [data-slot] strong')
+        .evaluateAll((elements) =>
+          elements.every((element) => element.scrollWidth <= element.clientWidth + 1),
+        ),
+    ).toBe(true);
     await expectVisibleControlsNamed(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
   expect(compositionSignatures.size).toBeGreaterThanOrEqual(6);
+  expect(heroMediaIntegrations.size).toBeGreaterThanOrEqual(3);
   await page.goto("/@selam-weave");
   const productOpener = page.locator(".sr-card").first().getByRole("button", { name: /^View / });
   await productOpener.click();
@@ -178,8 +286,8 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
 test("mobile search, persistent cart, quantity, and overflow", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/@afia-botanics");
-  await page.getByLabel("Search products").fill("Garden Cleansing");
+  await page.goto("/@addis-metalworks");
+  await page.getByLabel("Search products").fill("Powder-Coated");
   await expect(page.locator(".sr-card")).toHaveCount(1);
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
@@ -193,6 +301,14 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
     await page.goto(`/@${handle}`);
     await expect(page.locator(".showroom")).toBeVisible();
     await expect(page.locator(".sr-card").first()).toBeVisible();
+    await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
+    await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
+    expect(
+      await page.locator('[data-slot="hero"] img').first().evaluate((image) => {
+        const bounds = image.getBoundingClientRect();
+        return bounds.width / bounds.height;
+      }),
+    ).toBeGreaterThanOrEqual(1.58);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,

@@ -1,5 +1,6 @@
 import type { RevisionSnapshotV4 } from "./revision-v4-domain";
 import type { ShowroomComponentDefinitionV2 } from "./showroom-composition-v2";
+import type { HeroMediaIntegration } from "./showroom-design-systems";
 
 export type ShowroomArchetype =
   | "artisan"
@@ -31,6 +32,7 @@ export type ComponentGuidance = {
   supportsRtl: boolean;
   supportsLongTitles: boolean;
   mobileBehavior: "stack" | "horizontal_scroll" | "compact_list" | "fixed";
+  heroMediaIntegration: HeroMediaIntegration | null;
   fallbackComponent: string | null;
 };
 
@@ -168,6 +170,19 @@ const ALL_ARCHETYPES: ShowroomArchetype[] = [
   "food_producer", "textile_atelier", "service_product_hybrid",
 ];
 
+export function heroMediaIntegrationForComponent(
+  componentId: string,
+): HeroMediaIntegration | null {
+  if (!componentId.startsWith("hero.")) return null;
+  if (/centered-statement/.test(componentId)) return "hidden";
+  if (/product-spotlight|beauty-orbit/.test(componentId)) return "product_stage";
+  if (/editorial-collage|textile-swatch/.test(componentId)) {
+    return "editorial_overlap";
+  }
+  if (/provenance|ingredient-monograph/.test(componentId)) return "soft_inset";
+  return "split_bleed";
+}
+
 export function guidanceForComponent(
   component: ShowroomComponentDefinitionV2,
 ): ComponentGuidance {
@@ -176,6 +191,7 @@ export function guidanceForComponent(
   const dense = /dense-wholesale|technology-spec/.test(id);
   const rail = /horizontal|collection-led|room-set|textile-stack/.test(id);
   const mediaRequired = component.contentMediaSlots.some((slot) => slot.required);
+  const heroMediaIntegration = heroMediaIntegrationForComponent(id);
   return {
     supportsNoMedia: !mediaRequired,
     requiresMedia: mediaRequired,
@@ -218,6 +234,7 @@ export function guidanceForComponent(
       : isCatalog && dense
         ? "compact_list"
         : "stack",
+    heroMediaIntegration,
     fallbackComponent: component.slot === "catalog"
       ? "catalog.minimal-list@1"
       : component.slot === "hero"
@@ -235,6 +252,9 @@ export function evaluateCompositionFitness(
     issues.push({ severity: "error", code: "duplicate_navigation", message: "Use one category-navigation system." });
   }
   const catalog = sections.find((section) => section.component.startsWith("catalog."));
+  const standaloneNavigation = sections.find((section) =>
+    section.component.startsWith("navigation."),
+  );
   if (catalog) {
     const id = catalog.component;
     const hardMinimum = /dense-wholesale/.test(id)
@@ -262,6 +282,14 @@ export function evaluateCompositionFitness(
     }
     if (snapshot.categories.length <= 1 && catalog.properties.show_filters === true) {
       issues.push({ severity: "warning", code: "unnecessary_filters", sectionKey: catalog.key, message: "Filters need at least two meaningful categories." });
+    }
+    if (standaloneNavigation && catalog.properties.show_filters === true) {
+      issues.push({
+        severity: "error",
+        code: "duplicate_category_controls",
+        sectionKey: catalog.key,
+        message: "Use either standalone category navigation or catalog filters, not both.",
+      });
     }
   }
   const imageRefs = [

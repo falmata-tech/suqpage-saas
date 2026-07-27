@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
+import { heroMediaIntegrationForComponent } from "@/lib/showroom-guidance";
 import styles from "./bank.module.css";
 import type {
   BankPresentationContext,
@@ -24,6 +25,7 @@ function SectionRoot({
   label,
   experience,
   properties,
+  mediaIntegration,
   children,
 }: {
   slot: string;
@@ -31,6 +33,7 @@ function SectionRoot({
   label: string;
   experience: BankSectionRendererProps["experience"];
   properties?: BankSectionRendererProps["properties"];
+  mediaIntegration?: string;
   children: ReactNode;
 }) {
   const style = {
@@ -45,8 +48,11 @@ function SectionRoot({
   } as CSSProperties;
   return (
     <section
+      id={slot === "catalog" ? "showroom-catalog" : undefined}
       className={`${styles.section} ${styles[slot] || ""}`}
+      data-slot={slot}
       data-variant={variant}
+      data-media-integration={mediaIntegration}
       data-density={
         typeof properties?.density === "string"
           ? properties.density
@@ -82,7 +88,7 @@ function ProductVisual({ product }: { product: BankProductView }) {
     <img className={styles.productImage} src={product.imageRef} alt={product.name} />
   ) : (
     <div className={styles.productPlaceholder} aria-hidden="true">
-      <span>{product.name.slice(0, 1)}</span>
+      <span className={styles.placeholderTexture} />
     </div>
   );
 }
@@ -178,9 +184,9 @@ export function BankHeaderSection({
         <span className={styles.headerTagline}>{context.business.tagline}</span>
       ) : null}
       <nav className={styles.headerNav} aria-label="Showroom preview">
-        <button type="button" onClick={() => context.onCategoryChange("all")}>
+        <a href="#showroom-catalog" onClick={() => context.onCategoryChange("all")}>
           Catalog
-        </button>
+        </a>
         <button type="button" onClick={context.onOpenCart}>
           Inquiry <span aria-label={`${context.cartCount} selected items`}>{context.cartCount}</span>
         </button>
@@ -197,8 +203,9 @@ export function BankHeroSection({
   properties,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  const featured = context.products.slice(0, 3);
   const heroImage = mediaAsset(contentBlock, "hero_image") || context.business.heroImageRef;
+  const mediaIntegration =
+    heroMediaIntegrationForComponent(definition.id) || undefined;
   return (
     <SectionRoot
       slot="hero"
@@ -206,14 +213,15 @@ export function BankHeroSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      mediaIntegration={mediaIntegration}
     >
       <div className={styles.heroCopy}>
         <span className={styles.kicker}>{contentBlock?.kicker || context.business.tagline}</span>
         <h2>{contentBlock?.title || context.business.heroTitle}</h2>
         <p>{contentBlock?.body || context.business.heroSubtitle}</p>
-        <button type="button" onClick={() => context.onCategoryChange("all")}>
+        <a href="#showroom-catalog" onClick={() => context.onCategoryChange("all")}>
           Explore products
-        </button>
+        </a>
       </div>
       <div className={styles.heroVisual} aria-label="Featured product presentation">
         {heroImage ? (
@@ -221,18 +229,6 @@ export function BankHeroSection({
         ) : (
           <div className={styles.heroTexture} aria-hidden="true" />
         )}
-        <div className={styles.heroProducts}>
-          {featured.map((product) => (
-            <button
-              type="button"
-              key={product.key}
-              onClick={() => context.onOpenProduct(product)}
-            >
-              <span>{product.eyebrow}</span>
-              <strong>{product.name}</strong>
-            </button>
-          ))}
-        </div>
       </div>
     </SectionRoot>
   );

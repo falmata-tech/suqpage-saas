@@ -15,6 +15,27 @@ for (const business of businesses) {
   productCounts.add(catalog.products.length);
   const snapshot = catalogToRevisionSnapshotV4(catalog);
   assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} fitness`);
+  assert.equal(
+    snapshot.designManifest.sections.some((section) =>
+      section.component.startsWith("navigation."),
+    ),
+    false,
+    `${business.handle} uses catalog-owned category navigation`,
+  );
+  const catalogSection = snapshot.designManifest.sections.find((section) =>
+    section.component.startsWith("catalog."),
+  );
+  assert.ok(catalogSection, `${business.handle} has one catalog`);
+  assert.equal(
+    catalogSection.properties.show_filters,
+    catalog.categories.length > 1,
+    `${business.handle} enables only useful catalog filters`,
+  );
+  assert.equal(
+    catalogSection.properties.show_search,
+    catalog.products.length > 6,
+    `${business.handle} enables search only for a larger catalog`,
+  );
   for (const ref of [business.hero_image_path, ...catalog.products.map((product) => product.image_path)].filter(Boolean)) {
     const absolute = path.join(process.cwd(), "public", ref);
     assert.ok(fs.existsSync(absolute), `${business.handle} media exists: ${ref}`);

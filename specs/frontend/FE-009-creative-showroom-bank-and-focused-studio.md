@@ -4,7 +4,7 @@ title: Creative showroom bank and focused v4 studio
 status: in_progress
 related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-25
+last_updated: 2026-07-27
 change_level: L3
 ---
 
@@ -57,6 +57,10 @@ Research-derived patterns and exclusions are recorded in
 - Add five scoped token directions: silk atelier, cosmetic laboratory, chrome
   future, paper gallery, and mineral spa. Tokens preserve contrast and never
   encode tenant facts.
+- Every token direction declares primary, secondary, on-secondary, alternate
+  section, and strong-section roles. The secondary family must be intentionally
+  distinct from the dominant family, and components distribute these semantic
+  roles across the page instead of tinting every surface with one hue.
 - New variants may expose only bounded `reveal_style` and
   `interaction_style` enums. Effects use transform/opacity/clip/mask where
   supported, have static fallbacks, never hide essential content, and stop under
@@ -64,6 +68,23 @@ Research-derived patterns and exclusions are recorded in
 - Mobile retains native vertical scrolling, 44px touch targets, readable text,
   stable layout, horizontally scrollable rails with affordance, and no hover-only
   information. Product detail and inquiry actions remain unchanged.
+- Public compositions expose at most one category-browsing control surface.
+  Header actions remain limited to the catalog destination and inquiry cart;
+  hero media is not covered by product-link tiles. A standalone navigation
+  section and catalog filters cannot be enabled together.
+- Selected navigation and filter controls use an explicit high-contrast
+  foreground that does not depend on the token pack's surface color.
+- Decorative geometry cannot shape a copy container into an arch, doorway,
+  half-circle, or oversized asymmetric capsule. Text-bearing cards and sections
+  use restrained corners, allow content-driven height, and never clip or hide
+  copy at 320px, 390px, or desktop widths.
+- Split and media-led heroes use an explicit machine-readable integration
+  behavior (`split_bleed`, `soft_inset`, `editorial_overlap`,
+  `product_stage`, or `hidden`) instead of one universal bordered image frame.
+  The behavior keeps a stable responsive height and no factual-image overlay
+  controls. Product media uses declared aspect ratios and bounded grid tracks;
+  filtering or a small product count cannot stretch cards or images to fill an
+  arbitrary page width.
 - Focused controls show only server-computed compatible choices. Saving a
   correction updates only a private draft, produces a visible change summary,
   and never submits or publishes.
@@ -90,6 +111,24 @@ Scenario: Visitor requests reduced motion
   WHEN the browser reports prefers-reduced-motion
   THEN non-essential reveals and interactions become static
   AND all content and actions remain available
+
+Scenario: AI proposes competing category navigation
+  GIVEN a catalog section already exposes category filters
+  WHEN a recipe also includes a standalone category-navigation section
+  THEN composition fitness rejects the recipe
+  AND the preview cannot present duplicate category controls
+
+Scenario: Token and long copy meet a shaped component
+  GIVEN any admitted token system and bounded long component copy
+  WHEN a selected control and text-bearing section render at supported widths
+  THEN the selected state remains readable against its background
+  AND restrained geometry does not clip, overflow, or disguise the copy
+
+Scenario: A showroom receives a complete token direction
+  GIVEN an admitted business-appropriate dominant color
+  WHEN the token pack and responsive components render a full showroom
+  THEN a distinct secondary family separates section roles and controls
+  AND hero and product media retain bounded professional proportions
 
 Scenario: Incompatible creative choice is submitted directly
   GIVEN a typed block and component with incompatible contracts
@@ -151,9 +190,14 @@ complete release, all eight production-browser scenarios (including 390-pixel
 overflow, touch targets, reduced motion, focused publication, and controlled
 provider-video CSP), and the container privacy/build gate pass. Typed v4
 rendering, local reset-default bank 1.2 writes, focused private-draft controls,
-and controlled provider rendering are implemented. 320-pixel/pairwise visual
-admission, operations restore evidence, remote checks, and production rollout
-gates remain.
+and controlled provider rendering are implemented. The AI brief now exports 18
+machine-readable semantic foundation systems, eight page templates,
+component-level compatibility and hero-media behavior, and deterministic
+fitness. Ten-showroom desktop/mobile evidence passes with one category-control
+owner, restrained copy geometry, immediate selected-state contrast, four
+distinct hero integration modes, bounded product media, and no page overflow.
+Full pairwise visual admission, operations restore evidence, remote checks, and
+production rollout gates remain.
 
 The existing private recipe studio also has a controlled-video admission form
 only when the separate provider-admission capability is enabled. It accepts no

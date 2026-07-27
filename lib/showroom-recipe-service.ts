@@ -17,7 +17,12 @@ import {
   saveRecipeDraftRevision,
 } from "./revision-service";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
-import { evaluateCompositionFitness } from "./showroom-guidance";
+import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
+import {
+  evaluateCompositionFitness,
+  guidanceForComponent,
+  SHOWROOM_TEMPLATES,
+} from "./showroom-guidance";
 import {
   SHOWROOM_CONTENT_SCHEMA_VERSION,
   SHOWROOM_RECIPE_SCHEMA_VERSION,
@@ -34,6 +39,7 @@ import {
 import showroomContentSchema from "../showroom-sdk/showroom-content.schema.json";
 import showroomDesignSchema from "../showroom-sdk/showroom-proposal.schema.json";
 import showroomRecipeSchema from "../showroom-sdk/showroom-recipe.schema.json";
+import showroomDesignSystemSchema from "../showroom-sdk/showroom-design-system.schema.json";
 
 const opaque = (prefix: string, requestId: number, value: string) =>
   `${prefix}_${crypto
@@ -541,9 +547,20 @@ export function buildShowroomRecipeBrief(
       schemas: {
         content: showroomContentSchema,
         design: showroomDesignSchema,
+        designSystem: showroomDesignSystemSchema,
         recipe: showroomRecipeSchema,
       },
       componentBank: SHOWROOM_COMPONENT_BANK_LATEST,
+      designSystems: Object.values(SHOWROOM_DESIGN_SYSTEMS),
+      compositionGuidance: {
+        templates: SHOWROOM_TEMPLATES,
+        components: Object.fromEntries(
+          SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
+            component.id,
+            guidanceForComponent(component),
+          ]),
+        ),
+      },
       sourceFacts: sources.sources,
       mediaManifest: assets.descriptors,
       currentContent: portableSnapshot,
@@ -553,6 +570,8 @@ export function buildShowroomRecipeBrief(
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Choose dynamic catalog and media counts. Put unresolved image destinations in mediaPlan and leave their content image reference empty.",
+        "Choose one design system from designSystems before choosing a template or component. Match archetype, tone, density, typography, palette roles, section rhythm, and media behavior.",
+        "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
         "Declare every intentionally removed stable key.",
       ],
       completeExample: example,

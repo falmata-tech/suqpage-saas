@@ -34,7 +34,6 @@ type DefaultProfile = {
   decoration: ShowroomDecorativeDepth;
   header: string;
   hero: string;
-  navigation: string;
   story: string;
   highlights: string;
   catalog: string;
@@ -51,7 +50,6 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     decoration: "signature",
     header: "header.floating-capsule@1",
     hero: "hero.textile-swatch@1",
-    navigation: "navigation.material-index@1",
     story: "content.swatch-story@1",
     highlights: "content.lookbook-chapter@1",
     catalog: "catalog.textile-stack@1",
@@ -66,7 +64,6 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     decoration: "signature",
     header: "header.floating-capsule@1",
     hero: "hero.beauty-orbit@1",
-    navigation: "navigation.visual-chapters@1",
     story: "content.ritual-steps@1",
     highlights: "content.lookbook-chapter@1",
     catalog: "catalog.beauty-swatch@1",
@@ -81,7 +78,6 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     decoration: "clean",
     header: "header.technical-marquee@1",
     hero: "hero.technology-cinematic@1",
-    navigation: "navigation.material-index@1",
     story: "content.exploded-feature@1",
     highlights: "content.ritual-steps@1",
     catalog: "catalog.technology-spec@1",
@@ -96,7 +92,6 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     decoration: "subtle",
     header: "header.floating-capsule@1",
     hero: "hero.room-scene@1",
-    navigation: "navigation.visual-chapters@1",
     story: "content.swatch-story@1",
     highlights: "content.lookbook-chapter@1",
     catalog: "catalog.room-set@1",
@@ -121,26 +116,38 @@ DEFAULT_PROFILES["addis-metalworks"] = {
 DEFAULT_PROFILES["green-terrace-farm"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "harvest-earth",
+  header: "header.producer-badge@1",
   hero: "hero.provenance@1",
   story: "content.origin-story@1",
+  highlights: "content.process-steps@1",
   catalog: "catalog.horizontal-shelf@1",
   trust: "trust.provenance-panel@1",
+  cta: "call-to-action.wholesale@1",
+  footer: "footer.contact-panel@1",
 };
 DEFAULT_PROFILES["blue-nile-apiary"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "honey-amber",
+  header: "header.producer-badge@1",
   hero: "hero.ingredient-monograph@1",
   story: "content.origin-story@1",
+  highlights: "content.process-steps@1",
   catalog: "catalog.collection-led@1",
   trust: "trust.ingredient-ledger@1",
+  cta: "call-to-action.wholesale@1",
+  footer: "footer.contact-panel@1",
 };
 DEFAULT_PROFILES["rift-valley-mill"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "coffee-roast",
+  header: "header.producer-badge@1",
   hero: "hero.ingredient-monograph@1",
   story: "content.process-steps@1",
+  highlights: "content.production-metrics@1",
   catalog: "catalog.collection-led@1",
   trust: "trust.provenance-panel@1",
+  cta: "call-to-action.wholesale@1",
+  footer: "footer.contact-panel@1",
 };
 DEFAULT_PROFILES["entoto-ceramics"] = {
   ...DEFAULT_PROFILES.homevibe,
@@ -165,7 +172,6 @@ const FALLBACK_PROFILE: DefaultProfile = {
   decoration: "subtle",
   header: "header.floating-capsule@1",
   hero: "hero.ingredient-monograph@1",
-  navigation: "navigation.visual-chapters@1",
   story: "content.lookbook-chapter@1",
   highlights: "content.ritual-steps@1",
   catalog: "catalog.beauty-swatch@1",
@@ -376,9 +382,6 @@ function buildDesignManifest(
           alignment: "start",
           height: 680,
         }),
-        section("navigation-1", profile.navigation, profile, null, {
-          density: "comfortable",
-        }),
         section("content-story", profile.story, profile, "brand-story", {
           alignment: "start",
         }),
@@ -387,8 +390,8 @@ function buildDesignManifest(
         }),
         section("catalog-1", profile.catalog, profile, null, {
           columns: 3,
-          show_search: true,
-          show_filters: true,
+          show_search: catalog.products.length > 6,
+          show_filters: catalog.categories.length > 1,
         }),
         section("trust-1", profile.trust, profile, "showroom-information", {
           columns: 3,
