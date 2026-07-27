@@ -5,7 +5,10 @@
   "description": "Portable syntactic guidance. The SuqPage server parser, source, tenant, asset, and relationship checks remain authoritative.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "business", "collections", "categories", "products"],
+  "required": [
+    "schemaVersion", "business", "collections", "categories", "products",
+    "contentBlocks"
+  ],
   "properties": {
     "schemaVersion": { "const": 1 },
     "business": { "$ref": "#/$defs/business" },
@@ -23,7 +26,8 @@
       "type": "array",
       "maxItems": 500,
       "items": { "$ref": "#/$defs/product" }
-    }
+    },
+    "contentBlocks": { "$ref": "showroom-content-blocks.schema.json" }
   },
   "$defs": {
     "key": {

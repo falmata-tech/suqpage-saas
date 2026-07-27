@@ -20,6 +20,7 @@ async function main() {
       admitRecipeYouTube,
       buildShowroomRecipeBrief,
       importShowroomRecipe,
+      SHOWROOM_RECIPE_BRIEF_CONTRACTS,
     } = await import("../lib/showroom-recipe-service");
     const { ShowroomRecipeError } = await import(
       "../lib/showroom-recipe-domain"
@@ -177,6 +178,49 @@ async function main() {
       true,
     );
     assert.equal(serializedBrief.includes("dQw4w9WgXcQ"), false);
+    assert.deepEqual(
+      exported.brief.contractManifest,
+      SHOWROOM_RECIPE_BRIEF_CONTRACTS,
+    );
+    assert.deepEqual(exported.brief.contractManifest, {
+      brief: "suqpage.recipe-brief@1",
+      recipe: "suqpage.showroom-recipe@1",
+      content: "suqpage.showroom-content@1",
+      contentBlocks: "suqpage.showroom-content-blocks@1",
+      design: "suqpage.showroom-design@2",
+      componentBankSchema: "suqpage.component-bank@2",
+      componentBankRelease: "showroom-bank@1.2.0",
+      designSystems: "suqpage.showroom-design-systems@1",
+    });
+    assert.equal(exported.brief.requiredRecipeSchemaVersion, 1);
+    assert.equal(exported.brief.requiredContentSchemaVersion, 1);
+    assert.equal(exported.brief.requiredContentBlocksSchemaVersion, 1);
+    assert.equal(exported.brief.requiredDesignSchemaVersion, 2);
+    assert.equal(exported.brief.requiredComponentBankSchemaVersion, 2);
+    assert.equal(
+      exported.brief.schemas.design.properties.schemaVersion.const,
+      2,
+    );
+    assert.equal(
+      exported.brief.schemas.componentBank.properties.schemaVersion.const,
+      2,
+    );
+    assert.equal(
+      exported.brief.schemas.contentBlocks.properties.schemaVersion.const,
+      1,
+    );
+    assert.ok(
+      exported.brief.schemas.content.required.includes("contentBlocks"),
+    );
+    assert.equal(
+      exported.brief.schemas.recipe.properties.design.$ref,
+      "showroom-proposal-v2.schema.json",
+    );
+    assert.match(exported.brief.instructions[0], /do not normalize/i);
+    assert.equal(exported.brief.completeExample.schemaVersion, 1);
+    assert.equal(exported.brief.completeExample.content.schemaVersion, 1);
+    assert.equal(exported.brief.completeExample.content.contentBlocks.schemaVersion, 1);
+    assert.equal(exported.brief.completeExample.design.schemaVersion, 2);
     assert.equal(exported.brief.designSystems.length, 18);
     assert.equal(exported.brief.compositionGuidance.templates.length, 8);
     assert.equal(

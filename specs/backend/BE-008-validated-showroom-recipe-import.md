@@ -4,7 +4,7 @@ title: Validated full-showroom recipe import
 status: ready
 related: [FE-007, FE-009, FE-014, BE-003, BE-004, BE-007, BE-009, BE-010, BE-013, DEP-007, DEP-008, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, backend, security]
-last_updated: 2026-07-24
+last_updated: 2026-07-27
 change_level: L3
 ---
 
@@ -86,6 +86,17 @@ authority, access tenant persistence, or publish.
   Authoritative TypeScript parsers reject unknown fields, control characters,
   unsafe locators/markup, duplicate keys/slugs, invalid relationships, invalid
   enums, and limit violations.
+- Every exported brief contains a named contract manifest. Versions belong only
+  to their named document contract and are never presented as one global
+  generation: recipe `@1` contains content `@1`, content-blocks `@1`, and
+  design `@2`, while component-bank schema `@2` describes the separately named
+  `showroom-bank@1.2.0` release. The brief gives the AI one explicit instruction
+  not to normalize those independent versions.
+- The exported `schemas` object contains only the current recipe, content,
+  content-block, design, component-bank, and design-system schemas. Their
+  required versions, references, and required nested documents must match the
+  complete example and authoritative parsers; a legacy design schema cannot be
+  exported under the current design contract.
 - Content permits up to 100 collections, 200 categories, 500 products, four
   option groups and 50 values per group, and 24 typed section-content blocks,
   subject to one bounded serialized recipe limit. Counts may be zero through
@@ -183,6 +194,13 @@ Scenario: Content and design disagree
   THEN import fails with a bounded path/category report
   AND neither document is silently rewritten
 
+Scenario: AI receives independently versioned contracts
+  GIVEN the current recipe envelope uses recipe schema 1 and design schema 2
+  WHEN staff export the sanitized brief
+  THEN a named contract manifest identifies the owner of every version
+  AND the exported design and component-bank schemas require version 2
+  AND the complete example uses those exact versions
+
 Scenario: Recipe assigns admitted section media
   GIVEN the request media registry contains verified image keys and a normalized YouTube asset
   WHEN content blocks assign those keys to compatible declared component slots
@@ -237,6 +255,7 @@ asset keys, image bytes, provider prompts, or complete validation payloads.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Strict content and envelope parsing | unit/security | `scripts/test-showroom-recipe.ts` |
+| Named contract manifest and current portable-schema parity | contract | `scripts/test-showroom-recipe.ts` |
 | Dynamic catalog, typed blocks, and relationships | unit/integration | `scripts/test-showroom-recipe.ts` |
 | Provenance, reconciliation, and no invented facts | domain/security | `scripts/test-showroom-recipe.ts` |
 | Component/content/media cross-validation | domain/security | `scripts/test-showroom-recipe.ts`, `scripts/test-security.ts` |
@@ -269,6 +288,10 @@ Implementation checkpoint: portable content/recipe schemas, strict dynamic
 catalog parsing, provenance/reconciliation, opaque verified-image scope,
 request authorization, idempotent private import, and revision-v3 recipe
 metadata persistence are implemented and covered by the focused recipe gate.
-Typed section-content blocks, controlled YouTube admission/rendering, and the
-remaining mapped browser/security evidence are still open. The spec remains
-`ready` and is not yet complete.
+The current brief names every independent contract, exports design/component
+bank schema 2 rather than legacy schema 1, and keeps its portable content and
+recipe references aligned with the typed-block parser and complete example.
+Typed section-content blocks and controlled YouTube admission/rendering are now
+implemented through the linked BE-010 work. Production migration, remote
+checks, and the remaining rollout evidence are still open, so this spec remains
+`ready`.

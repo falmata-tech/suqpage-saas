@@ -866,9 +866,14 @@ remaining AI-assisted delivery sequence is recorded in
   counts remain bounded, not fixed by examples. Typed hero, story,
   highlights/trust, information, call-to-action, and video-capable blocks are
   implemented in revision v4/bank 1.2.
-- The studio exports a sanitized request/current-snapshot brief,
-  schemas, bank contract, source facts, allowed opaque asset keys, expected
-  counts, and complete synthetic examples. Staff manually import returned JSON,
+- The studio exports a sanitized request/current-snapshot brief with a named
+  contract manifest, current schemas, bank contract, source facts, allowed
+  opaque asset keys, expected counts, and complete synthetic examples. Contract
+  versions are independent and named: recipe/content/content-blocks remain
+  version 1 while current design and component-bank schemas are version 2 and
+  the component-bank release is separately `showroom-bank@1.2.0`. The brief
+  explicitly tells external AI not to normalize those numbers. Staff manually
+  import returned JSON,
   inspect provenance/completeness and an exact private preview. Re-import
   remains available through the staged Brief, Blueprint, Media, Preview, and
   Review workflow. Authorized staff can use focused v4 controls for token

@@ -4,7 +4,7 @@ title: AI showroom recipe import and focused staff studio
 status: ready
 related: [FE-003, FE-006, FE-008, FE-009, FE-014, BE-008, BE-009, BE-010, BE-013, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-24
+last_updated: 2026-07-27
 change_level: L3
 ---
 
@@ -87,6 +87,10 @@ choice.
   content version, allowed opaque asset keys, and counts. It excludes
   credentials, database IDs, storage paths, unrelated tenants, customer
   inquiries, and invitation/session data.
+- The brief shows one compact named contract manifest before the schemas. It
+  explains that `recipe@1`, `content@1`, `content-blocks@1`, `design@2`,
+  component-bank schema `@2`, design-systems `@1`, and the separately versioned
+  bank release are compatible nested contracts rather than competing choices.
 - For a first showroom, the AI returns a complete desired content proposal. For
   a change request, the brief includes the authorized current snapshot and the
   AI returns a complete replacement proposal, not an ambiguous patch.
@@ -206,6 +210,7 @@ request text, contacts, product copy, private media, or provider conversations.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Brief export and recipe import workflow | browser | `tests/acceptance/app.spec.ts` |
+| Named independent contract versions | contract/integration | `scripts/test-showroom-recipe.ts` |
 | Grouped validation and no silent repair | component/browser | `tests/acceptance/app.spec.ts` |
 | Dynamic item counts and exact preview | integration/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/app.spec.ts` |
 | Focused compatible corrections | component/browser | `scripts/test-showroom-recipe.ts`, `tests/acceptance/app.spec.ts` |
@@ -236,10 +241,12 @@ publishes, deletes, or rewrites client content.
 Implementation checkpoint: the assigned-staff studio, sanitized brief,
 verified-image admission, strict recipe import, grouped validation, idempotent
 private revision persistence, diff summary, preview, and recovery navigation
-are implemented. Focused post-import controls, typed section-content blocks,
-and controlled YouTube media remain open. The implemented checkpoint passes the
-focused gate and 7/7 production-browser acceptance scenarios. The spec
-therefore remains `ready`; this checkpoint is not full completion evidence.
+are implemented. The exported brief now presents a named contract manifest and
+an explicit independent-version instruction before its current schemas and
+example. Focused post-import controls, typed section-content blocks, and
+controlled YouTube media are implemented through linked FE-009/FE-014 work.
+Production rollout and remote evidence remain open, so this spec remains
+`ready`.
 
 ## Studio deep-link defect follow-up
 

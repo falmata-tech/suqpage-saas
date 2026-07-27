@@ -13,7 +13,7 @@
     "schemaVersion": { "const": 1 },
     "baseContentVersion": { "type": "integer", "minimum": 1 },
     "content": { "$ref": "showroom-content.schema.json" },
-    "design": { "$ref": "showroom-proposal.schema.json" },
+    "design": { "$ref": "showroom-proposal-v2.schema.json" },
     "summary": { "type": "string", "minLength": 1, "maxLength": 500 },
     "rationale": { "type": "string", "maxLength": 2000 },
     "questions": {

@@ -17,6 +17,11 @@ import {
   saveRecipeDraftRevision,
 } from "./revision-service";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
+import {
+  SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2,
+  SHOWROOM_DESIGN_SCHEMA_VERSION_V2,
+} from "./showroom-composition-v2";
+import { SHOWROOM_CONTENT_BLOCK_SCHEMA_VERSION } from "./showroom-content-blocks";
 import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
 import {
   evaluateCompositionFitness,
@@ -37,9 +42,22 @@ import {
   normalizeControlledYouTubeUrl,
 } from "./youtube-provider";
 import showroomContentSchema from "../showroom-sdk/showroom-content.schema.json";
-import showroomDesignSchema from "../showroom-sdk/showroom-proposal.schema.json";
+import showroomContentBlocksSchema from "../showroom-sdk/showroom-content-blocks.schema.json";
+import showroomDesignSchema from "../showroom-sdk/showroom-proposal-v2.schema.json";
+import showroomComponentBankSchema from "../showroom-sdk/component-bank-v2.schema.json";
 import showroomRecipeSchema from "../showroom-sdk/showroom-recipe.schema.json";
 import showroomDesignSystemSchema from "../showroom-sdk/showroom-design-system.schema.json";
+
+export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
+  brief: "suqpage.recipe-brief@1",
+  recipe: "suqpage.showroom-recipe@1",
+  content: "suqpage.showroom-content@1",
+  contentBlocks: "suqpage.showroom-content-blocks@1",
+  design: "suqpage.showroom-design@2",
+  componentBankSchema: "suqpage.component-bank@2",
+  componentBankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
+  designSystems: "suqpage.showroom-design-systems@1",
+});
 
 const opaque = (prefix: string, requestId: number, value: string) =>
   `${prefix}_${crypto
@@ -539,14 +557,21 @@ export function buildShowroomRecipeBrief(
     },
     brief: {
       briefSchemaVersion: 1,
+      contractManifest: SHOWROOM_RECIPE_BRIEF_CONTRACTS,
       exportedAt: new Date().toISOString(),
       requestReference: state.request.public_ref,
       baseContentVersion: state.revision.base_content_version,
       requiredRecipeSchemaVersion: SHOWROOM_RECIPE_SCHEMA_VERSION,
       requiredContentSchemaVersion: SHOWROOM_CONTENT_SCHEMA_VERSION,
+      requiredContentBlocksSchemaVersion: SHOWROOM_CONTENT_BLOCK_SCHEMA_VERSION,
+      requiredDesignSchemaVersion: SHOWROOM_DESIGN_SCHEMA_VERSION_V2,
+      requiredComponentBankSchemaVersion:
+        SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2,
       schemas: {
         content: showroomContentSchema,
+        contentBlocks: showroomContentBlocksSchema,
         design: showroomDesignSchema,
+        componentBank: showroomComponentBankSchema,
         designSystem: showroomDesignSystemSchema,
         recipe: showroomRecipeSchema,
       },
@@ -565,6 +590,7 @@ export function buildShowroomRecipeBrief(
       mediaManifest: assets.descriptors,
       currentContent: portableSnapshot,
       instructions: [
+        "Treat each @version in contractManifest as belonging only to its named contract. Return recipe@1 containing content@1, content-blocks@1, and design@2; do not normalize or align independent version numbers.",
         "Return one complete replacement recipe, never a partial patch.",
         "Use only source keys and media keys present in this brief.",
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
