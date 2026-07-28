@@ -904,11 +904,14 @@ remaining AI-assisted delivery sequence is recorded in
   those slots. Missing or incompatible required media blocks candidate/client
   review. Optional omissions use reviewed no-media treatments rather than
   broken images, unexplained initials, or false photography claims.
-- Eight reviewed business-model templates provide coherent page sequences
-  before individual variants are chosen. Machine-readable guidance declares
-  no-media support, fallback treatments, catalog modes, business archetypes,
-  recommended product/category counts, long-title and RTL support, mobile
-  behavior, fallback components, and section-media integration. Design-v2
+- Eight reviewed composition templates provide coherent page sequences before
+  individual variants are chosen. Machine-readable guidance declares visual
+  anatomy, no-media support, fallback treatments, commerce modes, content
+  needs, visual tones, recommended product/category counts, long-title and RTL
+  support, responsive behavior, unsuitable conditions, fallback components, and
+  section-media integration. Selection metadata is industry-neutral: legacy
+  identifiers remain stable but do not act as suitability signals, and guidance
+  is never inferred from words in IDs. Design-v2
   recipes let AI choose `ambient_overlay`, `edge_fade`, `split_bleed`,
   `editorial_overlap`, `product_stage`, or `hidden` independently of the
   component name. Hero and story imagery is borderless and connected to its

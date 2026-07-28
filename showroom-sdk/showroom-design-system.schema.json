@@ -108,19 +108,8 @@
       "guidance": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["archetypes", "tones"],
+        "required": ["tones"],
         "properties": {
-          "archetypes": {
-            "type": "array",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "enum": [
-                "artisan", "farm", "natural_beauty", "furniture", "manufacturer",
-                "food_producer", "textile_atelier", "service_product_hybrid"
-              ]
-            }
-          },
           "tones": {
             "type": "array",
             "minItems": 1,

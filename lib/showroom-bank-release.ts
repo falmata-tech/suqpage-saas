@@ -333,7 +333,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "header.editorial-wordmark@1",
       name: "Editorial wordmark header",
-      description: "A generous wordmark treatment for fashion, beauty, furniture, and artisan brands.",
+      description: "A generous wordmark treatment with prominent identity and restrained navigation.",
     },
     {
       id: "header.catalog-command@1",
@@ -343,19 +343,19 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "header.transparent-overlay@1",
       name: "Transparent overlay header",
-      description: "A lightweight brand bar suited to image-led and provenance-led openings.",
+      description: "A lightweight brand bar that overlays a controlled high-contrast opening.",
     },
     {
       id: "header.producer-badge@1",
-      name: "Producer badge header",
-      description: "A grounded identity header for makers, growers, manufacturers, and cooperatives.",
+      name: "Identity badge header",
+      description: "A grounded identity header with a compact badge-like brand treatment.",
     },
   ],
   hero: [
     {
       id: "hero.split-story@1",
       name: "Split story hero",
-      description: "Balanced narrative and image areas for almost any product business.",
+      description: "Balanced side-by-side narrative and image areas that stack on narrow screens.",
     },
     {
       id: "hero.centered-statement@1",
@@ -365,39 +365,39 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "hero.product-spotlight@1",
       name: "Product spotlight hero",
-      description: "A product-led opening for technology, beauty, food, and flagship goods.",
+      description: "A product-led opening with one dominant visual subject and secondary copy.",
     },
     {
       id: "hero.editorial-collage@1",
       name: "Editorial collage hero",
-      description: "Layered visual rhythm for fashion, artisan, decor, and lifestyle catalogs.",
+      description: "An asymmetrical opening with layered visual planes and compact editorial copy.",
     },
     {
       id: "hero.material-detail@1",
       name: "Material detail hero",
-      description: "A tactile composition for furniture, textiles, craft, ingredients, and finishes.",
+      description: "A close-detail composition where texture-rich media bleeds into concise copy.",
     },
     {
       id: "hero.provenance@1",
       name: "Provenance hero",
-      description: "An origin-led opening for coffee, honey, agriculture, food, and handmade goods.",
+      description: "A source-led opening that balances approved origin context with one factual image.",
     },
     {
       id: "hero.industrial-spec@1",
-      name: "Industrial specification hero",
-      description: "A precise structured opening for manufacturers, equipment, and trade suppliers.",
+      name: "Structured specification hero",
+      description: "A precise indexed opening where supplied facts carry more weight than decoration.",
     },
     {
       id: "hero.collection-mosaic@1",
       name: "Collection mosaic hero",
-      description: "A multi-product opening for broad catalogs, importers, and seasonal collections.",
+      description: "A bounded multi-product opening that gives several visual groups equal emphasis.",
     },
   ],
   navigation: [
     {
       id: "navigation.category-pills@1",
       name: "Category pills",
-      description: "Friendly rounded category navigation for compact consumer catalogs.",
+      description: "A rounded single-line category control for two to eight concise labels.",
     },
     {
       id: "navigation.collection-rail@1",
@@ -407,7 +407,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "navigation.catalog-index@1",
       name: "Catalog index",
-      description: "A structured numbered index for manufacturing, wholesale, and larger catalogs.",
+      description: "A structured numbered index for scanning many categories or collections.",
     },
     {
       id: "navigation.minimal-tabs@1",
@@ -434,7 +434,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "content.founder-note@1",
       name: "Founder note",
-      description: "A personal but restrained narrative block for independent businesses.",
+      description: "A personal but restrained first-person narrative block.",
     },
     {
       id: "content.production-metrics@1",
@@ -451,17 +451,17 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "catalog.editorial-grid@1",
       name: "Editorial grid",
-      description: "Spacious product cards for premium consumer and image-led catalogs.",
+      description: "Spacious equal-weight product cards with consistent media ratios.",
     },
     {
       id: "catalog.dense-wholesale@1",
-      name: "Dense wholesale grid",
-      description: "Compact scanning for manufacturers, importers, distributors, and broad inventories.",
+      name: "Dense comparison grid",
+      description: "Compact product scanning that prioritizes names and supplied details over large imagery.",
     },
     {
       id: "catalog.feature-tiles@1",
       name: "Feature tiles",
-      description: "Alternating product emphasis for launches, collections, and artisan work.",
+      description: "Alternating product emphasis that gives selected items more visual space.",
     },
     {
       id: "catalog.horizontal-shelf@1",
@@ -471,12 +471,12 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "catalog.collection-led@1",
       name: "Collection-led catalog",
-      description: "A collection-first treatment for furniture, fashion, food ranges, and seasonal goods.",
+      description: "A collection-first treatment that exposes meaningful groups before individual products.",
     },
     {
       id: "catalog.minimal-list@1",
       name: "Minimal specification list",
-      description: "A clean information-dense list for equipment, parts, materials, and technical products.",
+      description: "A clean information-dense list with compact optional media and room for long names.",
     },
   ],
   trust: [
@@ -554,45 +554,45 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
 
 export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
   header: [
-    { id: "header.floating-capsule@1", name: "Floating capsule header", description: "A polished floating command bar for beauty, textile, furniture, and design-led product showrooms." },
-    { id: "header.technical-marquee@1", name: "Technical marquee header", description: "A crisp indexed identity bar for technology, manufacturing, wholesale, and specification-led catalogs." },
+    { id: "header.floating-capsule@1", name: "Floating capsule header", description: "A polished floating command bar with prominent identity and compact actions." },
+    { id: "header.technical-marquee@1", name: "Indexed marquee header", description: "A crisp indexed identity bar with dense labels and straight dividers." },
   ],
   hero: [
-    { id: "hero.beauty-orbit@1", name: "Beauty orbit hero", description: "A sculptural cosmetic composition with soft orbital layers and a calm product-first beauty rhythm." },
-    { id: "hero.textile-swatch@1", name: "Textile swatch hero", description: "A tactile layered opening for textiles, fashion, upholstery, rugs, and material-rich artisan work." },
-    { id: "hero.technology-cinematic@1", name: "Technology cinematic hero", description: "A high-contrast cinematic stage for technology, instruments, equipment, and precise product launches." },
-    { id: "hero.room-scene@1", name: "Room scene hero", description: "An immersive room-inspired opening for furniture, lighting, interiors, decor, and architectural products." },
-    { id: "hero.ingredient-monograph@1", name: "Ingredient monograph hero", description: "An editorial ingredient study for coffee, honey, food, botanical beauty, agriculture, and provenance-led goods." },
+    { id: "hero.beauty-orbit@1", name: "Soft orbit hero", description: "A sculptural product stage with soft orbital layers and a calm single-subject rhythm." },
+    { id: "hero.textile-swatch@1", name: "Layered swatch hero", description: "A tactile layered opening that emphasizes color, texture, and close-detail media." },
+    { id: "hero.technology-cinematic@1", name: "High-contrast cinematic hero", description: "A dramatic high-contrast stage for one precise visual subject and concise launch copy." },
+    { id: "hero.room-scene@1", name: "Spatial scene hero", description: "An immersive scene-inspired opening that layers several related visual planes." },
+    { id: "hero.ingredient-monograph@1", name: "Source monograph hero", description: "An editorial source study that pairs approved context with one detailed factual image." },
   ],
   navigation: [
-    { id: "navigation.visual-chapters@1", name: "Visual chapter navigation", description: "A magazine-like chapter rail for fashion, beauty, furniture, food, and collection-led discovery." },
-    { id: "navigation.material-index@1", name: "Material index navigation", description: "A precise material and category index for textiles, furniture, ingredients, manufacturing, and wholesale." },
+    { id: "navigation.visual-chapters@1", name: "Visual chapter navigation", description: "A magazine-like horizontal chapter rail for visual group discovery." },
+    { id: "navigation.material-index@1", name: "Attribute index navigation", description: "A precise indexed control for named materials, attributes, categories, or collections." },
   ],
   content: [
-    { id: "content.lookbook-chapter@1", name: "Lookbook chapter", description: "An expressive editorial chapter for textile, fashion, beauty, artisan, and lifestyle storytelling." },
-    { id: "content.exploded-feature@1", name: "Exploded feature", description: "A layered feature breakdown for technology, furniture construction, equipment, and engineered products." },
-    { id: "content.ritual-steps@1", name: "Ritual steps", description: "A refined sequence for beauty routines, coffee preparation, food use, care, and customer education." },
-    { id: "content.swatch-story@1", name: "Swatch story", description: "A tactile color and material narrative for textiles, finishes, cosmetics, ceramics, and interior products." },
-    { id: "content.controlled-film@1", name: "Controlled film chapter", description: "A reviewed video chapter for process, product demonstrations, craft, technology, and manufacturing stories." },
+    { id: "content.lookbook-chapter@1", name: "Lookbook chapter", description: "An expressive editorial chapter with generous media and a paced narrative." },
+    { id: "content.exploded-feature@1", name: "Exploded feature", description: "A layered feature breakdown for supplied construction, parts, or functional details." },
+    { id: "content.ritual-steps@1", name: "Guided-use steps", description: "A refined sequence for preparation, use, care, handling, or customer education." },
+    { id: "content.swatch-story@1", name: "Swatch story", description: "A tactile color, texture, finish, or material narrative with optional supporting media." },
+    { id: "content.controlled-film@1", name: "Controlled film chapter", description: "A reviewed widescreen video chapter for process or product demonstration." },
   ],
   catalog: [
-    { id: "catalog.beauty-swatch@1", name: "Beauty swatch catalog", description: "Soft sculptural product cards for cosmetics, fragrance, wellness, personal care, and colorful small goods." },
-    { id: "catalog.technology-spec@1", name: "Technology specification catalog", description: "Crisp technical cards for devices, equipment, parts, manufacturing, and comparison-oriented product ranges." },
-    { id: "catalog.textile-stack@1", name: "Textile stack catalog", description: "Layered material cards for textiles, apparel, rugs, upholstery, artisan work, and finish-rich products." },
-    { id: "catalog.room-set@1", name: "Room set catalog", description: "Scene-inspired product groupings for furniture, lighting, homeware, decor, and interior collections." },
+    { id: "catalog.beauty-swatch@1", name: "Sculptural swatch catalog", description: "Soft sculptural product cards that emphasize color variation and compact imagery." },
+    { id: "catalog.technology-spec@1", name: "Technical comparison catalog", description: "Crisp information-forward cards for comparison-oriented product ranges." },
+    { id: "catalog.textile-stack@1", name: "Layered stack catalog", description: "Layered cards that emphasize texture, finish, variation, and horizontal browsing." },
+    { id: "catalog.room-set@1", name: "Scene-grouped catalog", description: "Scene-inspired product groupings that make collection relationships visible." },
   ],
   trust: [
-    { id: "trust.material-passport@1", name: "Material passport", description: "A structured material facts panel for textiles, furniture, construction, artisan, and industrial products." },
-    { id: "trust.ingredient-ledger@1", name: "Ingredient ledger", description: "A careful supplied-facts ledger for food, coffee, honey, agriculture, botanical beauty, and wellness." },
-    { id: "trust.specification-matrix@1", name: "Specification matrix", description: "A high-clarity facts matrix for technology, manufacturing, wholesale, equipment, and trade catalogs." },
+    { id: "trust.material-passport@1", name: "Material passport", description: "A structured panel for approved material, finish, construction, or composition facts." },
+    { id: "trust.ingredient-ledger@1", name: "Composition ledger", description: "A careful ledger for approved ingredients, contents, source facts, or handling details." },
+    { id: "trust.specification-matrix@1", name: "Specification matrix", description: "A high-clarity aligned matrix for supplied values that benefit from comparison." },
   ],
   call_to_action: [
-    { id: "call-to-action.magazine-close@1", name: "Magazine close", description: "An editorial inquiry invitation for fashion, beauty, furniture, artisan, food, and lifestyle brands." },
-    { id: "call-to-action.technical-brief@1", name: "Technical brief invitation", description: "A focused project and product inquiry close for technology, manufacturing, wholesale, and trade." },
+    { id: "call-to-action.magazine-close@1", name: "Magazine close", description: "A spacious editorial inquiry invitation with one visually dominant action." },
+    { id: "call-to-action.technical-brief@1", name: "Requirements brief invitation", description: "A focused close for requirement-led project or product inquiries." },
   ],
   footer: [
-    { id: "footer.magazine-masthead@1", name: "Magazine masthead footer", description: "A memorable editorial close for textile, beauty, furniture, artisan, food, and collection-rich showrooms." },
-    { id: "footer.technical-directory@1", name: "Technical directory footer", description: "A disciplined indexed close for technology, manufacturing, distribution, import, and wholesale catalogs." },
+    { id: "footer.magazine-masthead@1", name: "Magazine masthead footer", description: "A memorable editorial close with generous identity and bounded directory groups." },
+    { id: "footer.technical-directory@1", name: "Indexed directory footer", description: "A disciplined indexed close for contact details and compact directory links." },
   ],
 } as const satisfies Record<ShowroomSlot, readonly ComponentSeed[]>;
 
@@ -651,19 +651,19 @@ const components = [
 ];
 
 const tokenPacks = [
-  ["linen-luxury", "Linen luxury", "Restrained warmth for fashion, furniture, and premium artisan goods."],
-  ["harvest-earth", "Harvest earth", "Natural greens and grain tones for agriculture, food, and producer brands."],
-  ["honey-amber", "Honey amber", "Golden warmth for honey, food, ingredients, and welcoming retail."],
-  ["coffee-roast", "Coffee roast", "Deep roasted neutrals for coffee, cacao, hospitality goods, and craft."],
-  ["artisan-clay", "Artisan clay", "Tactile clay and blush tones for handmade goods, ceramics, and textiles."],
-  ["forest-botanical", "Forest botanical", "Rich botanical contrast for natural products, plants, and wellness goods."],
-  ["furniture-walnut", "Furniture walnut", "Quiet wood-inspired neutrals for furniture, interiors, and material catalogs."],
-  ["industrial-steel", "Industrial steel", "Precise steel and safety accents for manufacturing and equipment."],
-  ["maker-indigo", "Maker indigo", "Confident workshop color for makers, tools, textiles, and modern trade."],
-  ["ocean-trade", "Ocean trade", "Clear maritime blues for importers, distributors, and regional trade."],
-  ["beauty-editorial", "Beauty editorial", "Polished editorial color for beauty, fragrance, and personal care."],
-  ["technology-mono", "Technology mono", "High-clarity monochrome with an electric accent for technology."],
-  ["vibrant-market", "Vibrant market", "Energetic retail color for broad catalogs and social-first product brands."],
+  ["linen-luxury", "Warm eucalyptus", "Warm light neutrals with walnut and cool eucalyptus contrast."],
+  ["harvest-earth", "Field and clay", "Muted light neutrals with field green and clay contrast."],
+  ["honey-amber", "Amber and teal", "Soft parchment with amber and deep teal contrast."],
+  ["coffee-roast", "Copper and sage dark", "Dark roasted neutrals with warm copper and soft sage contrast."],
+  ["artisan-clay", "Terracotta and mineral", "Clay neutrals with terracotta and mineral-blue contrast."],
+  ["forest-botanical", "Leaf and ochre dark", "Deep green surfaces with leaf and ochre contrast."],
+  ["furniture-walnut", "Walnut and blue-green", "Warm architectural neutrals with walnut and blue-green contrast."],
+  ["industrial-steel", "Steel signal", "Cool steel neutrals with safety orange and technical blue contrast."],
+  ["maker-indigo", "Indigo and berry", "Cool light neutrals with indigo and muted-berry contrast."],
+  ["ocean-trade", "Ocean and brick", "Cool pale neutrals with ocean and brick contrast."],
+  ["beauty-editorial", "Blush and evergreen", "Blush neutrals with berry and evergreen contrast."],
+  ["technology-mono", "Signal monochrome", "High-clarity monochrome with signal blue and red contrast."],
+  ["vibrant-market", "Coral and teal", "Warm bright canvas with lively coral and teal contrast."],
 ].map(([id, name, description]) => ({ id, name, description }));
 
 export const SHOWROOM_COMPONENT_BANK_1_1 = deepFreeze(
@@ -729,11 +729,11 @@ function contentMediaSlots(
 
 const candidateTokenPacks = [
   ...SHOWROOM_COMPONENT_BANK_1_1.tokenPacks,
-  { id: "silk-atelier", name: "Silk atelier", description: "Luminous textile neutrals and saturated thread accents for fashion, fabric, artisan, and upholstery showrooms." },
-  { id: "cosmetic-laboratory", name: "Cosmetic laboratory", description: "Clean cosmetic whites with botanical and chromatic accents for beauty, wellness, fragrance, and personal care." },
-  { id: "chrome-future", name: "Chrome future", description: "Deep graphite, cool metal, and electric signal color for technology, equipment, and engineered product showrooms." },
-  { id: "paper-gallery", name: "Paper gallery", description: "Warm editorial paper and ink tones for furniture, artisan, collection, food, and design-led product stories." },
-  { id: "mineral-spa", name: "Mineral spa", description: "Stone, water, and mineral hues for wellness, botanical beauty, ceramics, interiors, and calm premium goods." },
+  { id: "silk-atelier", name: "Magenta and deep green", description: "Soft warm neutrals with saturated magenta and deep-green contrast." },
+  { id: "cosmetic-laboratory", name: "Rose and green clean", description: "Clean pale neutrals with rose and green contrast." },
+  { id: "chrome-future", name: "Graphite electric", description: "Deep graphite surfaces with electric cyan and amber contrast." },
+  { id: "paper-gallery", name: "Paper and vermilion", description: "Warm paper neutrals with vermilion and blue-green contrast." },
+  { id: "mineral-spa", name: "Mineral teal", description: "Mineral neutrals with muted teal and clay contrast." },
 ];
 
 export const SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE = deepFreeze(

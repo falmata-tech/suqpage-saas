@@ -89,7 +89,7 @@ choice.
   inquiries, and invitation/session data.
 - The brief shows one compact named contract manifest before the schemas. It
   explains that `recipe@1`, `content@1`, `content-blocks@1`, `design@2`,
-  component-bank schema `@2`, design-systems `@1`, and the separately versioned
+  component-bank schema `@2`, design-systems `@2`, and the separately versioned
   bank release are compatible nested contracts rather than competing choices.
 - The complete example is synthetic, client-independent, and structural-only.
   It demonstrates relationships, options, typed blocks, exact block assignment,

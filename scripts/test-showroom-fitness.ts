@@ -11,6 +11,10 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "../lib/showroom-bank-release";
 assert.equal(SHOWROOM_TEMPLATES.length, 8);
 for (const template of SHOWROOM_TEMPLATES) {
   assert.equal(template.components.length, 8);
+  assert.ok(template.description.length > 20);
+  assert.ok(template.contentNeeds.length > 0);
+  assert.ok(template.visualTones.length > 0);
+  assert.equal("archetypes" in template, false);
   for (const id of template.components) {
     assert.ok(
       SHOWROOM_COMPONENT_BANK_LATEST.components.some((component) => component.id === id),
@@ -22,6 +26,12 @@ for (const component of SHOWROOM_COMPONENT_BANK_LATEST.components) {
   const guidance = guidanceForComponent(component);
   assert.ok(guidance.noMediaFallbacks.length > 0);
   assert.equal(guidance.supportsRtl, true);
+  assert.ok(guidance.visualDescription.length > 40);
+  assert.ok(guidance.contentNeeds.length > 0);
+  assert.ok(guidance.idealWhen.length > 0);
+  assert.ok(guidance.avoidWhen.length > 0);
+  assert.equal("businessArchetypes" in guidance, false);
+  assert.equal("catalogModes" in guidance, false);
 }
 const business = getAllBusinesses().find((item) => item.handle === "selam-weave");
 assert.ok(business);

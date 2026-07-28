@@ -629,8 +629,46 @@ test("operations manager records on behalf and team member sees only assigned wo
 
   await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
   await page.goto(recipeStudioUrl);
+  const [briefDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download brief" }).click(),
+  ]);
+  const briefPath = await briefDownload.path();
+  expect(briefPath).toBeTruthy();
+  const brief = JSON.parse(fs.readFileSync(briefPath!, "utf8"));
   await page.getByText("Complete valid recipe example").click();
   const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
+  const {
+    schemaVersion: _snapshotSchemaVersion,
+    designManifest,
+    ...currentContent
+  } = brief.currentContent;
+  recipe.baseContentVersion = brief.baseContentVersion;
+  recipe.content = { schemaVersion: 1, ...currentContent };
+  recipe.design = designManifest;
+  recipe.mediaPlan = [];
+  const currentSource = brief.sourceFacts.find(
+    (source: { kind: string }) => source.kind === "current_showroom",
+  );
+  expect(currentSource).toBeTruthy();
+  const provenancePaths = ["$.content.business.name"];
+  for (const field of ["contactEmail", "whatsapp", "telegram", "tiktok"]) {
+    if (recipe.content.business[field]) {
+      provenancePaths.push(`$.content.business.${field}`);
+    }
+  }
+  recipe.content.products.forEach((_product: unknown, index: number) => {
+    provenancePaths.push(
+      `$.content.products[${index}].name`,
+      `$.content.products[${index}].description`,
+      `$.content.products[${index}].availability`,
+    );
+  });
+  recipe.provenance = provenancePaths.map((path) => ({
+    path,
+    sourceKey: currentSource.key,
+    kind: "source_fact",
+  }));
   recipe.summary="A revised hero prepared from the client’s private reference.";
   recipe.content.business.heroTitle="Acceptance approved showroom";
   await page.getByRole("textbox", { name: "Recipe JSON" }).fill(JSON.stringify(recipe));

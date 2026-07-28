@@ -4,7 +4,7 @@ title: Showroom blueprint media plan and composition fitness
 status: done
 related: [FE-007, FE-009, FE-014, FE-015, BE-008, BE-010, BE-011, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007]
 owners: [product, backend, security]
-last_updated: 2026-07-27
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -24,9 +24,10 @@ client review.
 - Strict media-plan entries containing purpose, owner key, required state,
   accepted kind, bounded count, aspect guidance, descriptive prompt, and
   illustrative/factual classification.
-- Bank metadata for media policy, no-media fallbacks, recommended catalog
-  counts, catalog modes, business archetypes, style families, long-title/RTL
-  support, mobile behavior, and fallback component.
+- Bank metadata for visual anatomy, media policy, no-media fallbacks,
+  recommended catalog counts, commerce modes, content needs, visual tones,
+  long-title/RTL support, responsive behavior, ideal/avoid conditions, and
+  fallback component.
 - A static reviewed showroom-template registry that selects page sequence before
   individual component variants.
 - A deterministic composition-fitness report with hard failures and warnings.
@@ -53,9 +54,17 @@ client review.
 - Warnings include unnecessary search/filter controls, repeated factual image
   use, consecutive identical surface/geometry, repeated business description,
   long-copy risk, and weak optional-media coverage.
-- Templates encode reviewed slot order, accepted archetypes/catalog modes,
-  preferred component families, and fallback behavior. They contain no tenant
-  facts or arbitrary markup.
+- Templates encode reviewed slot order, content needs, catalog shape, commerce
+  modes, media condition, visual tone, preferred component families, and
+  fallback behavior. They contain no tenant facts, industry/archetype
+  recommendations, or arbitrary markup.
+- Every component receives an explicitly assigned selection profile. Profiles
+  are never inferred from industry words in component IDs or names. Legacy IDs
+  remain stable for compatibility but are not machine-readable suitability
+  evidence.
+- Design systems describe objective palette, type, shape, density, rhythm, and
+  media behavior. Their guidance contains visual tones only and no industry or
+  business-archetype metadata.
 - Fitness scoring is deterministic and advisory except for explicit hard
   failures. The AI cannot waive security, media, provenance, or publication
   requirements.
@@ -86,6 +95,13 @@ Scenario: AI duplicates category browsing
   WHEN its catalog section also enables category filters
   THEN composition fitness reports a duplicate-navigation hard failure
   AND the recipe must choose one control owner before review
+
+Scenario: Component guidance is explicit and industry-neutral
+  GIVEN the current component-bank release is exported in a recipe brief
+  WHEN selection guidance is generated
+  THEN every admitted component has an explicit visual-anatomy profile
+  AND no profile is inferred by matching words in its identifier
+  AND component, template, and design-system guidance contains no industry archetype field
 
 Scenario: Portable product media destination is imported
   GIVEN a brief maps a product relationship to an opaque key
@@ -144,3 +160,8 @@ Evidence: implemented and verified on 2026-07-27.
 - Portable recipe briefs now expose exact media owner/slot triples, the schema
   constrains business and product slot names, and recipe regression evidence
   proves product media owner keys survive opaque-key normalization.
+- Design-system contract `@2` removes archetype guidance. Eight templates use
+  content needs, catalog shape, commerce mode, media condition, and visual
+  tones; every bank component maps to an explicit non-regex selection profile.
+  Bank tests prohibit industry steering in exported descriptions, and
+  `npm run check`, `npm run release`, and 10/10 browser acceptance pass.

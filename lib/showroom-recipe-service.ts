@@ -57,7 +57,7 @@ export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
   design: "suqpage.showroom-design@2",
   componentBankSchema: "suqpage.component-bank@2",
   componentBankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
-  designSystems: "suqpage.showroom-design-systems@1",
+  designSystems: "suqpage.showroom-design-systems@2",
 });
 
 const opaque = (prefix: string, requestId: number, value: string) =>
@@ -734,6 +734,22 @@ export function buildShowroomRecipeBrief(
       componentBank: SHOWROOM_COMPONENT_BANK_LATEST,
       designSystems: Object.values(SHOWROOM_DESIGN_SYSTEMS),
       compositionGuidance: {
+        selectionPolicy: {
+          identifiersAreSuitabilitySignals: false,
+          prohibitedSignals: ["industry", "business_archetype"],
+          decisionOrder: [
+            "content_needs",
+            "catalog_shape",
+            "commerce_mode",
+            "available_media",
+            "layout_anatomy",
+            "responsive_behavior",
+            "visual_tone",
+            "design_tokens",
+          ],
+          instruction:
+            "Choose by objective fit. Legacy IDs are stable references only and must not be interpreted as industry recommendations.",
+        },
         templates: SHOWROOM_TEMPLATES,
         components: Object.fromEntries(
           SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
@@ -756,7 +772,7 @@ export function buildShowroomRecipeBrief(
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
-        "Choose one design system from designSystems before choosing a template or component. Match archetype, tone, density, typography, palette roles, section rhythm, and media behavior.",
+        "Choose one design system from designSystems before choosing a template or component. Ignore industry implications in legacy IDs. Match objective content needs, catalog shape, commerce mode, available media, visual tone, density, typography, palette roles, section rhythm, and responsive behavior.",
         "Choose mediaIntegration explicitly for every media-bearing hero or story section. Use ambient_overlay, edge_fade, split_bleed, editorial_overlap, product_stage, or hidden so factual images integrate with the section surface instead of appearing in bordered image blocks.",
         "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
         "Declare every intentionally removed stable key.",

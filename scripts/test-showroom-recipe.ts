@@ -190,7 +190,7 @@ async function main() {
       design: "suqpage.showroom-design@2",
       componentBankSchema: "suqpage.component-bank@2",
       componentBankRelease: "showroom-bank@1.2.0",
-      designSystems: "suqpage.showroom-design-systems@1",
+      designSystems: "suqpage.showroom-design-systems@2",
     });
     assert.equal(exported.brief.requiredRecipeSchemaVersion, 1);
     assert.equal(exported.brief.requiredContentSchemaVersion, 1);
@@ -281,12 +281,39 @@ async function main() {
     assert.equal(exported.brief.designSystems.length, 18);
     assert.equal(exported.brief.compositionGuidance.templates.length, 8);
     assert.equal(
+      exported.brief.compositionGuidance.selectionPolicy
+        .identifiersAreSuitabilitySignals,
+      false,
+    );
+    assert.deepEqual(
+      exported.brief.compositionGuidance.selectionPolicy.prohibitedSignals,
+      ["industry", "business_archetype"],
+    );
+    assert.equal(
       Object.keys(exported.brief.compositionGuidance.components).length,
       67,
     );
     assert.equal(
       exported.brief.schemas.designSystem.items.properties.shape.properties.radius.maximum,
       8,
+    );
+    assert.equal(
+      "archetypes" in
+        exported.brief.schemas.designSystem.items.properties.guidance.properties,
+      false,
+    );
+    assert.ok(
+      exported.brief.designSystems.every(
+        (system) => !("archetypes" in system.guidance),
+      ),
+    );
+    assert.ok(
+      Object.values(exported.brief.compositionGuidance.components).every(
+        (guidance) =>
+          !("businessArchetypes" in guidance) &&
+          guidance.visualDescription.length > 40 &&
+          guidance.avoidWhen.length > 0,
+      ),
     );
     assert.equal(
       exported.brief.schemas.designSystem.items.properties.media.properties

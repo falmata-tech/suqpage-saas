@@ -315,8 +315,12 @@ export default function DesignBankLaboratory({
         <div>
           <strong>{template.name}</strong>
           <p>
-            {template.archetypes.join(", ").replaceAll("_", " ")} ·{" "}
-            {template.catalogModes.join(", ")} · {template.tokenPack}
+            {template.description}
+          </p>
+          <p>
+            {template.catalogShape.replaceAll("_", " ")} catalog ·{" "}
+            {template.commerceModes.join(", ")} ·{" "}
+            {template.mediaCondition.replaceAll("_", " ")} media
           </p>
           <div className={styles.templateSequence}>
             {template.components.map((component, index) => (
@@ -394,13 +398,17 @@ export default function DesignBankLaboratory({
                 {guidance ? (
                   <div className={styles.guidanceGrid} aria-label="Machine-readable selection guidance">
                     <span>{guidance.requiresMedia ? "Media required" : "No-media ready"}</span>
-                    <span>Mobile: {guidance.mobileBehavior.replaceAll("_", " ")}</span>
+                    <span>Layout: {guidance.layoutFamily.replaceAll("_", " ")}</span>
+                    <span>Media role: {guidance.mediaRole}</span>
+                    <span>Responsive: {guidance.responsiveBehavior.replaceAll("_", " ")}</span>
                     {guidance.recommendedProductCount ? (
                       <span>
                         Products: {guidance.recommendedProductCount.min}-
                         {guidance.recommendedProductCount.max}
                       </span>
                     ) : null}
+                    <span>Needs: {guidance.contentNeeds.join(", ").replaceAll("_", " ")}</span>
+                    <span>Tones: {guidance.visualTones.join(", ")}</span>
                     <span>Fallbacks: {guidance.noMediaFallbacks.join(", ").replaceAll("_", " ")}</span>
                   </div>
                 ) : null}

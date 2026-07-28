@@ -4,7 +4,7 @@ title: Recipe blueprint media studio
 status: done
 related: [FE-007, FE-009, BE-008, BE-010, BE-013, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-27
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -31,6 +31,9 @@ slots before client review.
   explicitly secondary Advanced recovery disclosure.
 - A visible readiness summary that distinguishes blueprint validity, preview
   readiness, and client-review readiness.
+- Industry-neutral component and template guidance that gives staff and AI a
+  concrete mental model of layout anatomy, media behavior, visual character,
+  content tolerance, responsive transformation, and unsuitable conditions.
 
 ### Non-goals
 
@@ -64,6 +67,13 @@ slots before client review.
   route after import.
 - The complete workflow is keyboard usable and has no horizontal page overflow
   at 320 and 390 CSS pixels.
+- Component names and legacy IDs are identifiers, not suitability signals.
+  Selection guidance never recommends components, templates, or design systems
+  by industry. It uses the actual content need, catalog shape, commerce mode,
+  available media, visual tone, density, and responsive behavior.
+- The design-bank laboratory presents the same machine-readable selection
+  factors exported to AI, so staff can review why a choice fits without relying
+  on private implementation knowledge or an after-the-fact screenshot.
 
 ## Scenarios
 
@@ -98,6 +108,13 @@ Scenario: Client attempts to use the media studio
   GIVEN an authenticated client
   WHEN the client requests a blueprint, slot upload, or focused-edit route
   THEN access is denied before recipe or asset details are disclosed
+
+Scenario: AI chooses without industry stereotypes
+  GIVEN the component bank contains legacy names associated with particular products
+  WHEN the AI receives composition guidance
+  THEN every component has an objective layout and visual-behavior description
+  AND suitability is expressed through content, catalog, media, commerce, and responsive conditions
+  AND no industry or business-archetype recommendation is exported
 ```
 
 ## Quality impact
@@ -147,3 +164,7 @@ Evidence: implemented and verified on 2026-07-27.
 - Recipe briefs now enumerate exact portable media destinations and demonstrate
   optional product photography plans for empty image references. Recipe
   integration tests prove opaque media owner keys normalize with product keys.
+- Component and template selection is now industry-neutral. The design-bank
+  laboratory exposes objective layout, media, responsive, content-need, and
+  visual-tone guidance; all 67 admitted components have an explicit reviewed
+  profile and browser acceptance passes 10/10.

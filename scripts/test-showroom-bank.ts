@@ -262,7 +262,7 @@ const combinedDescriptions = [
   ...SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.map((entry) => entry.description),
   ...SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.tokenPacks.map((entry) => entry.description),
 ].join(" ");
-for (const industry of [
+for (const industrySignal of [
   "agriculture",
   "coffee",
   "honey",
@@ -270,14 +270,16 @@ for (const industry of [
   "artisan",
   "manufactur",
   "import",
-  "wholesale",
   "beauty",
   "technology",
+  "cosmetic",
+  "textile",
+  "fashion",
 ]) {
-  assert.match(
+  assert.doesNotMatch(
     combinedDescriptions.toLowerCase(),
-    new RegExp(industry),
-    `bank guidance must cover ${industry}`,
+    new RegExp(industrySignal),
+    `bank descriptions must not steer selection through ${industrySignal}`,
   );
 }
 
