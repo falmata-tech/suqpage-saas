@@ -165,6 +165,7 @@ export function BankHeaderSection({
   return (
     <header
       className={`${styles.section} ${styles.header}`}
+      data-slot="header"
       data-variant={variant}
       data-density={
         typeof properties?.density === "string"
@@ -629,6 +630,7 @@ export function BankFooterSection({
   return (
     <footer
       className={`${styles.section} ${styles.footer}`}
+      data-slot="footer"
       data-variant={variant}
       data-alignment={
         typeof properties?.alignment === "string"

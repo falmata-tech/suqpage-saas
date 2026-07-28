@@ -146,13 +146,35 @@ const contrast = (first: string, second: string) => {
   const values = [luminance(first), luminance(second)].sort((a, b) => b - a);
   return (values[0] + 0.05) / (values[1] + 0.05);
 };
+const channelSpread = (hex: string) => {
+  const values = channels(hex);
+  return Math.max(...values) - Math.min(...values);
+};
 for (const system of Object.values(SHOWROOM_DESIGN_SYSTEMS)) {
   assert.ok(contrast(system.colors.text, system.colors.canvas) >= 4.5);
   assert.ok(contrast(system.colors.text, system.colors.surface) >= 4.5);
   assert.ok(
+    contrast(system.colors.text, system.colors.layer) >= 4.5,
+    `${system.id} neutral layer text contrast`,
+  );
+  assert.ok(
     contrast(system.colors.onSecondary, system.colors.secondary) >= 4.5,
     `${system.id} secondary control contrast`,
   );
+  assert.ok(
+    contrast(system.colors.onStrong, system.colors.strong) >= 4.5,
+    `${system.id} strong surface contrast`,
+  );
+  assert.ok(
+    contrast(system.colors.onInverse, system.colors.inverse) >= 4.5,
+    `${system.id} inverse surface contrast`,
+  );
+  for (const role of ["canvas", "surface", "layer"] as const) {
+    assert.ok(
+      channelSpread(system.colors[role]) <= 20,
+      `${system.id} ${role} must remain a neutral foundation`,
+    );
+  }
   const primary = channels(system.colors.primary);
   const secondary = channels(system.colors.secondary);
   const colorDistance = Math.sqrt(
@@ -179,6 +201,7 @@ for (const token of Object.values(SHOWROOM_BANK_TOKEN_STYLES)) {
   for (const variable of [
     "--bank-bg",
     "--bank-surface",
+    "--bank-layer",
     "--bank-ink",
     "--bank-muted",
     "--bank-accent",
@@ -188,6 +211,9 @@ for (const token of Object.values(SHOWROOM_BANK_TOKEN_STYLES)) {
     "--bank-on-secondary",
     "--bank-section-alt",
     "--bank-section-strong",
+    "--bank-on-strong",
+    "--bank-inverse",
+    "--bank-on-inverse",
     "--bank-line",
     "--bank-radius",
     "--bank-display",

@@ -6,17 +6,22 @@ import {
   guidanceForComponent,
   SHOWROOM_DESIGN_PROCESS,
   SHOWROOM_MEDIA_TREATMENTS,
+  SHOWROOM_CANONICAL_SURFACE_SEQUENCE,
   SHOWROOM_TEMPLATES,
 } from "../lib/showroom-guidance";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "../lib/showroom-bank-release";
 
 assert.equal(SHOWROOM_TEMPLATES.length, 8);
 for (const template of SHOWROOM_TEMPLATES) {
-  assert.ok(template.sectionPlan.length >= 6);
+  assert.equal(template.sectionPlan.length, 7);
+  assert.deepEqual(
+    template.sectionPlan.map((section) => section.slot),
+    ["header", "hero", "content", "content", "catalog", "call_to_action", "footer"],
+  );
   assert.ok(template.description.length > 20);
   assert.ok(template.contentNeeds.length > 0);
   assert.ok(template.visualTones.length > 0);
-  assert.ok(template.surfaceSequence.length >= template.sectionPlan.length);
+  assert.deepEqual(template.surfaceSequence, SHOWROOM_CANONICAL_SURFACE_SEQUENCE);
   assert.ok(template.pacingRules.length >= 2);
   assert.ok(template.avoidWhen.length > 0);
   assert.ok(template.signatureBudget <= 2);
@@ -84,7 +89,38 @@ const duplicateControlsResult = evaluateCompositionFitness(duplicateControls);
 assert.equal(duplicateControlsResult.allowed, false);
 assert.ok(
   duplicateControlsResult.issues.some(
-    (issue) => issue.code === "duplicate_category_controls",
+    (issue) =>
+      issue.code === "duplicate_category_controls" ||
+      issue.code === "noncanonical_section_count",
+  ),
+);
+
+const reordered = structuredClone(snapshot);
+const story = reordered.designManifest.sections[2];
+reordered.designManifest.sections[2] = reordered.designManifest.sections[3];
+reordered.designManifest.sections[3] = story;
+assert.ok(
+  evaluateCompositionFitness(reordered).issues.some(
+    (issue) => issue.code === "noncanonical_section_order",
+  ),
+);
+
+const filler = structuredClone(snapshot);
+filler.designManifest.sections.splice(4, 0, {
+  key: "trust-filler",
+  component: "trust.metrics@1",
+  contentBlockKey: null,
+  properties: {
+    density: "comfortable",
+    motion_intensity: "quiet",
+    decorative_depth: "clean",
+  },
+  bindings: {},
+  surfaceRole: "surface",
+});
+assert.ok(
+  evaluateCompositionFitness(filler).issues.some(
+    (issue) => issue.code === "noncanonical_section_count",
   ),
 );
 

@@ -150,6 +150,8 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
     const mediaIntegration =
       (await heroSection.getAttribute("data-media-integration")) || "";
     expect([
+      "natural",
+      "surface_blend",
       "ambient_overlay",
       "edge_fade",
       "split_bleed",
@@ -165,19 +167,28 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
       return {
         width: bounds.width,
         height: bounds.height,
-        ratio: bounds.width / bounds.height,
         borderWidth:
           Number.parseFloat(style.borderLeftWidth) +
           Number.parseFloat(style.borderRightWidth),
       };
     });
     expect(heroGeometry.width).toBeGreaterThan(0);
-    expect(heroGeometry.height).toBeLessThanOrEqual(620);
+    expect(heroGeometry.width).toBeLessThanOrEqual(1280);
+    expect(heroGeometry.height).toBeGreaterThanOrEqual(240);
+    expect(heroGeometry.height).toBeLessThanOrEqual(720);
     expect(heroGeometry.borderWidth).toBe(0);
-    if (mediaIntegration !== "split_bleed") {
-      expect(heroGeometry.ratio).toBeGreaterThanOrEqual(1.58);
-      expect(heroGeometry.ratio).toBeLessThanOrEqual(1.62);
-    }
+    expect(
+      await page.locator("[data-composition-schema] [data-slot]").evaluateAll(
+        (sections) =>
+          sections.map((section) => section.getAttribute("data-slot")).join(">"),
+      ),
+    ).toBe("header>hero>content>content>catalog>callToAction>footer");
+    expect(
+      await page.locator("[data-composition-schema] [data-slot]").evaluateAll(
+        (sections) =>
+          sections.map((section) => section.getAttribute("data-surface")).join(">"),
+      ),
+    ).toBe("surface>soft>surface>soft>canvas>strong>inverse");
     const catalog = page.locator('[data-slot="catalog"]');
     const catalogVariant = await catalog.getAttribute("data-variant");
     if (catalogVariant === "minimal-list") {
@@ -304,12 +315,21 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
     await expect(page.locator(".sr-card").first()).toBeVisible();
     await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
     await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
-    expect(
-      await page.locator('[data-slot="hero"] img').first().evaluate((image) => {
+    const mobileHeroMedia = await page
+      .locator('[data-slot="hero"] img')
+      .first()
+      .evaluate((image) => {
         const bounds = image.getBoundingClientRect();
-        return bounds.width / bounds.height;
-      }),
-    ).toBeGreaterThanOrEqual(1.58);
+        return {
+          width: bounds.width,
+          height: bounds.height,
+          objectFit: getComputedStyle(image).objectFit,
+        };
+      });
+    expect(mobileHeroMedia.width).toBeGreaterThan(0);
+    expect(mobileHeroMedia.height).toBeGreaterThan(0);
+    expect(mobileHeroMedia.height).toBeLessThanOrEqual(520);
+    expect(["cover", "contain"]).toContain(mobileHeroMedia.objectFit);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,

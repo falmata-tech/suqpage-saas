@@ -67,6 +67,16 @@ additive v4 domain boundary that preserves all retained releases.
 - Composition templates describe page intent, section roles, pacing, surface
   rhythm, signature budget, and content/media requirements. They do not bind an
   industry, tenant type, token pack, or one mandatory sequence of component IDs.
+- The normal generated-page profile has one immutable semantic section order:
+  header, hero, about/story content, process/highlights content, catalog,
+  call-to-action, and footer. Fitness rejects missing, extra, duplicated, or
+  reordered slots and rejects standalone navigation/trust sections for this
+  profile. Component IDs may vary only within the compatible slot and typed
+  content assignment.
+- Semantic design systems declare neutral canvas, surface, and layer roles plus
+  exact strong/onStrong and inverse/onInverse pairs. Runtime variables and
+  contrast tests use those pairs directly; a child cannot keep onSecondary text
+  when its parent renders on inverse or strong.
 - Exact typed-block assignment errors identify the specific unassigned or
   multiply assigned block key and the required correction. They never collapse
   an actionable key mismatch into a generic whole-design error.
@@ -121,6 +131,12 @@ Scenario: Exported guidance and runtime drift
   WHEN bank admission compares guidance, component properties, tokens, and renderer support
   THEN the release fails if that behavior has no reviewed runtime representation
   AND the AI is not offered fictional visual capabilities
+
+Scenario: Normal recipe adds a filler section
+  GIVEN a normal design-v2 recipe already contains the canonical seven sections
+  WHEN it adds a trust panel, standalone navigation, second story, or another catalog
+  THEN composition fitness rejects the recipe with the unexpected section key
+  AND no private candidate is marked review-ready
 
 Scenario: Unauthorized focused command is called directly
   GIVEN a client, unassigned staff actor, submitted revision, or another tenant

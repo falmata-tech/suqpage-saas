@@ -139,6 +139,13 @@ Each client composition can have its own:
 
 Shared behavior is acceptable. Shared visual identity is not.
 
+Normal generated showrooms share one purposeful information architecture:
+header, hero, about/story, process, products, inquiry call-to-action, and
+footer. The AI varies the visual anatomy, media treatment, typography, density,
+and component choice inside those roles; it does not add trust ledgers,
+information summaries, standalone navigation, or other filler chapters, and it
+does not reorder the five content sections.
+
 Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components
@@ -830,8 +837,11 @@ remaining AI-assisted delivery sequence is recorded in
   Bank 1.1 remains immutable and readable for retained revisions.
 - Those 18 systems are machine-readable semantic foundations, not color names
   alone. Each declares canvas/surface/text, primary and distinct secondary
-  roles, on-color contrast, border, typography, spacing, shape, layout rhythm,
-  product-media bounds, and preferred/allowed hero-media integration.
+  roles, neutral layer hierarchy, exact strong/onStrong and inverse/onInverse
+  contrast pairs, border, typography, spacing, shape, layout rhythm,
+  product-media bounds, and preferred/allowed hero-media integration. Canvas,
+  surface, and layer remain neutral; brand color is reserved for controls and
+  deliberate emphasis rather than tinting every page band.
 - Required-slot choices and tokens provide 98,280 validated base combinations
   before optional navigation, content, trust, call-to-action, and bounded
   component properties are counted. Combination volume never replaces visual,
@@ -907,6 +917,9 @@ remaining AI-assisted delivery sequence is recorded in
 - Eight reviewed abstract composition templates describe section roles, pacing,
   surface rhythm, and signature budget before individual variants are chosen;
   they do not prescribe an industry, token pack, or exact component sequence.
+  Every normal template preserves the same semantic order: header, hero,
+  about/story, process, catalog, inquiry CTA, footer. Templates differ in
+  anatomy and art direction, not information architecture.
   Machine-readable guidance declares rendered anatomy, true media-plane count,
   no-media support, fallback treatments, commerce modes, content needs, visual
   tones, recommended product/category counts, long-title and RTL support,

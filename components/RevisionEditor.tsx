@@ -8,10 +8,7 @@ import {
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomPrimitive } from "@/lib/showroom-composition";
-import type {
-  SectionSurfaceRole,
-  ShowroomSectionV2,
-} from "@/lib/showroom-composition-v2";
+import type { ShowroomSectionV2 } from "@/lib/showroom-composition-v2";
 import type { RevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 
 type MediaOption = { value: string; label: string; kind: "image" | "video" };
@@ -353,20 +350,6 @@ export default function RevisionEditor({
                       </select>
                     </div>
                   ) : null}
-                  <div className="field">
-                    <label>{section.key} surface</label>
-                    <select
-                      aria-label={`${section.key} surface`}
-                      value={section.surfaceRole || "canvas"}
-                      onChange={(event) => updateSection(index, {
-                        surfaceRole: event.target.value as SectionSurfaceRole,
-                      })}
-                    >
-                      {["canvas", "surface", "soft", "strong", "inverse"].map((value) => (
-                        <option key={value}>{value}</option>
-                      ))}
-                    </select>
-                  </div>
                   {current?.slot === "hero" || current?.slot === "content" ? (
                     <div className="field">
                       <label>{section.key} media treatment</label>

@@ -319,6 +319,8 @@
   font-family: var(--bank-body);
   font-size: var(--bank-body-size);
   --bank-active-surface: var(--bank-bg);
+  --bank-active-ink: var(--bank-ink);
+  --bank-active-muted: var(--bank-muted);
   --bank-motion-scale: 1;
 }
 
@@ -333,25 +335,29 @@
 }
 
 .section[data-surface="soft"] {
-  --bank-active-surface: var(--bank-secondary-soft);
-  background-color: var(--bank-secondary-soft);
+  --bank-active-surface: var(--bank-layer);
+  background-color: var(--bank-layer);
 }
 
 .section[data-surface="strong"] {
-  --bank-active-surface: var(--bank-secondary);
-  background-color: var(--bank-secondary);
-  color: var(--bank-on-secondary);
+  --bank-active-surface: var(--bank-section-strong);
+  --bank-active-ink: var(--bank-on-strong);
+  --bank-active-muted: color-mix(in srgb, var(--bank-on-strong) 78%, transparent);
+  background-color: var(--bank-section-strong);
+  color: var(--bank-on-strong);
 }
 
 .section[data-surface="inverse"] {
-  --bank-active-surface: var(--bank-ink);
-  background-color: var(--bank-ink);
-  color: var(--bank-bg);
+  --bank-active-surface: var(--bank-inverse);
+  --bank-active-ink: var(--bank-on-inverse);
+  --bank-active-muted: color-mix(in srgb, var(--bank-on-inverse) 78%, transparent);
+  background-color: var(--bank-inverse);
+  color: var(--bank-on-inverse);
 }
 
 .section[data-surface="strong"] :is(.kicker, p, .contentBody, .navigationLabel),
 .section[data-surface="inverse"] :is(.kicker, p, .contentBody, .navigationLabel) {
-  color: inherit;
+  color: var(--bank-active-ink);
 }
 
 .section[data-density="compact"] {
@@ -637,6 +643,11 @@
   color: var(--bank-bg);
   font-weight: 900;
   text-decoration: none;
+}
+
+.callToAction > button {
+  background: var(--bank-active-ink);
+  color: var(--bank-active-surface);
 }
 
 .heroVisual {
@@ -1234,7 +1245,8 @@
   justify-content: space-between;
   gap: 22px;
   padding: var(--bank-section-pad);
-  background: var(--bank-secondary-soft);
+  background: var(--bank-active-surface);
+  color: var(--bank-active-ink);
 }
 
 .callToAction > div {
@@ -1243,7 +1255,7 @@
 
 .callToAction p {
   margin: 9px 0 0;
-  color: var(--bank-muted);
+  color: var(--bank-active-muted);
   font-size: 0.75rem;
 }
 
@@ -1254,7 +1266,7 @@
 
 .callToAction[data-variant="wholesale"] {
   border: 2px solid var(--bank-ink);
-  background: var(--bank-bg);
+  background: var(--bank-active-surface);
 }
 
 .callToAction[data-variant="sample-question"] {
@@ -1262,12 +1274,12 @@
 }
 
 .callToAction[data-variant="consultation"] {
-  background: var(--bank-section-strong);
-  color: var(--bank-on-secondary);
+  background: var(--bank-active-surface);
+  color: var(--bank-active-ink);
 }
 
 .callToAction[data-variant="consultation"] p {
-  color: var(--bank-accent-soft);
+  color: var(--bank-active-muted);
 }
 
 .footer {
@@ -1279,13 +1291,13 @@
     max(28px, env(safe-area-inset-bottom))
     max(28px, env(safe-area-inset-left));
   border-top: 1px solid var(--bank-line);
-  background: var(--bank-section-strong);
-  color: var(--bank-on-secondary);
+  background: var(--bank-active-surface);
+  color: var(--bank-active-ink);
 }
 
 .footer p,
 .footer span {
-  color: color-mix(in srgb, var(--bank-on-secondary) 78%, transparent);
+  color: var(--bank-active-muted);
   font-size: 0.68rem;
   line-height: 1.5;
 }
@@ -1299,7 +1311,7 @@
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--bank-on-secondary);
+  color: var(--bank-active-ink);
   font-size: 0.68rem;
   text-align: left;
 }
@@ -1727,13 +1739,13 @@
 }
 
 .catalog[data-variant="technology-spec"] .productGrid {
-  gap: 1px;
-  padding: 1px;
-  background: var(--bank-line);
+  gap: 12px;
+  padding: 0;
+  background: transparent;
 }
 
 .catalog[data-variant="technology-spec"] .productCard {
-  border: 0;
+  border: 1px solid var(--bank-line);
   border-radius: 0;
 }
 
@@ -1774,12 +1786,12 @@
 .callToAction[data-variant="magazine-close"] {
   min-height: 220px;
   border-block: 1px solid var(--bank-line);
-  background: var(--bank-secondary-soft);
+  background: var(--bank-active-surface);
 }
 
 .callToAction[data-variant="technical-brief"] {
   border: 2px solid var(--bank-ink);
-  background: var(--bank-section-alt);
+  background: var(--bank-active-surface);
 }
 
 .footer[data-variant="magazine-masthead"] {
@@ -1795,7 +1807,7 @@
   border-top: 4px solid var(--bank-accent);
   background:
     linear-gradient(90deg, transparent 49.8%, color-mix(in srgb, var(--bank-line) 28%, transparent) 50%, transparent 50.2%),
-    var(--bank-ink);
+    var(--bank-active-surface);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

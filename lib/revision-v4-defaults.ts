@@ -37,13 +37,11 @@ type DefaultProfile = {
   tokenPack: string;
   motion: ShowroomMotionIntensity;
   decoration: ShowroomDecorativeDepth;
-  pacing: "story_first" | "catalog_first" | "facts_first" | "source_first";
   header: string;
   hero: string;
   story: string;
   highlights: string;
   catalog: string;
-  trust: string;
   cta: string;
   footer: string;
   ctaVariant: "magazine-close" | "technical-brief";
@@ -56,13 +54,11 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     tokenPack: "silk-atelier",
     motion: "quiet",
     decoration: "signature",
-    pacing: "story_first",
     header: "header.editorial-wordmark@1",
     hero: "hero.textile-swatch@1",
     story: "content.swatch-story@1",
     highlights: "content.process-steps@1",
     catalog: "catalog.textile-stack@1",
-    trust: "trust.material-passport@1",
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
@@ -73,13 +69,11 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     tokenPack: "cosmetic-laboratory",
     motion: "expressive",
     decoration: "signature",
-    pacing: "catalog_first",
     header: "header.compact-utility@1",
     hero: "hero.beauty-orbit@1",
-    story: "content.ritual-steps@1",
-    highlights: "content.lookbook-chapter@1",
+    story: "content.founder-note@1",
+    highlights: "content.ritual-steps@1",
     catalog: "catalog.beauty-swatch@1",
-    trust: "trust.ingredient-ledger@1",
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
@@ -90,13 +84,11 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     tokenPack: "chrome-future",
     motion: "balanced",
     decoration: "clean",
-    pacing: "facts_first",
     header: "header.technical-marquee@1",
     hero: "hero.technology-cinematic@1",
-    story: "content.exploded-feature@1",
-    highlights: "content.ritual-steps@1",
+    story: "content.editorial-quote@1",
+    highlights: "content.production-metrics@1",
     catalog: "catalog.technology-spec@1",
-    trust: "trust.specification-matrix@1",
     cta: "call-to-action.technical-brief@1",
     footer: "footer.technical-directory@1",
     ctaVariant: "technical-brief",
@@ -107,13 +99,11 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     tokenPack: "paper-gallery",
     motion: "balanced",
     decoration: "subtle",
-    pacing: "story_first",
     header: "header.catalog-command@1",
     hero: "hero.room-scene@1",
     story: "content.swatch-story@1",
     highlights: "content.process-steps@1",
     catalog: "catalog.room-set@1",
-    trust: "trust.material-passport@1",
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
@@ -130,9 +120,9 @@ DEFAULT_PROFILES["addis-metalworks"] = {
   ...DEFAULT_PROFILES.novatech,
   tokenPack: "industrial-steel",
   hero: "hero.industrial-spec@1",
-  story: "content.production-metrics@1",
+  story: "content.origin-story@1",
+  highlights: "content.production-metrics@1",
   catalog: "catalog.minimal-list@1",
-  pacing: "facts_first",
   heroMediaIntegration: "split_bleed",
   storyMediaIntegration: "natural",
 };
@@ -144,10 +134,8 @@ DEFAULT_PROFILES["green-terrace-farm"] = {
   story: "content.origin-story@1",
   highlights: "content.process-steps@1",
   catalog: "catalog.horizontal-shelf@1",
-  trust: "trust.provenance-panel@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
-  pacing: "source_first",
   heroMediaIntegration: "edge_fade",
   storyMediaIntegration: "natural",
 };
@@ -159,10 +147,8 @@ DEFAULT_PROFILES["blue-nile-apiary"] = {
   story: "content.origin-story@1",
   highlights: "content.process-steps@1",
   catalog: "catalog.collection-led@1",
-  trust: "trust.ingredient-ledger@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
-  pacing: "source_first",
   heroMediaIntegration: "surface_blend",
   storyMediaIntegration: "natural",
 };
@@ -171,38 +157,32 @@ DEFAULT_PROFILES["rift-valley-mill"] = {
   tokenPack: "coffee-roast",
   header: "header.producer-badge@1",
   hero: "hero.ingredient-monograph@1",
-  story: "content.process-steps@1",
+  story: "content.origin-story@1",
   highlights: "content.production-metrics@1",
   catalog: "catalog.collection-led@1",
-  trust: "trust.provenance-panel@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
-  pacing: "facts_first",
   heroMediaIntegration: "natural",
   storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["entoto-ceramics"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "artisan-clay",
-  pacing: "catalog_first",
   header: "header.editorial-wordmark@1",
   hero: "hero.material-detail@1",
   story: "content.material-focus@1",
   catalog: "catalog.editorial-grid@1",
-  trust: "trust.material-passport@1",
   heroMediaIntegration: "editorial_overlap",
   storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["koba-leather"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "maker-indigo",
-  pacing: "catalog_first",
   header: "header.compact-utility@1",
   hero: "hero.material-detail@1",
-  story: "content.process-steps@1",
-  highlights: "content.material-focus@1",
+  story: "content.material-focus@1",
+  highlights: "content.process-steps@1",
   catalog: "catalog.editorial-grid@1",
-  trust: "trust.material-passport@1",
   heroMediaIntegration: "edge_fade",
   storyMediaIntegration: "natural",
 };
@@ -211,13 +191,11 @@ const FALLBACK_PROFILE: DefaultProfile = {
   tokenPack: "paper-gallery",
   motion: "balanced",
   decoration: "subtle",
-  pacing: "story_first",
   header: "header.floating-capsule@1",
   hero: "hero.ingredient-monograph@1",
   story: "content.lookbook-chapter@1",
   highlights: "content.ritual-steps@1",
   catalog: "catalog.beauty-swatch@1",
-  trust: "trust.material-passport@1",
   cta: "call-to-action.magazine-close@1",
   footer: "footer.magazine-masthead@1",
   ctaVariant: "magazine-close",
@@ -318,27 +296,6 @@ function buildContentBlocks(
 ): ShowroomContentBlocksDocument {
   const business = catalog.business;
   const profile = profileFor(catalog);
-  const highlightedProducts = catalog.products.slice(0, 3);
-  const highlightItems = (
-    highlightedProducts.length
-      ? highlightedProducts.map((product) => ({
-          title: product.name,
-          body: product.eyebrow || product.description || "Available for inquiry.",
-        }))
-      : catalog.categories.slice(0, 3).map((category) => ({
-          title: category.name,
-          body: "Browse this showroom chapter and send one clear inquiry.",
-        }))
-  ).slice(0, 3);
-  const contact = firstText(
-    [
-      business.whatsapp && `WhatsApp ${business.whatsapp}`,
-      business.telegram && `Telegram @${business.telegram}`,
-      business.contact_email,
-      business.tiktok && `TikTok @${business.tiktok}`,
-    ],
-    "Inquiry confirmation through SuqPage",
-  );
   const blocks: ShowroomContentBlock[] = [
     {
       key: "hero-main",
@@ -366,33 +323,23 @@ function buildContentBlocks(
     {
       key: "showroom-highlights",
       type: "highlights",
-      kicker: "Highlights",
-      title: catalog.collections[0]?.name
-        ? `A closer look at ${catalog.collections[0].name}`
-        : "A closer look at the catalog",
-      body: "Selected products and supplied details that help visitors understand the range.",
-      media: [],
-      items: highlightItems.length
-        ? highlightItems
-        : [{ title: business.name, body: "Browse the catalog to start." }],
-    },
-    {
-      key: "showroom-information",
-      type: "information",
-      kicker: "Details",
-      title: "Before you inquire",
-      body: "The core facts customers need before starting an inquiry.",
+      kicker: "Process",
+      title: "From product selection to a clear inquiry",
+      body: "A simple path for turning supplied catalog details into a useful conversation.",
       media: [],
       items: [
-        { label: "Contact", value: contact },
         {
-          label: "Catalog",
-          value: `${catalog.products.length} products across ${Math.max(
-            catalog.categories.length,
-            1,
-          )} categories`,
+          title: "Explore the range",
+          body: "Review available products, options, and supplied details.",
         },
-        { label: "Confirmation", value: "Availability is confirmed after inquiry." },
+        {
+          title: "Share the requirement",
+          body: "Add products and note quantity, size, finish, or other needs.",
+        },
+        {
+          title: "Confirm the next step",
+          body: "The business confirms availability, options, and follow-up after inquiry.",
+        },
       ],
     },
     {
@@ -420,66 +367,6 @@ function buildDesignManifest(
   contentBlocks: ShowroomContentBlocksDocument,
 ): ShowroomDesignProposalV2 {
   const profile = profileFor(catalog);
-  const surfaceRoles = {
-    story_first: {
-      story: "canvas",
-      highlights: "surface",
-      catalog: "canvas",
-      trust: "soft",
-    },
-    catalog_first: {
-      story: "soft",
-      highlights: "surface",
-      catalog: "canvas",
-      trust: "canvas",
-    },
-    facts_first: {
-      story: "surface",
-      highlights: "soft",
-      catalog: "canvas",
-      trust: "canvas",
-    },
-    source_first: {
-      story: "surface",
-      highlights: "canvas",
-      catalog: "soft",
-      trust: "canvas",
-    },
-  } as const;
-  const roles = surfaceRoles[profile.pacing];
-  const middleSections = {
-    story: section("content-story", profile.story, profile, "brand-story", {
-      alignment: "start",
-    }, {
-      mediaIntegration: profile.storyMediaIntegration,
-      surfaceRole: roles.story,
-    }),
-    highlights: section("content-highlights", profile.highlights, profile, "showroom-highlights", {
-      alignment: "start",
-    }, {
-      surfaceRole: roles.highlights,
-    }),
-    catalog: section("catalog-1", profile.catalog, profile, null, {
-      show_search: catalog.products.length > 6,
-      show_filters: catalog.categories.length > 1,
-    }, {
-      surfaceRole: roles.catalog,
-    }),
-    trust: section("trust-1", profile.trust, profile, "showroom-information", {
-      columns: 3,
-    }, {
-      surfaceRole: roles.trust,
-    }),
-  };
-  const middleOrder: Record<
-    DefaultProfile["pacing"],
-    Array<keyof typeof middleSections>
-  > = {
-    story_first: ["story", "highlights", "catalog", "trust"],
-    catalog_first: ["catalog", "story", "highlights", "trust"],
-    facts_first: ["highlights", "catalog", "story", "trust"],
-    source_first: ["story", "trust", "catalog", "highlights"],
-  };
   return parseShowroomDesignProposalV2(
     {
       schemaVersion: 2,
@@ -502,7 +389,23 @@ function buildDesignManifest(
           mediaIntegration: profile.heroMediaIntegration,
           surfaceRole: "soft",
         }),
-        ...middleOrder[profile.pacing].map((key) => middleSections[key]),
+        section("content-story", profile.story, profile, "brand-story", {
+          alignment: "start",
+        }, {
+          mediaIntegration: profile.storyMediaIntegration,
+          surfaceRole: "surface",
+        }),
+        section("content-process", profile.highlights, profile, "showroom-highlights", {
+          alignment: "start",
+        }, {
+          surfaceRole: "soft",
+        }),
+        section("catalog-1", profile.catalog, profile, null, {
+          show_search: catalog.products.length > 6,
+          show_filters: catalog.categories.length > 1,
+        }, {
+          surfaceRole: "canvas",
+        }),
         section("call-to-action-1", profile.cta, profile, "inquiry-next", {
           alignment: profile.ctaVariant === "technical-brief" ? "start" : "center",
         }, {

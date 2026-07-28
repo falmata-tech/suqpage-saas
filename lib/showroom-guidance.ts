@@ -148,7 +148,6 @@ export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
     "commerce_mode_and_catalog_shape",
     "page_template",
     "semantic_design_system",
-    "surface_sequence",
     "section_anatomy",
     "media_treatment",
     "component_variant_and_properties",
@@ -157,6 +156,7 @@ export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
   ],
   rules: [
     "Choose one page template before individual component variants.",
+    "Preserve the canonical hero, about, process, products, and inquiry order.",
     "Choose semantic design roles by purpose, never by industry words in an ID.",
     "Spend the signature budget on the most important one or two sections.",
     "Treat media layout and media blending as separate decisions.",
@@ -277,15 +277,21 @@ export const SHOWROOM_MEDIA_TREATMENTS: Readonly<
 const STANDARD_SECTION_PLAN: ShowroomTemplateSection[] = [
   { role: "identity and primary actions", slot: "header", required: true, visualWeight: "quiet" },
   { role: "opening proposition", slot: "hero", required: true, visualWeight: "signature" },
-  { role: "supporting context", slot: "content", required: true, visualWeight: "supporting" },
+  { role: "about or story", slot: "content", required: true, visualWeight: "supporting" },
+  { role: "process", slot: "content", required: true, visualWeight: "supporting" },
   { role: "product discovery", slot: "catalog", required: true, visualWeight: "prominent" },
-  { role: "decision-support facts", slot: "trust", required: true, visualWeight: "supporting" },
   { role: "inquiry conversion", slot: "call_to_action", required: true, visualWeight: "prominent" },
   { role: "identity and contact close", slot: "footer", required: true, visualWeight: "quiet" },
 ];
 
+export const SHOWROOM_CANONICAL_SURFACE_SEQUENCE: readonly ShowroomSurfaceRole[] =
+  Object.freeze(["surface", "soft", "surface", "soft", "canvas", "strong", "inverse"]);
+
 function pageTemplate(
-  input: Omit<ShowroomTemplate, "sectionPlan" | "signatureBudget"> & {
+  input: Omit<
+    ShowroomTemplate,
+    "sectionPlan" | "signatureBudget" | "surfaceSequence"
+  > & {
     sectionPlan?: ShowroomTemplateSection[];
     signatureBudget?: 1 | 2;
   },
@@ -293,6 +299,7 @@ function pageTemplate(
   return {
     ...input,
     sectionPlan: input.sectionPlan || STANDARD_SECTION_PLAN,
+    surfaceSequence: [...SHOWROOM_CANONICAL_SURFACE_SEQUENCE],
     signatureBudget: input.signatureBudget || 2,
   };
 }
@@ -307,9 +314,8 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail"],
     mediaCondition: "optional",
     visualTones: ["editorial", "quiet"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     pacingRules: [
-      "Keep the opening concise, then reveal process before products.",
+      "Keep the opening concise, then move through about and process before products.",
       "Use no more than one image-dominant narrative section after the hero.",
     ],
     avoidWhen: ["the catalog is primarily specification comparison", "there is no useful process or material story"],
@@ -318,15 +324,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "source-led-shelf",
     name: "Source-led shelf",
     description: "An origin-first sequence with a horizontally browsable catalog and prominent contact handoff.",
-    contentNeeds: ["source_context", "product_discovery", "trust_facts", "contact_handoff"],
+    contentNeeds: ["source_context", "process_explanation", "product_discovery", "contact_handoff"],
     catalogShape: "focused",
     commerceModes: ["inquiry", "wholesale"],
     mediaCondition: "optional",
     visualTones: ["organic", "quiet"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "soft", "strong", "inverse"],
     pacingRules: [
-      "Establish supplied source context before the compact product shelf.",
-      "Keep provenance facts separate from promotional narrative.",
+      "Use the about section for supplied source context and the process section for how work or inquiries move.",
+      "Keep both sections concise before the compact product shelf.",
     ],
     avoidWhen: ["source or provenance facts are unavailable", "side-by-side specification comparison is essential"],
   }),
@@ -334,12 +339,11 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "guided-use-catalog",
     name: "Guided-use catalog",
     description: "A polished product sequence organized around use steps, visual chapters, and supplied detail facts.",
-    contentNeeds: ["usage_guidance", "category_browsing", "product_discovery", "trust_facts"],
+    contentNeeds: ["editorial_story", "usage_guidance", "category_browsing", "product_discovery"],
     catalogShape: "collection_led",
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["quiet", "playful"],
-    surfaceSequence: ["surface", "soft", "canvas", "soft", "canvas", "surface", "strong", "inverse"],
     pacingRules: [
       "Explain a bounded use sequence before asking visitors to compare products.",
       "Keep steps short enough to scan without hiding essential information.",
@@ -355,7 +359,6 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "quiet"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     pacingRules: [
       "Spend the primary signature on a scene-led opening.",
       "Group products only when supplied relationships are meaningful.",
@@ -366,12 +369,11 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "dense-rfq",
     name: "Dense RFQ",
     description: "A compact, indexed composition for comparison, supplied specifications, and requirement-led inquiries.",
-    contentNeeds: ["comparison", "trust_facts", "product_discovery", "inquiry_conversion"],
+    contentNeeds: ["editorial_story", "process_explanation", "comparison", "product_discovery"],
     catalogShape: "comparison_led",
     commerceModes: ["rfq", "wholesale", "inquiry"],
     mediaCondition: "optional",
     visualTones: ["technical", "precise"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     signatureBudget: 1,
     pacingRules: [
       "Prioritize supplied specifications, product names, and inquiry requirements over decorative media.",
@@ -383,15 +385,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "provenance-collection",
     name: "Provenance collection",
     description: "A source-and-story sequence followed by grouped products, factual proof, and a quantity conversation.",
-    contentNeeds: ["source_context", "editorial_story", "collection_browsing", "trust_facts"],
+    contentNeeds: ["source_context", "process_explanation", "collection_browsing", "product_discovery"],
     catalogShape: "collection_led",
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "optional",
     visualTones: ["organic", "editorial"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     pacingRules: [
       "Connect approved source context to real collection structure.",
-      "Do not repeat the same source paragraph in hero, story, and trust sections.",
+      "Do not repeat the same source paragraph in the hero and about section.",
     ],
     avoidWhen: ["collections are arbitrary or missing", "source claims would need to be inferred"],
   }),
@@ -404,7 +405,6 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "expressive"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     pacingRules: [
       "Use image and surface contrast to create two deliberate editorial peaks.",
       "Keep catalog cards bounded even when imagery is strong.",
@@ -415,12 +415,11 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "compact-service-catalog",
     name: "Compact service and catalog",
     description: "A restrained, information-forward sequence connecting process, a compact catalog, principles, and consultation.",
-    contentNeeds: ["process_explanation", "product_discovery", "trust_facts", "inquiry_conversion"],
+    contentNeeds: ["editorial_story", "process_explanation", "product_discovery", "inquiry_conversion"],
     catalogShape: "sparse",
     commerceModes: ["inquiry", "rfq"],
     mediaCondition: "optional",
     visualTones: ["precise", "utilitarian"],
-    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
     signatureBudget: 1,
     pacingRules: [
       "Keep the page short and information-forward.",
@@ -906,6 +905,53 @@ export function evaluateCompositionFitness(
 ): CompositionFitness {
   const issues: FitnessIssue[] = [];
   const sections = snapshot.designManifest.sections;
+  const contentTypeByKey = new Map(
+    snapshot.contentBlocks.blocks.map((block) => [block.key, block.type]),
+  );
+  const canonicalSections = [
+    { prefix: "header.", contentType: null },
+    { prefix: "hero.", contentType: "hero" },
+    { prefix: "content.", contentType: "story" },
+    { prefix: "content.", contentType: "highlights" },
+    { prefix: "catalog.", contentType: null },
+    { prefix: "call-to-action.", contentType: "call_to_action" },
+    { prefix: "footer.", contentType: null },
+  ] as const;
+  if (sections.length !== canonicalSections.length) {
+    issues.push({
+      severity: "error",
+      code: "noncanonical_section_count",
+      message:
+        "Normal showrooms use exactly seven sections: header, hero, about, process, products, inquiry CTA, and footer.",
+    });
+  } else {
+    canonicalSections.forEach((expected, index) => {
+      const section = sections[index];
+      const actualType = section.contentBlockKey
+        ? contentTypeByKey.get(section.contentBlockKey)
+        : null;
+      if (
+        !section.component.startsWith(expected.prefix) ||
+        actualType !== expected.contentType
+      ) {
+        issues.push({
+          severity: "error",
+          code: "noncanonical_section_order",
+          sectionKey: section.key,
+          message:
+            "Use this exact order and assignment: header, hero, about/story, process/highlights, products, inquiry CTA, footer.",
+        });
+      }
+      if (section.surfaceRole !== SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]) {
+        issues.push({
+          severity: "error",
+          code: "noncanonical_surface_sequence",
+          sectionKey: section.key,
+          message: `Section ${section.key} must use ${SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]} so the page returns to clear neutral layers before its strong close.`,
+        });
+      }
+    });
+  }
   if (sections.filter((section) => section.component.startsWith("navigation.")).length > 1) {
     issues.push({ severity: "error", code: "duplicate_navigation", message: "Use one category-navigation system." });
   }

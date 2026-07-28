@@ -12,6 +12,8 @@ const tokenPacks = new Set<string>();
 const heroTreatments = new Set<string>();
 const headerComponents = new Set<string>();
 const catalogComponents = new Set<string>();
+const storyComponents = new Set<string>();
+const processComponents = new Set<string>();
 const middleSequences = new Set<string>();
 const surfaceSequences = new Set<string>();
 for (const business of businesses) {
@@ -24,6 +26,7 @@ for (const business of businesses) {
   const componentIds = snapshot.designManifest.sections.map(
     (section) => section.component,
   );
+  assert.equal(componentIds.length, 7, `${business.handle} has the canonical section count`);
   assert.equal(
     new Set(componentIds).size,
     componentIds.length,
@@ -50,8 +53,12 @@ for (const business of businesses) {
   const catalogSection = snapshot.designManifest.sections.find((section) =>
     section.component.startsWith("catalog."),
   );
+  const storySection = snapshot.designManifest.sections[2];
+  const processSection = snapshot.designManifest.sections[3];
   assert.ok(catalogSection, `${business.handle} has one catalog`);
   catalogComponents.add(catalogSection.component);
+  storyComponents.add(storySection.component);
+  processComponents.add(processSection.component);
   middleSequences.add(
     snapshot.designManifest.sections
       .slice(2, -2)
@@ -83,7 +90,17 @@ assert.ok(tokenPacks.size >= 8, "benchmarks exercise at least eight semantic tok
 assert.ok(heroTreatments.size >= 6, "benchmarks exercise at least six hero media treatments");
 assert.ok(headerComponents.size >= 5, "benchmarks exercise at least five header anatomies");
 assert.ok(catalogComponents.size >= 7, "benchmarks exercise at least seven catalog anatomies");
-assert.ok(middleSequences.size >= 4, "benchmarks exercise at least four page pacing templates");
-assert.ok(surfaceSequences.size >= 4, "benchmarks exercise at least four semantic surface sequences");
+assert.ok(storyComponents.size >= 4, "benchmarks exercise at least four story anatomies");
+assert.ok(processComponents.size >= 3, "benchmarks exercise at least three process anatomies");
+assert.deepEqual(
+  [...middleSequences],
+  ["content-story>content-process>catalog-1"],
+  "all benchmarks preserve story, process, then products",
+);
+assert.deepEqual(
+  [...surfaceSequences],
+  ["surface>soft>surface>soft>canvas>strong>inverse"],
+  "all benchmarks preserve the neutral-to-emphasis surface hierarchy",
+);
 
-console.log("Ten validated benchmark showrooms, varied catalogs, templates, surfaces, media, and fitness passed.");
+console.log("Ten validated benchmark showrooms, canonical journeys, varied anatomy, media, and fitness passed.");

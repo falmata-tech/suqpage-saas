@@ -48,6 +48,9 @@ parity with the pixels rendered by that choice.
   and media tokens rather than a single page tint with descriptive-only tokens.
 - Ten fictional benchmark showrooms used as a cross-content visual evaluation,
   including sparse makers and dense manufacturer/RFQ catalogs.
+- One canonical public-showroom information architecture for normal recipes:
+  header, hero, about/story, process, products, inquiry CTA, and footer. Header
+  and footer are page chrome; the five content sections each have one clear job.
 
 ### Non-goals
 
@@ -74,6 +77,12 @@ parity with the pixels rendered by that choice.
   section, and strong-section roles. The secondary family must be intentionally
   distinct from the dominant family, and components distribute these semantic
   roles across the page instead of tinting every surface with one hue.
+- Every token direction also declares explicit neutral `layer`, `strong`,
+  `onStrong`, `inverse`, and `onInverse` roles. Canvas, surface, and layer are
+  neutral page hierarchy rather than pale brand-color swatches. Full-section
+  brand color is reserved for the final inquiry CTA or an explicitly reviewed
+  hero treatment; inverse is reserved for a deliberate close. Every foreground
+  is evaluated against the exact adjacent background it renders on.
 - Token metadata and runtime CSS remain in parity. Body/display typography,
   type scale, section spacing, content width, density, hero bounds, product
   ratio, and maximum product columns must visibly affect the rendered showroom.
@@ -129,6 +138,13 @@ parity with the pixels rendered by that choice.
   sequence, section anatomy, media treatment, and component variant. Templates
   describe composition and pacing rather than prescribing an industry or one
   exact component sequence.
+- Normal recipes always use this exact semantic order: one hero block, one
+  about/story block, one process/highlights block, one catalog, and one inquiry
+  CTA, surrounded by one header and one footer. Templates and AI choices vary
+  anatomy, alignment, density, typography, media treatment, and component
+  variant without adding filler sections or changing that order. Standalone
+  trust, information, navigation, and video chapters are not admitted in the
+  normal generated page.
 - Component metadata describes rendered anatomy, content flow, media role,
   visual weight, responsive behavior, ideal conditions, unsuitable conditions,
   compatible media treatments, and fallback behavior. Metadata cannot promise
@@ -215,6 +231,18 @@ Scenario: AI composes a coherent page instead of choosing isolated sections
   WHEN the AI follows the exported design decision sequence
   THEN it chooses one page template and one semantic foundation before section variants
   AND the resulting surface rhythm, visual weights, and media treatments pass composition fitness
+
+Scenario: Every normal showroom has a purposeful fixed spine
+  GIVEN any valid normal showroom recipe
+  WHEN its design sections are validated
+  THEN the semantic order is header, hero, about, process, products, inquiry CTA, footer
+  AND no standalone trust, information, navigation, or decorative filler section is present
+
+Scenario: Neutral layers and paired emphasis colors render
+  GIVEN any admitted semantic design system
+  WHEN about, process, products, inquiry CTA, and footer render in sequence
+  THEN the content layers alternate neutral surface, neutral layer, and canvas
+  AND strong/onStrong plus inverse/onInverse meet contrast against their exact backgrounds
 
 Scenario: A design-system value is exported to the AI
   GIVEN an admitted design system declares typography, spacing, layout, and media values

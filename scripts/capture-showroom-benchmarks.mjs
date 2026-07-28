@@ -100,6 +100,9 @@ try {
           componentVariants: sections
             .map((section) => section.getAttribute("data-variant"))
             .filter(Boolean),
+          sectionSlots: sections
+            .map((section) => section.getAttribute("data-slot"))
+            .filter(Boolean),
           productCardWidths: productCards.map((card) =>
             Math.round(card.getBoundingClientRect().width),
           ),
@@ -135,7 +138,10 @@ const failures = results.filter(
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
     result.textOverflow.length > 0 ||
-    new Set(result.surfaceRoles).size < 3,
+    result.sectionSlots.join(">") !==
+      "header>hero>content>content>catalog>callToAction>footer" ||
+    result.surfaceRoles.join(">") !==
+      "surface>soft>surface>soft>canvas>strong>inverse",
 );
 
 async function createContactSheet(viewport, tileWidth, tileHeight) {

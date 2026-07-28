@@ -44,6 +44,33 @@ Primary references:
 - [CSS Masking Module Level 1](https://www.w3.org/TR/css-masking-1/)
 - [Responsive image art direction](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images)
 
+## Purposeful page spine and color hierarchy correction
+
+Research checkpoint: 2026-07-28.
+
+- More component choice does not justify more page chapters. Normal SuqPage
+  showrooms need one predictable information architecture: hero, about,
+  process, products, and inquiry. Header and footer remain supporting chrome.
+  Visual systems vary the anatomy inside those roles, not the role order.
+- IBM Carbon models page hierarchy with a base background and explicit ordered
+  neutral layers. Shopify Polaris similarly uses default, secondary, and
+  tertiary surfaces for visual hierarchy while reserving color roles for
+  emphasis and meaning. This supports clear white/neutral returns between
+  sections instead of adjacent pale brand tints.
+- Every emphasized background needs its own paired foreground. WCAG 2.2 checks
+  text against the background that actually appears adjacent in normal use:
+  4.5:1 for normal text and 3:1 for large text. SuqPage therefore exports
+  `strong/onStrong` and `inverse/onInverse` pairs and tests them directly.
+- Brand accents remain useful for controls, rules, labels, and one important
+  full-section moment. They should not color the canvas, about, process, product,
+  CTA, and footer bands as a sequence of neighboring pastel swatches.
+
+Additional primary references:
+
+- [IBM Carbon color layering](https://carbondesignsystem.com/elements/color/usage/)
+- [Shopify Polaris palettes and roles](https://polaris-react.shopify.com/design/colors/palettes-and-roles)
+- [WCAG 2.2 contrast minimum](https://www.w3.org/TR/WCAG22/#contrast-minimum)
+
 ## SuqPage v1 comparison
 
 Desktop and 390px full-page captures of the static v1 homepage and its four

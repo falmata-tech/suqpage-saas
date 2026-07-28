@@ -25,6 +25,7 @@ export type ShowroomDesignSystem = {
   colors: {
     canvas: string;
     surface: string;
+    layer: string;
     text: string;
     textMuted: string;
     primary: string;
@@ -32,6 +33,10 @@ export type ShowroomDesignSystem = {
     secondary: string;
     secondarySoft: string;
     onSecondary: string;
+    strong: string;
+    onStrong: string;
+    inverse: string;
+    onInverse: string;
     border: string;
   };
   typography: {
@@ -118,8 +123,8 @@ function designSystem(
 const systems = [
   designSystem({
     id: "linen-luxury", label: "Warm eucalyptus",
-    description: "Warm light canvas, walnut primary, cool eucalyptus secondary, expressive serif type, and spacious editorial contrast.",
-    colors: { canvas: "#f6f0e6", surface: "#fffaf2", text: "#29231d", textMuted: "#74685c", primary: "#8b5e3c", primarySoft: "#ead8c4", secondary: "#315c57", secondarySoft: "#dce9e5", onSecondary: "#ffffff", border: "#d8c8b7" },
+    description: "White and cool-neutral layers, walnut accent, deep eucalyptus emphasis, expressive serif type, and spacious editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f4f5f6", layer: "#e7eceb", text: "#1c2222", textMuted: "#5e6867", primary: "#8b5e3c", primarySoft: "#e9ddd2", secondary: "#1f5a55", secondarySoft: "#d5e6e3", onSecondary: "#ffffff", strong: "#1f5a55", onStrong: "#ffffff", inverse: "#151a1a", onInverse: "#f7f9f8", border: "#cbd2d0" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "expressive" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "editorial_contrast" },
@@ -127,8 +132,8 @@ const systems = [
   }),
   designSystem({
     id: "harvest-earth", label: "Field and clay",
-    description: "Muted light canvas, field-green primary, clay secondary, standard serif type, and comfortable quiet alternation.",
-    colors: { canvas: "#f2efe2", surface: "#fbf9ef", text: "#263526", textMuted: "#66705d", primary: "#53723f", primarySoft: "#dbe5c9", secondary: "#8a4d32", secondarySoft: "#ecd7c8", onSecondary: "#ffffff", border: "#cdd5bf" },
+    description: "White and pale-gray-green layers, field-green emphasis, clay accent, standard serif type, and clear neutral alternation.",
+    colors: { canvas: "#ffffff", surface: "#f3f5f1", layer: "#e3e9df", text: "#1c2b20", textMuted: "#5d695f", primary: "#3f6b3f", primarySoft: "#dce8d8", secondary: "#b54a2f", secondarySoft: "#f2ddd7", onSecondary: "#ffffff", strong: "#244d32", onStrong: "#ffffff", inverse: "#162019", onInverse: "#ffffff", border: "#c9d2c7" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "quiet_alternation" },
@@ -136,17 +141,17 @@ const systems = [
   }),
   designSystem({
     id: "honey-amber", label: "Amber and teal",
-    description: "Soft parchment canvas, amber primary, deep teal secondary, standard serif type, and comfortable editorial contrast.",
-    colors: { canvas: "#fff7dc", surface: "#fffdf4", text: "#3a2912", textMuted: "#735f40", primary: "#a95f00", primarySoft: "#f4d58a", secondary: "#245b57", secondarySoft: "#d9ebe6", onSecondary: "#ffffff", border: "#dfc477" },
+    description: "White and neutral-gray layers, amber accent, deep teal emphasis, standard serif type, and decisive editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f5f5f2", layer: "#e9ece7", text: "#20231f", textMuted: "#656a61", primary: "#a95f00", primarySoft: "#f6e0b1", secondary: "#155e75", secondarySoft: "#d7eaf0", onSecondary: "#ffffff", strong: "#155e75", onStrong: "#ffffff", inverse: "#171a1c", onInverse: "#ffffff", border: "#d1d3cc" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "editorial_contrast" },
     guidance: { tones: ["organic", "editorial"] },
   }),
   designSystem({
-    id: "coffee-roast", label: "Copper and sage dark",
-    description: "Dark roasted canvas, copper primary, sage secondary, standard serif type, and comfortable editorial contrast.",
-    colors: { canvas: "#211a17", surface: "#30251f", text: "#f8eee2", textMuted: "#c7b3a2", primary: "#d18d52", primarySoft: "#5a3c2c", secondary: "#7fa69a", secondarySoft: "#26433d", onSecondary: "#171c1a", border: "#58483e" },
+    id: "coffee-roast", label: "Copper and forest",
+    description: "White and cool-neutral layers, copper accent, deep forest emphasis, standard serif type, and a dark grounded close.",
+    colors: { canvas: "#ffffff", surface: "#f4f4f3", layer: "#e5e8e6", text: "#1d2220", textMuted: "#646c68", primary: "#a14f22", primarySoft: "#efd8cc", secondary: "#236255", secondarySoft: "#d7e8e3", onSecondary: "#ffffff", strong: "#173f36", onStrong: "#ffffff", inverse: "#171918", onInverse: "#ffffff", border: "#cbd0cd" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "editorial_contrast" },
@@ -154,17 +159,17 @@ const systems = [
   }),
   designSystem({
     id: "artisan-clay", label: "Terracotta and mineral",
-    description: "Clay-neutral canvas, terracotta primary, mineral-blue secondary, standard serif type, and quiet section alternation.",
-    colors: { canvas: "#f4e7df", surface: "#fff8f2", text: "#3a2825", textMuted: "#765e58", primary: "#a9553f", primarySoft: "#eac1b3", secondary: "#315b62", secondarySoft: "#d8e5e5", onSecondary: "#ffffff", border: "#d9b8ae" },
+    description: "White and architectural-gray layers, terracotta accent, mineral-blue emphasis, standard serif type, and crisp section alternation.",
+    colors: { canvas: "#ffffff", surface: "#f4f5f7", layer: "#e7ebef", text: "#20242a", textMuted: "#646b75", primary: "#b44d2f", primarySoft: "#f0d8cf", secondary: "#2056a8", secondarySoft: "#d9e5f7", onSecondary: "#ffffff", strong: "#204f91", onStrong: "#ffffff", inverse: "#151a20", onInverse: "#ffffff", border: "#cbd1d8" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "quiet_alternation" },
     guidance: { tones: ["organic", "editorial"] },
   }),
   designSystem({
-    id: "forest-botanical", label: "Leaf and ochre dark",
-    description: "Deep green canvas, leaf primary, ochre secondary, standard serif type, and comfortable editorial contrast.",
-    colors: { canvas: "#12251f", surface: "#1b332b", text: "#eff8ef", textMuted: "#adc4b7", primary: "#8ccf85", primarySoft: "#315a45", secondary: "#d7a64a", secondarySoft: "#4a4024", onSecondary: "#1b251f", border: "#426456" },
+    id: "forest-botanical", label: "Leaf and ochre",
+    description: "White and restrained green-neutral layers, leaf accent, ochre detail, standard serif type, and deep-green emphasis.",
+    colors: { canvas: "#ffffff", surface: "#f2f5f3", layer: "#dfe8e3", text: "#17251e", textMuted: "#5b6961", primary: "#26744d", primarySoft: "#d5eadf", secondary: "#d18a16", secondarySoft: "#f5e6c4", onSecondary: "#1a1a1a", strong: "#164f34", onStrong: "#ffffff", inverse: "#101914", onInverse: "#ffffff", border: "#c7d2cb" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "editorial_contrast" },
@@ -172,8 +177,8 @@ const systems = [
   }),
   designSystem({
     id: "furniture-walnut", label: "Walnut and blue-green",
-    description: "Warm architectural canvas, walnut primary, blue-green secondary, expressive serif type, and spacious editorial contrast.",
-    colors: { canvas: "#eee8df", surface: "#faf7f2", text: "#292622", textMuted: "#706960", primary: "#704b34", primarySoft: "#d8c6b5", secondary: "#355b63", secondarySoft: "#dce7e8", onSecondary: "#ffffff", border: "#cfc5b9" },
+    description: "White and architectural-gray layers, walnut accent, blue-green emphasis, expressive serif type, and spacious editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f3f4f5", layer: "#e4e8ea", text: "#202427", textMuted: "#62686c", primary: "#795033", primarySoft: "#eadfd5", secondary: "#1e6375", secondarySoft: "#d8e9ed", onSecondary: "#ffffff", strong: "#1c5362", onStrong: "#ffffff", inverse: "#15191b", onInverse: "#ffffff", border: "#cbd0d3" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "expressive" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "editorial_contrast" },
@@ -181,8 +186,8 @@ const systems = [
   }),
   designSystem({
     id: "industrial-steel", label: "Steel signal",
-    description: "Cool steel canvas, safety-orange primary, technical-blue secondary, compact sans type, and dense horizontal bands.",
-    colors: { canvas: "#e9edf0", surface: "#f9fafb", text: "#182127", textMuted: "#59666e", primary: "#c94f29", primarySoft: "#f0c5b6", secondary: "#2f6073", secondarySoft: "#d7e5ea", onSecondary: "#ffffff", border: "#bfc8ce" },
+    description: "White, steel-gray, and dark navy layers with safety-orange accent, compact sans type, and dense horizontal bands.",
+    colors: { canvas: "#ffffff", surface: "#eef1f4", layer: "#dce3e8", text: "#15202a", textMuted: "#59636d", primary: "#c94f29", primarySoft: "#f0c5b6", secondary: "#15557a", secondarySoft: "#d7e5ea", onSecondary: "#ffffff", strong: "#123f5a", onStrong: "#ffffff", inverse: "#111820", onInverse: "#ffffff", border: "#bcc7cf" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "compact" },
     shape: { radius: 2, treatment: "square" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
@@ -191,8 +196,8 @@ const systems = [
   }),
   designSystem({
     id: "maker-indigo", label: "Indigo and berry",
-    description: "Cool light canvas, indigo primary, muted-berry secondary, humanist sans type, and comfortable quiet alternation.",
-    colors: { canvas: "#edf0f8", surface: "#fdfdff", text: "#19203c", textMuted: "#626b8a", primary: "#4056b8", primarySoft: "#ccd4fa", secondary: "#8d455b", secondarySoft: "#efd8df", onSecondary: "#ffffff", border: "#c5cbe0" },
+    description: "White and cool-gray layers, decisive indigo emphasis, restrained crimson accent, humanist sans type, and clear alternation.",
+    colors: { canvas: "#ffffff", surface: "#f1f4f8", layer: "#e0e7f0", text: "#121c32", textMuted: "#5c667c", primary: "#3157c8", primarySoft: "#d8e2ff", secondary: "#c13f52", secondarySoft: "#f4d9de", onSecondary: "#ffffff", strong: "#193f9d", onStrong: "#ffffff", inverse: "#10182a", onInverse: "#ffffff", border: "#c6cedc" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "humanist_sans", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "quiet_alternation" },
@@ -200,8 +205,8 @@ const systems = [
   }),
   designSystem({
     id: "ocean-trade", label: "Ocean and brick",
-    description: "Cool pale canvas, ocean primary, brick secondary, compact humanist sans type, and dense horizontal bands.",
-    colors: { canvas: "#e9f3f4", surface: "#fbffff", text: "#12323b", textMuted: "#54727a", primary: "#087a8b", primarySoft: "#bce4e7", secondary: "#a9472f", secondarySoft: "#f1d9d1", onSecondary: "#ffffff", border: "#b7d1d4" },
+    description: "White and cool-gray layers, ocean-blue emphasis, brick accent, compact humanist sans type, and dense horizontal bands.",
+    colors: { canvas: "#ffffff", surface: "#eef4f5", layer: "#dce8ea", text: "#102a31", textMuted: "#536a70", primary: "#00798a", primarySoft: "#cce8eb", secondary: "#b5432c", secondarySoft: "#f1d9d1", onSecondary: "#ffffff", strong: "#07566a", onStrong: "#ffffff", inverse: "#101b20", onInverse: "#ffffff", border: "#bfd0d3" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "humanist_sans", scale: "compact" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
@@ -209,9 +214,9 @@ const systems = [
     guidance: { tones: ["precise", "technical"] },
   }),
   designSystem({
-    id: "beauty-editorial", label: "Blush and evergreen",
-    description: "Blush canvas, berry primary, evergreen secondary, expressive serif type, and spacious editorial contrast.",
-    colors: { canvas: "#fff1f6", surface: "#fffafd", text: "#361e2b", textMuted: "#7f6071", primary: "#b9346d", primarySoft: "#f2c6da", secondary: "#38645a", secondarySoft: "#dceae5", onSecondary: "#ffffff", border: "#e5c3d3" },
+    id: "beauty-editorial", label: "Evergreen and cobalt",
+    description: "White and neutral-gray layers, evergreen emphasis, cobalt accent, expressive serif type, and spacious editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f3f5f4", layer: "#e4eae7", text: "#18251f", textMuted: "#5e6d65", primary: "#18734c", primarySoft: "#d5eadf", secondary: "#3159c7", secondarySoft: "#dce4fb", onSecondary: "#ffffff", strong: "#155d40", onStrong: "#ffffff", inverse: "#111a16", onInverse: "#ffffff", border: "#c8d2cd" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "expressive" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "editorial_contrast" },
@@ -219,8 +224,8 @@ const systems = [
   }),
   designSystem({
     id: "technology-mono", label: "Signal monochrome",
-    description: "Neutral white canvas, signal-blue primary, red secondary, compact technical sans type, and dense horizontal bands.",
-    colors: { canvas: "#f2f3f5", surface: "#ffffff", text: "#101114", textMuted: "#666970", primary: "#1517c2", primarySoft: "#d8d9ff", secondary: "#b8402f", secondarySoft: "#f3d8d2", onSecondary: "#ffffff", border: "#d3d5db" },
+    description: "White and neutral-gray layers, signal-blue emphasis, red accent, compact technical sans type, and dense horizontal bands.",
+    colors: { canvas: "#ffffff", surface: "#f2f3f5", layer: "#e1e3e7", text: "#101114", textMuted: "#5f636b", primary: "#1517c2", primarySoft: "#d8d9ff", secondary: "#b8402f", secondarySoft: "#f3d8d2", onSecondary: "#ffffff", strong: "#1517a8", onStrong: "#ffffff", inverse: "#101114", onInverse: "#ffffff", border: "#ccd0d6" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "compact" },
     shape: { radius: 6, treatment: "subtle" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
@@ -229,35 +234,35 @@ const systems = [
   }),
   designSystem({
     id: "vibrant-market", label: "Coral and teal",
-    description: "Warm bright canvas, coral primary, teal secondary, standard humanist sans type, and lively editorial contrast.",
-    colors: { canvas: "#fff5d8", surface: "#ffffff", text: "#17223a", textMuted: "#68728a", primary: "#d94328", primarySoft: "#ffd2a6", secondary: "#087a8b", secondarySoft: "#d3ecef", onSecondary: "#ffffff", border: "#e2cfaa" },
+    description: "White and cool-neutral layers, coral accent, teal emphasis, standard humanist sans type, and lively editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f4f5f7", layer: "#e5e8ed", text: "#17223a", textMuted: "#626d83", primary: "#d94328", primarySoft: "#f8d9d2", secondary: "#087a8b", secondarySoft: "#d3ecef", onSecondary: "#ffffff", strong: "#086474", onStrong: "#ffffff", inverse: "#111a2d", onInverse: "#ffffff", border: "#c9ced8" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "humanist_sans", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "editorial_contrast" },
     guidance: { tones: ["playful", "organic"] },
   }),
   designSystem({
-    id: "silk-atelier", label: "Magenta and deep green",
-    description: "Soft warm canvas, magenta primary, deep-green secondary, expressive serif type, and spacious editorial contrast.",
-    colors: { canvas: "#f2ece8", surface: "#fffaf7", text: "#271b25", textMuted: "#786873", primary: "#96265e", primarySoft: "#e9bfd3", secondary: "#375f59", secondarySoft: "#d9e8e4", onSecondary: "#ffffff", border: "#d7c3cd" },
+    id: "silk-atelier", label: "Ink blue and magenta",
+    description: "White and cool-gray layers, magenta accent, ink-blue emphasis, expressive serif type, and spacious editorial contrast.",
+    colors: { canvas: "#ffffff", surface: "#f3f4f6", layer: "#e1e5eb", text: "#171c27", textMuted: "#5f6674", primary: "#a32355", primarySoft: "#f0d7e1", secondary: "#164f8c", secondarySoft: "#d8e5f2", onSecondary: "#ffffff", strong: "#163f72", onStrong: "#ffffff", inverse: "#121722", onInverse: "#ffffff", border: "#c8ced8" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "expressive" },
     shape: { radius: 6, treatment: "subtle" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "editorial_contrast" },
     guidance: { tones: ["editorial", "playful"] },
   }),
   designSystem({
-    id: "cosmetic-laboratory", label: "Rose and green clean",
-    description: "Clean pale canvas, rose primary, green secondary, standard humanist sans type, and comfortable quiet alternation.",
-    colors: { canvas: "#f5f7f3", surface: "#ffffff", text: "#17211d", textMuted: "#69766f", primary: "#cf4569", primarySoft: "#f4d4df", secondary: "#416e63", secondarySoft: "#dceae5", onSecondary: "#ffffff", border: "#d7dfda" },
+    id: "cosmetic-laboratory", label: "Green and cobalt clean",
+    description: "White and clinical neutral layers, green emphasis, cobalt accent, standard humanist sans type, and clean alternation.",
+    colors: { canvas: "#ffffff", surface: "#f3f5f4", layer: "#e2e9e5", text: "#17211d", textMuted: "#5f6e66", primary: "#14704a", primarySoft: "#d5eadf", secondary: "#2b59c3", secondarySoft: "#dce4fa", onSecondary: "#ffffff", strong: "#115a3d", onStrong: "#ffffff", inverse: "#101a16", onInverse: "#ffffff", border: "#c7d2cc" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "humanist_sans", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "comfortable", sectionRhythm: "quiet_alternation" },
     guidance: { tones: ["quiet", "organic"] },
   }),
   designSystem({
-    id: "chrome-future", label: "Graphite electric",
-    description: "Dark graphite canvas, electric-cyan primary, amber secondary, expressive technical sans type, and compact horizontal bands.",
-    colors: { canvas: "#0d0f14", surface: "#171a21", text: "#f3f7ff", textMuted: "#a4adbd", primary: "#76f0ff", primarySoft: "#193c47", secondary: "#ffb454", secondarySoft: "#4b3521", onSecondary: "#101114", border: "#343a46" },
+    id: "chrome-future", label: "Graphite and electric cyan",
+    description: "Clearly stepped graphite layers, electric-cyan emphasis, amber detail, a light inverse close, expressive technical sans type, and compact bands.",
+    colors: { canvas: "#080a0d", surface: "#171c24", layer: "#303943", text: "#f3f7ff", textMuted: "#bfc7d3", primary: "#00d4f0", primarySoft: "#173945", secondary: "#ffb000", secondarySoft: "#3d321c", onSecondary: "#111111", strong: "#00cbe8", onStrong: "#071115", inverse: "#f4f6f8", onInverse: "#11151a", border: "#48515d" },
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "expressive" },
     shape: { radius: 4, treatment: "square" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
@@ -266,8 +271,8 @@ const systems = [
   }),
   designSystem({
     id: "paper-gallery", label: "Paper and vermilion",
-    description: "Paper canvas, vermilion primary, blue-green secondary, expressive serif type, square geometry, and spacious contrast.",
-    colors: { canvas: "#e9e2d5", surface: "#faf6ee", text: "#23201c", textMuted: "#70695f", primary: "#a83b28", primarySoft: "#e8c4b5", secondary: "#315b63", secondarySoft: "#d9e6e7", onSecondary: "#ffffff", border: "#c9c0b2" },
+    description: "White and paper-gray layers, vermilion accent, deep-blue emphasis, expressive serif type, square geometry, and spacious contrast.",
+    colors: { canvas: "#ffffff", surface: "#f3f4f6", layer: "#e3e7eb", text: "#1b2028", textMuted: "#616975", primary: "#b53f28", primarySoft: "#efd8d2", secondary: "#185b7a", secondarySoft: "#d7e7ed", onSecondary: "#ffffff", strong: "#174b6e", onStrong: "#ffffff", inverse: "#111820", onInverse: "#ffffff", border: "#c8ced5" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "expressive" },
     shape: { radius: 0, treatment: "square" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "editorial_contrast" },
@@ -275,8 +280,8 @@ const systems = [
   }),
   designSystem({
     id: "mineral-spa", label: "Mineral teal",
-    description: "Mineral canvas, muted-teal primary, clay secondary, standard serif type, and spacious quiet alternation.",
-    colors: { canvas: "#e8efec", surface: "#f8fbfa", text: "#1f302e", textMuted: "#687b78", primary: "#4d746f", primarySoft: "#c8ddda", secondary: "#8d4f3c", secondarySoft: "#ead9d3", onSecondary: "#ffffff", border: "#c1d0cd" },
+    description: "White and mineral-gray layers, muted-teal emphasis, clay accent, standard serif type, and spacious neutral alternation.",
+    colors: { canvas: "#ffffff", surface: "#f2f5f4", layer: "#e1e9e6", text: "#1b2927", textMuted: "#61716e", primary: "#34736d", primarySoft: "#d3e6e2", secondary: "#b34c2e", secondarySoft: "#f0d9d1", onSecondary: "#ffffff", strong: "#245a55", onStrong: "#ffffff", inverse: "#141b1a", onInverse: "#ffffff", border: "#c6d1ce" },
     typography: { displayStack: serifStack, bodyStack, displayRole: "editorial_serif", scale: "standard" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "spacious", sectionRhythm: "quiet_alternation" },

@@ -21,12 +21,23 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "canvas", "surface", "text", "textMuted", "primary", "primarySoft",
-          "secondary", "secondarySoft", "onSecondary", "border"
+          "canvas", "surface", "layer", "text", "textMuted", "primary",
+          "primarySoft", "secondary", "secondarySoft", "onSecondary", "strong",
+          "onStrong", "inverse", "onInverse", "border"
         ],
         "properties": {
-          "canvas": { "$ref": "#/$defs/color" },
-          "surface": { "$ref": "#/$defs/color" },
+          "canvas": {
+            "$ref": "#/$defs/color",
+            "description": "Neutral page base used behind the primary product area."
+          },
+          "surface": {
+            "$ref": "#/$defs/color",
+            "description": "Neutral raised or story surface with readable text."
+          },
+          "layer": {
+            "$ref": "#/$defs/color",
+            "description": "Clearly distinguishable neutral alternate band; never a weak brand-color wash."
+          },
           "text": { "$ref": "#/$defs/color" },
           "textMuted": { "$ref": "#/$defs/color" },
           "primary": { "$ref": "#/$defs/color" },
@@ -34,6 +45,22 @@
           "secondary": { "$ref": "#/$defs/color" },
           "secondarySoft": { "$ref": "#/$defs/color" },
           "onSecondary": { "$ref": "#/$defs/color" },
+          "strong": {
+            "$ref": "#/$defs/color",
+            "description": "High-emphasis final-call surface."
+          },
+          "onStrong": {
+            "$ref": "#/$defs/color",
+            "description": "Foreground guaranteed to be readable on strong."
+          },
+          "inverse": {
+            "$ref": "#/$defs/color",
+            "description": "Closing/footer surface distinct from strong."
+          },
+          "onInverse": {
+            "$ref": "#/$defs/color",
+            "description": "Foreground guaranteed to be readable on inverse."
+          },
           "border": { "$ref": "#/$defs/color" }
         }
       },

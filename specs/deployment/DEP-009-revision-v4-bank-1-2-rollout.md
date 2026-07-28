@@ -4,7 +4,7 @@ title: Revision v4 and showroom bank 1.2 controlled rollout
 status: in_progress
 related: [DEP-004, DEP-005, DEP-006, DEP-007, DEP-011, FE-007, FE-009, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, ADR-0005, ADR-0007]
 owners: [operations, security, product]
-last_updated: 2026-07-25
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -53,6 +53,10 @@ creative bank without rewriting retained revisions or widening trusted input.
 - Token-to-renderer parity proves every authoritative typography, spacing,
   layout, shape, color, and media foundation decision has a scoped runtime
   representation.
+- Palette admission proves canvas/surface/layer are neutral hierarchy roles,
+  strong/onStrong and inverse/onInverse meet WCAG AA text contrast, and rendered
+  children inherit the active section foreground instead of a different token
+  pair.
 - Static checks prohibit network access, runtime dependencies, global CSS,
   dynamic imports, document mutation, unbounded animation, and raw markup.
 - Browser checks at 320/390/desktop cover long text, missing optional media,
@@ -63,6 +67,10 @@ creative bank without rewriting retained revisions or widening trusted input.
   repeated generic compositions, one-hue pages, abrupt unintended image blocks,
   unreadable overlay headers, unbounded product media, dishonest component
   anatomy, or a dense manufacturer catalog rendered as a sparse lifestyle page.
+- Every benchmark uses the same canonical hero/about/process/products/inquiry
+  order. Admission rejects an extra trust/information chapter, changed order,
+  adjacent filler sections, or an all-pastel/all-tinted page whose content bands
+  do not return to a clear neutral canvas.
 - Provider security checks prove normalized IDs, privacy-enhanced lazy rendering,
   no autoplay, title, CSP allowlist, and denial of all unapproved origins.
 - Operations backup/restore pairs v4 rows, provider descriptors, and managed

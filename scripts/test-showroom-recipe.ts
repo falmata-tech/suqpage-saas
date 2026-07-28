@@ -310,8 +310,28 @@ async function main() {
         (template) =>
           !("tokenPack" in template) &&
           !("components" in template) &&
-          template.sectionPlan.length >= 6,
+          template.sectionPlan.length === 7 &&
+          template.sectionPlan.map((section) => section.slot).join(">") ===
+            "header>hero>content>content>catalog>call_to_action>footer" &&
+          template.surfaceSequence.join(">") ===
+            "surface>soft>surface>soft>canvas>strong>inverse",
       ),
+    );
+    assert.deepEqual(
+      exported.brief.compositionGuidance.canonicalNormalShowroom,
+      {
+        sectionOrder: [
+          "header",
+          "hero",
+          "about_story",
+          "process",
+          "products",
+          "inquiry_call_to_action",
+          "footer",
+        ],
+        surfaceSequence: ["surface", "soft", "surface", "soft", "canvas", "strong", "inverse"],
+        extraSectionsAllowed: false,
+      },
     );
     assert.equal(
       exported.brief.compositionGuidance.selectionPolicy
@@ -418,7 +438,7 @@ async function main() {
     recipe.design.sections[1].component = "hero.room-scene@1";
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
-    assert.equal(imported.difference.designSections.after, 8);
+    assert.equal(imported.difference.designSections.after, 7);
     assert.equal(imported.recipe.mediaPlan[0].slotKey, "product_image");
     assert.equal(
       imported.recipe.mediaPlan[0].ownerKey,
