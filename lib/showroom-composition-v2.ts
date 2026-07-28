@@ -22,6 +22,8 @@ import {
 export const SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2 = 2;
 export const SHOWROOM_DESIGN_SCHEMA_VERSION_V2 = 2;
 export const SHOWROOM_SECTION_MEDIA_INTEGRATIONS = [
+  "natural",
+  "surface_blend",
   "ambient_overlay",
   "edge_fade",
   "split_bleed",
@@ -29,6 +31,15 @@ export const SHOWROOM_SECTION_MEDIA_INTEGRATIONS = [
   "product_stage",
   "hidden",
 ] as const satisfies readonly SectionMediaIntegration[];
+export const SHOWROOM_SECTION_SURFACE_ROLES = [
+  "canvas",
+  "surface",
+  "soft",
+  "strong",
+  "inverse",
+] as const;
+export type SectionSurfaceRole =
+  (typeof SHOWROOM_SECTION_SURFACE_ROLES)[number];
 
 export type ShowroomContentMediaSlotDefinition = {
   key: string;
@@ -56,6 +67,7 @@ export type ShowroomComponentBankV2 = Omit<
 export type ShowroomSectionV2 = ShowroomSection & {
   contentBlockKey: string | null;
   mediaIntegration?: SectionMediaIntegration | null;
+  surfaceRole?: SectionSurfaceRole;
 };
 
 export type ShowroomDesignProposalV2 = Omit<
@@ -74,15 +86,20 @@ export function defaultMediaIntegrationForSection(
   slot: ShowroomSlot,
   componentId: string,
 ): SectionMediaIntegration | null {
-  if (slot === "content") return "edge_fade";
+  if (slot === "content") return "natural";
   if (slot !== "hero") return null;
   if (/centered-statement/.test(componentId)) return "hidden";
-  if (/product-spotlight|beauty-orbit/.test(componentId)) return "product_stage";
-  if (/editorial-collage|textile-swatch/.test(componentId)) {
-    return "editorial_overlap";
-  }
-  if (/provenance|ingredient-monograph/.test(componentId)) return "edge_fade";
-  return "split_bleed";
+  return "natural";
+}
+
+export function defaultSurfaceRoleForSection(
+  slot: ShowroomSlot,
+): SectionSurfaceRole {
+  if (slot === "header") return "surface";
+  if (slot === "hero" || slot === "trust") return "soft";
+  if (slot === "call_to_action") return "strong";
+  if (slot === "footer") return "inverse";
+  return "canvas";
 }
 
 function record(
@@ -330,6 +347,7 @@ export function parseShowroomDesignProposalV2(
         "bindings",
         "contentBlockKey",
         "mediaIntegration",
+        "surfaceRole",
       ]);
       if (
         section.contentBlockKey !== null &&
@@ -353,10 +371,23 @@ export function parseShowroomDesignProposalV2(
           "invalid_media_integration",
         );
       }
+      if (
+        section.surfaceRole !== undefined &&
+        (typeof section.surfaceRole !== "string" ||
+          !SHOWROOM_SECTION_SURFACE_ROLES.includes(
+            section.surfaceRole as SectionSurfaceRole,
+          ))
+      ) {
+        return fail(
+          `Proposal section ${index + 1} has an unsupported surfaceRole.`,
+          "invalid_surface_role",
+        );
+      }
       return {
         contentBlockKey: section.contentBlockKey as string | null,
         mediaIntegration:
           section.mediaIntegration as SectionMediaIntegration | null | undefined,
+        surfaceRole: section.surfaceRole as SectionSurfaceRole | undefined,
       };
     },
   );
@@ -368,6 +399,7 @@ export function parseShowroomDesignProposalV2(
         const {
           contentBlockKey: _,
           mediaIntegration: __,
+          surfaceRole: ___,
           ...section
         } = entry as Record<string, unknown>;
         return section;
@@ -385,6 +417,9 @@ export function parseShowroomDesignProposalV2(
     const mediaIntegration =
       requestedSections[index].mediaIntegration ??
       defaultMediaIntegrationForSection(component.slot, component.id);
+    const surfaceRole =
+      requestedSections[index].surfaceRole ??
+      defaultSurfaceRoleForSection(component.slot);
     if (
       mediaIntegration !== null &&
       component.slot !== "hero" &&
@@ -440,7 +475,7 @@ export function parseShowroomDesignProposalV2(
         }
       }
     }
-    return { ...section, contentBlockKey, mediaIntegration };
+    return { ...section, contentBlockKey, mediaIntegration, surfaceRole };
   });
   const used = requestedSections
     .map((section) => section.contentBlockKey)

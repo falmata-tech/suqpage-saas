@@ -225,7 +225,7 @@ async function main() {
     assert.match(exported.brief.instructions[0], /do not normalize/i);
     assert.ok(
       exported.brief.instructions.some((instruction) =>
-        /Choose mediaIntegration explicitly/.test(instruction),
+        /Choose mediaIntegration from compositionGuidance\.mediaTreatments/.test(instruction),
       ),
     );
     assert.ok(
@@ -235,6 +235,18 @@ async function main() {
     );
     assert.equal(exported.brief.examplePolicy.importable, false);
     assert.match(exported.brief.instructions[1], /synthetic structural reference/i);
+    assert.equal(
+      exported.brief.instructions.some((instruction) =>
+        instruction.includes("surfaceRole"),
+      ),
+      true,
+    );
+    assert.equal(
+      exported.brief.instructions.some((instruction) =>
+        instruction.includes("surface_role"),
+      ),
+      false,
+    );
     assert.equal(
       exported.brief.completeExample.content.business.name,
       "Reference Goods Studio",
@@ -281,6 +293,27 @@ async function main() {
     assert.equal(exported.brief.designSystems.length, 18);
     assert.equal(exported.brief.compositionGuidance.templates.length, 8);
     assert.equal(
+      exported.brief.compositionGuidance.designProcess.decisionOrder[2],
+      "page_template",
+    );
+    assert.equal(
+      exported.brief.compositionGuidance.mediaTreatments.surface_blend
+        .visualWeight,
+      "signature",
+    );
+    assert.equal(
+      exported.brief.compositionGuidance.mediaTreatments.ambient_overlay.status,
+      "legacy",
+    );
+    assert.ok(
+      exported.brief.compositionGuidance.templates.every(
+        (template) =>
+          !("tokenPack" in template) &&
+          !("components" in template) &&
+          template.sectionPlan.length >= 6,
+      ),
+    );
+    assert.equal(
       exported.brief.compositionGuidance.selectionPolicy
         .identifiersAreSuitabilitySignals,
       false,
@@ -312,7 +345,8 @@ async function main() {
         (guidance) =>
           !("businessArchetypes" in guidance) &&
           guidance.visualDescription.length > 40 &&
-          guidance.avoidWhen.length > 0,
+          guidance.avoidWhen.length > 0 &&
+          guidance.renderedAnatomy.regions.length > 0,
       ),
     );
     assert.equal(
@@ -323,10 +357,10 @@ async function main() {
     const heroIntegrations = new Set(
       Object.entries(exported.brief.compositionGuidance.components)
         .filter(([id]) => id.startsWith("hero."))
-        .map(([, guidance]) => guidance.heroMediaIntegration),
+        .flatMap(([, guidance]) => guidance.compatibleMediaIntegrations),
     );
-    assert.ok(heroIntegrations.size >= 4);
-    assert.equal(heroIntegrations.has(null), false);
+    assert.ok(heroIntegrations.size >= 6);
+    assert.equal(heroIntegrations.has("surface_blend"), true);
     assert.equal(
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,

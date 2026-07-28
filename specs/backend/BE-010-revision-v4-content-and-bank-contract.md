@@ -45,8 +45,28 @@ additive v4 domain boundary that preserves all retained releases.
 - Design-schema v2 sections may declare one reviewed `mediaIntegration`
   treatment independently of the selected component. Only media-bearing hero
   and content sections may use a visible treatment; unsupported values and
-  incompatible slot/treatment pairs fail closed. Omitted values remain readable
-  through deterministic integrated defaults and do not rewrite retained data.
+  incompatible slot/treatment pairs fail closed. `natural` is the neutral
+  default, `surface_blend` is an explicit full-section treatment, and retained
+  legacy treatment names remain readable. Omitted values do not silently select
+  a signature fade, overlay, or product stage and do not rewrite retained data.
+- Bank-1.2 design sections may declare one bounded top-level `surfaceRole` from
+  `canvas`, `surface`, `soft`, `strong`, or `inverse`. The component contract,
+  parser, renderer data attribute, focused editor, and portable design schema
+  use the same values without changing immutable component property contracts.
+- Machine-readable component guidance is derived from explicit reviewed
+  selection profiles, never component-ID keywords or industries. Each profile
+  identifies rendered anatomy, visual weight, media and content prerequisites,
+  responsive behavior, compatible treatments, and unsuitable conditions.
+- Machine-readable media-treatment guidance declares the visual result,
+  prerequisites, desktop behavior, phone behavior, visual weight, and unsuitable
+  conditions for every current and retained treatment.
+- Every semantic design-system field exported as current rendering authority is
+  consumed by a scoped CSS variable or explicit renderer decision. Descriptive
+  guidance that is not renderer authority is labeled as guidance and cannot be
+  presented as a guaranteed visual effect.
+- Composition templates describe page intent, section roles, pacing, surface
+  rhythm, signature budget, and content/media requirements. They do not bind an
+  industry, tenant type, token pack, or one mandatory sequence of component IDs.
 - Exact typed-block assignment errors identify the specific unassigned or
   multiply assigned block key and the required correction. They never collapse
   an actionable key mismatch into a generic whole-design error.
@@ -90,6 +110,18 @@ Scenario: Recipe requests an unsupported image frame
   THEN parsing rejects the complete recipe before persistence
   AND no arbitrary CSS, class name, or image URL reaches the renderer
 
+Scenario: AI requests a semantic section surface
+  GIVEN a bank-1.2 design section that admits surfaceRole
+  WHEN a recipe supplies one reviewed semantic role
+  THEN parsing preserves the exact role and the renderer applies its scoped surface contract
+  AND an unknown raw color, class name, or CSS value is rejected
+
+Scenario: Exported guidance and runtime drift
+  GIVEN a component or foundation claims a visible behavior in the portable brief
+  WHEN bank admission compares guidance, component properties, tokens, and renderer support
+  THEN the release fails if that behavior has no reviewed runtime representation
+  AND the AI is not offered fictional visual capabilities
+
 Scenario: Unauthorized focused command is called directly
   GIVEN a client, unassigned staff actor, submitted revision, or another tenant
   WHEN the actor sends an otherwise valid correction
@@ -124,6 +156,7 @@ Scenario: Typed block is not assigned
 |---|---|---|
 | Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-content-blocks.ts`, `scripts/test-showroom-recipe.ts` |
 | Bounded section-media integration and retained defaults | contract/unit | `scripts/test-showroom-composition-v2.ts` |
+| Semantic surfaces, media guidance, and foundation/runtime parity | contract/static | `scripts/test-showroom-bank.ts`, `scripts/test-showroom-fitness.ts`, `scripts/test-showroom-recipe.ts` |
 | V3/v4 and bank 1.1/1.2 exact compatibility | integration | `scripts/test-showroom-composition-v2.ts`, planned v4 migration tests |
 | Provider normalization and unsafe-input denial | unit/security | `scripts/test-youtube-provider.ts`, `scripts/test-security.ts` |
 | Atomic authorized focused commands | integration/security | planned focused-command tests |

@@ -26,6 +26,7 @@ function SectionRoot({
   experience,
   properties,
   mediaIntegration,
+  surfaceRole,
   children,
 }: {
   slot: string;
@@ -34,6 +35,7 @@ function SectionRoot({
   experience: BankSectionRendererProps["experience"];
   properties?: BankSectionRendererProps["properties"];
   mediaIntegration?: string;
+  surfaceRole?: BankSectionRendererProps["surfaceRole"];
   children: ReactNode;
 }) {
   const style = {
@@ -62,6 +64,9 @@ function SectionRoot({
         typeof properties?.alignment === "string"
           ? properties.alignment
           : undefined
+      }
+      data-surface={
+        surfaceRole
       }
       data-motion={experience.motionIntensity}
       data-decoration={experience.decorativeDepth}
@@ -154,6 +159,7 @@ export function BankHeaderSection({
   definition,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
@@ -176,6 +182,9 @@ export function BankHeaderSection({
         typeof properties?.interaction_style === "string"
           ? properties.interaction_style
           : undefined
+      }
+      data-surface={
+        surfaceRole
       }
       aria-label={`${definition.name} preview`}
     >
@@ -202,12 +211,23 @@ export function BankHeroSection({
   experience,
   properties,
   mediaIntegration: selectedMediaIntegration,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const heroImage = mediaAsset(contentBlock, "hero_image") || context.business.heroImageRef;
+  const supportingHeroImages = context.products
+    .map((product) => product.imageRef)
+    .filter((ref) => ref && ref !== heroImage)
+    .slice(0, 2);
+  const usesMultiPlaneMedia =
+    ["editorial-collage", "collection-mosaic"].includes(variant) &&
+    supportingHeroImages.length >= 2 &&
+    !["surface_blend", "ambient_overlay", "product_stage"].includes(
+      selectedMediaIntegration || "",
+    );
   const mediaIntegration =
-    selectedMediaIntegration ||
-    heroMediaIntegrationForComponent(definition.id) ||
+    selectedMediaIntegration ??
+    heroMediaIntegrationForComponent(definition.id) ??
     undefined;
   return (
     <SectionRoot
@@ -217,6 +237,7 @@ export function BankHeroSection({
       experience={experience}
       properties={properties}
       mediaIntegration={mediaIntegration}
+      surfaceRole={surfaceRole}
     >
       <div className={styles.heroCopy}>
         <span className={styles.kicker}>{contentBlock?.kicker || context.business.tagline}</span>
@@ -226,12 +247,21 @@ export function BankHeroSection({
           Explore products
         </a>
       </div>
-      <div className={styles.heroVisual} aria-label="Featured product presentation">
+      <div
+        className={styles.heroVisual}
+        data-media-planes={usesMultiPlaneMedia ? "multiple" : "single"}
+        aria-label="Featured product presentation"
+      >
         {heroImage ? (
           <img src={heroImage} alt="" />
         ) : (
           <div className={styles.heroTexture} aria-hidden="true" />
         )}
+        {usesMultiPlaneMedia
+          ? supportingHeroImages.map((imageRef) => (
+              <img key={imageRef} src={imageRef} alt="" aria-hidden="true" />
+            ))
+          : null}
       </div>
     </SectionRoot>
   );
@@ -242,6 +272,7 @@ export function BankNavigationSection({
   definition,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const items = context.categories.length
@@ -254,6 +285,7 @@ export function BankNavigationSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      surfaceRole={surfaceRole}
     >
       <div className={styles.navigationLabel}>Browse the catalog</div>
       <nav className={styles.categoryNav} aria-label="Product categories">
@@ -287,6 +319,7 @@ export function BankContentSection({
   experience,
   properties,
   mediaIntegration: selectedMediaIntegration,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const statements = blockItems(contentBlock).length
@@ -308,7 +341,8 @@ export function BankContentSection({
         label={`${definition.name} preview`}
         experience={experience}
         properties={properties}
-        mediaIntegration={selectedMediaIntegration || "edge_fade"}
+        mediaIntegration={selectedMediaIntegration ?? "natural"}
+        surfaceRole={surfaceRole}
       >
         <div className={styles.contentHeading}>
           <span className={styles.kicker}>{contentBlock.kicker || definition.name}</span>
@@ -329,7 +363,8 @@ export function BankContentSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
-      mediaIntegration={selectedMediaIntegration || "edge_fade"}
+      mediaIntegration={selectedMediaIntegration ?? "natural"}
+      surfaceRole={surfaceRole}
     >
       <div className={styles.contentHeading}>
         <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
@@ -409,6 +444,7 @@ export function BankCatalogSection({
   definition,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const normalizedQuery = context.query.trim().toLowerCase();
@@ -426,6 +462,7 @@ export function BankCatalogSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      surfaceRole={surfaceRole}
     >
       <div className={styles.catalogHeading}>
         <div>
@@ -477,6 +514,7 @@ export function BankTrustSection({
   contentBlock,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const facts = blockItems(contentBlock).length
@@ -495,6 +533,7 @@ export function BankTrustSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      surfaceRole={surfaceRole}
     >
       <div className={styles.trustIntro}>
         <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
@@ -552,6 +591,7 @@ export function BankCallToActionSection({
   contentBlock,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   const copy = ctaCopy[variant] || ctaCopy.inquiry;
@@ -564,6 +604,7 @@ export function BankCallToActionSection({
       label={`${definition.name} preview`}
       experience={experience}
       properties={properties}
+      surfaceRole={surfaceRole}
     >
       <div>
         <span className={styles.kicker}>{contentBlock?.kicker || copy.eyebrow}</span>
@@ -582,6 +623,7 @@ export function BankFooterSection({
   definition,
   experience,
   properties,
+  surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
   return (
@@ -605,6 +647,7 @@ export function BankFooterSection({
           ? properties.interaction_style
           : undefined
       }
+      data-surface={surfaceRole}
       aria-label={`${definition.name} preview`}
     >
       <div>

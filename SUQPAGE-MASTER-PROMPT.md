@@ -144,7 +144,7 @@ Never turn the shared composition interpreter into a visually generic theme.
 external AI may propose an exact combination of approved, versioned components
 and bounded tokens as declarative JSON, while SuqPage validates and renders it.
 The current `showroom-bank@1.2.0` release contains 67 reviewed component
-variants across eight section families and 18 cross-industry token systems.
+variants across eight section families and 18 semantic token systems.
 Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
 `clean`, `subtle`, or `signature` decorative depth. Those settings are CSS-only,
 scoped, reduced-motion safe, and cannot carry arbitrary code or style values.
@@ -182,8 +182,8 @@ implementation is additive: revision v4/content-schema v2/design-schema v2 and
 `showroom-bank@1.2.0` coexists with retained v1-v3 revisions and the immutable
 bank 1.1 release. The admitted synthetic laboratory
 contains 67 reviewed components, 18 token systems, and 98,280 required-slot
-combinations with stronger textile, beauty, technology, furniture, ingredient,
-artisan, industrial, and wholesale art direction. Bounded reveals
+combinations with stronger editorial, tactile, product-led, source-led,
+spatial, precise, high-contrast, and information-dense art direction. Bounded reveals
 and interactions must be CSS-first, mobile-safe, static without support, and
 disabled by reduced-motion preference; arbitrary code, copied trade dress,
 autoplay, parallax, and scroll-jacking remain prohibited.
@@ -824,10 +824,10 @@ remaining AI-assisted delivery sequence is recorded in
   compatibility metadata, and tests enter immutable bank releases through the
   repository review and CI workflow.
 - `showroom-bank@1.2.0` currently admits 67 variants across eight section
-  families. Eighteen token systems cover textile, agriculture, honey/food,
-  coffee, artisan, botanical, furniture, manufacturing, makers, wholesale,
-  beauty, technology, and other reviewed directions. Bank 1.1 remains immutable
-  and readable for retained revisions.
+  families. Eighteen token systems cover quiet editorial, organic, tactile,
+  spatial, precise, high-contrast, utilitarian, and expressive visual
+  directions. Their legacy stable IDs are not industry suitability signals.
+  Bank 1.1 remains immutable and readable for retained revisions.
 - Those 18 systems are machine-readable semantic foundations, not color names
   alone. Each declares canvas/surface/text, primary and distinct secondary
   roles, on-color contrast, border, typography, spacing, shape, layout rhythm,
@@ -904,28 +904,33 @@ remaining AI-assisted delivery sequence is recorded in
   those slots. Missing or incompatible required media blocks candidate/client
   review. Optional omissions use reviewed no-media treatments rather than
   broken images, unexplained initials, or false photography claims.
-- Eight reviewed composition templates provide coherent page sequences before
-  individual variants are chosen. Machine-readable guidance declares visual
-  anatomy, no-media support, fallback treatments, commerce modes, content
-  needs, visual tones, recommended product/category counts, long-title and RTL
-  support, responsive behavior, unsuitable conditions, fallback components, and
-  section-media integration. Selection metadata is industry-neutral: legacy
-  identifiers remain stable but do not act as suitability signals, and guidance
-  is never inferred from words in IDs. Design-v2
-  recipes let AI choose `ambient_overlay`, `edge_fade`, `split_bleed`,
-  `editorial_overlap`, `product_stage`, or `hidden` independently of the
-  component name. Hero and story imagery is borderless and connected to its
-  section surface; retained sections without the field receive a deterministic
-  integrated default. Product imagery remains proportionally bounded and flush
+- Eight reviewed abstract composition templates describe section roles, pacing,
+  surface rhythm, and signature budget before individual variants are chosen;
+  they do not prescribe an industry, token pack, or exact component sequence.
+  Machine-readable guidance declares rendered anatomy, true media-plane count,
+  no-media support, fallback treatments, commerce modes, content needs, visual
+  tones, recommended product/category counts, long-title and RTL support,
+  responsive behavior, unsuitable conditions, fallback components, and
+  compatible section-media integration. Selection metadata is
+  industry-neutral: legacy identifiers remain stable but do not act as
+  suitability signals, and guidance is never inferred from words in IDs.
+  Design-v2 recipes let AI choose neutral `natural`, full-section
+  `surface_blend`, `edge_fade`, `split_bleed`, `editorial_overlap`,
+  `product_stage`, or `hidden`; `ambient_overlay` is retained only for existing
+  designs. Every section also selects a semantic `surfaceRole` from `canvas`,
+  `surface`, `soft`, `strong`, or `inverse`. Hero and story imagery is
+  borderless and connects to its section only when the recipe explicitly
+  selects a blend, fade, overlap, or stage; omitted treatments receive a neutral
+  readable default. Product imagery remains proportionally bounded and flush
   with its catalog card rather than becoming an arbitrary loose image block.
   Catalog-owned category browsing uses compact, touch-sized, horizontally
   scrollable tabs with modest corners; it is one shared catalog control and
   does not change shape merely because the AI selects another catalog variant.
-  Deterministic
-  composition fitness blocks duplicate navigation, standalone navigation
-  combined with catalog filters, incompatible sparse catalogs, and more than
-  two signature sections, while warning about unnecessary controls, repeated
-  factual media, and intentional product-media fallbacks.
+  Deterministic composition fitness blocks duplicate navigation, standalone
+  navigation combined with catalog filters, incompatible sparse catalogs,
+  missing media-treatment prerequisites, and more than two signature sections,
+  while identifying surface monotony, adjacent anatomy repetition, unnecessary
+  controls, repeated factual media, and intentional product-media fallbacks.
 - Initial linked-video support is a manually entered YouTube link normalized
   into a canonical provider asset and rendered by a reviewed, privacy-conscious
   component. Recipes cannot supply raw iframe/embed markup, arbitrary query

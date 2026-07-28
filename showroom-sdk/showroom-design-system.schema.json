@@ -124,7 +124,7 @@
     "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
     "heroIntegration": {
       "enum": [
-        "ambient_overlay", "edge_fade", "split_bleed", "editorial_overlap", "product_stage", "hidden"
+        "natural", "surface_blend", "ambient_overlay", "edge_fade", "split_bleed", "editorial_overlap", "product_stage", "hidden"
       ]
     }
   }

@@ -12,6 +12,7 @@ import {
   SHOWROOM_COMPONENT_BANK_LATEST,
 } from "./showroom-bank-release";
 import type {
+  SectionSurfaceRole,
   ShowroomComponentDefinitionV2,
   ShowroomDesignProposalV2,
 } from "./showroom-composition-v2";
@@ -29,12 +30,14 @@ import type {
   ShowroomDecorativeDepth,
   ShowroomMotionIntensity,
 } from "./showroom-experience";
+import type { SectionMediaIntegration } from "./showroom-design-systems";
 import type { Catalog } from "./types";
 
 type DefaultProfile = {
   tokenPack: string;
   motion: ShowroomMotionIntensity;
   decoration: ShowroomDecorativeDepth;
+  pacing: "story_first" | "catalog_first" | "facts_first" | "source_first";
   header: string;
   hero: string;
   story: string;
@@ -44,6 +47,8 @@ type DefaultProfile = {
   cta: string;
   footer: string;
   ctaVariant: "magazine-close" | "technical-brief";
+  heroMediaIntegration: SectionMediaIntegration;
+  storyMediaIntegration: SectionMediaIntegration;
 };
 
 const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
@@ -51,21 +56,25 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     tokenPack: "silk-atelier",
     motion: "quiet",
     decoration: "signature",
-    header: "header.floating-capsule@1",
+    pacing: "story_first",
+    header: "header.editorial-wordmark@1",
     hero: "hero.textile-swatch@1",
     story: "content.swatch-story@1",
-    highlights: "content.lookbook-chapter@1",
+    highlights: "content.process-steps@1",
     catalog: "catalog.textile-stack@1",
     trust: "trust.material-passport@1",
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
+    heroMediaIntegration: "editorial_overlap",
+    storyMediaIntegration: "natural",
   },
   usashopet: {
     tokenPack: "cosmetic-laboratory",
     motion: "expressive",
     decoration: "signature",
-    header: "header.floating-capsule@1",
+    pacing: "catalog_first",
+    header: "header.compact-utility@1",
     hero: "hero.beauty-orbit@1",
     story: "content.ritual-steps@1",
     highlights: "content.lookbook-chapter@1",
@@ -74,11 +83,14 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
+    heroMediaIntegration: "product_stage",
+    storyMediaIntegration: "natural",
   },
   novatech: {
     tokenPack: "chrome-future",
     motion: "balanced",
     decoration: "clean",
+    pacing: "facts_first",
     header: "header.technical-marquee@1",
     hero: "hero.technology-cinematic@1",
     story: "content.exploded-feature@1",
@@ -88,20 +100,25 @@ const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
     cta: "call-to-action.technical-brief@1",
     footer: "footer.technical-directory@1",
     ctaVariant: "technical-brief",
+    heroMediaIntegration: "surface_blend",
+    storyMediaIntegration: "natural",
   },
   homevibe: {
     tokenPack: "paper-gallery",
     motion: "balanced",
     decoration: "subtle",
-    header: "header.floating-capsule@1",
+    pacing: "story_first",
+    header: "header.catalog-command@1",
     hero: "hero.room-scene@1",
     story: "content.swatch-story@1",
-    highlights: "content.lookbook-chapter@1",
+    highlights: "content.process-steps@1",
     catalog: "catalog.room-set@1",
     trust: "trust.material-passport@1",
     cta: "call-to-action.magazine-close@1",
     footer: "footer.magazine-masthead@1",
     ctaVariant: "magazine-close",
+    heroMediaIntegration: "surface_blend",
+    storyMediaIntegration: "natural",
   },
 };
 
@@ -115,6 +132,9 @@ DEFAULT_PROFILES["addis-metalworks"] = {
   hero: "hero.industrial-spec@1",
   story: "content.production-metrics@1",
   catalog: "catalog.minimal-list@1",
+  pacing: "facts_first",
+  heroMediaIntegration: "split_bleed",
+  storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["green-terrace-farm"] = {
   ...DEFAULT_PROFILES.homevibe,
@@ -127,6 +147,9 @@ DEFAULT_PROFILES["green-terrace-farm"] = {
   trust: "trust.provenance-panel@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
+  pacing: "source_first",
+  heroMediaIntegration: "edge_fade",
+  storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["blue-nile-apiary"] = {
   ...DEFAULT_PROFILES.homevibe,
@@ -139,6 +162,9 @@ DEFAULT_PROFILES["blue-nile-apiary"] = {
   trust: "trust.ingredient-ledger@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
+  pacing: "source_first",
+  heroMediaIntegration: "surface_blend",
+  storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["rift-valley-mill"] = {
   ...DEFAULT_PROFILES.homevibe,
@@ -151,28 +177,41 @@ DEFAULT_PROFILES["rift-valley-mill"] = {
   trust: "trust.provenance-panel@1",
   cta: "call-to-action.wholesale@1",
   footer: "footer.contact-panel@1",
+  pacing: "facts_first",
+  heroMediaIntegration: "natural",
+  storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["entoto-ceramics"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "artisan-clay",
+  pacing: "catalog_first",
+  header: "header.editorial-wordmark@1",
   hero: "hero.material-detail@1",
   story: "content.material-focus@1",
   catalog: "catalog.editorial-grid@1",
   trust: "trust.material-passport@1",
+  heroMediaIntegration: "editorial_overlap",
+  storyMediaIntegration: "natural",
 };
 DEFAULT_PROFILES["koba-leather"] = {
   ...DEFAULT_PROFILES.homevibe,
   tokenPack: "maker-indigo",
+  pacing: "catalog_first",
+  header: "header.compact-utility@1",
   hero: "hero.material-detail@1",
   story: "content.process-steps@1",
+  highlights: "content.material-focus@1",
   catalog: "catalog.editorial-grid@1",
   trust: "trust.material-passport@1",
+  heroMediaIntegration: "edge_fade",
+  storyMediaIntegration: "natural",
 };
 
 const FALLBACK_PROFILE: DefaultProfile = {
   tokenPack: "paper-gallery",
   motion: "balanced",
   decoration: "subtle",
+  pacing: "story_first",
   header: "header.floating-capsule@1",
   hero: "hero.ingredient-monograph@1",
   story: "content.lookbook-chapter@1",
@@ -182,6 +221,8 @@ const FALLBACK_PROFILE: DefaultProfile = {
   cta: "call-to-action.magazine-close@1",
   footer: "footer.magazine-masthead@1",
   ctaVariant: "magazine-close",
+  heroMediaIntegration: "natural",
+  storyMediaIntegration: "natural",
 };
 
 function profileFor(catalog: Catalog) {
@@ -236,16 +277,20 @@ function section(
   profile: DefaultProfile,
   contentBlockKey: string | null,
   properties: Record<string, ShowroomPrimitive> = {},
+  presentation: {
+    mediaIntegration?: SectionMediaIntegration;
+    surfaceRole?: SectionSurfaceRole;
+  } = {},
 ) {
   const definition = componentById(componentId);
   return {
     key,
     component: componentId,
     contentBlockKey,
-    mediaIntegration: defaultMediaIntegrationForSection(
-      definition.slot,
-      definition.id,
-    ),
+    mediaIntegration:
+      presentation.mediaIntegration ??
+      defaultMediaIntegrationForSection(definition.slot, definition.id),
+    surfaceRole: presentation.surfaceRole,
     properties: {
       ...requiredProperties(definition, profile),
       ...properties,
@@ -272,7 +317,7 @@ function buildContentBlocks(
   catalog: Catalog,
 ): ShowroomContentBlocksDocument {
   const business = catalog.business;
-  const firstProduct = catalog.products[0];
+  const profile = profileFor(catalog);
   const highlightedProducts = catalog.products.slice(0, 3);
   const highlightItems = (
     highlightedProducts.length
@@ -310,24 +355,22 @@ function buildContentBlocks(
       key: "brand-story",
       type: "story",
       kicker: "Showroom story",
-      title: business.name,
+      title: `How ${business.name} approaches the work`,
       body: firstText(
         [business.description],
         "A focused product showroom with a direct inquiry path.",
       ),
-      media: imageMedia(
-        "story_image",
-        firstProduct?.image_path || business.hero_image_path,
-        firstProduct?.name || business.name,
-      ),
+      media: [],
       quote: firstText([business.tagline], "Selected with care."),
     },
     {
       key: "showroom-highlights",
       type: "highlights",
       kicker: "Highlights",
-      title: "What to notice first",
-      body: "A short guide to the products and categories that shape this showroom.",
+      title: catalog.collections[0]?.name
+        ? `A closer look at ${catalog.collections[0].name}`
+        : "A closer look at the catalog",
+      body: "Selected products and supplied details that help visitors understand the range.",
       media: [],
       items: highlightItems.length
         ? highlightItems
@@ -337,7 +380,7 @@ function buildContentBlocks(
       key: "showroom-information",
       type: "information",
       kicker: "Details",
-      title: "Useful showroom information",
+      title: "Before you inquire",
       body: "The core facts customers need before starting an inquiry.",
       media: [],
       items: [
@@ -356,8 +399,14 @@ function buildContentBlocks(
       key: "inquiry-next",
       type: "call_to_action",
       kicker: "Next step",
-      title: "Bring selected products into one clear conversation.",
-      body: "Add items to the inquiry cart and the business can confirm availability, options, and next steps.",
+      title: profile.cta.includes("technical-brief")
+        ? "Send the products and requirements your project needs."
+        : profile.cta.includes("wholesale")
+          ? "Start one clear conversation about products and quantities."
+          : "Turn the products that caught your eye into one clear inquiry.",
+      body: profile.cta.includes("technical-brief")
+        ? "Add relevant products, then include dimensions, quantities, finish, or operating requirements in the inquiry."
+        : "Add selected items to the inquiry cart so the business can confirm availability, options, and next steps.",
       media: [],
       action: "inquiry",
       actionLabel: "Start an inquiry",
@@ -371,6 +420,66 @@ function buildDesignManifest(
   contentBlocks: ShowroomContentBlocksDocument,
 ): ShowroomDesignProposalV2 {
   const profile = profileFor(catalog);
+  const surfaceRoles = {
+    story_first: {
+      story: "canvas",
+      highlights: "surface",
+      catalog: "canvas",
+      trust: "soft",
+    },
+    catalog_first: {
+      story: "soft",
+      highlights: "surface",
+      catalog: "canvas",
+      trust: "canvas",
+    },
+    facts_first: {
+      story: "surface",
+      highlights: "soft",
+      catalog: "canvas",
+      trust: "canvas",
+    },
+    source_first: {
+      story: "surface",
+      highlights: "canvas",
+      catalog: "soft",
+      trust: "canvas",
+    },
+  } as const;
+  const roles = surfaceRoles[profile.pacing];
+  const middleSections = {
+    story: section("content-story", profile.story, profile, "brand-story", {
+      alignment: "start",
+    }, {
+      mediaIntegration: profile.storyMediaIntegration,
+      surfaceRole: roles.story,
+    }),
+    highlights: section("content-highlights", profile.highlights, profile, "showroom-highlights", {
+      alignment: "start",
+    }, {
+      surfaceRole: roles.highlights,
+    }),
+    catalog: section("catalog-1", profile.catalog, profile, null, {
+      show_search: catalog.products.length > 6,
+      show_filters: catalog.categories.length > 1,
+    }, {
+      surfaceRole: roles.catalog,
+    }),
+    trust: section("trust-1", profile.trust, profile, "showroom-information", {
+      columns: 3,
+    }, {
+      surfaceRole: roles.trust,
+    }),
+  };
+  const middleOrder: Record<
+    DefaultProfile["pacing"],
+    Array<keyof typeof middleSections>
+  > = {
+    story_first: ["story", "highlights", "catalog", "trust"],
+    catalog_first: ["catalog", "story", "highlights", "trust"],
+    facts_first: ["highlights", "catalog", "story", "trust"],
+    source_first: ["story", "trust", "catalog", "highlights"],
+  };
   return parseShowroomDesignProposalV2(
     {
       schemaVersion: 2,
@@ -384,31 +493,26 @@ function buildDesignManifest(
         section("header-1", profile.header, profile, null, {
           density: "comfortable",
           show_tagline: true,
+        }, {
+          surfaceRole: "surface",
         }),
         section("hero-1", profile.hero, profile, "hero-main", {
           alignment: "start",
-          height: 680,
+        }, {
+          mediaIntegration: profile.heroMediaIntegration,
+          surfaceRole: "soft",
         }),
-        section("content-story", profile.story, profile, "brand-story", {
-          alignment: "start",
-        }),
-        section("content-highlights", profile.highlights, profile, "showroom-highlights", {
-          alignment: "start",
-        }),
-        section("catalog-1", profile.catalog, profile, null, {
-          columns: 3,
-          show_search: catalog.products.length > 6,
-          show_filters: catalog.categories.length > 1,
-        }),
-        section("trust-1", profile.trust, profile, "showroom-information", {
-          columns: 3,
-        }),
+        ...middleOrder[profile.pacing].map((key) => middleSections[key]),
         section("call-to-action-1", profile.cta, profile, "inquiry-next", {
           alignment: profile.ctaVariant === "technical-brief" ? "start" : "center",
+        }, {
+          surfaceRole: "strong",
         }),
         section("footer-1", profile.footer, profile, null, {
           columns: 3,
           show_tagline: true,
+        }, {
+          surfaceRole: "inverse",
         }),
       ],
     },

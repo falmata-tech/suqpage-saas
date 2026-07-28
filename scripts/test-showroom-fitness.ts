@@ -4,24 +4,30 @@ import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import {
   evaluateCompositionFitness,
   guidanceForComponent,
+  SHOWROOM_DESIGN_PROCESS,
+  SHOWROOM_MEDIA_TREATMENTS,
   SHOWROOM_TEMPLATES,
 } from "../lib/showroom-guidance";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "../lib/showroom-bank-release";
 
 assert.equal(SHOWROOM_TEMPLATES.length, 8);
 for (const template of SHOWROOM_TEMPLATES) {
-  assert.equal(template.components.length, 8);
+  assert.ok(template.sectionPlan.length >= 6);
   assert.ok(template.description.length > 20);
   assert.ok(template.contentNeeds.length > 0);
   assert.ok(template.visualTones.length > 0);
+  assert.ok(template.surfaceSequence.length >= template.sectionPlan.length);
+  assert.ok(template.pacingRules.length >= 2);
+  assert.ok(template.avoidWhen.length > 0);
+  assert.ok(template.signatureBudget <= 2);
   assert.equal("archetypes" in template, false);
-  for (const id of template.components) {
-    assert.ok(
-      SHOWROOM_COMPONENT_BANK_LATEST.components.some((component) => component.id === id),
-      `${template.id} references ${id}`,
-    );
-  }
+  assert.equal("tokenPack" in template, false);
+  assert.equal("components" in template, false);
 }
+assert.equal(SHOWROOM_DESIGN_PROCESS.decisionOrder[2], "page_template");
+assert.equal(SHOWROOM_MEDIA_TREATMENTS.natural.visualWeight, "neutral");
+assert.equal(SHOWROOM_MEDIA_TREATMENTS.surface_blend.visualWeight, "signature");
+assert.equal(SHOWROOM_MEDIA_TREATMENTS.ambient_overlay.status, "legacy");
 for (const component of SHOWROOM_COMPONENT_BANK_LATEST.components) {
   const guidance = guidanceForComponent(component);
   assert.ok(guidance.noMediaFallbacks.length > 0);
@@ -30,6 +36,11 @@ for (const component of SHOWROOM_COMPONENT_BANK_LATEST.components) {
   assert.ok(guidance.contentNeeds.length > 0);
   assert.ok(guidance.idealWhen.length > 0);
   assert.ok(guidance.avoidWhen.length > 0);
+  assert.ok(guidance.renderedAnatomy.regions.length > 0);
+  assert.ok(guidance.renderedAnatomy.mediaPlanes.max >= guidance.renderedAnatomy.mediaPlanes.min);
+  if (component.slot === "hero" || component.slot === "content") {
+    assert.ok(guidance.compatibleMediaIntegrations.includes("natural"));
+  }
   assert.equal("businessArchetypes" in guidance, false);
   assert.equal("catalogModes" in guidance, false);
 }
@@ -74,6 +85,36 @@ assert.equal(duplicateControlsResult.allowed, false);
 assert.ok(
   duplicateControlsResult.issues.some(
     (issue) => issue.code === "duplicate_category_controls",
+  ),
+);
+
+const monotone = structuredClone(snapshot);
+for (const section of monotone.designManifest.sections) {
+  section.surfaceRole = "canvas";
+}
+assert.ok(
+  evaluateCompositionFitness(monotone).issues.some(
+    (issue) => issue.code === "surface_monotony",
+  ),
+);
+
+const missingSignatureMedia = structuredClone(snapshot);
+missingSignatureMedia.business.heroImageRef = "";
+const hero = missingSignatureMedia.designManifest.sections.find((section) =>
+  section.component.startsWith("hero."),
+);
+assert.ok(hero);
+hero.mediaIntegration = "surface_blend";
+const heroBlock = missingSignatureMedia.contentBlocks.blocks.find(
+  (block) => block.key === hero.contentBlockKey,
+);
+assert.ok(heroBlock);
+heroBlock.media = [];
+const missingMediaResult = evaluateCompositionFitness(missingSignatureMedia);
+assert.equal(missingMediaResult.allowed, false);
+assert.ok(
+  missingMediaResult.issues.some(
+    (issue) => issue.code === "media_treatment_requires_image",
   ),
 );
 

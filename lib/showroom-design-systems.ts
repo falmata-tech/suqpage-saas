@@ -7,6 +7,8 @@ export type ShowroomVisualTone =
   | "quiet";
 
 export type SectionMediaIntegration =
+  | "natural"
+  | "surface_blend"
   | "ambient_overlay"
   | "edge_fade"
   | "split_bleed"
@@ -49,7 +51,7 @@ export type ShowroomDesignSystem = {
     sectionDesktop: number;
   };
   layout: {
-    containerMax: 1200;
+    containerMax: number;
     density: "compact" | "comfortable" | "spacious";
     sectionRhythm: "quiet_alternation" | "editorial_contrast" | "technical_bands";
   };
@@ -57,8 +59,8 @@ export type ShowroomDesignSystem = {
     heroAspect: "16:10";
     productAspect: "4:3";
     fit: "cover";
-    maxHeroHeight: 620;
-    maxProductColumns: 3;
+    maxHeroHeight: number;
+    maxProductColumns: 1 | 2 | 3 | 4;
     preferredHeroIntegration: Exclude<SectionMediaIntegration, "hidden">;
     allowedHeroIntegrations: readonly SectionMediaIntegration[];
   };
@@ -81,12 +83,7 @@ function designSystem(
   },
 ): ShowroomDesignSystem {
   const preferredHeroIntegration =
-    input.media?.preferredHeroIntegration ||
-    (input.layout.sectionRhythm === "technical_bands"
-      ? "split_bleed"
-      : input.layout.sectionRhythm === "editorial_contrast"
-        ? "editorial_overlap"
-        : "edge_fade");
+    input.media?.preferredHeroIntegration || "natural";
   return {
     ...input,
     spacing: {
@@ -104,6 +101,8 @@ function designSystem(
       maxProductColumns: 3,
       preferredHeroIntegration,
       allowedHeroIntegrations: [
+        "natural",
+        "surface_blend",
         "ambient_overlay",
         "edge_fade",
         "split_bleed",
@@ -187,6 +186,7 @@ const systems = [
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "compact" },
     shape: { radius: 2, treatment: "square" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
+    media: { maxProductColumns: 4, maxHeroHeight: 600 },
     guidance: { tones: ["technical", "precise"] },
   }),
   designSystem({
@@ -205,6 +205,7 @@ const systems = [
     typography: { displayStack: bodyStack, bodyStack, displayRole: "humanist_sans", scale: "compact" },
     shape: { radius: 8, treatment: "subtle" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
+    media: { maxProductColumns: 4, maxHeroHeight: 580 },
     guidance: { tones: ["precise", "technical"] },
   }),
   designSystem({
@@ -223,6 +224,7 @@ const systems = [
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "compact" },
     shape: { radius: 6, treatment: "subtle" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
+    media: { maxProductColumns: 4, maxHeroHeight: 580 },
     guidance: { tones: ["technical", "precise"] },
   }),
   designSystem({
@@ -259,6 +261,7 @@ const systems = [
     typography: { displayStack: bodyStack, bodyStack, displayRole: "technical_sans", scale: "expressive" },
     shape: { radius: 4, treatment: "square" },
     layout: { containerMax: 1200, density: "compact", sectionRhythm: "technical_bands" },
+    media: { maxProductColumns: 4, maxHeroHeight: 640 },
     guidance: { tones: ["technical", "precise"] },
   }),
   designSystem({

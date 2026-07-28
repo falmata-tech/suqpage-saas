@@ -323,8 +323,10 @@ export default function DesignBankLaboratory({
             {template.mediaCondition.replaceAll("_", " ")} media
           </p>
           <div className={styles.templateSequence}>
-            {template.components.map((component, index) => (
-              <span key={component}>{index + 1}. {component.split(".")[0]}</span>
+            {template.sectionPlan.map((section, index) => (
+              <span key={`${section.slot}-${section.role}`}>
+                {index + 1}. {section.slot.replaceAll("_", " ")} · {section.role}
+              </span>
             ))}
           </div>
         </div>

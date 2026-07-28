@@ -165,7 +165,9 @@ for (const system of Object.values(SHOWROOM_DESIGN_SYSTEMS)) {
   assert.ok(system.shape.radius <= 8);
   assert.equal(system.layout.containerMax, 1200);
   assert.equal(system.media.productAspect, "4:3");
-  assert.equal(system.media.maxProductColumns, 3);
+  assert.ok(system.media.maxProductColumns >= 1);
+  assert.ok(system.media.maxProductColumns <= 4);
+  assert.equal(system.media.preferredHeroIntegration, "natural");
   assert.ok(system.media.allowedHeroIntegrations.length >= 4);
   assert.ok(
     system.media.allowedHeroIntegrations.includes(
@@ -189,6 +191,14 @@ for (const token of Object.values(SHOWROOM_BANK_TOKEN_STYLES)) {
     "--bank-line",
     "--bank-radius",
     "--bank-display",
+    "--bank-body",
+    "--bank-container-max",
+    "--bank-section-mobile",
+    "--bank-section-desktop",
+    "--bank-hero-max-height",
+    "--bank-product-columns",
+    "--bank-product-aspect",
+    "--bank-media-fit",
     "--bank-motion-duration",
     "--bank-motion-distance",
     "--bank-motion-ease",
@@ -236,6 +246,7 @@ assert.doesNotMatch(cssSource, /\.heroProducts\b/);
 assert.doesNotMatch(cssSource, /border-radius:\s*(?:50%\s+50%|48%\s+48%|40%\s+40%|100px\s+0\s+100px)/);
 assert.match(cssSource, /\.hero\[data-media-integration="split_bleed"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="edge_fade"\]/);
+assert.match(cssSource, /\.hero\[data-media-integration="surface_blend"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="ambient_overlay"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="editorial_overlap"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="product_stage"\]/);
@@ -257,6 +268,8 @@ assert.doesNotMatch(sectionSource, /product\.name\.slice/);
 assert.match(sectionSource, /placeholderTexture/);
 assert.match(sectionSource, /href="#showroom-catalog"/);
 assert.match(sectionSource, /data-media-integration/);
+assert.match(sectionSource, /data-surface/);
+assert.match(sectionSource, /data-media-planes/);
 
 const combinedDescriptions = [
   ...SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.map((entry) => entry.description),

@@ -8,6 +8,12 @@ import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 const businesses = getAllBusinesses().filter((business) => business.status === "active");
 assert.equal(businesses.length, 10, "reset must create ten active benchmark businesses");
 const productCounts = new Set<number>();
+const tokenPacks = new Set<string>();
+const heroTreatments = new Set<string>();
+const headerComponents = new Set<string>();
+const catalogComponents = new Set<string>();
+const middleSequences = new Set<string>();
+const surfaceSequences = new Set<string>();
 for (const business of businesses) {
   const catalog = getCatalogByBusinessId(business.id);
   assert.ok(catalog, `${business.handle} catalog exists`);
@@ -15,6 +21,25 @@ for (const business of businesses) {
   productCounts.add(catalog.products.length);
   const snapshot = catalogToRevisionSnapshotV4(catalog);
   assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} fitness`);
+  const componentIds = snapshot.designManifest.sections.map(
+    (section) => section.component,
+  );
+  assert.equal(
+    new Set(componentIds).size,
+    componentIds.length,
+    `${business.handle} does not repeat an exact component anatomy`,
+  );
+  tokenPacks.add(snapshot.designManifest.tokenPack);
+  const heroSection = snapshot.designManifest.sections.find((section) =>
+    section.component.startsWith("hero."),
+  );
+  const headerSection = snapshot.designManifest.sections.find((section) =>
+    section.component.startsWith("header."),
+  );
+  assert.ok(heroSection, `${business.handle} has one hero`);
+  assert.ok(headerSection, `${business.handle} has one header`);
+  heroTreatments.add(heroSection.mediaIntegration || "none");
+  headerComponents.add(headerSection.component);
   assert.equal(
     snapshot.designManifest.sections.some((section) =>
       section.component.startsWith("navigation."),
@@ -26,6 +51,18 @@ for (const business of businesses) {
     section.component.startsWith("catalog."),
   );
   assert.ok(catalogSection, `${business.handle} has one catalog`);
+  catalogComponents.add(catalogSection.component);
+  middleSequences.add(
+    snapshot.designManifest.sections
+      .slice(2, -2)
+      .map((section) => section.key)
+      .join(">"),
+  );
+  surfaceSequences.add(
+    snapshot.designManifest.sections
+      .map((section) => section.surfaceRole)
+      .join(">"),
+  );
   assert.equal(
     catalogSection.properties.show_filters,
     catalog.categories.length > 1,
@@ -42,5 +79,11 @@ for (const business of businesses) {
   }
 }
 assert.ok(productCounts.size >= 4, "benchmark catalogs vary their product count");
+assert.ok(tokenPacks.size >= 8, "benchmarks exercise at least eight semantic token systems");
+assert.ok(heroTreatments.size >= 6, "benchmarks exercise at least six hero media treatments");
+assert.ok(headerComponents.size >= 5, "benchmarks exercise at least five header anatomies");
+assert.ok(catalogComponents.size >= 7, "benchmarks exercise at least seven catalog anatomies");
+assert.ok(middleSequences.size >= 4, "benchmarks exercise at least four page pacing templates");
+assert.ok(surfaceSequences.size >= 4, "benchmarks exercise at least four semantic surface sequences");
 
-console.log("Ten validated benchmark showrooms, varied catalogs, media, and fitness passed.");
+console.log("Ten validated benchmark showrooms, varied catalogs, templates, surfaces, media, and fitness passed.");

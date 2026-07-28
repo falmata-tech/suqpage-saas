@@ -82,22 +82,38 @@ assert.deepEqual(
 );
 const parsedHero = parsed.sections.find((section) => section.contentBlockKey === "opening");
 const parsedStory = parsed.sections.find((section) => section.contentBlockKey === "story");
-assert.equal(parsedHero?.mediaIntegration, "editorial_overlap");
-assert.equal(parsedStory?.mediaIntegration, "edge_fade");
+assert.equal(parsedHero?.mediaIntegration, "natural");
+assert.equal(parsedStory?.mediaIntegration, "natural");
+assert.equal(parsedHero?.surfaceRole, "soft");
+assert.equal(parsedStory?.surfaceRole, "canvas");
 
-const ambientProposal = {
+const blendProposal = {
   ...proposal,
   sections: proposal.sections.map((section) =>
     section.contentBlockKey === "opening"
-      ? { ...section, mediaIntegration: "ambient_overlay" }
+      ? { ...section, mediaIntegration: "surface_blend" }
       : section
   ),
 };
 assert.equal(
-  parseShowroomDesignProposalV2(ambientProposal, bank, content).sections.find(
+  parseShowroomDesignProposalV2(blendProposal, bank, content).sections.find(
     (section) => section.contentBlockKey === "opening",
   )?.mediaIntegration,
-  "ambient_overlay",
+  "surface_blend",
+);
+const surfacedProposal = {
+  ...proposal,
+  sections: proposal.sections.map((section) =>
+    section.contentBlockKey === "story"
+      ? { ...section, surfaceRole: "strong" }
+      : section
+  ),
+};
+assert.equal(
+  parseShowroomDesignProposalV2(surfacedProposal, bank, content).sections.find(
+    (section) => section.contentBlockKey === "story",
+  )?.surfaceRole,
+  "strong",
 );
 
 function expectCode(callback: () => unknown, code: string) {
@@ -145,6 +161,22 @@ expectCode(
       content,
     ),
   "invalid_media_integration",
+);
+expectCode(
+  () =>
+    parseShowroomDesignProposalV2(
+      {
+        ...proposal,
+        sections: proposal.sections.map((section) =>
+          section.contentBlockKey === "story"
+            ? { ...section, surfaceRole: "neon" }
+            : section,
+        ),
+      },
+      bank,
+      content,
+    ),
+  "invalid_surface_role",
 );
 expectCode(
   () =>
@@ -206,6 +238,8 @@ const designSchemaSource = fs.readFileSync(
 );
 assert.match(designSchemaSource, /contentBlockKey/);
 assert.match(designSchemaSource, /mediaIntegration/);
+assert.match(designSchemaSource, /surfaceRole/);
+assert.match(designSchemaSource, /surface_blend/);
 assert.match(designSchemaSource, /ambient_overlay/);
 
 console.log("Additive design-v2 component compatibility, exact block assignment, and bank-v1 isolation passed.");

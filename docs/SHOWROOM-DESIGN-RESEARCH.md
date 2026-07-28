@@ -5,6 +5,45 @@ and art-direction patterns, not layouts or trade dress to copy. Component-bank
 contracts remain authoritative under `FE-009`, `BE-010`, `BE-013`, `DEP-009`,
 and `DEP-011`.
 
+## Systematic AI composition findings
+
+Research checkpoint: 2026-07-28.
+
+- A schema can guarantee output shape but cannot by itself guarantee design
+  quality. SuqPage therefore needs both strict recipe structure and an
+  evaluation set with explicit visual criteria.
+- Design choices should be layered. Foundations define semantic visual
+  decisions; patterns define functional page anatomy; templates define a
+  coherent sequence and pacing; variants refine a reviewed pattern. Giving an
+  AI dozens of peer-level section IDs without this hierarchy encourages valid
+  but unrelated choices.
+- Design-token names and descriptions should communicate semantic use rather
+  than a color value or industry. The stable Design Tokens Community Group
+  format formalizes typed tokens, descriptions, aliases, and groups; it also
+  warns tools not to infer purpose from arbitrary grouping alone.
+- Component guidance needs the equivalent of human design-system usage
+  documentation: visible anatomy, when to use, when not to use, content limits,
+  responsive behavior, and accessibility constraints. A name such as
+  `editorial-collage` is harmful if the runtime has only one ordinary image
+  plane.
+- Image layout and image blending are separate decisions. A mask changes image
+  transparency; a surface overlay protects text and connects the image to the
+  section color. A homepage-like blend may combine both, but it remains an
+  explicit treatment rather than a universal default.
+- Visual verification must cover isolated component states and complete pages.
+  The authenticated design bank serves the component-state role; the ten
+  benchmark showrooms provide varied page-level evaluation data. Stable
+  desktop/mobile screenshots make visual regressions reviewable.
+
+Primary references:
+
+- [Design Tokens Format Module 2025.10](https://www.designtokens.org/tr/2025.10/format/)
+- [Atlassian semantic design-token guidance](https://atlassian.design/foundations/tokens/design-tokens/)
+- [Storybook UI and visual testing guidance](https://storybook.js.org/docs/writing-tests)
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+- [CSS Masking Module Level 1](https://www.w3.org/TR/css-masking-1/)
+- [Responsive image art direction](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images)
+
 ## SuqPage v1 comparison
 
 Desktop and 390px full-page captures of the static v1 homepage and its four
@@ -74,8 +113,8 @@ desktop block.
   static presentation when effects are unavailable.
 - Semantic foundation systems: named canvas, surface, text, primary, secondary,
   on-color, border, typography, shape, spacing, layout, and media decisions.
-  The recipe brief selects this system before choosing a page template or
-  component variants.
+  The recipe brief chooses one page template, then one compatible semantic
+  foundation, before selecting component variants.
 
 ## Rejected patterns
 

@@ -142,6 +142,9 @@ export function CompositionShowroom({
             mediaIntegration={
               "mediaIntegration" in section ? section.mediaIntegration : null
             }
+            surfaceRole={
+              "surfaceRole" in section ? section.surfaceRole : undefined
+            }
           />
         );
       })}

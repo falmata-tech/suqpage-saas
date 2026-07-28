@@ -47,11 +47,22 @@ creative bank without rewriting retained revisions or widening trusted input.
   systems, and a 90,000 required-slot combination floor.
 - Pairwise fixtures across industry families, block types, media kinds, token
   systems, experience settings, and required capabilities.
+- Industry-neutral guidance fixtures prove the exported decision sequence,
+  template pacing, semantic surfaces, treatment prerequisites, and corrective
+  fitness messages without steering from tenant or industry labels.
+- Token-to-renderer parity proves every authoritative typography, spacing,
+  layout, shape, color, and media foundation decision has a scoped runtime
+  representation.
 - Static checks prohibit network access, runtime dependencies, global CSS,
   dynamic imports, document mutation, unbounded animation, and raw markup.
 - Browser checks at 320/390/desktop cover long text, missing optional media,
   keyboard/touch, reduced motion, no horizontal page overflow, client denial,
   focused corrections, exact preview, approval, publication, and rollback.
+- The ten disposable benchmark showrooms are regenerated through the current
+  bank and reviewed as one visual matrix at desktop and 390px. Admission rejects
+  repeated generic compositions, one-hue pages, abrupt unintended image blocks,
+  unreadable overlay headers, unbounded product media, dishonest component
+  anatomy, or a dense manufacturer catalog rendered as a sparse lifestyle page.
 - Provider security checks prove normalized IDs, privacy-enhanced lazy rendering,
   no autoplay, title, CSP allowlist, and denial of all unapproved origins.
 - Operations backup/restore pairs v4 rows, provider descriptors, and managed
@@ -71,6 +82,12 @@ Scenario: Creative component fails mobile admission
   WHEN the bank release gate runs
   THEN bank 1.2 is not admitted
   AND bank 1.1 remains the default supported release
+
+Scenario: Ten-showroom design evaluation exposes a generic bank
+  GIVEN the current semantic brief, renderer, and ten varied benchmark catalogs
+  WHEN every showroom is captured at desktop and phone widths
+  THEN the matrix demonstrates multiple coherent templates, surface rhythms, catalog anatomies, and intentional media treatments
+  AND any repeated weak composition is corrected before the bank checkpoint is accepted
 
 Scenario: Provider capability is disabled
   GIVEN a retained v4 draft references a normalized video asset
@@ -100,6 +117,7 @@ copy, images, provider conversations, or credentials.
 |---|---|---|
 | Migration, backup, restore, retained-release parity | operations | `scripts/test-operations.mjs`, planned v4 migration tests |
 | Bank 1.2 coverage/isolation/pairwise admission | contract/static | `scripts/test-showroom-bank.ts`, `npm run check` |
+| Ten-showroom design matrix and responsive media treatments | browser/manual | benchmark Playwright screenshot runner, `scripts/test-showroom-benchmarks.ts` |
 | Provider/CSP/security denial | security/browser | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 | Mobile/reduced-motion/role/publication/rollback | production browser | `tests/acceptance/app.spec.ts` |
 | Complete release and container privacy | release | `npm run release`, `npm run test:container` |
@@ -146,8 +164,14 @@ Static bank/experience/compatibility gates, the complete release, all eight
 production-browser scenarios, and the isolated container privacy/build gate
 pass. V4 persistence/rendering, local reset-default writes, provider/CSP
 browser proof, and focused private-draft controls are implemented. Operations
-migration/restore, 320-pixel and pairwise visual admission, remote checks, and
-production rollout evidence remain.
+migration/restore, full pairwise visual admission, remote checks, and
+production rollout evidence remain. The local ten-showroom admission runner
+creates twenty 1440px/390px captures plus comparison sheets and fails on browser
+errors, broken media, horizontal page/text overflow, or insufficient surface
+variety. The deterministic benchmark gate additionally requires four
+page-pacing templates, four surface rhythms, five header anatomies, seven
+catalog anatomies, six hero treatments, and no exact component repetition
+inside a showroom.
 
 The YouTube normalizer and request-scoped persistence adapter are implemented
 without network access. Admission is independently disabled by default through

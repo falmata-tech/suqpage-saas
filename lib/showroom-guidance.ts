@@ -1,6 +1,7 @@
 import type { RevisionSnapshotV4 } from "./revision-v4-domain";
 import type { ShowroomComponentDefinitionV2 } from "./showroom-composition-v2";
 import type { HeroMediaIntegration } from "./showroom-design-systems";
+import type { SectionMediaIntegration } from "./showroom-design-systems";
 import { defaultMediaIntegrationForSection } from "./showroom-composition-v2";
 
 export type ShowroomCommerceMode = "inquiry" | "retail" | "wholesale" | "rfq";
@@ -48,6 +49,12 @@ export type NoMediaFallback =
   | "abstract_texture"
   | "silhouette"
   | "compact_text";
+export type ShowroomSurfaceRole =
+  | "canvas"
+  | "surface"
+  | "soft"
+  | "strong"
+  | "inverse";
 
 export type ComponentGuidance = {
   visualDescription: string;
@@ -76,7 +83,34 @@ export type ComponentGuidance = {
   idealWhen: string[];
   avoidWhen: string[];
   heroMediaIntegration: HeroMediaIntegration | null;
+  compatibleMediaIntegrations: SectionMediaIntegration[];
+  renderedAnatomy: {
+    regions: string[];
+    mediaPlanes: { min: number; max: number };
+    interaction: string;
+  };
   fallbackComponent: string | null;
+};
+
+export type MediaTreatmentGuidance = {
+  id: SectionMediaIntegration;
+  label: string;
+  status: "current" | "legacy";
+  visualResult: string;
+  visualWeight: "neutral" | "supporting" | "signature";
+  requiresImage: boolean;
+  allowedSlots: Array<"hero" | "content">;
+  idealWhen: string[];
+  avoidWhen: string[];
+  desktopBehavior: string;
+  mobileBehavior: string;
+};
+
+export type ShowroomTemplateSection = {
+  role: string;
+  slot: "header" | "hero" | "content" | "catalog" | "trust" | "call_to_action" | "footer";
+  required: boolean;
+  visualWeight: "quiet" | "supporting" | "prominent" | "signature";
 };
 
 export type ShowroomTemplate = {
@@ -88,8 +122,11 @@ export type ShowroomTemplate = {
   commerceModes: ShowroomCommerceMode[];
   mediaCondition: ShowroomMediaCondition;
   visualTones: ShowroomVisualTone[];
-  tokenPack: string;
-  components: string[];
+  sectionPlan: ShowroomTemplateSection[];
+  surfaceSequence: ShowroomSurfaceRole[];
+  signatureBudget: 1 | 2;
+  pacingRules: string[];
+  avoidWhen: string[];
 };
 
 export type FitnessIssue = {
@@ -105,8 +142,163 @@ export type CompositionFitness = {
   issues: FitnessIssue[];
 };
 
+export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
+  decisionOrder: [
+    "source_facts_and_content_needs",
+    "commerce_mode_and_catalog_shape",
+    "page_template",
+    "semantic_design_system",
+    "surface_sequence",
+    "section_anatomy",
+    "media_treatment",
+    "component_variant_and_properties",
+    "composition_fitness",
+    "desktop_and_mobile_review",
+  ],
+  rules: [
+    "Choose one page template before individual component variants.",
+    "Choose semantic design roles by purpose, never by industry words in an ID.",
+    "Spend the signature budget on the most important one or two sections.",
+    "Treat media layout and media blending as separate decisions.",
+    "Use supplied facts and admitted media only; presentation freedom is not factual authority.",
+    "Revise any section identified by composition fitness before review.",
+  ],
+});
+
+export const SHOWROOM_MEDIA_TREATMENTS: Readonly<
+  Record<SectionMediaIntegration, MediaTreatmentGuidance>
+> = Object.freeze({
+  natural: {
+    id: "natural",
+    label: "Natural media",
+    status: "current",
+    visualResult: "The image follows the selected section anatomy without an imposed fade, overlay, or cutout.",
+    visualWeight: "neutral",
+    requiresImage: false,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["the section layout already gives the image a clear role", "the image must remain easy to inspect"],
+    avoidWhen: ["copy is placed directly over a busy image"],
+    desktopBehavior: "Uses the component's native split, inline, or staged media region.",
+    mobileBehavior: "Stacks media at its bounded ratio without adding a synthetic fade.",
+  },
+  surface_blend: {
+    id: "surface_blend",
+    label: "Full-section surface blend",
+    status: "current",
+    visualResult: "One image fills the section while a broad semantic surface gradient protects copy and dissolves into the image.",
+    visualWeight: "signature",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["one strong landscape image can carry the section", "copy is concise and needs an immersive backdrop"],
+    avoidWhen: ["the image subject sits beneath the copy", "the image is low resolution or informationally dense"],
+    desktopBehavior: "Uses a full-section image with a wide inline surface-to-transparent gradient.",
+    mobileBehavior: "Changes to a vertical surface-to-transparent gradient so copy remains readable above the image.",
+  },
+  ambient_overlay: {
+    id: "ambient_overlay",
+    label: "Legacy ambient overlay",
+    status: "legacy",
+    visualResult: "Retained full-section image overlay behavior for previously stored designs.",
+    visualWeight: "signature",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["rendering a retained design that already selected this treatment"],
+    avoidWhen: ["creating a new recipe; use surface_blend instead"],
+    desktopBehavior: "Renders through the reviewed surface-blend implementation.",
+    mobileBehavior: "Uses the same protected vertical blend as surface_blend.",
+  },
+  edge_fade: {
+    id: "edge_fade",
+    label: "Directional edge fade",
+    status: "current",
+    visualResult: "The image pixels gradually become transparent where media meets adjacent copy.",
+    visualWeight: "supporting",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["split copy and media need a softer transition", "the subject remains away from the faded edge"],
+    avoidWhen: ["the image contains important detail at the faded edge"],
+    desktopBehavior: "Applies a directional alpha mask at the copy-facing image edge.",
+    mobileBehavior: "Rotates the mask vertically at the stacked copy/media boundary.",
+  },
+  split_bleed: {
+    id: "split_bleed",
+    label: "Split bleed",
+    status: "current",
+    visualResult: "Copy and media occupy distinct regions while media reaches the section edge.",
+    visualWeight: "supporting",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["copy and image need equal responsibility", "the image crops well in a landscape region"],
+    avoidWhen: ["the available image needs its complete uncropped frame"],
+    desktopBehavior: "Uses a stable split with an edge-connected media plane.",
+    mobileBehavior: "Stacks into a bounded full-width media plane.",
+  },
+  editorial_overlap: {
+    id: "editorial_overlap",
+    label: "Editorial overlap",
+    status: "current",
+    visualResult: "Media slightly crosses the copy boundary with a restrained directional mask.",
+    visualWeight: "signature",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["the page needs one editorial focal section", "the subject remains readable in an asymmetric crop"],
+    avoidWhen: ["copy is long", "another nearby section already uses signature media"],
+    desktopBehavior: "Offsets media toward copy and masks its leading edge.",
+    mobileBehavior: "Removes the offset and uses a short vertical transition.",
+  },
+  product_stage: {
+    id: "product_stage",
+    label: "Product stage",
+    status: "current",
+    visualResult: "One isolated subject is contained and softened with a radial mask rather than cropped as a scene.",
+    visualWeight: "signature",
+    requiresImage: true,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["one product or object has a clean isolated subject", "the full object should remain visible"],
+    avoidWhen: ["the image is a room, workshop, landscape, or busy group scene"],
+    desktopBehavior: "Contains the image subject inside a soft radial stage.",
+    mobileBehavior: "Keeps the object contained at a stable landscape ratio.",
+  },
+  hidden: {
+    id: "hidden",
+    label: "Intentional no-media",
+    status: "current",
+    visualResult: "The media region is removed and the section becomes deliberately text-led.",
+    visualWeight: "neutral",
+    requiresImage: false,
+    allowedSlots: ["hero", "content"],
+    idealWhen: ["the message is stronger than available imagery", "no authorized image exists"],
+    avoidWhen: ["visual product recognition is essential in the opening"],
+    desktopBehavior: "Removes the media region and lets copy own the composition.",
+    mobileBehavior: "Preserves the text-led composition without an empty placeholder.",
+  },
+});
+
+const STANDARD_SECTION_PLAN: ShowroomTemplateSection[] = [
+  { role: "identity and primary actions", slot: "header", required: true, visualWeight: "quiet" },
+  { role: "opening proposition", slot: "hero", required: true, visualWeight: "signature" },
+  { role: "supporting context", slot: "content", required: true, visualWeight: "supporting" },
+  { role: "product discovery", slot: "catalog", required: true, visualWeight: "prominent" },
+  { role: "decision-support facts", slot: "trust", required: true, visualWeight: "supporting" },
+  { role: "inquiry conversion", slot: "call_to_action", required: true, visualWeight: "prominent" },
+  { role: "identity and contact close", slot: "footer", required: true, visualWeight: "quiet" },
+];
+
+function pageTemplate(
+  input: Omit<ShowroomTemplate, "sectionPlan" | "signatureBudget"> & {
+    sectionPlan?: ShowroomTemplateSection[];
+    signatureBudget?: 1 | 2;
+  },
+): ShowroomTemplate {
+  return {
+    ...input,
+    sectionPlan: input.sectionPlan || STANDARD_SECTION_PLAN,
+    signatureBudget: input.signatureBudget || 2,
+  };
+}
+
 export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
-  {
+  pageTemplate({
     id: "process-led-editorial",
     name: "Process-led editorial",
     description: "A spacious narrative sequence that connects process, material facts, products, and consultation.",
@@ -115,15 +307,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail"],
     mediaCondition: "optional",
     visualTones: ["editorial", "quiet"],
-    tokenPack: "paper-gallery",
-    components: [
-      "header.editorial-wordmark@1", "hero.material-detail@1",
-      "navigation.collection-rail@1", "content.process-steps@1",
-      "catalog.editorial-grid@1", "trust.material-passport@1",
-      "call-to-action.consultation@1", "footer.editorial@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    pacingRules: [
+      "Keep the opening concise, then reveal process before products.",
+      "Use no more than one image-dominant narrative section after the hero.",
     ],
-  },
-  {
+    avoidWhen: ["the catalog is primarily specification comparison", "there is no useful process or material story"],
+  }),
+  pageTemplate({
     id: "source-led-shelf",
     name: "Source-led shelf",
     description: "An origin-first sequence with a horizontally browsable catalog and prominent contact handoff.",
@@ -132,15 +323,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "wholesale"],
     mediaCondition: "optional",
     visualTones: ["organic", "quiet"],
-    tokenPack: "harvest-earth",
-    components: [
-      "header.producer-badge@1", "hero.provenance@1",
-      "navigation.collection-rail@1", "content.origin-story@1",
-      "catalog.horizontal-shelf@1", "trust.provenance-panel@1",
-      "call-to-action.wholesale@1", "footer.contact-panel@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "soft", "strong", "inverse"],
+    pacingRules: [
+      "Establish supplied source context before the compact product shelf.",
+      "Keep provenance facts separate from promotional narrative.",
     ],
-  },
-  {
+    avoidWhen: ["source or provenance facts are unavailable", "side-by-side specification comparison is essential"],
+  }),
+  pageTemplate({
     id: "guided-use-catalog",
     name: "Guided-use catalog",
     description: "A polished product sequence organized around use steps, visual chapters, and supplied detail facts.",
@@ -149,15 +339,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["quiet", "playful"],
-    tokenPack: "cosmetic-laboratory",
-    components: [
-      "header.floating-capsule@1", "hero.ingredient-monograph@1",
-      "navigation.visual-chapters@1", "content.ritual-steps@1",
-      "catalog.beauty-swatch@1", "trust.ingredient-ledger@1",
-      "call-to-action.sample-question@1", "footer.magazine-masthead@1",
+    surfaceSequence: ["surface", "soft", "canvas", "soft", "canvas", "surface", "strong", "inverse"],
+    pacingRules: [
+      "Explain a bounded use sequence before asking visitors to compare products.",
+      "Keep steps short enough to scan without hiding essential information.",
     ],
-  },
-  {
+    avoidWhen: ["products require dense technical comparison", "no supplied use or care guidance exists"],
+  }),
+  pageTemplate({
     id: "spatial-gallery",
     name: "Spatial gallery",
     description: "A scene-led composition with generous media, material context, and grouped product discovery.",
@@ -166,15 +355,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "quiet"],
-    tokenPack: "paper-gallery",
-    components: [
-      "header.editorial-wordmark@1", "hero.room-scene@1",
-      "navigation.visual-chapters@1", "content.material-focus@1",
-      "catalog.room-set@1", "trust.care-guide@1",
-      "call-to-action.consultation@1", "footer.editorial@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    pacingRules: [
+      "Spend the primary signature on a scene-led opening.",
+      "Group products only when supplied relationships are meaningful.",
     ],
-  },
-  {
+    avoidWhen: ["media is sparse or inconsistent", "products are best compared by specification"],
+  }),
+  pageTemplate({
     id: "dense-rfq",
     name: "Dense RFQ",
     description: "A compact, indexed composition for comparison, supplied specifications, and requirement-led inquiries.",
@@ -183,15 +371,15 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["rfq", "wholesale", "inquiry"],
     mediaCondition: "optional",
     visualTones: ["technical", "precise"],
-    tokenPack: "industrial-steel",
-    components: [
-      "header.technical-marquee@1", "hero.industrial-spec@1",
-      "navigation.catalog-index@1", "content.production-metrics@1",
-      "catalog.dense-wholesale@1", "trust.specification-matrix@1",
-      "call-to-action.technical-brief@1", "footer.technical-directory@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    signatureBudget: 1,
+    pacingRules: [
+      "Prioritize supplied specifications, product names, and inquiry requirements over decorative media.",
+      "Use compact density and reserve the only signature treatment for the opening.",
     ],
-  },
-  {
+    avoidWhen: ["fewer than five products exist", "the purchase decision is primarily emotional or lifestyle-led"],
+  }),
+  pageTemplate({
     id: "provenance-collection",
     name: "Provenance collection",
     description: "A source-and-story sequence followed by grouped products, factual proof, and a quantity conversation.",
@@ -200,15 +388,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "optional",
     visualTones: ["organic", "editorial"],
-    tokenPack: "artisan-clay",
-    components: [
-      "header.producer-badge@1", "hero.ingredient-monograph@1",
-      "navigation.material-index@1", "content.origin-story@1",
-      "catalog.collection-led@1", "trust.provenance-panel@1",
-      "call-to-action.wholesale@1", "footer.contact-panel@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    pacingRules: [
+      "Connect approved source context to real collection structure.",
+      "Do not repeat the same source paragraph in hero, story, and trust sections.",
     ],
-  },
-  {
+    avoidWhen: ["collections are arbitrary or missing", "source claims would need to be inferred"],
+  }),
+  pageTemplate({
     id: "material-editorial",
     name: "Material editorial",
     description: "A layered visual narrative centered on color, texture, material variation, and stacked product browsing.",
@@ -217,15 +404,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "expressive"],
-    tokenPack: "silk-atelier",
-    components: [
-      "header.transparent-overlay@1", "hero.textile-swatch@1",
-      "navigation.material-index@1", "content.swatch-story@1",
-      "catalog.textile-stack@1", "trust.material-passport@1",
-      "call-to-action.magazine-close@1", "footer.magazine-masthead@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    pacingRules: [
+      "Use image and surface contrast to create two deliberate editorial peaks.",
+      "Keep catalog cards bounded even when imagery is strong.",
     ],
-  },
-  {
+    avoidWhen: ["authorized photography is sparse", "long technical descriptions require dense comparison"],
+  }),
+  pageTemplate({
     id: "compact-service-catalog",
     name: "Compact service and catalog",
     description: "A restrained, information-forward sequence connecting process, a compact catalog, principles, and consultation.",
@@ -234,14 +420,14 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "rfq"],
     mediaCondition: "optional",
     visualTones: ["precise", "utilitarian"],
-    tokenPack: "technology-mono",
-    components: [
-      "header.compact-utility@1", "hero.split-story@1",
-      "navigation.minimal-tabs@1", "content.process-steps@1",
-      "catalog.minimal-list@1", "trust.business-principles@1",
-      "call-to-action.consultation@1", "footer.compact@1",
+    surfaceSequence: ["surface", "soft", "canvas", "surface", "canvas", "soft", "strong", "inverse"],
+    signatureBudget: 1,
+    pacingRules: [
+      "Keep the page short and information-forward.",
+      "Use a compact catalog and direct inquiry close instead of decorative chapters.",
     ],
-  },
+    avoidWhen: ["a broad image-rich collection needs visual grouping", "several editorial stories are essential"],
+  }),
 ]);
 
 type SelectionProfile = Omit<
@@ -252,6 +438,8 @@ type SelectionProfile = Omit<
   | "recommendedProductCount"
   | "recommendedCategoryCount"
   | "heroMediaIntegration"
+  | "compatibleMediaIntegrations"
+  | "renderedAnatomy"
   | "fallbackComponent"
 >;
 
@@ -591,6 +779,86 @@ export function heroMediaIntegrationForComponent(
   return defaultMediaIntegrationForSection("hero", componentId);
 }
 
+function compatibleMediaIntegrations(
+  slot: ShowroomComponentDefinitionV2["slot"],
+  profileKey: keyof typeof PROFILES,
+): SectionMediaIntegration[] {
+  if (slot !== "hero" && slot !== "content") return [];
+  if (profileKey === "centered_hero") return ["natural", "hidden"];
+  if (profileKey === "product_hero") {
+    return ["natural", "surface_blend", "edge_fade", "split_bleed", "product_stage", "hidden"];
+  }
+  if (profileKey === "collage_hero" || profileKey === "mosaic_hero") {
+    return ["natural", "surface_blend", "edge_fade", "split_bleed", "editorial_overlap", "hidden"];
+  }
+  if (profileKey === "video") return ["natural", "hidden"];
+  if (slot === "content") {
+    return ["natural", "surface_blend", "edge_fade", "split_bleed", "editorial_overlap", "hidden"];
+  }
+  return ["natural", "surface_blend", "edge_fade", "split_bleed", "editorial_overlap", "hidden"];
+}
+
+function renderedAnatomy(
+  component: ShowroomComponentDefinitionV2,
+  profileKey: keyof typeof PROFILES,
+): ComponentGuidance["renderedAnatomy"] {
+  if (component.slot === "header") {
+    return {
+      regions: ["brand identity", "optional tagline", "catalog action", "inquiry-cart action"],
+      mediaPlanes: { min: 0, max: 1 },
+      interaction: "Two bounded primary actions; navigation collapses on narrow screens.",
+    };
+  }
+  if (component.slot === "hero") {
+    const multiple = profileKey === "collage_hero" || profileKey === "mosaic_hero";
+    return {
+      regions: ["kicker and opening copy", "primary catalog action", multiple ? "one-to-three factual media planes" : "one optional factual media plane"],
+      mediaPlanes: { min: 0, max: multiple ? 3 : 1 },
+      interaction: "One catalog destination; hero media contains no product-link overlay.",
+    };
+  }
+  if (component.slot === "navigation") {
+    return {
+      regions: ["navigation label", "category or collection controls"],
+      mediaPlanes: { min: 0, max: 0 },
+      interaction: "One keyboard and touch-accessible browsing control surface.",
+    };
+  }
+  if (component.slot === "catalog") {
+    return {
+      regions: ["catalog heading", "optional search and category controls", "bounded product cards"],
+      mediaPlanes: { min: 0, max: 6 },
+      interaction: "Every visible product supports detail and add-to-inquiry actions.",
+    };
+  }
+  if (component.slot === "content") {
+    return {
+      regions: ["section heading", "typed narrative or facts", "optional supporting media"],
+      mediaPlanes: { min: 0, max: 1 },
+      interaction: profileKey === "video" ? "One controlled provider video with no autoplay." : "No hidden or hover-only information.",
+    };
+  }
+  if (component.slot === "trust") {
+    return {
+      regions: ["factual heading", "one-to-several supplied fact items"],
+      mediaPlanes: { min: 0, max: 0 },
+      interaction: "Read-only supplied decision-support facts.",
+    };
+  }
+  if (component.slot === "call_to_action") {
+    return {
+      regions: ["closing invitation", "one inquiry action"],
+      mediaPlanes: { min: 0, max: 0 },
+      interaction: "One direct inquiry-cart action.",
+    };
+  }
+  return {
+    regions: ["brand close", "bounded navigation", "contact handoff"],
+    mediaPlanes: { min: 0, max: 1 },
+    interaction: "Compact category links and contact information.",
+  };
+}
+
 export function guidanceForComponent(
   component: ShowroomComponentDefinitionV2,
 ): ComponentGuidance {
@@ -623,6 +891,8 @@ export function guidanceForComponent(
       ? { min: 2, max: profileKey === "nav_index" ? 12 : 8 }
       : null,
     heroMediaIntegration: heroMediaIntegrationForComponent(component.id),
+    compatibleMediaIntegrations: compatibleMediaIntegrations(component.slot, profileKey),
+    renderedAnatomy: renderedAnatomy(component, profileKey),
     fallbackComponent: component.slot === "catalog"
       ? "catalog.minimal-list@1"
       : component.slot === "hero"
@@ -701,12 +971,104 @@ export function evaluateCompositionFitness(
       message: `${missingProducts} product${missingProducts === 1 ? "" : "s"} use an intentional no-media treatment.`,
     });
   }
-  const signatureCount = sections.filter((section) =>
-    ["expressive", "signature"].includes(String(section.properties.reveal_style)) ||
-    ["expressive", "signature"].includes(String(section.properties.interaction_style)),
-  ).length;
+
+  const surfaceRoles = sections
+    .map((section) => section.surfaceRole)
+    .filter((value): value is ShowroomSurfaceRole => typeof value === "string");
+  if (surfaceRoles.length >= 4 && new Set(surfaceRoles).size < 3) {
+    issues.push({
+      severity: "warning",
+      code: "surface_monotony",
+      message: "Use at least three semantic surface roles to create deliberate page pacing.",
+    });
+  }
+  for (let index = 2; index < surfaceRoles.length; index += 1) {
+    if (
+      surfaceRoles[index] === surfaceRoles[index - 1] &&
+      surfaceRoles[index] === surfaceRoles[index - 2]
+    ) {
+      issues.push({
+        severity: "warning",
+        code: "repeated_surface_run",
+        message: `Three consecutive sections use ${surfaceRoles[index]}; vary the semantic surface rhythm.`,
+      });
+      break;
+    }
+  }
+
+  const layoutFamilies = sections.map((section) => {
+    const profileKey = PROFILE_BY_COMPONENT_ID[section.component];
+    return profileKey ? PROFILES[profileKey].layoutFamily : "";
+  });
+  for (let index = 1; index < layoutFamilies.length; index += 1) {
+    if (
+      layoutFamilies[index] &&
+      layoutFamilies[index] === layoutFamilies[index - 1]
+    ) {
+      issues.push({
+        severity: "warning",
+        code: "adjacent_layout_repetition",
+        sectionKey: sections[index].key,
+        message: `This section repeats the ${layoutFamilies[index]} anatomy used immediately above it.`,
+      });
+    }
+  }
+
+  const signatureSections = new Set<string>();
+  for (const section of sections) {
+    const profileKey = PROFILE_BY_COMPONENT_ID[section.component];
+    if (profileKey && PROFILES[profileKey].visualWeight === "signature") {
+      signatureSections.add(section.key);
+    }
+    if (section.component.startsWith("hero.") || section.component.startsWith("content.")) {
+      const treatment = section.mediaIntegration || "natural";
+      const treatmentGuidance = SHOWROOM_MEDIA_TREATMENTS[treatment];
+      const slot = section.component.startsWith("hero.") ? "hero" : "content";
+      const compatible = profileKey
+        ? compatibleMediaIntegrations(slot, profileKey)
+        : [];
+      if (compatible.length && !compatible.includes(treatment)) {
+        issues.push({
+          severity: "error",
+          code: "incompatible_media_treatment",
+          sectionKey: section.key,
+          message: `${section.component} does not support ${treatment}; choose one of ${compatible.join(", ")}.`,
+        });
+      }
+      const block = section.contentBlockKey
+        ? snapshot.contentBlocks.blocks.find((entry) => entry.key === section.contentBlockKey)
+        : undefined;
+      const hasImage =
+        (section.component.startsWith("hero.") && Boolean(snapshot.business.heroImageRef)) ||
+        Boolean(block?.media.some((media) => media.assetKeys.length > 0));
+      if (treatmentGuidance.requiresImage && !hasImage) {
+        issues.push({
+          severity: "error",
+          code: "media_treatment_requires_image",
+          sectionKey: section.key,
+          message: `${treatment} needs one admitted image; choose natural or hidden until that media destination is fulfilled.`,
+        });
+      }
+      if (treatmentGuidance.visualWeight === "signature") {
+        signatureSections.add(section.key);
+      }
+      if (treatmentGuidance.status === "legacy") {
+        issues.push({
+          severity: "warning",
+          code: "legacy_media_treatment",
+          sectionKey: section.key,
+          message: "ambient_overlay remains readable for retained designs; use surface_blend in a new recipe.",
+        });
+      }
+    }
+  }
+  const signatureCount = signatureSections.size;
   if (signatureCount > 2) {
-    issues.push({ severity: "error", code: "too_many_signatures", message: "Use no more than two signature sections in one composition." });
+    issues.push({
+      severity: "error",
+      code: "too_many_signatures",
+      message: `This composition has ${signatureCount} signature sections; keep the strongest one or two and make the rest supporting.`,
+    });
   }
   const penalty = issues.reduce(
     (total, issue) => total + (issue.severity === "error" ? 25 : 8),

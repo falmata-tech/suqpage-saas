@@ -27,6 +27,8 @@ import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
 import {
   evaluateCompositionFitness,
   guidanceForComponent,
+  SHOWROOM_DESIGN_PROCESS,
+  SHOWROOM_MEDIA_TREATMENTS,
   SHOWROOM_TEMPLATES,
 } from "./showroom-guidance";
 import {
@@ -734,23 +736,16 @@ export function buildShowroomRecipeBrief(
       componentBank: SHOWROOM_COMPONENT_BANK_LATEST,
       designSystems: Object.values(SHOWROOM_DESIGN_SYSTEMS),
       compositionGuidance: {
+        designProcess: SHOWROOM_DESIGN_PROCESS,
         selectionPolicy: {
           identifiersAreSuitabilitySignals: false,
           prohibitedSignals: ["industry", "business_archetype"],
-          decisionOrder: [
-            "content_needs",
-            "catalog_shape",
-            "commerce_mode",
-            "available_media",
-            "layout_anatomy",
-            "responsive_behavior",
-            "visual_tone",
-            "design_tokens",
-          ],
+          decisionOrder: SHOWROOM_DESIGN_PROCESS.decisionOrder,
           instruction:
             "Choose by objective fit. Legacy IDs are stable references only and must not be interpreted as industry recommendations.",
         },
         templates: SHOWROOM_TEMPLATES,
+        mediaTreatments: SHOWROOM_MEDIA_TREATMENTS,
         components: Object.fromEntries(
           SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
             component.id,
@@ -772,9 +767,12 @@ export function buildShowroomRecipeBrief(
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
-        "Choose one design system from designSystems before choosing a template or component. Ignore industry implications in legacy IDs. Match objective content needs, catalog shape, commerce mode, available media, visual tone, density, typography, palette roles, section rhythm, and responsive behavior.",
-        "Choose mediaIntegration explicitly for every media-bearing hero or story section. Use ambient_overlay, edge_fade, split_bleed, editorial_overlap, product_stage, or hidden so factual images integrate with the section surface instead of appearing in bordered image blocks.",
+        "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one semantic design system, then surface rhythm and section anatomy before choosing component IDs.",
+        "Choose every surfaceRole by semantic purpose: canvas, surface, soft, strong, or inverse. Use at least three roles across a normal full showroom and reserve strong or inverse surfaces for deliberate emphasis and closure.",
+        "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Spend no more than two signature treatments across the page.",
+        "Use each component's renderedAnatomy, idealWhen, avoidWhen, content limits, and compatibleMediaIntegrations. Do not infer visual behavior from the component ID and do not choose a component whose renderer anatomy contradicts the available content or media.",
         "Use one category-browsing owner: either a standalone navigation section or catalog filters, never both. Keep hero factual media free of product-link overlays.",
+        "Before returning JSON, evaluate the complete design against the composition rules: coherent template pacing, useful controls only, no repeated adjacent anatomy, at least three semantic surface roles, no more than two signature sections, compatible media prerequisites, and an appropriate catalog density.",
         "Declare every intentionally removed stable key.",
       ],
       examplePolicy: {
