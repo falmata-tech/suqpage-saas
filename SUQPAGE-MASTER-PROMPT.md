@@ -131,7 +131,7 @@ Each client composition can have its own:
 - animations;
 - buttons;
 - inquiry-cart treatment;
-- section order;
+- section anatomy within the canonical journey;
 - mobile behavior;
 - favicon;
 - social-sharing image;
@@ -145,6 +145,17 @@ footer. The AI varies the visual anatomy, media treatment, typography, density,
 and component choice inside those roles; it does not add trust ledgers,
 information summaries, standalone navigation, or other filler chapters, and it
 does not reorder the five content sections.
+
+All seven admitted headers and all six admitted footers expose distinct,
+industry-neutral machine-readable anatomy and materially different responsive
+layouts. Header and footer are selected independently by identity scale,
+available content, navigation density, visual weight, and mobile behavior.
+Adjacent about/story and process chapters alternate heading/body placement on
+wider screens, return to semantic heading-first reading order on phones, and
+use the exact neutral `surface` then `soft` roles. Normal showrooms do not use
+repeating plaid, pinstripe, graph-paper, center-divider, or repeated-rule
+background motifs; one bounded accent plane may provide direction without
+turning the page into a grid.
 
 Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
@@ -371,6 +382,14 @@ Expected customer flow:
 8. SuqPage saves the inquiry before or during social handoff.
 9. The customer may continue through WhatsApp, Telegram, TikTok, or native sharing.
 10. The business sees the inquiry in its dashboard even when the social-app step is not completed.
+
+The current inquiry cart opens as a bounded floating task panel with visible
+outer margins on desktop. At 320 and 390 CSS pixels it becomes a safe-area-aware,
+bottom-anchored near-full-height sheet with one internal scroll region. Opening
+locks background scrolling; closing restores it and returns focus to the
+opener. Close, quantity, remove, clear, and handoff controls provide at least a
+44-pixel mobile touch block. The panel inherits the active showroom's semantic
+type and color roles while preserving form contrast.
 
 An inquiry record should contain:
 
@@ -920,6 +939,11 @@ remaining AI-assisted delivery sequence is recorded in
   Every normal template preserves the same semantic order: header, hero,
   about/story, process, catalog, inquiry CTA, footer. Templates differ in
   anatomy and art direction, not information architecture.
+  All seven header and all six footer variants have unique layout families and
+  honest rendered-region descriptions. Header and footer are selected
+  independently from objective content and interaction needs; neither profile
+  contains an industry or tenant recommendation. The ten local benchmarks
+  exercise every admitted header and footer anatomy.
   Machine-readable guidance declares rendered anatomy, true media-plane count,
   no-media support, fallback treatments, commerce modes, content needs, visual
   tones, recommended product/category counts, long-title and RTL support,
@@ -939,6 +963,10 @@ remaining AI-assisted delivery sequence is recorded in
   Catalog-owned category browsing uses compact, touch-sized, horizontally
   scrollable tabs with modest corners; it is one shared catalog control and
   does not change shape merely because the AI selects another catalog variant.
+  About/story and process chapters use opposite desktop heading/body placement
+  and semantic single-column phone order. Their neutral surfaces provide
+  separation without repeated rules. Repeating plaid, pinstripe, graph-paper,
+  and center-divider motifs are rejected by bank and browser admission.
   Deterministic composition fitness blocks duplicate navigation, standalone
   navigation combined with catalog filters, incompatible sparse catalogs,
   missing media-treatment prerequisites, and more than two signature sections,

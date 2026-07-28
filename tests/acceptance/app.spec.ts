@@ -279,9 +279,28 @@ test("public discovery, ten benchmark showrooms, cart, and persisted inquiry", a
   const drawerOpener = page.getByRole("button", { name: /Inquiry.*1/ }).first();
   await drawerOpener.click();
   await expect(page.getByRole("button", { name: "Close inquiry" })).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  const desktopDrawer = await page
+    .getByRole("dialog", { name: "Product inquiry" })
+    .evaluate((dialog) => {
+      const bounds = dialog.getBoundingClientRect();
+      return {
+        top: bounds.top,
+        right: window.innerWidth - bounds.right,
+        bottom: window.innerHeight - bounds.bottom,
+        width: bounds.width,
+        scrollBehavior: getComputedStyle(dialog.querySelector(".drawer-scroll")!).overflowY,
+      };
+    });
+  expect(desktopDrawer.top).toBeGreaterThanOrEqual(16);
+  expect(desktopDrawer.right).toBeGreaterThanOrEqual(16);
+  expect(desktopDrawer.bottom).toBeGreaterThanOrEqual(16);
+  expect(desktopDrawer.width).toBeLessThanOrEqual(560);
+  expect(desktopDrawer.scrollBehavior).toBe("auto");
   await page.keyboard.press("Shift+Tab");
   expect(await page.getByRole("dialog", { name: "Product inquiry" }).evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
   await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
   await expect(drawerOpener).toBeFocused();
   await expect(page.locator(".inquiry-drawer")).toHaveAttribute("aria-hidden", "true");
   await drawerOpener.click();
@@ -305,6 +324,27 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await page.getByRole("button", { name: "Add selected item" }).click();
   await page.reload();
   await page.getByRole("button", { name: /Inquiry.*1/ }).first().click();
+  const mobileDrawer = await page
+    .getByRole("dialog", { name: "Product inquiry" })
+    .evaluate((dialog) => {
+      const bounds = dialog.getBoundingClientRect();
+      const controls = Array.from(dialog.querySelectorAll("button"));
+      return {
+        left: bounds.left,
+        right: window.innerWidth - bounds.right,
+        bottom: window.innerHeight - bounds.bottom,
+        height: bounds.height,
+        controlsMeetTouchTarget: controls.every((control) => {
+          const controlBounds = control.getBoundingClientRect();
+          return controlBounds.width >= 44 && controlBounds.height >= 44;
+        }),
+      };
+    });
+  expect(mobileDrawer.left).toBeGreaterThanOrEqual(5);
+  expect(mobileDrawer.right).toBeGreaterThanOrEqual(5);
+  expect(mobileDrawer.bottom).toBeGreaterThanOrEqual(5);
+  expect(mobileDrawer.height).toBeLessThanOrEqual(832);
+  expect(mobileDrawer.controlsMeetTouchTarget).toBe(true);
   await page.getByRole("button", { name: "Increase quantity" }).click();
   await expect(page.locator(".qty strong")).toHaveText("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

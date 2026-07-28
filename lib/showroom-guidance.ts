@@ -483,22 +483,43 @@ const PROFILES = {
     ["navigation labels are short", "the page needs a low-profile opening"],
     ["the header must become the visual signature"],
   ),
-  expressive_header: selectionProfile(
-    "A prominent brand header with generous identity space and navigation treated as part of the composition.",
-    "brand_led_header", "linear", "supporting", "prominent", "mixed", "subtle",
-    "collapse_to_menu", ["brand_identity"], ["editorial", "expressive"],
-    ["brand identity should remain visible before scrolling"],
-    ["navigation is long or utility-heavy"],
+  editorial_header: selectionProfile(
+    "A two-tier masthead with centered identity above a separate, quiet action row.",
+    "editorial_masthead", "linear", "none", "prominent", "rectilinear", "none",
+    "stack", ["brand_identity"], ["editorial", "quiet"],
+    ["the name should lead and the available navigation is short"],
+    ["the opening needs the lowest possible header height"],
+  ),
+  catalog_header: selectionProfile(
+    "A structured three-zone command header that separates identity, supporting context, and catalog actions.",
+    "catalog_command_bar", "indexed", "none", "supporting", "rectilinear", "subtle",
+    "compact_list", ["brand_identity", "category_browsing"], ["precise", "utilitarian"],
+    ["users need fast access to products and inquiry actions"],
+    ["the page needs a soft editorial masthead"],
   ),
   overlay_header: selectionProfile(
-    "A transparent header positioned over the opening section, relying on controlled contrast against its background.",
-    "hero_overlay_header", "linear", "supporting", "prominent", "rectilinear", "subtle",
+    "A translucent surface bar that visually connects to the opening while preserving its own contrast.",
+    "translucent_surface_bar", "linear", "none", "supporting", "rectilinear", "subtle",
     "collapse_to_menu", ["brand_identity"], ["editorial", "quiet"],
-    ["the hero supplies a stable high-contrast surface"],
-    ["hero contrast varies or media is unavailable"],
+    ["the header should feel connected to the hero without sitting directly on media"],
+    ["the opening requires a hard, technical separation"],
+  ),
+  producer_header: selectionProfile(
+    "An identity-led header with a compact emblem and a clearly separated supporting descriptor.",
+    "emblem_identity_bar", "split", "none", "supporting", "mixed", "subtle",
+    "stack", ["brand_identity"], ["organic", "precise"],
+    ["a short descriptor helps explain the business immediately"],
+    ["the business has no concise descriptor"],
+  ),
+  floating_header: selectionProfile(
+    "A contained floating command bar with bounded identity and actions over the page canvas.",
+    "floating_command_bar", "linear", "none", "prominent", "soft", "subtle",
+    "collapse_to_menu", ["brand_identity"], ["expressive", "quiet"],
+    ["the opening benefits from a compact elevated layer"],
+    ["the desired presentation is flat or information-dense"],
   ),
   technical_header: selectionProfile(
-    "A compact indexed header with crisp dividers, dense labels, and a command-bar rhythm.",
+    "A compact indexed header with dense labels, a strong accent block, and a command-bar rhythm.",
     "indexed_command_bar", "indexed", "none", "supporting", "rectilinear", "subtle",
     "collapse_to_menu", ["brand_identity", "category_browsing"], ["technical", "precise"],
     ["users need fast scanning and direct section access"],
@@ -692,22 +713,50 @@ const PROFILES = {
     ["the closing action already appears above"],
     ["many directory links must remain visible"],
   ),
+  footer_editorial: selectionProfile(
+    "A spacious three-part close with brand narrative, a restrained link list, and contact details aligned at the baseline.",
+    "editorial_footer", "grid", "none", "prominent", "rectilinear", "none",
+    "stack", ["contact_handoff"], ["editorial", "quiet"],
+    ["the close needs room for identity and a concise descriptor"],
+    ["the footer must remain extremely compact"],
+  ),
   footer_directory: selectionProfile(
-    "A structured multi-column close for identity, contact, and bounded directory links.",
-    "directory_footer", "grid", "none", "supporting", "rectilinear", "subtle",
+    "A scan-first directory close with bounded link columns between identity and contact.",
+    "catalog_directory_footer", "indexed", "none", "supporting", "rectilinear", "subtle",
     "stack", ["contact_handoff", "category_browsing"], ["precise", "editorial"],
     ["several useful link groups or contact methods exist"],
     ["content is too sparse to justify multiple columns"],
+  ),
+  footer_contact: selectionProfile(
+    "A contact-led close with identity and navigation kept secondary to one prominent reply destination.",
+    "contact_panel_footer", "split", "none", "prominent", "mixed", "subtle",
+    "stack", ["contact_handoff"], ["precise", "quiet"],
+    ["the reply destination is the most useful final information"],
+    ["contact information is incomplete"],
+  ),
+  footer_masthead: selectionProfile(
+    "A generous brand-led close with an oversized wordmark and compact supporting navigation.",
+    "masthead_footer", "layered", "none", "signature", "mixed", "expressive",
+    "stack", ["brand_identity", "contact_handoff"], ["editorial", "expressive"],
+    ["the page needs a memorable identity-led final beat"],
+    ["the preceding call to action is already visually dominant"],
+  ),
+  footer_technical: selectionProfile(
+    "An indexed close with compact uppercase labels, a numbered directory rhythm, and a bounded accent plane.",
+    "indexed_directory_footer", "indexed", "none", "supporting", "rectilinear", "subtle",
+    "compact_list", ["contact_handoff", "category_browsing"], ["technical", "precise"],
+    ["users benefit from a fast-scanning structured close"],
+    ["the desired ending is soft or spacious"],
   ),
 } as const;
 
 const PROFILE_BY_COMPONENT_ID: Readonly<Record<string, keyof typeof PROFILES>> = {
   "header.compact-utility@1": "compact_header",
-  "header.editorial-wordmark@1": "expressive_header",
-  "header.catalog-command@1": "technical_header",
+  "header.editorial-wordmark@1": "editorial_header",
+  "header.catalog-command@1": "catalog_header",
   "header.transparent-overlay@1": "overlay_header",
-  "header.producer-badge@1": "expressive_header",
-  "header.floating-capsule@1": "expressive_header",
+  "header.producer-badge@1": "producer_header",
+  "header.floating-capsule@1": "floating_header",
   "header.technical-marquee@1": "technical_header",
   "hero.split-story@1": "split_hero",
   "hero.centered-statement@1": "centered_hero",
@@ -764,11 +813,11 @@ const PROFILE_BY_COMPONENT_ID: Readonly<Record<string, keyof typeof PROFILES>> =
   "call-to-action.magazine-close@1": "cta_editorial",
   "call-to-action.technical-brief@1": "cta_direct",
   "footer.compact@1": "footer_compact",
-  "footer.editorial@1": "footer_directory",
+  "footer.editorial@1": "footer_editorial",
   "footer.catalog-directory@1": "footer_directory",
-  "footer.contact-panel@1": "footer_directory",
-  "footer.magazine-masthead@1": "footer_directory",
-  "footer.technical-directory@1": "footer_directory",
+  "footer.contact-panel@1": "footer_contact",
+  "footer.magazine-masthead@1": "footer_masthead",
+  "footer.technical-directory@1": "footer_technical",
 };
 
 export function heroMediaIntegrationForComponent(
@@ -802,10 +851,43 @@ function renderedAnatomy(
   profileKey: keyof typeof PROFILES,
 ): ComponentGuidance["renderedAnatomy"] {
   if (component.slot === "header") {
+    const anatomyByProfile = {
+      compact_header: {
+        regions: ["inline brand identity", "compact catalog action", "inquiry-cart action"],
+        interaction: "One low-profile row; both actions remain touch-accessible on narrow screens.",
+      },
+      editorial_header: {
+        regions: ["centered brand masthead", "optional descriptor", "separate action row"],
+        interaction: "Two-tier desktop masthead collapses to a compact stacked mobile header.",
+      },
+      catalog_header: {
+        regions: ["brand zone", "supporting context zone", "catalog and inquiry command zone"],
+        interaction: "Three-zone command bar compacts without hiding the two primary destinations.",
+      },
+      overlay_header: {
+        regions: ["brand identity", "translucent surface", "catalog and inquiry actions"],
+        interaction: "Contained contrast-safe surface visually connects with the opening section.",
+      },
+      producer_header: {
+        regions: ["emblem identity", "short descriptor", "catalog and inquiry actions"],
+        interaction: "Emblem and descriptor stack cleanly while actions retain full touch targets.",
+      },
+      floating_header: {
+        regions: ["floating identity capsule", "optional descriptor", "compact command group"],
+        interaction: "Elevated bounded bar preserves outer page margins at every viewport.",
+      },
+      technical_header: {
+        regions: ["indexed identity", "compact descriptor", "catalog and inquiry command group"],
+        interaction: "Dense command bar uses one bounded accent plane and compact mobile labels.",
+      },
+    } as const;
+    const anatomy = anatomyByProfile[
+      profileKey as keyof typeof anatomyByProfile
+    ];
     return {
-      regions: ["brand identity", "optional tagline", "catalog action", "inquiry-cart action"],
+      regions: [...anatomy.regions],
       mediaPlanes: { min: 0, max: 1 },
-      interaction: "Two bounded primary actions; navigation collapses on narrow screens.",
+      interaction: anatomy.interaction,
     };
   }
   if (component.slot === "hero") {
@@ -851,10 +933,18 @@ function renderedAnatomy(
       interaction: "One direct inquiry-cart action.",
     };
   }
+  const footerAnatomy = {
+    footer_compact: ["inline brand close", "contact handoff"],
+    footer_editorial: ["brand narrative", "restrained navigation", "baseline contact handoff"],
+    footer_directory: ["brand close", "multi-column catalog directory", "contact handoff"],
+    footer_contact: ["supporting identity", "bounded navigation", "prominent contact panel"],
+    footer_masthead: ["oversized brand masthead", "compact navigation", "contact handoff"],
+    footer_technical: ["indexed identity", "numbered directory", "compact contact handoff"],
+  } as const;
   return {
-    regions: ["brand close", "bounded navigation", "contact handoff"],
+    regions: [...footerAnatomy[profileKey as keyof typeof footerAnatomy]],
     mediaPlanes: { min: 0, max: 1 },
-    interaction: "Compact category links and contact information.",
+    interaction: "Responsive footer preserves readable links and contact information without mirroring the header.",
   };
 }
 

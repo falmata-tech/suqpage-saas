@@ -49,6 +49,21 @@ for (const component of SHOWROOM_COMPONENT_BANK_LATEST.components) {
   assert.equal("businessArchetypes" in guidance, false);
   assert.equal("catalogModes" in guidance, false);
 }
+for (const slot of ["header", "footer"] as const) {
+  const guidance = SHOWROOM_COMPONENT_BANK_LATEST.components
+    .filter((component) => component.slot === slot)
+    .map((component) => guidanceForComponent(component));
+  assert.equal(
+    new Set(guidance.map((entry) => entry.layoutFamily)).size,
+    guidance.length,
+    `${slot} choices expose distinct layout families`,
+  );
+  assert.equal(
+    new Set(guidance.map((entry) => entry.renderedAnatomy.regions.join(">"))).size,
+    guidance.length,
+    `${slot} choices expose distinct rendered anatomy`,
+  );
+}
 const business = getAllBusinesses().find((item) => item.handle === "selam-weave");
 assert.ok(business);
 const catalog = getCatalogByBusinessId(business.id);

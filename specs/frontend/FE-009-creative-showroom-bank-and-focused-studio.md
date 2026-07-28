@@ -145,6 +145,21 @@ parity with the pixels rendered by that choice.
   variant without adding filler sections or changing that order. Standalone
   trust, information, navigation, and video chapters are not admitted in the
   normal generated page.
+- All seven admitted header IDs and all six admitted footer IDs expose distinct
+  machine-readable anatomy profiles. Profiles describe identity scale, content
+  regions, navigation density, responsive collapse, visual weight, and unsuitable
+  conditions. They never recommend a choice from an industry or tenant label.
+- Benchmark showrooms exercise every admitted header and footer anatomy. Header
+  and footer variation must be visible in layout, spacing, hierarchy, and mobile
+  behavior rather than a one-pixel rule or color-only difference.
+- The adjacent about and process sections use opposite heading/body placement
+  at desktop widths and reset to semantic reading order on phones. When both
+  sections contain media, their media/text axes alternate. Their exact neutral
+  surface roles remain `surface` then `soft`.
+- Repeating plaid, pinstripe, graph-paper, and center-divider backgrounds are
+  prohibited in normal showrooms. Accent color may identify labels, controls,
+  a small edge treatment, or the final CTA; it cannot paint repeated decorative
+  bands across content, header, hero, and footer.
 - Component metadata describes rendered anatomy, content flow, media role,
   visual weight, responsive behavior, ideal conditions, unsuitable conditions,
   compatible media treatments, and fallback behavior. Metadata cannot promise
@@ -243,6 +258,21 @@ Scenario: Neutral layers and paired emphasis colors render
   WHEN about, process, products, inquiry CTA, and footer render in sequence
   THEN the content layers alternate neutral surface, neutral layer, and canvas
   AND strong/onStrong plus inverse/onInverse meet contrast against their exact backgrounds
+
+Scenario: AI chooses a header and footer from honest anatomy
+  GIVEN the brief exports seven headers and six footers
+  WHEN the AI compares their machine-readable guidance
+  THEN every choice has a distinct visual description, layout family, and suitability boundary
+  AND no choice is recommended from an industry or business-archetype label
+
+Scenario: Adjacent story and process chapters remain distinct
+  GIVEN a normal showroom has story followed by process
+  WHEN it renders at desktop width
+  THEN heading and body placement alternate across the two sections
+  AND surface then soft provides a neutral contrast between their purposes
+  AND no repeating stripe, plaid, graph, or center-divider decoration joins them visually
+  WHEN it renders at phone width
+  THEN both chapters return to heading-first reading order without horizontal overflow
 
 Scenario: A design-system value is exported to the AI
   GIVEN an admitted design system declares typography, spacing, layout, and media values

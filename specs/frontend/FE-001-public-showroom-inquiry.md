@@ -4,7 +4,7 @@ title: Public showroom discovery and inquiry experience
 status: done
 related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012]
 owners: [product, frontend]
-last_updated: 2026-07-24
+last_updated: 2026-07-28
 change_level: L2
 ---
 
@@ -22,6 +22,11 @@ Includes intentional directory discovery, four distinct composed showrooms, prod
 option selection, cart persistence, minimal contact capture, saved inquiry, and
 social/native/manual fallback. Excludes payment, checkout, pricing guarantees,
 variant-combination inventory, and automatic fulfillment.
+
+The inquiry cart is presented as a scoped floating task surface rather than an
+edge-to-edge generic sidebar. Desktop keeps visible breathing room around a
+bounded panel. Phone layouts use a near-full-height bottom sheet with safe-area
+spacing, an anchored header, and one internally scrolling content region.
 
 ## Scenarios
 
@@ -42,22 +47,41 @@ Scenario: Draft showroom is requested publicly
   GIVEN a business whose status is draft or suspended
   WHEN a visitor requests its public handle
   THEN no showroom catalog is disclosed
+
+Scenario: Customer reviews an inquiry on desktop
+  GIVEN one or more products are in the inquiry cart
+  WHEN the customer opens the inquiry at desktop width
+  THEN a bounded floating panel appears above a dimmed showroom with visible outer margins
+  AND products, quantity controls, contact fields, and handoff actions remain inside the panel
+
+Scenario: Customer reviews an inquiry on a phone
+  GIVEN one or more products are in the inquiry cart
+  WHEN the customer opens the inquiry at 320 or 390 CSS pixels
+  THEN a bottom-anchored sheet respects safe areas and remains within the viewport
+  AND its header stays available while the task content scrolls
+  AND every quantity, close, remove, clear, and handoff target has at least a 44-pixel touch block
 ```
 
 ## Quality impact
 
 - Merchant values remain exact and products come from dynamic catalog data.
 - Mobile has no horizontal overflow and controls remain keyboard accessible.
+- Opening the inquiry prevents background-page scrolling without losing the
+  cart, and closing it restores page scrolling and opener focus.
 - Customer contact is sent only to the inquiry API and not local storage.
 - Repeated social actions use a stable idempotency key for the current cart.
 
 ## Test plan and evidence
 
-- Browser: `tests/acceptance/app.spec.ts` public and mobile scenarios.
+- Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, focus, and
+  320/390px mobile-sheet scenarios.
 - HTTP/security: `scripts/http-smoke.mjs`, `scripts/test-security.ts`.
 - Design contract: `scripts/validate-designs.ts`.
-- Evidence: `npm run test:acceptance` 5 passed; `npm run release` passed on
-  2026-07-20.
+- Evidence: `npm run test:acceptance` 10/10 passed on 2026-07-28, including
+  bounded desktop geometry, 390px safe-area geometry, scroll lock/restoration,
+  focus containment/restoration, 44px mobile controls, persisted inquiry, and
+  social/manual handoff. Desktop and mobile open-panel captures are recorded by
+  `scripts/capture-showroom-benchmarks.mjs`; `npm run check` passed.
 
 ## Rollout and rollback
 

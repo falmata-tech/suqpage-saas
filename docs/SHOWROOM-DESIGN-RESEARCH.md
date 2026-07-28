@@ -71,6 +71,37 @@ Additional primary references:
 - [Shopify Polaris palettes and roles](https://polaris-react.shopify.com/design/colors/palettes-and-roles)
 - [WCAG 2.2 contrast minimum](https://www.w3.org/TR/WCAG22/#contrast-minimum)
 
+## Responsive chrome and scoped inquiry correction
+
+Research checkpoint: 2026-07-28.
+
+- Header variants should express differences in information hierarchy, not
+  merely color or a divider. USWDS distinguishes basic and extended headers by
+  navigation depth and advises short task-oriented labels, priority ordering,
+  keyboard operation, and click-based rather than hover-only mobile behavior.
+  Carbon similarly collapses header actions into a stacked side-navigation
+  model in smaller windows.
+- Footer scale should follow actual content. USWDS defines slim, medium, and big
+  footers and explicitly says the footer need not mirror the header. SuqPage
+  therefore distinguishes slim identity, editorial masthead, catalog directory,
+  contact-forward, and indexed closes by real regions and density.
+- An inquiry is a scoped task related to the current showroom. Apple describes
+  sheets as contextual task surfaces, with near-full-height phone presentation
+  when form content needs room and visible dismissal controls. SuqPage uses a
+  floating desktop panel and a phone bottom sheet with one internal scroll area,
+  safe-area spacing, focus containment, and an explicit close button.
+- Repeated stripes and divider grids do not communicate section purpose.
+  SuqPage uses semantic neutral surface changes, whitespace, and one bounded
+  directional edge treatment instead. Story/process placement alternates at
+  desktop widths while phone reading order remains heading first.
+
+Additional primary references:
+
+- [USWDS header](https://designsystem.digital.gov/components/header/)
+- [USWDS footer](https://designsystem.digital.gov/components/footer/)
+- [Carbon UI shell header](https://carbondesignsystem.com/components/UI-shell-header/style/)
+- [Apple sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)
+
 ## SuqPage v1 comparison
 
 Desktop and 390px full-page captures of the static v1 homepage and its four

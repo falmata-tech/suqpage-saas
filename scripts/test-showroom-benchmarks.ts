@@ -11,6 +11,7 @@ const productCounts = new Set<number>();
 const tokenPacks = new Set<string>();
 const heroTreatments = new Set<string>();
 const headerComponents = new Set<string>();
+const footerComponents = new Set<string>();
 const catalogComponents = new Set<string>();
 const storyComponents = new Set<string>();
 const processComponents = new Set<string>();
@@ -39,10 +40,15 @@ for (const business of businesses) {
   const headerSection = snapshot.designManifest.sections.find((section) =>
     section.component.startsWith("header."),
   );
+  const footerSection = snapshot.designManifest.sections.find((section) =>
+    section.component.startsWith("footer."),
+  );
   assert.ok(heroSection, `${business.handle} has one hero`);
   assert.ok(headerSection, `${business.handle} has one header`);
+  assert.ok(footerSection, `${business.handle} has one footer`);
   heroTreatments.add(heroSection.mediaIntegration || "none");
   headerComponents.add(headerSection.component);
+  footerComponents.add(footerSection.component);
   assert.equal(
     snapshot.designManifest.sections.some((section) =>
       section.component.startsWith("navigation."),
@@ -55,6 +61,8 @@ for (const business of businesses) {
   );
   const storySection = snapshot.designManifest.sections[2];
   const processSection = snapshot.designManifest.sections[3];
+  assert.equal(storySection.properties.alignment, "start", `${business.handle} story starts`);
+  assert.equal(processSection.properties.alignment, "end", `${business.handle} process alternates`);
   assert.ok(catalogSection, `${business.handle} has one catalog`);
   catalogComponents.add(catalogSection.component);
   storyComponents.add(storySection.component);
@@ -88,7 +96,8 @@ for (const business of businesses) {
 assert.ok(productCounts.size >= 4, "benchmark catalogs vary their product count");
 assert.ok(tokenPacks.size >= 8, "benchmarks exercise at least eight semantic token systems");
 assert.ok(heroTreatments.size >= 6, "benchmarks exercise at least six hero media treatments");
-assert.ok(headerComponents.size >= 5, "benchmarks exercise at least five header anatomies");
+assert.equal(headerComponents.size, 7, "benchmarks exercise all seven header anatomies");
+assert.equal(footerComponents.size, 6, "benchmarks exercise all six footer anatomies");
 assert.ok(catalogComponents.size >= 7, "benchmarks exercise at least seven catalog anatomies");
 assert.ok(storyComponents.size >= 4, "benchmarks exercise at least four story anatomies");
 assert.ok(processComponents.size >= 3, "benchmarks exercise at least three process anatomies");

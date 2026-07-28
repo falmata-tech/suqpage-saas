@@ -103,6 +103,17 @@ try {
           sectionSlots: sections
             .map((section) => section.getAttribute("data-slot"))
             .filter(Boolean),
+          sectionAlignments: sections
+            .map((section) => section.getAttribute("data-alignment"))
+            .filter(Boolean),
+          contentBackgroundImages: sections
+            .filter((section) => section.getAttribute("data-slot") === "content")
+            .map((section) => getComputedStyle(section).backgroundImage),
+          contentColumnCounts: sections
+            .filter((section) => section.getAttribute("data-slot") === "content")
+            .map((section) =>
+              getComputedStyle(section).gridTemplateColumns.trim().split(/\s+/).length
+            ),
           productCardWidths: productCards.map((card) =>
             Math.round(card.getBoundingClientRect().width),
           ),
@@ -123,6 +134,31 @@ try {
         screenshot,
         ...metrics,
       });
+      if (handle === "selam-weave") {
+        await page
+          .locator('[data-slot="catalog"] article')
+          .first()
+          .getByRole("button", { name: "Add to inquiry" })
+          .click();
+        const productDialog = page.locator(".product-dialog.open");
+        if (await productDialog.isVisible()) {
+          await productDialog
+            .getByRole("button", { name: "Add selected item" })
+            .click();
+        }
+        await page
+          .locator('[data-slot="header"] nav button')
+          .last()
+          .click();
+        await page.getByRole("dialog", { name: "Product inquiry" }).waitFor();
+        await page.locator(".toast").waitFor({ state: "hidden" });
+        await page.screenshot({
+          path: path.join(outputDir, `inquiry-${viewportName}.png`),
+          fullPage: false,
+          animations: "disabled",
+          caret: "initial",
+        });
+      }
       await page.close();
     }
     await context.close();
@@ -141,8 +177,35 @@ const failures = results.filter(
     result.sectionSlots.join(">") !==
       "header>hero>content>content>catalog>callToAction>footer" ||
     result.surfaceRoles.join(">") !==
-      "surface>soft>surface>soft>canvas>strong>inverse",
+      "surface>soft>surface>soft>canvas>strong>inverse" ||
+    result.sectionAlignments.slice(0, 3).join(">") !== "start>start>end" ||
+    !["start", "center"].includes(result.sectionAlignments.at(-1)) ||
+    result.contentBackgroundImages.some((background) => background !== "none") ||
+    (result.viewport === "mobile" &&
+      result.contentColumnCounts.some((count) => count !== 1)),
 );
+
+const desktopResults = results.filter((result) => result.viewport === "desktop");
+const headerVariants = new Set(
+  desktopResults.map((result) => result.componentVariants[0]),
+);
+const footerVariants = new Set(
+  desktopResults.map((result) => result.componentVariants.at(-1)),
+);
+if (headerVariants.size !== 7 || footerVariants.size !== 6) {
+  failures.push({
+    handle: "benchmark-coverage",
+    viewport: "desktop",
+    status: 200,
+    browserErrors: [
+      `Expected 7 header and 6 footer variants; received ${headerVariants.size} and ${footerVariants.size}.`,
+    ],
+    horizontalOverflow: false,
+    brokenImages: [],
+    textOverflow: [],
+    surfaceRoles: [],
+  });
+}
 
 async function createContactSheet(viewport, tileWidth, tileHeight) {
   const captures = results.filter((result) => result.viewport === viewport);

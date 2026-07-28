@@ -269,6 +269,8 @@ assert.doesNotMatch(cssSource, /(^|[},\n])\s*(?:html|body|\*)\b/i);
 assert.match(cssSource, /\.section\s*\{/);
 assert.match(cssSource, /@media \(max-width: 480px\)/);
 assert.doesNotMatch(cssSource, /\.heroProducts\b/);
+assert.doesNotMatch(cssSource, /repeating-linear-gradient/);
+assert.doesNotMatch(cssSource, /49\.8%/);
 assert.doesNotMatch(cssSource, /border-radius:\s*(?:50%\s+50%|48%\s+48%|40%\s+40%|100px\s+0\s+100px)/);
 assert.match(cssSource, /\.hero\[data-media-integration="split_bleed"\]/);
 assert.match(cssSource, /\.hero\[data-media-integration="edge_fade"\]/);

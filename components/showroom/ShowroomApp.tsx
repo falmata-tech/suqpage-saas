@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import { parseShowroomDesignProposalV2 } from "@/lib/showroom-composition-v2";
 import { parseShowroomContentBlocks } from "@/lib/showroom-content-blocks";
@@ -8,6 +15,7 @@ import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
+import { SHOWROOM_BANK_TOKEN_STYLES } from "./bank/tokens";
 import "./showrooms.css";
 
 type CartLine = { product: Product; quantity: number; options: Record<string, string> };
@@ -257,9 +265,17 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       }
     } catch {}
   }
+  const runtimeTokenVariables = compositionManifest
+    ? SHOWROOM_BANK_TOKEN_STYLES[
+        compositionManifest.tokenPack as keyof typeof SHOWROOM_BANK_TOKEN_STYLES
+      ]?.variables
+    : undefined;
 
   return (
-    <div className={`runtime-root theme-${catalog.business.design_key}`}>
+    <div
+      className={`runtime-root theme-${catalog.business.design_key}`}
+      style={runtimeTokenVariables as CSSProperties | undefined}
+    >
       {compositionManifest ? (
         <CompositionShowroom
           {...designProps}
@@ -378,6 +394,8 @@ function InquiryDrawer({
     if (!open) return;
     const root = panel.current;
     if (!root) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -390,6 +408,7 @@ function InquiryDrawer({
     requestAnimationFrame(() => root.querySelector<HTMLElement>(focusableSelector)?.focus());
     return () => {
       document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
       opener.current?.focus();
     };
   }, [open, opener]);
@@ -491,25 +510,38 @@ function InquiryDrawer({
           <div>
             <span className="eyebrow">Your shortlist</span>
             <h2>Product inquiry</h2>
+            <p>
+              {cart.reduce((total, line) => total + line.quantity, 0)}{" "}
+              {cart.reduce((total, line) => total + line.quantity, 0) === 1
+                ? "selected item"
+                : "selected items"}
+            </p>
           </div>
           <button className="icon-button" aria-label="Close inquiry" onClick={close}>
             ×
           </button>
         </div>
+        <div className="drawer-scroll">
         {cart.length === 0 ? (
           <div className="empty-cart">Your inquiry is empty.</div>
         ) : (
           cart.map((line, index) => (
-            <div className="cart-item" key={`${line.product.id}-${JSON.stringify(line.options)}`}>
-              <img src={line.product.image_path} alt="" />
-              <div>
+            <article className="cart-item" key={`${line.product.id}-${JSON.stringify(line.options)}`}>
+              {line.product.image_path ? (
+                <img src={line.product.image_path} alt="" />
+              ) : (
+                <div className="cart-thumb-placeholder" aria-hidden="true">
+                  {line.product.name.slice(0, 1)}
+                </div>
+              )}
+              <div className="cart-item-copy">
                 <h3>{line.product.name}</h3>
                 <div className="cart-options">
                   {Object.entries(line.options)
                     .map(([keyName, value]) => `${keyName}: ${value}`)
                     .join(" · ")}
                 </div>
-                <div className="qty">
+                <div className="qty" aria-label={`Quantity for ${line.product.name}`}>
                   <button aria-label={`Decrease quantity for ${line.product.name}`} onClick={() => quantity(index, -1)}>
                     −
                   </button>
@@ -526,11 +558,15 @@ function InquiryDrawer({
               >
                 Remove
               </button>
-            </div>
+            </article>
           ))
         )}
         {cart.length > 0 && (
           <div className="drawer-form">
+            <div className="drawer-form-heading">
+              <span className="eyebrow">Your details</span>
+              <h3>Where should the business reply?</h3>
+            </div>
             <label>
               <strong>First name</strong>
               <input
@@ -558,19 +594,22 @@ function InquiryDrawer({
                 placeholder="Delivery area or another question"
               />
             </label>
-            <div className="send-grid">
-              <button disabled={busy} className="primary" onClick={() => send("whatsapp")}>
-                WhatsApp
-              </button>
-              <button disabled={busy} onClick={() => send("telegram")}>
-                Telegram
-              </button>
-              <button disabled={busy} onClick={() => send("tiktok")}>
-                TikTok
-              </button>
-              <button disabled={busy} onClick={() => send("share")}>
-                Share / copy
-              </button>
+            <div className="drawer-send">
+              <h3>Send inquiry</h3>
+              <div className="send-grid">
+                <button disabled={busy} className="primary" onClick={() => send("whatsapp")}>
+                  WhatsApp
+                </button>
+                <button disabled={busy} onClick={() => send("telegram")}>
+                  Telegram
+                </button>
+                <button disabled={busy} onClick={() => send("tiktok")}>
+                  TikTok
+                </button>
+                <button disabled={busy} onClick={() => send("share")}>
+                  Share / copy
+                </button>
+              </div>
             </div>
             {manual && (
               <>
@@ -590,11 +629,12 @@ function InquiryDrawer({
                 </div>
               </>
             )}
-            <button className="remove" onClick={clear}>
+            <button className="remove clear-inquiry" onClick={clear}>
               Clear inquiry
             </button>
           </div>
         )}
+        </div>
       </aside>
     </div>
   );

@@ -46,7 +46,7 @@ const alignmentProperty: ShowroomPropertyDefinition = {
   label: "Text alignment",
   type: "enum",
   required: false,
-  values: ["start", "center"],
+  values: ["start", "center", "end"],
 };
 
 const heroHeightProperty: ShowroomPropertyDefinition = {
