@@ -295,7 +295,7 @@ confirmed the local data is disposable. Any production or data-important
 environment requires an explicit preserve-or-reset decision, backup, rollback,
 and migration plan before a comparable change.
 
-Merchant-entered product, collection, option, contact, availability,
+Merchant-entered product, category, option, contact, availability,
 specification, and certification facts remain authoritative. AI may organize
 and present them but must not invent or silently translate them.
 
@@ -309,14 +309,18 @@ Core hierarchy:
 
 ```text
 Business
-└── Collection
-    └── Category
-        └── Product
-            ├── Images
-            ├── Availability
-            └── Up to four option groups
-                └── Option values
+└── Product category
+    └── Product
+        ├── Images
+        ├── Availability
+        └── Up to four option groups
+            └── Option values
 ```
+
+Product category is the only active browsing taxonomy. Retained collection
+tables and revision fields are compatibility-only recovery input: current seed,
+recipe, admin, product-upkeep, and public-renderer workflows do not create,
+select, display, or derive editorial content from them.
 
 Examples of merchant-defined option groups:
 
@@ -615,10 +619,10 @@ A client has a minimal workspace bound to one business. The client can:
 - view customer inquiries and delivery activity without mutating them;
 - after first publication, use **My products** to create products and maintain
   their name, description, primary image, descriptive availability, and
-  compatible existing collection/category placement;
+  compatible existing product-category placement;
 - view their showroom and manage their account password.
 
-Clients cannot directly edit business settings, design, collections, categories,
+Clients cannot directly edit business settings, design, categories,
 options, ordering, slugs, structural publication state, or complete showroom
 revisions. They cannot delete/unpublish products structurally, update inquiry
 status, or create deliveries.
@@ -782,7 +786,6 @@ The renderer owns:
 SuqPage owns:
 
 - business data;
-- collections;
 - categories;
 - products;
 - option groups;
@@ -889,10 +892,13 @@ remaining AI-assisted delivery sequence is recorded in
   certifications, specifications, product facts, or delivery claims.
 - The current implementation uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
-  currently covers dynamic collections/categories/products/options,
+  currently covers dynamic product categories/products/options,
   business/meta/contact values, and allowed image keys. Product availability is
-  descriptive; numeric product/option inventory is prohibited. Dynamic catalog
-  counts remain bounded, not fixed by examples. Typed hero, story,
+  descriptive; numeric product/option inventory is prohibited. Compatibility
+  collection arrays/removals are fixed empty and all recipe collection
+  relationships are null; the server alone may preserve hidden legacy
+  relationships for matching stable entities. Dynamic catalog counts remain
+  bounded, not fixed by examples. Typed hero, story,
   highlights/trust, information, call-to-action, and video-capable blocks are
   implemented in revision v4/bank 1.2.
 - The studio exports a sanitized request/current-snapshot brief with a named
@@ -1276,7 +1282,7 @@ publication it is a change request. The server decides this classification.
 
 After first publication, **My products** lets the client create a product or maintain its
 name, description, primary managed image, availability, and assignment to
-existing compatible collection/category choices. The same bounded workflow is
+an existing compatible product category. The same bounded workflow is
 available to assigned team members acting for the client with staff attribution.
 It publishes a retained new content version and makes older-base staff work
 stale. It does not expose structure creation, options, ordering, deletion,
@@ -1294,7 +1300,7 @@ request, sanitized AI brief, strict full-recipe blueprint import, grouped
 content/design/provenance validation, composition fitness, labeled media-slot
 fulfillment, private preview, focused exception correction, client review, and
 controlled publication.
-Routine staff should not enter every collection, category, item, hero field,
+Routine staff should not enter every category, item, hero field,
 story block, or design choice manually. A change recipe is a complete desired
 snapshot based on the authorized current version, not an ambiguous patch.
 Staff may admit available client images and supported media links before import,
@@ -1372,7 +1378,7 @@ Required verification areas:
 - active/draft/suspended visibility;
 - revision-based settings, design, option, structure, and image changes;
 - versioned basic product upkeep for every authorized role;
-- collection/category integrity;
+- compatibility-collection and active product-category integrity;
 - option validation;
 - availability-only inquiry behavior and absence of active inventory counts;
 - image upload validation and serving;

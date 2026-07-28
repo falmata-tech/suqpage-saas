@@ -4,7 +4,7 @@ title: Simple client and staff product upkeep
 status: done
 related: [FE-001, FE-003, FE-007, BE-009, DEP-008, ADR-0006]
 owners: [product, frontend]
-last_updated: 2026-07-24
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -27,8 +27,7 @@ information without exposing catalog architecture or showroom design.
 
 - List and search products for one established client showroom.
 - Create a product with name, description, one primary managed image,
-  availability, and an optional assignment to existing collection/category
-  choices.
+  availability, and an optional assignment to an existing product category.
 - Edit those same basic fields on an existing product.
 - Replace or remove the primary image through the verified media boundary.
 - Compact product-card preview, explicit live-update confirmation, success,
@@ -42,7 +41,7 @@ information without exposing catalog architecture or showroom design.
 
 ### Non-goals
 
-- Creating, renaming, reordering, or deleting collections or categories.
+- Creating, renaming, reordering, or deleting categories.
 - Editing option groups/values, sort order, slug, product-card component,
   showroom design, page content, contacts, business settings, or other products
   in bulk.
@@ -61,8 +60,8 @@ information without exposing catalog architecture or showroom design.
   existing product's permitted fields. It is not a full showroom revision.
 - **Established showroom** has retained publication history. A draft tenant
   without a first publication continues through request-led onboarding.
-- **Existing structure choice** is a collection/category already owned by the
-  same business. Selecting it does not grant authority to alter that structure.
+- **Existing structure choice** is a product category already owned by the same
+  business. Selecting it does not grant authority to alter that structure.
 - **Availability** is `available`, `limited`, `unavailable`, or `coming_soon`.
   It is descriptive catalog truth and has no numeric inventory behind it.
 - The acting client is authority for their own basic update. Staff acting for a
@@ -74,20 +73,19 @@ information without exposing catalog architecture or showroom design.
   Assigned team members see the same upkeep entry inside authorized business
   context; managers/administrators can select a managed client.
 - The product list uses touch-sized cards/rows with image, exact product name,
-  collection/category context, availability, and one clear Edit action. It
+  category context, availability, and one clear Edit action. It
   contains no stock column.
 - Create/edit shows only product name, description, primary image, availability,
-  existing collection, and a category filtered to a compatible collection.
-  Unsupported hidden fields cannot be submitted into authority.
+  and an existing category. Unsupported hidden fields, including collection
+  identifiers, cannot be submitted into authority.
 - Product names are required and bounded; descriptions are bounded. Merchant
   text remains exact and is never automatically translated.
 - The server generates a stable unique slug and append position for a new
   product. Renaming an existing product does not expose or silently rewrite its
   slug, structure, options, or presentation component.
-- A category/collection choice is optional only when the current tenant
-  structure permits an unassigned product. A selected category and collection
-  must be a compatible same-tenant pair; stale choices show a conflict rather
-  than being silently changed.
+- A category choice is optional only when the current tenant structure permits
+  an unassigned product. A selected category must belong to the same tenant;
+  stale choices show a conflict rather than being silently changed.
 - Image input accepts one JPEG, PNG, or WebP through the existing signature,
   decode, pixel/size, re-encoding, metadata-removal, generated-filename, and
   controlled-serving boundary. Replacement and removal are explicit.
@@ -109,10 +107,10 @@ information without exposing catalog architecture or showroom design.
 
 ```gherkin
 Scenario: Client adds a product to existing structure
-  GIVEN an authenticated client with an established showroom and existing collection/category choices
+  GIVEN an authenticated client with an established showroom and existing category choices
   WHEN they enter valid basic fields, choose a compatible category, preview, and confirm
   THEN the product appears in the next live content version
-  AND no category, collection, option, design, or inventory field was exposed
+  AND no category-creation, collection, option, design, or inventory field was exposed
 
 Scenario: Client updates routine product facts
   GIVEN a product belonging to the client's own business
@@ -199,15 +197,17 @@ published versions are reconciled rather than overwritten.
 
 ## Evidence
 
-Evidence: verified locally on 2026-07-24.
+Evidence: verified locally on 2026-07-28.
 
 - `components/ProductForm.tsx`, `components/ProductUpkeepList.tsx`,
   `app/dashboard/products/**`, `components/DashboardShell.tsx`, and
   `app/dashboard/page.tsx` implement established-showroom routing, search,
-  live summary preview, filtered structure choices, breadcrumbs, client/staff
+  live summary preview, category-only structure choices, breadcrumbs, client/staff
   attribution, responsive cards, and protected-field omission.
-- `tests/acceptance/app.spec.ts` passed all seven production-browser journeys on
-  2026-07-24, including client, assigned team member, operations manager,
-  administrator, draft-client denial, mobile overflow, and live version results.
-- `npm run check`, `npm run release`, and `npm run test:container` passed on
-  2026-07-24.
+- The product form has no collection control, and the active command rejects a
+  submitted collection identifier as an unsupported field.
+- `tests/acceptance/app.spec.ts` passed all 10 production-browser journeys on
+  2026-07-28, including category-only client product creation, assigned team
+  member, operations manager, administrator, mobile overflow, and live version
+  results.
+- `npm run check` and `npm run release` passed on 2026-07-28.

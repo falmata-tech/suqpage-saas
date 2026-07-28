@@ -26,12 +26,6 @@ export type BankBusinessView = {
   contactLabel: string;
 };
 
-export type BankCollectionView = {
-  key: string;
-  name: string;
-  description: string;
-};
-
 export type BankCategoryView = {
   key: string;
   name: string;
@@ -48,7 +42,6 @@ export type BankProductView = {
 
 export type BankPresentationContext = {
   business: BankBusinessView;
-  collections: BankCollectionView[];
   categories: BankCategoryView[];
   products: BankProductView[];
   query: string;

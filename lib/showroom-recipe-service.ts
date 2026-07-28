@@ -451,7 +451,6 @@ function relationshipKeyMaps(requestId: number, snapshot: RevisionSnapshotV4) {
   const actualToOpaque = new Map<string, string>();
   const opaqueToActual = new Map<string, string>();
   for (const [kind, keys] of [
-    ["collection", snapshot.collections.map((item) => item.key)],
     ["category", snapshot.categories.map((item) => item.key)],
     ["product", snapshot.products.map((item) => item.key)],
   ] as const) {
@@ -472,19 +471,16 @@ function mapSnapshotRelationshipKeys(
     value ? map.get(value) || value : null;
   return {
     ...snapshot,
-    collections: snapshot.collections.map((item) => ({
-      ...item,
-      key: replace(item.key)!,
-    })),
+    collections: [],
     categories: snapshot.categories.map((item) => ({
       ...item,
       key: replace(item.key)!,
-      collectionKey: replace(item.collectionKey),
+      collectionKey: null,
     })),
     products: snapshot.products.map((item) => ({
       ...item,
       key: replace(item.key)!,
-      collectionKey: replace(item.collectionKey),
+      collectionKey: null,
       categoryKey: replace(item.categoryKey),
     })),
   };
@@ -537,22 +533,12 @@ function syntheticReferenceCatalog(): Catalog {
       favicon_path: "",
       content_version: 1,
     },
-    collections: [
-      {
-        id: 9010,
-        business_id: 9000,
-        name: "Reference Collection",
-        slug: "reference-collection",
-        description: "Demonstrates a collection relationship.",
-        sort_order: 0,
-        is_active: 1,
-      },
-    ],
+    collections: [],
     categories: [
       {
         id: 9020,
         business_id: 9000,
-        collection_id: 9010,
+        collection_id: null,
         name: "Reference Category",
         slug: "reference-category",
         sort_order: 0,
@@ -561,7 +547,7 @@ function syntheticReferenceCatalog(): Catalog {
       {
         id: 9021,
         business_id: 9000,
-        collection_id: 9010,
+        collection_id: null,
         name: "Second Reference Category",
         slug: "second-reference-category",
         sort_order: 1,
@@ -572,7 +558,7 @@ function syntheticReferenceCatalog(): Catalog {
       {
         id: 9030,
         business_id: 9000,
-        collection_id: 9010,
+        collection_id: null,
         category_id: 9020,
         name: "Reference Item One",
         slug: "reference-item-one",
@@ -598,7 +584,7 @@ function syntheticReferenceCatalog(): Catalog {
       {
         id: 9031,
         business_id: 9000,
-        collection_id: 9010,
+        collection_id: null,
         category_id: 9021,
         name: "Reference Item Two",
         slug: "reference-item-two",
@@ -780,6 +766,7 @@ export function buildShowroomRecipeBrief(
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
+        "Product category is the only active catalog grouping. Return content.collections as an empty array, declaredRemovals.collections as an empty array, and every category/product collectionKey as null. Never use a collection as navigation, story, process, trust, footer, or composition content.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one semantic design system and compatible section anatomy before choosing component IDs.",
         "Use compositionGuidance.canonicalNormalShowroom exactly: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Use its exact surfaceRole sequence.",

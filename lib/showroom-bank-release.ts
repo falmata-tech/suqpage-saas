@@ -168,12 +168,6 @@ const navigationBindings: ShowroomBindingDefinition[] = [
     required: true,
     allowedSources: ["catalog.categories"],
   },
-  {
-    key: "collections",
-    label: "Catalog collections",
-    required: false,
-    allowedSources: ["catalog.collections"],
-  },
 ];
 
 const storyBindings: ShowroomBindingDefinition[] = [
@@ -209,12 +203,6 @@ const catalogBindings: ShowroomBindingDefinition[] = [
     label: "Catalog categories",
     required: true,
     allowedSources: ["catalog.categories"],
-  },
-  {
-    key: "collections",
-    label: "Catalog collections",
-    required: false,
-    allowedSources: ["catalog.collections"],
   },
 ];
 
@@ -360,7 +348,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "hero.centered-statement@1",
       name: "Centered statement hero",
-      description: "A bold central message for a focused collection or memorable brand promise.",
+      description: "A bold central message for a focused product range or memorable brand promise.",
     },
     {
       id: "hero.product-spotlight@1",
@@ -389,7 +377,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     },
     {
       id: "hero.collection-mosaic@1",
-      name: "Collection mosaic hero",
+      name: "Product mosaic hero",
       description: "A bounded multi-product opening that gives several visual groups equal emphasis.",
     },
   ],
@@ -401,13 +389,13 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     },
     {
       id: "navigation.collection-rail@1",
-      name: "Collection rail",
-      description: "A horizontally flowing collection index for visual browsing.",
+      name: "Category rail",
+      description: "A horizontally flowing product-category index for visual browsing.",
     },
     {
       id: "navigation.catalog-index@1",
       name: "Catalog index",
-      description: "A structured numbered index for scanning many categories or collections.",
+      description: "A structured numbered index for scanning many product categories.",
     },
     {
       id: "navigation.minimal-tabs@1",
@@ -470,8 +458,8 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     },
     {
       id: "catalog.collection-led@1",
-      name: "Collection-led catalog",
-      description: "A collection-first treatment that exposes meaningful groups before individual products.",
+      name: "Category-grouped catalog",
+      description: "A category-first treatment that exposes meaningful product groups before individual products.",
     },
     {
       id: "catalog.minimal-list@1",
@@ -542,7 +530,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "footer.catalog-directory@1",
       name: "Catalog directory footer",
-      description: "A structured close for broad collection and category navigation.",
+      description: "A structured close for broad product-category navigation.",
     },
     {
       id: "footer.contact-panel@1",
@@ -566,7 +554,7 @@ export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
   ],
   navigation: [
     { id: "navigation.visual-chapters@1", name: "Visual chapter navigation", description: "A magazine-like horizontal chapter rail for visual group discovery." },
-    { id: "navigation.material-index@1", name: "Attribute index navigation", description: "A precise indexed control for named materials, attributes, categories, or collections." },
+    { id: "navigation.material-index@1", name: "Attribute index navigation", description: "A precise indexed control for named materials, attributes, or product categories." },
   ],
   content: [
     { id: "content.lookbook-chapter@1", name: "Lookbook chapter", description: "An expressive editorial chapter with generous media and a paced narrative." },
@@ -579,7 +567,7 @@ export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
     { id: "catalog.beauty-swatch@1", name: "Sculptural swatch catalog", description: "Soft sculptural product cards that emphasize color variation and compact imagery." },
     { id: "catalog.technology-spec@1", name: "Technical comparison catalog", description: "Crisp information-forward cards for comparison-oriented product ranges." },
     { id: "catalog.textile-stack@1", name: "Layered stack catalog", description: "Layered cards that emphasize texture, finish, variation, and horizontal browsing." },
-    { id: "catalog.room-set@1", name: "Scene-grouped catalog", description: "Scene-inspired product groupings that make collection relationships visible." },
+    { id: "catalog.room-set@1", name: "Scene-grouped catalog", description: "Scene-inspired product groupings that make category relationships visible." },
   ],
   trust: [
     { id: "trust.material-passport@1", name: "Material passport", description: "A structured panel for approved material, finish, construction, or composition facts." },

@@ -98,6 +98,13 @@ parity with the pixels rendered by that choice.
   stable layout, horizontally scrollable rails with affordance, and no hover-only
   information. Product detail and inquiry actions remain unchanged.
 - Public compositions expose at most one category-browsing control surface.
+- Product category is the sole active public browsing taxonomy. Collection
+  records and relationship fields may be read only at retained-revision recovery
+  boundaries; they never populate current navigation, story/process content,
+  trust content, footer links, product forms, or new recipe output.
+- Story, process, and trust sections render only their assigned typed content
+  and business fallback copy. They never synthesize editorial content from
+  product categories or legacy collections.
   Header actions remain limited to the catalog destination and inquiry cart;
   hero media is not covered by product-link tiles. A standalone navigation
   section and catalog filters cannot be enabled together.

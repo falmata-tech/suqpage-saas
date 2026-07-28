@@ -136,26 +136,6 @@ export default function RevisionEditor({
       ...current,
       business: { ...current.business, [key]: value },
     }));
-  const updateCollection = (index: number, patch: Record<string, unknown>) =>
-    setSnapshot((current) => ({
-      ...current,
-      collections: current.collections.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item,
-      ),
-    }));
-  const removeCollection = (index: number) => {
-    const removed = snapshot.collections[index].key;
-    setSnapshot((current) => ({
-      ...current,
-      collections: current.collections.filter((_, i) => i !== index),
-      categories: current.categories.map((item) =>
-        item.collectionKey === removed ? { ...item, collectionKey: null } : item,
-      ),
-      products: current.products.map((item) =>
-        item.collectionKey === removed ? { ...item, collectionKey: null } : item,
-      ),
-    }));
-  };
   const updateCategory = (index: number, patch: Record<string, unknown>) =>
     setSnapshot((current) => ({
       ...current,
@@ -437,26 +417,6 @@ export default function RevisionEditor({
 
         <section className="panel">
           <div className="dashboard-head">
-            <div>
-              <h2>Collections</h2>
-              <p>Group products into client-friendly ranges.</p>
-            </div>
-            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, collections: [...current.collections, { key: uid("collection"), name: "New collection", slug: "", description: "", sortOrder: current.collections.length, active: true }] }))}>Add collection</button>
-          </div>
-          {snapshot.collections.map((item, index) => (
-            <div className="revision-item form-grid" key={item.key}>
-              <Field value={item.name} onChange={(value) => updateCollection(index, { name: value })} label={`Collection ${index + 1} name`} max={100} />
-              <Field value={item.slug} onChange={(value) => updateCollection(index, { slug: value })} label={`Collection ${index + 1} slug`} max={80} />
-              <div className="field"><label>Sort order</label><input aria-label={`Collection ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateCollection(index, { sortOrder: Number(event.target.value) })} /></div>
-              <label className="check-field"><input type="checkbox" checked={item.active} onChange={(event) => updateCollection(index, { active: event.target.checked })} /> Active</label>
-              <div className="field full"><label>Description</label><textarea aria-label={`Collection ${index + 1} description`} value={item.description} onChange={(event) => updateCollection(index, { description: event.target.value })} /></div>
-              <button type="button" className="small-btn danger" onClick={() => removeCollection(index)}>Remove collection</button>
-            </div>
-          ))}
-        </section>
-
-        <section className="panel">
-          <div className="dashboard-head">
             <div><h2>Categories</h2><p>Categories drive showroom filters.</p></div>
             <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, categories: [...current.categories, { key: uid("category"), collectionKey: null, name: "New category", slug: "", sortOrder: current.categories.length, active: true }] }))}>Add category</button>
           </div>
@@ -464,7 +424,6 @@ export default function RevisionEditor({
             <div className="revision-item form-grid" key={item.key}>
               <Field value={item.name} onChange={(value) => updateCategory(index, { name: value })} label={`Category ${index + 1} name`} max={100} />
               <Field value={item.slug} onChange={(value) => updateCategory(index, { slug: value })} label={`Category ${index + 1} slug`} max={80} />
-              <div className="field"><label>Collection</label><select aria-label={`Category ${index + 1} collection`} value={item.collectionKey || ""} onChange={(event) => updateCategory(index, { collectionKey: event.target.value || null })}><option value="">No collection</option>{snapshot.collections.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}</select></div>
               <div className="field"><label>Sort order</label><input aria-label={`Category ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateCategory(index, { sortOrder: Number(event.target.value) })} /></div>
               <label className="check-field"><input type="checkbox" checked={item.active} onChange={(event) => updateCategory(index, { active: event.target.checked })} /> Active</label>
               <button type="button" className="small-btn danger" onClick={() => removeCategory(index)}>Remove category</button>
@@ -482,7 +441,6 @@ export default function RevisionEditor({
               <Field value={item.name} onChange={(value) => updateProduct(index, { name: value })} label={`Product ${index + 1} name`} max={140} />
               <Field value={item.slug} onChange={(value) => updateProduct(index, { slug: value })} label={`Product ${index + 1} slug`} max={80} />
               <Field value={item.eyebrow} onChange={(value) => updateProduct(index, { eyebrow: value })} label={`Product ${index + 1} short label`} max={100} />
-              <div className="field"><label>Collection</label><select aria-label={`Product ${index + 1} collection`} value={item.collectionKey || ""} onChange={(event) => updateProduct(index, { collectionKey: event.target.value || null })}><option value="">Unassigned</option>{snapshot.collections.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}</select></div>
               <div className="field"><label>Category</label><select aria-label={`Product ${index + 1} category`} value={item.categoryKey || ""} onChange={(event) => updateProduct(index, { categoryKey: event.target.value || null })}><option value="">Unassigned</option>{snapshot.categories.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}</select></div>
               <div className="field"><label>Availability</label><select aria-label={`Product ${index + 1} availability`} value={item.availability} onChange={(event) => updateProduct(index, { availability: event.target.value })}>{["available", "limited", "unavailable", "coming_soon"].map((value) => <option key={value}>{value}</option>)}</select></div>
               <div className="field"><label>Sort order</label><input aria-label={`Product ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateProduct(index, { sortOrder: Number(event.target.value) })} /></div>

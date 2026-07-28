@@ -411,12 +411,57 @@ export function validateShowroomRecipe(
   }
   let snapshot: RevisionSnapshotV4;
   try {
+    if (recipe.content.collections.length) {
+      issue(
+        "content",
+        "$.content.collections",
+        "Collections are compatibility-only; use product categories.",
+      );
+    }
+    const categoryWithCollection = recipe.content.categories.findIndex(
+      (category) => category.collectionKey !== null,
+    );
+    if (categoryWithCollection >= 0) {
+      issue(
+        "content",
+        `$.content.categories[${categoryWithCollection}].collectionKey`,
+        "Product categories cannot belong to a collection.",
+      );
+    }
+    const productWithCollection = recipe.content.products.findIndex(
+      (product) => product.collectionKey !== null,
+    );
+    if (productWithCollection >= 0) {
+      issue(
+        "content",
+        `$.content.products[${productWithCollection}].collectionKey`,
+        "Products are grouped only by category.",
+      );
+    }
+    const baseCategoryCollections = new Map(
+      context.baseSnapshot.categories.map((category) => [
+        category.key,
+        category.collectionKey,
+      ]),
+    );
+    const baseProductCollections = new Map(
+      context.baseSnapshot.products.map((product) => [
+        product.key,
+        product.collectionKey,
+      ]),
+    );
     snapshot = requireRevisionSnapshotV4({
       schemaVersion: 4,
       business: recipe.content.business,
-      collections: recipe.content.collections,
-      categories: recipe.content.categories,
-      products: recipe.content.products,
+      collections: context.baseSnapshot.collections,
+      categories: recipe.content.categories.map((category) => ({
+        ...category,
+        collectionKey: baseCategoryCollections.get(category.key) ?? null,
+      })),
+      products: recipe.content.products.map((product) => ({
+        ...product,
+        collectionKey: baseProductCollections.get(product.key) ?? null,
+      })),
       contentBlocks: recipe.content.contentBlocks,
       designManifest: design,
     }, SHOWROOM_COMPONENT_BANK_LATEST);

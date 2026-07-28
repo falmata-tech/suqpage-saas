@@ -8,7 +8,6 @@ export type ShowroomCommerceMode = "inquiry" | "retail" | "wholesale" | "rfq";
 export type ShowroomContentNeed =
   | "brand_identity"
   | "category_browsing"
-  | "collection_browsing"
   | "comparison"
   | "contact_handoff"
   | "editorial_story"
@@ -35,7 +34,7 @@ export type ShowroomCatalogShape =
   | "sparse"
   | "focused"
   | "broad"
-  | "collection_led"
+  | "category_grouped"
   | "comparison_led";
 export type ShowroomMediaCondition =
   | "none"
@@ -340,7 +339,7 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     name: "Guided-use catalog",
     description: "A polished product sequence organized around use steps, visual chapters, and supplied detail facts.",
     contentNeeds: ["editorial_story", "usage_guidance", "category_browsing", "product_discovery"],
-    catalogShape: "collection_led",
+    catalogShape: "category_grouped",
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["quiet", "playful"],
@@ -354,8 +353,8 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     id: "spatial-gallery",
     name: "Spatial gallery",
     description: "A scene-led composition with generous media, material context, and grouped product discovery.",
-    contentNeeds: ["product_focus", "material_details", "collection_browsing", "usage_guidance"],
-    catalogShape: "collection_led",
+    contentNeeds: ["product_focus", "material_details", "category_browsing", "usage_guidance"],
+    catalogShape: "category_grouped",
     commerceModes: ["inquiry", "retail"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "quiet"],
@@ -382,26 +381,26 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     avoidWhen: ["fewer than five products exist", "the purchase decision is primarily emotional or lifestyle-led"],
   }),
   pageTemplate({
-    id: "provenance-collection",
-    name: "Provenance collection",
+    id: "provenance-catalog",
+    name: "Provenance catalog",
     description: "A source-and-story sequence followed by grouped products, factual proof, and a quantity conversation.",
-    contentNeeds: ["source_context", "process_explanation", "collection_browsing", "product_discovery"],
-    catalogShape: "collection_led",
+    contentNeeds: ["source_context", "process_explanation", "category_browsing", "product_discovery"],
+    catalogShape: "category_grouped",
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "optional",
     visualTones: ["organic", "editorial"],
     pacingRules: [
-      "Connect approved source context to real collection structure.",
+      "Connect approved source context to meaningful product categories.",
       "Do not repeat the same source paragraph in the hero and about section.",
     ],
-    avoidWhen: ["collections are arbitrary or missing", "source claims would need to be inferred"],
+    avoidWhen: ["categories are arbitrary or missing", "source claims would need to be inferred"],
   }),
   pageTemplate({
     id: "material-editorial",
     name: "Material editorial",
     description: "A layered visual narrative centered on color, texture, material variation, and stacked product browsing.",
     contentNeeds: ["material_details", "editorial_story", "category_browsing", "product_discovery"],
-    catalogShape: "collection_led",
+    catalogShape: "category_grouped",
     commerceModes: ["inquiry", "retail", "wholesale"],
     mediaCondition: "image_rich",
     visualTones: ["editorial", "expressive"],
@@ -425,7 +424,7 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
       "Keep the page short and information-forward.",
       "Use a compact catalog and direct inquiry close instead of decorative chapters.",
     ],
-    avoidWhen: ["a broad image-rich collection needs visual grouping", "several editorial stories are essential"],
+    avoidWhen: ["a broad image-rich catalog needs visual grouping", "several editorial stories are essential"],
   }),
 ]);
 
@@ -550,7 +549,7 @@ const PROFILES = {
   collage_hero: selectionProfile(
     "An asymmetrical layered opening that combines several visual planes with a compact editorial text area.",
     "editorial_collage", "layered", "dominant", "signature", "layered", "expressive",
-    "stack", ["editorial_story", "collection_browsing"], ["editorial", "expressive"],
+    "stack", ["editorial_story", "category_browsing"], ["editorial", "expressive"],
     ["multiple coherent images or product groups are available"],
     ["media is sparse, inconsistent, or text is long"],
   ),
@@ -577,9 +576,9 @@ const PROFILES = {
     ["inquiry", "wholesale", "rfq"],
   ),
   mosaic_hero: selectionProfile(
-    "A multi-item opening that presents several products or collections as a bounded visual mosaic.",
+    "A multi-item opening that presents several products or categories as a bounded visual mosaic.",
     "collection_mosaic", "grid", "dominant", "signature", "mixed", "expressive",
-    "stack", ["collection_browsing", "product_discovery"], ["playful", "editorial"],
+    "stack", ["category_browsing", "product_discovery"], ["playful", "editorial"],
     ["several coherent images deserve equal emphasis"],
     ["fewer than three useful images are available"],
   ),
@@ -594,14 +593,14 @@ const PROFILES = {
   nav_rail: selectionProfile(
     "A horizontally scrolling chapter rail that exposes several groups without expanding page height.",
     "chapter_rail", "rail", "supporting", "prominent", "rectilinear", "subtle",
-    "horizontal_scroll", ["collection_browsing", "category_browsing"], ["editorial", "expressive"],
+    "horizontal_scroll", ["category_browsing"], ["editorial", "expressive"],
     ["groups benefit from sequential visual browsing"],
     ["there is only one group or another category control already exists"],
   ),
   nav_index: selectionProfile(
-    "A structured numbered index optimized for scanning many categories or collections.",
+    "A structured numbered index optimized for scanning many product categories.",
     "indexed_navigation", "indexed", "none", "supporting", "rectilinear", "none",
-    "compact_list", ["category_browsing", "collection_browsing"], ["technical", "precise"],
+    "compact_list", ["category_browsing"], ["technical", "precise"],
     ["there are many meaningful groups with concise labels"],
     ["the catalog is tiny or another category control already exists"],
     ["inquiry", "wholesale", "rfq"],
@@ -671,9 +670,9 @@ const PROFILES = {
     ["side-by-side specification comparison is essential"],
   ),
   catalog_collection: selectionProfile(
-    "A grouped catalog that makes collection or category structure visible before individual products.",
-    "collection_groups", "grid", "balanced", "prominent", "mixed", "subtle",
-    "stack", ["collection_browsing", "product_discovery"], ["editorial", "organic"],
+    "A grouped catalog that makes product-category structure visible before individual products.",
+    "category_groups", "grid", "balanced", "prominent", "mixed", "subtle",
+    "stack", ["category_browsing", "product_discovery"], ["editorial", "organic"],
     ["products form at least two meaningful groups"],
     ["groups are missing, arbitrary, or redundant"],
   ),
@@ -900,7 +899,7 @@ function renderedAnatomy(
   }
   if (component.slot === "navigation") {
     return {
-      regions: ["navigation label", "category or collection controls"],
+      regions: ["navigation label", "product-category controls"],
       mediaPlanes: { min: 0, max: 0 },
       interaction: "One keyboard and touch-accessible browsing control surface.",
     };

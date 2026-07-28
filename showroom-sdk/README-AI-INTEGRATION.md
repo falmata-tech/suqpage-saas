@@ -20,7 +20,7 @@ for the current reviewed-code workflow described below.
 
 1. The custom renderer owns layout, typography, animation, sections, cards and responsive behavior.
 2. SuqPage owns business data, catalog data, option groups, stock, inquiry state, inquiry persistence, social routing and delivery APIs.
-3. Do not hard-code products, categories, collections, business contacts, availability or inventory.
+3. Do not hard-code products, product categories, business contacts, availability or inventory. Collection fields are compatibility-only and must remain empty/null.
 4. Do not translate product names, color names, sizes, model numbers or other merchant-entered values.
 5. Do not call the SQLite database from design components.
 6. Keep the supplied TypeScript props intact.

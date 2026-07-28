@@ -61,23 +61,6 @@ const laboratoryFixture = {
     heroImageRef: "",
     contactLabel: "Choose products to prepare one structured inquiry",
   },
-  collections: [
-    {
-      key: "harvest",
-      name: "Harvest goods",
-      description: "Food and agricultural products prepared for clear product inquiry.",
-    },
-    {
-      key: "workshop",
-      name: "Workshop",
-      description: "Furniture, textiles, artisan work, tools, and material-led goods.",
-    },
-    {
-      key: "production",
-      name: "Production",
-      description: "Equipment, parts, packaging, and manufacturing-oriented products.",
-    },
-  ],
   categories: [
     { key: "food", name: "Food goods" },
     { key: "home", name: "Home and furniture" },

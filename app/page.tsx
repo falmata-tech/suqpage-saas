@@ -39,8 +39,7 @@ export default function Home() {
       business.hero_subtitle,
       industry,
       ...((catalog?.categories || []).map((item) => item.name)),
-      ...((catalog?.collections || []).map((item) => `${item.name} ${item.description}`)),
-      ...((catalog?.products || []).map((item) => `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""} ${item.collection_name || ""}`)),
+      ...((catalog?.products || []).map((item) => `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""}`)),
     ].join(" ").toLowerCase();
     return {
       id: business.id,

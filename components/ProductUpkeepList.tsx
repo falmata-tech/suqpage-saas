@@ -19,7 +19,6 @@ export default function ProductUpkeepList({
       [
         product.name,
         product.description,
-        product.collection_name,
         product.category_name,
         product.availability.replace("_", " "),
       ]
@@ -37,7 +36,7 @@ export default function ProductUpkeepList({
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search name, category, collection, or availability"
+          placeholder="Search name, category, or availability"
         />
         <small aria-live="polite">
           Showing {visible.length} of {products.length} products

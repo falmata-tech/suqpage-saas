@@ -11,7 +11,6 @@ import type {
   Business,
   Catalog,
   Category,
-  Collection,
   OptionGroup,
   OptionValue,
   Product,
@@ -33,7 +32,6 @@ if (count > 0) {
 }
 
 const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,'active')`);
-const addCollection = db.prepare("INSERT INTO collections(business_id,name,slug,description,sort_order) VALUES(?,?,?,?,?)");
 const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
 const addProduct = db.prepare(`INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,1,?)`);
 const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)");
@@ -48,7 +46,7 @@ const businesses = [
   { handle:"blue-nile-apiary", name:"Blue Nile Apiary", tagline:"Honey, comb and beeswax from responsibly kept hives.", description:"A small apiary offering raw honey, seasonal comb and useful beeswax goods with batch-by-batch availability.", logo_path:"", hero_title:"From active hives to a careful harvest.", hero_subtitle:"Discover the current honey character and ask about jars, gifts or wholesale quantities.", hero_image_path:"/uploads/seed/benchmarks/blue-nile-apiary/hero.jpg", contact_email:"", whatsapp:"", telegram:"bluenileapiary", tiktok:"" },
   { handle:"rift-valley-mill", name:"Rift Valley Mill", tagline:"Local grains milled for homes and small bakeries.", description:"A clean small-scale mill producing teff flours, roasted barley blends and practical mixed-grain packs.", logo_path:"", hero_title:"Know the grain behind every bag.", hero_subtitle:"Compare grain types, milling styles and available pack formats in one clear catalog.", hero_image_path:"/uploads/seed/benchmarks/rift-valley-mill/hero.jpg", contact_email:"orders@riftmill.local", whatsapp:"", telegram:"", tiktok:"" },
   { handle:"entoto-ceramics", name:"Entoto Ceramics", tagline:"Quiet tableware made in a working pottery studio.", description:"Wheel-thrown and hand-finished cups, bowls, vases and table pieces with natural glaze variation.", logo_path:"", hero_title:"Useful forms, shaped one at a time.", hero_subtitle:"Browse studio pieces and ask about sets, glaze variation or hospitality orders.", hero_image_path:"/uploads/seed/benchmarks/entoto-ceramics/hero.jpg", contact_email:"", whatsapp:"251911100108", telegram:"", tiktok:"" },
-  { handle:"koba-leather", name:"Koba Leather Workshop", tagline:"Durable leather goods cut and stitched by hand.", description:"A practical collection of work bags, wallets, rolls and satchels made in small production runs.", logo_path:"", hero_title:"Leather goods that show their construction.", hero_subtitle:"Inspect the forms, choose a finish and ask about personal or team orders.", hero_image_path:"/uploads/seed/benchmarks/koba-leather/hero.jpg", contact_email:"", whatsapp:"", telegram:"kobaleather", tiktok:"" },
+  { handle:"koba-leather", name:"Koba Leather Workshop", tagline:"Durable leather goods cut and stitched by hand.", description:"A practical range of work bags, wallets, rolls and satchels made in small production runs.", logo_path:"", hero_title:"Leather goods that show their construction.", hero_subtitle:"Inspect the forms, choose a finish and ask about personal or team orders.", hero_image_path:"/uploads/seed/benchmarks/koba-leather/hero.jpg", contact_email:"", whatsapp:"", telegram:"kobaleather", tiktok:"" },
   { handle:"nova-assembly", name:"Nova Assembly Lab", tagline:"Electronics assembly, repair and custom power work.", description:"A small technical studio building power-control products, cable harnesses and repair solutions for local operators.", logo_path:"", hero_title:"Technical work explained before it is ordered.", hero_subtitle:"Review standard builds or describe the equipment, repair and connector requirements.", hero_image_path:"/uploads/seed/benchmarks/nova-assembly/hero.jpg", contact_email:"lab@novaassembly.local", whatsapp:"251911100110", telegram:"", tiktok:"" }
 ] satisfies Array<Record<string,string>>;
 
@@ -65,13 +63,12 @@ for (const business of businesses) {
   );
 }
 
-function seedCatalog(handle: string, collectionName: string, categoryNames: string[], products: any[]) {
+function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
   const businessId = seeded.get(handle)!;
-  const collectionId = Number(addCollection.run(businessId, collectionName, collectionName.toLowerCase().replace(/[^a-z0-9]+/g,"-"), "Seed collection", 0).lastInsertRowid);
   const cats = new Map<string, number>();
-  categoryNames.forEach((name, i) => cats.set(name, Number(addCategory.run(businessId, collectionId, name, name.toLowerCase().replace(/[^a-z0-9]+/g,"-"), i).lastInsertRowid)));
+  categoryNames.forEach((name, i) => cats.set(name, Number(addCategory.run(businessId, null, name, name.toLowerCase().replace(/[^a-z0-9]+/g,"-"), i).lastInsertRowid)));
   products.forEach((p, i) => {
-    const productId = Number(addProduct.run(businessId, collectionId, cats.get(p.category)!, p.name, p.slug, p.eyebrow, p.description, p.image, p.availability || "available", i).lastInsertRowid);
+    const productId = Number(addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, p.eyebrow, p.description, p.image, p.availability || "available", i).lastInsertRowid);
     (p.options || []).slice(0,4).forEach((g:any, gi:number) => {
       const groupId = Number(addGroup.run(productId, g.name, gi).lastInsertRowid);
       g.values.forEach((v:string) => addValue.run(groupId, v));
@@ -80,8 +77,8 @@ function seedCatalog(handle: string, collectionName: string, categoryNames: stri
 }
 
 type BenchmarkProduct = { name:string; category:string; eyebrow:string; description:string; image?:number; availability?:string };
-function benchmarkCatalog(handle:string, collection:string, categories:string[], products:BenchmarkProduct[]) {
-  seedCatalog(handle, collection, categories, products.map((product, index) => ({
+function benchmarkCatalog(handle:string, categories:string[], products:BenchmarkProduct[]) {
+  seedCatalog(handle, categories, products.map((product, index) => ({
     ...product,
     slug: product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
     image: product.image ? `/uploads/seed/benchmarks/${handle}/product-${product.image}.jpg` : "",
@@ -89,20 +86,20 @@ function benchmarkCatalog(handle:string, collection:string, categories:string[],
   })));
 }
 
-benchmarkCatalog("selam-weave","Woven Collection",["Wear","Table","Carry"],[
+benchmarkCatalog("selam-weave",["Wear","Table","Carry"],[
   {name:"Indigo Kuta Shawl",category:"Wear",eyebrow:"Handwoven cotton",description:"A substantial indigo-and-ivory shawl with hand-finished fringe.",image:1},
   {name:"Natural Cotton Wrap",category:"Wear",eyebrow:"Undyed weave",description:"A breathable wrap woven from natural cotton yarn.",image:2},
   {name:"Indigo Table Linen",category:"Table",eyebrow:"Dining textile",description:"A woven table cloth with a restrained indigo border.",image:3},
   {name:"Workshop Tote",category:"Carry",eyebrow:"Woven utility",description:"A structured cloth tote with reinforced woven handles.",image:4},
   {name:"Custom Hospitality Runner",category:"Table",eyebrow:"Made to order",description:"A custom-length runner planned for cafes and guest spaces."},
 ]);
-benchmarkCatalog("afia-botanics","Daily Ritual",["Cleanse","Treat","Hair"],[
+benchmarkCatalog("afia-botanics",["Cleanse","Treat","Hair"],[
   {name:"Garden Cleansing Bars",category:"Cleanse",eyebrow:"Cold-process soap",description:"A small set of botanical cleansing bars with clearly listed ingredients.",image:1},
   {name:"Leaf & Seed Body Oil",category:"Treat",eyebrow:"Light body oil",description:"A simple amber-bottled oil blended for everyday body care.",image:2},
   {name:"Mineral Clay Mask",category:"Treat",eyebrow:"Dry mask blend",description:"A dry clay and botanical powder mixed with water at use.",image:3},
   {name:"Nourishing Hair Butter",category:"Hair",eyebrow:"Rich treatment",description:"A concentrated butter for protective styles and dry ends.",image:4},
 ]);
-benchmarkCatalog("warka-furniture","Workshop Editions",["Seating","Tables","Storage"],[
+benchmarkCatalog("warka-furniture",["Seating","Tables","Storage"],[
   {name:"Low Woven Lounge Chair",category:"Seating",eyebrow:"Hardwood and cord",description:"A low lounge chair with a handwoven seat and visible joinery.",image:1},
   {name:"Round Cross-Leg Table",category:"Tables",eyebrow:"Compact side table",description:"A small round table with a stable crossed hardwood base.",image:2},
   {name:"Entry Bench",category:"Seating",eyebrow:"Woven bench",description:"A narrow bench for entries, bedrooms and hospitality spaces.",image:3},
@@ -110,7 +107,7 @@ benchmarkCatalog("warka-furniture","Workshop Editions",["Seating","Tables","Stor
   {name:"Custom Dining Table",category:"Tables",eyebrow:"Project inquiry",description:"A made-to-order table specified by size, timber and finish."},
   {name:"Hospitality Stool Set",category:"Seating",eyebrow:"Small production run",description:"A repeatable stool design for cafes and counters."},
 ]);
-benchmarkCatalog("addis-metalworks","Fabrication Catalog",["Frames","Work Surfaces","Storage","Parts"],[
+benchmarkCatalog("addis-metalworks",["Frames","Work Surfaces","Storage","Parts"],[
   {name:"Powder-Coated Equipment Frame",category:"Frames",eyebrow:"Machine support",description:"A rigid fabricated frame prepared for equipment installation.",image:1},
   {name:"Stainless Prep Table",category:"Work Surfaces",eyebrow:"Food-safe work surface",description:"A stainless work table with lower shelf and adjustable feet.",image:2},
   {name:"Modular Storage Rack",category:"Storage",eyebrow:"Workshop storage",description:"A bolt-together rack for bins, tools and production materials.",image:3},
@@ -120,26 +117,26 @@ benchmarkCatalog("addis-metalworks","Fabrication Catalog",["Frames","Work Surfac
   {name:"Sink Support Stand",category:"Work Surfaces",eyebrow:"Stainless support",description:"A fabricated stand prepared for a specified sink and plumbing layout."},
   {name:"Short-Run Cut Parts",category:"Parts",eyebrow:"RFQ service",description:"A quoted batch of repeat metal parts from supplied dimensions."},
 ]);
-benchmarkCatalog("green-terrace-farm","Current Harvest",["Greens","Herbs","Seasonal Crates"],[
+benchmarkCatalog("green-terrace-farm",["Greens","Herbs","Seasonal Crates"],[
   {name:"Highland Greens Mix",category:"Greens",eyebrow:"Seasonal leaves",description:"A fresh mixed selection based on the current field harvest.",image:1},
   {name:"Kitchen Herb Bunch",category:"Herbs",eyebrow:"Mixed herbs",description:"A practical bunch of aromatic herbs for home and kitchen use.",image:2},
   {name:"Heirloom Tomato Mix",category:"Seasonal Crates",eyebrow:"Field tomatoes",description:"A mixed-color tomato selection available during its harvest window.",image:3,availability:"limited"},
   {name:"Weekly Produce Crate",category:"Seasonal Crates",eyebrow:"Farm assortment",description:"A rotating crate of vegetables selected from the week's harvest.",image:4},
   {name:"Cafe Greens Supply",category:"Greens",eyebrow:"Recurring inquiry",description:"A recurring greens inquiry sized for a small cafe or kitchen."},
 ]);
-benchmarkCatalog("blue-nile-apiary","Hive Harvest",["Honey","Comb","Beeswax"],[
+benchmarkCatalog("blue-nile-apiary",["Honey","Comb","Beeswax"],[
   {name:"Seasonal Raw Honey",category:"Honey",eyebrow:"Current harvest",description:"Raw amber honey presented by season and available jar size.",image:1},
   {name:"Cut Comb Honey",category:"Comb",eyebrow:"Whole comb",description:"Fresh comb honey cut and packed in limited seasonal quantities.",image:2,availability:"limited"},
   {name:"Pure Beeswax Candles",category:"Beeswax",eyebrow:"Hive byproduct",description:"Simple hand-poured candles made from cleaned beeswax.",image:3},
   {name:"Honey & Comb Gift Box",category:"Honey",eyebrow:"Small gift set",description:"A compact pairing of honey and comb for gifting.",image:4},
 ]);
-benchmarkCatalog("rift-valley-mill","Mill Pantry",["Teff","Barley","Blends"],[
+benchmarkCatalog("rift-valley-mill",["Teff","Barley","Blends"],[
   {name:"Ivory Teff Flour",category:"Teff",eyebrow:"Fine milled",description:"A finely milled ivory teff flour for household and bakery use.",image:1},
   {name:"Brown Teff Flour",category:"Teff",eyebrow:"Whole grain",description:"Brown teff milled with a fuller grain character.",image:2},
   {name:"Roasted Barley Blend",category:"Barley",eyebrow:"Roasted grain",description:"A roasted barley blend prepared for traditional and modern drinks.",image:3},
   {name:"Mixed Grain Baking Pack",category:"Blends",eyebrow:"Practical blend",description:"A balanced grain blend for breads, pancakes and test batches.",image:4},
 ]);
-benchmarkCatalog("entoto-ceramics","Studio Table",["Drinkware","Serveware","Objects"],[
+benchmarkCatalog("entoto-ceramics",["Drinkware","Serveware","Objects"],[
   {name:"Studio Coffee Set",category:"Drinkware",eyebrow:"Wheel-thrown set",description:"A small set of cups and saucers with natural glaze variation.",image:1},
   {name:"Everyday Serving Bowl",category:"Serveware",eyebrow:"Wide bowl",description:"A useful serving bowl with a durable glazed interior.",image:2},
   {name:"Textured Stem Vase",category:"Objects",eyebrow:"Carved surface",description:"A hand-finished vase with a softly carved vertical texture.",image:3},
@@ -147,13 +144,13 @@ benchmarkCatalog("entoto-ceramics","Studio Table",["Drinkware","Serveware","Obje
   {name:"Custom Cafe Cup Run",category:"Drinkware",eyebrow:"Hospitality order",description:"A repeat cup form produced in an agreed glaze and quantity."},
   {name:"Small Planter Pair",category:"Objects",eyebrow:"Studio object",description:"A paired planter format with drainage and glaze options."},
 ]);
-benchmarkCatalog("koba-leather","Workshop Goods",["Bags","Small Goods","Tools"],[
+benchmarkCatalog("koba-leather",["Bags","Small Goods","Tools"],[
   {name:"Structured Work Tote",category:"Bags",eyebrow:"Daily carry",description:"A sturdy open tote with reinforced handles and an exterior pocket.",image:1},
   {name:"Slim Card Wallet",category:"Small Goods",eyebrow:"Hand stitched",description:"A compact card wallet with visible edge finishing.",image:2},
   {name:"Leather Tool Roll",category:"Tools",eyebrow:"Organized carry",description:"A roll-up organizer for small tools, brushes or studio equipment.",image:3},
   {name:"Everyday Crossbody",category:"Bags",eyebrow:"Secure satchel",description:"A medium satchel with adjustable strap and covered closure.",image:4},
 ]);
-benchmarkCatalog("nova-assembly","Technical Builds",["Power","Repair","Harnesses"],[
+benchmarkCatalog("nova-assembly",["Power","Repair","Harnesses"],[
   {name:"Rugged Solar Charge Controller",category:"Power",eyebrow:"Field power control",description:"A protected controller assembled for small off-grid systems.",image:1},
   {name:"Compact Backup Power Box",category:"Power",eyebrow:"Configured power",description:"A portable backup enclosure configured to the approved load plan.",image:2},
   {name:"Audio Amplifier Rebuild",category:"Repair",eyebrow:"Bench repair",description:"A diagnostic and rebuild service for compatible amplifier hardware.",image:3},
@@ -177,17 +174,13 @@ for (const businessId of seeded.values()) {
   const business = db
     .prepare("SELECT * FROM businesses WHERE id=?")
     .get(businessId) as unknown as Business;
-  const collections = db
-    .prepare("SELECT * FROM collections WHERE business_id=? ORDER BY sort_order,name")
-    .all(businessId) as unknown as Collection[];
   const categories = db
     .prepare("SELECT * FROM categories WHERE business_id=? ORDER BY sort_order,name")
     .all(businessId) as unknown as Category[];
   const products = db
     .prepare(
-      `SELECT p.*,c.name collection_name,cat.name category_name
+      `SELECT p.*,cat.name category_name
        FROM products p
-       LEFT JOIN collections c ON c.id=p.collection_id
        LEFT JOIN categories cat ON cat.id=p.category_id
        WHERE p.business_id=? ORDER BY p.sort_order,p.name`,
     )
@@ -200,7 +193,7 @@ for (const businessId of seeded.values()) {
       values: seededValueQuery.all(group.id) as unknown as OptionValue[],
     }));
   }
-  const catalog: Catalog = { business, collections, categories, products };
+  const catalog: Catalog = { business, collections: [], categories, products };
   const snapshot = catalogToRevisionSnapshotV4(catalog);
   updatePublishedComposition.run(
     JSON.stringify(snapshot.designManifest),

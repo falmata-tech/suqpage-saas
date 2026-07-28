@@ -4,7 +4,7 @@ title: Tenant-scoped versioned product upkeep
 status: done
 related: [BE-001, BE-003, BE-007, BE-008, FE-007, FE-008, DEP-008, ADR-0006]
 owners: [product, backend, security]
-last_updated: 2026-07-24
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -30,8 +30,7 @@ uses availability—not inventory count—as canonical inquiry eligibility.
 - Equivalent authority for an actively assigned team member, operations
   manager, or administrator within explicit business scope.
 - New product creation and existing product update for name, description,
-  primary managed image, availability, and existing collection/category
-  association.
+  primary managed image, availability, and existing category association.
 - Stable version conflict, idempotency, safe media staging, retained snapshot,
   atomic canonical publication, audit, and cache/event effects.
 - Availability-only product and inquiry contracts with no active numeric stock.
@@ -40,12 +39,12 @@ uses availability—not inventory count—as canonical inquiry eligibility.
 
 ### Non-goals
 
-- Category/collection creation, rename, deletion, or ordering.
+- Category creation, rename, deletion, or ordering.
 - Option-group mutation, product ordering, client-chosen slug, hard deletion,
   arbitrary unpublish, business/settings/design changes, or bulk updates.
 - Client recipe/studio/recovery-editor access or complete showroom publication.
 - Numeric product/variant inventory, inventory reservation, or fulfillment.
-- Trusting form-supplied tenant, product, collection, category, media, actor,
+- Trusting form-supplied tenant, product, category, media, actor,
   publication, or version authority.
 
 ## Domain language and invariants
@@ -76,11 +75,11 @@ uses availability—not inventory count—as canonical inquiry eligibility.
 - The application port accepts no database IDs as relationship authority.
   Persistence reloads the target product and structure under the authorized
   business and rejects cross-tenant or missing values.
-- For category assignment, a selected category must belong to the same tenant
-  and either belong to the selected collection or have no conflicting
-  collection. The server never silently reparents a category or product.
+- For category assignment, a selected category must belong to the same tenant.
+  The active command does not accept collection identity and never silently
+  reparents a category or product.
 - Create accepts bounded exact name/description, allowed availability, optional
-  verified primary-image intent, and compatible existing structure keys. Update
+  verified primary-image intent, and one compatible existing category key. Update
   reloads the product and applies only supplied allowlisted changes.
 - Product image replacement uses staged verified/re-encoded managed media.
   Commit promotes the canonical reference; failure removes staged files.
@@ -117,7 +116,7 @@ uses availability—not inventory count—as canonical inquiry eligibility.
 
 ```gherkin
 Scenario: Client creates one product safely
-  GIVEN a client for an established tenant and compatible existing structure
+  GIVEN a client for an established tenant and an optional existing category
   WHEN they submit a valid create command at the current content version
   THEN one product and one retained next content version commit atomically
   AND no protected structure, design, option, or inventory field changes
@@ -207,18 +206,19 @@ restore and are never silently overwritten.
 
 ## Evidence
 
-Evidence: verified locally on 2026-07-24.
+Evidence: verified locally on 2026-07-28.
 
 - `lib/product-upkeep-domain.ts`, `lib/product-upkeep.ts`,
   `lib/product-upkeep-sqlite.ts`, `lib/capabilities.ts`, `lib/media.ts`,
   `app/actions.ts`, and schema migration 10 implement the pure use-case port,
-  strict command allowlist, role/assignment scope, compatible structure reload,
+  strict category-only command allowlist, role/assignment scope, compatible structure reload,
   managed image staging, idempotency, optimistic version conflict, exact
   one-product mutation, retained publication, audit, and emergency disable
   control.
 - `scripts/test-product-upkeep.ts` passed client/team/manager/admin scope,
-  cross-tenant and unsupported structure denial, protected-field preservation,
-  stale/idempotency behavior, image cleanup/retention, migration-10 rebuild, and
-  disable-control evidence on 2026-07-24.
-- `scripts/test-security.ts`, `scripts/test-revisions.ts`, the seven Playwright
-  journeys, `npm run check`, and `npm run release` passed on 2026-07-24.
+  cross-tenant category and submitted-collection denial, null collection writes,
+  protected-field preservation, stale/idempotency behavior, image
+  cleanup/retention, migration-10 rebuild, and disable-control evidence on
+  2026-07-28.
+- `scripts/test-security.ts`, `scripts/test-revisions.ts`, all 10 Playwright
+  journeys, `npm run check`, and `npm run release` passed on 2026-07-28.

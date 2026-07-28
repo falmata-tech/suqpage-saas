@@ -12,7 +12,6 @@ export type BasicProductCommand = {
   name: string;
   description: string;
   availability: Product["availability"];
-  collectionId: number | null;
   categoryId: number | null;
   imageAction: ProductImageAction;
   serviceNote: string;
@@ -37,7 +36,6 @@ const commandKeys = new Set([
   "name",
   "description",
   "availability",
-  "collectionId",
   "categoryId",
   "imageAction",
   "serviceNote",
@@ -119,25 +117,8 @@ export function parseBasicProductCommand(
     name,
     description,
     availability,
-    collectionId: optionalInteger(raw.collectionId, "Collection"),
     categoryId: optionalInteger(raw.categoryId, "Category"),
     imageAction,
     serviceNote: text(raw.serviceNote, 300),
   };
-}
-
-export function assertCompatibleStructure(
-  collection: { id: number } | null,
-  category: { id: number; collection_id: number | null } | null,
-) {
-  if (
-    category?.collection_id &&
-    (!collection || category.collection_id !== collection.id)
-  ) {
-    throw new ProductUpkeepError(
-      "Choose the collection that contains this category.",
-      400,
-      "incompatible_structure",
-    );
-  }
 }

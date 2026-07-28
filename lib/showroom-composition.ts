@@ -39,7 +39,6 @@ export const SHOWROOM_BINDING_SOURCES = [
   "business.hero_subtitle",
   "business.hero_image",
   "business.contact_methods",
-  "catalog.collections",
   "catalog.categories",
   "catalog.products",
   "catalog.featured_products",

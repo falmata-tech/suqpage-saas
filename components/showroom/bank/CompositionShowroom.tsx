@@ -84,13 +84,6 @@ export function CompositionShowroom({
       heroImageRef: props.catalog.business.hero_image_path,
       contactLabel: contactLabel(props),
     },
-    collections: props.catalog.collections
-      .filter((collection) => collection.is_active)
-      .map((collection) => ({
-        key: `collection:${collection.id}`,
-        name: collection.name,
-        description: collection.description,
-      })),
     categories: props.catalog.categories
       .filter((category) => category.is_active)
       .map((category) => ({

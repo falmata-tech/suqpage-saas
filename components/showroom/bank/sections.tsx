@@ -276,9 +276,6 @@ export function BankNavigationSection({
   surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  const items = context.categories.length
-    ? context.categories
-    : context.collections.map(({ key, name }) => ({ key, name }));
   return (
     <SectionRoot
       slot="navigation"
@@ -297,7 +294,7 @@ export function BankNavigationSection({
         >
           All products
         </button>
-        {items.map((item, index) => (
+        {context.categories.map((item, index) => (
           <button
             type="button"
             key={item.key}
@@ -323,16 +320,11 @@ export function BankContentSection({
   surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  const statements = blockItems(contentBlock).length
-    ? blockItems(contentBlock).map((item) =>
-        "label" in item
-          ? { title: item.label, body: item.value }
-          : { title: item.title, body: item.body },
-      )
-    : context.collections.slice(0, 3).map((statement) => ({
-        title: statement.name,
-        body: statement.description,
-      }));
+  const statements = blockItems(contentBlock).map((item) =>
+    "label" in item
+      ? { title: item.label, body: item.value }
+      : { title: item.title, body: item.body },
+  );
   const storyImage = mediaAsset(contentBlock, "story_image");
   if (contentBlock?.type === "video") {
     return (
@@ -524,7 +516,6 @@ export function BankTrustSection({
       )
     : [
         context.business.description,
-        context.collections[0]?.description,
         context.business.contactLabel,
       ].filter((entry): entry is string => Boolean(entry));
   return (
@@ -659,13 +650,13 @@ export function BankFooterSection({
         ) : null}
       </div>
       <nav aria-label="Footer catalog">
-        {context.collections.slice(0, 4).map((collection) => (
+        {context.categories.slice(0, 4).map((category) => (
           <button
             type="button"
-            key={collection.key}
-            onClick={() => context.onCategoryChange(collection.key)}
+            key={category.key}
+            onClick={() => context.onCategoryChange(category.key)}
           >
-            {collection.name}
+            {category.name}
           </button>
         ))}
       </nav>

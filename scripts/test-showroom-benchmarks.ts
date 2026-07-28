@@ -20,9 +20,27 @@ const surfaceSequences = new Set<string>();
 for (const business of businesses) {
   const catalog = getCatalogByBusinessId(business.id);
   assert.ok(catalog, `${business.handle} catalog exists`);
+  assert.equal(catalog.collections.length, 0, `${business.handle} has no active collections`);
+  assert.ok(
+    catalog.categories.every((category) => category.collection_id === null),
+    `${business.handle} categories use the category-only taxonomy`,
+  );
+  assert.ok(
+    catalog.products.every((product) => product.collection_id === null),
+    `${business.handle} products use the category-only taxonomy`,
+  );
   assert.ok(catalog.products.length >= 4, `${business.handle} has a useful catalog`);
   productCounts.add(catalog.products.length);
   const snapshot = catalogToRevisionSnapshotV4(catalog);
+  assert.equal(snapshot.collections.length, 0, `${business.handle} snapshot has no collections`);
+  assert.ok(
+    snapshot.categories.every((category) => category.collectionKey === null),
+    `${business.handle} snapshot categories have no collection relationship`,
+  );
+  assert.ok(
+    snapshot.products.every((product) => product.collectionKey === null),
+    `${business.handle} snapshot products have no collection relationship`,
+  );
   assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} fitness`);
   const componentIds = snapshot.designManifest.sections.map(
     (section) => section.component,

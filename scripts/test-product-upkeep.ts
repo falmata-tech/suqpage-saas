@@ -229,7 +229,6 @@ async function main() {
       name: "New client product",
       description: "A client-created product description.",
       availability: "limited",
-      collectionId: tenantA.collectionId,
       categoryId: tenantA.categoryId,
       imageAction: "keep",
       serviceNote: "",
@@ -263,13 +262,15 @@ async function main() {
     );
     const createdProduct = db
       .prepare(
-        "SELECT business_id,is_published,availability FROM products WHERE id=?",
+        "SELECT business_id,collection_id,category_id,is_published,availability FROM products WHERE id=?",
       )
       .get(created.productId) as Record<string, unknown>;
     assert.deepEqual(
       { ...createdProduct },
       {
         business_id: tenantA.businessId,
+        collection_id: null,
+        category_id: tenantA.categoryId,
         is_published: 1,
         availability: "limited",
       },
@@ -361,11 +362,23 @@ async function main() {
         executeBasicProductUpkeep(
           clientA,
           command({
+            idempotencyKey: "upkeep_collection_01",
+            expectedContentVersion: 2,
+            collectionId: tenantA.collectionId,
+          }),
+          null,
+        ),
+      throwsCode("unsupported_fields"),
+    );
+    assert.throws(
+      () =>
+        executeBasicProductUpkeep(
+          clientA,
+          command({
             kind: "update",
             productId: tenantA.productId,
             idempotencyKey: "upkeep_structure_01",
             expectedContentVersion: 2,
-            collectionId: tenantB.collectionId,
             categoryId: tenantB.categoryId,
           }),
           null,
@@ -392,11 +405,13 @@ async function main() {
       {
         ...(db
           .prepare(
-            "SELECT slug,eyebrow,is_published,sort_order FROM products WHERE id=?",
+            "SELECT collection_id,category_id,slug,eyebrow,is_published,sort_order FROM products WHERE id=?",
           )
           .get(tenantA.productId) as Record<string, unknown>),
       },
       {
+        collection_id: null,
+        category_id: tenantA.categoryId,
         slug: "stable-product",
         eyebrow: "Protected label",
         is_published: 1,

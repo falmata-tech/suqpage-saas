@@ -36,7 +36,11 @@
       "additionalProperties": false,
       "required": ["collections", "categories", "products"],
       "properties": {
-        "collections": { "$ref": "#/$defs/keyList100" },
+        "collections": {
+          "description": "Compatibility field; always empty.",
+          "type": "array",
+          "maxItems": 0
+        },
         "categories": { "$ref": "#/$defs/keyList200" },
         "products": { "$ref": "#/$defs/keyList500" }
       }

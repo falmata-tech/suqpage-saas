@@ -42,11 +42,6 @@ async function authorizedOperationsBusinessId(requested:number) {
   return {businessId:requested,user};
 }
 
-function validateRelationship(businessId:number,collectionId:number|null,categoryId:number|null) {
-  if(collectionId&&!getDb().prepare("SELECT id FROM collections WHERE id=? AND business_id=?").get(collectionId,businessId))throw new Error("Collection does not belong to this business.");
-  if(categoryId&&!getDb().prepare("SELECT id FROM categories WHERE id=? AND business_id=?").get(categoryId,businessId))throw new Error("Category does not belong to this business.");
-}
-
 export async function loginAction(formData:FormData) {
   const email=text(formData,"email",160).toLowerCase();
   const password=String(formData.get("password")||"");
@@ -117,33 +112,16 @@ export async function adminResetClientPasswordAction(formData:FormData){
   go("/dashboard/admin",{saved:"password"});
 }
 
-export async function createCollectionAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100);if(!name)go("/dashboard/catalog",{business:businessId,error:"Collection name is required."});
-  try{getDb().prepare("INSERT INTO collections(business_id,name,slug,description,sort_order,is_active) VALUES(?,?,?,?,?,1)").run(businessId,name,slugify(text(formData,"slug",80)||name),text(formData,"description",500),int(formData,"sortOrder"));audit("collection.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create collection."});}
-  revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"collection"});
-}
-
-export async function updateCollectionAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"collectionId"),name=text(formData,"name",100);
-  const existing=getDb().prepare("SELECT id FROM collections WHERE id=? AND business_id=?").get(id,businessId);if(!existing)throw new Error("Collection not found.");
-  getDb().prepare("UPDATE collections SET name=?,slug=?,description=?,sort_order=?,is_active=? WHERE id=? AND business_id=?").run(name,slugify(text(formData,"slug",80)||name),text(formData,"description",500),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId);audit("collection.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"collection"});
-}
-
-export async function deleteCollectionAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"collectionId");
-  inTransaction(()=>{getDb().prepare("UPDATE products SET collection_id=NULL WHERE business_id=? AND collection_id=?").run(businessId,id);getDb().prepare("UPDATE categories SET collection_id=NULL WHERE business_id=? AND collection_id=?").run(businessId,id);getDb().prepare("DELETE FROM collections WHERE id=? AND business_id=?").run(id,businessId);});audit("collection.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
-}
-
 export async function createCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100),collectionId=int(formData,"collectionId")||null;validateRelationship(businessId,collectionId,null);
-  try{getDb().prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,?,?,?,?,1)").run(businessId,collectionId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"));audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100);
+  try{getDb().prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,NULL,?,?,?,1)").run(businessId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"));audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
   revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
 }
 
 export async function updateCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId"),collectionId=int(formData,"collectionId")||null,name=text(formData,"name",100);validateRelationship(businessId,collectionId,null);
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId"),name=text(formData,"name",100);
   if(!getDb().prepare("SELECT id FROM categories WHERE id=? AND business_id=?").get(id,businessId))throw new Error("Category not found.");
-  getDb().prepare("UPDATE categories SET collection_id=?,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?").run(collectionId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId);audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
+  getDb().prepare("UPDATE categories SET collection_id=NULL,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?").run(name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId);audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
 }
 
 export async function deleteCategoryAction(formData:FormData){
@@ -159,7 +137,6 @@ const productFormFields = new Set([
   "name",
   "description",
   "availability",
-  "collectionId",
   "categoryId",
   "removeImage",
   "image",
@@ -189,7 +166,6 @@ export async function basicProductUpkeepAction(formData:FormData){
       name:text(formData,"name",140),
       description:text(formData,"description",3000),
       availability:text(formData,"availability",30),
-      collectionId:int(formData,"collectionId")||null,
       categoryId:int(formData,"categoryId")||null,
       imageAction:hasFile?"replace":removeImage?"remove":"keep",
       serviceNote:text(formData,"serviceNote",300),

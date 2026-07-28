@@ -7,7 +7,6 @@ import {
   inTransaction,
 } from "./db";
 import {
-  assertCompatibleStructure,
   ProductUpkeepError,
   type BasicProductCommand,
 } from "./product-upkeep-domain";
@@ -19,7 +18,7 @@ import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { audit } from "./security";
-import type { Category, Collection, SessionUser } from "./types";
+import type { Category, SessionUser } from "./types";
 
 type StoredCommand = {
   payload_hash: string;
@@ -112,27 +111,11 @@ function uniqueSlug(businessId: number, name: string) {
 }
 
 function loadStructure(command: BasicProductCommand) {
-  const collection = command.collectionId
-    ? (getDb()
-        .prepare("SELECT id FROM collections WHERE id=? AND business_id=?")
-        .get(command.collectionId, command.businessId) as
-        | Pick<Collection, "id">
-        | undefined)
-    : null;
-  if (command.collectionId && !collection) {
-    throw new ProductUpkeepError(
-      "Collection not found for this business.",
-      404,
-      "structure_not_found",
-    );
-  }
   const category = command.categoryId
     ? (getDb()
-        .prepare(
-          "SELECT id,collection_id FROM categories WHERE id=? AND business_id=?",
-        )
+        .prepare("SELECT id FROM categories WHERE id=? AND business_id=?")
         .get(command.categoryId, command.businessId) as
-        | Pick<Category, "id" | "collection_id">
+        | Pick<Category, "id">
         | undefined)
     : null;
   if (command.categoryId && !category) {
@@ -142,8 +125,7 @@ function loadStructure(command: BasicProductCommand) {
       "structure_not_found",
     );
   }
-  assertCompatibleStructure(collection || null, category || null);
-  return { collection: collection || null, category: category || null };
+  return category || null;
 }
 
 function validateProspectiveSnapshot(
@@ -155,16 +137,13 @@ function validateProspectiveSnapshot(
     throw new ProductUpkeepError("Business catalog not found.", 404, "not_found");
   }
   const snapshot = catalogToRevisionSnapshotV4(catalog);
-  const collectionKey = command.collectionId
-    ? `collection-${command.collectionId}`
-    : null;
   const categoryKey = command.categoryId
     ? `category-${command.categoryId}`
     : null;
   if (command.kind === "create") {
     snapshot.products.push({
       key: `pending-${command.idempotencyKey}`,
-      collectionKey,
+      collectionKey: null,
       categoryKey,
       name: command.name,
       slug: uniqueSlug(command.businessId, command.name),
@@ -188,7 +167,7 @@ function validateProspectiveSnapshot(
       throw new ProductUpkeepError("Product not found.", 404, "not_found");
     }
     Object.assign(product, {
-      collectionKey,
+      collectionKey: null,
       categoryKey,
       name: command.name,
       description: command.description,
@@ -284,11 +263,10 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
               `INSERT INTO products(
                 business_id,collection_id,category_id,name,slug,eyebrow,
                 description,image_path,availability,is_published,sort_order
-              ) VALUES(?,?,?,?,?,'',?,?,?,1,?)`,
+              ) VALUES(?,NULL,?,?,?,'',?,?,?,1,?)`,
             )
             .run(
               command.businessId,
-              command.collectionId,
               command.categoryId,
               command.name,
               uniqueSlug(command.businessId, command.name),
@@ -303,12 +281,11 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
         const changed = getDb()
           .prepare(
             `UPDATE products SET
-              collection_id=?,category_id=?,name=?,description=?,
+              collection_id=NULL,category_id=?,name=?,description=?,
               image_path=?,availability=?
             WHERE id=? AND business_id=?`,
           )
           .run(
-            command.collectionId,
             command.categoryId,
             command.name,
             command.description,
@@ -376,7 +353,6 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             "name",
             "description",
             "availability",
-            "collection",
             "category",
             ...(command.imageAction === "keep" ? [] : ["image"]),
           ],

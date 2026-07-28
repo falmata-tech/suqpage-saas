@@ -4,7 +4,7 @@ title: Managed request, permission, and publication security
 status: done
 related: [FE-003, BE-007, BE-008, BE-009, DEP-002, DEP-003, ADR-0004, ADR-0006]
 owners: [backend, security]
-last_updated: 2026-07-24
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -133,15 +133,18 @@ option, settings, design, deletion, and full-showroom work.
   identifiers.
 - Publication rejects a stale `base_content_version`; staff must rebase and
   obtain new client approval.
-- Revision snapshot schema version 1 contains only bounded business presentation
-  and contact fields, one supported design key, collections, categories,
-  products, availability/stock, and up to four option groups. Opaque snapshot
-  keys express internal relationships; database IDs supplied by a browser have
-  no authority.
-- A snapshot contains at most 100 collections, 200 categories, 500 products,
-  four option groups and 50 values per product group, and 1 MiB serialized JSON.
-  Slugs, relationships, stock, supported design keys, and image references are
-  validated before draft persistence and again before publication.
+- Current revision snapshots contain bounded business presentation and contact
+  fields, typed page content, one admitted design composition, product
+  categories, products, descriptive availability, and up to four option
+  groups. Opaque snapshot keys express internal relationships; database IDs
+  supplied by a browser have no authority. Retained collection fields are
+  compatibility-only recovery data and are not an active public or authoring
+  taxonomy.
+- A snapshot contains at most 100 compatibility collections, 200 product
+  categories, 500 products, four option groups and 50 values per product group,
+  and 1 MiB serialized JSON. Slugs, relationships, supported design
+  composition, and image references are validated before draft persistence and
+  again before publication.
 - Revision image references may use current same-tenant catalog media or an
   attachment belonging to the same request. Preview resolves private references
   through the authorized attachment adapter. Publication sanitizes/stages new

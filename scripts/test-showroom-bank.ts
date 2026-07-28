@@ -105,6 +105,24 @@ const registrySource = fs.readFileSync(
   "components/showroom/bank/registry.tsx",
   "utf8",
 );
+const sectionsSource = fs.readFileSync(
+  "components/showroom/bank/sections.tsx",
+  "utf8",
+);
+const legacyDesignSource = fs.readFileSync(
+  "components/showroom/designs.tsx",
+  "utf8",
+);
+assert.equal(
+  sectionsSource.includes("context.collections"),
+  false,
+  "public bank sections must use product categories instead of collections",
+);
+assert.equal(
+  legacyDesignSource.includes("catalog.collections"),
+  false,
+  "legacy recovery designs must not expose collection content",
+);
 const registryIds = [
   ...registrySource.matchAll(/^\s+"([^"]+@[1-9][0-9]*)": Bank[A-Za-z]+Section,/gm),
 ].map((match) => match[1]);

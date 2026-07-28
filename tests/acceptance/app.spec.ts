@@ -806,7 +806,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await page.getByLabel("Product name").fill("Client browser product");
   await page.getByLabel("Description").fill("A client-managed product created in the simplified workflow.");
   await page.getByLabel("Availability").selectOption("limited");
-  await page.getByLabel("Collection").selectOption({index:1});
+  await expect(page.getByLabel("Collection")).toHaveCount(0);
   await page.getByLabel("Category").selectOption({index:1});
   await page.getByRole("button",{name:"Add and publish product"}).click();
   await expect(page.getByText(/Product published successfully as showroom version/)).toBeVisible();

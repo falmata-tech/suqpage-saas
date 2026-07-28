@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Catalog, Product } from "@/lib/types";
 
 export default function ProductForm({
@@ -20,9 +20,6 @@ export default function ProductForm({
   idempotencyKey: string;
   staffMode: boolean;
 }) {
-  const [collectionId, setCollectionId] = useState(
-    String(product?.collection_id || ""),
-  );
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
   const [availability, setAvailability] = useState(
@@ -40,19 +37,6 @@ export default function ProductForm({
     },
     [],
   );
-  const availableCategories = useMemo(
-    () =>
-      catalog.categories.filter(
-        (category) =>
-          category.collection_id === null ||
-          String(category.collection_id) === collectionId,
-      ),
-    [catalog.categories, collectionId],
-  );
-  const currentCategoryIsCompatible = availableCategories.some(
-    (category) => category.id === product?.category_id,
-  );
-
   return (
     <form action={action} className="panel form-grid product-upkeep-form">
       <input type="hidden" name="businessId" value={businessId} />
@@ -114,40 +98,20 @@ export default function ProductForm({
       </div>
 
       <div className="field">
-        <label htmlFor="product-collection">Collection</label>
-        <select
-          id="product-collection"
-          name="collectionId"
-          value={collectionId}
-          onChange={(event) => setCollectionId(event.target.value)}
-        >
-          <option value="">Unassigned</option>
-          {catalog.collections.map((collection) => (
-            <option key={collection.id} value={collection.id}>
-              {collection.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="field">
         <label htmlFor="product-category">Category</label>
         <select
           id="product-category"
           name="categoryId"
-          defaultValue={
-            currentCategoryIsCompatible ? product?.category_id || "" : ""
-          }
-          key={`${collectionId}-${currentCategoryIsCompatible}`}
+          defaultValue={product?.category_id || ""}
         >
           <option value="">Unassigned</option>
-          {availableCategories.map((category) => (
+          {catalog.categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
         </select>
-        <small>Only compatible existing categories are shown.</small>
+        <small>Only categories for this business are shown.</small>
       </div>
 
       <div className="field">
@@ -233,7 +197,7 @@ export default function ProductForm({
       <div className="field full product-upkeep-explainer">
         <strong>This publishes only this product update.</strong>
         <span>
-          Design, options, order, collections, categories, and business settings
+          Design, options, order, categories, and business settings
           stay protected. A retained showroom version is created automatically.
         </span>
       </div>

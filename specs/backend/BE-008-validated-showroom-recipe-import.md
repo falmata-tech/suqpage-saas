@@ -1,10 +1,10 @@
 ---
 id: BE-008
 title: Validated full-showroom recipe import
-status: ready
+status: done
 related: [FE-007, FE-009, FE-014, BE-003, BE-004, BE-007, BE-009, BE-010, BE-013, DEP-007, DEP-008, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, backend, security]
-last_updated: 2026-07-27
+last_updated: 2026-07-28
 change_level: L3
 ---
 
@@ -28,7 +28,7 @@ authority, access tenant persistence, or publish.
 ### In scope
 
 - `ShowroomContentProposal` schema/parser for business/meta/contact fields,
-  typed section-content blocks, collections, categories, products, options,
+  typed section-content blocks, product categories, products, options,
   availability, and opaque media references. Numeric inventory is absent.
 - A separately versioned `ShowroomDesignProposal` schema/parser for approved
   bank composition.
@@ -101,10 +101,14 @@ authority, access tenant persistence, or publish.
   uses reserved example relationship, source, and media keys that are not
   authorized for import. Active client facts and permitted opaque keys remain
   exclusively in the client-specific brief fields.
-- Content permits up to 100 collections, 200 categories, 500 products, four
-  option groups and 50 values per group, and 24 typed section-content blocks,
-  subject to one bounded serialized recipe limit. Counts may be zero through
-  their maxima and are never fixed by the UI or examples.
+- Content permits up to 200 product categories, 500 products, four option
+  groups and 50 values per group, and 24 typed section-content blocks, subject
+  to one bounded serialized recipe limit. Counts may be zero through their
+  maxima and are never fixed by the UI or examples. Compatibility collection
+  arrays and removal lists must be empty, and category/product `collectionKey`
+  values must be null. The server may preserve a matching entity's hidden
+  legacy relationship from the base snapshot, but the AI cannot read, create,
+  select, remove, or present it.
 - Product content has descriptive availability only. `stock`, `stockCount`,
   `stock_count`, option inventory, and equivalent numeric inventory fields are
   unknown/prohibited. Requested inquiry quantity is not recipe content.
@@ -175,10 +179,16 @@ Scenario: Complete recipe becomes a private candidate
   AND its dynamic catalog and typed page content render in the deterministic preview
 
 Scenario: AI structures a dynamic catalog
-  GIVEN source material describes an arbitrary permitted number of products and collections
+  GIVEN source material describes an arbitrary permitted number of products and product categories
   WHEN the AI returns all entries inside the content schema and limits
   THEN relationships, options, counts, provenance, and media keys are validated
   AND no fixed example count or manual per-item form is required
+
+Scenario: AI attempts to revive compatibility collections
+  GIVEN an exported recipe represents collections as fixed-empty compatibility fields
+  WHEN the AI returns a collection or a non-null category/product collectionKey
+  THEN strict content validation rejects the recipe
+  AND the hidden base relationship remains recovery-only
 
 Scenario: Brief example cannot impersonate client authority
   GIVEN a sanitized brief contains a synthetic complete example
@@ -292,16 +302,28 @@ v2/v3 revisions remain immutable and retained.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Implementation checkpoint: portable content/recipe schemas, strict dynamic
+Evidence: verified locally on 2026-07-28.
+
+Portable content/recipe schemas, strict dynamic
 catalog parsing, provenance/reconciliation, opaque verified-image scope,
 request authorization, idempotent private import, and revision-v3 recipe
 metadata persistence are implemented and covered by the focused recipe gate.
 The current brief names every independent contract, exports design/component
 bank schema 2 rather than legacy schema 1, and keeps its portable content and
 recipe references aligned with the typed-block parser and complete example.
-Typed section-content blocks and controlled YouTube admission/rendering are now
-implemented through the linked BE-010 work. Production migration, remote
-checks, and the remaining rollout evidence are still open, so this spec remains
-`ready`.
+Typed section-content blocks and controlled YouTube admission/rendering are
+implemented through linked BE-010 work. The exported example and current
+content use empty collection arrays and null collection relationships;
+authoritative import rejects attempts to restore them while preserving matching
+hidden legacy relationships from the base snapshot.
+
+- `scripts/test-showroom-recipe.ts`, `scripts/test-security.ts`,
+  `scripts/test-revisions.ts`, and `npm run check` passed on 2026-07-28.
+- `tests/acceptance/app.spec.ts` passed all 10 production-browser workflows,
+  including controlled-provider CSP evidence, on 2026-07-28.
+- `npm run release` passed production build, HTTP smoke, security, recipe,
+  revision, dependency, and recovery gates on 2026-07-28.
+- Production migration, remote checks, and rollout evidence remain owned by
+  linked deployment specs rather than this implemented import contract.

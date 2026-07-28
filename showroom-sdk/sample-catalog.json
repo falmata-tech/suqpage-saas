@@ -8,7 +8,7 @@
     "hero_subtitle": "Content comes from the SuqPage business record.",
     "hero_image_path": "/media/hero.jpg"
   },
-  "collections": [{ "id": 1, "name": "Main Collection" }],
+  "collections": [],
   "categories": [{ "id": 1, "name": "Category" }],
   "products": [{
     "id": 1,

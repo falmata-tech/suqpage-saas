@@ -273,9 +273,25 @@ async function main() {
     assert.equal(exported.brief.completeExample.content.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.content.contentBlocks.schemaVersion, 1);
     assert.equal(exported.brief.completeExample.design.schemaVersion, 2);
-    assert.equal(exported.brief.completeExample.content.collections.length, 1);
+    assert.equal(exported.brief.completeExample.content.collections.length, 0);
     assert.equal(exported.brief.completeExample.content.categories.length, 2);
     assert.equal(exported.brief.completeExample.content.products.length, 2);
+    assert.ok(
+      exported.brief.completeExample.content.categories.every(
+        (category) => category.collectionKey === null,
+      ),
+    );
+    assert.ok(
+      exported.brief.completeExample.content.products.every(
+        (product) => product.collectionKey === null,
+      ),
+    );
+    assert.equal(exported.brief.currentContent.collections.length, 0);
+    assert.ok(
+      exported.brief.currentContent.products.every(
+        (product) => product.collectionKey === null,
+      ),
+    );
     assert.equal(
       exported.brief.completeExample.content.products[0].optionGroups[0].values.length,
       2,
@@ -439,6 +455,13 @@ async function main() {
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
     assert.equal(imported.difference.designSections.after, 7);
+    assert.equal(imported.recipe.content.collections.length, 0);
+    assert.equal(imported.recipe.content.products[0].collectionKey, null);
+    assert.equal(
+      imported.snapshot.products[0].collectionKey,
+      `collection-${collectionId}`,
+      "hidden legacy relationships are preserved without entering the AI recipe",
+    );
     assert.equal(imported.recipe.mediaPlan[0].slotKey, "product_image");
     assert.equal(
       imported.recipe.mediaPlan[0].ownerKey,
@@ -459,6 +482,24 @@ async function main() {
     );
     assert.match(getContentRevision(draft.id)?.recipe_import_hash || "", /^[a-f0-9]{64}$/);
     assert.equal(importShowroomRecipe(team, draft.id, recipe).duplicate, true);
+
+    const withCollection = structuredClone(recipe);
+    withCollection.content.collections.push({} as never);
+    assert.throws(
+      () => importShowroomRecipe(team, draft.id, withCollection),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        error.issues[0]?.category === "content",
+    );
+    const withCollectionRelationship = structuredClone(recipe);
+    withCollectionRelationship.content.products[0].collectionKey =
+      `collection-${collectionId}`;
+    assert.throws(
+      () => importShowroomRecipe(team, draft.id, withCollectionRelationship),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        error.issues[0]?.category === "content",
+    );
 
     const withInventory = structuredClone(recipe) as unknown as {
       content: { products: Array<Record<string, unknown>> };
