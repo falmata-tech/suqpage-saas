@@ -31,8 +31,10 @@ showrooms, inquiries, managed requests, or the controlled single-instance pilot.
   and never commit the source PBF. Runtime operation must not require map tiles,
   geocoding, or a third-party map API.
 - Evidence covers projection, country framing, active-host framing, selector
-  navigation, dynamic venue completeness, booth selection, origin labels,
-  Map/List parity, reduced motion, and no overflow at desktop, 390px, and 320px.
+  navigation, persistent-map city focus, surrounding geographic context,
+  reversible venue reveal, dynamic venue completeness, booth selection, origin
+  labels, Map/List parity, reduced motion, and no overflow at desktop, 390px,
+  and 320px.
 - `/expo` is canonical; `/bazaar` redirect behavior is included in smoke tests.
 - Rollback deploys the prior code. Additive location columns and public assets
   may remain inert.
@@ -144,7 +146,8 @@ evidence.
 | Dynamic geometry and visual floor cap | integration/acceptance | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Existing check gate remains green | release | `npm run check` |
 | Local geographic assets are bounded, attributed, and provider-free at runtime | operations/browser | `public/geo/ATTRIBUTION.md`, `scripts/capture-expo-visuals.mjs` |
-| City selection opens complete responsive venue plans | acceptance | `tests/acceptance/app.spec.ts` |
+| City selection preserves geographic context and opens one complete responsive venue | browser/acceptance | `scripts/capture-expo-visuals.mjs`, `tests/acceptance/app.spec.ts` |
+| Venue close reverses the reveal without remounting a separate map surface | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 

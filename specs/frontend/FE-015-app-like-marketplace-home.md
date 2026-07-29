@@ -24,8 +24,9 @@ paper.
   Expos, a direct host selector, Map/List modes, dynamic venue plans, and a
   bounded booth sheet.
 - Country view and **View Ethiopia** show all active hosts. **Center today's
-  Expos** frames the active host-city set. Selecting a host opens its Expo venue
-  rather than scattering assigned booths over the geographic map.
+  Expos** frames the active host-city set. Selecting a host focuses the
+  persistent geographic map and reveals its virtual Expo venue within the same
+  stage rather than scattering assigned booths or opening a separate screen.
 - Mobile controls remain reachable without trapping ordinary vertical page
   scrolling; pinch and button zoom are bounded and reduced motion is honored.
 - The homepage contains one showroom discovery feed. Featured status influences
@@ -43,7 +44,7 @@ paper.
 - One persistent discovery surface for search, Industry filtering, featured
   state, and five-result pagination.
 - Today's Bazaar as the principal live module with Map/List modes.
-- A compact weekly schedule placed after primary discovery.
+- A compact weekly calendar integrated directly above the primary Expo map.
 - A dynamic mall floor with restrained offset tiles, clear corridors and
   entrances, grounded storefronts, booth references, and bounded participant
   capacity.
@@ -154,8 +155,13 @@ normal document scrolling, bounded map interaction, country/hub framing,
 Map/List modes, a booth sheet above safe-area navigation, and one horizontally
 scrollable showroom result rail. Country view exposes zone boundaries, major
 road context, towns/cities, and city hosts; selecting a host opens a complete
-dynamic Expo venue whose balanced rows grow with its participating showrooms.
+dynamic Expo venue inside the same mounted map stage. Restrained geographic
+context stays visible around that virtual venue, its balanced rows grow with
+the participating showrooms, and an in-venue close control returns to the
+country extent. The compact weekly Industry calendar sits immediately above
+the map inside that one Expo workspace.
 
 `npm run test:expo-visual` passed desktop, 390px, and 320px probes with no
-overflow or undersized controls. `npm run test:acceptance` passed 10/10;
-`npm run check` and `npm run release` passed.
+overflow or undersized controls and proves the shared map stage, visible city
+context, nonzero map opacity, and calendar placement. `npm run test:acceptance`
+passed 10/10; `npm run check` and `npm run release` passed.

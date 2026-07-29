@@ -50,6 +50,7 @@ function hasTypedContentMedia(
 
 const laboratoryFixture = {
   business: {
+    handle: "field-and-form",
     name: "Field & Form Cooperative",
     tagline: "Products shaped by material, place, and practical craft",
     description:

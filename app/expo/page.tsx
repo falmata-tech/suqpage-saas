@@ -32,9 +32,9 @@ export default function ExpoPage() {
               <span className="expo-kicker">Today across Ethiopia</span>
               <h1>Find today&apos;s Expo host cities.</h1>
               <p>
-                Use the Ethiopia overview to choose a host city, walk its complete
-                Expo hall, then continue into permanent showrooms built for direct
-                inquiries.
+                Use the Ethiopia overview to choose a host city, zoom into its
+                virtual Expo hall, then continue into permanent showrooms built
+                for direct inquiries.
               </p>
             </div>
             <dl className="expo-page-stats">

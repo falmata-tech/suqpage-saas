@@ -330,7 +330,9 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       >
         <span className="floating-inquiry-icon" aria-hidden="true" />
         <span className="floating-inquiry-label">Inquiry</span>
-        <span className="floating-inquiry-count" aria-hidden="true">{cartCount}</span>
+        {cartCount ? (
+          <span className="floating-inquiry-count" aria-hidden="true">{cartCount}</span>
+        ) : null}
       </button>
       {selected && (
         <div

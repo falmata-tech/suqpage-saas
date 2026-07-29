@@ -80,6 +80,7 @@ export function CompositionShowroom({
     };
   const context: BankPresentationContext = {
     business: {
+      handle: props.catalog.business.handle,
       name: props.catalog.business.name,
       tagline: props.catalog.business.tagline,
       description: props.catalog.business.description,

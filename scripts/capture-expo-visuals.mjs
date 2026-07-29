@@ -94,6 +94,10 @@ try {
             : [];
         });
       const aisle = document.querySelector(".expo-venue-aisle")?.getBoundingClientRect();
+      const mapStage = document.querySelector(".expo-map-stage");
+      const map = document.querySelector(".expo-map");
+      const venue = document.querySelector(".expo-venue-context");
+      const cityContext = document.querySelector(".expo-city-context");
       const venueBoothCenters = [...document.querySelectorAll(".expo-venue-booth")]
         .filter(visible)
         .map((booth) => {
@@ -112,6 +116,16 @@ try {
         zonePaths: document.querySelectorAll(".expo-zones path").length,
         placeLabels: document.querySelectorAll(".expo-place-labels text").length,
         roadPaths: document.querySelectorAll(".expo-roads path").length,
+        mapVisible: Boolean(map && visible(map)),
+        mapOpacity: map ? Number(getComputedStyle(map).opacity) : 0,
+        contextualVenue: Boolean(
+          mapStage &&
+          venue &&
+          mapStage.classList.contains("expo-map-stage-venue") &&
+          mapStage.contains(map) &&
+          mapStage.contains(venue),
+        ),
+        cityContextVisible: Boolean(cityContext && visible(cityContext)),
         venueBooths: document.querySelectorAll(".expo-venue-booth").length,
         venueBoothsLeftOfAisle: aisle
           ? venueBoothCenters.filter((center) => center < aisle.left).length
@@ -148,11 +162,16 @@ const failures = results.filter(
     result.browserErrors.length > 0 ||
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
-    (result.mapRegions !== 14 && result.venueBooths < 1) ||
-    (result.hubs < 1 && result.venueBooths < 1) ||
-    (result.venueBooths < 1 && result.zonePaths < 100) ||
-    (result.venueBooths < 1 && result.placeLabels < 1) ||
-    (result.venueBooths < 1 && result.roadPaths < 1) ||
+    result.mapRegions !== 14 ||
+    result.hubs < 1 ||
+    result.zonePaths < 100 ||
+    result.placeLabels < 1 ||
+    result.roadPaths < 1 ||
+    !result.mapVisible ||
+    (result.openVenue &&
+      (!result.contextualVenue ||
+        !result.cityContextVisible ||
+        result.mapOpacity < 0.25)) ||
     (result.venueBooths > 1 &&
       (result.venueBoothsLeftOfAisle < 1 || result.venueBoothsRightOfAisle < 1)) ||
     result.textOverflow.length > 0 ||

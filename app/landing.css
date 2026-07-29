@@ -247,8 +247,7 @@
   background: #f6f5f7;
 }
 
-.landing-section-intro,
-.landing-schedule-head {
+.landing-section-intro {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.75fr);
   align-items: end;
@@ -257,7 +256,6 @@
 }
 
 .landing-section-intro h2,
-.landing-schedule-head h2,
 .landing-closing h2 {
   margin: 8px 0 0;
   font-size: clamp(2.8rem, 5.4vw, 5.4rem);
@@ -265,8 +263,7 @@
   letter-spacing: 0;
 }
 
-.landing-section-intro > p,
-.landing-schedule-head > p {
+.landing-section-intro > p {
   margin: 0;
   color: var(--landing-muted);
   line-height: 1.72;
@@ -277,14 +274,33 @@
   border-top: 1px solid #d4d0d9;
 }
 
-.landing-schedule {
-  padding-block: 80px;
+.landing-expo-calendar {
+  margin-bottom: 38px;
+  padding: 24px 26px 28px;
   background: #211b2b;
   color: #fff;
 }
 
-.landing-schedule-head > p {
+.landing-expo-calendar-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.landing-expo-calendar-head h3 {
+  margin: 5px 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  letter-spacing: 0;
+}
+
+.landing-expo-calendar-head > p {
+  max-width: 360px;
+  margin: 0;
   color: rgb(255 255 255 / 65%);
+  font-size: 0.84rem;
+  line-height: 1.5;
 }
 
 .landing-schedule-grid {
@@ -296,8 +312,8 @@
 
 .landing-schedule-grid article {
   position: relative;
-  min-height: 190px;
-  padding: 20px 16px;
+  min-height: 154px;
+  padding: 16px 14px;
   border-right: 1px solid rgb(255 255 255 / 20%);
   border-bottom: 1px solid rgb(255 255 255 / 20%);
 }
@@ -314,7 +330,7 @@
 
 .landing-schedule-grid strong {
   display: block;
-  margin-top: 24px;
+  margin-top: 17px;
   font-size: 0.78rem;
 }
 
@@ -327,8 +343,8 @@
 
 .landing-schedule-grid small {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
+  bottom: 13px;
+  left: 14px;
   color: #fff;
   font-weight: 900;
 }
@@ -634,7 +650,6 @@
   }
 
   .landing-section-intro,
-  .landing-schedule-head,
   .landing-closing-inner,
   .landing-footer-grid {
     grid-template-columns: 1fr;
@@ -642,9 +657,20 @@
   }
 
   .landing-section-intro h2,
-  .landing-schedule-head h2,
   .landing-closing h2 {
     font-size: clamp(2.6rem, 12vw, 4rem);
+  }
+
+  .landing-expo-calendar {
+    margin-inline: -10px;
+    padding: 20px 10px 22px;
+  }
+
+  .landing-expo-calendar-head {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+    padding-inline: 6px;
   }
 
   .landing-home .directory-tools {

@@ -7,6 +7,10 @@
 @media(max-width:620px){.sr-wrap{width:min(100% - 22px,1180px)}.sr-logo span{display:none}.sr-header{padding:12px 0}.theme-usashopet .sr-header{margin:0 -2px}.sr-hero-copy h1{font-size:3.3rem}.sr-hero-media img,.theme-usashopet .sr-hero-media img,.theme-homevibe .sr-hero-media img{height:360px}.sr-products,.theme-alhaya .sr-products,.theme-usashopet .sr-products,.theme-novatech .sr-products{grid-template-columns:1fr}.theme-homevibe .sr-card,.theme-homevibe .sr-card:nth-child(1),.theme-homevibe .sr-card:nth-child(5){grid-column:1/-1}.sr-section{padding:58px 0}.drawer-panel{padding:18px}.cart-item{grid-template-columns:68px 1fr}.cart-item img{width:68px;height:68px}.cart-item>.remove{grid-column:2}.send-grid{grid-template-columns:1fr}.product-dialog-panel{padding:14px}}
 
 /* The inquiry is a scoped task surface, visually tied to the active showroom. */
+.sr-nav {
+  display: none;
+}
+
 .inquiry-drawer {
   font-family: var(--bank-body, Arial, sans-serif);
 }
@@ -383,8 +387,26 @@
   .floating-inquiry-trigger {
     right: max(10px, env(safe-area-inset-right));
     bottom: max(10px, env(safe-area-inset-bottom));
-    min-width: 122px;
-    min-height: 50px;
+    justify-content: center;
+    width: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    padding: 0;
+  }
+
+  .floating-inquiry-label {
+    display: none;
+  }
+
+  .floating-inquiry-count {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 18px;
+    height: 18px;
+    padding-inline: 3px;
+    border: 1px solid var(--bank-inverse, #151c2c);
+    font-size: 0.62rem;
   }
 
   .inquiry-drawer.open {

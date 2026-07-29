@@ -36,10 +36,19 @@ of the previous implementation.
   geographic coordinates. A labeled host-city selector provides direct
   navigation.
 - Each Expo is hosted in a reviewed major city serving a zone or nearby
-  catchment. Selecting a host replaces the country map with a dynamic top-view
-  Expo venue containing every assigned showroom in numbered halls and booths.
-  **Center today's Expos** frames all active host cities, while **View Ethiopia**
-  restores the country extent from either the map or venue.
+  catchment. Selecting a host keeps the geographic layer mounted, animates the
+  map toward that city, and reveals one dynamic top-view Expo venue containing
+  every assigned showroom in numbered halls and booths. Restrained surrounding
+  boundaries, roads, and place context remain visible around the venue so the
+  transition reads as a geographic zoom rather than a separate screen.
+  **Center today's Expos** frames all active host cities. A familiar close
+  control in the venue header removes the venue and reverses the map to the
+  country extent; **View Ethiopia** remains a country-map reset rather than a
+  venue-dismissal command.
+- The venue is a virtual Expo anchored to its serving city. The presentation
+  must not imply a physical building, parcel, street address, or exact real-world
+  footprint. Only the selected host venue renders; other active Expos remain
+  lightweight map markers when the country extent is restored.
 - Venue geometry grows from participant count, admits at most 12 booths per
   hall, and provides restrained architectural wayfinding: entrance, reception,
   center aisle, hall label, and exits. It does not resemble a road map, graph
@@ -64,9 +73,18 @@ Scenario: Visitor sees all active city-hosted Expos
 Scenario: Visitor explores one city Expo on mobile
   GIVEN a 320 or 390 CSS-pixel viewport
   WHEN the visitor selects a host city
-  THEN a responsive venue plan contains every assigned showroom
+  THEN the map remains mounted and focused on the selected host city
+  AND a responsive venue plan contains every assigned showroom
+  AND restrained geographic context remains visible around the venue
   AND booth selection opens a bounded sheet without horizontal page overflow
   AND the visitor can return to all active Expos with one control
+
+Scenario: Visitor returns from a city Expo to the country overview
+  GIVEN one host-city venue is open over its geographic context
+  WHEN the visitor activates the venue close control
+  THEN the selected venue is removed
+  AND the same map reverses to the complete Ethiopia extent
+  AND every active host marker is available again
 ```
 
 ## Scope
@@ -200,8 +218,9 @@ Scenario: A visitor refers to a booth consistently
   list fallback is complete; 320px and 390px layouts must avoid overflow.
 - Localization and merchant-entered values: long business names, handles, and
   category names wrap without obscuring controls.
-- Performance and limits: images are lazy-loaded and dimensioned; offscreen
-  booths may be simplified; no large animation/WebGL dependency is allowed.
+- Performance and limits: images are lazy-loaded and dimensioned; only one
+  selected venue renders over the persistent map; no large animation/WebGL
+  dependency is allowed.
 - Failure recovery and idempotency: failed map rendering falls back to list;
   refresh after rollover shows server-current data.
 
@@ -218,7 +237,8 @@ raw media paths.
 |---|---|---|
 | Mobile map pan/zoom/select at 390px and 320px without overflow | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
 | Country map has local zones, roads, towns, and no geographic booth scatter | focused/browser | `scripts/test-expo.ts`, `scripts/capture-expo-visuals.mjs` |
-| Host selection opens a dynamic complete venue with 12-booth hall capacity | focused/browser | `scripts/test-expo.ts`, `tests/acceptance/app.spec.ts` |
+| Host selection preserves the map, focuses the city, and opens one complete dynamic venue | focused/browser | `scripts/capture-expo-visuals.mjs`, `tests/acceptance/app.spec.ts` |
+| Venue close removes the venue and reverses the persistent map to all active hosts | acceptance | `tests/acceptance/app.spec.ts` |
 | Bazaar List contains all active booths and keyboard links | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
 | No-media grounded storefront fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Dynamic dimensions, grounded corridor rows, and 48-booth floor cap | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
@@ -283,13 +303,19 @@ The canonical `/expo` experience and `/bazaar` compatibility redirect were
 implemented and verified on 2026-07-29. The public map uses locally attributed
 Admin-1/Admin-2 boundaries, selected OSM place labels and major-road corridors,
 D3 projection/zoom, all-host framing, a labeled host selector, and complete
-Map/List parity. Selecting a host replaces country navigation with its complete
-dynamic top-view venue and image-backed numbered booths.
+Map/List parity. Selecting a host keeps that map mounted, focuses the serving
+city, and reveals its complete dynamic top-view venue and image-backed numbered
+booths within the same stage. Restrained geographic context remains visible
+around the virtual venue, and its close control reverses the same map to the
+country extent.
 
 Evidence: `npm run test:expo-visual` passed at 1440px, 390px, and 320px with 14
 regions, 101 zones, local road/place context, active host cities, and no browser
 errors, broken images, text/page overflow, or undersized mobile controls.
-Incomplete venue rows balance around the central aisle and venue depth grows
-with its hall population. `npm run test:acceptance` passed 10/10, including
-host-city selection, booth origin/reference, list parity, and redirect behavior.
-`npm run check` and `npm run release` passed.
+The visual probe additionally requires the map and venue to share one stage,
+visible city context, and nonzero map opacity. Incomplete venue rows balance
+around the central aisle and venue depth grows with its hall population.
+`npm run test:acceptance` passed 10/10, including persistent-map host selection,
+venue close and country return, booth origin/reference, list parity, mobile
+overflow, and redirect behavior. Repository-wide gate evidence is recorded in
+`specs/TRACEABILITY.md`.

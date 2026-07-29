@@ -27,11 +27,16 @@ This revision replaces the previous mall-floor composition.
   with one clear promise: a permanent virtual showroom plus participation in a
   rotating daily Industry Expo that creates direct inquiry opportunities.
 - The order is compact header, showroom-and-Expo hero, concise benefit strip,
-  full-width Live Expo workspace, weekly Industry schedule, one searchable
-  showroom directory, strong merchant closing action, and footer.
+  full-width Live Expo workspace with its weekly Industry calendar directly
+  above the map, one searchable showroom directory, strong merchant closing
+  action, and footer.
 - The Expo workspace is visually native to the page: the same restrained
   purple/ink/white palette, shared controls, aligned containers, and no detached
   promotional card around the map.
+- The seven-day calendar is a compact dark-purple rail within the Expo
+  workspace, not a second full-height chapter. It keeps the current day clearly
+  highlighted, scrolls horizontally on narrow screens, and uses one concise
+  supporting sentence instead of another large section title.
 - The showroom directory owns search, Industry pills, featured emphasis, and
   five-result pagination. Featured is a badge and ranking signal, not a second
   repeated business catalog.
@@ -61,8 +66,8 @@ Scenario: Landing page feels like one public product
 - A compact public header with desktop navigation and an accessible mobile menu.
 - A photographic maker hero with showroom-first copy, one merchant action, four
   compact product benefits, and a secondary live-Bazaar card.
-- A seven-day schedule rail directly below the hero with the server-selected day
-  clearly highlighted.
+- A seven-day calendar rail directly above today's Expo map with the
+  server-selected day clearly highlighted.
 - A visually prominent All Showrooms section above the Bazaar with search,
   industry pills, restrained sorting, five-result pagination, and permanent
   showroom links.
@@ -100,9 +105,10 @@ Scenario: Landing page feels like one public product
 - The homepage server component supplies active businesses and the current
   Bazaar view; client components may filter or change display mode but do not
   determine eligibility.
-- The desktop composition follows the approved order: header, hero, weekly
-  schedule, All Showrooms, today's Bazaar, featured businesses, final CTA,
-  footer. There is no separate process section or How it works action.
+- The desktop composition follows the approved order: header, hero, concise
+  benefits, one Expo workspace containing calendar then map, All Showrooms,
+  final CTA, footer. There is no separate schedule chapter, process section, or
+  How it works action.
 - Desktop content uses the available viewport deliberately and presents showroom
   cards as a compact horizontal marketplace rail rather than full-page previews.
 - At 320px and 390px, controls wrap or scroll intentionally, key copy remains
@@ -138,7 +144,7 @@ Scenario: Visitor understands the product hierarchy
   WHEN a visitor opens the homepage
   THEN the first viewport presents the permanent showroom value proposition
   AND today's Bazaar appears as a secondary live discovery card
-  AND the weekly schedule and All Showrooms appear before the Bazaar floor
+  AND the weekly calendar appears immediately before the map inside one Expo workspace
 
 Scenario: Visitor browses the complete marketplace composition
   GIVEN the homepage has active public businesses
@@ -160,7 +166,7 @@ Scenario: Visitor uses the homepage on a narrow mobile device
   GIVEN a viewport between 320 and 390 CSS pixels wide
   WHEN the visitor opens and interacts with the homepage
   THEN navigation remains available through a compact menu
-  AND schedule, showroom pagination, and the featured rail remain usable
+  AND the horizontally scrollable calendar and showroom pagination remain usable
   AND map controls and booth previews remain reachable
   AND the document has no horizontal overflow
 
@@ -260,11 +266,14 @@ Evidence:
 
 The Expo-led landing revision was implemented and verified on 2026-07-29. The
 current order is producer-first photographic hero, concise benefits, integrated
-regional Expo workspace, weekly Industry schedule, one searchable five-result
-showroom directory, a distinct merchant CTA, and footer. Twenty-eight seeded
-showrooms provide real page density without duplicate featured inventory.
+regional Expo workspace with its compact weekly Industry calendar directly
+above the map, one searchable five-result showroom directory, a distinct
+merchant CTA, and footer. There is no detached schedule chapter. Twenty-eight
+seeded showrooms provide real page density without duplicate featured inventory.
 
 The repeatable `npm run test:expo-visual` audit passed at 1440px, 390px, and
 320px with no browser, image, text, touch-target, or page-overflow failures.
-`npm run test:marketplace-home`, `npm run test:acceptance` (10/10),
-`npm run check`, and `npm run release` passed.
+It also proves calendar-before-map order inside one Expo section and the
+persistent map-to-venue transition. `npm run test:marketplace-home`,
+`npm run test:acceptance` (10/10), `npm run check`, and `npm run release`
+passed.

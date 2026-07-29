@@ -150,7 +150,12 @@ does not reorder the five content sections.
 All seven admitted headers and all six admitted footers expose distinct,
 industry-neutral machine-readable anatomy and materially different responsive
 layouts. Header and footer are selected independently by identity scale,
-available content, navigation density, visual weight, and mobile behavior.
+available content, visual weight, and mobile behavior. Headers carry identity
+and at most one concise descriptor; they do not repeat catalog or inquiry
+commands. Footers close with identity, the permanent showroom handle, and the
+configured inquiry/contact destination; they do not repeat product-category
+navigation. The one floating inquiry control owns persistent cart access and
+contracts to an icon-sized, accessibly named control on phones.
 Adjacent about/story and process chapters alternate heading/body placement on
 wider screens, return to semantic heading-first reading order on phones, and
 use the exact neutral `surface` then `soft` roles. Normal showrooms do not use
@@ -214,8 +219,9 @@ mobile-first marketplace surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-015` defines the current visual composition: a
 photographic maker hero leads with the permanent `/@handle` showroom product
 and a compact live-Expo callout; the full-width city-hosted Expo map/list is the
-primary live module, followed by the server-owned weekly Industry schedule and
-one searchable, Industry-filtered permanent-showroom directory. The directory
+primary live module. Its compact server-owned weekly Industry calendar sits
+directly above the map inside the same Expo workspace, followed by one
+searchable, Industry-filtered permanent-showroom directory. The directory
 renders at most five matching showrooms per page, uses one horizontally
 scrollable Industry pill row instead of category controls or duplicate
 all-business navigation, and resets pagination when search or Industry changes.
@@ -225,17 +231,22 @@ asset with a proven geographic projection and bounded SVG pan/zoom. The country
 view is navigation, not a booth floor: it shows Admin-1 and Admin-2 boundaries,
 restrained major-road corridors, selected city/town labels, and every active
 major-city host. A labeled selector jumps to one host, **Center today's Expos**
-frames the active set, and **View Ethiopia** restores the country extent.
-Selecting a host opens a complete top-view Expo venue with reception, central
-aisle, exits, numbered halls, and every assigned showroom. Venue depth and
-balanced booth rows derive from hall population, with at most 12 booths per
-hall. During the pilot, two eligible businesses in a host catchment create an
-Expo; a sparse catchment joins its geographically nearest active major-city host
-without changing the origin city, zone, and region shown to visitors. A business
-must have an active showroom, matching Industry, approved booth-specific image,
-valid city/zone/region/WGS84 coordinates, and no exclusion before it may
-participate. Map and List views expose the same complete participant set. Venue
-booths and the selected-booth sheet expose consistent
+frames the active set, and **View Ethiopia** resets a manually changed country
+extent. Selecting a host keeps the SVG map mounted, animates toward the serving
+city, and reveals one complete top-view virtual Expo venue while restrained
+boundaries, roads, and place context remain visible around it. The venue has
+reception, central aisle, exits, numbered halls, every assigned showroom, and
+its own familiar close control that reverses to the country view. It is a
+virtual city anchor and never claims a physical parcel, street address, or
+real-world building footprint. Venue depth and balanced booth rows derive from
+hall population, with at most 12 booths per hall; only the selected venue
+renders over the map. During the pilot, two eligible businesses in a host
+catchment create an Expo; a sparse catchment joins its geographically nearest
+active major-city host without changing the origin city, zone, and region shown
+to visitors. A business must have an active showroom, matching Industry,
+approved booth-specific image, valid city/zone/region/WGS84 coordinates, and no
+exclusion before it may participate. Map and List views expose the same complete
+participant set. Venue booths and the selected-booth sheet expose consistent
 `H{hub-number}.{hall-number}-B{booth-number}` references.
 
 Featured emphasis is integrated into the one paginated directory instead of
@@ -422,7 +433,8 @@ opener. Close, quantity, remove, clear, and handoff controls provide at least a
 type and color roles while preserving form contrast. One shared persistent
 inquiry trigger remains fixed inside the viewport across every showroom anatomy,
 shows the current selected-item count, and opens the same cart without requiring
-the visitor to return to the header.
+the visitor to return to the header. At phone widths it becomes a compact
+icon-sized control, and its visible badge is omitted while the cart is empty.
 
 An inquiry record should contain:
 
@@ -983,8 +995,11 @@ remaining AI-assisted delivery sequence is recorded in
   All seven header and all six footer variants have unique layout families and
   honest rendered-region descriptions. Header and footer are selected
   independently from objective content and interaction needs; neither profile
-  contains an industry or tenant recommendation. The ten local benchmarks
-  exercise every admitted header and footer anatomy.
+  contains an industry or tenant recommendation. Headers expose identity and an
+  optional descriptor without catalog or inquiry commands. Footers expose
+  identity, permanent handle, and contact destination without category
+  navigation. The ten local benchmarks exercise every admitted header and
+  footer anatomy.
   Machine-readable guidance declares rendered anatomy, true media-plane count,
   no-media support, fallback treatments, commerce modes, content needs, visual
   tones, recommended product/category counts, long-title and RTL support,

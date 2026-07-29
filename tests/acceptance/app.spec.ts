@@ -98,7 +98,20 @@ test("public discovery, Expo, benchmark showrooms, cart, and persisted inquiry",
   await page.goto("/");
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Virtual showrooms and daily Expos");
-  await expect(page.getByRole("heading", { name: "The Expo changes every morning." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "This week's Expo calendar" })).toBeVisible();
+  await expect(page.locator(".landing-schedule")).toHaveCount(0);
+  await expect(page.locator(".landing-expo-section .landing-expo-calendar")).toBeVisible();
+  expect(
+    await page.evaluate(() => {
+      const calendar = document.querySelector(".landing-expo-calendar");
+      const explorer = document.querySelector(".landing-expo-section .expo-explorer");
+      return Boolean(
+        calendar &&
+        explorer &&
+        (calendar.compareDocumentPosition(explorer) & Node.DOCUMENT_POSITION_FOLLOWING),
+      );
+    }),
+  ).toBe(true);
   await expect(page.getByRole("heading", { name: "Find a showroom." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Enterprise & Export Showcase" })).toBeVisible();
   await expect(page.getByRole("tablist", { name: "Expo view" })).toBeVisible();
@@ -143,6 +156,11 @@ test("public discovery, Expo, benchmark showrooms, cart, and persisted inquiry",
     );
     await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
     await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
+    await expect(page.locator('[data-slot="header"] nav')).toHaveCount(0);
+    await expect(page.locator('[data-slot="header"] button')).toHaveCount(0);
+    await expect(page.locator('[data-slot="footer"] nav')).toHaveCount(0);
+    await expect(page.locator('[data-slot="footer"]').getByText(`@${handle}`, { exact: true })).toBeVisible();
+    await expect(page.locator(".floating-inquiry-trigger")).toHaveCount(1);
     await expect(page.locator('[data-slot="hero"] button')).toHaveCount(0);
     await expect(page.locator('a[href="#showroom-catalog"]').first()).toBeVisible();
     const heroSection = page.locator('[data-slot="hero"]');
@@ -342,6 +360,7 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(floatingBounds.right).toBeGreaterThanOrEqual(8);
   expect(floatingBounds.bottom).toBeGreaterThanOrEqual(8);
   expect(floatingBounds.width).toBeGreaterThanOrEqual(44);
+  expect(floatingBounds.width).toBeLessThanOrEqual(56);
   expect(floatingBounds.height).toBeGreaterThanOrEqual(44);
   await floatingInquiry.click();
   const mobileDrawer = await page
@@ -419,6 +438,12 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await expect(page.locator(".expo-hub")).toHaveCount(2);
   await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(3);
   await page.getByLabel("Jump to a host city").selectOption({ label: "Dire Dawa, Dire Dawa urban · 2 booths" });
+  const contextualStage = page.locator(".expo-map-stage-venue");
+  await expect(contextualStage).toBeVisible();
+  await expect(contextualStage.locator(".expo-map")).toBeVisible();
+  await expect(contextualStage.locator(".expo-regions path")).toHaveCount(14);
+  await expect(contextualStage.getByText("Virtual Expo anchored in")).toBeVisible();
+  await expect(contextualStage.locator(".expo-city-context strong")).toHaveText("Dire Dawa");
   await expect(page.locator(".expo-venue-booth")).toHaveCount(2);
   await expect(page.getByText("Entrance")).toBeVisible();
   await expect(page.getByText("Reception")).toBeVisible();
@@ -431,8 +456,11 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await expect(preview.locator(".expo-preview-meta").getByText(dawaReference)).toBeVisible();
   await expect(preview.getByText(/From Dire Dawa, Dire Dawa urban, Dire Dawa/)).toBeVisible();
   await expect(preview.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@dawa-water-solutions");
-  await page.getByRole("button", { name: "View Ethiopia" }).click();
+  await page.getByRole("button", { name: "Close Dire Dawa Expo and return to Ethiopia" }).click();
   await expect(page.getByLabel("Jump to a host city")).toHaveValue("");
+  await expect(page.locator(".expo-map-stage-venue")).toHaveCount(0);
+  await expect(page.locator(".expo-map")).toBeVisible();
+  await expect(page.locator(".expo-venue")).toHaveCount(0);
   await page.getByRole("button", { name: "Center today's Expos" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List View" }).click();

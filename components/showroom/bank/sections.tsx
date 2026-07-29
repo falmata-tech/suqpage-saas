@@ -190,14 +190,6 @@ export function BankHeaderSection({
       {properties?.show_tagline !== false ? (
         <span className={styles.headerTagline}>{context.business.tagline}</span>
       ) : null}
-      <nav className={styles.headerNav} aria-label="Showroom preview">
-        <a href="#showroom-catalog" onClick={() => context.onCategoryChange("all")}>
-          Catalog
-        </a>
-        <button type="button" onClick={context.onOpenCart}>
-          Inquiry <span aria-label={`${context.cartCount} selected items`}>{context.cartCount}</span>
-        </button>
-      </nav>
     </header>
   );
 }
@@ -645,25 +637,18 @@ export function BankFooterSection({
       data-surface={surfaceRole}
       aria-label={`${definition.name} preview`}
     >
-      <div>
+      <div className={styles.footerIdentity}>
         <BrandMark context={context} />
         {properties?.show_tagline !== false ? (
           <p>{context.business.tagline}</p>
         ) : null}
       </div>
-      <nav aria-label="Footer catalog">
-        {context.categories.slice(0, 4).map((category) => (
-          <button
-            type="button"
-            key={category.key}
-            onClick={() => context.onCategoryChange(category.key)}
-          >
-            {category.name}
-          </button>
-        ))}
-      </nav>
-      <div>
-        <span>Product inquiries</span>
+      <div className={styles.footerShowroom}>
+        <span>Permanent showroom</span>
+        <strong>@{context.business.handle}</strong>
+      </div>
+      <div className={styles.footerContact}>
+        <span>Products and capabilities</span>
         <strong>{context.business.contactLabel}</strong>
       </div>
     </footer>

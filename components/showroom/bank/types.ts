@@ -17,6 +17,7 @@ export type BankAvailability =
   | "coming_soon";
 
 export type BankBusinessView = {
+  handle: string;
   name: string;
   tagline: string;
   description: string;

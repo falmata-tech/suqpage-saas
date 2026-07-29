@@ -137,6 +137,12 @@ try {
           productCardWidths: productCards.map((card) =>
             Math.round(card.getBoundingClientRect().width),
           ),
+          headerCommandCount: document.querySelectorAll(
+            '[data-slot="header"] nav, [data-slot="header"] button',
+          ).length,
+          footerNavigationCount: document.querySelectorAll(
+            '[data-slot="footer"] nav, [data-slot="footer"] button',
+          ).length,
           floatingInquiry: floatingInquiry && floatingInquiryBounds
             ? {
                 position: getComputedStyle(floatingInquiry).position,
@@ -176,10 +182,7 @@ try {
             .getByRole("button", { name: "Add selected item" })
             .click();
         }
-        await page
-          .locator('[data-slot="header"] nav button')
-          .last()
-          .click();
+        await page.locator(".floating-inquiry-trigger").click();
         await page.getByRole("dialog", { name: "Product inquiry" }).waitFor();
         await page.locator(".toast").waitFor({ state: "hidden" });
         await page.screenshot({
@@ -204,6 +207,8 @@ const failures = results.filter(
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
     result.textOverflow.length > 0 ||
+    result.headerCommandCount !== 0 ||
+    result.footerNavigationCount !== 0 ||
     result.sectionSlots.join(">") !==
       "header>hero>content>content>catalog>callToAction>footer" ||
     result.surfaceRoles.join(">") !==
@@ -217,7 +222,9 @@ const failures = results.filter(
     result.floatingInquiry.right < 8 ||
     result.floatingInquiry.bottom < 8 ||
     (result.viewport === "mobile" &&
-      (result.floatingInquiry.width < 44 || result.floatingInquiry.height < 44)) ||
+      (result.floatingInquiry.width < 44 ||
+        result.floatingInquiry.width > 56 ||
+        result.floatingInquiry.height < 44)) ||
     (result.viewport === "mobile" &&
       result.contentColumnCounts.some((count) => count !== 1)),
 );

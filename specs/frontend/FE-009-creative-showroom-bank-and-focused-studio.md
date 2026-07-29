@@ -368,6 +368,33 @@ bounded labels and narrow-screen horizontal scrolling instead of oversized
 pill shapes. Desktop and 390-pixel Addis Metalworks captures verify the shared
 control independently of catalog component choice.
 
+## Accepted showroom chrome correction
+
+- Every composed header is identity-led. It may render the business mark, name,
+  and one concise descriptor according to its selected anatomy, but it does not
+  repeat Catalog or Inquiry commands already available in the hero, catalog,
+  closing action, and persistent inquiry control.
+- The floating inquiry control is the only persistent inquiry entry point. It
+  keeps its complete accessible name and item count while becoming a compact
+  icon-sized control at phone widths so it does not cover showroom content.
+- Every composed footer contains useful closing information only: business
+  identity, permanent showroom handle, and the configured inquiry/contact
+  destination. It does not repeat product-category navigation, and every footer
+  anatomy reduces to a readable single-column information stack on phones.
+- Header and footer variants remain visually distinct through identity scale,
+  alignment, surface, information arrangement, and decorative depth rather
+  than duplicated command clusters.
+
+```gherkin
+Scenario: Showroom chrome stays quiet around the catalog workflow
+  GIVEN any valid composed showroom
+  WHEN it renders at desktop or phone width
+  THEN its header contains no Catalog or Inquiry command
+  AND its footer contains no product-category navigation
+  AND the floating inquiry control remains reachable and accessibly named
+  AND hero, catalog filters, product actions, and the closing inquiry action remain usable
+```
+
 The existing private recipe studio also has a controlled-video admission form
 only when the separate provider-admission capability is enabled. It accepts no
 iframe or arbitrary provider input; approved YouTube IDs render through the

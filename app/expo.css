@@ -132,21 +132,23 @@
   color: var(--expo-purple-dark);
 }
 
-.expo-map-controls button.expo-country-return {
-  width: auto;
-  padding-inline: 16px;
-  font-size: 0.88rem;
-}
-
 .expo-map-stage {
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
   height: min(68vh, 680px);
   min-height: 480px;
   border: 1px solid #d9d5e1;
   border-radius: 6px;
   background: #f7f8fa;
   box-shadow: 0 14px 34px rgb(31 24 48 / 8%);
+}
+
+.expo-map-stage-venue {
+  height: auto;
+  min-height: 680px;
+  padding: 72px clamp(38px, 6vw, 78px) 42px;
+  background: #e8e9ed;
 }
 
 .expo-map {
@@ -156,6 +158,30 @@
   outline: none;
   cursor: grab;
   touch-action: none;
+}
+
+.expo-map-stage-venue .expo-map {
+  position: absolute;
+  inset: 0;
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.expo-map-stage-venue .expo-hub {
+  opacity: 0.18;
+}
+
+.expo-map-stage-venue .expo-hub.selected {
+  opacity: 0.72;
+}
+
+.expo-map-stage-venue .expo-regions path {
+  fill: #e6e4e9;
+}
+
+.expo-map-stage-venue .expo-roads path {
+  stroke: #aa9778;
+  opacity: 0.82;
 }
 
 .expo-map:active {
@@ -318,6 +344,7 @@
 
 .expo-map-attribution {
   position: absolute;
+  z-index: 6;
   right: 9px;
   bottom: 7px;
   padding: 4px 6px;
@@ -325,6 +352,70 @@
   background: rgb(255 255 255 / 88%);
   color: #716c78;
   font-size: 0.65rem;
+}
+
+.expo-city-context {
+  display: grid;
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 14px;
+  max-width: calc(100% - 28px);
+  padding: 8px 11px;
+  border: 1px solid rgb(88 79 103 / 24%);
+  border-radius: 4px;
+  background: rgb(255 255 255 / 91%);
+  box-shadow: 0 5px 14px rgb(35 28 48 / 9%);
+}
+
+.expo-city-context span,
+.expo-city-context small {
+  color: var(--expo-muted);
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.expo-city-context strong {
+  margin-block: 1px;
+  color: var(--expo-purple-dark);
+  font-size: 0.88rem;
+}
+
+.expo-venue-context {
+  position: relative;
+  z-index: 4;
+  width: min(100%, 1160px);
+  min-width: 0;
+  margin-inline: auto;
+  animation: expo-venue-reveal 360ms ease 140ms both;
+}
+
+.expo-venue-context .expo-venue {
+  border-color: rgb(105 98 116 / 42%);
+  background: rgb(238 240 243 / 94%);
+  box-shadow: 0 16px 38px rgb(31 24 48 / 16%);
+}
+
+.expo-venue-context .expo-venue-header {
+  background: rgb(255 255 255 / 96%);
+}
+
+.expo-venue-context .expo-venue-shell {
+  background:
+    linear-gradient(90deg, transparent 49.85%, rgb(92 84 106 / 8%) 50%, transparent 50.15%),
+    rgb(238 240 243 / 94%);
+}
+
+@keyframes expo-venue-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .expo-map-loading,
@@ -369,6 +460,13 @@
   flex-wrap: wrap;
 }
 
+.expo-venue-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .expo-hall-tabs button,
 .expo-hall-badge {
   display: inline-flex;
@@ -381,6 +479,29 @@
   background: #fff;
   color: var(--expo-ink);
   font-weight: 850;
+}
+
+.expo-venue-close {
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--expo-line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--expo-ink);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.expo-venue-close:hover,
+.expo-venue-close:focus-visible {
+  border-color: var(--expo-purple);
+  color: var(--expo-purple-dark);
+  outline: 3px solid rgb(101 70 184 / 18%);
+  outline-offset: 2px;
 }
 
 .expo-hall-tabs button[aria-pressed="true"] {
@@ -687,21 +808,25 @@
     grid-column: 1 / -1;
   }
 
-  .expo-map-controls button.expo-country-return {
-    grid-column: 1 / -1;
-    width: 100%;
-    white-space: normal;
-  }
-
   .expo-map-stage {
     height: 510px;
     min-height: 510px;
+  }
+
+  .expo-map-stage.expo-map-stage-venue {
+    height: auto;
+    min-height: 620px;
+    padding: 68px 10px 34px;
   }
 
   .expo-venue-header {
     align-items: stretch;
     flex-direction: column;
     padding: 18px;
+  }
+
+  .expo-venue-header-actions {
+    justify-content: space-between;
   }
 
   .expo-venue-shell {
@@ -790,6 +915,12 @@
   .expo-map-stage {
     height: 470px;
     min-height: 470px;
+  }
+
+  .expo-map-stage.expo-map-stage-venue {
+    height: auto;
+    min-height: 590px;
+    padding-inline: 7px;
   }
 }
 

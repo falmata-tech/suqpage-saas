@@ -153,32 +153,29 @@ export default function Home() {
                 every business keeps its real origin visible.
               </p>
             </div>
-            <ExpoMap expo={expo} embedded />
-          </div>
-        </section>
-
-        <section className="landing-schedule" aria-labelledby="schedule-title">
-          <div className="landing-container">
-            <div className="landing-schedule-head">
-              <div>
-                <span className="landing-eyebrow">Seven days of production</span>
-                <h2 id="schedule-title">The Expo changes every morning.</h2>
+            <section className="landing-expo-calendar" aria-labelledby="expo-calendar-title">
+              <div className="landing-expo-calendar-head">
+                <div>
+                  <span className="landing-eyebrow">A different Industry every morning</span>
+                  <h3 id="expo-calendar-title">This week&apos;s Expo calendar</h3>
+                </div>
+                <p>Permanent showrooms remain open every day.</p>
               </div>
-              <p>Each daily Expo highlights one Industry while permanent showrooms stay open all week.</p>
-            </div>
-            <div className="landing-schedule-grid">
-              {schedule.map((theme) => (
-                <article
-                  key={theme.id}
-                  className={theme.slug === expo.themeSlug ? "active" : ""}
-                >
-                  <span>{scheduleMarks[theme.icon] || "00"}</span>
-                  <strong>{weekdayLabels[theme.weekday]}</strong>
-                  <p>{theme.name.replace(/Market/g, "Expo")}</p>
-                  {theme.slug === expo.themeSlug ? <small>Live today</small> : null}
-                </article>
-              ))}
-            </div>
+              <div className="landing-schedule-grid">
+                {schedule.map((theme) => (
+                  <article
+                    key={theme.id}
+                    className={theme.slug === expo.themeSlug ? "active" : ""}
+                  >
+                    <span>{scheduleMarks[theme.icon] || "00"}</span>
+                    <strong>{weekdayLabels[theme.weekday]}</strong>
+                    <p>{theme.name.replace(/Market/g, "Expo")}</p>
+                    {theme.slug === expo.themeSlug ? <small>Live today</small> : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+            <ExpoMap expo={expo} embedded />
           </div>
         </section>
 

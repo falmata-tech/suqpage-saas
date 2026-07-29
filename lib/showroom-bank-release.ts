@@ -325,8 +325,8 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     },
     {
       id: "header.catalog-command@1",
-      name: "Catalog command header",
-      description: "A product-forward header that emphasizes discovery and inquiry access.",
+      name: "Structured identity header",
+      description: "A precise two-zone header separating business identity from one concise descriptor.",
     },
     {
       id: "header.transparent-overlay@1",
@@ -529,8 +529,8 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     },
     {
       id: "footer.catalog-directory@1",
-      name: "Catalog directory footer",
-      description: "A structured close for broad product-category navigation.",
+      name: "Structured information footer",
+      description: "A structured close separating identity, permanent showroom handle, and contact destination.",
     },
     {
       id: "footer.contact-panel@1",
@@ -542,8 +542,8 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
 
 export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
   header: [
-    { id: "header.floating-capsule@1", name: "Floating capsule header", description: "A polished floating command bar with prominent identity and compact actions." },
-    { id: "header.technical-marquee@1", name: "Indexed marquee header", description: "A crisp indexed identity bar with dense labels and straight dividers." },
+    { id: "header.floating-capsule@1", name: "Floating identity header", description: "A polished floating identity bar with a prominent mark and restrained descriptor." },
+    { id: "header.technical-marquee@1", name: "Indexed identity header", description: "A crisp indexed identity bar with a concise descriptor and bounded accent plane." },
   ],
   hero: [
     { id: "hero.beauty-orbit@1", name: "Soft orbit hero", description: "A sculptural product stage with soft orbital layers and a calm single-subject rhythm." },
@@ -579,8 +579,8 @@ export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
     { id: "call-to-action.technical-brief@1", name: "Requirements brief invitation", description: "A focused close for requirement-led project or product inquiries." },
   ],
   footer: [
-    { id: "footer.magazine-masthead@1", name: "Magazine masthead footer", description: "A memorable editorial close with generous identity and bounded directory groups." },
-    { id: "footer.technical-directory@1", name: "Indexed directory footer", description: "A disciplined indexed close for contact details and compact directory links." },
+    { id: "footer.magazine-masthead@1", name: "Magazine masthead footer", description: "A memorable editorial close with generous identity, permanent showroom handle, and concise contact handoff." },
+    { id: "footer.technical-directory@1", name: "Indexed information footer", description: "A disciplined indexed close for showroom identity and contact details." },
   ],
 } as const satisfies Record<ShowroomSlot, readonly ComponentSeed[]>;
 

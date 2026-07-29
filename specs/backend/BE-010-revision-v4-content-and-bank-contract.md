@@ -73,6 +73,11 @@ additive v4 domain boundary that preserves all retained releases.
   reordered slots and rejects standalone navigation/trust sections for this
   profile. Component IDs may vary only within the compatible slot and typed
   content assignment.
+- Shared header renderers expose identity and an optional descriptor without
+  duplicating catalog or inquiry commands. Shared footer renderers expose
+  identity, permanent handle, and contact destination without category
+  navigation. Catalog filtering and inquiry behavior remain owned by their
+  dedicated catalog, call-to-action, and persistent inquiry controls.
 - Semantic design systems declare neutral canvas, surface, and layer roles plus
   exact strong/onStrong and inverse/onInverse pairs. Runtime variables and
   contrast tests use those pairs directly; a child cannot keep onSecondary text

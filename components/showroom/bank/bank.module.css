@@ -514,49 +514,11 @@
 
 .headerTagline {
   overflow: hidden;
+  margin-left: auto;
   color: var(--bank-muted);
   font-size: 0.68rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.headerNav {
-  display: flex;
-  gap: 7px;
-  margin-left: auto;
-}
-
-.headerNav button,
-.headerNav a {
-  display: inline-flex;
-  align-items: center;
-  border: 0;
-  border-radius: 999px;
-  padding: 7px 9px;
-  background: transparent;
-  color: var(--bank-ink);
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.headerNav button {
-  gap: 4px;
-}
-
-.headerNav button span {
-  display: inline-grid;
-  min-width: 16px;
-  min-height: 16px;
-  place-items: center;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--bank-surface) 18%, transparent);
-  font-size: 0.58rem;
-}
-
-.headerNav button:last-child {
-  background: var(--bank-secondary);
-  color: var(--bank-on-secondary);
 }
 
 .header[data-variant="editorial-wordmark"] {
@@ -570,21 +532,21 @@
   font-size: 1.15rem;
 }
 
-.header[data-variant="editorial-wordmark"] .headerNav {
-  justify-content: center;
-  margin: 0;
-  padding-top: 3px;
+.header[data-variant="editorial-wordmark"] .headerTagline {
+  margin-left: 0;
 }
 
 .header[data-variant="catalog-command"] {
   display: grid;
-  grid-template-columns: minmax(170px, 0.8fr) minmax(180px, 1.2fr) auto;
+  grid-template-columns: minmax(170px, 0.8fr) minmax(180px, 1.2fr);
   background: var(--bank-layer);
 }
 
 .header[data-variant="catalog-command"] .headerTagline {
-  justify-self: center;
-  text-align: center;
+  justify-self: end;
+  max-width: 520px;
+  margin-left: 0;
+  text-align: right;
 }
 
 .header[data-variant="transparent-overlay"] {
@@ -1345,37 +1307,23 @@
   line-height: 1.5;
 }
 
-.footer nav {
-  display: grid;
-  gap: 5px;
-}
-
-.footer nav button {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--bank-active-ink);
-  font-size: 0.68rem;
-  text-align: left;
-}
-
-.footer > div:last-child {
+.footerShowroom,
+.footerContact {
   display: grid;
   align-content: start;
   gap: 5px;
 }
 
-.footer > div:last-child strong {
+.footerShowroom strong,
+.footerContact strong {
   overflow-wrap: anywhere;
   font-size: 0.75rem;
 }
 
 .footer[data-variant="compact"] {
-  grid-template-columns: 1fr auto;
-}
-
-.footer[data-variant="compact"] nav {
-  display: none;
+  grid-template-columns: minmax(0, 1.4fr) auto auto;
+  align-items: center;
+  padding-block: 22px;
 }
 
 .footer[data-variant="editorial"] {
@@ -1384,19 +1332,19 @@
   align-items: end;
 }
 
-.footer[data-variant="catalog-directory"] nav {
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 18px;
+.footer[data-variant="catalog-directory"] .footerShowroom {
+  padding-inline: 18px;
+  border-inline: 1px solid var(--bank-line);
 }
 
-.footer[data-variant="contact-panel"] > div:last-child {
+.footer[data-variant="contact-panel"] .footerContact {
   padding: 16px;
   color: var(--bank-on-secondary);
   background: var(--bank-secondary);
   border-radius: 6px;
 }
 
-.footer[data-variant="contact-panel"] > div:last-child :is(span, strong) {
+.footer[data-variant="contact-panel"] .footerContact :is(span, strong) {
   color: inherit;
 }
 
@@ -1877,20 +1825,9 @@
   opacity: 1;
 }
 
-.footer[data-variant="technical-directory"] nav {
-  counter-reset: footer-directory;
-}
-
-.footer[data-variant="technical-directory"] nav button {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-  align-items: center;
-}
-
-.footer[data-variant="technical-directory"] nav button::before {
-  color: var(--bank-active-muted);
-  content: "0" counter(footer-directory);
-  counter-increment: footer-directory;
+.footer[data-variant="technical-directory"] .footerShowroom {
+  padding-left: 18px;
+  border-left: 1px solid var(--bank-line);
 }
 
 @keyframes bank-enter-balanced {
@@ -2076,8 +2013,16 @@
   .productGrid,
   .catalog[data-variant="dense-wholesale"] .productGrid,
   .catalog[data-variant="collection-led"] .productGrid,
-  .footer {
+  .footer,
+  .footer[data-variant="compact"],
+  .footer[data-variant="editorial"] {
     grid-template-columns: 1fr;
+  }
+
+  .footer[data-variant="catalog-directory"] .footerShowroom,
+  .footer[data-variant="technical-directory"] .footerShowroom {
+    padding-inline: 0;
+    border-inline: 0;
   }
 
   .headerTagline {
@@ -2099,35 +2044,19 @@
     font-size: 0.9rem;
   }
 
-  .header[data-variant="editorial-wordmark"] .headerNav {
-    justify-content: flex-end;
-    margin-left: auto;
-    padding: 0;
-  }
-
   .header[data-variant="catalog-command"] {
     display: flex;
   }
 
   .header .brandMark {
     min-width: 0;
-    max-width: 46%;
+    max-width: 100%;
   }
 
   .header .brandMark > span:last-child {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .headerNav {
-    gap: 3px;
-  }
-
-  .headerNav a,
-  .headerNav button {
-    min-height: 44px;
-    padding: 7px 8px;
   }
 
   .catalog[data-variant="feature-tiles"] .productCard:first-child {
@@ -2248,8 +2177,16 @@
 @container bank-preview (max-width: 480px) {
   .productGrid,
   .catalog[data-variant="collection-led"] .productGrid,
-  .footer {
+  .footer,
+  .footer[data-variant="compact"],
+  .footer[data-variant="editorial"] {
     grid-template-columns: 1fr;
+  }
+
+  .footer[data-variant="catalog-directory"] .footerShowroom,
+  .footer[data-variant="technical-directory"] .footerShowroom {
+    padding-inline: 0;
+    border-inline: 0;
   }
 
   .header {
@@ -2266,10 +2203,6 @@
     display: none;
   }
 
-  .headerNav {
-    min-width: 0;
-  }
-
   .header[data-variant="editorial-wordmark"] {
     flex-direction: row;
     align-items: center;
@@ -2281,35 +2214,19 @@
     font-size: 0.9rem;
   }
 
-  .header[data-variant="editorial-wordmark"] .headerNav {
-    justify-content: flex-end;
-    margin-left: auto;
-    padding: 0;
-  }
-
   .header[data-variant="catalog-command"] {
     display: flex;
   }
 
   .header .brandMark {
     min-width: 0;
-    max-width: 46%;
+    max-width: 100%;
   }
 
   .header .brandMark > span:last-child {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .headerNav {
-    gap: 3px;
-  }
-
-  .headerNav a,
-  .headerNav button {
-    min-height: 44px;
-    padding: 7px 8px;
   }
 
   .hero {
