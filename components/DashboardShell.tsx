@@ -53,7 +53,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
     ]),
     group("Administration", [
       platformAdmin ? { href: "/dashboard/admin", label: "Platform administration" } : null,
-      platformAdmin ? { href: "/dashboard/admin/bazaar", label: "Bazaar controls" } : null,
+      platformAdmin ? { href: "/dashboard/admin/bazaar", label: "Expo controls" } : null,
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item));
 

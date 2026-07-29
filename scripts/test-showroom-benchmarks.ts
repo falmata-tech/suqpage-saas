@@ -2,11 +2,40 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { getAllBusinesses, getCatalogByBusinessId } from "../lib/db";
+import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "../lib/expo-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 
-const businesses = getAllBusinesses().filter((business) => business.status === "active");
-assert.equal(businesses.length, 10, "reset must create ten active benchmark businesses");
+const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
+assert.ok(activeBusinesses.length >= 25, "reset must create at least 25 active Expo showrooms");
+assert.equal(
+  activeBusinesses.length,
+  Object.keys(SEEDED_EXPO_PROFILES).length,
+  "every seeded active showroom has an Expo location profile",
+);
+for (const business of activeBusinesses) {
+  const catalog = getCatalogByBusinessId(business.id);
+  assert.ok(catalog && catalog.products.length >= 3, `${business.handle} has an inquiry-ready catalog`);
+  assert.ok(
+    fs.existsSync(path.join(process.cwd(), "public", seededExpoBoothPath(business.handle))),
+    `${business.handle} has a generated booth image`,
+  );
+}
+
+const benchmarkHandles = new Set([
+  "selam-weave",
+  "afia-botanics",
+  "warka-furniture",
+  "addis-metalworks",
+  "green-terrace-farm",
+  "blue-nile-apiary",
+  "rift-valley-mill",
+  "entoto-ceramics",
+  "koba-leather",
+  "nova-assembly",
+]);
+const businesses = activeBusinesses.filter((business) => benchmarkHandles.has(business.handle));
+assert.equal(businesses.length, 10, "ten design benchmark showrooms remain available");
 const productCounts = new Set<number>();
 const tokenPacks = new Set<string>();
 const heroTreatments = new Set<string>();
@@ -130,4 +159,4 @@ assert.deepEqual(
   "all benchmarks preserve the neutral-to-emphasis surface hierarchy",
 );
 
-console.log("Ten validated benchmark showrooms, canonical journeys, varied anatomy, media, and fitness passed.");
+console.log("Twenty-eight Expo showrooms and ten validated design benchmarks passed.");

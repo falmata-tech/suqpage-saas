@@ -4,7 +4,7 @@ title: Visual marketplace homepage
 status: done
 related: [FE-001, FE-010, FE-013, FE-015, BE-011, DEP-010, DEP-011]
 owners: [product, frontend]
-last_updated: 2026-07-26
+last_updated: 2026-07-29
 change_level: L1
 ---
 
@@ -18,6 +18,41 @@ affordances of the approved homepage mockup. Visitors need a polished,
 mobile-first marketplace landing experience that presents the permanent
 showroom as the primary product and the daily Bazaar as an active discovery
 benefit.
+
+## Accepted Expo-led landing revision
+
+This revision replaces the previous mall-floor composition.
+
+- The page serves growers, producers, and small, medium, or large manufacturers
+  with one clear promise: a permanent virtual showroom plus participation in a
+  rotating daily Industry Expo that creates direct inquiry opportunities.
+- The order is compact header, showroom-and-Expo hero, concise benefit strip,
+  full-width Live Expo workspace, weekly Industry schedule, one searchable
+  showroom directory, strong merchant closing action, and footer.
+- The Expo workspace is visually native to the page: the same restrained
+  purple/ink/white palette, shared controls, aligned containers, and no detached
+  promotional card around the map.
+- The showroom directory owns search, Industry pills, featured emphasis, and
+  five-result pagination. Featured is a badge and ranking signal, not a second
+  repeated business catalog.
+- Desktop and mobile expose direct regional-hub navigation. Mobile uses compact
+  app navigation for Expo, Showrooms, and Join while preserving normal document
+  scrolling and landing-page context.
+- Copy explains that Expo themes change daily and regional hubs appear wherever
+  eligible businesses are represented. It must not imply checkout, guaranteed
+  buyers, or physical relocation of participating businesses.
+- Section surfaces use crisp white, ink, soft neutral, and bounded purple roles
+  with clear contrast. Busy textures, floating cards, and repeated identical
+  section geometry are excluded.
+
+```gherkin
+Scenario: Landing page feels like one public product
+  GIVEN active showrooms and multiple regional Expo hubs
+  WHEN a visitor moves from the hero into the Live Expo and showroom search
+  THEN shared navigation, palette, spacing, and terminology connect the sections
+  AND no duplicate featured inventory or detached map promotion appears
+  AND the final action clearly invites a producer to request a showroom
+```
 
 ## Scope
 
@@ -184,7 +219,7 @@ unchanged.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Implemented and verified on 2026-07-26.
 
@@ -220,3 +255,16 @@ Evidence:
   mall-map references, and all existing stateful workflows.
 - `npm run check` passed the complete local quality, domain, security, adapter,
   revision, recipe, provider-video, Bazaar, and homepage gate.
+
+## Completion evidence
+
+The Expo-led landing revision was implemented and verified on 2026-07-29. The
+current order is producer-first photographic hero, concise benefits, integrated
+regional Expo workspace, weekly Industry schedule, one searchable five-result
+showroom directory, a distinct merchant CTA, and footer. Twenty-eight seeded
+showrooms provide real page density without duplicate featured inventory.
+
+The repeatable `npm run test:expo-visual` audit passed at 1440px, 390px, and
+320px with no browser, image, text, touch-target, or page-overflow failures.
+`npm run test:marketplace-home`, `npm run test:acceptance` (10/10),
+`npm run check`, and `npm run release` passed.

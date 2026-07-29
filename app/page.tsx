@@ -1,35 +1,44 @@
 import Image from "next/image";
 import Link from "next/link";
-import BazaarMap from "@/components/BazaarMap";
-import ShowroomDirectory, { type ShowroomDirectoryEntry } from "@/components/ShowroomDirectory";
+import ExpoMap from "@/components/ExpoMap";
+import ShowroomDirectory, {
+  type ShowroomDirectoryEntry,
+} from "@/components/ShowroomDirectory";
 import SuqPageBrand from "@/components/SuqPageBrand";
 import { listBazaarAdminState } from "@/lib/bazaar";
 import { getAllBusinesses, getCatalogByBusinessId } from "@/lib/db";
+import { getCurrentExpo } from "@/lib/expo";
 
 export const dynamic = "force-dynamic";
 
 const weekdayLabels = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const scheduleMarks: Record<string, string> = {
-  monitor: "TV",
-  sparkle: "+",
-  leaf: "LF",
-  gear: "GR",
-  home: "HM",
-  shirt: "TS",
-  star: "ST",
+  monitor: "01",
+  sparkle: "02",
+  leaf: "03",
+  gear: "04",
+  home: "05",
+  shirt: "06",
+  star: "07",
 };
 
 export default function Home() {
-  const businesses = getAllBusinesses().filter((business) => business.status === "active");
-  const bazaarState = listBazaarAdminState();
-  const bazaar = bazaarState.current;
-  const schedule = [...bazaarState.themes].sort((left, right) => (left.weekday || 7) - (right.weekday || 7));
-  const profilesByBusinessId = new Map(bazaarState.profiles.map((profile) => [profile.businessId, profile]));
+  const businesses = getAllBusinesses().filter(
+    (business) => business.status === "active",
+  );
+  const legacyAdminState = listBazaarAdminState();
+  const expo = getCurrentExpo();
+  const schedule = [...legacyAdminState.themes].sort(
+    (left, right) => (left.weekday || 7) - (right.weekday || 7),
+  );
+  const profilesByBusinessId = new Map(
+    legacyAdminState.profiles.map((profile) => [profile.businessId, profile]),
+  );
 
   const directoryEntries: ShowroomDirectoryEntry[] = businesses.map((business) => {
     const catalog = getCatalogByBusinessId(business.id);
     const profile = profilesByBusinessId.get(business.id);
-    const industry = profile?.industryLabel || "Community Market";
+    const industry = profile?.industryLabel || "Enterprise & Export";
     const searchable = [
       business.name,
       business.handle,
@@ -38,8 +47,11 @@ export default function Home() {
       business.hero_title,
       business.hero_subtitle,
       industry,
-      ...((catalog?.categories || []).map((item) => item.name)),
-      ...((catalog?.products || []).map((item) => `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""}`)),
+      ...(catalog?.categories || []).map((item) => item.name),
+      ...(catalog?.products || []).map(
+        (item) =>
+          `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""}`,
+      ),
     ].join(" ").toLowerCase();
     return {
       id: business.id,
@@ -54,21 +66,23 @@ export default function Home() {
   });
 
   return (
-    <div className="marketplace-home" id="top">
-      <header className="marketplace-header">
-        <div className="market-container marketplace-nav-shell">
-          <SuqPageBrand className="marketplace-brand" />
-          <nav className="marketplace-desktop-nav" aria-label="Public navigation">
-            <a href="#bazaar">Bazaar</a>
-            <a href="#showrooms">All Showrooms</a>
-            <Link className="market-nav-cta" href="/request">Get a Showroom</Link>
-            <Link className="market-login" href="/login"><span className="login-icon" aria-hidden="true" /> Login</Link>
+    <div className="landing-home" id="top">
+      <header className="landing-header">
+        <div className="landing-container landing-nav">
+          <SuqPageBrand className="landing-brand" />
+          <nav className="landing-desktop-nav" aria-label="Public navigation">
+            <a href="#expo">Live Expo</a>
+            <a href="#showrooms">Showrooms</a>
+            <Link href="/request">For producers</Link>
+            <Link className="landing-login" href="/login">Login</Link>
           </nav>
-          <details className="marketplace-mobile-menu">
-            <summary aria-label="Open public navigation"><span /><span /><span /></summary>
+          <details className="landing-mobile-menu">
+            <summary aria-label="Open public navigation">
+              <span /><span /><span />
+            </summary>
             <nav aria-label="Mobile public navigation">
-              <a href="#bazaar">Bazaar</a>
-              <a href="#showrooms">All Showrooms</a>
+              <a href="#expo">Live Expo</a>
+              <a href="#showrooms">Showrooms</a>
               <Link href="/request">Get a Showroom</Link>
               <Link href="/login">Login</Link>
             </nav>
@@ -77,96 +91,159 @@ export default function Home() {
       </header>
 
       <main>
-        <div className="market-container market-home-frame">
-          <section className="market-hero" aria-labelledby="market-hero-title">
-            <Image
-              className="market-hero-image"
-              src="/landing/maker-workshop-hero.jpg"
-              alt="A furniture maker shaping wood in his workshop"
-              fill
-              priority
-              sizes="(max-width: 720px) 100vw, 1240px"
-            />
-            <div className="market-hero-shade" />
-            <div className="market-hero-copy">
-              <h1 id="market-hero-title">Your products.<br />Your story.<br /><span>Your own showroom.</span></h1>
-              <p>For artisans, growers, producers, and small manufacturers. Show what you sell, explain your process, receive customer inquiries, and share your own /@handle.</p>
-              <div className="market-hero-actions">
-                <Link className="market-primary-action" href="/request">Get your SuqPage showroom <span aria-hidden="true">→</span></Link>
-              </div>
-              <div className="market-benefits" aria-label="Showroom benefits">
-                <span><i aria-hidden="true">@</i>Your own<br />/@handle</span>
-                <span><i aria-hidden="true">P</i>Show your<br />products</span>
-                <span><i aria-hidden="true">Q</i>Receive customer<br />inquiries</span>
-                <span><i aria-hidden="true">B</i>Join weekly<br />Bazaars</span>
+        <section className="landing-hero" aria-labelledby="landing-title">
+          <Image
+            className="landing-hero-image"
+            src="/landing/maker-workshop-hero.jpg"
+            alt="A producer shaping a product in a working workshop"
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className="landing-hero-overlay" />
+          <div className="landing-container landing-hero-inner">
+            <div className="landing-hero-copy">
+              <span className="landing-eyebrow">Built for people who make and grow</span>
+              <h1 id="landing-title">Virtual showrooms and daily Expos for producers.</h1>
+              <p>
+                Present products clearly, tell the production story, and receive
+                direct inquiries through a permanent SuqPage showroom. From
+                emerging growers to established manufacturers.
+              </p>
+              <div className="landing-hero-actions">
+                <Link className="landing-primary-action" href="/request">
+                  Get a SuqPage showroom
+                </Link>
+                <a className="landing-secondary-action" href="#expo">
+                  Explore today&apos;s Expo
+                </a>
               </div>
             </div>
-            <aside className="market-hero-bazaar" aria-label="Today's Bazaar">
+            <a className="landing-live-panel" href="#expo">
+              <span className="landing-live-label"><i /> Live today</span>
+              <strong>{expo.themeName}</strong>
+              <span>
+                {expo.map.hubs.length} regional Expos · {expo.booths.length} open booths
+              </span>
+              <b>Open Expo Map</b>
+            </a>
+          </div>
+        </section>
+
+        <section className="landing-benefits" aria-label="SuqPage benefits">
+          <div className="landing-container landing-benefit-grid">
+            <article><span>01</span><h2>One permanent showroom</h2><p>A clear /@handle for products, capabilities, and inquiries.</p></article>
+            <article><span>02</span><h2>Daily Industry visibility</h2><p>Join the rotating Expo wherever eligible producers gather.</p></article>
+            <article><span>03</span><h2>Regional discovery</h2><p>Buyers can move from Ethiopia overview to a regional booth.</p></article>
+            <article><span>04</span><h2>Direct business inquiry</h2><p>Move serious interest into one structured conversation.</p></article>
+          </div>
+        </section>
+
+        <section className="landing-expo-section" id="expo">
+          <div className="landing-container">
+            <div className="landing-section-intro">
               <div>
-                <span className="market-kicker">Today&apos;s Bazaar</span>
-                <span className="market-theme-mark" aria-hidden="true">{scheduleMarks[schedule.find((theme) => theme.slug === bazaar.themeSlug)?.icon || "star"] || "ST"}</span>
+                <span className="landing-eyebrow">A different Industry every day</span>
+                <h2>See where today&apos;s Expo is active.</h2>
               </div>
-              <h2>{bazaar.themeName}</h2>
-              <span className={`market-live-status ${bazaar.status}`}>{bazaar.status === "live" ? "Live now" : bazaar.status}</span>
-              <p>New discoveries. Real businesses.<br />Changes daily at 4:00 AM.</p>
-              <a href="#bazaar">View today&apos;s Bazaar <span aria-hidden="true">→</span></a>
-            </aside>
-          </section>
+              <p>
+                Every active region becomes an Expo hub when enough participating
+                businesses are present. Smaller regional groups join their nearest
+                active hub while keeping their real origin visible.
+              </p>
+            </div>
+            <ExpoMap expo={expo} embedded />
+          </div>
+        </section>
 
-          <section className="market-section market-bazaar-section" id="bazaar">
-            <BazaarMap bazaar={bazaar} embedded />
-          </section>
-
-          <section className="market-section market-showrooms" id="showrooms" aria-labelledby="showrooms-title">
-            <div className="market-section-heading">
+        <section className="landing-schedule" aria-labelledby="schedule-title">
+          <div className="landing-container">
+            <div className="landing-schedule-head">
               <div>
-                <span className="market-kicker">Permanent showrooms</span>
-                <h2 id="showrooms-title">Explore SuqPage</h2>
-                <p>Search every business once. Featured showrooms appear first without creating a second catalog.</p>
+                <span className="landing-eyebrow">Seven days of production</span>
+                <h2 id="schedule-title">The Expo changes every morning.</h2>
               </div>
+              <p>Each daily floor highlights one Industry while permanent showrooms stay open all week.</p>
             </div>
-            <ShowroomDirectory entries={directoryEntries} />
-          </section>
-
-          <section className="market-schedule" aria-labelledby="schedule-title">
-            <div className="market-schedule-heading">
-              <span className="market-kicker">Changes every morning</span>
-              <h2 id="schedule-title">This week&apos;s Bazaar</h2>
-            </div>
-            <div className="market-schedule-rail">
+            <div className="landing-schedule-grid">
               {schedule.map((theme) => (
-                <article key={theme.id} className={`market-schedule-card market-schedule-${theme.icon}${theme.slug === bazaar.themeSlug ? " active" : ""}`}>
+                <article
+                  key={theme.id}
+                  className={theme.slug === expo.themeSlug ? "active" : ""}
+                >
+                  <span>{scheduleMarks[theme.icon] || "00"}</span>
                   <strong>{weekdayLabels[theme.weekday]}</strong>
-                  <span className="market-schedule-mark" aria-hidden="true">{scheduleMarks[theme.icon] || "SP"}</span>
-                  <p>{theme.name}</p>
+                  <p>{theme.name.replace(/Market/g, "Expo")}</p>
+                  {theme.slug === expo.themeSlug ? <small>Live today</small> : null}
                 </article>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="market-closing" aria-labelledby="market-closing-title">
-            <div>
-              <span className="market-kicker">Your business, clearly presented</span>
-              <h2 id="market-closing-title">Ready to give your business a showroom of its own?</h2>
-              <p>Tell us what you sell and how customers reach you. We&apos;ll help shape it into a polished SuqPage showroom.</p>
+        <section
+          className="landing-showrooms"
+          id="showrooms"
+          aria-labelledby="showrooms-title"
+        >
+          <div className="landing-container">
+            <div className="landing-section-intro">
+              <div>
+                <span className="landing-eyebrow">Permanent business profiles</span>
+                <h2 id="showrooms-title">Find a showroom.</h2>
+              </div>
+              <p>
+                Search producers, products, and capabilities across every active
+                showroom. Featured businesses appear first inside the same result set.
+              </p>
             </div>
-            <Link className="market-closing-action" href="/request">Tell us about your business <span aria-hidden="true">→</span></Link>
-          </section>
-        </div>
+            <ShowroomDirectory entries={directoryEntries} />
+          </div>
+        </section>
+
+        <section className="landing-closing" aria-labelledby="closing-title">
+          <div className="landing-container landing-closing-inner">
+            <div>
+              <span className="landing-eyebrow">Your products deserve a useful presence</span>
+              <h2 id="closing-title">Bring your business into the next Expo.</h2>
+              <p>
+                Tell us what you produce, where you operate, and how buyers should
+                inquire. We will shape it into a permanent showroom and prepare
+                your Expo booth.
+              </p>
+            </div>
+            <Link className="landing-closing-action" href="/request">
+              Start your showroom request
+            </Link>
+          </div>
+        </section>
       </main>
 
-      <nav className="market-mobile-tabs" aria-label="Marketplace navigation">
+      <nav className="landing-mobile-tabs" aria-label="Marketplace navigation">
         <a href="#top"><span aria-hidden="true">⌂</span>Home</a>
-        <a href="#bazaar"><span aria-hidden="true">⌖</span>Bazaar</a>
+        <a href="#expo"><span aria-hidden="true">⌖</span>Expo</a>
         <a href="#showrooms"><span aria-hidden="true">▦</span>Showrooms</a>
-        <Link href="/login"><span aria-hidden="true">○</span>Account</Link>
+        <Link href="/request"><span aria-hidden="true">＋</span>Join</Link>
       </nav>
 
-      <footer className="market-footer">
-        <div className="market-container">
-          <SuqPageBrand className="marketplace-brand" />
-          <nav aria-label="Footer navigation"><a href="#bazaar">Bazaar</a><a href="#showrooms">All Showrooms</a><Link href="/request">Get a Showroom</Link><Link href="/login">Login</Link></nav>
-          <div><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 SuqPage</span></div>
+      <footer className="landing-footer">
+        <div className="landing-container landing-footer-grid">
+          <div>
+            <SuqPageBrand className="landing-brand" />
+            <p>Permanent showrooms and regional daily Expos for people who make and grow.</p>
+          </div>
+          <nav aria-label="Footer navigation">
+            <a href="#expo">Live Expo</a>
+            <a href="#showrooms">Showrooms</a>
+            <Link href="/request">Get a Showroom</Link>
+            <Link href="/login">Login</Link>
+          </nav>
+          <div className="landing-legal">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <a href="mailto:falmata.dawano@gmail.com">Contact</a>
+            <span>© 2026 SuqPage</span>
+          </div>
         </div>
       </footer>
     </div>

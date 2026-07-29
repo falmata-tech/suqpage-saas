@@ -5,17 +5,17 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import {
   BazaarAdminError,
-  getCurrentBazaar,
   updateBazaarBoothPlacement,
   updateBazaarBoothProfile,
   updateBazaarTheme,
 } from "@/lib/bazaar";
 import { hasCapability } from "@/lib/capabilities";
+import { getCurrentExpo, regenerateCurrentExpo } from "@/lib/expo";
 import { assignRequestToTeamMember, createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
 import { audit, cleanText } from "@/lib/security";
 
 function bazaarAdminError(error: unknown) {
-  return error instanceof BazaarAdminError ? error.message : "Could not save Bazaar controls.";
+  return error instanceof BazaarAdminError ? error.message : "Could not save Expo controls.";
 }
 
 export async function createStaffAccountAction(formData: FormData) {
@@ -61,12 +61,14 @@ export async function updateBazaarThemeAction(formData: FormData) {
       startsAtTime: formData.get("startsAtTime"),
       active: formData.get("active") === "on",
     });
-    getCurrentBazaar();
+    getCurrentExpo();
     audit("bazaar.theme_updated", { userId:user.id, detail:{ themeId:result.themeId } });
   } catch (error) {
     redirect(`/dashboard/admin/bazaar?error=${encodeURIComponent(bazaarAdminError(error))}`);
   }
   revalidatePath("/dashboard/admin/bazaar");
+  revalidatePath("/");
+  revalidatePath("/expo");
   revalidatePath("/bazaar");
   redirect("/dashboard/admin/bazaar?saved=theme");
 }
@@ -79,16 +81,22 @@ export async function updateBazaarBoothProfileAction(formData: FormData) {
       businessId: formData.get("businessId"),
       industryKeys: formData.get("industryKeys"),
       boothImagePath: formData.get("boothImagePath"),
+      city: formData.get("city"),
+      region: formData.get("region"),
+      latitude: formData.get("latitude"),
+      longitude: formData.get("longitude"),
       fallbackStyle: formData.get("fallbackStyle"),
       featured: formData.get("featured") === "on",
       excluded: formData.get("excluded") === "on",
     });
-    getCurrentBazaar();
+    regenerateCurrentExpo();
     audit("bazaar.booth_profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
   } catch (error) {
     redirect(`/dashboard/admin/bazaar?error=${encodeURIComponent(bazaarAdminError(error))}`);
   }
   revalidatePath("/dashboard/admin/bazaar");
+  revalidatePath("/");
+  revalidatePath("/expo");
   revalidatePath("/bazaar");
   redirect("/dashboard/admin/bazaar?saved=profile");
 }
@@ -116,9 +124,11 @@ export async function updateBazaarBoothPlacementAction(formData: FormData) {
 export async function regenerateBazaarAction() {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
-  const current = getCurrentBazaar();
+  const current = regenerateCurrentExpo();
   audit("bazaar.regenerated", { userId:user.id, detail:{ occurrenceId:current.occurrenceId, boothCount:current.booths.length } });
   revalidatePath("/dashboard/admin/bazaar");
+  revalidatePath("/");
+  revalidatePath("/expo");
   revalidatePath("/bazaar");
   redirect("/dashboard/admin/bazaar?saved=regenerated");
 }

@@ -1,20 +1,39 @@
 ---
 id: DEP-010
-title: Bazaar map rollout and operations
+title: Expo geographic map rollout and operations
 status: done
 related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011]
 owners: [operations, security]
-last_updated: 2026-07-26
+last_updated: 2026-07-29
 change_level: L2
 ---
 
-# DEP-010 — Bazaar map rollout and operations
+# DEP-010 — Expo geographic map rollout and operations
 
 ## Problem and outcome
 
 The Bazaar map adds a public discovery route, new tables, daily time behavior,
 and mobile performance risk. It must roll out without disrupting existing
 showrooms, inquiries, managed requests, or the controlled single-instance pilot.
+
+## Accepted geographic Expo rollout revision
+
+- Apply an additive migration for city, region, latitude, longitude, and
+  occurrence hub assignment while retaining legacy `bazaar_*` tables.
+- Setup/reset creates at least 25 active showroom accounts. Every seeded account
+  has valid Expo location data and an approved, business-specific booth image.
+- Seeded businesses span seven daily Industry themes and multiple Ethiopian
+  regions/cities so every deterministic day has participants and sparse groups
+  exercise nearest-hub behavior.
+- Store one simplified, attributed Ethiopia boundary asset in the application.
+  Runtime operation must not require OpenStreetMap, map tiles, geocoding, or a
+  third-party map API.
+- Evidence covers projection, country framing, active-hub framing, selector
+  navigation, booth selection, origin labels, Map/List parity, reduced motion,
+  and no overflow at desktop, 390px, and 320px.
+- `/expo` is canonical; `/bazaar` redirect behavior is included in smoke tests.
+- Rollback deploys the prior code. Additive location columns and public assets
+  may remain inert.
 
 ## Scope
 
@@ -141,7 +160,7 @@ unused until a later verified rollout.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Implemented locally on 2026-07-26 as an additive pilot rollout slice. Migration
 15 creates Bazaar tables without destructive data movement. Reset/setup seeds
@@ -166,3 +185,18 @@ Evidence:
 Known limitation: no remote checks, production backup/restore run, or scheduled
 4:00 AM production job evidence has been collected. The route is locally ready
 for testing; production promotion still requires the normal operator rollout.
+
+## Completion evidence
+
+The local Expo rollout slice was implemented and verified on 2026-07-29.
+Migration 16 is additive; setup/reset creates 28 showroom profiles with valid
+booth media and locations across seven daily Industries and multiple regions.
+The 260KB attributed Ethiopia boundary is local, so runtime requires no map
+provider, map tiles, geocoder, or map server.
+
+Evidence: `npm run test:expo`, `npm run test:expo-visual`,
+`npm run test:acceptance` (10/10), `npm run check`, and `npm run release`
+passed. The release gate included production build, HTTP smoke, output-path
+privacy, security/adapters, migration-history integrity, and a zero-vulnerability
+production dependency audit. No production deployment, remote checks, or
+data-preserving rollout was requested or performed.

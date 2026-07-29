@@ -1,14 +1,14 @@
 ---
 id: FE-011
-title: Bazaar administration controls
+title: Expo administration controls
 status: done
 related: [FE-010, BE-012, DEP-010]
 owners: [product, frontend]
-last_updated: 2026-07-26
+last_updated: 2026-07-29
 change_level: L2
 ---
 
-# FE-011 — Bazaar administration controls
+# FE-011 — Expo administration controls
 
 ## Problem and outcome
 
@@ -16,6 +16,19 @@ Platform administrators need a dashboard surface to adjust the Daily Bazaar
 without editing SQLite directly. The outcome is a minimal admin UI for theme
 configuration, booth eligibility, featured flags, exclusion flags, and manual
 coordinates for the current Bazaar.
+
+## Accepted Expo profile revision
+
+- Public and dashboard labels use Expo.
+- Each business profile exposes labeled fields for approved booth image path,
+  city, region, latitude, longitude, Industry keys, featured, and excluded.
+- The page shows an explicit eligible/ineligible state and names missing
+  requirements.
+- Coordinates use WGS84 decimal degrees and are validated server-side.
+- Saving an incomplete profile is allowed, but it remains excluded from
+  occurrence generation until booth media and location are complete.
+- The current occurrence table shows true origin and assigned regional hub.
+- Saving or regenerating revalidates `/expo` and the homepage.
 
 ## Scope
 
@@ -112,7 +125,7 @@ the route/actions from the dashboard while additive Bazaar data remains unused.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Implemented on 2026-07-26 with `/dashboard/admin/bazaar`, dashboard navigation,
 labeled theme/profile/placement forms, public Bazaar revalidation, and browser
@@ -128,3 +141,15 @@ Evidence:
 
 Known limitation: this is a compact form-based admin surface, not a drag-and-drop
 floor editor or paid placement campaign manager.
+
+## Completion evidence
+
+The Expo controls revision was implemented and verified on 2026-07-29. The
+platform-admin page exposes every participation requirement, an explicit
+eligibility result with missing-field reasons, today's hub/reference/origin,
+weekly Industry controls, and explicit occurrence regeneration. Legacy manual
+floor placement is no longer presented.
+
+Evidence: `npm run test:acceptance` passed the admin save and public Featured
+state scenario as part of 10/10 tests; `npm run test:bazaar`,
+`npm run test:expo`, `npm run check`, and `npm run release` passed.

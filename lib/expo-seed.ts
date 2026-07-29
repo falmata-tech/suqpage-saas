@@ -1,0 +1,210 @@
+export type SeededExpoProfile = {
+  industryKeys: string[];
+  city: string;
+  region: string;
+  latitude: number;
+  longitude: number;
+};
+
+export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
+  "nova-assembly": {
+    industryKeys: ["electronics"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.0192,
+    longitude: 38.7525,
+  },
+  "tekle-circuit-systems": {
+    industryKeys: ["electronics"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.031,
+    longitude: 38.761,
+  },
+  "luna-cold-chain": {
+    industryKeys: ["electronics"],
+    city: "Adama",
+    region: "Oromia",
+    latitude: 8.541,
+    longitude: 39.268,
+  },
+  "abyssinia-solar-devices": {
+    industryKeys: ["electronics"],
+    city: "Bishoftu",
+    region: "Oromia",
+    latitude: 8.752,
+    longitude: 38.978,
+  },
+  "afia-botanics": {
+    industryKeys: ["beauty-wellness"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.012,
+    longitude: 38.744,
+  },
+  "nuru-naturals-lab": {
+    industryKeys: ["beauty-wellness"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 8.998,
+    longitude: 38.757,
+  },
+  "bale-herb-care": {
+    industryKeys: ["beauty-wellness"],
+    city: "Robe",
+    region: "Oromia",
+    latitude: 7.12,
+    longitude: 40.0,
+  },
+  "saba-soap-works": {
+    industryKeys: ["beauty-wellness"],
+    city: "Shashamane",
+    region: "Oromia",
+    latitude: 7.2,
+    longitude: 38.59,
+  },
+  "green-terrace-farm": {
+    industryKeys: ["food-farming"],
+    city: "Holeta",
+    region: "Oromia",
+    latitude: 9.06,
+    longitude: 38.5,
+  },
+  "rift-valley-mill": {
+    industryKeys: ["food-farming"],
+    city: "Adama",
+    region: "Oromia",
+    latitude: 8.54,
+    longitude: 39.27,
+  },
+  "blue-nile-apiary": {
+    industryKeys: ["food-farming"],
+    city: "Bahir Dar",
+    region: "Amhara",
+    latitude: 11.574,
+    longitude: 37.361,
+  },
+  "geda-coffee-cooperative": {
+    industryKeys: ["food-farming"],
+    city: "Gondar",
+    region: "Amhara",
+    latitude: 12.603,
+    longitude: 37.452,
+  },
+  "addis-metalworks": {
+    industryKeys: ["machinery-tools"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 8.986,
+    longitude: 38.742,
+  },
+  "merkato-packaging-systems": {
+    industryKeys: ["machinery-tools"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.037,
+    longitude: 38.736,
+  },
+  "atlas-pump-works": {
+    industryKeys: ["machinery-tools"],
+    city: "Adama",
+    region: "Oromia",
+    latitude: 8.55,
+    longitude: 39.285,
+  },
+  "jimma-agro-machinery": {
+    industryKeys: ["machinery-tools"],
+    city: "Jimma",
+    region: "Oromia",
+    latitude: 7.677,
+    longitude: 36.834,
+  },
+  "warka-furniture": {
+    industryKeys: ["home-living"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.041,
+    longitude: 38.727,
+  },
+  "entoto-ceramics": {
+    industryKeys: ["home-living"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.086,
+    longitude: 38.75,
+  },
+  "hadiya-woodcraft": {
+    industryKeys: ["home-living"],
+    city: "Hosaena",
+    region: "Central Ethiopia",
+    latitude: 7.55,
+    longitude: 37.85,
+  },
+  "gurage-lighting-works": {
+    industryKeys: ["home-living"],
+    city: "Butajira",
+    region: "Central Ethiopia",
+    latitude: 8.12,
+    longitude: 38.37,
+  },
+  "selam-weave": {
+    industryKeys: ["fashion-textiles"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.025,
+    longitude: 38.746,
+  },
+  "koba-leather": {
+    industryKeys: ["fashion-textiles"],
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.008,
+    longitude: 38.72,
+  },
+  "sidama-workwear": {
+    industryKeys: ["fashion-textiles"],
+    city: "Hawassa",
+    region: "Sidama",
+    latitude: 7.05,
+    longitude: 38.49,
+  },
+  "hawassa-loom-house": {
+    industryKeys: ["fashion-textiles"],
+    city: "Hawassa",
+    region: "Sidama",
+    latitude: 7.063,
+    longitude: 38.476,
+  },
+  "dawa-water-solutions": {
+    industryKeys: ["community"],
+    city: "Dire Dawa",
+    region: "Dire Dawa",
+    latitude: 9.6,
+    longitude: 41.85,
+  },
+  "eastern-safety-gear": {
+    industryKeys: ["community"],
+    city: "Dire Dawa",
+    region: "Dire Dawa",
+    latitude: 9.61,
+    longitude: 41.86,
+  },
+  "gambela-recycled-paper": {
+    industryKeys: ["community"],
+    city: "Gambela",
+    region: "Gambela",
+    latitude: 8.25,
+    longitude: 34.59,
+  },
+  "baro-nursery-supplies": {
+    industryKeys: ["community"],
+    city: "Gambela",
+    region: "Gambela",
+    latitude: 8.263,
+    longitude: 34.575,
+  },
+};
+
+export function seededExpoBoothPath(handle: string) {
+  return `/landing/expo-booths/${handle}.webp`;
+}

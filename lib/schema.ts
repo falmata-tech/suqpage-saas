@@ -1035,4 +1035,40 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const expoGeographyApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=16")
+    .get();
+  if (!expoGeographyApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(db, "bazaar_booth_profiles", "city TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "bazaar_booth_profiles", "region TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "bazaar_booth_profiles", "latitude REAL");
+      addColumn(db, "bazaar_booth_profiles", "longitude REAL");
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS expo_hub_assignments (
+          occurrence_id INTEGER NOT NULL REFERENCES bazaar_occurrences(id) ON DELETE CASCADE,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          origin_region TEXT NOT NULL,
+          hub_key TEXT NOT NULL,
+          hub_name TEXT NOT NULL,
+          hub_city TEXT NOT NULL,
+          hub_latitude REAL NOT NULL CHECK(hub_latitude BETWEEN -90 AND 90),
+          hub_longitude REAL NOT NULL CHECK(hub_longitude BETWEEN -180 AND 180),
+          hall_number INTEGER NOT NULL CHECK(hall_number >= 1),
+          booth_number INTEGER NOT NULL CHECK(booth_number >= 1),
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY(occurrence_id,business_id)
+        );
+        CREATE INDEX IF NOT EXISTS expo_hub_assignment_idx
+          ON expo_hub_assignments(occurrence_id,hub_key,hall_number,booth_number);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(16)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

@@ -14,6 +14,7 @@ async function main() {
     BazaarAdminError,
     getCurrentBazaar,
     listBazaarAdminState,
+    seedDefaultBazaarConfig,
     updateBazaarBoothPlacement,
     updateBazaarBoothProfile,
     updateBazaarTheme,
@@ -92,10 +93,25 @@ async function main() {
     "active",
   );
 
+  seedDefaultBazaarConfig(db);
+  db.prepare(`
+    UPDATE bazaar_themes
+    SET industry_keys_json=?
+    WHERE slug='enterprise-export-showcase'
+  `).run(JSON.stringify([
+    "electronics",
+    "beauty-wellness",
+    "food-farming",
+    "machinery-tools",
+    "home-living",
+    "fashion-textiles",
+    "community",
+  ]));
+
   const sunday = new Date("2026-07-26T10:00:00.000Z");
   const first = getCurrentBazaar({ db, now: sunday });
   assert.equal(first.status, "live");
-  assert.equal(first.themeSlug, "community-market-special-event");
+  assert.equal(first.themeSlug, "enterprise-export-showcase");
   assert.equal(first.floor.totalBoothCount, 4);
   assert.equal(first.floor.visibleBoothCount, 4);
   assert.equal(first.floor.columns, 2);
@@ -117,7 +133,7 @@ async function main() {
   );
   assert.equal(
     first.booths.find((booth) => booth.handle === "alhayabrand")?.imageUrl,
-    "/landing/booths/alhayabrand-storefront.jpg",
+    "/uploads/seed/alhaya/hero-featured.jpg",
   );
   assert.equal(first.booths.every((booth) => booth.onFloor), true);
   assert.deepEqual(
@@ -225,6 +241,10 @@ async function main() {
     businessId: communityBusinessId,
     industryKeys: "community, food-farming",
     boothImagePath: "",
+    city: "Addis Ababa",
+    region: "Addis Ababa",
+    latitude: 9.03,
+    longitude: 38.74,
     fallbackStyle: "market",
     featured: true,
     excluded: false,
@@ -234,7 +254,7 @@ async function main() {
     1,
   );
   assert.throws(
-    () => updateBazaarBoothProfile({ businessId: communityBusinessId, industryKeys: "community", boothImagePath: "https://remote.test/img.jpg", fallbackStyle: "market", featured: false, excluded: false }, db),
+    () => updateBazaarBoothProfile({ businessId: communityBusinessId, industryKeys: "community", boothImagePath: "https://remote.test/img.jpg", city: "Addis Ababa", region: "Addis Ababa", latitude: 9.03, longitude: 38.74, fallbackStyle: "market", featured: false, excluded: false }, db),
     (error: unknown) => error instanceof BazaarAdminError && error.code === "invalid_media_path",
   );
 

@@ -1,14 +1,14 @@
 ---
 id: FE-015
-title: App-like marketplace home and Bazaar
+title: App-like marketplace home and Expo
 status: done
 related: [FE-010, FE-012, FE-013, BE-011, BE-013, DEP-010, DEP-011]
 owners: [product, frontend, design]
-last_updated: 2026-07-27
+last_updated: 2026-07-29
 change_level: L2
 ---
 
-# FE-015 - App-like marketplace home and Bazaar
+# FE-015 - App-like marketplace home and Expo
 
 ## Problem and outcome
 
@@ -17,6 +17,19 @@ featured sections. On mobile it becomes a long stack of rails followed by a
 small map. Visitors need one coherent marketplace discovery experience and a
 dynamic Bazaar that feels like a restrained contemporary mall rather than graph
 paper.
+
+## Accepted geographic Expo revision
+
+- The mobile app surface uses a local Ethiopia vector map, active regional Expo
+  hubs, a direct hub selector, Map/List modes, and a bounded booth sheet.
+- Country view and **View Ethiopia** show all active hubs. **Center today's
+  Expos** frames the active hub set. Selecting a hub frames its assigned booths.
+- Mobile controls remain reachable without trapping ordinary vertical page
+  scrolling; pinch and button zoom are bounded and reduced motion is honored.
+- The homepage contains one showroom discovery feed. Featured status influences
+  ordering and visual emphasis without creating another repeated rail.
+- Stable section dimensions prevent map controls, long region names, selected
+  booth content, or sparse search results from shifting the page unexpectedly.
 
 ## Scope
 
@@ -118,7 +131,7 @@ showrooms and Bazaar records remain unchanged.
 - [x] Desktop/mobile behavior explicit
 - [x] Tests and rollback planned
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Evidence: implemented and verified on 2026-07-27.
 
@@ -130,3 +143,15 @@ Evidence: implemented and verified on 2026-07-27.
   document overflow.
 - Marketplace, Bazaar, full-check, and 10/10 production-browser acceptance
   evidence passed.
+
+## Completion evidence
+
+The geographic Expo and revised mobile public app were implemented and verified
+on 2026-07-29. Mobile provides persistent Home/Expo/Showrooms/Join navigation,
+normal document scrolling, bounded map interaction, country/hub framing,
+Map/List modes, a booth sheet above safe-area navigation, and one horizontally
+scrollable showroom result rail.
+
+`npm run test:expo-visual` passed desktop, 390px, and 320px probes with no
+overflow or undersized controls. `npm run test:acceptance` passed 10/10;
+`npm run check` and `npm run release` passed.

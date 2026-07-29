@@ -1,20 +1,34 @@
 ---
 id: BE-012
-title: Bazaar administration operations
+title: Expo administration operations
 status: done
 related: [BE-011, FE-011, DEP-010]
 owners: [backend, security]
-last_updated: 2026-07-26
+last_updated: 2026-07-29
 change_level: L2
 ---
 
-# BE-012 — Bazaar administration operations
+# BE-012 — Expo administration operations
 
 ## Problem and outcome
 
 The Daily Bazaar needs server-side admin operations so platform staff can adjust
 themes, booth profiles, and manual coordinates without bypassing validation. The
 outcome is a narrow application boundary for safe Bazaar administration.
+
+## Accepted Expo profile revision
+
+- Booth-profile mutation accepts city, region, latitude, longitude, Industry
+  keys, booth image path, featured, and excluded.
+- Latitude must be within `[-90, 90]`, longitude within `[-180, 180]`, and booth
+  paths must use an approved public application path.
+- Eligibility is derived server-side and returned with human-readable missing
+  requirements; the browser does not decide participation.
+- Regeneration recomputes regional hubs for a new occurrence but preserves
+  assignments for an existing occurrence unless an administrator explicitly
+  regenerates after profile changes.
+- Existing manual floor-coordinate operations become legacy compatibility
+  behavior and are not presented in the geographic Expo UI.
 
 ## Scope
 
@@ -116,7 +130,7 @@ public Bazaar map.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Implemented on 2026-07-26 with Bazaar admin read/mutation helpers in
 `lib/bazaar.ts` and platform-admin server actions in `app/staff-actions.ts`.
@@ -134,3 +148,13 @@ Evidence:
 
 Known limitation: new booth image upload/approval remains out of scope; the
 admin can point a booth at an existing public app media path.
+
+## Completion evidence
+
+The Expo profile revision was implemented and verified on 2026-07-29.
+Platform-admin actions validate approved local booth paths, Industry keys,
+city, region, WGS84 latitude/longitude, featured/excluded state, and explicit
+hub regeneration. Public eligibility remains server-derived.
+
+Evidence: `npm run test:bazaar`, `npm run test:expo`, `npm run check`,
+`npm run test:acceptance` (10/10), and `npm run release` passed.

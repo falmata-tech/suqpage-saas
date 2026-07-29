@@ -1,14 +1,14 @@
 ---
 id: FE-010
-title: Public daily Bazaar mobile map
+title: Public daily Expo geographic map
 status: done
 related: [FE-001, FE-011, FE-012, FE-015, BE-011, DEP-010, DEP-011]
 owners: [product, frontend]
-last_updated: 2026-07-26
+last_updated: 2026-07-29
 change_level: L2
 ---
 
-# FE-010 — Public daily Bazaar mobile map
+# FE-010 — Public daily Expo geographic map
 
 ## Problem and outcome
 
@@ -17,6 +17,46 @@ Bazaar feel active while still sending every customer into the business's
 permanent `/@handle` showroom. The first outcome is a mobile-first `/bazaar`
 experience with a movable visual floor, booth previews, and an accessible list
 fallback backed by server-owned Bazaar data.
+
+## Accepted geographic Expo revision
+
+This section supersedes the mall-floor presentation retained below as evidence
+of the previous implementation.
+
+- `/expo` is canonical and `/bazaar` redirects for bookmark compatibility.
+- The primary visual is a lightweight SVG map of Ethiopia rendered from a
+  locally stored, attributed, simplified boundary asset. It shows the country
+  border, restrained region borders, useful city labels, and no roads, remote
+  tiles, satellite imagery, decorative terrain, WebGL, or static floor image.
+- Proven geographic projection and zoom utilities handle GeoJSON, drag, wheel,
+  keyboard, and pinch input with bounded movement.
+- Country view shows every regional Expo hub active today with participant
+  counts. A labeled region/hub selector provides direct navigation.
+- Selecting a hub smoothly frames its booths. **Center today's Expos** frames
+  all active hubs, while **View Ethiopia** restores the country extent.
+- Booth markers use approved booth imagery at detail zoom. A selected booth
+  opens a bounded mobile sheet with reference, business, Industry, true origin
+  city/region, assigned hub, and showroom action.
+- References use `H{hub-number}.{hall-number}-B{booth-number}` consistently in
+  the map, selected-booth sheet, and Expo List.
+- Map View and List View expose the same participant set. List View is complete
+  and remains the low-motion/accessibility fallback.
+- Public labels say Expo, Expo Map, Expo List, and regional Expo.
+
+```gherkin
+Scenario: Visitor sees all active regional Expos
+  GIVEN today's occurrence has multiple regional hubs
+  WHEN a visitor opens /expo or activates View Ethiopia
+  THEN the whole Ethiopia boundary and every active hub are visible
+  AND the visitor can choose a hub from the labeled selector
+
+Scenario: Visitor explores one hub on mobile
+  GIVEN a 320 or 390 CSS-pixel viewport
+  WHEN the visitor selects a regional Expo
+  THEN the map frames that hub at a useful zoom
+  AND booth selection opens a bounded sheet without horizontal page overflow
+  AND the visitor can return to all active Expos with one control
+```
 
 ## Scope
 
@@ -190,7 +230,7 @@ additive and inert unless used by the deployed code.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Prior floor evidence (superseded)
 
 Implemented on 2026-07-26 with `/bazaar`, the homepage live Bazaar section,
 weekly schedule, hero Bazaar callout, `components/BazaarMap.tsx`, mobile map
@@ -223,3 +263,17 @@ Evidence:
 Known limitation: the public visual floor is intentionally capped at 48
 storefronts for bounded browser work. Additional participating businesses remain
 fully available in Bazaar List rather than receiving a floor storefront.
+
+## Completion evidence
+
+The canonical `/expo` experience and `/bazaar` compatibility redirect were
+implemented and verified on 2026-07-29. The public map uses the local attributed
+Ethiopia GeoJSON, D3 projection/zoom, all-hub and selected-hub framing, a labeled
+hub selector, image-backed booth markers, bounded mobile preview, and complete
+Map/List parity.
+
+Evidence: `npm run test:expo-visual` passed at 1440px, 390px, and 320px with 14
+regions, active hubs, no browser errors, broken images, text/page overflow, or
+undersized mobile controls. `npm run test:acceptance` passed 10/10, including
+regional selection, booth origin/reference, list parity, and redirect behavior.
+`npm run check` and `npm run release` passed.

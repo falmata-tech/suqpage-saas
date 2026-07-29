@@ -85,10 +85,11 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
 - a public discovery surface where eligible businesses can appear in a themed
-  Daily Bazaar while every booth leads back to the business's permanent
+  Daily Expo while every booth leads back to the business's permanent
   `/@handle` showroom;
-- a controlled SaaS pilot with ten fictional local benchmark showrooms spanning
-  makers, producers, farms, workshops, and small manufacturers.
+- a controlled SaaS pilot with 28 fictional local showrooms spanning makers,
+  producers, farms, workshops, and small-to-medium manufacturers; ten of those
+  remain the deeper visual benchmark set.
 
 ### SuqPage is not
 
@@ -192,7 +193,7 @@ work. The current local checkpoint passes the standard check and ten
 production-browser acceptance scenarios, including CSP/provider-video proof,
 the blueprint studio, client approval, and publication. `FE-014`, `BE-013`,
 `FE-015`, and `DEP-011` record the completed local blueprint, composition-
-fitness, marketplace, Bazaar, and ten-showroom benchmark scope. Remote checks
+fitness, marketplace, Expo, and ten-showroom benchmark scope. Remote checks
 and any production/data-preserving rollout remain separate future evidence.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
@@ -212,30 +213,36 @@ The SuqPage landing page must not look like any client showroom. It is a polishe
 mobile-first marketplace surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-015` defines the current visual composition: a
 photographic maker hero leads with the permanent `/@handle` showroom product
-and a compact live-Bazaar callout; the dynamic Bazaar map/list is the primary
-live module, followed by one searchable, Industry-filtered permanent-showroom
-directory and the server-owned weekly schedule. The directory renders at most
-five matching showrooms per page,
-uses one horizontally scrollable Industry pill row instead of category controls
-or duplicate all-business navigation, and resets pagination when search or
-Industry changes.
-The map derives bounded floor dimensions from current participation, grounds up
-to 48 storefronts against code-rendered corridors, balances automatic booths in
-centered near-square rows, fits the initial view to the available viewport, and
-keeps every additional participant available in Bazaar List. Its project-owned
-storefront facades sit on a restrained CSS-rendered mall floor with neutral
-tiles, thin edges, simple corridors, and no decorative lounge or furniture.
-Floor booths expose consistent `R{row}-{number}` references across Map View,
-preview, and List View. Featured emphasis is integrated into the one paginated
-directory instead of repeating businesses in a second catalog. A visually
-distinct final merchant CTA closes the page. The useful product explanation
-lives in compact hero benefits; there is no separate How SuqPage works section
-or action. Tenant cards and booths use active public tenant data and link
-to the authoritative showroom. Platform artwork is decorative and makes no
-tenant-specific product claim. For the current small marketplace, every active
-public showroom is currently marked featured, with the pool capped at 20 and at
-most five results rendered on a directory page.
-Desktop showroom result cards remain compact when filters reduce the result count.
+and a compact live-Expo callout; the full-width regional Expo map/list is the
+primary live module, followed by the server-owned weekly Industry schedule and
+one searchable, Industry-filtered permanent-showroom directory. The directory
+renders at most five matching showrooms per page, uses one horizontally
+scrollable Industry pill row instead of category controls or duplicate
+all-business navigation, and resets pagination when search or Industry changes.
+
+The Expo uses a locally stored and attributed Ethiopia administrative-boundary
+asset with a proven geographic projection and bounded SVG pan/zoom. Country view
+shows every active regional hub. A labeled selector jumps to one hub, **Center
+today's Expos** frames the active set, and **View Ethiopia** restores the country
+extent. During the pilot, two eligible businesses in a represented region create
+a regional hub; a one-business region joins its geographically nearest active
+hub without changing the origin city and region shown to visitors. A business
+must have an active showroom, matching Industry, approved booth-specific image,
+valid city/region/WGS84 coordinates, and no exclusion before it may participate.
+Map and List views expose the same complete participant set. Detail markers and
+the selected-booth sheet expose consistent
+`H{hub-number}.{hall-number}-B{booth-number}` references.
+
+Featured emphasis is integrated into the one paginated directory instead of
+repeating businesses in a second catalog. A visually distinct final merchant CTA
+closes the page. The useful product explanation lives in compact hero benefits;
+there is no separate How SuqPage works section or action. Tenant cards and Expo
+booths use active public tenant data and link to the authoritative showroom.
+Approved booth media belongs to its represented business; a generic named booth
+is only a failed-file fallback and does not make an incomplete profile eligible.
+For the current fictional marketplace, every active public showroom is featured
+and at most five results render on a directory page. Desktop cards remain compact
+when filters reduce the result count.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file
@@ -741,7 +748,7 @@ Current verified behavior:
   dashboard. The public site is a separate, explicit link, and an authenticated
   visit to the login route returns to the dashboard instead of showing a second
   sign-in form.
-- Platform-owned homepage, Bazaar, intake, login, legal, favicon, and workspace
+- Platform-owned homepage, Expo, intake, login, legal, favicon, and workspace
   surfaces use one SuqPage mark and wordmark without replacing any tenant's
   showroom identity. Authenticated navigation groups role-permitted work in a
   neutral desktop sidebar and exposes the same destinations in a focus-contained

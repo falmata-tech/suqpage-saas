@@ -1,5 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
+import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "./expo-seed";
 
 const DEFAULT_TIMEZONE = process.env.SUQPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
 const MIN_FLOOR_WIDTH = 720;
@@ -11,13 +12,6 @@ const BOOTH_HEIGHT = 150;
 const BOOTH_GAP = 44;
 const CORRIDOR_HEIGHT = 132;
 const ROW_GAP = 42;
-
-const SEEDED_STOREFRONT_IMAGES: Record<string, string> = {
-  alhayabrand: "/landing/booths/alhayabrand-storefront.jpg",
-  usashopet: "/landing/booths/usashopet-storefront.jpg",
-  novatech: "/landing/booths/novatech-storefront.jpg",
-  homevibe: "/landing/booths/homevibe-storefront.jpg",
-};
 
 const INDUSTRY_LABELS: Record<string, string> = {
   electronics: "Electronics & Appliances",
@@ -38,10 +32,10 @@ const DEFAULT_THEMES = [
   { weekday: 6, name: "Fashion, Textiles & Accessories", slug: "fashion-textiles-accessories", icon: "shirt", industryKeys: ["fashion-textiles"] },
   {
     weekday: 0,
-    name: "Community Market & Special Event",
-    slug: "community-market-special-event",
+    name: "Enterprise & Export Showcase",
+    slug: "enterprise-export-showcase",
     icon: "star",
-    industryKeys: ["electronics", "beauty-wellness", "food-farming", "machinery-tools", "home-living", "fashion-textiles", "community"],
+    industryKeys: ["community"],
   },
 ] as const;
 
@@ -147,9 +141,15 @@ export type BazaarProfileAdminView = {
   industryKeys: string[];
   industryLabel: string;
   boothImagePath: string;
+  city: string;
+  region: string;
+  latitude: number | null;
+  longitude: number | null;
   fallbackStyle: string;
   featured: boolean;
   excluded: boolean;
+  eligible: boolean;
+  eligibilityIssues: string[];
   booth: BazaarBoothView | null;
 };
 
@@ -193,6 +193,24 @@ function normalizeIndustryKeys(value: string | string[]) {
 function requireInteger(value: unknown, label: string) {
   const number = typeof value === "number" ? value : Number.parseInt(String(value || ""), 10);
   if (!Number.isInteger(number)) throw new BazaarAdminError(`${label} is invalid.`, "invalid_number");
+  return number;
+}
+
+function requireCoordinate(
+  value: unknown,
+  label: string,
+  minimum: number,
+  maximum: number,
+) {
+  const number = typeof value === "number"
+    ? value
+    : Number.parseFloat(String(value ?? ""));
+  if (!Number.isFinite(number) || number < minimum || number > maximum) {
+    throw new BazaarAdminError(
+      `${label} must be between ${minimum} and ${maximum}.`,
+      "invalid_coordinate",
+    );
+  }
   return number;
 }
 
@@ -244,6 +262,8 @@ function occurrenceWindow(localDate: string, timezone: string, startsAtTime: str
 }
 
 function defaultIndustryKeysForBusiness(handle: string) {
+  const seeded = SEEDED_EXPO_PROFILES[handle];
+  if (seeded) return seeded.industryKeys;
   const keys: Record<string, string[]> = {
     alhayabrand: ["fashion-textiles"],
     usashopet: ["beauty-wellness"],
@@ -258,7 +278,7 @@ function defaultIndustryKeysForBusiness(handle: string) {
     "rift-valley-mill": ["food-farming"],
     "entoto-ceramics": ["home-living"],
     "koba-leather": ["fashion-textiles"],
-    "nova-assembly": ["electronics", "machinery-tools"],
+    "nova-assembly": ["electronics"],
   };
   return keys[handle] || ["community"];
 }
@@ -319,24 +339,40 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
     .all() as Array<{ id: number; handle: string; hero_image_path: string }>;
   const insertProfile = db.prepare(`
     INSERT OR IGNORE INTO bazaar_booth_profiles(
-      business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,is_excluded,approved_at
-    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP)
+      business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,
+      is_excluded,approved_at,city,region,latitude,longitude
+    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP,?,?,?,?)
   `);
   for (const business of businesses) {
     const industryKeys = defaultIndustryKeysForBusiness(business.handle);
-    const boothImagePath = SEEDED_STOREFRONT_IMAGES[business.handle] || business.hero_image_path || "";
+    const seededProfile = SEEDED_EXPO_PROFILES[business.handle];
+    const boothImagePath = seededProfile ? seededExpoBoothPath(business.handle) : "";
     insertProfile.run(
       business.id,
       JSON.stringify(industryKeys),
       boothImagePath,
       fallbackStyleForIndustry(industryKeys),
+      seededProfile?.city || "",
+      seededProfile?.region || "",
+      seededProfile?.latitude ?? null,
+      seededProfile?.longitude ?? null,
     );
-    if (SEEDED_STOREFRONT_IMAGES[business.handle]) {
+    if (seededProfile) {
       db.prepare(`
         UPDATE bazaar_booth_profiles
-        SET booth_image_path=?,updated_at=CURRENT_TIMESTAMP
-        WHERE business_id=? AND (booth_image_path IS NULL OR booth_image_path='' OR booth_image_path=?)
-      `).run(boothImagePath, business.id, business.hero_image_path || "");
+        SET industry_keys_json=?,booth_image_path=?,city=?,region=?,latitude=?,
+          longitude=?,approved_at=COALESCE(approved_at,CURRENT_TIMESTAMP),
+          updated_at=CURRENT_TIMESTAMP
+        WHERE business_id=?
+      `).run(
+        JSON.stringify(industryKeys),
+        boothImagePath,
+        seededProfile.city,
+        seededProfile.region,
+        seededProfile.latitude,
+        seededProfile.longitude,
+        business.id,
+      );
     }
   }
 }
@@ -575,7 +611,8 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
   const boothByBusinessId = new Map(current.booths.map((booth) => [booth.businessId, booth]));
   const profiles = db.prepare(`
     SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
-      p.booth_image_path,p.fallback_style,p.is_featured,p.is_excluded
+      p.booth_image_path,p.city,p.region,p.latitude,p.longitude,
+      p.fallback_style,p.is_featured,p.is_excluded
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
     ORDER BY b.status='active' DESC,b.name,b.id
@@ -586,6 +623,10 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
     status: string;
     industry_keys_json: string | null;
     booth_image_path: string | null;
+    city: string | null;
+    region: string | null;
+    latitude: number | null;
+    longitude: number | null;
     fallback_style: string | null;
     is_featured: number | null;
     is_excluded: number | null;
@@ -593,19 +634,34 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
   return {
     current,
     themes,
-    profiles: profiles.map((profile) => ({
-      businessId: profile.business_id,
-      businessName: profile.name,
-      handle: profile.handle,
-      status: profile.status,
-      industryKeys: jsonArray(profile.industry_keys_json),
-      industryLabel: INDUSTRY_LABELS[jsonArray(profile.industry_keys_json)[0] || "community"] || "Community Market",
-      boothImagePath: profile.booth_image_path || "",
-      fallbackStyle: profile.fallback_style || "market",
-      featured: Boolean(profile.is_featured),
-      excluded: Boolean(profile.is_excluded),
-      booth: boothByBusinessId.get(profile.business_id) || null,
-    })),
+    profiles: profiles.map((profile) => {
+      const eligibilityIssues = [
+        ...(!profile.booth_image_path?.startsWith("/") ? ["booth image"] : []),
+        ...(!profile.city?.trim() ? ["city"] : []),
+        ...(!profile.region?.trim() ? ["region"] : []),
+        ...(typeof profile.latitude !== "number" || profile.latitude < -90 || profile.latitude > 90 ? ["latitude"] : []),
+        ...(typeof profile.longitude !== "number" || profile.longitude < -180 || profile.longitude > 180 ? ["longitude"] : []),
+      ];
+      return {
+        businessId: profile.business_id,
+        businessName: profile.name,
+        handle: profile.handle,
+        status: profile.status,
+        industryKeys: jsonArray(profile.industry_keys_json),
+        industryLabel: INDUSTRY_LABELS[jsonArray(profile.industry_keys_json)[0] || "community"] || "Enterprise & Export Showcase",
+        boothImagePath: profile.booth_image_path || "",
+        city: profile.city || "",
+        region: profile.region || "",
+        latitude: profile.latitude,
+        longitude: profile.longitude,
+        fallbackStyle: profile.fallback_style || "market",
+        featured: Boolean(profile.is_featured),
+        excluded: Boolean(profile.is_excluded),
+        eligible: profile.status === "active" && !profile.is_excluded && eligibilityIssues.length === 0,
+        eligibilityIssues,
+        booth: boothByBusinessId.get(profile.business_id) || null,
+      };
+    }),
   };
 }
 
@@ -637,6 +693,10 @@ export function updateBazaarBoothProfile(input: {
   businessId: unknown;
   industryKeys: unknown;
   boothImagePath: unknown;
+  city?: unknown;
+  region?: unknown;
+  latitude?: unknown;
+  longitude?: unknown;
   fallbackStyle: unknown;
   featured: unknown;
   excluded: unknown;
@@ -646,14 +706,23 @@ export function updateBazaarBoothProfile(input: {
   if (!industryKeys.length) throw new BazaarAdminError("At least one industry key is required.", "missing_industry");
   const boothImagePath = requireBoundedText(input.boothImagePath, "Booth image path", 240, false);
   if (boothImagePath && !boothImagePath.startsWith("/")) throw new BazaarAdminError("Booth image path must be a public app path.", "invalid_media_path");
+  const city = requireBoundedText(input.city, "City", 100);
+  const region = requireBoundedText(input.region, "Region", 100);
+  const latitude = requireCoordinate(input.latitude, "Latitude", -90, 90);
+  const longitude = requireCoordinate(input.longitude, "Longitude", -180, 180);
   const fallbackStyle = requireBoundedText(input.fallbackStyle, "Fallback style", 40, false) || fallbackStyleForIndustry(industryKeys);
   const result = db.prepare(`
     INSERT INTO bazaar_booth_profiles(
-      business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,is_excluded,approved_at,updated_at
-    ) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      business_id,industry_keys_json,booth_image_path,city,region,latitude,
+      longitude,fallback_style,is_featured,is_excluded,approved_at,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     ON CONFLICT(business_id) DO UPDATE SET
       industry_keys_json=excluded.industry_keys_json,
       booth_image_path=excluded.booth_image_path,
+      city=excluded.city,
+      region=excluded.region,
+      latitude=excluded.latitude,
+      longitude=excluded.longitude,
       fallback_style=excluded.fallback_style,
       is_featured=excluded.is_featured,
       is_excluded=excluded.is_excluded,
@@ -662,6 +731,10 @@ export function updateBazaarBoothProfile(input: {
     businessId,
     JSON.stringify(industryKeys),
     boothImagePath,
+    city,
+    region,
+    latitude,
+    longitude,
     fallbackStyle,
     input.featured ? 1 : 0,
     input.excluded ? 1 : 0,
