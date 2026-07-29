@@ -93,7 +93,7 @@ test("prospect submits an interest request without public uploads", async ({ pag
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("public discovery, Expo, benchmark showrooms, cart, and persisted inquiry", async ({ page }) => {
+test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/");
   await expectVisibleControlsNamed(page);
@@ -325,13 +325,18 @@ test("public discovery, Expo, benchmark showrooms, cart, and persisted inquiry",
   await expect(drawerOpener).toBeFocused();
   await expect(page.locator(".inquiry-drawer")).toHaveAttribute("aria-hidden", "true");
   await drawerOpener.click();
-  await page.getByPlaceholder("Your first name").fill("Browser Tester");
-  await page.getByPlaceholder("How the business can contact you").fill("251900123456");
-  await page.getByPlaceholder("Delivery area or another question").fill("Acceptance test inquiry");
-  await page.getByRole("button", { name: "Share / copy" }).click();
-  await expect(page.getByText("Message", { exact: true })).toBeVisible();
-  const saved = readAcceptanceRow("inquiryByCustomer", "Browser Tester");
-  expect(saved).toEqual({ status: "new", contact: "251900123456" });
+  await expect(page.getByPlaceholder("Your first name")).toHaveCount(0);
+  await expect(page.getByPlaceholder("How the business can contact you")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "TikTok" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Share / copy" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "WhatsApp" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Telegram" })).toBeVisible();
+  await page.getByRole("button", { name: "Copy inquiry" }).click();
+  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  const copiedReference = page.locator(".copied-reference pre");
+  await expect(copiedReference).toContainText("Showroom reference: @selam-weave");
+  await expect(copiedReference).not.toContainText("Desired quantity:");
+  expect(readAcceptanceRow("inquiryByCustomer", "Browser Tester")).toBeNull();
   expect(errors).toEqual([]);
 });
 
@@ -384,17 +389,28 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(mobileDrawer.bottom).toBeGreaterThanOrEqual(5);
   expect(mobileDrawer.height).toBeLessThanOrEqual(832);
   expect(mobileDrawer.controlsMeetTouchTarget).toBe(true);
-  await page.getByRole("button", { name: "Increase quantity" }).click();
-  await expect(page.locator(".qty strong")).toHaveText("2");
+  await expect(page.locator(".direct-handoffs")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Telegram" })).toHaveCount(0);
+  const firstQuantity = page.locator(".cart-item").first().getByRole("spinbutton", {
+    name: /Desired quantity/,
+  });
+  await expect(firstQuantity).toHaveValue("");
+  await firstQuantity.fill("2");
+  await expect(firstQuantity).toHaveValue("2");
   await page.getByRole("button", { name: "Close inquiry" }).click();
   await page.getByLabel("Search products and capabilities").fill("Short-Run");
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await floatingInquiry.click();
-  const optionalQuantity = page.getByPlaceholder("Discuss with supplier");
+  const optionalQuantity = page.locator(".cart-item").last().getByRole("spinbutton", {
+    name: /Desired quantity/,
+  });
   await expect(optionalQuantity).toHaveValue("");
   await optionalQuantity.fill("250");
   await expect(optionalQuantity).toHaveValue("250");
+  await page.getByRole("button", { name: "Copy inquiry" }).click();
+  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 250");
   await page.getByRole("button", { name: "Close inquiry" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 320, height: 700 });
@@ -821,7 +837,7 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.getByLabel("Offering name").fill("Team assisted fabrication capability");
   await page.getByLabel("Description").fill("Created by assigned staff after the first showroom publication.");
   await page.getByLabel("Offering type").selectOption("manufacturing_capability");
-  await page.getByLabel("Desired quantity").selectOption("optional");
+  await expect(page.getByText("Desired quantity is optional")).toBeVisible();
   await page.getByLabel(/Production or supply capacity/).fill("Up to 800 assemblies per month");
   await page.getByLabel("Availability").selectOption("coming_soon");
   await page.getByLabel("Customer-service note").fill("The client asked the assigned team member to add this product.");
@@ -899,11 +915,11 @@ test("seeded client is restricted while operations manages customer activity", a
   await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
   await page.goto("/dashboard/inquiries?business=1");
   await expectVisibleControlsNamed(page);
-  const row = page.locator("section.panel").filter({ hasText: "Browser Tester" });
+  const row = page.locator("section.panel").filter({ hasText: "Hana" });
   await row.getByRole("combobox").selectOption("confirmed");
   await row.getByRole("button", { name: "Update" }).click();
   await expect(page.getByText("Inquiry status updated")).toBeVisible();
-  await page.getByRole("link", { name: "Create delivery" }).first().click();
+  await row.getByRole("link", { name: "Create delivery request" }).click();
   await expectVisibleControlsNamed(page);
   const sessionCookie = (await page.context().cookies()).find((cookie) => cookie.name === "suqpage_session");
   expect(sessionCookie).toBeDefined();
@@ -920,7 +936,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await page.locator('input[name="deliveryAddress"]').fill("Acceptance destination");
   await page.getByRole("button", { name: "Submit to Malikt Board" }).click();
   await expect(page.getByText(/submitted to the mock Malikt Board/)).toBeVisible();
-  expect(readAcceptanceRow("inquiryByCustomer", "Browser Tester")).toMatchObject({ status: "confirmed" });
+  expect(readAcceptanceRow("inquiryByCustomer", "Hana")).toMatchObject({ status: "confirmed" });
   expect(readAcceptanceRow("deliveryByAddress", "Acceptance destination")).toEqual({ status: "submitted" });
   expect(errors).toEqual([]);
 });

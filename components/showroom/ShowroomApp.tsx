@@ -43,25 +43,41 @@ function legacyCopy(value: string) {
   }
 }
 
-function buildMessage(catalog: Catalog, cart: CartLine[], name: string, note: string) {
-  return [
-    `Hello ${catalog.business.name},`,
-    "",
-    `My name is ${name}. I would like to ask about:`,
-    ...cart.map((line, index) => {
+function buildMessage(catalog: Catalog, cart: CartLine[]) {
+  const offerings = cart.flatMap((line, index) => {
       const options = Object.entries(line.options)
         .map(([key, value]) => `${key}: ${value}`)
         .join(", ");
-      const desiredQuantity =
-        line.quantity === null ? "" : ` · Desired quantity: ${line.quantity}`;
-      return `${index + 1}. ${line.product.name}${desiredQuantity}${options ? ` (${options})` : ""}`;
-    }),
-    note ? `\nNote: ${note}` : "",
+      return [
+        `${index + 1}. ${line.product.name}`,
+        options ? `   Options: ${options}` : null,
+        line.quantity === null
+          ? null
+          : `   Desired quantity: ${line.quantity}`,
+      ].filter((value): value is string => Boolean(value));
+    });
+  return [
+    `Hello ${catalog.business.name},`,
+    "",
+    "I would like to ask about:",
+    ...offerings,
+    "",
     "Please confirm availability and the next steps.",
-    `Sent from @${catalog.business.handle} on SuqPage.`,
+    "",
+    `Showroom reference: @${catalog.business.handle}`,
+    `https://suqpage.com/@${catalog.business.handle}`,
   ]
-    .filter(Boolean)
     .join("\n");
+}
+
+async function copyText(value: string) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch {}
+  }
+  return legacyCopy(value);
 }
 
 function trapTab(event: KeyboardEvent, root: HTMLElement) {
@@ -128,7 +144,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
                 {
                   product,
                   quantity:
-                    product.quantity_mode === "optional" && line.quantity === null
+                    line.quantity === null || line.quantity === undefined
                       ? null
                       : Math.max(
                           1,
@@ -208,7 +224,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           ...current,
           {
             product,
-            quantity: product.quantity_mode === "required" ? 1 : null,
+            quantity: null,
             options,
           },
         ];
@@ -222,22 +238,6 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     setSelected(null);
     show("Added to inquiry");
   };
-  const quantity = (index: number, delta: number) =>
-    setCart((current) =>
-      current
-        .map((line, lineIndex) =>
-          lineIndex === index
-            ? {
-                ...line,
-                quantity:
-                  line.quantity === null
-                    ? null
-                    : Math.min(1_000_000, line.quantity + delta),
-              }
-            : line,
-        )
-        .filter((line) => line.quantity === null || line.quantity > 0),
-    );
   const setDesiredQuantity = (index: number, raw: string) =>
     setCart((current) =>
       current.map((line, lineIndex) => {
@@ -395,7 +395,6 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         opener={drawerOpener}
         catalog={catalog}
         cart={cart}
-        quantity={quantity}
         setDesiredQuantity={setDesiredQuantity}
         remove={(index) => setCart((current) => current.filter((_, lineIndex) => lineIndex !== index))}
         clear={() => setCart([])}
@@ -416,7 +415,6 @@ function InquiryDrawer({
   opener,
   catalog,
   cart,
-  quantity,
   setDesiredQuantity,
   remove,
   clear,
@@ -427,25 +425,21 @@ function InquiryDrawer({
   opener: RefObject<HTMLElement | null>;
   catalog: Catalog;
   cart: CartLine[];
-  quantity: (index: number, delta: number) => void;
   setDesiredQuantity: (index: number, raw: string) => void;
   remove: (index: number) => void;
   clear: () => void;
   show: (message: string) => void;
 }) {
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
-  const [note, setNote] = useState("");
-  const [manual, setManual] = useState("");
-  const [busy, setBusy] = useState(false);
-  const key = useRef(crypto.randomUUID());
+  const [preparedMessage, setPreparedMessage] = useState("");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
   const panel = useRef<HTMLElement>(null);
   const closeAction = useRef(close);
   closeAction.current = close;
   const signature = JSON.stringify(cart.map((line) => [line.product.id, line.quantity, line.options]));
 
   useEffect(() => {
-    key.current = crypto.randomUUID();
+    setPreparedMessage("");
+    setCopyState("idle");
   }, [signature]);
   useEffect(() => {
     if (!open) return;
@@ -470,93 +464,17 @@ function InquiryDrawer({
     };
   }, [open, opener]);
 
-  const message = buildMessage(catalog, cart, name || "Customer", note);
-  async function saveInquiry(channel: string) {
-    if (!name.trim() || !contact.trim()) {
-      show("Enter your name and contact first.");
-      return false;
-    }
-    setBusy(true);
-    try {
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId: catalog.business.id,
-          customerName: name,
-          contact,
-          contactMethod: channel,
-          note,
-          website: "",
-          idempotencyKey: key.current,
-          items: cart.map((line) => ({
-            productId: line.product.id,
-            quantity: line.quantity,
-            options: line.options,
-          })),
-        }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        show(data.error || "The inquiry could not be saved.");
-        return false;
-      }
-      return true;
-    } catch {
-      show("Network error. Your list is still available here.");
-      return false;
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function send(channel: "whatsapp" | "telegram" | "tiktok" | "share") {
+  const message = buildMessage(catalog, cart);
+  const encodedMessage = encodeURIComponent(message);
+  async function copyInquiry() {
     if (!cart.length) {
       show("Add at least one product or capability.");
       return;
     }
-    if (channel === "tiktok") legacyCopy(message);
-    if (!(await saveInquiry(channel))) return;
-    const business = catalog.business;
-    const encoded = encodeURIComponent(message);
-    if (channel === "whatsapp") {
-      if (!business.whatsapp) {
-        setManual(message);
-        show("WhatsApp is not connected yet.");
-        return;
-      }
-      window.location.assign(`https://wa.me/${business.whatsapp}?text=${encoded}`);
-    }
-    if (channel === "telegram") {
-      if (!business.telegram) {
-        setManual(message);
-        show("Telegram is not connected yet.");
-        return;
-      }
-      window.location.assign(`https://t.me/${business.telegram}?text=${encoded}`);
-    }
-    if (channel === "tiktok") {
-      setManual(message);
-      if (!business.tiktok) {
-        show("TikTok is not connected yet. The message is displayed below.");
-        return;
-      }
-      window.location.assign(`https://www.tiktok.com/@${business.tiktok}`);
-    }
-    if (channel === "share") {
-      try {
-        if (navigator.share) await navigator.share({ title: `${business.name} inquiry`, text: message });
-        else {
-          const ok = legacyCopy(message);
-          setManual(message);
-          show(ok ? "Message copied." : "Select the message below and copy it.");
-        }
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setManual(message);
-        show("Select the message below and copy it.");
-      }
-    }
+    setPreparedMessage(message);
+    const copied = await copyText(message);
+    setCopyState(copied ? "copied" : "manual");
+    show(copied ? "Inquiry copied." : "Select the inquiry text and copy it.");
   }
 
   return (
@@ -595,30 +513,18 @@ function InquiryDrawer({
                     .map(([keyName, value]) => `${keyName}: ${value}`)
                     .join(" · ")}
                 </div>
-                {line.product.quantity_mode === "required" ? (
-                  <div className="qty" aria-label={`Desired quantity for ${line.product.name}`}>
-                    <button aria-label={`Decrease quantity for ${line.product.name}`} onClick={() => quantity(index, -1)}>
-                      −
-                    </button>
-                    <strong>{line.quantity}</strong>
-                    <button aria-label={`Increase quantity for ${line.product.name}`} onClick={() => quantity(index, 1)}>
-                      +
-                    </button>
-                  </div>
-                ) : (
-                  <label className="optional-quantity">
-                    <span>Desired quantity <small>(optional)</small></span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={1_000_000}
-                      inputMode="numeric"
-                      value={line.quantity ?? ""}
-                      onChange={(event) => setDesiredQuantity(index, event.target.value)}
-                      placeholder="Discuss with supplier"
-                    />
-                  </label>
-                )}
+                <label className="optional-quantity">
+                  <span>Desired quantity <small>(optional)</small></span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1_000_000}
+                    inputMode="numeric"
+                    value={line.quantity ?? ""}
+                    onChange={(event) => setDesiredQuantity(index, event.target.value)}
+                    placeholder="Optional"
+                  />
+                </label>
               </div>
               <button
                 className="remove"
@@ -631,73 +537,48 @@ function InquiryDrawer({
           ))
         )}
         {cart.length > 0 && (
-          <div className="drawer-form">
-            <div className="drawer-form-heading">
-              <span className="eyebrow">Your details</span>
-              <h3>Where should the business reply?</h3>
+          <div className="drawer-actions">
+            <div className="drawer-action-heading">
+              <span className="eyebrow">Ready to send</span>
+              <h3>Copy your inquiry</h3>
+              <p>Paste it into any message. No name or contact details are required here.</p>
             </div>
-            <label>
-              <strong>First name</strong>
-              <input
-                value={name}
-                maxLength={80}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Your first name"
-              />
-            </label>
-            <label>
-              <strong>WhatsApp, phone or email</strong>
-              <input
-                value={contact}
-                maxLength={120}
-                onChange={(event) => setContact(event.target.value)}
-                placeholder="How the business can contact you"
-              />
-            </label>
-            <label>
-              <strong>Additional note</strong>
-              <textarea
-                value={note}
-                maxLength={1000}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Delivery area or another question"
-              />
-            </label>
-            <div className="drawer-send">
-              <h3>Send inquiry</h3>
-              <div className="send-grid">
-                <button disabled={busy} className="primary" onClick={() => send("whatsapp")}>
-                  WhatsApp
-                </button>
-                <button disabled={busy} onClick={() => send("telegram")}>
-                  Telegram
-                </button>
-                <button disabled={busy} onClick={() => send("tiktok")}>
-                  TikTok
-                </button>
-                <button disabled={busy} onClick={() => send("share")}>
-                  Share / copy
-                </button>
-              </div>
-            </div>
-            {manual && (
-              <>
-                <strong>Message</strong>
-                <div
-                  className="manual-message"
-                  tabIndex={0}
-                  onClick={(event) => {
-                    const selection = window.getSelection();
-                    const range = document.createRange();
-                    range.selectNodeContents(event.currentTarget);
-                    selection?.removeAllRanges();
-                    selection?.addRange(range);
-                  }}
-                >
-                  {manual}
+            <button className="copy-inquiry primary" onClick={copyInquiry}>
+              {copyState === "copied" ? "Copied" : "Copy inquiry"}
+            </button>
+            {catalog.business.whatsapp || catalog.business.telegram ? (
+              <div className="direct-handoffs">
+                <span>Or open a connected app</span>
+                <div>
+                  {catalog.business.whatsapp ? (
+                    <a
+                      href={`https://wa.me/${catalog.business.whatsapp}?text=${encodedMessage}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setPreparedMessage(message)}
+                    >
+                      WhatsApp
+                    </a>
+                  ) : null}
+                  {catalog.business.telegram ? (
+                    <a
+                      href={`https://t.me/${catalog.business.telegram}?text=${encodedMessage}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setPreparedMessage(message)}
+                    >
+                      Telegram
+                    </a>
+                  ) : null}
                 </div>
-              </>
-            )}
+              </div>
+            ) : null}
+            {preparedMessage ? (
+              <section className="copied-reference" aria-live="polite">
+                <strong>{copyState === "copied" ? "Copied inquiry" : "Inquiry text"}</strong>
+                <pre tabIndex={0}>{preparedMessage}</pre>
+              </section>
+            ) : null}
             <button className="remove clear-inquiry" onClick={clear}>
               Clear inquiry
             </button>

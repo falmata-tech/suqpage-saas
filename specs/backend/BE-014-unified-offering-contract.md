@@ -20,6 +20,19 @@ The outcome is an additive `Offering` contract over the established Product
 entity. It preserves tenant isolation, publication history, and the compatible
 `products` transport while making type and desired-quantity behavior explicit.
 
+## Accepted optional-quantity correction
+
+This correction supersedes required public quantity behavior without requiring
+another database rebuild.
+
+- Desired quantity is optional buyer intent for every offering kind.
+- Current upkeep, revision, and recipe output writes `quantityMode: optional`.
+- Retained rows and snapshots containing `required` remain readable
+  compatibility input and normalize to optional current behavior.
+- Public inquiry validation accepts an absent quantity for every offering and
+  still rejects non-integer, non-positive, or over-limit supplied values.
+- Historical inquiry-line snapshots are not rewritten.
+
 ## Scope
 
 ### In scope
@@ -30,8 +43,7 @@ entity. It preserves tenant isolation, publication history, and the compatible
 - Bounded `capacitySummary`, `minimumOrderSummary`, and `leadTimeSummary`.
 - Additive canonical columns, snapshot/recipe fields, upkeep fields, and
   inquiry-line snapshots.
-- Nullable inquiry quantity when and only when the authoritative offering uses
-  optional quantity.
+- Nullable inquiry quantity for every current offering.
 - Context-aware status labels derived from kind and existing availability.
 
 ### Non-goals
@@ -48,8 +60,8 @@ entity. It preserves tenant isolation, publication history, and the compatible
   its current domain role.
 - Existing rows and legacy snapshots default to `standard_product`,
   `required`, and empty production facts.
-- Required quantity is a positive integer within the public inquiry limit.
-  Optional quantity is either absent or a positive integer within that limit.
+- Quantity is either absent or a positive integer within the public inquiry
+  limit.
 - An inquiry line snapshots offering kind and quantity mode so historical
   meaning survives later catalog edits.
 - `available` and `limited` remain the only inquiry-eligible availability
@@ -66,9 +78,8 @@ entity. It preserves tenant isolation, publication history, and the compatible
 - The exported AI schema retains the `products` property with an explicit
   compatibility description and requires offering fields for current output.
 - Public inquiry validation reloads the selected offering under the requested
-  business. It rejects missing quantity for `required`, invalid supplied
-  quantity for either mode, unavailable offerings, bad options, and cross-
-  tenant IDs before insertion.
+  business. It accepts absent quantity, and rejects invalid supplied quantity,
+  unavailable offerings, bad options, and cross-tenant IDs before insertion.
 - Persisted inquiry lines use nullable quantity and snapshot kind/policy. No
   downstream view assumes quantity is always present.
 
@@ -81,11 +92,11 @@ Scenario: Optional capability inquiry is persisted truthfully
   THEN the inquiry line stores a null quantity and capability snapshots
   AND no synthetic unit count is introduced
 
-Scenario: Required product quantity is enforced
-  GIVEN a published standard product with required quantity
+Scenario: Retained required policy no longer blocks a visitor
+  GIVEN a published standard product retaining required quantity metadata
   WHEN an inquiry omits quantity
-  THEN the request is rejected
-  AND no inquiry or partial item is stored
+  THEN the request is accepted with null quantity
+  AND its current quantity behavior is snapshotted as optional
 
 Scenario: Cross-tenant capability is rejected
   GIVEN a capability belongs to tenant B
@@ -123,7 +134,7 @@ and whether quantity was supplied, never its customer note or complete payload.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Parser, upkeep, tenant, and publication rules | integration/security | `scripts/test-product-upkeep.ts`, `scripts/test-security.ts` |
-| Required/optional inquiry semantics | integration/security | `scripts/test-inquiries.ts` |
+| Optional inquiry quantity and retained compatibility | integration/security | `scripts/test-security.ts` |
 | Snapshot and recipe compatibility | contract/integration | `scripts/test-revisions.ts`, `scripts/test-showroom-recipe.ts` |
 | Schema migration and database constraints | migration | `scripts/test-offering-migration.ts` |
 
@@ -151,13 +162,14 @@ Evidence: verified locally on 2026-07-29.
 - `lib/offerings.ts`, `lib/types.ts`, `lib/inquiries.ts`,
   `lib/product-upkeep-domain.ts`, `lib/product-upkeep-sqlite.ts`,
   `lib/revision-domain.ts`, `lib/revision-service.ts`, and the current showroom
-  recipe/content contracts implement the additive offering model and
-  authoritative required/optional inquiry quantity behavior.
-- `scripts/test-security.ts` proves required-quantity denial, bounded quantity,
-  optional null persistence, enum snapshots, option validation, and unavailable
-  denial under tenant scope.
+  recipe/content contracts implement the additive offering model, current
+  optional quantity output, and retained required-value normalization.
+- `scripts/test-security.ts` proves retained required metadata accepts null,
+  snapshots current optional behavior, bounds supplied quantity, and preserves
+  option, availability, and tenant denial.
 - `scripts/test-product-upkeep.ts`, `scripts/test-showroom-recipe.ts`, and
   `scripts/test-revisions.ts` prove enum/fact validation, retained publication,
   current AI schema/provenance, compatibility defaults, publication, and
   rollback.
-- `npm run check` and `npm run release` passed on 2026-07-29.
+- `npm run check`, 10/10 browser acceptance, and `npm run release` passed on
+  2026-07-29.

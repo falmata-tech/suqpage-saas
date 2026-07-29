@@ -26,7 +26,7 @@ async function main() {
     const { sqliteProductUpkeepPort } = await import(
       "../lib/product-upkeep-sqlite"
     );
-    const { ProductUpkeepError } = await import(
+    const { parseBasicProductCommand, ProductUpkeepError } = await import(
       "../lib/product-upkeep-domain"
     );
     const { stageUploadedImage } = await import("../lib/media");
@@ -276,6 +276,11 @@ async function main() {
           null,
         ),
       /desired-quantity policy/,
+    );
+    assert.equal(
+      parseBasicProductCommand(command({ quantityMode: "required" }))
+        .quantityMode,
+      "optional",
     );
     assert.throws(
       () =>

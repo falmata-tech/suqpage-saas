@@ -502,7 +502,7 @@ function catalogToRevisionBase(catalog: Catalog): {
       imageRef: item.image_path,
       availability: item.availability,
       offeringKind: item.offering_kind || "standard_product",
-      quantityMode: item.quantity_mode || "required",
+      quantityMode: "optional",
       capacitySummary: item.capacity_summary || "",
       minimumOrderSummary: item.minimum_order_summary || "",
       leadTimeSummary: item.lead_time_summary || "",

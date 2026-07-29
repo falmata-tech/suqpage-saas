@@ -130,8 +130,8 @@ excluded.
   of IDs/relationships/existing quantities, compatible defaults, null optional
   quantity, constraints, integrity, foreign keys, and idempotency. It runs in
   both `npm run check` and `npm run release`.
-- `npm run reset` created 28 fictional businesses and 105 offerings spanning all
-  four offering kinds and both quantity modes. Manufacturing capabilities have
+- `npm run reset` creates 28 fictional businesses and 105 offerings spanning all
+  four offering kinds with optional desired quantity. Manufacturing capabilities have
   capacity and lead-time facts and do not inherit ordinary product options.
 - `npm run test:visual-benchmarks` passed 56 captures with zero failures;
   `npm run test:acceptance` passed 10/10; `npm run check` and `npm run release`
@@ -139,3 +139,16 @@ excluded.
 - A future production/data-preserving rollout still requires a fresh data-
   importance decision, stopped-writer checkpoint, monitored migration, and
   matching application rollback artifact.
+
+## Optional-quantity follow-up
+
+The current optional-quantity correction is application-level and requires no
+schema migration or destructive data rewrite. Migration 18 already permits null
+inquiry quantities and the retained `required` storage value. Current code
+normalizes that retained value to optional behavior, while historical inquiry
+snapshots remain unchanged. Rollback therefore uses the normal application
+artifact boundary; the migration-18 checkpoint rules above are unaffected.
+
+The follow-up passed `scripts/test-offering-migration.ts`,
+`scripts/test-security.ts`, 56 visual captures, 10/10 browser acceptance,
+`npm run check`, and `npm run release` on 2026-07-29.

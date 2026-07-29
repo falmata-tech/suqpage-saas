@@ -184,6 +184,8 @@ try {
         }
         await page.locator(".floating-inquiry-trigger").click();
         await page.getByRole("dialog", { name: "Product inquiry" }).waitFor();
+        await page.getByRole("button", { name: "Copy inquiry" }).click();
+        await page.locator(".copied-reference").waitFor();
         await page.locator(".toast").waitFor({ state: "hidden" });
         await page.screenshot({
           path: path.join(outputDir, `inquiry-${viewportName}.png`),

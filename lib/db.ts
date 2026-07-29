@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
 import { databasePath, ensureRuntimeDirectories } from "./config";
+import { normalizeQuantityMode } from "./offerings";
 import { migrateDatabase } from "./schema";
 import type { Business, Catalog, Category, Collection, OptionGroup, OptionValue, Product, SessionUser } from "./types";
 
@@ -85,6 +86,7 @@ export function getCatalogByBusinessId(businessId: number, includeDrafts = false
   const groupStmt = getDb().prepare("SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id");
   const valueStmt = getDb().prepare("SELECT * FROM option_values WHERE option_group_id=? ORDER BY id");
   for (const product of products) {
+    product.quantity_mode = normalizeQuantityMode(product.quantity_mode);
     product.option_groups = rows<OptionGroup>(groupStmt.all(product.id)).map((group) => ({
       ...group,
       values: rows<OptionValue>(valueStmt.all(group.id)),

@@ -291,7 +291,7 @@ async function main() {
         (product) =>
           product.collectionKey === null &&
           ["standard_product", "made_to_order", "manufacturing_capability", "production_supply"].includes(product.offeringKind) &&
-          ["required", "optional"].includes(product.quantityMode),
+          product.quantityMode === "optional",
       ),
     );
     assert.equal(

@@ -80,7 +80,8 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a dynamic catalog and availability manager;
 - an inquiry-cart system;
 - a lightweight customer lead-capture system;
-- a bridge to WhatsApp, Telegram, TikTok, native sharing, and direct contact;
+- a copy-first inquiry-message builder with configured WhatsApp and Telegram
+  handoff;
 - an inquiry management dashboard;
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
@@ -377,10 +378,11 @@ Rules:
 7. Descriptive availability is the only current product-status authority.
 8. Unavailable or coming-soon products are not inquiry-ready unless a future
    waitlist-style workflow explicitly supports them.
-9. Customer-requested quantity is bounded inquiry intent from 1 through
-   1,000,000. It is required for `quantity_mode=required` and may remain absent
-   for `quantity_mode=optional`. It is never compared with, reserved from, or
-   deducted from inventory.
+9. Customer-requested quantity is optional bounded inquiry intent from 1
+   through 1,000,000. It may remain absent for every offering and is never
+   compared with, reserved from, or deducted from inventory. Retained
+   `quantity_mode=required` values are compatibility input and normalize to
+   optional current behavior.
 10. Every current offering declares one kind: `standard_product`,
     `made_to_order`, `manufacturing_capability`, or `production_supply`.
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
@@ -414,29 +416,30 @@ Expected customer flow:
 3. The customer selects required option values.
 4. The customer adds the item to the inquiry cart.
 5. The customer can add multiple offerings.
-6. The customer can adjust required quantities, optionally state quantity for
-   compatible capability-style offerings, and remove items.
-7. The customer provides minimal contact information:
-   - first name;
-   - WhatsApp, phone, Telegram, email, or another usable contact;
-   - optional note.
-8. SuqPage saves the inquiry before or during social handoff.
-9. The customer may continue through WhatsApp, Telegram, TikTok, or native sharing.
-10. The business sees the inquiry in its dashboard even when the social-app step is not completed.
+6. The customer may state a desired quantity for any offering or leave it open,
+   and can remove items.
+7. The customer activates the primary **Copy inquiry** action without providing
+   a name, contact value, or note.
+8. The exact copied text remains visible and selectable as a reference.
+9. When the business configured them, the customer may instead open WhatsApp
+   or Telegram with the prepared message.
+10. Message preparation does not fabricate a saved dashboard inquiry without a
+    customer reply path and does not claim that copying delivered the message.
 
 The current inquiry cart opens as a bounded floating task panel with visible
 outer margins on desktop. At 320 and 390 CSS pixels it becomes a safe-area-aware,
 bottom-anchored near-full-height sheet with one internal scroll region. Opening
 locks background scrolling; closing restores it and returns focus to the
-opener. Close, quantity, remove, clear, and handoff controls provide at least a
-44-pixel mobile touch block. The panel inherits the active showroom's semantic
-type and color roles while preserving form contrast. One shared persistent
+opener. Close, optional quantity, remove, clear, copy, and configured handoff
+controls provide at least a 44-pixel mobile touch block. The panel inherits the
+active showroom's semantic type and color roles while preserving contrast. One shared persistent
 inquiry trigger remains fixed inside the viewport across every showroom anatomy,
 shows the current selected-item count, and opens the same cart without requiring
 the visitor to return to the header. At phone widths it becomes a compact
 icon-sized control, and its visible badge is omitted while the cart is empty.
 
-An inquiry record should contain:
+A canonical inquiry record created by an explicit contact-bearing submission
+should contain:
 
 - business;
 - customer name;
@@ -445,8 +448,7 @@ An inquiry record should contain:
 - optional note;
 - selected products and capabilities;
 - selected options;
-- optional or required desired quantity according to the snapshotted offering
-  policy;
+- optional desired quantity;
 - source;
 - status;
 - timestamps.
@@ -510,23 +512,14 @@ Example stored value:
 AlHayaModest
 ```
 
-### TikTok
-
-- Store the exact handle without `@` where possible.
-- Open the exact business profile.
-- Do not claim reliable public TikTok DM prefilling.
-- Show a selectable inquiry message and copy/native-share fallback.
-- Never route to a made-up or unrelated account.
-
 ### General fallback
 
 When automatic copy is blocked, the customer must still see:
 
 - the complete inquiry message;
 - a copy button;
-- a select-message action or selectable text;
-- native share where supported;
-- a clear button to open the intended business profile.
+- selectable text;
+- configured WhatsApp and Telegram actions only.
 
 Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
@@ -660,7 +653,7 @@ A client has a minimal workspace bound to one business. The client can:
 - review an exact private showroom revision and approve or reject it;
 - view customer inquiries and delivery activity without mutating them;
 - after first publication, use **My offerings** to create products or
-  capabilities and maintain their type, desired-quantity policy, name,
+  capabilities and maintain their type, optional desired-quantity behavior, name,
   description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
 - view their showroom and manage their account password.
@@ -696,9 +689,9 @@ A public customer does not require an account. The customer can:
 - filter products and capabilities;
 - select options;
 - build an inquiry cart;
-- provide contact details;
-- submit an inquiry;
-- continue to a social messaging destination.
+- optionally add desired quantities;
+- copy the prepared inquiry without personal-detail fields;
+- continue through configured WhatsApp or Telegram.
 
 The access-profile layer distinguishes platform administrator, client, team
 member, and operations manager. Every account has an explicit profile.
@@ -938,7 +931,7 @@ remaining AI-assisted delivery sequence is recorded in
 - The current implementation uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
   currently covers dynamic product categories, products/capabilities, offering
-  kind, desired-quantity policy, bounded production facts, options,
+  kind, optional desired-quantity behavior, bounded production facts, options,
   business/meta/contact values, and allowed image keys. Product availability is
   descriptive; numeric product/option inventory is prohibited. The `products`
   key is the single documented compatibility transport for offerings. Compatibility
@@ -1331,7 +1324,7 @@ business with no retained publication is a first-showroom request; after
 publication it is a change request. The server decides this classification.
 
 After first publication, **My offerings** lets the client create a product or
-capability or maintain its offering type, desired-quantity policy, name,
+capability or maintain its offering type, optional desired-quantity behavior, name,
 description, bounded capacity/minimum-order/lead-time facts, primary managed
 image, availability, and assignment to an existing compatible product
 category. The same bounded workflow is
@@ -1433,7 +1426,7 @@ Required verification areas:
 - versioned basic offering upkeep for every authorized role;
 - compatibility-collection and active product-category integrity;
 - option validation;
-- offering kind, required/optional desired quantity, availability-only inquiry
+- offering kind, optional desired quantity, availability-only inquiry
   behavior, and absence of active inventory counts;
 - image upload validation and serving;
 - public inquiry submission;

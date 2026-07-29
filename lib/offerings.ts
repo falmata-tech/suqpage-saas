@@ -58,8 +58,7 @@ export function normalizeOfferingKind(value: unknown): OfferingKind {
     : "standard_product";
 }
 
-export function normalizeQuantityMode(value: unknown): QuantityMode {
-  return quantityModes.includes(value as QuantityMode)
-    ? (value as QuantityMode)
-    : "required";
+export function normalizeQuantityMode(_value: unknown): QuantityMode {
+  // Retained "required" values remain readable but current behavior is optional.
+  return "optional";
 }

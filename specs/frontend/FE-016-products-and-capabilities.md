@@ -20,13 +20,13 @@ pretending that one unit is in stock.
 The outcome is one clear **Products & Capabilities** experience. A showroom can
 mix standard products, made-to-order products, manufacturing capabilities, and
 production supply. Every offering can enter the same inquiry bag, while desired
-quantity is required only when the offering says it is.
+quantity is always optional buyer context.
 
 ## Scope
 
 ### In scope
 
-- Offering-kind, quantity-policy, capacity, minimum-order, and lead-time
+- Offering-kind, optional desired quantity, capacity, minimum-order, and lead-time
   controls in basic client/staff upkeep and staff recipe/revision workflows.
 - Product cards and details that distinguish product and capability facts.
 - Optional desired quantity for capability-style inquiry lines.
@@ -49,8 +49,8 @@ quantity is required only when the offering says it is.
 - **Offering** is the umbrella term for a standard product, made-to-order
   product, manufacturing capability, or production supply.
 - **Products & Capabilities** is the public section label.
-- **Desired quantity** is buyer intent, not inventory. It may be absent only
-  when the offering's quantity policy is optional.
+- **Desired quantity** is optional buyer intent, not inventory. A visitor may
+  add it to any inquiry line or leave it open for discussion.
 - Capacity, minimum order, and lead time are bounded merchant-authored text,
   not calculated or verified platform promises.
 - Existing availability values remain canonical but receive context-appropriate
@@ -58,10 +58,11 @@ quantity is required only when the offering says it is.
 
 ## Contracts
 
-- The offering editor exposes kind, quantity policy, capacity, minimum order,
-  and lead time with examples and no stock-count control.
-- Standard products default to required desired quantity. Capability and
-  made-to-order offerings may make quantity optional.
+- The offering editor exposes kind, capacity, minimum order, and lead time with
+  examples and no stock-count or required-quantity control.
+- Current authoring writes optional quantity behavior for every offering.
+  Retained `required` values remain readable compatibility input but are
+  normalized to optional behavior rather than blocking a visitor.
 - Cards preserve a stable media frame, bounded facts, and one **Add to inquiry**
   action. Missing media keeps the approved intentional fallback.
 - The inquiry drawer keeps optional quantity blank by default, accepts a
@@ -86,10 +87,11 @@ Scenario: Buyer provides desired quantity
   WHEN the buyer enters a positive desired quantity
   THEN the inquiry summary and submitted line retain that quantity
 
-Scenario: Standard product retains quantity behavior
-  GIVEN a standard product requires desired quantity
+Scenario: Standard product keeps quantity optional
+  GIVEN a standard product is available for inquiry
   WHEN a visitor adds it to the inquiry bag
-  THEN it starts at one and retains the bounded quantity stepper
+  THEN it starts with no desired quantity
+  AND the visitor may add a bounded quantity or leave it open for discussion
 
 Scenario: Offering editor rejects unsupported data
   GIVEN a client can maintain one offering
@@ -114,7 +116,7 @@ Scenario: Offering editor rejects unsupported data
 
 ## Observability
 
-Record offering kind, quantity-policy presence, command kind, business/product
+Record offering kind, optional-quantity presence, command kind, business/product
 IDs, result, and conflict without logging descriptions, capacity claims,
 customer notes, or full inquiry payloads.
 
@@ -152,10 +154,10 @@ Evidence: verified locally on 2026-07-29.
   `components/RevisionEditor.tsx`, `components/ClientRequestForm.tsx`, and
   `components/showroom/**` implement current offering authoring, factual
   production fields, mixed cards/details, text-first no-media detail, contextual
-  availability, and required/optional desired quantity.
+  availability, and optional desired quantity.
 - `tests/acceptance/app.spec.ts` passed all 10 production-browser workflows,
-  including mobile required quantity, an optional-quantity manufacturing
-  capability, client/staff offering upkeep, intake, and no horizontal overflow.
+  including blank-by-default and buyer-entered mobile quantity, copied-message
+  inclusion, client/staff offering upkeep, intake, and no horizontal overflow.
 - `npm run test:visual-benchmarks` produced 56 desktop/mobile captures with zero
   automated visual failures. Focused Chromium review covered the homepage,
   Addis Metalworks catalog, capability detail, and inquiry drawer.

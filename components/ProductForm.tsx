@@ -8,7 +8,6 @@ import {
   offeringKindLabels,
   offeringKinds,
   type OfferingKind,
-  type QuantityMode,
 } from "@/lib/offerings";
 
 export default function ProductForm({
@@ -35,9 +34,6 @@ export default function ProductForm({
   );
   const [offeringKind, setOfferingKind] = useState<OfferingKind>(
     product?.offering_kind || "standard_product",
-  );
-  const [quantityMode, setQuantityMode] = useState<QuantityMode>(
-    product?.quantity_mode || "required",
   );
   const [capacitySummary, setCapacitySummary] = useState(
     product?.capacity_summary || "",
@@ -103,18 +99,10 @@ export default function ProductForm({
         <small>{offeringKindDescriptions[offeringKind]}</small>
       </div>
 
-      <div className="field">
-        <label htmlFor="product-quantity-mode">Desired quantity</label>
-        <select
-          id="product-quantity-mode"
-          name="quantityMode"
-          value={quantityMode}
-          onChange={(event) => setQuantityMode(event.target.value as QuantityMode)}
-        >
-          <option value="required">Buyer must provide quantity</option>
-          <option value="optional">Buyer may leave quantity open</option>
-        </select>
-        <small>This records buyer intent; it is not an inventory count.</small>
+      <input type="hidden" name="quantityMode" value="optional" />
+      <div className="field product-quantity-note">
+        <strong>Desired quantity is optional</strong>
+        <small>Buyers may add a quantity to their inquiry or leave it open for discussion.</small>
       </div>
 
       <div className="field full">

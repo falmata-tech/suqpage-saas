@@ -53,9 +53,8 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
         ? null
         : Number(raw.quantity);
     if (
-      (quantityMode === "required" && quantity === null) ||
-      (quantity !== null &&
-        (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000))
+      quantity !== null &&
+      (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000)
     ) {
       throw new InquiryError("Enter a valid desired quantity.");
     }

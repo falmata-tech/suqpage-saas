@@ -39,8 +39,8 @@ assert.deepEqual(
 );
 assert.deepEqual(
   [...quantityModes].sort(),
-  ["optional", "required"],
-  "reset fixtures exercise both desired-quantity policies",
+  ["optional"],
+  "reset fixtures use optional desired quantity",
 );
 
 const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));

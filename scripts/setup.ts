@@ -107,7 +107,7 @@ function seedOfferingProfile(handle: string, product: any) {
   if (productionSupplyBusinesses.has(handle)) {
     return {
       offeringKind: "production_supply",
-      quantityMode: "required",
+      quantityMode: "optional",
       capacitySummary: "Batch or seasonal volume confirmed for each supply cycle",
       minimumOrderSummary: "Pack and wholesale minimums available on inquiry",
       leadTimeSummary: "Next supply window confirmed directly",
@@ -117,7 +117,7 @@ function seedOfferingProfile(handle: string, product: any) {
     const capability = manufacturingCapabilityNames.has(product.name);
     return {
       offeringKind: capability ? "manufacturing_capability" : "made_to_order",
-      quantityMode: capability ? "optional" : "required",
+      quantityMode: "optional",
       capacitySummary: capability
         ? "Prototype, small-run, and repeat production capacity"
         : "Configured production runs scheduled after specification review",
@@ -138,7 +138,7 @@ function seedOfferingProfile(handle: string, product: any) {
   }
   return {
     offeringKind: "standard_product",
-    quantityMode: "required",
+    quantityMode: "optional",
     capacitySummary: "",
     minimumOrderSummary: "",
     leadTimeSummary: "",

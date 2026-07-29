@@ -1,5 +1,6 @@
 import type { Product } from "./types";
 import {
+  normalizeQuantityMode,
   offeringKinds,
   quantityModes,
   type OfferingKind,
@@ -120,10 +121,11 @@ export function parseBasicProductCommand(
   if (!offeringKinds.includes(offeringKind)) {
     throw new ProductUpkeepError("Choose a valid offering type.");
   }
-  const quantityMode = text(raw.quantityMode, 20) as QuantityMode;
-  if (!quantityModes.includes(quantityMode)) {
+  const submittedQuantityMode = text(raw.quantityMode, 20) as QuantityMode;
+  if (!quantityModes.includes(submittedQuantityMode)) {
     throw new ProductUpkeepError("Choose a valid desired-quantity policy.");
   }
+  const quantityMode = normalizeQuantityMode(submittedQuantityMode);
   const imageAction = text(raw.imageAction, 20) as ProductImageAction;
   if (!imageActions.has(imageAction)) {
     throw new ProductUpkeepError("Choose a valid image action.");

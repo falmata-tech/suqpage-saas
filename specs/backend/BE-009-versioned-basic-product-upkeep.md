@@ -106,8 +106,9 @@ uses availability—not inventory count—as canonical inquiry eligibility.
   snapshot.
 - Public inquiry validation canonically reloads business/product/options and
   accepts only published `available`/`limited` offerings. Requested quantity
-  follows BE-014's required/optional policy and bounded range, but no inventory
-  comparison or availability decrement occurs.
+  follows BE-014's optional current behavior and bounded range, while retained
+  required metadata remains compatibility input. No inventory comparison or
+  availability decrement occurs.
 - Commands are idempotent per business and command key. A successful retry
   returns the original result; conflicting reuse fails safely.
 - The use case depends on narrow actor-scope, catalog-version repository, media,

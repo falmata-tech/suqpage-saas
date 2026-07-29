@@ -213,7 +213,8 @@
   cursor: pointer;
 }
 
-.drawer-form {
+.drawer-actions {
+  display: grid;
   gap: 13px;
   margin-top: 14px;
   padding: 18px;
@@ -222,76 +223,87 @@
   border-radius: 8px;
 }
 
-.drawer-form-heading h3,
-.drawer-send h3 {
+.drawer-action-heading {
+  display: grid;
+  gap: 5px;
+}
+
+.drawer-action-heading h3 {
   margin: 0;
   font-family: var(--bank-display, Arial, sans-serif);
   font-size: 1.12rem;
   line-height: 1.3;
 }
 
-.drawer-form label {
-  display: grid;
-  gap: 6px;
-  color: var(--bank-ink, #141b2a);
-  font-size: 0.82rem;
+.drawer-action-heading p,
+.direct-handoffs > span {
+  margin: 0;
+  color: var(--bank-muted, #657086);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
-.drawer-form input,
-.drawer-form textarea {
-  min-height: 48px;
-  padding: 12px;
-  color: var(--bank-ink, #141b2a);
-  background: var(--bank-bg, #f5f7fa);
-  border-color: var(--bank-line, #d5dbe5);
+.copy-inquiry {
+  min-height: 50px;
+  padding: 12px 16px;
+  color: var(--bank-on-secondary, #fff);
+  background: var(--bank-secondary, #243247);
+  border: 1px solid var(--bank-secondary, #243247);
   border-radius: 6px;
-  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
 }
 
-.drawer-form textarea {
-  min-height: 88px;
-  resize: vertical;
-}
-
-.drawer-form input:focus-visible,
-.drawer-form textarea:focus-visible,
-.drawer-panel button:focus-visible {
-  outline: 3px solid var(--bank-accent-soft, #c7d8f2);
-  outline-offset: 2px;
-}
-
-.drawer-send {
+.direct-handoffs {
   display: grid;
-  gap: 9px;
-  padding-top: 2px;
+  gap: 7px;
 }
 
-.send-grid {
+.direct-handoffs > div {
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-.send-grid button {
+.direct-handoffs a {
+  display: grid;
+  place-items: center;
   min-height: 46px;
   padding: 10px;
   color: var(--bank-ink, #141b2a);
   background: var(--bank-bg, #f5f7fa);
-  border-color: var(--bank-line, #d5dbe5);
+  border: 1px solid var(--bank-line, #d5dbe5);
   border-radius: 6px;
-  cursor: pointer;
+  font-weight: 800;
+  text-decoration: none;
 }
 
-.send-grid .primary {
-  color: var(--bank-on-secondary, #fff);
-  background: var(--bank-secondary, #243247);
-  border-color: var(--bank-secondary, #243247);
+.drawer-panel button:focus-visible,
+.drawer-panel a:focus-visible,
+.copied-reference pre:focus-visible {
+  outline: 3px solid var(--bank-accent-soft, #c7d8f2);
+  outline-offset: 2px;
 }
 
-.manual-message {
+.copied-reference {
+  display: grid;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.copied-reference pre {
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
+  padding: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
   color: var(--bank-ink, #141b2a);
   background: var(--bank-bg, #f5f7fa);
-  border-color: var(--bank-line, #d5dbe5);
+  border: 1px solid var(--bank-line, #d5dbe5);
   border-radius: 6px;
+  font: 0.78rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .clear-inquiry {

@@ -143,8 +143,8 @@
           "enum": ["standard_product", "made_to_order", "manufacturing_capability", "production_supply"]
         },
         "quantityMode": {
-          "description": "Whether a buyer must provide desired quantity. This is inquiry intent, never inventory.",
-          "enum": ["required", "optional"]
+          "description": "Desired quantity is optional buyer intent, never inventory.",
+          "enum": ["optional"]
         },
         "capacitySummary": {
           "description": "Optional factual production or supply capacity, including its period or basis.",
