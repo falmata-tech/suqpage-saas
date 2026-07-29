@@ -4,7 +4,7 @@ title: Public showroom discovery and inquiry experience
 status: done
 related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012]
 owners: [product, frontend]
-last_updated: 2026-07-28
+last_updated: 2026-07-29
 change_level: L2
 ---
 
@@ -27,6 +27,10 @@ The inquiry cart is presented as a scoped floating task surface rather than an
 edge-to-edge generic sidebar. Desktop keeps visible breathing room around a
 bounded panel. Phone layouts use a near-full-height bottom sheet with safe-area
 spacing, an anchored header, and one internally scrolling content region.
+Every public showroom also exposes one persistent floating inquiry trigger with
+the current selected-item count. It remains available while the visitor scrolls,
+without depending on the chosen header anatomy or obscuring primary mobile
+content.
 
 ## Scenarios
 
@@ -60,6 +64,12 @@ Scenario: Customer reviews an inquiry on a phone
   THEN a bottom-anchored sheet respects safe areas and remains within the viewport
   AND its header stays available while the task content scrolls
   AND every quantity, close, remove, clear, and handoff target has at least a 44-pixel touch block
+
+Scenario: Customer returns to a growing inquiry while browsing
+  GIVEN a customer has added products and scrolled away from the showroom header
+  WHEN the customer continues through story, process, products, or footer content
+  THEN a persistent inquiry trigger remains visible with the current item count
+  AND activating it opens the same inquiry without changing scroll position or cart contents
 ```
 
 ## Quality impact
@@ -74,7 +84,7 @@ Scenario: Customer reviews an inquiry on a phone
 ## Test plan and evidence
 
 - Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, focus, and
-  320/390px mobile-sheet scenarios.
+  320/390px mobile-sheet and persistent-trigger scenarios.
 - HTTP/security: `scripts/http-smoke.mjs`, `scripts/test-security.ts`.
 - Design contract: `scripts/validate-designs.ts`.
 - Evidence: `npm run test:acceptance` 10/10 passed on 2026-07-28, including

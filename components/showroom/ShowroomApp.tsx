@@ -219,6 +219,12 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         .filter((line) => line.quantity > 0),
     );
 
+  const cartCount = cart.reduce((count, line) => count + line.quantity, 0);
+  const openCart = () => {
+    if(previewMode){show("Private preview only — the inquiry cart is disabled.");return;}
+    drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setDrawer(true);
+  };
   const designProps: DesignProps = {
     catalog,
     products,
@@ -228,12 +234,8 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     setQuery,
     openProduct,
     addProduct: (product) => (product.option_groups?.length ? openProduct(product) : add(product)),
-    cartCount: cart.reduce((count, line) => count + line.quantity, 0),
-    openCart: () => {
-      if(previewMode){show("Private preview only — the inquiry cart is disabled.");return;}
-      drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      setDrawer(true);
-    },
+    cartCount,
+    openCart,
   };
   const registry = {
     alhaya: AlHayaDesign,
@@ -288,6 +290,17 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       ) : (
         <InvalidComposition />
       )}
+      <button
+        type="button"
+        className={`floating-inquiry-trigger${cartCount ? " has-items" : ""}`}
+        aria-label={`Inquiry, ${cartCount} selected ${cartCount === 1 ? "item" : "items"}`}
+        title="Open inquiry"
+        onClick={openCart}
+      >
+        <span className="floating-inquiry-icon" aria-hidden="true" />
+        <span className="floating-inquiry-label">Inquiry</span>
+        <span className="floating-inquiry-count" aria-hidden="true">{cartCount}</span>
+      </button>
       {selected && (
         <div
           ref={productDialog}

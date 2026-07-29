@@ -87,6 +87,8 @@ try {
         const productCards = Array.from(
           document.querySelectorAll('[data-slot="catalog"] article'),
         );
+        const floatingInquiry = document.querySelector(".floating-inquiry-trigger");
+        const floatingInquiryBounds = floatingInquiry?.getBoundingClientRect();
         const textOverflow = Array.from(document.querySelectorAll("h1,h2,h3,p,a,button"))
           .filter((element) => {
             const style = getComputedStyle(element);
@@ -135,6 +137,16 @@ try {
           productCardWidths: productCards.map((card) =>
             Math.round(card.getBoundingClientRect().width),
           ),
+          floatingInquiry: floatingInquiry && floatingInquiryBounds
+            ? {
+                position: getComputedStyle(floatingInquiry).position,
+                visible: floatingInquiry.getClientRects().length > 0,
+                right: Math.round(root.clientWidth - floatingInquiryBounds.right),
+                bottom: Math.round(window.innerHeight - floatingInquiryBounds.bottom),
+                width: Math.round(floatingInquiryBounds.width),
+                height: Math.round(floatingInquiryBounds.height),
+              }
+            : null,
         };
       });
       const screenshot = path.join(outputDir, `${handle}-${viewportName}.png`);
@@ -199,6 +211,13 @@ const failures = results.filter(
     result.sectionAlignments.slice(0, 3).join(">") !== "start>start>end" ||
     !["start", "center"].includes(result.sectionAlignments.at(-1)) ||
     result.contentBackgroundImages.some((background) => background !== "none") ||
+    !result.floatingInquiry ||
+    result.floatingInquiry.position !== "fixed" ||
+    !result.floatingInquiry.visible ||
+    result.floatingInquiry.right < 8 ||
+    result.floatingInquiry.bottom < 8 ||
+    (result.viewport === "mobile" &&
+      (result.floatingInquiry.width < 44 || result.floatingInquiry.height < 44)) ||
     (result.viewport === "mobile" &&
       result.contentColumnCounts.some((count) => count !== 1)),
 );

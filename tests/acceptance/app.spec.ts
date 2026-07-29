@@ -275,7 +275,11 @@ test("public discovery, Expo, benchmark showrooms, cart, and persisted inquiry",
   await expect(productOpener).toBeFocused();
   await productOpener.click();
   await page.getByRole("button", { name: "Add selected item" }).click();
-  const drawerOpener = page.getByRole("button", { name: /Inquiry.*1/ }).first();
+  const drawerOpener = page.locator(".floating-inquiry-trigger");
+  await expect(drawerOpener).toHaveAccessibleName("Inquiry, 1 selected item");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(drawerOpener).toBeInViewport();
+  await expect(drawerOpener).toBeVisible();
   await drawerOpener.click();
   await expect(page.getByRole("button", { name: "Close inquiry" })).toBeFocused();
   expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
@@ -322,7 +326,24 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await page.reload();
-  await page.getByRole("button", { name: /Inquiry.*1/ }).first().click();
+  const floatingInquiry = page.locator(".floating-inquiry-trigger");
+  await expect(floatingInquiry).toHaveAccessibleName("Inquiry, 1 selected item");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(floatingInquiry).toBeInViewport();
+  const floatingBounds = await floatingInquiry.evaluate((button) => {
+    const bounds = button.getBoundingClientRect();
+    return {
+      right: window.innerWidth - bounds.right,
+      bottom: window.innerHeight - bounds.bottom,
+      width: bounds.width,
+      height: bounds.height,
+    };
+  });
+  expect(floatingBounds.right).toBeGreaterThanOrEqual(8);
+  expect(floatingBounds.bottom).toBeGreaterThanOrEqual(8);
+  expect(floatingBounds.width).toBeGreaterThanOrEqual(44);
+  expect(floatingBounds.height).toBeGreaterThanOrEqual(44);
+  await floatingInquiry.click();
   const mobileDrawer = await page
     .getByRole("dialog", { name: "Product inquiry" })
     .evaluate((dialog) => {

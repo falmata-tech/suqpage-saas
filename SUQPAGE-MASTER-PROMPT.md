@@ -405,7 +405,10 @@ bottom-anchored near-full-height sheet with one internal scroll region. Opening
 locks background scrolling; closing restores it and returns focus to the
 opener. Close, quantity, remove, clear, and handoff controls provide at least a
 44-pixel mobile touch block. The panel inherits the active showroom's semantic
-type and color roles while preserving form contrast.
+type and color roles while preserving form contrast. One shared persistent
+inquiry trigger remains fixed inside the viewport across every showroom anatomy,
+shows the current selected-item count, and opens the same cart without requiring
+the visitor to return to the header.
 
 An inquiry record should contain:
 
