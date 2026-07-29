@@ -54,9 +54,9 @@ uses availability—not inventory count—as canonical inquiry eligibility.
   attribution. Unknown fields have no domain effect.
 - `Availability` is `available`, `limited`, `unavailable`, or `coming_soon`.
   `available` and `limited` are inquiry-eligible; the other states are not.
-- BE-014 expands customer `RequestedQuantity` to a bounded integer from
-  1–1,000,000 or an absent value for an authoritative optional-quantity
-  offering. It is not inventory and is never compared with product quantity.
+- BE-014 expands customer `RequestedQuantity` to optional bounded text intent
+  so units and packaging remain explicit. It is not inventory and is never
+  compared with product quantity.
 - A client is authorized only for their own business. A team member needs active
   business assignment. Managers/administrators use explicit capability scope.
 - A new product receives server-generated stable identity, unique slug, append

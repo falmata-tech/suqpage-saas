@@ -48,15 +48,20 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
     const product = productStmt.get(productId, businessId) as any;
     if (!product || !["available","limited"].includes(product.availability)) throw new InquiryError("A selected offering is not available.");
     const quantityMode = normalizeQuantityMode(product.quantity_mode);
-    const quantity =
-      raw.quantity === null || raw.quantity === undefined || raw.quantity === ""
-        ? null
-        : Number(raw.quantity);
     if (
-      quantity !== null &&
-      (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000)
+      raw.quantity !== null &&
+      raw.quantity !== undefined &&
+      typeof raw.quantity !== "string" &&
+      typeof raw.quantity !== "number"
     ) {
-      throw new InquiryError("Enter a valid desired quantity.");
+      throw new InquiryError("Enter desired quantity as text.");
+    }
+    const quantityIntent =
+      raw.quantity === null || raw.quantity === undefined
+        ? ""
+        : cleanText(raw.quantity, 81).replace(/\s+/g, " ");
+    if (quantityIntent.length > 80) {
+      throw new InquiryError("Desired quantity must be 80 characters or fewer.");
     }
     const options = raw.options && typeof raw.options === "object" && !Array.isArray(raw.options) ? raw.options as Record<string, unknown> : {};
     const groups = groupStmt.all(productId) as Array<{ id:number; name:string }>;
@@ -71,7 +76,7 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
     }
     return {
       productId,
-      quantity,
+      quantityIntent,
       name: String(product.name),
       offeringKind: normalizeOfferingKind(product.offering_kind),
       quantityMode,
@@ -87,16 +92,17 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
     const id = Number(result.lastInsertRowid);
     const insertItem = db.prepare(
       `INSERT INTO inquiry_items(
-        inquiry_id,product_id,product_name_snapshot,quantity,
+        inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,
         offering_kind_snapshot,quantity_mode_snapshot,options_json
-      ) VALUES(?,?,?,?,?,?,?)`,
+      ) VALUES(?,?,?,?,?,?,?,?)`,
     );
     for (const item of validated) {
       insertItem.run(
         id,
         item.productId,
         item.name,
-        item.quantity,
+        null,
+        item.quantityIntent,
         item.offeringKind,
         item.quantityMode,
         JSON.stringify(item.options),

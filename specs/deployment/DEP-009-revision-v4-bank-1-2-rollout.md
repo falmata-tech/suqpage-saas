@@ -54,9 +54,10 @@ creative bank without rewriting retained revisions or widening trusted input.
   layout, shape, color, and media foundation decision has a scoped runtime
   representation.
 - Palette admission proves canvas/surface/layer are neutral hierarchy roles,
-  strong/onStrong and inverse/onInverse meet WCAG AA text contrast, and rendered
-  children inherit the active section foreground instead of a different token
-  pair.
+  accent-soft/secondary-soft introduce both palette families before the CTA,
+  strong/onStrong and inverse/onInverse meet WCAG AA text contrast, and
+  rendered children inherit the active section foreground instead of a
+  different token pair.
 - Static checks prohibit network access, runtime dependencies, global CSS,
   dynamic imports, document mutation, unbounded animation, and raw markup.
 - Browser checks at 320/390/desktop cover long text, missing optional media,

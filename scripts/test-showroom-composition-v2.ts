@@ -84,7 +84,7 @@ const parsedHero = parsed.sections.find((section) => section.contentBlockKey ===
 const parsedStory = parsed.sections.find((section) => section.contentBlockKey === "story");
 assert.equal(parsedHero?.mediaIntegration, "natural");
 assert.equal(parsedStory?.mediaIntegration, "natural");
-assert.equal(parsedHero?.surfaceRole, "soft");
+assert.equal(parsedHero?.surfaceRole, "accent-soft");
 assert.equal(parsedStory?.surfaceRole, "canvas");
 
 const blendProposal = {

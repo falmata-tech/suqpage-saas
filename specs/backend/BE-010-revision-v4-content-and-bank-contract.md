@@ -50,9 +50,12 @@ additive v4 domain boundary that preserves all retained releases.
   legacy treatment names remain readable. Omitted values do not silently select
   a signature fade, overlay, or product stage and do not rewrite retained data.
 - Bank-1.2 design sections may declare one bounded top-level `surfaceRole` from
-  `canvas`, `surface`, `soft`, `strong`, or `inverse`. The component contract,
-  parser, renderer data attribute, focused editor, and portable design schema
-  use the same values without changing immutable component property contracts.
+  `canvas`, `surface`, `soft`, `accent-soft`, `secondary-soft`, `strong`, or
+  `inverse`. `soft` remains accepted for retained manifests and resolves by
+  section slot; current recipe output uses explicit brand-soft roles. The
+  component contract, parser, renderer data attribute, focused editor, and
+  portable design schema use the same values without changing immutable
+  component property contracts.
 - Machine-readable component guidance is derived from explicit reviewed
   selection profiles, never component-ID keywords or industries. Each profile
   identifies rendered anatomy, visual weight, media and content prerequisites,

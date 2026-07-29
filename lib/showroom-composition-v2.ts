@@ -35,6 +35,8 @@ export const SHOWROOM_SECTION_SURFACE_ROLES = [
   "canvas",
   "surface",
   "soft",
+  "accent-soft",
+  "secondary-soft",
   "strong",
   "inverse",
 ] as const;
@@ -96,7 +98,8 @@ export function defaultSurfaceRoleForSection(
   slot: ShowroomSlot,
 ): SectionSurfaceRole {
   if (slot === "header") return "surface";
-  if (slot === "hero" || slot === "trust") return "soft";
+  if (slot === "hero") return "accent-soft";
+  if (slot === "trust") return "secondary-soft";
   if (slot === "call_to_action") return "strong";
   if (slot === "footer") return "inverse";
   return "canvas";

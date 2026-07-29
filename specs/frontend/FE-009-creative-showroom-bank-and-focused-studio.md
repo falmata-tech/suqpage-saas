@@ -79,19 +79,23 @@ parity with the pixels rendered by that choice.
   section, and strong-section roles. The secondary family must be intentionally
   distinct from the dominant family, and components distribute these semantic
   roles across the page instead of tinting every surface with one hue.
-- Every token direction also declares explicit neutral `layer`, `strong`,
+- Every token direction also declares explicit neutral `layer`, soft brand
+  families, `strong`,
   `onStrong`, `inverse`, and `onInverse` roles. Canvas, surface, and layer are
-  neutral page hierarchy rather than pale brand-color swatches. Full-section
-  brand color is reserved for the final inquiry CTA or an explicitly reviewed
-  hero treatment; inverse is reserved for a deliberate close. Every foreground
-  is evaluated against the exact adjacent background it renders on.
+  neutral page hierarchy rather than pale brand-color swatches. Low-intensity
+  `accent-soft` and `secondary-soft` roles deliberately introduce both palette
+  families before the final strong CTA; inverse is reserved for a deliberate
+  close. Every foreground is evaluated against the exact adjacent background it
+  renders on.
 - Token metadata and runtime CSS remain in parity. Body/display typography,
   type scale, section spacing, content width, density, hero bounds, product
   ratio, and maximum product columns must visibly affect the rendered showroom.
 - Every bank-1.2 section may choose one bounded semantic surface role:
-  `canvas`, `surface`, `soft`, `strong`, or `inverse`. A composition uses those
-  roles to create deliberate section pacing; role names express purpose rather
-  than raw color values.
+  `canvas`, `surface`, `soft`, `accent-soft`, `secondary-soft`, `strong`, or
+  `inverse`. `soft` remains retained compatibility input; current normal
+  recipes use the two explicit brand-soft roles. A composition uses those roles
+  to create deliberate section pacing; role names express purpose rather than
+  raw color values.
 - New variants may expose only bounded `reveal_style` and
   `interaction_style` enums. Effects use transform/opacity/clip/mask where
   supported, have static fallbacks, never hide essential content, and stop under
@@ -163,8 +167,9 @@ parity with the pixels rendered by that choice.
   behavior rather than a one-pixel rule or color-only difference.
 - The adjacent about and process sections use opposite heading/body placement
   at desktop widths and reset to semantic reading order on phones. When both
-  sections contain media, their media/text axes alternate. Their exact neutral
-  surface roles remain `surface` then `soft`.
+  sections contain media, their media/text axes alternate. Their current
+  surface roles are `surface` then `secondary-soft`, while the hero uses
+  `accent-soft` so both palette families appear before the strong close.
 - Repeating plaid, pinstripe, graph-paper, and center-divider backgrounds are
   prohibited in normal showrooms. Accent color may identify labels, controls,
   a small edge treatment, or the final CTA; it cannot paint repeated decorative
@@ -265,7 +270,7 @@ Scenario: Every normal showroom has a purposeful fixed spine
 Scenario: Neutral layers and paired emphasis colors render
   GIVEN any admitted semantic design system
   WHEN about, process, products, inquiry CTA, and footer render in sequence
-  THEN the content layers alternate neutral surface, neutral layer, and canvas
+  THEN the hero and process introduce accent-soft and secondary-soft around neutral story and catalog layers
   AND strong/onStrong plus inverse/onInverse meet contrast against their exact backgrounds
 
 Scenario: AI chooses a header and footer from honest anatomy

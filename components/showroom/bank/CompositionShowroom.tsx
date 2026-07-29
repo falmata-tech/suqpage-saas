@@ -16,6 +16,16 @@ import { SHOWROOM_BANK_REGISTRY } from "./registry";
 import { SHOWROOM_BANK_TOKEN_STYLES } from "./tokens";
 import type { BankPresentationContext, BankProductView } from "./types";
 
+function currentSurfaceRole(
+  role: ShowroomDesignProposalV2["sections"][number]["surfaceRole"],
+  slot: string,
+) {
+  if (role !== "soft") return role;
+  if (slot === "hero") return "accent-soft";
+  if (slot === "content" || slot === "trust") return "secondary-soft";
+  return role;
+}
+
 function contactLabel(props: DesignProps): string {
   const business = props.catalog.business;
   if (business.whatsapp) return `WhatsApp ${business.whatsapp}`;
@@ -142,7 +152,9 @@ export function CompositionShowroom({
               "mediaIntegration" in section ? section.mediaIntegration : null
             }
             surfaceRole={
-              "surfaceRole" in section ? section.surfaceRole : undefined
+              "surfaceRole" in section
+                ? currentSurfaceRole(section.surfaceRole, definition.slot)
+                : undefined
             }
           />
         );

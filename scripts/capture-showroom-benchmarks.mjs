@@ -214,7 +214,7 @@ const failures = results.filter(
     result.sectionSlots.join(">") !==
       "header>hero>content>content>catalog>callToAction>footer" ||
     result.surfaceRoles.join(">") !==
-      "surface>soft>surface>soft>canvas>strong>inverse" ||
+      "surface>accent-soft>surface>secondary-soft>canvas>strong>inverse" ||
     result.sectionAlignments.slice(0, 3).join(">") !== "start>start>end" ||
     !["start", "center"].includes(result.sectionAlignments.at(-1)) ||
     result.contentBackgroundImages.some((background) => background !== "none") ||

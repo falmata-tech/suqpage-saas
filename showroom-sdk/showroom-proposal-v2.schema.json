@@ -33,7 +33,7 @@
         },
         "surfaceRole": {
           "description": "Semantic section surface role used to pace the complete page.",
-          "enum": ["canvas", "surface", "soft", "strong", "inverse"]
+          "enum": ["canvas", "surface", "soft", "accent-soft", "secondary-soft", "strong", "inverse"]
         },
         "mediaIntegration": {
           "description": "Reviewed section-media treatment. Omit for the neutral natural treatment.",

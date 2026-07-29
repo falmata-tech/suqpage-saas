@@ -26,11 +26,13 @@ This correction supersedes required public quantity behavior without requiring
 another database rebuild.
 
 - Desired quantity is optional buyer intent for every offering kind.
+- Current desired quantity is a normalized single-line text intent of at most
+  80 characters so units and packaging remain explicit.
 - Current upkeep, revision, and recipe output writes `quantityMode: optional`.
 - Retained rows and snapshots containing `required` remain readable
   compatibility input and normalize to optional current behavior.
 - Public inquiry validation accepts an absent quantity for every offering and
-  still rejects non-integer, non-positive, or over-limit supplied values.
+  rejects non-scalar input or supplied text beyond the bounded contract.
 - Historical inquiry-line snapshots are not rewritten.
 
 ## Scope
@@ -60,8 +62,8 @@ another database rebuild.
   its current domain role.
 - Existing rows and legacy snapshots default to `standard_product`,
   `required`, and empty production facts.
-- Quantity is either absent or a positive integer within the public inquiry
-  limit.
+- Current quantity intent is either absent or normalized text of at most 80
+  characters. Legacy numeric quantity remains readable compatibility data.
 - An inquiry line snapshots offering kind and quantity mode so historical
   meaning survives later catalog edits.
 - `available` and `limited` remain the only inquiry-eligible availability
@@ -81,7 +83,9 @@ another database rebuild.
   business. It accepts absent quantity, and rejects invalid supplied quantity,
   unavailable offerings, bad options, and cross-tenant IDs before insertion.
 - Persisted inquiry lines use nullable quantity and snapshot kind/policy. No
-  downstream view assumes quantity is always present.
+  downstream view assumes quantity is always present. Migration 19 adds
+  `quantity_intent` without rebuilding the table and backfills retained numeric
+  values as text while preserving the legacy numeric column.
 
 ## Scenarios
 
@@ -91,6 +95,12 @@ Scenario: Optional capability inquiry is persisted truthfully
   WHEN a visitor submits a valid inquiry without quantity
   THEN the inquiry line stores a null quantity and capability snapshots
   AND no synthetic unit count is introduced
+
+Scenario: Quantity units survive canonical persistence
+  GIVEN a valid contact-bearing inquiry for an available offering
+  WHEN desired quantity is "1 ton"
+  THEN the inquiry line stores "1 ton" as quantity intent
+  AND no unitless numeric quantity is invented
 
 Scenario: Retained required policy no longer blocks a visitor
   GIVEN a published standard product retaining required quantity metadata
@@ -120,7 +130,7 @@ Scenario: Historical catalog receives compatible defaults
 - Accessibility and responsive behavior: owned by FE-016.
 - Localization and merchant-entered values: exact text is preserved.
 - Performance and limits: existing 20-line inquiry bound remains; desired
-  quantity has a larger but finite numeric bound.
+  quantity text is bounded to 80 characters.
 - Failure recovery and idempotency: migration checkpoint, atomic publication,
   and inquiry idempotency remain active.
 
@@ -140,10 +150,10 @@ and whether quantity was supplied, never its customer note or complete payload.
 
 ## Rollout and rollback
 
-DEP-012 owns migration 18, checkpoint requirements, reset fixtures, and
-operator verification. Additive product columns may remain after application
-rollback; nullable inquiry quantity requires database/application versions to
-roll back together from the checkpoint.
+DEP-012 owns migration 18 checkpoint requirements, additive migration 19,
+reset fixtures, and operator verification. Additive product and
+`quantity_intent` columns may remain after application rollback; the legacy
+numeric column remains available to the older application artifact.
 
 ## Readiness checklist
 
@@ -164,9 +174,11 @@ Evidence: verified locally on 2026-07-29.
   `lib/revision-domain.ts`, `lib/revision-service.ts`, and the current showroom
   recipe/content contracts implement the additive offering model, current
   optional quantity output, and retained required-value normalization.
-- `scripts/test-security.ts` proves retained required metadata accepts null,
-  snapshots current optional behavior, bounds supplied quantity, and preserves
-  option, availability, and tenant denial.
+- `scripts/test-security.ts` proves retained required metadata accepts optional
+  text intent, preserves `1 ton`, rejects overlong input, snapshots current
+  optional behavior, and preserves option, availability, and tenant denial.
+- `scripts/test-offering-migration.ts` proves migration 19 additively backfills
+  retained numeric values as text, keeps the numeric column, and is idempotent.
 - `scripts/test-product-upkeep.ts`, `scripts/test-showroom-recipe.ts`, and
   `scripts/test-revisions.ts` prove enum/fact validation, retained publication,
   current AI schema/provenance, compatibility defaults, publication, and

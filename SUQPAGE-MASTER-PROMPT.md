@@ -378,11 +378,12 @@ Rules:
 7. Descriptive availability is the only current product-status authority.
 8. Unavailable or coming-soon products are not inquiry-ready unless a future
    waitlist-style workflow explicitly supports them.
-9. Customer-requested quantity is optional bounded inquiry intent from 1
-   through 1,000,000. It may remain absent for every offering and is never
-   compared with, reserved from, or deducted from inventory. Retained
-   `quantity_mode=required` values are compatibility input and normalize to
-   optional current behavior.
+9. Customer-requested quantity is optional free-form inquiry intent of at most
+   80 characters. It may include units, packages, ranges, or phrases such as
+   `1 g`, `1 ton`, or `two pallets`; it may remain absent for every offering and
+   is never compared with, reserved from, or deducted from inventory. Retained
+   numeric quantity and `quantity_mode=required` values are compatibility input
+   and normalize to current text/optional behavior.
 10. Every current offering declares one kind: `standard_product`,
     `made_to_order`, `manufacturing_capability`, or `production_supply`.
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
@@ -416,8 +417,8 @@ Expected customer flow:
 3. The customer selects required option values.
 4. The customer adds the item to the inquiry cart.
 5. The customer can add multiple offerings.
-6. The customer may state a desired quantity for any offering or leave it open,
-   and can remove items.
+6. The customer may state a concise desired quantity with units or packaging
+   for any offering, leave it open, and remove items.
 7. The customer activates the primary **Copy inquiry** action without providing
    a name, contact value, or note.
 8. The exact copied text remains visible and selectable as a reference.
@@ -448,7 +449,7 @@ should contain:
 - optional note;
 - selected products and capabilities;
 - selected options;
-- optional desired quantity;
+- optional free-form desired quantity intent;
 - source;
 - status;
 - timestamps.
@@ -900,8 +901,10 @@ remaining AI-assisted delivery sequence is recorded in
   roles, neutral layer hierarchy, exact strong/onStrong and inverse/onInverse
   contrast pairs, border, typography, spacing, shape, layout rhythm,
   product-media bounds, and preferred/allowed hero-media integration. Canvas,
-  surface, and layer remain neutral; brand color is reserved for controls and
-  deliberate emphasis rather than tinting every page band.
+  surface, and layer remain neutral. The canonical hero and process surfaces
+  use low-intensity accent-soft and secondary-soft roles so both palette
+  families appear before the strong CTA rather than arriving only at the
+  bottom. Neutral story and catalog sections still prevent an all-tinted page.
 - Required-slot choices and tokens provide 98,280 validated base combinations
   before optional navigation, content, trust, call-to-action, and bounded
   component properties are counted. Combination volume never replaces visual,
@@ -1013,8 +1016,9 @@ remaining AI-assisted delivery sequence is recorded in
   scrollable tabs with modest corners; it is one shared catalog control and
   does not change shape merely because the AI selects another catalog variant.
   About/story and process chapters use opposite desktop heading/body placement
-  and semantic single-column phone order. Their neutral surfaces provide
-  separation without repeated rules. Repeating plaid, pinstripe, graph-paper,
+  and semantic single-column phone order. Their surface and secondary-soft
+  roles provide separation without repeated rules, while the hero introduces
+  accent-soft. Repeating plaid, pinstripe, graph-paper,
   and center-divider motifs are rejected by bank and browser admission.
   Deterministic composition fitness blocks duplicate navigation, standalone
   navigation combined with catalog filters, incompatible sparse catalogs,
@@ -1121,7 +1125,7 @@ Security requirements are product requirements, not optional cleanup.
 - Require the product to belong to the target business.
 - Require the product to be published and inquiry-eligible.
 - Validate options against the product’s current option groups and values.
-- Bound quantity, item count, field lengths, and body size.
+- Bound quantity-intent length, item count, field lengths, and body size.
 - Use idempotency and duplicate suppression.
 - Rate-limit abuse.
 - Do not trust client-provided product names or snapshots as authority.

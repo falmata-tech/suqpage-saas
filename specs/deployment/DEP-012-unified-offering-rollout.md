@@ -29,6 +29,8 @@ and inquiry history remain valid.
 - Reset fixtures spanning all offering kinds and quantity modes.
 - Local migration, integrity, release, acceptance, and visual gates.
 - Application rollback boundary and operator verification.
+- Additive migration 19 for bounded free-form quantity intent, with legacy
+  numeric values preserved and mirrored into the text field.
 
 ### Non-goals
 
@@ -44,6 +46,8 @@ and inquiry history remain valid.
 - New optional-quantity lines may store null; existing lines never become null.
 - Migration 18 requires a stopped single-instance checkpoint because it rebuilds
   `inquiry_items`.
+- Migration 19 only adds and backfills `quantity_intent`; it does not rebuild
+  `inquiry_items` and requires no destructive checkpoint.
 
 ## Contracts
 
@@ -140,15 +144,17 @@ excluded.
   importance decision, stopped-writer checkpoint, monitored migration, and
   matching application rollback artifact.
 
-## Optional-quantity follow-up
+## Quantity-intent follow-up
 
-The current optional-quantity correction is application-level and requires no
-schema migration or destructive data rewrite. Migration 18 already permits null
-inquiry quantities and the retained `required` storage value. Current code
-normalizes that retained value to optional behavior, while historical inquiry
-snapshots remain unchanged. Rollback therefore uses the normal application
-artifact boundary; the migration-18 checkpoint rules above are unaffected.
+Migration 19 additively creates bounded `quantity_intent` text and backfills
+retained numeric values without deleting or rewriting the legacy numeric
+column. New inquiry writes use the text field so units and packaging remain
+explicit. The migration is transactional and idempotent but does not rebuild
+`inquiry_items`, so the migration-18 destructive checkpoint rules are
+unaffected. Application rollback may leave the additive column in place.
 
 The follow-up passed `scripts/test-offering-migration.ts`,
-`scripts/test-security.ts`, 56 visual captures, 10/10 browser acceptance,
-`npm run check`, and `npm run release` on 2026-07-29.
+`scripts/test-security.ts`, 56 visual captures, and 10/10 browser acceptance on
+2026-07-29. `npm run check` and `npm run release` also passed, including the
+production build, HTTP smoke tests, trace-privacy check, and zero-vulnerability
+production dependency audit.

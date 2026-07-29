@@ -20,7 +20,7 @@ pretending that one unit is in stock.
 The outcome is one clear **Products & Capabilities** experience. A showroom can
 mix standard products, made-to-order products, manufacturing capabilities, and
 production supply. Every offering can enter the same inquiry bag, while desired
-quantity is always optional buyer context.
+quantity is always optional free-form buyer context.
 
 ## Scope
 
@@ -50,7 +50,8 @@ quantity is always optional buyer context.
   product, manufacturing capability, or production supply.
 - **Products & Capabilities** is the public section label.
 - **Desired quantity** is optional buyer intent, not inventory. A visitor may
-  add it to any inquiry line or leave it open for discussion.
+  enter a concise value with units or packaging such as `1 g`, `1 ton`, `500
+  units`, or `two pallets`, or leave it open for discussion.
 - Capacity, minimum order, and lead time are bounded merchant-authored text,
   not calculated or verified platform promises.
 - Existing availability values remain canonical but receive context-appropriate
@@ -65,9 +66,9 @@ quantity is always optional buyer context.
   normalized to optional behavior rather than blocking a visitor.
 - Cards preserve a stable media frame, bounded facts, and one **Add to inquiry**
   action. Missing media keeps the approved intentional fallback.
-- The inquiry drawer keeps optional quantity blank by default, accepts a
-  positive bounded value when supplied, and never inserts a fake quantity of
-  one into the customer summary.
+- The inquiry drawer keeps optional quantity blank by default, accepts one
+  bounded single-line text value up to 80 characters, and never inserts a fake
+  quantity or unit into the customer summary.
 - Public labels and statuses remain readable at 320 pixels and do not rely on
   color alone.
 - Intake allows attached references but does not require final photography or a
@@ -84,8 +85,8 @@ Scenario: Manufacturer presents a capability
 
 Scenario: Buyer provides desired quantity
   GIVEN an optional-quantity capability is in the inquiry bag
-  WHEN the buyer enters a positive desired quantity
-  THEN the inquiry summary and submitted line retain that quantity
+  WHEN the buyer enters "1 ton" or another bounded quantity description
+  THEN the inquiry summary and submitted line retain the exact normalized text
 
 Scenario: Standard product keeps quantity optional
   GIVEN a standard product is available for inquiry
@@ -132,9 +133,10 @@ customer notes, or full inquiry payloads.
 
 ## Rollout and rollback
 
-DEP-012 adds compatible defaults before any UI writes expanded fields. Rollback
-disables expanded controls and optional-quantity submission while retaining the
-additive offering columns. Published snapshots remain recoverable.
+DEP-012 adds compatible defaults and quantity-intent storage before current UI
+writes expanded fields. Rollback may retain additive offering and
+`quantity_intent` columns because the legacy numeric field remains available.
+Published snapshots remain recoverable.
 
 ## Readiness checklist
 
@@ -156,8 +158,9 @@ Evidence: verified locally on 2026-07-29.
   production fields, mixed cards/details, text-first no-media detail, contextual
   availability, and optional desired quantity.
 - `tests/acceptance/app.spec.ts` passed all 10 production-browser workflows,
-  including blank-by-default and buyer-entered mobile quantity, copied-message
-  inclusion, client/staff offering upkeep, intake, and no horizontal overflow.
+  including blank-by-default and unit-bearing mobile quantity, exact
+  copied-message inclusion, client/staff offering upkeep, intake, and no
+  horizontal overflow.
 - `npm run test:visual-benchmarks` produced 56 desktop/mobile captures with zero
   automated visual failures. Focused Chromium review covered the homepage,
   Addis Metalworks catalog, capability detail, and inquiry drawer.

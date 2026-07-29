@@ -22,7 +22,7 @@ import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowr
 import { SHOWROOM_BANK_TOKEN_STYLES } from "./bank/tokens";
 import "./showrooms.css";
 
-type CartLine = { product: Product; quantity: number | null; options: Record<string, string> };
+type CartLine = { product: Product; quantity: string; options: Record<string, string> };
 const focusableSelector =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -45,17 +45,16 @@ function legacyCopy(value: string) {
 
 function buildMessage(catalog: Catalog, cart: CartLine[]) {
   const offerings = cart.flatMap((line, index) => {
-      const options = Object.entries(line.options)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(", ");
-      return [
-        `${index + 1}. ${line.product.name}`,
-        options ? `   Options: ${options}` : null,
-        line.quantity === null
-          ? null
-          : `   Desired quantity: ${line.quantity}`,
-      ].filter((value): value is string => Boolean(value));
-    });
+    const quantity = line.quantity.trim();
+    const options = Object.entries(line.options)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ");
+    return [
+      `${index + 1}. ${line.product.name}`,
+      options ? `   Options: ${options}` : null,
+      !quantity ? null : `   Desired quantity: ${quantity}`,
+    ].filter((value): value is string => Boolean(value));
+  });
   return [
     `Hello ${catalog.business.name},`,
     "",
@@ -133,7 +132,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as Array<{
         productId: number;
-        quantity: number | null;
+        quantity: unknown;
         options: Record<string, string>;
       }>;
       setCart(
@@ -144,12 +143,10 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
                 {
                   product,
                   quantity:
-                    line.quantity === null || line.quantity === undefined
-                      ? null
-                      : Math.max(
-                          1,
-                          Math.min(Number(line.quantity) || 1, 1_000_000),
-                        ),
+                    typeof line.quantity === "string" ||
+                    typeof line.quantity === "number"
+                      ? String(line.quantity).trim().slice(0, 80)
+                      : "",
                   options: line.options || {},
                 },
               ]
@@ -224,16 +221,12 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           ...current,
           {
             product,
-            quantity: null,
+            quantity: "",
             options,
           },
         ];
       }
-      return current.map((line, lineIndex) =>
-        lineIndex === index && line.quantity !== null
-          ? { ...line, quantity: Math.min(1_000_000, line.quantity + 1) }
-          : line,
-      );
+      return current;
     });
     setSelected(null);
     show("Added to inquiry");
@@ -242,11 +235,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     setCart((current) =>
       current.map((line, lineIndex) => {
         if (lineIndex !== index) return line;
-        if (!raw.trim()) return { ...line, quantity: null };
-        const parsed = Number(raw);
-        return Number.isInteger(parsed) && parsed > 0
-          ? { ...line, quantity: Math.min(parsed, 1_000_000) }
-          : line;
+        return { ...line, quantity: raw.replace(/\s+/g, " ").slice(0, 80) };
       }),
     );
 
@@ -516,13 +505,11 @@ function InquiryDrawer({
                 <label className="optional-quantity">
                   <span>Desired quantity <small>(optional)</small></span>
                   <input
-                    type="number"
-                    min={1}
-                    max={1_000_000}
-                    inputMode="numeric"
-                    value={line.quantity ?? ""}
+                    type="text"
+                    maxLength={80}
+                    value={line.quantity}
                     onChange={(event) => setDesiredQuantity(index, event.target.value)}
-                    placeholder="Optional"
+                    placeholder="e.g. 1 g, 1 ton, 2 pallets"
                   />
                 </label>
               </div>

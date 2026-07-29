@@ -69,6 +69,5 @@ explicit one-command approval, and adequate disk. Rollback requires schema
 compatibility or verified database/media restore.
 
 `BE-009` and `DEP-008` now define the implemented eligibility rule:
-availability is canonical, requested quantity is bounded intent from 1–1,000,000
-and may be absent only for an authoritative optional-quantity offering, and
-no active inventory count is stored or consulted.
+availability is canonical, requested quantity is optional bounded text intent
+under BE-014, and no active inventory count is stored or consulted.

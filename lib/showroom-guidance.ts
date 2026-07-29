@@ -52,6 +52,8 @@ export type ShowroomSurfaceRole =
   | "canvas"
   | "surface"
   | "soft"
+  | "accent-soft"
+  | "secondary-soft"
   | "strong"
   | "inverse";
 
@@ -284,7 +286,15 @@ const STANDARD_SECTION_PLAN: ShowroomTemplateSection[] = [
 ];
 
 export const SHOWROOM_CANONICAL_SURFACE_SEQUENCE: readonly ShowroomSurfaceRole[] =
-  Object.freeze(["surface", "soft", "surface", "soft", "canvas", "strong", "inverse"]);
+  Object.freeze([
+    "surface",
+    "accent-soft",
+    "surface",
+    "secondary-soft",
+    "canvas",
+    "strong",
+    "inverse",
+  ]);
 
 function pageTemplate(
   input: Omit<
@@ -1036,7 +1046,7 @@ export function evaluateCompositionFitness(
           severity: "error",
           code: "noncanonical_surface_sequence",
           sectionKey: section.key,
-          message: `Section ${section.key} must use ${SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]} so the page returns to clear neutral layers before its strong close.`,
+          message: `Section ${section.key} must use ${SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]} so both palette families appear before the strong close while story and catalog return to neutral layers.`,
         });
       }
     });

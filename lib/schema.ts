@@ -143,6 +143,7 @@ export function migrateDatabase(
       product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
       product_name_snapshot TEXT NOT NULL,
       quantity INTEGER CHECK(quantity IS NULL OR quantity BETWEEN 1 AND 1000000),
+      quantity_intent TEXT NOT NULL DEFAULT '' CHECK(length(quantity_intent) <= 80),
       offering_kind_snapshot TEXT NOT NULL DEFAULT 'standard_product'
         CHECK(offering_kind_snapshot IN ('standard_product','made_to_order','manufacturing_capability','production_supply')),
       quantity_mode_snapshot TEXT NOT NULL DEFAULT 'required'
@@ -1185,6 +1186,30 @@ export function migrateDatabase(
       throw error;
     } finally {
       db.exec("PRAGMA foreign_keys = ON");
+    }
+  }
+
+  const quantityIntentApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=19")
+    .get();
+  if (!quantityIntentApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(
+        db,
+        "inquiry_items",
+        "quantity_intent TEXT NOT NULL DEFAULT '' CHECK(length(quantity_intent) <= 80)",
+      );
+      db.exec(`
+        UPDATE inquiry_items
+        SET quantity_intent=CAST(quantity AS TEXT)
+        WHERE quantity IS NOT NULL AND quantity_intent='';
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(19)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
     }
   }
 }

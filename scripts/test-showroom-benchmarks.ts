@@ -223,8 +223,8 @@ assert.deepEqual(
 );
 assert.deepEqual(
   [...surfaceSequences],
-  ["surface>soft>surface>soft>canvas>strong>inverse"],
-  "all benchmarks preserve the neutral-to-emphasis surface hierarchy",
+  ["surface>accent-soft>surface>secondary-soft>canvas>strong>inverse"],
+  "all benchmarks introduce both palette families before the strong close",
 );
 
 console.log("Twenty-eight Expo showrooms, 18 authored briefs, and ten validated design benchmarks passed.");

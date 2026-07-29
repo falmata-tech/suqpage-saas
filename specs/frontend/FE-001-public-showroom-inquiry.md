@@ -19,7 +19,7 @@ identity fields, or dependence on a social app successfully opening.
 ## Scope and non-goals
 
 Includes intentional directory discovery, distinct composed showrooms, product
-search, option selection, cart persistence, optional desired quantity,
+search, option selection, cart persistence, optional free-form desired quantity,
 copy-first message preparation, and configured WhatsApp/Telegram handoff.
 Excludes payment, checkout, pricing guarantees, variant-combination inventory,
 automatic fulfillment, native share menus, TikTok handoff, and mandatory
@@ -43,6 +43,12 @@ Scenario: Customer copies an inquiry without personal details
   THEN the exact inquiry message is copied without requesting name, contact, or a note
   AND the copied text remains visibly available as a reference
   AND no dashboard inquiry is fabricated without a customer reply path
+
+Scenario: Customer describes quantity in useful units
+  GIVEN an offering is in the inquiry
+  WHEN the customer enters "1 ton", "500 g", or another bounded quantity description
+  THEN the exact text appears in the prepared inquiry
+  AND the field does not force a unitless integer
 
 Scenario: Clipboard access is unavailable
   GIVEN a prepared inquiry
@@ -87,6 +93,9 @@ Scenario: Customer returns to a growing inquiry while browsing
 - Mobile has no horizontal overflow and controls remain keyboard accessible.
 - Opening the inquiry prevents background-page scrolling without losing the
   cart, and closing it restores page scrolling and opener focus.
+- Desired quantity is an optional single-line text value of at most 80
+  characters so visitors may include units, packs, pallets, ranges, or another
+  concise production quantity description.
 - Message preparation stores no customer identity or contact data.
 - Copy/share preparation is not represented as delivery and does not create a
   canonical dashboard inquiry without an explicit customer reply path.
@@ -101,7 +110,8 @@ Scenario: Customer returns to a growing inquiry while browsing
 - Evidence: `npm run test:acceptance` passed 10/10 on 2026-07-29, including
   zero personal-detail fields, primary copy, visible copied reference, no
   fabricated dashboard row, configured WhatsApp/Telegram filtering, optional
-  quantity, bounded desktop geometry, 390px safe-area geometry, scroll/focus
+  free-form quantities including `1 ton` and `250 kg`, bounded desktop
+  geometry, 390px safe-area geometry, scroll/focus
   restoration, and 44px mobile controls. `npm run test:visual-benchmarks`
   recorded desktop/mobile copied-message panels among 56 zero-failure captures.
   `npm run check` and `npm run release` passed with zero production
@@ -110,5 +120,5 @@ Scenario: Customer returns to a growing inquiry while browsing
 ## Rollout and rollback
 
 Renderer/application changes ship together after browser and release gates.
-Rollback deploys the previous compatible build. This correction changes no
-database schema or stored customer data.
+Rollback deploys the previous compatible build. Additive migration 19 may
+remain in place because it preserves the legacy numeric quantity column.

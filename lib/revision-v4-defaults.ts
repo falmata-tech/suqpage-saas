@@ -407,7 +407,7 @@ function buildDesignManifest(
           alignment: "start",
         }, {
           mediaIntegration: profile.heroMediaIntegration,
-          surfaceRole: "soft",
+          surfaceRole: "accent-soft",
         }),
         section("content-story", profile.story, profile, "brand-story", {
           alignment: "start",
@@ -418,7 +418,7 @@ function buildDesignManifest(
         section("content-process", profile.highlights, profile, "showroom-highlights", {
           alignment: "end",
         }, {
-          surfaceRole: "soft",
+          surfaceRole: "secondary-soft",
         }),
         section("catalog-1", profile.catalog, profile, null, {
           show_search: catalog.products.length > 6,

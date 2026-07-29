@@ -205,7 +205,7 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
         (sections) =>
           sections.map((section) => section.getAttribute("data-surface")).join(">"),
       ),
-    ).toBe("surface>soft>surface>soft>canvas>strong>inverse");
+    ).toBe("surface>accent-soft>surface>secondary-soft>canvas>strong>inverse");
     const catalog = page.locator('[data-slot="catalog"]');
     const catalogVariant = await catalog.getAttribute("data-variant");
     if (catalogVariant === "minimal-list") {
@@ -392,25 +392,26 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await expect(page.locator(".direct-handoffs")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Telegram" })).toHaveCount(0);
-  const firstQuantity = page.locator(".cart-item").first().getByRole("spinbutton", {
+  const firstQuantity = page.locator(".cart-item").first().getByRole("textbox", {
     name: /Desired quantity/,
   });
   await expect(firstQuantity).toHaveValue("");
-  await firstQuantity.fill("2");
-  await expect(firstQuantity).toHaveValue("2");
+  await firstQuantity.fill("1 ton");
+  await expect(firstQuantity).toHaveValue("1 ton");
   await page.getByRole("button", { name: "Close inquiry" }).click();
   await page.getByLabel("Search products and capabilities").fill("Short-Run");
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await floatingInquiry.click();
-  const optionalQuantity = page.locator(".cart-item").last().getByRole("spinbutton", {
+  const optionalQuantity = page.locator(".cart-item").last().getByRole("textbox", {
     name: /Desired quantity/,
   });
   await expect(optionalQuantity).toHaveValue("");
-  await optionalQuantity.fill("250");
-  await expect(optionalQuantity).toHaveValue("250");
+  await optionalQuantity.fill("250 kg");
+  await expect(optionalQuantity).toHaveValue("250 kg");
   await page.getByRole("button", { name: "Copy inquiry" }).click();
-  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 250");
+  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 1 ton");
+  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 250 kg");
   await page.getByRole("button", { name: "Close inquiry" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 320, height: 700 });

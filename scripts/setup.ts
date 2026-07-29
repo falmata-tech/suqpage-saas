@@ -388,14 +388,14 @@ const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_
 
 const inquiry = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,idempotency_key) VALUES(?,?,?,?,?,?,?)");
 const inquiryItem = db.prepare(`INSERT INTO inquiry_items(
-  inquiry_id,product_id,product_name_snapshot,quantity,
+  inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,
   offering_kind_snapshot,quantity_mode_snapshot,options_json
-) VALUES(?,?,?,?,?,?,?)`);
+) VALUES(?,?,?,?,?,?,?,?)`);
 for (const [handle, customer] of businesses.slice(0, 4).map((business, index) => [business.handle, ["Hana","Mimi","Samuel","Rahel"][index]] as const)) {
   const businessId = seeded.get(handle)!;
   const iid = Number(inquiry.run(businessId, customer, "251911000000", "whatsapp", "Seed inquiry for local testing.", "new", `seed-${handle}`).lastInsertRowid);
   const product = db.prepare("SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 1").get(businessId) as any;
-  inquiryItem.run(iid, product.id, product.name, 1, product.offering_kind, product.quantity_mode, JSON.stringify({}));
+  inquiryItem.run(iid, product.id, product.name, null, "1 unit", product.offering_kind, product.quantity_mode, JSON.stringify({}));
 }
 
 const credentialPath=path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));

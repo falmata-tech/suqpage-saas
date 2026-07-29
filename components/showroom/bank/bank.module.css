@@ -339,6 +339,16 @@
   background-color: var(--bank-layer);
 }
 
+.section[data-surface="accent-soft"] {
+  --bank-active-surface: var(--bank-accent-soft);
+  background-color: var(--bank-accent-soft);
+}
+
+.section[data-surface="secondary-soft"] {
+  --bank-active-surface: var(--bank-secondary-soft);
+  background-color: var(--bank-secondary-soft);
+}
+
 .section[data-surface="strong"] {
   --bank-active-surface: var(--bank-section-strong);
   --bank-active-ink: var(--bank-on-strong);

@@ -346,7 +346,7 @@ async function main() {
           template.sectionPlan.map((section) => section.slot).join(">") ===
             "header>hero>content>content>catalog>call_to_action>footer" &&
           template.surfaceSequence.join(">") ===
-            "surface>soft>surface>soft>canvas>strong>inverse",
+            "surface>accent-soft>surface>secondary-soft>canvas>strong>inverse",
       ),
     );
     assert.deepEqual(
@@ -361,7 +361,7 @@ async function main() {
           "inquiry_call_to_action",
           "footer",
         ],
-        surfaceSequence: ["surface", "soft", "surface", "soft", "canvas", "strong", "inverse"],
+        surfaceSequence: ["surface", "accent-soft", "surface", "secondary-soft", "canvas", "strong", "inverse"],
         extraSectionsAllowed: false,
       },
     );
