@@ -19,16 +19,16 @@ async function main() {
   const db = getDb();
 
   const pureCandidates = [
-    { businessId: 1, name: "Addis One", city: "Addis Ababa", region: "Addis Ababa", latitude: 9.03, longitude: 38.74, featured: false },
-    { businessId: 2, name: "Addis Two", city: "Addis Ababa", region: "Addis Ababa", latitude: 9.04, longitude: 38.75, featured: false },
-    { businessId: 3, name: "Oromia One", city: "Adama", region: "Oromia", latitude: 8.54, longitude: 39.27, featured: true },
-    { businessId: 4, name: "Oromia Two", city: "Bishoftu", region: "Oromia", latitude: 8.75, longitude: 38.98, featured: false },
-    { businessId: 5, name: "Sparse", city: "Gambela", region: "Gambela", latitude: 8.25, longitude: 34.59, featured: false },
+    { businessId: 1, name: "Addis One", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.03, longitude: 38.74, featured: false },
+    { businessId: 2, name: "Addis Two", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.04, longitude: 38.75, featured: false },
+    { businessId: 3, name: "Oromia One", city: "Adama", zone: "East Shewa", region: "Oromia", latitude: 8.54, longitude: 39.27, featured: true },
+    { businessId: 4, name: "Oromia Two", city: "Bishoftu", zone: "East Shewa", region: "Oromia", latitude: 8.75, longitude: 38.98, featured: false },
+    { businessId: 5, name: "Sparse", city: "Gambela", zone: "Agniwak", region: "Gambela", latitude: 8.25, longitude: 34.59, featured: false },
   ];
   const pureAssignments = assignExpoHubs(pureCandidates);
   assert.deepEqual(
     [...new Set(pureAssignments.map((assignment) => assignment.hubKey))],
-    ["addis-ababa", "oromia"],
+    ["adama", "addis-ababa"],
   );
   const sparseAssignment = pureAssignments.find((assignment) => assignment.businessId === 5)!;
   const sparseOrigin = pureCandidates.find((candidate) => candidate.businessId === 5)!;
@@ -36,14 +36,15 @@ async function main() {
     latitude: 9.035,
     longitude: 38.745,
   });
-  const oromiaDistance = geographicDistanceKm(sparseOrigin, {
-    latitude: (8.54 + 8.75) / 2,
-    longitude: (39.27 + 38.98) / 2,
+  const adamaDistance = geographicDistanceKm(sparseOrigin, {
+    latitude: 8.54,
+    longitude: 39.27,
   });
   assert.equal(
     sparseAssignment.hubKey,
-    addisDistance < oromiaDistance ? "addis-ababa" : "oromia",
+    addisDistance < adamaDistance ? "addis-ababa" : "adama",
   );
+  assert.equal(sparseAssignment.originZone, "Agniwak");
   assert.equal(sparseAssignment.originRegion, "Gambela");
 
   const hallAssignments = assignExpoHubs(
@@ -51,6 +52,7 @@ async function main() {
       businessId: index + 1,
       name: `Maker ${String(index + 1).padStart(2, "0")}`,
       city: "Addis Ababa",
+      zone: "Addis Ababa",
       region: "Addis Ababa",
       latitude: 9.03,
       longitude: 38.74,
@@ -67,12 +69,12 @@ async function main() {
     ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
   `);
   const fixtures = [
-    ["addis-one", "Addis One", "Addis Ababa", "Addis Ababa", 9.03, 38.74, "/booths/addis-one.webp"],
-    ["addis-two", "Addis Two", "Addis Ababa", "Addis Ababa", 9.04, 38.75, "/booths/addis-two.webp"],
-    ["oromia-one", "Oromia One", "Adama", "Oromia", 8.54, 39.27, "/booths/oromia-one.webp"],
-    ["oromia-two", "Oromia Two", "Bishoftu", "Oromia", 8.75, 38.98, "/booths/oromia-two.webp"],
-    ["sparse-maker", "Sparse Maker", "Gambela", "Gambela", 8.25, 34.59, "/booths/sparse.webp"],
-    ["missing-media", "Missing Media", "Bahir Dar", "Amhara", 11.57, 37.36, ""],
+    ["addis-one", "Addis One", "Addis Ababa", "Addis Ababa", "Addis Ababa", 9.03, 38.74, "/booths/addis-one.webp"],
+    ["addis-two", "Addis Two", "Addis Ababa", "Addis Ababa", "Addis Ababa", 9.04, 38.75, "/booths/addis-two.webp"],
+    ["oromia-one", "Oromia One", "Adama", "East Shewa", "Oromia", 8.54, 39.27, "/booths/oromia-one.webp"],
+    ["oromia-two", "Oromia Two", "Bishoftu", "East Shewa", "Oromia", 8.75, 38.98, "/booths/oromia-two.webp"],
+    ["sparse-maker", "Sparse Maker", "Gambela", "Agniwak", "Gambela", 8.25, 34.59, "/booths/sparse.webp"],
+    ["missing-media", "Missing Media", "Bahir Dar", "Bahir Dar", "Amhara", 11.57, 37.36, ""],
   ] as const;
   for (const [handle, name] of fixtures) {
     insertBusiness.run(
@@ -92,12 +94,12 @@ async function main() {
   seedDefaultBazaarConfig(db);
   const updateProfile = db.prepare(`
     UPDATE bazaar_booth_profiles
-    SET industry_keys_json='["community"]',booth_image_path=?,city=?,region=?,
+    SET industry_keys_json='["community"]',booth_image_path=?,city=?,zone=?,region=?,
       latitude=?,longitude=?,approved_at=CURRENT_TIMESTAMP,is_excluded=0
     WHERE business_id=(SELECT id FROM businesses WHERE handle=?)
   `);
-  for (const [handle, , city, region, latitude, longitude, boothImage] of fixtures) {
-    updateProfile.run(boothImage, city, region, latitude, longitude, handle);
+  for (const [handle, , city, zone, region, latitude, longitude, boothImage] of fixtures) {
+    updateProfile.run(boothImage, city, zone, region, latitude, longitude, handle);
   }
 
   const sunday = new Date("2026-07-26T10:00:00.000Z");
@@ -112,8 +114,26 @@ async function main() {
     first.booths.find((booth) => booth.handle === "sparse-maker")?.region,
     "Gambela",
   );
+  const legacyBusinessId = first.booths[0].businessId;
+  db.prepare(`
+    UPDATE expo_hub_assignments
+    SET origin_zone='',hub_key='legacy-region',hub_name='Legacy Region Expo',
+      hub_zone='',hub_region=''
+    WHERE occurrence_id=? AND business_id=?
+  `).run(first.occurrenceId, legacyBusinessId);
+  const migrated = getCurrentExpo({ db, now: sunday });
+  const migratedBooth = migrated.booths.find(
+    (booth) => booth.businessId === legacyBusinessId,
+  );
+  assert.ok(migratedBooth);
+  assert.notEqual(migratedBooth.hubKey, "legacy-region");
+  assert.ok(migratedBooth.zone);
+  assert.ok(
+    migrated.map.hubs.find((hub) => hub.key === migratedBooth.hubKey)?.zone,
+    "migration-16 assignments receive city-host zone metadata",
+  );
 
-  const stable = first.booths.map((booth) => ({
+  const stable = migrated.booths.map((booth) => ({
     businessId: booth.businessId,
     hubKey: booth.hubKey,
     boothReference: booth.boothReference,
@@ -139,7 +159,7 @@ async function main() {
 
   closeDbForTests();
   fs.rmSync(root, { recursive: true, force: true });
-  console.log("Expo eligibility, regional hubs, nearest assignment, hall capacity, and occurrence stability passed.");
+console.log("Expo eligibility, city hosts, nearest assignment, hall capacity, and occurrence stability passed.");
 }
 
 main().catch((error) => {

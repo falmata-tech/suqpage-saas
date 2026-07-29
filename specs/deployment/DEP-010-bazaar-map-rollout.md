@@ -1,7 +1,7 @@
 ---
 id: DEP-010
 title: Expo geographic map rollout and operations
-status: done
+status: in_progress
 related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011]
 owners: [operations, security]
 last_updated: 2026-07-29
@@ -18,19 +18,21 @@ showrooms, inquiries, managed requests, or the controlled single-instance pilot.
 
 ## Accepted geographic Expo rollout revision
 
-- Apply an additive migration for city, region, latitude, longitude, and
-  occurrence hub assignment while retaining legacy `bazaar_*` tables.
+- Apply an additive migration for city, zone, region, latitude, longitude, and
+  city-host assignment while retaining legacy `bazaar_*` tables.
 - Setup/reset creates at least 25 active showroom accounts. Every seeded account
   has valid Expo location data and an approved, business-specific booth image.
 - Seeded businesses span seven daily Industry themes and multiple Ethiopian
   regions/cities so every deterministic day has participants and sparse groups
   exercise nearest-hub behavior.
-- Store one simplified, attributed Ethiopia boundary asset in the application.
-  Runtime operation must not require OpenStreetMap, map tiles, geocoding, or a
-  third-party map API.
-- Evidence covers projection, country framing, active-hub framing, selector
-  navigation, booth selection, origin labels, Map/List parity, reduced motion,
-  and no overflow at desktop, 390px, and 320px.
+- Store simplified, attributed Ethiopia region/zone boundaries, major roads,
+  and city/town points in the application. Derive the road and place layers from
+  a pinned OpenStreetMap/Geofabrik extract, record attribution and provenance,
+  and never commit the source PBF. Runtime operation must not require map tiles,
+  geocoding, or a third-party map API.
+- Evidence covers projection, country framing, active-host framing, selector
+  navigation, dynamic venue completeness, booth selection, origin labels,
+  Map/List parity, reduced motion, and no overflow at desktop, 390px, and 320px.
 - `/expo` is canonical; `/bazaar` redirect behavior is included in smoke tests.
 - Rollback deploys the prior code. Additive location columns and public assets
   may remain inert.
@@ -141,6 +143,8 @@ evidence.
 | Public mobile route evidence | acceptance | `tests/acceptance/app.spec.ts` |
 | Dynamic geometry and visual floor cap | integration/acceptance | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Existing check gate remains green | release | `npm run check` |
+| Local geographic assets are bounded, attributed, and provider-free at runtime | operations/browser | `public/geo/ATTRIBUTION.md`, `scripts/capture-expo-visuals.mjs` |
+| City selection opens complete responsive venue plans | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -189,10 +193,11 @@ for testing; production promotion still requires the normal operator rollout.
 ## Completion evidence
 
 The local Expo rollout slice was implemented and verified on 2026-07-29.
-Migration 16 is additive; setup/reset creates 28 showroom profiles with valid
-booth media and locations across seven daily Industries and multiple regions.
-The 260KB attributed Ethiopia boundary is local, so runtime requires no map
-provider, map tiles, geocoder, or map server.
+Migration 17 is additive; setup/reset creates 28 showroom profiles with valid
+booth media and city, zone, region, and WGS84 locations across seven daily
+Industries. Attributed Admin-1/Admin-2 boundaries, selected OSM place labels,
+and restrained OSM-derived major-road corridors are stored locally, so runtime
+requires no map provider, map tiles, geocoder, or map server.
 
 Evidence: `npm run test:expo`, `npm run test:expo-visual`,
 `npm run test:acceptance` (10/10), `npm run check`, and `npm run release`

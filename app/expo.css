@@ -132,6 +132,12 @@
   color: var(--expo-purple-dark);
 }
 
+.expo-map-controls button.expo-country-return {
+  width: auto;
+  padding-inline: 16px;
+  font-size: 0.88rem;
+}
+
 .expo-map-stage {
   position: relative;
   overflow: hidden;
@@ -179,12 +185,49 @@
   fill: #e5e8eb;
 }
 
+.expo-zones path {
+  fill: none;
+  stroke: #c7c2cd;
+  stroke-width: 0.55;
+  stroke-dasharray: 2.5 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.expo-roads path {
+  fill: none;
+  stroke: #c5b9a3;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  opacity: 0.72;
+  vector-effect: non-scaling-stroke;
+}
+
 .expo-region-labels {
   fill: #696473;
   font-size: 11px;
   font-weight: 750;
   pointer-events: none;
   text-anchor: middle;
+}
+
+.expo-place-labels {
+  color: #5d5865;
+  pointer-events: none;
+}
+
+.expo-place-labels circle {
+  fill: #6b5a8d;
+  stroke: #fff;
+  stroke-width: 1.4;
+}
+
+.expo-place-labels text {
+  fill: currentColor;
+  paint-order: stroke;
+  stroke: #f7f8fa;
+  stroke-width: 3px;
+  font-size: 9px;
+  font-weight: 750;
 }
 
 .expo-hub {
@@ -290,6 +333,190 @@
   place-items: center;
   min-height: 480px;
   color: var(--expo-muted);
+}
+
+.expo-venue {
+  border: 1px solid #d9d5e1;
+  border-radius: 6px;
+  background: #eef0f3;
+  box-shadow: 0 14px 34px rgb(31 24 48 / 8%);
+}
+
+.expo-venue-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #d4d7dd;
+  background: #fff;
+}
+
+.expo-venue-header h3 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  letter-spacing: 0;
+}
+
+.expo-venue-header p {
+  margin: 0;
+  color: var(--expo-muted);
+}
+
+.expo-hall-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.expo-hall-tabs button,
+.expo-hall-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 13px;
+  border: 1px solid var(--expo-line);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--expo-ink);
+  font-weight: 850;
+}
+
+.expo-hall-tabs button[aria-pressed="true"] {
+  border-color: var(--expo-purple);
+  background: #eee9fb;
+  color: var(--expo-purple-dark);
+}
+
+.expo-venue-shell {
+  position: relative;
+  min-height: var(--venue-desktop-height, 570px);
+  padding: 82px 34px 58px;
+  background:
+    linear-gradient(90deg, transparent 49.85%, rgb(92 84 106 / 8%) 50%, transparent 50.15%),
+    #eef0f3;
+}
+
+.expo-venue-shell::before {
+  position: absolute;
+  inset: 24px;
+  border: 10px solid #d5d9df;
+  border-bottom-width: 6px;
+  content: "";
+  pointer-events: none;
+}
+
+.expo-venue-entrance {
+  display: grid;
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 50%;
+  min-width: 150px;
+  padding: 8px 18px;
+  border: 1px solid #babfc8;
+  border-top: 4px solid var(--expo-purple);
+  background: #fff;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.expo-venue-entrance span,
+.expo-venue-entrance small {
+  color: var(--expo-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.expo-venue-floor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 82px repeat(2, minmax(0, 1fr));
+  gap: 18px 12px;
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1080px);
+  margin: 0 auto;
+}
+
+.expo-venue-aisle {
+  display: grid;
+  grid-column: 3;
+  grid-row: 1 / span var(--venue-desktop-rows, 1);
+  place-items: center;
+  min-height: calc(var(--venue-desktop-height, 570px) - 140px);
+  border-inline: 1px solid #c8cbd1;
+  color: #77717f;
+  font-size: 0.67rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+.expo-venue-booth {
+  display: grid;
+  grid-template-rows: minmax(108px, 1fr) auto;
+  min-width: 0;
+  min-height: 174px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #c5c9d0;
+  border-top: 5px solid #3e3258;
+  border-radius: 4px;
+  background: #fff;
+  color: var(--expo-ink);
+  box-shadow: 0 6px 15px rgb(31 26 43 / 9%);
+  cursor: pointer;
+  text-align: left;
+  grid-column: var(--booth-desktop-column);
+  grid-row: var(--booth-desktop-row);
+}
+
+.expo-venue-booth.selected,
+.expo-venue-booth:focus-visible {
+  border-color: var(--expo-purple);
+  border-top-color: var(--expo-purple);
+  outline: 3px solid rgb(101 70 184 / 24%);
+  outline-offset: 2px;
+}
+
+.expo-venue-booth > img,
+.expo-venue-booth > .expo-image-fallback {
+  width: 100%;
+  height: 108px;
+  object-fit: cover;
+}
+
+.expo-venue-booth-copy {
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px 12px;
+}
+
+.expo-venue-booth-copy small {
+  color: var(--expo-purple-dark);
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.expo-venue-booth-copy strong {
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.expo-venue-exits {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  right: 46px;
+  bottom: 18px;
+  left: 46px;
+  color: #6c6672;
+  font-size: 0.66rem;
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
 .expo-preview {
@@ -460,9 +687,59 @@
     grid-column: 1 / -1;
   }
 
+  .expo-map-controls button.expo-country-return {
+    grid-column: 1 / -1;
+    width: 100%;
+    white-space: normal;
+  }
+
   .expo-map-stage {
     height: 510px;
     min-height: 510px;
+  }
+
+  .expo-venue-header {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .expo-venue-shell {
+    min-height: var(--venue-mobile-height, 650px);
+    padding: 78px 22px 52px;
+  }
+
+  .expo-venue-shell::before {
+    inset: 18px 10px;
+    border-width: 7px;
+  }
+
+  .expo-venue-floor {
+    grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr);
+    gap: 12px 8px;
+  }
+
+  .expo-venue-aisle {
+    grid-column: 2;
+    grid-row: 1 / span var(--venue-mobile-rows, 1);
+    min-height: calc(var(--venue-mobile-height, 650px) - 130px);
+  }
+
+  .expo-venue-booth {
+    grid-column: var(--booth-mobile-column);
+    grid-row: var(--booth-mobile-row);
+    grid-template-rows: 88px auto;
+    min-height: 152px;
+  }
+
+  .expo-venue-booth > img,
+  .expo-venue-booth > .expo-image-fallback {
+    height: 88px;
+  }
+
+  .expo-venue-exits {
+    right: 26px;
+    left: 26px;
   }
 
   .expo-preview {

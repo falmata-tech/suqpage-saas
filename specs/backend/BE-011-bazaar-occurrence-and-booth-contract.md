@@ -1,6 +1,6 @@
 ---
 id: BE-011
-title: Expo occurrence, regional hub, and booth contract
+title: Expo occurrence, city host, and booth contract
 status: done
 related: [FE-010, FE-012, FE-015, BE-012, BE-013, DEP-010, DEP-011, BE-001]
 owners: [backend, security]
@@ -8,7 +8,7 @@ last_updated: 2026-07-29
 change_level: L2
 ---
 
-# BE-011 — Expo occurrence, regional hub, and booth contract
+# BE-011 — Expo occurrence, city host, and booth contract
 
 ## Problem and outcome
 
@@ -26,18 +26,21 @@ evidence of the previous implementation.
 - Public product language is **Expo**. Legacy `bazaar_*` SQLite identifiers may
   remain internal during this additive migration.
 - Participation requires an active showroom, a matching Industry key, an
-  approved non-empty booth image path, a city, a region, valid WGS84 latitude
-  and longitude, and no administrative exclusion. Hero and logo media do not
-  satisfy the booth-image requirement.
-- Today's eligible businesses are grouped by their true region. During the
-  pilot, a region with at least two eligible businesses creates an Expo hub.
-  The threshold is an explicit domain constant that may increase with scale.
-- A region with one eligible business joins the geographically nearest
-  active hub using great-circle distance. If no region reaches two, the
-  largest group becomes the first hub; ties use normalized region name.
+  approved non-empty booth image path, a city, a zone or equivalent second-level
+  administrative area, a region, valid WGS84 latitude and longitude, and no
+  administrative exclusion. Hero and logo media do not satisfy the booth-image
+  requirement.
+- Expo hosts come from a reviewed registry of major Ethiopian cities with
+  WGS84 coordinates, zone, and region. Candidate businesses first join the
+  nearest host city in their own zone; where no same-zone host is registered,
+  they join the nearest reviewed host by great-circle distance.
+- During the pilot, a host catchment with at least two eligible businesses
+  creates an Expo. A sparse catchment joins the geographically nearest active
+  city-hosted Expo. If no catchment reaches two, the largest catchment becomes
+  the first host; ties use normalized host key.
 - Assignment moves the occurrence booth, not the represented business:
-  previews and lists always display the business's real city and region and
-  identify the regional hub serving it.
+  previews and lists always display the business's real city, zone, and region
+  and identify the host city serving it.
 - Hub assignments are computed server-side and remain stable for the occurrence.
   A hall contains at most 12 booths; overflow creates another hall at the same
   hub rather than hiding participants.
@@ -47,17 +50,17 @@ evidence of the previous implementation.
   becomes unavailable. It does not make an incomplete profile eligible.
 
 ```gherkin
-Scenario: Sparse region joins its nearest active Expo hub
-  GIVEN one represented region has fewer than two eligible businesses
-  AND at least one other represented region has two eligible businesses
+Scenario: Sparse host catchment joins its nearest active city Expo
+  GIVEN one host catchment has fewer than two eligible businesses
+  AND at least one other host catchment has two eligible businesses
   WHEN today's occurrence is generated
-  THEN the sparse group joins the nearest active regional hub
-  AND every booth retains its true origin city and region
+  THEN the sparse group joins the nearest active city-hosted Expo
+  AND every booth retains its true origin city, zone, and region
   AND regenerating the same occurrence preserves the assignment
 
 Scenario: Missing booth media or location prevents participation
   GIVEN an active showroom has matching Industry data
-  WHEN its booth image, city, region, latitude, or longitude is missing or invalid
+  WHEN its booth image, city, zone, region, latitude, or longitude is missing or invalid
   THEN it receives no active Expo booth
   AND it remains available through its permanent showroom
 ```
@@ -241,6 +244,8 @@ Never log private request content, contact details, or raw uploaded file bytes.
 | Near-square columns and centered incomplete rows | integration | `scripts/test-bazaar.ts` |
 | Unique derived row/booth references | integration | `scripts/test-bazaar.ts` |
 | Current Bazaar unavailable state | integration | `scripts/test-bazaar.ts` |
+| Zone-aware major-city host selection and sparse catchment assignment | focused | `scripts/test-expo.ts` |
+| Stable host assignment and 12-booth hall capacity | focused | `scripts/test-expo.ts` |
 
 ## Rollout and rollback
 
@@ -289,10 +294,11 @@ media approval and paid-placement providers remain outside this local contract.
 
 ## Completion evidence
 
-The geographic Expo revision was implemented and verified on 2026-07-29.
-Migration 16 adds profile location fields and stable occurrence hub assignments.
-`lib/expo.ts` owns eligibility, Haversine nearest-hub assignment, two-business
-pilot hubs, 12-booth halls, and unique `H{hub}.{hall}-B{booth}` references.
+The city-hosted geographic Expo revision was implemented and verified on
+2026-07-29. Migration 17 adds zone-aware profile and stable occurrence-host
+fields. `lib/expo.ts` owns eligibility, reviewed major-city selection,
+same-zone then Haversine-nearest assignment, two-business pilot hosts,
+12-booth halls, and unique `H{hub}.{hall}-B{booth}` references.
 
 Evidence: `npm run test:expo`, `npm run test:bazaar`, `npm run check`,
 `npm run test:acceptance` (10/10), and `npm run release` all passed. Missing

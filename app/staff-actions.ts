@@ -82,6 +82,7 @@ export async function updateBazaarBoothProfileAction(formData: FormData) {
       industryKeys: formData.get("industryKeys"),
       boothImagePath: formData.get("boothImagePath"),
       city: formData.get("city"),
+      zone: formData.get("zone"),
       region: formData.get("region"),
       latitude: formData.get("latitude"),
       longitude: formData.get("longitude"),

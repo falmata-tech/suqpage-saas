@@ -1,6 +1,7 @@
 export type SeededExpoProfile = {
   industryKeys: string[];
   city: string;
+  zone: string;
   region: string;
   latitude: number;
   longitude: number;
@@ -10,6 +11,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "nova-assembly": {
     industryKeys: ["electronics"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.0192,
     longitude: 38.7525,
@@ -17,6 +19,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "tekle-circuit-systems": {
     industryKeys: ["electronics"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.031,
     longitude: 38.761,
@@ -24,6 +27,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "luna-cold-chain": {
     industryKeys: ["electronics"],
     city: "Adama",
+    zone: "East Shewa",
     region: "Oromia",
     latitude: 8.541,
     longitude: 39.268,
@@ -31,6 +35,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "abyssinia-solar-devices": {
     industryKeys: ["electronics"],
     city: "Bishoftu",
+    zone: "East Shewa",
     region: "Oromia",
     latitude: 8.752,
     longitude: 38.978,
@@ -38,6 +43,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "afia-botanics": {
     industryKeys: ["beauty-wellness"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.012,
     longitude: 38.744,
@@ -45,6 +51,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "nuru-naturals-lab": {
     industryKeys: ["beauty-wellness"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 8.998,
     longitude: 38.757,
@@ -52,27 +59,31 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "bale-herb-care": {
     industryKeys: ["beauty-wellness"],
     city: "Robe",
+    zone: "Bale",
     region: "Oromia",
     latitude: 7.12,
     longitude: 40.0,
   },
   "saba-soap-works": {
     industryKeys: ["beauty-wellness"],
-    city: "Shashamane",
+    city: "Robe",
+    zone: "Bale",
     region: "Oromia",
-    latitude: 7.2,
-    longitude: 38.59,
+    latitude: 7.13,
+    longitude: 40.01,
   },
   "green-terrace-farm": {
     industryKeys: ["food-farming"],
-    city: "Holeta",
+    city: "Bishoftu",
+    zone: "East Shewa",
     region: "Oromia",
-    latitude: 9.06,
-    longitude: 38.5,
+    latitude: 8.75,
+    longitude: 38.98,
   },
   "rift-valley-mill": {
     industryKeys: ["food-farming"],
     city: "Adama",
+    zone: "East Shewa",
     region: "Oromia",
     latitude: 8.54,
     longitude: 39.27,
@@ -80,20 +91,23 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "blue-nile-apiary": {
     industryKeys: ["food-farming"],
     city: "Bahir Dar",
+    zone: "Bahir Dar",
     region: "Amhara",
     latitude: 11.574,
     longitude: 37.361,
   },
   "geda-coffee-cooperative": {
     industryKeys: ["food-farming"],
-    city: "Gondar",
+    city: "Bahir Dar",
+    zone: "Bahir Dar",
     region: "Amhara",
-    latitude: 12.603,
-    longitude: 37.452,
+    latitude: 11.58,
+    longitude: 37.37,
   },
   "addis-metalworks": {
     industryKeys: ["machinery-tools"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 8.986,
     longitude: 38.742,
@@ -101,20 +115,23 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "merkato-packaging-systems": {
     industryKeys: ["machinery-tools"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.037,
     longitude: 38.736,
   },
   "atlas-pump-works": {
     industryKeys: ["machinery-tools"],
-    city: "Adama",
+    city: "Jimma",
+    zone: "Jimma",
     region: "Oromia",
-    latitude: 8.55,
-    longitude: 39.285,
+    latitude: 7.69,
+    longitude: 36.84,
   },
   "jimma-agro-machinery": {
     industryKeys: ["machinery-tools"],
     city: "Jimma",
+    zone: "Jimma",
     region: "Oromia",
     latitude: 7.677,
     longitude: 36.834,
@@ -122,6 +139,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "warka-furniture": {
     industryKeys: ["home-living"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.041,
     longitude: 38.727,
@@ -129,6 +147,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "entoto-ceramics": {
     industryKeys: ["home-living"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.086,
     longitude: 38.75,
@@ -136,6 +155,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "hadiya-woodcraft": {
     industryKeys: ["home-living"],
     city: "Hosaena",
+    zone: "Hadiya",
     region: "Central Ethiopia",
     latitude: 7.55,
     longitude: 37.85,
@@ -143,6 +163,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "gurage-lighting-works": {
     industryKeys: ["home-living"],
     city: "Butajira",
+    zone: "East Gurage",
     region: "Central Ethiopia",
     latitude: 8.12,
     longitude: 38.37,
@@ -150,6 +171,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "selam-weave": {
     industryKeys: ["fashion-textiles"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.025,
     longitude: 38.746,
@@ -157,6 +179,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "koba-leather": {
     industryKeys: ["fashion-textiles"],
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.008,
     longitude: 38.72,
@@ -164,6 +187,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "sidama-workwear": {
     industryKeys: ["fashion-textiles"],
     city: "Hawassa",
+    zone: "Sidama",
     region: "Sidama",
     latitude: 7.05,
     longitude: 38.49,
@@ -171,6 +195,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "hawassa-loom-house": {
     industryKeys: ["fashion-textiles"],
     city: "Hawassa",
+    zone: "Sidama",
     region: "Sidama",
     latitude: 7.063,
     longitude: 38.476,
@@ -178,6 +203,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "dawa-water-solutions": {
     industryKeys: ["community"],
     city: "Dire Dawa",
+    zone: "Dire Dawa urban",
     region: "Dire Dawa",
     latitude: 9.6,
     longitude: 41.85,
@@ -185,6 +211,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "eastern-safety-gear": {
     industryKeys: ["community"],
     city: "Dire Dawa",
+    zone: "Dire Dawa urban",
     region: "Dire Dawa",
     latitude: 9.61,
     longitude: 41.86,
@@ -192,6 +219,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "gambela-recycled-paper": {
     industryKeys: ["community"],
     city: "Gambela",
+    zone: "Agniwak",
     region: "Gambela",
     latitude: 8.25,
     longitude: 34.59,
@@ -199,6 +227,7 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "baro-nursery-supplies": {
     industryKeys: ["community"],
     city: "Gambela",
+    zone: "Agniwak",
     region: "Gambela",
     latitude: 8.263,
     longitude: 34.575,

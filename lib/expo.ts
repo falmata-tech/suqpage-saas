@@ -1,6 +1,7 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getCurrentBazaar } from "./bazaar";
 import { getDb } from "./db";
+import { EXPO_HOST_CITIES, type ExpoHostCity } from "./expo-hosts";
 
 const MIN_HUB_BUSINESSES = 2;
 const MAX_BOOTHS_PER_HALL = 12;
@@ -14,6 +15,7 @@ export type ExpoCandidate = {
   businessId: number;
   name: string;
   city: string;
+  zone: string;
   region: string;
   latitude: number;
   longitude: number;
@@ -22,10 +24,13 @@ export type ExpoCandidate = {
 
 export type ExpoHubAssignment = {
   businessId: number;
+  originZone: string;
   originRegion: string;
   hubKey: string;
   hubName: string;
   hubCity: string;
+  hubZone: string;
+  hubRegion: string;
   hubLatitude: number;
   hubLongitude: number;
   hallNumber: number;
@@ -36,11 +41,13 @@ export type ExpoHubView = {
   key: string;
   name: string;
   city: string;
+  zone: string;
   region: string;
   latitude: number;
   longitude: number;
   boothCount: number;
   hallCount: number;
+  representedZones: string[];
   representedRegions: string[];
 };
 
@@ -55,9 +62,11 @@ export type ExpoBoothView = {
   imageUrl: string;
   fallbackToken: string;
   city: string;
+  zone: string;
   region: string;
   latitude: number;
   longitude: number;
+  hubCity: string;
   hubKey: string;
   hubName: string;
   hallNumber: number;
@@ -95,6 +104,7 @@ type ExpoRow = {
   fallback_style: string | null;
   industry_keys_json: string | null;
   city: string | null;
+  zone: string | null;
   region: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -158,31 +168,41 @@ export function geographicDistanceKm(
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function regionalGroups(candidates: ExpoCandidate[]) {
-  const groups = new Map<string, ExpoCandidate[]>();
+function nearestHost(
+  candidate: Pick<ExpoCandidate, "zone" | "latitude" | "longitude">,
+  hosts = EXPO_HOST_CITIES,
+) {
+  const sameZone = hosts.filter(
+    (host) => normalizeKey(host.zone) === normalizeKey(candidate.zone),
+  );
+  return [...(sameZone.length ? sameZone : hosts)].sort(
+    (left, right) =>
+      geographicDistanceKm(candidate, left) -
+        geographicDistanceKm(candidate, right) ||
+      left.key.localeCompare(right.key),
+  )[0];
+}
+
+function groupCandidatesByHost(candidates: ExpoCandidate[]) {
+  const groups = new Map<string, { host: ExpoHostCity; businesses: ExpoCandidate[] }>();
   for (const candidate of candidates) {
-    const key = normalizeKey(candidate.region);
-    groups.set(key, [...(groups.get(key) || []), candidate]);
+    const host = nearestHost(candidate);
+    const group = groups.get(host.key) || { host, businesses: [] };
+    group.businesses.push(candidate);
+    groups.set(host.key, group);
   }
-  return [...groups.entries()]
-    .map(([key, businesses]) => {
-      const ordered = [...businesses].sort(
+  return [...groups.values()]
+    .map(({ host, businesses }) => {
+      const ordered = businesses.sort(
         (left, right) => left.name.localeCompare(right.name) || left.businessId - right.businessId,
       );
-      return {
-        key,
-        region: ordered[0].region,
-        city: ordered[0].city,
-        latitude: ordered.reduce((sum, business) => sum + business.latitude, 0) / ordered.length,
-        longitude: ordered.reduce((sum, business) => sum + business.longitude, 0) / ordered.length,
-        businesses: ordered,
-      };
+      return { ...host, businesses: ordered };
     })
     .sort((left, right) => left.key.localeCompare(right.key));
 }
 
 export function assignExpoHubs(candidates: ExpoCandidate[]): ExpoHubAssignment[] {
-  const groups = regionalGroups(candidates);
+  const groups = groupCandidatesByHost(candidates);
   if (!groups.length) return [];
 
   let hostGroups = groups.filter((group) => group.businesses.length >= MIN_HUB_BUSINESSES);
@@ -202,9 +222,8 @@ export function assignExpoHubs(candidates: ExpoCandidate[]): ExpoHubAssignment[]
   for (const group of groups) {
     const host = hostGroups.find((candidate) => candidate.key === group.key) ||
       [...hostGroups].sort((left, right) => {
-        const origin = group.businesses[0];
-        const leftDistance = geographicDistanceKm(origin, left);
-        const rightDistance = geographicDistanceKm(origin, right);
+        const leftDistance = geographicDistanceKm(group, left);
+        const rightDistance = geographicDistanceKm(group, right);
         return leftDistance - rightDistance || left.key.localeCompare(right.key);
       })[0];
     assignmentsByHub.get(host.key)?.push(...group.businesses);
@@ -222,10 +241,13 @@ export function assignExpoHubs(candidates: ExpoCandidate[]): ExpoHubAssignment[]
         )
         .map((business, index) => ({
           businessId: business.businessId,
+          originZone: business.zone,
           originRegion: business.region,
           hubKey: host.key,
-          hubName: `${host.region} Expo`,
+          hubName: `${host.city} Expo`,
           hubCity: host.city,
+          hubZone: host.zone,
+          hubRegion: host.region,
           hubLatitude: host.latitude,
           hubLongitude: host.longitude,
           hallNumber: Math.floor(index / MAX_BOOTHS_PER_HALL) + 1,
@@ -238,7 +260,7 @@ function eligibleRows(db: DatabaseSync, occurrenceId: number) {
   const rows = db.prepare(`
     SELECT bb.id booth_id,bb.business_id,bb.featured,b.handle,b.name,b.tagline,
       b.description,b.hero_title,b.hero_subtitle,p.booth_image_path,
-      p.fallback_style,p.industry_keys_json,p.city,p.region,p.latitude,p.longitude,
+      p.fallback_style,p.industry_keys_json,p.city,p.zone,p.region,p.latitude,p.longitude,
       p.is_featured,p.is_excluded,p.approved_at
     FROM bazaar_booths bb
     JOIN businesses b ON b.id=bb.business_id
@@ -253,6 +275,7 @@ function eligibleRows(db: DatabaseSync, occurrenceId: number) {
       Boolean(row.approved_at) &&
       Boolean(row.booth_image_path?.startsWith("/")) &&
       Boolean(row.city?.trim()) &&
+      Boolean(row.zone?.trim()) &&
       Boolean(row.region?.trim()) &&
       isCoordinate(row.latitude, -90, 90) &&
       isCoordinate(row.longitude, -180, 180),
@@ -268,6 +291,7 @@ function ensureHubAssignments(
     businessId: row.business_id,
     name: row.name,
     city: row.city!.trim(),
+    zone: row.zone!.trim(),
     region: row.region!.trim(),
     latitude: row.latitude!,
     longitude: row.longitude!,
@@ -275,10 +299,26 @@ function ensureHubAssignments(
   }));
   const computed = assignExpoHubs(candidates);
   const insert = db.prepare(`
-    INSERT OR IGNORE INTO expo_hub_assignments(
-      occurrence_id,business_id,origin_region,hub_key,hub_name,hub_city,
-      hub_latitude,hub_longitude,hall_number,booth_number
-    ) VALUES(?,?,?,?,?,?,?,?,?,?)
+    INSERT INTO expo_hub_assignments(
+      occurrence_id,business_id,origin_zone,origin_region,hub_key,hub_name,
+      hub_city,hub_zone,hub_region,hub_latitude,hub_longitude,hall_number,
+      booth_number
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(occurrence_id,business_id) DO UPDATE SET
+      origin_zone=excluded.origin_zone,
+      origin_region=excluded.origin_region,
+      hub_key=excluded.hub_key,
+      hub_name=excluded.hub_name,
+      hub_city=excluded.hub_city,
+      hub_zone=excluded.hub_zone,
+      hub_region=excluded.hub_region,
+      hub_latitude=excluded.hub_latitude,
+      hub_longitude=excluded.hub_longitude,
+      hall_number=excluded.hall_number,
+      booth_number=excluded.booth_number
+    WHERE expo_hub_assignments.origin_zone=''
+      OR expo_hub_assignments.hub_zone=''
+      OR expo_hub_assignments.hub_region=''
   `);
   db.exec("BEGIN IMMEDIATE");
   try {
@@ -286,10 +326,13 @@ function ensureHubAssignments(
       insert.run(
         occurrenceId,
         assignment.businessId,
+        assignment.originZone,
         assignment.originRegion,
         assignment.hubKey,
         assignment.hubName,
         assignment.hubCity,
+        assignment.hubZone,
+        assignment.hubRegion,
         assignment.hubLatitude,
         assignment.hubLongitude,
         assignment.hallNumber,
@@ -332,6 +375,8 @@ export function getCurrentExpo(options: ExpoOptions = {}): CurrentExpoView {
     hub_key: string;
     hub_name: string;
     hub_city: string;
+    hub_zone: string;
+    hub_region: string;
     hub_latitude: number;
     hub_longitude: number;
     hall_number: number;
@@ -362,9 +407,11 @@ export function getCurrentExpo(options: ExpoOptions = {}): CurrentExpoView {
       imageUrl: row.booth_image_path || "",
       fallbackToken: row.fallback_style || "expo",
       city: row.city!.trim(),
+      zone: row.zone!.trim(),
       region: row.region!.trim(),
       latitude: row.latitude!,
       longitude: row.longitude!,
+      hubCity: assignment.hub_city,
       hubKey: assignment.hub_key,
       hubName: assignment.hub_name,
       hallNumber: assignment.hall_number,
@@ -381,11 +428,13 @@ export function getCurrentExpo(options: ExpoOptions = {}): CurrentExpoView {
       key: hubKey,
       name: assignment.hub_name,
       city: assignment.hub_city,
-      region: assignment.hub_name.replace(/ Expo$/, ""),
+      zone: assignment.hub_zone,
+      region: assignment.hub_region,
       latitude: assignment.hub_latitude,
       longitude: assignment.hub_longitude,
       boothCount: assigned.length,
       hallCount: Math.max(...assigned.map((booth) => booth.hallNumber)),
+      representedZones: [...new Set(assigned.map((booth) => booth.zone))].sort(),
       representedRegions: [...new Set(assigned.map((booth) => booth.region))].sort(),
     };
   });

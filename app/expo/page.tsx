@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Daily Expo | SuqPage",
-  description: "Explore today's regional SuqPage Expos and enter permanent business showrooms.",
+  description: "Explore today's city-hosted SuqPage Expos and enter permanent business showrooms.",
 };
 
 export default function ExpoPage() {
@@ -30,16 +30,16 @@ export default function ExpoPage() {
           <div className="container expo-page-intro-grid">
             <div>
               <span className="expo-kicker">Today across Ethiopia</span>
-              <h1>Find the regional Expo closest to the work.</h1>
+              <h1>Find today&apos;s Expo host cities.</h1>
               <p>
-                Discover growers, producers, and manufacturers through their
-                Expo booths, then continue into a permanent showroom built for
-                direct inquiries.
+                Use the Ethiopia overview to choose a host city, walk its complete
+                Expo hall, then continue into permanent showrooms built for direct
+                inquiries.
               </p>
             </div>
             <dl className="expo-page-stats">
               <div><dt>Today&apos;s Industry</dt><dd>{expo.themeName}</dd></div>
-              <div><dt>Regional Expos</dt><dd>{expo.map.hubs.length}</dd></div>
+              <div><dt>Host cities</dt><dd>{expo.map.hubs.length}</dd></div>
               <div><dt>Open booths</dt><dd>{expo.booths.length}</dd></div>
             </dl>
           </div>

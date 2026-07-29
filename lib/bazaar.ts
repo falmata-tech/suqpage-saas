@@ -142,6 +142,7 @@ export type BazaarProfileAdminView = {
   industryLabel: string;
   boothImagePath: string;
   city: string;
+  zone: string;
   region: string;
   latitude: number | null;
   longitude: number | null;
@@ -340,8 +341,8 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
   const insertProfile = db.prepare(`
     INSERT OR IGNORE INTO bazaar_booth_profiles(
       business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,
-      is_excluded,approved_at,city,region,latitude,longitude
-    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP,?,?,?,?)
+      is_excluded,approved_at,city,zone,region,latitude,longitude
+    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP,?,?,?,?,?)
   `);
   for (const business of businesses) {
     const industryKeys = defaultIndustryKeysForBusiness(business.handle);
@@ -353,6 +354,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
       boothImagePath,
       fallbackStyleForIndustry(industryKeys),
       seededProfile?.city || "",
+      seededProfile?.zone || "",
       seededProfile?.region || "",
       seededProfile?.latitude ?? null,
       seededProfile?.longitude ?? null,
@@ -360,7 +362,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
     if (seededProfile) {
       db.prepare(`
         UPDATE bazaar_booth_profiles
-        SET industry_keys_json=?,booth_image_path=?,city=?,region=?,latitude=?,
+        SET industry_keys_json=?,booth_image_path=?,city=?,zone=?,region=?,latitude=?,
           longitude=?,approved_at=COALESCE(approved_at,CURRENT_TIMESTAMP),
           updated_at=CURRENT_TIMESTAMP
         WHERE business_id=?
@@ -368,6 +370,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
         JSON.stringify(industryKeys),
         boothImagePath,
         seededProfile.city,
+        seededProfile.zone,
         seededProfile.region,
         seededProfile.latitude,
         seededProfile.longitude,
@@ -611,7 +614,7 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
   const boothByBusinessId = new Map(current.booths.map((booth) => [booth.businessId, booth]));
   const profiles = db.prepare(`
     SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
-      p.booth_image_path,p.city,p.region,p.latitude,p.longitude,
+      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
       p.fallback_style,p.is_featured,p.is_excluded
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
@@ -624,6 +627,7 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
     industry_keys_json: string | null;
     booth_image_path: string | null;
     city: string | null;
+    zone: string | null;
     region: string | null;
     latitude: number | null;
     longitude: number | null;
@@ -638,6 +642,7 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
       const eligibilityIssues = [
         ...(!profile.booth_image_path?.startsWith("/") ? ["booth image"] : []),
         ...(!profile.city?.trim() ? ["city"] : []),
+        ...(!profile.zone?.trim() ? ["zone"] : []),
         ...(!profile.region?.trim() ? ["region"] : []),
         ...(typeof profile.latitude !== "number" || profile.latitude < -90 || profile.latitude > 90 ? ["latitude"] : []),
         ...(typeof profile.longitude !== "number" || profile.longitude < -180 || profile.longitude > 180 ? ["longitude"] : []),
@@ -651,6 +656,7 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
         industryLabel: INDUSTRY_LABELS[jsonArray(profile.industry_keys_json)[0] || "community"] || "Enterprise & Export Showcase",
         boothImagePath: profile.booth_image_path || "",
         city: profile.city || "",
+        zone: profile.zone || "",
         region: profile.region || "",
         latitude: profile.latitude,
         longitude: profile.longitude,
@@ -694,6 +700,7 @@ export function updateBazaarBoothProfile(input: {
   industryKeys: unknown;
   boothImagePath: unknown;
   city?: unknown;
+  zone?: unknown;
   region?: unknown;
   latitude?: unknown;
   longitude?: unknown;
@@ -707,19 +714,21 @@ export function updateBazaarBoothProfile(input: {
   const boothImagePath = requireBoundedText(input.boothImagePath, "Booth image path", 240, false);
   if (boothImagePath && !boothImagePath.startsWith("/")) throw new BazaarAdminError("Booth image path must be a public app path.", "invalid_media_path");
   const city = requireBoundedText(input.city, "City", 100);
+  const zone = requireBoundedText(input.zone, "Zone", 100);
   const region = requireBoundedText(input.region, "Region", 100);
   const latitude = requireCoordinate(input.latitude, "Latitude", -90, 90);
   const longitude = requireCoordinate(input.longitude, "Longitude", -180, 180);
   const fallbackStyle = requireBoundedText(input.fallbackStyle, "Fallback style", 40, false) || fallbackStyleForIndustry(industryKeys);
   const result = db.prepare(`
     INSERT INTO bazaar_booth_profiles(
-      business_id,industry_keys_json,booth_image_path,city,region,latitude,
+      business_id,industry_keys_json,booth_image_path,city,zone,region,latitude,
       longitude,fallback_style,is_featured,is_excluded,approved_at,updated_at
-    ) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     ON CONFLICT(business_id) DO UPDATE SET
       industry_keys_json=excluded.industry_keys_json,
       booth_image_path=excluded.booth_image_path,
       city=excluded.city,
+      zone=excluded.zone,
       region=excluded.region,
       latitude=excluded.latitude,
       longitude=excluded.longitude,
@@ -732,6 +741,7 @@ export function updateBazaarBoothProfile(input: {
     JSON.stringify(industryKeys),
     boothImagePath,
     city,
+    zone,
     region,
     latitude,
     longitude,

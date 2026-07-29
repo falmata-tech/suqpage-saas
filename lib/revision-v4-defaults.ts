@@ -32,6 +32,10 @@ import type {
 } from "./showroom-experience";
 import type { SectionMediaIntegration } from "./showroom-design-systems";
 import type { Catalog } from "./types";
+import {
+  ADDITIONAL_SEED_SHOWROOM_BRIEFS,
+  type SeedShowroomBrief,
+} from "./showroom-seed-briefs";
 
 type DefaultProfile = {
   tokenPack: string;
@@ -208,7 +212,13 @@ const FALLBACK_PROFILE: DefaultProfile = {
 };
 
 function profileFor(catalog: Catalog) {
+  const authored = ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle];
+  if (authored) return authored.profile;
   return DEFAULT_PROFILES[catalog.business.handle] || FALLBACK_PROFILE;
+}
+
+function briefFor(catalog: Catalog): SeedShowroomBrief | null {
+  return ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle] || null;
 }
 
 function componentById(id: string) {
@@ -300,6 +310,7 @@ function buildContentBlocks(
 ): ShowroomContentBlocksDocument {
   const business = catalog.business;
   const profile = profileFor(catalog);
+  const brief = briefFor(catalog);
   const blocks: ShowroomContentBlock[] = [
     {
       key: "hero-main",
@@ -315,23 +326,26 @@ function buildContentBlocks(
     {
       key: "brand-story",
       type: "story",
-      kicker: "Showroom story",
-      title: `How ${business.name} approaches the work`,
+      kicker: brief?.story.kicker || "Showroom story",
+      title: brief?.story.title || `How ${business.name} approaches the work`,
       body: firstText(
         [business.description],
         "A focused product showroom with a direct inquiry path.",
       ),
       media: [],
-      quote: firstText([business.tagline], "Selected with care."),
+      quote: brief?.story.quote || firstText([business.tagline], "Selected with care."),
     },
     {
       key: "showroom-highlights",
       type: "highlights",
       kicker: "Process",
-      title: "From product selection to a clear inquiry",
-      body: "A simple path for turning supplied catalog details into a useful conversation.",
+      title: brief?.process.title || "From product selection to a clear inquiry",
+      body: brief?.process.body || "A simple path for turning supplied catalog details into a useful conversation.",
       media: [],
-      items: [
+      items: brief ? brief.process.items.map((title) => ({
+        title,
+        body: `Confirm ${title.toLowerCase()} before production or supply is quoted.`,
+      })) : [
         {
           title: "Explore the range",
           body: "Review available products, options, and supplied details.",
@@ -350,14 +364,14 @@ function buildContentBlocks(
       key: "inquiry-next",
       type: "call_to_action",
       kicker: "Next step",
-      title: profile.cta.includes("technical-brief")
+      title: brief?.cta.title || (profile.cta.includes("technical-brief")
         ? "Send the products and requirements your project needs."
         : profile.cta.includes("wholesale")
           ? "Start one clear conversation about products and quantities."
-          : "Turn the products that caught your eye into one clear inquiry.",
-      body: profile.cta.includes("technical-brief")
+          : "Turn the products that caught your eye into one clear inquiry."),
+      body: brief?.cta.body || (profile.cta.includes("technical-brief")
         ? "Add relevant products, then include dimensions, quantities, finish, or operating requirements in the inquiry."
-        : "Add selected items to the inquiry cart so the business can confirm availability, options, and next steps.",
+        : "Add selected items to the inquiry cart so the business can confirm availability, options, and next steps."),
       media: [],
       action: "inquiry",
       actionLabel: "Start an inquiry",
@@ -371,13 +385,15 @@ function buildDesignManifest(
   contentBlocks: ShowroomContentBlocksDocument,
 ): ShowroomDesignProposalV2 {
   const profile = profileFor(catalog);
+  const brief = briefFor(catalog);
   return parseShowroomDesignProposalV2(
     {
       schemaVersion: 2,
       bankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
       tokenPack: profile.tokenPack,
-      rationale:
-        "Reset-only development cutover to the typed-content showroom bank 1.2 composition.",
+      rationale: brief
+        ? `${brief.objective} Composition direction: ${brief.template}`
+        : "Reset-only development cutover to the typed-content showroom bank 1.2 composition.",
       questions: [],
       warnings: [],
       sections: [

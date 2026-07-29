@@ -378,17 +378,19 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test("mobile regional Expo map, booth preview, list parity, and overflow", async ({ page }) => {
+test("mobile city Expo venue, booth preview, list parity, and overflow", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
-  await expect(page.getByRole("heading", { name: "Find the regional Expo closest to the work." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Find today's Expo host cities." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Enterprise & Export Showcase" })).toBeVisible();
   await expect(page.locator(".expo-regions path")).toHaveCount(14);
   await expect(page.locator(".expo-hub")).toHaveCount(2);
-  await expect(page.getByLabel("Jump to regional Expo").locator("option")).toHaveCount(3);
-  await page.getByLabel("Jump to regional Expo").selectOption({ label: "Dire Dawa Expo · 2 booths" });
-  await expect(page.locator(".expo-booth-marker")).toHaveCount(2);
+  await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(3);
+  await page.getByLabel("Jump to a host city").selectOption({ label: "Dire Dawa, Dire Dawa urban · 2 booths" });
+  await expect(page.locator(".expo-venue-booth")).toHaveCount(2);
+  await expect(page.getByText("Entrance")).toBeVisible();
+  await expect(page.getByText("Reception")).toBeVisible();
   const dawaBooth = page.getByRole("button", { name: /Select Dawa Water Solutions, H\d+\.1-B\d+/ });
   const dawaReference = (await dawaBooth.getAttribute("aria-label"))?.match(/(H\d+\.1-B\d+)/)?.[1] || "";
   expect(dawaReference).toMatch(/^H\d+\.1-B\d{2}$/);
@@ -396,10 +398,10 @@ test("mobile regional Expo map, booth preview, list parity, and overflow", async
   const preview = page.getByLabel("Dawa Water Solutions booth preview");
   await expect(preview).toBeVisible();
   await expect(preview.locator(".expo-preview-meta").getByText(dawaReference)).toBeVisible();
-  await expect(preview.getByText(/From Dire Dawa, Dire Dawa/)).toBeVisible();
+  await expect(preview.getByText(/From Dire Dawa, Dire Dawa urban, Dire Dawa/)).toBeVisible();
   await expect(preview.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@dawa-water-solutions");
   await page.getByRole("button", { name: "View Ethiopia" }).click();
-  await expect(page.getByLabel("Jump to regional Expo")).toHaveValue("");
+  await expect(page.getByLabel("Jump to a host city")).toHaveValue("");
   await page.getByRole("button", { name: "Center today's Expos" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List View" }).click();

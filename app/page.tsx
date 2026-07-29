@@ -123,7 +123,7 @@ export default function Home() {
               <span className="landing-live-label"><i /> Live today</span>
               <strong>{expo.themeName}</strong>
               <span>
-                {expo.map.hubs.length} regional Expos · {expo.booths.length} open booths
+                {expo.map.hubs.length} host cities · {expo.booths.length} open booths
               </span>
               <b>Open Expo Map</b>
             </a>
@@ -134,7 +134,7 @@ export default function Home() {
           <div className="landing-container landing-benefit-grid">
             <article><span>01</span><h2>One permanent showroom</h2><p>A clear /@handle for products, capabilities, and inquiries.</p></article>
             <article><span>02</span><h2>Daily Industry visibility</h2><p>Join the rotating Expo wherever eligible producers gather.</p></article>
-            <article><span>03</span><h2>Regional discovery</h2><p>Buyers can move from Ethiopia overview to a regional booth.</p></article>
+            <article><span>03</span><h2>City-hosted discovery</h2><p>Move from the Ethiopia overview into a complete local Expo hall.</p></article>
             <article><span>04</span><h2>Direct business inquiry</h2><p>Move serious interest into one structured conversation.</p></article>
           </div>
         </section>
@@ -147,9 +147,9 @@ export default function Home() {
                 <h2>See where today&apos;s Expo is active.</h2>
               </div>
               <p>
-                Every active region becomes an Expo hub when enough participating
-                businesses are present. Smaller regional groups join their nearest
-                active hub while keeping their real origin visible.
+                Participating showrooms gather inside Expo halls hosted by major
+                cities. Smaller zone groups join the nearest active host while
+                every business keeps its real origin visible.
               </p>
             </div>
             <ExpoMap expo={expo} embedded />
@@ -163,7 +163,7 @@ export default function Home() {
                 <span className="landing-eyebrow">Seven days of production</span>
                 <h2 id="schedule-title">The Expo changes every morning.</h2>
               </div>
-              <p>Each daily floor highlights one Industry while permanent showrooms stay open all week.</p>
+              <p>Each daily Expo highlights one Industry while permanent showrooms stay open all week.</p>
             </div>
             <div className="landing-schedule-grid">
               {schedule.map((theme) => (
@@ -230,7 +230,7 @@ export default function Home() {
         <div className="landing-container landing-footer-grid">
           <div>
             <SuqPageBrand className="landing-brand" />
-            <p>Permanent showrooms and regional daily Expos for people who make and grow.</p>
+            <p>Permanent showrooms and city-hosted daily Expos for people who make and grow.</p>
           </div>
           <nav aria-label="Footer navigation">
             <a href="#expo">Live Expo</a>

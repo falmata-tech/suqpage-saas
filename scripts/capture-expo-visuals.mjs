@@ -11,7 +11,25 @@ const scenarios = [
   { name: "home-mobile", path: "/", viewport: { width: 390, height: 844 } },
   { name: "home-compact", path: "/", viewport: { width: 320, height: 700 } },
   { name: "expo-desktop", path: "/expo", viewport: { width: 1440, height: 1000 } },
-  { name: "expo-mobile", path: "/expo", viewport: { width: 390, height: 844 } },
+  {
+    name: "expo-venue-desktop",
+    path: "/expo",
+    viewport: { width: 1440, height: 1000 },
+    openVenue: true,
+  },
+  {
+    name: "expo-venue-mobile",
+    path: "/expo",
+    viewport: { width: 390, height: 844 },
+    openVenue: true,
+  },
+  {
+    name: "expo-preview-mobile",
+    path: "/expo",
+    viewport: { width: 390, height: 844 },
+    openVenue: true,
+    openBooth: true,
+  },
 ];
 
 fs.mkdirSync(outputDir, { recursive: true });
@@ -28,7 +46,13 @@ try {
     const page = await context.newPage();
     const browserErrors = [];
     page.on("console", (message) => {
-      if (message.type() === "error") browserErrors.push(message.text());
+      const messageText = message.text();
+      const isNodeSqliteWarning = messageText.includes(
+        "ExperimentalWarning: SQLite is an experimental feature",
+      );
+      if (message.type() === "error" && !isNodeSqliteWarning) {
+        browserErrors.push(messageText);
+      }
     });
     page.on("pageerror", (error) => browserErrors.push(error.message));
 
@@ -37,12 +61,14 @@ try {
       timeout: 30_000,
     });
     await page.locator(".expo-regions path").first().waitFor();
-    if (scenario.name === "expo-mobile") {
-      const selector = page.getByLabel("Jump to regional Expo");
+    if (scenario.openVenue) {
+      const selector = page.getByLabel("Jump to a host city");
       const firstHub = await selector.locator("option").nth(1).getAttribute("value");
       if (firstHub) await selector.selectOption(firstHub);
-      await page.locator(".expo-booth-marker").first().waitFor();
-      await page.locator(".expo-booth-marker").first().click();
+      await page.locator(".expo-venue-booth").first().waitFor();
+    }
+    if (scenario.openBooth) {
+      await page.locator(".expo-venue-booth").first().click();
     }
 
     const metrics = await page.evaluate(() => {
@@ -67,6 +93,13 @@ try {
             ? [`${element.tagName.toLowerCase()}:${(element.textContent || element.getAttribute("aria-label") || "").trim()}`]
             : [];
         });
+      const aisle = document.querySelector(".expo-venue-aisle")?.getBoundingClientRect();
+      const venueBoothCenters = [...document.querySelectorAll(".expo-venue-booth")]
+        .filter(visible)
+        .map((booth) => {
+          const bounds = booth.getBoundingClientRect();
+          return bounds.left + bounds.width / 2;
+        });
       return {
         pageWidth: root.scrollWidth,
         viewportWidth: root.clientWidth,
@@ -76,6 +109,16 @@ try {
           .map((image) => image.getAttribute("src")),
         mapRegions: document.querySelectorAll(".expo-regions path").length,
         hubs: document.querySelectorAll(".expo-hub").length,
+        zonePaths: document.querySelectorAll(".expo-zones path").length,
+        placeLabels: document.querySelectorAll(".expo-place-labels text").length,
+        roadPaths: document.querySelectorAll(".expo-roads path").length,
+        venueBooths: document.querySelectorAll(".expo-venue-booth").length,
+        venueBoothsLeftOfAisle: aisle
+          ? venueBoothCenters.filter((center) => center < aisle.left).length
+          : 0,
+        venueBoothsRightOfAisle: aisle
+          ? venueBoothCenters.filter((center) => center > aisle.right).length
+          : 0,
         textOverflow,
         undersizedControls,
       };
@@ -105,8 +148,13 @@ const failures = results.filter(
     result.browserErrors.length > 0 ||
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
-    result.mapRegions !== 14 ||
-    result.hubs < 1 ||
+    (result.mapRegions !== 14 && result.venueBooths < 1) ||
+    (result.hubs < 1 && result.venueBooths < 1) ||
+    (result.venueBooths < 1 && result.zonePaths < 100) ||
+    (result.venueBooths < 1 && result.placeLabels < 1) ||
+    (result.venueBooths < 1 && result.roadPaths < 1) ||
+    (result.venueBooths > 1 &&
+      (result.venueBoothsLeftOfAisle < 1 || result.venueBoothsRightOfAisle < 1)) ||
     result.textOverflow.length > 0 ||
     (result.viewport.width <= 390 && result.undersizedControls.length > 0),
 );

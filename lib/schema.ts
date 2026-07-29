@@ -1071,4 +1071,22 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const expoCityHostsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=17")
+    .get();
+  if (!expoCityHostsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(db, "bazaar_booth_profiles", "zone TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "expo_hub_assignments", "origin_zone TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "expo_hub_assignments", "hub_zone TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "expo_hub_assignments", "hub_region TEXT NOT NULL DEFAULT ''");
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(17)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

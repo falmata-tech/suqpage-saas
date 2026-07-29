@@ -242,6 +242,7 @@ async function main() {
     industryKeys: "community, food-farming",
     boothImagePath: "",
     city: "Addis Ababa",
+    zone: "Addis Ababa",
     region: "Addis Ababa",
     latitude: 9.03,
     longitude: 38.74,
@@ -254,7 +255,7 @@ async function main() {
     1,
   );
   assert.throws(
-    () => updateBazaarBoothProfile({ businessId: communityBusinessId, industryKeys: "community", boothImagePath: "https://remote.test/img.jpg", city: "Addis Ababa", region: "Addis Ababa", latitude: 9.03, longitude: 38.74, fallbackStyle: "market", featured: false, excluded: false }, db),
+    () => updateBazaarBoothProfile({ businessId: communityBusinessId, industryKeys: "community", boothImagePath: "https://remote.test/img.jpg", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.03, longitude: 38.74, fallbackStyle: "market", featured: false, excluded: false }, db),
     (error: unknown) => error instanceof BazaarAdminError && error.code === "invalid_media_path",
   );
 

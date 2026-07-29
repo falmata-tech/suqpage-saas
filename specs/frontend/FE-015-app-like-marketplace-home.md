@@ -20,10 +20,12 @@ paper.
 
 ## Accepted geographic Expo revision
 
-- The mobile app surface uses a local Ethiopia vector map, active regional Expo
-  hubs, a direct hub selector, Map/List modes, and a bounded booth sheet.
-- Country view and **View Ethiopia** show all active hubs. **Center today's
-  Expos** frames the active hub set. Selecting a hub frames its assigned booths.
+- The mobile app surface uses a local Ethiopia vector map, active city-hosted
+  Expos, a direct host selector, Map/List modes, dynamic venue plans, and a
+  bounded booth sheet.
+- Country view and **View Ethiopia** show all active hosts. **Center today's
+  Expos** frames the active host-city set. Selecting a host opens its Expo venue
+  rather than scattering assigned booths over the geographic map.
 - Mobile controls remain reachable without trapping ordinary vertical page
   scrolling; pinch and button zoom are bounded and reduced motion is honored.
 - The homepage contains one showroom discovery feed. Featured status influences
@@ -87,9 +89,9 @@ Scenario: Visitor discovers one marketplace rather than repeated inventories
   AND today's Bazaar appears as the primary live experience
   AND no second featured-business catalog repeats the same businesses
 
-Scenario: Visitor opens a Bazaar booth on mobile
-  GIVEN multiple dynamic booth rows at a 390-pixel viewport
-  WHEN the visitor selects a visible booth
+Scenario: Visitor opens an Expo booth on mobile
+  GIVEN a city Expo with multiple dynamic venue rows at a 390-pixel viewport
+  WHEN the visitor selects the host and then a visible booth
   THEN the map remains usable
   AND a compact selected-booth sheet exposes its reference, business, Industry, and showroom action
 
@@ -150,7 +152,9 @@ The geographic Expo and revised mobile public app were implemented and verified
 on 2026-07-29. Mobile provides persistent Home/Expo/Showrooms/Join navigation,
 normal document scrolling, bounded map interaction, country/hub framing,
 Map/List modes, a booth sheet above safe-area navigation, and one horizontally
-scrollable showroom result rail.
+scrollable showroom result rail. Country view exposes zone boundaries, major
+road context, towns/cities, and city hosts; selecting a host opens a complete
+dynamic Expo venue whose balanced rows grow with its participating showrooms.
 
 `npm run test:expo-visual` passed desktop, 390px, and 320px probes with no
 overflow or undersized controls. `npm run test:acceptance` passed 10/10;

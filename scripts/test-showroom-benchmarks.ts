@@ -5,6 +5,7 @@ import { getAllBusinesses, getCatalogByBusinessId } from "../lib/db";
 import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "../lib/expo-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
+import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 assert.ok(activeBusinesses.length >= 25, "reset must create at least 25 active Expo showrooms");
@@ -21,6 +22,53 @@ for (const business of activeBusinesses) {
     `${business.handle} has a generated booth image`,
   );
 }
+
+const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));
+const authoredBusinesses = activeBusinesses.filter((business) =>
+  authoredHandles.has(business.handle));
+assert.equal(authoredBusinesses.length, 18, "all 18 additional showrooms have authored briefs");
+const authoredSignatures = new Set<string>();
+const authoredTokens = new Set<string>();
+const authoredHeaders = new Set<string>();
+const authoredHeroes = new Set<string>();
+const authoredCatalogs = new Set<string>();
+const authoredCtas = new Set<string>();
+const authoredFooters = new Set<string>();
+const authoredStoryTitles = new Set<string>();
+const authoredProcessTitles = new Set<string>();
+for (const business of authoredBusinesses) {
+  const catalog = getCatalogByBusinessId(business.id);
+  assert.ok(catalog, `${business.handle} authored catalog exists`);
+  const snapshot = catalogToRevisionSnapshotV4(catalog);
+  assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} authored fitness`);
+  const ids = snapshot.designManifest.sections.map((section) => section.component);
+  authoredSignatures.add(`${snapshot.designManifest.tokenPack}|${ids.join("|")}`);
+  authoredTokens.add(snapshot.designManifest.tokenPack);
+  authoredHeaders.add(ids[0]);
+  authoredHeroes.add(ids[1]);
+  authoredCatalogs.add(ids[4]);
+  authoredCtas.add(ids[5]);
+  authoredFooters.add(ids[6]);
+  const story = snapshot.contentBlocks.blocks.find((block) => block.key === "brand-story");
+  const process = snapshot.contentBlocks.blocks.find((block) => block.key === "showroom-highlights");
+  assert.ok(story && process, `${business.handle} has authored narrative blocks`);
+  authoredStoryTitles.add(story.title);
+  authoredProcessTitles.add(process.title);
+  assert.match(
+    snapshot.designManifest.rationale,
+    /Composition direction:/,
+    `${business.handle} records its authored composition direction`,
+  );
+}
+assert.equal(authoredSignatures.size, 18, "every additional showroom has a distinct full design signature");
+assert.ok(authoredTokens.size >= 12, "authored showrooms exercise at least twelve token systems");
+assert.equal(authoredHeaders.size, 7, "authored showrooms exercise all header anatomies");
+assert.ok(authoredHeroes.size >= 11, "authored showrooms exercise at least eleven hero anatomies");
+assert.ok(authoredCatalogs.size >= 8, "authored showrooms exercise at least eight catalog anatomies");
+assert.ok(authoredCtas.size >= 5, "authored showrooms exercise at least five CTA anatomies");
+assert.equal(authoredFooters.size, 6, "authored showrooms exercise all footer anatomies");
+assert.equal(authoredStoryTitles.size, 18, "authored showrooms do not reuse story titles");
+assert.equal(authoredProcessTitles.size, 18, "authored showrooms do not reuse process titles");
 
 const benchmarkHandles = new Set([
   "selam-weave",
@@ -159,4 +207,4 @@ assert.deepEqual(
   "all benchmarks preserve the neutral-to-emphasis surface hierarchy",
 );
 
-console.log("Twenty-eight Expo showrooms and ten validated design benchmarks passed.");
+console.log("Twenty-eight Expo showrooms, 18 authored briefs, and ten validated design benchmarks passed.");

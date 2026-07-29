@@ -4,7 +4,7 @@ title: Creative showroom bank and focused v4 studio
 status: in_progress
 related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-28
+last_updated: 2026-07-29
 change_level: L3
 ---
 
@@ -46,8 +46,10 @@ parity with the pixels rendered by that choice.
   bounded component variant.
 - Semantic per-section surface roles and rendered typography, spacing, layout,
   and media tokens rather than a single page tint with descriptive-only tokens.
-- Ten fictional benchmark showrooms used as a cross-content visual evaluation,
-  including sparse makers and dense manufacturer/RFQ catalogs.
+- Twenty-eight fictional Expo showrooms used as a cross-content visual
+  evaluation, including ten retained deep benchmarks and 18 additional
+  business-specific authored briefs spanning sparse makers and dense
+  manufacturer/RFQ catalogs.
 - One canonical public-showroom information architecture for normal recipes:
   header, hero, about/story, process, products, inquiry CTA, and footer. Header
   and footer are page chrome; the five content sections each have one clear job.

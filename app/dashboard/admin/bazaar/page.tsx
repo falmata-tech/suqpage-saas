@@ -45,7 +45,7 @@ export default async function ExpoAdminPage({
           <h1>Expo controls</h1>
           <p>
             Manage daily Industries, geographic eligibility, booth media, and
-            the regional hub assignment without changing permanent showrooms.
+            the city-host assignment without changing permanent showrooms.
           </p>
         </div>
         <div className="inline-actions">
@@ -134,6 +134,10 @@ export default async function ExpoAdminPage({
                         <div className="field">
                           <label htmlFor={`profile-city-${profile.businessId}`}>City</label>
                           <input id={`profile-city-${profile.businessId}`} name="city" defaultValue={profile.city} required />
+                        </div>
+                        <div className="field">
+                          <label htmlFor={`profile-zone-${profile.businessId}`}>Zone / administrative area</label>
+                          <input id={`profile-zone-${profile.businessId}`} name="zone" defaultValue={profile.zone} required />
                         </div>
                         <div className="field">
                           <label htmlFor={`profile-region-${profile.businessId}`}>Region</label>

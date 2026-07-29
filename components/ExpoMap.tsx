@@ -11,6 +11,7 @@ import {
   type ZoomTransform,
 } from "d3-zoom";
 import {
+  type CSSProperties,
   useEffect,
   useMemo,
   useRef,
@@ -40,6 +41,17 @@ type RegionCollection = {
   features: RegionFeature[];
 };
 
+type MapFeature = {
+  type: "Feature";
+  properties: Record<string, string | number | [number, number]>;
+  geometry: GeoPermissibleObjects;
+};
+
+type MapCollection = {
+  type: "FeatureCollection";
+  features: MapFeature[];
+};
+
 export default function ExpoMap({
   expo,
   embedded = false,
@@ -49,6 +61,9 @@ export default function ExpoMap({
 }) {
   const [view, setView] = useState<"map" | "list">("map");
   const [regions, setRegions] = useState<RegionCollection | null>(null);
+  const [zones, setZones] = useState<MapCollection | null>(null);
+  const [places, setPlaces] = useState<MapCollection | null>(null);
+  const [roads, setRoads] = useState<MapCollection | null>(null);
   const [mapFailed, setMapFailed] = useState(false);
   const [selectedHubKey, setSelectedHubKey] = useState("");
   const [selectedBoothId, setSelectedBoothId] = useState<number | null>(null);
@@ -79,6 +94,24 @@ export default function ExpoMap({
       .catch(() => {
         if (active) setMapFailed(true);
       });
+    fetch("/geo/ethiopia-admin2-2023.geojson")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active && data) setZones(data as MapCollection);
+      })
+      .catch(() => {});
+    fetch("/geo/ethiopia-places-osm.geojson")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active && data) setPlaces(data as MapCollection);
+      })
+      .catch(() => {});
+    fetch("/geo/ethiopia-major-roads-osm.geojson")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active && data) setRoads(data as MapCollection);
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -96,9 +129,10 @@ export default function ExpoMap({
   const selectedBooth = selectedBoothId === null
     ? null
     : expo.booths.find((booth) => booth.id === selectedBoothId) || null;
-  const visibleBooths = selectedHubKey
-    ? expo.booths.filter((booth) => booth.hubKey === selectedHubKey)
-    : expo.booths;
+  const selectedHub = expo.map.hubs.find((hub) => hub.key === selectedHubKey) || null;
+  const selectedHubBooths = selectedHub
+    ? expo.booths.filter((booth) => booth.hubKey === selectedHub.key)
+    : [];
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -151,8 +185,6 @@ export default function ExpoMap({
   function selectHub(hubKey: string) {
     setSelectedHubKey(hubKey);
     setSelectedBoothId(null);
-    const hub = expo.map.hubs.find((candidate) => candidate.key === hubKey);
-    if (hub) framePoint(hub.longitude, hub.latitude);
   }
 
   function viewEthiopia() {
@@ -165,7 +197,6 @@ export default function ExpoMap({
     if (!projection || !expo.map.hubs.length) return;
     if (expo.map.hubs.length === 1) {
       const hub = expo.map.hubs[0];
-      setSelectedHubKey(hub.key);
       framePoint(hub.longitude, hub.latitude);
       return;
     }
@@ -230,7 +261,7 @@ export default function ExpoMap({
           <span className="expo-kicker">Live daily Expo</span>
           <h2 id="expo-title">{expo.themeName}</h2>
           <p>
-            {expo.map.hubs.length} regional {expo.map.hubs.length === 1 ? "Expo" : "Expos"} hosting{" "}
+            {expo.map.hubs.length} host {expo.map.hubs.length === 1 ? "city" : "cities"} welcoming{" "}
             {expo.booths.length} {expo.booths.length === 1 ? "business" : "businesses"} today.
           </p>
         </div>
@@ -260,7 +291,7 @@ export default function ExpoMap({
         <div className="expo-map-shell">
           <div className="expo-commandbar">
             <label className="expo-hub-select">
-              <span>Jump to regional Expo</span>
+              <span>Jump to a host city</span>
               <select
                 value={selectedHubKey}
                 onChange={(event) => {
@@ -268,23 +299,39 @@ export default function ExpoMap({
                   else viewEthiopia();
                 }}
               >
-                <option value="">All active regional Expos</option>
+                <option value="">Ethiopia · all active Expos</option>
                 {expo.map.hubs.map((hub) => (
                   <option key={hub.key} value={hub.key}>
-                    {hub.name} · {hub.boothCount} booths
+                    {hub.city}, {hub.zone} · {hub.boothCount} booths
                   </option>
                 ))}
               </select>
             </label>
-            <div className="expo-map-controls" aria-label="Expo map controls">
-              <button type="button" title="Zoom in" aria-label="Zoom in" onClick={() => zoomBy(1.4)}>+</button>
-              <button type="button" title="Zoom out" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.4)}>−</button>
-              <button type="button" onClick={centerActiveExpos}>Center today&apos;s Expos</button>
-              <button type="button" onClick={viewEthiopia}>View Ethiopia</button>
-            </div>
+            {selectedHub ? (
+              <div className="expo-map-controls" aria-label="Expo venue controls">
+                <button type="button" className="expo-country-return" onClick={viewEthiopia}>
+                  View Ethiopia
+                </button>
+              </div>
+            ) : (
+              <div className="expo-map-controls" aria-label="Expo map controls">
+                <button type="button" title="Zoom in" aria-label="Zoom in" onClick={() => zoomBy(1.4)}>+</button>
+                <button type="button" title="Zoom out" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.4)}>−</button>
+                <button type="button" onClick={centerActiveExpos}>Center today&apos;s Expos</button>
+                <button type="button" onClick={viewEthiopia}>View Ethiopia</button>
+              </div>
+            )}
           </div>
 
-          {mapFailed ? (
+          {selectedHub ? (
+            <ExpoVenue
+              key={selectedHub.key}
+              hub={selectedHub}
+              booths={selectedHubBooths}
+              selectedBoothId={selectedBoothId}
+              onSelectBooth={setSelectedBoothId}
+            />
+          ) : mapFailed ? (
             <div className="expo-map-failed">
               <p>The visual map could not load.</p>
               <button type="button" onClick={() => setView("list")}>Open Expo List</button>
@@ -299,7 +346,7 @@ export default function ExpoMap({
                   className="expo-map"
                   viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
                   role="img"
-                  aria-label="Interactive map of Ethiopia showing today's regional Expos"
+                  aria-label="Interactive map of Ethiopia showing today's host cities"
                   onKeyDown={(event) => {
                     if (event.key === "+" || event.key === "=") zoomBy(1.4);
                     if (event.key === "-") zoomBy(1 / 1.4);
@@ -318,7 +365,27 @@ export default function ExpoMap({
                         />
                       ))}
                     </g>
-                    {zoomLevel < 2.2 ? (
+                    {zones ? (
+                      <g className="expo-zones">
+                        {zones.features.map((feature) => (
+                          <path
+                            key={String(feature.properties.code || feature.properties.name)}
+                            d={path(feature as unknown as GeoPermissibleObjects) || undefined}
+                          />
+                        ))}
+                      </g>
+                    ) : null}
+                    {roads ? (
+                      <g className="expo-roads" aria-hidden="true">
+                        {roads.features.map((feature, index) => (
+                          <path
+                            key={`${String(feature.properties.ref || feature.properties.name)}-${index}`}
+                            d={path(feature as unknown as GeoPermissibleObjects) || undefined}
+                          />
+                        ))}
+                      </g>
+                    ) : null}
+                    {zoomLevel < 1.7 ? (
                       <g className="expo-region-labels" aria-hidden="true">
                         {regions.features.map((feature) => {
                           const point = projection(feature.properties.centroid);
@@ -334,6 +401,38 @@ export default function ExpoMap({
                         })}
                       </g>
                     ) : null}
+                    {places ? (
+                      <g className="expo-place-labels" aria-hidden="true">
+                        {places.features
+                          .filter((feature) =>
+                            zoomLevel >= 2 ||
+                            feature.properties.place === "city")
+                          .slice(0, zoomLevel >= 2 ? 80 : 18)
+                          .map((feature) => {
+                            const coordinates = (
+                              feature.geometry as { coordinates?: [number, number] }
+                            ).coordinates;
+                            const point = coordinates ? projection(coordinates) : null;
+                            if (!point) return null;
+                            const conflictsWithHost = expo.map.hubs.some((hub) => {
+                              const hostPoint = projection([hub.longitude, hub.latitude]);
+                              return hostPoint &&
+                                Math.hypot(point[0] - hostPoint[0], point[1] - hostPoint[1]) <
+                                  52 / zoomLevel;
+                            });
+                            if (conflictsWithHost) return null;
+                            return (
+                              <g
+                                key={`${String(feature.properties.name)}-${coordinates?.join("-")}`}
+                                transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`}
+                              >
+                                <circle r="2.6" />
+                                <text x="5" y="3">{String(feature.properties.name)}</text>
+                              </g>
+                            );
+                          })}
+                      </g>
+                    ) : null}
                     <g className="expo-hubs">
                       {expo.map.hubs.map((hub) => (
                         <HubMarker
@@ -346,34 +445,12 @@ export default function ExpoMap({
                         />
                       ))}
                     </g>
-                    {zoomLevel >= 1.8 ? (
-                      <g className="expo-booths">
-                        {visibleBooths.map((booth, index) => {
-                          const hub = expo.map.hubs.find((candidate) => candidate.key === booth.hubKey);
-                          const point = hub ? projection([hub.longitude, hub.latitude]) : null;
-                          if (!point) return null;
-                          const siblings = visibleBooths.filter((candidate) => candidate.hubKey === booth.hubKey);
-                          const siblingIndex = siblings.findIndex((candidate) => candidate.id === booth.id);
-                          const angle = (Math.PI * 2 * siblingIndex) / Math.max(1, siblings.length) - Math.PI / 2;
-                          const radius = siblings.length === 1 ? 0 : 92;
-                          return (
-                            <BoothMarker
-                              key={booth.id}
-                              booth={booth}
-                              x={point[0] + Math.cos(angle) * radius / zoomLevel}
-                              y={point[1] + Math.sin(angle) * radius / zoomLevel}
-                              zoomLevel={zoomLevel}
-                              selected={selectedBoothId === booth.id}
-                              onSelect={() => setSelectedBoothId(booth.id)}
-                            />
-                          );
-                        })}
-                      </g>
-                    ) : null}
                   </g>
                 </svg>
               )}
-              <div className="expo-map-attribution">Boundaries: FEWS NET, 2023 · Visual reference</div>
+              <div className="expo-map-attribution">
+                Boundaries: FEWS NET, 2023 · Places and roads: OpenStreetMap contributors
+              </div>
             </div>
           )}
 
@@ -409,7 +486,7 @@ function HubMarker({
       transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`}
       role="button"
       tabIndex={0}
-      aria-label={`${hub.name}, ${hub.boothCount} booths`}
+      aria-label={`${hub.city} Expo, ${hub.boothCount} booths`}
       onClick={onSelect}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") onSelect();
@@ -418,61 +495,133 @@ function HubMarker({
       <circle r="27" />
       <circle className="expo-hub-core" r="18" />
       <text className="expo-hub-count" textAnchor="middle" y="5">{hub.boothCount}</text>
-      <text className="expo-hub-name" textAnchor="middle" y="48">{hub.region}</text>
+      <text className="expo-hub-name" textAnchor="middle" y="48">{hub.city}</text>
     </g>
   );
 }
 
-function BoothMarker({
+function ExpoVenue({
+  hub,
+  booths,
+  selectedBoothId,
+  onSelectBooth,
+}: {
+  hub: ExpoHubView;
+  booths: ExpoBoothView[];
+  selectedBoothId: number | null;
+  onSelectBooth: (id: number) => void;
+}) {
+  const [hallNumber, setHallNumber] = useState(1);
+  const halls = [...new Set(booths.map((booth) => booth.hallNumber))];
+  const hallBooths = booths.filter((booth) => booth.hallNumber === hallNumber);
+  const desktopRows = Math.max(1, Math.ceil(hallBooths.length / 4));
+  const mobileRows = Math.max(1, Math.ceil(hallBooths.length / 2));
+  const venueStyle = {
+    "--venue-desktop-height": `${140 + desktopRows * 174 + (desktopRows - 1) * 18}px`,
+    "--venue-mobile-height": `${130 + mobileRows * 152 + (mobileRows - 1) * 12}px`,
+    "--venue-desktop-rows": desktopRows,
+    "--venue-mobile-rows": mobileRows,
+  } as CSSProperties;
+  return (
+    <section className="expo-venue" aria-labelledby="expo-venue-title">
+      <header className="expo-venue-header">
+        <div>
+          <span className="expo-kicker">Today&apos;s host city</span>
+          <h3 id="expo-venue-title">{hub.city} Expo</h3>
+          <p>{hub.zone}, {hub.region} · {booths.length} participating showrooms</p>
+        </div>
+        {halls.length > 1 ? (
+          <div className="expo-hall-tabs" aria-label="Expo halls">
+            {halls.map((hall) => (
+              <button
+                key={hall}
+                type="button"
+                aria-pressed={hallNumber === hall}
+                onClick={() => setHallNumber(hall)}
+              >
+                Hall {hall}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="expo-hall-badge">Hall 1</span>
+        )}
+      </header>
+
+      <div className="expo-venue-shell" style={venueStyle}>
+        <div className="expo-venue-entrance">
+          <span>Entrance</span>
+          <strong>Reception</strong>
+          <small>You are here</small>
+        </div>
+        <div className="expo-venue-floor" data-booth-count={hallBooths.length}>
+          <div className="expo-venue-aisle" aria-hidden="true">
+            <span>Hall {hallNumber}</span>
+          </div>
+          {hallBooths.map((booth, index) => (
+            <VenueBooth
+              key={booth.id}
+              booth={booth}
+              index={index}
+              hallBoothCount={hallBooths.length}
+              selected={selectedBoothId === booth.id}
+              onSelect={() => onSelectBooth(booth.id)}
+            />
+          ))}
+        </div>
+        <div className="expo-venue-exits" aria-hidden="true">
+          <span>Exit A</span>
+          <span>Exit B</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VenueBooth({
   booth,
-  x,
-  y,
-  zoomLevel,
+  index,
+  hallBoothCount,
   selected,
   onSelect,
 }: {
   booth: ExpoBoothView;
-  x: number;
-  y: number;
-  zoomLevel: number;
+  index: number;
+  hallBoothCount: number;
   selected: boolean;
   onSelect: () => void;
 }) {
-  const [failed, setFailed] = useState(false);
+  const desktopColumnsByRowSize: Record<number, number[]> = {
+    1: [2],
+    2: [2, 4],
+    3: [1, 2, 4],
+    4: [1, 2, 4, 5],
+  };
+  const desktopRow = Math.floor(index / 4) + 1;
+  const desktopRowStart = (desktopRow - 1) * 4;
+  const desktopRowSize = Math.min(4, hallBoothCount - desktopRowStart);
+  const mobileRow = Math.floor(index / 2) + 1;
+  const boothStyle = {
+    "--booth-desktop-column":
+      desktopColumnsByRowSize[desktopRowSize][index - desktopRowStart],
+    "--booth-desktop-row": desktopRow,
+    "--booth-mobile-column": index % 2 === 0 ? 1 : 3,
+    "--booth-mobile-row": mobileRow,
+  } as CSSProperties;
   return (
-    <g
-      className={`expo-booth-marker${selected ? " selected" : ""}`}
-      transform={`translate(${x} ${y}) scale(${1 / zoomLevel})`}
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
+      className={`expo-venue-booth${selected ? " selected" : ""}`}
+      style={boothStyle}
       aria-label={`Select ${booth.name}, ${booth.boothReference}`}
       onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") onSelect();
-      }}
     >
-      <rect x="-54" y="-42" width="108" height="84" rx="6" />
-      {!failed && booth.imageUrl ? (
-        <image
-          href={booth.imageUrl}
-          x="-50"
-          y="-38"
-          width="100"
-          height="56"
-          preserveAspectRatio="xMidYMid slice"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <g className="expo-booth-fallback">
-          <rect x="-50" y="-38" width="100" height="56" />
-          <text textAnchor="middle" y="-5">{booth.name.slice(0, 1)}</text>
-        </g>
-      )}
-      <text className="expo-booth-name" textAnchor="middle" y="31">
-        {booth.name.length > 18 ? `${booth.name.slice(0, 17)}…` : booth.name}
-      </text>
-      <text className="expo-booth-reference" textAnchor="middle" y="-48">{booth.boothReference}</text>
-    </g>
+      <BoothImage booth={booth} />
+      <span className="expo-venue-booth-copy">
+        <small>{booth.boothReference}</small>
+        <strong>{booth.name}</strong>
+      </span>
+    </button>
   );
 }
 
@@ -507,7 +656,7 @@ function BoothPreview({
         </div>
         <p className="expo-preview-industry">{booth.industryLabel}</p>
         <h3>{booth.name}</h3>
-        <p className="expo-origin">From {booth.city}, {booth.region} · Hosted by {booth.hubName}</p>
+        <p className="expo-origin">From {booth.city}, {booth.zone}, {booth.region} · Hosted in {booth.hubCity}</p>
         <p>{booth.description}</p>
         <Link className="expo-showroom-action" href={`/@${booth.handle}`}>Enter showroom</Link>
       </div>
@@ -528,7 +677,7 @@ function ExpoList({ booths }: { booths: ExpoBoothView[] }) {
             </div>
             <p className="expo-preview-industry">{booth.industryLabel}</p>
             <h3>{booth.name}</h3>
-            <p className="expo-origin">From {booth.city}, {booth.region} · {booth.hubName}</p>
+            <p className="expo-origin">From {booth.city}, {booth.zone}, {booth.region} · Hosted in {booth.hubCity}</p>
             <p>{booth.description}</p>
           </div>
           <Link className="expo-showroom-action" href={`/@${booth.handle}`}>Enter showroom</Link>

@@ -193,7 +193,7 @@ work. The current local checkpoint passes the standard check and ten
 production-browser acceptance scenarios, including CSP/provider-video proof,
 the blueprint studio, client approval, and publication. `FE-014`, `BE-013`,
 `FE-015`, and `DEP-011` record the completed local blueprint, composition-
-fitness, marketplace, Expo, and ten-showroom benchmark scope. Remote checks
+fitness, marketplace, Expo, and 28-showroom benchmark scope. Remote checks
 and any production/data-preserving rollout remain separate future evidence.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
@@ -213,7 +213,7 @@ The SuqPage landing page must not look like any client showroom. It is a polishe
 mobile-first marketplace surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-015` defines the current visual composition: a
 photographic maker hero leads with the permanent `/@handle` showroom product
-and a compact live-Expo callout; the full-width regional Expo map/list is the
+and a compact live-Expo callout; the full-width city-hosted Expo map/list is the
 primary live module, followed by the server-owned weekly Industry schedule and
 one searchable, Industry-filtered permanent-showroom directory. The directory
 renders at most five matching showrooms per page, uses one horizontally
@@ -221,16 +221,21 @@ scrollable Industry pill row instead of category controls or duplicate
 all-business navigation, and resets pagination when search or Industry changes.
 
 The Expo uses a locally stored and attributed Ethiopia administrative-boundary
-asset with a proven geographic projection and bounded SVG pan/zoom. Country view
-shows every active regional hub. A labeled selector jumps to one hub, **Center
-today's Expos** frames the active set, and **View Ethiopia** restores the country
-extent. During the pilot, two eligible businesses in a represented region create
-a regional hub; a one-business region joins its geographically nearest active
-hub without changing the origin city and region shown to visitors. A business
+asset with a proven geographic projection and bounded SVG pan/zoom. The country
+view is navigation, not a booth floor: it shows Admin-1 and Admin-2 boundaries,
+restrained major-road corridors, selected city/town labels, and every active
+major-city host. A labeled selector jumps to one host, **Center today's Expos**
+frames the active set, and **View Ethiopia** restores the country extent.
+Selecting a host opens a complete top-view Expo venue with reception, central
+aisle, exits, numbered halls, and every assigned showroom. Venue depth and
+balanced booth rows derive from hall population, with at most 12 booths per
+hall. During the pilot, two eligible businesses in a host catchment create an
+Expo; a sparse catchment joins its geographically nearest active major-city host
+without changing the origin city, zone, and region shown to visitors. A business
 must have an active showroom, matching Industry, approved booth-specific image,
-valid city/region/WGS84 coordinates, and no exclusion before it may participate.
-Map and List views expose the same complete participant set. Detail markers and
-the selected-booth sheet expose consistent
+valid city/zone/region/WGS84 coordinates, and no exclusion before it may
+participate. Map and List views expose the same complete participant set. Venue
+booths and the selected-booth sheet expose consistent
 `H{hub-number}.{hall-number}-B{booth-number}` references.
 
 Featured emphasis is integrated into the one paginated directory instead of

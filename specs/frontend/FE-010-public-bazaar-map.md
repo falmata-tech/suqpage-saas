@@ -24,36 +24,47 @@ This section supersedes the mall-floor presentation retained below as evidence
 of the previous implementation.
 
 - `/expo` is canonical and `/bazaar` redirects for bookmark compatibility.
-- The primary visual is a lightweight SVG map of Ethiopia rendered from a
-  locally stored, attributed, simplified boundary asset. It shows the country
-  border, restrained region borders, useful city labels, and no roads, remote
-  tiles, satellite imagery, decorative terrain, WebGL, or static floor image.
+- The primary visual is a lightweight SVG map of Ethiopia rendered from locally
+  stored, attributed, simplified geographic assets. It shows the country
+  border, restrained region and zone borders, useful city/town labels, and a
+  small major-road reference layer. It uses no remote tiles, satellite imagery,
+  decorative terrain, WebGL, or static Expo-floor image.
 - Proven geographic projection and zoom utilities handle GeoJSON, drag, wheel,
   keyboard, and pinch input with bounded movement.
-- Country view shows every regional Expo hub active today with participant
-  counts. A labeled region/hub selector provides direct navigation.
-- Selecting a hub smoothly frames its booths. **Center today's Expos** frames
-  all active hubs, while **View Ethiopia** restores the country extent.
-- Booth markers use approved booth imagery at detail zoom. A selected booth
-  opens a bounded mobile sheet with reference, business, Industry, true origin
-  city/region, assigned hub, and showroom action.
+- Country view is a navigation layer. It shows every city-hosted Expo active
+  today with participant counts; it never places individual booths at
+  geographic coordinates. A labeled host-city selector provides direct
+  navigation.
+- Each Expo is hosted in a reviewed major city serving a zone or nearby
+  catchment. Selecting a host replaces the country map with a dynamic top-view
+  Expo venue containing every assigned showroom in numbered halls and booths.
+  **Center today's Expos** frames all active host cities, while **View Ethiopia**
+  restores the country extent from either the map or venue.
+- Venue geometry grows from participant count, admits at most 12 booths per
+  hall, and provides restrained architectural wayfinding: entrance, reception,
+  center aisle, hall label, and exits. It does not resemble a road map, graph
+  paper, shopping-mall facade row, or static image.
+- Booths use approved booth imagery as signage within the venue. A selected
+  booth opens a bounded mobile sheet with reference, business, Industry, true
+  origin city/zone/region, assigned host city, and showroom action.
 - References use `H{hub-number}.{hall-number}-B{booth-number}` consistently in
   the map, selected-booth sheet, and Expo List.
 - Map View and List View expose the same participant set. List View is complete
   and remains the low-motion/accessibility fallback.
-- Public labels say Expo, Expo Map, Expo List, and regional Expo.
+- Public labels say Expo, Map View, List View, and city-hosted Expo.
 
 ```gherkin
-Scenario: Visitor sees all active regional Expos
-  GIVEN today's occurrence has multiple regional hubs
+Scenario: Visitor sees all active city-hosted Expos
+  GIVEN today's occurrence has multiple city hosts
   WHEN a visitor opens /expo or activates View Ethiopia
   THEN the whole Ethiopia boundary and every active hub are visible
-  AND the visitor can choose a hub from the labeled selector
+  AND zone borders, useful towns, and restrained major roads provide orientation
+  AND the visitor can choose a host city from the labeled selector
 
-Scenario: Visitor explores one hub on mobile
+Scenario: Visitor explores one city Expo on mobile
   GIVEN a 320 or 390 CSS-pixel viewport
-  WHEN the visitor selects a regional Expo
-  THEN the map frames that hub at a useful zoom
+  WHEN the visitor selects a host city
+  THEN a responsive venue plan contains every assigned showroom
   AND booth selection opens a bounded sheet without horizontal page overflow
   AND the visitor can return to all active Expos with one control
 ```
@@ -206,6 +217,8 @@ raw media paths.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Mobile map pan/zoom/select at 390px and 320px without overflow | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
+| Country map has local zones, roads, towns, and no geographic booth scatter | focused/browser | `scripts/test-expo.ts`, `scripts/capture-expo-visuals.mjs` |
+| Host selection opens a dynamic complete venue with 12-booth hall capacity | focused/browser | `scripts/test-expo.ts`, `tests/acceptance/app.spec.ts` |
 | Bazaar List contains all active booths and keyboard links | acceptance | `tests/acceptance/app.spec.ts` Bazaar scenario |
 | No-media grounded storefront fallback remains usable | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
 | Dynamic dimensions, grounded corridor rows, and 48-booth floor cap | integration/browser | `scripts/test-bazaar.ts`, `tests/acceptance/app.spec.ts` |
@@ -267,13 +280,16 @@ fully available in Bazaar List rather than receiving a floor storefront.
 ## Completion evidence
 
 The canonical `/expo` experience and `/bazaar` compatibility redirect were
-implemented and verified on 2026-07-29. The public map uses the local attributed
-Ethiopia GeoJSON, D3 projection/zoom, all-hub and selected-hub framing, a labeled
-hub selector, image-backed booth markers, bounded mobile preview, and complete
-Map/List parity.
+implemented and verified on 2026-07-29. The public map uses locally attributed
+Admin-1/Admin-2 boundaries, selected OSM place labels and major-road corridors,
+D3 projection/zoom, all-host framing, a labeled host selector, and complete
+Map/List parity. Selecting a host replaces country navigation with its complete
+dynamic top-view venue and image-backed numbered booths.
 
 Evidence: `npm run test:expo-visual` passed at 1440px, 390px, and 320px with 14
-regions, active hubs, no browser errors, broken images, text/page overflow, or
-undersized mobile controls. `npm run test:acceptance` passed 10/10, including
-regional selection, booth origin/reference, list parity, and redirect behavior.
+regions, 101 zones, local road/place context, active host cities, and no browser
+errors, broken images, text/page overflow, or undersized mobile controls.
+Incomplete venue rows balance around the central aisle and venue depth grows
+with its hall population. `npm run test:acceptance` passed 10/10, including
+host-city selection, booth origin/reference, list parity, and redirect behavior.
 `npm run check` and `npm run release` passed.
