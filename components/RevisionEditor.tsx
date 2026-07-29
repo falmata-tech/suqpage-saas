@@ -8,7 +8,15 @@ import {
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomPrimitive } from "@/lib/showroom-composition";
-import type { ShowroomSectionV2 } from "@/lib/showroom-composition-v2";
+import {
+  SHOWROOM_CUSTOM_PALETTE_KEYS,
+  SHOWROOM_SECTION_SURFACE_ROLES,
+  type ShowroomSectionV2,
+} from "@/lib/showroom-composition-v2";
+import {
+  SHOWROOM_DESIGN_SYSTEMS,
+  type ShowroomColorPalette,
+} from "@/lib/showroom-design-systems";
 import type { RevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 
 type MediaOption = { value: string; label: string; kind: "image" | "video" };
@@ -35,6 +43,58 @@ function Field({
         maxLength={max}
         onChange={(event) => onChange(event.target.value)}
       />
+    </div>
+  );
+}
+
+const paletteLabels: Record<keyof ShowroomColorPalette, string> = {
+  canvas: "Page canvas",
+  surface: "Raised surface",
+  layer: "Alternate layer",
+  text: "Primary text",
+  textMuted: "Muted text",
+  primary: "Primary accent",
+  primarySoft: "Primary soft surface",
+  secondary: "Secondary accent",
+  secondarySoft: "Secondary soft surface",
+  onSecondary: "Text on secondary",
+  strong: "Strong section",
+  onStrong: "Text on strong",
+  inverse: "Inverse section",
+  onInverse: "Text on inverse",
+  border: "Borders",
+};
+
+function ColorField({
+  colorKey,
+  value,
+  onChange,
+}: {
+  colorKey: keyof ShowroomColorPalette;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const label = paletteLabels[colorKey];
+  return (
+    <div className="field">
+      <label htmlFor={`palette-${colorKey}`}>{label}</label>
+      <div className="color-field">
+        <input
+          id={`palette-${colorKey}`}
+          type="color"
+          value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000"}
+          aria-label={`${label} swatch`}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <input
+          type="text"
+          aria-label={`${label} hex value`}
+          value={value}
+          maxLength={7}
+          pattern="^#[0-9a-fA-F]{6}$"
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
     </div>
   );
 }
@@ -120,6 +180,9 @@ export default function RevisionEditor({
   const [snapshot, setSnapshot] = useState(initial);
   const [summary, setSummary] = useState(initialSummary);
   const business = snapshot.business;
+  const foundation =
+    SHOWROOM_DESIGN_SYSTEMS[snapshot.designManifest.tokenPack] ||
+    Object.values(SHOWROOM_DESIGN_SYSTEMS)[0];
   const componentById = useMemo(
     () =>
       new Map(
@@ -181,6 +244,25 @@ export default function RevisionEditor({
         [key]: value,
       },
     });
+  const setCustomPalette = (palette?: ShowroomColorPalette) =>
+    setSnapshot((current) => {
+      const { customPalette: _currentPalette, ...manifest } =
+        current.designManifest;
+      return {
+        ...current,
+        designManifest: {
+          ...manifest,
+          ...(palette ? { customPalette: palette } : {}),
+        },
+      };
+    });
+  const updatePaletteColor = (
+    key: keyof ShowroomColorPalette,
+    value: string,
+  ) => {
+    const palette = snapshot.designManifest.customPalette || foundation.colors;
+    setCustomPalette({ ...palette, [key]: value });
+  };
   const updateBlock = (key: string, patch: Partial<ShowroomContentBlock>) =>
     setSnapshot((current) => ({
       ...current,
@@ -275,6 +357,32 @@ export default function RevisionEditor({
             </div>
             <MediaChoice label="Browser icon" value={business.faviconRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("faviconRef", value)} />
           </div>
+          <div className="revision-item">
+            <label className="check-field">
+              <input
+                type="checkbox"
+                checked={Boolean(snapshot.designManifest.customPalette)}
+                onChange={(event) =>
+                  setCustomPalette(
+                    event.target.checked ? { ...foundation.colors } : undefined,
+                  )
+                }
+              />
+              Use a custom showroom palette
+            </label>
+            {snapshot.designManifest.customPalette ? (
+              <div className="form-grid">
+                {SHOWROOM_CUSTOM_PALETTE_KEYS.map((key) => (
+                  <ColorField
+                    key={key}
+                    colorKey={key}
+                    value={snapshot.designManifest.customPalette![key]}
+                    onChange={(value) => updatePaletteColor(key, value)}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <section className="panel">
@@ -354,6 +462,25 @@ export default function RevisionEditor({
                       </select>
                     </div>
                   ) : null}
+                  <div className="field">
+                    <label>{section.key} surface</label>
+                    <select
+                      aria-label={`${section.key} surface`}
+                      value={section.surfaceRole || "canvas"}
+                      onChange={(event) =>
+                        updateSection(index, {
+                          surfaceRole:
+                            event.target.value as typeof section.surfaceRole,
+                        })
+                      }
+                    >
+                      {SHOWROOM_SECTION_SURFACE_ROLES.map((value) => (
+                        <option key={value} value={value}>
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   {typeof section.properties.height === "number" ? (
                     <div className="field">
                       <label>{section.key} height</label>

@@ -2,9 +2,9 @@
 id: BE-013
 title: Showroom blueprint media plan and composition fitness
 status: done
-related: [FE-007, FE-009, FE-014, FE-015, BE-008, BE-010, BE-011, BE-014, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007]
+related: [FE-007, FE-009, FE-014, FE-015, BE-008, BE-010, BE-011, BE-014, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007, ADR-0008]
 owners: [product, backend, security]
-last_updated: 2026-07-28
+last_updated: 2026-07-29
 change_level: L3
 ---
 
@@ -50,10 +50,11 @@ client review.
 - Hard fitness failures include incompatible content/component binding, missing
   required media at review time, unsupported media kind, duplicate category
   navigation, a standalone category navigator combined with catalog filters,
-  more than two signature sections, and incompatible catalog count.
+  and incompatible catalog count.
 - Warnings include unnecessary search/filter controls, repeated factual image
   use, consecutive identical surface/geometry, repeated business description,
-  long-copy risk, and weak optional-media coverage.
+  long-copy risk, weak optional-media coverage, and a composition whose many
+  signature treatments warrant review.
 - Templates encode reviewed slot order, content needs, catalog shape, commerce
   modes, media condition, visual tone, preferred component families, and
   fallback behavior. They contain no tenant facts, industry/archetype
@@ -66,8 +67,9 @@ client review.
   media behavior. Their guidance contains visual tones only and no industry or
   business-archetype metadata.
 - Fitness scoring is deterministic and advisory except for explicit hard
-  failures. The AI cannot waive security, media, provenance, or publication
-  requirements.
+  failures. The AI cannot waive security, media, tenant, revision, or
+  publication requirements. Written-content provenance is optional private
+  review metadata under ADR-0008.
 
 ## Scenarios
 

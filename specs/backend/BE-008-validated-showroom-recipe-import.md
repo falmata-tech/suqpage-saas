@@ -33,7 +33,7 @@ authority, access tenant persistence, or publish.
 - A separately versioned `ShowroomDesignProposal` schema/parser for approved
   bank composition.
 - A small `ShowroomRecipeEnvelope` schema/parser pairing exact content/design
-  versions with provenance, source reconciliation, questions, warnings, and
+  versions with optional provenance plus advisory questions, warnings, and
   rationale.
 - Export of an actor/tenant-scoped sanitized brief with current content for
   change requests, allowed asset keys, source facts, expected counts, bank
@@ -42,8 +42,8 @@ authority, access tenant persistence, or publish.
   allowlisted external-provider links, exposed to recipes only through opaque
   asset descriptors.
 - Cross-validation of content keys, section-content types, component content
-  contracts, bindings, asset scope, source requirements, limits, and current
-  base content version.
+  contracts, bindings, asset scope, supplied provenance references, limits, and
+  current base content version.
 - Idempotent private candidate import and conversion into the next revision
   write schema without live mutation.
 - Structured safe validation results for the staff workflow.
@@ -63,9 +63,9 @@ authority, access tenant persistence, or publish.
   cross-document domain parsers.
 - **Source fact** is attributable to the client request/clarification, an
   authorized current snapshot, an authorized asset, or an explicit staff input.
-- **AI draft copy** is proposed presentation language, not authority for
-  contacts, availability, product specifications, certifications,
-  materials, origin, delivery, pricing, or other factual claims.
+- **AI draft copy** is provisional written content admitted to a private
+  candidate. Staff/client review and authorized publication, not provenance
+  completeness, determine whether it becomes public.
 - **Stable key** is a recipe-local opaque relationship key. It is never a
   database ID or storage path.
 - **Media descriptor** is an authorized opaque key plus a bounded kind, label,
@@ -138,18 +138,19 @@ authority, access tenant persistence, or publish.
   kind, dimensions/aspect ratio, and provider/title. It exports no private file
   bytes or storage locations; staff may separately supply approved files to the
   external AI conversation.
-- Provenance maps every factual or media-bearing field to an exported source
-  key. AI-drafted marketing copy is labeled `ai_draft`; missing required facts
-  become questions. Server validation never upgrades `ai_draft` to `source_fact`.
+- Provenance is optional review metadata. Empty or omitted provenance is valid
+  for provisional private-draft copy. Supplied entries must map an existing
+  content path to an exported source key, and server validation never upgrades
+  `ai_draft` to `source_fact`.
 - Image alt text/captions and video titles are bounded and reviewed. AI may
   propose descriptive text, but staff acceptance and media usage-rights
   acknowledgement are required before client review.
 - A change brief includes the exact base content version and complete authorized
   current recipe content. Import rejects stale base versions before replacing a
   draft candidate.
-- Source reconciliation records expected and returned counts and stable keys.
-  Missing/duplicate source items, unexplained removals, and unresolved required
-  questions block submission for client review.
+- Stable-key reconciliation records expected and returned counts. Unexplained
+  removals remain invalid; questions and warnings remain advisory review notes
+  and do not block private candidate creation.
 - Import authorization reuses request assignment/manager scope. Clients,
   unassigned staff, and cross-tenant actors cannot export, import, preview, or
   read recipe payloads.
@@ -198,9 +199,9 @@ Scenario: Brief example cannot impersonate client authority
 
 Scenario: AI invents a factual claim
   GIVEN no exported source supports a product specification, certification, availability, or contact
-  WHEN the recipe marks that value as a source fact or omits provenance
-  THEN import fails with a safe provenance error
-  AND the value cannot enter a revision candidate
+  WHEN the recipe includes provisional written content with empty provenance
+  THEN import creates only a private revision candidate
+  AND existing staff, client-review, approval, and publication controls remain required before it can become public
 
 Scenario: AI includes an inventory count
   GIVEN the portable content schema has no numeric inventory field

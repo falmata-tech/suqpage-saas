@@ -771,35 +771,62 @@ test("operations manager records on behalf and team member sees only assigned wo
   recipe.baseContentVersion = brief.baseContentVersion;
   recipe.content = { schemaVersion: 1, ...currentContent };
   recipe.design = designManifest;
+  recipe.design.customPalette = {
+    canvas: "#F7F8FA",
+    surface: "#FFFFFF",
+    layer: "#E8EDF3",
+    text: "#17212B",
+    textMuted: "#4D5966",
+    primary: "#006D77",
+    primarySoft: "#D9F0F0",
+    secondary: "#9B3A22",
+    secondarySoft: "#F6DDD5",
+    onSecondary: "#FFFFFF",
+    strong: "#113F45",
+    onStrong: "#FFFFFF",
+    inverse: "#201A2B",
+    onInverse: "#FFFFFF",
+    border: "#AEB8C2",
+  };
   recipe.mediaPlan = [];
-  const currentSource = brief.sourceFacts.find(
-    (source: { kind: string }) => source.kind === "current_showroom",
-  );
-  expect(currentSource).toBeTruthy();
-  const provenancePaths = ["$.content.business.name"];
-  for (const field of ["contactEmail", "whatsapp", "telegram", "tiktok"]) {
-    if (recipe.content.business[field]) {
-      provenancePaths.push(`$.content.business.${field}`);
-    }
-  }
-  recipe.content.products.forEach((_product: unknown, index: number) => {
-    provenancePaths.push(
-      `$.content.products[${index}].name`,
-      `$.content.products[${index}].description`,
-      `$.content.products[${index}].availability`,
-    );
-  });
-  recipe.provenance = provenancePaths.map((path) => ({
-    path,
-    sourceKey: currentSource.key,
-    kind: "source_fact",
-  }));
-  recipe.summary="A revised hero prepared from the client’s private reference.";
+  recipe.provenance = [];
+  recipe.questions = [
+    "Staff should verify the provisional production claims before publication.",
+  ];
+  recipe.summary="A freely drafted private showroom with a custom color direction.";
   recipe.content.business.heroTitle="Acceptance approved showroom";
   await page.getByRole("textbox", { name: "Recipe JSON" }).fill(JSON.stringify(recipe));
   await page.getByRole("button",{name:"Validate blueprint and open preview"}).click();
   await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
+  await expect(page.locator('[data-custom-palette="true"]')).toBeVisible();
   await expect(page.getByRole("heading",{name:"Validated recipe difference"})).toBeVisible();
+  const privatePreviewUrl = page.url();
+  const recoveryEditorUrl = new URL(privatePreviewUrl);
+  recoveryEditorUrl.pathname = recoveryEditorUrl.pathname.replace(/\/preview$/, "/edit");
+  recoveryEditorUrl.search = "";
+  await page.goto(recoveryEditorUrl.toString());
+  await expect(page.getByRole("heading",{name:"Manual revision editor"})).toBeVisible();
+  await expect(page.getByLabel("Use a custom showroom palette")).toBeChecked();
+  await page.getByLabel("Primary accent hex value").fill("#14532D");
+  const heroSection = recipe.design.sections.find(
+    (section: { component: string }) => section.component.startsWith("hero."),
+  );
+  expect(heroSection).toBeTruthy();
+  await page.getByLabel(`${heroSection.key} surface`).selectOption("inverse");
+  await page.getByRole("button",{name:"Save private draft"}).click();
+  await expect(page.getByText("Private draft saved.")).toBeVisible();
+  await page.goto(privatePreviewUrl);
+  const customShowroom = page.locator('[data-custom-palette="true"]');
+  await expect(customShowroom).toBeVisible();
+  await expect(customShowroom.locator(":scope > [data-surface]").nth(1)).toHaveAttribute(
+    "data-surface",
+    "inverse",
+  );
+  expect(
+    await customShowroom.evaluate((element) =>
+      getComputedStyle(element).getPropertyValue("--bank-accent").trim().toUpperCase(),
+    ),
+  ).toBe("#14532D");
   await page.getByRole("button",{name:"Send revision for client review"}).click();
   await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
   await expect(page.getByText("Revision sent for client review.")).toBeVisible();

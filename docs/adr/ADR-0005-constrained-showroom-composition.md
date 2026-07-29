@@ -87,10 +87,10 @@ Adopt option 3 as the default future production path.
   automatic media transfer in the manual phase.
 - Server-side schema, semantic, compatibility, provenance, tenant, revision,
   and publication validation remain authoritative.
-- Missing factual information becomes a question. AI-generated marketing copy
-  may be proposed and labeled, but contact details, product claims,
-  certifications, availability, specifications, and media require an
-  attributable exported source.
+- Superseded for private written drafts by `ADR-0008`: missing factual
+  information may become a question or bounded provisional copy without an
+  exported source. Provider media and tenant assets still require separate
+  admission and authorization.
 - The next product/recipe model is availability-only under ADR-0006. Numeric
   inventory is not an accepted source fact or content field and will be
   rejected if returned by an external tool.
@@ -105,6 +105,15 @@ Adopt option 3 as the default future production path.
 - Existing custom renderers remain readable during migration and recovery.
   One-off custom code may remain an explicitly reviewed premium exception, not
   the routine tenant production path.
+
+## 2026-07-29 Draft-authority amendment
+
+`ADR-0008` supersedes the initial requirement that every factual recipe field
+must have an exported source before private import. Bounded provisional copy may
+enter a private candidate with empty provenance, and an admitted foundation may
+carry a validated custom color palette. This does not change the reviewed-
+component, tenant/media isolation, client approval, or manager publication
+decisions above.
 
 The 2026-07-24 implementation completed the four-example-client cutover under
 `FE-006`, `BE-007`, and `DEP-006`. All normal seeds, invitations, revision

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://suqpage.com/schemas/showroom-design-system.schema.json",
   "title": "SuqPage semantic showroom design-system guidance",
-  "description": "Machine-readable foundation guidance for choosing an admitted token pack before composing reviewed sections.",
+  "description": "Machine-readable non-color foundation and admitted palette guidance. A recipe may retain one foundation while supplying a contrast-safe custom color palette.",
   "type": "array",
   "minItems": 1,
   "maxItems": 32,

@@ -20,6 +20,7 @@ import {
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import {
   SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2,
+  SHOWROOM_SECTION_SURFACE_ROLES,
   SHOWROOM_DESIGN_SCHEMA_VERSION_V2,
 } from "./showroom-composition-v2";
 import { SHOWROOM_CONTENT_BLOCK_SCHEMA_VERSION } from "./showroom-content-blocks";
@@ -27,7 +28,6 @@ import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
 import {
   evaluateCompositionFitness,
   guidanceForComponent,
-  SHOWROOM_CANONICAL_SURFACE_SEQUENCE,
   SHOWROOM_DESIGN_PROCESS,
   SHOWROOM_MEDIA_TREATMENTS,
   SHOWROOM_TEMPLATES,
@@ -37,7 +37,6 @@ import {
   SHOWROOM_RECIPE_SCHEMA_VERSION,
   ShowroomRecipeError,
   validateShowroomRecipe,
-  type RecipeProvenance,
   type ValidatedShowroomRecipe,
 } from "./showroom-recipe-domain";
 import type { Catalog, SessionUser } from "./types";
@@ -486,28 +485,6 @@ function mapSnapshotRelationshipKeys(
   };
 }
 
-function factProvenance(
-  snapshot: RevisionSnapshotV4,
-  sourceKey: string,
-): RecipeProvenance[] {
-  const paths = ["$.content.business.name"];
-  for (const field of ["contactEmail", "whatsapp", "telegram", "tiktok"] as const) {
-    if (snapshot.business[field]) paths.push(`$.content.business.${field}`);
-  }
-  snapshot.products.forEach((_product, index) => {
-    paths.push(
-      `$.content.products[${index}].name`,
-      `$.content.products[${index}].description`,
-      `$.content.products[${index}].availability`,
-      `$.content.products[${index}].offeringKind`,
-      `$.content.products[${index}].quantityMode`,
-    );
-  });
-  return paths.map((path) => ({ path, sourceKey, kind: "source_fact" }));
-}
-
-const SYNTHETIC_SOURCE_KEY = "source_00000000000000000000";
-
 function syntheticReferenceCatalog(): Catalog {
   return {
     business: {
@@ -643,7 +620,7 @@ function syntheticExampleRecipe() {
         classification: "factual" as const,
       })),
     declaredRemovals: { collections: [], categories: [], products: [] },
-    provenance: factProvenance(snapshot, SYNTHETIC_SOURCE_KEY),
+    provenance: [],
   };
 }
 
@@ -754,7 +731,8 @@ export function buildShowroomRecipeBrief(
             "inquiry_call_to_action",
             "footer",
           ],
-          surfaceSequence: SHOWROOM_CANONICAL_SURFACE_SEQUENCE,
+          surfaceRoleOptions: SHOWROOM_SECTION_SURFACE_ROLES,
+          surfaceSequenceRequired: false,
           extraSectionsAllowed: false,
         },
         mediaTreatments: SHOWROOM_MEDIA_TREATMENTS,
@@ -774,22 +752,23 @@ export function buildShowroomRecipeBrief(
         "Treat each @version in contractManifest as belonging only to its named contract. Return recipe@1 containing content@1, content-blocks@1, and design@2; do not normalize or align independent version numbers.",
         "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, or component choices. Its seven-role section order is canonical and must be preserved. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
         "Return one complete replacement recipe, never a partial patch.",
-        "Use only source keys and media keys present in this brief.",
+        "You may freely write provisional business, product, and section copy for this private candidate. provenance is optional review metadata and may be an empty array. When you do cite a source_fact, use only source keys present in this brief.",
         "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
-        "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
+        "Use questions and warnings as non-blocking notes for staff review. They do not prevent private import.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Product category is the only active catalog grouping. Return content.collections as an empty array, declaredRemovals.collections as an empty array, and every category/product collectionKey as null. Never use a collection as navigation, story, process, trust, footer, or composition content.",
         "Treat content.products as the compatibility transport for public offerings. Classify each entry from supplied facts as standard_product, made_to_order, manufacturing_capability, or production_supply. Set quantityMode to optional for every offering. Desired quantity is optional buyer intent and never stock.",
-        "Use capacitySummary, minimumOrderSummary, and leadTimeSummary only for factual client-supplied production information. Include a period or basis in capacity claims. Leave unknown facts empty rather than inventing capacity, MOQ, lead time, certifications, or availability.",
+        "You may draft capacity, minimum-order, lead-time, availability, and marketing copy when the intake is incomplete, but state it provisionally and flag consequential assumptions in warnings for human review.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
-        "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one semantic design system and compatible section anatomy before choosing component IDs.",
-        "Use compositionGuidance.canonicalNormalShowroom exactly: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Use its exact surfaceRole sequence.",
-        "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Spend no more than two signature treatments across the page.",
+        "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one admitted design foundation and compatible section anatomy before choosing component IDs.",
+        "Use compositionGuidance.canonicalNormalShowroom exactly for section roles and order: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Choose any admitted surfaceRole per section; no exact color-role sequence is required.",
+        "For unrestricted colors, keep tokenPack as the typography, spacing, geometry, density, and media foundation and add design.customPalette with every color role from the design schema. Use six-digit hex values and readable foreground/background pairs. Omit customPalette only when an admitted palette already fits.",
+        "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Use signature treatments deliberately; several are allowed when the complete preview remains coherent.",
         "Use each component's renderedAnatomy, idealWhen, avoidWhen, content limits, and compatibleMediaIntegrations. Do not infer visual behavior from the component ID and do not choose a component whose renderer anatomy contradicts the available content or media.",
         "Choose header and footer independently by their rendered anatomy and available content. Do not default to one familiar pair, and do not infer suitability from an industry; the footer does not need to mirror the header.",
-        "Keep adjacent about/story and process sections compositionally distinct: use opposite start/end alignment on wider screens, preserve the exact surface then secondary-soft contrast, and avoid plaid, pinstripes, graph-paper grids, or repeated straight divider motifs. The hero accent-soft and process secondary-soft roles must introduce both palette families before the strong CTA instead of leaving its color isolated.",
+        "Keep adjacent about/story and process sections compositionally distinct through alignment, density, media, typography, or surface contrast. Avoid plaid, pinstripes, graph-paper grids, and repeated straight divider motifs.",
         "Catalog filters are the only category-browsing owner in a normal showroom. Keep hero factual media free of product-link overlays.",
-        "Before returning JSON, evaluate the complete design against the composition rules: exact canonical role order, useful catalog controls only, no repeated adjacent anatomy, exact semantic surface sequence, no more than two signature sections, compatible media prerequisites, and an appropriate catalog density.",
+        "Before returning JSON, evaluate the complete design against the composition rules: exact canonical role order, useful catalog controls only, no repeated adjacent anatomy, deliberate but freely chosen semantic surfaces and media treatments, compatible media prerequisites, and an appropriate catalog density.",
         "Declare every intentionally removed stable key.",
       ],
       examplePolicy: {
@@ -994,7 +973,8 @@ export function importShowroomRecipe(
         products: validated.difference.products.after,
         sections: validated.difference.designSections.after,
       },
-      warningCount: validated.recipe.warnings.length,
+      warningCount:
+        validated.recipe.warnings.length + validated.recipe.questions.length,
       mediaPlan: validated.recipe.mediaPlan,
       fitness: evaluateCompositionFitness(validated.snapshot),
     },

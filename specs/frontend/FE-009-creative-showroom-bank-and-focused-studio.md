@@ -2,7 +2,7 @@
 id: FE-009
 title: Creative showroom bank and focused v4 studio
 status: in_progress
-related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
+related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007, ADR-0008]
 owners: [product, frontend, design]
 last_updated: 2026-07-29
 change_level: L3
@@ -31,9 +31,10 @@ parity with the pixels rendered by that choice.
 
 - Visual rendering for typed hero, story/editorial, highlight, information/trust,
   CTA, and controlled-video blocks from FE-007/BE-008.
-- Focused private-draft controls to replace a compatible section, change token
-  pack, bounded motion/decorative properties, edit typed copy, and assign an
-  admitted compatible asset.
+- Focused private-draft controls to replace a compatible section, change its
+  foundation, create/edit/remove a custom color palette, choose each section's
+  semantic surface, change bounded motion/decorative properties, edit typed
+  copy, and assign an admitted compatible asset.
 - `showroom-bank@1.2.0` with at least 66 reviewed components across all eight
   slots and at least 18 token systems.
 - New art directions for textiles/fashion, beauty/wellness, technology,
@@ -46,6 +47,9 @@ parity with the pixels rendered by that choice.
   bounded component variant.
 - Semantic per-section surface roles and rendered typography, spacing, layout,
   and media tokens rather than a single page tint with descriptive-only tokens.
+- Free provisional written content in private recipes without mandatory source
+  references. Staff and clients review and correct the candidate before the
+  unchanged approval/publication path can make it public.
 - Twenty-eight fictional Expo showrooms used as a cross-content visual
   evaluation, including ten retained deep benchmarks and 18 additional
   business-specific authored briefs spanning sparse makers and dense
@@ -87,6 +91,11 @@ parity with the pixels rendered by that choice.
   families before the final strong CTA; inverse is reserved for a deliberate
   close. Every foreground is evaluated against the exact adjacent background it
   renders on.
+- A recipe may instead supply a complete custom six-digit-hex color palette.
+  The selected token direction remains the non-color foundation for typography,
+  spacing, geometry, density, and media bounds. Custom palette controls use
+  familiar color swatches plus exact values and reject unreadable text pairs,
+  but do not restrict the AI to the 18 admitted color combinations.
 - Token metadata and runtime CSS remain in parity. Body/display typography,
   type scale, section spacing, content width, density, hero bounds, product
   ratio, and maximum product columns must visibly affect the rendered showroom.
@@ -96,6 +105,11 @@ parity with the pixels rendered by that choice.
   recipes use the two explicit brand-soft roles. A composition uses those roles
   to create deliberate section pacing; role names express purpose rather than
   raw color values.
+- The seven semantic section roles remain ordered consistently, but no single
+  surface-role sequence is mandatory. The AI and staff may choose any admitted
+  role for each section, inspect the complete preview, and revise it. Monotony,
+  repeated adjacent roles, and weak pacing are review guidance rather than
+  import blockers.
 - New variants may expose only bounded `reveal_style` and
   `interaction_style` enums. Effects use transform/opacity/clip/mask where
   supported, have static fallbacks, never hide essential content, and stop under

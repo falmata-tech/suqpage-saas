@@ -228,10 +228,11 @@ function parseEnvelope(input: unknown): ShowroomRecipeEnvelope {
     "categories",
     "products",
   ]);
-  if (!Array.isArray(raw.provenance) || raw.provenance.length > 4000) {
+  const provenanceInput = raw.provenance ?? [];
+  if (!Array.isArray(provenanceInput) || provenanceInput.length > 4000) {
     issue("provenance", "$.provenance", "Provenance must be a bounded list.");
   }
-  const provenance = raw.provenance.map((entry, index) => {
+  const provenance = provenanceInput.map((entry, index) => {
     const value = object(entry, `$.provenance[${index}]`, [
       "path",
       "sourceKey",
@@ -312,23 +313,6 @@ function requireDeclaredRemovals(
       `Declared ${label} removals must match the complete replacement content.`,
     );
   }
-}
-
-function requiredFactPaths(snapshot: RevisionSnapshotV4) {
-  const paths = ["$.content.business.name"];
-  for (const field of ["contactEmail", "whatsapp", "telegram", "tiktok"] as const) {
-    if (snapshot.business[field]) paths.push(`$.content.business.${field}`);
-  }
-  snapshot.products.forEach((product, index) => {
-    paths.push(
-      `$.content.products[${index}].name`,
-      `$.content.products[${index}].description`,
-      `$.content.products[${index}].availability`,
-      `$.content.products[${index}].offeringKind`,
-      `$.content.products[${index}].quantityMode`,
-    );
-  });
-  return paths;
 }
 
 function contentPathExists(
@@ -546,13 +530,6 @@ export function validateShowroomRecipe(
       }
     }
   }
-  if (recipe.questions.length) {
-    issue(
-      "provenance",
-      "$.questions",
-      "Required questions must be resolved before a candidate can be imported.",
-    );
-  }
   const invalidSource = recipe.provenance.find(
     (entry) => !context.allowedSourceKeys.has(entry.sourceKey),
   );
@@ -581,19 +558,6 @@ export function validateShowroomRecipe(
       "provenance",
       unknownPath.path,
       "A provenance entry points to a field that is not in the content proposal.",
-    );
-  }
-  const provenanceByPath = new Map(
-    recipe.provenance.map((entry) => [entry.path, entry]),
-  );
-  const missingFact = requiredFactPaths(snapshot).find(
-    (path) => provenanceByPath.get(path)?.kind !== "source_fact",
-  );
-  if (missingFact) {
-    issue(
-      "provenance",
-      missingFact,
-      "This factual field needs an exported source_fact reference.",
     );
   }
   const base = context.baseSnapshot;

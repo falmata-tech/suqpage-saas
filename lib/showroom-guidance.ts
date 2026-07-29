@@ -124,8 +124,7 @@ export type ShowroomTemplate = {
   mediaCondition: ShowroomMediaCondition;
   visualTones: ShowroomVisualTone[];
   sectionPlan: ShowroomTemplateSection[];
-  surfaceSequence: ShowroomSurfaceRole[];
-  signatureBudget: 1 | 2;
+  surfaceGuidance: string[];
   pacingRules: string[];
   avoidWhen: string[];
 };
@@ -145,7 +144,7 @@ export type CompositionFitness = {
 
 export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
   decisionOrder: [
-    "source_facts_and_content_needs",
+    "content_needs_and_draft_direction",
     "commerce_mode_and_catalog_shape",
     "page_template",
     "semantic_design_system",
@@ -159,9 +158,9 @@ export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
     "Choose one page template before individual component variants.",
     "Preserve the canonical hero, about, process, products, and inquiry order.",
     "Choose semantic design roles by purpose, never by industry words in an ID.",
-    "Spend the signature budget on the most important one or two sections.",
+    "Use signature treatments wherever they improve the complete composition, then review the result for visual competition.",
     "Treat media layout and media blending as separate decisions.",
-    "Use supplied facts and admitted media only; presentation freedom is not factual authority.",
+    "Write useful provisional copy when intake is incomplete; human review remains publication authority.",
     "Revise any section identified by composition fitness before review.",
   ],
 });
@@ -285,31 +284,21 @@ const STANDARD_SECTION_PLAN: ShowroomTemplateSection[] = [
   { role: "identity and contact close", slot: "footer", required: true, visualWeight: "quiet" },
 ];
 
-export const SHOWROOM_CANONICAL_SURFACE_SEQUENCE: readonly ShowroomSurfaceRole[] =
-  Object.freeze([
-    "surface",
-    "accent-soft",
-    "surface",
-    "secondary-soft",
-    "canvas",
-    "strong",
-    "inverse",
-  ]);
-
 function pageTemplate(
   input: Omit<
     ShowroomTemplate,
-    "sectionPlan" | "signatureBudget" | "surfaceSequence"
+    "sectionPlan" | "surfaceGuidance"
   > & {
     sectionPlan?: ShowroomTemplateSection[];
-    signatureBudget?: 1 | 2;
   },
 ): ShowroomTemplate {
   return {
     ...input,
     sectionPlan: input.sectionPlan || STANDARD_SECTION_PLAN,
-    surfaceSequence: [...SHOWROOM_CANONICAL_SURFACE_SEQUENCE],
-    signatureBudget: input.signatureBudget || 2,
+    surfaceGuidance: [
+      "Choose section surfaces for the complete palette and media composition, not from one universal sequence.",
+      "Use neutral resets and intentional contrast; avoid long runs of visually indistinguishable sections.",
+    ],
   };
 }
 
@@ -383,10 +372,9 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["rfq", "wholesale", "inquiry"],
     mediaCondition: "optional",
     visualTones: ["technical", "precise"],
-    signatureBudget: 1,
     pacingRules: [
       "Prioritize supplied specifications, product names, and inquiry requirements over decorative media.",
-      "Use compact density and reserve the only signature treatment for the opening.",
+      "Use compact density and make every signature treatment earn its visual weight.",
     ],
     avoidWhen: ["fewer than five products exist", "the purchase decision is primarily emotional or lifestyle-led"],
   }),
@@ -429,7 +417,6 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     commerceModes: ["inquiry", "rfq"],
     mediaCondition: "optional",
     visualTones: ["precise", "utilitarian"],
-    signatureBudget: 1,
     pacingRules: [
       "Keep the page short and information-forward.",
       "Use a compact catalog and direct inquiry close instead of decorative chapters.",
@@ -1041,14 +1028,6 @@ export function evaluateCompositionFitness(
             "Use this exact order and assignment: header, hero, about/story, process/highlights, products, inquiry CTA, footer.",
         });
       }
-      if (section.surfaceRole !== SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]) {
-        issues.push({
-          severity: "error",
-          code: "noncanonical_surface_sequence",
-          sectionKey: section.key,
-          message: `Section ${section.key} must use ${SHOWROOM_CANONICAL_SURFACE_SEQUENCE[index]} so both palette families appear before the strong close while story and catalog return to neutral layers.`,
-        });
-      }
     });
   }
   if (sections.filter((section) => section.component.startsWith("navigation.")).length > 1) {
@@ -1210,9 +1189,9 @@ export function evaluateCompositionFitness(
   const signatureCount = signatureSections.size;
   if (signatureCount > 2) {
     issues.push({
-      severity: "error",
+      severity: "warning",
       code: "too_many_signatures",
-      message: `This composition has ${signatureCount} signature sections; keep the strongest one or two and make the rest supporting.`,
+      message: `This composition has ${signatureCount} signature sections; review whether each treatment strengthens the page or whether some should become supporting.`,
     });
   }
   const penalty = issues.reduce(

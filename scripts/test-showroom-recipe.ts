@@ -345,8 +345,7 @@ async function main() {
           template.sectionPlan.length === 7 &&
           template.sectionPlan.map((section) => section.slot).join(">") ===
             "header>hero>content>content>catalog>call_to_action>footer" &&
-          template.surfaceSequence.join(">") ===
-            "surface>accent-soft>surface>secondary-soft>canvas>strong>inverse",
+          template.surfaceGuidance.length >= 2,
       ),
     );
     assert.deepEqual(
@@ -361,7 +360,8 @@ async function main() {
           "inquiry_call_to_action",
           "footer",
         ],
-        surfaceSequence: ["surface", "accent-soft", "surface", "secondary-soft", "canvas", "strong", "inverse"],
+        surfaceRoleOptions: ["canvas", "surface", "soft", "accent-soft", "secondary-soft", "strong", "inverse"],
+        surfaceSequenceRequired: false,
         extraSectionsAllowed: false,
       },
     );
@@ -436,22 +436,7 @@ async function main() {
     } = exported.brief.currentContent;
     recipe.content = { schemaVersion: 1, ...currentContent };
     recipe.design = designManifest;
-    const currentSource = exported.brief.sourceFacts.find(
-      (source) => source.kind === "current_showroom",
-    );
-    assert.ok(currentSource);
-    recipe.provenance = [
-      "$.content.business.name",
-      "$.content.products[0].name",
-      "$.content.products[0].description",
-      "$.content.products[0].availability",
-      "$.content.products[0].offeringKind",
-      "$.content.products[0].quantityMode",
-    ].map((path) => ({
-      path,
-      sourceKey: currentSource.key,
-      kind: "source_fact" as const,
-    }));
+    recipe.provenance = [];
     recipe.mediaPlan = [
       {
         key: "media-client-product",
@@ -470,6 +455,10 @@ async function main() {
     recipe.content.business.heroTitle = "Recipe-approved public hero";
     recipe.content.business.heroImageRef = admitted.assetKey;
     recipe.design.sections[1].component = "hero.room-scene@1";
+    recipe.design.customPalette =
+      exported.brief.designSystems.find(
+        (system) => system.id === "maker-indigo",
+      )!.colors;
     const imported = importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
     assert.equal(imported.difference.designSections.after, 7);
@@ -481,6 +470,10 @@ async function main() {
       "hidden legacy relationships are preserved without entering the AI recipe",
     );
     assert.equal(imported.recipe.mediaPlan[0].slotKey, "product_image");
+    assert.deepEqual(
+      imported.snapshot.designManifest.customPalette,
+      recipe.design.customPalette,
+    );
     assert.equal(
       imported.recipe.mediaPlan[0].ownerKey,
       imported.snapshot.products[0].key,
@@ -532,9 +525,6 @@ async function main() {
     const silentRemoval = structuredClone(recipe);
     silentRemoval.content.products = [];
     silentRemoval.mediaPlan = [];
-    silentRemoval.provenance = silentRemoval.provenance.filter(
-      (entry) => !entry.path.startsWith("$.content.products"),
-    );
     assert.throws(
       () => importShowroomRecipe(team, draft.id, silentRemoval),
       (error: unknown) =>
@@ -546,11 +536,22 @@ async function main() {
       unknown
     > & { questions: string[] };
     unresolved.questions = ["Which certification is authorized?"];
+    assert.deepEqual(
+      importShowroomRecipe(team, draft.id, unresolved).recipe.questions,
+      unresolved.questions,
+    );
+    const unreadablePalette = structuredClone(recipe);
+    unreadablePalette.design.customPalette = {
+      ...unreadablePalette.design.customPalette!,
+      text: "#ffffff",
+      textMuted: "#ffffff",
+      primary: "#ffffff",
+    };
     assert.throws(
-      () => importShowroomRecipe(team, draft.id, unresolved),
+      () => importShowroomRecipe(team, draft.id, unreadablePalette),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
-        error.issues[0]?.path === "$.questions",
+        error.issues[0]?.category === "design",
     );
     const unknownComponent = structuredClone(recipe);
     unknownComponent.design.sections[0].component = "hero.unknown@1";

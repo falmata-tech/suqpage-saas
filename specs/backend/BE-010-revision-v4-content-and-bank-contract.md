@@ -2,7 +2,7 @@
 id: BE-010
 title: Revision v4 typed content and multi-release bank contract
 status: in_progress
-related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, FE-007, FE-009, FE-014, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, FE-007, FE-009, FE-014, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007, ADR-0008]
 owners: [backend, security, product]
 last_updated: 2026-07-28
 change_level: L3
@@ -36,9 +36,17 @@ additive v4 domain boundary that preserves all retained releases.
 
 - Content and design parsers reject unknown fields, markup, controls, raw URLs,
   duplicate keys, incompatible block/component pairs, invalid media kind/count/
-  aspect, stale bases, unresolved questions, and unsupported releases.
-- V4 provenance covers factual and media-bearing block fields; AI draft copy
-  never becomes authority for contacts, product facts, claims, or provider media.
+  aspect, stale bases, and unsupported releases. Unresolved questions are
+  retained as non-blocking private-review notes.
+- Recipe provenance is optional review metadata. A private candidate may contain
+  freely written AI draft copy in business, product, and typed-block fields
+  without an exported `source_fact` entry. When provenance is supplied, every
+  entry must still point to an existing content path and an exported source key.
+  Source labels help reviewers but do not gate private draft creation.
+- Recipe questions are advisory review notes and do not block private import.
+  The existing client-review and authorized publication workflow remains the
+  authority boundary for all draft copy, contacts, product facts, and claims.
+  Provider media remains separately admitted and cannot be invented by a recipe.
 - Design-schema v2 sections reference at most one compatible content-block key;
   catalog/navigation/header/footer components may use canonical bindings without
   inventing a page block.
@@ -56,6 +64,13 @@ additive v4 domain boundary that preserves all retained releases.
   component contract, parser, renderer data attribute, focused editor, and
   portable design schema use the same values without changing immutable
   component property contracts.
+- Design-schema v2 may include an optional complete `customPalette` that
+  overrides only the color variables of one admitted token pack. The admitted
+  token pack remains the reviewed authority for typography, spacing, shape,
+  density, media bounds, and other non-color foundation decisions. Every custom
+  color is an exact six-digit hex value; unknown keys, CSS values, gradients,
+  URLs, alpha channels, and unreadable foreground/background pairs fail closed.
+  Retained manifests without a custom palette render exactly as before.
 - Machine-readable component guidance is derived from explicit reviewed
   selection profiles, never component-ID keywords or industries. Each profile
   identifies rendered anatomy, visual weight, media and content prerequisites,
@@ -81,19 +96,25 @@ additive v4 domain boundary that preserves all retained releases.
   identity, permanent handle, and contact destination without category
   navigation. Catalog filtering and inquiry behavior remain owned by their
   dedicated catalog, call-to-action, and persistent inquiry controls.
-- Semantic design systems declare neutral canvas, surface, and layer roles plus
-  exact strong/onStrong and inverse/onInverse pairs. Runtime variables and
-  contrast tests use those pairs directly; a child cannot keep onSecondary text
-  when its parent renders on inverse or strong.
+- Semantic design systems and custom palettes declare canvas, surface, layer,
+  both soft families, primary/secondary accents, and exact strong/onStrong and
+  inverse/onInverse pairs. Runtime variables and contrast validation use those
+  pairs directly; a child cannot keep onSecondary text when its parent renders
+  on inverse or strong.
+- The canonical seven section roles and their order remain fixed, but their
+  semantic surface roles are not one mandatory color sequence. Fitness warns on
+  monotony and repeated adjacent roles rather than rejecting a valid reviewed
+  composition merely because it uses a different color rhythm.
 - Exact typed-block assignment errors identify the specific unassigned or
   multiply assigned block key and the required correction. They never collapse
   an actionable key mismatch into a generic whole-design error.
 - A release registry returns only statically imported reviewed banks. Existing
   bank-1.1 proposals parse/render exactly as before; unknown releases fail closed.
-- Focused commands allow: replace compatible component, select admitted token,
-  change bounded experience properties, edit one typed block, or assign/remove
-  optional compatible media. They reauthorize and revalidate atomically and
-  record actor plus safe diff metadata.
+- Focused controls allow: replace a compatible component, select an admitted
+  foundation, create/edit/remove a contrast-safe custom palette, choose each
+  section surface role, change bounded experience properties, edit typed copy,
+  or assign/remove optional compatible media. Saves reauthorize and revalidate
+  the complete private draft atomically.
 - YouTube parsing accepts `youtube.com/watch?v=ID` and `youtu.be/ID` over HTTPS,
   discards unrelated parameters, rejects playlists/shorts/embed markup/arbitrary
   hosts, and stores no recipe-controlled URL. Rendering receives only
@@ -133,6 +154,24 @@ Scenario: AI requests a semantic section surface
   WHEN a recipe supplies one reviewed semantic role
   THEN parsing preserves the exact role and the renderer applies its scoped surface contract
   AND an unknown raw color, class name, or CSS value is rejected
+
+Scenario: AI writes a complete provisional showroom
+  GIVEN a recipe has no exported source facts
+  WHEN it supplies bounded business, product, and section copy with empty provenance
+  THEN the recipe imports as a private draft
+  AND staff can edit, submit for client review, approve, or reject that copy through the existing workflow
+
+Scenario: AI supplies a custom color palette
+  GIVEN a design-v2 recipe selects an admitted token foundation
+  WHEN it also supplies a complete six-digit-hex customPalette with readable foreground pairs
+  THEN the custom colors override the foundation color variables only
+  AND typography, spacing, shape, media bounds, component validation, and publication authority remain controlled
+
+Scenario: AI chooses a different section color rhythm
+  GIVEN the canonical seven section roles remain complete and ordered
+  WHEN their valid semantic surface roles differ from the recommended examples
+  THEN the recipe remains importable
+  AND fitness reports monotony or repeated-role concerns as review warnings rather than a fixed-sequence error
 
 Scenario: Exported guidance and runtime drift
   GIVEN a component or foundation claims a visible behavior in the portable brief
@@ -180,7 +219,9 @@ Scenario: Typed block is not assigned
 |---|---|---|
 | Parser/schema parity and payload limits | contract/security | `scripts/test-showroom-content-blocks.ts`, `scripts/test-showroom-recipe.ts` |
 | Bounded section-media integration and retained defaults | contract/unit | `scripts/test-showroom-composition-v2.ts` |
-| Semantic surfaces, media guidance, and foundation/runtime parity | contract/static | `scripts/test-showroom-bank.ts`, `scripts/test-showroom-fitness.ts`, `scripts/test-showroom-recipe.ts` |
+| Optional provenance and non-blocking review notes | contract/regression | `scripts/test-showroom-recipe.ts` |
+| Custom palette parsing, contrast, rendering, and editor persistence | contract/browser | `scripts/test-showroom-composition-v2.ts`, `scripts/test-showroom-recipe.ts`, `tests/acceptance/app.spec.ts` |
+| Flexible semantic surfaces, media guidance, and foundation/runtime parity | contract/static | `scripts/test-showroom-bank.ts`, `scripts/test-showroom-fitness.ts`, `scripts/test-showroom-recipe.ts` |
 | V3/v4 and bank 1.1/1.2 exact compatibility | integration | `scripts/test-showroom-composition-v2.ts`, planned v4 migration tests |
 | Provider normalization and unsafe-input denial | unit/security | `scripts/test-youtube-provider.ts`, `scripts/test-security.ts` |
 | Atomic authorized focused commands | integration/security | planned focused-command tests |

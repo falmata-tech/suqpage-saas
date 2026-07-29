@@ -159,15 +159,17 @@ navigation. The one floating inquiry control owns persistent cart access and
 contracts to an icon-sized, accessibly named control on phones.
 Adjacent about/story and process chapters alternate heading/body placement on
 wider screens, return to semantic heading-first reading order on phones, and
-use the exact neutral `surface` then `soft` roles. Normal showrooms do not use
+may use any reviewed semantic surfaces that keep their purposes distinct.
+Normal showrooms do not use
 repeating plaid, pinstripe, graph-paper, center-divider, or repeated-rule
 background motifs; one bounded accent plane may provide direction without
 turning the page into a grid.
 
 Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
-external AI may propose an exact combination of approved, versioned components
-and bounded tokens as declarative JSON, while SuqPage validates and renders it.
+external AI may propose an exact combination of approved, versioned components,
+one reviewed non-color foundation, optional contrast-safe custom colors, and
+bounded properties as declarative JSON, while SuqPage validates and renders it.
 The current `showroom-bank@1.2.0` release contains 67 reviewed component
 variants across eight section families and 18 semantic token systems.
 Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
@@ -900,11 +902,10 @@ remaining AI-assisted delivery sequence is recorded in
   alone. Each declares canvas/surface/text, primary and distinct secondary
   roles, neutral layer hierarchy, exact strong/onStrong and inverse/onInverse
   contrast pairs, border, typography, spacing, shape, layout rhythm,
-  product-media bounds, and preferred/allowed hero-media integration. Canvas,
-  surface, and layer remain neutral. The canonical hero and process surfaces
-  use low-intensity accent-soft and secondary-soft roles so both palette
-  families appear before the strong CTA rather than arriving only at the
-  bottom. Neutral story and catalog sections still prevent an all-tinted page.
+  product-media bounds, and preferred/allowed hero-media integration. A recipe
+  may retain any one of these non-color foundations while replacing the complete
+  color-role set with reviewed six-digit hex values. Custom colors remain data,
+  never CSS, and required text/surface pairs must remain readable.
 - Required-slot choices and tokens provide 98,280 validated base combinations
   before optional navigation, content, trust, call-to-action, and bounded
   component properties are counted. Combination volume never replaces visual,
@@ -922,15 +923,18 @@ remaining AI-assisted delivery sequence is recorded in
   binds canonical content to an exact validated design manifest and bank
   release for reproducible preview, publication, and rollback.
 - The currently implemented external-tool contract validates bounded design JSON
-  containing approved component references, allowed token choices, properties,
-  bindings, questions, warnings, and rationale. It receives no credentials,
-  database access, publication authority, or ability to register component code.
+  containing approved component references, an admitted non-color foundation,
+  optional custom palette, semantic section surfaces, properties, bindings,
+  questions, warnings, and rationale. It receives no credentials, database
+  access, publication authority, or ability to register component code.
 - Portable JSON schemas guide external tools but never replace authoritative
   server-side schema, compatibility, provenance, tenant, revision, client-
   approval, and publication checks.
-- Missing customer facts produce questions. AI may suggest presentation and
-  marketing copy, but it cannot invent contacts, availability,
-  certifications, specifications, product facts, or delivery claims.
+- AI may write provisional business, product, capability, and section copy even
+  when intake is incomplete. Provenance is optional review metadata and
+  questions/warnings are advisory. This freedom creates only a private
+  candidate; staff review, client approval, and authorized publication remain
+  the authority boundary for public claims and contact information.
 - The current implementation uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
   currently covers dynamic product categories, products/capabilities, offering
@@ -948,19 +952,19 @@ remaining AI-assisted delivery sequence is recorded in
   contract manifest, current schemas, bank contract, source facts, allowed
   opaque asset keys, expected counts, and one fixed client-independent synthetic
   structural example. The example demonstrates nested relationships, options,
-  typed blocks, exact assignments, provenance, and unresolved media planning,
+  typed blocks, exact assignments, optional empty provenance, and unresolved media planning,
   but its reserved example keys are not import authority and its content,
   counts, component choices, and token choices must not be copied. Contract
   versions are independent and named: recipe/content/content-blocks remain
   version 1 while current design and component-bank schemas are version 2 and
   the component-bank release is separately `showroom-bank@1.2.0`. The brief
   explicitly tells external AI not to normalize those numbers. Staff manually
-  import returned JSON,
-  inspect provenance/completeness and an exact private preview. Re-import
+  import returned JSON and inspect the exact private preview. Re-import
   remains available through the staged Brief, Blueprint, Media, Preview, and
-  Review workflow. Authorized staff can use focused v4 controls for token
-  systems, compatible section swaps, bounded section properties, content blocks,
-  media assignments, and catalog details on editable private drafts.
+  Review workflow. Authorized staff can use focused v4 controls for foundations,
+  custom palette colors, section surfaces, compatible section swaps, bounded
+  section properties, content blocks, media assignments, and catalog details on
+  editable private drafts.
 - Media remains a separately admitted source, not AI authority. A recipe may
   first declare a bounded `mediaPlan` of exact business, product, or content-
   block destinations with purpose, aspect, required state, alt text, and
@@ -1007,7 +1011,9 @@ remaining AI-assisted delivery sequence is recorded in
   `surface_blend`, `edge_fade`, `split_bleed`, `editorial_overlap`,
   `product_stage`, or `hidden`; `ambient_overlay` is retained only for existing
   designs. Every section also selects a semantic `surfaceRole` from `canvas`,
-  `surface`, `soft`, `strong`, or `inverse`. Hero and story imagery is
+  `surface`, `soft`, `accent-soft`, `secondary-soft`, `strong`, or `inverse`.
+  The semantic content order remains fixed, but no one surface-role sequence is
+  mandatory; monotony and weak pacing are review feedback. Hero and story imagery is
   borderless and connects to its section only when the recipe explicitly
   selects a blend, fade, overlap, or stage; omitted treatments receive a neutral
   readable default. Product imagery remains proportionally bounded and flush
@@ -1015,16 +1021,17 @@ remaining AI-assisted delivery sequence is recorded in
   Catalog-owned category browsing uses compact, touch-sized, horizontally
   scrollable tabs with modest corners; it is one shared catalog control and
   does not change shape merely because the AI selects another catalog variant.
-  About/story and process chapters use opposite desktop heading/body placement
-  and semantic single-column phone order. Their surface and secondary-soft
-  roles provide separation without repeated rules, while the hero introduces
-  accent-soft. Repeating plaid, pinstripe, graph-paper,
+  About/story and process chapters use distinct desktop composition and semantic
+  single-column phone order. Their independently selected surfaces, media,
+  density, and typography provide separation without repeated rules. Repeating
+  plaid, pinstripe, graph-paper,
   and center-divider motifs are rejected by bank and browser admission.
   Deterministic composition fitness blocks duplicate navigation, standalone
-  navigation combined with catalog filters, incompatible sparse catalogs,
-  missing media-treatment prerequisites, and more than two signature sections,
-  while identifying surface monotony, adjacent anatomy repetition, unnecessary
-  controls, repeated factual media, and intentional product-media fallbacks.
+  navigation combined with catalog filters, incompatible sparse catalogs, and
+  missing media-treatment prerequisites. It provides review guidance for
+  signature-treatment density, surface monotony, adjacent anatomy repetition,
+  unnecessary controls, repeated factual media, and intentional product-media
+  fallbacks without imposing one universal visual rhythm.
 - Initial linked-video support is a manually entered YouTube link normalized
   into a canonical provider asset and rendered by a reviewed, privacy-conscious
   component. Recipes cannot supply raw iframe/embed markup, arbitrary query
@@ -1339,7 +1346,7 @@ design, settings, page content, recipe tools, or complete-showroom publication.
 `FE-008`, `BE-009`, `DEP-008`, `FE-016`, `BE-014`, `DEP-012`, and `ADR-0006`
 control this verified exception and its expanded offering contract.
 
-### Current composition assembly and planned AI import
+### Current composition assembly and AI import
 
 The current workflow stores an exact validated composition in each schema-v2
 revision and renders it consistently in private preview and public publication.
@@ -1347,7 +1354,7 @@ The structured revision editor remains a bounded content-recovery surface; it
 shows the immutable composition identity instead of offering old renderer keys.
 The implemented workflow under `FE-007`, `FE-014`, `BE-008`, and `BE-013` is
 request, sanitized AI brief, strict full-recipe blueprint import, grouped
-content/design/provenance validation, composition fitness, labeled media-slot
+content/design/optional-provenance validation, composition fitness, labeled media-slot
 fulfillment, private preview, focused exception correction, client review, and
 controlled publication.
 Routine staff should not enter every category, item, hero field,
@@ -1356,9 +1363,10 @@ snapshot based on the authorized current version, not an ambiguous patch.
 Staff may admit available client images and supported media links before import,
 or fulfill exact labeled destinations after the blueprint chooses its dynamic
 composition. The recipe assigns opaque keys to typed component media slots; it
-cannot create URLs, embeds, or cross-tenant asset references. Missing
-required media, incompatible slot assignments, and unreviewed descriptive text
-remain visible blockers. If the external AI needs image understanding, staff
+cannot create URLs, embeds, or cross-tenant asset references. Missing required
+media and incompatible slot assignments remain visible blockers. Provisional
+written copy and unresolved questions remain visible review notes but do not
+prevent a private candidate. If the external AI needs image understanding, staff
 manually supplies only the approved files in that external conversation.
 Manual recipe import and its focused staff workspace are implemented as a
 private checkpoint under `ADR-0005`; `FE-007`, `BE-008`, and `DEP-007` remain

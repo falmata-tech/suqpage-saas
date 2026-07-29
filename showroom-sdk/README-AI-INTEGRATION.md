@@ -1,59 +1,61 @@
-# SuqPage Showroom Integration Contract
+# SuqPage AI Showroom Integration Contract
 
-The current production path uses separately reviewed showroom renderer code. The
-accepted target in `ADR-0005` is a versioned bank of reviewed components and
-strict, non-executable AI design proposals.
+SuqPage accepts a bounded, declarative showroom recipe. The AI chooses reviewed
+components, writes provisional content, selects media behavior, and supplies a
+semantic color palette. It never returns executable code or publishes a site.
 
-The files `component-bank.schema.json` and `showroom-proposal.schema.json`
-describe the syntactic foundation for that target. SuqPage now has the reviewed
-repository release `showroom-bank@1.0.0` and a staff-only visual laboratory. It
-does **not** yet have a public composition renderer, proposal import screen,
-revision-schema integration, client-content mapper, or external AI provider
-integration. A JSON document that matches the portable schema is not authorized
-for preview, persistence, or publication until later server-side semantic,
-tenant, revision, provenance, and compatibility validation exists.
+The portable schemas in this directory describe the JSON shape. The server is
+authoritative for component compatibility, tenant and revision scope, media
+admission, payload limits, private preview, approval, and publication.
 
-Use `ShowroomTemplate.tsx`, `design-manifest.json`, and `sample-catalog.json` only
-for the current reviewed-code workflow described below.
+## What the AI may choose
 
-## Non-negotiable boundaries
+1. Freely drafted business, product, capability, story, process, hero, and call
+   to action copy within the schema limits.
+2. Any compatible reviewed component for each canonical page role.
+3. Any admitted semantic `surfaceRole` for each section.
+4. Any compatible reviewed `mediaIntegration` treatment.
+5. An admitted `tokenPack` for typography, spacing, geometry, density, and media
+   bounds.
+6. An optional complete `customPalette` of exact six-digit hex colors. This
+   replaces the token pack's colors without changing its non-color foundation.
 
-1. The custom renderer owns layout, typography, animation, sections, cards and responsive behavior.
-2. SuqPage owns business data, catalog data, option groups, stock, inquiry state, inquiry persistence, social routing and delivery APIs.
-3. Do not hard-code offerings, product categories, business contacts, availability, capacity, MOQ, lead time, or inventory. The `products` array is the compatibility transport for products and capabilities; collection fields are compatibility-only and must remain empty/null.
-4. Do not translate product names, color names, sizes, model numbers or other merchant-entered values.
-5. Do not call the SQLite database from design components.
-6. Keep the supplied TypeScript props intact.
-7. Place `SmartAddButton` or the supplied `addProduct` callback anywhere an offering can be added to an inquiry.
-8. Keep a visible inquiry-cart trigger.
-9. Return a manifest describing the design key and supported features.
+`provenance` may be omitted or empty. `questions` and `warnings` are useful
+review notes but do not block creation of a private draft. When provenance is
+supplied, its paths and exported source keys must be valid.
 
-## Current reviewed-code workflow
+## Boundaries
 
-1. Copy `ShowroomTemplate.tsx`, `design-manifest.json` and `sample-catalog.json` into a separate design workspace.
-2. Ask the AI to redesign every visual section while preserving the integration props and event callbacks.
-3. Treat all returned code as untrusted proposed source: review it, remove
-   external dependencies and tenant-specific hard-coding, and add tests.
-4. Copy the reviewed renderer into `components/showroom/designs.tsx` or its own
-   folder.
-5. Register the business `design_key` in `ShowroomApp.tsx`.
-6. Run `npm run validate:designs`, `npm run check`, and the applicable release
-   and production-browser gates.
-7. Preview the exact revision using authorized tenant data and publish only
-   after client approval.
+1. Return JSON only. Do not return React, JavaScript, CSS, HTML, class names,
+   selectors, gradients, URLs, iframes, scripts, or dependencies.
+2. Use the exact bank release, component IDs, properties, bindings, content
+   block keys, and media destinations exported in the brief.
+3. Assign every typed content block exactly once. This connects authored
+   content to a renderer; it is not a factual-source requirement.
+4. Keep the normal page roles in their exported order. Vary the component
+   anatomy, alignment, density, surface, palette, and media treatment.
+5. Do not invent media references. Use admitted opaque asset keys or declared
+   planned-media destinations only.
+6. Do not invent relationship keys. Preserve retained keys, declare intended
+   removals, and obey the exported catalog limits.
+7. Custom palettes must include every documented color role and maintain
+   readable foreground/background contrast. They are data, not arbitrary CSS.
+8. The recipe creates a private candidate only. Staff editing, client review,
+   approval, and authorized publication remain separate actions.
 
-The four included tenants demonstrate the pattern: Al Haya, USAshopET, NovaTech and HomeVibe each use a separately coded renderer while sharing SuqPage's smart workflow.
+## Workflow
 
-## Planned constrained-composition workflow
+1. Download the sanitized brief from the staff recipe studio.
+2. Choose the content direction and write a complete provisional draft.
+3. Choose a page template and compatible components from their explicit visual
+   metadata rather than their IDs or an assumed industry.
+4. Choose the non-color foundation, section surfaces, media treatments, and
+   optional custom palette.
+5. Return one complete recipe matching `showroom-recipe.schema.json`.
+6. Import it into the private studio, resolve any true schema or media errors,
+   and inspect the exact responsive preview.
+7. Correct content or design in the focused editor, then use the existing
+   client-review and publication workflow.
 
-After the later roadmap phases are implemented, an external AI tool will receive
-a sanitized component-bank package and return only a proposal matching
-`showroom-proposal.schema.json`. It will not return executable tenant code,
-receive database credentials, write a revision, or publish a showroom.
-
-Authorized staff can currently inspect the admitted components and token systems
-at `/dashboard/design-bank`. The laboratory uses synthetic fixture content and
-is not an AI export, tenant preview, or publication tool.
-
-The authoritative delivery sequence and remaining gates are in
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md`.
+The example in each downloaded brief is synthetic and structural. Copy its JSON
+shape, not its words, identifiers, counts, colors, or component choices.

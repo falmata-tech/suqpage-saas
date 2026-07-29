@@ -24,8 +24,8 @@ remain the final authority.
   manifest needed to reproduce its preview and publication.
 - Customer content remains separate from component code and design. A versioned
   content proposal supports dynamic catalog lists and typed hero, story,
-  highlight/trust, information, and call-to-action blocks. Factual/media fields
-  retain source provenance; missing facts produce questions.
+  highlight/trust, information, and call-to-action blocks. Written fields may
+  be provisional with optional provenance; media remains separately admitted.
 - One recipe envelope pins separately versioned content/design documents,
   schema/bank releases, provenance, source reconciliation, questions, and
   warnings. It never grants either document independent publication authority.
@@ -201,7 +201,7 @@ remain immutable while additive v4/bank-1.2 work proceeds.
 #### 4.5 Versioned revision and rollout
 
 - Persist valid candidates in revision schema v3 with separate exact content
-  and design documents plus minimum durable provenance/reconciliation.
+  and design documents plus durable reconciliation and any supplied provenance.
 - Share the identical stockless v3 content contract admitted by DEP-008; neither
   product upkeep nor recipe import may release a conflicting v3 schema.
 - Keep v2 as a read/upgrade recovery input during the controlled migration.

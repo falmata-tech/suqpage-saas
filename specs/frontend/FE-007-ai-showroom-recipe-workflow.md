@@ -38,12 +38,13 @@ choice.
 - Manual media intake before brief export: request attachments, same-tenant
   existing media, new verified image uploads, and allowlisted provider links
   such as YouTube become labeled opaque asset keys.
-- A validation report grouped into content, design, cross-document,
-  provenance/completeness, and tenant/asset errors.
+- A validation report grouped into content, design, cross-document, optional
+  provenance-reference, and tenant/asset errors.
 - A candidate private preview using the client's imported dynamic content and
   exact component combination before any revision is submitted.
-- Focused staff controls for approved component, token, motion, decoration, and
-  content-block associations after a valid import.
+- Focused staff controls for approved component, foundation, custom palette,
+  section surface, motion, decoration, and content-block associations after a
+  valid import.
 - Re-import as the default correction path for catalog/content errors; the
   current field-heavy editor becomes a clearly labeled administrative recovery
   tool rather than routine production workflow.
@@ -54,7 +55,7 @@ choice.
 
 - Client access to the studio, public self-service generation, direct provider
   integration, arbitrary code/CSS/HTML, or automatic publication.
-- Treating AI-created facts as merchant authority.
+- Automatically publishing AI-created facts without staff/client review.
 - Uploading private image bytes to an external provider from SuqPage.
 - AI-created image URLs, arbitrary remote-image hotlinks, raw iframe/embed HTML,
   or unrestricted video providers.
@@ -66,11 +67,13 @@ choice.
 - A **content proposal** contains business identity/presentation, typed section
   content, collections, categories, products, options, availability, and
   allowed media-reference keys. It contains no inventory count.
-- A **design proposal** contains the exact bank release, token pack, reviewed
-  sections, bounded properties, motion/decorative settings, and bindings.
+- A **design proposal** contains the exact bank release, admitted non-color
+  foundation, optional contrast-safe custom palette, reviewed sections, bounded
+  properties, motion/decorative settings, and bindings.
 - A **showroom recipe** is a versioned envelope pairing one content proposal
-  with one design proposal plus provenance, questions, warnings, and source
-  reconciliation. The two documents remain separately inspectable and valid.
+  with one design proposal plus optional provenance and advisory questions,
+  warnings, and rationale. The two documents remain separately inspectable and
+  valid.
 - A **focused correction** changes only a reviewed bounded choice. It never
   exposes raw CSS, markup, code, database IDs, or unrestricted style values.
 - A **media asset** is a manually admitted image or provider link with an opaque
@@ -93,9 +96,9 @@ choice.
   bank release are compatible nested contracts rather than competing choices.
 - The complete example is synthetic, client-independent, and structural-only.
   It demonstrates relationships, options, typed blocks, exact block assignment,
-  provenance, and unresolved media planning without copying the active client's
-  facts, counts, opaque keys, or design choices. The AI must derive the actual
-  recipe only from the current client inputs.
+  optional empty provenance, and unresolved media planning without copying the
+  active client's facts, counts, opaque keys, or design choices. The AI may
+  write provisional content for the private candidate.
 - For a first showroom, the AI returns a complete desired content proposal. For
   a change request, the brief includes the authorized current snapshot and the
   AI returns a complete replacement proposal, not an ambiguous patch.
@@ -158,7 +161,7 @@ Scenario: Staff exports a client-independent structural example
   AND no active client fact, opaque key, source key, count, or design choice is copied into it
 
 Scenario: Imported recipe needs correction
-  GIVEN a recipe has an invalid product relationship, unsupported component, missing source fact, or unknown asset key
+  GIVEN a recipe has an invalid product relationship, unsupported component, malformed supplied provenance, or unknown asset key
   WHEN staff imports it
   THEN the report identifies the content, design, cross-document, or provenance failure
   AND no draft candidate is persisted or silently repaired

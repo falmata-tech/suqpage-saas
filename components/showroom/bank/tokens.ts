@@ -1,4 +1,5 @@
 import { SHOWROOM_DESIGN_SYSTEMS } from "@/lib/showroom-design-systems";
+import type { ShowroomColorPalette } from "@/lib/showroom-design-systems";
 import type { BankTokenStyle } from "./types";
 
 const sharedExperienceVariables = {
@@ -84,5 +85,40 @@ export const SHOWROOM_BANK_TOKEN_STYLES = Object.freeze(
     ]),
   ),
 ) as Readonly<Record<string, BankTokenStyle>>;
+
+function paletteVariables(palette: ShowroomColorPalette) {
+  return {
+    "--bank-bg": palette.canvas,
+    "--bank-surface": palette.surface,
+    "--bank-layer": palette.layer,
+    "--bank-ink": palette.text,
+    "--bank-muted": palette.textMuted,
+    "--bank-accent": palette.primary,
+    "--bank-accent-soft": palette.primarySoft,
+    "--bank-secondary": palette.secondary,
+    "--bank-secondary-soft": palette.secondarySoft,
+    "--bank-on-secondary": palette.onSecondary,
+    "--bank-section-alt": palette.layer,
+    "--bank-section-strong": palette.strong,
+    "--bank-on-strong": palette.onStrong,
+    "--bank-inverse": palette.inverse,
+    "--bank-on-inverse": palette.onInverse,
+    "--bank-line": palette.border,
+  } as const;
+}
+
+export function showroomTokenVariables(manifest: {
+  tokenPack: string;
+  customPalette?: ShowroomColorPalette;
+}) {
+  const foundation =
+    SHOWROOM_BANK_TOKEN_STYLES[
+      manifest.tokenPack as keyof typeof SHOWROOM_BANK_TOKEN_STYLES
+    ];
+  if (!foundation) return undefined;
+  return manifest.customPalette
+    ? { ...foundation.variables, ...paletteVariables(manifest.customPalette) }
+    : foundation.variables;
+}
 
 export type ShowroomBankTokenId = keyof typeof SHOWROOM_BANK_TOKEN_STYLES;

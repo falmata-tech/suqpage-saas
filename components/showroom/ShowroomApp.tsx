@@ -19,7 +19,7 @@ import {
 } from "@/lib/offerings";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
-import { SHOWROOM_BANK_TOKEN_STYLES } from "./bank/tokens";
+import { showroomTokenVariables } from "./bank/tokens";
 import "./showrooms.css";
 
 type CartLine = { product: Product; quantity: string; options: Record<string, string> };
@@ -288,9 +288,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     } catch {}
   }
   const runtimeTokenVariables = compositionManifest
-    ? SHOWROOM_BANK_TOKEN_STYLES[
-        compositionManifest.tokenPack as keyof typeof SHOWROOM_BANK_TOKEN_STYLES
-      ]?.variables
+    ? showroomTokenVariables(compositionManifest)
     : undefined;
 
   return (

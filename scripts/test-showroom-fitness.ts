@@ -6,7 +6,6 @@ import {
   guidanceForComponent,
   SHOWROOM_DESIGN_PROCESS,
   SHOWROOM_MEDIA_TREATMENTS,
-  SHOWROOM_CANONICAL_SURFACE_SEQUENCE,
   SHOWROOM_TEMPLATES,
 } from "../lib/showroom-guidance";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "../lib/showroom-bank-release";
@@ -21,10 +20,10 @@ for (const template of SHOWROOM_TEMPLATES) {
   assert.ok(template.description.length > 20);
   assert.ok(template.contentNeeds.length > 0);
   assert.ok(template.visualTones.length > 0);
-  assert.deepEqual(template.surfaceSequence, SHOWROOM_CANONICAL_SURFACE_SEQUENCE);
+  assert.ok(template.surfaceGuidance.length >= 2);
   assert.ok(template.pacingRules.length >= 2);
   assert.ok(template.avoidWhen.length > 0);
-  assert.ok(template.signatureBudget <= 2);
+  assert.equal("signatureBudget" in template, false);
   assert.equal("archetypes" in template, false);
   assert.equal("tokenPack" in template, false);
   assert.equal("components" in template, false);
@@ -146,6 +145,44 @@ for (const section of monotone.designManifest.sections) {
 assert.ok(
   evaluateCompositionFitness(monotone).issues.some(
     (issue) => issue.code === "surface_monotony",
+  ),
+);
+assert.equal(evaluateCompositionFitness(monotone).allowed, true);
+
+const alternateSurfaces = structuredClone(snapshot);
+const alternateRoleOrder = [
+  "inverse",
+  "canvas",
+  "strong",
+  "surface",
+  "secondary-soft",
+  "accent-soft",
+  "soft",
+] as const;
+alternateSurfaces.designManifest.sections.forEach((section, index) => {
+  section.surfaceRole = alternateRoleOrder[index];
+});
+assert.equal(evaluateCompositionFitness(alternateSurfaces).allowed, true);
+assert.equal(
+  evaluateCompositionFitness(alternateSurfaces).issues.some(
+    (issue) => issue.code === "noncanonical_surface_sequence",
+  ),
+  false,
+);
+
+const expressiveComposition = structuredClone(snapshot);
+expressiveComposition.designManifest.sections[0].component =
+  "header.transparent-overlay@1";
+expressiveComposition.designManifest.sections[5].component =
+  "call-to-action.magazine-close@1";
+expressiveComposition.designManifest.sections[6].component =
+  "footer.magazine-masthead@1";
+const expressiveResult = evaluateCompositionFitness(expressiveComposition);
+assert.equal(expressiveResult.allowed, true);
+assert.ok(
+  expressiveResult.issues.some(
+    (issue) =>
+      issue.code === "too_many_signatures" && issue.severity === "warning",
   ),
 );
 

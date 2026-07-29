@@ -10,6 +10,7 @@ import {
   type ShowroomComponentBankV2,
 } from "../lib/showroom-composition-v2";
 import { SHOWROOM_COMPONENT_BANK_1_1 } from "../lib/showroom-bank-release";
+import { SHOWROOM_DESIGN_SYSTEMS } from "../lib/showroom-design-systems";
 import { curatedManifestForLegacyDesign } from "../lib/showroom-manifests";
 
 const acceptedBySlot = {
@@ -86,6 +87,14 @@ assert.equal(parsedHero?.mediaIntegration, "natural");
 assert.equal(parsedStory?.mediaIntegration, "natural");
 assert.equal(parsedHero?.surfaceRole, "accent-soft");
 assert.equal(parsedStory?.surfaceRole, "canvas");
+
+const customPalette = SHOWROOM_DESIGN_SYSTEMS["maker-indigo"].colors;
+const customPaletteProposal = { ...proposal, customPalette };
+assert.deepEqual(
+  parseShowroomDesignProposalV2(customPaletteProposal, bank, content)
+    .customPalette,
+  customPalette,
+);
 
 const blendProposal = {
   ...proposal,
@@ -177,6 +186,35 @@ expectCode(
       content,
     ),
   "invalid_surface_role",
+);
+expectCode(
+  () =>
+    parseShowroomDesignProposalV2(
+      {
+        ...customPaletteProposal,
+        customPalette: { ...customPalette, primary: "linear-gradient(red, blue)" },
+      },
+      bank,
+      content,
+    ),
+  "invalid_custom_palette",
+);
+expectCode(
+  () =>
+    parseShowroomDesignProposalV2(
+      {
+        ...customPaletteProposal,
+        customPalette: {
+          ...customPalette,
+          text: "#ffffff",
+          textMuted: "#ffffff",
+          primary: "#ffffff",
+        },
+      },
+      bank,
+      content,
+    ),
+  "custom_palette_contrast",
 );
 expectCode(
   () =>

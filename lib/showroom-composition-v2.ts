@@ -11,7 +11,10 @@ import {
   type ShowroomSection,
   type ShowroomSlot,
 } from "./showroom-composition";
-import type { SectionMediaIntegration } from "./showroom-design-systems";
+import type {
+  SectionMediaIntegration,
+  ShowroomColorPalette,
+} from "./showroom-design-systems";
 import {
   SHOWROOM_CONTENT_BLOCK_TYPES,
   parseShowroomContentBlocks,
@@ -77,12 +80,88 @@ export type ShowroomDesignProposalV2 = Omit<
   "schemaVersion" | "sections"
 > & {
   schemaVersion: 2;
+  customPalette?: ShowroomColorPalette;
   sections: ShowroomSectionV2[];
 };
 
 const fail = (message: string, code: string, status = 400): never => {
   throw new ShowroomCompositionError(message, code, status);
 };
+
+export const SHOWROOM_CUSTOM_PALETTE_KEYS = [
+  "canvas",
+  "surface",
+  "layer",
+  "text",
+  "textMuted",
+  "primary",
+  "primarySoft",
+  "secondary",
+  "secondarySoft",
+  "onSecondary",
+  "strong",
+  "onStrong",
+  "inverse",
+  "onInverse",
+  "border",
+] as const satisfies readonly (keyof ShowroomColorPalette)[];
+
+const hexColorPattern = /^#[0-9a-fA-F]{6}$/;
+
+function relativeLuminance(hex: string) {
+  const channels = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map(
+    (value) => Number.parseInt(value, 16) / 255,
+  );
+  const linear = channels.map((value) =>
+    value <= 0.04045
+      ? value / 12.92
+      : ((value + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+export function showroomColorContrast(first: string, second: string) {
+  const values = [relativeLuminance(first), relativeLuminance(second)].sort(
+    (a, b) => b - a,
+  );
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+
+function parseCustomPalette(input: unknown): ShowroomColorPalette | undefined {
+  if (input === undefined) return undefined;
+  const value = record(input, "Custom palette", SHOWROOM_CUSTOM_PALETTE_KEYS);
+  for (const key of SHOWROOM_CUSTOM_PALETTE_KEYS) {
+    if (typeof value[key] !== "string" || !hexColorPattern.test(value[key])) {
+      fail(
+        `Custom palette ${key} must be a six-digit hex color.`,
+        "invalid_custom_palette",
+      );
+    }
+  }
+  const palette = value as ShowroomColorPalette;
+  const normalSurfaces = [
+    palette.canvas,
+    palette.surface,
+    palette.layer,
+    palette.primarySoft,
+    palette.secondarySoft,
+  ];
+  const unreadableBody = normalSurfaces.some(
+    (background) => showroomColorContrast(palette.text, background) < 4.5,
+  );
+  if (
+    unreadableBody ||
+    showroomColorContrast(palette.onSecondary, palette.secondary) < 4.5 ||
+    showroomColorContrast(palette.onStrong, palette.strong) < 4.5 ||
+    showroomColorContrast(palette.onInverse, palette.inverse) < 4.5
+  ) {
+    fail(
+      "Custom palette text and emphasis colors must meet WCAG AA contrast on every surface where they render.",
+      "custom_palette_contrast",
+    );
+  }
+  return palette;
+}
 
 export function defaultMediaIntegrationForSection(
   slot: ShowroomSlot,
@@ -146,6 +225,7 @@ function parsedInput(input: unknown, limit?: number): Record<string, unknown> {
         "rationale",
         "questions",
         "warnings",
+        "customPalette",
         "sections",
       ],
     );
@@ -340,6 +420,7 @@ export function parseShowroomDesignProposalV2(
   }
   const bank = parseShowroomComponentBankV2(bankInput);
   const content = parseShowroomContentBlocks(contentInput, contentMode);
+  const customPalette = parseCustomPalette(raw.customPalette);
   const contentKeys = new Map(content.blocks.map((block) => [block.key, block]));
   const requestedSections = raw.sections.map(
     (entry, index) => {
@@ -394,9 +475,10 @@ export function parseShowroomDesignProposalV2(
       };
     },
   );
+  const { customPalette: _customPalette, ...v1Input } = raw;
   const proposalV1 = parseShowroomDesignProposal(
     {
-      ...raw,
+      ...v1Input,
       schemaVersion: SHOWROOM_COMPOSITION_SCHEMA_VERSION,
       sections: raw.sections.map((entry) => {
         const {
@@ -504,7 +586,12 @@ export function parseShowroomDesignProposalV2(
       "orphan_content",
     );
   }
-  return { ...proposalV1, schemaVersion: 2, sections };
+  return {
+    ...proposalV1,
+    schemaVersion: 2,
+    ...(customPalette ? { customPalette } : {}),
+    sections,
+  };
 }
 
 export function componentBankV2AsV1(

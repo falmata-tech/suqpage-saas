@@ -42,9 +42,12 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   publication without giving an external provider application authority.
 - Controlling specs: `FE-007`, `BE-008`, and `DEP-007` remain `ready` because
   the broader initiative is not complete.
-- Delivered checkpoint: portable schemas, opaque image keys, strict provenance
-  and reconciliation, idempotent revision-v3 draft metadata, staff studio,
+- Delivered checkpoint: portable schemas, opaque image keys, provenance
+  integrity when supplied, strict reconciliation, idempotent revision-v3 draft metadata, staff studio,
   preview workflow, recovery navigation, and an emergency disable switch.
+- `ADR-0008` later made written-content provenance optional for private drafts;
+  this historical checkpoint no longer describes a required source for every
+  factual field.
 - Evidence: commits `ef00c04` and `c67466d`; standard check, production release,
   7/7 browser acceptance, container privacy/build, and operations restore gates
   passed on 2026-07-24.

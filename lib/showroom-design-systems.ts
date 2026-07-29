@@ -18,27 +18,29 @@ export type SectionMediaIntegration =
 
 export type HeroMediaIntegration = SectionMediaIntegration;
 
+export type ShowroomColorPalette = {
+  canvas: string;
+  surface: string;
+  layer: string;
+  text: string;
+  textMuted: string;
+  primary: string;
+  primarySoft: string;
+  secondary: string;
+  secondarySoft: string;
+  onSecondary: string;
+  strong: string;
+  onStrong: string;
+  inverse: string;
+  onInverse: string;
+  border: string;
+};
+
 export type ShowroomDesignSystem = {
   id: string;
   label: string;
   description: string;
-  colors: {
-    canvas: string;
-    surface: string;
-    layer: string;
-    text: string;
-    textMuted: string;
-    primary: string;
-    primarySoft: string;
-    secondary: string;
-    secondarySoft: string;
-    onSecondary: string;
-    strong: string;
-    onStrong: string;
-    inverse: string;
-    onInverse: string;
-    border: string;
-  };
+  colors: ShowroomColorPalette;
   typography: {
     displayStack: string;
     bodyStack: string;

@@ -2,12 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://suqpage.com/schemas/showroom-recipe.schema.json",
   "title": "SuqPage complete showroom recipe envelope",
-  "description": "One complete replacement content-and-design proposal. Server authorization, provenance, asset, reconciliation, and semantic validation remain authoritative.",
+  "description": "One complete replacement content-and-design proposal. Server authorization, supplied-provenance integrity, asset, reconciliation, and semantic validation remain authoritative.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schemaVersion", "baseContentVersion", "content", "design", "summary",
-    "rationale", "questions", "warnings", "mediaPlan", "declaredRemovals", "provenance"
+    "rationale", "questions", "warnings", "mediaPlan", "declaredRemovals"
   ],
   "properties": {
     "schemaVersion": { "const": 1 },
@@ -46,6 +46,7 @@
       }
     },
     "provenance": {
+      "description": "Optional review metadata. Empty or omitted provenance is valid for provisional private-draft copy.",
       "type": "array",
       "maxItems": 4000,
       "items": { "$ref": "#/$defs/provenance" }

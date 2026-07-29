@@ -13,7 +13,7 @@ import type { Product } from "@/lib/types";
 import type { DesignProps } from "../designs";
 import styles from "./bank.module.css";
 import { SHOWROOM_BANK_REGISTRY } from "./registry";
-import { SHOWROOM_BANK_TOKEN_STYLES } from "./tokens";
+import { showroomTokenVariables } from "./tokens";
 import type { BankPresentationContext, BankProductView } from "./types";
 
 function currentSurfaceRole(
@@ -71,8 +71,8 @@ export function CompositionShowroom({
   const productByKey = new Map(
     props.catalog.products.map((product) => [String(product.id), product]),
   );
-  const token = SHOWROOM_BANK_TOKEN_STYLES[manifest.tokenPack as keyof typeof SHOWROOM_BANK_TOKEN_STYLES];
-  if (!token) {
+  const tokenVariables = showroomTokenVariables(manifest);
+  if (!tokenVariables) {
     return <InvalidComposition />;
   }
 
@@ -120,9 +120,12 @@ export function CompositionShowroom({
   return (
     <div
       className={`showroom ${styles.compositionRoot}`}
-      style={token.variables as CSSProperties}
+      style={tokenVariables as CSSProperties}
       data-bank-release={manifest.bankRelease}
       data-token-pack={manifest.tokenPack}
+      data-custom-palette={
+        "customPalette" in manifest && manifest.customPalette ? "true" : undefined
+      }
       data-composition-schema={manifest.schemaVersion}
     >
       {manifest.sections.map((section) => {
