@@ -2,7 +2,7 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-001, BE-003, BE-007, BE-008, FE-007, FE-008, DEP-008, ADR-0006]
+related: [BE-001, BE-003, BE-007, BE-008, BE-014, FE-007, FE-008, DEP-008, ADR-0006]
 owners: [product, backend, security]
 last_updated: 2026-07-28
 change_level: L3
@@ -54,8 +54,9 @@ uses availability—not inventory count—as canonical inquiry eligibility.
   attribution. Unknown fields have no domain effect.
 - `Availability` is `available`, `limited`, `unavailable`, or `coming_soon`.
   `available` and `limited` are inquiry-eligible; the other states are not.
-- Customer `RequestedQuantity` remains an integer from 1–20 for bounded inquiry
-  intent. It is not inventory and is never compared with product quantity.
+- BE-014 expands customer `RequestedQuantity` to a bounded integer from
+  1–1,000,000 or an absent value for an authoritative optional-quantity
+  offering. It is not inventory and is never compared with product quantity.
 - A client is authorized only for their own business. A team member needs active
   business assignment. Managers/administrators use explicit capability scope.
 - A new product receives server-generated stable identity, unique slug, append
@@ -104,8 +105,9 @@ uses availability—not inventory count—as canonical inquiry eligibility.
   recovery edge and discard them while upgrading to the stockless current
   snapshot.
 - Public inquiry validation canonically reloads business/product/options and
-  accepts only published `available`/`limited` products. Requested quantity is
-  bounded 1–20 but no inventory comparison or availability decrement occurs.
+  accepts only published `available`/`limited` offerings. Requested quantity
+  follows BE-014's required/optional policy and bounded range, but no inventory
+  comparison or availability decrement occurs.
 - Commands are idempotent per business and command key. A successful retry
   returns the original result; conflicting reuse fails safely.
 - The use case depends on narrow actor-scope, catalog-version repository, media,
@@ -141,7 +143,7 @@ Scenario: Product upkeep loses a version race
 
 Scenario: Inquiry requests more than an unknown stock amount
   GIVEN a published available product with no inventory-count field
-  WHEN a visitor requests a bounded quantity from 1 through 20
+  WHEN a visitor requests a quantity allowed by the offering's BE-014 policy
   THEN canonical availability permits the inquiry
   AND SuqPage stores requested intent without claiming or decrementing stock
 

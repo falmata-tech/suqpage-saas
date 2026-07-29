@@ -1,19 +1,16 @@
 import type { CSSProperties, ReactNode } from "react";
 import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
 import { heroMediaIntegrationForComponent } from "@/lib/showroom-guidance";
+import {
+  availabilityLabel,
+  offeringKindLabels,
+} from "@/lib/offerings";
 import styles from "./bank.module.css";
 import type {
   BankPresentationContext,
   BankProductView,
   BankSectionRendererProps,
 } from "./types";
-
-const availabilityLabels: Record<BankProductView["availability"], string> = {
-  available: "Available",
-  limited: "Limited",
-  unavailable: "Unavailable",
-  coming_soon: "Coming soon",
-};
 
 function variantName(componentId: string): string {
   return componentId.split("@")[0].split(".").slice(1).join("-");
@@ -399,7 +396,7 @@ function CatalogControls({
     <div className={styles.catalogControls}>
       {showSearch ? (
         <label>
-          <span>Search products</span>
+          <span>Search products and capabilities</span>
           <input
             value={context.query}
             onChange={(event) => context.onQueryChange(event.target.value)}
@@ -459,8 +456,8 @@ export function BankCatalogSection({
     >
       <div className={styles.catalogHeading}>
         <div>
-          <span className={styles.kicker}>Product showroom</span>
-          <h2>Explore {context.business.name}</h2>
+          <span className={styles.kicker}>Products &amp; capabilities</span>
+          <h2>What {context.business.name} offers</h2>
         </div>
         <CatalogControls
           context={context}
@@ -481,13 +478,18 @@ export function BankCatalogSection({
             </button>
             <div className={styles.productCopy}>
               <div>
-                <span>{product.eyebrow}</span>
+                <span>{offeringKindLabels[product.offeringKind]}</span>
                 <h3>{product.name}</h3>
               </div>
               <p>{product.description}</p>
+              {product.capacitySummary ? (
+                <small className={styles.productFact}>
+                  Capacity: {product.capacitySummary}
+                </small>
+              ) : null}
               <div className={styles.productActions}>
                 <span data-availability={product.availability}>
-                  {availabilityLabels[product.availability]}
+                  {availabilityLabel(product.offeringKind, product.availability)}
                 </span>
                 <button type="button" onClick={() => context.onAddProduct(product)}>
                   Add to inquiry

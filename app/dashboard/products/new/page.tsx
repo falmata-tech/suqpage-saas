@@ -26,18 +26,18 @@ export default async function NewProduct({
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            My products
+            My offerings
           </Link>
           <span aria-hidden="true">/</span>
-          <span>Add product</span>
+          <span>Add offering</span>
         </nav>
       </div>
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">Basic upkeep</p>
-          <h1>Add a product</h1>
+          <h1>Add a product or capability</h1>
           <p>
-            Add the customer-facing essentials. The existing showroom design
+            Add what the business sells, makes, grows, supplies, or can manufacture. The showroom design
             handles presentation automatically.
           </p>
         </div>

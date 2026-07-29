@@ -5,6 +5,14 @@ import {
 } from "./showroom-manifests";
 import type { ShowroomDesignProposal } from "./showroom-composition";
 import type { Business, Catalog, Category, Collection, Product } from "./types";
+import {
+  normalizeOfferingKind,
+  normalizeQuantityMode,
+  offeringKinds,
+  quantityModes,
+  type OfferingKind,
+  type QuantityMode,
+} from "./offerings";
 
 export const REVISION_SCHEMA_VERSION = 3;
 export const MAX_REVISION_BYTES = 1024 * 1024;
@@ -68,6 +76,11 @@ export type RevisionProduct = {
   description: string;
   imageRef: string;
   availability: Product["availability"];
+  offeringKind: OfferingKind;
+  quantityMode: QuantityMode;
+  capacitySummary: string;
+  minimumOrderSummary: string;
+  leadTimeSummary: string;
   published: boolean;
   sortOrder: number;
   optionGroups: RevisionOptionGroup[];
@@ -302,6 +315,11 @@ export function parseRevisionContent(
         "description",
         "imageRef",
         "availability",
+        "offeringKind",
+        "quantityMode",
+        "capacitySummary",
+        "minimumOrderSummary",
+        "leadTimeSummary",
         "published",
         "sortOrder",
         "optionGroups",
@@ -350,6 +368,20 @@ export function parseRevisionContent(
     if (!availability.has(productAvailability)) {
       throw new RevisionError("Choose a valid product availability.");
     }
+    const offeringKind = normalizeOfferingKind(value.offeringKind);
+    const quantityMode = normalizeQuantityMode(value.quantityMode);
+    if (
+      value.offeringKind !== undefined &&
+      !offeringKinds.includes(value.offeringKind as OfferingKind)
+    ) {
+      throw new RevisionError("Choose a valid offering kind.");
+    }
+    if (
+      value.quantityMode !== undefined &&
+      !quantityModes.includes(value.quantityMode as QuantityMode)
+    ) {
+      throw new RevisionError("Choose a valid desired-quantity policy.");
+    }
     if (schemaVersion < 3 && value.stockCount !== undefined) {
       integer(value.stockCount, 0, 100000);
     }
@@ -363,6 +395,11 @@ export function parseRevisionContent(
       description: clean(value.description, 3000),
       imageRef: image(value.imageRef),
       availability: productAvailability,
+      offeringKind,
+      quantityMode,
+      capacitySummary: clean(value.capacitySummary, 180),
+      minimumOrderSummary: clean(value.minimumOrderSummary, 140),
+      leadTimeSummary: clean(value.leadTimeSummary, 140),
       published: Boolean(value.published),
       sortOrder: integer(value.sortOrder, -100000, 100000),
       optionGroups,
@@ -557,6 +594,11 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
       description: item.description,
       imageRef: item.image_path,
       availability: item.availability,
+      offeringKind: normalizeOfferingKind(item.offering_kind),
+      quantityMode: normalizeQuantityMode(item.quantity_mode),
+      capacitySummary: item.capacity_summary || "",
+      minimumOrderSummary: item.minimum_order_summary || "",
+      leadTimeSummary: item.lead_time_summary || "",
       published: Boolean(item.is_published),
       sortOrder: item.sort_order,
       optionGroups: (item.option_groups || []).map((group) => ({
@@ -625,6 +667,11 @@ export function snapshotToCatalog(
     description: item.description,
     image_path: resolveImage(item.imageRef),
     availability: item.availability,
+    offering_kind: normalizeOfferingKind(item.offeringKind),
+    quantity_mode: normalizeQuantityMode(item.quantityMode),
+    capacity_summary: item.capacitySummary || "",
+    minimum_order_summary: item.minimumOrderSummary || "",
+    lead_time_summary: item.leadTimeSummary || "",
     is_published: item.published ? 1 : 0,
     sort_order: item.sortOrder,
     collection_name: item.collectionKey

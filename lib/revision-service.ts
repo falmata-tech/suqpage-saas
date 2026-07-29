@@ -638,7 +638,11 @@ function replaceCanonicalCatalog(
     const productId = Number(
       getDb()
         .prepare(
-          "INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+          `INSERT INTO products(
+            business_id,collection_id,category_id,name,slug,eyebrow,description,
+            image_path,availability,offering_kind,quantity_mode,capacity_summary,
+            minimum_order_summary,lead_time_summary,is_published,sort_order
+          ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         )
         .run(
           businessId,
@@ -650,6 +654,11 @@ function replaceCanonicalCatalog(
           item.description,
           item.imageRef,
           item.availability,
+          item.offeringKind,
+          item.quantityMode,
+          item.capacitySummary,
+          item.minimumOrderSummary,
+          item.leadTimeSummary,
           item.published ? 1 : 0,
           item.sortOrder,
         ).lastInsertRowid,

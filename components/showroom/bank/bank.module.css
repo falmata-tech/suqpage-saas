@@ -1146,6 +1146,14 @@
   -webkit-line-clamp: 2;
 }
 
+.productFact {
+  display: block;
+  color: var(--bank-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .productActions {
   display: flex;
   align-items: center;

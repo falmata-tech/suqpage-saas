@@ -33,7 +33,11 @@ if (count > 0) {
 
 const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,'active')`);
 const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
-const addProduct = db.prepare(`INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,availability,is_published,sort_order) VALUES(?,?,?,?,?,?,?,?,?,1,?)`);
+const addProduct = db.prepare(`INSERT INTO products(
+  business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,
+  availability,offering_kind,quantity_mode,capacity_summary,
+  minimum_order_summary,lead_time_summary,is_published,sort_order
+) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?)`);
 const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)");
 const addValue = db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)");
 
@@ -72,6 +76,74 @@ const additionalBusinesses = [
 ] satisfies Array<Record<string,string>>;
 
 const businesses = [...benchmarkBusinesses, ...additionalBusinesses];
+const productionSupplyBusinesses = new Set([
+  "green-terrace-farm",
+  "blue-nile-apiary",
+  "rift-valley-mill",
+  "geda-coffee-cooperative",
+  "bale-herb-care",
+]);
+const manufacturingBusinesses = new Set([
+  "addis-metalworks",
+  "nova-assembly",
+  "tekle-circuit-systems",
+  "luna-cold-chain",
+  "abyssinia-solar-devices",
+  "atlas-pump-works",
+  "merkato-packaging-systems",
+  "jimma-agro-machinery",
+  "dawa-water-solutions",
+  "eastern-safety-gear",
+  "baro-nursery-supplies",
+]);
+const manufacturingCapabilityNames = new Set([
+  "Short-Run Cut Parts",
+  "Custom Cable Harness Kit",
+  "Labeled Wiring Assembly",
+  "Custom Site Sign Set",
+]);
+
+function seedOfferingProfile(handle: string, product: any) {
+  if (productionSupplyBusinesses.has(handle)) {
+    return {
+      offeringKind: "production_supply",
+      quantityMode: "required",
+      capacitySummary: "Batch or seasonal volume confirmed for each supply cycle",
+      minimumOrderSummary: "Pack and wholesale minimums available on inquiry",
+      leadTimeSummary: "Next supply window confirmed directly",
+    };
+  }
+  if (manufacturingBusinesses.has(handle)) {
+    const capability = manufacturingCapabilityNames.has(product.name);
+    return {
+      offeringKind: capability ? "manufacturing_capability" : "made_to_order",
+      quantityMode: capability ? "optional" : "required",
+      capacitySummary: capability
+        ? "Prototype, small-run, and repeat production capacity"
+        : "Configured production runs scheduled after specification review",
+      minimumOrderSummary: capability
+        ? "Project minimum depends on process and material"
+        : "One configured unit or an agreed repeat run",
+      leadTimeSummary: "Lead time confirmed after drawings and inputs are reviewed",
+    };
+  }
+  if (/\b(custom|hospitality|project|private-label|fitted|run)\b/i.test(`${product.name} ${product.eyebrow}`)) {
+    return {
+      offeringKind: "made_to_order",
+      quantityMode: "optional",
+      capacitySummary: "Made-to-order capacity confirmed with the brief",
+      minimumOrderSummary: "",
+      leadTimeSummary: "Production window confirmed after requirements",
+    };
+  }
+  return {
+    offeringKind: "standard_product",
+    quantityMode: "required",
+    capacitySummary: "",
+    minimumOrderSummary: "",
+    leadTimeSummary: "",
+  };
+}
 
 const seeded = new Map<string, number>();
 for (const business of businesses) {
@@ -91,8 +163,27 @@ function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
   const cats = new Map<string, number>();
   categoryNames.forEach((name, i) => cats.set(name, Number(addCategory.run(businessId, null, name, name.toLowerCase().replace(/[^a-z0-9]+/g,"-"), i).lastInsertRowid)));
   products.forEach((p, i) => {
-    const productId = Number(addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, p.eyebrow, p.description, p.image, p.availability || "available", i).lastInsertRowid);
-    (p.options || []).slice(0,4).forEach((g:any, gi:number) => {
+    const profile = seedOfferingProfile(handle, p);
+    const productId = Number(addProduct.run(
+      businessId,
+      null,
+      cats.get(p.category)!,
+      p.name,
+      p.slug,
+      p.eyebrow,
+      p.description,
+      p.image,
+      p.availability || "available",
+      p.offeringKind || profile.offeringKind,
+      p.quantityMode || profile.quantityMode,
+      p.capacitySummary ?? profile.capacitySummary,
+      p.minimumOrderSummary ?? profile.minimumOrderSummary,
+      p.leadTimeSummary ?? profile.leadTimeSummary,
+      i,
+    ).lastInsertRowid);
+    const optionGroups =
+      profile.offeringKind === "manufacturing_capability" ? [] : p.options || [];
+    optionGroups.slice(0,4).forEach((g:any, gi:number) => {
       const groupId = Number(addGroup.run(productId, g.name, gi).lastInsertRowid);
       g.values.forEach((v:string) => addValue.run(groupId, v));
     });
@@ -296,12 +387,15 @@ const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_
 [["Malikt Express","malikt-express","Addis Ababa and surrounding areas"],["Addis Courier","addis-courier","Addis Ababa"],["Swift Delivery","swift-delivery","Major Ethiopian cities"],["CityDrop","citydrop","Same-day urban delivery"]].forEach((c) => addCompany.run(...c));
 
 const inquiry = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,idempotency_key) VALUES(?,?,?,?,?,?,?)");
-const inquiryItem = db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,options_json) VALUES(?,?,?,?,?)");
+const inquiryItem = db.prepare(`INSERT INTO inquiry_items(
+  inquiry_id,product_id,product_name_snapshot,quantity,
+  offering_kind_snapshot,quantity_mode_snapshot,options_json
+) VALUES(?,?,?,?,?,?,?)`);
 for (const [handle, customer] of businesses.slice(0, 4).map((business, index) => [business.handle, ["Hana","Mimi","Samuel","Rahel"][index]] as const)) {
   const businessId = seeded.get(handle)!;
   const iid = Number(inquiry.run(businessId, customer, "251911000000", "whatsapp", "Seed inquiry for local testing.", "new", `seed-${handle}`).lastInsertRowid);
-  const product = db.prepare("SELECT id,name FROM products WHERE business_id=? ORDER BY id LIMIT 1").get(businessId) as any;
-  inquiryItem.run(iid, product.id, product.name, 1, JSON.stringify({}));
+  const product = db.prepare("SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 1").get(businessId) as any;
+  inquiryItem.run(iid, product.id, product.name, 1, product.offering_kind, product.quantity_mode, JSON.stringify({}));
 }
 
 const credentialPath=path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));

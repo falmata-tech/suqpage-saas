@@ -101,6 +101,13 @@ export function migrateDatabase(
       description TEXT DEFAULT '',
       image_path TEXT DEFAULT '',
       availability TEXT NOT NULL DEFAULT 'available' CHECK(availability IN ('available','limited','unavailable','coming_soon')),
+      offering_kind TEXT NOT NULL DEFAULT 'standard_product'
+        CHECK(offering_kind IN ('standard_product','made_to_order','manufacturing_capability','production_supply')),
+      quantity_mode TEXT NOT NULL DEFAULT 'required'
+        CHECK(quantity_mode IN ('required','optional')),
+      capacity_summary TEXT NOT NULL DEFAULT '',
+      minimum_order_summary TEXT NOT NULL DEFAULT '',
+      lead_time_summary TEXT NOT NULL DEFAULT '',
       is_published INTEGER NOT NULL DEFAULT 1 CHECK(is_published IN (0,1)),
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -135,7 +142,11 @@ export function migrateDatabase(
       inquiry_id INTEGER NOT NULL REFERENCES inquiries(id) ON DELETE CASCADE,
       product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
       product_name_snapshot TEXT NOT NULL,
-      quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity BETWEEN 1 AND 20),
+      quantity INTEGER CHECK(quantity IS NULL OR quantity BETWEEN 1 AND 1000000),
+      offering_kind_snapshot TEXT NOT NULL DEFAULT 'standard_product'
+        CHECK(offering_kind_snapshot IN ('standard_product','made_to_order','manufacturing_capability','production_supply')),
+      quantity_mode_snapshot TEXT NOT NULL DEFAULT 'required'
+        CHECK(quantity_mode_snapshot IN ('required','optional')),
       options_json TEXT NOT NULL DEFAULT '{}'
     );
     CREATE TABLE IF NOT EXISTS delivery_companies (
@@ -1087,6 +1098,93 @@ export function migrateDatabase(
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
+    }
+  }
+
+  const unifiedOfferingApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=18")
+    .get();
+  if (!unifiedOfferingApplied) {
+    const inquiryItemsSql = db
+      .prepare(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='inquiry_items'",
+      )
+      .get() as { sql: string } | undefined;
+    const inquiryColumns = columns(db, "inquiry_items");
+    const needsInquiryRebuild =
+      /quantity\s+INTEGER\s+NOT\s+NULL/i.test(inquiryItemsSql?.sql || "") ||
+      !inquiryColumns.has("offering_kind_snapshot") ||
+      !inquiryColumns.has("quantity_mode_snapshot");
+    if (needsInquiryRebuild) {
+      requireDestructiveMigrationCheckpoint(
+        options,
+        "Unified offering inquiry migration",
+      );
+    }
+    db.exec("PRAGMA foreign_keys = OFF");
+    try {
+      db.exec("BEGIN IMMEDIATE");
+      addColumn(
+        db,
+        "products",
+        `offering_kind TEXT NOT NULL DEFAULT 'standard_product'
+          CHECK(offering_kind IN ('standard_product','made_to_order','manufacturing_capability','production_supply'))`,
+      );
+      addColumn(
+        db,
+        "products",
+        `quantity_mode TEXT NOT NULL DEFAULT 'required'
+          CHECK(quantity_mode IN ('required','optional'))`,
+      );
+      addColumn(db, "products", "capacity_summary TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "products", "minimum_order_summary TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "products", "lead_time_summary TEXT NOT NULL DEFAULT ''");
+      if (needsInquiryRebuild) {
+        db.exec(`
+          DROP TRIGGER IF EXISTS inquiry_item_same_business_insert;
+          CREATE TABLE inquiry_items_v18 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            inquiry_id INTEGER NOT NULL REFERENCES inquiries(id) ON DELETE CASCADE,
+            product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
+            product_name_snapshot TEXT NOT NULL,
+            quantity INTEGER CHECK(quantity IS NULL OR quantity BETWEEN 1 AND 1000000),
+            offering_kind_snapshot TEXT NOT NULL DEFAULT 'standard_product'
+              CHECK(offering_kind_snapshot IN ('standard_product','made_to_order','manufacturing_capability','production_supply')),
+            quantity_mode_snapshot TEXT NOT NULL DEFAULT 'required'
+              CHECK(quantity_mode_snapshot IN ('required','optional')),
+            options_json TEXT NOT NULL DEFAULT '{}'
+          );
+          INSERT INTO inquiry_items_v18(
+            id,inquiry_id,product_id,product_name_snapshot,quantity,
+            offering_kind_snapshot,quantity_mode_snapshot,options_json
+          )
+          SELECT
+            id,inquiry_id,product_id,product_name_snapshot,quantity,
+            'standard_product','required',options_json
+          FROM inquiry_items;
+          DROP TABLE inquiry_items;
+          ALTER TABLE inquiry_items_v18 RENAME TO inquiry_items;
+          CREATE TRIGGER inquiry_item_same_business_insert
+          BEFORE INSERT ON inquiry_items WHEN NEW.product_id IS NOT NULL
+          BEGIN
+            SELECT CASE WHEN NOT EXISTS (
+              SELECT 1 FROM inquiries i JOIN products p ON p.id=NEW.product_id
+              WHERE i.id=NEW.inquiry_id AND i.business_id=p.business_id
+            ) THEN RAISE(ABORT, 'product does not belong to inquiry business') END;
+          END;
+        `);
+      }
+      const foreignKeyFailures = db.prepare("PRAGMA foreign_key_check").all();
+      if (foreignKeyFailures.length) {
+        throw new Error("Unified offering migration failed foreign-key validation.");
+      }
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(18)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    } finally {
+      db.exec("PRAGMA foreign_keys = ON");
     }
   }
 }

@@ -2,6 +2,10 @@ import { getBusinessById, getDb, inTransaction } from "./db";
 import { notifyNewInquiry } from "./notifications";
 import { consumeRateLimit } from "./rate-limit";
 import { cleanText } from "./security";
+import {
+  normalizeOfferingKind,
+  normalizeQuantityMode,
+} from "./offerings";
 
 const METHODS = new Set(["whatsapp","telegram","tiktok","share","phone","email"]);
 
@@ -40,10 +44,21 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
   const valueStmt = getDb().prepare("SELECT value FROM option_values WHERE option_group_id=?");
   const validated = rawItems.map((raw) => {
     const productId = Number(raw.productId);
-    const quantity = Number(raw.quantity);
-    if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw new InquiryError("Invalid product quantity.");
+    if (!Number.isInteger(productId)) throw new InquiryError("Invalid offering.");
     const product = productStmt.get(productId, businessId) as any;
-    if (!product || !["available","limited"].includes(product.availability)) throw new InquiryError("A selected product is not available.");
+    if (!product || !["available","limited"].includes(product.availability)) throw new InquiryError("A selected offering is not available.");
+    const quantityMode = normalizeQuantityMode(product.quantity_mode);
+    const quantity =
+      raw.quantity === null || raw.quantity === undefined || raw.quantity === ""
+        ? null
+        : Number(raw.quantity);
+    if (
+      (quantityMode === "required" && quantity === null) ||
+      (quantity !== null &&
+        (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000))
+    ) {
+      throw new InquiryError("Enter a valid desired quantity.");
+    }
     const options = raw.options && typeof raw.options === "object" && !Array.isArray(raw.options) ? raw.options as Record<string, unknown> : {};
     const groups = groupStmt.all(productId) as Array<{ id:number; name:string }>;
     const normalized: Record<string,string> = {};
@@ -55,7 +70,14 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
       if (!selected || !values.has(selected)) throw new InquiryError(`Choose a valid ${group.name} for ${product.name}.`);
       normalized[group.name] = selected;
     }
-    return { productId, quantity, name: String(product.name), options: normalized };
+    return {
+      productId,
+      quantity,
+      name: String(product.name),
+      offeringKind: normalizeOfferingKind(product.offering_kind),
+      quantityMode,
+      options: normalized,
+    };
   });
 
   const inquiryId = inTransaction(() => {
@@ -64,8 +86,23 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
       businessId, customerName, contact, contactMethod, note, idempotencyKey, ipHash,
     );
     const id = Number(result.lastInsertRowid);
-    const insertItem = db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,options_json) VALUES(?,?,?,?,?)");
-    for (const item of validated) insertItem.run(id, item.productId, item.name, item.quantity, JSON.stringify(item.options));
+    const insertItem = db.prepare(
+      `INSERT INTO inquiry_items(
+        inquiry_id,product_id,product_name_snapshot,quantity,
+        offering_kind_snapshot,quantity_mode_snapshot,options_json
+      ) VALUES(?,?,?,?,?,?,?)`,
+    );
+    for (const item of validated) {
+      insertItem.run(
+        id,
+        item.productId,
+        item.name,
+        item.quantity,
+        item.offeringKind,
+        item.quantityMode,
+        JSON.stringify(item.options),
+      );
+    }
     return id;
   });
 

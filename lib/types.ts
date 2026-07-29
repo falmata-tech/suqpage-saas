@@ -8,7 +8,9 @@ export type Collection = { id:number; business_id:number; name:string; slug:stri
 export type Category = { id:number; business_id:number; collection_id:number|null; name:string; slug:string; sort_order:number; is_active:number };
 export type OptionGroup = { id:number; product_id:number; name:string; position:number; values:OptionValue[] };
 export type OptionValue = { id:number; option_group_id:number; value:string };
-export type Product = { id:number; business_id:number; collection_id:number|null; category_id:number|null; name:string; slug:string; eyebrow:string; description:string; image_path:string; availability:"available"|"limited"|"unavailable"|"coming_soon"; is_published:number; sort_order:number; collection_name?:string; category_name?:string; option_groups?:OptionGroup[] };
+import type { OfferingKind, QuantityMode } from "./offerings";
+
+export type Product = { id:number; business_id:number; collection_id:number|null; category_id:number|null; name:string; slug:string; eyebrow:string; description:string; image_path:string; availability:"available"|"limited"|"unavailable"|"coming_soon"; offering_kind:OfferingKind; quantity_mode:QuantityMode; capacity_summary:string; minimum_order_summary:string; lead_time_summary:string; is_published:number; sort_order:number; collection_name?:string; category_name?:string; option_groups?:OptionGroup[] };
 export type Catalog = { business:Business; collections:Collection[]; categories:Category[]; products:Product[] };
 export type AccessRole = "platform_admin" | "client" | "team_member" | "operations_manager";
 export type SessionUser = {

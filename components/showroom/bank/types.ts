@@ -8,6 +8,7 @@ import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomExperienceSettings } from "@/lib/showroom-experience";
 import type { SectionMediaIntegration } from "@/lib/showroom-design-systems";
 import type { SectionSurfaceRole } from "@/lib/showroom-composition-v2";
+import type { OfferingKind, QuantityMode } from "@/lib/offerings";
 
 export type BankAvailability =
   | "available"
@@ -38,6 +39,11 @@ export type BankProductView = {
   description: string;
   imageRef: string;
   availability: BankAvailability;
+  offeringKind: OfferingKind;
+  quantityMode: QuantityMode;
+  capacitySummary: string;
+  minimumOrderSummary: string;
+  leadTimeSummary: string;
 };
 
 export type BankPresentationContext = {

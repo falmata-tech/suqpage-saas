@@ -2,7 +2,7 @@
 id: FE-008
 title: Simple client and staff product upkeep
 status: done
-related: [FE-001, FE-003, FE-007, BE-009, DEP-008, ADR-0006]
+related: [FE-001, FE-003, FE-007, FE-016, BE-009, DEP-008, ADR-0006]
 owners: [product, frontend]
 last_updated: 2026-07-28
 change_level: L3
@@ -17,7 +17,7 @@ more often than its structure or design. Requiring a service request for every
 new product, image replacement, description correction, or availability change
 creates avoidable work for both the client and team.
 
-The outcome is a mobile-first **My products** workflow that lets a client, or
+The outcome is a mobile-first **My offerings** workflow that lets a client, or
 authorized SuqPage staff serving that client, create and maintain basic product
 information without exposing catalog architecture or showroom design.
 
@@ -69,7 +69,7 @@ information without exposing catalog architecture or showroom design.
 
 ## Contracts
 
-- Client navigation adds **My products** only for an established showroom.
+- Client navigation adds **My offerings** only for an established showroom.
   Assigned team members see the same upkeep entry inside authorized business
   context; managers/administrators can select a managed client.
 - The product list uses touch-sized cards/rows with image, exact product name,
@@ -125,7 +125,7 @@ Scenario: Assigned team member helps a client
   AND the audit/history attributes the staff actor rather than impersonating the client
 
 Scenario: Client attempts structural mutation
-  GIVEN the client can access My products
+  GIVEN the client can access My offerings
   WHEN they submit a new category, option, sort position, design value, another tenant identifier, or hidden unsupported field
   THEN the operation is rejected or the unsupported value is ignored before authority
   AND no protected catalog structure or other tenant changes
@@ -138,7 +138,7 @@ Scenario: Basic update races with showroom work
 
 Scenario: Draft client opens product upkeep
   GIVEN an invited client whose first showroom has not been published
-  WHEN they open a My products deep link
+  WHEN they open a My offerings deep link
   THEN the upkeep surface is unavailable
   AND the client is directed to their first-showroom request workflow
 ```

@@ -8,6 +8,8 @@ import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
+const offeringKinds = new Set<string>();
+const quantityModes = new Set<string>();
 assert.ok(activeBusinesses.length >= 25, "reset must create at least 25 active Expo showrooms");
 assert.equal(
   activeBusinesses.length,
@@ -17,11 +19,29 @@ assert.equal(
 for (const business of activeBusinesses) {
   const catalog = getCatalogByBusinessId(business.id);
   assert.ok(catalog && catalog.products.length >= 3, `${business.handle} has an inquiry-ready catalog`);
+  for (const product of catalog.products) {
+    offeringKinds.add(product.offering_kind);
+    quantityModes.add(product.quantity_mode);
+    if (product.offering_kind === "manufacturing_capability") {
+      assert.ok(product.capacity_summary, `${business.handle} capability states capacity`);
+      assert.ok(product.lead_time_summary, `${business.handle} capability states lead time`);
+    }
+  }
   assert.ok(
     fs.existsSync(path.join(process.cwd(), "public", seededExpoBoothPath(business.handle))),
     `${business.handle} has a generated booth image`,
   );
 }
+assert.deepEqual(
+  [...offeringKinds].sort(),
+  ["made_to_order", "manufacturing_capability", "production_supply", "standard_product"],
+  "reset fixtures exercise every offering kind",
+);
+assert.deepEqual(
+  [...quantityModes].sort(),
+  ["optional", "required"],
+  "reset fixtures exercise both desired-quantity policies",
+);
 
 const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));
 const authoredBusinesses = activeBusinesses.filter((business) =>

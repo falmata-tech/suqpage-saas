@@ -20,11 +20,11 @@ for the current reviewed-code workflow described below.
 
 1. The custom renderer owns layout, typography, animation, sections, cards and responsive behavior.
 2. SuqPage owns business data, catalog data, option groups, stock, inquiry state, inquiry persistence, social routing and delivery APIs.
-3. Do not hard-code products, product categories, business contacts, availability or inventory. Collection fields are compatibility-only and must remain empty/null.
+3. Do not hard-code offerings, product categories, business contacts, availability, capacity, MOQ, lead time, or inventory. The `products` array is the compatibility transport for products and capabilities; collection fields are compatibility-only and must remain empty/null.
 4. Do not translate product names, color names, sizes, model numbers or other merchant-entered values.
 5. Do not call the SQLite database from design components.
 6. Keep the supplied TypeScript props intact.
-7. Place `SmartAddButton` or the supplied `addProduct` callback anywhere a product can be added.
+7. Place `SmartAddButton` or the supplied `addProduct` callback anywhere an offering can be added to an inquiry.
 8. Keep a visible inquiry-cart trigger.
 9. Return a manifest describing the design key and supported features.
 

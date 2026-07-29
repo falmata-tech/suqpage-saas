@@ -32,7 +32,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
     group("Workspace", [
       { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : operations ? "Businesses" : "Overview" },
       operations && business ? { href: "/dashboard", label: "Switch business" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "My products" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "My offerings" } : null,
       client ? { href: "/dashboard/requests", label: "Requests" } : null,
       client && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
       client && business ? { href: `/dashboard/deliveries${query}`, label: "Delivery activity" } : null,

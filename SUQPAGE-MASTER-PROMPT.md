@@ -349,6 +349,12 @@ Region
 Count
 ```
 
+SuqPage uses **Offering** as the internal umbrella for a standard product,
+made-to-order product, manufacturing capability, or production supply. Public
+showrooms label this catalog **Products & Capabilities**. The compatible
+`products` table and recipe array remain the current transport; they do not
+limit an offering to stocked retail merchandise.
+
 Rules:
 
 1. A product can have zero to four option groups.
@@ -360,8 +366,15 @@ Rules:
 7. Descriptive availability is the only current product-status authority.
 8. Unavailable or coming-soon products are not inquiry-ready unless a future
    waitlist-style workflow explicitly supports them.
-9. Customer-requested quantity is bounded inquiry intent from 1 through 20. It
-   is not compared with, reserved from, or deducted from inventory.
+9. Customer-requested quantity is bounded inquiry intent from 1 through
+   1,000,000. It is required for `quantity_mode=required` and may remain absent
+   for `quantity_mode=optional`. It is never compared with, reserved from, or
+   deducted from inventory.
+10. Every current offering declares one kind: `standard_product`,
+    `made_to_order`, `manufacturing_capability`, or `production_supply`.
+11. Capacity, minimum-order, and lead-time summaries are optional bounded
+    merchant facts. The platform and AI must not calculate, verify, or invent
+    them.
 
 Supported availability states:
 
@@ -386,11 +399,12 @@ The inquiry cart is SuqPage’s central conversion feature.
 Expected customer flow:
 
 1. A customer browses a client showroom.
-2. The customer selects a product.
+2. The customer selects a product or capability.
 3. The customer selects required option values.
 4. The customer adds the item to the inquiry cart.
-5. The customer can add multiple products.
-6. The customer can adjust quantities and remove items.
+5. The customer can add multiple offerings.
+6. The customer can adjust required quantities, optionally state quantity for
+   compatible capability-style offerings, and remove items.
 7. The customer provides minimal contact information:
    - first name;
    - WhatsApp, phone, Telegram, email, or another usable contact;
@@ -417,9 +431,10 @@ An inquiry record should contain:
 - contact value;
 - contact method;
 - optional note;
-- selected products;
+- selected products and capabilities;
 - selected options;
-- quantity;
+- optional or required desired quantity according to the snapshotted offering
+  policy;
 - source;
 - status;
 - timestamps.
@@ -632,8 +647,9 @@ A client has a minimal workspace bound to one business. The client can:
 - see their own request history;
 - review an exact private showroom revision and approve or reject it;
 - view customer inquiries and delivery activity without mutating them;
-- after first publication, use **My products** to create products and maintain
-  their name, description, primary image, descriptive availability, and
+- after first publication, use **My offerings** to create products or
+  capabilities and maintain their type, desired-quantity policy, name,
+  description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
 - view their showroom and manage their account password.
 
@@ -665,7 +681,7 @@ view the internal showroom component laboratory; clients cannot.
 A public customer does not require an account. The customer can:
 
 - browse an active showroom;
-- filter products;
+- filter products and capabilities;
 - select options;
 - build an inquiry cart;
 - provide contact details;
@@ -700,15 +716,17 @@ Current verified behavior:
   customer inquiries, read-only delivery activity, showroom preview, and
   account security. Before first publication, product upkeep is hidden and a
   deep link returns to the first-showroom request. After publication, only the
-  bounded **My products** fields are available; structural catalog,
+  bounded **My offerings** fields are available; structural catalog,
   business-setting, design, delivery-create, and inquiry-status mutations remain
   hidden and denied on the server.
 - Authenticated clients can submit a 10–10,000 character instruction with up to
   ten private sanitized JPEG, PNG, or WebP references of at most 5 MB each.
-  The intake captures business archetype, catalog stage, and photography stage
-  while leaving page structure and dynamic product/media counts to the
-  blueprint workflow. Missing photography becomes labeled recipe destinations,
-  not an unexplained “no images” state.
+  The intake captures business archetype, products/capabilities stage, and
+  photography stage while asking what the business sells, makes, grows,
+  supplies, or can manufacture and any known capacity, minimum-order, and
+  lead-time facts. Page structure and dynamic offering/media counts remain with
+  the blueprint workflow. Missing photography becomes labeled recipe
+  destinations, not an unexplained “no images” state.
   The server derives first-showroom versus change request from retained
   publication state; the browser cannot choose or forge it. Requests are
   tenant-bound, idempotent, and visible in the client’s request history.
@@ -907,9 +925,11 @@ remaining AI-assisted delivery sequence is recorded in
   certifications, specifications, product facts, or delivery claims.
 - The current implementation uses a full showroom recipe with a separate
   content proposal and design proposal inside a versioned envelope. Content
-  currently covers dynamic product categories/products/options,
+  currently covers dynamic product categories, products/capabilities, offering
+  kind, desired-quantity policy, bounded production facts, options,
   business/meta/contact values, and allowed image keys. Product availability is
-  descriptive; numeric product/option inventory is prohibited. Compatibility
+  descriptive; numeric product/option inventory is prohibited. The `products`
+  key is the single documented compatibility transport for offerings. Compatibility
   collection arrays/removals are fixed empty and all recipe collection
   relationships are null; the server alone may preserve hidden legacy
   relationships for matching stable entities. Dynamic catalog counts remain
@@ -1295,14 +1315,17 @@ deliveries, private previews, approvals, and account security. A request for a
 business with no retained publication is a first-showroom request; after
 publication it is a change request. The server decides this classification.
 
-After first publication, **My products** lets the client create a product or maintain its
-name, description, primary managed image, availability, and assignment to
-an existing compatible product category. The same bounded workflow is
+After first publication, **My offerings** lets the client create a product or
+capability or maintain its offering type, desired-quantity policy, name,
+description, bounded capacity/minimum-order/lead-time facts, primary managed
+image, availability, and assignment to an existing compatible product
+category. The same bounded workflow is
 available to assigned team members acting for the client with staff attribution.
 It publishes a retained new content version and makes older-base staff work
 stale. It does not expose structure creation, options, ordering, deletion,
 design, settings, page content, recipe tools, or complete-showroom publication.
-`FE-008`, `BE-009`, `DEP-008`, and `ADR-0006` control this verified exception.
+`FE-008`, `BE-009`, `DEP-008`, `FE-016`, `BE-014`, `DEP-012`, and `ADR-0006`
+control this verified exception and its expanded offering contract.
 
 ### Current composition assembly and planned AI import
 
@@ -1392,10 +1415,11 @@ Required verification areas:
 - cross-tenant denial;
 - active/draft/suspended visibility;
 - revision-based settings, design, option, structure, and image changes;
-- versioned basic product upkeep for every authorized role;
+- versioned basic offering upkeep for every authorized role;
 - compatibility-collection and active product-category integrity;
 - option validation;
-- availability-only inquiry behavior and absence of active inventory counts;
+- offering kind, required/optional desired quantity, availability-only inquiry
+  behavior, and absence of active inventory counts;
 - image upload validation and serving;
 - public inquiry submission;
 - idempotency;

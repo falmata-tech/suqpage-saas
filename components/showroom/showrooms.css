@@ -172,6 +172,35 @@
   text-align: center;
 }
 
+.optional-quantity {
+  display: grid;
+  gap: 5px;
+  max-width: 240px;
+  margin-top: 9px;
+  color: var(--bank-muted, #657086);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.optional-quantity input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  color: var(--bank-ink, #141b2a);
+  background: var(--bank-bg, #f5f7fa);
+  border: 1px solid var(--bank-line, #d5dbe5);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.product-dialog-panel.no-media {
+  width: min(680px, 100%);
+}
+
+.product-dialog-grid.no-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .remove {
   min-height: 36px;
   padding: 0 4px;

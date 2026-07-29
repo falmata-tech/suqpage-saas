@@ -499,6 +499,8 @@ function factProvenance(
       `$.content.products[${index}].name`,
       `$.content.products[${index}].description`,
       `$.content.products[${index}].availability`,
+      `$.content.products[${index}].offeringKind`,
+      `$.content.products[${index}].quantityMode`,
     );
   });
   return paths.map((path) => ({ path, sourceKey, kind: "source_fact" }));
@@ -566,6 +568,11 @@ function syntheticReferenceCatalog(): Catalog {
         description: "Demonstrates relationships, options, and descriptive availability.",
         image_path: "",
         availability: "available",
+        offering_kind: "made_to_order",
+        quantity_mode: "optional",
+        capacity_summary: "Capacity agreed after specification review",
+        minimum_order_summary: "Minimum order depends on the selected format",
+        lead_time_summary: "Lead time confirmed with the production brief",
         is_published: 1,
         sort_order: 0,
         option_groups: [
@@ -592,6 +599,11 @@ function syntheticReferenceCatalog(): Catalog {
         description: "Demonstrates a second category and a different availability state.",
         image_path: "",
         availability: "coming_soon",
+        offering_kind: "production_supply",
+        quantity_mode: "required",
+        capacity_summary: "Seasonal supply",
+        minimum_order_summary: "",
+        lead_time_summary: "Next cycle to be confirmed",
         is_published: 1,
         sort_order: 1,
         option_groups: [],
@@ -767,6 +779,8 @@ export function buildShowroomRecipeBrief(
         "Keep unresolved facts in questions; a recipe with questions cannot be imported.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Product category is the only active catalog grouping. Return content.collections as an empty array, declaredRemovals.collections as an empty array, and every category/product collectionKey as null. Never use a collection as navigation, story, process, trust, footer, or composition content.",
+        "Treat content.products as the compatibility transport for public offerings. Classify each entry from supplied facts as standard_product, made_to_order, manufacturing_capability, or production_supply. Set quantityMode to required only when the buyer must state desired quantity; use optional when specification or fit can begin without it. Never describe quantity as stock.",
+        "Use capacitySummary, minimumOrderSummary, and leadTimeSummary only for factual client-supplied production information. Include a period or basis in capacity claims. Leave unknown facts empty rather than inventing capacity, MOQ, lead time, certifications, or availability.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one semantic design system and compatible section anatomy before choosing component IDs.",
         "Use compositionGuidance.canonicalNormalShowroom exactly: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Use its exact surfaceRole sequence.",

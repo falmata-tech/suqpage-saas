@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-001, DEP-001, BE-009, BE-011]
+related: [FE-001, DEP-001, BE-009, BE-011, BE-014]
 owners: [backend, security]
 last_updated: 2026-07-24
 change_level: L2
@@ -69,5 +69,6 @@ explicit one-command approval, and adequate disk. Rollback requires schema
 compatibility or verified database/media restore.
 
 `BE-009` and `DEP-008` now define the implemented eligibility rule:
-availability is canonical, requested quantity is bounded intent from 1–20, and
+availability is canonical, requested quantity is bounded intent from 1–1,000,000
+and may be absent only for an authoritative optional-quantity offering, and
 no active inventory count is stored or consulted.

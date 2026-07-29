@@ -1,4 +1,10 @@
 import type { Product } from "./types";
+import {
+  offeringKinds,
+  quantityModes,
+  type OfferingKind,
+  type QuantityMode,
+} from "./offerings";
 
 export type ProductUpkeepKind = "create" | "update";
 export type ProductImageAction = "keep" | "remove" | "replace";
@@ -12,6 +18,11 @@ export type BasicProductCommand = {
   name: string;
   description: string;
   availability: Product["availability"];
+  offeringKind: OfferingKind;
+  quantityMode: QuantityMode;
+  capacitySummary: string;
+  minimumOrderSummary: string;
+  leadTimeSummary: string;
   categoryId: number | null;
   imageAction: ProductImageAction;
   serviceNote: string;
@@ -36,6 +47,11 @@ const commandKeys = new Set([
   "name",
   "description",
   "availability",
+  "offeringKind",
+  "quantityMode",
+  "capacitySummary",
+  "minimumOrderSummary",
+  "leadTimeSummary",
   "categoryId",
   "imageAction",
   "serviceNote",
@@ -51,6 +67,13 @@ const controlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 
 const text = (value: unknown, max: number) =>
   String(value ?? "").trim().replace(controlPattern, "").slice(0, max);
+const boundedText = (value: unknown, max: number, label: string) => {
+  const cleaned = String(value ?? "").trim().replace(controlPattern, "");
+  if (cleaned.length > max) {
+    throw new ProductUpkeepError(`${label} is too long.`);
+  }
+  return cleaned;
+};
 
 const positiveInteger = (value: unknown, label: string) => {
   const parsed = Number(value);
@@ -93,6 +116,14 @@ export function parseBasicProductCommand(
   if (!availabilityValues.has(availability)) {
     throw new ProductUpkeepError("Choose a valid availability.");
   }
+  const offeringKind = text(raw.offeringKind, 40) as OfferingKind;
+  if (!offeringKinds.includes(offeringKind)) {
+    throw new ProductUpkeepError("Choose a valid offering type.");
+  }
+  const quantityMode = text(raw.quantityMode, 20) as QuantityMode;
+  if (!quantityModes.includes(quantityMode)) {
+    throw new ProductUpkeepError("Choose a valid desired-quantity policy.");
+  }
   const imageAction = text(raw.imageAction, 20) as ProductImageAction;
   if (!imageActions.has(imageAction)) {
     throw new ProductUpkeepError("Choose a valid image action.");
@@ -117,6 +148,11 @@ export function parseBasicProductCommand(
     name,
     description,
     availability,
+    offeringKind,
+    quantityMode,
+    capacitySummary: boundedText(raw.capacitySummary, 180, "Capacity"),
+    minimumOrderSummary: boundedText(raw.minimumOrderSummary, 140, "Minimum order"),
+    leadTimeSummary: boundedText(raw.leadTimeSummary, 140, "Lead time"),
     categoryId: optionalInteger(raw.categoryId, "Category"),
     imageAction,
     serviceNote: text(raw.serviceNote, 300),

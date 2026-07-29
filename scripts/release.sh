@@ -22,6 +22,9 @@ node node_modules/tsx/dist/cli.mjs scripts/validate-designs.ts
 printf '\n=== Stockless catalog and recovery validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-stockless-catalog.ts
 
+printf '\n=== Unified offering migration validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-offering-migration.ts
+
 printf '\n=== Versioned product upkeep validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-product-upkeep.ts
 

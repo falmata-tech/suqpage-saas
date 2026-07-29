@@ -39,7 +39,7 @@ export default async function EditProduct({
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            My products
+            My offerings
           </Link>
           <span aria-hidden="true">/</span>
           <span>{product.name}</span>
@@ -64,7 +64,7 @@ export default async function EditProduct({
       </div>
       {query.saved ? (
         <p className="notice">
-          Product published successfully
+          Offering published successfully
           {query.version ? ` as showroom version ${query.version}` : ""}.
         </p>
       ) : null}

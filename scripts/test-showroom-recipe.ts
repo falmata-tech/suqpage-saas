@@ -233,6 +233,11 @@ async function main() {
         /Product images always use slotKey product_image/.test(instruction),
       ),
     );
+    assert.ok(
+      exported.brief.instructions.some((instruction) =>
+        /compatibility transport for public offerings/.test(instruction),
+      ),
+    );
     assert.equal(exported.brief.examplePolicy.importable, false);
     assert.match(exported.brief.instructions[1], /synthetic structural reference/i);
     assert.equal(
@@ -283,8 +288,19 @@ async function main() {
     );
     assert.ok(
       exported.brief.completeExample.content.products.every(
-        (product) => product.collectionKey === null,
+        (product) =>
+          product.collectionKey === null &&
+          ["standard_product", "made_to_order", "manufacturing_capability", "production_supply"].includes(product.offeringKind) &&
+          ["required", "optional"].includes(product.quantityMode),
       ),
+    );
+    assert.equal(
+      exported.brief.schemas.content.$defs.product.required.includes("offeringKind"),
+      true,
+    );
+    assert.equal(
+      exported.brief.schemas.content.$defs.product.required.includes("quantityMode"),
+      true,
     );
     assert.equal(exported.brief.currentContent.collections.length, 0);
     assert.ok(
@@ -429,6 +445,8 @@ async function main() {
       "$.content.products[0].name",
       "$.content.products[0].description",
       "$.content.products[0].availability",
+      "$.content.products[0].offeringKind",
+      "$.content.products[0].quantityMode",
     ].map((path) => ({
       path,
       sourceKey: currentSource.key,

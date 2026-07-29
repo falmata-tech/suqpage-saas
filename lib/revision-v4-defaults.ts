@@ -501,6 +501,11 @@ function catalogToRevisionBase(catalog: Catalog): {
       description: item.description,
       imageRef: item.image_path,
       availability: item.availability,
+      offeringKind: item.offering_kind || "standard_product",
+      quantityMode: item.quantity_mode || "required",
+      capacitySummary: item.capacity_summary || "",
+      minimumOrderSummary: item.minimum_order_summary || "",
+      leadTimeSummary: item.lead_time_summary || "",
       published: Boolean(item.is_published),
       sortOrder: item.sort_order,
       optionGroups: (item.option_groups || []).map((group) => ({

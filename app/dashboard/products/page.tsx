@@ -27,15 +27,15 @@ export default async function ProductsPage({
         <nav aria-label="Breadcrumb">
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
-          <span>My products</span>
+          <span>My offerings</span>
         </nav>
       </div>
       <div className="dashboard-head">
         <div>
-          <p className="eyebrow">Simple product upkeep</p>
-          <h1>My products</h1>
+          <p className="eyebrow">Simple catalog upkeep</p>
+          <h1>Products &amp; capabilities</h1>
           <p>
-            Keep names, descriptions, images, availability, and placement
+            Keep products, made-to-order work, capabilities, supply, and production facts
             current without opening the showroom design system.
           </p>
         </div>
@@ -43,11 +43,11 @@ export default async function ProductsPage({
           className="btn brand"
           href={`/dashboard/products/new?business=${business.id}`}
         >
-          Add product
+          Add offering
         </Link>
       </div>
       {query.saved ? (
-        <p className="notice">Product published in a retained showroom version.</p>
+        <p className="notice">Offering published in a retained showroom version.</p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       {catalog.products.length ? (
@@ -57,13 +57,13 @@ export default async function ProductsPage({
         />
       ) : (
         <section className="empty-state">
-          <h2>No products yet</h2>
-          <p>Add the first product to this established showroom.</p>
+          <h2>No offerings yet</h2>
+          <p>Add the first product or capability to this established showroom.</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}
           >
-            Add first product
+            Add first offering
           </Link>
         </section>
       )}

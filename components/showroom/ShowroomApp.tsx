@@ -13,19 +13,16 @@ import { parseShowroomDesignProposalV2 } from "@/lib/showroom-composition-v2";
 import { parseShowroomContentBlocks } from "@/lib/showroom-content-blocks";
 import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
+import {
+  availabilityLabel,
+  offeringKindLabels,
+} from "@/lib/offerings";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import { SHOWROOM_BANK_TOKEN_STYLES } from "./bank/tokens";
 import "./showrooms.css";
 
-type CartLine = { product: Product; quantity: number; options: Record<string, string> };
-
-const statusText: Record<string, string> = {
-  available: "Available",
-  limited: "Limited",
-  unavailable: "Unavailable",
-  coming_soon: "Coming soon",
-};
+type CartLine = { product: Product; quantity: number | null; options: Record<string, string> };
 const focusableSelector =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -55,7 +52,9 @@ function buildMessage(catalog: Catalog, cart: CartLine[], name: string, note: st
       const options = Object.entries(line.options)
         .map(([key, value]) => `${key}: ${value}`)
         .join(", ");
-      return `${index + 1}. ${line.product.name} × ${line.quantity}${options ? ` (${options})` : ""}`;
+      const desiredQuantity =
+        line.quantity === null ? "" : ` · Desired quantity: ${line.quantity}`;
+      return `${index + 1}. ${line.product.name}${desiredQuantity}${options ? ` (${options})` : ""}`;
     }),
     note ? `\nNote: ${note}` : "",
     "Please confirm availability and the next steps.",
@@ -106,7 +105,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           product.is_published &&
           (filter === "all" || product.category_id === Number(filter)) &&
           (!query ||
-            `${product.name} ${product.description} ${product.category_name}`
+            `${product.name} ${product.description} ${product.category_name} ${product.offering_kind} ${product.capacity_summary}`
               .toLowerCase()
               .includes(query.toLowerCase())),
       ),
@@ -118,7 +117,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as Array<{
         productId: number;
-        quantity: number;
+        quantity: number | null;
         options: Record<string, string>;
       }>;
       setCart(
@@ -128,7 +127,13 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
             ? [
                 {
                   product,
-                  quantity: Math.max(1, Math.min(Number(line.quantity) || 1, 20)),
+                  quantity:
+                    product.quantity_mode === "optional" && line.quantity === null
+                      ? null
+                      : Math.max(
+                          1,
+                          Math.min(Number(line.quantity) || 1, 1_000_000),
+                        ),
                   options: line.options || {},
                 },
               ]
@@ -198,10 +203,19 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       const index = current.findIndex(
         (line) => line.product.id === product.id && JSON.stringify(line.options) === optionKey,
       );
-      if (index < 0) return [...current, { product, quantity: 1, options }];
+      if (index < 0) {
+        return [
+          ...current,
+          {
+            product,
+            quantity: product.quantity_mode === "required" ? 1 : null,
+            options,
+          },
+        ];
+      }
       return current.map((line, lineIndex) =>
-        lineIndex === index
-          ? { ...line, quantity: Math.min(20, line.quantity + 1) }
+        lineIndex === index && line.quantity !== null
+          ? { ...line, quantity: Math.min(1_000_000, line.quantity + 1) }
           : line,
       );
     });
@@ -213,13 +227,30 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       current
         .map((line, lineIndex) =>
           lineIndex === index
-            ? { ...line, quantity: Math.min(20, line.quantity + delta) }
+            ? {
+                ...line,
+                quantity:
+                  line.quantity === null
+                    ? null
+                    : Math.min(1_000_000, line.quantity + delta),
+              }
             : line,
         )
-        .filter((line) => line.quantity > 0),
+        .filter((line) => line.quantity === null || line.quantity > 0),
+    );
+  const setDesiredQuantity = (index: number, raw: string) =>
+    setCart((current) =>
+      current.map((line, lineIndex) => {
+        if (lineIndex !== index) return line;
+        if (!raw.trim()) return { ...line, quantity: null };
+        const parsed = Number(raw);
+        return Number.isInteger(parsed) && parsed > 0
+          ? { ...line, quantity: Math.min(parsed, 1_000_000) }
+          : line;
+      }),
     );
 
-  const cartCount = cart.reduce((count, line) => count + line.quantity, 0);
+  const cartCount = cart.length;
   const openCart = () => {
     if(previewMode){show("Private preview only — the inquiry cart is disabled.");return;}
     drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -310,17 +341,24 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           aria-label={selected.name}
           tabIndex={-1}
         >
-          <div className="product-dialog-panel">
+          <div className={`product-dialog-panel${selected.image_path ? "" : " no-media"}`}>
             <button className="icon-button dialog-close" aria-label="Close product" onClick={() => setSelected(null)}>
               ×
             </button>
-            <div className="product-dialog-grid">
-              <img src={selected.image_path} alt={selected.name} />
+            <div className={`product-dialog-grid${selected.image_path ? "" : " no-media"}`}>
+              {selected.image_path ? (
+                <img src={selected.image_path} alt={selected.name} />
+              ) : null}
               <div>
-                <span className="eyebrow">{selected.eyebrow}</span>
-                <h2 style={{ fontSize: "2.5rem", letterSpacing: "-.05em" }}>{selected.name}</h2>
+                <span className="eyebrow">
+                  {offeringKindLabels[selected.offering_kind]}
+                </span>
+                <h2 style={{ fontSize: "2.5rem" }}>{selected.name}</h2>
                 <p style={{ lineHeight: 1.7 }}>{selected.description}</p>
-                <p><strong>Availability:</strong> {statusText[selected.availability]}</p>
+                <p><strong>Status:</strong> {availabilityLabel(selected.offering_kind, selected.availability)}</p>
+                {selected.capacity_summary ? <p><strong>Capacity:</strong> {selected.capacity_summary}</p> : null}
+                {selected.minimum_order_summary ? <p><strong>Minimum order:</strong> {selected.minimum_order_summary}</p> : null}
+                {selected.lead_time_summary ? <p><strong>Lead time:</strong> {selected.lead_time_summary}</p> : null}
                 {selected.option_groups?.map((group) => (
                   <label className="option-set" key={group.id}>
                     <strong>{group.name}</strong>
@@ -338,10 +376,11 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
                 ))}
                 <button
                   className="sr-cart-trigger"
+                  aria-label="Add selected item"
                   disabled={!["available", "limited"].includes(selected.availability)}
                   onClick={() => add(selected, selections)}
                 >
-                  Add selected item
+                  Add to inquiry
                 </button>
               </div>
             </div>
@@ -355,6 +394,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         catalog={catalog}
         cart={cart}
         quantity={quantity}
+        setDesiredQuantity={setDesiredQuantity}
         remove={(index) => setCart((current) => current.filter((_, lineIndex) => lineIndex !== index))}
         clear={() => setCart([])}
         show={show}
@@ -375,6 +415,7 @@ function InquiryDrawer({
   catalog,
   cart,
   quantity,
+  setDesiredQuantity,
   remove,
   clear,
   show,
@@ -385,6 +426,7 @@ function InquiryDrawer({
   catalog: Catalog;
   cart: CartLine[];
   quantity: (index: number, delta: number) => void;
+  setDesiredQuantity: (index: number, raw: string) => void;
   remove: (index: number) => void;
   clear: () => void;
   show: (message: string) => void;
@@ -468,7 +510,7 @@ function InquiryDrawer({
 
   async function send(channel: "whatsapp" | "telegram" | "tiktok" | "share") {
     if (!cart.length) {
-      show("Add at least one product.");
+      show("Add at least one product or capability.");
       return;
     }
     if (channel === "tiktok") legacyCopy(message);
@@ -522,12 +564,9 @@ function InquiryDrawer({
         <div className="drawer-head">
           <div>
             <span className="eyebrow">Your shortlist</span>
-            <h2>Product inquiry</h2>
+            <h2>Products &amp; capabilities inquiry</h2>
             <p>
-              {cart.reduce((total, line) => total + line.quantity, 0)}{" "}
-              {cart.reduce((total, line) => total + line.quantity, 0) === 1
-                ? "selected item"
-                : "selected items"}
+              {cart.length} {cart.length === 1 ? "selected offering" : "selected offerings"}
             </p>
           </div>
           <button className="icon-button" aria-label="Close inquiry" onClick={close}>
@@ -554,15 +593,30 @@ function InquiryDrawer({
                     .map(([keyName, value]) => `${keyName}: ${value}`)
                     .join(" · ")}
                 </div>
-                <div className="qty" aria-label={`Quantity for ${line.product.name}`}>
-                  <button aria-label={`Decrease quantity for ${line.product.name}`} onClick={() => quantity(index, -1)}>
-                    −
-                  </button>
-                  <strong>{line.quantity}</strong>
-                  <button aria-label={`Increase quantity for ${line.product.name}`} onClick={() => quantity(index, 1)}>
-                    +
-                  </button>
-                </div>
+                {line.product.quantity_mode === "required" ? (
+                  <div className="qty" aria-label={`Desired quantity for ${line.product.name}`}>
+                    <button aria-label={`Decrease quantity for ${line.product.name}`} onClick={() => quantity(index, -1)}>
+                      −
+                    </button>
+                    <strong>{line.quantity}</strong>
+                    <button aria-label={`Increase quantity for ${line.product.name}`} onClick={() => quantity(index, 1)}>
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <label className="optional-quantity">
+                    <span>Desired quantity <small>(optional)</small></span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={1_000_000}
+                      inputMode="numeric"
+                      value={line.quantity ?? ""}
+                      onChange={(event) => setDesiredQuantity(index, event.target.value)}
+                      placeholder="Discuss with supplier"
+                    />
+                  </label>
+                )}
               </div>
               <button
                 className="remove"

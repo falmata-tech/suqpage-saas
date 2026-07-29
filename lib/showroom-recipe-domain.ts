@@ -324,6 +324,8 @@ function requiredFactPaths(snapshot: RevisionSnapshotV4) {
       `$.content.products[${index}].name`,
       `$.content.products[${index}].description`,
       `$.content.products[${index}].availability`,
+      `$.content.products[${index}].offeringKind`,
+      `$.content.products[${index}].quantityMode`,
     );
   });
   return paths;

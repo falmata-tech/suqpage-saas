@@ -27,6 +27,7 @@
     "test:experience": "tsx scripts/test-showroom-experience.ts",
     "test:showroom-migration": "tsx scripts/test-showroom-migration.ts",
     "test:stockless": "tsx scripts/test-stockless-catalog.ts",
+    "test:offerings": "tsx scripts/test-offering-migration.ts",
     "test:product-upkeep": "tsx scripts/test-product-upkeep.ts",
     "test:recipe": "tsx scripts/test-showroom-recipe.ts",
     "test:content-blocks": "tsx scripts/test-showroom-content-blocks.ts",
@@ -47,7 +48,7 @@
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:bazaar && npm run test:expo && npm run test:marketplace-home && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:showroom-migration && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
+    "check": "npm run validate:specs && npm run test:workflow && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:bazaar && npm run test:expo && npm run test:marketplace-home && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:requests && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {

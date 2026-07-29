@@ -433,8 +433,8 @@ export default function RevisionEditor({
 
         <section className="panel">
           <div className="dashboard-head">
-            <div><h2>Products</h2><p>Structured products remain private until this revision is approved and published.</p></div>
-            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New product", slug: "", eyebrow: "", description: "", imageRef: "", availability: "available", published: true, sortOrder: current.products.length, optionGroups: [] }] }))}>Add product</button>
+            <div><h2>Products &amp; capabilities</h2><p>Structured offerings remain private until this revision is approved and published.</p></div>
+            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New offering", slug: "", eyebrow: "", description: "", imageRef: "", availability: "available", offeringKind: "standard_product", quantityMode: "required", capacitySummary: "", minimumOrderSummary: "", leadTimeSummary: "", published: true, sortOrder: current.products.length, optionGroups: [] }] }))}>Add offering</button>
           </div>
           {snapshot.products.map((item, index) => (
             <div className="revision-item form-grid" key={item.key}>
@@ -443,10 +443,15 @@ export default function RevisionEditor({
               <Field value={item.eyebrow} onChange={(value) => updateProduct(index, { eyebrow: value })} label={`Product ${index + 1} short label`} max={100} />
               <div className="field"><label>Category</label><select aria-label={`Product ${index + 1} category`} value={item.categoryKey || ""} onChange={(event) => updateProduct(index, { categoryKey: event.target.value || null })}><option value="">Unassigned</option>{snapshot.categories.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}</select></div>
               <div className="field"><label>Availability</label><select aria-label={`Product ${index + 1} availability`} value={item.availability} onChange={(event) => updateProduct(index, { availability: event.target.value })}>{["available", "limited", "unavailable", "coming_soon"].map((value) => <option key={value}>{value}</option>)}</select></div>
+              <div className="field"><label>Offering type</label><select aria-label={`Product ${index + 1} offering type`} value={item.offeringKind} onChange={(event) => updateProduct(index, { offeringKind: event.target.value })}><option value="standard_product">Standard product</option><option value="made_to_order">Made to order</option><option value="manufacturing_capability">Manufacturing capability</option><option value="production_supply">Production supply</option></select></div>
+              <div className="field"><label>Desired quantity</label><select aria-label={`Product ${index + 1} desired quantity policy`} value={item.quantityMode} onChange={(event) => updateProduct(index, { quantityMode: event.target.value })}><option value="required">Required</option><option value="optional">Optional</option></select></div>
               <div className="field"><label>Sort order</label><input aria-label={`Product ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateProduct(index, { sortOrder: Number(event.target.value) })} /></div>
               <MediaChoice label={`Product ${index + 1} image`} value={item.imageRef} options={imageOptions} kind="image" onChange={(value) => updateProduct(index, { imageRef: value })} />
               <label className="check-field"><input type="checkbox" checked={item.published} onChange={(event) => updateProduct(index, { published: event.target.checked })} /> Show in showroom</label>
               <div className="field full"><label>Description</label><textarea aria-label={`Product ${index + 1} description`} value={item.description} maxLength={3000} onChange={(event) => updateProduct(index, { description: event.target.value })} /></div>
+              <Field value={item.capacitySummary} onChange={(value) => updateProduct(index, { capacitySummary: value })} label={`Product ${index + 1} capacity`} max={180} />
+              <Field value={item.minimumOrderSummary} onChange={(value) => updateProduct(index, { minimumOrderSummary: value })} label={`Product ${index + 1} minimum order`} max={140} />
+              <Field value={item.leadTimeSummary} onChange={(value) => updateProduct(index, { leadTimeSummary: value })} label={`Product ${index + 1} lead time`} max={140} />
               <div className="field full">
                 <label>Option groups</label>
                 <textarea
@@ -457,7 +462,7 @@ export default function RevisionEditor({
                 />
                 <small>One group per line: Name: value, value. Up to four groups.</small>
               </div>
-              <button type="button" className="small-btn danger" onClick={() => setSnapshot((current) => ({ ...current, products: current.products.filter((_, i) => i !== index) }))}>Remove product</button>
+              <button type="button" className="small-btn danger" onClick={() => setSnapshot((current) => ({ ...current, products: current.products.filter((_, i) => i !== index) }))}>Remove offering</button>
             </div>
           ))}
         </section>

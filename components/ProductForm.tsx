@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Catalog, Product } from "@/lib/types";
+import {
+  availabilityLabel,
+  offeringKindDescriptions,
+  offeringKindLabels,
+  offeringKinds,
+  type OfferingKind,
+  type QuantityMode,
+} from "@/lib/offerings";
 
 export default function ProductForm({
   catalog,
@@ -24,6 +32,21 @@ export default function ProductForm({
   const [description, setDescription] = useState(product?.description || "");
   const [availability, setAvailability] = useState(
     product?.availability || "available",
+  );
+  const [offeringKind, setOfferingKind] = useState<OfferingKind>(
+    product?.offering_kind || "standard_product",
+  );
+  const [quantityMode, setQuantityMode] = useState<QuantityMode>(
+    product?.quantity_mode || "required",
+  );
+  const [capacitySummary, setCapacitySummary] = useState(
+    product?.capacity_summary || "",
+  );
+  const [minimumOrderSummary, setMinimumOrderSummary] = useState(
+    product?.minimum_order_summary || "",
+  );
+  const [leadTimeSummary, setLeadTimeSummary] = useState(
+    product?.lead_time_summary || "",
   );
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
   const [removeImage, setRemoveImage] = useState(false);
@@ -52,7 +75,7 @@ export default function ProductForm({
       ) : null}
 
       <div className="field full">
-        <label htmlFor="product-name">Product name</label>
+        <label htmlFor="product-name">Offering name</label>
         <input
           id="product-name"
           name="name"
@@ -62,7 +85,36 @@ export default function ProductForm({
           onChange={(event) => setName(event.target.value)}
           autoComplete="off"
         />
-        <small>Shown exactly as entered in the showroom.</small>
+        <small>Name the product, made-to-order work, supply, or capability exactly as customers should see it.</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-offering-kind">Offering type</label>
+        <select
+          id="product-offering-kind"
+          name="offeringKind"
+          value={offeringKind}
+          onChange={(event) => setOfferingKind(event.target.value as OfferingKind)}
+        >
+          {offeringKinds.map((kind) => (
+            <option key={kind} value={kind}>{offeringKindLabels[kind]}</option>
+          ))}
+        </select>
+        <small>{offeringKindDescriptions[offeringKind]}</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-quantity-mode">Desired quantity</label>
+        <select
+          id="product-quantity-mode"
+          name="quantityMode"
+          value={quantityMode}
+          onChange={(event) => setQuantityMode(event.target.value as QuantityMode)}
+        >
+          <option value="required">Buyer must provide quantity</option>
+          <option value="optional">Buyer may leave quantity open</option>
+        </select>
+        <small>This records buyer intent; it is not an inventory count.</small>
       </div>
 
       <div className="field full">
@@ -74,6 +126,42 @@ export default function ProductForm({
           maxLength={3000}
           value={description}
           onChange={(event) => setDescription(event.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-capacity">Production or supply capacity <span className="optional">(optional)</span></label>
+        <input
+          id="product-capacity"
+          name="capacitySummary"
+          maxLength={180}
+          value={capacitySummary}
+          onChange={(event) => setCapacitySummary(event.target.value)}
+          placeholder="Example: Up to 5,000 units per month"
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-minimum-order">Minimum order <span className="optional">(optional)</span></label>
+        <input
+          id="product-minimum-order"
+          name="minimumOrderSummary"
+          maxLength={140}
+          value={minimumOrderSummary}
+          onChange={(event) => setMinimumOrderSummary(event.target.value)}
+          placeholder="Example: MOQ 100 units"
+        />
+      </div>
+
+      <div className="field full">
+        <label htmlFor="product-lead-time">Lead time or production window <span className="optional">(optional)</span></label>
+        <input
+          id="product-lead-time"
+          name="leadTimeSummary"
+          maxLength={140}
+          value={leadTimeSummary}
+          onChange={(event) => setLeadTimeSummary(event.target.value)}
+          placeholder="Example: Samples in 7 days; production in 3-4 weeks"
         />
       </div>
 
@@ -187,15 +275,23 @@ export default function ProductForm({
         </div>
         <div>
           <span className={`badge ${availability}`}>
-            {availability.replace("_", " ")}
+            {availabilityLabel(offeringKind, availability)}
           </span>
-          <strong>{name || "Product name preview"}</strong>
-          <p>{description || "The product description will appear here."}</p>
+          <small>{offeringKindLabels[offeringKind]}</small>
+          <strong>{name || "Offering name preview"}</strong>
+          <p>{description || "The offering description will appear here."}</p>
+          {[capacitySummary, minimumOrderSummary, leadTimeSummary].filter(Boolean).length ? (
+            <ul className="product-upkeep-facts">
+              {capacitySummary ? <li>Capacity: {capacitySummary}</li> : null}
+              {minimumOrderSummary ? <li>Minimum order: {minimumOrderSummary}</li> : null}
+              {leadTimeSummary ? <li>Lead time: {leadTimeSummary}</li> : null}
+            </ul>
+          ) : null}
         </div>
       </aside>
 
       <div className="field full product-upkeep-explainer">
-        <strong>This publishes only this product update.</strong>
+        <strong>This publishes only this offering update.</strong>
         <span>
           Design, options, order, categories, and business settings
           stay protected. A retained showroom version is created automatically.
@@ -204,7 +300,7 @@ export default function ProductForm({
 
       <div className="field full">
         <button className="btn brand" type="submit">
-          {product ? "Save and publish product" : "Add and publish product"}
+          {product ? "Save and publish offering" : "Add and publish offering"}
         </button>
       </div>
     </form>

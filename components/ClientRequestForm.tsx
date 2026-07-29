@@ -8,7 +8,7 @@ const archetypes = [
   ["farm", "Farm or grower"],
   ["natural_beauty", "Natural beauty producer"],
   ["furniture", "Furniture workshop"],
-  ["manufacturer", "Small manufacturer"],
+  ["manufacturer", "Manufacturer"],
   ["food_producer", "Food producer"],
   ["textile_atelier", "Textile atelier"],
   ["service_product_hybrid", "Products and services"],
@@ -33,7 +33,7 @@ export default function ClientRequestForm({
       const request = String(formData.get("requestText") || "").trim();
       const context = [
         `Business type: ${formData.get("businessArchetype")}`,
-        `Catalog stage: ${formData.get("catalogStage")}`,
+        `Offerings stage: ${formData.get("catalogStage")}`,
         `Photography stage: ${formData.get("photographyStage")}`,
       ].join("\n");
       formData.set("requestText", `${context}\n\nClient instruction:\n${request}`);
@@ -63,7 +63,7 @@ export default function ClientRequestForm({
         <h2>Tell us what exists today</h2>
         <p>
           SuqPage will choose a suitable page structure and the number of
-          product and image slots. You do not need to prepare a website layout.
+          product, capability, and image slots. You do not need to prepare a website layout.
         </p>
       </div>
       <div className="field">
@@ -73,12 +73,12 @@ export default function ClientRequestForm({
         </select>
       </div>
       <div className="field">
-        <label htmlFor="client-catalog-stage">Catalog stage</label>
-        <select id="client-catalog-stage" name="catalogStage" defaultValue="AI should choose from supplied products">
-          <option>AI should choose from supplied products</option>
-          <option>Small focused catalog, roughly 1-5 products</option>
-          <option>Growing catalog, roughly 6-15 products</option>
-          <option>Larger catalog, more than 15 products</option>
+        <label htmlFor="client-catalog-stage">Products &amp; capabilities</label>
+        <select id="client-catalog-stage" name="catalogStage" defaultValue="AI should choose from supplied offerings">
+          <option>AI should choose from supplied offerings</option>
+          <option>Small focused catalog, roughly 1-5 offerings</option>
+          <option>Growing catalog, roughly 6-15 offerings</option>
+          <option>Larger catalog, more than 15 offerings</option>
         </select>
       </div>
       <div className="field full">
@@ -90,14 +90,14 @@ export default function ClientRequestForm({
         </select>
       </div>
       <div className="field full">
-        <label htmlFor="client-request-text">Products, story, and requested outcome</label>
+        <label htmlFor="client-request-text">Products, capabilities, story, and requested outcome</label>
         <textarea
           id="client-request-text"
           name="requestText"
           required
           minLength={10}
           maxLength={9600}
-          placeholder="List what you make or sell, important categories, customer questions, and any change you want. A simple list is fine."
+          placeholder="List what you sell, make, grow, supply, or can manufacture. Add known capacity, minimum order, lead time, categories, and common customer questions. A simple list is fine; leave unknown facts out."
         />
       </div>
       <div className="field full">

@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Product } from "@/lib/types";
+import {
+  availabilityLabel,
+  offeringKindLabels,
+} from "@/lib/offerings";
 
 export default function ProductUpkeepList({
   products,
@@ -21,6 +25,8 @@ export default function ProductUpkeepList({
         product.description,
         product.category_name,
         product.availability.replace("_", " "),
+        offeringKindLabels[product.offering_kind],
+        product.capacity_summary,
       ]
         .filter(Boolean)
         .some((value) => String(value).toLocaleLowerCase().includes(normalized)),
@@ -30,7 +36,7 @@ export default function ProductUpkeepList({
   return (
     <>
       <div className="product-upkeep-search field">
-        <label htmlFor="product-upkeep-search">Find a product</label>
+        <label htmlFor="product-upkeep-search">Find an offering</label>
         <input
           id="product-upkeep-search"
           type="search"
@@ -39,11 +45,11 @@ export default function ProductUpkeepList({
           placeholder="Search name, category, or availability"
         />
         <small aria-live="polite">
-          Showing {visible.length} of {products.length} products
+          Showing {visible.length} of {products.length} offerings
         </small>
       </div>
       {visible.length ? (
-        <section className="product-upkeep-grid" aria-label="Products">
+        <section className="product-upkeep-grid" aria-label="Products and capabilities">
           {visible.map((product) => (
             <article className="product-upkeep-card" key={product.id}>
               <div className="product-upkeep-image">
@@ -56,12 +62,14 @@ export default function ProductUpkeepList({
               <div className="product-upkeep-copy">
                 <div className="product-upkeep-meta">
                   <span className={`badge ${product.availability}`}>
-                    {product.availability.replace("_", " ")}
+                    {availabilityLabel(product.offering_kind, product.availability)}
                   </span>
+                  <span>{offeringKindLabels[product.offering_kind]}</span>
                   <span>{product.category_name || "Unassigned"}</span>
                 </div>
                 <h2>{product.name}</h2>
                 <p>{product.description}</p>
+                {product.capacity_summary ? <small>Capacity: {product.capacity_summary}</small> : null}
                 <Link
                   className="small-btn"
                   href={`/dashboard/products/${product.id}?business=${businessId}`}
@@ -74,7 +82,7 @@ export default function ProductUpkeepList({
         </section>
       ) : (
         <section className="empty-state" aria-live="polite">
-          No products match “{query}”.
+          No offerings match “{query}”.
         </section>
       )}
     </>

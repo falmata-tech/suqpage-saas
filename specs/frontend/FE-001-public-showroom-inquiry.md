@@ -2,7 +2,7 @@
 id: FE-001
 title: Public showroom discovery and inquiry experience
 status: done
-related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012]
+related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L2

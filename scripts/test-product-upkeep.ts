@@ -229,6 +229,11 @@ async function main() {
       name: "New client product",
       description: "A client-created product description.",
       availability: "limited",
+      offeringKind: "manufacturing_capability",
+      quantityMode: "optional",
+      capacitySummary: "Up to 500 assemblies per month",
+      minimumOrderSummary: "Prototype or 25-unit production run",
+      leadTimeSummary: "Prototype in 10 working days",
       categoryId: tenantA.categoryId,
       imageAction: "keep",
       serviceNote: "",
@@ -254,6 +259,33 @@ async function main() {
       /Product name is required/,
     );
     assert.equal(invalidImageDiscarded, true);
+    assert.throws(
+      () =>
+        executeBasicProductUpkeep(
+          clientA,
+          command({ offeringKind: "service" }),
+          null,
+        ),
+      /valid offering type/,
+    );
+    assert.throws(
+      () =>
+        executeBasicProductUpkeep(
+          clientA,
+          command({ quantityMode: "inventory" }),
+          null,
+        ),
+      /desired-quantity policy/,
+    );
+    assert.throws(
+      () =>
+        executeBasicProductUpkeep(
+          clientA,
+          command({ capacitySummary: "x".repeat(181) }),
+          null,
+        ),
+      /Capacity is too long/,
+    );
 
     const created = executeBasicProductUpkeep(clientA, command(), null);
     assert.deepEqual(
@@ -262,7 +294,7 @@ async function main() {
     );
     const createdProduct = db
       .prepare(
-        "SELECT business_id,collection_id,category_id,is_published,availability FROM products WHERE id=?",
+        "SELECT business_id,collection_id,category_id,is_published,availability,offering_kind,quantity_mode,capacity_summary,minimum_order_summary,lead_time_summary FROM products WHERE id=?",
       )
       .get(created.productId) as Record<string, unknown>;
     assert.deepEqual(
@@ -273,6 +305,11 @@ async function main() {
         category_id: tenantA.categoryId,
         is_published: 1,
         availability: "limited",
+        offering_kind: "manufacturing_capability",
+        quantity_mode: "optional",
+        capacity_summary: "Up to 500 assemblies per month",
+        minimum_order_summary: "Prototype or 25-unit production run",
+        lead_time_summary: "Prototype in 10 working days",
       },
     );
     assert.equal(

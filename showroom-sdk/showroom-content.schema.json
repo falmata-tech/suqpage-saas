@@ -25,6 +25,7 @@
     },
     "products": {
       "type": "array",
+      "description": "Compatibility transport for public offerings. Each entry may be a standard product, made-to-order product, manufacturing capability, or production supply.",
       "maxItems": 500,
       "items": { "$ref": "#/$defs/product" }
     },
@@ -118,8 +119,9 @@
       "additionalProperties": false,
       "required": [
         "key", "collectionKey", "categoryKey", "name", "slug", "eyebrow",
-        "description", "imageRef", "availability", "published", "sortOrder",
-        "optionGroups"
+        "description", "imageRef", "availability", "offeringKind",
+        "quantityMode", "capacitySummary", "minimumOrderSummary",
+        "leadTimeSummary", "published", "sortOrder", "optionGroups"
       ],
       "properties": {
         "key": { "$ref": "#/$defs/key" },
@@ -135,6 +137,29 @@
         "imageRef": { "$ref": "#/$defs/imageKey" },
         "availability": {
           "enum": ["available", "limited", "unavailable", "coming_soon"]
+        },
+        "offeringKind": {
+          "description": "What is being offered; choose from the business facts, not an industry stereotype.",
+          "enum": ["standard_product", "made_to_order", "manufacturing_capability", "production_supply"]
+        },
+        "quantityMode": {
+          "description": "Whether a buyer must provide desired quantity. This is inquiry intent, never inventory.",
+          "enum": ["required", "optional"]
+        },
+        "capacitySummary": {
+          "description": "Optional factual production or supply capacity, including its period or basis.",
+          "type": "string",
+          "maxLength": 180
+        },
+        "minimumOrderSummary": {
+          "description": "Optional factual minimum order or batch condition.",
+          "type": "string",
+          "maxLength": 140
+        },
+        "leadTimeSummary": {
+          "description": "Optional factual lead-time or production-window statement.",
+          "type": "string",
+          "maxLength": 140
         },
         "published": { "type": "boolean" },
         "sortOrder": { "type": "integer", "minimum": -100000, "maximum": 100000 },

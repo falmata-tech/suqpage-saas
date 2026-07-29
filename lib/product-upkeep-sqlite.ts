@@ -151,6 +151,11 @@ function validateProspectiveSnapshot(
       description: command.description,
       imageRef,
       availability: command.availability,
+      offeringKind: command.offeringKind,
+      quantityMode: command.quantityMode,
+      capacitySummary: command.capacitySummary,
+      minimumOrderSummary: command.minimumOrderSummary,
+      leadTimeSummary: command.leadTimeSummary,
       published: true,
       sortOrder:
         snapshot.products.reduce(
@@ -173,6 +178,11 @@ function validateProspectiveSnapshot(
       description: command.description,
       imageRef,
       availability: command.availability,
+      offeringKind: command.offeringKind,
+      quantityMode: command.quantityMode,
+      capacitySummary: command.capacitySummary,
+      minimumOrderSummary: command.minimumOrderSummary,
+      leadTimeSummary: command.leadTimeSummary,
     });
   }
   requireRevisionSnapshotV4(snapshot, SHOWROOM_COMPONENT_BANK_LATEST);
@@ -262,8 +272,10 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             .prepare(
               `INSERT INTO products(
                 business_id,collection_id,category_id,name,slug,eyebrow,
-                description,image_path,availability,is_published,sort_order
-              ) VALUES(?,NULL,?,?,?,'',?,?,?,1,?)`,
+                description,image_path,availability,offering_kind,quantity_mode,
+                capacity_summary,minimum_order_summary,lead_time_summary,
+                is_published,sort_order
+              ) VALUES(?,NULL,?,?,?,'',?,?,?,?,?,?,?,?,1,?)`,
             )
             .run(
               command.businessId,
@@ -273,6 +285,11 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
               command.description,
               imageRef,
               command.availability,
+              command.offeringKind,
+              command.quantityMode,
+              command.capacitySummary,
+              command.minimumOrderSummary,
+              command.leadTimeSummary,
               nextOrder,
             ).lastInsertRowid,
         );
@@ -282,7 +299,8 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
           .prepare(
             `UPDATE products SET
               collection_id=NULL,category_id=?,name=?,description=?,
-              image_path=?,availability=?
+              image_path=?,availability=?,offering_kind=?,quantity_mode=?,
+              capacity_summary=?,minimum_order_summary=?,lead_time_summary=?
             WHERE id=? AND business_id=?`,
           )
           .run(
@@ -291,6 +309,11 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             command.description,
             imageRef,
             command.availability,
+            command.offeringKind,
+            command.quantityMode,
+            command.capacitySummary,
+            command.minimumOrderSummary,
+            command.leadTimeSummary,
             productId,
             command.businessId,
           );
@@ -353,6 +376,11 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             "name",
             "description",
             "availability",
+            "offeringKind",
+            "quantityMode",
+            "capacitySummary",
+            "minimumOrderSummary",
+            "leadTimeSummary",
             "category",
             ...(command.imageAction === "keep" ? [] : ["image"]),
           ],

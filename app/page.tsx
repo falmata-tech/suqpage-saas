@@ -50,7 +50,7 @@ export default function Home() {
       ...(catalog?.categories || []).map((item) => item.name),
       ...(catalog?.products || []).map(
         (item) =>
-          `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""}`,
+          `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""} ${item.offering_kind} ${item.capacity_summary} ${item.minimum_order_summary} ${item.lead_time_summary}`,
       ),
     ].join(" ").toLowerCase();
     return {
@@ -104,11 +104,12 @@ export default function Home() {
           <div className="landing-container landing-hero-inner">
             <div className="landing-hero-copy">
               <span className="landing-eyebrow">Built for people who make and grow</span>
-              <h1 id="landing-title">Virtual showrooms and daily Expos for producers.</h1>
+              <h1 id="landing-title">Virtual showrooms and daily Expos for makers, growers, and manufacturers.</h1>
               <p>
-                Present products clearly, tell the production story, and receive
-                direct inquiries through a permanent SuqPage showroom. From
-                emerging growers to established manufacturers.
+                Present products and production capabilities clearly, tell the
+                business story, and receive direct inquiries through a permanent
+                SuqPage showroom. From independent growers and workshops to
+                established factories and producer cooperatives.
               </p>
               <div className="landing-hero-actions">
                 <Link className="landing-primary-action" href="/request">
@@ -204,7 +205,7 @@ export default function Home() {
         <section className="landing-closing" aria-labelledby="closing-title">
           <div className="landing-container landing-closing-inner">
             <div>
-              <span className="landing-eyebrow">Your products deserve a useful presence</span>
+              <span className="landing-eyebrow">Your production deserves a useful presence</span>
               <h2 id="closing-title">Bring your business into the next Expo.</h2>
               <p>
                 Tell us what you produce, where you operate, and how buyers should

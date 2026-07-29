@@ -33,6 +33,11 @@ function toBankProduct(product: Product): BankProductView {
     description: product.description,
     imageRef: product.image_path,
     availability: product.availability,
+    offeringKind: product.offering_kind,
+    quantityMode: product.quantity_mode,
+    capacitySummary: product.capacity_summary,
+    minimumOrderSummary: product.minimum_order_summary,
+    leadTimeSummary: product.lead_time_summary,
   };
 }
 
