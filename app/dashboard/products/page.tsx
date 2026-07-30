@@ -1,9 +1,11 @@
 import Link from "next/link";
+import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
+import PaginationNav from "@/components/PaginationNav";
 import ProductUpkeepList from "@/components/ProductUpkeepList";
 import { requireUser } from "@/lib/auth";
 import { resolveProductBusiness } from "@/lib/dashboard";
-import { getCatalogByBusinessId } from "@/lib/db";
+import { listProductsPage } from "@/lib/scalable-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +16,15 @@ export default async function ProductsPage({
     business?: string;
     saved?: string;
     error?: string;
+    page?: string;
+    q?: string;
   }>;
 }) {
   const user = await requireUser();
   const query = await searchParams;
   const business = resolveProductBusiness(user, query.business);
   if (!business) return null;
-  const catalog = getCatalogByBusinessId(business.id, true)!;
+  const products = listProductsPage(business.id, query, true);
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
@@ -50,15 +54,25 @@ export default async function ProductsPage({
         <p className="notice">Offering published in a retained showroom version.</p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
-      {catalog.products.length ? (
-        <ProductUpkeepList
-          products={catalog.products}
-          businessId={business.id}
-        />
+      <CollectionToolbar
+        action="/dashboard/products"
+        search={query.q || ""}
+        placeholder="Name, category, type, or availability"
+        hidden={{ business: business.id }}
+      />
+      {products.items.length ? (
+        <>
+          <ProductUpkeepList products={products.items} businessId={business.id} />
+          <PaginationNav
+            result={products}
+            pathname="/dashboard/products"
+            params={{ business: business.id, q: query.q }}
+          />
+        </>
       ) : (
         <section className="empty-state">
-          <h2>No offerings yet</h2>
-          <p>Add the first product or capability to this established showroom.</p>
+          <h2>{query.q ? "No matching offerings" : "No offerings yet"}</h2>
+          <p>{query.q ? "Try a broader search." : "Add the first product or capability to this established showroom."}</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}

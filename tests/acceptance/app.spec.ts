@@ -47,6 +47,26 @@ async function expectVisibleControlsNamed(page: Page) {
   );
   expect(unnamed).toEqual([]);
 }
+async function horizontalOverflowingElements(page: Page) {
+  return page.locator("body *").evaluateAll((elements) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    return elements.flatMap((element) => {
+      const rect = element.getBoundingClientRect();
+      if (rect.right <= viewportWidth + 0.5 && rect.left >= -0.5) return [];
+      const style = getComputedStyle(element);
+      const parentStyle = element.parentElement ? getComputedStyle(element.parentElement) : null;
+      if (parentStyle?.overflowX === "auto" || parentStyle?.overflowX === "scroll") return [];
+      return [{
+        tag: element.tagName.toLowerCase(),
+        className: element.className,
+        left: Math.round(rect.left),
+        right: Math.round(rect.right),
+        width: Math.round(rect.width),
+        overflowX: style.overflowX,
+      }];
+    }).slice(0, 12);
+  });
+}
 async function loginAndChangePassword(page: Page, email: string, nextPassword: string) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
@@ -118,7 +138,7 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
   await expect(page.getByRole("tab", { name: "Map View" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "List View" })).toBeVisible();
   await expect(page.locator(".expo-regions path")).toHaveCount(14);
-  await expect(page.locator(".expo-hub")).toHaveCount(2);
+  await expect(page.locator(".expo-hub")).toHaveCount(5);
   await expect(page.getByRole("heading", { name: "Bring your business into the next Expo." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
@@ -126,16 +146,16 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
   await expect(page.getByLabel("Category selector")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "All businesses" })).toHaveCount(0);
   await expect(page.locator(".market-showrooms .market-heading-link")).toHaveCount(0);
-  await page.getByRole("button", { name: "All industries" }).click();
+  await page.getByRole("link", { name: "All industries" }).click();
   await expect(page.locator(".market-showroom-card")).toHaveCount(5);
   expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
-  await page.locator(".directory-filters button").nth(1).click();
+  await page.locator(".directory-filters a").nth(1).click();
   expect(await page.locator(".market-showroom-card").count()).toBeGreaterThan(0);
   expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
   expect(await page.locator(".market-showroom-card").first().evaluate((card) => card.getBoundingClientRect().width)).toBeLessThanOrEqual(280);
-  await page.getByRole("button", { name: "All industries" }).click();
+  await page.getByRole("link", { name: "All industries" }).click();
   await expect(page.locator(".market-featured-label")).toHaveCount(5);
-  await expect(page.getByRole("button", { name: "Next showroom page" })).toBeEnabled();
+  await expect(page.getByRole("link", { name: "Next page" })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByLabel("Open public navigation").click();
@@ -452,16 +472,16 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await expect(page.getByRole("heading", { name: "Find today's Expo host cities." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Enterprise & Export Showcase" })).toBeVisible();
   await expect(page.locator(".expo-regions path")).toHaveCount(14);
-  await expect(page.locator(".expo-hub")).toHaveCount(2);
-  await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(3);
-  await page.getByLabel("Jump to a host city").selectOption({ label: "Dire Dawa, Dire Dawa urban · 2 booths" });
+  await expect(page.locator(".expo-hub")).toHaveCount(5);
+  await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(6);
+  await page.getByLabel("Jump to a host city").selectOption({ label: "Dire Dawa, Dire Dawa urban · 3 booths" });
   const contextualStage = page.locator(".expo-map-stage-venue");
   await expect(contextualStage).toBeVisible();
   await expect(contextualStage.locator(".expo-map")).toBeVisible();
   await expect(contextualStage.locator(".expo-regions path")).toHaveCount(14);
   await expect(contextualStage.getByText("Virtual Expo anchored in")).toBeVisible();
   await expect(contextualStage.locator(".expo-city-context strong")).toHaveText("Dire Dawa");
-  await expect(page.locator(".expo-venue-booth")).toHaveCount(2);
+  await expect(page.locator(".expo-venue-booth")).toHaveCount(3);
   await expect(page.getByText("Entrance")).toBeVisible();
   await expect(page.getByText("Reception")).toBeVisible();
   const dawaBooth = page.getByRole("button", { name: /Select Dawa Water Solutions, H\d+\.1-B\d+/ });
@@ -481,8 +501,8 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await page.getByRole("button", { name: "Center today's Expos" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List View" }).click();
-  await expect(page.locator(".expo-list-card")).toHaveCount(4);
-  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(4);
+  await expect(page.locator(".expo-list-card")).toHaveCount(16);
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(16);
   await expect(page.locator(".expo-list-card").filter({ hasText: "Dawa Water Solutions" }).getByText(dawaReference)).toBeVisible();
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
@@ -514,11 +534,14 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole("link", { name: "Expo controls" }).click();
   await expect(page.getByRole("heading", { name: "Expo controls" })).toBeVisible();
+  await page.getByLabel("Search").fill("Dawa Water Solutions");
+  await page.getByRole("button", { name: "Apply" }).click();
   const dawaRow = page.getByRole("row").filter({ hasText: "Dawa Water Solutions" }).first();
   await expect(dawaRow.getByText("Expo eligible")).toBeVisible();
-  await dawaRow.getByLabel("Featured").check();
-  await dawaRow.getByRole("button", { name: "Save Expo profile" }).click();
-  await expect(page.getByText("Expo controls saved.")).toBeVisible();
+  await dawaRow.getByRole("link", { name: "Edit profile" }).click();
+  await page.getByLabel("Featured showroom").check();
+  await page.getByRole("button", { name: "Save Expo profile" }).click();
+  await expect(page.getByText("Expo profile saved")).toBeVisible();
   await page.goto("/expo");
   await page.getByRole("tab", { name: "List View" }).click();
   await expect(
@@ -573,7 +596,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/dashboard/products?business=1");
   await expect(page.getByRole("heading",{name:"Products & capabilities"})).toBeVisible();
-  await page.getByRole("link",{name:"Edit basic details"}).first().click();
+  await page.getByRole("link",{name:"Edit"}).first().click();
   await expect(page.getByLabel("Customer-service note")).toBeVisible();
   await expect(page.getByLabel("Sort order")).toHaveCount(0);
   await expect(page.getByLabel("Publish in showroom")).toHaveCount(0);
@@ -596,9 +619,10 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByText("Invitation created.")).toBeVisible();
   const invitationUrl = await page.getByLabel("Single-use invitation link").inputValue();
   expect(invitationUrl).toMatch(/^https:\/\/suqpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
-  await page.goto("/dashboard/admin");
+  await page.goto("/dashboard/admin?view=staff");
   await expectVisibleControlsNamed(page);
   let staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.locator("summary").filter({hasText:"Create staff account"}).click();
   await staffPanel.getByLabel("Name").fill("Acceptance Operations");
   await staffPanel.getByLabel("Email").fill("operations@example.test");
   await staffPanel.getByLabel("Access role").selectOption("operations_manager");
@@ -606,6 +630,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await staffPanel.getByRole("button",{name:"Create staff account"}).click();
   await expect(page.getByText("Acceptance Operations")).toBeVisible();
   staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
+  await staffPanel.locator("summary").filter({hasText:"Create staff account"}).click();
   await staffPanel.getByLabel("Name").fill("Acceptance Team");
   await staffPanel.getByLabel("Email").fill("team@example.test");
   await staffPanel.getByLabel("Access role").selectOption("team_member");
@@ -626,9 +651,10 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.goto("/preview/@acceptanceflowers");
   await expect(page.locator(".showroom")).toBeVisible();
   await page.goto("/dashboard/requests/on-behalf");
-  await page.getByLabel(/Existing managed client/).selectOption({
-    label: "Selam Weave Studio · Selam Weave Studio Client · selam-weave@suqpage.local",
-  });
+  const selamPicker = page.locator(".client-picker");
+  await selamPicker.getByLabel("Search").fill("Selam Weave Studio");
+  await selamPicker.getByRole("button", { name: "Apply" }).click();
+  await page.getByRole("row").filter({ hasText: "Selam Weave Studio" }).getByRole("link", { name: "Select" }).click();
   await page.getByLabel("Client’s instruction").fill(
     "Please prepare a more expressive private showroom direction for administrator review.",
   );
@@ -693,7 +719,10 @@ test("operations manager records on behalf and team member sees only assigned wo
   await expect(page.getByRole("link",{name:"SaaS administration"})).toHaveCount(0);
   await page.getByRole("link",{name:"Record on behalf"}).first().click();
   await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
-  await page.getByLabel(/Existing managed client/).selectOption({label:"Acceptance Market · Acceptance Client · acceptance-client@example.test"});
+  const clientPicker = page.locator(".client-picker");
+  await clientPicker.getByLabel("Search").fill("Acceptance Market");
+  await clientPicker.getByRole("button",{name:"Apply"}).click();
+  await page.getByRole("row").filter({hasText:"Acceptance Market"}).getByRole("link",{name:"Select"}).click();
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
   await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and featured collection for review.");
   await page.getByLabel(/Available reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
@@ -907,11 +936,16 @@ test("seeded client is restricted while operations manages customer activity", a
   await expect(page.getByText(/Offering published successfully as showroom version/)).toBeVisible();
   await page.goto("/dashboard/products");
   await expect(page.getByRole("heading",{name:"Products & capabilities"})).toBeVisible();
-  await page.getByLabel("Find an offering").fill("Client browser");
-  await expect(page.getByRole("heading",{name:"Client browser product"})).toBeVisible();
-  await expect(page.getByText(/Showing 1 of/)).toBeVisible();
+  await page.getByLabel("Search").fill("Client browser");
+  await page.getByRole("button",{name:"Apply"}).click();
+  await expect(page.getByText("Client browser product",{exact:true})).toBeVisible();
+  await expect(page.getByText(/Showing 1-1 of 1/)).toBeVisible();
   await page.setViewportSize({width:390,height:844});
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const overflowDiagnostics = await horizontalOverflowingElements(page);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    `Unexpected horizontal overflow: ${JSON.stringify(overflowDiagnostics)}`,
+  ).toBe(true);
   const menuButton = page.getByRole("button",{name:"Open workspace menu"});
   await expect(menuButton).toBeVisible();
   await menuButton.click();
@@ -943,6 +977,8 @@ test("seeded client is restricted while operations manages customer activity", a
   await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
   await page.goto("/dashboard/inquiries?business=1");
   await expectVisibleControlsNamed(page);
+  await page.getByLabel("Search").fill("Hana");
+  await page.getByRole("button",{name:"Apply"}).click();
   const row = page.locator("section.panel").filter({ hasText: "Hana" });
   await row.getByRole("combobox").selectOption("confirmed");
   await row.getByRole("button", { name: "Update" }).click();

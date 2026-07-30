@@ -82,7 +82,7 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   if (!ready) throw new Error("Acceptance server did not become ready.");
-  run(process.execPath, ["node_modules/@playwright/test/cli.js", "test"]);
+  run(process.execPath, ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)]);
 } finally {
   await stop();
   fs.rmSync(root, { recursive: true, force: true });

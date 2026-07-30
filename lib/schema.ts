@@ -1212,4 +1212,40 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const scalableCollectionsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=20")
+    .get();
+  if (!scalableCollectionsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE INDEX IF NOT EXISTS business_status_name_idx
+          ON businesses(status,name,id);
+        CREATE INDEX IF NOT EXISTS user_business_idx
+          ON users(business_id,id);
+        CREATE INDEX IF NOT EXISTS access_profile_role_user_idx
+          ON user_access_profiles(access_role,user_id);
+        CREATE INDEX IF NOT EXISTS product_business_published_order_idx
+          ON products(business_id,is_published,sort_order,id);
+        CREATE INDEX IF NOT EXISTS inquiry_business_status_created_idx
+          ON inquiries(business_id,status,created_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS delivery_business_status_created_idx
+          ON delivery_requests(business_id,status,created_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS request_status_updated_idx
+          ON service_requests(status,updated_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS request_business_updated_idx
+          ON service_requests(business_id,updated_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS request_assignee_updated_idx
+          ON service_requests(assigned_user_id,updated_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS bazaar_profile_featured_business_idx
+          ON bazaar_booth_profiles(is_featured,is_excluded,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(20)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

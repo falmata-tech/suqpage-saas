@@ -1,4 +1,5 @@
 import { DENSE_DEMO_BUSINESSES } from "./dense-demo-seed";
+import { SCALE_DEMO_BUSINESSES, scaleDemoBusiness } from "./scale-demo-seed";
 
 export type SeededExpoProfile = {
   industryKeys: string[];
@@ -264,8 +265,16 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
       },
     ]),
   ),
+  ...Object.fromEntries(
+    SCALE_DEMO_BUSINESSES.map((business) => [
+      business.handle,
+      business.profile,
+    ]),
+  ),
 };
 
 export function seededExpoBoothPath(handle: string) {
+  const scaleDemo = scaleDemoBusiness(handle);
+  if (scaleDemo) return scaleDemo.boothPath;
   return `/landing/expo-booths/${handle}.webp`;
 }

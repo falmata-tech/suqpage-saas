@@ -96,20 +96,20 @@ export async function updateBusinessAction(formData:FormData){
 export async function adminUpdateBusinessAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const businessId=int(formData,"businessId"),status=text(formData,"status",20),business=getBusinessById(businessId);
-  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin",{error:"Only an established showroom can be suspended or restored."});
+  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin",{view:"businesses",error:"Only an established showroom can be suspended or restored."});
   getDb().prepare("UPDATE businesses SET status=? WHERE id=?").run(status,businessId);
   audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
-  revalidatePath("/");go("/dashboard/admin",{saved:1});
+  revalidatePath("/");go("/dashboard/admin",{view:"businesses",saved:1});
 }
 
 export async function adminResetClientPasswordAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
   const target=getDb().prepare("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'").get(userId) as any;
-  if(!target||!isStrongPassword(password))go("/dashboard/admin",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
+  if(!target||!isStrongPassword(password))go("/dashboard/admin",{view:"clients",error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(bcrypt.hashSync(password,12),userId);
   revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
-  go("/dashboard/admin",{saved:"password"});
+  go("/dashboard/admin",{view:"clients",saved:"password"});
 }
 
 export async function createCategoryAction(formData:FormData){
@@ -194,7 +194,7 @@ export async function basicProductUpkeepAction(formData:FormData){
   go(`/dashboard/products/${result.productId}`,{business:businessId,saved:1,version:result.contentVersion});
 }
 
-export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1});}
+export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined});}
 
 export async function createDeliveryRequestAction(formData:FormData){
   const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));

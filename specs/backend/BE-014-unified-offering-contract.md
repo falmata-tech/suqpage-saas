@@ -2,7 +2,7 @@
 id: BE-014
 title: Tenant-scoped unified offering contract
 status: done
-related: [BE-001, BE-007, BE-008, BE-009, BE-013, FE-016, DEP-012]
+related: [BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, DEP-012]
 owners: [product, backend, security]
 last_updated: 2026-07-29
 change_level: L3

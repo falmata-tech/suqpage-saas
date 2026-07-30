@@ -2,7 +2,7 @@
 id: DEP-013
 title: Dense Expo demo fixtures
 status: done
-related: [FE-009, FE-010, FE-012, FE-015, BE-010, BE-011, DEP-009, DEP-010, DEP-011, DEP-012]
+related: [FE-009, FE-010, FE-012, FE-015, BE-010, BE-011, DEP-009, DEP-010, DEP-011, DEP-012, DEP-014]
 owners: [operations, product, design, qa]
 last_updated: 2026-07-30
 change_level: L2

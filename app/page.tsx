@@ -1,13 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import ExpoMap from "@/components/ExpoMap";
-import ShowroomDirectory, {
-  type ShowroomDirectoryEntry,
-} from "@/components/ShowroomDirectory";
+import ShowroomDirectory from "@/components/ShowroomDirectory";
 import SuqPageBrand from "@/components/SuqPageBrand";
-import { listBazaarAdminState } from "@/lib/bazaar";
-import { getAllBusinesses, getCatalogByBusinessId } from "@/lib/db";
+import { listBazaarThemes } from "@/lib/bazaar";
 import { getCurrentExpo } from "@/lib/expo";
+import {
+  listPublicIndustries,
+  listPublicShowrooms,
+} from "@/lib/scalable-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -22,49 +23,32 @@ const scheduleMarks: Record<string, string> = {
   star: "07",
 };
 
-export default function Home() {
-  const businesses = getAllBusinesses().filter(
-    (business) => business.status === "active",
-  );
-  const legacyAdminState = listBazaarAdminState();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    showroomPage?: string;
+    showroomQ?: string;
+    showroomIndustry?: string;
+    showroomSort?: string;
+  }>;
+}) {
+  const query = await searchParams;
+  const directoryQuery = String(query.showroomQ || "");
+  const directoryIndustry = String(query.showroomIndustry || "all");
+  const directorySort = query.showroomSort === "handle" ? "handle" : "name";
+  const directory = listPublicShowrooms({
+    page: query.showroomPage,
+    q: directoryQuery,
+    industry: directoryIndustry,
+    sort: directorySort,
+  });
+  const industries = listPublicIndustries();
+  const expoThemes = listBazaarThemes();
   const expo = getCurrentExpo();
-  const schedule = [...legacyAdminState.themes].sort(
+  const schedule = [...expoThemes].sort(
     (left, right) => (left.weekday || 7) - (right.weekday || 7),
   );
-  const profilesByBusinessId = new Map(
-    legacyAdminState.profiles.map((profile) => [profile.businessId, profile]),
-  );
-
-  const directoryEntries: ShowroomDirectoryEntry[] = businesses.map((business) => {
-    const catalog = getCatalogByBusinessId(business.id);
-    const profile = profilesByBusinessId.get(business.id);
-    const industry = profile?.industryLabel || "Enterprise & Export";
-    const searchable = [
-      business.name,
-      business.handle,
-      business.tagline,
-      business.description,
-      business.hero_title,
-      business.hero_subtitle,
-      industry,
-      ...(catalog?.categories || []).map((item) => item.name),
-      ...(catalog?.products || []).map(
-        (item) =>
-          `${item.name} ${item.eyebrow} ${item.description} ${item.category_name || ""} ${item.offering_kind} ${item.capacity_summary} ${item.minimum_order_summary} ${item.lead_time_summary}`,
-      ),
-    ].join(" ").toLowerCase();
-    return {
-      id: business.id,
-      handle: business.handle,
-      name: business.name,
-      tagline: business.tagline,
-      imageUrl: business.hero_image_path || business.logo_path || "",
-      industry,
-      searchText: searchable,
-      featured: Boolean(profile?.featured),
-    };
-  });
-
   return (
     <div className="landing-home" id="top">
       <header className="landing-header">
@@ -195,7 +179,13 @@ export default function Home() {
                 showroom. Featured businesses appear first inside the same result set.
               </p>
             </div>
-            <ShowroomDirectory entries={directoryEntries} />
+            <ShowroomDirectory
+              result={directory}
+              industries={industries}
+              query={directoryQuery}
+              industry={directoryIndustry}
+              sort={directorySort}
+            />
           </div>
         </section>
 

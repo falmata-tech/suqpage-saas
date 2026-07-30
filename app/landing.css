@@ -371,7 +371,8 @@
   margin-block: 18px 30px;
 }
 
-.landing-home .directory-filters button {
+.landing-home .directory-filters button,
+.landing-home .directory-filters a {
   min-height: 42px;
   border-radius: 999px;
   border-color: #d4d0d9;
@@ -384,7 +385,8 @@
   height: 42px;
 }
 
-.landing-home .directory-filters button.active {
+.landing-home .directory-filters button.active,
+.landing-home .directory-filters a.active {
   border-color: var(--landing-ink);
   background: var(--landing-ink);
   color: #fff;

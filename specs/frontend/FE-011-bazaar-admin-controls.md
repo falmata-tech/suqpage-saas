@@ -2,7 +2,7 @@
 id: FE-011
 title: Expo administration controls
 status: done
-related: [FE-010, BE-012, DEP-010]
+related: [FE-010, FE-017, BE-012, DEP-010]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L2
@@ -93,7 +93,9 @@ Scenario: Administrator enters invalid coordinates
   inputs and buttons are labeled.
 - Localization and merchant-entered values: business names and handles are
   displayed verbatim and wrap in cells.
-- Performance and limits: admin tables are bounded to current pilot scale.
+- Performance and limits: the Expo profile list uses 20-row server pagination,
+  bounded search/status filters, and compact summaries; one business-specific
+  route loads the complete authorized edit form.
 - Failure recovery and idempotency: saving a form twice does not duplicate
   occurrences or booths.
 

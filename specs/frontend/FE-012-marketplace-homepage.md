@@ -2,7 +2,7 @@
 id: FE-012
 title: Visual marketplace homepage
 status: done
-related: [FE-001, FE-010, FE-013, FE-015, BE-011, DEP-010, DEP-011, DEP-013]
+related: [FE-001, FE-010, FE-013, FE-015, FE-017, BE-011, DEP-010, DEP-011, DEP-013]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L1
@@ -103,9 +103,10 @@ Scenario: Landing page feels like one public product
 
 ## Contracts
 
-- The homepage server component supplies active businesses and the current
-  Bazaar view; client components may filter or change display mode but do not
-  determine eligibility.
+- The homepage server component supplies one database-filtered five-showroom
+  page, lightweight Expo profile themes, and the current Expo view. Client
+  components may change Expo display mode but do not receive the complete
+  business/catalog collection or determine eligibility.
 - The desktop composition follows the approved order: header, hero, concise
   benefits, one Expo workspace containing calendar then map, All Showrooms,
   final CTA, footer. There is no separate schedule chapter, process section, or
@@ -283,6 +284,8 @@ passed.
 
 On 2026-07-30, featured emphasis was narrowed from every active showroom to ten
 explicitly curated reset profiles. The homepage now reads the persisted profile
-flag, while all 48 active businesses remain in search and pagination.
+flag. FE-017 and DEP-014 subsequently expanded the disposable account to 120
+active businesses while keeping exactly ten featured; all 120 remain available
+through database-backed search and five-result pagination.
 `npm run test:marketplace-home`, `npm run test:benchmarks`, `npm run check`,
 `npm run test:acceptance` (10/10), and `npm run release` passed.

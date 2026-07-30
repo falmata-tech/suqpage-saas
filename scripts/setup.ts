@@ -11,7 +11,9 @@ import {
   type DenseDemoOfferingKind,
 } from "../lib/dense-demo-seed";
 import { seededExpoBoothPath } from "../lib/expo-seed";
+import type { OfferingKind, QuantityMode } from "../lib/offerings";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
+import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import { migrateDatabase } from "../lib/schema";
 import type {
   Business,
@@ -96,10 +98,26 @@ const denseDemoBusinessRows = DENSE_DEMO_BUSINESSES.map((business) => ({
   tiktok: "",
 }));
 
+const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
+  handle: business.handle,
+  name: business.name,
+  tagline: business.tagline,
+  description: business.description,
+  logo_path: "",
+  hero_title: business.heroTitle,
+  hero_subtitle: business.heroSubtitle,
+  hero_image_path: business.heroPath,
+  contact_email: `${business.handle}@demo.suqpage.local`,
+  whatsapp: "",
+  telegram: "",
+  tiktok: "",
+}));
+
 const businesses = [
   ...benchmarkBusinesses,
   ...additionalBusinesses,
   ...denseDemoBusinessRows,
+  ...scaleDemoBusinessRows,
 ];
 const productionSupplyBusinesses = new Set([
   "green-terrace-farm",
@@ -387,6 +405,42 @@ for (const business of DENSE_DEMO_BUSINESSES) {
   );
 }
 
+for (const business of SCALE_DEMO_BUSINESSES) {
+  const offerings = [...business.offerings];
+  if (business === SCALE_DEMO_BUSINESSES[0]) {
+    for (let index = 1; index <= 22; index += 1) {
+      offerings.push({
+        name: `Production Input ${String(index).padStart(2, "0")}`,
+        category: "Inputs",
+        description: `A fictional repeat electrical input used to exercise a multi-page offering catalog (${index}).`,
+        kind: "production_supply",
+      });
+    }
+  }
+  seedCatalog(
+    business.handle,
+    [...new Set(offerings.map((offering) => offering.category))],
+    offerings.map((offering) => ({
+      name: offering.name,
+      category: offering.category,
+      eyebrow: offering.category,
+      description: offering.description,
+      slug: offering.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, ""),
+      image: "",
+      offeringKind: offering.kind,
+      quantityMode: "optional",
+      ...denseOfferingProfile(offering.kind),
+      options:
+        offering.kind === "manufacturing_capability"
+          ? []
+          : [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+    })),
+  );
+}
+
 const seededGroupQuery = db.prepare(
   "SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id",
 );
@@ -444,22 +498,123 @@ const generatedCredentials: Array<{ role:string; business:string; email:string; 
 const generatePassword = () => crypto.randomBytes(18).toString("base64url");
 const addUser = db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,?,?,?,?,1)");
 const addAccessProfile = db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)");
-function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client",business:string,email:string,name:string,businessId:number|null){
+function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client"|"team_member"|"operations_manager",business:string,email:string,name:string,businessId:number|null){
   const password=generatePassword();
   const userId = Number(addUser.run(email,bcrypt.hashSync(password,12),name,role,businessId).lastInsertRowid);
   addAccessProfile.run(userId,accessRole);
-  generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : "CLIENT",business,email,password});
+  generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : accessRole === "client" ? "CLIENT" : "STAFF",business,email,password});
+  return userId;
 }
-seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
-for (const business of [...benchmarkBusinesses, ...additionalBusinesses]) {
-  seedUser(
+const adminUserId = seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
+const clientUsersByHandle = new Map<string, number>();
+for (const business of [...benchmarkBusinesses, ...additionalBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
+  clientUsersByHandle.set(business.handle, seedUser(
     "owner",
     "client",
     business.name,
     `${business.handle}@suqpage.local`,
     `${business.name} Client`,
     seeded.get(business.handle)!,
-  );
+  ));
+}
+
+const operationsStaff = ["Mekdes Operations", "Samuel Operations", "Rahel Operations", "Dawit Operations"]
+  .map((name, index) => seedUser("admin", "operations_manager", "SuqPage", `operations-${index + 1}@demo.suqpage.local`, name, null));
+const teamStaff = ["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
+  .map((name, index) => seedUser("admin", "team_member", "SuqPage", `team-${index + 1}@demo.suqpage.local`, name, null));
+
+const lifecycleStatuses = [
+  "submitted",
+  "under_review",
+  "needs_information",
+  "approved_for_work",
+  "in_progress",
+  "client_review",
+  "client_approved",
+  "published",
+  "completed",
+  "rejected",
+  "cancelled",
+] as const;
+const lifecycleHandles = [...clientUsersByHandle.keys()];
+const addServiceRequest = db.prepare(`
+  INSERT INTO service_requests(
+    public_ref,business_id,represented_client_user_id,request_type,status,
+    contact_name,contact_value,business_name,request_text,submitter_kind,
+    submitted_by_user_id,assigned_user_id,idempotency_key,notification_state,
+    created_at,updated_at
+  ) VALUES(?,?,?,'change',?,?,?,?,?,'client',?,?,?,'not_required',
+    datetime('now',?),datetime('now',?))
+`);
+const addRequestEvent = db.prepare(
+  "INSERT INTO request_events(request_id,actor_user_id,event_type,detail,created_at) VALUES(?,?,?,?,datetime('now',?))",
+);
+const addAssignment = db.prepare(`
+  INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active)
+  VALUES(?,?,?,1)
+  ON CONFLICT(user_id,business_id) DO UPDATE SET active=1,assigned_by_user_id=excluded.assigned_by_user_id
+`);
+const addLifecycleRevision = db.prepare(`
+  INSERT INTO content_revisions(
+    request_id,business_id,revision_number,base_content_version,status,
+    snapshot_json,snapshot_schema_version,summary,created_by_user_id,
+    submitted_at,decided_by_user_id,decision_comment,decided_at,
+    published_by_user_id,published_at,published_content_version
+  ) VALUES(?,?,1,1,?,?,4,?,?,CURRENT_TIMESTAMP,?,?,CURRENT_TIMESTAMP,?,?,?)
+`);
+
+for (let index = 0; index < 66; index += 1) {
+  const handle = lifecycleHandles[index % lifecycleHandles.length];
+  const businessId = seeded.get(handle)!;
+  const clientUserId = clientUsersByHandle.get(handle)!;
+  const status = lifecycleStatuses[index % lifecycleStatuses.length];
+  const terminal = ["completed", "rejected", "cancelled"].includes(status);
+  const assignedUserId = terminal ? null : teamStaff[index % teamStaff.length];
+  const age = `-${66 - index} hours`;
+  const requestId = Number(addServiceRequest.run(
+    `DEMO-${String(index + 1).padStart(5, "0")}`,
+    businessId,
+    clientUserId,
+    status,
+    `${handle} client`,
+    `${handle}@suqpage.local`,
+    businesses.find((business) => business.handle === handle)!.name,
+    `Fictional ${status.replaceAll("_", " ")} showroom request used to exercise the operations queue.`,
+    clientUserId,
+    assignedUserId,
+    `demo-lifecycle-${index + 1}`,
+    age,
+    age,
+  ).lastInsertRowid);
+  addRequestEvent.run(requestId, clientUserId, "submitted", "fictional demo request", age);
+  if (status !== "submitted") {
+    addRequestEvent.run(requestId, assignedUserId || operationsStaff[0], "status_changed", `submitted->${status}`, age);
+  }
+  if (assignedUserId) addAssignment.run(assignedUserId, businessId, adminUserId);
+  if (["client_review", "client_approved", "published"].includes(status)) {
+    const retained = db.prepare(
+      "SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=1",
+    ).get(businessId) as { snapshot_json: string };
+    const revisionStatus =
+      status === "client_review"
+        ? "awaiting_review"
+        : status === "client_approved"
+          ? "approved"
+          : "published";
+    addLifecycleRevision.run(
+      requestId,
+      businessId,
+      revisionStatus,
+      retained.snapshot_json,
+      `Fictional ${revisionStatus.replaceAll("_", " ")} revision`,
+      assignedUserId || teamStaff[index % teamStaff.length],
+      status === "client_review" ? null : clientUserId,
+      status === "client_review" ? "" : "Approved in the fictional demo workflow.",
+      status === "published" ? operationsStaff[index % operationsStaff.length] : null,
+      status === "published" ? new Date().toISOString() : null,
+      status === "published" ? 1 : null,
+    );
+  }
 }
 
 const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_area) VALUES(?,?,?)");
@@ -475,6 +630,71 @@ for (const [handle, customer] of businesses.slice(0, 4).map((business, index) =>
   const iid = Number(inquiry.run(businessId, customer, "251911000000", "whatsapp", "Seed inquiry for local testing.", "new", `seed-${handle}`).lastInsertRowid);
   const product = db.prepare("SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 1").get(businessId) as any;
   inquiryItem.run(iid, product.id, product.name, null, "1 unit", product.offering_kind, product.quantity_mode, JSON.stringify({}));
+}
+
+const denseInquiryIds: number[] = [];
+const denseInquiryBusinessId = seeded.get("selam-weave")!;
+const denseInquiryProduct = db.prepare(
+  "SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 1",
+).get(denseInquiryBusinessId) as {
+  id: number;
+  name: string;
+  offering_kind: OfferingKind;
+  quantity_mode: QuantityMode;
+};
+const inquiryStatuses = ["new", "contacted", "confirmed", "closed", "cancelled"] as const;
+for (let index = 1; index <= 36; index += 1) {
+  const inquiryId = Number(inquiry.run(
+    denseInquiryBusinessId,
+    `Demo Buyer ${String(index).padStart(2, "0")}`,
+    `demo-buyer-${index}@example.test`,
+    "email",
+    `Fictional inquiry ${index} used to exercise server pagination.`,
+    inquiryStatuses[(index - 1) % inquiryStatuses.length],
+    `scale-inquiry-${index}`,
+  ).lastInsertRowid);
+  denseInquiryIds.push(inquiryId);
+  inquiryItem.run(
+    inquiryId,
+    denseInquiryProduct.id,
+    denseInquiryProduct.name,
+    null,
+    index % 3 === 0 ? "1 ton" : `${index} units`,
+    denseInquiryProduct.offering_kind,
+    denseInquiryProduct.quantity_mode,
+    JSON.stringify({}),
+  );
+}
+
+const addDelivery = db.prepare(`
+  INSERT INTO delivery_requests(
+    business_id,inquiry_id,customer_name,phone,pickup_address,delivery_address,
+    package_count,note,status,external_request_id
+  ) VALUES(?,?,?,?,?,?,?,?,?,?)
+`);
+const addDeliveryCompany = db.prepare(
+  "INSERT INTO delivery_request_companies(delivery_request_id,company_id,status) VALUES(?,?,'sent')",
+);
+const primaryDeliveryCompany = (
+  db.prepare("SELECT id FROM delivery_companies ORDER BY id LIMIT 1").get() as {
+    id: number;
+  }
+).id;
+const deliveryStatuses = ["submitted", "viewed", "accepted", "driver_assigned", "picked_up", "delivered", "cancelled"] as const;
+for (let index = 1; index <= 28; index += 1) {
+  const deliveryId = Number(addDelivery.run(
+    denseInquiryBusinessId,
+    denseInquiryIds[index - 1],
+    `Demo Buyer ${String(index).padStart(2, "0")}`,
+    `251911${String(index).padStart(6, "0")}`,
+    "Selam Weave demo pickup",
+    `Demo destination ${index}, Addis Ababa`,
+    (index % 4) + 1,
+    "Fictional delivery history for pagination testing.",
+    deliveryStatuses[(index - 1) % deliveryStatuses.length],
+    `DEMO-DELIVERY-${String(index).padStart(4, "0")}`,
+  ).lastInsertRowid);
+  addDeliveryCompany.run(deliveryId, primaryDeliveryCompany);
 }
 
 const credentialPath=path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));

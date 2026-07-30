@@ -88,10 +88,11 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a public discovery surface where eligible businesses can appear in a themed
   Daily Expo while every booth leads back to the business's permanent
   `/@handle` showroom;
-- a controlled SaaS pilot with 48 fictional local showrooms spanning makers,
+- a controlled SaaS pilot with 120 fictional local showrooms spanning makers,
   producers, farms, workshops, manufacturers, and production-input suppliers;
-  28 remain the curated visual benchmark set while 20 simple reset-only
-  fixtures exercise a dense Expo day.
+  28 remain the curated visual benchmark set, 20 simple fixtures exercise a
+  dense Manufacturing Expo, and 72 scale fixtures exercise every Expo day and
+  high-volume operations workflow.
 
 ### SuqPage is not
 
@@ -230,6 +231,8 @@ searchable, Industry-filtered permanent-showroom directory. The directory
 renders at most five matching showrooms per page, uses one horizontally
 scrollable Industry pill row instead of category controls or duplicate
 all-business navigation, and resets pagination when search or Industry changes.
+Its count, search, Industry filter, sort, and five-card page are resolved in
+SQLite; the browser never receives every business or a full catalog fan-out.
 
 The Expo uses a locally stored and attributed Ethiopia administrative-boundary
 asset with a proven geographic projection and bounded SVG pan/zoom. The country
@@ -320,13 +323,16 @@ components, catalog modes, and mobile behaviors intentionally vary. Generated
 benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
-The wider disposable seed contains 18 additional authored visual showrooms and
-20 deliberately simple dense-demo showrooms. The dense cohort has three
-offerings per business, managed local hero media, project-owned Expo booth
-media, and Addis Ababa locations that make Thursday's Manufacturing, Tools &
-Production Inputs Expo contain 24 participants across two host cities. Addis
-Ababa hosts 22 of them in two bounded halls of 12 and 10. These are stress and
-demonstration fixtures, not finished client designs.
+The wider disposable seed contains 18 additional authored visual showrooms, 20
+deliberately simple dense-demo showrooms, and 72 lightweight scale showrooms.
+The dense cohort has three offerings per business, managed local hero media,
+project-owned Expo booth media, and locations that make Thursday's
+Manufacturing, Tools & Production Inputs Expo contain 24 participants. The
+scale cohort distributes 12 businesses across each of the six Expo themes that
+needed more density. Sunday through Wednesday and Friday through Saturday each
+contain 16 eligible booths; Thursday contains 24. Every hall remains bounded to
+12 booths. These are stress and demonstration fixtures, not finished client
+designs.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important
@@ -794,6 +800,13 @@ Current verified behavior:
   dashboard. The public site is a separate, explicit link, and an authenticated
   visit to the login route returns to the dashboard instead of showing a second
   sign-in form.
+- High-volume dashboard collections use bounded server queries: five public
+  showroom cards or 20 authorized workspace rows per page. Businesses, clients,
+  staff, requests, products, inquiries, deliveries, and Expo profiles have
+  linkable search/filter state, accurate counts, and focused record actions.
+  Business and staff selection never loads the complete account into a dropdown;
+  Expo administration edits one business-specific profile, and inquiry rows
+  include item summaries without per-row follow-up queries.
 - Platform-owned homepage, Expo, intake, login, legal, favicon, and workspace
   surfaces use one SuqPage mark and wordmark without replacing any tenant's
   showroom identity. Authenticated navigation groups role-permitted work in a

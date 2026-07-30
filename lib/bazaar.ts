@@ -1,6 +1,13 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
 import {
+  likePattern,
+  normalizePageRequest,
+  pageResult,
+  pageWindow,
+  type PageResult,
+} from "./pagination";
+import {
   SEEDED_EXPO_PROFILES,
   isSeededFeatured,
   seededExpoBoothPath,
@@ -17,7 +24,7 @@ const BOOTH_GAP = 44;
 const CORRIDOR_HEIGHT = 132;
 const ROW_GAP = 42;
 
-const INDUSTRY_LABELS: Record<string, string> = {
+export const INDUSTRY_LABELS: Record<string, string> = {
   electronics: "Electronics & Appliances",
   "beauty-wellness": "Beauty, Wellness & Natural Medicine",
   "food-farming": "Produce, Farming & Food",
@@ -162,6 +169,23 @@ export type BazaarAdminState = {
   current: CurrentBazaarView;
   themes: BazaarThemeAdminView[];
   profiles: BazaarProfileAdminView[];
+};
+
+type BazaarProfileRow = {
+  business_id: number;
+  name: string;
+  handle: string;
+  status: string;
+  industry_keys_json: string | null;
+  booth_image_path: string | null;
+  city: string | null;
+  zone: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  fallback_style: string | null;
+  is_featured: number | null;
+  is_excluded: number | null;
 };
 
 export class BazaarAdminError extends Error {
@@ -610,12 +634,21 @@ function themeAdmin(row: BazaarThemeRow & { active: number }): BazaarThemeAdminV
   };
 }
 
+export function listBazaarThemes(options: BazaarOptions = {}) {
+  const db = options.db || getDb();
+  seedDefaultBazaarConfig(db);
+  return (
+    db
+      .prepare("SELECT * FROM bazaar_themes ORDER BY weekday,id")
+      .all() as Array<BazaarThemeRow & { active: number }>
+  ).map(themeAdmin);
+}
+
 export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminState {
   const db = options.db || getDb();
   seedDefaultBazaarConfig(db);
   const current = getCurrentBazaar({ db, now: options.now });
-  const themes = (db.prepare("SELECT * FROM bazaar_themes ORDER BY weekday,id").all() as Array<BazaarThemeRow & { active: number }>)
-    .map(themeAdmin);
+  const themes = listBazaarThemes({ db });
   const boothByBusinessId = new Map(current.booths.map((booth) => [booth.businessId, booth]));
   const profiles = db.prepare(`
     SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
@@ -624,56 +657,142 @@ export function listBazaarAdminState(options: BazaarOptions = {}): BazaarAdminSt
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
     ORDER BY b.status='active' DESC,b.name,b.id
-  `).all() as Array<{
-    business_id: number;
-    name: string;
-    handle: string;
-    status: string;
-    industry_keys_json: string | null;
-    booth_image_path: string | null;
-    city: string | null;
-    zone: string | null;
-    region: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    fallback_style: string | null;
-    is_featured: number | null;
-    is_excluded: number | null;
-  }>;
+  `).all() as BazaarProfileRow[];
   return {
     current,
     themes,
-    profiles: profiles.map((profile) => {
-      const eligibilityIssues = [
-        ...(!profile.booth_image_path?.startsWith("/") ? ["booth image"] : []),
-        ...(!profile.city?.trim() ? ["city"] : []),
-        ...(!profile.zone?.trim() ? ["zone"] : []),
-        ...(!profile.region?.trim() ? ["region"] : []),
-        ...(typeof profile.latitude !== "number" || profile.latitude < -90 || profile.latitude > 90 ? ["latitude"] : []),
-        ...(typeof profile.longitude !== "number" || profile.longitude < -180 || profile.longitude > 180 ? ["longitude"] : []),
-      ];
-      return {
-        businessId: profile.business_id,
-        businessName: profile.name,
-        handle: profile.handle,
-        status: profile.status,
-        industryKeys: jsonArray(profile.industry_keys_json),
-        industryLabel: INDUSTRY_LABELS[jsonArray(profile.industry_keys_json)[0] || "community"] || "Enterprise & Export Showcase",
-        boothImagePath: profile.booth_image_path || "",
-        city: profile.city || "",
-        zone: profile.zone || "",
-        region: profile.region || "",
-        latitude: profile.latitude,
-        longitude: profile.longitude,
-        fallbackStyle: profile.fallback_style || "market",
-        featured: Boolean(profile.is_featured),
-        excluded: Boolean(profile.is_excluded),
-        eligible: profile.status === "active" && !profile.is_excluded && eligibilityIssues.length === 0,
-        eligibilityIssues,
-        booth: boothByBusinessId.get(profile.business_id) || null,
-      };
-    }),
+    profiles: profiles.map((profile) =>
+      bazaarProfileAdminView(
+        profile,
+        boothByBusinessId.get(profile.business_id) || null,
+      ),
+    ),
   };
+}
+
+function bazaarProfileAdminView(
+  profile: BazaarProfileRow,
+  booth: BazaarBoothView | null,
+): BazaarProfileAdminView {
+  const industryKeys = jsonArray(profile.industry_keys_json);
+  const eligibilityIssues = [
+    ...(!profile.booth_image_path?.startsWith("/") ? ["booth image"] : []),
+    ...(!profile.city?.trim() ? ["city"] : []),
+    ...(!profile.zone?.trim() ? ["zone"] : []),
+    ...(!profile.region?.trim() ? ["region"] : []),
+    ...(typeof profile.latitude !== "number" || profile.latitude < -90 || profile.latitude > 90 ? ["latitude"] : []),
+    ...(typeof profile.longitude !== "number" || profile.longitude < -180 || profile.longitude > 180 ? ["longitude"] : []),
+  ];
+  return {
+    businessId: profile.business_id,
+    businessName: profile.name,
+    handle: profile.handle,
+    status: profile.status,
+    industryKeys,
+    industryLabel:
+      INDUSTRY_LABELS[industryKeys[0] || "community"] ||
+      "Enterprise & Export Showcase",
+    boothImagePath: profile.booth_image_path || "",
+    city: profile.city || "",
+    zone: profile.zone || "",
+    region: profile.region || "",
+    latitude: profile.latitude,
+    longitude: profile.longitude,
+    fallbackStyle: profile.fallback_style || "market",
+    featured: Boolean(profile.is_featured),
+    excluded: Boolean(profile.is_excluded),
+    eligible:
+      profile.status === "active" &&
+      !profile.is_excluded &&
+      eligibilityIssues.length === 0,
+    eligibilityIssues,
+    booth,
+  };
+}
+
+export function listBazaarProfilesPage(input: {
+  page?: unknown;
+  q?: unknown;
+  status?: unknown;
+}, options: BazaarOptions = {}): PageResult<BazaarProfileAdminView> {
+  const db = options.db || getDb();
+  seedDefaultBazaarConfig(db);
+  const request = normalizePageRequest({ page: input.page, search: input.q });
+  const status = ["active", "draft", "suspended"].includes(String(input.status))
+    ? String(input.status)
+    : "";
+  const params: Array<string | number> = [];
+  let where = " WHERE 1=1";
+  if (status) {
+    where += " AND b.status=?";
+    params.push(status);
+  }
+  if (request.search) {
+    const pattern = likePattern(request.search);
+    where += ` AND (
+      lower(b.name) LIKE ? ESCAPE '\\'
+      OR lower(b.handle) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(p.city,'')) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(p.zone,'')) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(p.region,'')) LIKE ? ESCAPE '\\'
+    )`;
+    params.push(pattern, pattern, pattern, pattern, pattern);
+  }
+  const from = `
+    FROM businesses b
+    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id${where}`;
+  const totalItems = Number(
+    (
+      db.prepare(`SELECT COUNT(*) total ${from}`).get(...params) as {
+        total: number;
+      }
+    ).total,
+  );
+  const window = pageWindow(totalItems, request);
+  const current = getCurrentBazaar({ db, now: options.now });
+  const boothByBusinessId = new Map(
+    current.booths.map((booth) => [booth.businessId, booth]),
+  );
+  const rows = db.prepare(`
+    SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
+      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+      p.fallback_style,p.is_featured,p.is_excluded
+    ${from}
+    ORDER BY b.status='active' DESC,lower(b.name),b.id
+    LIMIT ? OFFSET ?
+  `).all(...params, window.limit, window.offset) as BazaarProfileRow[];
+  return pageResult(
+    rows.map((profile) =>
+      bazaarProfileAdminView(
+        profile,
+        boothByBusinessId.get(profile.business_id) || null,
+      ),
+    ),
+    totalItems,
+    request,
+  );
+}
+
+export function getBazaarProfileAdminView(
+  businessId: number,
+  options: BazaarOptions = {},
+) {
+  const db = options.db || getDb();
+  seedDefaultBazaarConfig(db);
+  const profile = db.prepare(`
+    SELECT b.id business_id,b.name,b.handle,b.status,p.industry_keys_json,
+      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+      p.fallback_style,p.is_featured,p.is_excluded
+    FROM businesses b
+    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
+    WHERE b.id=?
+  `).get(businessId) as BazaarProfileRow | undefined;
+  if (!profile) return undefined;
+  const current = getCurrentBazaar({ db, now: options.now });
+  const booth =
+    current.booths.find((candidate) => candidate.businessId === businessId) ||
+    null;
+  return bazaarProfileAdminView(profile, booth);
 }
 
 export function updateBazaarTheme(input: {

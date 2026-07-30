@@ -2,7 +2,7 @@
 id: FE-008
 title: Simple client and staff product upkeep
 status: done
-related: [FE-001, FE-003, FE-007, FE-016, BE-009, DEP-008, ADR-0006]
+related: [FE-001, FE-003, FE-007, FE-016, FE-017, BE-009, DEP-008, ADR-0006]
 owners: [product, frontend]
 last_updated: 2026-07-28
 change_level: L3

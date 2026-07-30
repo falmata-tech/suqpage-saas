@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ManagedClient } from "@/lib/staff-operations";
+import type { ManagedClientRow } from "@/lib/scalable-queries";
 
 const archetypes = [
   ["artisan", "Artisan or maker"],
@@ -15,10 +15,9 @@ const archetypes = [
   ["service_product_hybrid", "Products and services"],
 ];
 
-export default function OnBehalfRequestForm({ clients }: { clients:ManagedClient[] }) {
+export default function OnBehalfRequestForm({ client }: { client?: ManagedClientRow }) {
   const router = useRouter();
   const key = useMemo(() => crypto.randomUUID(),[]);
-  const [clientUserId,setClientUserId] = useState("");
   const [error,setError] = useState("");
   const [pending,setPending] = useState(false);
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -38,13 +37,17 @@ export default function OnBehalfRequestForm({ clients }: { clients:ManagedClient
       router.push(`/dashboard/requests/${body.id}?created=manager`);router.refresh();
     } catch (problem) { setError(problem instanceof Error ? problem.message : "The request could not be saved.");setPending(false); }
   }
-  const existingClient = Boolean(clientUserId);
-  const selectedClient = clients.find((client)=>String(client.id)===clientUserId);
+  const existingClient = Boolean(client);
   return <form className="panel form-grid" onSubmit={submit} encType="multipart/form-data">
     <input type="hidden" name="idempotencyKey" value={key}/>
-    <div className="field full"><label htmlFor="behalf-client">Existing managed client <span className="optional">optional</span></label><select id="behalf-client" name="clientUserId" value={clientUserId} onChange={(event)=>setClientUserId(event.target.value)}><option value="">New prospect without an account</option>{clients.map((client)=><option key={client.id} value={client.id}>{client.business_name} · {client.name} · {client.email}</option>)}</select></div>
+    {client ? <input type="hidden" name="clientUserId" value={client.id}/> : null}
+    <div className="field full selected-client-summary">
+      <span className="eyebrow">{client ? "Existing managed client" : "New prospect"}</span>
+      <strong>{client ? client.business_name : "No client account selected"}</strong>
+      <p>{client ? `${client.name} · ${client.email}` : "The request will create a prospect lead without an account."}</p>
+    </div>
     {!existingClient ? <><div className="field"><label htmlFor="behalf-name">Prospect name</label><input id="behalf-name" name="contactName" required maxLength={100}/></div><div className="field"><label htmlFor="behalf-contact">Email, phone, or WhatsApp</label><input id="behalf-contact" name="contactValue" required maxLength={160}/></div><div className="field full"><label htmlFor="behalf-business">Business name</label><input id="behalf-business" name="businessName" required maxLength={120}/></div></> : null}
-    <div className="field full"><span className="eyebrow">{selectedClient?.request_type==="change"?"Showroom change request":"New showroom request"}</span><p>The request type is determined from the selected business’s publication state.</p></div>
+    <div className="field full"><span className="eyebrow">{client?.request_type==="change"?"Showroom change request":"New showroom request"}</span><p>The request type is determined from the selected business’s publication state.</p></div>
     <div className="field"><label htmlFor="behalf-archetype">Business type</label><select id="behalf-archetype" name="businessArchetype" defaultValue="artisan">{archetypes.map(([value,label])=><option value={value} key={value}>{label}</option>)}</select></div>
     <div className="field"><label htmlFor="behalf-catalog-stage">Catalog stage</label><select id="behalf-catalog-stage" name="catalogStage" defaultValue="AI should choose from supplied products"><option>AI should choose from supplied products</option><option>Small focused catalog, roughly 1-5 products</option><option>Growing catalog, roughly 6-15 products</option><option>Larger catalog, more than 15 products</option></select></div>
     <div className="field full"><label htmlFor="behalf-photography-stage">Photography</label><select id="behalf-photography-stage" name="photographyStage" defaultValue="Some images exist; create labeled slots for the rest"><option>Images are ready to attach</option><option>Some images exist; create labeled slots for the rest</option><option>Photography will be added after the blueprint</option></select></div>

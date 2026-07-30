@@ -13,6 +13,11 @@ node scripts/test-build-trace.mjs
 printf '\n=== Production HTTP smoke tests ===\n'
 node scripts/http-smoke.mjs
 
+printf '\n=== Server pagination and scale fixture validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts
+node node_modules/tsx/dist/cli.mjs scripts/test-scalable-queries.ts
+node node_modules/tsx/dist/cli.mjs scripts/test-scale-fixtures.ts
+
 printf '\n=== TypeScript validation ===\n'
 node node_modules/typescript/bin/tsc --noEmit
 

@@ -25,10 +25,10 @@ export async function createStaffAccountAction(formData: FormData) {
     const created = createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
     audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
   } catch (error) {
-    redirect(`/dashboard/admin?error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
+    redirect(`/dashboard/admin?view=staff&error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
   }
   revalidatePath("/dashboard/admin");
-  redirect("/dashboard/admin?saved=staff");
+  redirect("/dashboard/admin?view=staff&saved=staff");
 }
 
 export async function assignRequestAction(formData: FormData) {
@@ -76,6 +76,7 @@ export async function updateBazaarThemeAction(formData: FormData) {
 export async function updateBazaarBoothProfileAction(formData: FormData) {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
+  const requestedBusinessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
   try {
     const result = updateBazaarBoothProfile({
       businessId: formData.get("businessId"),
@@ -93,13 +94,16 @@ export async function updateBazaarBoothProfileAction(formData: FormData) {
     regenerateCurrentExpo();
     audit("bazaar.booth_profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
   } catch (error) {
-    redirect(`/dashboard/admin/bazaar?error=${encodeURIComponent(bazaarAdminError(error))}`);
+    const path = Number.isInteger(requestedBusinessId)
+      ? `/dashboard/admin/bazaar/${requestedBusinessId}`
+      : "/dashboard/admin/bazaar";
+    redirect(`${path}?error=${encodeURIComponent(bazaarAdminError(error))}`);
   }
   revalidatePath("/dashboard/admin/bazaar");
   revalidatePath("/");
   revalidatePath("/expo");
   revalidatePath("/bazaar");
-  redirect("/dashboard/admin/bazaar?saved=profile");
+  redirect(`/dashboard/admin/bazaar/${requestedBusinessId}?saved=profile`);
 }
 
 export async function updateBazaarBoothPlacementAction(formData: FormData) {

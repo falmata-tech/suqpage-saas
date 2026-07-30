@@ -7,6 +7,7 @@ import {
   DENSE_DEMO_HANDLES,
   denseDemoHeroPath,
 } from "../lib/dense-demo-seed";
+import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import {
   SEEDED_FEATURED_HANDLES,
   SEEDED_EXPO_PROFILES,
@@ -21,8 +22,9 @@ import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 const offeringKinds = new Set<string>();
 const quantityModes = new Set<string>();
-assert.equal(activeBusinesses.length, 48, "reset creates 48 active Expo showrooms");
+assert.equal(activeBusinesses.length, 120, "reset creates 120 active Expo showrooms");
 assert.equal(DENSE_DEMO_BUSINESSES.length, 20, "dense demo registry contains 20 businesses");
+assert.equal(SCALE_DEMO_BUSINESSES.length, 72, "scale demo registry contains 72 businesses");
 assert.equal(
   activeBusinesses.length,
   Object.keys(SEEDED_EXPO_PROFILES).length,
@@ -290,4 +292,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("Forty-eight Expo showrooms, 20 dense fixtures, 18 authored briefs, and ten validated design benchmarks passed.");
+console.log("One hundred twenty Expo showrooms, 20 dense fixtures, 72 scale fixtures, 18 authored briefs, and ten validated design benchmarks passed.");

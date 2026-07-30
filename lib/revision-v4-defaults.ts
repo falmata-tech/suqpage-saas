@@ -34,6 +34,7 @@ import {
   denseDemoBusiness,
   type DenseDemoDesignVariant,
 } from "./dense-demo-seed";
+import { scaleDemoBusiness } from "./scale-demo-seed";
 import type { SectionMediaIntegration } from "./showroom-design-systems";
 import type { Catalog } from "./types";
 import {
@@ -283,6 +284,8 @@ function profileFor(catalog: Catalog) {
   if (authored) return authored.profile;
   const denseDemo = denseDemoBusiness(catalog.business.handle);
   if (denseDemo) return DENSE_DEMO_PROFILES[denseDemo.designVariant];
+  const scaleDemo = scaleDemoBusiness(catalog.business.handle);
+  if (scaleDemo) return DENSE_DEMO_PROFILES[scaleDemo.designVariant];
   return DEFAULT_PROFILES[catalog.business.handle] || FALLBACK_PROFILE;
 }
 

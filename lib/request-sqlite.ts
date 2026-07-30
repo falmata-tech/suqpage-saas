@@ -1,8 +1,15 @@
 import crypto from "node:crypto";
 import { getDb, inTransaction } from "./db";
-import { classifyShowroomRequest, isReviewTransitionAllowed, RequestError, type PublicInterestInput } from "./request-domain";
+import { classifyShowroomRequest, isReviewTransitionAllowed, RequestError, REQUEST_STATUSES, type PublicInterestInput } from "./request-domain";
 import type { PublicRequestRecord, RequestRepository } from "./request-ports";
 import { hasCapability } from "./capabilities";
+import {
+  likePattern,
+  normalizePageRequest,
+  pageResult,
+  pageWindow,
+  type PageResult,
+} from "./pagination";
 import type { RequestAttachment, RequestEvent, ServiceRequest, ServiceRequestStatus, SessionUser } from "./types";
 
 export type OperationsRequest = ServiceRequest & {
@@ -76,6 +83,67 @@ export function listAssignedRequests(userId: number, limit = 100): OperationsReq
     WHERE r.assigned_user_id=?
     GROUP BY r.id ORDER BY r.created_at DESC,r.id DESC LIMIT ?
   `).all(userId,Math.max(1,Math.min(100,limit))) as OperationsRequest[];
+}
+
+export function listRequestsPage(
+  user: SessionUser,
+  input: { page?: unknown; q?: unknown; status?: unknown },
+): PageResult<OperationsRequest> {
+  const request = normalizePageRequest({ page: input.page, search: input.q });
+  const statuses = [...REQUEST_STATUSES];
+  const status = statuses.includes(input.status as ServiceRequestStatus)
+    ? String(input.status)
+    : "";
+  const params: Array<string | number | null> = [];
+  let where = " WHERE 1=1";
+  if (hasCapability(user, "operations:manage")) {
+    // Managers operate across the queue.
+  } else if (user.access_role === "client" && user.business_id) {
+    where +=
+      " AND r.business_id=? AND (r.represented_client_user_id=? OR r.submitted_by_user_id=?)";
+    params.push(user.business_id, user.id, user.id);
+  } else if (user.access_role === "team_member") {
+    where += " AND r.assigned_user_id=?";
+    params.push(user.id);
+  } else {
+    return pageResult([], 0, request);
+  }
+  if (status) {
+    where += " AND r.status=?";
+    params.push(status);
+  }
+  if (request.search) {
+    const pattern = likePattern(request.search);
+    where += ` AND (
+      lower(r.public_ref) LIKE ? ESCAPE '\\'
+      OR lower(r.contact_name) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(r.business_name,'')) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(b.name,'')) LIKE ? ESCAPE '\\'
+      OR lower(COALESCE(u.name,'')) LIKE ? ESCAPE '\\'
+    )`;
+    params.push(pattern, pattern, pattern, pattern, pattern);
+  }
+  const from = `
+    FROM service_requests r
+    LEFT JOIN businesses b ON b.id=r.business_id
+    LEFT JOIN users u ON u.id=r.assigned_user_id${where}`;
+  const totalItems = Number(
+    (
+      getDb()
+        .prepare(`SELECT COUNT(*) total ${from}`)
+        .get(...params) as { total: number }
+    ).total,
+  );
+  const window = pageWindow(totalItems, request);
+  const items = getDb().prepare(`
+    SELECT r.*,
+      (SELECT COUNT(*) FROM request_attachments a WHERE a.request_id=r.id) attachment_count,
+      b.name business_display_name,u.name assigned_user_name
+    ${from}
+    ORDER BY r.updated_at DESC,r.id DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, window.limit, window.offset) as OperationsRequest[];
+  return pageResult(items, totalItems, request);
 }
 
 export function requestTypeForBusiness(businessId: number) {

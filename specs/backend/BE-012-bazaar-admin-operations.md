@@ -2,7 +2,7 @@
 id: BE-012
 title: Expo administration operations
 status: done
-related: [BE-011, FE-011, DEP-010]
+related: [BE-011, BE-015, FE-011, DEP-010]
 owners: [backend, security]
 last_updated: 2026-07-29
 change_level: L2
