@@ -61,7 +61,7 @@ export default function Home() {
       imageUrl: business.hero_image_path || business.logo_path || "",
       industry,
       searchText: searchable,
-      featured: true,
+      featured: Boolean(profile?.featured),
     };
   });
 

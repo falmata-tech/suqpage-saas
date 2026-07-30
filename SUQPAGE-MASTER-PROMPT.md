@@ -261,9 +261,11 @@ there is no separate How SuqPage works section or action. Tenant cards and Expo
 booths use active public tenant data and link to the authoritative showroom.
 Approved booth media belongs to its represented business; a generic named booth
 is only a failed-file fallback and does not make an incomplete profile eligible.
-For the current fictional marketplace, every active public showroom is featured
-and at most five results render on a directory page. Desktop cards remain compact
-when filters reduce the result count.
+For the current fictional marketplace, exactly ten explicitly curated public
+showrooms are featured. All other active showrooms remain searchable and
+Expo-eligible without featured treatment. At most five results render on a
+directory page, and desktop cards remain compact when filters reduce the result
+count.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file

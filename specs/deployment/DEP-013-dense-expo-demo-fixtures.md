@@ -59,6 +59,9 @@ active public showrooms.
 - Every dense-demo handle has one matching location profile, one existing booth
   asset, at least two categories, exactly three published offerings, a valid v4
   snapshot, and a retained baseline.
+- Exactly ten reset-created showrooms belong to the curated featured pool.
+  Featured status does not determine ordinary directory visibility or Expo
+  eligibility.
 - The 28 DEP-011 businesses and their authored/deep benchmark assertions remain
   unchanged. Dense fixtures are counted and tested separately.
 - Dense fixtures use the `machinery-tools` Expo key because the Thursday theme
@@ -139,6 +142,9 @@ Scenario: List view remains complete
 Evidence: verified locally on 2026-07-30:
 
 - `npm run reset` created 48 active fictional businesses and 165 offerings.
+- The same reset created exactly ten explicitly curated featured profiles; the
+  other 38 remain active, searchable, and Expo-eligible without featured
+  treatment.
 - `npm run test:benchmarks` proved all 20 dense fixtures, their managed heroes,
   booth assets, three-offering catalogs, valid v4 snapshots, and the Thursday
   24-booth occurrence.

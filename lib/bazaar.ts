@@ -1,6 +1,10 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
-import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "./expo-seed";
+import {
+  SEEDED_EXPO_PROFILES,
+  isSeededFeatured,
+  seededExpoBoothPath,
+} from "./expo-seed";
 
 const DEFAULT_TIMEZONE = process.env.SUQPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
 const MIN_FLOOR_WIDTH = 720;
@@ -342,7 +346,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
     INSERT OR IGNORE INTO bazaar_booth_profiles(
       business_id,industry_keys_json,booth_image_path,fallback_style,is_featured,
       is_excluded,approved_at,city,zone,region,latitude,longitude
-    ) VALUES(?,?,?,?,1,0,CURRENT_TIMESTAMP,?,?,?,?,?)
+    ) VALUES(?,?,?,?,?,0,CURRENT_TIMESTAMP,?,?,?,?,?)
   `);
   for (const business of businesses) {
     const industryKeys = defaultIndustryKeysForBusiness(business.handle);
@@ -353,6 +357,7 @@ export function seedDefaultBazaarConfig(db: DatabaseSync = getDb()) {
       JSON.stringify(industryKeys),
       boothImagePath,
       fallbackStyleForIndustry(industryKeys),
+      isSeededFeatured(business.handle) ? 1 : 0,
       seededProfile?.city || "",
       seededProfile?.zone || "",
       seededProfile?.region || "",

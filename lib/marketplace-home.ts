@@ -1,5 +1,5 @@
 export const HOMEPAGE_DIRECTORY_PAGE_SIZE = 5;
-export const HOMEPAGE_FEATURED_LIMIT = 20;
+export const HOMEPAGE_FEATURED_LIMIT = 10;
 export const HOMEPAGE_FEATURED_ADVANCE_MS = 4500;
 
 export function paginateHomepageEntries<T>(entries: T[], requestedPage: number) {

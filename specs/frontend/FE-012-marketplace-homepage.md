@@ -95,8 +95,9 @@ Scenario: Landing page feels like one public product
 - The daily Bazaar is included discovery; it is not checkout and normal
   participation is not presented as paid placement.
 - Featured businesses are visually and semantically separate from ordinary
-  Bazaar participation. Until administrative curation is needed, every active
-  public showroom belongs to the featured pool, which is capped at 20 entries.
+  Bazaar participation. The reset fixture has an explicitly curated pool of ten
+  showrooms; ordinary active showrooms remain searchable and Expo-eligible
+  without inheriting featured treatment.
 - Every business card and booth preview links to its authoritative `/@handle`.
 - Public business and Bazaar data comes from existing active server records.
 
@@ -126,7 +127,7 @@ Scenario: Landing page feels like one public product
   marks, filters, callouts, and map furniture must not create a busy rainbow.
 - The hero's compact benefit row carries the useful product explanation without
   duplicating it in a separate process band, especially on mobile.
-- The featured pool contains at most 20 active public showrooms. Up to five are
+- The featured pool contains at most 10 active public showrooms. Up to five are
   visible at once, the rail advances left on a bounded interval and loops, and
   automatic movement pauses for hover, keyboard focus, document visibility,
   and reduced-motion preference.
@@ -242,7 +243,7 @@ Evidence:
   `public/landing/booths/`. The mall floor is CSS-rendered and contains no booth
   geometry or tenant claims. Future tenants without approved media receive a
   structural storefront fallback rather than an invented product photograph.
-- `lib/marketplace-home.ts` enforces a five-result directory page and a 20-entry
+- `lib/marketplace-home.ts` enforces a five-result directory page and a 10-entry
   featured pool. Search and Industry changes return to page one; pagination is
   conditional. The featured rail advances every 4.5 seconds, loops through a
   duplicate visual track, remains touch-scrollable, and pauses for hover, focus,
@@ -279,3 +280,9 @@ It also proves calendar-before-map order inside one Expo section and the
 persistent map-to-venue transition. `npm run test:marketplace-home`,
 `npm run test:acceptance` (10/10), `npm run check`, and `npm run release`
 passed.
+
+On 2026-07-30, featured emphasis was narrowed from every active showroom to ten
+explicitly curated reset profiles. The homepage now reads the persisted profile
+flag, while all 48 active businesses remain in search and pagination.
+`npm run test:marketplace-home`, `npm run test:benchmarks`, `npm run check`,
+`npm run test:acceptance` (10/10), and `npm run release` passed.

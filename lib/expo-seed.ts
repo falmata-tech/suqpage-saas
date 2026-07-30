@@ -9,6 +9,23 @@ export type SeededExpoProfile = {
   longitude: number;
 };
 
+export const SEEDED_FEATURED_HANDLES = Object.freeze([
+  "selam-weave",
+  "afia-botanics",
+  "warka-furniture",
+  "addis-metalworks",
+  "green-terrace-farm",
+  "blue-nile-apiary",
+  "nova-assembly",
+  "geda-coffee-cooperative",
+  "saba-soap-works",
+  "sheger-carton-label",
+]);
+
+export function isSeededFeatured(handle: string) {
+  return (SEEDED_FEATURED_HANDLES as readonly string[]).includes(handle);
+}
+
 export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
   "nova-assembly": {
     industryKeys: ["electronics"],

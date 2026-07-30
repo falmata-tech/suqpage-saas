@@ -19,6 +19,6 @@ assert.equal(paginateHomepageEntries([], 1).totalPages, 0);
 
 const featured = buildHomepageFeaturedPool(entries);
 assert.equal(featured.length, HOMEPAGE_FEATURED_LIMIT);
-assert.deepEqual(featured.map((entry) => entry.id), entries.slice(0, 20).map((entry) => entry.id));
+assert.deepEqual(featured.map((entry) => entry.id), entries.slice(0, 10).map((entry) => entry.id));
 
 console.log("Marketplace homepage domain tests passed.");

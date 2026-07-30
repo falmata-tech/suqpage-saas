@@ -7,7 +7,12 @@ import {
   DENSE_DEMO_HANDLES,
   denseDemoHeroPath,
 } from "../lib/dense-demo-seed";
-import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "../lib/expo-seed";
+import {
+  SEEDED_FEATURED_HANDLES,
+  SEEDED_EXPO_PROFILES,
+  seededExpoBoothPath,
+} from "../lib/expo-seed";
+import { listBazaarAdminState } from "../lib/bazaar";
 import { getCurrentExpo } from "../lib/expo";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
@@ -22,6 +27,16 @@ assert.equal(
   activeBusinesses.length,
   Object.keys(SEEDED_EXPO_PROFILES).length,
   "every seeded active showroom has an Expo location profile",
+);
+const featuredHandles = listBazaarAdminState().profiles
+  .filter((profile) => profile.status === "active" && profile.featured)
+  .map((profile) => profile.handle)
+  .sort();
+assert.equal(featuredHandles.length, 10, "reset creates ten featured showrooms");
+assert.deepEqual(
+  featuredHandles,
+  [...SEEDED_FEATURED_HANDLES].sort(),
+  "only the explicitly curated showrooms are featured",
 );
 for (const business of activeBusinesses) {
   const catalog = getCatalogByBusinessId(business.id);
