@@ -2,7 +2,7 @@
 id: FE-015
 title: App-like marketplace home and Expo
 status: done
-related: [FE-010, FE-012, FE-013, BE-011, BE-013, DEP-010, DEP-011]
+related: [FE-010, FE-012, FE-013, BE-011, BE-013, DEP-010, DEP-011, DEP-013]
 owners: [product, frontend, design]
 last_updated: 2026-07-29
 change_level: L2

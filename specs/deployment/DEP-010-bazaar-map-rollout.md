@@ -2,7 +2,7 @@
 id: DEP-010
 title: Expo geographic map rollout and operations
 status: in_progress
-related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011]
+related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011, DEP-013]
 owners: [operations, security]
 last_updated: 2026-07-29
 change_level: L2
@@ -196,9 +196,10 @@ for testing; production promotion still requires the normal operator rollout.
 ## Completion evidence
 
 The local Expo rollout slice was implemented and verified on 2026-07-29.
-Migration 17 is additive; setup/reset creates 28 showroom profiles with valid
+Migration 17 is additive; setup/reset creates 48 showroom profiles with valid
 booth media and city, zone, region, and WGS84 locations across seven daily
-Industries. Attributed Admin-1/Admin-2 boundaries, selected OSM place labels,
+Industries. Twenty of those are reset-only dense-demo fixtures governed by
+`DEP-013`. Attributed Admin-1/Admin-2 boundaries, selected OSM place labels,
 and restrained OSM-derived major-road corridors are stored locally, so runtime
 requires no map provider, map tiles, geocoder, or map server.
 

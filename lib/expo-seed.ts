@@ -1,3 +1,5 @@
+import { DENSE_DEMO_BUSINESSES } from "./dense-demo-seed";
+
 export type SeededExpoProfile = {
   industryKeys: string[];
   city: string;
@@ -232,6 +234,19 @@ export const SEEDED_EXPO_PROFILES: Record<string, SeededExpoProfile> = {
     latitude: 8.263,
     longitude: 34.575,
   },
+  ...Object.fromEntries(
+    DENSE_DEMO_BUSINESSES.map((business) => [
+      business.handle,
+      {
+        industryKeys: ["machinery-tools"],
+        city: "Addis Ababa",
+        zone: "Addis Ababa",
+        region: "Addis Ababa",
+        latitude: business.latitude,
+        longitude: business.longitude,
+      },
+    ]),
+  ),
 };
 
 export function seededExpoBoothPath(handle: string) {

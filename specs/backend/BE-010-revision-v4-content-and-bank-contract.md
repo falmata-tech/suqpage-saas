@@ -2,7 +2,7 @@
 id: BE-010
 title: Revision v4 typed content and multi-release bank contract
 status: in_progress
-related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, FE-007, FE-009, FE-014, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007, ADR-0008]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, FE-007, FE-009, FE-014, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, ADR-0005, ADR-0007, ADR-0008]
 owners: [backend, security, product]
 last_updated: 2026-07-28
 change_level: L3

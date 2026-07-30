@@ -22,6 +22,21 @@ const scenarios = [
     path: "/expo",
     viewport: { width: 390, height: 844 },
     openVenue: true,
+    denseHall: 1,
+  },
+  {
+    name: "expo-venue-compact-hall-2",
+    path: "/expo",
+    viewport: { width: 320, height: 700 },
+    openVenue: true,
+    denseHall: 2,
+  },
+  {
+    name: "expo-list-compact",
+    path: "/expo",
+    viewport: { width: 320, height: 700 },
+    listView: true,
+    expectedListCount: 24,
   },
   {
     name: "expo-preview-mobile",
@@ -63,9 +78,23 @@ try {
     await page.locator(".expo-regions path").first().waitFor();
     if (scenario.openVenue) {
       const selector = page.getByLabel("Jump to a host city");
-      const firstHub = await selector.locator("option").nth(1).getAttribute("value");
-      if (firstHub) await selector.selectOption(firstHub);
+      const options = await selector.locator("option").evaluateAll((entries) =>
+        entries.slice(1).map((entry) => ({
+          value: entry.getAttribute("value") || "",
+          text: entry.textContent || "",
+        })),
+      );
+      const addisHub = options.find((option) => option.text.includes("Addis Ababa"));
+      const selectedHub = addisHub?.value || options[0]?.value;
+      if (selectedHub) await selector.selectOption(selectedHub);
       await page.locator(".expo-venue-booth").first().waitFor();
+      if (scenario.denseHall === 2) {
+        await page.getByRole("button", { name: "Hall 2", exact: true }).click();
+      }
+    }
+    if (scenario.listView) {
+      await page.getByRole("tab", { name: "List View" }).click();
+      await page.locator(".expo-list-card").first().waitFor();
     }
     if (scenario.openBooth) {
       await page.locator(".expo-venue-booth").first().click();
@@ -127,6 +156,8 @@ try {
         ),
         cityContextVisible: Boolean(cityContext && visible(cityContext)),
         venueBooths: document.querySelectorAll(".expo-venue-booth").length,
+        hallTabs: document.querySelectorAll(".expo-hall-tabs button").length,
+        listCards: document.querySelectorAll(".expo-list-card").length,
         venueBoothsLeftOfAisle: aisle
           ? venueBoothCenters.filter((center) => center < aisle.left).length
           : 0,
@@ -162,16 +193,23 @@ const failures = results.filter(
     result.browserErrors.length > 0 ||
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
-    result.mapRegions !== 14 ||
-    result.hubs < 1 ||
-    result.zonePaths < 100 ||
-    result.placeLabels < 1 ||
-    result.roadPaths < 1 ||
-    !result.mapVisible ||
+    (!result.listView && result.mapRegions !== 14) ||
+    (!result.listView && result.hubs < 1) ||
+    (!result.listView && result.zonePaths < 100) ||
+    (!result.listView && result.placeLabels < 1) ||
+    (!result.listView && result.roadPaths < 1) ||
+    (!result.listView && !result.mapVisible) ||
     (result.openVenue &&
       (!result.contextualVenue ||
         !result.cityContextVisible ||
-        result.mapOpacity < 0.25)) ||
+        result.mapOpacity < 0.25 ||
+        result.venueBooths > 12)) ||
+    (result.denseHall === 1 &&
+      (result.hallTabs !== 2 || result.venueBooths !== 12)) ||
+    (result.denseHall === 2 &&
+      (result.hallTabs !== 2 || result.venueBooths !== 10)) ||
+    (result.expectedListCount &&
+      result.listCards !== result.expectedListCount) ||
     (result.venueBooths > 1 &&
       (result.venueBoothsLeftOfAisle < 1 || result.venueBoothsRightOfAisle < 1)) ||
     result.textOverflow.length > 0 ||

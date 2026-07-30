@@ -2,7 +2,7 @@
 id: DEP-012
 title: Unified offering migration and rollout
 status: done
-related: [DEP-001, DEP-008, DEP-011, FE-016, BE-014]
+related: [DEP-001, DEP-008, DEP-011, DEP-013, FE-016, BE-014]
 owners: [operations, backend, qa]
 last_updated: 2026-07-29
 change_level: L3
@@ -134,7 +134,7 @@ excluded.
   of IDs/relationships/existing quantities, compatible defaults, null optional
   quantity, constraints, integrity, foreign keys, and idempotency. It runs in
   both `npm run check` and `npm run release`.
-- `npm run reset` creates 28 fictional businesses and 105 offerings spanning all
+- `npm run reset` creates 48 fictional businesses and 165 offerings spanning all
   four offering kinds with optional desired quantity. Manufacturing capabilities have
   capacity and lead-time facts and do not inherit ordinary product options.
 - `npm run test:visual-benchmarks` passed 56 captures with zero failures;

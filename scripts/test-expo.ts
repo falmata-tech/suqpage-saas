@@ -16,6 +16,7 @@ async function main() {
     getCurrentExpo,
     geographicDistanceKm,
   } = await import("../lib/expo");
+  const { DENSE_DEMO_BUSINESSES } = await import("../lib/dense-demo-seed");
   const db = getDb();
 
   const pureCandidates = [
@@ -61,6 +62,52 @@ async function main() {
   );
   assert.equal(hallAssignments.filter((entry) => entry.hallNumber === 1).length, 12);
   assert.equal(hallAssignments.filter((entry) => entry.hallNumber === 2).length, 1);
+
+  const denseAddisAssignments = assignExpoHubs([
+    {
+      businessId: 1,
+      name: "Existing Addis One",
+      city: "Addis Ababa",
+      zone: "Addis Ababa",
+      region: "Addis Ababa",
+      latitude: 9.03,
+      longitude: 38.74,
+      featured: false,
+    },
+    {
+      businessId: 2,
+      name: "Existing Addis Two",
+      city: "Addis Ababa",
+      zone: "Addis Ababa",
+      region: "Addis Ababa",
+      latitude: 9.04,
+      longitude: 38.75,
+      featured: false,
+    },
+    ...DENSE_DEMO_BUSINESSES.map((business, index) => ({
+      businessId: index + 3,
+      name: business.name,
+      city: "Addis Ababa",
+      zone: "Addis Ababa",
+      region: "Addis Ababa",
+      latitude: business.latitude,
+      longitude: business.longitude,
+      featured: false,
+    })),
+  ]);
+  assert.equal(denseAddisAssignments.length, 22);
+  assert.equal(
+    denseAddisAssignments.filter((entry) => entry.hallNumber === 1).length,
+    12,
+  );
+  assert.equal(
+    denseAddisAssignments.filter((entry) => entry.hallNumber === 2).length,
+    10,
+  );
+  assert.deepEqual(
+    [...new Set(denseAddisAssignments.map((entry) => entry.hubKey))],
+    ["addis-ababa"],
+  );
 
   const insertBusiness = db.prepare(`
     INSERT INTO businesses(

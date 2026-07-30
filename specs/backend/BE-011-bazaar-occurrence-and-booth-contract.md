@@ -2,7 +2,7 @@
 id: BE-011
 title: Expo occurrence, city host, and booth contract
 status: done
-related: [FE-010, FE-012, FE-015, BE-012, BE-013, DEP-010, DEP-011, BE-001]
+related: [FE-010, FE-012, FE-015, BE-012, BE-013, DEP-010, DEP-011, DEP-013, BE-001]
 owners: [backend, security]
 last_updated: 2026-07-29
 change_level: L2

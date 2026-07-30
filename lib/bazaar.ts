@@ -17,7 +17,7 @@ const INDUSTRY_LABELS: Record<string, string> = {
   electronics: "Electronics & Appliances",
   "beauty-wellness": "Beauty, Wellness & Natural Medicine",
   "food-farming": "Produce, Farming & Food",
-  "machinery-tools": "Machinery, Tools & Manufacturing",
+  "machinery-tools": "Manufacturing, Tools & Production Inputs",
   "home-living": "Home, Furniture & Living",
   "fashion-textiles": "Fashion, Textiles & Accessories",
   community: "Community Market",
@@ -27,7 +27,7 @@ const DEFAULT_THEMES = [
   { weekday: 1, name: "Electronics & Appliances", slug: "electronics-appliances", icon: "monitor", industryKeys: ["electronics"] },
   { weekday: 2, name: "Beauty, Wellness & Natural Medicine", slug: "beauty-wellness-natural-medicine", icon: "sparkle", industryKeys: ["beauty-wellness"] },
   { weekday: 3, name: "Produce, Farming & Food", slug: "produce-farming-food", icon: "leaf", industryKeys: ["food-farming"] },
-  { weekday: 4, name: "Machinery, Tools & Manufacturing", slug: "machinery-tools-manufacturing", icon: "gear", industryKeys: ["machinery-tools"] },
+  { weekday: 4, name: "Manufacturing, Tools & Production Inputs", slug: "machinery-tools-manufacturing", icon: "gear", industryKeys: ["machinery-tools"] },
   { weekday: 5, name: "Home, Furniture & Living", slug: "home-furniture-living", icon: "home", industryKeys: ["home-living"] },
   { weekday: 6, name: "Fashion, Textiles & Accessories", slug: "fashion-textiles-accessories", icon: "shirt", industryKeys: ["fashion-textiles"] },
   {

@@ -2,7 +2,7 @@
 id: FE-009
 title: Creative showroom bank and focused v4 studio
 status: in_progress
-related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0007, ADR-0008]
+related: [FE-004, FE-005, FE-006, FE-007, FE-014, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, ADR-0005, ADR-0007, ADR-0008]
 owners: [product, frontend, design]
 last_updated: 2026-07-29
 change_level: L3

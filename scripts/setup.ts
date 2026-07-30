@@ -5,6 +5,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
+import {
+  DENSE_DEMO_BUSINESSES,
+  denseDemoHeroPath,
+  type DenseDemoOfferingKind,
+} from "../lib/dense-demo-seed";
+import { seededExpoBoothPath } from "../lib/expo-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { migrateDatabase } from "../lib/schema";
 import type {
@@ -75,7 +81,26 @@ const additionalBusinesses = [
   { handle:"baro-nursery-supplies", name:"Baro Nursery Supplies", tagline:"Propagation and growing supplies for farms and restoration teams.", description:"A producer of seedling trays, shade structures and nursery starter materials.", logo_path:"", hero_title:"Give young plants a dependable start.", hero_subtitle:"Compare nursery formats and discuss seasonal project quantities.", hero_image_path:"/uploads/seed/expo/baro-nursery-supplies/hero.webp", contact_email:"", whatsapp:"251911200118", telegram:"", tiktok:"" }
 ] satisfies Array<Record<string,string>>;
 
-const businesses = [...benchmarkBusinesses, ...additionalBusinesses];
+const denseDemoBusinessRows = DENSE_DEMO_BUSINESSES.map((business) => ({
+  handle: business.handle,
+  name: business.name,
+  tagline: business.tagline,
+  description: business.description,
+  logo_path: "",
+  hero_title: business.heroTitle,
+  hero_subtitle: business.heroSubtitle,
+  hero_image_path: denseDemoHeroPath(business.handle),
+  contact_email: `${business.handle}@demo.suqpage.local`,
+  whatsapp: "",
+  telegram: "",
+  tiktok: "",
+}));
+
+const businesses = [
+  ...benchmarkBusinesses,
+  ...additionalBusinesses,
+  ...denseDemoBusinessRows,
+];
 const productionSupplyBusinesses = new Set([
   "green-terrace-farm",
   "blue-nile-apiary",
@@ -308,6 +333,60 @@ for (const [handle, catalog] of Object.entries(additionalCatalogs)) {
   })));
 }
 
+function denseOfferingProfile(kind: DenseDemoOfferingKind) {
+  if (kind === "manufacturing_capability") {
+    return {
+      capacitySummary: "Prototype, short-run, and repeat production capacity",
+      minimumOrderSummary: "Project minimum depends on process and material",
+      leadTimeSummary: "Lead time confirmed after the requirement is reviewed",
+    };
+  }
+  if (kind === "production_supply") {
+    return {
+      capacitySummary: "Recurring volume scheduled against the buyer's production cycle",
+      minimumOrderSummary: "Pack, batch, or pallet minimum confirmed on inquiry",
+      leadTimeSummary: "The next supply window is confirmed directly",
+    };
+  }
+  if (kind === "made_to_order") {
+    return {
+      capacitySummary: "Configured production scheduled after specification review",
+      minimumOrderSummary: "One configured unit or an agreed repeat run",
+      leadTimeSummary: "Production timing is confirmed with the approved brief",
+    };
+  }
+  return {
+    capacitySummary: "",
+    minimumOrderSummary: "",
+    leadTimeSummary: "",
+  };
+}
+
+for (const business of DENSE_DEMO_BUSINESSES) {
+  seedCatalog(
+    business.handle,
+    [...new Set(business.offerings.map((offering) => offering.category))],
+    business.offerings.map((offering) => ({
+      name: offering.name,
+      category: offering.category,
+      eyebrow: offering.category,
+      description: offering.description,
+      slug: offering.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, ""),
+      image: "",
+      offeringKind: offering.kind,
+      quantityMode: "optional",
+      ...denseOfferingProfile(offering.kind),
+      options:
+        offering.kind === "manufacturing_capability"
+          ? []
+          : [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+    })),
+  );
+}
+
 const seededGroupQuery = db.prepare(
   "SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id",
 );
@@ -372,7 +451,7 @@ function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client",busi
   generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : "CLIENT",business,email,password});
 }
 seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
-for (const business of businesses) {
+for (const business of [...benchmarkBusinesses, ...additionalBusinesses]) {
   seedUser(
     "owner",
     "client",

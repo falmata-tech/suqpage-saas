@@ -118,7 +118,7 @@ const industryLabels: Record<string, string> = {
   electronics: "Electronics & Appliances",
   "beauty-wellness": "Beauty, Wellness & Natural Medicine",
   "food-farming": "Produce, Farming & Food",
-  "machinery-tools": "Machinery, Tools & Manufacturing",
+  "machinery-tools": "Manufacturing, Tools & Production Inputs",
   "home-living": "Home, Furniture & Living",
   "fashion-textiles": "Fashion, Textiles & Accessories",
   community: "Enterprise & Export Showcase",

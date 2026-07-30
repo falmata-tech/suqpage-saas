@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { getAllBusinesses, getCatalogByBusinessId } from "../lib/db";
+import {
+  DENSE_DEMO_BUSINESSES,
+  DENSE_DEMO_HANDLES,
+  denseDemoHeroPath,
+} from "../lib/dense-demo-seed";
 import { SEEDED_EXPO_PROFILES, seededExpoBoothPath } from "../lib/expo-seed";
+import { getCurrentExpo } from "../lib/expo";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
@@ -10,7 +16,8 @@ import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 const offeringKinds = new Set<string>();
 const quantityModes = new Set<string>();
-assert.ok(activeBusinesses.length >= 25, "reset must create at least 25 active Expo showrooms");
+assert.equal(activeBusinesses.length, 48, "reset creates 48 active Expo showrooms");
+assert.equal(DENSE_DEMO_BUSINESSES.length, 20, "dense demo registry contains 20 businesses");
 assert.equal(
   activeBusinesses.length,
   Object.keys(SEEDED_EXPO_PROFILES).length,
@@ -41,6 +48,47 @@ assert.deepEqual(
   [...quantityModes].sort(),
   ["optional"],
   "reset fixtures use optional desired quantity",
+);
+
+const denseHandles = new Set(DENSE_DEMO_HANDLES);
+const denseBusinesses = activeBusinesses.filter((business) =>
+  denseHandles.has(business.handle));
+assert.equal(denseBusinesses.length, 20, "all dense demo showrooms are active");
+for (const business of denseBusinesses) {
+  const catalog = getCatalogByBusinessId(business.id);
+  assert.ok(catalog, `${business.handle} dense catalog exists`);
+  assert.equal(catalog.products.length, 3, `${business.handle} has three offerings`);
+  assert.ok(catalog.categories.length >= 2, `${business.handle} has useful categories`);
+  assert.equal(
+    business.hero_image_path,
+    denseDemoHeroPath(business.handle),
+    `${business.handle} uses its managed demo hero`,
+  );
+  const snapshot = catalogToRevisionSnapshotV4(catalog);
+  assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} dense fitness`);
+  assert.equal(snapshot.designManifest.sections.length, 7, `${business.handle} uses the canonical showroom sequence`);
+}
+
+const thursdayExpo = getCurrentExpo({
+  now: new Date("2026-07-30T10:00:00.000Z"),
+});
+assert.equal(thursdayExpo.themeSlug, "machinery-tools-manufacturing");
+assert.equal(thursdayExpo.booths.length, 24, "Thursday Expo has 24 participants");
+const addisHub = thursdayExpo.map.hubs.find((hub) => hub.key === "addis-ababa");
+assert.ok(addisHub, "Thursday Expo has an Addis Ababa host");
+assert.equal(addisHub.boothCount, 22, "Addis Ababa venue has 22 booths");
+assert.equal(addisHub.hallCount, 2, "Addis Ababa venue spans two halls");
+assert.equal(
+  thursdayExpo.booths.filter((booth) =>
+    booth.hubKey === "addis-ababa" && booth.hallNumber === 1).length,
+  12,
+  "Addis Hall 1 reaches its bounded capacity",
+);
+assert.equal(
+  thursdayExpo.booths.filter((booth) =>
+    booth.hubKey === "addis-ababa" && booth.hallNumber === 2).length,
+  10,
+  "Addis Hall 2 contains the deterministic overflow",
 );
 
 const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));
@@ -227,4 +275,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("Twenty-eight Expo showrooms, 18 authored briefs, and ten validated design benchmarks passed.");
+console.log("Forty-eight Expo showrooms, 20 dense fixtures, 18 authored briefs, and ten validated design benchmarks passed.");

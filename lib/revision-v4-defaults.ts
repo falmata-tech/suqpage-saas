@@ -30,6 +30,10 @@ import type {
   ShowroomDecorativeDepth,
   ShowroomMotionIntensity,
 } from "./showroom-experience";
+import {
+  denseDemoBusiness,
+  type DenseDemoDesignVariant,
+} from "./dense-demo-seed";
 import type { SectionMediaIntegration } from "./showroom-design-systems";
 import type { Catalog } from "./types";
 import {
@@ -211,9 +215,74 @@ const FALLBACK_PROFILE: DefaultProfile = {
   storyMediaIntegration: "natural",
 };
 
+const DENSE_DEMO_PROFILES: Record<DenseDemoDesignVariant, DefaultProfile> = {
+  technical: {
+    tokenPack: "industrial-steel",
+    motion: "quiet",
+    decoration: "clean",
+    header: "header.compact-utility@1",
+    hero: "hero.industrial-spec@1",
+    story: "content.origin-story@1",
+    highlights: "content.production-metrics@1",
+    catalog: "catalog.minimal-list@1",
+    cta: "call-to-action.technical-brief@1",
+    footer: "footer.technical-directory@1",
+    ctaVariant: "technical-brief",
+    heroMediaIntegration: "split_bleed",
+    storyMediaIntegration: "natural",
+  },
+  producer: {
+    tokenPack: "forest-botanical",
+    motion: "quiet",
+    decoration: "subtle",
+    header: "header.producer-badge@1",
+    hero: "hero.provenance@1",
+    story: "content.origin-story@1",
+    highlights: "content.process-steps@1",
+    catalog: "catalog.horizontal-shelf@1",
+    cta: "call-to-action.wholesale@1",
+    footer: "footer.catalog-directory@1",
+    ctaVariant: "magazine-close",
+    heroMediaIntegration: "edge_fade",
+    storyMediaIntegration: "natural",
+  },
+  catalog: {
+    tokenPack: "ocean-trade",
+    motion: "balanced",
+    decoration: "clean",
+    header: "header.catalog-command@1",
+    hero: "hero.split-story@1",
+    story: "content.material-focus@1",
+    highlights: "content.process-steps@1",
+    catalog: "catalog.editorial-grid@1",
+    cta: "call-to-action.inquiry@1",
+    footer: "footer.compact@1",
+    ctaVariant: "magazine-close",
+    heroMediaIntegration: "split_bleed",
+    storyMediaIntegration: "natural",
+  },
+  editorial: {
+    tokenPack: "maker-indigo",
+    motion: "quiet",
+    decoration: "subtle",
+    header: "header.editorial-wordmark@1",
+    hero: "hero.material-detail@1",
+    story: "content.lookbook-chapter@1",
+    highlights: "content.process-steps@1",
+    catalog: "catalog.feature-tiles@1",
+    cta: "call-to-action.consultation@1",
+    footer: "footer.editorial@1",
+    ctaVariant: "magazine-close",
+    heroMediaIntegration: "edge_fade",
+    storyMediaIntegration: "natural",
+  },
+};
+
 function profileFor(catalog: Catalog) {
   const authored = ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle];
   if (authored) return authored.profile;
+  const denseDemo = denseDemoBusiness(catalog.business.handle);
+  if (denseDemo) return DENSE_DEMO_PROFILES[denseDemo.designVariant];
   return DEFAULT_PROFILES[catalog.business.handle] || FALLBACK_PROFILE;
 }
 

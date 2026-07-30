@@ -88,9 +88,10 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a public discovery surface where eligible businesses can appear in a themed
   Daily Expo while every booth leads back to the business's permanent
   `/@handle` showroom;
-- a controlled SaaS pilot with 28 fictional local showrooms spanning makers,
-  producers, farms, workshops, and small-to-medium manufacturers; ten of those
-  remain the deeper visual benchmark set.
+- a controlled SaaS pilot with 48 fictional local showrooms spanning makers,
+  producers, farms, workshops, manufacturers, and production-input suppliers;
+  28 remain the curated visual benchmark set while 20 simple reset-only
+  fixtures exercise a dense Expo day.
 
 ### SuqPage is not
 
@@ -201,7 +202,8 @@ work. The current local checkpoint passes the standard check and ten
 production-browser acceptance scenarios, including CSP/provider-video proof,
 the blueprint studio, client approval, and publication. `FE-014`, `BE-013`,
 `FE-015`, and `DEP-011` record the completed local blueprint, composition-
-fitness, marketplace, Expo, and 28-showroom benchmark scope. Remote checks
+fitness, marketplace, Expo, 28-showroom visual benchmark, and 20-showroom dense
+demo scope. Remote checks
 and any production/data-preserving rollout remain separate future evidence.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
@@ -315,6 +317,14 @@ Their product counts, category counts, media coverage, token systems, page
 components, catalog modes, and mobile behaviors intentionally vary. Generated
 benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
+
+The wider disposable seed contains 18 additional authored visual showrooms and
+20 deliberately simple dense-demo showrooms. The dense cohort has three
+offerings per business, managed local hero media, project-owned Expo booth
+media, and Addis Ababa locations that make Thursday's Manufacturing, Tools &
+Production Inputs Expo contain 24 participants across two host cities. Addis
+Ababa hosts 22 of them in two bounded halls of 12 and 10. These are stress and
+demonstration fixtures, not finished client designs.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important

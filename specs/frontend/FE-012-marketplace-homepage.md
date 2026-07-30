@@ -2,7 +2,7 @@
 id: FE-012
 title: Visual marketplace homepage
 status: done
-related: [FE-001, FE-010, FE-013, FE-015, BE-011, DEP-010, DEP-011]
+related: [FE-001, FE-010, FE-013, FE-015, BE-011, DEP-010, DEP-011, DEP-013]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L1
@@ -268,8 +268,10 @@ The Expo-led landing revision was implemented and verified on 2026-07-29. The
 current order is producer-first photographic hero, concise benefits, integrated
 regional Expo workspace with its compact weekly Industry calendar directly
 above the map, one searchable five-result showroom directory, a distinct
-merchant CTA, and footer. There is no detached schedule chapter. Twenty-eight
-seeded showrooms provide real page density without duplicate featured inventory.
+merchant CTA, and footer. There is no detached schedule chapter. Forty-eight
+seeded showrooms provide real page density without duplicate featured inventory;
+20 are intentionally simple dense-demo fixtures for high-volume Expo and
+directory testing.
 
 The repeatable `npm run test:expo-visual` audit passed at 1440px, 390px, and
 320px with no browser, image, text, touch-target, or page-overflow failures.
