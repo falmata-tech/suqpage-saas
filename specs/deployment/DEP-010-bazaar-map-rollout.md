@@ -2,7 +2,7 @@
 id: DEP-010
 title: Expo geographic map rollout and operations
 status: in_progress
-related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, DEP-002, DEP-011, DEP-013]
+related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, BE-016, DEP-002, DEP-011, DEP-013, DEP-015]
 owners: [operations, security]
 last_updated: 2026-07-29
 change_level: L2

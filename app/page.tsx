@@ -31,6 +31,7 @@ export default async function Home({
     showroomQ?: string;
     showroomIndustry?: string;
     showroomSort?: string;
+    showroom?: string;
   }>;
 }) {
   const query = await searchParams;
@@ -75,6 +76,7 @@ export default async function Home({
       </header>
 
       <main>
+        {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">That showroom is temporarily unavailable. Browse today&apos;s active businesses below.</div> : null}
         <section className="landing-hero" aria-labelledby="landing-title">
           <Image
             className="landing-hero-image"

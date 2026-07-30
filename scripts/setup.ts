@@ -491,6 +491,33 @@ for (const businessId of seeded.values()) {
   );
 }
 
+const subscriptionNow = Date.now();
+const subscriptionAccountStart = subscriptionNow - 90 * 24 * 60 * 60 * 1000;
+const subscriptionPeriodStart = subscriptionNow - 10 * 24 * 60 * 60 * 1000;
+const subscriptionEnd = subscriptionNow + 20 * 24 * 60 * 60 * 1000;
+const seedSubscription = db.prepare(`
+  INSERT INTO business_subscriptions(
+    business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
+    current_period_end,grace_ends_at,updated_at
+  ) VALUES(?,'SuqPage monthly',NULL,'ETB',?,?,?,?,?)
+  ON CONFLICT(business_id) DO UPDATE SET
+    starts_at=excluded.starts_at,
+    current_period_start=excluded.current_period_start,
+    current_period_end=excluded.current_period_end,
+    grace_ends_at=excluded.grace_ends_at,
+    updated_at=excluded.updated_at
+`);
+for (const businessId of seeded.values()) {
+  seedSubscription.run(
+    businessId,
+    subscriptionAccountStart,
+    subscriptionPeriodStart,
+    subscriptionEnd,
+    subscriptionEnd + 4 * 24 * 60 * 60 * 1000,
+    subscriptionNow,
+  );
+}
+
 seedDefaultBazaarConfig(db);
 
 
@@ -522,6 +549,162 @@ const operationsStaff = ["Mekdes Operations", "Samuel Operations", "Rahel Operat
   .map((name, index) => seedUser("admin", "operations_manager", "SuqPage", `operations-${index + 1}@demo.suqpage.local`, name, null));
 const teamStaff = ["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
   .map((name, index) => seedUser("admin", "team_member", "SuqPage", `team-${index + 1}@demo.suqpage.local`, name, null));
+
+const subscriptionStateHandles = [
+  SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "fashion-textiles"),
+  SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "beauty-wellness"),
+  SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "home-living"),
+  SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "machinery-tools"),
+  ...SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "food-farming").slice(0, 3),
+  SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "home-living")[1],
+].map((business) => {
+  if (!business) throw new Error("Subscription lifecycle fixture is missing.");
+  return business.handle;
+});
+subscriptionStateHandles.slice(0, 4).forEach((handle, index) => {
+  const end = subscriptionNow - (index + 1) * 12 * 60 * 60 * 1000;
+  db.prepare(`
+    UPDATE business_subscriptions
+    SET current_period_start=?,current_period_end=?,grace_ends_at=?,updated_at=?
+    WHERE business_id=?
+  `).run(end - 30 * 24 * 60 * 60 * 1000, end, end + 4 * 24 * 60 * 60 * 1000, subscriptionNow, seeded.get(handle)!);
+});
+subscriptionStateHandles.slice(4).forEach((handle, index) => {
+  const end = subscriptionNow - (8 + index) * 24 * 60 * 60 * 1000;
+  db.prepare(`
+    UPDATE business_subscriptions
+    SET current_period_start=?,current_period_end=?,grace_ends_at=?,updated_at=?
+    WHERE business_id=?
+  `).run(end - 30 * 24 * 60 * 60 * 1000, end, end + 4 * 24 * 60 * 60 * 1000, subscriptionNow, seeded.get(handle)!);
+});
+
+const seedPayment = db.prepare(`
+  INSERT INTO subscription_payments(
+    public_ref,business_id,amount_minor,currency,idempotency_key,paid_at,
+    recorded_by_user_id,created_at
+  ) VALUES(?,?,NULL,'ETB',?,?,?,?)
+`);
+let paymentOrdinal = 0;
+for (const handle of clientUsersByHandle.keys()) {
+  paymentOrdinal += 1;
+  const paidAt = subscriptionPeriodStart - paymentOrdinal * 60_000;
+  seedPayment.run(
+    `DEMO-PAY-${String(paymentOrdinal).padStart(5, "0")}`,
+    seeded.get(handle)!,
+    `demo-payment-${paymentOrdinal}`,
+    paidAt,
+    adminUserId,
+    paidAt,
+  );
+}
+
+const seedVisit = db.prepare(`
+  INSERT INTO showroom_visits(
+    business_id,visitor_hash,visit_date,source,expo_occurrence_id,expo_hub_key,created_at
+  ) VALUES(?,?,?,?,NULL,?,?)
+`);
+let visitOrdinal = 0;
+for (const [handle, businessId] of seeded) {
+  for (let index = 0; index < 8; index += 1) {
+    visitOrdinal += 1;
+    const createdAt = subscriptionNow - (index % 6) * 24 * 60 * 60 * 1000 - visitOrdinal;
+    const source = index % 3 === 0 ? "expo" : index % 3 === 1 ? "directory" : "direct";
+    seedVisit.run(
+      businessId,
+      crypto.createHash("sha256").update(`fictional-visitor-${handle}-${index}`).digest("hex"),
+      new Date(createdAt).toISOString().slice(0, 10),
+      source,
+      source === "expo" ? "demo-host" : "",
+      createdAt,
+    );
+  }
+}
+
+const seedSupportAgent = db.prepare(`
+  INSERT INTO support_agent_settings(
+    user_id,enabled,max_open_conversations,updated_by_user_id,updated_at
+  ) VALUES(?,?,?,?,?)
+`);
+teamStaff.forEach((userId, index) => {
+  seedSupportAgent.run(userId, index >= 4 ? 1 : 0, 3, adminUserId, subscriptionNow);
+});
+
+const addSupportConversation = db.prepare(`
+  INSERT INTO support_conversations(
+    public_ref,business_id,opened_by_user_id,subject,status,assigned_user_id,
+    created_at,updated_at,last_message_at,closed_at
+  ) VALUES(?,?,?,?,?,?,?,?,?,?)
+`);
+const addSupportMessage = db.prepare(`
+  INSERT INTO support_messages(
+    conversation_id,sender_user_id,body,idempotency_key,created_at
+  ) VALUES(?,?,?,?,?)
+`);
+const addSupportAssignment = db.prepare(`
+  INSERT INTO support_assignments(
+    conversation_id,assigned_user_id,assigned_by_user_id,reason,assigned_at,released_at
+  ) VALUES(?,?,NULL,'automatic',?,?)
+`);
+const addSupportEvent = db.prepare(`
+  INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+  VALUES(?,?,?,?,?)
+`);
+const supportHandles = [...clientUsersByHandle.keys()].slice(0, 30);
+supportHandles.forEach((handle, index) => {
+  const status = index < 10 ? "waiting" : index < 22 ? "open" : "closed";
+  const assigned = status === "waiting" ? null : teamStaff[4 + ((index - 10) % 4)];
+  const createdAt = subscriptionNow - (30 - index) * 45 * 60 * 1000;
+  const closedAt = status === "closed" ? createdAt + 30 * 60 * 1000 : null;
+  const conversationId = Number(addSupportConversation.run(
+    `DEMO-SUP-${String(index + 1).padStart(5, "0")}`,
+    seeded.get(handle)!,
+    clientUsersByHandle.get(handle)!,
+    [
+      "Help updating showroom information",
+      "Question about Expo participation",
+      "Image replacement request",
+      "Monthly account question",
+    ][index % 4],
+    status,
+    assigned,
+    createdAt,
+    closedAt || createdAt,
+    closedAt || createdAt,
+    closedAt,
+  ).lastInsertRowid);
+  const firstMessage = addSupportMessage.run(
+    conversationId,
+    clientUsersByHandle.get(handle)!,
+    `Fictional support message from ${handle} used to exercise the customer support queue.`,
+    `demo-support-client-${index + 1}`,
+    createdAt,
+  );
+  addSupportEvent.run(conversationId, clientUsersByHandle.get(handle)!, "created", "fictional seeded conversation", createdAt);
+  if (assigned) {
+    const replyAt = createdAt + 15 * 60 * 1000;
+    const reply = addSupportMessage.run(
+      conversationId,
+      assigned,
+      "Thanks. The SuqPage team has reviewed this fictional demo request and will follow up here.",
+      `demo-support-staff-${index + 1}`,
+      replyAt,
+    );
+    db.prepare(`
+      UPDATE support_conversations
+      SET client_last_read_message_id=?,staff_last_read_message_id=?,
+        updated_at=?,last_message_at=?
+      WHERE id=?
+    `).run(Number(firstMessage.lastInsertRowid), Number(reply.lastInsertRowid), replyAt, replyAt, conversationId);
+    addSupportAssignment.run(conversationId, assigned, createdAt, closedAt);
+    addSupportEvent.run(conversationId, null, "assigned", `agent:${assigned};reason:automatic`, createdAt);
+    addSupportEvent.run(conversationId, assigned, "message", "fictional staff reply", replyAt);
+    if (closedAt) addSupportEvent.run(conversationId, assigned, "closed", "fictional seeded close", closedAt);
+  } else {
+    db.prepare(`
+      UPDATE support_conversations SET client_last_read_message_id=? WHERE id=?
+    `).run(Number(firstMessage.lastInsertRowid), conversationId);
+  }
+});
 
 const lifecycleStatuses = [
   "submitted",

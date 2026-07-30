@@ -22,9 +22,9 @@ import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 const offeringKinds = new Set<string>();
 const quantityModes = new Set<string>();
-assert.equal(activeBusinesses.length, 120, "reset creates 120 active Expo showrooms");
+assert.equal(activeBusinesses.length, 398, "reset creates 398 active demo showrooms");
 assert.equal(DENSE_DEMO_BUSINESSES.length, 20, "dense demo registry contains 20 businesses");
-assert.equal(SCALE_DEMO_BUSINESSES.length, 72, "scale demo registry contains 72 businesses");
+assert.equal(SCALE_DEMO_BUSINESSES.length, 350, "scale demo registry contains 350 businesses");
 assert.equal(
   activeBusinesses.length,
   Object.keys(SEEDED_EXPO_PROFILES).length,
@@ -90,23 +90,27 @@ const thursdayExpo = getCurrentExpo({
   now: new Date("2026-07-30T10:00:00.000Z"),
 });
 assert.equal(thursdayExpo.themeSlug, "machinery-tools-manufacturing");
-assert.equal(thursdayExpo.booths.length, 24, "Thursday Expo has 24 participants");
-const addisHub = thursdayExpo.map.hubs.find((hub) => hub.key === "addis-ababa");
-assert.ok(addisHub, "Thursday Expo has an Addis Ababa host");
-assert.equal(addisHub.boothCount, 22, "Addis Ababa venue has 22 booths");
-assert.equal(addisHub.hallCount, 2, "Addis Ababa venue spans two halls");
-assert.equal(
-  thursdayExpo.booths.filter((booth) =>
-    booth.hubKey === "addis-ababa" && booth.hallNumber === 1).length,
-  12,
-  "Addis Hall 1 reaches its bounded capacity",
+assert.equal(thursdayExpo.booths.length, 74, "Thursday Expo has 74 participants");
+assert.equal(thursdayExpo.map.hubs.length, 5, "Thursday Expo has five host cities");
+const thursdayHubCounts = thursdayExpo.map.hubs.map((hub) => hub.boothCount);
+assert.ok(
+  thursdayHubCounts.every((count) => count >= 10 && count <= 20),
+  "every Thursday venue has between ten and twenty booths",
 );
-assert.equal(
-  thursdayExpo.booths.filter((booth) =>
-    booth.hubKey === "addis-ababa" && booth.hallNumber === 2).length,
-  10,
-  "Addis Hall 2 contains the deterministic overflow",
+assert.ok(
+  Math.max(...thursdayHubCounts) - Math.min(...thursdayHubCounts) <= 1,
+  "Thursday venue sizes differ by at most one booth",
 );
+for (const hub of thursdayExpo.map.hubs) {
+  const hallCounts = new Map<number, number>();
+  for (const booth of thursdayExpo.booths.filter((entry) => entry.hubKey === hub.key)) {
+    hallCounts.set(booth.hallNumber, (hallCounts.get(booth.hallNumber) || 0) + 1);
+  }
+  assert.ok(
+    [...hallCounts.values()].every((count) => count <= 12),
+    `${hub.city} keeps every hall within the twelve-booth limit`,
+  );
+}
 
 const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));
 const authoredBusinesses = activeBusinesses.filter((business) =>
@@ -292,4 +296,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("One hundred twenty Expo showrooms, 20 dense fixtures, 72 scale fixtures, 18 authored briefs, and ten validated design benchmarks passed.");
+console.log("Three hundred ninety-eight Expo showrooms, 20 dense fixtures, 350 scale fixtures, 18 authored briefs, and ten validated design benchmarks passed.");

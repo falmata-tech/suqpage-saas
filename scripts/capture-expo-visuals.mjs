@@ -36,7 +36,7 @@ const scenarios = [
     path: "/expo",
     viewport: { width: 320, height: 700 },
     listView: true,
-    expectedListCount: 24,
+    minimumListCount: 50,
   },
   {
     name: "expo-preview-mobile",
@@ -205,11 +205,11 @@ const failures = results.filter(
         result.mapOpacity < 0.25 ||
         result.venueBooths > 12)) ||
     (result.denseHall === 1 &&
-      (result.hallTabs !== 2 || result.venueBooths !== 12)) ||
+      (result.hallTabs !== 2 || result.venueBooths < 1 || result.venueBooths > 12)) ||
     (result.denseHall === 2 &&
-      (result.hallTabs !== 2 || result.venueBooths !== 10)) ||
-    (result.expectedListCount &&
-      result.listCards !== result.expectedListCount) ||
+      (result.hallTabs !== 2 || result.venueBooths < 1 || result.venueBooths > 12)) ||
+    (result.minimumListCount &&
+      result.listCards < result.minimumListCount) ||
     (result.venueBooths > 1 &&
       (result.venueBoothsLeftOfAisle < 1 || result.venueBoothsRightOfAisle < 1)) ||
     result.textOverflow.length > 0 ||

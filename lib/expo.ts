@@ -5,6 +5,8 @@ import { EXPO_HOST_CITIES, type ExpoHostCity } from "./expo-hosts";
 
 const MIN_HUB_BUSINESSES = 2;
 const MAX_BOOTHS_PER_HALL = 12;
+const FOUR_VENUE_THRESHOLD = 40;
+const FIVE_VENUE_THRESHOLD = 50;
 
 type ExpoOptions = {
   db?: DatabaseSync;
@@ -53,6 +55,7 @@ export type ExpoHubView = {
 
 export type ExpoBoothView = {
   id: number;
+  occurrenceId: number;
   businessId: number;
   handle: string;
   name: string;
@@ -205,6 +208,90 @@ export function assignExpoHubs(candidates: ExpoCandidate[]): ExpoHubAssignment[]
   const groups = groupCandidatesByHost(candidates);
   if (!groups.length) return [];
 
+  const denseVenueCount = candidates.length >= FIVE_VENUE_THRESHOLD
+    ? 5
+    : candidates.length >= FOUR_VENUE_THRESHOLD
+      ? 4
+      : 0;
+  if (denseVenueCount) {
+    const localCount = new Map(groups.map((group) => [group.key, group.businesses.length]));
+    const selected: ExpoHostCity[] = [];
+    while (selected.length < denseVenueCount) {
+      const next = EXPO_HOST_CITIES
+        .filter((host) => !selected.some((item) => item.key === host.key))
+        .sort((left, right) => {
+          const leftSpread = selected.length
+            ? Math.min(...selected.map((host) => geographicDistanceKm(left, host)))
+            : 0;
+          const rightSpread = selected.length
+            ? Math.min(...selected.map((host) => geographicDistanceKm(right, host)))
+            : 0;
+          const leftScore = (localCount.get(left.key) || 0) * 10_000 + leftSpread;
+          const rightScore = (localCount.get(right.key) || 0) * 10_000 + rightSpread;
+          return rightScore - leftScore || left.key.localeCompare(right.key);
+        })[0];
+      selected.push(next);
+    }
+
+    const baseTarget = Math.floor(candidates.length / selected.length);
+    const remainder = candidates.length % selected.length;
+    const targets = new Map(
+      [...selected]
+        .sort((left, right) => left.key.localeCompare(right.key))
+        .map((host, index) => [host.key, baseTarget + (index < remainder ? 1 : 0)]),
+    );
+    const assigned = new Map(selected.map((host) => [host.key, [] as ExpoCandidate[]]));
+    const affinity = candidates.map((candidate) => {
+      const distances = selected
+        .map((host) => ({ host, distance: geographicDistanceKm(candidate, host) }))
+        .sort((left, right) => left.distance - right.distance || left.host.key.localeCompare(right.host.key));
+      return {
+        candidate,
+        distances,
+        margin: (distances[1]?.distance ?? distances[0].distance) - distances[0].distance,
+      };
+    }).sort(
+      (left, right) =>
+        right.margin - left.margin ||
+        Number(right.candidate.featured) - Number(left.candidate.featured) ||
+        left.candidate.name.localeCompare(right.candidate.name) ||
+        left.candidate.businessId - right.candidate.businessId,
+    );
+
+    for (const item of affinity) {
+      const destination = item.distances.find(({ host }) =>
+        (assigned.get(host.key)?.length || 0) < (targets.get(host.key) || 0),
+      )!.host;
+      assigned.get(destination.key)!.push(item.candidate);
+    }
+
+    return [...selected]
+      .sort((left, right) => left.key.localeCompare(right.key))
+      .flatMap((host) =>
+        assigned.get(host.key)!
+          .sort(
+            (left, right) =>
+              Number(right.featured) - Number(left.featured) ||
+              left.name.localeCompare(right.name) ||
+              left.businessId - right.businessId,
+          )
+          .map((business, index) => ({
+            businessId: business.businessId,
+            originZone: business.zone,
+            originRegion: business.region,
+            hubKey: host.key,
+            hubName: `${host.city} Expo`,
+            hubCity: host.city,
+            hubZone: host.zone,
+            hubRegion: host.region,
+            hubLatitude: host.latitude,
+            hubLongitude: host.longitude,
+            hallNumber: Math.floor(index / MAX_BOOTHS_PER_HALL) + 1,
+            boothNumber: (index % MAX_BOOTHS_PER_HALL) + 1,
+          })),
+      );
+  }
+
   let hostGroups = groups.filter((group) => group.businesses.length >= MIN_HUB_BUSINESSES);
   if (!hostGroups.length) {
     hostGroups = [
@@ -265,9 +352,11 @@ function eligibleRows(db: DatabaseSync, occurrenceId: number) {
     FROM bazaar_booths bb
     JOIN businesses b ON b.id=bb.business_id
     JOIN bazaar_booth_profiles p ON p.business_id=b.id
+    JOIN business_subscriptions s ON s.business_id=b.id
     WHERE bb.occurrence_id=? AND bb.status='active' AND b.status='active'
+      AND s.grace_ends_at>=?
     ORDER BY bb.featured DESC,b.name,b.id
-  `).all(occurrenceId) as ExpoRow[];
+  `).all(occurrenceId, Date.now()) as ExpoRow[];
 
   return rows.filter(
     (row) =>
@@ -298,6 +387,26 @@ function ensureHubAssignments(
     featured: Boolean(row.featured || row.is_featured),
   }));
   const computed = assignExpoHubs(candidates);
+  const existing = db.prepare(`
+    SELECT business_id,origin_zone,hub_zone,hub_region
+    FROM expo_hub_assignments WHERE occurrence_id=?
+  `).all(occurrenceId) as Array<{
+    business_id: number;
+    origin_zone: string;
+    hub_zone: string;
+    hub_region: string;
+  }>;
+  const eligibleIds = new Set(computed.map((assignment) => assignment.businessId));
+  if (
+    existing.length === eligibleIds.size &&
+    existing.every(
+      (row) =>
+        eligibleIds.has(row.business_id) &&
+        Boolean(row.origin_zone && row.hub_zone && row.hub_region),
+    )
+  ) {
+    return;
+  }
   const insert = db.prepare(`
     INSERT INTO expo_hub_assignments(
       occurrence_id,business_id,origin_zone,origin_region,hub_key,hub_name,
@@ -316,12 +425,15 @@ function ensureHubAssignments(
       hub_longitude=excluded.hub_longitude,
       hall_number=excluded.hall_number,
       booth_number=excluded.booth_number
-    WHERE expo_hub_assignments.origin_zone=''
-      OR expo_hub_assignments.hub_zone=''
-      OR expo_hub_assignments.hub_region=''
   `);
   db.exec("BEGIN IMMEDIATE");
   try {
+    const remove = db.prepare(`
+      DELETE FROM expo_hub_assignments WHERE occurrence_id=? AND business_id=?
+    `);
+    for (const row of existing) {
+      if (!eligibleIds.has(row.business_id)) remove.run(occurrenceId, row.business_id);
+    }
     for (const assignment of computed) {
       insert.run(
         occurrenceId,
@@ -394,6 +506,7 @@ export function getCurrentExpo(options: ExpoOptions = {}): CurrentExpoView {
     const primaryKey = keys[0] || "community";
     return [{
       id: row.booth_id,
+      occurrenceId: base.occurrenceId!,
       businessId: row.business_id,
       handle: row.handle,
       name: row.name,

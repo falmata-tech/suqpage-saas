@@ -1248,4 +1248,181 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const accountHealthApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=21")
+    .get();
+  if (!accountHealthApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS business_subscriptions (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          plan_name TEXT NOT NULL DEFAULT 'SuqPage monthly',
+          amount_minor INTEGER CHECK(amount_minor IS NULL OR amount_minor >= 0),
+          currency TEXT NOT NULL DEFAULT 'ETB' CHECK(length(currency)=3),
+          starts_at INTEGER NOT NULL,
+          current_period_start INTEGER NOT NULL,
+          current_period_end INTEGER NOT NULL,
+          grace_ends_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          CHECK(current_period_start >= starts_at),
+          CHECK(current_period_end > current_period_start),
+          CHECK(grace_ends_at > current_period_end)
+        );
+        CREATE TABLE IF NOT EXISTS subscription_payments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          public_ref TEXT UNIQUE NOT NULL,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          amount_minor INTEGER CHECK(amount_minor IS NULL OR amount_minor >= 0),
+          currency TEXT NOT NULL DEFAULT 'ETB' CHECK(length(currency)=3),
+          idempotency_key TEXT NOT NULL,
+          paid_at INTEGER,
+          recorded_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at INTEGER NOT NULL,
+          UNIQUE(business_id,idempotency_key)
+        );
+        CREATE TABLE IF NOT EXISTS showroom_visits (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          visitor_hash TEXT NOT NULL,
+          visit_date TEXT NOT NULL,
+          source TEXT NOT NULL CHECK(source IN ('direct','expo','directory')),
+          expo_occurrence_id INTEGER REFERENCES bazaar_occurrences(id) ON DELETE SET NULL,
+          expo_hub_key TEXT NOT NULL DEFAULT '',
+          created_at INTEGER NOT NULL,
+          UNIQUE(business_id,visitor_hash,visit_date,source)
+        );
+        CREATE INDEX IF NOT EXISTS subscription_period_idx
+          ON business_subscriptions(grace_ends_at,current_period_end,business_id);
+        CREATE INDEX IF NOT EXISTS subscription_payment_business_idx
+          ON subscription_payments(business_id,created_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS showroom_visit_business_date_idx
+          ON showroom_visits(business_id,visit_date DESC,source);
+        CREATE INDEX IF NOT EXISTS showroom_visit_source_date_idx
+          ON showroom_visits(source,visit_date DESC,business_id);
+        CREATE TRIGGER IF NOT EXISTS business_subscription_after_insert
+        AFTER INSERT ON businesses
+        BEGIN
+          INSERT OR IGNORE INTO business_subscriptions(
+            business_id,plan_name,amount_minor,currency,starts_at,
+            current_period_start,current_period_end,grace_ends_at,updated_at
+          ) VALUES(
+            NEW.id,'SuqPage monthly',NULL,'ETB',
+            CAST(strftime('%s','now') AS INTEGER)*1000,
+            CAST(strftime('%s','now') AS INTEGER)*1000,
+            CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
+            CAST(strftime('%s','now','+34 days') AS INTEGER)*1000,
+            CAST(strftime('%s','now') AS INTEGER)*1000
+          );
+        END;
+        INSERT INTO business_subscriptions(
+          business_id,plan_name,amount_minor,currency,starts_at,
+          current_period_start,current_period_end,grace_ends_at,updated_at
+        )
+        SELECT
+          id,'SuqPage monthly',NULL,'ETB',
+          CAST(strftime('%s','now') AS INTEGER)*1000,
+          CAST(strftime('%s','now') AS INTEGER)*1000,
+          CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
+          CAST(strftime('%s','now','+34 days') AS INTEGER)*1000,
+          CAST(strftime('%s','now') AS INTEGER)*1000
+        FROM businesses
+        WHERE NOT EXISTS (
+          SELECT 1 FROM business_subscriptions s WHERE s.business_id=businesses.id
+        );
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(21)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const supportQueueApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=22")
+    .get();
+  if (!supportQueueApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS support_conversations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          public_ref TEXT UNIQUE NOT NULL,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          opened_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          subject TEXT NOT NULL CHECK(length(subject) BETWEEN 1 AND 120),
+          status TEXT NOT NULL DEFAULT 'waiting'
+            CHECK(status IN ('waiting','open','closed')),
+          assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          client_last_read_message_id INTEGER NOT NULL DEFAULT 0,
+          staff_last_read_message_id INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          last_message_at INTEGER NOT NULL,
+          closed_at INTEGER,
+          CHECK(
+            (status='waiting' AND assigned_user_id IS NULL)
+            OR status IN ('open','closed')
+          )
+        );
+        CREATE TABLE IF NOT EXISTS support_messages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          sender_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          body TEXT NOT NULL CHECK(length(body) BETWEEN 1 AND 4000),
+          idempotency_key TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          UNIQUE(sender_user_id,idempotency_key)
+        );
+        CREATE TABLE IF NOT EXISTS support_agent_settings (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          enabled INTEGER NOT NULL DEFAULT 0 CHECK(enabled IN (0,1)),
+          max_open_conversations INTEGER NOT NULL DEFAULT 3
+            CHECK(max_open_conversations BETWEEN 1 AND 20),
+          updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          updated_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS support_assignments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          assigned_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          assigned_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          reason TEXT NOT NULL CHECK(reason IN ('automatic','claimed','reassigned','reopened')),
+          assigned_at INTEGER NOT NULL,
+          released_at INTEGER
+        );
+        CREATE TABLE IF NOT EXISTS support_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          event_type TEXT NOT NULL CHECK(event_type IN (
+            'created','assigned','reassigned','message','closed','reopened'
+          )),
+          detail TEXT NOT NULL DEFAULT '',
+          created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS support_queue_status_idx
+          ON support_conversations(status,last_message_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS support_queue_assignee_idx
+          ON support_conversations(assigned_user_id,status,last_message_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS support_queue_business_idx
+          ON support_conversations(business_id,last_message_at DESC,id DESC);
+        CREATE INDEX IF NOT EXISTS support_message_thread_idx
+          ON support_messages(conversation_id,id);
+        CREATE INDEX IF NOT EXISTS support_assignment_agent_idx
+          ON support_assignments(assigned_user_id,released_at,assigned_at DESC);
+        CREATE INDEX IF NOT EXISTS support_assignment_thread_idx
+          ON support_assignments(conversation_id,assigned_at DESC);
+        CREATE INDEX IF NOT EXISTS support_event_thread_idx
+          ON support_events(conversation_id,id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(22)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

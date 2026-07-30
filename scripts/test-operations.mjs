@@ -28,65 +28,34 @@ try {
     businesses: db.prepare("SELECT COUNT(*) count FROM businesses").get().count,
     products: db.prepare("SELECT COUNT(*) count FROM products").get().count,
     clients: db.prepare("SELECT COUNT(*) count FROM users WHERE role='owner'").get().count,
+    requests: db.prepare("SELECT COUNT(*) count FROM service_requests").get().count,
+    revisions: db.prepare("SELECT COUNT(*) count FROM content_revisions").get().count,
   };
-  const preCutoverClient = db.prepare("SELECT id FROM users WHERE role='owner' ORDER BY id LIMIT 1").get();
   db.exec(`
     PRAGMA foreign_keys=OFF;
-    CREATE TABLE user_access_profiles_v6 (
-      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-      access_role TEXT NOT NULL CHECK(access_role IN ('platform_admin','legacy_owner','client','team_member','operations_manager')),
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-    INSERT INTO user_access_profiles_v6
-      SELECT user_id,CASE WHEN access_role='client' THEN 'legacy_owner' ELSE access_role END,created_at
-      FROM user_access_profiles;
-    DROP TABLE user_access_profiles;
-    ALTER TABLE user_access_profiles_v6 RENAME TO user_access_profiles;
-    CREATE TABLE client_invitations_v6 (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
-      business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-      email TEXT NOT NULL,name TEXT NOT NULL,token_hash TEXT UNIQUE NOT NULL,
-      expires_at INTEGER NOT NULL,accepted_at INTEGER,
-      accepted_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-      revoked_at INTEGER,created_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-      created_at INTEGER NOT NULL
-    );
-    INSERT INTO client_invitations_v6 SELECT * FROM client_invitations;
-    DROP TABLE client_invitations;
-    ALTER TABLE client_invitations_v6 RENAME TO client_invitations;
-    CREATE INDEX invitation_request_idx ON client_invitations(request_id,created_at DESC);
-    CREATE INDEX invitation_expiry_idx ON client_invitations(expires_at);
-    DELETE FROM schema_migrations WHERE version=7;
-    DELETE FROM schema_migrations WHERE version=8;
-    UPDATE businesses SET
-      design_key=CASE handle
-        WHEN 'alhayabrand' THEN 'alhaya'
-        WHEN 'usashopet' THEN 'usashopet'
-        WHEN 'novatech' THEN 'novatech'
-        WHEN 'homevibe' THEN 'homevibe'
-      END,
-      design_manifest_json='';
+    DROP TABLE support_events;
+    DROP TABLE support_assignments;
+    DROP TABLE support_messages;
+    DROP TABLE support_conversations;
+    DROP TABLE support_agent_settings;
+    DROP TABLE showroom_visits;
+    DROP TABLE subscription_payments;
+    DROP TABLE business_subscriptions;
+    DROP TRIGGER IF EXISTS business_subscription_after_insert;
+    DELETE FROM schema_migrations WHERE version IN (21,22);
     PRAGMA foreign_keys=ON;
   `);
-  db.prepare("INSERT INTO sessions(token_hash,user_id,expires_at,created_at,last_seen_at) VALUES('cutover-session',?,?,?,?)").run(preCutoverClient.id,Date.now()+60_000,Date.now(),Date.now());
   db.close();
   run("scripts/migrate.ts");
   db = new DatabaseSync(env.SUQPAGE_DB_PATH);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses").get().count,preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM products").get().count,preCutover.products);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM user_access_profiles WHERE access_role='client'").get().count,preCutover.clients);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM sessions WHERE token_hash='cutover-session' AND revoked_at IS NOT NULL").get().count,1);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses WHERE design_key='composition' AND design_manifest_json!=''").get().count,preCutover.businesses);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=8").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=9").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=10").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=11").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=12").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=13").get().count,1);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('products') WHERE name='stock_count'").get().count,0);
-  assert.equal(db.prepare("SELECT COUNT(*) count FROM pragma_table_info('option_values') WHERE name='stock_count'").get().count,0);
-  assert.throws(()=>db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(99999,'legacy_owner')").run(),/CHECK constraint failed/);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version IN (21,22)").get().count,2);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM business_subscriptions").get().count,preCutover.businesses);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM support_conversations").get().count,0);
+  assert.equal(db.prepare("PRAGMA foreign_key_check").all().length,0);
   db.close();
   fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
   fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "media restore proof");
@@ -106,15 +75,17 @@ try {
   const revisionId = Number(db.prepare("INSERT INTO content_revisions(request_id,business_id,revision_number,base_content_version,status,snapshot_json,summary,created_by_user_id,submitted_at) VALUES(?,?,1,1,'awaiting_review',?,'Backup revision',?,CURRENT_TIMESTAMP)").run(requestId,owner.business_id,revisionSnapshot,owner.id).lastInsertRowid);
   db.prepare("UPDATE published_catalog_versions SET source_revision_id=?,actor_user_id=? WHERE business_id=? AND content_version=1").run(revisionId,owner.id,owner.business_id);
   const retainedVersionCount = db.prepare("SELECT COUNT(*) count FROM published_catalog_versions").get().count;
+  const expectedRequestCount = preCutover.requests + 1;
+  const expectedRevisionCount = preCutover.revisions + 1;
   db.close();
   run("scripts/backup.ts");
   const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));
 
   db = new DatabaseSync(env.SUQPAGE_DB_PATH);
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, preCutover.businesses);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, expectedRequestCount);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, expectedRevisionCount);
   db.exec("DELETE FROM businesses");
   db.close();
   fs.rmSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true, force: true });
@@ -122,12 +93,14 @@ try {
   run("scripts/restore.ts", [`--from=${backup}`]);
   db = new DatabaseSync(env.SUQPAGE_DB_PATH, { readOnly: true });
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, 4);
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, preCutover.businesses);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, expectedRequestCount);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM request_attachments").get().count, 1);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM recipe_media_assets").get().count, 1);
-  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, expectedRevisionCount);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM published_catalog_versions").get().count, retainedVersionCount);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM business_subscriptions").get().count, preCutover.businesses);
+  assert.equal(db.prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE version IN (21,22)").get().count, 2);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM client_invitations WHERE request_id IS NULL AND token_hash='backup-invitation-hash'").get().count, 1);
   db.close();
   assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");

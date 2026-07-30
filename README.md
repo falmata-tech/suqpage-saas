@@ -124,6 +124,27 @@ RESEND_API_KEY=
 NOTIFICATION_FROM_EMAIL=SuqPage <notifications@suqpage.com>
 ```
 
+Customer support is first-party and works without an external provider.
+Operations can enable support agents, set each concurrent-conversation limit,
+and rely on transactional least-loaded assignment with a waiting queue.
+Optional Telegram alerts contain only the support reference, business name,
+assignment, and an authenticated dashboard link:
+
+```bash
+SUQPAGE_TELEGRAM_BOT_TOKEN=
+SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID=
+SUQPAGE_SUPPORT_WHATSAPP_URL=
+```
+
+The WhatsApp value is an optional official `https://wa.me/...` or
+`https://api.whatsapp.com/...` emergency handoff. Telegram and WhatsApp are not
+the support record and never receive the in-app message body.
+
+Monthly account access is also manual in this release. SuqPage staff record that
+a renewal was received and advance the monthly period. No amount or price is
+collected in the current UI, and no checkout, payment gateway, or automatic
+debit is configured.
+
 Production startup refuses non-HTTPS app URLs and non-persistent database/media configuration.
 Set `SUQPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
 basic product writes while leaving requests and showrooms available.

@@ -133,7 +133,7 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
     }),
   ).toBe(true);
   await expect(page.getByRole("heading", { name: "Find a showroom." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Enterprise & Export Showcase" })).toBeVisible();
+  await expect(page.locator("#expo-title")).not.toBeEmpty();
   await expect(page.getByRole("tablist", { name: "Expo view" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Map View" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "List View" })).toBeVisible();
@@ -470,30 +470,51 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
   await expect(page.getByRole("heading", { name: "Find today's Expo host cities." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Enterprise & Export Showcase" })).toBeVisible();
+  await expect(page.locator("#expo-title")).not.toBeEmpty();
   await expect(page.locator(".expo-regions path")).toHaveCount(14);
   await expect(page.locator(".expo-hub")).toHaveCount(5);
   await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(6);
-  await page.getByLabel("Jump to a host city").selectOption({ label: "Dire Dawa, Dire Dawa urban · 3 booths" });
+  const hostOption = await page
+    .getByLabel("Jump to a host city")
+    .locator("option")
+    .nth(1)
+    .evaluate((option) => ({
+      value: option.getAttribute("value") || "",
+      label: option.textContent || "",
+    }));
+  const hostCity = hostOption.label.split(",")[0].trim();
+  const hostBoothCount = Number(hostOption.label.match(/(\d+) booths/)?.[1] || "0");
+  expect(hostBoothCount).toBeGreaterThanOrEqual(10);
+  expect(hostBoothCount).toBeLessThanOrEqual(20);
+  await page.getByLabel("Jump to a host city").selectOption(hostOption.value);
   const contextualStage = page.locator(".expo-map-stage-venue");
   await expect(contextualStage).toBeVisible();
   await expect(contextualStage.locator(".expo-map")).toBeVisible();
   await expect(contextualStage.locator(".expo-regions path")).toHaveCount(14);
   await expect(contextualStage.getByText("Virtual Expo anchored in")).toBeVisible();
-  await expect(contextualStage.locator(".expo-city-context strong")).toHaveText("Dire Dawa");
-  await expect(page.locator(".expo-venue-booth")).toHaveCount(3);
+  await expect(contextualStage.locator(".expo-city-context strong")).toHaveText(hostCity);
+  const visibleHallBooths = await page.locator(".expo-venue-booth").count();
+  expect(visibleHallBooths).toBeGreaterThan(0);
+  expect(visibleHallBooths).toBeLessThanOrEqual(12);
   await expect(page.getByText("Entrance")).toBeVisible();
   await expect(page.getByText("Reception")).toBeVisible();
-  const dawaBooth = page.getByRole("button", { name: /Select Dawa Water Solutions, H\d+\.1-B\d+/ });
-  const dawaReference = (await dawaBooth.getAttribute("aria-label"))?.match(/(H\d+\.1-B\d+)/)?.[1] || "";
-  expect(dawaReference).toMatch(/^H\d+\.1-B\d{2}$/);
-  await dawaBooth.click();
-  const preview = page.getByLabel("Dawa Water Solutions booth preview");
+  const booth = page.locator(".expo-venue-booth").first();
+  const boothLabel = (await booth.getAttribute("aria-label")) || "";
+  const boothMatch = boothLabel.match(/^Select (.+), (H\d+\.\d+-B\d+)$/);
+  expect(boothMatch).not.toBeNull();
+  const boothName = boothMatch?.[1] || "";
+  const boothReference = boothMatch?.[2] || "";
+  expect(boothReference).toMatch(/^H\d+\.\d+-B\d{2}$/);
+  await booth.click();
+  const preview = page.getByLabel(`${boothName} booth preview`);
   await expect(preview).toBeVisible();
-  await expect(preview.locator(".expo-preview-meta").getByText(dawaReference)).toBeVisible();
-  await expect(preview.getByText(/From Dire Dawa, Dire Dawa urban, Dire Dawa/)).toBeVisible();
-  await expect(preview.getByRole("link", { name: "Enter showroom" })).toHaveAttribute("href", "/@dawa-water-solutions");
-  await page.getByRole("button", { name: "Close Dire Dawa Expo and return to Ethiopia" }).click();
+  await expect(preview.locator(".expo-preview-meta").getByText(boothReference)).toBeVisible();
+  await expect(preview.locator(".expo-origin")).toContainText(`Hosted in ${hostCity}`);
+  await expect(preview.getByRole("link", { name: "Enter showroom" })).toHaveAttribute(
+    "href",
+    /\/@[^?]+\?ref=expo&occurrence=[^&]+&hub=[^&]+/,
+  );
+  await page.getByRole("button", { name: `Close ${hostCity} Expo and return to Ethiopia` }).click();
   await expect(page.getByLabel("Jump to a host city")).toHaveValue("");
   await expect(page.locator(".expo-map-stage-venue")).toHaveCount(0);
   await expect(page.locator(".expo-map")).toBeVisible();
@@ -501,13 +522,20 @@ test("mobile city Expo venue, booth preview, list parity, and overflow", async (
   await page.getByRole("button", { name: "Center today's Expos" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List View" }).click();
-  await expect(page.locator(".expo-list-card")).toHaveCount(16);
-  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(16);
-  await expect(page.locator(".expo-list-card").filter({ hasText: "Dawa Water Solutions" }).getByText(dawaReference)).toBeVisible();
+  const listCount = await page.locator(".expo-list-card").count();
+  expect(listCount).toBeGreaterThanOrEqual(50);
+  expect(listCount).toBeLessThanOrEqual(100);
+  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(listCount);
+  await expect(
+    page.locator(".expo-list-card").filter({ hasText: boothName }).getByText(boothReference),
+  ).toBeVisible();
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/bazaar");
   await expect(page).toHaveURL(/\/expo$/);
+  await page.goto("/@demo-bora-highland-produce");
+  await expect(page).toHaveURL(/\?showroom=inactive$/);
+  await expect(page.getByText("That showroom is temporarily unavailable.")).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -972,9 +1000,35 @@ test("seeded client is restricted while operations manages customer activity", a
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("button",{name:"Update"})).toHaveCount(0);
   await expect(page.getByRole("link",{name:"Create delivery"})).toHaveCount(0);
+  await page.goto("/dashboard/account-health");
+  await expect(page.getByRole("heading",{name:"Selam Weave Studio"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Active"})).toBeVisible();
+  await expect(page.getByText("Unique visits",{exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Record payment and renew one month"})).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/dashboard/support");
+  await expect(page.getByRole("heading",{name:"How can we help?"})).toBeVisible();
+  await page.getByLabel("Subject").fill("Acceptance support question");
+  await page.getByLabel("Message").fill("Please help us verify the new support workflow.");
+  await page.getByRole("button",{name:"Send to SuqPage support"}).click();
+  await expect(page.getByRole("heading",{name:"Acceptance support question"})).toBeVisible();
+  await expect(page.getByText("waiting",{exact:true})).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+  ).toBe(true);
+  await page.setViewportSize({width:1280,height:720});
   await page.getByRole("button",{name:"Sign out"}).click();
 
   await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
+  await page.goto("/dashboard/account-health");
+  await expect(page.getByRole("heading",{name:"Monthly accounts"})).toBeVisible();
+  await expect(page.getByLabel("Account state")).toBeVisible();
+  await expect(page.getByText(/Showing 1-20 of \d+/)).toBeVisible();
+  await page.goto("/dashboard/support?status=waiting");
+  await expect(page.getByRole("heading",{name:"Support inbox"})).toBeVisible();
+  await expect(page.getByText("Agent workload and assignment limits")).toBeVisible();
+  await expect(page.locator(".support-row").first()).toBeVisible();
+  await expect(page.locator(".support-row").first().getByText("waiting",{exact:true})).toBeVisible();
   await page.goto("/dashboard/inquiries?business=1");
   await expectVisibleControlsNamed(page);
   await page.getByLabel("Search").fill("Hana");

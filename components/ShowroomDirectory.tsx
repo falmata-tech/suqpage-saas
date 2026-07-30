@@ -92,7 +92,7 @@ export default function ShowroomDirectory({
         <>
           <div className="showroom-rail" id="showroom-results" aria-live="polite">
             {result.items.map((entry) => (
-              <Link key={entry.id} className="market-showroom-card" href={`/@${entry.handle}`}>
+              <Link key={entry.id} className="market-showroom-card" href={`/@${entry.handle}?ref=directory`}>
                 <div className="market-showroom-media">
                   {entry.imageUrl ? (
                     <Image

@@ -109,6 +109,34 @@ async function main() {
     ["addis-ababa"],
   );
 
+  const balancedCandidates = Array.from({ length: 53 }, (_, index) => {
+    const locations = [
+      ["Addis Ababa", "Addis Ababa", "Addis Ababa", 9.03, 38.74],
+      ["Adama", "East Shewa", "Oromia", 8.54, 39.27],
+      ["Bahir Dar", "Bahir Dar", "Amhara", 11.57, 37.36],
+      ["Hawassa", "Sidama", "Sidama", 7.05, 38.49],
+      ["Dire Dawa", "Dire Dawa urban", "Dire Dawa", 9.6, 41.85],
+      ["Jimma", "Jimma", "Oromia", 7.68, 36.83],
+    ] as const;
+    const location = locations[index % locations.length];
+    return {
+      businessId: index + 100,
+      name: `Regional producer ${index + 1}`,
+      city: location[0],
+      zone: location[1],
+      region: location[2],
+      latitude: location[3],
+      longitude: location[4],
+      featured: false,
+    };
+  });
+  const balancedAssignments = assignExpoHubs(balancedCandidates);
+  const balancedCounts = [...new Set(balancedAssignments.map((item) => item.hubKey))]
+    .map((hubKey) => balancedAssignments.filter((item) => item.hubKey === hubKey).length);
+  assert.equal(balancedCounts.length, 5);
+  assert.ok(balancedCounts.every((count) => count >= 10 && count <= 20));
+  assert.ok(Math.max(...balancedCounts) - Math.min(...balancedCounts) <= 1);
+
   const insertBusiness = db.prepare(`
     INSERT INTO businesses(
       handle,name,design_key,design_manifest_json,tagline,description,
@@ -206,7 +234,7 @@ async function main() {
 
   closeDbForTests();
   fs.rmSync(root, { recursive: true, force: true });
-console.log("Expo eligibility, city hosts, nearest assignment, hall capacity, and occurrence stability passed.");
+console.log("Expo eligibility, balanced regional hosts, nearest assignment, hall capacity, and occurrence stability passed.");
 }
 
 main().catch((error) => {

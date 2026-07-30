@@ -88,10 +88,10 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a public discovery surface where eligible businesses can appear in a themed
   Daily Expo while every booth leads back to the business's permanent
   `/@handle` showroom;
-- a controlled SaaS pilot with 120 fictional local showrooms spanning makers,
+- a controlled SaaS pilot with 398 fictional local showrooms spanning makers,
   producers, farms, workshops, manufacturers, and production-input suppliers;
   28 remain the curated visual benchmark set, 20 simple fixtures exercise a
-  dense Manufacturing Expo, and 72 scale fixtures exercise every Expo day and
+  dense Manufacturing Expo, and 350 scale fixtures exercise every Expo day and
   high-volume operations workflow.
 
 ### SuqPage is not
@@ -248,13 +248,15 @@ its own familiar close control that reverses to the country view. It is a
 virtual city anchor and never claims a physical parcel, street address, or
 real-world building footprint. Venue depth and balanced booth rows derive from
 hall population, with at most 12 booths per hall; only the selected venue
-renders over the map. During the pilot, two eligible businesses in a host
-catchment create an Expo; a sparse catchment joins its geographically nearest
-active major-city host without changing the origin city, zone, and region shown
-to visitors. A business must have an active showroom, matching Industry,
-approved booth-specific image, valid city/zone/region/WGS84 coordinates, and no
-exclusion before it may participate. Map and List views expose the same complete
-participant set. Venue booths and the selected-booth sheet expose consistent
+renders over the map. Dense days with at least 50 eligible businesses use five
+capacity-balanced city venues; days with 40–49 use four. Each dense venue has
+10–20 booths and venue counts differ by at most one. A smaller real catchment
+retains deterministic nearest-host behavior without changing the origin city,
+zone, and region shown to visitors. A business must have an active,
+subscription-entitled showroom, matching Industry, approved booth-specific
+image, valid city/zone/region/WGS84 coordinates, and no exclusion before it may
+participate. Map and List views expose the same complete participant set. Venue
+booths and the selected-booth sheet expose consistent
 `H{hub-number}.{hall-number}-B{booth-number}` references.
 
 Featured emphasis is integrated into the one paginated directory instead of
@@ -324,15 +326,13 @@ benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
 The wider disposable seed contains 18 additional authored visual showrooms, 20
-deliberately simple dense-demo showrooms, and 72 lightweight scale showrooms.
+deliberately simple dense-demo showrooms, and 350 lightweight scale showrooms.
 The dense cohort has three offerings per business, managed local hero media,
-project-owned Expo booth media, and locations that make Thursday's
-Manufacturing, Tools & Production Inputs Expo contain 24 participants. The
-scale cohort distributes 12 businesses across each of the six Expo themes that
-needed more density. Sunday through Wednesday and Friday through Saturday each
-contain 16 eligible booths; Thursday contains 24. Every hall remains bounded to
-12 booths. These are stress and demonstration fixtures, not finished client
-designs.
+project-owned Expo booth media, and locations across Ethiopian regions. The
+scale cohort distributes 50 businesses across each of all seven daily Expo
+themes. Reset creates five daily city venues with 10–15 booths per venue, at
+least 50 eligible booths every day, and at most 12 booths per hall. These are
+stress and demonstration fixtures, not finished client designs.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important
@@ -678,6 +678,9 @@ A client has a minimal workspace bound to one business. The client can:
   description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
 - view their showroom and manage their account password.
+- view monthly account state, grace deadline, renewal history, and aggregate
+  direct/directory/Expo showroom visits;
+- open, reply to, close, and reopen tenant-scoped SuqPage support conversations.
 
 Clients cannot directly edit business settings, design, categories,
 options, ordering, slugs, structural publication state, or complete showroom
@@ -696,11 +699,16 @@ private revision, exact client approval, and manager publication.
 Operations managers can create or invite clients, record requests on their
 behalf, review and assign work, ask clarifying questions, manage inquiry and
 delivery activity, publish approved revisions, and perform retained-version
-rollback. Team members see only assigned requests and their associated
+rollback. They can also record a manual monthly renewal without a configured
+price, review account health, configure support-agent limits, inspect workload, and
+reassign support conversations. Team members see only assigned requests and their associated
 read-only business context; they can ask clarifying questions and prepare
 private revisions but cannot invite, assign, publish, or perform customer
-operations. Platform administrators, operations managers, and team members can
-view the internal showroom component laboratory; clients cannot.
+operations. Enabled support team members additionally receive least-loaded
+support assignments up to their configured limit and can reply, close, and
+reopen assigned conversations. Platform administrators, operations managers,
+and team members can view the internal showroom component laboratory; clients
+cannot.
 
 ### Public customer
 
@@ -807,6 +815,22 @@ Current verified behavior:
   Business and staff selection never loads the complete account into a dropdown;
   Expo administration edits one business-specific profile, and inquiry rows
   include item summaries without per-row follow-up queries.
+- Every business has a manually operated monthly subscription ledger. Public
+  access remains active through period end and a four-day grace window; after
+  grace, the showroom redirects home and is omitted from discovery and Expo.
+  Operations records renewal without collecting an amount or requiring a
+  configured price. There is no
+  checkout, payment gateway, automatic debit, or public pricing claim.
+- Showroom visits use an opaque first-party visitor token hashed with the privacy
+  salt and deduplicate per business, source, and day. Clients see aggregate
+  direct, directory, Expo, and recent counts; raw IP addresses are not stored
+  and traffic counts are not billing authority.
+- Authenticated client support is stored inside SuqPage. Enabled agents have
+  configurable concurrent limits; new conversations transactionally select the
+  least-loaded available agent or remain waiting. Assignment history and
+  lifecycle events are retained, open threads refresh every five seconds, and
+  Telegram may send metadata-only secure dashboard links. WhatsApp is an
+  optional emergency handoff, never the support source of truth.
 - Platform-owned homepage, Expo, intake, login, legal, favicon, and workspace
   surfaces use one SuqPage mark and wordmark without replacing any tenant's
   showroom identity. Authenticated navigation groups role-permitted work in a
@@ -1231,6 +1255,9 @@ Current SQLite requirements:
 - appropriate file permissions.
 
 Do not horizontally scale the SQLite build across multiple application instances.
+`docs/MANAGED-POSTGRES-READINESS.md` records the required SQL-adapter, migration,
+object-storage, job, realtime, backup, and monitored-cutover work. Supabase is a
+candidate managed PostgreSQL host, not a current runtime configuration.
 
 Before broad self-service SaaS onboarding, migrate to:
 

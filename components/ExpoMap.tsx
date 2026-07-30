@@ -687,7 +687,7 @@ function BoothPreview({
         <h3>{booth.name}</h3>
         <p className="expo-origin">From {booth.city}, {booth.zone}, {booth.region} · Hosted in {booth.hubCity}</p>
         <p>{booth.description}</p>
-        <Link className="expo-showroom-action" href={`/@${booth.handle}`}>Enter showroom</Link>
+        <Link className="expo-showroom-action" href={`/@${booth.handle}?ref=expo&occurrence=${booth.occurrenceId}&hub=${encodeURIComponent(booth.hubKey)}`}>Enter showroom</Link>
       </div>
     </aside>
   );
@@ -709,7 +709,7 @@ function ExpoList({ booths }: { booths: ExpoBoothView[] }) {
             <p className="expo-origin">From {booth.city}, {booth.zone}, {booth.region} · Hosted in {booth.hubCity}</p>
             <p>{booth.description}</p>
           </div>
-          <Link className="expo-showroom-action" href={`/@${booth.handle}`}>Enter showroom</Link>
+          <Link className="expo-showroom-action" href={`/@${booth.handle}?ref=expo&occurrence=${booth.occurrenceId}&hub=${encodeURIComponent(booth.hubKey)}`}>Enter showroom</Link>
         </article>
       ))}
     </div>

@@ -5,11 +5,11 @@ import { SEEDED_FEATURED_HANDLES } from "../lib/expo-seed";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 
 const db = getDb();
-assert.equal(getAllBusinesses().filter((business) => business.status === "active").length, 120);
-assert.equal(SCALE_DEMO_BUSINESSES.length, 72);
+assert.equal(getAllBusinesses().filter((business) => business.status === "active").length, 398);
+assert.equal(SCALE_DEMO_BUSINESSES.length, 350);
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM products").get() as { total: number }).total),
-  403,
+  1237,
 );
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM service_requests").get() as { total: number }).total),
@@ -63,7 +63,11 @@ for (let offset = 0; offset < 7; offset += 1) {
   now.setUTCDate(sunday.getUTCDate() + offset);
   const expo = getCurrentExpo({ db, now });
   dailyCounts.push(expo.booths.length);
-  assert.ok(expo.booths.length >= 15, `${expo.themeName} has at least 15 booths`);
+  assert.ok(expo.booths.length >= 50, `${expo.themeName} has at least 50 booths`);
+  assert.equal(expo.map.hubs.length, 5, `${expo.themeName} has five city venues`);
+  const venueCounts = expo.map.hubs.map((hub) => hub.boothCount);
+  assert.ok(venueCounts.every((count) => count >= 10 && count <= 20));
+  assert.ok(Math.max(...venueCounts) - Math.min(...venueCounts) <= 1);
   const hallCounts = new Map<string, number>();
   for (const booth of expo.booths) {
     const key = `${booth.hubKey}:${booth.hallNumber}`;
@@ -74,7 +78,19 @@ for (let offset = 0; offset < 7; offset += 1) {
     `${expo.themeName} keeps halls bounded`,
   );
 }
-assert.deepEqual(dailyCounts, [16, 16, 16, 16, 24, 16, 16]);
+assert.deepEqual(dailyCounts, [54, 54, 54, 51, 74, 53, 54]);
+assert.equal(
+  Number((db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get() as { total: number }).total),
+  398,
+);
+assert.equal(
+  Number((db.prepare("SELECT COUNT(*) total FROM showroom_visits").get() as { total: number }).total),
+  3184,
+);
+assert.equal(
+  Number((db.prepare("SELECT COUNT(*) total FROM support_conversations").get() as { total: number }).total),
+  30,
+);
 assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
 
-console.log("Scale fixtures passed: 120 showrooms, ten featured, all lifecycle states, and 15+ booths every day.");
+console.log("Scale fixtures passed: 398 showrooms, ten featured, all lifecycle states, and five balanced venues every day.");

@@ -2,7 +2,7 @@
 id: FE-010
 title: Public daily Expo geographic map
 status: done
-related: [FE-001, FE-011, FE-012, FE-015, BE-011, DEP-010, DEP-011, DEP-013]
+related: [FE-001, FE-011, FE-012, FE-015, BE-011, BE-016, DEP-010, DEP-011, DEP-013, DEP-015]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L2

@@ -88,6 +88,17 @@ const themes: readonly ScaleTheme[] = [
     boothPath: "/landing/expo-booths/green-terrace-farm.webp",
   },
   {
+    key: "machinery-tools",
+    names: ["Shewa Tool Systems", "Rift Fabrication Supply", "Abay Machine Works", "Tana Industrial Inputs", "Bale Equipment Lab", "Dawa Production Tools", "Kaffa Process Systems", "Sidama Workshop Supply", "Gibe Metal Systems", "Awash Factory Inputs", "Wabi Equipment Works", "Meda Industrial Parts"],
+    categories: ["Equipment", "Fabrication", "Production Inputs"],
+    offerings: ["Serviceable Equipment Range", "Configured Fabrication Run", "Recurring Factory Input Supply"],
+    kinds: ["standard_product", "manufacturing_capability", "production_supply"],
+    copy: { tagline: "Machinery, fabrication, and practical production inputs.", description: "A fictional scale fixture representing equipment makers, fabrication teams, and industrial input suppliers.", heroTitle: "Specify the duty, material, tolerance, and production rate.", heroSubtitle: "Review standard equipment or prepare one clear fabrication and supply requirement." },
+    designVariant: "technical",
+    heroPath: "/uploads/seed/benchmarks/addis-metalworks/hero.jpg",
+    boothPath: "/landing/expo-booths/addis-metalworks.webp",
+  },
+  {
     key: "home-living",
     names: ["Meda Furniture Studio", "Tullu Timber Works", "Buna Interior Supply", "Kora Ceramic House", "Aster Lighting Works", "Wabi Joinery Lab", "Sena Home Textiles", "Dara Fixture Works", "Lume Panel Supply", "Nile Seating Studio", "Biftu Interior Parts", "Horizon Home Inputs"],
     categories: ["Furniture", "Interior Components", "Projects"],
@@ -126,9 +137,32 @@ function slug(value: string) {
   return value.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+const SCALE_BUSINESSES_PER_THEME = 50;
+const businessForms = ["Works", "Cooperative", "Production", "Supply"] as const;
+const themeMarkers: Record<string, string> = {
+  electronics: "Electrical",
+  "beauty-wellness": "Botanical",
+  "food-farming": "Agricultural",
+  "machinery-tools": "Industrial",
+  "home-living": "Interior",
+  "fashion-textiles": "Textile",
+  community: "Enterprise",
+};
+
+function expandedNames(theme: ScaleTheme) {
+  const names = [...theme.names];
+  for (let index = 0; names.length < SCALE_BUSINESSES_PER_THEME; index += 1) {
+    const location = locations[index % locations.length];
+    const category = theme.categories[index % theme.categories.length];
+    const form = businessForms[Math.floor(index / locations.length) % businessForms.length];
+    names.push(`${location.city} ${themeMarkers[theme.key]} ${category} ${form}`);
+  }
+  return names;
+}
+
 export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = themes.flatMap(
   (theme, themeIndex) =>
-    theme.names.map((name, index) => {
+    expandedNames(theme).map((name, index) => {
       const location = locations[(index + themeIndex * 2) % locations.length];
       return {
         handle: `demo-${slug(name)}`,

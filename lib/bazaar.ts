@@ -451,9 +451,10 @@ function eligibleBusinesses(db: DatabaseSync, theme: BazaarThemeRow) {
       p.fallback_style,p.is_featured,p.is_excluded
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-    WHERE b.status='active'
+    JOIN business_subscriptions s ON s.business_id=b.id
+    WHERE b.status='active' AND s.grace_ends_at>=?
     ORDER BY COALESCE(p.is_featured,0) DESC,b.name,b.id
-  `).all() as EligibleBusinessRow[];
+  `).all(Date.now()) as EligibleBusinessRow[];
   return rows.filter((business) => {
     if (business.is_excluded) return false;
     const profileKeys = jsonArray(business.industry_keys_json);
