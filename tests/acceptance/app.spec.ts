@@ -346,7 +346,8 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
   await expect(page.locator(".inquiry-drawer")).toHaveAttribute("aria-hidden", "true");
   await drawerOpener.click();
   await expect(page.getByPlaceholder("Your first name")).toHaveCount(0);
-  await expect(page.getByPlaceholder("How the business can contact you")).toHaveCount(0);
+  const inquiryPhone = page.getByRole("textbox", { name: "Phone number" });
+  await expect(inquiryPhone).toBeVisible();
   await expect(page.getByRole("button", { name: "TikTok" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Share / copy" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "WhatsApp" })).toBeVisible();
@@ -356,7 +357,18 @@ test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", asyn
   const copiedReference = page.locator(".copied-reference pre");
   await expect(copiedReference).toContainText("Showroom reference: @selam-weave");
   await expect(copiedReference).not.toContainText("Desired quantity:");
-  expect(readAcceptanceRow("inquiryByCustomer", "Browser Tester")).toBeNull();
+  expect(readAcceptanceRow("inquiryByCustomer", "Showroom visitor")).toBeNull();
+  await inquiryPhone.fill("123");
+  await page.getByRole("button", { name: "Send inquiry" }).click();
+  await expect(page.locator("#inquiry-send-status")).toContainText("7 to 15 digits");
+  expect(readAcceptanceRow("inquiryByCustomer", "Showroom visitor")).toBeNull();
+  await inquiryPhone.fill("+251 91 123 4567");
+  await page.getByRole("button", { name: "Send inquiry" }).click();
+  await expect(page.locator("#inquiry-send-status")).toContainText("Sent to Selam Weave Studio");
+  expect(readAcceptanceRow("inquiryByCustomer", "Showroom visitor")).toEqual({
+    status: "new",
+    contact: "+251911234567",
+  });
   expect(errors).toEqual([]);
 });
 
@@ -409,6 +421,8 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(mobileDrawer.bottom).toBeGreaterThanOrEqual(5);
   expect(mobileDrawer.height).toBeLessThanOrEqual(832);
   expect(mobileDrawer.controlsMeetTouchTarget).toBe(true);
+  await expect(page.getByRole("textbox", { name: "Phone number" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send inquiry" })).toBeVisible();
   await expect(page.locator(".direct-handoffs")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Telegram" })).toHaveCount(0);
@@ -1000,6 +1014,11 @@ test("seeded client is restricted while operations manages customer activity", a
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("button",{name:"Update"})).toHaveCount(0);
   await expect(page.getByRole("link",{name:"Create delivery"})).toHaveCount(0);
+  await page.getByLabel("Search").fill("Showroom visitor");
+  await page.getByRole("button",{name:"Apply"}).click();
+  const showroomInquiry = page.locator("section.panel").filter({hasText:"Showroom visitor"});
+  await expect(showroomInquiry).toContainText("phone: +251911234567");
+  await expect(showroomInquiry).toContainText("Open for discussion");
   await page.goto("/dashboard/account-health");
   await expect(page.getByRole("heading",{name:"Selam Weave Studio"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Active"})).toBeVisible();

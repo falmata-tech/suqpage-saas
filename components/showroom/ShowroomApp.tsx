@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type FormEvent,
   type RefObject,
 } from "react";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
@@ -419,6 +420,10 @@ function InquiryDrawer({
 }) {
   const [preparedMessage, setPreparedMessage] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
+  const [phone, setPhone] = useState("");
+  const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [sendError, setSendError] = useState("");
+  const idempotencyKey = useRef("");
   const panel = useRef<HTMLElement>(null);
   const closeAction = useRef(close);
   closeAction.current = close;
@@ -427,6 +432,9 @@ function InquiryDrawer({
   useEffect(() => {
     setPreparedMessage("");
     setCopyState("idle");
+    setSendState("idle");
+    setSendError("");
+    idempotencyKey.current = "";
   }, [signature]);
   useEffect(() => {
     if (!open) return;
@@ -462,6 +470,57 @@ function InquiryDrawer({
     const copied = await copyText(message);
     setCopyState(copied ? "copied" : "manual");
     show(copied ? "Inquiry copied." : "Select the inquiry text and copy it.");
+  }
+  function updatePhone(value: string) {
+    setPhone(value.slice(0, 40));
+    if (sendState === "sent" || sendState === "error") {
+      setSendState("idle");
+      setSendError("");
+      idempotencyKey.current = "";
+    }
+  }
+  async function sendInquiry(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!cart.length || sendState === "sending" || sendState === "sent") return;
+    const digits = phone.replace(/\D/g, "");
+    if (!/^\+?[\d\s().-]+$/.test(phone.trim()) || digits.length < 7 || digits.length > 15) {
+      setSendState("error");
+      setSendError("Enter a valid phone number with 7 to 15 digits.");
+      return;
+    }
+    if (!idempotencyKey.current) {
+      idempotencyKey.current = `showroom-${crypto.randomUUID()}`;
+    }
+    setSendState("sending");
+    setSendError("");
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId: catalog.business.id,
+          customerName: "Showroom visitor",
+          contact: phone,
+          contactMethod: "phone",
+          idempotencyKey: idempotencyKey.current,
+          items: cart.map((line) => ({
+            productId: line.product.id,
+            quantity: line.quantity,
+            options: line.options,
+          })),
+          website: "",
+        }),
+      });
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) {
+        throw new Error(result.error || "The inquiry could not be sent. Please try again.");
+      }
+      setSendState("sent");
+      show("Inquiry sent.");
+    } catch (error) {
+      setSendState("error");
+      setSendError(error instanceof Error ? error.message : "The inquiry could not be sent. Please try again.");
+    }
   }
 
   return (
@@ -523,8 +582,48 @@ function InquiryDrawer({
         )}
         {cart.length > 0 && (
           <div className="drawer-actions">
+            <form className="platform-inquiry" onSubmit={sendInquiry}>
+              <div className="drawer-action-heading">
+                <span className="eyebrow">Send through SuqPage</span>
+                <h3>Send to {catalog.business.name}</h3>
+                <p>Add a phone number so the business can reply to your inquiry.</p>
+              </div>
+              <label className="inquiry-phone">
+                <span>Phone number</span>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(event) => updatePhone(event.target.value)}
+                  placeholder="+251 91 123 4567"
+                  maxLength={40}
+                  required
+                  disabled={sendState === "sending" || sendState === "sent"}
+                  aria-invalid={sendState === "error"}
+                  aria-describedby="inquiry-send-status"
+                />
+              </label>
+              <button
+                type="submit"
+                className="send-inquiry"
+                disabled={sendState === "sending" || sendState === "sent"}
+              >
+                {sendState === "sending" ? "Sending..." : sendState === "sent" ? "Sent" : "Send inquiry"}
+              </button>
+              <p
+                id="inquiry-send-status"
+                className={`inquiry-send-status ${sendState}`}
+                role={sendState === "error" ? "alert" : "status"}
+                aria-live="polite"
+              >
+                {sendState === "sent"
+                  ? `Sent to ${catalog.business.name}. They can reply using your phone number.`
+                  : sendError}
+              </p>
+            </form>
+            <div className="inquiry-action-separator"><span>Other ways to send</span></div>
             <div className="drawer-action-heading">
-              <span className="eyebrow">Ready to send</span>
               <h3>Copy your inquiry</h3>
               <p>Paste it into any message. No name or contact details are required here.</p>
             </div>

@@ -4,7 +4,7 @@ title: Public showroom discovery and inquiry experience
 status: done
 related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016]
 owners: [product, frontend]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
@@ -13,17 +13,19 @@ change_level: L2
 ## Problem and outcome
 
 Customers need to discover a seller, select exact catalog options, preserve a
-shortlist, and prepare one clear inquiry message without checkout, mandatory
-identity fields, or dependence on a social app successfully opening.
+shortlist, and either prepare one clear inquiry message without identity fields
+or send the structured inquiry into the business's SuqPage inbox with a usable
+phone number for a reply.
 
 ## Scope and non-goals
 
 Includes intentional directory discovery, distinct composed showrooms, product
 search, option selection, cart persistence, optional free-form desired quantity,
-copy-first message preparation, and configured WhatsApp/Telegram handoff.
+copy-first message preparation, configured WhatsApp/Telegram handoff, and a
+phone-required `Send inquiry` action that saves to the tenant's SuqPage inbox.
 Excludes payment, checkout, pricing guarantees, variant-combination inventory,
 automatic fulfillment, native share menus, TikTok handoff, and mandatory
-identity/contact/note capture inside the message-preparation drawer.
+identity/contact/note capture for copy or social-app handoff.
 
 The inquiry cart is presented as a scoped floating task surface rather than an
 edge-to-edge generic sidebar. Desktop keeps visible breathing room around a
@@ -60,7 +62,20 @@ Scenario: Configured direct handoff
   GIVEN the showroom has a configured WhatsApp number or Telegram username
   WHEN the customer reviews the prepared inquiry
   THEN only the configured WhatsApp and Telegram handoff actions are shown
-  AND Copy inquiry remains the primary action on every supported device
+  AND Copy inquiry remains available without requiring personal details
+
+Scenario: Customer sends through SuqPage
+  GIVEN one or more inquiry-eligible offerings are selected
+  WHEN the customer enters a usable phone number and activates Send inquiry
+  THEN the structured inquiry is saved to that business's Customer inquiries inbox
+  AND the customer sees a clear sent state
+  AND no unrelated tenant receives the inquiry
+
+Scenario: Platform delivery requires a phone
+  GIVEN one or more inquiry-eligible offerings are selected
+  WHEN the customer omits or enters an invalid phone number
+  THEN Send inquiry does not create a dashboard row
+  AND copy, WhatsApp, and Telegram preparation remain available without personal details
 
 Scenario: Draft showroom is requested publicly
   GIVEN a business whose status is draft or suspended
@@ -96,26 +111,35 @@ Scenario: Customer returns to a growing inquiry while browsing
 - Desired quantity is an optional single-line text value of at most 80
   characters so visitors may include units, packs, pallets, ranges, or another
   concise production quantity description.
-- Message preparation stores no customer identity or contact data.
+- Copy and social-app message preparation store no customer identity or contact
+  data. Direct SuqPage delivery stores the submitted phone only in the
+  canonical tenant-scoped inquiry.
 - Copy/share preparation is not represented as delivery and does not create a
   canonical dashboard inquiry without an explicit customer reply path.
 - Modern clipboard access has a legacy-copy and visible selectable-text fallback.
 
 ## Test plan and evidence
 
-- Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, focus, and
-  320/390px mobile-sheet and persistent-trigger scenarios.
+- Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, direct
+  SuqPage delivery, owner inbox, focus, and 320/390px mobile-sheet and
+  persistent-trigger scenarios.
 - HTTP/security: `scripts/http-smoke.mjs`, `scripts/test-security.ts`.
 - Design contract: `scripts/validate-designs.ts`.
 - Evidence: `npm run test:acceptance` passed 10/10 on 2026-07-29, including
-  zero personal-detail fields, primary copy, visible copied reference, no
-  fabricated dashboard row, configured WhatsApp/Telegram filtering, optional
+  contact-free copy preparation, primary copy, visible copied reference, no
+  fabricated dashboard row from copy, configured WhatsApp/Telegram filtering, optional
   free-form quantities including `1 ton` and `250 kg`, bounded desktop
   geometry, 390px safe-area geometry, scroll/focus
   restoration, and 44px mobile controls. `npm run test:visual-benchmarks`
   recorded desktop/mobile copied-message panels among 56 zero-failure captures.
   `npm run check` and `npm run release` passed with zero production
   vulnerabilities.
+
+The phone-required direct-delivery revision passed on 2026-08-01. Typecheck,
+production build, security integration, production HTTP smoke, and 10/10
+browser acceptance passed. Browser evidence covers malformed-phone rejection
+without a row, normalized phone persistence, the sent state, mobile controls,
+and visibility in the correct client inquiry inbox.
 
 ## Rollout and rollback
 

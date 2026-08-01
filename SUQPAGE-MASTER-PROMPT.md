@@ -81,7 +81,7 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - an inquiry-cart system;
 - a lightweight customer lead-capture system;
 - a copy-first inquiry-message builder with configured WhatsApp and Telegram
-  handoff;
+  handoff, plus phone-required delivery into the business's SuqPage inbox;
 - an inquiry management dashboard;
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
@@ -444,8 +444,12 @@ Expected customer flow:
 8. The exact copied text remains visible and selectable as a reference.
 9. When the business configured them, the customer may instead open WhatsApp
    or Telegram with the prepared message.
-10. Message preparation does not fabricate a saved dashboard inquiry without a
-    customer reply path and does not claim that copying delivered the message.
+10. The customer may separately enter a phone number and activate **Send
+    inquiry** to save the structured cart in that business's SuqPage inbox.
+11. Direct SuqPage delivery requires a normalized phone number with 7–15 digits
+    and shows an explicit success or failure state.
+12. Copy and social-app preparation do not fabricate a saved dashboard inquiry
+    and do not claim that copying delivered the message.
 
 The current inquiry cart opens as a bounded floating task panel with visible
 outer margins on desktop. At 320 and 390 CSS pixels it becomes a safe-area-aware,
@@ -459,13 +463,13 @@ shows the current selected-item count, and opens the same cart without requiring
 the visitor to return to the header. At phone widths it becomes a compact
 icon-sized control, and its visible badge is omitted while the cart is empty.
 
-A canonical inquiry record created by an explicit contact-bearing submission
-should contain:
+A canonical inquiry record created by the public **Send inquiry** action
+contains:
 
 - business;
-- customer name;
-- contact value;
-- contact method;
+- a neutral visitor label;
+- the visitor's required phone number;
+- phone as the contact method;
 - optional note;
 - selected products and capabilities;
 - selected options;
@@ -720,7 +724,9 @@ A public customer does not require an account. The customer can:
 - build an inquiry cart;
 - optionally add desired quantities;
 - copy the prepared inquiry without personal-detail fields;
-- continue through configured WhatsApp or Telegram.
+- continue through configured WhatsApp or Telegram;
+- enter a required phone number and send the structured inquiry into the
+  business's SuqPage inbox.
 
 The access-profile layer distinguishes platform administrator, client, team
 member, and operations manager. Every account has an explicit profile.

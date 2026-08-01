@@ -7,13 +7,23 @@ import {
   normalizeQuantityMode,
 } from "./offerings";
 
-const METHODS = new Set(["whatsapp","telegram","tiktok","share","phone","email"]);
-
 type RawItem = { productId?: unknown; quantity?: unknown; options?: unknown };
 export type InquiryInput = { businessId?: unknown; customerName?: unknown; contact?: unknown; contactMethod?: unknown; note?: unknown; items?: unknown; idempotencyKey?: unknown; website?: unknown };
 
 export class InquiryError extends Error {
   constructor(message: string, public status = 400, public retryAfter = 0) { super(message); }
+}
+
+function normalizePhone(value: unknown) {
+  const raw = cleanText(value, 40);
+  if (!/^\+?[\d\s().-]+$/.test(raw)) {
+    throw new InquiryError("Enter a valid phone number.");
+  }
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length < 7 || digits.length > 15) {
+    throw new InquiryError("Enter a phone number with 7 to 15 digits.");
+  }
+  return `${raw.startsWith("+") ? "+" : ""}${digits}`;
 }
 
 export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
@@ -26,13 +36,13 @@ export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
   if (!rate.allowed) throw new InquiryError("Too many inquiry attempts. Please try again later.", 429, rate.retryAfterSeconds);
 
   const customerName = cleanText(input.customerName, 80);
-  const contact = cleanText(input.contact, 120);
   const note = cleanText(input.note, 1000);
   const contactMethod = cleanText(input.contactMethod, 20).toLowerCase() || "phone";
   const idempotencyKey = cleanText(input.idempotencyKey, 100);
   const rawItems = Array.isArray(input.items) ? input.items as RawItem[] : [];
-  if (customerName.length < 1 || contact.length < 3) throw new InquiryError("Name and contact are required.");
-  if (!METHODS.has(contactMethod)) throw new InquiryError("Invalid contact method.");
+  if (customerName.length < 1) throw new InquiryError("A visitor label is required.");
+  if (contactMethod !== "phone") throw new InquiryError("A phone number is required to send an inquiry.");
+  const contact = normalizePhone(input.contact);
   if (rawItems.length < 1 || rawItems.length > 20) throw new InquiryError("An inquiry must contain between 1 and 20 items.");
   if (!/^[a-zA-Z0-9_-]{10,100}$/.test(idempotencyKey)) throw new InquiryError("A valid inquiry key is required.");
 

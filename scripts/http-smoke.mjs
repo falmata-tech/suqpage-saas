@@ -183,6 +183,36 @@ try {
   });
   assert.equal(forged.status, 400);
 
+  const missingPhone = await fetch(`${baseUrl}/api/inquiries`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      businessId: product.business_id,
+      customerName: 'Test',
+      contact: 'test@example.test',
+      contactMethod: 'email',
+      idempotencyKey: 'http-contact-001',
+      items: [{ productId: product.id, quantity: '1 pallet', options }],
+    }),
+  });
+  assert.equal(missingPhone.status, 400);
+  assert.match((await missingPhone.json()).error, /phone number is required/i);
+
+  const invalidPhone = await fetch(`${baseUrl}/api/inquiries`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      businessId: product.business_id,
+      customerName: 'Test',
+      contact: '123',
+      contactMethod: 'phone',
+      idempotencyKey: 'http-contact-002',
+      items: [{ productId: product.id, quantity: '1 pallet', options }],
+    }),
+  });
+  assert.equal(invalidPhone.status, 400);
+  assert.match((await invalidPhone.json()).error, /7 to 15 digits/i);
+
   const payload = {
     businessId: product.business_id,
     customerName: 'Test',
