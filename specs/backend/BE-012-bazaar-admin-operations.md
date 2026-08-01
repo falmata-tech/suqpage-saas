@@ -1,14 +1,17 @@
 ---
 id: BE-012
 title: Expo administration operations
-status: done
+status: deprecated
 related: [BE-011, BE-015, FE-011, DEP-010]
 owners: [backend, security]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # BE-012 — Expo administration operations
+
+Deprecated by BE-019. Permanent indexed industries and discovery profiles
+replace theme regeneration and occurrence placement.
 
 ## Problem and outcome
 

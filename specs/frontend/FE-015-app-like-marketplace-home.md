@@ -1,14 +1,17 @@
 ---
 id: FE-015
 title: App-like marketplace home and Expo
-status: done
+status: deprecated
 related: [FE-010, FE-012, FE-013, BE-011, BE-013, BE-016, DEP-010, DEP-011, DEP-013]
 owners: [product, frontend, design]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # FE-015 - App-like marketplace home and Expo
+
+Deprecated by FE-020. Its useful mobile map behavior is retained under the new
+industry-selected permanent discovery contract.
 
 ## Problem and outcome
 

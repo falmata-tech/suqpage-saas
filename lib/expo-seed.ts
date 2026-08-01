@@ -17,10 +17,10 @@ export const SEEDED_FEATURED_HANDLES = Object.freeze([
   "addis-metalworks",
   "green-terrace-farm",
   "blue-nile-apiary",
+  "rift-valley-mill",
+  "entoto-ceramics",
+  "koba-leather",
   "nova-assembly",
-  "geda-coffee-cooperative",
-  "saba-soap-works",
-  "sheger-carton-label",
 ]);
 
 export function isSeededFeatured(handle: string) {

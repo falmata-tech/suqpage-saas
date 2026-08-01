@@ -1,14 +1,17 @@
 ---
 id: DEP-013
 title: Dense Expo demo fixtures
-status: done
+status: deprecated
 related: [FE-009, FE-010, FE-012, FE-015, BE-010, BE-011, DEP-009, DEP-010, DEP-011, DEP-012, DEP-014]
 owners: [operations, product, design, qa]
-last_updated: 2026-07-30
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # DEP-013 - Dense Expo demo fixtures
+
+Deprecated by DEP-016. The enterprise/input-supplier stress cohort is replaced
+by a curated permanent small-business discovery fixture.
 
 ## Problem and outcome
 

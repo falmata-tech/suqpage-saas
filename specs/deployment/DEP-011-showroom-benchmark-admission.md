@@ -2,7 +2,7 @@
 id: DEP-011
 title: Twenty-eight-showroom benchmark and visual admission
 status: done
-related: [FE-007, FE-009, FE-010, FE-012, FE-014, FE-015, FE-016, BE-008, BE-010, BE-011, BE-013, DEP-009, DEP-010, DEP-012, DEP-013]
+related: [FE-007, FE-009, FE-010, FE-012, FE-014, FE-015, FE-016, BE-008, BE-010, BE-011, BE-013, DEP-009, DEP-010, DEP-012, DEP-013, DEP-016]
 owners: [operations, product, design]
 last_updated: 2026-07-29
 change_level: L3

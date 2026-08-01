@@ -1,14 +1,17 @@
 ---
 id: FE-011
 title: Expo administration controls
-status: done
+status: deprecated
 related: [FE-010, FE-017, BE-012, DEP-010]
 owners: [product, frontend]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # FE-011 — Expo administration controls
+
+Deprecated by FE-020 and BE-019. Permanent discovery profile administration
+replaces occurrence and theme controls.
 
 ## Problem and outcome
 

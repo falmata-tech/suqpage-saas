@@ -1,14 +1,17 @@
 ---
 id: FE-010
 title: Public daily Expo geographic map
-status: done
+status: deprecated
 related: [FE-001, FE-011, FE-012, FE-015, BE-011, BE-016, DEP-010, DEP-011, DEP-013, DEP-015]
 owners: [product, frontend]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # FE-010 — Public daily Expo geographic map
+
+Deprecated by FE-020. Retained as historical evidence for the date-driven Expo
+experience; it is not current behavior after the City Suq cutover.
 
 ## Problem and outcome
 

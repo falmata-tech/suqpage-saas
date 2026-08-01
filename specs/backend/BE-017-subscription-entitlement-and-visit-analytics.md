@@ -2,7 +2,7 @@
 id: BE-017
 title: Subscription entitlement and visit analytics
 status: done
-related: [FE-018, BE-001, BE-011, BE-015, DEP-015, ADR-0010]
+related: [FE-018, BE-001, BE-011, BE-015, BE-019, DEP-015, ADR-0010]
 owners: [backend, security, operations]
 last_updated: 2026-07-30
 change_level: L2

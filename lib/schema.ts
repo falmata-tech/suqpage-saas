@@ -1425,4 +1425,53 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const citySuqDiscoveryApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=23")
+    .get();
+  if (!citySuqDiscoveryApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS discovery_industries (
+          key TEXT PRIMARY KEY,
+          label TEXT NOT NULL,
+          icon TEXT NOT NULL,
+          position INTEGER NOT NULL,
+          active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))
+        );
+        CREATE TABLE IF NOT EXISTS business_industries (
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          industry_key TEXT NOT NULL REFERENCES discovery_industries(key) ON DELETE CASCADE,
+          PRIMARY KEY(business_id,industry_key)
+        );
+        CREATE TABLE IF NOT EXISTS business_discovery_profiles (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          booth_image_path TEXT NOT NULL DEFAULT '',
+          city TEXT NOT NULL,
+          zone TEXT NOT NULL,
+          region TEXT NOT NULL,
+          latitude REAL NOT NULL CHECK(latitude BETWEEN 3 AND 15),
+          longitude REAL NOT NULL CHECK(longitude BETWEEN 32 AND 49),
+          fallback_style TEXT NOT NULL DEFAULT 'workshop'
+            CHECK(fallback_style IN ('workshop','botanical','textile','food','home','technical')),
+          is_featured INTEGER NOT NULL DEFAULT 0 CHECK(is_featured IN (0,1)),
+          is_excluded INTEGER NOT NULL DEFAULT 0 CHECK(is_excluded IN (0,1)),
+          approved_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS business_industry_lookup_idx
+          ON business_industries(industry_key,business_id);
+        CREATE INDEX IF NOT EXISTS discovery_profile_visibility_idx
+          ON business_discovery_profiles(is_excluded,is_featured,business_id);
+        CREATE INDEX IF NOT EXISTS discovery_profile_location_idx
+          ON business_discovery_profiles(region,zone,city,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(23)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

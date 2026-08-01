@@ -8,7 +8,7 @@
 
 ## 1. Your role
 
-You are working on **SuqPage**, a multi-tenant SaaS platform for social sellers, home-based businesses, and small retailers that primarily sell through WhatsApp, Telegram, TikTok, phone calls, or direct messages.
+You are working on **SuqPage**, a multi-tenant SaaS platform for independent makers, growers, processors, workshops, home-based product businesses, and small retailers that primarily sell through WhatsApp, Telegram, TikTok, phone calls, or direct messages.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
@@ -85,14 +85,13 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - an inquiry management dashboard;
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
-- a public discovery surface where eligible businesses can appear in a themed
-  Daily Expo while every booth leads back to the business's permanent
-  `/@handle` showroom;
-- a controlled SaaS pilot with 398 fictional local showrooms spanning makers,
-  producers, farms, workshops, manufacturers, and production-input suppliers;
-  28 remain the curated visual benchmark set, 20 simple fixtures exercise a
-  dense Manufacturing Expo, and 350 scale fixtures exercise every Expo day and
-  high-volume operations workflow.
+- a permanent public discovery surface where visitors choose an industry,
+  explore virtual City Suqs, and enter each business's permanent `/@handle`
+  digital showroom;
+- a controlled SaaS pilot with 58 fictional local showrooms spanning makers,
+  growers, processors, workshops, natural-care producers, and home brands; ten
+  are curated visual benchmarks and 48 lightweight fixtures exercise discovery
+  and high-volume operations workflows.
 
 ### SuqPage is not
 
@@ -203,8 +202,7 @@ work. The current local checkpoint passes the standard check and ten
 production-browser acceptance scenarios, including CSP/provider-video proof,
 the blueprint studio, client approval, and publication. `FE-014`, `BE-013`,
 `FE-015`, and `DEP-011` record the completed local blueprint, composition-
-fitness, marketplace, Expo, 28-showroom visual benchmark, and 20-showroom dense
-demo scope. Remote checks
+fitness, marketplace, and showroom visual-benchmark scope. Remote checks
 and any production/data-preserving rollout remain separate future evidence.
 The product owner has promoted that completion work and a creative expansion to
 the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
@@ -221,56 +219,49 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 ### 5.2 SuqPage must have its own platform identity
 
 The SuqPage landing page must not look like any client showroom. It is a polished,
-mobile-first marketplace surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-015` defines the current visual composition: a
-photographic maker hero leads with the permanent `/@handle` showroom product
-and a compact live-Expo callout; the full-width city-hosted Expo map/list is the
-primary live module. Its compact server-owned weekly Industry calendar sits
-directly above the map inside the same Expo workspace, followed by one
-searchable, Industry-filtered permanent-showroom directory. The directory
-renders at most five matching showrooms per page, uses one horizontally
-scrollable Industry pill row instead of category controls or duplicate
-all-business navigation, and resets pagination when search or Industry changes.
-Its count, search, Industry filter, sort, and five-card page are resolved in
-SQLite; the browser never receives every business or a full catalog fan-out.
+mobile-first discovery surface designed to remain understandable inside TikTok
+and other in-app browsers. `FE-020` defines the current composition: a
+photographic maker hero explains permanent `/@handle` digital showrooms, a
+compact benefit band speaks to both visitors and businesses, and one integrated
+discovery workspace combines industry selection, search, featured emphasis,
+Ethiopia navigation, City Suqs, and the matching list. There is no date picker,
+live-event state, duplicate showroom directory, or separate all-business
+navigation. Six stable industries appear as icon-labeled touch controls and
+remain available every day.
 
-The Expo uses a locally stored and attributed Ethiopia administrative-boundary
-asset with a proven geographic projection and bounded SVG pan/zoom. The country
-view is navigation, not a booth floor: it shows Admin-1 and Admin-2 boundaries,
-restrained major-road corridors, selected city/town labels, and every active
-major-city host. A labeled selector jumps to one host, **Center today's Expos**
-frames the active set, and **View Ethiopia** resets a manually changed country
-extent. Selecting a host keeps the SVG map mounted, animates toward the serving
-city, and reveals one complete top-view virtual Expo venue while restrained
-boundaries, roads, and place context remain visible around it. The venue has
-reception, central aisle, exits, numbered halls, every assigned showroom, and
-its own familiar close control that reverses to the country view. It is a
-virtual city anchor and never claims a physical parcel, street address, or
-real-world building footprint. Venue depth and balanced booth rows derive from
-hall population, with at most 12 booths per hall; only the selected venue
-renders over the map. Dense days with at least 50 eligible businesses use five
-capacity-balanced city venues; days with 40–49 use four. Each dense venue has
-10–20 booths and venue counts differ by at most one. A smaller real catchment
-retains deterministic nearest-host behavior without changing the origin city,
-zone, and region shown to visitors. A business must have an active,
-subscription-entitled showroom, matching Industry, approved booth-specific
-image, valid city/zone/region/WGS84 coordinates, and no exclusion before it may
-participate. Map and List views expose the same complete participant set. Venue
-booths and the selected-booth sheet expose consistent
-`H{hub-number}.{hall-number}-B{booth-number}` references.
+The discovery workspace uses a locally stored and attributed Ethiopia
+administrative-boundary asset with a proven geographic projection and bounded
+SVG navigation. The country view shows regional context and every qualifying
+major-city host for the selected industry. A labeled city selector jumps to a
+host and the center control frames the active City Suqs. Selecting a host keeps
+the Ethiopia map mounted beneath one top-view virtual City Suq, and a familiar
+close control returns to the country view. A City Suq is a virtual discovery
+anchor, never a claim about a physical parcel, street address, or building.
 
-Featured emphasis is integrated into the one paginated directory instead of
-repeating businesses in a second catalog. A visually distinct final merchant CTA
-closes the page. The useful product explanation lives in compact hero benefits;
-there is no separate How SuqPage works section or action. Tenant cards and Expo
-booths use active public tenant data and link to the authoritative showroom.
-Approved booth media belongs to its represented business; a generic named booth
-is only a failed-file fallback and does not make an incomplete profile eligible.
-For the current fictional marketplace, exactly ten explicitly curated public
-showrooms are featured. All other active showrooms remain searchable and
-Expo-eligible without featured treatment. At most five results render on a
-directory page, and desktop cards remain compact when filters reduce the result
-count.
+Each venue uses a quiet architectural floor, a circular central lobby, and
+bounded perimeter booth placement. A hall contains at most 12 booths; additional
+businesses create deterministic halls without increasing phone rendering cost.
+Every booth exposes a stable `{city-code}-{hall}-B{booth-number}` reference. A
+business must have an active, subscription-entitled showroom, one approved and
+published offering, a matching discovery industry, valid reviewed location, an
+approved business-owned booth image, and no discovery exclusion. A host opens
+when at least three matching businesses originate there. Businesses from sparse
+locations move to the nearest qualifying host while their real city, zone, and
+region remain unchanged; if no city reaches the threshold, the largest reviewed
+host provides the bounded fallback. Map and List views always represent the same
+eligible result set and search is resolved by indexed, parameterized SQLite
+queries rather than a browser-side full-catalog fan-out.
+
+Featured treatment is emphasis inside this one result set, not a separate or
+duplicated catalog. Exactly ten fictional showrooms are explicitly featured;
+all other eligible showrooms remain discoverable. Tenant cards and City Suq
+booths link to the authoritative permanent showroom. Approved booth media
+belongs to its represented business; a generic named booth is only a failed-file
+display fallback and cannot make an incomplete profile eligible. The useful
+product explanation lives in the hero and concise benefit sections, and a
+visually distinct merchant CTA closes the page. Public controls have at least
+44-pixel touch targets and the complete composition is verified without
+horizontal overflow at 320 and 390 CSS pixels.
 
 The homepage CTA links to the low-friction expression-of-interest flow. That
 flow collects contact details, one short message, and consent, with no file
@@ -325,14 +316,12 @@ components, catalog modes, and mobile behaviors intentionally vary. Generated
 benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
-The wider disposable seed contains 18 additional authored visual showrooms, 20
-deliberately simple dense-demo showrooms, and 350 lightweight scale showrooms.
-The dense cohort has three offerings per business, managed local hero media,
-project-owned Expo booth media, and locations across Ethiopian regions. The
-scale cohort distributes 50 businesses across each of all seven daily Expo
-themes. Reset creates five daily city venues with 10–15 booths per venue, at
-least 50 eligible booths every day, and at most 12 booths per hall. These are
-stress and demonstration fixtures, not finished client designs.
+The wider disposable seed contains 48 lightweight small-business showrooms
+distributed across six industries and reviewed Ethiopian city clusters. Reset
+creates 58 total businesses, exactly ten featured profiles, multiple qualifying
+City Suqs for populated industries, approved business-owned booth media, and at
+most 12 booths per rendered hall. These are workflow and demonstration fixtures,
+not finished client designs or evidence of real businesses.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important
@@ -683,7 +672,7 @@ A client has a minimal workspace bound to one business. The client can:
   compatible existing product-category placement;
 - view their showroom and manage their account password.
 - view monthly account state, grace deadline, renewal history, and aggregate
-  direct/directory/Expo showroom visits;
+  direct and City Suq discovery visits;
 - open, reply to, close, and reopen tenant-scoped SuqPage support conversations.
 
 Clients cannot directly edit business settings, design, categories,
@@ -816,20 +805,20 @@ Current verified behavior:
   sign-in form.
 - High-volume dashboard collections use bounded server queries: five public
   showroom cards or 20 authorized workspace rows per page. Businesses, clients,
-  staff, requests, products, inquiries, deliveries, and Expo profiles have
+  staff, requests, products, inquiries, deliveries, and discovery profiles have
   linkable search/filter state, accurate counts, and focused record actions.
   Business and staff selection never loads the complete account into a dropdown;
-  Expo administration edits one business-specific profile, and inquiry rows
+  discovery administration edits one business-specific profile, and inquiry rows
   include item summaries without per-row follow-up queries.
 - Every business has a manually operated monthly subscription ledger. Public
   access remains active through period end and a four-day grace window; after
-  grace, the showroom redirects home and is omitted from discovery and Expo.
+  grace, the showroom redirects home and is omitted from discovery.
   Operations records renewal without collecting an amount or requiring a
   configured price. There is no
   checkout, payment gateway, automatic debit, or public pricing claim.
 - Showroom visits use an opaque first-party visitor token hashed with the privacy
   salt and deduplicate per business, source, and day. Clients see aggregate
-  direct, directory, Expo, and recent counts; raw IP addresses are not stored
+  direct, City Suq discovery, and recent counts; raw IP addresses are not stored
   and traffic counts are not billing authority.
 - Authenticated client support is stored inside SuqPage. Enabled agents have
   configurable concurrent limits; new conversations transactionally select the
@@ -837,7 +826,7 @@ Current verified behavior:
   lifecycle events are retained, open threads refresh every five seconds, and
   Telegram may send metadata-only secure dashboard links. WhatsApp is an
   optional emergency handoff, never the support source of truth.
-- Platform-owned homepage, Expo, intake, login, legal, favicon, and workspace
+- Platform-owned homepage, discovery, intake, login, legal, favicon, and workspace
   surfaces use one SuqPage mark and wordmark without replacing any tenant's
   showroom identity. Authenticated navigation groups role-permitted work in a
   neutral desktop sidebar and exposes the same destinations in a focus-contained

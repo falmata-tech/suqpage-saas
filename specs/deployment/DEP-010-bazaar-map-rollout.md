@@ -1,14 +1,16 @@
 ---
 id: DEP-010
 title: Expo geographic map rollout and operations
-status: in_progress
+status: deprecated
 related: [FE-010, FE-011, FE-012, FE-015, BE-011, BE-012, BE-013, BE-016, DEP-002, DEP-011, DEP-013, DEP-015]
 owners: [operations, security]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # DEP-010 — Expo geographic map rollout and operations
+
+Deprecated by DEP-016. No production Expo rollout occurred.
 
 ## Problem and outcome
 

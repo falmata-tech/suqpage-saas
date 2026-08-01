@@ -1,14 +1,17 @@
 ---
 id: BE-011
 title: Expo occurrence, city host, and booth contract
-status: done
+status: deprecated
 related: [FE-010, FE-012, FE-015, BE-012, BE-013, BE-016, BE-017, DEP-010, DEP-011, DEP-013, BE-001]
 owners: [backend, security]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # BE-011 — Expo occurrence, city host, and booth contract
+
+Deprecated by BE-019. Date occurrences and weekday eligibility are no longer
+current discovery authority.
 
 ## Problem and outcome
 

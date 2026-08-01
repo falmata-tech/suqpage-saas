@@ -1,14 +1,17 @@
 ---
 id: BE-016
 title: Balanced regional Expo allocation
-status: done
+status: deprecated
 related: [FE-010, FE-015, BE-011, DEP-010, DEP-015]
 owners: [backend, expo]
-last_updated: 2026-07-30
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # BE-016 - Balanced regional Expo allocation
+
+Deprecated by BE-019. Artificially balanced host counts are replaced by nearest
+qualifying City Suq assignment.
 
 ## Problem and outcome
 

@@ -113,49 +113,28 @@ test("prospect submits an interest request without public uploads", async ({ pag
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("public discovery, Expo, benchmark showrooms, and copy-first inquiry", async ({ page }) => {
+test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Virtual showrooms and daily Expos");
-  await expect(page.getByRole("heading", { name: "This week's Expo calendar" })).toBeVisible();
-  await expect(page.locator(".landing-schedule")).toHaveCount(0);
-  await expect(page.locator(".landing-expo-section .landing-expo-calendar")).toBeVisible();
-  expect(
-    await page.evaluate(() => {
-      const calendar = document.querySelector(".landing-expo-calendar");
-      const explorer = document.querySelector(".landing-expo-section .expo-explorer");
-      return Boolean(
-        calendar &&
-        explorer &&
-        (calendar.compareDocumentPosition(explorer) & Node.DOCUMENT_POSITION_FOLLOWING),
-      );
-    }),
-  ).toBe(true);
-  await expect(page.getByRole("heading", { name: "Find a showroom." })).toBeVisible();
-  await expect(page.locator("#expo-title")).not.toBeEmpty();
-  await expect(page.getByRole("tablist", { name: "Expo view" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Map View" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "List View" })).toBeVisible();
-  await expect(page.locator(".expo-regions path")).toHaveCount(14);
-  await expect(page.locator(".expo-hub")).toHaveCount(5);
-  await expect(page.getByRole("heading", { name: "Bring your business into the next Expo." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("A permanent place for the products Ethiopia makes");
+  await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
+  await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Map" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "List" })).toBeVisible();
+  await expect(page.locator(".discovery-regions path")).toHaveCount(14);
+  expect(await page.locator(".discovery-hubs > g").count()).toBeGreaterThan(0);
+  await expect(page.getByRole("heading", { name: "Give your products one clear place to be found." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
   await expect(page.locator(".landing-hero-image")).toBeVisible();
-  await expect(page.getByLabel("Category selector")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "All businesses" })).toHaveCount(0);
-  await expect(page.locator(".market-showrooms .market-heading-link")).toHaveCount(0);
-  await page.getByRole("link", { name: "All industries" }).click();
-  await expect(page.locator(".market-showroom-card")).toHaveCount(5);
-  expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
-  await page.locator(".directory-filters a").nth(1).click();
-  expect(await page.locator(".market-showroom-card").count()).toBeGreaterThan(0);
-  expect(await page.locator(".market-showroom-card").count()).toBeLessThanOrEqual(5);
-  expect(await page.locator(".market-showroom-card").first().evaluate((card) => card.getBoundingClientRect().width)).toBeLessThanOrEqual(280);
-  await page.getByRole("link", { name: "All industries" }).click();
-  await expect(page.locator(".market-featured-label")).toHaveCount(5);
-  await expect(page.getByRole("link", { name: "Next page" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/daily expo|live today|weekly expo/i);
+  await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
+  await expect(page).toHaveURL(/industry=beauty-wellness/);
+  await page.getByRole("tab", { name: "List" }).click();
+  expect(await page.locator(".discovery-list article").count()).toBeGreaterThanOrEqual(3);
+  await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByLabel("Open public navigation").click();
@@ -479,78 +458,69 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test("mobile city Expo venue, booth preview, list parity, and overflow", async ({ page }) => {
+test("mobile City Suq venue, booth preview, list parity, and legacy redirects", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
-  await expect(page.getByRole("heading", { name: "Find today's Expo host cities." })).toBeVisible();
-  await expect(page.locator("#expo-title")).not.toBeEmpty();
-  await expect(page.locator(".expo-regions path")).toHaveCount(14);
-  await expect(page.locator(".expo-hub")).toHaveCount(5);
-  await expect(page.getByLabel("Jump to a host city").locator("option")).toHaveCount(6);
+  await expect(page).toHaveURL(/\/discover$/);
+  await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
+  await expect(page.locator(".discovery-regions path")).toHaveCount(14);
+  const hostOptions = page.getByLabel("Jump to a City Suq").locator("option");
+  expect(await hostOptions.count()).toBeGreaterThan(1);
   const hostOption = await page
-    .getByLabel("Jump to a host city")
+    .getByLabel("Jump to a City Suq")
     .locator("option")
     .nth(1)
     .evaluate((option) => ({
       value: option.getAttribute("value") || "",
       label: option.textContent || "",
     }));
-  const hostCity = hostOption.label.split(",")[0].trim();
-  const hostBoothCount = Number(hostOption.label.match(/(\d+) booths/)?.[1] || "0");
-  expect(hostBoothCount).toBeGreaterThanOrEqual(10);
-  expect(hostBoothCount).toBeLessThanOrEqual(20);
-  await page.getByLabel("Jump to a host city").selectOption(hostOption.value);
-  const contextualStage = page.locator(".expo-map-stage-venue");
+  const hostCity = hostOption.label.split("·")[0].trim();
+  await page.getByLabel("Jump to a City Suq").selectOption(hostOption.value);
+  const contextualStage = page.locator(".discovery-map-stage.city-open");
   await expect(contextualStage).toBeVisible();
-  await expect(contextualStage.locator(".expo-map")).toBeVisible();
-  await expect(contextualStage.locator(".expo-regions path")).toHaveCount(14);
-  await expect(contextualStage.getByText("Virtual Expo anchored in")).toBeVisible();
-  await expect(contextualStage.locator(".expo-city-context strong")).toHaveText(hostCity);
-  const visibleHallBooths = await page.locator(".expo-venue-booth").count();
+  await expect(contextualStage.locator(".discovery-map")).toBeVisible();
+  await expect(contextualStage.locator(".discovery-regions path")).toHaveCount(14);
+  await expect(page.getByRole("heading", { name: `${hostCity} City Suq` })).toBeVisible();
+  const visibleHallBooths = await page.locator(".city-booth").count();
   expect(visibleHallBooths).toBeGreaterThan(0);
   expect(visibleHallBooths).toBeLessThanOrEqual(12);
   await expect(page.getByText("Entrance")).toBeVisible();
-  await expect(page.getByText("Reception")).toBeVisible();
-  const booth = page.locator(".expo-venue-booth").first();
+  await expect(page.locator(".city-lobby").getByText("City Suq")).toBeVisible();
+  const booth = page.locator(".city-booth").first();
   const boothLabel = (await booth.getAttribute("aria-label")) || "";
-  const boothMatch = boothLabel.match(/^Select (.+), (H\d+\.\d+-B\d+)$/);
+  const boothMatch = boothLabel.match(/^([A-Z]{3}-\d+-B\d{2}), (.+)$/);
   expect(boothMatch).not.toBeNull();
-  const boothName = boothMatch?.[1] || "";
-  const boothReference = boothMatch?.[2] || "";
-  expect(boothReference).toMatch(/^H\d+\.\d+-B\d{2}$/);
+  const boothReference = boothMatch?.[1] || "";
+  const boothName = boothMatch?.[2] || "";
   await booth.click();
-  const preview = page.getByLabel(`${boothName} booth preview`);
+  const preview = page.locator(".discovery-preview");
   await expect(preview).toBeVisible();
-  await expect(preview.locator(".expo-preview-meta").getByText(boothReference)).toBeVisible();
-  await expect(preview.locator(".expo-origin")).toContainText(`Hosted in ${hostCity}`);
-  await expect(preview.getByRole("link", { name: "Enter showroom" })).toHaveAttribute(
-    "href",
-    /\/@[^?]+\?ref=expo&occurrence=[^&]+&hub=[^&]+/,
-  );
-  await page.getByRole("button", { name: `Close ${hostCity} Expo and return to Ethiopia` }).click();
-  await expect(page.getByLabel("Jump to a host city")).toHaveValue("");
-  await expect(page.locator(".expo-map-stage-venue")).toHaveCount(0);
-  await expect(page.locator(".expo-map")).toBeVisible();
-  await expect(page.locator(".expo-venue")).toHaveCount(0);
-  await page.getByRole("button", { name: "Center today's Expos" }).click();
+  await expect(preview.getByText(boothReference, { exact: false })).toBeVisible();
+  await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
+  await page.getByRole("button", { name: `Close ${hostCity} City Suq` }).click();
+  await expect(page.getByLabel("Jump to a City Suq")).toHaveValue("");
+  await expect(page.locator(".city-venue")).toHaveCount(0);
+  await expect(page.locator(".discovery-map")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.getByRole("tab", { name: "List View" }).click();
-  const listCount = await page.locator(".expo-list-card").count();
-  expect(listCount).toBeGreaterThanOrEqual(50);
-  expect(listCount).toBeLessThanOrEqual(100);
-  await expect(page.getByRole("link", { name: "Enter showroom" })).toHaveCount(listCount);
+  await page.getByRole("tab", { name: "List" }).click();
+  const listCount = await page.locator(".discovery-list article").count();
+  expect(listCount).toBeGreaterThanOrEqual(3);
+  await expect(page.getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
   await expect(
-    page.locator(".expo-list-card").filter({ hasText: boothName }).getByText(boothReference),
+    page.locator(".discovery-list article").filter({ hasText: boothName }).getByText(boothReference, { exact: false }),
   ).toBeVisible();
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/bazaar");
-  await expect(page).toHaveURL(/\/expo$/);
-  await page.goto("/@demo-bora-highland-produce");
-  await expect(page).toHaveURL(/\?showroom=inactive$/);
-  await expect(page.getByText("That showroom is temporarily unavailable.")).toBeVisible();
-  expect(errors).toEqual([]);
+  await expect(page).toHaveURL(/\/discover$/);
+  await page.route("**/geo/ethiopia-admin1-2023.geojson", (route) => route.fulfill({ status: 503, body: "" }));
+  await page.goto("/discover");
+  await expect(page.getByText("The map could not load, but every Suq is still available.")).toBeVisible();
+  await page.getByRole("button", { name: "Open list" }).click();
+  expect(await page.locator(".discovery-list article").count()).toBeGreaterThanOrEqual(3);
+  await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toBeVisible();
+  expect(errors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
 });
 
 test("platform surfaces share the SuqPage identity", async ({ page }) => {
@@ -574,21 +544,19 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByRole("link", { name: "Public site", exact: true })).toHaveAttribute("target", "_blank");
   await page.getByRole("link", { name: "SuqPage home" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  await page.getByRole("link", { name: "Expo controls" }).click();
-  await expect(page.getByRole("heading", { name: "Expo controls" })).toBeVisible();
-  await page.getByLabel("Search").fill("Dawa Water Solutions");
+  await page.getByRole("link", { name: "Discovery profiles" }).click();
+  await expect(page.getByRole("heading", { name: "Discovery profiles" })).toBeVisible();
+  await page.getByLabel("Search").fill("Meda Furniture Studio");
   await page.getByRole("button", { name: "Apply" }).click();
-  const dawaRow = page.getByRole("row").filter({ hasText: "Dawa Water Solutions" }).first();
-  await expect(dawaRow.getByText("Expo eligible")).toBeVisible();
-  await dawaRow.getByRole("link", { name: "Edit profile" }).click();
-  await page.getByLabel("Featured showroom").check();
-  await page.getByRole("button", { name: "Save Expo profile" }).click();
-  await expect(page.getByText("Expo profile saved")).toBeVisible();
-  await page.goto("/expo");
-  await page.getByRole("tab", { name: "List View" }).click();
-  await expect(
-    page.locator(".expo-list-card").filter({ hasText: "Dawa Water Solutions" }).getByText("Featured"),
-  ).toBeVisible();
+  const profileRow = page.getByRole("row").filter({ hasText: "Meda Furniture Studio" }).first();
+  await expect(profileRow.getByText("discoverable")).toBeVisible();
+  await profileRow.getByRole("link", { name: "Edit profile" }).click();
+  await page.getByLabel("Featured Suq").check();
+  await page.getByRole("button", { name: "Save discovery profile" }).click();
+  await expect(page.getByText("Discovery profile saved")).toBeVisible();
+  await page.goto("/discover?industry=home-living");
+  await page.getByRole("tab", { name: "List" }).click();
+  await expect(page.locator(".discovery-list article").filter({ hasText: "Meda Furniture Studio" }).getByText(/Featured/)).toBeVisible();
   await page.goto("/dashboard");
   await page.getByRole("link", { name: "Component bank" }).click();
   await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();

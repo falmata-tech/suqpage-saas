@@ -1,39 +1,31 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { getAllBusinesses, getCatalogByBusinessId } from "../lib/db";
-import {
-  DENSE_DEMO_BUSINESSES,
-  DENSE_DEMO_HANDLES,
-  denseDemoHeroPath,
-} from "../lib/dense-demo-seed";
+import { getAllBusinesses, getCatalogByBusinessId, getDb } from "../lib/db";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import {
   SEEDED_FEATURED_HANDLES,
-  SEEDED_EXPO_PROFILES,
   seededExpoBoothPath,
 } from "../lib/expo-seed";
-import { listBazaarAdminState } from "../lib/bazaar";
-import { getCurrentExpo } from "../lib/expo";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
-import { ADDITIONAL_SEED_SHOWROOM_BRIEFS } from "../lib/showroom-seed-briefs";
 
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 const offeringKinds = new Set<string>();
 const quantityModes = new Set<string>();
-assert.equal(activeBusinesses.length, 398, "reset creates 398 active demo showrooms");
-assert.equal(DENSE_DEMO_BUSINESSES.length, 20, "dense demo registry contains 20 businesses");
-assert.equal(SCALE_DEMO_BUSINESSES.length, 350, "scale demo registry contains 350 businesses");
+assert.equal(activeBusinesses.length, 58, "reset creates 58 active small-business demo showrooms");
+assert.equal(SCALE_DEMO_BUSINESSES.length, 48, "discovery fixture registry contains 48 businesses");
 assert.equal(
+  Number((getDb().prepare("SELECT COUNT(*) total FROM business_discovery_profiles").get() as { total: number }).total),
   activeBusinesses.length,
-  Object.keys(SEEDED_EXPO_PROFILES).length,
-  "every seeded active showroom has an Expo location profile",
+  "every seeded active showroom has an approved discovery profile",
 );
-const featuredHandles = listBazaarAdminState().profiles
-  .filter((profile) => profile.status === "active" && profile.featured)
-  .map((profile) => profile.handle)
-  .sort();
+const featuredHandles = (getDb().prepare(`
+  SELECT b.handle FROM businesses b
+  JOIN business_discovery_profiles p ON p.business_id=b.id
+  WHERE b.status='active' AND p.is_featured=1 AND p.is_excluded=0
+  ORDER BY b.handle
+`).all() as Array<{ handle: string }>).map((row) => row.handle);
 assert.equal(featuredHandles.length, 10, "reset creates ten featured showrooms");
 assert.deepEqual(
   featuredHandles,
@@ -66,98 +58,6 @@ assert.deepEqual(
   ["optional"],
   "reset fixtures use optional desired quantity",
 );
-
-const denseHandles = new Set(DENSE_DEMO_HANDLES);
-const denseBusinesses = activeBusinesses.filter((business) =>
-  denseHandles.has(business.handle));
-assert.equal(denseBusinesses.length, 20, "all dense demo showrooms are active");
-for (const business of denseBusinesses) {
-  const catalog = getCatalogByBusinessId(business.id);
-  assert.ok(catalog, `${business.handle} dense catalog exists`);
-  assert.equal(catalog.products.length, 3, `${business.handle} has three offerings`);
-  assert.ok(catalog.categories.length >= 2, `${business.handle} has useful categories`);
-  assert.equal(
-    business.hero_image_path,
-    denseDemoHeroPath(business.handle),
-    `${business.handle} uses its managed demo hero`,
-  );
-  const snapshot = catalogToRevisionSnapshotV4(catalog);
-  assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} dense fitness`);
-  assert.equal(snapshot.designManifest.sections.length, 7, `${business.handle} uses the canonical showroom sequence`);
-}
-
-const thursdayExpo = getCurrentExpo({
-  now: new Date("2026-07-30T10:00:00.000Z"),
-});
-assert.equal(thursdayExpo.themeSlug, "machinery-tools-manufacturing");
-assert.equal(thursdayExpo.booths.length, 74, "Thursday Expo has 74 participants");
-assert.equal(thursdayExpo.map.hubs.length, 5, "Thursday Expo has five host cities");
-const thursdayHubCounts = thursdayExpo.map.hubs.map((hub) => hub.boothCount);
-assert.ok(
-  thursdayHubCounts.every((count) => count >= 10 && count <= 20),
-  "every Thursday venue has between ten and twenty booths",
-);
-assert.ok(
-  Math.max(...thursdayHubCounts) - Math.min(...thursdayHubCounts) <= 1,
-  "Thursday venue sizes differ by at most one booth",
-);
-for (const hub of thursdayExpo.map.hubs) {
-  const hallCounts = new Map<number, number>();
-  for (const booth of thursdayExpo.booths.filter((entry) => entry.hubKey === hub.key)) {
-    hallCounts.set(booth.hallNumber, (hallCounts.get(booth.hallNumber) || 0) + 1);
-  }
-  assert.ok(
-    [...hallCounts.values()].every((count) => count <= 12),
-    `${hub.city} keeps every hall within the twelve-booth limit`,
-  );
-}
-
-const authoredHandles = new Set(Object.keys(ADDITIONAL_SEED_SHOWROOM_BRIEFS));
-const authoredBusinesses = activeBusinesses.filter((business) =>
-  authoredHandles.has(business.handle));
-assert.equal(authoredBusinesses.length, 18, "all 18 additional showrooms have authored briefs");
-const authoredSignatures = new Set<string>();
-const authoredTokens = new Set<string>();
-const authoredHeaders = new Set<string>();
-const authoredHeroes = new Set<string>();
-const authoredCatalogs = new Set<string>();
-const authoredCtas = new Set<string>();
-const authoredFooters = new Set<string>();
-const authoredStoryTitles = new Set<string>();
-const authoredProcessTitles = new Set<string>();
-for (const business of authoredBusinesses) {
-  const catalog = getCatalogByBusinessId(business.id);
-  assert.ok(catalog, `${business.handle} authored catalog exists`);
-  const snapshot = catalogToRevisionSnapshotV4(catalog);
-  assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} authored fitness`);
-  const ids = snapshot.designManifest.sections.map((section) => section.component);
-  authoredSignatures.add(`${snapshot.designManifest.tokenPack}|${ids.join("|")}`);
-  authoredTokens.add(snapshot.designManifest.tokenPack);
-  authoredHeaders.add(ids[0]);
-  authoredHeroes.add(ids[1]);
-  authoredCatalogs.add(ids[4]);
-  authoredCtas.add(ids[5]);
-  authoredFooters.add(ids[6]);
-  const story = snapshot.contentBlocks.blocks.find((block) => block.key === "brand-story");
-  const process = snapshot.contentBlocks.blocks.find((block) => block.key === "showroom-highlights");
-  assert.ok(story && process, `${business.handle} has authored narrative blocks`);
-  authoredStoryTitles.add(story.title);
-  authoredProcessTitles.add(process.title);
-  assert.match(
-    snapshot.designManifest.rationale,
-    /Composition direction:/,
-    `${business.handle} records its authored composition direction`,
-  );
-}
-assert.equal(authoredSignatures.size, 18, "every additional showroom has a distinct full design signature");
-assert.ok(authoredTokens.size >= 12, "authored showrooms exercise at least twelve token systems");
-assert.equal(authoredHeaders.size, 7, "authored showrooms exercise all header anatomies");
-assert.ok(authoredHeroes.size >= 11, "authored showrooms exercise at least eleven hero anatomies");
-assert.ok(authoredCatalogs.size >= 8, "authored showrooms exercise at least eight catalog anatomies");
-assert.ok(authoredCtas.size >= 5, "authored showrooms exercise at least five CTA anatomies");
-assert.equal(authoredFooters.size, 6, "authored showrooms exercise all footer anatomies");
-assert.equal(authoredStoryTitles.size, 18, "authored showrooms do not reuse story titles");
-assert.equal(authoredProcessTitles.size, 18, "authored showrooms do not reuse process titles");
 
 const benchmarkHandles = new Set([
   "selam-weave",
@@ -296,4 +196,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("Three hundred ninety-eight Expo showrooms, 20 dense fixtures, 350 scale fixtures, 18 authored briefs, and ten validated design benchmarks passed.");
+console.log("Fifty-eight discovery showrooms, 48 lightweight fixtures, and ten validated design benchmarks passed.");

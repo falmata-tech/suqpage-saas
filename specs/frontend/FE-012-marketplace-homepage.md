@@ -1,14 +1,17 @@
 ---
 id: FE-012
 title: Visual marketplace homepage
-status: done
+status: deprecated
 related: [FE-001, FE-010, FE-013, FE-015, FE-017, BE-011, DEP-010, DEP-011, DEP-013]
 owners: [product, frontend]
-last_updated: 2026-07-29
+last_updated: 2026-08-01
 change_level: L1
 ---
 
 # FE-012 - Visual marketplace homepage
+
+Deprecated by FE-020. Retained as historical evidence for the Expo-led landing
+page that permanent City Suq discovery replaces.
 
 ## Problem and outcome
 

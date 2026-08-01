@@ -1,14 +1,17 @@
 ---
 id: DEP-014
 title: Scale demo workflow fixtures
-status: done
-related: [FE-017, BE-015, DEP-013]
+status: deprecated
+related: [FE-017, BE-015, DEP-013, DEP-016]
 owners: [operations, product, qa]
-last_updated: 2026-07-30
+last_updated: 2026-08-01
 change_level: L2
 ---
 
 # DEP-014 - Scale demo workflow fixtures
+
+Deprecated in part by DEP-016. Authenticated workflow density remains useful,
+but its 350 public Expo showrooms and weekday occurrence targets are removed.
 
 ## Problem and outcome
 

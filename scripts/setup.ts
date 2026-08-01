@@ -5,12 +5,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
+import type { DenseDemoOfferingKind } from "../lib/dense-demo-seed";
+import { DISCOVERY_INDUSTRIES } from "../lib/discovery";
 import {
-  DENSE_DEMO_BUSINESSES,
-  denseDemoHeroPath,
-  type DenseDemoOfferingKind,
-} from "../lib/dense-demo-seed";
-import { seededExpoBoothPath } from "../lib/expo-seed";
+  isSeededFeatured,
+  SEEDED_EXPO_PROFILES,
+  seededExpoBoothPath,
+} from "../lib/expo-seed";
 import type { OfferingKind, QuantityMode } from "../lib/offerings";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
@@ -83,21 +84,6 @@ const additionalBusinesses = [
   { handle:"baro-nursery-supplies", name:"Baro Nursery Supplies", tagline:"Propagation and growing supplies for farms and restoration teams.", description:"A producer of seedling trays, shade structures and nursery starter materials.", logo_path:"", hero_title:"Give young plants a dependable start.", hero_subtitle:"Compare nursery formats and discuss seasonal project quantities.", hero_image_path:"/uploads/seed/expo/baro-nursery-supplies/hero.webp", contact_email:"", whatsapp:"251911200118", telegram:"", tiktok:"" }
 ] satisfies Array<Record<string,string>>;
 
-const denseDemoBusinessRows = DENSE_DEMO_BUSINESSES.map((business) => ({
-  handle: business.handle,
-  name: business.name,
-  tagline: business.tagline,
-  description: business.description,
-  logo_path: "",
-  hero_title: business.heroTitle,
-  hero_subtitle: business.heroSubtitle,
-  hero_image_path: denseDemoHeroPath(business.handle),
-  contact_email: `${business.handle}@demo.suqpage.local`,
-  whatsapp: "",
-  telegram: "",
-  tiktok: "",
-}));
-
 const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
   handle: business.handle,
   name: business.name,
@@ -115,8 +101,6 @@ const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
 
 const businesses = [
   ...benchmarkBusinesses,
-  ...additionalBusinesses,
-  ...denseDemoBusinessRows,
   ...scaleDemoBusinessRows,
 ];
 const productionSupplyBusinesses = new Set([
@@ -340,6 +324,7 @@ const additionalCatalogs: Record<string, {
 };
 
 for (const [handle, catalog] of Object.entries(additionalCatalogs)) {
+  if (!seeded.has(handle)) continue;
   seedCatalog(handle, catalog.categories, catalog.products.map(([name, category, description], index) => ({
     name,
     category,
@@ -378,31 +363,6 @@ function denseOfferingProfile(kind: DenseDemoOfferingKind) {
     minimumOrderSummary: "",
     leadTimeSummary: "",
   };
-}
-
-for (const business of DENSE_DEMO_BUSINESSES) {
-  seedCatalog(
-    business.handle,
-    [...new Set(business.offerings.map((offering) => offering.category))],
-    business.offerings.map((offering) => ({
-      name: offering.name,
-      category: offering.category,
-      eyebrow: offering.category,
-      description: offering.description,
-      slug: offering.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, ""),
-      image: "",
-      offeringKind: offering.kind,
-      quantityMode: "optional",
-      ...denseOfferingProfile(offering.kind),
-      options:
-        offering.kind === "manufacturing_capability"
-          ? []
-          : [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
-    })),
-  );
 }
 
 for (const business of SCALE_DEMO_BUSINESSES) {
@@ -520,6 +480,51 @@ for (const businessId of seeded.values()) {
 
 seedDefaultBazaarConfig(db);
 
+const seedIndustry = db.prepare(`
+  INSERT INTO discovery_industries(key,label,icon,position,active)
+  VALUES(?,?,?,?,1)
+`);
+DISCOVERY_INDUSTRIES.forEach((industry, index) => {
+  seedIndustry.run(industry.key, industry.label, industry.icon, index);
+});
+const seedDiscoveryProfile = db.prepare(`
+  INSERT INTO business_discovery_profiles(
+    business_id,booth_image_path,city,zone,region,latitude,longitude,
+    fallback_style,is_featured,is_excluded,approved_at,updated_at
+  ) VALUES(?,?,?,?,?,?,?,?,?,0,?,?)
+`);
+const seedBusinessIndustry = db.prepare(`
+  INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)
+`);
+const fallbackByIndustry: Record<string, string> = {
+  electronics: "technical",
+  "beauty-wellness": "botanical",
+  "food-farming": "food",
+  "machinery-tools": "workshop",
+  "home-living": "home",
+  "fashion-textiles": "textile",
+};
+for (const [handle, businessId] of seeded) {
+  const profile = SEEDED_EXPO_PROFILES[handle];
+  const industryKeys = profile?.industryKeys.filter((key) => key in fallbackByIndustry) || [];
+  if (!profile || !industryKeys.length) continue;
+  const industryKey = industryKeys[0];
+  seedDiscoveryProfile.run(
+    businessId,
+    seededExpoBoothPath(handle),
+    profile.city,
+    profile.zone,
+    profile.region,
+    profile.latitude,
+    profile.longitude,
+    fallbackByIndustry[industryKey],
+    isSeededFeatured(handle) ? 1 : 0,
+    subscriptionNow,
+    subscriptionNow,
+  );
+  for (const key of industryKeys) seedBusinessIndustry.run(businessId, key);
+}
+
 
 const generatedCredentials: Array<{ role:string; business:string; email:string; password:string }> = [];
 const generatePassword = () => crypto.randomBytes(18).toString("base64url");
@@ -534,7 +539,7 @@ function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client"|"tea
 }
 const adminUserId = seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
 const clientUsersByHandle = new Map<string, number>();
-for (const business of [...benchmarkBusinesses, ...additionalBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
+for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
   clientUsersByHandle.set(business.handle, seedUser(
     "owner",
     "client",

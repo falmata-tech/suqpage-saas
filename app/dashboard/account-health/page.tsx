@@ -80,12 +80,12 @@ export default async function AccountHealthPage({
       <section className={`account-status-panel ${subscription.state}`}>
         <div><span className="eyebrow">Showroom status</span><h2>{subscription.state === "active" ? "Active" : subscription.state === "grace" ? "Payment grace period" : "Inactive"}</h2></div>
         <div className="account-dates"><span><small>Current period</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>Grace deadline</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
-        <p>{subscription.state === "active" ? "The public showroom and Expo eligibility are online." : subscription.state === "grace" ? "The showroom remains online temporarily. Contact SuqPage to confirm renewal before the grace deadline." : "The public showroom is offline and no longer appears in Expo or directory results. Contact SuqPage to renew access."}</p>
+        <p>{subscription.state === "active" ? "The public Suq and discovery eligibility are online." : subscription.state === "grace" ? "The Suq remains online temporarily. Contact SuqPage to confirm renewal before the grace deadline." : "The public Suq is offline and no longer appears in discovery results. Contact SuqPage to renew access."}</p>
       </section>
       <div className="cards account-insights">
         <article className="metric"><span>Unique visits</span><strong>{insights.totalVisitors}</strong><small>All recorded showroom sources</small></article>
-        <article className="metric"><span>From Expo</span><strong>{insights.expoVisitors}</strong><small>Visitors who entered through a booth</small></article>
-        <article className="metric"><span>From directory</span><strong>{insights.directoryVisitors}</strong><small>Visitors who used showroom search</small></article>
+        <article className="metric"><span>From City Suq</span><strong>{insights.directoryVisitors}</strong><small>Visitors who entered through discovery</small></article>
+        <article className="metric"><span>Direct visits</span><strong>{insights.directVisitors}</strong><small>Visitors who opened the Suq directly</small></article>
         <article className="metric"><span>Last 30 days</span><strong>{insights.last30Days}</strong><small>Deduplicated daily visits</small></article>
       </div>
       {operations ? (

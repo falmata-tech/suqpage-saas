@@ -2,7 +2,7 @@
 id: DEP-015
 title: Free-first service and managed database readiness
 status: in_progress
-related: [FE-010, FE-018, FE-019, BE-016, BE-017, BE-018, DEP-010, DEP_BASE, ADR-0002, ADR-0009, ADR-0010]
+related: [FE-010, FE-018, FE-019, BE-016, BE-017, BE-018, BE-019, DEP-010, DEP-016, DEP_BASE, ADR-0002, ADR-0009, ADR-0010]
 owners: [deployment, operations, security]
 last_updated: 2026-07-30
 change_level: L3
