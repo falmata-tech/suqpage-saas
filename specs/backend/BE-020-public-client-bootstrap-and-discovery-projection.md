@@ -16,7 +16,7 @@ Invitation-only account creation adds avoidable onboarding delay, while the
 current City Suq projection rewrites business locations and mixes geographic and
 virtual-venue concerns. The system needs a secure self-service bootstrap and one
 public business projection that independently powers geographic discovery and
-the daily industry Expo.
+the weekly industry Expo program.
 
 ## Scope
 
@@ -29,7 +29,9 @@ the daily industry Expo.
 - Immediate authenticated access to the private client workspace.
 - Existing admin invitation onboarding as a supported parallel path.
 - Indexed eligible business projection including reviewed coordinates.
-- Deterministic Expo hall/booth assignment from the selected projection.
+- SQL-counted, limit/offset List pages capped at five rows.
+- Deterministic weekday-industry Expo hall/booth assignment and a Sunday
+  selected-featured-business livestream projection.
 - Publication plus active business status as public visibility authority.
 - Manual subscription records retained for operations but not used as automatic
   public visibility or discovery gates.
@@ -58,8 +60,9 @@ the daily industry Expo.
 - An eligible public business is active, has retained publication, at least one
   published offering, approved discovery media/profile, valid reviewed WGS84
   coordinates, selected indexed industry membership, and no discovery exclusion.
-- Every eligible row appears exactly once in map/list/Expo projection. No nearest
-  host assignment changes its coordinates.
+- Every eligible row appears exactly once in its applicable projection. No
+  nearest-host assignment changes its coordinates.
+- Map filters and search do not narrow the independently date-selected Expo.
 - Expo ordering is featured first, then normalized business name and ID. Each
   hall has 12 entries and stable references for an unchanged projection.
 
@@ -117,6 +120,20 @@ Scenario: Browser forges discovery authority
   WHEN signup or discovery is processed
   THEN those values are ignored or rejected
   AND only reviewed staff-managed profile data is public authority
+
+Scenario: Public List is requested at scale
+  GIVEN more than five eligible businesses match the selected filters
+  WHEN a public List page is requested
+  THEN SQL count and limit/offset queries return at most five rows
+  AND an out-of-range page is clamped to the final available page
+
+Scenario: Weekly Expo is projected
+  GIVEN an Ethiopia-local Monday-through-Saturday date is selected
+  WHEN discovery is projected
+  THEN every eligible business in that date's stable industry is assigned once
+    across deterministic twelve-booth halls
+  AND map filters do not alter the assignment
+  AND Sunday instead returns selected featured businesses for TikTok live
 ```
 
 ## Quality impact
@@ -128,8 +145,8 @@ Scenario: Browser forges discovery authority
 - Accessibility and responsive behavior: owned by FE-021.
 - Localization and merchant-entered values: bounded Unicode display values;
   normalized ASCII handle and lower-case email authority.
-- Performance and limits: indexed one-industry query, no occurrence fan-out,
-  bounded payload, and 12-row Expo hall projection.
+- Performance and limits: indexed industry/search predicates, bounded five-row
+  List pages, no occurrence fan-out, and 12-row Expo hall projection.
 - Failure recovery and idempotency: transaction rollback, safe duplicate
   response, revocable session, and additive migration only if required.
 
@@ -145,7 +162,7 @@ session token, or request body.
 |---|---|---|
 | Atomic bootstrap, conflicts, rate limit, tenant binding | security/integration | `scripts/test-signup.ts`, `scripts/test-security.ts` |
 | Public eligibility without subscription gating | integration | `scripts/test-discovery.ts`, `scripts/test-account-health.ts` |
-| Unified coordinates and stable Expo halls | integration | `scripts/test-discovery.ts` |
+| Exact coordinates, bounded List pages, weekly schedule, stable Expo halls | integration | `scripts/test-discovery.ts` |
 | Exact-origin/body/session behavior | HTTP/browser | `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -167,14 +184,12 @@ production rollout requires abuse monitoring, backup, and reconciled migration.
 
 ## Completion evidence
 
-Evidence: verified locally on 2026-08-01. `lib/signup.ts` and `POST /api/signup` provide
-atomic draft-tenant/client/request bootstrap, strong-password hashing,
-same-origin and bounded-JSON enforcement, privacy-preserving rate limits, safe
-conflicts, audit events, and an authenticated private destination. Focused and
-HTTP tests prove tenant binding, rollback, no public projection, file rejection,
-forged-origin denial, session creation, and unpublished handle denial.
-`lib/discovery.ts` supplies one indexed exact-coordinate projection to map,
-list, featured, and deterministic 12-booth Expo halls without subscription-date
-gating. Explicit suspension and active restoration remain enforced.
-`npm run check`, 10/10 ordered acceptance scenarios, and `npm run release`
-passed; the production audit reported zero vulnerabilities.
+Evidence: verified locally on 2026-08-01. `lib/discovery.ts` derives Ethiopia-
+local calendar labels, stable weekday industries, deterministic twelve-booth
+halls, and a de-duplicated Sunday featured-business live projection independent
+of map filters. Public List results use matching SQL count and limit/offset
+queries, clamp invalid pages, and return no more than five rows. Exact marker
+coordinates and publication-only eligibility remain unchanged. Focused tests,
+scale fixtures, all 10 browser scenarios, `npm run check`, and `npm run release`
+passed with production build, HTTP smoke, security, privacy, and zero
+vulnerabilities.

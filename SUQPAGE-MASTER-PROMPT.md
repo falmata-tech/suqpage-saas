@@ -231,34 +231,43 @@ mobile-first discovery surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-021` defines the current composition: a compact
 purple merchant invitation sits immediately above one integrated,
 application-first discovery workspace combining industry selection, search, a
-bounded featured shortcut rail, exact-location Ethiopia map, and five-row list.
-A separate daily country-wide industry Expo follows the map inside the same
-workspace. Long platform education lives on `/about`, signup lives on `/request`,
-and only a restrained merchant call-to-action follows the marketplace. There is
-no date picker, duplicated all-business directory, or browser-side full-catalog
-fan-out. Six stable industries appear as icon-labeled touch controls and remain
-available every day.
+bounded featured shortcut rail, exact-location Ethiopia map, and server-paginated
+five-row List. A separate weekly country-wide Expo program follows the map inside
+the same workspace. Monday through Saturday each have one stable assigned
+industry; Sunday presents selected businesses in a SuqPage TikTok livestream.
+Long platform education lives on `/about`, signup lives on `/request`, and only
+a restrained merchant call-to-action follows the marketplace. There is no
+duplicated all-business directory or browser-side full-catalog List fan-out.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.
 Visitor browsers make no runtime request to a tile, geocoding, routing, or map
 provider. Each eligible business appears at its reviewed WGS84 coordinates.
-Nearby markers form numbered zoom-dependent clusters; activating a cluster
-zooms to the level where its children separate. Isolated businesses remain
-individual markers, location controls frame reviewed city groups, and the
-center control restores the country view.
+Nearby markers form numbered zoom-dependent clusters; repeated activation zooms
+until their exact-coordinate individual markers separate. Isolated businesses
+remain individual markers. Location controls are generated only for named
+places with nearby matching businesses and frame those nearby points without
+claiming an authoritative city boundary. The center control restores the
+country view. No mall, venue, hall, host-city aggregate, or Expo floor is ever
+rendered on this geographic map.
 
-The Expo is a virtual presentation, not a physical location or scheduled live
-event. It uses a quiet bounded top-view floor, restrained central court, no
-people, and perimeter booth placement. A hall contains at most 12 booths;
+The Monday-through-Saturday Expo is a virtual presentation, not a physical
+location claim. It uses a clear bounded top-view floor, restrained central
+court, no people, and perimeter booth placement. The selected calendar date,
+not map filters, chooses its industry. Monday is Electronics, Tuesday Beauty &
+Care, Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home &
+Living, and Saturday Fashion & Textiles. Sunday replaces the floor with a
+TikTok livestream showcase of selected featured businesses and permanent Visit
+Suq links. A hall contains at most 12 booths;
 additional businesses create deterministic Hall 2, Hall 3, and later halls
 without increasing phone rendering cost. Every booth exposes a stable
 `{industry-code}-H{hall}-B{booth-number}` reference. A business must have an
 active published showroom, one published offering, a matching reviewed industry,
 valid reviewed location, an approved discovery profile and media, and no
 discovery exclusion. Subscription or payment dates do not determine public
-eligibility. Map, List, Featured, and Expo always use the same server-authoritative
-eligible result set and bounded indexed query.
+eligibility. Map, List, Featured, and Expo use the same server-authoritative
+eligibility rules, while map search/industry selection and the date-selected
+Expo remain independent projections.
 
 Featured treatment is emphasis inside this one result set, not a separate or
 duplicated catalog. Exactly ten fictional showrooms are explicitly featured;
@@ -569,6 +578,8 @@ Default behavior:
 - provide search plus simple Industry pills, beginning with **All industries**;
 - do not expose category filters or duplicate all-business/reset navigation;
 - reset to page one when search or Industry changes;
+- fetch no more than five List records per response page using database count,
+  limit, and offset queries;
 - show previous/next pagination only when more than five records match;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;

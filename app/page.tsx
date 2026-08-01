@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ industry?: string; q?: string; showroom?: string }>;
+  searchParams: Promise<{ industry?: string; q?: string; showroom?: string; page?: string; view?: string; expoDay?: string }>;
 }) {
   const query = await searchParams;
-  const discovery = getDiscoveryView({ industry: query.industry, q: query.q });
+  const discovery = getDiscoveryView({ industry: query.industry, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
   return (
     <div className="landing-home" id="top">
       <header className="landing-header">
@@ -40,7 +40,7 @@ export default async function Home({
         <div className="landing-container landing-market-shell">
           <section className="landing-market-banner" aria-labelledby="landing-title">
             <div><span>For makers, growers, and product businesses</span><h1 id="landing-title">Give your products one clear place to be found.</h1></div>
-            <p>A permanent digital showroom customers can discover by industry, location, and the daily virtual Expo.</p>
+            <p>A permanent digital showroom customers can discover by industry, location, and the weekly virtual Expo.</p>
             <Link href="/request">Build your Suq</Link>
           </section>
           <section className="landing-discovery-section" aria-label="SuqPage marketplace">

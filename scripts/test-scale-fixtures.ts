@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { getAllBusinesses, getDb } from "../lib/db";
-import { DISCOVERY_INDUSTRIES, getDiscoveryView } from "../lib/discovery";
+import { DISCOVERY_INDUSTRIES, EXPO_WEEK, getDiscoveryView } from "../lib/discovery";
 import { SEEDED_FEATURED_HANDLES } from "../lib/expo-seed";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 
@@ -58,7 +58,9 @@ assert.deepEqual(featured.map((row) => row.handle), [...SEEDED_FEATURED_HANDLES]
 
 const industryCounts: number[] = [];
 for (const industry of DISCOVERY_INDUSTRIES) {
-  const discovery = getDiscoveryView({ db, industry: industry.key });
+  const expoDay = EXPO_WEEK.find((day) => day.industryKey === industry.key)?.weekday;
+  assert.notEqual(expoDay, undefined, `${industry.label} has one stable weekday assignment`);
+  const discovery = getDiscoveryView({ db, industry: industry.key, expoDay });
   industryCounts.push(discovery.total);
   assert.ok(discovery.total >= 8, `${industry.label} has a useful active fixture cohort`);
   assert.ok(discovery.locationCount >= 1, `${industry.label} has a reviewed geographic location`);
@@ -73,6 +75,9 @@ for (const industry of DISCOVERY_INDUSTRIES) {
     `${industry.label} keeps halls bounded`,
   );
 }
+const searchedMonday = getDiscoveryView({ db, industry: "electronics", q: "Nova Assembly", expoDay: 1 });
+assert.equal(searchedMonday.total, 1, "map search narrows geographic results");
+assert.equal(searchedMonday.expo.booths.length, industryCounts[0], "map search does not shrink the date-selected Expo");
 assert.equal(industryCounts.reduce((total, count) => total + count, 0), 58);
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get() as { total: number }).total),

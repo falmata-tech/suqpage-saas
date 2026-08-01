@@ -23,7 +23,7 @@ try {
       fallback_style,is_featured,is_excluded,approved_at,updated_at
     ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
   `);
-  const addMembership = db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'electronics')");
+  const addMembership = db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)");
   const future = Date.now() + 30 * 24 * 60 * 60 * 1000;
 
   function seed(input: {
@@ -38,6 +38,7 @@ try {
     excluded?: boolean;
     status?: "active" | "draft" | "suspended";
     expired?: boolean;
+    industryKey?: string;
   }) {
     const id = Number(addBusiness.run(
       input.handle,
@@ -72,7 +73,7 @@ try {
       Date.now(),
       Date.now(),
     );
-    addMembership.run(id);
+    addMembership.run(id, input.industryKey || "electronics");
     return id;
   }
 
@@ -105,8 +106,10 @@ try {
   seed({ handle: "expired-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, expired: true });
   seed({ handle: "draft-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, status: "draft" });
   seed({ handle: "empty-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, product: "" });
+  seed({ handle: "sheger-soap", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.025, longitude: 38.755, industryKey: "beauty-wellness", featured: true });
 
-  const view = getDiscoveryView({ db, industry: "electronics" });
+  const monday = new Date("2026-07-27T09:00:00+03:00");
+  const view = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.featuredCount, 2);
   assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
@@ -117,14 +120,39 @@ try {
   );
   assert.equal(view.suqs.some((suq) => suq.handle === "expired-device"), true, "manual renewal dates do not hide an active published showroom");
   assert.equal(view.expo.hallCount, 2);
+  assert.equal(view.expo.mode, "expo");
+  assert.equal(view.expo.selectedWeekday, 1);
+  assert.equal(view.expo.schedule.length, 7);
+  assert.equal(view.expo.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
   assert.equal(Math.max(...view.expo.booths.map((booth) => booth.booth)), 12, "an Expo hall never exposes more than twelve booth positions");
   assert.equal(new Set(view.expo.booths.map((booth) => booth.reference)).size, view.expo.booths.length, "Expo booth references are unique");
   assert.match(view.expo.booths[0].reference, /^ELC-H1-B\d{2}$/);
 
-  const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal" });
+  assert.equal(view.list.items.length, 5, "the database-backed List response is capped at five rows");
+  assert.equal(view.list.pageCount, 4);
+  const secondPage = getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", expoDay: 1, now: monday });
+  assert.equal(secondPage.list.page, 2);
+  assert.equal(secondPage.list.items.length, 5);
+  assert.equal(secondPage.view, "list");
+  assert.equal(secondPage.list.items.some((item) => view.list.items.some((first) => first.id === item.id)), false, "List pages do not repeat rows");
+  const clampedPage = getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", expoDay: 1, now: monday });
+  assert.equal(clampedPage.list.page, 4, "an out-of-range page is clamped to the final page");
+  assert.equal(clampedPage.list.items.length, 4);
+
+  const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
   assert.equal(search.total, 1, "published offering text is searchable");
   assert.equal(search.suqs[0].city, "Addis Ababa");
-  assert.equal(search.expo.booths.length, 1, "Expo uses the same searched projection");
+  assert.equal(search.expo.booths.length, 19, "map search does not narrow the independently scheduled Expo");
+
+  const tuesday = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
+  assert.equal(tuesday.expo.title, "Beauty & body care Expo");
+  assert.deepEqual(tuesday.expo.booths.map((booth) => booth.handle), ["sheger-soap"]);
+
+  const sunday = getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
+  assert.equal(sunday.expo.mode, "livestream");
+  assert.equal(sunday.expo.title, "Sunday Suq Live");
+  assert.deepEqual(new Set(sunday.expo.booths.map((booth) => booth.handle)), new Set(["addis-device-1", "addis-device-2", "sheger-soap"]));
+  assert.ok(sunday.expo.booths.every((booth) => /^LIVE-\d{2}$/.test(booth.reference)));
 
   const invalidIndustry = getDiscoveryView({ db, industry: "not-real" });
   assert.equal(invalidIndustry.industry.key, DISCOVERY_INDUSTRIES[0].key, "invalid industry resolves to the first allowlisted industry");
@@ -165,7 +193,7 @@ try {
     "admin discovery updates replace indexed industry membership atomically",
   );
 
-  console.log("Geographic Suq discovery and daily industry Expo tests passed.");
+  console.log("Geographic Suq discovery and weekly industry Expo tests passed.");
 } finally {
   db.close();
   fs.rmSync(root, { recursive: true, force: true });

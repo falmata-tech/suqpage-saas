@@ -128,9 +128,9 @@ test("business creates a private client workspace without public uploads", async
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("geographic discovery, daily Expo, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
+test("geographic discovery, weekly Expo, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
   const errors = monitor(page);
-  await page.goto("/");
+  await page.goto("/?expoDay=1");
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Give your products one clear place to be found");
   await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
@@ -149,17 +149,22 @@ test("geographic discovery, daily Expo, benchmark Suqs, and copy-first inquiry",
   expect(featuredShortcuts).toBeLessThanOrEqual(5);
   const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
   expect(desktopMap?.y).toBeLessThan(720);
-  await expect(page.getByRole("heading", { name: /Expo$/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link")).toHaveCount(7);
+  await expect(page.getByRole("heading", { name: "Electronics & devices Expo" })).toBeVisible();
   const firstHallBooths = await page.locator(".expo-booth").count();
   expect(firstHallBooths).toBeGreaterThan(0);
   expect(firstHallBooths).toBeLessThanOrEqual(12);
   await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
+  await expect(page).toHaveURL(/expoDay=1/);
+  await expect(page.getByRole("heading", { name: "Electronics & devices Expo" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Tue/ }).click();
+  await expect(page.getByRole("heading", { name: "Beauty & body care Expo" })).toBeVisible();
   await page.getByRole("tab", { name: "List" }).click();
   expect(await page.locator(".discovery-list article").count()).toBe(5);
   await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/?expoDay=1");
   const phoneMap = await page.locator(".discovery-map-stage").boundingBox();
   expect(phoneMap?.y).toBeLessThan(844);
   await page.getByLabel("Open public navigation").click();
@@ -488,16 +493,33 @@ test("mobile clustered map, Expo halls, list parity, and legacy redirects", asyn
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
   await expect(page).toHaveURL(/\/discover$/);
+  await page.goto("/discover?industry=electronics&expoDay=1");
   await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
   await expect(page.locator(".discovery-roads path")).toHaveCount(4);
-  const initialMarkers = await page.locator(".discovery-cluster, .discovery-point").count();
-  const cluster = page.locator(".discovery-cluster").first();
-  await expect(cluster).toBeVisible();
-  await cluster.click();
-  await expect.poll(() => page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(initialMarkers);
-  const point = page.locator(".discovery-point").first();
+  const visibleMarkerIndex = (selector: string) => page.locator(selector).evaluateAll((markers) => {
+    const stage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
+    if (!stage) return -1;
+    return markers.findIndex((marker) => {
+      const bounds = marker.getBoundingClientRect();
+      const centerX = bounds.left + bounds.width / 2;
+      const centerY = bounds.top + bounds.height / 2;
+      return centerX >= stage.left && centerX <= stage.right && centerY >= stage.top && centerY <= stage.bottom;
+    });
+  });
+  for (let attempt = 0; attempt < 7; attempt += 1) {
+    const index = await visibleMarkerIndex(".discovery-cluster");
+    if (index < 0) break;
+    await page.locator(".discovery-cluster").nth(index).click();
+    await page.waitForTimeout(450);
+  }
+  const visiblePointIndex = await visibleMarkerIndex(".discovery-point");
+  expect(visiblePointIndex).toBeGreaterThanOrEqual(0);
+  const point = page.locator(".discovery-point").nth(visiblePointIndex);
   await expect(point).toBeVisible();
+  await expect(point).toHaveAttribute("data-latitude", /^-?\d+(\.\d+)?$/);
+  await expect(point).toHaveAttribute("data-longitude", /^-?\d+(\.\d+)?$/);
+  await expect(page.locator(".discovery-map").getByText(/Hall \d/)).toHaveCount(0);
   await point.click();
   await expect(page.locator(".discovery-preview").getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
   await page.getByRole("button", { name: "Close business preview" }).click();
@@ -519,12 +541,26 @@ test("mobile clustered map, Expo halls, list parity, and legacy redirects", asyn
   const listCount = await page.locator(".discovery-list article").count();
   expect(listCount).toBe(5);
   await expect(page.locator(".discovery-list").getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
+  const firstPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-suq-id")));
+  await page.getByRole("navigation", { name: "Suq list pages" }).getByRole("link", { name: "Next" }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await expect(page).toHaveURL(/view=list/);
+  await expect(page.getByRole("navigation", { name: "Suq list pages" })).toContainText("Page 2 of");
+  const secondPageCount = await page.locator(".discovery-list article").count();
+  expect(secondPageCount).toBeGreaterThan(0);
+  expect(secondPageCount).toBeLessThanOrEqual(5);
+  const secondPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-suq-id")));
+  expect(secondPageIds.some((id) => firstPageIds.includes(id))).toBe(false);
+  await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Sun/ }).click();
+  await expect(page.getByRole("heading", { name: "Sunday Suq Live" })).toBeVisible();
+  await expect(page.locator(".expo-floor")).toHaveCount(0);
+  expect(await page.locator(".expo-live-businesses > a").count()).toBeGreaterThan(0);
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/bazaar");
   await expect(page).toHaveURL(/\/discover$/);
   await page.route("**/geo/ethiopia-admin1-2023.geojson", (route) => route.fulfill({ status: 503, body: "" }));
-  await page.goto("/discover");
+  await page.goto("/discover?expoDay=1");
   await expect(page.getByText("The map could not load, but every Suq is still available.")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Expo$/ })).toBeVisible();
   await page.getByRole("button", { name: "Open list" }).click();

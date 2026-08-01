@@ -8,12 +8,14 @@ import "d3-transition";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import Supercluster from "supercluster";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import type { DailyIndustryExpo, DiscoverySuq, DiscoveryView, ExpoBooth } from "@/lib/discovery";
+import type { DiscoverySuq, DiscoveryView, ExpoBooth, WeeklyIndustryExpo } from "@/lib/discovery";
 
 const MAP_WIDTH = 900;
 const MAP_HEIGHT = 650;
 const BASE_CLUSTER_ZOOM = 5;
-const MAX_CLUSTER_ZOOM = 12;
+const MAX_CLUSTER_ZOOM = 17;
+const MAX_MAP_ZOOM = 18;
+const MAX_MAP_SCALE = 2 ** (MAX_MAP_ZOOM - BASE_CLUSTER_ZOOM);
 const ETHIOPIA_BOUNDS: [number, number, number, number] = [32, 3, 49, 15];
 
 type MapFeature = {
@@ -37,6 +39,7 @@ const iconPath: Record<string, string> = {
   tool: "M14 6 6 14l4 4 8-8M15 3l6 6-3 3-6-6zM4 16l4 4-2 2H2v-4z",
   home: "M3 11 12 4l9 7v9h-6v-6H9v6H3z",
   thread: "M7 4h10v4H7zM8 8h8l2 12H6zM9 12h6M8 16h8",
+  live: "M8 8.5a5 5 0 0 0 0 7M5 5.5a9 9 0 0 0 0 13M16 8l5-3v14l-5-3zM3 8h13v8H3z",
 };
 
 function IndustryIcon({ name }: { name: string }) {
@@ -44,11 +47,19 @@ function IndustryIcon({ name }: { name: string }) {
 }
 
 function mapZoomForScale(scale: number) {
-  return Math.max(BASE_CLUSTER_ZOOM, Math.min(MAX_CLUSTER_ZOOM, Math.floor(BASE_CLUSTER_ZOOM + Math.log2(scale))));
+  return Math.max(BASE_CLUSTER_ZOOM, Math.min(MAX_MAP_ZOOM, Math.floor(BASE_CLUSTER_ZOOM + Math.log2(scale))));
+}
+
+function discoveryHref(action: string, values: Record<string, string | number | undefined>, hash = "discover") {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  return `${action}?${params.toString()}#${hash}`;
 }
 
 export default function DiscoveryWorkspace({ discovery, embedded = false }: { discovery: DiscoveryView; embedded?: boolean }) {
-  const [view, setView] = useState<"map" | "list">("map");
+  const [view, setView] = useState<"map" | "list">(discovery.view);
   const [regions, setRegions] = useState<MapCollection | null>(null);
   const [zones, setZones] = useState<MapCollection | null>(null);
   const [places, setPlaces] = useState<MapCollection | null>(null);
@@ -62,7 +73,8 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
 
   useEffect(() => {
     setSelectedSuqId(null);
-  }, [discovery.industry.key, discovery.query]);
+    setView(discovery.view);
+  }, [discovery.industry.key, discovery.query, discovery.view]);
 
   useEffect(() => {
     let active = true;
@@ -123,10 +135,24 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   }, [places, zoomLevel]);
 
   const locations = useMemo(() => {
+    const namedPlaces = (places?.features || []).filter((feature) => {
+      const coordinates = (feature.geometry as { coordinates?: [number, number] }).coordinates;
+      return coordinates && (feature.properties.place === "city" || feature.properties.place === "town");
+    });
     const grouped = new Map<string, { city: string; region: string; latitude: number; longitude: number; count: number }>();
     for (const suq of discovery.suqs) {
-      const key = `${suq.city}\u0000${suq.region}`;
-      const current = grouped.get(key) || { city: suq.city, region: suq.region, latitude: 0, longitude: 0, count: 0 };
+      let nearest: MapFeature | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (const place of namedPlaces) {
+        const coordinates = (place.geometry as unknown as { coordinates: [number, number] }).coordinates;
+        const longitudeDistance = (coordinates[0] - suq.longitude) * Math.cos(suq.latitude * Math.PI / 180);
+        const latitudeDistance = coordinates[1] - suq.latitude;
+        const distance = longitudeDistance * longitudeDistance + latitudeDistance * latitudeDistance;
+        if (distance < nearestDistance) { nearest = place; nearestDistance = distance; }
+      }
+      const nearbyName = nearest && nearestDistance <= 1.2 * 1.2 ? String(nearest.properties.name) : suq.city;
+      const key = `${nearbyName}\u0000${suq.region}`;
+      const current = grouped.get(key) || { city: nearbyName, region: suq.region, latitude: 0, longitude: 0, count: 0 };
       current.latitude += suq.latitude;
       current.longitude += suq.longitude;
       current.count += 1;
@@ -134,12 +160,12 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
     }
     return [...grouped.values()].map((location) => ({ ...location, latitude: location.latitude / location.count, longitude: location.longitude / location.count }))
       .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
-  }, [discovery.suqs]);
+  }, [discovery.suqs, places]);
 
   useEffect(() => {
     if (!svgRef.current || !groupRef.current || !projection) return;
     const behavior = zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 12])
+      .scaleExtent([1, MAX_MAP_SCALE])
       .extent([[0, 0], [MAP_WIDTH, MAP_HEIGHT]])
       .translateExtent([[-90, -75], [MAP_WIDTH + 90, MAP_HEIGHT + 75]])
       .on("zoom", (event: { transform: ZoomTransform }) => {
@@ -167,7 +193,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
 
   function openCluster(clusterId: number, coordinates: [number, number]) {
     const expansion = clusterIndex.getClusterExpansionZoom(clusterId);
-    const scale = Math.min(12, Math.max(1.8, 2 ** (expansion - BASE_CLUSTER_ZOOM)));
+    const scale = Math.min(MAX_MAP_SCALE, Math.max(1.8, 2 ** (expansion - BASE_CLUSTER_ZOOM)));
     framePoint(coordinates[0], coordinates[1], scale);
   }
 
@@ -184,23 +210,23 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   const action = embedded ? "/" : "/discover";
   return <section className="discovery" id="discover" aria-labelledby="discovery-title">
     <div className="discovery-switcher">
-      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Explore Ethiopia&apos;s product businesses</span><h2 id="discovery-title">Choose an industry. Find a Suq.</h2></div><p>Browse by real business location, then step into today&apos;s country-wide industry Expo.</p></div>
+      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Explore Ethiopia&apos;s product businesses</span><h2 id="discovery-title">Choose an industry. Find a Suq.</h2></div><p>Search real business locations, zoom to an exact Suq, or visit this week&apos;s country-wide Expos.</p></div>
       <nav className="discovery-industries" aria-label="Industries">
-        {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={`${action}?industry=${encodeURIComponent(industry.key)}#discover`} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
+        {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={discoveryHref(action, { industry: industry.key, expoDay: discovery.expo.selectedWeekday, view })} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
       </nav>
-      <form className="discovery-search" action={action} method="get"><input type="hidden" name="industry" value={discovery.industry.key} /><label><span className="sr-only">Search this industry</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.5-4.5M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input name="q" defaultValue={discovery.query} maxLength={80} placeholder="Search a business, product, craft, or place" /></label><button type="submit">Search</button>{discovery.query ? <Link href={`${action}?industry=${discovery.industry.key}#discover`}>Clear</Link> : null}</form>
+      <form className="discovery-search" action={action} method="get"><input type="hidden" name="industry" value={discovery.industry.key} /><input type="hidden" name="expoDay" value={discovery.expo.selectedWeekday} /><input type="hidden" name="view" value={view} /><label><span className="sr-only">Search this industry</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.5-4.5M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input name="q" defaultValue={discovery.query} maxLength={80} placeholder="Search a business, product, craft, or place" /></label><button type="submit">Search</button>{discovery.query ? <Link href={discoveryHref(action, { industry: discovery.industry.key, expoDay: discovery.expo.selectedWeekday, view })}>Clear</Link> : null}</form>
       <FeaturedRail suqs={featuredSuqs} />
     </div>
 
     <div className="discovery-summary"><div><span className="discovery-kicker">{discovery.industry.label}</span><strong>{discovery.total} Suqs across {discovery.locationCount} {discovery.locationCount === 1 ? "location" : "locations"}</strong><small>Zoom into clusters to reveal each business at its reviewed location.</small></div><div className="discovery-tabs" role="tablist" aria-label="Discovery view"><button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Map</button><button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>List</button></div></div>
 
-    {view === "list" ? <DiscoveryList suqs={discovery.suqs} /> : <div className="discovery-map-shell">
+    {view === "list" ? <DiscoveryList discovery={discovery} action={action} /> : <div className="discovery-map-shell">
       <div className="discovery-map-tools">
         <label className="discovery-location-picker"><span>Jump to a location</span><select defaultValue="" onChange={(event) => {
           if (!event.target.value) { resetMap(); return; }
           const location = locations[Number(event.target.value)];
           if (location) framePoint(location.longitude, location.latitude, 5);
-        }}><option value="">All Ethiopia</option>{locations.map((location, index) => <option key={`${location.city}-${location.region}`} value={index}>{location.city}, {location.region} ({location.count})</option>)}</select></label>
+        }}><option value="">All Ethiopia</option>{locations.map((location, index) => <option key={`${location.city}-${location.region}`} value={index}>Near {location.city}, {location.region} ({location.count})</option>)}</select></label>
         <div className="discovery-zoom" aria-label="Map controls"><button type="button" onClick={() => zoomBy(1.5)} title="Zoom in" aria-label="Zoom in">+</button><button type="button" onClick={() => zoomBy(1 / 1.5)} title="Zoom out" aria-label="Zoom out">−</button><button type="button" onClick={resetMap} title="Center Ethiopia" aria-label="Center Ethiopia">◎</button></div>
       </div>
       <div className="discovery-map-stage">
@@ -226,7 +252,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
               }
               const suq = discovery.suqs.find((candidate) => candidate.id === properties.suqId);
               if (!suq) return null;
-              return <g key={`suq-${suq.id}`} className={`discovery-point${suq.featured ? " featured" : ""}${selectedSuqId === suq.id ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${suq.name}, ${suq.city}. Open preview.`} onClick={() => setSelectedSuqId(suq.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedSuqId(suq.id); }}><circle className="point-halo" r="18" /><path d="M0 13C-3 8-9 3-9-5a9 9 0 1 1 18 0c0 8-6 13-9 18Z" /><circle cx="0" cy="-5" r="3" /></g>;
+              return <g key={`suq-${suq.id}`} data-suq-id={suq.id} data-latitude={suq.latitude} data-longitude={suq.longitude} className={`discovery-point${suq.featured ? " featured" : ""}${selectedSuqId === suq.id ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${suq.name}, ${suq.city}. Open preview.`} onClick={() => setSelectedSuqId(suq.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedSuqId(suq.id); }}><circle className="point-halo" r="18" /><path d="M0 13C-3 8-9 3-9-5a9 9 0 1 1 18 0c0 8-6 13-9 18Z" /><circle cx="0" cy="-5" r="3" /></g>;
             })}</g>
           </g>
         </svg> : null}
@@ -235,7 +261,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
       </div>
     </div>}
 
-    <DailyExpo expo={discovery.expo} />
+    <WeeklyExpo expo={discovery.expo} action={action} mapIndustry={discovery.industry.key} query={discovery.query} view={view} />
   </section>;
 }
 
@@ -253,14 +279,17 @@ function SuqPreview({ suq, source, onClose }: { suq: DiscoverySuq; source: "disc
   return <aside className="discovery-preview" aria-live="polite"><SuqImage suq={suq} /><div><span>{suq.featured ? "Featured · " : ""}{suq.city}</span><h3>{suq.name}</h3><p>{suq.tagline}</p><small>{suq.zone}, {suq.region}</small><Link href={`/@${suq.handle}?ref=${source}`}>Visit Suq</Link></div><button type="button" onClick={onClose} aria-label="Close business preview">×</button></aside>;
 }
 
-function DiscoveryList({ suqs }: { suqs: DiscoverySuq[] }) {
-  const [page, setPage] = useState(1);
-  useEffect(() => setPage(1), [suqs]);
-  if (!suqs.length) return <div className="discovery-empty"><h3>No Suqs match this search yet.</h3><p>Try another word or choose a different industry.</p></div>;
-  const pageSize = 5;
-  const pageCount = Math.ceil(suqs.length / pageSize);
-  const visible = suqs.slice((page - 1) * pageSize, page * pageSize);
-  return <div className="discovery-list-wrap"><div className="discovery-list">{visible.map((suq) => <article key={suq.id}><SuqImage suq={suq} /><div><span>{suq.featured ? "Featured" : "Local Suq"}</span><h3>{suq.name}</h3><p>{suq.tagline}</p><small>{suq.city}, {suq.region}</small></div><Link href={`/@${suq.handle}?ref=discovery`}>Visit Suq</Link></article>)}</div>{pageCount > 1 ? <nav className="discovery-pages" aria-label="Suq list pages"><button type="button" disabled={page === 1} onClick={() => setPage((value) => value - 1)}>Previous</button><span>Page {page} of {pageCount}</span><button type="button" disabled={page === pageCount} onClick={() => setPage((value) => value + 1)}>Next</button></nav> : null}</div>;
+function DiscoveryList({ discovery, action }: { discovery: DiscoveryView; action: string }) {
+  const { list } = discovery;
+  if (!list.items.length) return <div className="discovery-empty"><h3>No Suqs match this search yet.</h3><p>Try another word or choose a different industry.</p></div>;
+  const pageHref = (page: number) => discoveryHref(action, {
+    industry: discovery.industry.key,
+    q: discovery.query,
+    expoDay: discovery.expo.selectedWeekday,
+    view: "list",
+    page,
+  });
+  return <div className="discovery-list-wrap"><div className="discovery-list">{list.items.map((suq) => <article key={suq.id} data-suq-id={suq.id}><SuqImage suq={suq} /><div><span>{suq.featured ? "Featured" : "Local Suq"}</span><h3>{suq.name}</h3><p>{suq.tagline}</p><small>{suq.city}, {suq.region}</small></div><Link href={`/@${suq.handle}?ref=discovery`}>Visit Suq</Link></article>)}</div>{list.pageCount > 1 ? <nav className="discovery-pages" aria-label="Suq list pages">{list.page > 1 ? <Link href={pageHref(list.page - 1)} rel="prev">Previous</Link> : <span className="disabled">Previous</span>}<span>Page {list.page} of {list.pageCount}</span>{list.page < list.pageCount ? <Link href={pageHref(list.page + 1)} rel="next">Next</Link> : <span className="disabled">Next</span>}</nav> : null}</div>;
 }
 
 function boothPosition(index: number, total: number): CSSProperties {
@@ -270,17 +299,21 @@ function boothPosition(index: number, total: number): CSSProperties {
   return { gridRow: row, gridColumn: column };
 }
 
-function DailyExpo({ expo }: { expo: DailyIndustryExpo }) {
+function WeeklyExpo({ expo, action, mapIndustry, query, view }: { expo: WeeklyIndustryExpo; action: string; mapIndustry: string; query: string; view: "map" | "list" }) {
   const [hall, setHall] = useState(1);
   const [selected, setSelected] = useState<ExpoBooth | null>(null);
   useEffect(() => { setHall(1); setSelected(null); }, [expo.title]);
   const hallBooths = expo.booths.filter((booth) => booth.hall === hall);
-  return <section className="daily-expo" aria-labelledby="daily-expo-title">
-    <header className="daily-expo-head"><div><span className="discovery-kicker">Open every day · Country-wide</span><h2 id="daily-expo-title">{expo.title}</h2><p>Walk one focused virtual floor, meet businesses from across Ethiopia, and continue into any permanent Suq.</p></div><div className="expo-hall-controls" role="group" aria-label="Expo halls">{Array.from({ length: expo.hallCount }, (_, index) => index + 1).map((number) => <button key={number} type="button" aria-pressed={hall === number} onClick={() => { setHall(number); setSelected(null); }}>Hall {number}</button>)}</div></header>
-    {hallBooths.length ? <div className="expo-floor-wrap"><div className="expo-floor" aria-label={`${expo.title}, Hall ${hall}`}>
+  return <section className={`daily-expo expo-theme-${expo.industryCode.toLowerCase()}`} aria-labelledby="daily-expo-title">
+    <nav className="expo-week" aria-label="Weekly Expo schedule">{expo.schedule.map((day) => <Link key={day.weekday} href={discoveryHref(action, { industry: mapIndustry, q: query, view, expoDay: day.weekday }, "daily-expo-title")} className={[day.weekday === expo.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === expo.selectedWeekday ? "date" : undefined}><span><IndustryIcon name={day.industryIcon} /></span><b>{day.dayLabel.slice(0, 3)}</b><small>{day.dateLabel}</small><em>{day.mode === "livestream" ? "Live" : day.industryLabel.split(/[,&]/)[0]}</em></Link>)}</nav>
+    <header className="daily-expo-head"><div><span className="discovery-kicker">{expo.dayLabel} · {expo.dateLabel} · Country-wide</span><h2 id="daily-expo-title">{expo.title}</h2><p>{expo.mode === "livestream" ? "Meet selected independent businesses live on TikTok, then visit their permanent Suqs to see and support their work." : "Walk one focused virtual floor, meet independent businesses from across Ethiopia, and continue into any permanent Suq."}</p></div>{expo.mode === "expo" ? <div className="expo-hall-controls" role="group" aria-label="Expo halls">{Array.from({ length: expo.hallCount }, (_, index) => index + 1).map((number) => <button key={number} type="button" aria-pressed={hall === number} onClick={() => { setHall(number); setSelected(null); }}>Hall {number}</button>)}</div> : <span className="expo-live-badge"><i /> SuqPage on TikTok</span>}</header>
+    {expo.mode === "livestream" ? <div className="expo-live">
+      <div className="expo-live-stage"><span>Sunday showcase</span><strong>Made here.<br />Seen together.</strong><p>Selected Suqs join the livestream. Their permanent pages stay open before, during, and after the show.</p></div>
+      <div className="expo-live-businesses">{expo.booths.map((booth) => <Link key={booth.id} href={`/@${booth.handle}?ref=expo`}><SuqImage suq={booth} /><span><b>{booth.reference}</b><strong>{booth.name}</strong><small>{booth.city} · Visit Suq</small></span></Link>)}</div>
+    </div> : hallBooths.length ? <div className="expo-floor-wrap"><div className="expo-floor" aria-label={`${expo.title}, Hall ${hall}`}>
       <div className="expo-center" aria-hidden="true"><span className="expo-canopy" /><i className="expo-planter expo-planter-one" /><i className="expo-planter expo-planter-two" /><i className="expo-planter expo-planter-three" /><strong>{expo.industryCode}</strong><small>Maker Expo</small></div>
       <span className="expo-entrance">Hall {hall} entrance</span>
       {hallBooths.map((booth, index) => <button key={booth.id} type="button" style={boothPosition(index, hallBooths.length)} className={`expo-booth${selected?.id === booth.id ? " selected" : ""}`} onClick={() => setSelected(booth)} aria-label={`${booth.reference}, ${booth.name}`}><SuqImage suq={booth} /><span><b>{booth.reference}</b><strong>{booth.name}</strong></span></button>)}
-    </div>{selected ? <SuqPreview suq={selected} source="expo" onClose={() => setSelected(null)} /> : null}</div> : <div className="discovery-empty"><h3>This Expo floor is being prepared.</h3><p>Choose another industry or clear the search to see more Suqs.</p></div>}
+    </div>{selected ? <SuqPreview suq={selected} source="expo" onClose={() => setSelected(null)} /> : null}</div> : <div className="discovery-empty"><h3>This Expo floor is being prepared.</h3><p>More businesses will appear here as their Suqs are published.</p></div>}
   </section>;
 }

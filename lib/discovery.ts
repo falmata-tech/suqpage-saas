@@ -12,6 +12,20 @@ export const DISCOVERY_INDUSTRIES = [
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
 
+export const EXPO_WEEK = [
+  { weekday: 1, dayLabel: "Monday", industryKey: "electronics" },
+  { weekday: 2, dayLabel: "Tuesday", industryKey: "beauty-wellness" },
+  { weekday: 3, dayLabel: "Wednesday", industryKey: "food-farming" },
+  { weekday: 4, dayLabel: "Thursday", industryKey: "machinery-tools" },
+  { weekday: 5, dayLabel: "Friday", industryKey: "home-living" },
+  { weekday: 6, dayLabel: "Saturday", industryKey: "fashion-textiles" },
+  { weekday: 0, dayLabel: "Sunday", industryKey: null },
+] as const;
+
+const LIST_PAGE_SIZE = 5;
+const EXPO_HALL_SIZE = 12;
+const ETHIOPIA_TIME_ZONE = "Africa/Addis_Ababa";
+
 type DiscoveryRow = {
   id: number;
   handle: string;
@@ -51,65 +65,66 @@ export type ExpoBooth = DiscoverySuq & {
   reference: string;
 };
 
-export type DailyIndustryExpo = {
+export type WeeklyExpoDay = {
+  weekday: number;
+  dayLabel: string;
+  dateIso: string;
+  dateLabel: string;
+  mode: "expo" | "livestream";
+  industryKey: string | null;
+  industryLabel: string;
+  industryIcon: string;
+  isToday: boolean;
+};
+
+export type WeeklyIndustryExpo = {
+  mode: "expo" | "livestream";
   title: string;
   industryCode: string;
+  industryIcon: string;
+  selectedWeekday: number;
+  dayLabel: string;
+  dateLabel: string;
   hallCount: number;
   booths: ExpoBooth[];
+  schedule: WeeklyExpoDay[];
 };
 
 export type DiscoveryView = {
   industry: DiscoveryIndustry;
   industries: readonly DiscoveryIndustry[];
   query: string;
+  view: "map" | "list";
   total: number;
   featuredCount: number;
   locationCount: number;
   suqs: DiscoverySuq[];
-  expo: DailyIndustryExpo;
+  list: {
+    items: DiscoverySuq[];
+    page: number;
+    pageCount: number;
+    pageSize: number;
+    total: number;
+  };
+  expo: WeeklyIndustryExpo;
 };
 
 function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
 }
 
-export function getDiscoveryView(
-  options: { industry?: string; q?: string; db?: DatabaseSync } = {},
-): DiscoveryView {
-  const db = options.db || getDb();
-  const industry = normalizeIndustry(options.industry);
-  const query = (options.q || "").trim().slice(0, 80);
-  const search = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
-  const rows = db.prepare(`
-    SELECT
-      b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
-      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
-      p.fallback_style,p.is_featured
-    FROM business_industries i
-    JOIN businesses b ON b.id=i.business_id
-    JOIN business_discovery_profiles p ON p.business_id=b.id
-    WHERE i.industry_key=?
-      AND b.status='active'
-      AND p.is_excluded=0
-      AND p.approved_at > 0
-      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-      AND (
-        ?='' OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
-        OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
-        OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
-        OR EXISTS(
-          SELECT 1 FROM products product
-          WHERE product.business_id=b.id AND product.is_published=1
-            AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
-        )
-      )
-    ORDER BY p.is_featured DESC,b.name COLLATE NOCASE,b.id
-  `).all(
-    industry.key, query,
-    search, search, search, search, search, search, search, search,
-  ) as DiscoveryRow[];
+function normalizePositiveInteger(value: string | number | undefined, fallback: number) {
+  const parsed = typeof value === "number" ? value : Number.parseInt(value || "", 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
 
-  const suqs = rows.map((row): DiscoverySuq => ({
+function normalizeWeekday(value: string | number | undefined, fallback: number) {
+  const parsed = typeof value === "number" ? value : Number.parseInt(value || "", 10);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 6 ? parsed : fallback;
+}
+
+function toSuq(row: DiscoveryRow): DiscoverySuq {
+  return {
     id: row.id,
     handle: row.handle,
     name: row.name,
@@ -123,15 +138,149 @@ export function getDiscoveryView(
     longitude: row.longitude,
     fallbackStyle: row.fallback_style,
     featured: Boolean(row.is_featured),
-  }));
-  const booths = suqs.map((suq, index): ExpoBooth => {
-    const hall = Math.floor(index / 12) + 1;
-    const booth = index % 12 + 1;
+  };
+}
+
+function selectSql(extraWhere: string, suffix = "") {
+  return `
+    SELECT
+      b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
+      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+      p.fallback_style,p.is_featured
+    FROM business_industries i
+    JOIN businesses b ON b.id=i.business_id
+    JOIN business_discovery_profiles p ON p.business_id=b.id
+    WHERE i.industry_key=?
+      AND b.status='active'
+      AND p.is_excluded=0
+      AND p.approved_at > 0
+      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+      ${extraWhere}
+    ORDER BY p.is_featured DESC,b.name COLLATE NOCASE,b.id
+    ${suffix}
+  `;
+}
+
+const SEARCH_WHERE = `AND (
+  ?='' OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
+  OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
+  OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
+  OR EXISTS(
+    SELECT 1 FROM products product
+    WHERE product.business_id=b.id AND product.is_published=1
+      AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
+  )
+)`;
+
+function searchParameters(industryKey: string, query: string) {
+  const search = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+  return [industryKey, query, search, search, search, search, search, search, search, search];
+}
+
+function ethiopiaDateParts(now: Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: ETHIOPIA_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const value = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value);
+  return { year: value("year"), month: value("month"), day: value("day") };
+}
+
+function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[] } {
+  const { year, month, day } = ethiopiaDateParts(now);
+  const today = new Date(Date.UTC(year, month - 1, day));
+  const todayWeekday = today.getUTCDay();
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() - ((todayWeekday + 6) % 7));
+  const labelFormatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+  const days = EXPO_WEEK.map((entry, index): WeeklyExpoDay => {
+    const date = new Date(monday);
+    date.setUTCDate(monday.getUTCDate() + index);
+    const industry = entry.industryKey ? normalizeIndustry(entry.industryKey) : null;
+    return {
+      weekday: entry.weekday,
+      dayLabel: entry.dayLabel,
+      dateIso: date.toISOString().slice(0, 10),
+      dateLabel: labelFormatter.format(date),
+      mode: industry ? "expo" : "livestream",
+      industryKey: industry?.key || null,
+      industryLabel: industry?.label || "SuqPage TikTok Live",
+      industryIcon: industry?.icon || "live",
+      isToday: entry.weekday === todayWeekday,
+    };
+  });
+  return { todayWeekday, days };
+}
+
+export function getDiscoveryView(
+  options: {
+    industry?: string;
+    q?: string;
+    page?: string | number;
+    view?: string;
+    expoDay?: string | number;
+    now?: Date;
+    db?: DatabaseSync;
+  } = {},
+): DiscoveryView {
+  const db = options.db || getDb();
+  const industry = normalizeIndustry(options.industry);
+  const query = (options.q || "").trim().slice(0, 80);
+  const params = searchParameters(industry.key, query);
+  const countRow = db.prepare(`
+    SELECT COUNT(DISTINCT b.id) AS total
+    FROM business_industries i
+    JOIN businesses b ON b.id=i.business_id
+    JOIN business_discovery_profiles p ON p.business_id=b.id
+    WHERE i.industry_key=?
+      AND b.status='active'
+      AND p.is_excluded=0
+      AND p.approved_at > 0
+      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+      ${SEARCH_WHERE}
+  `).get(...params) as { total: number };
+  const total = countRow.total;
+  const pageCount = Math.max(1, Math.ceil(total / LIST_PAGE_SIZE));
+  const page = Math.min(normalizePositiveInteger(options.page, 1), pageCount);
+  const rows = db.prepare(selectSql(SEARCH_WHERE)).all(...params) as DiscoveryRow[];
+  const listRows = db.prepare(selectSql(SEARCH_WHERE, "LIMIT ? OFFSET ?"))
+    .all(...params, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE) as DiscoveryRow[];
+  const suqs = rows.map(toSuq);
+
+  const schedule = weeklySchedule(options.now || new Date());
+  const selectedWeekday = normalizeWeekday(options.expoDay, schedule.todayWeekday);
+  const selectedDay = schedule.days.find((entry) => entry.weekday === selectedWeekday) || schedule.days[0];
+  const expoIndustry = selectedDay.industryKey ? normalizeIndustry(selectedDay.industryKey) : null;
+  const expoRows = expoIndustry
+    ? db.prepare(selectSql("")).all(expoIndustry.key) as DiscoveryRow[]
+    : db.prepare(`
+        SELECT
+          b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
+          p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+          p.fallback_style,p.is_featured
+        FROM businesses b
+        JOIN business_discovery_profiles p ON p.business_id=b.id
+        WHERE b.status='active'
+          AND p.is_excluded=0
+          AND p.approved_at > 0
+          AND p.is_featured=1
+          AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+        ORDER BY b.name COLLATE NOCASE,b.id
+      `).all() as DiscoveryRow[];
+  const expoSuqs = expoRows.map(toSuq);
+  const booths = expoSuqs.map((suq, index): ExpoBooth => {
+    const hall = Math.floor(index / EXPO_HALL_SIZE) + 1;
+    const booth = index % EXPO_HALL_SIZE + 1;
     return {
       ...suq,
       hall,
       booth,
-      reference: `${industry.code}-H${hall}-B${String(booth).padStart(2, "0")}`,
+      reference: selectedDay.mode === "livestream"
+        ? `LIVE-${String(index + 1).padStart(2, "0")}`
+        : `${expoIndustry?.code}-H${hall}-B${String(booth).padStart(2, "0")}`,
     };
   });
 
@@ -139,15 +288,29 @@ export function getDiscoveryView(
     industry,
     industries: DISCOVERY_INDUSTRIES,
     query,
-    total: suqs.length,
+    view: options.view === "list" ? "list" : "map",
+    total,
     featuredCount: suqs.filter((suq) => suq.featured).length,
     locationCount: new Set(suqs.map((suq) => `${suq.city}\u0000${suq.region}`)).size,
     suqs,
+    list: {
+      items: listRows.map(toSuq),
+      page,
+      pageCount,
+      pageSize: LIST_PAGE_SIZE,
+      total,
+    },
     expo: {
-      title: `${industry.label} Expo`,
-      industryCode: industry.code,
-      hallCount: Math.max(1, Math.ceil(booths.length / 12)),
+      mode: selectedDay.mode,
+      title: selectedDay.mode === "livestream" ? "Sunday Suq Live" : `${expoIndustry?.label} Expo`,
+      industryCode: selectedDay.mode === "livestream" ? "LIVE" : expoIndustry?.code || "SUQ",
+      industryIcon: selectedDay.industryIcon,
+      selectedWeekday,
+      dayLabel: selectedDay.dayLabel,
+      dateLabel: selectedDay.dateLabel,
+      hallCount: Math.max(1, Math.ceil(booths.length / EXPO_HALL_SIZE)),
       booths,
+      schedule: schedule.days,
     },
   };
 }

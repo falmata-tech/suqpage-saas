@@ -29,6 +29,8 @@ self-service onboarding release.
   the application image or Git history.
 - Signup endpoint rate-limit, audit, backup/restore, browser, and release gates.
 - Compatibility for existing admin invitation onboarding and `/request` links.
+- Browser and release gates for weekly Expo selection, deep exact-coordinate
+  cluster expansion, and server-bounded List pagination.
 
 ### Non-goals
 
@@ -96,6 +98,7 @@ text, session tokens, IP addresses, and raw geographic source metadata.
 |---|---|---|
 | Deterministic local geography and asset budget | operations | `scripts/test-discovery-geography.mjs` |
 | No remote map runtime requests | browser | `tests/acceptance/app.spec.ts` |
+| Weekly selector, exact-pin expansion, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Signup backup/restore and security | operations/security | `scripts/test-operations.mjs`, `scripts/test-signup.ts` |
 | Production build and HTTP surface | release | `npm run release` |
 
@@ -118,14 +121,11 @@ additive and harmless when unused.
 
 ## Completion evidence
 
-Evidence: verified locally on 2026-08-01. A current 2026-07-31 Geofabrik Ethiopia extract
-was integrity-checked outside the repository, filtered and exported with Osmium,
-and reduced to four MultiLineString road layers plus 2,612 named places. The two
-committed same-origin GeoJSON assets total 1,168,811 bytes; attribution and the
-rebuild command are recorded in `public/geo/ATTRIBUTION.md`. The geography gate,
-desktop/390px/320px visual proof, map-failure browser scenario, atomic signup
-tests, production HTTP smoke, output-trace privacy validation, 58-Suq scale
-fixtures, backup/operations coverage in the release workflow, and zero-
-vulnerability production audit passed. `npm run check`, `npm run
-test:acceptance` (10/10), and `npm run release` passed. No production rollout or
-data-preserving migration was performed.
+Evidence: verified locally on 2026-08-01. Existing same-origin geography remains
+four road layers and 2,612 places within the 1,168,811-byte budget. Refreshed
+desktop/390px/320px visual proof passed for exact-pin expansion, weekly weekday
+controls, weekday Expo, Sunday live, bounded List results, touch targets, and no
+horizontal overflow. All 10 ordered browser workflows, `npm run check`, and
+`npm run release` passed with production build, HTTP smoke, scale fixtures,
+backup/security/migration gates, trace privacy, and zero vulnerabilities. No
+production rollout or data-preserving migration was performed.
