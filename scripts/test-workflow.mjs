@@ -7,6 +7,11 @@ const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
 const acceptanceRunner = fs.readFileSync("scripts/acceptance-runner.mjs", "utf8");
 const typecheckScript = fs.readFileSync("scripts/typecheck.mjs", "utf8");
+const agentContract = fs.readFileSync("AGENTS.md", "utf8");
+const masterPrompt = fs.readFileSync("SUQPAGE-MASTER-PROMPT.md", "utf8");
+const showroomWorkflow = fs.readFileSync("showroom-projects/WORKFLOW.md", "utf8");
+const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "utf8");
+const showroomReview = fs.readFileSync("showroom-projects/_template/reviews/REVIEW.md", "utf8");
 
 function job(name, nextName) {
   const start = workflow.indexOf(`  ${name}:\n`);
@@ -59,6 +64,14 @@ assert.match(acceptanceRunner, /SUQPAGE_NEXT_DIST_DIR: distDir/, "Acceptance mus
 assert.match(acceptanceRunner, /SUQPAGE_NEXT_TSCONFIG: tsconfigName/, "Acceptance must isolate generated TypeScript configuration");
 assert.match(acceptanceRunner, /fs\.rmSync\(buildOutputPath/, "Acceptance must clean only its isolated Next.js output");
 assert.match(acceptanceRunner, /fs\.rmSync\(tsconfigPath/, "Acceptance must clean its generated TypeScript configuration");
+assert.match(agentContract, /showroom-projects\/WORKFLOW\.md/, "Agent contract must require the client-showroom workflow");
+assert.match(masterPrompt, /showroom-projects\/WORKFLOW\.md/, "Product contract must require the client-showroom workflow");
+assert.match(showroomWorkflow, /full-page 1440px desktop and 390px phone views/, "Showroom workflow must require desktop and phone evidence");
+assert.match(showroomWorkflow, /common camera, scale, or venue language/, "Showroom workflow must coordinate City Suq booths");
+for (const heading of ["Identity", "Customer And Goal", "Brand Direction", "Media Authority", "Booth Direction"]) {
+  assert.match(showroomBrief, new RegExp(`## ${heading}`), `Showroom brief must include ${heading}`);
+}
+assert.match(showroomReview, /Blocking and high findings were corrected and recaptured/, "Showroom review must require a correction pass");
 assert.equal(
   spawnSync("git", ["check-ignore", "-q", ".next-acceptance/example/BUILD_ID"]).status,
   0,

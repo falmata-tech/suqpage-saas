@@ -50,6 +50,15 @@ silently change product behavior to match convenient code.
 No implementation begins from a vague request when a material product,
 security, data, or deployment choice remains unresolved.
 
+## Client showroom design commands
+
+When the user asks to design, redesign, or visually review a client showroom or
+booth, follow `showroom-projects/WORKFLOW.md`. Create or use the client folder
+under `showroom-projects/<handle>/`, read its brief and approved assets before
+choosing a recipe, and retain screenshot/review evidence there. Do not begin
+from the business industry alone, skip the required desktop/phone review loop,
+or treat generated illustrative media as a factual product photograph.
+
 ## Architecture and design rules
 
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,

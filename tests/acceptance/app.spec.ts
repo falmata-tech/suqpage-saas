@@ -117,7 +117,7 @@ test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", asy
   const errors = monitor(page);
   await page.goto("/");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("A permanent place for the products Ethiopia makes");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Give your products one clear place to be found");
   await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
   await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
@@ -125,10 +125,14 @@ test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", asy
   await expect(page.getByRole("tab", { name: "List" })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
   expect(await page.locator(".discovery-hubs > g").count()).toBeGreaterThan(0);
-  await expect(page.getByRole("heading", { name: "Give your products one clear place to be found." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
-  await expect(page.locator(".landing-hero-image")).toBeVisible();
+  await expect(page.locator(".landing-hero-image")).toHaveCount(0);
+  const featuredShortcuts = await page.locator(".discovery-featured-rail > a").count();
+  expect(featuredShortcuts).toBeGreaterThan(0);
+  expect(featuredShortcuts).toBeLessThanOrEqual(5);
+  const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
+  expect(desktopMap?.y).toBeLessThan(720);
   await expect(page.locator("body")).not.toContainText(/daily expo|live today|weekly expo/i);
   await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
@@ -137,6 +141,8 @@ test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", asy
   await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  const phoneMap = await page.locator(".discovery-map-stage").boundingBox();
+  expect(phoneMap?.y).toBeLessThan(844);
   await page.getByLabel("Open public navigation").click();
   await expect(page.getByRole("navigation", { name: "Mobile public navigation" }).getByRole("link", { name: "Login" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
@@ -465,18 +471,11 @@ test("mobile City Suq venue, booth preview, list parity, and legacy redirects", 
   await expect(page).toHaveURL(/\/discover$/);
   await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  const hostOptions = page.getByLabel("Jump to a City Suq").locator("option");
-  expect(await hostOptions.count()).toBeGreaterThan(1);
-  const hostOption = await page
-    .getByLabel("Jump to a City Suq")
-    .locator("option")
-    .nth(1)
-    .evaluate((option) => ({
-      value: option.getAttribute("value") || "",
-      label: option.textContent || "",
-    }));
-  const hostCity = hostOption.label.split("·")[0].trim();
-  await page.getByLabel("Jump to a City Suq").selectOption(hostOption.value);
+  const cityControls = page.getByRole("group", { name: "City Suqs" });
+  expect(await cityControls.getByRole("button").count()).toBeGreaterThan(1);
+  const hostButton = cityControls.getByRole("button").nth(1);
+  const hostCity = (await hostButton.locator("strong").innerText()).trim();
+  await hostButton.click();
   const contextualStage = page.locator(".discovery-map-stage.city-open");
   await expect(contextualStage).toBeVisible();
   await expect(contextualStage.locator(".discovery-map")).toBeVisible();
@@ -487,6 +486,13 @@ test("mobile City Suq venue, booth preview, list parity, and legacy redirects", 
   expect(visibleHallBooths).toBeLessThanOrEqual(12);
   await expect(page.getByText("Entrance")).toBeVisible();
   await expect(page.locator(".city-lobby").getByText("City Suq")).toBeVisible();
+  await expect(page.locator(".city-planter")).toHaveCount(4);
+  await expect(page.locator(".city-water")).toHaveCount(1);
+  await expect(page.locator(".city-bench")).toHaveCount(2);
+  const stageBounds = await contextualStage.boundingBox();
+  const venueBounds = await page.locator(".city-venue").boundingBox();
+  expect((venueBounds?.height || 0)).toBeLessThan((stageBounds?.height || 0) - 100);
+  expect((venueBounds?.width || 0)).toBeLessThan((stageBounds?.width || 0) - 20);
   const booth = page.locator(".city-booth").first();
   const boothLabel = (await booth.getAttribute("aria-label")) || "";
   const boothMatch = boothLabel.match(/^([A-Z]{3}-\d+-B\d{2}), (.+)$/);
@@ -499,14 +505,14 @@ test("mobile City Suq venue, booth preview, list parity, and legacy redirects", 
   await expect(preview.getByText(boothReference, { exact: false })).toBeVisible();
   await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
   await page.getByRole("button", { name: `Close ${hostCity} City Suq` }).click();
-  await expect(page.getByLabel("Jump to a City Suq")).toHaveValue("");
+  await expect(cityControls.getByRole("button", { name: "All Ethiopia" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".city-venue")).toHaveCount(0);
   await expect(page.locator(".discovery-map")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List" }).click();
   const listCount = await page.locator(".discovery-list article").count();
   expect(listCount).toBeGreaterThanOrEqual(3);
-  await expect(page.getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
+  await expect(page.locator(".discovery-list").getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
   await expect(
     page.locator(".discovery-list article").filter({ hasText: boothName }).getByText(boothReference, { exact: false }),
   ).toBeVisible();
@@ -525,7 +531,7 @@ test("mobile City Suq venue, booth preview, list parity, and legacy redirects", 
 
 test("platform surfaces share the SuqPage identity", async ({ page }) => {
   const errors = monitor(page);
-  for (const pathName of ["/", "/expo", "/request", "/login", "/privacy", "/terms"]) {
+  for (const pathName of ["/", "/about", "/expo", "/request", "/login", "/privacy", "/terms"]) {
     await page.goto(pathName);
     const brand = page.locator('.suqpage-brand img[src="/brand/suqpage-mark.svg"]').first();
     await expect(brand).toBeVisible();

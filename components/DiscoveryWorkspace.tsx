@@ -96,6 +96,7 @@ export default function DiscoveryWorkspace({
   const selectedHostBooths = selectedHost
     ? discovery.booths.filter((booth) => booth.hostKey === selectedHost.key)
     : [];
+  const featuredBooths = discovery.booths.filter((booth) => booth.featured).slice(0, 5);
 
   useEffect(() => {
     if (!svgRef.current || !groupRef.current || !projection) return;
@@ -182,6 +183,7 @@ export default function DiscoveryWorkspace({
           <button type="submit">Search</button>
           {discovery.query ? <Link href={`${action}?industry=${discovery.industry.key}#discover`}>Clear</Link> : null}
         </form>
+        <FeaturedRail booths={featuredBooths} />
       </div>
 
       <div className="discovery-summary">
@@ -201,13 +203,13 @@ export default function DiscoveryWorkspace({
       ) : (
         <div className="discovery-map-shell">
           <div className="discovery-map-tools">
-            <label>
-              <span>Jump to a City Suq</span>
-              <select value={selectedHostKey} onChange={(event) => event.target.value ? openHost(event.target.value) : resetMap()}>
-                <option value="">All City Suqs in Ethiopia</option>
-                {discovery.hosts.map((host) => <option key={host.key} value={host.key}>{host.city} · {host.boothCount} Suqs</option>)}
-              </select>
-            </label>
+            <div className="discovery-city-picker">
+              <span>Explore a City Suq</span>
+              <div role="group" aria-label="City Suqs">
+                <button type="button" aria-pressed={!selectedHost} onClick={resetMap}>All Ethiopia</button>
+                {discovery.hosts.map((host) => <button key={host.key} type="button" aria-pressed={selectedHostKey === host.key} onClick={() => openHost(host.key)}><strong>{host.city}</strong><small>{host.boothCount} Suqs</small></button>)}
+              </div>
+            </div>
             {!selectedHost ? <div className="discovery-zoom" aria-label="Map controls">
               <button type="button" onClick={() => zoomBy(1.35)} title="Zoom in" aria-label="Zoom in">+</button>
               <button type="button" onClick={() => zoomBy(1 / 1.35)} title="Zoom out" aria-label="Zoom out">-</button>
@@ -277,12 +279,28 @@ function CityVenue({ host, booths, selectedBoothId, onSelectBooth, onClose }: {
         </div>
       </header>
       <div className="city-floor">
-        <div className="city-lobby" aria-hidden="true"><i /><strong>City Suq</strong><span>Meet local makers</span></div>
+        <div className="city-lobby" aria-hidden="true">
+          <div className="city-court">
+            <i className="city-planter planter-one" /><i className="city-planter planter-two" />
+            <i className="city-planter planter-three" /><i className="city-planter planter-four" />
+            <span className="city-water" />
+            <span className="city-bench bench-one" /><span className="city-bench bench-two" />
+          </div>
+          <strong>City Suq</strong><span>{host.city} maker court</span>
+        </div>
         <span className="city-entrance">Entrance</span>
         {hallBooths.map((booth, index) => <button key={booth.id} type="button" style={boothPosition(index, hallBooths.length)} className={`city-booth${selectedBoothId === booth.id ? " selected" : ""}`} onClick={() => onSelectBooth(booth.id)} aria-label={`${booth.reference}, ${booth.name}`}><BoothImage booth={booth} /><span><b>{booth.reference}</b><strong>{booth.name}</strong></span></button>)}
       </div>
     </section>
   );
+}
+
+function FeaturedRail({ booths }: { booths: DiscoveryBooth[] }) {
+  if (!booths.length) return null;
+  return <section className="discovery-featured" aria-labelledby="featured-suq-title">
+    <div className="discovery-featured-heading"><span id="featured-suq-title">Featured Suqs</span><small>Selected by SuqPage</small></div>
+    <div className="discovery-featured-rail">{booths.map((booth) => <Link key={booth.id} href={`/@${booth.handle}?ref=discovery`}><BoothImage booth={booth} /><span><b>{booth.name}</b><small>{booth.originCity} · Visit Suq</small></span></Link>)}</div>
+  </section>;
 }
 
 function BoothImage({ booth }: { booth: DiscoveryBooth }) {

@@ -142,6 +142,14 @@ Each client composition can have its own:
 
 Shared behavior is acceptable. Shared visual identity is not.
 
+Every direct client-showroom design command uses the repository workflow in
+`showroom-projects/WORKFLOW.md`. The client folder is the working source for the
+brief, approved assets, visual references, booth direction, and review evidence.
+Design begins from that evidence and the machine-readable component bank, not
+from industry stereotypes. A candidate is not complete until its 1440-pixel and
+390-pixel screenshots are inspected, defects are recorded and corrected, and
+the final recipe remains inside the normal private review/publication boundary.
+
 Normal generated showrooms share one purposeful information architecture:
 header, hero, about/story, process, products, inquiry call-to-action, and
 footer. The AI varies the visual anatomy, media treatment, typography, density,
@@ -221,26 +229,32 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 The SuqPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-020` defines the current composition: a
-photographic maker hero explains permanent `/@handle` digital showrooms, a
-compact benefit band speaks to both visitors and businesses, and one integrated
-discovery workspace combines industry selection, search, featured emphasis,
-Ethiopia navigation, City Suqs, and the matching list. There is no date picker,
-live-event state, duplicate showroom directory, or separate all-business
-navigation. Six stable industries appear as icon-labeled touch controls and
-remain available every day.
+compact purple merchant invitation sits immediately above one integrated,
+application-first discovery workspace combining industry selection, search, a
+bounded featured shortcut rail, Ethiopia navigation, direct City Suq buttons,
+and the matching map/list views. Long platform education lives on `/about`, the
+business introduction flow lives on `/request`, and only a restrained merchant
+call-to-action follows the marketplace. There is no date picker, live-event
+state, duplicate showroom directory, or separate all-business navigation. Six
+stable industries appear as icon-labeled touch controls and remain available
+every day.
 
 The discovery workspace uses a locally stored and attributed Ethiopia
 administrative-boundary asset with a proven geographic projection and bounded
 SVG navigation. The country view shows regional context and every qualifying
-major-city host for the selected industry. A labeled city selector jumps to a
-host and the center control frames the active City Suqs. Selecting a host keeps
-the Ethiopia map mounted beneath one top-view virtual City Suq, and a familiar
-close control returns to the country view. A City Suq is a virtual discovery
-anchor, never a claim about a physical parcel, street address, or building.
+major-city host for the selected industry. Labeled city buttons jump directly
+to a host and the center control frames the active City Suqs. Selecting a host
+keeps the Ethiopia map mounted beneath a bounded top-view virtual City Suq,
+leaves recognizable geographic context visible around or below it, and exposes
+a familiar close control that returns to the country view. A City Suq is a
+virtual discovery anchor, never a claim about a physical parcel, street address,
+or building.
 
-Each venue uses a quiet architectural floor, a circular central lobby, and
-bounded perimeter booth placement. A hall contains at most 12 booths; additional
-businesses create deterministic halls without increasing phone rendering cost.
+Each venue uses a quiet architectural floor, circular circulation, a landscaped
+maker court with restrained planting, seating, and a small water feature but no
+people, and bounded perimeter booth placement. A hall contains at most 12
+booths; additional businesses create deterministic halls without increasing
+phone rendering cost.
 Every booth exposes a stable `{city-code}-{hall}-B{booth-number}` reference. A
 business must have an active, subscription-entitled showroom, one approved and
 published offering, a matching discovery industry, valid reviewed location, an
@@ -258,8 +272,8 @@ all other eligible showrooms remain discoverable. Tenant cards and City Suq
 booths link to the authoritative permanent showroom. Approved booth media
 belongs to its represented business; a generic named booth is only a failed-file
 display fallback and cannot make an incomplete profile eligible. The useful
-product explanation lives in the hero and concise benefit sections, and a
-visually distinct merchant CTA closes the page. Public controls have at least
+product explanation lives on `/about` and in the compact merchant invitation,
+and a visually distinct merchant CTA closes the page. Public controls have at least
 44-pixel touch targets and the complete composition is verified without
 horizontal overflow at 320 and 390 CSS pixels.
 
