@@ -18,6 +18,8 @@ import {
   type ShowroomColorPalette,
 } from "@/lib/showroom-design-systems";
 import type { RevisionSnapshotV4 } from "@/lib/revision-v4-domain";
+import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "@/lib/product-detail-patterns";
+import { LIVE_PLATFORMS, LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
 type MediaOption = { value: string; label: string; kind: "image" | "video" };
 
@@ -346,10 +348,20 @@ export default function RevisionEditor({
             </div>
             <MediaChoice label="Logo image" value={business.logoRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("logoRef", value)} />
             <MediaChoice label="Hero image" value={business.heroImageRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("heroImageRef", value)} />
+            <MediaChoice label="Process video" value={business.processVideoRef} options={imageOptions} kind="video" onChange={(value) => setBusiness("processVideoRef", value)} />
             <Field value={business.contactEmail} onChange={(value) => setBusiness("contactEmail", value)} label="Notification email" max={160} />
             <Field value={business.whatsapp} onChange={(value) => setBusiness("whatsapp", value)} label="WhatsApp" max={40} />
             <Field value={business.telegram} onChange={(value) => setBusiness("telegram", value)} label="Telegram" max={80} />
             <Field value={business.tiktok} onChange={(value) => setBusiness("tiktok", value)} label="TikTok" max={80} />
+            <div className="field">
+              <label>Live platform</label>
+              <select aria-label="Live platform" value={business.livePlatform} onChange={(event) => setBusiness("livePlatform", event.target.value)}>
+                <option value="">Not configured</option>
+                {LIVE_PLATFORMS.map((platform) => <option key={platform} value={platform}>{LIVE_PLATFORM_LABELS[platform]}</option>)}
+              </select>
+            </div>
+            <Field value={business.liveUrl} onChange={(value) => setBusiness("liveUrl", value)} label="Live-session link" max={500} />
+            <label className="check-field"><input type="checkbox" checked={business.isLive} onChange={(event) => setSnapshot((current) => ({ ...current, business: { ...current.business, isLive: event.target.checked } }))} /> Show as live now</label>
             <Field value={business.siteTitle} onChange={(value) => setBusiness("siteTitle", value)} label="Page title" max={120} />
             <div className="field full">
               <label>Search and sharing description</label>
@@ -358,6 +370,16 @@ export default function RevisionEditor({
             <MediaChoice label="Browser icon" value={business.faviconRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("faviconRef", value)} />
           </div>
           <div className="revision-item">
+            <div className="field">
+              <label>Product detail pattern</label>
+              <select
+                aria-label="Product detail pattern"
+                value={snapshot.designManifest.productDetailPattern}
+                onChange={(event) => setSnapshot((current) => ({ ...current, designManifest: { ...current.designManifest, productDetailPattern: event.target.value as RevisionSnapshotV4["designManifest"]["productDetailPattern"] } }))}
+              >
+                {PRODUCT_DETAIL_PATTERN_DEFINITIONS.map((pattern) => <option key={pattern.id} value={pattern.id}>{pattern.name} - {pattern.density}</option>)}
+              </select>
+            </div>
             <label className="check-field">
               <input
                 type="checkbox"
@@ -561,7 +583,7 @@ export default function RevisionEditor({
         <section className="panel">
           <div className="dashboard-head">
             <div><h2>Products &amp; capabilities</h2><p>Structured offerings remain private until this revision is approved and published.</p></div>
-            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New offering", slug: "", eyebrow: "", description: "", imageRef: "", availability: "available", offeringKind: "standard_product", quantityMode: "optional", capacitySummary: "", minimumOrderSummary: "", leadTimeSummary: "", published: true, sortOrder: current.products.length, optionGroups: [] }] }))}>Add offering</button>
+            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New offering", slug: "", eyebrow: "", description: "", imageRef: "", videoRef: "", priceMinor: null, currency: "ETB", quantityUnit: "", highlights: [], availability: "available", offeringKind: "standard_product", quantityMode: "optional", capacitySummary: "", minimumOrderSummary: "", leadTimeSummary: "", published: true, sortOrder: current.products.length, optionGroups: [] }] }))}>Add offering</button>
           </div>
           {snapshot.products.map((item, index) => (
             <div className="revision-item form-grid" key={item.key}>
@@ -574,11 +596,15 @@ export default function RevisionEditor({
               <div className="field"><label>Desired quantity</label><p>Optional for the buyer</p></div>
               <div className="field"><label>Sort order</label><input aria-label={`Product ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateProduct(index, { sortOrder: Number(event.target.value) })} /></div>
               <MediaChoice label={`Product ${index + 1} image`} value={item.imageRef} options={imageOptions} kind="image" onChange={(value) => updateProduct(index, { imageRef: value })} />
+              <MediaChoice label={`Product ${index + 1} video`} value={item.videoRef} options={imageOptions} kind="video" onChange={(value) => updateProduct(index, { videoRef: value })} />
+              <div className="field"><label>Price in ETB</label><input aria-label={`Product ${index + 1} price in ETB`} type="number" min="0" step="0.01" value={item.priceMinor === null ? "" : item.priceMinor / 100} onChange={(event) => updateProduct(index, { priceMinor: event.target.value === "" ? null : Math.round(Number(event.target.value) * 100), currency: "ETB" })} /></div>
+              <Field value={item.quantityUnit} onChange={(value) => updateProduct(index, { quantityUnit: value })} label={`Product ${index + 1} offered by`} max={40} />
               <label className="check-field"><input type="checkbox" checked={item.published} onChange={(event) => updateProduct(index, { published: event.target.checked })} /> Show in showroom</label>
               <div className="field full"><label>Description</label><textarea aria-label={`Product ${index + 1} description`} value={item.description} maxLength={3000} onChange={(event) => updateProduct(index, { description: event.target.value })} /></div>
               <Field value={item.capacitySummary} onChange={(value) => updateProduct(index, { capacitySummary: value })} label={`Product ${index + 1} capacity`} max={180} />
               <Field value={item.minimumOrderSummary} onChange={(value) => updateProduct(index, { minimumOrderSummary: value })} label={`Product ${index + 1} minimum order`} max={140} />
               <Field value={item.leadTimeSummary} onChange={(value) => updateProduct(index, { leadTimeSummary: value })} label={`Product ${index + 1} lead time`} max={140} />
+              <div className="field full"><label>Highlights</label><textarea aria-label={`Product ${index + 1} highlights`} value={item.highlights.join("\n")} maxLength={485} onChange={(event) => updateProduct(index, { highlights: [...new Set(event.target.value.split(/\r?\n/).map((value) => value.trim()).filter(Boolean))].slice(0, 6) })} /><small>One concise highlight per line, up to six.</small></div>
               <div className="field full">
                 <label>Option groups</label>
                 <textarea

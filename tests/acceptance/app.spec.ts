@@ -132,7 +132,7 @@ test("geographic discovery, weekly Expo, benchmark Suqs, and copy-first inquiry"
   const errors = monitor(page);
   await page.goto("/?expoDay=1");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Give your products one clear place to be found");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome to SuqPage. Discover what Ethiopia makes.");
   await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
   await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
@@ -1105,11 +1105,11 @@ test("seeded client is restricted while operations manages customer activity", a
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("button",{name:"Update"})).toHaveCount(0);
   await expect(page.getByRole("link",{name:"Create delivery"})).toHaveCount(0);
-  await page.getByLabel("Search").fill("Showroom visitor");
+  await page.getByLabel("Search").fill("Hana");
   await page.getByRole("button",{name:"Apply"}).click();
-  const showroomInquiry = page.locator("section.panel").filter({hasText:"Showroom visitor"});
-  await expect(showroomInquiry).toContainText("phone: +251911234567");
-  await expect(showroomInquiry).toContainText("Open for discussion");
+  const showroomInquiry = page.locator("section.panel").filter({hasText:"Hana"});
+  await expect(showroomInquiry).toContainText("whatsapp: 251911000000");
+  await expect(showroomInquiry).toContainText("Desired quantity: 1 unit");
   await page.goto("/dashboard/account-health");
   await expect(page.getByRole("heading",{name:"Selam Weave Studio"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Current period"})).toBeVisible();

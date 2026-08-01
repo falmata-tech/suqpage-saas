@@ -3,6 +3,7 @@ import type {
   ShowroomMotionIntensity,
 } from "./showroom-experience";
 import type { SectionMediaIntegration } from "./showroom-design-systems";
+import type { ProductDetailPattern } from "./product-detail-patterns";
 
 export type SeedShowroomBrief = {
   objective: string;
@@ -21,6 +22,7 @@ export type SeedShowroomBrief = {
     ctaVariant: "magazine-close" | "technical-brief";
     heroMediaIntegration: SectionMediaIntegration;
     storyMediaIntegration: SectionMediaIntegration;
+    productDetailPattern?: ProductDetailPattern;
   };
   story: {
     kicker: string;
@@ -39,6 +41,166 @@ export type SeedShowroomBrief = {
 };
 
 export const ADDITIONAL_SEED_SHOWROOM_BRIEFS: Record<string, SeedShowroomBrief> = {
+  "selam-weave": {
+    objective: "Present handwoven textiles as useful material objects with visible craft and custom-run potential.",
+    template: "Textile-led editorial opening, tactile process chapter, and vertically paced product stack.",
+    profile: {
+      tokenPack: "silk-atelier", motion: "quiet", decoration: "signature",
+      header: "header.editorial-wordmark@1", hero: "hero.textile-swatch@1",
+      story: "content.swatch-story@1", highlights: "content.process-steps@1",
+      catalog: "catalog.textile-stack@1", cta: "call-to-action.magazine-close@1",
+      footer: "footer.editorial@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "editorial_overlap", storyMediaIntegration: "natural",
+      productDetailPattern: "editorial",
+    },
+    story: { kicker: "At the loom", title: "Every cloth begins with fiber, rhythm, and intended use", quote: "A useful textile should make its construction easy to see." },
+    process: { title: "From yarn choice to hand-finished edge", body: "Color, weave density, dimensions, and finishing are agreed before a limited or custom run begins.", items: ["Choose fiber and palette", "Set dimensions and weave", "Finish, inspect, and pack"] },
+    cta: { title: "Start with the cloth, size, and setting you have in mind.", body: "Add a textile and share color, dimensions, quantity, and whether it is for home, hospitality, or gifting." },
+  },
+  "afia-botanics": {
+    objective: "Make small-batch botanical care feel clean, credible, and easy to compare by ritual.",
+    template: "Ingredient-focused beauty story with a light product stage and concise formulation details.",
+    profile: {
+      tokenPack: "cosmetic-laboratory", motion: "expressive", decoration: "subtle",
+      header: "header.floating-capsule@1", hero: "hero.beauty-orbit@1",
+      story: "content.founder-note@1", highlights: "content.ritual-steps@1",
+      catalog: "catalog.beauty-swatch@1", cta: "call-to-action.inquiry@1",
+      footer: "footer.magazine-masthead@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "product_stage", storyMediaIntegration: "natural",
+      productDetailPattern: "product_stage",
+    },
+    story: { kicker: "Formula notes", title: "Simple care begins with ingredients people can understand", quote: "Botanical does not have to mean vague." },
+    process: { title: "A measured path from ingredient to jar", body: "Each batch follows a clear formula, preparation sequence, fill, and label check.", items: ["Select and measure ingredients", "Mix the controlled batch", "Fill, label, and review"] },
+    cta: { title: "Ask about a ritual, ingredient, or small production run.", body: "Choose a formula and share intended use, pack size, quantity, and any labeling needs." },
+  },
+  "warka-furniture": {
+    objective: "Let buyers understand proportion, joinery, finish, and project fit before discussing furniture.",
+    template: "Room-scene opening followed by material proof and grouped furniture browsing.",
+    profile: {
+      tokenPack: "paper-gallery", motion: "balanced", decoration: "subtle",
+      header: "header.catalog-command@1", hero: "hero.room-scene@1",
+      story: "content.material-focus@1", highlights: "content.process-steps@1",
+      catalog: "catalog.room-set@1", cta: "call-to-action.consultation@1",
+      footer: "footer.contact-panel@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "surface_blend", storyMediaIntegration: "natural",
+      productDetailPattern: "editorial",
+    },
+    story: { kicker: "Material and joinery", title: "Furniture shaped around the room and the way it is used", quote: "Proportion is a practical decision before it is a visual one." },
+    process: { title: "From room measure to finished piece", body: "Standard pieces begin with dimensions and finish; project work adds site conditions and installation.", items: ["Measure use and space", "Choose timber and finish", "Build, inspect, and install"] },
+    cta: { title: "Bring the room, dimensions, and intended use.", body: "Add a related piece and share measurements, finish, quantity, and installation location." },
+  },
+  "addis-metalworks": {
+    objective: "Turn fabricated products and capabilities into a precise requirement-led RFQ conversation.",
+    template: "Industrial specification opening, production proof, and compact technical catalog.",
+    profile: {
+      tokenPack: "industrial-steel", motion: "quiet", decoration: "clean",
+      header: "header.compact-utility@1", hero: "hero.industrial-spec@1",
+      story: "content.origin-story@1", highlights: "content.production-metrics@1",
+      catalog: "catalog.minimal-list@1", cta: "call-to-action.technical-brief@1",
+      footer: "footer.technical-directory@1", ctaVariant: "technical-brief",
+      heroMediaIntegration: "split_bleed", storyMediaIntegration: "natural",
+      productDetailPattern: "technical",
+    },
+    story: { kicker: "Fabrication floor", title: "Built from reviewed dimensions, material, and finish", quote: "The drawing and the working environment belong in the same brief." },
+    process: { title: "From requirement to inspected fabrication", body: "Material, dimensions, joints, finish, and quantity are reviewed before cutting begins.", items: ["Review drawing and duty", "Cut, form, and join", "Inspect finish and fit"] },
+    cta: { title: "Send the dimensions, material, finish, and required quantity.", body: "Add the closest fabrication and include drawings, tolerances, operating context, and delivery timing." },
+  },
+  "green-terrace-farm": {
+    objective: "Keep seasonal produce current while making recurring household and kitchen supply easy to discuss.",
+    template: "Field provenance, harvest rhythm, and a horizontally browsable seasonal shelf.",
+    profile: {
+      tokenPack: "forest-botanical", motion: "quiet", decoration: "subtle",
+      header: "header.producer-badge@1", hero: "hero.provenance@1",
+      story: "content.origin-story@1", highlights: "content.process-steps@1",
+      catalog: "catalog.horizontal-shelf@1", cta: "call-to-action.wholesale@1",
+      footer: "footer.catalog-directory@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "edge_fade", storyMediaIntegration: "natural",
+      productDetailPattern: "compact",
+    },
+    story: { kicker: "Current field cycle", title: "A seasonal catalog connected to what is actually growing", quote: "The field sets the rhythm; the inquiry sets the useful quantity." },
+    process: { title: "Harvested around the current supply window", body: "Crop condition, harvest day, handling, and recurring need shape each supply conversation.", items: ["Review the current harvest", "Choose pack or crate format", "Confirm collection or supply day"] },
+    cta: { title: "Plan a household, kitchen, or recurring harvest inquiry.", body: "Select current produce and share preferred quantity, frequency, and collection or delivery area." },
+  },
+  "blue-nile-apiary": {
+    objective: "Explain seasonal honey character and hive products without turning the showroom into rustic decoration.",
+    template: "Ingredient monograph with clear harvest notes and restrained product-led browsing.",
+    profile: {
+      tokenPack: "honey-amber", motion: "quiet", decoration: "clean",
+      header: "header.transparent-overlay@1", hero: "hero.ingredient-monograph@1",
+      story: "content.origin-story@1", highlights: "content.process-steps@1",
+      catalog: "catalog.collection-led@1", cta: "call-to-action.wholesale@1",
+      footer: "footer.compact@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "edge_fade", storyMediaIntegration: "natural",
+      productDetailPattern: "product_stage",
+    },
+    story: { kicker: "Harvest character", title: "Each hive product follows a season, source, and careful handling path", quote: "Good honey needs a clear harvest story, not an invented one." },
+    process: { title: "From active hive to clean jar", body: "Harvest timing, separation, settling, and packing protect each small batch.", items: ["Observe and select the harvest", "Separate and settle carefully", "Jar, label, and store"] },
+    cta: { title: "Ask about the current honey, comb, or beeswax batch.", body: "Select an item and share jar size, gift, household, or wholesale quantity needs." },
+  },
+  "rift-valley-mill": {
+    objective: "Make grain source, milling style, pack format, and recurring bakery supply simple to compare.",
+    template: "Grain-led producer story with dense factual shelf and trade-ready close.",
+    profile: {
+      tokenPack: "ocean-trade", motion: "quiet", decoration: "clean",
+      header: "header.producer-badge@1", hero: "hero.ingredient-monograph@1",
+      story: "content.origin-story@1", highlights: "content.production-metrics@1",
+      catalog: "catalog.collection-led@1", cta: "call-to-action.wholesale@1",
+      footer: "footer.catalog-directory@1", ctaVariant: "technical-brief",
+      heroMediaIntegration: "natural", storyMediaIntegration: "natural",
+      productDetailPattern: "compact",
+    },
+    story: { kicker: "Inside the mill", title: "Grain identity stays visible from intake to finished pack", quote: "A useful flour catalog should tell buyers what was milled and how." },
+    process: { title: "Clean, mill, check, and pack", body: "Grain type, milling target, pack size, and supply cadence are agreed for each request.", items: ["Receive and clean grain", "Mill to the chosen format", "Check and pack the run"] },
+    cta: { title: "Start with grain type, pack size, and expected frequency.", body: "Add a flour or blend and share household, bakery, hospitality, or recurring supply needs." },
+  },
+  "entoto-ceramics": {
+    objective: "Show tableware as useful studio forms with honest glaze variation and hospitality potential.",
+    template: "Material-detail opening, quiet studio story, and spacious editorial product grid.",
+    profile: {
+      tokenPack: "artisan-clay", motion: "quiet", decoration: "subtle",
+      header: "header.editorial-wordmark@1", hero: "hero.material-detail@1",
+      story: "content.material-focus@1", highlights: "content.ritual-steps@1",
+      catalog: "catalog.editorial-grid@1", cta: "call-to-action.magazine-close@1",
+      footer: "footer.editorial@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "editorial_overlap", storyMediaIntegration: "natural",
+      productDetailPattern: "editorial",
+    },
+    story: { kicker: "Studio form", title: "Useful objects shaped with room for natural variation", quote: "The hand remains visible, but the form still has a job to do." },
+    process: { title: "Shape, dry, fire, glaze, and fire again", body: "Form, set quantity, glaze family, and use guide the studio production plan.", items: ["Shape and refine the form", "Dry and complete first firing", "Glaze, fire, and inspect"] },
+    cta: { title: "Build a table, gift, or hospitality set with the studio.", body: "Add a form and share quantity, glaze family, timing, and tolerance for natural variation." },
+  },
+  "koba-leather": {
+    objective: "Put construction, carry use, finish, and small-run customization at the center of leather goods.",
+    template: "Material-led opening with practical process proof and a restrained editorial catalog.",
+    profile: {
+      tokenPack: "maker-indigo", motion: "balanced", decoration: "clean",
+      header: "header.compact-utility@1", hero: "hero.material-detail@1",
+      story: "content.material-focus@1", highlights: "content.process-steps@1",
+      catalog: "catalog.editorial-grid@1", cta: "call-to-action.consultation@1",
+      footer: "footer.compact@1", ctaVariant: "magazine-close",
+      heroMediaIntegration: "edge_fade", storyMediaIntegration: "natural",
+      productDetailPattern: "product_stage",
+    },
+    story: { kicker: "Cut and construction", title: "Leather goods designed around what they must carry", quote: "Durability is visible in the edge, stitch, reinforcement, and closure." },
+    process: { title: "From pattern to finished edge", body: "Use, dimensions, leather, hardware, and quantity define the cut and assembly plan.", items: ["Choose form and finish", "Cut, reinforce, and stitch", "Finish edges and inspect"] },
+    cta: { title: "Choose a carry form or describe a small team run.", body: "Add a product and share finish, dimensions, quantity, marking, and delivery timing." },
+  },
+  "nova-assembly": {
+    objective: "Make electronics assembly and repair understandable without hiding specification requirements.",
+    template: "Cinematic technical opening, structured process proof, and specification-led catalog.",
+    profile: {
+      tokenPack: "chrome-future", motion: "balanced", decoration: "clean",
+      header: "header.technical-marquee@1", hero: "hero.technology-cinematic@1",
+      story: "content.editorial-quote@1", highlights: "content.production-metrics@1",
+      catalog: "catalog.technology-spec@1", cta: "call-to-action.technical-brief@1",
+      footer: "footer.technical-directory@1", ctaVariant: "technical-brief",
+      heroMediaIntegration: "surface_blend", storyMediaIntegration: "natural",
+      productDetailPattern: "technical",
+    },
+    story: { kicker: "Bench discipline", title: "Technical work documented before assembly or repair begins", quote: "The connector, load, fault, and operating environment all matter." },
+    process: { title: "Diagnose, define, assemble, and verify", body: "The lab records the requirement, confirms compatibility, completes the work, and verifies the result.", items: ["Document equipment and need", "Review circuit and interfaces", "Assemble, test, and label"] },
+    cta: { title: "Send the equipment, fault, load, connector, and quantity context.", body: "Add a related build or service and include photos, model details, interfaces, and expected operating conditions." },
+  },
   "tekle-circuit-systems": {
     objective: "Make repeat electronics assembly legible to equipment buyers.",
     template: "Technical proof with a compact comparison catalog.",

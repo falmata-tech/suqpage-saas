@@ -5,6 +5,7 @@
   --landing-line: #dedbe4;
   --landing-purple: #6442b5;
   --landing-purple-dark: #372064;
+  --landing-green: #2f7d68;
   min-height: 100vh;
   overflow-x: clip;
   background: #fff;
@@ -22,14 +23,14 @@
 .landing-account-notice { padding: 11px 20px; background: #fff1c9; color: #4c3900; text-align: center; font-weight: 750; }
 .landing-eyebrow { display: block; color: #6a46bc; font-size: .72rem; font-weight: 900; text-transform: uppercase; }
 
-.landing-market-main { background: #f3f4f6; }
-.landing-market-shell { padding-block: 18px 72px; }
-.landing-market-banner { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr) auto; align-items: center; gap: 34px; min-height: 118px; padding: 22px 26px; border-radius: 7px 7px 0 0; background: #4f318f; color: #fff; }
+.landing-market-main { background: #eef1f2; }
+.landing-market-shell { padding-block: 20px 72px; }
+.landing-market-banner { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr) auto; align-items: center; gap: 34px; min-height: 132px; padding: 24px 28px; border-bottom: 5px solid #3fa085; border-radius: 7px 7px 0 0; background: #543398; color: #fff; }
 .landing-market-banner span { display: block; color: #d9cef6; font-size: .67rem; font-weight: 900; text-transform: uppercase; }
-.landing-market-banner h1 { margin: 5px 0 0; font-size: 2.05rem; line-height: 1.05; letter-spacing: 0; }
+.landing-market-banner h1 { max-width: 650px; margin: 5px 0 0; font-size: 2.05rem; line-height: 1.06; letter-spacing: 0; }
 .landing-market-banner p { margin: 0; color: rgb(255 255 255 / 72%); font-size: .88rem; line-height: 1.5; }
-.landing-market-banner > a { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 16px; border-radius: 5px; background: #fff; color: #382263; font-size: .82rem; font-weight: 900; white-space: nowrap; }
-.landing-discovery-section { border: 1px solid #d9d6df; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; box-shadow: 0 22px 46px rgb(35 29 44 / 8%); }
+.landing-market-banner > a { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 16px; border: 1px solid rgb(255 255 255 / 52%); border-radius: 5px; background: #fff; color: #382263; font-size: .82rem; font-weight: 900; white-space: nowrap; }
+.landing-discovery-section { border: 1px solid #d5d8dc; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; box-shadow: 0 24px 56px rgb(29 25 35 / 10%); }
 
 .landing-closing { padding-block: 64px; background: #222027; color: #fff; }
 .landing-closing-inner { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: end; gap: 70px; }
@@ -164,7 +165,7 @@
   .landing-market-shell { width: 100%; padding-block: 0 54px; }
   .landing-market-banner { grid-template-columns: 1fr auto; min-height: 104px; padding: 15px 12px; border-radius: 0; }
   .landing-market-banner h1 { font-size: 1.35rem; }
-  .landing-market-banner p { overflow: hidden; max-width: 38ch; font-size: .75rem; text-overflow: ellipsis; white-space: nowrap; }
+  .landing-market-banner p { max-width: 42ch; font-size: .75rem; line-height: 1.4; }
   .landing-market-banner > a { min-height: 44px; padding-inline: 12px; }
   .landing-discovery-section { border-inline: 0; border-radius: 0; box-shadow: none; }
   .landing-closing { padding-block: 54px 82px; }

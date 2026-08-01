@@ -57,7 +57,9 @@ function snapshotAssetRefs(snapshot: RevisionSnapshotV4) {
     snapshot.business.logoRef,
     snapshot.business.heroImageRef,
     snapshot.business.faviconRef,
+    snapshot.business.processVideoRef,
     ...snapshot.products.map((product) => product.imageRef),
+    ...snapshot.products.map((product) => product.videoRef),
     ...snapshot.contentBlocks.blocks.flatMap((block) =>
       block.media.flatMap((media) => media.assetKeys),
     ),
@@ -72,7 +74,9 @@ function allowedAssetRefs(requestId: number, businessId: number) {
       catalog.business.logo_path,
       catalog.business.hero_image_path,
       catalog.business.favicon_path,
+      catalog.business.process_video_ref,
       ...catalog.products.map((product) => product.image_path),
+      ...catalog.products.map((product) => product.video_ref),
     ].filter(Boolean),
   );
   try {
@@ -570,6 +574,7 @@ function replaceCanonicalCatalog(
        SET name=?,design_key=?,design_manifest_json=?,content_blocks_json=?,
          tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,
          hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,
+         process_video_ref=?,is_live=?,live_platform=?,live_url=?,
          site_title=?,site_description=?,favicon_path=?,status='active',
          content_version=?
        WHERE id=?`,
@@ -589,6 +594,10 @@ function replaceCanonicalCatalog(
       catalog.business.whatsapp,
       catalog.business.telegram,
       catalog.business.tiktok,
+      catalog.business.process_video_ref,
+      catalog.business.is_live,
+      catalog.business.live_platform,
+      catalog.business.live_url,
       catalog.business.site_title,
       catalog.business.site_description,
       catalog.business.favicon_path,
@@ -641,8 +650,9 @@ function replaceCanonicalCatalog(
           `INSERT INTO products(
             business_id,collection_id,category_id,name,slug,eyebrow,description,
             image_path,availability,offering_kind,quantity_mode,capacity_summary,
-            minimum_order_summary,lead_time_summary,is_published,sort_order
-          ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            minimum_order_summary,lead_time_summary,video_ref,price_minor,currency,
+            quantity_unit,highlights_json,is_published,sort_order
+          ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         )
         .run(
           businessId,
@@ -659,6 +669,11 @@ function replaceCanonicalCatalog(
           item.capacitySummary,
           item.minimumOrderSummary,
           item.leadTimeSummary,
+          item.videoRef,
+          item.priceMinor,
+          item.currency,
+          item.quantityUnit,
+          JSON.stringify(item.highlights),
           item.published ? 1 : 0,
           item.sortOrder,
         ).lastInsertRowid,

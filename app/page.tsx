@@ -39,9 +39,9 @@ export default async function Home({
         {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">That Suq is temporarily unavailable. Discover active businesses below.</div> : null}
         <div className="landing-container landing-market-shell">
           <section className="landing-market-banner" aria-labelledby="landing-title">
-            <div><span>For makers, growers, and product businesses</span><h1 id="landing-title">Give your products one clear place to be found.</h1></div>
-            <p>A permanent digital showroom customers can discover by industry, location, and the weekly virtual Expo.</p>
-            <Link href="/request">Build your Suq</Link>
+            <div><span>Ethiopia&apos;s product marketplace</span><h1 id="landing-title">Welcome to SuqPage. Discover what Ethiopia makes.</h1></div>
+            <p>Explore real makers, growers, and small producers by industry or location, then step inside their permanent digital Suq.</p>
+            <a href="#discover">Start exploring</a>
           </section>
           <section className="landing-discovery-section" aria-label="SuqPage marketplace">
             <DiscoveryWorkspace discovery={discovery} embedded />

@@ -21,6 +21,11 @@ import {
   type ShowroomContentBlocksDocument,
   type ShowroomContentBlockType,
 } from "./showroom-content-blocks";
+import {
+  PRODUCT_DETAIL_PATTERNS,
+  normalizeProductDetailPattern,
+  type ProductDetailPattern,
+} from "./product-detail-patterns";
 
 export const SHOWROOM_COMPONENT_BANK_SCHEMA_VERSION_V2 = 2;
 export const SHOWROOM_DESIGN_SCHEMA_VERSION_V2 = 2;
@@ -81,6 +86,7 @@ export type ShowroomDesignProposalV2 = Omit<
 > & {
   schemaVersion: 2;
   customPalette?: ShowroomColorPalette;
+  productDetailPattern: ProductDetailPattern;
   sections: ShowroomSectionV2[];
 };
 
@@ -226,6 +232,7 @@ function parsedInput(input: unknown, limit?: number): Record<string, unknown> {
         "questions",
         "warnings",
         "customPalette",
+        "productDetailPattern",
         "sections",
       ],
     );
@@ -421,6 +428,13 @@ export function parseShowroomDesignProposalV2(
   const bank = parseShowroomComponentBankV2(bankInput);
   const content = parseShowroomContentBlocks(contentInput, contentMode);
   const customPalette = parseCustomPalette(raw.customPalette);
+  if (
+    raw.productDetailPattern !== undefined &&
+    !PRODUCT_DETAIL_PATTERNS.includes(raw.productDetailPattern as ProductDetailPattern)
+  ) {
+    fail("The product detail pattern is not supported.", "invalid_product_detail_pattern");
+  }
+  const productDetailPattern = normalizeProductDetailPattern(raw.productDetailPattern);
   const contentKeys = new Map(content.blocks.map((block) => [block.key, block]));
   const requestedSections = raw.sections.map(
     (entry, index) => {
@@ -475,7 +489,11 @@ export function parseShowroomDesignProposalV2(
       };
     },
   );
-  const { customPalette: _customPalette, ...v1Input } = raw;
+  const {
+    customPalette: _customPalette,
+    productDetailPattern: _productDetailPattern,
+    ...v1Input
+  } = raw;
   const proposalV1 = parseShowroomDesignProposal(
     {
       ...v1Input,
@@ -590,6 +608,7 @@ export function parseShowroomDesignProposalV2(
     ...proposalV1,
     schemaVersion: 2,
     ...(customPalette ? { customPalette } : {}),
+    productDetailPattern,
     sections,
   };
 }

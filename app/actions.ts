@@ -15,6 +15,8 @@ import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
 import { sqliteProductUpkeepPort } from "@/lib/product-upkeep-sqlite";
 import { consumeRateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
+import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
+import { validateLiveSettings } from "@/lib/live-showroom";
 
 const text = (fd:FormData,key:string,max=500) => cleanText(fd.get(key),max);
 const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt(text(fd,key,30),10); return Number.isFinite(value)?value:fallback; };
@@ -84,8 +86,11 @@ export async function updateBusinessAction(formData:FormData){
     const logoPath=await saveUploadedImage(formData.get("logo"),existing.logo_path,"logo");
     const heroImage=await saveUploadedImage(formData.get("heroImage"),existing.hero_image_path,"hero");
     const favicon=await saveUploadedImage(formData.get("favicon"),existing.favicon_path,"favicon");
-    getDb().prepare(`UPDATE businesses SET name=?,tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`).run(
-      text(formData,"name",100),text(formData,"tagline",180),text(formData,"description",1200),logoPath,text(formData,"heroTitle",180),text(formData,"heroSubtitle",300),heroImage,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
+    const processVideoUrl=text(formData,"processVideoUrl",500);
+    const processVideoRef=processVideoUrl?normalizeControlledYouTubeUrl(processVideoUrl).managedRef:"";
+    const live=validateLiveSettings({isLive:formData.get("isLive"),platform:text(formData,"livePlatform",30),url:text(formData,"liveUrl",500)});
+    getDb().prepare(`UPDATE businesses SET name=?,tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,process_video_ref=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`).run(
+      text(formData,"name",100),text(formData,"tagline",180),text(formData,"description",1200),logoPath,text(formData,"heroTitle",180),text(formData,"heroSubtitle",300),heroImage,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),processVideoRef,live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
     );
     audit("business.updated",{userId:user.id,businessId});
   }catch(error){go("/dashboard/settings",{business:businessId,error:error instanceof Error?error.message:"Could not save settings."});}
@@ -142,6 +147,10 @@ const productFormFields = new Set([
   "capacitySummary",
   "minimumOrderSummary",
   "leadTimeSummary",
+  "priceEtb",
+  "quantityUnit",
+  "highlights",
+  "videoUrl",
   "categoryId",
   "removeImage",
   "image",
@@ -162,6 +171,10 @@ export async function basicProductUpkeepAction(formData:FormData){
     const removeImage=Boolean(formData.get("removeImage"));
     if(hasFile&&removeImage)throw new ProductUpkeepError("Choose either a replacement image or remove the current image.");
     const staged=await stageUploadedImage(file,"product");
+    const priceInput=text(formData,"priceEtb",40);
+    const priceValue=priceInput===""?null:Number(priceInput);
+    if(priceValue!==null&&(!Number.isFinite(priceValue)||priceValue<0||priceValue>9999999.99))throw new ProductUpkeepError("Price must be a valid non-negative ETB amount.");
+    const videoInput=text(formData,"videoUrl",500);
     result=executeBasicProductUpkeep(sqliteProductUpkeepPort,user,{
       kind:text(formData,"kind",20),
       businessId,
@@ -176,6 +189,10 @@ export async function basicProductUpkeepAction(formData:FormData){
       capacitySummary:text(formData,"capacitySummary",180),
       minimumOrderSummary:text(formData,"minimumOrderSummary",140),
       leadTimeSummary:text(formData,"leadTimeSummary",140),
+      priceMinor:priceValue===null?null:Math.round(priceValue*100),
+      quantityUnit:text(formData,"quantityUnit",40),
+      highlights:text(formData,"highlights",485).split(/\r?\n/),
+      videoRef:videoInput?normalizeControlledYouTubeUrl(videoInput).managedRef:"",
       categoryId:int(formData,"categoryId")||null,
       imageAction:hasFile?"replace":removeImage?"remove":"keep",
       serviceNote:text(formData,"serviceNote",300),

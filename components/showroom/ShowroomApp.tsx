@@ -18,6 +18,9 @@ import {
   availabilityLabel,
   offeringKindLabels,
 } from "@/lib/offerings";
+import { formatEtbPrice } from "@/lib/offering-presentation";
+import { normalizeProductDetailPattern } from "@/lib/product-detail-patterns";
+import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import { showroomTokenVariables } from "./bank/tokens";
@@ -108,6 +111,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
   const [cart, setCart] = useState<CartLine[]>([]);
   const [drawer, setDrawer] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
+  const [productMediaMode, setProductMediaMode] = useState<"image" | "video">("image");
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [toast, setToast] = useState("");
   const productDialog = useRef<HTMLDivElement>(null);
@@ -204,6 +208,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       if (group.values[0]) defaults[group.name] = group.values[0].value;
     });
     setSelections(defaults);
+    setProductMediaMode(product.image_path ? "image" : "video");
     setSelected(product);
   };
   const add = (product: Product, options: Record<string, string> = {}) => {
@@ -291,6 +296,11 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
   const runtimeTokenVariables = compositionManifest
     ? showroomTokenVariables(compositionManifest)
     : undefined;
+  const productDetailPattern = normalizeProductDetailPattern(
+    compositionManifest && "productDetailPattern" in compositionManifest
+      ? compositionManifest.productDetailPattern
+      : undefined,
+  );
 
   return (
     <div
@@ -331,24 +341,65 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           aria-label={selected.name}
           tabIndex={-1}
         >
-          <div className={`product-dialog-panel${selected.image_path ? "" : " no-media"}`}>
+          <div
+            className={`product-dialog-panel${selected.image_path || selected.video_ref ? "" : " no-media"}`}
+            data-detail-pattern={productDetailPattern}
+          >
             <button className="icon-button dialog-close" aria-label="Close product" onClick={() => setSelected(null)}>
               ×
             </button>
-            <div className={`product-dialog-grid${selected.image_path ? "" : " no-media"}`}>
-              {selected.image_path ? (
-                <img src={selected.image_path} alt={selected.name} />
+            <div className={`product-dialog-grid${selected.image_path || selected.video_ref ? "" : " no-media"}`}>
+              {selected.image_path || selected.video_ref ? (
+                <div className="product-dialog-media">
+                  {selected.image_path && selected.video_ref ? (
+                    <div className="product-dialog-media-tabs" aria-label="Product media">
+                      <button
+                        type="button"
+                        className={productMediaMode === "image" ? "active" : ""}
+                        aria-pressed={productMediaMode === "image"}
+                        onClick={() => setProductMediaMode("image")}
+                      >
+                        Photo
+                      </button>
+                      <button
+                        type="button"
+                        className={productMediaMode === "video" ? "active" : ""}
+                        aria-pressed={productMediaMode === "video"}
+                        onClick={() => setProductMediaMode("video")}
+                      >
+                        Video
+                      </button>
+                    </div>
+                  ) : null}
+                  {selected.image_path && productMediaMode === "image" ? (
+                    <img src={selected.image_path} alt={selected.name} />
+                  ) : null}
+                  {selected.video_ref && productMediaMode === "video" ? (
+                    <ProductVideo product={selected} />
+                  ) : null}
+                </div>
               ) : null}
-              <div>
+              <div className="product-dialog-copy">
                 <span className="eyebrow">
                   {offeringKindLabels[selected.offering_kind]}
                 </span>
-                <h2 style={{ fontSize: "2.5rem" }}>{selected.name}</h2>
-                <p style={{ lineHeight: 1.7 }}>{selected.description}</p>
-                <p><strong>Status:</strong> {availabilityLabel(selected.offering_kind, selected.availability)}</p>
-                {selected.capacity_summary ? <p><strong>Capacity:</strong> {selected.capacity_summary}</p> : null}
-                {selected.minimum_order_summary ? <p><strong>Minimum order:</strong> {selected.minimum_order_summary}</p> : null}
-                {selected.lead_time_summary ? <p><strong>Lead time:</strong> {selected.lead_time_summary}</p> : null}
+                <h2>{selected.name}</h2>
+                {selected.price_minor !== null ? (
+                  <p className="product-dialog-price">{formatEtbPrice(selected.price_minor)}</p>
+                ) : null}
+                <p className="product-dialog-description">{selected.description}</p>
+                {selected.highlights.length ? (
+                  <ul className="product-dialog-highlights" aria-label="Offering highlights">
+                    {selected.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
+                  </ul>
+                ) : null}
+                <dl className="product-dialog-facts">
+                  <div><dt>Status</dt><dd>{availabilityLabel(selected.offering_kind, selected.availability)}</dd></div>
+                  {selected.quantity_unit ? <div><dt>Offered by</dt><dd>{selected.quantity_unit}</dd></div> : null}
+                  {selected.capacity_summary ? <div><dt>Capacity</dt><dd>{selected.capacity_summary}</dd></div> : null}
+                  {selected.minimum_order_summary ? <div><dt>Minimum order</dt><dd>{selected.minimum_order_summary}</dd></div> : null}
+                  {selected.lead_time_summary ? <div><dt>Lead time</dt><dd>{selected.lead_time_summary}</dd></div> : null}
+                </dl>
                 {selected.option_groups?.map((group) => (
                   <label className="option-set" key={group.id}>
                     <strong>{group.name}</strong>
@@ -393,6 +444,28 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           {toast}
         </div>
       )}
+    </div>
+  );
+}
+
+function ProductVideo({ product }: { product: Product }) {
+  let src = "";
+  try {
+    src = privacyEnhancedYouTubeEmbedUrl(product.video_ref);
+  } catch {
+    return null;
+  }
+  return (
+    <div className="product-dialog-video">
+      <iframe
+        src={src}
+        title={`${product.name} video`}
+        loading="lazy"
+        allow="encrypted-media; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+        allowFullScreen
+      />
     </div>
   );
 }

@@ -234,6 +234,10 @@ async function main() {
       capacitySummary: "Up to 500 assemblies per month",
       minimumOrderSummary: "Prototype or 25-unit production run",
       leadTimeSummary: "Prototype in 10 working days",
+      priceMinor: 125_000,
+      quantityUnit: "per assembly",
+      highlights: ["Custom dimensions", "Documented material options"],
+      videoRef: "youtube:M7lc1UVf-VE",
       categoryId: tenantA.categoryId,
       imageAction: "keep",
       serviceNote: "",
@@ -291,6 +295,17 @@ async function main() {
         ),
       /Capacity is too long/,
     );
+    assert.throws(
+      () => parseBasicProductCommand(command({ priceMinor: -1 })),
+      (error: unknown) => error instanceof ProductUpkeepError,
+    );
+    assert.throws(
+      () =>
+        parseBasicProductCommand(
+          command({ highlights: Array.from({ length: 7 }, (_, index) => `Highlight ${index}`) }),
+        ),
+      /no more than six/,
+    );
 
     const created = executeBasicProductUpkeep(clientA, command(), null);
     assert.deepEqual(
@@ -299,7 +314,7 @@ async function main() {
     );
     const createdProduct = db
       .prepare(
-        "SELECT business_id,collection_id,category_id,is_published,availability,offering_kind,quantity_mode,capacity_summary,minimum_order_summary,lead_time_summary FROM products WHERE id=?",
+        "SELECT business_id,collection_id,category_id,is_published,availability,offering_kind,quantity_mode,capacity_summary,minimum_order_summary,lead_time_summary,price_minor,currency,quantity_unit,highlights_json,video_ref FROM products WHERE id=?",
       )
       .get(created.productId) as Record<string, unknown>;
     assert.deepEqual(
@@ -315,6 +330,14 @@ async function main() {
         capacity_summary: "Up to 500 assemblies per month",
         minimum_order_summary: "Prototype or 25-unit production run",
         lead_time_summary: "Prototype in 10 working days",
+        price_minor: 125_000,
+        currency: "ETB",
+        quantity_unit: "per assembly",
+        highlights_json: JSON.stringify([
+          "Custom dimensions",
+          "Documented material options",
+        ]),
+        video_ref: "youtube:M7lc1UVf-VE",
       },
     );
     assert.equal(

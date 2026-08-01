@@ -531,6 +531,40 @@
   white-space: nowrap;
 }
 
+.headerMediaActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.headerMediaActions a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--bank-line);
+  border-radius: var(--bank-radius-control);
+  background: var(--bank-layer);
+  color: var(--bank-ink);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.headerMediaActions .liveAction {
+  border-color: var(--bank-accent);
+}
+
+.liveAction i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d62f45;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #d62f45 18%, transparent);
+}
+
 .header[data-variant="editorial-wordmark"] {
   flex-direction: column;
   align-items: stretch;
@@ -546,10 +580,19 @@
   margin-left: 0;
 }
 
+.header[data-variant="editorial-wordmark"] .headerMediaActions {
+  justify-content: center;
+}
+
 .header[data-variant="catalog-command"] {
   display: grid;
   grid-template-columns: minmax(170px, 0.8fr) minmax(180px, 1.2fr);
   background: var(--bank-layer);
+}
+
+.header[data-variant="catalog-command"] .headerMediaActions {
+  grid-column: 1 / -1;
+  justify-self: end;
 }
 
 .header[data-variant="catalog-command"] .headerTagline {
@@ -2019,6 +2062,36 @@
 }
 
 @media (max-width: 480px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .headerTagline {
+    display: none;
+  }
+
+  .headerMediaActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .headerMediaActions a {
+    min-height: 44px;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .header[data-variant="editorial-wordmark"] {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .header[data-variant="catalog-command"] {
+    display: flex;
+  }
+
   .labSummary,
   .productGrid,
   .catalog[data-variant="dense-wholesale"] .productGrid,
@@ -2211,6 +2284,17 @@
 
   .headerTagline {
     display: none;
+  }
+
+  .headerMediaActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .headerMediaActions a {
+    min-height: 44px;
+    flex: 1 1 auto;
+    justify-content: center;
   }
 
   .header[data-variant="editorial-wordmark"] {

@@ -6,6 +6,11 @@ import {
   type OfferingKind,
   type QuantityMode,
 } from "./offerings";
+import {
+  normalizeOfferingHighlights,
+  normalizeOfferingPriceMinor,
+  normalizeOfferingUnit,
+} from "./offering-presentation";
 
 export type ProductUpkeepKind = "create" | "update";
 export type ProductImageAction = "keep" | "remove" | "replace";
@@ -24,6 +29,10 @@ export type BasicProductCommand = {
   capacitySummary: string;
   minimumOrderSummary: string;
   leadTimeSummary: string;
+  priceMinor: number | null;
+  quantityUnit: string;
+  highlights: string[];
+  videoRef: string;
   categoryId: number | null;
   imageAction: ProductImageAction;
   serviceNote: string;
@@ -53,6 +62,10 @@ const commandKeys = new Set([
   "capacitySummary",
   "minimumOrderSummary",
   "leadTimeSummary",
+  "priceMinor",
+  "quantityUnit",
+  "highlights",
+  "videoRef",
   "categoryId",
   "imageAction",
   "serviceNote",
@@ -138,6 +151,18 @@ export function parseBasicProductCommand(
       "invalid_idempotency_key",
     );
   }
+  let priceMinor: number | null;
+  let quantityUnit: string;
+  let highlights: string[];
+  try {
+    priceMinor = normalizeOfferingPriceMinor(raw.priceMinor);
+    quantityUnit = normalizeOfferingUnit(raw.quantityUnit);
+    highlights = normalizeOfferingHighlights(raw.highlights);
+  } catch (error) {
+    throw new ProductUpkeepError(
+      error instanceof Error ? error.message : "The offering details are invalid.",
+    );
+  }
   return {
     kind,
     businessId: positiveInteger(raw.businessId, "Business"),
@@ -155,6 +180,16 @@ export function parseBasicProductCommand(
     capacitySummary: boundedText(raw.capacitySummary, 180, "Capacity"),
     minimumOrderSummary: boundedText(raw.minimumOrderSummary, 140, "Minimum order"),
     leadTimeSummary: boundedText(raw.leadTimeSummary, 140, "Lead time"),
+    priceMinor,
+    quantityUnit,
+    highlights,
+    videoRef: (() => {
+      const value = text(raw.videoRef, 40);
+      if (value && !/^youtube:[A-Za-z0-9_-]{11}$/.test(value)) {
+        throw new ProductUpkeepError("Use a supported YouTube video.");
+      }
+      return value;
+    })(),
     categoryId: optionalInteger(raw.categoryId, "Category"),
     imageAction,
     serviceNote: text(raw.serviceNote, 300),

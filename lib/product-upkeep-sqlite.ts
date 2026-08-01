@@ -150,6 +150,11 @@ function validateProspectiveSnapshot(
       eyebrow: "",
       description: command.description,
       imageRef,
+      videoRef: command.videoRef,
+      priceMinor: command.priceMinor,
+      currency: "ETB",
+      quantityUnit: command.quantityUnit,
+      highlights: command.highlights,
       availability: command.availability,
       offeringKind: command.offeringKind,
       quantityMode: command.quantityMode,
@@ -177,6 +182,11 @@ function validateProspectiveSnapshot(
       name: command.name,
       description: command.description,
       imageRef,
+      videoRef: command.videoRef,
+      priceMinor: command.priceMinor,
+      currency: "ETB",
+      quantityUnit: command.quantityUnit,
+      highlights: command.highlights,
       availability: command.availability,
       offeringKind: command.offeringKind,
       quantityMode: command.quantityMode,
@@ -274,8 +284,9 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
                 business_id,collection_id,category_id,name,slug,eyebrow,
                 description,image_path,availability,offering_kind,quantity_mode,
                 capacity_summary,minimum_order_summary,lead_time_summary,
+                video_ref,price_minor,currency,quantity_unit,highlights_json,
                 is_published,sort_order
-              ) VALUES(?,NULL,?,?,?,'',?,?,?,?,?,?,?,?,1,?)`,
+              ) VALUES(?,NULL,?,?,?,'',?,?,?,?,?,?,?,?,?,?,'ETB',?,?,1,?)`,
             )
             .run(
               command.businessId,
@@ -290,6 +301,10 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
               command.capacitySummary,
               command.minimumOrderSummary,
               command.leadTimeSummary,
+              command.videoRef,
+              command.priceMinor,
+              command.quantityUnit,
+              JSON.stringify(command.highlights),
               nextOrder,
             ).lastInsertRowid,
         );
@@ -300,7 +315,8 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             `UPDATE products SET
               collection_id=NULL,category_id=?,name=?,description=?,
               image_path=?,availability=?,offering_kind=?,quantity_mode=?,
-              capacity_summary=?,minimum_order_summary=?,lead_time_summary=?
+              capacity_summary=?,minimum_order_summary=?,lead_time_summary=?,
+              video_ref=?,price_minor=?,currency='ETB',quantity_unit=?,highlights_json=?
             WHERE id=? AND business_id=?`,
           )
           .run(
@@ -314,6 +330,10 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             command.capacitySummary,
             command.minimumOrderSummary,
             command.leadTimeSummary,
+            command.videoRef,
+            command.priceMinor,
+            command.quantityUnit,
+            JSON.stringify(command.highlights),
             productId,
             command.businessId,
           );
@@ -381,6 +401,10 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
             "capacitySummary",
             "minimumOrderSummary",
             "leadTimeSummary",
+            "price",
+            "quantityUnit",
+            "highlights",
+            "video",
             "category",
             ...(command.imageAction === "keep" ? [] : ["image"]),
           ],

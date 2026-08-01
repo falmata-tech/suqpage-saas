@@ -48,6 +48,12 @@ node node_modules/tsx/dist/cli.mjs scripts/test-revision-v4.ts
 printf '\n=== Controlled YouTube provider normalization ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-youtube-provider.ts
 
+printf '\n=== Controlled live-showroom validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-live-showroom.ts
+
+printf '\n=== Rich offering additive migration validation ===\n'
+node node_modules/tsx/dist/cli.mjs scripts/test-rich-offering-migration.ts
+
 printf '\n=== Security integration tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-security.ts
 

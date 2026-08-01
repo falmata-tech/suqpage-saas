@@ -13,6 +13,12 @@ import {
   type OfferingKind,
   type QuantityMode,
 } from "./offerings";
+import {
+  normalizeOfferingHighlights,
+  normalizeOfferingPriceMinor,
+  normalizeOfferingUnit,
+} from "./offering-presentation";
+import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 
 export const REVISION_SCHEMA_VERSION = 3;
 export const MAX_REVISION_BYTES = 1024 * 1024;
@@ -27,6 +33,7 @@ const keyPattern = /^[A-Za-z0-9_-]{1,80}$/;
 const imagePattern =
   /^(?:\/uploads\/seed\/[A-Za-z0-9._/-]+|\/media\/[A-Za-z0-9.-]+|request-attachment:\d+)?$/;
 const controlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
+const youtubeRefPattern = /^(?:youtube:[A-Za-z0-9_-]{11})?$/;
 
 export type RevisionBusiness = {
   name: string;
@@ -41,6 +48,10 @@ export type RevisionBusiness = {
   whatsapp: string;
   telegram: string;
   tiktok: string;
+  processVideoRef: string;
+  isLive: boolean;
+  livePlatform: LivePlatform | "";
+  liveUrl: string;
   siteTitle: string;
   siteDescription: string;
   faviconRef: string;
@@ -75,6 +86,11 @@ export type RevisionProduct = {
   eyebrow: string;
   description: string;
   imageRef: string;
+  videoRef: string;
+  priceMinor: number | null;
+  currency: "ETB";
+  quantityUnit: string;
+  highlights: string[];
   availability: Product["availability"];
   offeringKind: OfferingKind;
   quantityMode: QuantityMode;
@@ -158,6 +174,14 @@ const image = (value: unknown) => {
   return result;
 };
 
+const youtubeRef = (value: unknown) => {
+  const result = clean(value, 40);
+  if (!youtubeRefPattern.test(result)) {
+    throw new RevisionError("A managed YouTube reference is invalid.");
+  }
+  return result;
+};
+
 function onlyKeys(
   value: Record<string, unknown>,
   allowed: readonly string[],
@@ -191,6 +215,10 @@ export function parseRevisionContent(
       "whatsapp",
       "telegram",
       "tiktok",
+      "processVideoRef",
+      "isLive",
+      "livePlatform",
+      "liveUrl",
       "siteTitle",
       "siteDescription",
       "faviconRef",
@@ -210,6 +238,16 @@ export function parseRevisionContent(
   }
   const name = clean(sourceBusiness.name, 100);
   if (!name) throw new RevisionError("Business name is required.");
+  let liveSettings;
+  try {
+    liveSettings = validateLiveSettings({
+      isLive: sourceBusiness.isLive,
+      platform: sourceBusiness.livePlatform,
+      url: sourceBusiness.liveUrl,
+    });
+  } catch (error) {
+    throw new RevisionError(error instanceof Error ? error.message : "Live showroom settings are invalid.");
+  }
   const business: RevisionBusiness = {
     name,
     designKey,
@@ -223,6 +261,10 @@ export function parseRevisionContent(
     whatsapp: clean(sourceBusiness.whatsapp, 40).replace(/\D/g, ""),
     telegram: clean(sourceBusiness.telegram, 80).replace(/^@/, ""),
     tiktok: clean(sourceBusiness.tiktok, 80).replace(/^@/, ""),
+    processVideoRef: youtubeRef(sourceBusiness.processVideoRef),
+    isLive: liveSettings.isLive,
+    livePlatform: liveSettings.platform,
+    liveUrl: liveSettings.url,
     siteTitle: clean(sourceBusiness.siteTitle, 120),
     siteDescription: clean(sourceBusiness.siteDescription, 240),
     faviconRef: image(sourceBusiness.faviconRef),
@@ -314,6 +356,11 @@ export function parseRevisionContent(
         "eyebrow",
         "description",
         "imageRef",
+        "videoRef",
+        "priceMinor",
+        "currency",
+        "quantityUnit",
+        "highlights",
         "availability",
         "offeringKind",
         "quantityMode",
@@ -385,6 +432,19 @@ export function parseRevisionContent(
     if (schemaVersion < 3 && value.stockCount !== undefined) {
       integer(value.stockCount, 0, 100000);
     }
+    let priceMinor: number | null;
+    let quantityUnit: string;
+    let highlights: string[];
+    try {
+      priceMinor = normalizeOfferingPriceMinor(value.priceMinor);
+      quantityUnit = normalizeOfferingUnit(value.quantityUnit);
+      highlights = normalizeOfferingHighlights(value.highlights);
+    } catch (error) {
+      throw new RevisionError(error instanceof Error ? error.message : "Offering presentation is invalid.");
+    }
+    if (value.currency !== undefined && value.currency !== "ETB") {
+      throw new RevisionError("Offering currency must be ETB.");
+    }
     return {
       key: key(value.key),
       collectionKey,
@@ -394,6 +454,11 @@ export function parseRevisionContent(
       eyebrow: clean(value.eyebrow, 100),
       description: clean(value.description, 3000),
       imageRef: image(value.imageRef),
+      videoRef: youtubeRef(value.videoRef),
+      priceMinor,
+      currency: "ETB" as const,
+      quantityUnit,
+      highlights,
       availability: productAvailability,
       offeringKind,
       quantityMode,
@@ -559,6 +624,10 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
       whatsapp: catalog.business.whatsapp,
       telegram: catalog.business.telegram,
       tiktok: catalog.business.tiktok,
+      processVideoRef: catalog.business.process_video_ref || "",
+      isLive: Boolean(catalog.business.is_live),
+      livePlatform: catalog.business.live_platform || "",
+      liveUrl: catalog.business.live_url || "",
       siteTitle: catalog.business.site_title,
       siteDescription: catalog.business.site_description,
       faviconRef: catalog.business.favicon_path,
@@ -593,6 +662,11 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
       eyebrow: item.eyebrow,
       description: item.description,
       imageRef: item.image_path,
+      videoRef: item.video_ref || "",
+      priceMinor: item.price_minor ?? null,
+      currency: "ETB",
+      quantityUnit: item.quantity_unit || "",
+      highlights: item.highlights || [],
       availability: item.availability,
       offeringKind: normalizeOfferingKind(item.offering_kind),
       quantityMode: normalizeQuantityMode(item.quantity_mode),
@@ -666,6 +740,12 @@ export function snapshotToCatalog(
     eyebrow: item.eyebrow,
     description: item.description,
     image_path: resolveImage(item.imageRef),
+    video_ref: item.videoRef || "",
+    price_minor: item.priceMinor ?? null,
+    currency: "ETB",
+    quantity_unit: item.quantityUnit || "",
+    highlights_json: JSON.stringify(item.highlights || []),
+    highlights: item.highlights || [],
     availability: item.availability,
     offering_kind: normalizeOfferingKind(item.offeringKind),
     quantity_mode: normalizeQuantityMode(item.quantityMode),
@@ -713,6 +793,10 @@ export function snapshotToCatalog(
       whatsapp: snapshot.business.whatsapp,
       telegram: snapshot.business.telegram,
       tiktok: snapshot.business.tiktok,
+      process_video_ref: snapshot.business.processVideoRef || "",
+      is_live: snapshot.business.isLive ? 1 : 0,
+      live_platform: snapshot.business.livePlatform || "",
+      live_url: snapshot.business.liveUrl || "",
       site_title: snapshot.business.siteTitle,
       site_description: snapshot.business.siteDescription,
       favicon_path: resolveImage(snapshot.business.faviconRef),

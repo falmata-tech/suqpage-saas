@@ -9,6 +9,7 @@ import type { ShowroomExperienceSettings } from "@/lib/showroom-experience";
 import type { SectionMediaIntegration } from "@/lib/showroom-design-systems";
 import type { SectionSurfaceRole } from "@/lib/showroom-composition-v2";
 import type { OfferingKind, QuantityMode } from "@/lib/offerings";
+import type { LivePlatform } from "@/lib/live-showroom";
 
 export type BankAvailability =
   | "available"
@@ -26,6 +27,10 @@ export type BankBusinessView = {
   logoRef: string;
   heroImageRef: string;
   contactLabel: string;
+  processVideoRef: string;
+  isLive: boolean;
+  livePlatform: LivePlatform | "";
+  liveUrl: string;
 };
 
 export type BankCategoryView = {
@@ -39,6 +44,10 @@ export type BankProductView = {
   eyebrow: string;
   description: string;
   imageRef: string;
+  videoRef: string;
+  priceMinor: number | null;
+  quantityUnit: string;
+  highlights: string[];
   availability: BankAvailability;
   offeringKind: OfferingKind;
   quantityMode: QuantityMode;

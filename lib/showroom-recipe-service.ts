@@ -50,6 +50,7 @@ import showroomDesignSchema from "../showroom-sdk/showroom-proposal-v2.schema.js
 import showroomComponentBankSchema from "../showroom-sdk/component-bank-v2.schema.json";
 import showroomRecipeSchema from "../showroom-sdk/showroom-recipe.schema.json";
 import showroomDesignSystemSchema from "../showroom-sdk/showroom-design-system.schema.json";
+import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "./product-detail-patterns";
 
 export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
   brief: "suqpage.recipe-brief@1",
@@ -162,7 +163,7 @@ function assetMaps(
       }>
     ).map((asset) => [asset.request_attachment_id, asset.asset_key]),
   );
-  const current = [
+  const currentImages = [
     ["Current logo", snapshot.business.logoRef],
     ["Current hero image", snapshot.business.heroImageRef],
     ["Current browser icon", snapshot.business.faviconRef],
@@ -171,19 +172,40 @@ function assetMaps(
     ),
     ...snapshot.contentBlocks.blocks.flatMap((block) =>
       block.media.flatMap((media) =>
-        media.assetKeys.map(
+        media.assetKeys.filter((assetKey) => !assetKey.startsWith("youtube:")).map(
           (assetKey) => [`Current block · ${block.title}`, assetKey] as [string, string],
         ),
       ),
     ),
   ] as Array<[string, string]>;
-  for (const [label, ref] of current) {
+  for (const [label, ref] of currentImages) {
     if (!ref || actualToOpaque.has(ref)) continue;
     const key = opaque("asset", requestId, ref);
     actualToOpaque.set(ref, key);
     opaqueToActual.set(key, ref);
     descriptors.push({ key, kind: "image", label, source: "current_showroom" });
     details.set(ref, { kind: "image" });
+  }
+  const currentVideos = [
+    ["Current process video", snapshot.business.processVideoRef],
+    ...snapshot.products.map(
+      (product) => [`Current product video · ${product.name}`, product.videoRef],
+    ),
+    ...snapshot.contentBlocks.blocks.flatMap((block) =>
+      block.media.flatMap((media) =>
+        media.assetKeys.filter((assetKey) => assetKey.startsWith("youtube:")).map(
+          (assetKey) => [`Current block video · ${block.title}`, assetKey] as [string, string],
+        ),
+      ),
+    ),
+  ] as Array<[string, string]>;
+  for (const [label, ref] of currentVideos) {
+    if (!ref || actualToOpaque.has(ref)) continue;
+    const key = opaque("asset", requestId, ref);
+    actualToOpaque.set(ref, key);
+    opaqueToActual.set(key, ref);
+    descriptors.push({ key, kind: "video", label, source: "current_showroom" });
+    details.set(ref, { kind: "video" });
   }
   for (const attachment of attachments || []) {
     const ref = `request-attachment:${attachment.id}`;
@@ -428,10 +450,12 @@ function mapSnapshotAssets(
       logoRef: replace(snapshot.business.logoRef),
       heroImageRef: replace(snapshot.business.heroImageRef),
       faviconRef: replace(snapshot.business.faviconRef),
+      processVideoRef: replace(snapshot.business.processVideoRef),
     },
     products: snapshot.products.map((product) => ({
       ...product,
       imageRef: replace(product.imageRef),
+      videoRef: replace(product.videoRef),
     })),
     contentBlocks: {
       ...snapshot.contentBlocks,
@@ -506,6 +530,10 @@ function syntheticReferenceCatalog(): Catalog {
       whatsapp: "",
       telegram: "",
       tiktok: "",
+      process_video_ref: "",
+      is_live: 0,
+      live_platform: "",
+      live_url: "",
       status: "draft",
       site_title: "Reference Goods Studio",
       site_description: "Synthetic showroom recipe reference.",
@@ -544,6 +572,12 @@ function syntheticReferenceCatalog(): Catalog {
         eyebrow: "Synthetic example",
         description: "Demonstrates relationships, options, and descriptive availability.",
         image_path: "",
+        video_ref: "",
+        price_minor: null,
+        currency: "ETB",
+        quantity_unit: "",
+        highlights_json: "[]",
+        highlights: [],
         availability: "available",
         offering_kind: "made_to_order",
         quantity_mode: "optional",
@@ -575,6 +609,12 @@ function syntheticReferenceCatalog(): Catalog {
         eyebrow: "Synthetic example",
         description: "Demonstrates a second category and a different availability state.",
         image_path: "",
+        video_ref: "",
+        price_minor: null,
+        currency: "ETB",
+        quantity_unit: "",
+        highlights_json: "[]",
+        highlights: [],
         availability: "coming_soon",
         offering_kind: "production_supply",
         quantity_mode: "optional",
@@ -736,6 +776,7 @@ export function buildShowroomRecipeBrief(
           extraSectionsAllowed: false,
         },
         mediaTreatments: SHOWROOM_MEDIA_TREATMENTS,
+        productDetailPatterns: PRODUCT_DETAIL_PATTERN_DEFINITIONS,
         components: Object.fromEntries(
           SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
             component.id,
@@ -753,11 +794,12 @@ export function buildShowroomRecipeBrief(
         "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, or component choices. Its seven-role section order is canonical and must be preserved. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
         "Return one complete replacement recipe, never a partial patch.",
         "You may freely write provisional business, product, and section copy for this private candidate. provenance is optional review metadata and may be an empty array. When you do cite a source_fact, use only source keys present in this brief.",
-        "Do not add stock, inventory, pricing, code, HTML, CSS, iframe markup, remote image URLs, or database IDs.",
+        "Do not add stock, inventory, checkout behavior, code, HTML, CSS, iframe markup, remote image URLs, or database IDs. Optional priceMinor is informational ETB context only.",
         "Use questions and warnings as non-blocking notes for staff review. They do not prevent private import.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Product category is the only active catalog grouping. Return content.collections as an empty array, declaredRemovals.collections as an empty array, and every category/product collectionKey as null. Never use a collection as navigation, story, process, trust, footer, or composition content.",
         "Treat content.products as the compatibility transport for public offerings. Classify each entry from supplied facts as standard_product, made_to_order, manufacturing_capability, or production_supply. Set quantityMode to optional for every offering. Desired quantity is optional buyer intent and never stock.",
+        "For every offering return optional priceMinor in ETB minor units, currency ETB, merchant-defined quantityUnit, zero to six concise highlights, and an admitted videoRef or an empty string. Do not invent a price presented as verified fact; provisional fixture or draft values must be reviewable.",
         "You may draft capacity, minimum-order, lead-time, availability, and marketing copy when the intake is incomplete, but state it provisionally and flag consequential assumptions in warnings for human review.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one admitted design foundation and compatible section anatomy before choosing component IDs.",
@@ -766,6 +808,7 @@ export function buildShowroomRecipeBrief(
         "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Use signature treatments deliberately; several are allowed when the complete preview remains coherent.",
         "Use each component's renderedAnatomy, idealWhen, avoidWhen, content limits, and compatibleMediaIntegrations. Do not infer visual behavior from the component ID and do not choose a component whose renderer anatomy contradicts the available content or media.",
         "Choose header and footer independently by their rendered anatomy and available content. Do not default to one familiar pair, and do not infer suitability from an industry; the footer does not need to mirror the header.",
+        "Choose design.productDetailPattern from compositionGuidance.productDetailPatterns by layout, media behavior, density, and content fit. Do not infer the choice from an industry label.",
         "Keep adjacent about/story and process sections compositionally distinct through alignment, density, media, typography, or surface contrast. Avoid plaid, pinstripes, graph-paper grids, and repeated straight divider motifs.",
         "Catalog filters are the only category-browsing owner in a normal showroom. Keep hero factual media free of product-link overlays.",
         "Before returning JSON, evaluate the complete design against the composition rules: exact canonical role order, useful catalog controls only, no repeated adjacent anatomy, deliberate but freely chosen semantic surfaces and media treatments, compatible media prerequisites, and an appropriate catalog density.",
@@ -808,13 +851,14 @@ function normalizeImportedAssets(
       ? opaqueToActual.get(value) || value
       : value;
   if (business) {
-    for (const field of ["logoRef", "heroImageRef", "faviconRef"]) {
+    for (const field of ["logoRef", "heroImageRef", "faviconRef", "processVideoRef"]) {
       business[field] = replace(business[field]);
     }
   }
   if (Array.isArray(content?.products)) {
     for (const product of content.products as Array<Record<string, unknown>>) {
       product.imageRef = replace(product.imageRef);
+      product.videoRef = replace(product.videoRef);
     }
   }
   const blocks = (content?.contentBlocks as Record<string, unknown> | undefined)?.blocks;

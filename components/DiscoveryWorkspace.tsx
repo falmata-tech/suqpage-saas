@@ -90,17 +90,28 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
       })
       .then((data) => { if (active) setRegions(data); })
       .catch(() => { if (active) setMapFailed(true); });
-    Promise.all([
-      fetch("/geo/ethiopia-admin2-2023.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
-      fetch("/geo/ethiopia-places-osm.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
-      fetch("/geo/ethiopia-major-roads-osm.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
-    ]).then(([zoneData, placeData, roadData]) => {
-      if (!active) return;
-      setZones(zoneData);
-      setPlaces(placeData);
-      setRoads(roadData);
-    }).catch(() => undefined);
-    return () => { active = false; };
+    const loadDetails = () => Promise.all([
+        fetch("/geo/ethiopia-admin2-2023.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
+        fetch("/geo/ethiopia-places-osm.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
+        fetch("/geo/ethiopia-major-roads-osm.geojson").then((response) => response.ok ? response.json() as Promise<MapCollection> : null),
+      ]).then(([zoneData, placeData, roadData]) => {
+        if (!active) return;
+        setZones(zoneData);
+        setPlaces(placeData);
+        setRoads(roadData);
+      }).catch(() => undefined);
+    let cancelDetailLoad: () => void;
+    if (typeof window.requestIdleCallback === "function") {
+      const idleId = window.requestIdleCallback(loadDetails, { timeout: 1_200 });
+      cancelDetailLoad = () => window.cancelIdleCallback(idleId);
+    } else {
+      const timeoutId = globalThis.setTimeout(loadDetails, 120);
+      cancelDetailLoad = () => globalThis.clearTimeout(timeoutId);
+    }
+    return () => {
+      active = false;
+      cancelDetailLoad();
+    };
   }, []);
 
   const projection = useMemo(() => regions

@@ -44,13 +44,19 @@
       "maxLength": 100,
       "pattern": "^(?:asset_[a-f0-9]{20})?$"
     },
+    "videoKey": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:asset_[a-f0-9]{20})?$"
+    },
     "business": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "name", "designKey", "tagline", "description", "logoRef", "heroTitle",
         "heroSubtitle", "heroImageRef", "contactEmail", "whatsapp", "telegram",
-        "tiktok", "siteTitle", "siteDescription", "faviconRef"
+        "tiktok", "processVideoRef", "isLive", "livePlatform", "liveUrl",
+        "siteTitle", "siteDescription", "faviconRef"
       ],
       "properties": {
         "name": { "type": "string", "minLength": 1, "maxLength": 100 },
@@ -65,6 +71,10 @@
         "whatsapp": { "type": "string", "maxLength": 40 },
         "telegram": { "type": "string", "maxLength": 80 },
         "tiktok": { "type": "string", "maxLength": 80 },
+        "processVideoRef": { "$ref": "#/$defs/videoKey" },
+        "isLive": { "type": "boolean" },
+        "livePlatform": { "enum": ["", "tiktok", "facebook", "youtube", "google_meet"] },
+        "liveUrl": { "type": "string", "maxLength": 500 },
         "siteTitle": { "type": "string", "maxLength": 120 },
         "siteDescription": { "type": "string", "maxLength": 240 },
         "faviconRef": { "$ref": "#/$defs/imageKey" }
@@ -119,7 +129,8 @@
       "additionalProperties": false,
       "required": [
         "key", "collectionKey", "categoryKey", "name", "slug", "eyebrow",
-        "description", "imageRef", "availability", "offeringKind",
+        "description", "imageRef", "videoRef", "priceMinor", "currency",
+        "quantityUnit", "highlights", "availability", "offeringKind",
         "quantityMode", "capacitySummary", "minimumOrderSummary",
         "leadTimeSummary", "published", "sortOrder", "optionGroups"
       ],
@@ -135,6 +146,23 @@
         "eyebrow": { "type": "string", "maxLength": 100 },
         "description": { "type": "string", "minLength": 1, "maxLength": 3000 },
         "imageRef": { "$ref": "#/$defs/imageKey" },
+        "videoRef": { "$ref": "#/$defs/videoKey" },
+        "priceMinor": {
+          "description": "Optional informational ETB price in minor units; null omits the price.",
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0, "maximum": 999999999 }]
+        },
+        "currency": { "const": "ETB" },
+        "quantityUnit": {
+          "description": "Optional merchant-defined offered-by unit such as kg, piece, set, tonne, or project.",
+          "type": "string",
+          "maxLength": 40
+        },
+        "highlights": {
+          "type": "array",
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+        },
         "availability": {
           "enum": ["available", "limited", "unavailable", "coming_soon"]
         },

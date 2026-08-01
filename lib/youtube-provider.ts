@@ -72,3 +72,11 @@ export function privacyEnhancedYouTubeEmbedUrl(input: unknown): string {
   const id = providerId(input.slice("youtube:".length));
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
+
+export function controlledYouTubeWatchUrl(input: unknown): string {
+  if (typeof input !== "string" || !input.startsWith("youtube:")) {
+    return fail("The managed YouTube reference is invalid.", "invalid_managed_ref");
+  }
+  const id = providerId(input.slice("youtube:".length));
+  return `https://www.youtube.com/watch?v=${id}`;
+}

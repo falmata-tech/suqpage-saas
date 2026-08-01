@@ -1,5 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
-import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
+import {
+  controlledYouTubeWatchUrl,
+  privacyEnhancedYouTubeEmbedUrl,
+} from "@/lib/youtube-provider";
+import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 import { heroMediaIntegrationForComponent } from "@/lib/showroom-guidance";
 import {
   availabilityLabel,
@@ -159,6 +163,12 @@ export function BankHeaderSection({
   surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
+  let processVideoUrl = "";
+  try {
+    processVideoUrl = context.business.processVideoRef
+      ? controlledYouTubeWatchUrl(context.business.processVideoRef)
+      : "";
+  } catch {}
   return (
     <header
       className={`${styles.section} ${styles.header}`}
@@ -189,6 +199,26 @@ export function BankHeaderSection({
       <BrandMark context={context} />
       {properties?.show_tagline !== false ? (
         <span className={styles.headerTagline}>{context.business.tagline}</span>
+      ) : null}
+      {context.business.isLive || processVideoUrl ? (
+        <span className={styles.headerMediaActions}>
+          {context.business.isLive && context.business.livePlatform && context.business.liveUrl ? (
+            <a
+              className={styles.liveAction}
+              href={context.business.liveUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i aria-hidden="true" />
+              Live on: {LIVE_PLATFORM_LABELS[context.business.livePlatform]}
+            </a>
+          ) : null}
+          {processVideoUrl ? (
+            <a href={processVideoUrl} target="_blank" rel="noreferrer">
+              Watch our process
+            </a>
+          ) : null}
+        </span>
       ) : null}
     </header>
   );

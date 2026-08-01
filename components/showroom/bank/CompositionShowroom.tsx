@@ -42,6 +42,10 @@ function toBankProduct(product: Product): BankProductView {
     eyebrow: product.eyebrow || product.category_name || "",
     description: product.description,
     imageRef: product.image_path,
+    videoRef: product.video_ref,
+    priceMinor: product.price_minor,
+    quantityUnit: product.quantity_unit,
+    highlights: product.highlights,
     availability: product.availability,
     offeringKind: product.offering_kind,
     quantityMode: product.quantity_mode,
@@ -99,6 +103,10 @@ export function CompositionShowroom({
       logoRef: props.catalog.business.logo_path,
       heroImageRef: props.catalog.business.hero_image_path,
       contactLabel: contactLabel(props),
+      processVideoRef: props.catalog.business.process_video_ref,
+      isLive: Boolean(props.catalog.business.is_live),
+      livePlatform: props.catalog.business.live_platform,
+      liveUrl: props.catalog.business.live_url,
     },
     categories: props.catalog.categories
       .filter((category) => category.is_active)
@@ -127,6 +135,11 @@ export function CompositionShowroom({
         "customPalette" in manifest && manifest.customPalette ? "true" : undefined
       }
       data-composition-schema={manifest.schemaVersion}
+      data-product-detail-pattern={
+        "productDetailPattern" in manifest
+          ? manifest.productDetailPattern
+          : "editorial"
+      }
     >
       {manifest.sections.map((section) => {
         const definition = definitionById.get(section.component);

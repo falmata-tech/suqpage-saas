@@ -205,6 +205,340 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* Product detail is a reviewed showroom pattern, not a platform-white popup. */
+.product-dialog {
+  padding: 18px;
+  background: color-mix(in srgb, var(--bank-strong, #111827) 72%, transparent);
+  backdrop-filter: blur(5px);
+}
+
+.product-dialog-panel {
+  position: relative;
+  width: min(1040px, 100%);
+  max-height: calc(100dvh - 36px);
+  padding: 0;
+  overflow: auto;
+  color: var(--bank-ink, #151c2c);
+  background: var(--bank-surface, #fff);
+  border: 1px solid var(--bank-line, #d5dbe5);
+  border-radius: var(--bank-radius-card, 8px);
+  box-shadow: 0 28px 80px color-mix(in srgb, var(--bank-strong, #111827) 28%, transparent);
+  font-family: var(--bank-body, Arial, sans-serif);
+  scrollbar-gutter: stable;
+}
+
+.product-dialog-panel .dialog-close {
+  position: sticky;
+  z-index: 4;
+  top: 12px;
+  float: right;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  margin: 12px 12px -56px 0;
+  place-items: center;
+  padding: 0 0 3px;
+  color: var(--bank-ink, #151c2c);
+  background: color-mix(in srgb, var(--bank-surface, #fff) 92%, transparent);
+  border: 1px solid var(--bank-line, #d5dbe5);
+  border-radius: 50%;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bank-strong, #111827) 13%, transparent);
+  cursor: pointer;
+}
+
+.product-dialog-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr);
+  gap: 0;
+  min-height: 590px;
+}
+
+.product-dialog-media {
+  position: relative;
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  background: var(--bank-layer, #eef1f5);
+}
+
+.product-dialog-media-tabs {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(72px, 1fr));
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in srgb, var(--bank-surface, #fff) 92%, transparent);
+  border: 1px solid var(--bank-line, #d5dbe5);
+  border-radius: var(--bank-radius-control, 5px);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bank-strong, #111827) 13%, transparent);
+}
+
+.product-dialog-media-tabs button {
+  min-height: 38px;
+  padding: 7px 10px;
+  color: var(--bank-ink, #151c2c);
+  background: transparent;
+  border: 0;
+  border-radius: max(2px, calc(var(--bank-radius-control, 5px) - 2px));
+  font: 800 .76rem/1 var(--bank-body, Arial, sans-serif);
+  cursor: pointer;
+}
+
+.product-dialog-media-tabs button.active {
+  color: var(--bank-on-accent, #fff);
+  background: var(--bank-accent, #5b3ea6);
+}
+
+.product-dialog-media > img {
+  width: 100%;
+  min-height: 420px;
+  max-height: 610px;
+  aspect-ratio: auto;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.product-dialog-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  align-self: center;
+  background: var(--bank-strong, #111827);
+}
+
+.product-dialog-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.product-dialog-copy {
+  align-self: center;
+  min-width: 0;
+  padding: 58px 46px 42px;
+}
+
+.product-dialog-copy .eyebrow {
+  color: var(--bank-accent, #5b3ea6);
+  font-size: .7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.product-dialog-copy h2 {
+  margin: 8px 0 12px;
+  font-family: var(--bank-display, Arial, sans-serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.02;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-dialog-price {
+  margin: 0 0 16px;
+  color: var(--bank-secondary, #29483f);
+  font: 900 1.2rem/1.2 var(--bank-body, Arial, sans-serif);
+}
+
+.product-dialog-description {
+  margin: 0;
+  color: var(--bank-muted, #657086);
+  line-height: 1.65;
+}
+
+.product-dialog-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.product-dialog-highlights li {
+  padding: 7px 9px;
+  color: var(--bank-ink, #151c2c);
+  background: var(--bank-accent-soft, #eee8fb);
+  border-left: 3px solid var(--bank-accent, #5b3ea6);
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+.product-dialog-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 22px 0;
+  background: var(--bank-line, #d5dbe5);
+  border: 1px solid var(--bank-line, #d5dbe5);
+}
+
+.product-dialog-facts > div {
+  padding: 11px 12px;
+  background: var(--bank-layer, #f5f7fa);
+}
+
+.product-dialog-facts dt {
+  color: var(--bank-muted, #657086);
+  font-size: .66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.product-dialog-facts dd {
+  margin: 4px 0 0;
+  font-size: .82rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.product-dialog .option-set {
+  gap: 6px;
+  margin: 14px 0;
+  font-size: .8rem;
+}
+
+.product-dialog .option-set select {
+  min-height: 44px;
+  padding: 10px 11px;
+  color: var(--bank-ink, #151c2c);
+  background: var(--bank-surface, #fff);
+  border: 1px solid var(--bank-line, #d5dbe5);
+  border-radius: var(--bank-radius-control, 5px);
+}
+
+.product-dialog .sr-cart-trigger {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 8px;
+  padding: 12px 16px;
+  color: var(--bank-on-accent, #fff);
+  background: var(--bank-accent, #5b3ea6);
+  border: 1px solid var(--bank-accent, #5b3ea6);
+  border-radius: var(--bank-radius-control, 5px);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.product-dialog .sr-cart-trigger:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.product-dialog-panel[data-detail-pattern="technical"] {
+  border-top: 5px solid var(--bank-accent, #5b3ea6);
+}
+
+.product-dialog-panel[data-detail-pattern="technical"] .product-dialog-copy {
+  align-self: start;
+  padding-top: 62px;
+}
+
+.product-dialog-panel[data-detail-pattern="technical"] .product-dialog-copy h2 {
+  font-size: clamp(1.9rem, 3.2vw, 2.65rem);
+}
+
+.product-dialog-panel[data-detail-pattern="technical"] .product-dialog-media > img {
+  object-fit: contain;
+  padding: 26px;
+}
+
+.product-dialog-panel[data-detail-pattern="technical"] .product-dialog-facts {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.product-dialog-panel[data-detail-pattern="product_stage"] .product-dialog-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(330px, .65fr);
+}
+
+.product-dialog-panel[data-detail-pattern="product_stage"] .product-dialog-media > img {
+  min-height: 610px;
+}
+
+.product-dialog-panel[data-detail-pattern="compact"] {
+  width: min(820px, 100%);
+}
+
+.product-dialog-panel[data-detail-pattern="compact"] .product-dialog-grid {
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.product-dialog-panel[data-detail-pattern="compact"] .product-dialog-media > img {
+  min-height: 280px;
+  height: 100%;
+}
+
+.product-dialog-panel[data-detail-pattern="compact"] .product-dialog-copy {
+  padding: 44px 34px 30px;
+}
+
+.product-dialog-panel[data-detail-pattern="compact"] .product-dialog-copy h2 {
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.product-dialog-panel.no-media {
+  width: min(680px, 100%);
+}
+
+.product-dialog-grid.no-media {
+  min-height: 0;
+}
+
+@media (max-width: 760px) {
+  .product-dialog {
+    align-items: end;
+    padding: 8px 8px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .product-dialog-panel,
+  .product-dialog-panel[data-detail-pattern="compact"] {
+    width: 100%;
+    max-height: calc(100dvh - 16px - env(safe-area-inset-bottom));
+    border-radius: 8px 8px 4px 4px;
+  }
+
+  .product-dialog-grid,
+  .product-dialog-panel[data-detail-pattern="product_stage"] .product-dialog-grid,
+  .product-dialog-panel[data-detail-pattern="compact"] .product-dialog-grid {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .product-dialog-media > img,
+  .product-dialog-panel[data-detail-pattern="product_stage"] .product-dialog-media > img,
+  .product-dialog-panel[data-detail-pattern="compact"] .product-dialog-media > img {
+    min-height: 0;
+    height: min(38dvh, 330px);
+    padding: 0;
+  }
+
+  .product-dialog-media-tabs {
+    top: 10px;
+    left: 10px;
+  }
+
+  .product-dialog-copy,
+  .product-dialog-panel[data-detail-pattern="compact"] .product-dialog-copy,
+  .product-dialog-panel[data-detail-pattern="technical"] .product-dialog-copy {
+    padding: 28px 18px 22px;
+  }
+
+  .product-dialog-copy h2 {
+    padding-right: 40px;
+    font-size: 2rem;
+  }
+
+  .product-dialog-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .remove {
   min-height: 36px;
   padding: 0 4px;

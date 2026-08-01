@@ -37,6 +37,7 @@ import {
 import { scaleDemoBusiness } from "./scale-demo-seed";
 import type { SectionMediaIntegration } from "./showroom-design-systems";
 import type { Catalog } from "./types";
+import type { ProductDetailPattern } from "./product-detail-patterns";
 import {
   ADDITIONAL_SEED_SHOWROOM_BRIEFS,
   type SeedShowroomBrief,
@@ -56,6 +57,7 @@ type DefaultProfile = {
   ctaVariant: "magazine-close" | "technical-brief";
   heroMediaIntegration: SectionMediaIntegration;
   storyMediaIntegration: SectionMediaIntegration;
+  productDetailPattern?: ProductDetailPattern;
 };
 
 const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
@@ -468,6 +470,8 @@ function buildDesignManifest(
         : "Reset-only development cutover to the typed-content showroom bank 1.2 composition.",
       questions: [],
       warnings: [],
+      productDetailPattern: profile.productDetailPattern ||
+        (profile.ctaVariant === "technical-brief" ? "technical" : "editorial"),
       sections: [
         section("header-1", profile.header, profile, null, {
           density: "comfortable",
@@ -539,6 +543,10 @@ function catalogToRevisionBase(catalog: Catalog): {
       whatsapp: catalog.business.whatsapp,
       telegram: catalog.business.telegram,
       tiktok: catalog.business.tiktok,
+      processVideoRef: catalog.business.process_video_ref || "",
+      isLive: Boolean(catalog.business.is_live),
+      livePlatform: catalog.business.live_platform || "",
+      liveUrl: catalog.business.live_url || "",
       siteTitle: catalog.business.site_title,
       siteDescription: catalog.business.site_description,
       faviconRef: catalog.business.favicon_path,
@@ -572,6 +580,11 @@ function catalogToRevisionBase(catalog: Catalog): {
       eyebrow: item.eyebrow,
       description: item.description,
       imageRef: item.image_path,
+      videoRef: item.video_ref || "",
+      priceMinor: item.price_minor ?? null,
+      currency: "ETB",
+      quantityUnit: item.quantity_unit || "",
+      highlights: item.highlights || [],
       availability: item.availability,
       offeringKind: item.offering_kind || "standard_product",
       quantityMode: "optional",

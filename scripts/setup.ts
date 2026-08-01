@@ -13,6 +13,7 @@ import {
   seededExpoBoothPath,
 } from "../lib/expo-seed";
 import type { OfferingKind, QuantityMode } from "../lib/offerings";
+import { parseOfferingHighlightsJson } from "../lib/offering-presentation";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import { migrateDatabase } from "../lib/schema";
@@ -40,13 +41,15 @@ if (count > 0) {
   process.exit(0);
 }
 
-const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,'active')`);
+const SEED_VIDEO_REF = "youtube:M7lc1UVf-VE";
+const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,process_video_ref,is_live,live_platform,live_url,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,@process_video_ref,@is_live,@live_platform,@live_url,'active')`);
 const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
 const addProduct = db.prepare(`INSERT INTO products(
   business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,
   availability,offering_kind,quantity_mode,capacity_summary,
   minimum_order_summary,lead_time_summary,is_published,sort_order
-) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?)`);
+  ,video_ref,price_minor,currency,quantity_unit,highlights_json
+) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?, ?,?,'ETB',?,?)`);
 const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)");
 const addValue = db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)");
 
@@ -180,6 +183,10 @@ for (const business of businesses) {
       addBusiness.run({
         ...business,
         design_manifest_json: "{}",
+        process_video_ref: SEED_VIDEO_REF,
+        is_live: business.handle === "nova-assembly" ? 1 : 0,
+        live_platform: business.handle === "nova-assembly" ? "youtube" : "",
+        live_url: business.handle === "nova-assembly" ? "https://www.youtube.com/watch?v=M7lc1UVf-VE" : "",
       }).lastInsertRowid,
     ),
   );
@@ -207,6 +214,10 @@ function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
       p.minimumOrderSummary ?? profile.minimumOrderSummary,
       p.leadTimeSummary ?? profile.leadTimeSummary,
       i,
+      p.videoRef || SEED_VIDEO_REF,
+      p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35_000 + i * 12_500),
+      p.quantityUnit || (profile.offeringKind === "production_supply" ? "kg" : profile.offeringKind === "manufacturing_capability" ? "project" : "piece"),
+      JSON.stringify(p.highlights || [p.eyebrow || p.category, profile.offeringKind === "standard_product" ? "Available for direct inquiry" : "Requirements confirmed before production"]),
     ).lastInsertRowid);
     const optionGroups =
       profile.offeringKind === "manufacturing_capability" ? [] : p.options || [];
@@ -429,6 +440,7 @@ for (const businessId of seeded.values()) {
     )
     .all(businessId) as unknown as Product[];
   for (const product of products) {
+    product.highlights = parseOfferingHighlightsJson(product.highlights_json);
     product.option_groups = (
       seededGroupQuery.all(product.id) as unknown as OptionGroup[]
     ).map((group) => ({

@@ -48,7 +48,7 @@ function hasTypedContentMedia(
   );
 }
 
-const laboratoryFixture = {
+const laboratoryFixtureBase = {
   business: {
     handle: "field-and-form",
     name: "Field & Form Cooperative",
@@ -61,6 +61,10 @@ const laboratoryFixture = {
     logoRef: "",
     heroImageRef: "",
     contactLabel: "Choose products to prepare one structured inquiry",
+    processVideoRef: "",
+    isLive: false,
+    livePlatform: "" as const,
+    liveUrl: "",
   },
   categories: [
     { key: "food", name: "Food goods" },
@@ -148,6 +152,17 @@ const laboratoryFixture = {
       leadTimeSummary: "",
     },
   ],
+};
+
+const laboratoryFixture = {
+  ...laboratoryFixtureBase,
+  products: laboratoryFixtureBase.products.map((product) => ({
+    videoRef: "",
+    priceMinor: null,
+    quantityUnit: "",
+    highlights: [] as string[],
+    ...product,
+  })),
 };
 
 export default function DesignBankLaboratory({

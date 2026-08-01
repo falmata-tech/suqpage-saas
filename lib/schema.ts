@@ -59,6 +59,11 @@ export function migrateDatabase(
       whatsapp TEXT DEFAULT '',
       telegram TEXT DEFAULT '',
       tiktok TEXT DEFAULT '',
+      process_video_ref TEXT NOT NULL DEFAULT '',
+      is_live INTEGER NOT NULL DEFAULT 0 CHECK(is_live IN (0,1)),
+      live_platform TEXT NOT NULL DEFAULT ''
+        CHECK(live_platform IN ('','tiktok','facebook','youtube','google_meet')),
+      live_url TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('active','draft','suspended')),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
@@ -100,6 +105,11 @@ export function migrateDatabase(
       eyebrow TEXT DEFAULT '',
       description TEXT DEFAULT '',
       image_path TEXT DEFAULT '',
+      video_ref TEXT NOT NULL DEFAULT '',
+      price_minor INTEGER CHECK(price_minor IS NULL OR price_minor BETWEEN 0 AND 999999999),
+      currency TEXT NOT NULL DEFAULT 'ETB' CHECK(currency='ETB'),
+      quantity_unit TEXT NOT NULL DEFAULT '' CHECK(length(quantity_unit) <= 40),
+      highlights_json TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(highlights_json)),
       availability TEXT NOT NULL DEFAULT 'available' CHECK(availability IN ('available','limited','unavailable','coming_soon')),
       offering_kind TEXT NOT NULL DEFAULT 'standard_product'
         CHECK(offering_kind IN ('standard_product','made_to_order','manufacturing_capability','production_supply')),
@@ -1468,6 +1478,29 @@ export function migrateDatabase(
           ON business_discovery_profiles(region,zone,city,business_id);
       `);
       db.prepare("INSERT INTO schema_migrations(version) VALUES(23)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const richShowroomPresentationApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=24")
+    .get();
+  if (!richShowroomPresentationApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(db, "businesses", "process_video_ref TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "businesses", "is_live INTEGER NOT NULL DEFAULT 0 CHECK(is_live IN (0,1))");
+      addColumn(db, "businesses", "live_platform TEXT NOT NULL DEFAULT '' CHECK(live_platform IN ('','tiktok','facebook','youtube','google_meet'))");
+      addColumn(db, "businesses", "live_url TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "products", "video_ref TEXT NOT NULL DEFAULT ''");
+      addColumn(db, "products", "price_minor INTEGER CHECK(price_minor IS NULL OR price_minor BETWEEN 0 AND 999999999)");
+      addColumn(db, "products", "currency TEXT NOT NULL DEFAULT 'ETB' CHECK(currency='ETB')");
+      addColumn(db, "products", "quantity_unit TEXT NOT NULL DEFAULT '' CHECK(length(quantity_unit) <= 40)");
+      addColumn(db, "products", "highlights_json TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(highlights_json))");
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(24)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

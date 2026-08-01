@@ -229,7 +229,7 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 The SuqPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
 and other in-app browsers. `FE-021` defines the current composition: a compact
-purple merchant invitation sits immediately above one integrated,
+purple visitor welcome introduces one integrated,
 application-first discovery workspace combining industry selection, search, a
 bounded featured shortcut rail, exact-location Ethiopia map, and server-paginated
 five-row List. A separate weekly country-wide Expo program follows the map inside
@@ -238,6 +238,9 @@ industry; Sunday presents selected businesses in a SuqPage TikTok livestream.
 Long platform education lives on `/about`, signup lives on `/request`, and only
 a restrained merchant call-to-action follows the marketplace. There is no
 duplicated all-business directory or browser-side full-catalog List fan-out.
+The welcome names the marketplace, invites immediate exploration, and visually
+connects to the workspace; merchant education and conversion remain secondary
+content below the public discovery experience.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.
@@ -382,7 +385,9 @@ Business
 └── Product category
     └── Product
         ├── Images
+        ├── Controlled video
         ├── Availability
+        ├── Optional ETB display price, offered-by unit, and highlights
         └── Up to four option groups
             └── Option values
 ```
@@ -435,6 +440,13 @@ Rules:
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
     merchant facts. The platform and AI must not calculate, verify, or invent
     them.
+12. An offering may display one optional non-negative ETB price, one normalized
+    merchant-defined offered-by unit, and up to six concise highlights. These
+    fields support inquiry context only and never create checkout, payment, tax,
+    inventory, or price-verification behavior.
+13. Each offering and each showroom may carry one controlled YouTube reference.
+    Public rendering derives a privacy-enhanced embed or normal watch link from
+    the canonical provider ID; recipes and users cannot supply iframe markup.
 
 Supported availability states:
 
@@ -1117,6 +1129,12 @@ remaining AI-assisted delivery sequence is recorded in
   density, and typography provide separation without repeated rules. Repeating
   plaid, pinstripe, graph-paper,
   and center-divider motifs are rejected by bank and browser admission.
+  Product detail presentation is also a design-v2 choice. Recipes select one of
+  the reviewed `editorial`, `technical`, `product_stage`, or `compact` patterns;
+  each inherits the showroom token system, preserves bounded image/video media,
+  presents optional price, highlights, unit and capability facts, and becomes a
+  mobile bottom sheet without horizontal overflow. Unknown detail patterns fail
+  recipe and publication validation.
   Deterministic composition fitness blocks duplicate navigation, standalone
   navigation combined with catalog filters, incompatible sparse catalogs, and
   missing media-treatment prerequisites. It provides review guidance for
@@ -1127,6 +1145,10 @@ remaining AI-assisted delivery sequence is recorded in
   into a canonical provider asset and rendered by a reviewed, privacy-conscious
   component. Recipes cannot supply raw iframe/embed markup, arbitrary query
   parameters, provider scripts, remote-image hotlinks, or unapproved URLs.
+- A business may mark its showroom live on TikTok, Facebook, YouTube, or Google
+  Meet. Active state requires a matching allowlisted HTTPS destination and is
+  rendered as one concise `Live on: {platform}` action. SuqPage does not host,
+  proxy, record, or autoplay the session.
 - A direct AI-provider adapter still requires a later accepted provider,
   privacy, failure, cost, and deployment contract.
 - All ten local benchmark clients use distinct validated revision-v4/bank-1.2
@@ -1390,7 +1412,10 @@ When adding or updating recognizable branded products, especially current techno
 - preserve merchant-provided names exactly when importing their catalog;
 - keep product imagery legally and operationally appropriate for the business.
 
-Prices are not required for every SuqPage catalog. The platform’s main goal is structured inquiry, not online checkout.
+Prices are optional ETB display context and are not required for every SuqPage
+catalog. They are merchant- or reviewer-controlled presentation data, not a
+charge, quote guarantee, or checkout amount. The platform’s main goal is
+structured inquiry, not online checkout.
 
 ---
 

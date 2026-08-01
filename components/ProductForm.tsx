@@ -9,6 +9,12 @@ import {
   offeringKinds,
   type OfferingKind,
 } from "@/lib/offerings";
+import { controlledYouTubeWatchUrl } from "@/lib/youtube-provider";
+
+function productVideoUrl(product?: Product) {
+  if (!product?.video_ref) return "";
+  try { return controlledYouTubeWatchUrl(product.video_ref); } catch { return ""; }
+}
 
 export default function ProductForm({
   catalog,
@@ -44,6 +50,11 @@ export default function ProductForm({
   const [leadTimeSummary, setLeadTimeSummary] = useState(
     product?.lead_time_summary || "",
   );
+  const [price, setPrice] = useState(
+    product?.price_minor == null ? "" : (product.price_minor / 100).toFixed(product.price_minor % 100 ? 2 : 0),
+  );
+  const [quantityUnit, setQuantityUnit] = useState(product?.quantity_unit || "");
+  const [highlights, setHighlights] = useState((product?.highlights || []).join("\n"));
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
   const [removeImage, setRemoveImage] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
@@ -82,6 +93,61 @@ export default function ProductForm({
           autoComplete="off"
         />
         <small>Name the product, made-to-order work, supply, or capability exactly as customers should see it.</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-price">Price in ETB <span className="optional">(optional)</span></label>
+        <input
+          id="product-price"
+          name="priceEtb"
+          type="number"
+          min="0"
+          max="9999999.99"
+          step="0.01"
+          inputMode="decimal"
+          value={price}
+          onChange={(event) => setPrice(event.target.value)}
+          placeholder="Example: 1250"
+        />
+        <small>Informational only. SuqPage does not collect payment.</small>
+      </div>
+
+      <div className="field">
+        <label htmlFor="product-unit">Offered by <span className="optional">(optional)</span></label>
+        <input
+          id="product-unit"
+          name="quantityUnit"
+          maxLength={40}
+          value={quantityUnit}
+          onChange={(event) => setQuantityUnit(event.target.value)}
+          placeholder="Example: kg, piece, set, tonne, or project"
+        />
+      </div>
+
+      <div className="field full">
+        <label htmlFor="product-highlights">Highlights <span className="optional">(optional)</span></label>
+        <textarea
+          id="product-highlights"
+          name="highlights"
+          maxLength={485}
+          value={highlights}
+          onChange={(event) => setHighlights(event.target.value)}
+          placeholder={"One highlight per line\nLocally serviceable\nFood-safe stainless steel"}
+        />
+        <small>Up to six highlights, each 80 characters or fewer.</small>
+      </div>
+
+      <div className="field full">
+        <label htmlFor="product-video">Product YouTube video <span className="optional">(optional)</span></label>
+        <input
+          id="product-video"
+          name="videoUrl"
+          type="url"
+          maxLength={500}
+          defaultValue={productVideoUrl(product)}
+          placeholder="https://www.youtube.com/watch?v=..."
+        />
+        <small>Use a standard YouTube watch or share link.</small>
       </div>
 
       <div className="field">
@@ -268,6 +334,9 @@ export default function ProductForm({
           <small>{offeringKindLabels[offeringKind]}</small>
           <strong>{name || "Offering name preview"}</strong>
           <p>{description || "The offering description will appear here."}</p>
+          {price ? <strong>ETB {price}</strong> : null}
+          {quantityUnit ? <p>Offered by {quantityUnit}</p> : null}
+          {highlights.trim() ? <ul className="product-upkeep-facts">{highlights.split(/\r?\n/).filter(Boolean).slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul> : null}
           {[capacitySummary, minimumOrderSummary, leadTimeSummary].filter(Boolean).length ? (
             <ul className="product-upkeep-facts">
               {capacitySummary ? <li>Capacity: {capacitySummary}</li> : null}

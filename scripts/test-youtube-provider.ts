@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   ControlledYouTubeError,
+  controlledYouTubeWatchUrl,
   normalizeControlledYouTubeUrl,
   privacyEnhancedYouTubeEmbedUrl,
 } from "../lib/youtube-provider";
@@ -17,6 +18,10 @@ assert.deepEqual(
 assert.equal(
   privacyEnhancedYouTubeEmbedUrl(`youtube:${id}`),
   `https://www.youtube-nocookie.com/embed/${id}`,
+);
+assert.equal(
+  controlledYouTubeWatchUrl(`youtube:${id}`),
+  `https://www.youtube.com/watch?v=${id}`,
 );
 
 for (const value of [

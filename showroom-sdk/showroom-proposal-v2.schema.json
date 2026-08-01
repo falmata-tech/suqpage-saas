@@ -5,7 +5,7 @@
   "description": "Portable syntactic guidance. The server verifies the exact bank release, content compatibility, media, tenant, revision, and publication authority.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "bankRelease", "tokenPack", "rationale", "questions", "warnings", "sections"],
+  "required": ["schemaVersion", "bankRelease", "tokenPack", "productDetailPattern", "rationale", "questions", "warnings", "sections"],
   "properties": {
     "schemaVersion": { "const": 2 },
     "bankRelease": { "type": "string", "pattern": "^showroom-bank@[1-9][0-9]*(\\.[0-9]+){0,2}$", "maxLength": 80 },
@@ -13,6 +13,10 @@
     "customPalette": {
       "description": "Optional reviewed color override. tokenPack still controls typography, spacing, geometry, density, and media bounds.",
       "$ref": "showroom-design-system.schema.json#/items/properties/colors"
+    },
+    "productDetailPattern": {
+      "description": "Reviewed product-detail presentation selected by rendered anatomy and content fit, never by industry name.",
+      "enum": ["editorial", "technical", "product_stage", "compact"]
     },
     "rationale": { "type": "string", "maxLength": 2000 },
     "questions": { "type": "array", "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 500 } },

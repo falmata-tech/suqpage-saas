@@ -14,25 +14,20 @@ const handles = [
   "entoto-ceramics",
   "koba-leather",
   "nova-assembly",
-  "tekle-circuit-systems",
-  "luna-cold-chain",
-  "abyssinia-solar-devices",
-  "nuru-naturals-lab",
-  "bale-herb-care",
-  "saba-soap-works",
-  "geda-coffee-cooperative",
-  "atlas-pump-works",
-  "merkato-packaging-systems",
-  "jimma-agro-machinery",
-  "hadiya-woodcraft",
-  "gurage-lighting-works",
-  "sidama-workwear",
-  "hawassa-loom-house",
-  "dawa-water-solutions",
-  "eastern-safety-gear",
-  "gambela-recycled-paper",
-  "baro-nursery-supplies",
 ];
+
+const expectedDetailPatterns = {
+  "selam-weave": "editorial",
+  "afia-botanics": "product_stage",
+  "warka-furniture": "editorial",
+  "addis-metalworks": "technical",
+  "green-terrace-farm": "compact",
+  "blue-nile-apiary": "product_stage",
+  "rift-valley-mill": "compact",
+  "entoto-ceramics": "editorial",
+  "koba-leather": "product_stage",
+  "nova-assembly": "technical",
+};
 
 const baseUrl = process.env.SUQPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
 const outputDir =
@@ -170,6 +165,43 @@ try {
         screenshot,
         ...metrics,
       });
+      await page
+        .locator('[data-slot="catalog"] article')
+        .first()
+        .getByRole("button", { name: /^View / })
+        .click();
+      const detailDialog = page.locator(".product-dialog.open");
+      await detailDialog.waitFor();
+      await detailDialog.getByRole("button", { name: "Video" }).click();
+      await detailDialog.locator("iframe").waitFor();
+      const detailMetrics = await detailDialog.evaluate((dialog) => {
+        const panel = dialog.querySelector(".product-dialog-panel");
+        const frame = dialog.querySelector("iframe");
+        return {
+          pattern: panel?.getAttribute("data-detail-pattern"),
+          price: Boolean(dialog.querySelector(".product-dialog-price")),
+          highlights: dialog.querySelectorAll(".product-dialog-highlights li").length,
+          videoSrc: frame?.getAttribute("src") || "",
+          overflow: panel ? panel.scrollWidth > panel.clientWidth + 1 : true,
+        };
+      });
+      if (
+        detailMetrics.pattern !== expectedDetailPatterns[handle] ||
+        !detailMetrics.price ||
+        detailMetrics.highlights < 1 ||
+        !detailMetrics.videoSrc.startsWith("https://www.youtube-nocookie.com/embed/") ||
+        detailMetrics.overflow
+      ) {
+        browserErrors.push(`Invalid product detail presentation: ${JSON.stringify(detailMetrics)}`);
+      }
+      await detailDialog.getByRole("button", { name: "Photo" }).click();
+      await page.screenshot({
+        path: path.join(outputDir, `product-${handle}-${viewportName}.png`),
+        fullPage: false,
+        animations: "disabled",
+        caret: "initial",
+      });
+      await detailDialog.getByRole("button", { name: "Close product" }).click();
       if (handle === "selam-weave") {
         await page
           .locator('[data-slot="catalog"] article')
