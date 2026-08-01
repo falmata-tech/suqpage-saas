@@ -20,7 +20,7 @@ export default async function Home({
           <nav className="landing-desktop-nav" aria-label="Public navigation">
             <a href="#discover">Explore Suqs</a>
             <Link href="/about">About</Link>
-            <Link href="/request">For businesses</Link>
+            <Link href="/request">Sign up</Link>
             <Link className="landing-login" href="/login">Login</Link>
           </nav>
           <details className="landing-mobile-menu">
@@ -28,7 +28,7 @@ export default async function Home({
             <nav aria-label="Mobile public navigation">
               <a href="#discover">Explore Suqs</a>
               <Link href="/about">About</Link>
-              <Link href="/request">For businesses</Link>
+              <Link href="/request">Sign up</Link>
               <Link href="/login">Login</Link>
             </nav>
           </details>
@@ -69,7 +69,7 @@ export default async function Home({
       <footer className="landing-footer">
         <div className="landing-container landing-footer-grid">
           <div><SuqPageBrand className="landing-brand" /><p>Permanent digital showrooms for Ethiopia&apos;s independent makers, growers, and product businesses.</p></div>
-          <nav aria-label="Footer navigation"><Link href="/discover">Explore Suqs</Link><Link href="/about">About SuqPage</Link><Link href="/request">For businesses</Link><Link href="/login">Login</Link></nav>
+          <nav aria-label="Footer navigation"><Link href="/discover">Explore Suqs</Link><Link href="/about">About SuqPage</Link><Link href="/request">Sign up</Link><Link href="/login">Login</Link></nav>
           <div className="landing-legal"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 SuqPage</span></div>
         </div>
       </footer>

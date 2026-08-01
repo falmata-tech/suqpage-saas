@@ -54,6 +54,9 @@ findable on desktop and mobile.
 
 - The same accessible brand component appears on the homepage, Bazaar, public
   intake, login, legal pages, and authenticated workspace shell.
+- Every public navigation link to `/request` is labeled **Sign up** on desktop,
+  mobile, and footer navigation. Promotional calls to action may retain their
+  purposeful **Build your Suq** or **Start your Suq** wording.
 - Login and public intake use the same platform header, compact geometry,
   semantic palette, form controls, and focus treatment as the current homepage
   and About page. Their distinct tasks remain immediately clear.
@@ -84,6 +87,12 @@ Scenario: Visitor recognizes SuqPage across platform surfaces
   WHEN each platform header or identity area renders
   THEN the same SuqPage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
+
+Scenario: Visitor finds business signup consistently
+  GIVEN a visitor opens the homepage, About page, or login page
+  WHEN desktop, mobile, or footer public navigation is available
+  THEN every `/request` navigation destination is labeled Sign up
+  AND no navigation destination uses the ambiguous For businesses label
 
 Scenario: Visitor uses a public platform task on a phone
   GIVEN a visitor opens login or the expression-of-interest form at 320 or 390 CSS pixels
@@ -155,7 +164,13 @@ component, CSS, and platform mark references in one deployment.
 
 ## Completion evidence
 
-Evidence: implemented and verified through 2026-08-01.
+Evidence: verified on 2026-08-01. Homepage desktop/mobile/footer, About
+desktop/mobile, and Login desktop/mobile navigation all label `/request` as
+**Sign up**; no public navigation retains **For businesses**. The focused
+production-browser identity test passed across all public surfaces, and
+`npm run check` plus `npm run release` passed with production build, HTTP smoke,
+scale, security, trace privacy, and zero-vulnerability gates. No route, signup
+behavior, schema, or tenant data changed.
 
 - `public/brand/suqpage-mark.svg` and `components/SuqPageBrand.tsx` provide one
   project-owned platform identity on the homepage, Bazaar, intake, login, legal,

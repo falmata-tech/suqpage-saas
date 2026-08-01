@@ -635,6 +635,12 @@ test("platform surfaces share the SuqPage identity", async ({ page }) => {
     const brand = page.locator('.suqpage-brand img[src="/brand/suqpage-mark.svg"]').first();
     await expect(brand).toBeVisible();
     await expect(brand.locator("..")).toHaveAccessibleName("SuqPage home");
+    if (["/", "/about", "/login"].includes(pathName)) {
+      const signupLinks = page.locator('nav a[href="/request"]');
+      expect(await signupLinks.count()).toBeGreaterThan(0);
+      expect(await signupLinks.allTextContents()).toEqual(Array(await signupLinks.count()).fill("Sign up"));
+      await expect(page.getByRole("link", { name: /For businesses?/i })).toHaveCount(0);
+    }
   }
   await page.setViewportSize({ width: 390, height: 844 });
   for (const pathName of ["/request", "/login"]) {

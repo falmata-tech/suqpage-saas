@@ -9,7 +9,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
   if (user) redirect(user.must_change_password ? "/dashboard/account?required=1" : "/dashboard");
   const p=await searchParams;
   return <div className="landing-home platform-task-page">
-    <header className="landing-header"><div className="landing-container landing-nav"><SuqPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Suqs</Link><Link href="/about">About</Link><Link href="/request">For businesses</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Suqs</Link><Link href="/about">About</Link><Link href="/request">For businesses</Link></nav></details></div></header>
+    <header className="landing-header"><div className="landing-container landing-nav"><SuqPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Suqs</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Suqs</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav></details></div></header>
     <main className="platform-task-main">
       <section className="platform-task-shell login-task-shell" aria-labelledby="login-title">
         <div className="platform-task-context">

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return <div className="landing-home about-page">
-    <header className="landing-header"><div className="landing-container landing-nav"><SuqPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Suqs</Link><Link href="/request">For businesses</Link><Link className="landing-login" href="/login">Login</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Suqs</Link><Link href="/request">For businesses</Link><Link href="/login">Login</Link></nav></details></div></header>
+    <header className="landing-header"><div className="landing-container landing-nav"><SuqPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Suqs</Link><Link href="/request">Sign up</Link><Link className="landing-login" href="/login">Login</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Suqs</Link><Link href="/request">Sign up</Link><Link href="/login">Login</Link></nav></details></div></header>
     <main>
       <section className="about-hero" aria-labelledby="about-title">
         <Image src="/landing/maker-workshop-hero.jpg" alt="A maker working in a small production workshop" fill priority sizes="100vw" />
