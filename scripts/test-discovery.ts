@@ -123,14 +123,16 @@ try {
     "a sparse business keeps its exact reviewed coordinates",
   );
   assert.equal(view.suqs.some((suq) => suq.handle === "expired-device"), true, "manual renewal dates do not hide an active published showroom");
-  assert.equal(view.expo.hallCount, 2);
+  assert.equal(view.expo.boothCount, 19);
   assert.equal(view.expo.mode, "expo");
+  assert.equal(view.expo.isToday, true);
   assert.equal(view.expo.selectedWeekday, 1);
   assert.equal(view.expo.schedule.length, 7);
   assert.equal(view.expo.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
-  assert.equal(Math.max(...view.expo.booths.map((booth) => booth.booth)), 12, "an Expo hall never exposes more than twelve booth positions");
+  assert.ok(view.expo.booths.every((booth) => booth.revealed && booth.suq.imagePath === `/booths/${booth.suq.handle}.webp`), "today's Expo uses each business's approved booth profile image");
+  assert.deepEqual(view.expo.booths.map((booth) => booth.slot), Array.from({ length: 19 }, (_, index) => index + 1), "every Expo business receives one continuous floor slot");
   assert.equal(new Set(view.expo.booths.map((booth) => booth.reference)).size, view.expo.booths.length, "Expo booth references are unique");
-  assert.match(view.expo.booths[0].reference, /^ELC-H1-B\d{2}$/);
+  assert.match(view.expo.booths[0].reference, /^ELC-B\d{2}$/);
 
   assert.equal(view.list.items.length, 5, "the database-backed List response is capped at five rows");
   assert.equal(view.list.pageCount, 4);
@@ -151,12 +153,16 @@ try {
 
   const tuesday = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
   assert.equal(tuesday.expo.title, "Beauty & body care Expo");
-  assert.deepEqual(tuesday.expo.booths.map((booth) => booth.handle), ["sheger-soap"]);
+  assert.equal(tuesday.expo.isToday, false);
+  assert.equal(tuesday.expo.boothCount, 1);
+  assert.ok(tuesday.expo.booths.every((booth) => !booth.revealed && booth.suq === null), "non-today Expo slots contain no business projection");
+  assert.equal(JSON.stringify(tuesday.expo.booths).includes("sheger-soap"), false, "non-today page data does not leak a business handle");
 
   const sunday = getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
   assert.equal(sunday.expo.mode, "livestream");
   assert.equal(sunday.expo.title, "Sunday Suq Live");
-  assert.deepEqual(new Set(sunday.expo.booths.map((booth) => booth.handle)), new Set(["addis-device-1", "addis-device-2", "sheger-soap"]));
+  assert.equal(sunday.expo.boothCount, 3);
+  assert.ok(sunday.expo.booths.every((booth) => !booth.revealed && booth.suq === null), "the future Sunday lineup is also redacted");
   assert.ok(sunday.expo.booths.every((booth) => /^LIVE-\d{2}$/.test(booth.reference)));
 
   const invalidIndustry = getDiscoveryView({ db, industry: "not-real" });
@@ -192,11 +198,18 @@ try {
     is_featured: 1,
     is_excluded: 0,
   }, "admin discovery updates persist the profile flags and media path");
+  const refreshedToday = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const updatedBooth = refreshedToday.expo.booths.find((booth) => booth.revealed && booth.suq.id === firstAddisBusinessId);
+  assert.equal(updatedBooth?.revealed ? updatedBooth.suq.imagePath : null, "/booths/admin-approved.webp", "the public booth reads its image from the owning business profile");
   assert.deepEqual(
     (db.prepare("SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key").all(firstAddisBusinessId) as Array<{ industry_key: string }>).map((row) => row.industry_key),
     ["electronics", "machinery-tools"],
     "admin discovery updates replace indexed industry membership atomically",
   );
+  db.prepare("UPDATE business_discovery_profiles SET booth_image_path='' WHERE business_id=(SELECT id FROM businesses WHERE handle='bishoftu-repair')").run();
+  const missingBoothMedia = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  assert.equal(missingBoothMedia.total, 19, "missing booth setup does not erase an otherwise eligible geographic Suq");
+  assert.equal(missingBoothMedia.expo.boothCount, 18, "a business without its own approved booth image does not receive an Expo slot");
 
   console.log("Geographic Suq discovery and weekly industry Expo tests passed.");
 } finally {

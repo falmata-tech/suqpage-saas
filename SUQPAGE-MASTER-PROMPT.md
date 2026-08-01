@@ -254,16 +254,22 @@ Closing it restores the same map state. Location controls show only places with
 matching businesses, and the center control restores the country view.
 
 The Monday-through-Saturday Expo is a virtual presentation, not a physical
-location claim. It uses a clear bounded top-view floor, restrained central
-court, no people, and perimeter booth placement. The selected calendar date,
-not map filters, chooses its industry. Monday is Electronics, Tuesday Beauty &
+location claim. It uses one dynamically sized top-view floor, restrained
+architectural context, no people, and direct pan/zoom/fit controls. Every booth
+remains on that floor; there are no halls, pages, or hidden overflow records.
+The rolling seven-date selector begins with Ethiopia-local today, never a past
+date. Today retains the strongest persistent visual emphasis. Selecting another
+date opens a six-second anonymous preview and then returns to today; selecting a
+different preview restarts that timer without changing map filters. The selected
+calendar date, not map filters, chooses its industry. Monday is Electronics, Tuesday Beauty &
 Care, Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home &
-Living, and Saturday Fashion & Textiles. Sunday replaces the floor with a
-TikTok livestream showcase of selected featured businesses and permanent Visit
-Suq links. A hall contains at most 12 booths;
-additional businesses create deterministic Hall 2, Hall 3, and later halls
-without increasing phone rendering cost. Every booth exposes a stable
-`{industry-code}-H{hall}-B{booth-number}` reference. A business must have an
+Living, and Saturday Fashion & Textiles. Today's Expo reveals each business's
+identity, approved account-owned booth image, preview, and permanent Visit Suq
+link. Selecting any other date returns only count-preserving anonymous booth
+outlines; business identity, handle, media, and destination are not serialized.
+Sunday replaces the floor with a TikTok livestream showcase and reveals its
+selected featured businesses only on Sunday. Every booth exposes a stable
+`{industry-code}-B{booth-number}` reference. A business must have an
 active published showroom, one published offering, a matching reviewed industry,
 valid reviewed location, an approved discovery profile and media, and no
 discovery exclusion. Subscription or payment dates do not determine public
@@ -350,7 +356,7 @@ merchant product. Public presentation uses normal finished business copy.
 The wider disposable seed contains 48 lightweight small-business showrooms
 distributed across six industries and reviewed Ethiopian locations. Reset
 creates 58 total businesses, exactly ten featured profiles, approved discovery
-media, exact map coordinates, and at most 12 booths per rendered Expo hall.
+media, exact map coordinates, and complete dynamically sized Expo floors.
 These are workflow and demonstration fixtures, not finished client designs or
 evidence of real businesses.
 

@@ -67,16 +67,9 @@ for (const industry of DISCOVERY_INDUSTRIES) {
   const groupedIds = discovery.cityGroups.flatMap((group) => group.suqs.map((suq) => suq.id));
   assert.equal(new Set(groupedIds).size, groupedIds.length, `${industry.label} city gateways contain no duplicate businesses`);
   assert.ok(discovery.cityGroups.every((group) => group.count === group.suqs.length && group.count > 1), `${industry.label} city gateway counts remain exact`);
-  const hallCounts = new Map<string, number>();
   assert.equal(discovery.expo.booths.length, discovery.suqs.length, `${industry.label} Expo includes the complete result set`);
-  for (const booth of discovery.expo.booths) {
-    const key = String(booth.hall);
-    hallCounts.set(key, (hallCounts.get(key) || 0) + 1);
-  }
-  assert.ok(
-    [...hallCounts.values()].every((count) => count <= 12),
-    `${industry.label} keeps halls bounded`,
-  );
+  assert.deepEqual(discovery.expo.booths.map((booth) => booth.slot), Array.from({ length: discovery.expo.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
+  assert.equal(new Set(discovery.expo.booths.map((booth) => booth.reference)).size, discovery.expo.boothCount, `${industry.label} floor references remain unique`);
 }
 const searchedMonday = getDiscoveryView({ db, industry: "electronics", q: "Nova Assembly", expoDay: 1 });
 assert.equal(searchedMonday.total, 1, "map search narrows geographic results");

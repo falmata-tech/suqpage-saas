@@ -38,13 +38,17 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
 - Local region, zone, city/town, and road context with no runtime map service.
 - Search, industry, featured, map, and list controls over one eligible result set.
 - Server-paginated List results with at most five businesses per response page.
-- A date-labeled weekly Expo selector: Monday through Saturday each have one
-  stable assigned industry, while Sunday is a TikTok livestream showcase of
-  selected featured businesses.
-- Twelve booths per Expo hall, deterministic hall navigation, numbered booth
-  references, approved booth imagery, and named visual fallback on file failure.
+- A rolling date-labeled selector beginning today and exposing the next six
+  dates: Monday through Saturday each have one stable assigned industry, while
+  Sunday is a TikTok livestream showcase of selected featured businesses.
+- One dynamically sized, pannable and zoomable Expo floor with every booth on
+  the same surface, stable numbered references, and no halls or pagination.
+- Full business identity, approved booth imagery, preview, and showroom links
+  only for today's selected Expo; every other date exposes anonymous booth
+  outlines and schedule information without business identity or media.
 - A compact marker preview and permanent **Visit Suq** destination.
-- Mobile-first touch, pan, zoom, map reset, list fallback, and Expo hall controls.
+- Mobile-first touch, pan, bounded zoom, fit/reset, map reset, List fallback,
+  and continuous Expo-floor controls.
 
 ### Non-goals
 
@@ -81,12 +85,14 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
   maximum supported zoom, individual markers remain reachable.
 - A location option represents businesses near that named place, not a claim
   that every result lies inside an authoritative city boundary.
-- An Expo hall contains at most 12 booths. Additional businesses create Hall 2,
-  Hall 3, and so on without enlarging one rendered floor.
-- Expo booth references are `{industry-code}-H{hall}-B{booth}` and deterministic
-  for an unchanged selected result set.
-- An approved booth image is the preferred Expo visual. A named fallback is
-  only a failed-file rendering fallback and does not create eligibility.
+- Every Expo business occupies one stable slot on one continuous floor. The
+  floor expands with the eligible count and never moves overflow into a hall or
+  page.
+- Expo booth references are `{industry-code}-B{booth}` and deterministic for an
+  unchanged selected result set.
+- An approved booth image belongs to the business discovery profile and is the
+  only factual Expo-booth visual. A named fallback handles file failure without
+  creating eligibility. Non-today previews receive neither identity nor media.
 
 ## Contracts
 
@@ -97,8 +103,14 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
 - The stable weekly assignment is Monday Electronics, Tuesday Beauty & Care,
   Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home & Living,
   Saturday Fashion & Textiles, and Sunday TikTok livestream.
-- Map controls use familiar zoom/reset icons with accessible names. Industry,
-  view, and hall modes use labeled segmented or tab controls.
+- The seven-date selector begins with Ethiopia-local today and moves forward six
+  dates; it never presents a past date as an upcoming preview.
+- Today's date retains the strongest persistent visual emphasis even while a
+  different date has temporary selected styling. A non-today preview returns to
+  today after six seconds; choosing another non-today date restarts that timer
+  while preserving map industry, search, and view state.
+- Map and floor controls use familiar zoom/reset icons with accessible names.
+  Industry and view modes use labeled segmented or tab controls.
 - At 320px and 390px, all primary controls are at least 44px, horizontal rails
   are bounded, the document has no horizontal overflow, and the map remains
   pannable without trapping page scrolling outside its stage.
@@ -106,6 +118,12 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
   zoom, reduced-motion behavior, native modal focus containment, Escape/Close,
   and fit-to-view initialization. Drag/zoom is useful only when floor overflow
   exists; a small floor remains centered and stable.
+- The Expo uses the same one-layer performance contract, with restrained
+  architectural context, direct transforms, fit-to-view initialization, and no
+  React rerender for every pan or zoom frame.
+- Geographic zoom commits rendered labels and marker detail only after the zoom
+  gesture or animation ends, and city gateways appear before unnecessary
+  street-level magnification.
 - Local geographic attribution remains visible and links to the source licence.
 
 ## Scenarios
@@ -139,11 +157,20 @@ Scenario: Visitor changes map industry
   THEN map clusters and list rows use the newly selected eligible result set
   AND the date-selected Expo remains unchanged
 
-Scenario: Expo exceeds one hall
-  GIVEN the selected industry has more than twelve eligible businesses
-  WHEN that industry's assigned weekday Expo renders
-  THEN Hall 1 contains at most twelve usable booths
-    AND every remaining business is reachable in deterministic later halls
+Scenario: Today's Expo grows on one floor
+  GIVEN today's assigned industry has more than twelve eligible businesses
+  WHEN today's Expo renders
+  THEN every eligible business has one booth on one continuous floor
+  AND pan, zoom, and fit controls keep every booth reachable
+  AND no hall, page selector, or hidden overflow record exists
+
+Scenario: Visitor previews another Expo date
+  GIVEN the visitor selects a date that is not today
+  WHEN that Expo preview renders
+  THEN its expected booth slots appear as anonymous outlines
+  AND no business name, image, handle, preview, or showroom link is exposed
+  AND the schedule clearly identifies today's live Expo
+  AND after six seconds the selected Expo returns to today
 
 Scenario: Sunday presents selected businesses live
   GIVEN Sunday is selected
@@ -177,8 +204,9 @@ Scenario: Local map assets fail
 - Localization and merchant-entered values: long place/business names truncate
   or wrap without changing marker/control geometry.
 - Performance and limits: indexed marker projection, deterministic in-memory
-  city grouping, one hardware-transformed City Suq layer, lazy dimensioned media,
-  SQL count/limit/offset list pages, zoom-tiered geography, and one Expo hall.
+  city grouping, zoom-end map rendering, one hardware-transformed layer per
+  open floor, lazy dimensioned media, SQL count/limit/offset list pages, and
+  zoom-tiered geography.
 - Failure recovery and idempotency: local assets fail independently; list and
   Expo do not depend on map initialization.
 
@@ -192,7 +220,7 @@ attribute `directory` and `expo` showroom entries.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Eligibility, server list pages, weekly schedule, Expo hall bounds/references | integration | `scripts/test-discovery.ts` |
+| Eligibility, server list pages, weekly schedule, Expo redaction, floor slots/references | integration | `scripts/test-discovery.ts` |
 | Cluster expansion, city gateway/floor, close restoration, marker preview | browser | `tests/acceptance/app.spec.ts` |
 | Desktop/390px/320px map, City Suq, and Expo layout | visual/browser | `scripts/capture-discovery-visuals.mjs` |
 | Local geography failure and list/Expo recovery | browser | `tests/acceptance/app.spec.ts` |
@@ -216,13 +244,13 @@ this pre-launch change.
 
 ## Evidence
 
-Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` and
-`scripts/test-scale-fixtures.ts` prove exact, duplicate-free reviewed-city
-groups after eligibility and filtering. `tests/acceptance/app.spec.ts` proves
-cluster expansion, isolated exact pins, counted city gateways, one-floor City
-Suq navigation, transform restoration, local-asset failure recovery, and every
-other public workflow; all 10 scenarios passed. Visual captures at desktop,
-390px, and 320px prove bounded layouts, 44px-or-larger controls, and no document
-overflow. `npm run check` and `npm run release` passed, including the production
-build, HTTP smoke, scale, security, and dependency gates. Production rollout
-and TikTok account configuration remain excluded.
+Evidence: completed locally on 2026-08-01. Focused discovery tests prove the
+rolling Ethiopia-local seven-date schedule, sequential one-floor references,
+business-owned booth media, media-gated Expo eligibility, and identity/media
+redaction for every non-today date. Browser acceptance passed all 10 workflows,
+including the six-second return to persistently highlighted today, continuous
+floor pan/zoom/fit, and the reduced city-gateway transition. Desktop, 390px, and
+320px visual captures passed with no overflow, no halls, anonymous preview
+slots, complete today booths, and 44px-or-larger controls. `npm run check` and
+`npm run release` passed. Production rollout and TikTok configuration remain
+excluded.

@@ -151,9 +151,13 @@ test("geographic discovery, weekly Expo, benchmark Suqs, and copy-first inquiry"
   expect(desktopMap?.y).toBeLessThan(720);
   await expect(page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "Electronics & devices Expo" })).toBeVisible();
-  const firstHallBooths = await page.locator(".expo-booth").count();
-  expect(firstHallBooths).toBeGreaterThan(0);
-  expect(firstHallBooths).toBeLessThanOrEqual(12);
+  await page.locator(".expo-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
+  const previewBooths = await page.locator(".expo-booth").count();
+  expect(previewBooths).toBeGreaterThan(0);
+  await expect(page.locator(".expo-hall-controls")).toHaveCount(0);
+  await expect(page.locator(".expo-booth-outline")).toHaveCount(previewBooths);
+  await expect(page.locator(".expo-booth[data-business-id], .expo-booth img")).toHaveCount(0);
+  await page.goto("/?expoDay=1");
   await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
   await expect(page).toHaveURL(/expoDay=1/);
@@ -488,7 +492,7 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test("mobile clustered map, Expo halls, list parity, and legacy redirects", async ({ page }) => {
+test("mobile clustered map, continuous Expo floor, list parity, and legacy redirects", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
@@ -549,18 +553,35 @@ test("mobile clustered map, Expo halls, list parity, and legacy redirects", asyn
   await expect(page.locator(".discovery-map").getByText(/Hall \d/)).toHaveCount(0);
 
   await page.goto("/discover?industry=electronics&expoDay=1");
-  const booth = page.locator(".expo-booth").first();
-  await expect(booth).toBeVisible();
-  const boothLabel = (await booth.getAttribute("aria-label")) || "";
-  const boothMatch = boothLabel.match(/^([A-Z]{3}-H\d+-B\d{2}), (.+)$/);
-  expect(boothMatch).not.toBeNull();
-  const boothReference = boothMatch?.[1] || "";
-  await booth.click();
-  const preview = page.locator(".discovery-preview");
-  await expect(preview).toBeVisible();
-  await expect(page.getByRole("button", { name: new RegExp(`^${boothReference},`) })).toHaveClass(/selected/);
-  await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=expo$/);
-  expect(await page.locator(".expo-booth").count()).toBeLessThanOrEqual(12);
+  await page.locator(".expo-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
+  await expect(page.locator(".expo-booth-outline")).not.toHaveCount(0);
+  await expect(page.locator(".expo-booth[data-business-id], .expo-booth img")).toHaveCount(0);
+  await page.locator(".expo-week a.today").click();
+  await expect(page.locator(".expo-status-badge.open")).toBeVisible();
+  if (await page.locator(".expo-floor").count()) {
+    const booth = page.locator(".expo-booth[data-business-id]").first();
+    await expect(booth).toBeVisible();
+    const boothLabel = (await booth.getAttribute("aria-label")) || "";
+    const boothMatch = boothLabel.match(/^([A-Z]{3}-B\d{2}), (.+)$/);
+    expect(boothMatch).not.toBeNull();
+    const boothReference = boothMatch?.[1] || "";
+    await booth.click();
+    const preview = page.locator(".discovery-preview");
+    await expect(preview).toBeVisible();
+    await expect(page.getByRole("button", { name: new RegExp(`^${boothReference},`) })).toHaveClass(/selected/);
+    await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=expo$/);
+    const expoControls = page.locator(".expo-floor-actions button");
+    await expect(expoControls).toHaveCount(3);
+    const expoControlSizes = await expoControls.evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
+    expect(expoControlSizes.every((height) => height >= 44)).toBe(true);
+    const initialExpoZoom = await page.locator(".expo-floor-actions > span").textContent();
+    await page.getByRole("button", { name: "Zoom in to Expo floor" }).click();
+    await expect.poll(() => page.locator(".expo-floor-actions > span").textContent()).not.toBe(initialExpoZoom);
+    await page.getByRole("button", { name: "Fit Expo floor to view" }).click();
+  } else {
+    await expect(page.locator(".expo-live-businesses a")).not.toHaveCount(0);
+  }
+  await expect(page.locator(".expo-hall-controls")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List" }).click();
   const listCount = await page.locator(".discovery-list article").count();
@@ -579,7 +600,16 @@ test("mobile clustered map, Expo halls, list parity, and legacy redirects", asyn
   await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Sun/ }).click();
   await expect(page.getByRole("heading", { name: "Sunday Suq Live" })).toBeVisible();
   await expect(page.locator(".expo-floor")).toHaveCount(0);
-  expect(await page.locator(".expo-live-businesses > a").count()).toBeGreaterThan(0);
+  const sundayIsToday = await page.locator(".expo-week a[aria-current='date']").evaluate((link) => link.classList.contains("today"));
+  if (sundayIsToday) expect(await page.locator(".expo-live-businesses > a").count()).toBeGreaterThan(0);
+  else {
+    expect(await page.locator(".expo-live-slot").count()).toBeGreaterThan(0);
+    await expect(page.locator(".expo-live-businesses > a")).toHaveCount(0);
+    const todayHref = await page.locator(".expo-week a.today").getAttribute("href") || "";
+    const todayDay = todayHref.match(/expoDay=(\d)/)?.[1] || "";
+    await expect(page).toHaveURL(new RegExp(`expoDay=${todayDay}`), { timeout: 8_000 });
+    await expect(page.locator(".expo-week a.today")).toHaveAttribute("aria-current", "date");
+  }
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/bazaar");

@@ -33,6 +33,9 @@ self-service onboarding release.
   cluster expansion, and server-bounded List pagination.
 - Desktop/390px/320px gates for counted city gateways and one continuous,
   map-backed, touch-pannable virtual City Suq floor.
+- Desktop/390px/320px gates for one continuous Expo floor, non-today anonymous
+  booth outlines, the timed return to distinctly highlighted today, and
+  zoom-end geographic rendering without device stalls.
 
 ### Non-goals
 
@@ -100,7 +103,7 @@ text, session tokens, IP addresses, and raw geographic source metadata.
 |---|---|---|
 | Deterministic local geography and asset budget | operations | `scripts/test-discovery-geography.mjs` |
 | No remote map runtime requests | browser | `tests/acceptance/app.spec.ts` |
-| Weekly selector, city gateway/floor, isolated exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
+| Weekly selector, Expo floor/redaction, city gateway/floor, exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Signup backup/restore and security | operations/security | `scripts/test-operations.mjs`, `scripts/test-signup.ts` |
 | Production build and HTTP surface | release | `npm run release` |
 
@@ -123,11 +126,11 @@ additive and harmless when unused.
 
 ## Evidence
 
-Evidence: completed locally on 2026-08-01. Browser acceptance passed all 10 scenarios,
-including close-zoom city gateways, one continuous City Suq floor, isolated
-exact pins, transform restoration, and local-map failure recovery. Desktop,
-390px, and 320px visual captures prove fit-to-view, bounded controls, and no
-document overflow; the floor uses one transformed layer with lazy dimensioned
-media. `npm run check` and `npm run release` passed, including the production
-build, HTTP smoke, scale, security, and zero-vulnerability dependency audit. No
-production rollout or data migration is included.
+Evidence: completed locally on 2026-08-01. Desktop, 390px, and 320px captures
+prove one bounded transformed Expo floor, anonymous future outlines, complete
+today booths, persistent Today emphasis, touch-sized controls, enriched City
+Suq/Expo environments, and no document overflow. Browser acceptance passed all
+10 workflows, including the timed return and lower city zoom. `npm run check`
+and `npm run release` passed with production build, HTTP smoke, scale, security,
+trace privacy, and zero vulnerabilities. No production rollout or data migration
+is included.

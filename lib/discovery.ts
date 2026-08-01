@@ -23,7 +23,6 @@ export const EXPO_WEEK = [
 ] as const;
 
 const LIST_PAGE_SIZE = 5;
-const EXPO_HALL_SIZE = 12;
 const ETHIOPIA_TIME_ZONE = "Africa/Addis_Ababa";
 
 type DiscoveryRow = {
@@ -59,11 +58,16 @@ export type DiscoverySuq = {
   featured: boolean;
 };
 
-export type ExpoBooth = DiscoverySuq & {
-  hall: number;
-  booth: number;
+export type ExpoBooth = {
+  slot: number;
   reference: string;
-};
+} & ({
+  revealed: true;
+  suq: DiscoverySuq;
+} | {
+  revealed: false;
+  suq: null;
+});
 
 export type DiscoveryCityGroup = {
   key: string;
@@ -93,9 +97,10 @@ export type WeeklyIndustryExpo = {
   industryCode: string;
   industryIcon: string;
   selectedWeekday: number;
+  isToday: boolean;
   dayLabel: string;
   dateLabel: string;
-  hallCount: number;
+  boothCount: number;
   booths: ExpoBooth[];
   schedule: WeeklyExpoDay[];
 };
@@ -203,13 +208,12 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
   const { year, month, day } = ethiopiaDateParts(now);
   const today = new Date(Date.UTC(year, month - 1, day));
   const todayWeekday = today.getUTCDay();
-  const monday = new Date(today);
-  monday.setUTCDate(today.getUTCDate() - ((todayWeekday + 6) % 7));
   const labelFormatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
-  const days = EXPO_WEEK.map((entry, index): WeeklyExpoDay => {
-    const date = new Date(monday);
-    date.setUTCDate(monday.getUTCDate() + index);
+  const days = Array.from({ length: 7 }, (_, index): WeeklyExpoDay => {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() + index);
+    const entry = EXPO_WEEK.find((candidate) => candidate.weekday === date.getUTCDay()) || EXPO_WEEK[0];
     const industry = entry.industryKey ? normalizeIndustry(entry.industryKey) : null;
     return {
       weekday: entry.weekday,
@@ -220,7 +224,7 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
       industryKey: industry?.key || null,
       industryLabel: industry?.label || "SuqPage TikTok Live",
       industryIcon: industry?.icon || "live",
-      isToday: entry.weekday === todayWeekday,
+      isToday: index === 0,
     };
   });
   return { todayWeekday, days };
@@ -253,6 +257,34 @@ function groupCities(suqs: DiscoverySuq[]): DiscoveryCityGroup[] {
       longitude: group.longitude / group.count,
     }))
     .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
+}
+
+function expoEligibleCount(db: DatabaseSync, industryKey: string | null) {
+  if (industryKey) {
+    return (db.prepare(`
+      SELECT COUNT(DISTINCT b.id) AS total
+      FROM business_industries i
+      JOIN businesses b ON b.id=i.business_id
+      JOIN business_discovery_profiles p ON p.business_id=b.id
+      WHERE i.industry_key=?
+        AND b.status='active'
+        AND p.is_excluded=0
+        AND p.approved_at > 0
+        AND p.booth_image_path LIKE '/%'
+        AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+    `).get(industryKey) as { total: number }).total;
+  }
+  return (db.prepare(`
+    SELECT COUNT(*) AS total
+    FROM businesses b
+    JOIN business_discovery_profiles p ON p.business_id=b.id
+    WHERE b.status='active'
+      AND p.is_excluded=0
+      AND p.approved_at > 0
+      AND p.is_featured=1
+      AND p.booth_image_path LIKE '/%'
+      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+  `).get() as { total: number }).total;
 }
 
 export function getDiscoveryView(
@@ -295,9 +327,11 @@ export function getDiscoveryView(
   const selectedWeekday = normalizeWeekday(options.expoDay, schedule.todayWeekday);
   const selectedDay = schedule.days.find((entry) => entry.weekday === selectedWeekday) || schedule.days[0];
   const expoIndustry = selectedDay.industryKey ? normalizeIndustry(selectedDay.industryKey) : null;
-  const expoRows = expoIndustry
-    ? db.prepare(selectSql("")).all(expoIndustry.key) as DiscoveryRow[]
-    : db.prepare(`
+  const revealExpo = selectedDay.isToday;
+  const expoRows = revealExpo
+    ? expoIndustry
+      ? db.prepare(selectSql("AND p.booth_image_path LIKE '/%' ")).all(expoIndustry.key) as DiscoveryRow[]
+      : db.prepare(`
         SELECT
           b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
           p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
@@ -308,21 +342,21 @@ export function getDiscoveryView(
           AND p.is_excluded=0
           AND p.approved_at > 0
           AND p.is_featured=1
+          AND p.booth_image_path LIKE '/%'
           AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
         ORDER BY b.name COLLATE NOCASE,b.id
-      `).all() as DiscoveryRow[];
-  const expoSuqs = expoRows.map(toSuq);
-  const booths = expoSuqs.map((suq, index): ExpoBooth => {
-    const hall = Math.floor(index / EXPO_HALL_SIZE) + 1;
-    const booth = index % EXPO_HALL_SIZE + 1;
-    return {
-      ...suq,
-      hall,
-      booth,
-      reference: selectedDay.mode === "livestream"
-        ? `LIVE-${String(index + 1).padStart(2, "0")}`
-        : `${expoIndustry?.code}-H${hall}-B${String(booth).padStart(2, "0")}`,
-    };
+      `).all() as DiscoveryRow[]
+    : [];
+  const expoSuqs = expoRows.map((row) => ({ ...toSuq(row), imagePath: row.booth_image_path }));
+  const boothCount = revealExpo ? expoSuqs.length : expoEligibleCount(db, selectedDay.industryKey);
+  const booths = Array.from({ length: boothCount }, (_, index): ExpoBooth => {
+    const slot = index + 1;
+    const reference = selectedDay.mode === "livestream"
+      ? `LIVE-${String(slot).padStart(2, "0")}`
+      : `${expoIndustry?.code}-B${String(slot).padStart(2, "0")}`;
+    return revealExpo
+      ? { revealed: true, suq: expoSuqs[index], slot, reference }
+      : { revealed: false, suq: null, slot, reference };
   });
 
   return {
@@ -348,9 +382,10 @@ export function getDiscoveryView(
       industryCode: selectedDay.mode === "livestream" ? "LIVE" : expoIndustry?.code || "SUQ",
       industryIcon: selectedDay.industryIcon,
       selectedWeekday,
+      isToday: selectedDay.isToday,
       dayLabel: selectedDay.dayLabel,
       dateLabel: selectedDay.dateLabel,
-      hallCount: Math.max(1, Math.ceil(booths.length / EXPO_HALL_SIZE)),
+      boothCount,
       booths,
       schedule: schedule.days,
     },

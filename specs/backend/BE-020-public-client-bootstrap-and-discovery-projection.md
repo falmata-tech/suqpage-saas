@@ -30,8 +30,11 @@ the weekly industry Expo program.
 - Existing admin invitation onboarding as a supported parallel path.
 - Indexed eligible business projection including reviewed coordinates.
 - SQL-counted, limit/offset List pages capped at five rows.
-- Deterministic weekday-industry Expo hall/booth assignment and a Sunday
+- Deterministic weekday-industry Expo floor-slot assignment and a Sunday
   selected-featured-business livestream projection.
+- Detailed booth projection only when the selected schedule date is today;
+  non-today selections return count-preserving anonymous slots without client
+  identity, media paths, handles, or showroom destinations.
 - Publication plus active business status as public visibility authority.
 - Manual subscription records retained for operations but not used as automatic
   public visibility or discovery gates.
@@ -67,8 +70,13 @@ the weekly industry Expo program.
   exposes an exact count and centroid, and retains every member's authoritative
   coordinates for direct discovery data.
 - Map filters and search do not narrow the independently date-selected Expo.
-- Expo ordering is featured first, then normalized business name and ID. Each
-  hall has 12 entries and stable references for an unchanged projection.
+- Today's Expo ordering is featured first, then normalized business name and ID.
+  Every entry has one sequential stable floor reference for an unchanged
+  projection; there is no hall partition.
+- Approved `booth_image_path` remains business-owned profile configuration and
+  is projected only with that business's revealed booth on today's Expo.
+- Schedule dates are calculated in `Africa/Addis_Ababa`, beginning today and
+  continuing through the next six dates while preserving weekday assignments.
 
 ## Contracts
 
@@ -134,10 +142,16 @@ Scenario: Public List is requested at scale
 Scenario: Weekly Expo is projected
   GIVEN an Ethiopia-local Monday-through-Saturday date is selected
   WHEN discovery is projected
-  THEN every eligible business in that date's stable industry is assigned once
-    across deterministic twelve-booth halls
+  THEN every eligible business in today's stable industry is assigned once on
+    one deterministic continuous floor
   AND map filters do not alter the assignment
   AND Sunday instead returns selected featured businesses for TikTok live
+
+Scenario: Non-today Expo identity is redacted
+  GIVEN the visitor selects a schedule date that is not today
+  WHEN the public Expo projection is built
+  THEN it returns the eligible booth count and stable anonymous slot references
+  AND it returns no business identity, media path, handle, or destination
 
 Scenario: Matching city businesses form one gateway
   GIVEN at least two eligible map results share a reviewed city and region
@@ -157,8 +171,8 @@ Scenario: Matching city businesses form one gateway
 - Localization and merchant-entered values: bounded Unicode display values;
   normalized ASCII handle and lower-case email authority.
 - Performance and limits: indexed industry/search predicates, one linear city-
-  grouping pass, bounded five-row List pages, no occurrence fan-out, and 12-row
-  Expo hall projection.
+  grouping pass, bounded five-row List pages, count-only non-today Expo queries,
+  and no occurrence or hall fan-out.
 - Failure recovery and idempotency: transaction rollback, safe duplicate
   response, revocable session, and additive migration only if required.
 
@@ -174,7 +188,7 @@ session token, or request body.
 |---|---|---|
 | Atomic bootstrap, conflicts, rate limit, tenant binding | security/integration | `scripts/test-signup.ts`, `scripts/test-security.ts` |
 | Public eligibility without subscription gating | integration | `scripts/test-discovery.ts`, `scripts/test-account-health.ts` |
-| Exact coordinates, deterministic city groups, bounded List pages, weekly schedule, stable Expo halls | integration | `scripts/test-discovery.ts` |
+| Exact coordinates, deterministic city groups, bounded List pages, weekly schedule, Expo slots/redaction | integration | `scripts/test-discovery.ts` |
 | Exact-origin/body/session behavior | HTTP/browser | `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -196,10 +210,11 @@ production rollout requires abuse monitoring, backup, and reconciled migration.
 
 ## Evidence
 
-Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` proves deterministic
-reviewed-city-and-region grouping, exact counts and centroids, isolated-result
-behavior, eligibility filtering, bounded List pages, and the weekly schedule.
-`scripts/test-scale-fixtures.ts` proves that grouped business IDs remain exact
-and duplicate-free across every discovery industry. All 10 browser acceptance
-scenarios, `npm run check`, and `npm run release` passed, including security,
-HTTP, scale, and production-build gates. No production rollout occurred.
+Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` proves one stable
+sequential floor-slot projection, approved booth-image ownership, missing-media
+exclusion from Expo without geographic exclusion, rolling schedule dates, and
+count-preserving non-today slots containing no business, handle, destination,
+or media projection. Scale fixtures prove complete unique slot sequences across
+all six industries. All 10 browser workflows, `npm run check`, and
+`npm run release` passed, including security, HTTP, scale, and production-build
+gates. No production rollout occurred.
