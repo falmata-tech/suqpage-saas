@@ -31,6 +31,8 @@ async function capture(name, viewport, action) {
       roadLayers: document.querySelectorAll(".discovery-roads path").length,
       clusters: document.querySelectorAll(".discovery-cluster").length,
       points: document.querySelectorAll(".discovery-point").length,
+      cityGateways: document.querySelectorAll(".discovery-city-gateway").length,
+      cityShops: document.querySelectorAll(".city-suq-shop").length,
       expoBooths: document.querySelectorAll(".expo-booth").length,
       expoHalls: document.querySelectorAll(".expo-hall-controls button").length,
       featured: document.querySelectorAll(".discovery-featured-rail > a").length,
@@ -47,6 +49,8 @@ async function capture(name, viewport, action) {
       visibleLive: Boolean(document.querySelector(".expo-live")?.getClientRects().length),
       weekDays: document.querySelectorAll(".expo-week a").length,
       weekTargets: [...document.querySelectorAll(".expo-week a")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      cityTargets: [...document.querySelectorAll(".city-suq-actions button")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      visibleCitySuq: Boolean(document.querySelector(".city-suq-dialog[open]")?.getClientRects().length),
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
@@ -62,8 +66,13 @@ async function capture(name, viewport, action) {
   assert.ok(metrics.hallTargets.every((height) => height >= 42), `${name} Expo hall controls are touch sized`);
   assert.equal(metrics.weekDays, 7, `${name} renders the full weekly schedule`);
   assert.ok(metrics.weekTargets.every((height) => height >= 44), `${name} weekly controls are touch sized`);
+  assert.ok(metrics.cityTargets.every((height) => height >= 44), `${name} City Suq controls are touch sized`);
   assert.ok(metrics.expoBooths <= 12, `${name} renders at most twelve Expo booths`);
   assert.equal(metrics.visibleExpo || metrics.visibleLive, true, `${name} renders the scheduled Expo or Sunday live program`);
+  if (name.includes("city-suq")) {
+    assert.equal(metrics.visibleCitySuq, true, `${name} renders the City Suq dialog`);
+    assert.ok(metrics.cityShops > 1, `${name} renders every grouped city business on one floor`);
+  }
   if (name.includes("home")) {
     assert.ok(metrics.featured > 0 && metrics.featured <= 5, `${name} renders the bounded featured rail`);
     assert.ok(metrics.mapTop !== null && metrics.mapTop < metrics.viewportHeight, `${name} brings the map into the first viewport`);
@@ -73,6 +82,32 @@ async function capture(name, viewport, action) {
   await page.screenshot({ path: screenshot, fullPage: name.includes("home") || name.includes("expo") });
   evidence.push({ name, screenshot, ...metrics });
   await page.close();
+}
+
+async function openVisibleCitySuq(page) {
+  const visibleIndex = (selector) => page.locator(selector).evaluateAll((markers) => {
+    const stage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
+    if (!stage) return -1;
+    return markers.findIndex((marker) => {
+      const bounds = marker.getBoundingClientRect();
+      const centerX = bounds.left + bounds.width / 2;
+      const centerY = bounds.top + bounds.height / 2;
+      return centerX >= stage.left && centerX <= stage.right && centerY >= stage.top && centerY <= stage.bottom;
+    });
+  });
+  for (let attempt = 0; attempt < 7; attempt += 1) {
+    const gatewayIndex = await visibleIndex(".discovery-city-gateway");
+    if (gatewayIndex >= 0) {
+      await page.locator(".discovery-city-gateway").nth(gatewayIndex).click();
+      await page.locator(".city-suq-dialog[open]").waitFor();
+      return;
+    }
+    const clusterIndex = await visibleIndex(".discovery-cluster");
+    if (clusterIndex < 0) break;
+    await page.locator(".discovery-cluster").nth(clusterIndex).click();
+    await page.waitForTimeout(420);
+  }
+  throw new Error("No visible multi-business city gateway was reachable");
 }
 
 try {
@@ -96,6 +131,9 @@ try {
     }
     await page.locator(".discovery-map-stage").scrollIntoViewIfNeeded();
   });
+  await capture("city-suq-desktop", { width: 1440, height: 1000 }, openVisibleCitySuq);
+  await capture("city-suq-mobile-390", { width: 390, height: 844 }, openVisibleCitySuq);
+  await capture("city-suq-mobile-320", { width: 320, height: 700 }, openVisibleCitySuq);
   await capture("expo-mobile-390", { width: 390, height: 844 }, async (page) => {
     await page.locator(".daily-expo").scrollIntoViewIfNeeded();
   });

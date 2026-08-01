@@ -8,7 +8,7 @@ import "d3-transition";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import Supercluster from "supercluster";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import type { DiscoverySuq, DiscoveryView, ExpoBooth, WeeklyIndustryExpo } from "@/lib/discovery";
+import type { DiscoveryCityGroup, DiscoverySuq, DiscoveryView, ExpoBooth, WeeklyIndustryExpo } from "@/lib/discovery";
 
 const MAP_WIDTH = 900;
 const MAP_HEIGHT = 650;
@@ -16,6 +16,8 @@ const BASE_CLUSTER_ZOOM = 5;
 const MAX_CLUSTER_ZOOM = 17;
 const MAX_MAP_ZOOM = 18;
 const MAX_MAP_SCALE = 2 ** (MAX_MAP_ZOOM - BASE_CLUSTER_ZOOM);
+const CITY_GATEWAY_ZOOM = 11;
+const CITY_GATEWAY_SCALE = 2 ** (CITY_GATEWAY_ZOOM - BASE_CLUSTER_ZOOM);
 const ETHIOPIA_BOUNDS: [number, number, number, number] = [32, 3, 49, 15];
 
 type MapFeature = {
@@ -66,6 +68,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   const [roads, setRoads] = useState<MapCollection | null>(null);
   const [mapFailed, setMapFailed] = useState(false);
   const [selectedSuqId, setSelectedSuqId] = useState<number | null>(null);
+  const [activeCityKey, setActiveCityKey] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const groupRef = useRef<SVGGElement | null>(null);
@@ -73,6 +76,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
 
   useEffect(() => {
     setSelectedSuqId(null);
+    setActiveCityKey(null);
     setView(discovery.view);
   }, [discovery.industry.key, discovery.query, discovery.view]);
 
@@ -103,7 +107,9 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
     : null, [regions]);
   const path = useMemo(() => projection ? geoPath(projection) : null, [projection]);
   const selectedSuq = discovery.suqs.find((suq) => suq.id === selectedSuqId) || null;
+  const activeCity = discovery.cityGroups.find((group) => group.key === activeCityKey) || null;
   const featuredSuqs = discovery.suqs.filter((suq) => suq.featured).slice(0, 5);
+  const groupedSuqIds = useMemo(() => new Set(discovery.cityGroups.flatMap((group) => group.suqs.map((suq) => suq.id))), [discovery.cityGroups]);
 
   const clusterIndex = useMemo(() => {
     const index = new Supercluster<MarkerProperties, ClusterProperties>({
@@ -135,24 +141,10 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   }, [places, zoomLevel]);
 
   const locations = useMemo(() => {
-    const namedPlaces = (places?.features || []).filter((feature) => {
-      const coordinates = (feature.geometry as { coordinates?: [number, number] }).coordinates;
-      return coordinates && (feature.properties.place === "city" || feature.properties.place === "town");
-    });
     const grouped = new Map<string, { city: string; region: string; latitude: number; longitude: number; count: number }>();
     for (const suq of discovery.suqs) {
-      let nearest: MapFeature | null = null;
-      let nearestDistance = Number.POSITIVE_INFINITY;
-      for (const place of namedPlaces) {
-        const coordinates = (place.geometry as unknown as { coordinates: [number, number] }).coordinates;
-        const longitudeDistance = (coordinates[0] - suq.longitude) * Math.cos(suq.latitude * Math.PI / 180);
-        const latitudeDistance = coordinates[1] - suq.latitude;
-        const distance = longitudeDistance * longitudeDistance + latitudeDistance * latitudeDistance;
-        if (distance < nearestDistance) { nearest = place; nearestDistance = distance; }
-      }
-      const nearbyName = nearest && nearestDistance <= 1.2 * 1.2 ? String(nearest.properties.name) : suq.city;
-      const key = `${nearbyName}\u0000${suq.region}`;
-      const current = grouped.get(key) || { city: nearbyName, region: suq.region, latitude: 0, longitude: 0, count: 0 };
+      const key = `${suq.city.trim().toLocaleLowerCase()}\u0000${suq.region.trim().toLocaleLowerCase()}`;
+      const current = grouped.get(key) || { city: suq.city, region: suq.region, latitude: 0, longitude: 0, count: 0 };
       current.latitude += suq.latitude;
       current.longitude += suq.longitude;
       current.count += 1;
@@ -160,7 +152,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
     }
     return [...grouped.values()].map((location) => ({ ...location, latitude: location.latitude / location.count, longitude: location.longitude / location.count }))
       .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
-  }, [discovery.suqs, places]);
+  }, [discovery.suqs]);
 
   useEffect(() => {
     if (!svgRef.current || !groupRef.current || !projection) return;
@@ -207,7 +199,14 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
     select(svgRef.current).transition().duration(220).call(zoomRef.current.scaleBy, factor);
   }
 
+  function renderSuqPoint(suq: DiscoverySuq) {
+    const point = projection?.([suq.longitude, suq.latitude]);
+    if (!point) return null;
+    return <g key={`suq-${suq.id}`} data-suq-id={suq.id} data-latitude={suq.latitude} data-longitude={suq.longitude} className={`discovery-point${suq.featured ? " featured" : ""}${selectedSuqId === suq.id ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${suq.name}, ${suq.city}. Open preview.`} onClick={() => setSelectedSuqId(suq.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedSuqId(suq.id); }}><circle className="point-halo" r="18" /><path d="M0 13C-3 8-9 3-9-5a9 9 0 1 1 18 0c0 8-6 13-9 18Z" /><circle cx="0" cy="-5" r="3" /></g>;
+  }
+
   const action = embedded ? "/" : "/discover";
+  const showCityGateways = clusterZoom >= CITY_GATEWAY_ZOOM;
   return <section className="discovery" id="discover" aria-labelledby="discovery-title">
     <div className="discovery-switcher">
       <div className="discovery-switcher-head"><div><span className="discovery-kicker">Explore Ethiopia&apos;s product businesses</span><h2 id="discovery-title">Choose an industry. Find a Suq.</h2></div><p>Search real business locations, zoom to an exact Suq, or visit this week&apos;s country-wide Expos.</p></div>
@@ -225,7 +224,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
         <label className="discovery-location-picker"><span>Jump to a location</span><select defaultValue="" onChange={(event) => {
           if (!event.target.value) { resetMap(); return; }
           const location = locations[Number(event.target.value)];
-          if (location) framePoint(location.longitude, location.latitude, 5);
+          if (location) framePoint(location.longitude, location.latitude, CITY_GATEWAY_SCALE);
         }}><option value="">All Ethiopia</option>{locations.map((location, index) => <option key={`${location.city}-${location.region}`} value={index}>Near {location.city}, {location.region} ({location.count})</option>)}</select></label>
         <div className="discovery-zoom" aria-label="Map controls"><button type="button" onClick={() => zoomBy(1.5)} title="Zoom in" aria-label="Zoom in">+</button><button type="button" onClick={() => zoomBy(1 / 1.5)} title="Zoom out" aria-label="Zoom out">−</button><button type="button" onClick={resetMap} title="Center Ethiopia" aria-label="Center Ethiopia">◎</button></div>
       </div>
@@ -243,7 +242,13 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
               const point = coordinates ? projection(coordinates) : null;
               return point ? <text key={`${String(feature.properties.name)}-${index}`} className={`place-${String(feature.properties.place)}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`}>{String(feature.properties.name)}</text> : null;
             })}</g>
-            <g className="discovery-markers">{markers.map((marker) => {
+            <g className="discovery-markers">{showCityGateways ? <>
+              {discovery.cityGroups.map((group) => {
+                const point = projection([group.longitude, group.latitude]);
+                return point ? <g key={group.key} data-city-key={group.key} className="discovery-city-gateway" transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${group.city} City Suq, ${group.count} businesses. Open virtual floor.`} onClick={() => setActiveCityKey(group.key)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setActiveCityKey(group.key); }}><circle className="city-gateway-halo" r="34" /><path d="M-20 15V-10L0-22l20 12v25M-13 15V-7h26v22M-7-1h5v6h-5zM2-1h5v6H2zM-7 9h14v6H-7z" /><circle className="city-gateway-count" cx="18" cy="-18" r="13" /><text className="city-gateway-number" x="18" y="-14" textAnchor="middle">{group.count}</text><text className="city-gateway-name" y="34" textAnchor="middle">{group.city}</text></g> : null;
+              })}
+              {discovery.suqs.filter((suq) => !groupedSuqIds.has(suq.id)).map(renderSuqPoint)}
+            </> : markers.map((marker) => {
               const point = projection(marker.geometry.coordinates as [number, number]);
               if (!point) return null;
               const properties = marker.properties;
@@ -252,7 +257,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
               }
               const suq = discovery.suqs.find((candidate) => candidate.id === properties.suqId);
               if (!suq) return null;
-              return <g key={`suq-${suq.id}`} data-suq-id={suq.id} data-latitude={suq.latitude} data-longitude={suq.longitude} className={`discovery-point${suq.featured ? " featured" : ""}${selectedSuqId === suq.id ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${suq.name}, ${suq.city}. Open preview.`} onClick={() => setSelectedSuqId(suq.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedSuqId(suq.id); }}><circle className="point-halo" r="18" /><path d="M0 13C-3 8-9 3-9-5a9 9 0 1 1 18 0c0 8-6 13-9 18Z" /><circle cx="0" cy="-5" r="3" /></g>;
+              return renderSuqPoint(suq);
             })}</g>
           </g>
         </svg> : null}
@@ -260,6 +265,8 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
         {selectedSuq ? <SuqPreview suq={selectedSuq} source="discovery" onClose={() => setSelectedSuqId(null)} /> : null}
       </div>
     </div>}
+
+    {activeCity ? <CitySuqDialog group={activeCity} onClose={() => setActiveCityKey(null)} /> : null}
 
     <WeeklyExpo expo={discovery.expo} action={action} mapIndustry={discovery.industry.key} query={discovery.query} view={view} />
   </section>;
@@ -277,6 +284,123 @@ function SuqImage({ suq }: { suq: DiscoverySuq }) {
 
 function SuqPreview({ suq, source, onClose }: { suq: DiscoverySuq; source: "discovery" | "expo"; onClose: () => void }) {
   return <aside className="discovery-preview" aria-live="polite"><SuqImage suq={suq} /><div><span>{suq.featured ? "Featured · " : ""}{suq.city}</span><h3>{suq.name}</h3><p>{suq.tagline}</p><small>{suq.zone}, {suq.region}</small><Link href={`/@${suq.handle}?ref=${source}`}>Visit Suq</Link></div><button type="button" onClick={onClose} aria-label="Close business preview">×</button></aside>;
+}
+
+function cityFloorLayout(count: number) {
+  const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
+  const rows = Math.ceil(count / columns);
+  const cardWidth = 218;
+  const cardHeight = 148;
+  const gapX = 48;
+  const gapY = 78;
+  const paddingX = 52;
+  const paddingTop = 132;
+  const paddingBottom = 92;
+  return {
+    columns,
+    cardWidth,
+    cardHeight,
+    gapX,
+    gapY,
+    paddingX,
+    paddingTop,
+    width: paddingX * 2 + columns * cardWidth + (columns - 1) * gapX,
+    height: paddingTop + rows * cardHeight + Math.max(0, rows - 1) * gapY + paddingBottom,
+  };
+}
+
+function CitySuqDialog({ group, onClose }: { group: DiscoveryCityGroup; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const floorRef = useRef<HTMLDivElement | null>(null);
+  const zoomLabelRef = useRef<HTMLSpanElement | null>(null);
+  const behaviorRef = useRef<ZoomBehavior<HTMLDivElement, unknown> | null>(null);
+  const fitTransformRef = useRef<ZoomTransform>(zoomIdentity);
+  const layout = useMemo(() => cityFloorLayout(group.count), [group.count]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    dialog.showModal();
+    return () => { if (dialog.open) dialog.close(); };
+  }, []);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    const floor = floorRef.current;
+    if (!stage || !floor) return;
+    const selection = select(stage);
+    const floorSelection = select(floor);
+    const behavior = zoom<HTMLDivElement, unknown>()
+      .filter((event) => {
+        const target = event.target as Element | null;
+        if (event.type === "wheel") return true;
+        return !target?.closest("a, button");
+      })
+      .on("zoom", (event: { transform: ZoomTransform }) => {
+        floorSelection.style("transform", `translate(${event.transform.x}px, ${event.transform.y}px) scale(${event.transform.k})`).style("transform-origin", "0 0");
+        if (zoomLabelRef.current) zoomLabelRef.current.textContent = `${Math.round(event.transform.k * 100)}%`;
+      });
+    behaviorRef.current = behavior;
+    selection.call(behavior).on("dblclick.zoom", null);
+
+    const fitFloor = () => {
+      const bounds = stage.getBoundingClientRect();
+      const fit = Math.min(1, (bounds.width - 24) / layout.width, (bounds.height - 24) / layout.height);
+      const scale = group.count <= 6 ? fit : Math.max(fit, .55);
+      behavior
+        .extent([[0, 0], [bounds.width, bounds.height]])
+        .translateExtent([[-80, -80], [layout.width + 80, layout.height + 80]])
+        .scaleExtent([Math.min(fit, scale), 1.6]);
+      const transform = zoomIdentity
+        .translate((bounds.width - layout.width * scale) / 2, (bounds.height - layout.height * scale) / 2)
+        .scale(scale);
+      fitTransformRef.current = transform;
+      selection.call(behavior.transform, transform);
+    };
+    const observer = new ResizeObserver(fitFloor);
+    observer.observe(stage);
+    fitFloor();
+    return () => {
+      observer.disconnect();
+      selection.on(".zoom", null);
+      behaviorRef.current = null;
+    };
+  }, [group.count, layout.height, layout.width]);
+
+  function zoomFloor(factor: number) {
+    const stage = stageRef.current;
+    const behavior = behaviorRef.current;
+    if (!stage || !behavior) return;
+    const selection = select(stage);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) selection.call(behavior.scaleBy, factor);
+    else selection.transition().duration(220).call(behavior.scaleBy, factor);
+  }
+
+  function resetFloor() {
+    const stage = stageRef.current;
+    const behavior = behaviorRef.current;
+    if (!stage || !behavior) return;
+    const selection = select(stage);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) selection.call(behavior.transform, fitTransformRef.current);
+    else selection.transition().duration(280).call(behavior.transform, fitTransformRef.current);
+  }
+
+  return <dialog ref={dialogRef} className="city-suq-dialog" aria-labelledby="city-suq-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
+    <section className="city-suq-shell">
+      <header className="city-suq-head"><div><span className="discovery-kicker">Virtual City Suq · {group.region}</span><h2 id="city-suq-title">{group.city} City Suq</h2><p>{group.count} independent businesses in one place.</p></div><div className="city-suq-actions" aria-label="City Suq controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to City Suq">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of City Suq">−</button><button type="button" onClick={resetFloor} title="Fit City Suq" aria-label="Fit City Suq to view">◎</button><button className="city-suq-close" type="button" onClick={onClose} title="Close" aria-label="Close City Suq">×</button></div></header>
+      <div ref={stageRef} className="city-suq-stage" aria-label={`${group.city} virtual City Suq floor`}>
+        <div ref={floorRef} className="city-suq-floor" style={{ width: layout.width, height: layout.height }}>
+          <div className="city-suq-place" aria-hidden="true"><span>{group.city}</span><b>City Suq</b><small>{group.count} showrooms</small></div>
+          {group.suqs.map((suq, index) => {
+            const column = index % layout.columns;
+            const row = Math.floor(index / layout.columns);
+            return <Link key={suq.id} className="city-suq-shop" data-suq-id={suq.id} href={`/@${suq.handle}?ref=discovery`} style={{ left: layout.paddingX + column * (layout.cardWidth + layout.gapX), top: layout.paddingTop + row * (layout.cardHeight + layout.gapY), width: layout.cardWidth, height: layout.cardHeight }}><SuqImage suq={suq} /><span><b>{suq.featured ? "Featured Suq" : `${group.city} maker`}</b><strong>{suq.name}</strong><small>{suq.tagline}</small><em>Visit Suq</em></span></Link>;
+          })}
+        </div>
+      </div>
+    </section>
+  </dialog>;
 }
 
 function DiscoveryList({ discovery, action }: { discovery: DiscoveryView; action: string }) {

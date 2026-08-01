@@ -243,13 +243,15 @@ The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.
 Visitor browsers make no runtime request to a tile, geocoding, routing, or map
 provider. Each eligible business appears at its reviewed WGS84 coordinates.
-Nearby markers form numbered zoom-dependent clusters; repeated activation zooms
-until their exact-coordinate individual markers separate. Isolated businesses
-remain individual markers. Location controls are generated only for named
-places with nearby matching businesses and frame those nearby points without
-claiming an authoritative city boundary. The center control restores the
-country view. No mall, venue, hall, host-city aggregate, or Expo floor is ever
-rendered on this geographic map.
+Nearby markers form numbered zoom-dependent clusters. Repeated activation zooms
+to either an isolated exact-coordinate marker or, when two or more matching
+businesses share a reviewed city and region, one close-zoom counted city
+gateway. The gateway centroid is only a discovery affordance and does not change
+any business address. Activating it opens a map-backed virtual City Suq in place:
+every grouped business occupies one dynamically sized floor that visitors can
+pan and zoom, with no halls, pagination, route change, or hidden overflow.
+Closing it restores the same map state. Location controls show only places with
+matching businesses, and the center control restores the country view.
 
 The Monday-through-Saturday Expo is a virtual presentation, not a physical
 location claim. It uses a clear bounded top-view floor, restrained central

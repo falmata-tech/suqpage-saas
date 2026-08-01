@@ -62,6 +62,10 @@ the weekly industry Expo program.
   coordinates, selected indexed industry membership, and no discovery exclusion.
 - Every eligible row appears exactly once in its applicable projection. No
   nearest-host assignment changes its coordinates.
+- City grouping uses normalized reviewed city plus region only after eligibility
+  and search filtering. A group contains each eligible business exactly once,
+  exposes an exact count and centroid, and retains every member's authoritative
+  coordinates for direct discovery data.
 - Map filters and search do not narrow the independently date-selected Expo.
 - Expo ordering is featured first, then normalized business name and ID. Each
   hall has 12 entries and stable references for an unchanged projection.
@@ -134,6 +138,13 @@ Scenario: Weekly Expo is projected
     across deterministic twelve-booth halls
   AND map filters do not alter the assignment
   AND Sunday instead returns selected featured businesses for TikTok live
+
+Scenario: Matching city businesses form one gateway
+  GIVEN at least two eligible map results share a reviewed city and region
+  WHEN the public discovery projection is built
+  THEN one deterministic city group contains each matching business exactly once
+  AND its count and centroid derive only from those reviewed coordinates
+  AND an isolated result remains outside every multi-business city group
 ```
 
 ## Quality impact
@@ -145,8 +156,9 @@ Scenario: Weekly Expo is projected
 - Accessibility and responsive behavior: owned by FE-021.
 - Localization and merchant-entered values: bounded Unicode display values;
   normalized ASCII handle and lower-case email authority.
-- Performance and limits: indexed industry/search predicates, bounded five-row
-  List pages, no occurrence fan-out, and 12-row Expo hall projection.
+- Performance and limits: indexed industry/search predicates, one linear city-
+  grouping pass, bounded five-row List pages, no occurrence fan-out, and 12-row
+  Expo hall projection.
 - Failure recovery and idempotency: transaction rollback, safe duplicate
   response, revocable session, and additive migration only if required.
 
@@ -162,7 +174,7 @@ session token, or request body.
 |---|---|---|
 | Atomic bootstrap, conflicts, rate limit, tenant binding | security/integration | `scripts/test-signup.ts`, `scripts/test-security.ts` |
 | Public eligibility without subscription gating | integration | `scripts/test-discovery.ts`, `scripts/test-account-health.ts` |
-| Exact coordinates, bounded List pages, weekly schedule, stable Expo halls | integration | `scripts/test-discovery.ts` |
+| Exact coordinates, deterministic city groups, bounded List pages, weekly schedule, stable Expo halls | integration | `scripts/test-discovery.ts` |
 | Exact-origin/body/session behavior | HTTP/browser | `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -182,14 +194,12 @@ production rollout requires abuse monitoring, backup, and reconciled migration.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Evidence: verified locally on 2026-08-01. `lib/discovery.ts` derives Ethiopia-
-local calendar labels, stable weekday industries, deterministic twelve-booth
-halls, and a de-duplicated Sunday featured-business live projection independent
-of map filters. Public List results use matching SQL count and limit/offset
-queries, clamp invalid pages, and return no more than five rows. Exact marker
-coordinates and publication-only eligibility remain unchanged. Focused tests,
-scale fixtures, all 10 browser scenarios, `npm run check`, and `npm run release`
-passed with production build, HTTP smoke, security, privacy, and zero
-vulnerabilities.
+Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` proves deterministic
+reviewed-city-and-region grouping, exact counts and centroids, isolated-result
+behavior, eligibility filtering, bounded List pages, and the weekly schedule.
+`scripts/test-scale-fixtures.ts` proves that grouped business IDs remain exact
+and duplicate-free across every discovery industry. All 10 browser acceptance
+scenarios, `npm run check`, and `npm run release` passed, including security,
+HTTP, scale, and production-build gates. No production rollout occurred.

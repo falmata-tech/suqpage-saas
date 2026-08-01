@@ -113,6 +113,10 @@ try {
   assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.featuredCount, 2);
   assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
+  assert.deepEqual(view.cityGroups.map((group) => [group.city, group.count]), [["Addis Ababa", 15], ["Adama", 3]], "multi-business reviewed cities form deterministic counted gateways");
+  assert.equal(new Set(view.cityGroups.flatMap((group) => group.suqs.map((suq) => suq.id))).size, 18, "a grouped business appears once in one city gateway");
+  assert.equal(view.cityGroups[0].latitude, view.cityGroups[0].suqs.reduce((total, suq) => total + suq.latitude, 0) / view.cityGroups[0].count, "gateway latitude is the exact member centroid");
+  assert.equal(view.cityGroups[0].longitude, view.cityGroups[0].suqs.reduce((total, suq) => total + suq.longitude, 0) / view.cityGroups[0].count, "gateway longitude is the exact member centroid");
   assert.deepEqual(
     view.suqs.filter((suq) => suq.handle === "bishoftu-repair").map((suq) => [suq.latitude, suq.longitude]),
     [[8.748, 38.982]],
@@ -142,6 +146,7 @@ try {
   const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
   assert.equal(search.total, 1, "published offering text is searchable");
   assert.equal(search.suqs[0].city, "Addis Ababa");
+  assert.equal(search.cityGroups.length, 0, "a single searched result remains an isolated exact-coordinate pin");
   assert.equal(search.expo.booths.length, 19, "map search does not narrow the independently scheduled Expo");
 
   const tuesday = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });

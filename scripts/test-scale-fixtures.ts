@@ -64,6 +64,9 @@ for (const industry of DISCOVERY_INDUSTRIES) {
   industryCounts.push(discovery.total);
   assert.ok(discovery.total >= 8, `${industry.label} has a useful active fixture cohort`);
   assert.ok(discovery.locationCount >= 1, `${industry.label} has a reviewed geographic location`);
+  const groupedIds = discovery.cityGroups.flatMap((group) => group.suqs.map((suq) => suq.id));
+  assert.equal(new Set(groupedIds).size, groupedIds.length, `${industry.label} city gateways contain no duplicate businesses`);
+  assert.ok(discovery.cityGroups.every((group) => group.count === group.suqs.length && group.count > 1), `${industry.label} city gateway counts remain exact`);
   const hallCounts = new Map<string, number>();
   assert.equal(discovery.expo.booths.length, discovery.suqs.length, `${industry.label} Expo includes the complete result set`);
   for (const booth of discovery.expo.booths) {

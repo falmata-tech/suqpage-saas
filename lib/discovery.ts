@@ -65,6 +65,16 @@ export type ExpoBooth = DiscoverySuq & {
   reference: string;
 };
 
+export type DiscoveryCityGroup = {
+  key: string;
+  city: string;
+  region: string;
+  latitude: number;
+  longitude: number;
+  count: number;
+  suqs: DiscoverySuq[];
+};
+
 export type WeeklyExpoDay = {
   weekday: number;
   dayLabel: string;
@@ -99,6 +109,7 @@ export type DiscoveryView = {
   featuredCount: number;
   locationCount: number;
   suqs: DiscoverySuq[];
+  cityGroups: DiscoveryCityGroup[];
   list: {
     items: DiscoverySuq[];
     page: number;
@@ -215,6 +226,35 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
   return { todayWeekday, days };
 }
 
+function groupCities(suqs: DiscoverySuq[]): DiscoveryCityGroup[] {
+  const groups = new Map<string, DiscoveryCityGroup>();
+  for (const suq of suqs) {
+    const key = `${suq.city.trim().toLocaleLowerCase()}\u0000${suq.region.trim().toLocaleLowerCase()}`;
+    const group = groups.get(key) || {
+      key,
+      city: suq.city,
+      region: suq.region,
+      latitude: 0,
+      longitude: 0,
+      count: 0,
+      suqs: [],
+    };
+    group.latitude += suq.latitude;
+    group.longitude += suq.longitude;
+    group.count += 1;
+    group.suqs.push(suq);
+    groups.set(key, group);
+  }
+  return [...groups.values()]
+    .filter((group) => group.count > 1)
+    .map((group) => ({
+      ...group,
+      latitude: group.latitude / group.count,
+      longitude: group.longitude / group.count,
+    }))
+    .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
+}
+
 export function getDiscoveryView(
   options: {
     industry?: string;
@@ -249,6 +289,7 @@ export function getDiscoveryView(
   const listRows = db.prepare(selectSql(SEARCH_WHERE, "LIMIT ? OFFSET ?"))
     .all(...params, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE) as DiscoveryRow[];
   const suqs = rows.map(toSuq);
+  const cityGroups = groupCities(suqs);
 
   const schedule = weeklySchedule(options.now || new Date());
   const selectedWeekday = normalizeWeekday(options.expoDay, schedule.todayWeekday);
@@ -293,6 +334,7 @@ export function getDiscoveryView(
     featuredCount: suqs.filter((suq) => suq.featured).length,
     locationCount: new Set(suqs.map((suq) => `${suq.city}\u0000${suq.region}`)).size,
     suqs,
+    cityGroups,
     list: {
       items: listRows.map(toSuq),
       page,

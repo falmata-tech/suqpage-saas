@@ -31,6 +31,8 @@ self-service onboarding release.
 - Compatibility for existing admin invitation onboarding and `/request` links.
 - Browser and release gates for weekly Expo selection, deep exact-coordinate
   cluster expansion, and server-bounded List pagination.
+- Desktop/390px/320px gates for counted city gateways and one continuous,
+  map-backed, touch-pannable virtual City Suq floor.
 
 ### Non-goals
 
@@ -98,7 +100,7 @@ text, session tokens, IP addresses, and raw geographic source metadata.
 |---|---|---|
 | Deterministic local geography and asset budget | operations | `scripts/test-discovery-geography.mjs` |
 | No remote map runtime requests | browser | `tests/acceptance/app.spec.ts` |
-| Weekly selector, exact-pin expansion, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
+| Weekly selector, city gateway/floor, isolated exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Signup backup/restore and security | operations/security | `scripts/test-operations.mjs`, `scripts/test-signup.ts` |
 | Production build and HTTP surface | release | `npm run release` |
 
@@ -119,13 +121,13 @@ additive and harmless when unused.
 - [x] Test plan maps every acceptance criterion
 - [x] Rollout/rollback decided
 
-## Completion evidence
+## Evidence
 
-Evidence: verified locally on 2026-08-01. Existing same-origin geography remains
-four road layers and 2,612 places within the 1,168,811-byte budget. Refreshed
-desktop/390px/320px visual proof passed for exact-pin expansion, weekly weekday
-controls, weekday Expo, Sunday live, bounded List results, touch targets, and no
-horizontal overflow. All 10 ordered browser workflows, `npm run check`, and
-`npm run release` passed with production build, HTTP smoke, scale fixtures,
-backup/security/migration gates, trace privacy, and zero vulnerabilities. No
-production rollout or data-preserving migration was performed.
+Evidence: completed locally on 2026-08-01. Browser acceptance passed all 10 scenarios,
+including close-zoom city gateways, one continuous City Suq floor, isolated
+exact pins, transform restoration, and local-map failure recovery. Desktop,
+390px, and 320px visual captures prove fit-to-view, bounded controls, and no
+document overflow; the floor uses one transformed layer with lazy dimensioned
+media. `npm run check` and `npm run release` passed, including the production
+build, HTTP smoke, scale, security, and zero-vulnerability dependency audit. No
+production rollout or data migration is included.
