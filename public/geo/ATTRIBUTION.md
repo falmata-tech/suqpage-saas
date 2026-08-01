@@ -13,15 +13,19 @@ copy of **ET_Admin1_2023**, downloaded from the FEWS NET Data Warehouse:
 - Source layer: https://fdw.fews.net/api/feature.geojson?layer=4696
 - Generated with: `npm run build:expo-geography`
 
-`ethiopia-places-osm.geojson` contains city and town points queried from
-OpenStreetMap through the public Overpass API on July 29, 2026. Points outside
-the FEWS NET Ethiopia boundary were removed. `ethiopia-major-roads-osm.geojson`
-contains a restrained set of simplified inter-city road corridors routed on
-OpenStreetMap data through the public OSRM service on the same date.
+`ethiopia-places-osm.geojson` and `ethiopia-major-roads-osm.geojson` are
+property-reduced, coordinate-quantized, and display-simplified derivatives of
+the metadata-stripped Geofabrik Ethiopia OpenStreetMap extract timestamped
+2026-07-31T20:21:56Z. Places outside the FEWS NET Ethiopia boundary are removed.
+The road asset contains motorway, trunk, primary, and secondary display layers;
+it is not a routable street database.
+
+- Extract: https://download.geofabrik.de/africa/ethiopia.html
+- Rebuild: `npm run build:discovery-geography -- /path/to/ethiopia.osm.pbf`
 
 - OpenStreetMap copyright: https://www.openstreetmap.org/copyright
 - Open Database License: https://opendatacommons.org/licenses/odbl/
-- OSRM project: https://project-osrm.org/
+- Geofabrik attribution: https://www.geofabrik.de/geofabrik/geofabrik.html
 
 The local copies retain only the names, classifications, coordinates, and
 geometry needed for the SuqPage Expo overview. They are visual discovery aids,

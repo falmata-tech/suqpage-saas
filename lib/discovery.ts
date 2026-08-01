@@ -1,14 +1,13 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
-import { DISCOVERY_HOSTS, type DiscoveryHost } from "./discovery-hosts";
 
 export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics & devices", icon: "circuit" },
-  { key: "beauty-wellness", label: "Beauty & body care", icon: "leaf" },
-  { key: "food-farming", label: "Food, farms & ingredients", icon: "sprout" },
-  { key: "machinery-tools", label: "Metalwork, tools & equipment", icon: "tool" },
-  { key: "home-living", label: "Furniture, home & craft", icon: "home" },
-  { key: "fashion-textiles", label: "Clothing, textiles & leather", icon: "thread" },
+  { key: "electronics", label: "Electronics & devices", icon: "circuit", code: "ELC" },
+  { key: "beauty-wellness", label: "Beauty & body care", icon: "leaf", code: "BEA" },
+  { key: "food-farming", label: "Food, farms & ingredients", icon: "sprout", code: "FOD" },
+  { key: "machinery-tools", label: "Metalwork, tools & equipment", icon: "tool", code: "MCH" },
+  { key: "home-living", label: "Furniture, home & craft", icon: "home", code: "HOM" },
+  { key: "fashion-textiles", label: "Clothing, textiles & leather", icon: "thread", code: "FSH" },
 ] as const;
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
@@ -30,28 +29,33 @@ type DiscoveryRow = {
   is_featured: number;
 };
 
-export type DiscoveryBooth = {
+export type DiscoverySuq = {
   id: number;
   handle: string;
   name: string;
   tagline: string;
   description: string;
   imagePath: string;
-  originCity: string;
-  originZone: string;
-  originRegion: string;
+  city: string;
+  zone: string;
+  region: string;
+  latitude: number;
+  longitude: number;
   fallbackStyle: string;
   featured: boolean;
-  hostKey: string;
+};
+
+export type ExpoBooth = DiscoverySuq & {
   hall: number;
   booth: number;
   reference: string;
 };
 
-export type CitySuq = DiscoveryHost & {
-  localCount: number;
-  boothCount: number;
+export type DailyIndustryExpo = {
+  title: string;
+  industryCode: string;
   hallCount: number;
+  booths: ExpoBooth[];
 };
 
 export type DiscoveryView = {
@@ -60,45 +64,10 @@ export type DiscoveryView = {
   query: string;
   total: number;
   featuredCount: number;
-  hosts: CitySuq[];
-  booths: DiscoveryBooth[];
+  locationCount: number;
+  suqs: DiscoverySuq[];
+  expo: DailyIndustryExpo;
 };
-
-function distanceKm(a: { latitude: number; longitude: number }, b: DiscoveryHost) {
-  const toRad = (value: number) => value * Math.PI / 180;
-  const dLat = toRad(b.latitude - a.latitude);
-  const dLon = toRad(b.longitude - a.longitude);
-  const lat1 = toRad(a.latitude);
-  const lat2 = toRad(b.latitude);
-  const chord = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-  return 6371 * 2 * Math.atan2(Math.sqrt(chord), Math.sqrt(1 - chord));
-}
-
-function nearestHost(row: DiscoveryRow, candidates = DISCOVERY_HOSTS) {
-  return [...candidates].sort((left, right) => distanceKm(row, left) - distanceKm(row, right))[0];
-}
-
-function allocateHosts(rows: DiscoveryRow[]) {
-  const local = new Map<string, DiscoveryRow[]>();
-  for (const row of rows) {
-    const host = nearestHost(row);
-    local.set(host.key, [...(local.get(host.key) || []), row]);
-  }
-  let qualified = DISCOVERY_HOSTS.filter((host) => (local.get(host.key)?.length || 0) >= 3);
-  if (!qualified.length && rows.length) {
-    const largest = [...DISCOVERY_HOSTS].sort(
-      (left, right) => (local.get(right.key)?.length || 0) - (local.get(left.key)?.length || 0),
-    )[0];
-    qualified = [largest];
-  }
-  const assigned = new Map<string, DiscoveryRow[]>();
-  for (const row of rows) {
-    const host = nearestHost(row, qualified);
-    assigned.set(host.key, [...(assigned.get(host.key) || []), row]);
-  }
-  return { local, assigned, qualified };
-}
 
 function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
@@ -119,12 +88,10 @@ export function getDiscoveryView(
     FROM business_industries i
     JOIN businesses b ON b.id=i.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
-    JOIN business_subscriptions s ON s.business_id=b.id
     WHERE i.industry_key=?
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
-      AND s.grace_ends_at > ?
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
       AND (
         ?='' OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
@@ -138,48 +105,49 @@ export function getDiscoveryView(
       )
     ORDER BY p.is_featured DESC,b.name COLLATE NOCASE,b.id
   `).all(
-    industry.key, Date.now(), query,
+    industry.key, query,
     search, search, search, search, search, search, search, search,
   ) as DiscoveryRow[];
-  const { local, assigned, qualified } = allocateHosts(rows);
-  const booths: DiscoveryBooth[] = [];
-  const hosts = qualified.map((host) => {
-    const members = assigned.get(host.key) || [];
-    members.forEach((row, index) => {
-      const hall = Math.floor(index / 12) + 1;
-      const booth = index % 12 + 1;
-      booths.push({
-        id: row.id,
-        handle: row.handle,
-        name: row.name,
-        tagline: row.tagline,
-        description: row.description,
-        imagePath: row.booth_image_path || row.hero_image_path,
-        originCity: row.city,
-        originZone: row.zone,
-        originRegion: row.region,
-        fallbackStyle: row.fallback_style,
-        featured: Boolean(row.is_featured),
-        hostKey: host.key,
-        hall,
-        booth,
-        reference: `${host.code}-${hall}-B${String(booth).padStart(2, "0")}`,
-      });
-    });
+
+  const suqs = rows.map((row): DiscoverySuq => ({
+    id: row.id,
+    handle: row.handle,
+    name: row.name,
+    tagline: row.tagline,
+    description: row.description,
+    imagePath: row.booth_image_path || row.hero_image_path,
+    city: row.city,
+    zone: row.zone,
+    region: row.region,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    fallbackStyle: row.fallback_style,
+    featured: Boolean(row.is_featured),
+  }));
+  const booths = suqs.map((suq, index): ExpoBooth => {
+    const hall = Math.floor(index / 12) + 1;
+    const booth = index % 12 + 1;
     return {
-      ...host,
-      localCount: local.get(host.key)?.length || 0,
-      boothCount: members.length,
-      hallCount: Math.ceil(members.length / 12),
+      ...suq,
+      hall,
+      booth,
+      reference: `${industry.code}-H${hall}-B${String(booth).padStart(2, "0")}`,
     };
-  }).sort((left, right) => right.boothCount - left.boothCount || left.city.localeCompare(right.city));
+  });
+
   return {
     industry,
     industries: DISCOVERY_INDUSTRIES,
     query,
-    total: booths.length,
-    featuredCount: booths.filter((booth) => booth.featured).length,
-    hosts,
-    booths,
+    total: suqs.length,
+    featuredCount: suqs.filter((suq) => suq.featured).length,
+    locationCount: new Set(suqs.map((suq) => `${suq.city}\u0000${suq.region}`)).size,
+    suqs,
+    expo: {
+      title: `${industry.label} Expo`,
+      industryCode: industry.code,
+      hallCount: Math.max(1, Math.ceil(booths.length / 12)),
+      booths,
+    },
   };
 }

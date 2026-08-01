@@ -86,8 +86,8 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
 - a delivery-request initiation layer for confirmed inquiries;
 - a platform that supports manually designed, highly distinct client pages;
 - a permanent public discovery surface where visitors choose an industry,
-  explore virtual City Suqs, and enter each business's permanent `/@handle`
-  digital showroom;
+  explore exact reviewed business locations or a daily country-wide virtual
+  Expo, and enter each business's permanent `/@handle` digital showroom;
 - a controlled SaaS pilot with 58 fictional local showrooms spanning makers,
   growers, processors, workshops, natural-care producers, and home brands; ten
   are curated visual benchmarks and 48 lightweight fixtures exercise discovery
@@ -228,48 +228,42 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The SuqPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-020` defines the current composition: a
-compact purple merchant invitation sits immediately above one integrated,
+and other in-app browsers. `FE-021` defines the current composition: a compact
+purple merchant invitation sits immediately above one integrated,
 application-first discovery workspace combining industry selection, search, a
-bounded featured shortcut rail, Ethiopia navigation, direct City Suq buttons,
-and the matching map/list views. Long platform education lives on `/about`, the
-business introduction flow lives on `/request`, and only a restrained merchant
-call-to-action follows the marketplace. There is no date picker, live-event
-state, duplicate showroom directory, or separate all-business navigation. Six
-stable industries appear as icon-labeled touch controls and remain available
-every day.
+bounded featured shortcut rail, exact-location Ethiopia map, and five-row list.
+A separate daily country-wide industry Expo follows the map inside the same
+workspace. Long platform education lives on `/about`, signup lives on `/request`,
+and only a restrained merchant call-to-action follows the marketplace. There is
+no date picker, duplicated all-business directory, or browser-side full-catalog
+fan-out. Six stable industries appear as icon-labeled touch controls and remain
+available every day.
 
-The discovery workspace uses a locally stored and attributed Ethiopia
-administrative-boundary asset with a proven geographic projection and bounded
-SVG navigation. The country view shows regional context and every qualifying
-major-city host for the selected industry. Labeled city buttons jump directly
-to a host and the center control frames the active City Suqs. Selecting a host
-keeps the Ethiopia map mounted beneath a bounded top-view virtual City Suq,
-leaves recognizable geographic context visible around or below it, and exposes
-a familiar close control that returns to the country view. A City Suq is a
-virtual discovery anchor, never a claim about a physical parcel, street address,
-or building.
+The discovery map uses locally stored, attributed Ethiopia region and zone
+boundaries plus an offline-derived OpenStreetMap place and major-road subset.
+Visitor browsers make no runtime request to a tile, geocoding, routing, or map
+provider. Each eligible business appears at its reviewed WGS84 coordinates.
+Nearby markers form numbered zoom-dependent clusters; activating a cluster
+zooms to the level where its children separate. Isolated businesses remain
+individual markers, location controls frame reviewed city groups, and the
+center control restores the country view.
 
-Each venue uses a quiet architectural floor, circular circulation, a landscaped
-maker court with restrained planting, seating, and a small water feature but no
-people, and bounded perimeter booth placement. A hall contains at most 12
-booths; additional businesses create deterministic halls without increasing
-phone rendering cost.
-Every booth exposes a stable `{city-code}-{hall}-B{booth-number}` reference. A
-business must have an active, subscription-entitled showroom, one approved and
-published offering, a matching discovery industry, valid reviewed location, an
-approved business-owned booth image, and no discovery exclusion. A host opens
-when at least three matching businesses originate there. Businesses from sparse
-locations move to the nearest qualifying host while their real city, zone, and
-region remain unchanged; if no city reaches the threshold, the largest reviewed
-host provides the bounded fallback. Map and List views always represent the same
-eligible result set and search is resolved by indexed, parameterized SQLite
-queries rather than a browser-side full-catalog fan-out.
+The Expo is a virtual presentation, not a physical location or scheduled live
+event. It uses a quiet bounded top-view floor, restrained central court, no
+people, and perimeter booth placement. A hall contains at most 12 booths;
+additional businesses create deterministic Hall 2, Hall 3, and later halls
+without increasing phone rendering cost. Every booth exposes a stable
+`{industry-code}-H{hall}-B{booth-number}` reference. A business must have an
+active published showroom, one published offering, a matching reviewed industry,
+valid reviewed location, an approved discovery profile and media, and no
+discovery exclusion. Subscription or payment dates do not determine public
+eligibility. Map, List, Featured, and Expo always use the same server-authoritative
+eligible result set and bounded indexed query.
 
 Featured treatment is emphasis inside this one result set, not a separate or
 duplicated catalog. Exactly ten fictional showrooms are explicitly featured;
-all other eligible showrooms remain discoverable. Tenant cards and City Suq
-booths link to the authoritative permanent showroom. Approved booth media
+all other eligible showrooms remain discoverable. List cards, map previews, and
+Expo booths link to the authoritative permanent showroom. Approved booth media
 belongs to its represented business; a generic named booth is only a failed-file
 display fallback and cannot make an incomplete profile eligible. The useful
 product explanation lives on `/about` and in the compact merchant invitation,
@@ -277,13 +271,17 @@ and a visually distinct merchant CTA closes the page. Public controls have at le
 44-pixel touch targets and the complete composition is verified without
 horizontal overflow at 320 and 390 CSS pixels.
 
-The homepage CTA links to the low-friction expression-of-interest flow. That
-flow collects contact details, one short message, and consent, with no file
-uploads or public self-sign-up. The homepage and request flow use professional
-copy with no development-stage disclaimers. The public composition is verified
-without horizontal document overflow at 320 and 390 CSS pixels.
+The homepage CTA links to review-gated client signup. Signup creates an
+authenticated private business workspace and onboarding request from bounded
+contact, handle, password, and showroom-description fields. It accepts no public
+file upload and creates no public marker, Expo booth, catalog, or showroom.
+Existing administrator-created invitations and the attachment-free legacy lead
+endpoint remain supported parallel intake paths. The homepage and request flow
+use professional copy with no development-stage disclaimers. The public
+composition is verified without horizontal document overflow at 320 and 390
+CSS pixels.
 
-The public login and expression-of-interest routes use the same SuqPage header,
+The public login and business-signup routes use the same SuqPage header,
 solid purple, white, charcoal, and cool-neutral platform language as the
 homepage and About page. Each is a focused task surface with one purple context
 panel and one white form panel on wider screens, stacked in semantic order on
@@ -339,11 +337,11 @@ benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
 The wider disposable seed contains 48 lightweight small-business showrooms
-distributed across six industries and reviewed Ethiopian city clusters. Reset
-creates 58 total businesses, exactly ten featured profiles, multiple qualifying
-City Suqs for populated industries, approved business-owned booth media, and at
-most 12 booths per rendered hall. These are workflow and demonstration fixtures,
-not finished client designs or evidence of real businesses.
+distributed across six industries and reviewed Ethiopian locations. Reset
+creates 58 total businesses, exactly ten featured profiles, approved discovery
+media, exact map coordinates, and at most 12 booths per rendered Expo hall.
+These are workflow and demonstration fixtures, not finished client designs or
+evidence of real businesses.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important
@@ -578,33 +576,36 @@ Default behavior:
 
 ---
 
-## 11. Public expression of interest
+## 11. Public client signup
 
-The SuqPage landing page must lead prospects to a simple private onboarding
-interest form. No account is required, created, or self-registered at this step.
+The SuqPage landing page leads businesses to a simple review-gated signup. It
+creates a private client account, draft business, explicit client access profile,
+and tenant-bound onboarding request atomically. It does not publish anything.
 
-Keep it intentionally small. Required inputs and limits are controlled by
-`FE-003`, `BE-003`, and `DEP-003`:
+Required inputs and limits are controlled by `FE-021`, `BE-020`, and `DEP-017`:
 
-- name;
-- WhatsApp, phone, or email;
-- optional business name;
-- one short interest message of 10–2,000 characters;
+- name and email;
+- phone or WhatsApp;
+- business name and preferred Suq handle;
+- strong password and confirmation;
+- one showroom description of 20–4,000 characters;
 - processing consent;
-- no file or image inputs.
+- no public file or image inputs.
 
 Requirements:
 
-- persist the request inside SuqPage with a random public reference and
-  idempotency;
-- explain that receipt is not acceptance or publication;
-- do not expose internal development wording;
-- use bounded JSON input, a honeypot, privacy-preserving rate limits, and
-  explicit-origin checks;
-- reject multipart/file submissions before decoding or storage, and enforce at
-  the database level that public interest records cannot have attachments;
-- never expose contact details, instructions, attachment identifiers, or
-  storage paths through the public reference.
+- use bounded JSON, exact-origin checks, privacy-preserving IP/email rate limits,
+  strong password hashing, safe conflicts, and an idempotency token;
+- commit the draft tenant, client identity, access profile, request, and event in
+  one transaction or roll back all of them;
+- authenticate the new client into the private request destination;
+- reject multipart/file submissions before storage;
+- ignore or reject browser-supplied publication, location, industry, featured,
+  and media authority;
+- keep the draft absent from public showroom, map, list, featured, and Expo
+  surfaces until exact authorized publication;
+- retain administrator-created invitations and the legacy attachment-free lead
+  endpoint as parallel operations paths.
 
 ---
 
@@ -666,7 +667,8 @@ When the real Malikt Board API becomes available, add:
 
 The administrator can:
 
-- accept public interests and invite clients;
+- accept legacy public leads and invite clients;
+- review self-created private client workspaces and onboarding requests;
 - create a draft client workspace and invitation without requiring a prior
   public interest or service request;
 - reset client passwords and revoke their sessions;
@@ -680,7 +682,9 @@ The administrator can:
 
 ### Client
 
-A client has a minimal workspace bound to one business. The client can:
+A client has a minimal workspace bound to one business. The client can create
+that private workspace through public signup or receive an administrator-issued
+invitation. The client can:
 
 - submit an unstructured first-showroom or change request with private reference
   images after invitation;
@@ -693,8 +697,8 @@ A client has a minimal workspace bound to one business. The client can:
   description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
 - view their showroom and manage their account password.
-- view monthly account state, grace deadline, renewal history, and aggregate
-  direct and City Suq discovery visits;
+- view advisory monthly renewal state, history, and aggregate direct, map/list,
+  and Expo visits;
 - open, reply to, close, and reopen tenant-scoped SuqPage support conversations.
 
 Clients cannot directly edit business settings, design, categories,
@@ -832,15 +836,15 @@ Current verified behavior:
   Business and staff selection never loads the complete account into a dropdown;
   discovery administration edits one business-specific profile, and inquiry rows
   include item summaries without per-row follow-up queries.
-- Every business has a manually operated monthly subscription ledger. Public
-  access remains active through period end and a four-day grace window; after
-  grace, the showroom redirects home and is omitted from discovery.
-  Operations records renewal without collecting an amount or requiring a
-  configured price. There is no
-  checkout, payment gateway, automatic debit, or public pricing claim.
+- Every business has a manually operated monthly renewal ledger. Its dates are
+  advisory operations records and never automatically hide, redirect, or remove
+  an active published showroom. Operations may record renewal without collecting
+  an amount or requiring a configured price. Only explicit administrator
+  suspension removes a published Suq from public access and discovery. There is
+  no checkout, payment gateway, automatic debit, or public pricing claim.
 - Showroom visits use an opaque first-party visitor token hashed with the privacy
   salt and deduplicate per business, source, and day. Clients see aggregate
-  direct, City Suq discovery, and recent counts; raw IP addresses are not stored
+  direct, map/list discovery, Expo, and recent counts; raw IP addresses are not stored
   and traffic counts are not billing authority.
 - Authenticated client support is stored inside SuqPage. Enabled agents have
   configurable concurrent limits; new conversations transactionally select the
@@ -1278,7 +1282,7 @@ Do not horizontally scale the SQLite build across multiple application instances
 object-storage, job, realtime, backup, and monitored-cutover work. Supabase is a
 candidate managed PostgreSQL host, not a current runtime configuration.
 
-Before broad self-service SaaS onboarding, migrate to:
+Before broad external rollout or multi-instance production scale, migrate to:
 
 - managed PostgreSQL or another production multi-instance database;
 - object storage for media;

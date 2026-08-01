@@ -42,10 +42,8 @@ export function inTransaction<T>(fn: () => T): T {
 export function getBusinessByHandle(handle: string): Business | undefined {
   const found = getDb().prepare(`
     SELECT b.* FROM businesses b
-    JOIN business_subscriptions s ON s.business_id=b.id
     WHERE lower(b.handle)=lower(?) AND b.status='active'
-      AND s.grace_ends_at>=?
-  `).get(handle.replace(/^@/, ""), Date.now());
+  `).get(handle.replace(/^@/, ""));
   return found ? row<Business>(found) : undefined;
 }
 

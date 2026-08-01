@@ -1,14 +1,17 @@
 ---
 id: BE-019
 title: Indexed industry and nearest City Suq discovery
-status: done
-related: [FE-020, BE-015, BE-017, DEP-015, DEP-016]
+status: deprecated
+related: [FE-020, FE-021, BE-015, BE-017, BE-020, DEP-015, DEP-016]
 owners: [backend, security, operations]
 last_updated: 2026-08-01
 change_level: L2
 ---
 
 # BE-019 - Indexed industry and nearest City Suq discovery
+
+Deprecated by `FE-021`, `BE-020`, and `DEP-017`. This file retains the verified
+historical nearest-host contract; it is not current public behavior.
 
 ## Problem and outcome
 

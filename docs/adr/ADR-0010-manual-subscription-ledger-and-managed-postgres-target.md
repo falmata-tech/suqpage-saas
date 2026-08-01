@@ -1,10 +1,10 @@
 ---
 id: ADR-0010
 title: Manual subscription ledger and managed PostgreSQL target
-status: accepted
+status: superseded
 date: 2026-07-30
 deciders: [SuqPage]
-related: [FE-018, BE-017, DEP-015, ADR-0001, ADR-0002]
+related: [FE-018, BE-017, DEP-015, ADR-0001, ADR-0002, ADR-0011]
 ---
 
 # ADR-0010 - Manual subscription ledger and managed PostgreSQL target
@@ -65,3 +65,12 @@ with persistent SQLite and media volumes.
 
 BE-017 tests entitlement boundaries, immutable idempotent renewal records, and
 privacy analytics. DEP-015 documents the managed-database migration boundary.
+
+## Superseded decision
+
+`ADR-0011` supersedes only the access-enforcement part of this decision.
+Renewal records remain useful advisory operations data, but their dates no
+longer hide a published showroom or remove it from discovery. Publication and
+explicit administrator suspension are the public-visibility authority. The
+manual ledger, no-checkout decision, and managed PostgreSQL target remain in
+force.

@@ -40,7 +40,7 @@ export default async function Home({
         <div className="landing-container landing-market-shell">
           <section className="landing-market-banner" aria-labelledby="landing-title">
             <div><span>For makers, growers, and product businesses</span><h1 id="landing-title">Give your products one clear place to be found.</h1></div>
-            <p>A permanent digital showroom that customers can discover by industry and city.</p>
+            <p>A permanent digital showroom customers can discover by industry, location, and the daily virtual Expo.</p>
             <Link href="/request">Build your Suq</Link>
           </section>
           <section className="landing-discovery-section" aria-label="SuqPage marketplace">
@@ -62,7 +62,7 @@ export default async function Home({
 
       <nav className="landing-mobile-tabs" aria-label="Primary navigation">
         <a href="#discover"><span aria-hidden="true">⌖</span>Explore</a>
-        <a href="#featured-suq-title"><span aria-hidden="true">★</span>Featured</a>
+        <a href="#daily-expo-title"><span aria-hidden="true">★</span>Expo</a>
         <Link href="/about"><span aria-hidden="true">i</span>About</Link>
       </nav>
 

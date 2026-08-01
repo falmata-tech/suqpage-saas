@@ -6,7 +6,7 @@ import { getDiscoveryView } from "@/lib/discovery";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Discover Suqs | SuqPage",
-  description: "Discover independent Ethiopian makers and product businesses by industry and City Suq.",
+  description: "Discover Ethiopian makers and product businesses by industry, reviewed location, and daily virtual Expo.",
 };
 
 export default async function DiscoverPage({ searchParams }: {

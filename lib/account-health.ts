@@ -318,7 +318,7 @@ export function recordShowroomVisit(input: {
     SELECT id FROM businesses
     WHERE lower(handle)=? AND status='active'
   `).get(handle) as { id: number } | undefined;
-  if (!business || !hasPublicEntitlement(business.id, now)) return { recorded: false };
+  if (!business) return { recorded: false };
   const date = new Date(now).toISOString().slice(0, 10);
   const visitorHash = hashPrivateValue(`${input.visitorToken}|${date}`);
   const occurrenceId = Number.parseInt(String(input.occurrenceId ?? ""), 10);

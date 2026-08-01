@@ -1,14 +1,17 @@
 ---
 id: FE-020
 title: Permanent industry and City Suq discovery
-status: done
-related: [FE-001, FE-013, FE-017, BE-019, DEP-016]
+status: deprecated
+related: [FE-001, FE-013, FE-017, FE-021, BE-019, DEP-016]
 owners: [product, frontend, design]
 last_updated: 2026-08-01
 change_level: L2
 ---
 
 # FE-020 - Permanent industry and City Suq discovery
+
+Deprecated by `FE-021`, `BE-020`, and `DEP-017`. This file retains the verified
+historical City Suq contract; it is not current public behavior.
 
 ## Problem and outcome
 

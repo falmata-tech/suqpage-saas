@@ -12,7 +12,7 @@ The launch build addresses the independent audit blockers as follows.
 | Unsafe upload validation | JPEG, PNG and WebP signatures, MIME consistency, file size and dimensions are verified; filenames are server-generated. |
 | Cross-tenant foreign relationships | Server checks and SQLite triggers enforce same-business collections, categories, products, inquiries and deliveries. |
 | Draft pages publicly accessible | Public lookup requires `status='active'`; authenticated preview uses `/preview/@handle`. |
-| No admin onboarding | Administrator can accept a public interest or create a referred-client workspace, issue a single-use invitation, and reset client passwords. |
+| No admin onboarding | Businesses can create a review-gated private workspace; administrators can also accept a legacy public lead or create a referred-client workspace, issue a single-use invitation, and reset client passwords. |
 | Catalog structure cannot be corrected | Authorized staff correct structure inside retained request revisions; clients and routine product upkeep cannot restructure it. |
 | No migration path | Idempotent migration module and `npm run migrate` support existing databases. |
 | Inconsistent DB path | Setup, runtime, backup and restore all use `SUQPAGE_DB_PATH`. |

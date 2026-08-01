@@ -60,11 +60,12 @@ const industryCounts: number[] = [];
 for (const industry of DISCOVERY_INDUSTRIES) {
   const discovery = getDiscoveryView({ db, industry: industry.key });
   industryCounts.push(discovery.total);
-  assert.ok(discovery.total >= 8, `${industry.label} has a useful entitled fixture cohort`);
-  assert.ok(discovery.hosts.length >= 1, `${industry.label} has a qualifying City Suq`);
+  assert.ok(discovery.total >= 8, `${industry.label} has a useful active fixture cohort`);
+  assert.ok(discovery.locationCount >= 1, `${industry.label} has a reviewed geographic location`);
   const hallCounts = new Map<string, number>();
-  for (const booth of discovery.booths) {
-    const key = `${booth.hostKey}:${booth.hall}`;
+  assert.equal(discovery.expo.booths.length, discovery.suqs.length, `${industry.label} Expo includes the complete result set`);
+  for (const booth of discovery.expo.booths) {
+    const key = String(booth.hall);
     hallCounts.set(key, (hallCounts.get(key) || 0) + 1);
   }
   assert.ok(
@@ -72,7 +73,7 @@ for (const industry of DISCOVERY_INDUSTRIES) {
     `${industry.label} keeps halls bounded`,
   );
 }
-assert.equal(industryCounts.reduce((total, count) => total + count, 0), 54);
+assert.equal(industryCounts.reduce((total, count) => total + count, 0), 58);
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get() as { total: number }).total),
   58,

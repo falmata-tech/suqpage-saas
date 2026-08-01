@@ -46,9 +46,9 @@ export default async function AccountHealthPage({
     const accounts = listAccountHealthPage(user, query);
     return (
       <DashboardShell user={user} business={null}>
-        <div className="dashboard-head"><div><span className="eyebrow">Platform health</span><h1>Monthly accounts</h1><p>Find renewals approaching grace or inactivity without loading every business at once.</p></div></div>
+        <div className="dashboard-head"><div><span className="eyebrow">Platform health</span><h1>Monthly accounts</h1><p>Find upcoming and overdue manual renewal records without loading every business at once. Renewal dates do not control publication.</p></div></div>
         <CollectionToolbar action="/dashboard/account-health" search={query.q || ""} placeholder="Business or handle" activeFilters={Boolean(query.q || query.status)}>
-          <label><span>Account state</span><select name="status" defaultValue={query.status || ""}><option value="">All states</option><option value="active">Active</option><option value="grace">Grace</option><option value="inactive">Inactive</option></select></label>
+          <label><span>Renewal state</span><select name="status" defaultValue={query.status || ""}><option value="">All states</option><option value="active">Current period</option><option value="grace">Renewal due</option><option value="inactive">Renewal overdue</option></select></label>
         </CollectionToolbar>
         <div className="account-health-list">
           {accounts.items.map((account) => (
@@ -72,19 +72,19 @@ export default async function AccountHealthPage({
   return (
     <DashboardShell user={user} business={business}>
       <div className="dashboard-head">
-        <div><span className="eyebrow">Account and visibility</span><h1>{business.name}</h1><p>Monthly showroom access and privacy-conscious visitor totals in one place.</p></div>
+        <div><span className="eyebrow">Account and visibility</span><h1>{business.name}</h1><p>Manual renewal records and privacy-conscious visitor totals in one place.</p></div>
         {operations ? <Link className="btn secondary" href="/dashboard/account-health">All accounts</Link> : null}
       </div>
       {query.saved ? <p className="notice">Payment recorded and the monthly period renewed.</p> : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       <section className={`account-status-panel ${subscription.state}`}>
-        <div><span className="eyebrow">Showroom status</span><h2>{subscription.state === "active" ? "Active" : subscription.state === "grace" ? "Payment grace period" : "Inactive"}</h2></div>
+        <div><span className="eyebrow">Manual renewal record</span><h2>{subscription.state === "active" ? "Current period" : subscription.state === "grace" ? "Renewal due" : "Renewal overdue"}</h2></div>
         <div className="account-dates"><span><small>Current period</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>Grace deadline</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
-        <p>{subscription.state === "active" ? "The public Suq and discovery eligibility are online." : subscription.state === "grace" ? "The Suq remains online temporarily. Contact SuqPage to confirm renewal before the grace deadline." : "The public Suq is offline and no longer appears in discovery results. Contact SuqPage to renew access."}</p>
+        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact SuqPage to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: a published active Suq remains public unless an administrator explicitly suspends it.</p>
       </section>
       <div className="cards account-insights">
         <article className="metric"><span>Unique visits</span><strong>{insights.totalVisitors}</strong><small>All recorded showroom sources</small></article>
-        <article className="metric"><span>From City Suq</span><strong>{insights.directoryVisitors}</strong><small>Visitors who entered through discovery</small></article>
+        <article className="metric"><span>From discovery</span><strong>{insights.directoryVisitors}</strong><small>Visitors who entered through the map or list</small></article>
         <article className="metric"><span>Direct visits</span><strong>{insights.directVisitors}</strong><small>Visitors who opened the Suq directly</small></article>
         <article className="metric"><span>Last 30 days</span><strong>{insights.last30Days}</strong><small>Deduplicated daily visits</small></article>
       </div>

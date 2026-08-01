@@ -2,7 +2,7 @@
 id: FE-017
 title: Scalable operations workspace
 status: done
-related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, BE-015, DEP-014]
+related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, FE-021, BE-015, DEP-014]
 owners: [product, frontend, operations]
 last_updated: 2026-07-30
 change_level: L2

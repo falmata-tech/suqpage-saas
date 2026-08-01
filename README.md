@@ -303,8 +303,9 @@ The client renderer owns layout and styling. SuqPage owns catalog data, availabi
 ## MVP deployment boundary
 
 This build is suitable for a small controlled pilot on one persistent server.
-The ten included businesses are disposable local benchmarks, not a production
-capacity claim. SQLite is configured with WAL, busy timeout, integrity checks,
+The 58 included businesses are disposable local fixtures, including ten visual
+benchmarks, not a production capacity claim. SQLite is configured with WAL,
+busy timeout, integrity checks,
 backups and migrations, but it is not a multi-instance database. Move to managed
-PostgreSQL and object storage before broad self-service SaaS onboarding or
+PostgreSQL and object storage before broad external SaaS onboarding or
 horizontal scaling.

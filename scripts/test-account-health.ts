@@ -39,7 +39,10 @@ async function main() {
   db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?")
     .run(now - 1, businessA);
   assert.equal(getBusinessSubscription(businessA, now)?.state, "inactive");
-  assert.equal(getBusinessByHandle("tenant-a"), undefined);
+  assert.ok(getBusinessByHandle("tenant-a"), "an advisory renewal date does not hide an active showroom");
+  db.prepare("UPDATE businesses SET status='suspended' WHERE id=?").run(businessA);
+  assert.equal(getBusinessByHandle("tenant-a"), undefined, "explicit suspension hides the showroom");
+  db.prepare("UPDATE businesses SET status='active' WHERE id=?").run(businessA);
 
   const renewed = recordManualPayment(operations, {
     businessId: businessA,

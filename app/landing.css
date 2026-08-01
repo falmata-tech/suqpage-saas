@@ -105,6 +105,10 @@
 .platform-interest-form.form-card { padding: 0; border: 0; border-radius: 0; background: transparent; }
 .platform-interest-form .form-grid { gap: 15px; }
 .platform-interest-form .field small { color: var(--landing-muted); font-size: .7rem; line-height: 1.5; }
+.signup-handle { display: flex; align-items: center; min-height: 48px; overflow: hidden; border: 1px solid #c9c5cf; border-radius: 5px; background: #fff; }
+.signup-handle:focus-within { border-color: var(--landing-purple); box-shadow: 0 0 0 3px rgb(100 66 181 / 13%); }
+.signup-handle span { flex: 0 0 auto; padding-left: 12px; color: #716a78; font-size: .76rem; font-weight: 750; }
+.platform-form-panel .signup-handle input:not([type="checkbox"]) { min-width: 0; border: 0; box-shadow: none; }
 .platform-interest-form .consent-field { padding-block: 3px; }
 .platform-interest-form .consent-field label { display: grid; min-height: 44px; grid-template-columns: 20px minmax(0, 1fr); align-items: start; gap: 10px; color: #56515c; font-size: .73rem; font-weight: 650; line-height: 1.5; }
 .platform-interest-form .consent-field input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: #4f318f; }

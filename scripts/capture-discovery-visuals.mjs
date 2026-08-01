@@ -22,54 +22,50 @@ async function capture(name, viewport, action) {
   if (action) await action(page);
   const metrics = await page.evaluate(() => {
     const mapStage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
-    const venue = document.querySelector(".city-venue")?.getBoundingClientRect();
+    const expoFloor = document.querySelector(".expo-floor")?.getBoundingClientRect();
     return {
       documentWidth: document.documentElement.scrollWidth,
       viewportWidth: document.documentElement.clientWidth,
       viewportHeight: window.innerHeight,
       regions: document.querySelectorAll(".discovery-regions path").length,
-      hubs: document.querySelectorAll(".discovery-hubs > g").length,
-      booths: document.querySelectorAll(".city-booth").length,
+      roadLayers: document.querySelectorAll(".discovery-roads path").length,
+      clusters: document.querySelectorAll(".discovery-cluster").length,
+      points: document.querySelectorAll(".discovery-point").length,
+      expoBooths: document.querySelectorAll(".expo-booth").length,
+      expoHalls: document.querySelectorAll(".expo-hall-controls button").length,
       featured: document.querySelectorAll(".discovery-featured-rail > a").length,
       listRows: document.querySelectorAll(".discovery-list article").length,
       industryTargets: [...document.querySelectorAll(".discovery-industries a")].map((node) => Math.round(node.getBoundingClientRect().height)),
-      cityTargets: [...document.querySelectorAll(".discovery-city-picker button")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      mapTargets: [...document.querySelectorAll(".discovery-zoom button")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      hallTargets: [...document.querySelectorAll(".expo-hall-controls button")].map((node) => Math.round(node.getBoundingClientRect().height)),
       mapTop: mapStage ? Math.round(mapStage.top) : null,
       mapHeight: mapStage ? Math.round(mapStage.height) : null,
-      venueWidth: venue ? Math.round(venue.width) : null,
-      venueHeight: venue ? Math.round(venue.height) : null,
-      planters: document.querySelectorAll(".city-planter").length,
-      benches: document.querySelectorAll(".city-bench").length,
-      waterFeatures: document.querySelectorAll(".city-water").length,
+      expoWidth: expoFloor ? Math.round(expoFloor.width) : null,
+      expoHeight: expoFloor ? Math.round(expoFloor.height) : null,
       visibleMap: Boolean(document.querySelector(".discovery-map")?.getClientRects().length),
-      visibleVenue: Boolean(document.querySelector(".city-venue")?.getClientRects().length),
+      visibleExpo: Boolean(document.querySelector(".expo-floor")?.getClientRects().length),
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
-  if (metrics.listRows) {
-    assert.ok(metrics.listRows >= 3, `${name} renders the complete selected-industry list`);
-  } else {
+  if (metrics.listRows) assert.equal(metrics.listRows, 5, `${name} keeps the list page bounded to five rows`);
+  else {
     assert.equal(metrics.regions, 14, `${name} renders all region paths`);
-    assert.ok(metrics.hubs > 0, `${name} renders at least one City Suq`);
+    assert.equal(metrics.roadLayers, 4, `${name} renders four local road classes`);
+    assert.ok(metrics.clusters + metrics.points > 0, `${name} renders clustered or individual Suqs`);
     assert.equal(metrics.visibleMap, true, `${name} keeps the map visible`);
   }
   assert.ok(metrics.industryTargets.every((height) => height >= 44), `${name} industry controls are touch sized`);
-  assert.ok(metrics.cityTargets.every((height) => height >= 44), `${name} city controls are touch sized`);
-  assert.ok(metrics.booths <= 12, `${name} renders at most twelve booths`);
+  assert.ok(metrics.mapTargets.every((height) => height >= 44), `${name} map controls are touch sized`);
+  assert.ok(metrics.hallTargets.every((height) => height >= 42), `${name} Expo hall controls are touch sized`);
+  assert.ok(metrics.expoBooths <= 12, `${name} renders at most twelve Expo booths`);
+  assert.equal(metrics.visibleExpo, true, `${name} renders the daily industry Expo`);
   if (name.includes("home")) {
-    assert.ok(metrics.featured > 0 && metrics.featured <= 5, `${name} renders the bounded featured shortcut rail`);
-    assert.ok(metrics.mapTop !== null && metrics.mapTop < metrics.viewportHeight, `${name} brings the marketplace map into the first viewport`);
-  }
-  if (metrics.visibleVenue) {
-    assert.equal(metrics.planters, 4, `${name} renders the landscaped planters`);
-    assert.equal(metrics.benches, 2, `${name} renders restrained seating`);
-    assert.equal(metrics.waterFeatures, 1, `${name} renders the central water feature`);
-    assert.ok(metrics.venueHeight < metrics.mapHeight - 100, `${name} leaves map context visible below the venue`);
-    assert.ok(metrics.venueWidth < metrics.viewportWidth - 20, `${name} leaves map context visible beside the venue`);
+    assert.ok(metrics.featured > 0 && metrics.featured <= 5, `${name} renders the bounded featured rail`);
+    assert.ok(metrics.mapTop !== null && metrics.mapTop < metrics.viewportHeight, `${name} brings the map into the first viewport`);
   }
   assert.deepEqual(errors, [], `${name} has no browser errors`);
   const screenshot = path.join(output, `${name}.png`);
-  await page.screenshot({ path: screenshot, fullPage: name.includes("home") });
+  await page.screenshot({ path: screenshot, fullPage: name.includes("home") || name.includes("expo") });
   evidence.push({ name, screenshot, ...metrics });
   await page.close();
 }
@@ -77,15 +73,14 @@ async function capture(name, viewport, action) {
 try {
   await capture("home-desktop", { width: 1440, height: 1000 });
   await capture("home-mobile-390", { width: 390, height: 844 });
-  await capture("city-suq-desktop", { width: 1440, height: 1000 }, async (page) => {
-    await page.getByRole("group", { name: "City Suqs" }).getByRole("button").nth(1).click();
-    await page.locator(".city-venue").waitFor();
-    await page.locator(".city-venue").scrollIntoViewIfNeeded();
+  await capture("cluster-expanded-desktop", { width: 1440, height: 1000 }, async (page) => {
+    const cluster = page.locator(".discovery-cluster").first();
+    if (await cluster.count()) await cluster.click();
+    await page.waitForTimeout(500);
+    await page.locator(".discovery-map-stage").scrollIntoViewIfNeeded();
   });
-  await capture("city-suq-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await page.getByRole("group", { name: "City Suqs" }).getByRole("button").nth(1).click();
-    await page.locator(".city-venue").waitFor();
-    await page.locator(".city-venue").scrollIntoViewIfNeeded();
+  await capture("expo-mobile-390", { width: 390, height: 844 }, async (page) => {
+    await page.locator(".daily-expo").scrollIntoViewIfNeeded();
   });
   await capture("discovery-list-mobile-320", { width: 320, height: 700 }, async (page) => {
     await page.getByRole("tab", { name: "List" }).click();

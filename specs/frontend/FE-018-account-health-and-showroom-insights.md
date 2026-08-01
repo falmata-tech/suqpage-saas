@@ -2,9 +2,9 @@
 id: FE-018
 title: Account health and showroom insights
 status: done
-related: [BE-017, BE-015, DEP-015, ADR-0010]
+related: [FE-021, BE-017, BE-015, DEP-015, ADR-0010, ADR-0011]
 owners: [frontend, operations]
-last_updated: 2026-07-30
+last_updated: 2026-08-01
 change_level: L2
 ---
 
@@ -12,20 +12,21 @@ change_level: L2
 
 ## Problem and outcome
 
-Clients need a clear monthly account state and useful evidence that their
+Clients need a clear monthly account record and useful evidence that their
 showroom and Expo participation are being visited. Operations needs a compact,
-searchable way to record renewals and see accounts approaching inactivity.
+searchable way to record manual renewals without making an undecided commercial
+schedule an automatic public-availability switch.
 
 ## Scope
 
 ### In scope
 
-- Client account-health page with active period, grace warning, renewal history,
+- Client account-health page with period status, renewal history,
   and total/Expo/directory visit summary.
 - Operations business context with the same health state and a manual ETB
   payment-recording control.
 - Platform account-health list with search, status filter, and pagination.
-- Neutral homepage notice after an inactive showroom redirect.
+- Neutral homepage notice after an explicitly suspended showroom redirect.
 
 ### Non-goals
 
@@ -35,11 +36,11 @@ searchable way to record renewals and see accounts approaching inactivity.
 ## Scenarios
 
 ```gherkin
-Scenario: Client sees an actionable grace warning
+Scenario: Client sees an advisory renewal status
   GIVEN the client's monthly period has ended but the four-day grace period remains
   WHEN the client opens account health
-  THEN the exact grace deadline is shown
-  AND the showroom is described as temporarily still online
+  THEN the exact period and grace dates are shown as account records
+  AND the active published showroom remains online until explicitly suspended
 
 Scenario: Operations handles many accounts
   GIVEN hundreds of subscriptions
@@ -63,7 +64,7 @@ Scenario: Operations handles many accounts
 |---|---|---|
 | Client health and aggregate insight | browser | `tests/acceptance/app.spec.ts` |
 | Operations search/filter/page | integration/browser | `scripts/test-account-health.ts`, `tests/acceptance/app.spec.ts` |
-| Inactive redirect notice | browser | `tests/acceptance/app.spec.ts` |
+| Explicit suspension redirect notice | browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
@@ -82,11 +83,13 @@ removed without changing ledger history.
 
 ## Completion evidence
 
-Evidence: verified locally on 2026-07-30.
+Evidence: verified locally on 2026-08-01.
 
-`app/dashboard/account-health/page.tsx`, manual renewal actions, dashboard
-navigation, aggregate metrics, and the inactive homepage notice are
-implemented. Ordered browser acceptance proves the client active state and
-metrics, operations 20-row account page and filter, and role restrictions; the
-focused browser run proves inactive showroom redirect. Account integration,
-full check, operations, and release gates passed on 2026-07-30.
+`app/dashboard/account-health/page.tsx`, advisory manual renewal actions,
+dashboard navigation, aggregate metrics, and the explicit-suspension homepage
+notice are implemented. Ordered browser acceptance proves the client renewal
+state and metrics, operations 20-row account page and filter, and role
+restrictions. `scripts/test-account-health.ts` proves elapsed renewal dates do
+not hide an active published showroom while explicit suspension still does.
+`npm run check`, 10/10 browser acceptance, and `npm run release` passed on
+2026-08-01.

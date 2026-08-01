@@ -107,20 +107,24 @@ try {
   seed({ handle: "empty-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, product: "" });
 
   const view = getDiscoveryView({ db, industry: "electronics" });
-  assert.equal(view.total, 18, "only active, entitled, approved businesses with a published offering appear");
+  assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.featuredCount, 2);
-  assert.equal(view.hosts.length, 2, "only qualifying hosts remain");
-  assert.equal(view.hosts.find((host) => host.key === "addis-ababa")?.boothCount, 14);
-  assert.equal(view.hosts.find((host) => host.key === "adama")?.boothCount, 4, "sparse Bishoftu joins nearest qualifying Adama");
-  assert.equal(view.hosts.find((host) => host.key === "addis-ababa")?.hallCount, 2);
-  assert.equal(Math.max(...view.booths.map((booth) => booth.booth)), 12, "a hall never exposes more than twelve booth positions");
-  assert.equal(new Set(view.booths.map((booth) => booth.reference)).size, view.booths.length, "booth references are unique");
-  assert.match(view.booths[0].reference, /^[A-Z]{3}-1-B\d{2}$/);
+  assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
+  assert.deepEqual(
+    view.suqs.filter((suq) => suq.handle === "bishoftu-repair").map((suq) => [suq.latitude, suq.longitude]),
+    [[8.748, 38.982]],
+    "a sparse business keeps its exact reviewed coordinates",
+  );
+  assert.equal(view.suqs.some((suq) => suq.handle === "expired-device"), true, "manual renewal dates do not hide an active published showroom");
+  assert.equal(view.expo.hallCount, 2);
+  assert.equal(Math.max(...view.expo.booths.map((booth) => booth.booth)), 12, "an Expo hall never exposes more than twelve booth positions");
+  assert.equal(new Set(view.expo.booths.map((booth) => booth.reference)).size, view.expo.booths.length, "Expo booth references are unique");
+  assert.match(view.expo.booths[0].reference, /^ELC-H1-B\d{2}$/);
 
   const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal" });
   assert.equal(search.total, 1, "published offering text is searchable");
-  assert.equal(search.hosts.length, 1, "a sub-three result remains discoverable through deterministic fallback");
-  assert.equal(search.booths[0].originCity, "Addis Ababa");
+  assert.equal(search.suqs[0].city, "Addis Ababa");
+  assert.equal(search.expo.booths.length, 1, "Expo uses the same searched projection");
 
   const invalidIndustry = getDiscoveryView({ db, industry: "not-real" });
   assert.equal(invalidIndustry.industry.key, DISCOVERY_INDUSTRIES[0].key, "invalid industry resolves to the first allowlisted industry");
@@ -161,7 +165,7 @@ try {
     "admin discovery updates replace indexed industry membership atomically",
   );
 
-  console.log("City Suq discovery tests passed.");
+  console.log("Geographic Suq discovery and daily industry Expo tests passed.");
 } finally {
   db.close();
   fs.rmSync(root, { recursive: true, force: true });

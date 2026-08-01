@@ -25,8 +25,8 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   previews while assigned SuqPage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
-- Delivered: attachment-free public interest, direct or lead-based invitations,
-  authenticated client requests, server-derived request type, attributable
+- Delivered: attachment-free legacy public interest, review-gated public client
+  signup, direct or lead-based invitations, authenticated client requests, server-derived request type, attributable
   clarifications, assigned staff, revision preview and approval, controlled
   customer operations, atomic publication/rollback, and migration 7 permission
   cutover.
@@ -112,7 +112,7 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 - Outcome: complete the operator-owned items in `docs/LAUNCH-CHECKLIST.md` for
   the four approved tenants without expanding the deployment topology.
 - Controlling specs: `DEP-001`, `BE-002`, and the base specifications.
-- Non-goal: broad self-service onboarding or horizontal scaling.
+- Non-goal: broad external rollout or horizontal scaling.
 
 ## Next — learn from the four-client pilot
 
@@ -129,7 +129,7 @@ being listed here; it must first be promoted to **Now** and specified.
 ## Later — conditional expansion
 
 - Managed PostgreSQL and object storage before multiple instances or broad
-  self-service onboarding.
+  external onboarding.
 - Post-pilot refinements to the staff roles and operational permissions being
   introduced under the current managed-request initiative.
 - A real Malikt Board adapter and callback/reconciliation contract.

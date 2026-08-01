@@ -169,6 +169,35 @@ try {
   const crossOrigin = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { origin: 'https://attacker.example', 'x-forwarded-host': 'attacker.example', 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
   assert.equal(crossOrigin.status, 403);
 
+  const signupPayload = {
+    name: 'HTTP Client',
+    email: 'http-client@example.test',
+    phone: '+251911000222',
+    businessName: 'HTTP Client Workshop',
+    handle: 'http-client-workshop',
+    password: 'HTTP-Workspace-2026!',
+    confirmPassword: 'HTTP-Workspace-2026!',
+    requestText: 'We produce practical household goods and need a clear private showroom design.',
+    idempotencyKey: 'http-signup-key-0001',
+    consent: true,
+  };
+  const signup = await fetch(`${baseUrl}/api/signup`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(signupPayload) });
+  assert.equal(signup.status, 201);
+  const signupResult = await signup.json();
+  assert.match(signupResult.reference, /^REQ-[A-F0-9]{12}$/);
+  assert.match(signupResult.destination, /^\/dashboard\/requests\/\d+$/);
+  const sessionCookie = signup.headers.get('set-cookie');
+  assert.match(sessionCookie || '', /^suqpage_session=/);
+  const privateRequest = await fetch(`${baseUrl}${signupResult.destination}`, { headers: { cookie: sessionCookie.split(';', 1)[0] } });
+  assert.equal(privateRequest.status, 200);
+  assert.equal((await fetch(`${baseUrl}/@http-client-workshop`)).status, 404);
+  const signupUpload = new FormData();
+  signupUpload.set('name', 'Signup Upload Attempt');
+  signupUpload.set('images', new File(['blocked'], 'blocked.txt', { type: 'text/plain' }));
+  assert.equal((await fetch(`${baseUrl}/api/signup`, { method: 'POST', body: signupUpload })).status, 415);
+  const signupCrossOrigin = await fetch(`${baseUrl}/api/signup`, { method: 'POST', headers: { origin: 'https://attacker.example', 'x-forwarded-host': 'attacker.example', 'content-type': 'application/json' }, body: JSON.stringify({ ...signupPayload, email: 'cross-origin@example.test', handle: 'cross-origin-client' }) });
+  assert.equal(signupCrossOrigin.status, 403);
+
   const forged = await fetch(`${baseUrl}/api/inquiries`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

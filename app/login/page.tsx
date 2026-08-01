@@ -16,7 +16,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
           <span className="platform-task-eyebrow">Private workspace</span>
           <h1 id="login-title">Welcome back to SuqPage.</h1>
           <p>Follow showroom requests, customer inquiries, delivery activity, and private previews in one protected workspace.</p>
-          <div className="platform-context-note"><strong>Access is assigned by SuqPage.</strong><span>New accounts confirm a private invitation and change their temporary password before continuing.</span></div>
+          <div className="platform-context-note"><strong>New to SuqPage?</strong><span>Create a private business workspace and submit your first showroom request without waiting for an invitation.</span></div>
         </div>
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>Account access</span><h2>Sign in</h2><p>Use the email and password connected to your SuqPage account.</p></div>
@@ -25,8 +25,9 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
             <div className="field"><label htmlFor="login-email">Email</label><input id="login-email" name="email" type="email" autoComplete="email" required/></div>
             <div className="field"><label htmlFor="login-password">Password</label><input id="login-password" name="password" type="password" autoComplete="current-password" required/></div>
             <button type="submit">Sign in</button>
-            <p className="platform-form-note">Temporary passwords must be changed after the first sign-in.</p>
+            <p className="platform-form-note">Staff-created temporary passwords must be changed after the first sign-in.</p>
           </form>
+          <div className="platform-form-footer"><span>Need a showroom?</span><Link href="/request">Create your account</Link></div>
           <Link className="platform-return-link" href="/">Return to marketplace</Link>
         </div>
       </section>

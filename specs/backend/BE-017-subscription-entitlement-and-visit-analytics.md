@@ -1,14 +1,14 @@
 ---
 id: BE-017
-title: Subscription entitlement and visit analytics
+title: Manual subscription records and visit analytics
 status: done
-related: [FE-018, BE-001, BE-011, BE-015, BE-019, DEP-015, ADR-0010]
+related: [FE-018, BE-001, BE-011, BE-015, BE-019, BE-020, DEP-015, ADR-0010, ADR-0011]
 owners: [backend, security, operations]
-last_updated: 2026-07-30
+last_updated: 2026-08-01
 change_level: L2
 ---
 
-# BE-017 - Subscription entitlement and visit analytics
+# BE-017 - Manual subscription records and visit analytics
 
 ## Problem and outcome
 
@@ -23,8 +23,8 @@ invasive visitor data.
 - One monthly subscription ledger per business with start, period end,
   four-day grace deadline, and manually confirmed renewal records. Amount is
   nullable in storage and is not collected by the current UI.
-- Active, grace, and inactive entitlement evaluation on every protected public
-  read.
+- Active, grace, and inactive account-record evaluation for client and
+  operations visibility without automatic public enforcement.
 - Operations payment recording and period renewal.
 - Privacy-conscious showroom visit recording and Expo attribution.
 - Tenant-scoped and platform aggregate traffic summaries.
@@ -44,7 +44,8 @@ invasive visitor data.
   override dates.
 - A renewal record is immutable evidence. A manually accepted renewal advances
   the period from the later of now or the previous period end.
-- Inactive showrooms are omitted from Expo eligibility and public discovery.
+- Subscription state is advisory. Active published showrooms remain public
+  until an administrator explicitly suspends them.
 - A visit contains an opaque daily visitor hash, business, source, optional Expo
   occurrence/hub, and timestamp. Raw IP addresses are never persisted.
 
@@ -64,12 +65,12 @@ invasive visitor data.
 ## Scenarios
 
 ```gherkin
-Scenario: Grace expires safely
+Scenario: Grace expiry remains advisory
   GIVEN a business whose monthly period ended more than four days ago
   AND no confirmed renewal
-  WHEN a visitor opens its public showroom
-  THEN the visitor is redirected to the SuqPage homepage
-  AND the business is absent from Expo eligibility
+  WHEN a visitor opens its active published showroom
+  THEN the showroom remains public and discoverable
+  AND an explicit administrator suspension is still enforced
 
 Scenario: Expo visit is attributed without personal data
   GIVEN a visitor follows a booth link
@@ -107,8 +108,8 @@ Scenario: Client cannot read another tenant's analytics
 ## Rollout and rollback
 
 Migration 21 is additive. Reset fixtures receive active subscriptions. Existing
-databases are backfilled with an active pilot period before entitlement is
-enforced. Application rollback may leave additive tables unused. Payment
+databases are backfilled with an active pilot period for account reporting.
+Application rollback may leave additive tables unused. Payment
 checkout is not part of this feature.
 
 ## Readiness checklist
@@ -123,14 +124,15 @@ checkout is not part of this feature.
 
 ## Completion evidence
 
-Evidence: verified locally on 2026-07-30.
+Evidence: verified locally on 2026-08-01.
 
-Migration 21, `lib/account-health.ts`, the same-origin visit endpoint, public
-entitlement filters, and manual renewal service are implemented.
+Migration 21, `lib/account-health.ts`, the same-origin visit endpoint, advisory
+renewal records, and explicit active/suspended publication controls are implemented.
 `scripts/test-account-health.ts` proves active/grace/inactive boundaries,
 amount-free idempotent renewal, tenant denial, daily visit deduplication, and
 Expo attribution without raw IP storage. `scripts/test-scale-fixtures.ts`
 proves 398 subscription rows and 3,184 aggregate demo visits. Ordered browser
-acceptance proves client insights, operations pagination, and inactive public
-redirect. `npm run check`, `npm run test:operations`, and `npm run release`
-passed on 2026-07-30.
+acceptance proves client insights, operations pagination, and explicit suspended
+public redirect. Renewal-date public filters were removed from canonical
+showroom and discovery queries. `npm run check`, 10/10 ordered browser
+acceptance, and `npm run release` passed on 2026-08-01.

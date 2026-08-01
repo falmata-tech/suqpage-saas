@@ -78,9 +78,7 @@ export function listPublicIndustries() {
     SELECT DISTINCT COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community') industry_key
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-    JOIN business_subscriptions s ON s.business_id=b.id
     WHERE b.status='active'
-      AND s.grace_ends_at>=CAST(strftime('%s','now') AS INTEGER)*1000
     ORDER BY industry_key
   `).all() as Array<{ industry_key: string }>;
   return rows.map(({ industry_key: key }) => ({
@@ -131,9 +129,7 @@ export function listPublicShowrooms(input: PageInput & {
   const totalItems = total(
     `SELECT COUNT(*) total
      FROM businesses b
-     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-     JOIN business_subscriptions s ON s.business_id=b.id
-       AND s.grace_ends_at>=CAST(strftime('%s','now') AS INTEGER)*1000${where}`,
+     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id${where}`,
     params,
   );
   const window = pageWindow(totalItems, request);
@@ -145,8 +141,6 @@ export function listPublicShowrooms(input: PageInput & {
       COALESCE(p.is_featured,0) featured
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-    JOIN business_subscriptions s ON s.business_id=b.id
-      AND s.grace_ends_at>=CAST(strftime('%s','now') AS INTEGER)*1000
     ${where}
     ORDER BY COALESCE(p.is_featured,0) DESC,${order}
     LIMIT ? OFFSET ?

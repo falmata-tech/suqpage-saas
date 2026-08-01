@@ -136,4 +136,4 @@ Before opening the site publicly:
 
 ## Remaining post-pilot work
 
-Before broad self-service SaaS onboarding or horizontal scaling, migrate to managed PostgreSQL and object storage, add staff roles, connect the real Malikt Board API and callbacks, and expand public localization.
+Before broad external SaaS onboarding or horizontal scaling, migrate to managed PostgreSQL and object storage, strengthen account recovery and monitoring, connect the real Malikt Board API and callbacks, and expand public localization.

@@ -93,38 +93,54 @@ async function loginAndChangeKnownPassword(page: Page, email:string, temporaryPa
 }
 async function loginWithKnownPassword(page:Page,email:string,password:string){await page.goto("/login");await page.getByLabel("Email").fill(email);await page.getByLabel("Password").fill(password);await page.getByRole("button",{name:"Sign in"}).click();await expect(page).toHaveURL(/\/dashboard$/);}
 
-test("prospect submits an interest request without public uploads", async ({ page }) => {
+test("business creates a private client workspace without public uploads", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/request");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Introduce your business");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Start your Suq in one clear step");
   await page.getByLabel("Your name").fill("Acceptance Prospect");
-  await page.getByLabel("Email, phone, or WhatsApp").fill("prospect@example.test");
-  await page.getByLabel(/Business name/).fill("Acceptance Market");
-  await page.getByLabel("What are you interested in?").fill("I am interested in a showroom for our handmade home products.");
+  await page.getByLabel("Email").fill("prospect@example.test");
+  await page.getByLabel("Phone or WhatsApp").fill("+251911000111");
+  await page.getByLabel("Business name").fill("Acceptance Self Signup");
+  await page.getByLabel("Preferred Suq address").fill("acceptance-self-signup");
+  await page.getByLabel("Password", { exact: true }).fill("Acceptance-Workspace-2026!");
+  await page.getByLabel("Confirm password").fill("Acceptance-Workspace-2026!");
+  await page.getByLabel("What do you make, grow, or produce?").fill("We make durable household storage and woven market baskets for local retailers.");
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
-  await page.getByLabel(/SuqPage may use/).check();
-  await page.getByRole("button", { name: "Tell SuqPage I’m interested" }).click();
-  await expect(page.getByRole("status")).toContainText(/REQ-[A-F0-9]{12}/);
-  await expect(page.getByRole("status")).toContainText("Nothing has been accepted, designed, or published yet");
+  await page.getByLabel(/Create my private SuqPage workspace/).check();
+  await page.getByRole("button", { name: "Create my workspace" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/requests\/\d+$/);
+  await expect(page.getByText("Acceptance Self Signup", { exact: false }).first()).toBeVisible();
+  const unpublished = await page.request.get("/@acceptance-self-signup");
+  expect(unpublished.status()).toBe(404);
+  const legacyLead = await page.request.post("/api/requests", { data: {
+    contactName: "Acceptance Prospect",
+    contactValue: "prospect@example.test",
+    businessName: "Acceptance Market",
+    requestText: "I am interested in a showroom for our handmade home products.",
+    idempotencyKey: "acceptance-public-lead-0001",
+    consent: true,
+  } });
+  expect(legacyLead.status()).toBe(201);
   const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png")) } } });
   expect(publicUpload.status()).toBe(415);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
+test("geographic discovery, daily Expo, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/");
   await expectVisibleControlsNamed(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Give your products one clear place to be found");
-  await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
   await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Map" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "List" })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  expect(await page.locator(".discovery-hubs > g").count()).toBeGreaterThan(0);
+  await expect(page.locator(".discovery-roads path")).toHaveCount(4);
+  expect(await page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
   await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
   await expect(page.locator(".landing-hero-image")).toHaveCount(0);
@@ -133,11 +149,14 @@ test("permanent City Suq discovery, benchmark Suqs, and copy-first inquiry", asy
   expect(featuredShortcuts).toBeLessThanOrEqual(5);
   const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
   expect(desktopMap?.y).toBeLessThan(720);
-  await expect(page.locator("body")).not.toContainText(/daily expo|live today|weekly expo/i);
+  await expect(page.getByRole("heading", { name: /Expo$/ })).toBeVisible();
+  const firstHallBooths = await page.locator(".expo-booth").count();
+  expect(firstHallBooths).toBeGreaterThan(0);
+  expect(firstHallBooths).toBeLessThanOrEqual(12);
   await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
   await page.getByRole("tab", { name: "List" }).click();
-  expect(await page.locator(".discovery-list article").count()).toBeGreaterThanOrEqual(3);
+  expect(await page.locator(".discovery-list article").count()).toBe(5);
   await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
@@ -464,58 +483,42 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test("mobile City Suq venue, booth preview, list parity, and legacy redirects", async ({ page }) => {
+test("mobile clustered map, Expo halls, list parity, and legacy redirects", async ({ page }) => {
   const errors = monitor(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/expo");
   await expect(page).toHaveURL(/\/discover$/);
-  await expect(page.getByRole("heading", { name: "Choose what you want to discover." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  const cityControls = page.getByRole("group", { name: "City Suqs" });
-  expect(await cityControls.getByRole("button").count()).toBeGreaterThan(1);
-  const hostButton = cityControls.getByRole("button").nth(1);
-  const hostCity = (await hostButton.locator("strong").innerText()).trim();
-  await hostButton.click();
-  const contextualStage = page.locator(".discovery-map-stage.city-open");
-  await expect(contextualStage).toBeVisible();
-  await expect(contextualStage.locator(".discovery-map")).toBeVisible();
-  await expect(contextualStage.locator(".discovery-regions path")).toHaveCount(14);
-  await expect(page.getByRole("heading", { name: `${hostCity} City Suq` })).toBeVisible();
-  const visibleHallBooths = await page.locator(".city-booth").count();
-  expect(visibleHallBooths).toBeGreaterThan(0);
-  expect(visibleHallBooths).toBeLessThanOrEqual(12);
-  await expect(page.getByText("Entrance")).toBeVisible();
-  await expect(page.locator(".city-lobby").getByText("City Suq")).toBeVisible();
-  await expect(page.locator(".city-planter")).toHaveCount(4);
-  await expect(page.locator(".city-water")).toHaveCount(1);
-  await expect(page.locator(".city-bench")).toHaveCount(2);
-  const stageBounds = await contextualStage.boundingBox();
-  const venueBounds = await page.locator(".city-venue").boundingBox();
-  expect((venueBounds?.height || 0)).toBeLessThan((stageBounds?.height || 0) - 100);
-  expect((venueBounds?.width || 0)).toBeLessThan((stageBounds?.width || 0) - 20);
-  const booth = page.locator(".city-booth").first();
+  await expect(page.locator(".discovery-roads path")).toHaveCount(4);
+  const initialMarkers = await page.locator(".discovery-cluster, .discovery-point").count();
+  const cluster = page.locator(".discovery-cluster").first();
+  await expect(cluster).toBeVisible();
+  await cluster.click();
+  await expect.poll(() => page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(initialMarkers);
+  const point = page.locator(".discovery-point").first();
+  await expect(point).toBeVisible();
+  await point.click();
+  await expect(page.locator(".discovery-preview").getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
+  await page.getByRole("button", { name: "Close business preview" }).click();
+
+  const booth = page.locator(".expo-booth").first();
+  await expect(booth).toBeVisible();
   const boothLabel = (await booth.getAttribute("aria-label")) || "";
-  const boothMatch = boothLabel.match(/^([A-Z]{3}-\d+-B\d{2}), (.+)$/);
+  const boothMatch = boothLabel.match(/^([A-Z]{3}-H\d+-B\d{2}), (.+)$/);
   expect(boothMatch).not.toBeNull();
   const boothReference = boothMatch?.[1] || "";
-  const boothName = boothMatch?.[2] || "";
   await booth.click();
   const preview = page.locator(".discovery-preview");
   await expect(preview).toBeVisible();
-  await expect(preview.getByText(boothReference, { exact: false })).toBeVisible();
-  await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
-  await page.getByRole("button", { name: `Close ${hostCity} City Suq` }).click();
-  await expect(cityControls.getByRole("button", { name: "All Ethiopia" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".city-venue")).toHaveCount(0);
-  await expect(page.locator(".discovery-map")).toBeVisible();
+  await expect(page.getByRole("button", { name: new RegExp(`^${boothReference},`) })).toHaveClass(/selected/);
+  await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=expo$/);
+  expect(await page.locator(".expo-booth").count()).toBeLessThanOrEqual(12);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "List" }).click();
   const listCount = await page.locator(".discovery-list article").count();
-  expect(listCount).toBeGreaterThanOrEqual(3);
+  expect(listCount).toBe(5);
   await expect(page.locator(".discovery-list").getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
-  await expect(
-    page.locator(".discovery-list article").filter({ hasText: boothName }).getByText(boothReference, { exact: false }),
-  ).toBeVisible();
   await page.setViewportSize({ width: 320, height: 700 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/bazaar");
@@ -523,8 +526,9 @@ test("mobile City Suq venue, booth preview, list parity, and legacy redirects", 
   await page.route("**/geo/ethiopia-admin1-2023.geojson", (route) => route.fulfill({ status: 503, body: "" }));
   await page.goto("/discover");
   await expect(page.getByText("The map could not load, but every Suq is still available.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Expo$/ })).toBeVisible();
   await page.getByRole("button", { name: "Open list" }).click();
-  expect(await page.locator(".discovery-list article").count()).toBeGreaterThanOrEqual(3);
+  expect(await page.locator(".discovery-list article").count()).toBe(5);
   await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toBeVisible();
   expect(errors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
 });
@@ -634,7 +638,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page.getByText(/Offering published successfully as showroom version/)).toBeVisible();
   await page.goto("/dashboard/requests");
   await expect(page.getByText("Acceptance Market")).toBeVisible();
-  await page.getByRole("link", { name: /REQ-/ }).click();
+  await page.getByRole("row").filter({ hasText: "Acceptance Market" }).getByRole("link", { name: /REQ-/ }).click();
   await expect(page.getByText("prospect@example.test")).toBeVisible();
   await expect(page.locator(".request-image-grid img")).toHaveCount(0);
   await page.getByLabel("Status").selectOption("under_review");
@@ -1007,7 +1011,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await expect(showroomInquiry).toContainText("Open for discussion");
   await page.goto("/dashboard/account-health");
   await expect(page.getByRole("heading",{name:"Selam Weave Studio"})).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Active"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Current period"})).toBeVisible();
   await expect(page.getByText("Unique visits",{exact:true})).toBeVisible();
   await expect(page.getByRole("button",{name:"Record payment and renew one month"})).toHaveCount(0);
   await page.setViewportSize({width:390,height:844});
@@ -1027,7 +1031,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await loginWithKnownPassword(page,"operations@example.test","OperationsReady123!");
   await page.goto("/dashboard/account-health");
   await expect(page.getByRole("heading",{name:"Monthly accounts"})).toBeVisible();
-  await expect(page.getByLabel("Account state")).toBeVisible();
+  await expect(page.getByLabel("Renewal state")).toBeVisible();
   await expect(page.getByText(/Showing 1-20 of \d+/)).toBeVisible();
   await page.goto("/dashboard/support?status=waiting");
   await expect(page.getByRole("heading",{name:"Support inbox"})).toBeVisible();

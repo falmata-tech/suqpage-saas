@@ -1,14 +1,17 @@
 ---
 id: DEP-016
 title: Permanent City Suq pre-production cutover
-status: done
-related: [FE-020, BE-019, DEP-011, DEP-014, DEP-015]
+status: deprecated
+related: [FE-020, FE-021, BE-019, DEP-011, DEP-014, DEP-015, DEP-017]
 owners: [deployment, operations, product, qa]
 last_updated: 2026-08-01
 change_level: L3
 ---
 
 # DEP-016 - Permanent City Suq pre-production cutover
+
+Deprecated by `FE-021`, `BE-020`, and `DEP-017`. This file retains the verified
+historical pre-production cutover evidence; it is not current public behavior.
 
 ## Problem and outcome
 
