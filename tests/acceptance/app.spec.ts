@@ -537,6 +537,18 @@ test("platform surfaces share the SuqPage identity", async ({ page }) => {
     await expect(brand).toBeVisible();
     await expect(brand.locator("..")).toHaveAccessibleName("SuqPage home");
   }
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const pathName of ["/request", "/login"]) {
+    await page.goto(pathName);
+    await expect(page.locator(".platform-task-shell")).toBeVisible();
+    const controlHeights = await page.locator(".platform-form-panel .field input:not([type=hidden]):not([type=checkbox]), .platform-form-panel .field textarea, .platform-form-panel button, .platform-form-panel .consent-field label").evaluateAll((controls) => controls.filter((control) => control.getClientRects().length > 0).map((control) => Math.round(control.getBoundingClientRect().height)));
+    expect(controlHeights.length).toBeGreaterThan(0);
+    expect(controlHeights.every((height) => height >= 44)).toBe(true);
+    const firstField = page.locator(".platform-form-panel .field input:not([type=hidden]):not([type=checkbox])").first();
+    await firstField.focus();
+    expect(await firstField.evaluate((field) => getComputedStyle(field).boxShadow)).not.toBe("none");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  }
   expect(errors).toEqual([]);
 });
 

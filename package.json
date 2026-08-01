@@ -45,6 +45,7 @@
     "test:benchmarks": "tsx scripts/test-showroom-benchmarks.ts",
     "test:visual-benchmarks": "node scripts/capture-showroom-benchmarks.mjs",
     "test:discovery-visual": "node scripts/capture-discovery-visuals.mjs",
+    "test:platform-forms-visual": "node scripts/capture-platform-form-visuals.mjs",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",

@@ -4,7 +4,7 @@ title: Unified platform identity and workspace shell
 status: done
 related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE_BASE]
 owners: [product, frontend]
-last_updated: 2026-07-26
+last_updated: 2026-08-01
 change_level: L1
 ---
 
@@ -25,6 +25,9 @@ findable on desktop and mobile.
   public and authenticated surfaces.
 - A neutral platform palette shared by the public marketplace and workspace
   shell while preserving tenant showroom identity inside showroom renderers.
+- Purposeful public task surfaces for login and expression-of-interest intake
+  using the homepage/About solid purple, white, charcoal, and cool-neutral
+  language without promotional gradients or oversized rounded cards.
 - Grouped, role-aware workspace navigation with one primary destination for
   each workflow and an accessible mobile drawer.
 - Clear account, current-business, public-site, and sign-out context.
@@ -33,8 +36,8 @@ findable on desktop and mobile.
 
 - Changing authorization, tenant scope, routes, or business data.
 - Restyling tenant-owned showroom brands or component-bank previews.
-- Redesigning intake, request detail, recipe studio, Bazaar controls, or other
-  workflow content beyond the shell that contains them.
+- Changing intake fields, login behavior, request detail, recipe studio,
+  discovery controls, or other workflow behavior beyond presentation.
 
 ## Domain language and invariants
 
@@ -51,6 +54,12 @@ findable on desktop and mobile.
 
 - The same accessible brand component appears on the homepage, Bazaar, public
   intake, login, legal pages, and authenticated workspace shell.
+- Login and public intake use the same platform header, compact geometry,
+  semantic palette, form controls, and focus treatment as the current homepage
+  and About page. Their distinct tasks remain immediately clear.
+- On desktop, each public task may pair one solid-purple context panel with one
+  white form panel. On phones the panels stack in semantic reading order, all
+  inputs remain visible, and no fixed navigation covers form controls.
 - Activating the workspace brand returns to the actor's role-appropriate
   dashboard; public surfaces return home.
 - Desktop navigation groups destinations by workspace, customer work, design
@@ -75,6 +84,13 @@ Scenario: Visitor recognizes SuqPage across platform surfaces
   WHEN each platform header or identity area renders
   THEN the same SuqPage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
+
+Scenario: Visitor uses a public platform task on a phone
+  GIVEN a visitor opens login or the expression-of-interest form at 320 or 390 CSS pixels
+  WHEN the page and form controls render
+  THEN the SuqPage header and solid platform palette match the homepage and About page
+  AND the task heading, fields, primary action, and recovery copy remain clear
+  AND controls are at least 44 CSS pixels high with no horizontal overflow
 
 Scenario: Authenticated actor navigates role-appropriate work
   GIVEN an authenticated client, assigned team member, operations manager, or administrator
@@ -116,6 +132,7 @@ log names, tenant data, or navigation interactions for this change.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Shared platform mark on public and authenticated surfaces | acceptance | `tests/acceptance/app.spec.ts` |
+| Login/intake desktop and phone composition, controls, focus, and overflow | visual/acceptance | `scripts/capture-platform-form-visuals.mjs`, `tests/acceptance/app.spec.ts` |
 | Role-aware grouped navigation | focused/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Mobile drawer semantics, focus, targets, and overflow | acceptance/browser | `tests/acceptance/app.spec.ts` |
 | Existing route authorization remains enforced | security/acceptance | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
@@ -138,7 +155,7 @@ component, CSS, and platform mark references in one deployment.
 
 ## Completion evidence
 
-Evidence: implemented and verified on 2026-07-26.
+Evidence: implemented and verified through 2026-08-01.
 
 - `public/brand/suqpage-mark.svg` and `components/SuqPageBrand.tsx` provide one
   project-owned platform identity on the homepage, Bazaar, intake, login, legal,
@@ -149,9 +166,19 @@ Evidence: implemented and verified on 2026-07-26.
   desktop sidebar and a modal mobile drawer with active-route indication,
   Escape, focus containment/restoration, backdrop close, scroll locking, and
   route-change close behavior.
+- `/login` and `/request` now use the current public header and one bounded
+  solid-purple context/white-form composition. Their phone layouts stack in
+  semantic order without changing login actions, intake fields, consent,
+  no-upload behavior, or success handling.
+- `scripts/capture-platform-form-visuals.mjs` passed five 1440px, 390px, and
+  320px captures with exact document widths, solid `rgb(79, 49, 143)` context
+  panels, no background gradients, 44-134px visible controls, and no browser
+  errors.
 - The production-browser suite proved the shared identity across six public
-  surfaces, client mobile access to every expected destination, 44-pixel menu
-  targets, focus behavior, no horizontal overflow, and existing direct-route
-  authorization. The suite passed 10/10.
-- `npm run test:bank`, `npm run test:requests`, `npm run check`, and
-  `npm run test:acceptance` passed. No schema, tenant data, or migration changed.
+  surfaces, public-task 44-pixel targets and focus treatment, client mobile
+  access to every expected destination, no horizontal overflow, and existing
+  direct-route authorization. The suite passed 10/10.
+- `npm run test:platform-forms-visual`, `npm run check`, `npm run
+  test:acceptance`, and `npm run release` passed, including the production
+  build, HTTP smoke, security/request tests, scale fixtures, and zero production
+  dependency vulnerabilities. No schema, tenant data, or migration changed.

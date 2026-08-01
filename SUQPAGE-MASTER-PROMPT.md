@@ -283,6 +283,14 @@ uploads or public self-sign-up. The homepage and request flow use professional
 copy with no development-stage disclaimers. The public composition is verified
 without horizontal document overflow at 320 and 390 CSS pixels.
 
+The public login and expression-of-interest routes use the same SuqPage header,
+solid purple, white, charcoal, and cool-neutral platform language as the
+homepage and About page. Each is a focused task surface with one purple context
+panel and one white form panel on wider screens, stacked in semantic order on
+phones. They do not return to the former promotional gradients or oversized
+rounded-card treatment, and their authentication and intake contracts remain
+unchanged.
+
 ### 5.3 Public copy must look finished
 
 Do not place public-facing words such as these on production pages:
@@ -842,9 +850,11 @@ Current verified behavior:
   optional emergency handoff, never the support source of truth.
 - Platform-owned homepage, discovery, intake, login, legal, favicon, and workspace
   surfaces use one SuqPage mark and wordmark without replacing any tenant's
-  showroom identity. Authenticated navigation groups role-permitted work in a
-  neutral desktop sidebar and exposes the same destinations in a focus-contained
-  mobile drawer rather than a clipped horizontal link strip.
+  showroom identity. Public intake and login also share the solid platform
+  palette, compact form geometry, and responsive public header. Authenticated
+  navigation groups role-permitted work in a neutral desktop sidebar and
+  exposes the same destinations in a focus-contained mobile drawer rather than
+  a clipped horizontal link strip.
 - Clients see a revision preview action only after that exact revision is sent
   for review. A staff-only draft is described as being prepared, and client
   request history replaces internal assignment IDs, raw status-transition
