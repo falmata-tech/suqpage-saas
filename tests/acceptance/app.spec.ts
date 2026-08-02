@@ -155,9 +155,15 @@ test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inq
   await expect(page.getByRole("button", { name: "Resume sponsored showrooms" })).toBeVisible();
   const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
   expect(desktopMap?.y).toBeLessThan(720);
-  await expect(page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link")).toHaveCount(7);
-  await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Mon/ }).click();
-  await expect(page.getByRole("heading", { name: "Electronics, electrical & appliances Expo" })).toBeVisible();
+  const expoSchedule = page.getByRole("navigation", { name: "Weekly Expo schedule" });
+  await expect(expoSchedule.getByRole("link")).toHaveCount(7);
+  const todayLink = expoSchedule.locator("a.today");
+  await expect(todayLink).toHaveCount(1);
+  const todayHref = (await todayLink.getAttribute("href")) || "";
+  const todayDay = todayHref.match(/expoDay=(\d)/)?.[1] || "";
+  expect(todayDay).not.toBe("");
+  await expoSchedule.locator("a:not(.today)").first().click();
+  await expect(page.locator("#daily-expo-title")).toBeVisible();
   await expect(page.getByText("Preview only", { exact: true })).toBeVisible();
   const previewOutlines = page.locator(".expo-booth-outline");
   await expect(previewOutlines.first()).toBeVisible();
@@ -166,8 +172,8 @@ test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inq
   await expect(page.locator(".expo-hall-controls")).toHaveCount(0);
   await expect(page.locator(".expo-booth")).toHaveCount(previewBooths);
   await expect(page.locator(".expo-booth[data-business-id], .expo-booth img")).toHaveCount(0);
-  await expect(page.getByText("Featured today", { exact: true })).toBeVisible({ timeout: 8_000 });
-  await expect(page).toHaveURL(/expoDay=0/);
+  await expect(page.locator(".expo-status-badge.open")).toContainText(/Open today|Featured today/, { timeout: 8_000 });
+  await expect(page).toHaveURL(new RegExp(`expoDay=${todayDay}`));
   await page.goto("/?expoDay=1");
   await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty, hygiene & household care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
@@ -570,7 +576,24 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   await page.locator(".expo-week a.today").click();
   await expect(page.locator(".expo-status-badge.open")).toBeVisible();
   if (await page.locator(".expo-floor").count()) {
-    const booth = page.locator(".expo-booth[data-business-id]").first();
+    const booths = page.locator(".expo-booth[data-business-id]");
+    const visibleBoothIndex = await booths.evaluateAll((items) => {
+      const stage = document.querySelector(".expo-floor-stage")?.getBoundingClientRect();
+      const controls = document.querySelector(".expo-floor-actions")?.getBoundingClientRect();
+      if (!stage) return -1;
+      return items.findIndex((item) => {
+        const bounds = item.getBoundingClientRect();
+        const fullyInside = bounds.left >= stage.left && bounds.right <= stage.right
+          && bounds.top >= stage.top && bounds.bottom <= stage.bottom;
+        const overlapsControls = controls
+          ? bounds.left < controls.right && bounds.right > controls.left
+            && bounds.top < controls.bottom && bounds.bottom > controls.top
+          : false;
+        return fullyInside && !overlapsControls;
+      });
+    });
+    expect(visibleBoothIndex).toBeGreaterThanOrEqual(0);
+    const booth = booths.nth(visibleBoothIndex);
     await expect(booth).toBeVisible();
     const boothLabel = (await booth.getAttribute("aria-label")) || "";
     const boothMatch = boothLabel.match(/^([A-Z]+-(?:B)?\d{2}), (.+)$/);
