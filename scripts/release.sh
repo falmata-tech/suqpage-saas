@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+scale_fixture_root=""
+cleanup_release_fixtures() {
+  if [[ -n "$scale_fixture_root" && -d "$scale_fixture_root" ]]; then
+    rm -rf -- "$scale_fixture_root"
+  fi
+}
+trap cleanup_release_fixtures EXIT
+
 printf '\n=== Specification and traceability validation ===\n'
 node scripts/validate-specs.mjs
 
@@ -16,7 +24,22 @@ node scripts/http-smoke.mjs
 printf '\n=== Server pagination and scale fixture validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts
 node node_modules/tsx/dist/cli.mjs scripts/test-scalable-queries.ts
+scale_fixture_root="$(mktemp -d "${TMPDIR:-/tmp}/mirtpage-release-scale.XXXXXX")"
+MIRTPAGE_DB_PATH="$scale_fixture_root/mirtpage.db" \
+MIRTPAGE_MEDIA_ROOT="$scale_fixture_root/media" \
+MIRTPAGE_BACKUP_ROOT="$scale_fixture_root/backups" \
+MIRTPAGE_CREDENTIAL_PATH="$scale_fixture_root/seed-credentials.txt" \
+MIRTPAGE_MEDIA_DRIVER=filesystem \
+MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT=1 \
+node node_modules/tsx/dist/cli.mjs scripts/setup.ts
+MIRTPAGE_DB_PATH="$scale_fixture_root/mirtpage.db" \
+MIRTPAGE_MEDIA_ROOT="$scale_fixture_root/media" \
+MIRTPAGE_BACKUP_ROOT="$scale_fixture_root/backups" \
+MIRTPAGE_CREDENTIAL_PATH="$scale_fixture_root/seed-credentials.txt" \
+MIRTPAGE_MEDIA_DRIVER=filesystem \
 node node_modules/tsx/dist/cli.mjs scripts/test-scale-fixtures.ts
+cleanup_release_fixtures
+scale_fixture_root=""
 
 printf '\n=== TypeScript validation ===\n'
 node node_modules/typescript/bin/tsc --noEmit

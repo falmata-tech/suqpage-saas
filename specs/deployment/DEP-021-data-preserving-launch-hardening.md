@@ -80,6 +80,12 @@ Scenario: Launch hardening preserves demo data
   THEN business, user, request, showroom, offering, Expo, support, and media counts remain reconciled
   AND no reset command or destructive migration is used
 
+Scenario: Release validation is independent of operator data
+  GIVEN a clean source checkout with no local database or credentials
+  WHEN npm run release validates the production-scale fixture
+  THEN the gate creates and removes its own isolated disposable database
+  AND it proves the 66-showroom baseline without reading or resetting operator data
+
 Scenario: Supabase credentials are not configured
   GIVEN filesystem mode and persistent application volumes
   WHEN the production preflight runs
@@ -126,7 +132,7 @@ Scenario: Launch preserves data while retiring Delivery
 | Media adapters and copy plan | `npm run test:media-storage`; after private bucket configuration, `npm run migrate:media -- --dry-run` |
 | Public/workspace browser workflows | `npm run test:acceptance`, capture scripts |
 | Delivery retirement without destructive migration | `scripts/test-security.ts`, `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` |
-| Production dependency/build/security | `npm run release` |
+| Production dependency/build/security and isolated scale fixture | `npm run release`; clean-checkout reproduction |
 | Container persistence/privacy | `npm run test:container` |
 | Remote quality | GitHub Actions `quality.yml` terminal run |
 
@@ -147,6 +153,12 @@ test:container`. The container used a clean bounded `npm ci`, ran as a non-root
 user, passed persistent-path/origin/health checks, and the release audit found
 zero production vulnerabilities. Two reviewed fictional-data demo videos were
 generated and inspected.
+
+GitHub run `30768276026` exposed a clean-checkout dependency on the operator's
+seeded database in the release scale assertion. The release gate now provisions
+and removes an isolated temporary fixture database. The corrected gate passed
+both in the working tree and in a clean `.env`-free checkout; replacement remote
+evidence remains required.
 
 This rollout remains in progress because MirtPage is not launching yet. A real
 HTTPS deployment configuration, credential rotation, optional Supabase private
