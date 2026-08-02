@@ -5,7 +5,7 @@ import { getDb, getUserById } from "./db";
 import { currentRequestIdentity } from "./security";
 import type { SessionUser } from "./types";
 
-const COOKIE = "suqpage_session";
+const COOKIE = "mirtpage_session";
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 

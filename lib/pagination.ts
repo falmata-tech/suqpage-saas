@@ -1,5 +1,5 @@
 export const PUBLIC_PAGE_SIZE = 5;
-export const WORKSPACE_PAGE_SIZE = 20;
+export const WORKSPACE_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_LENGTH = 120;
 

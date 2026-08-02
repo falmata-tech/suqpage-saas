@@ -3,7 +3,7 @@ id: ADR-0011
 title: Review-gated self-service onboarding and public visibility
 status: accepted
 date: 2026-08-01
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-003, FE-018, FE-021, BE-003, BE-017, BE-020, DEP-017, ADR-0004, ADR-0010]
 ---
 
@@ -14,7 +14,7 @@ related: [FE-003, FE-018, FE-021, BE-003, BE-017, BE-020, DEP-017, ADR-0004, ADR
 Invitation-only client provisioning creates onboarding friction before a client
 can describe a simple design request. Separately, the pre-launch manual renewal
 ledger was made an automatic public entitlement gate before price or payment
-operations were decided. SuqPage now needs immediate private client access while
+operations were decided. MirtPage now needs immediate private client access while
 keeping staff-reviewed publication and explicit suspension as public authority.
 
 ## Decision drivers

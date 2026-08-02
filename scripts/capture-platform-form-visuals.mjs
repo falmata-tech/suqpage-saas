@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-platform-form-visuals");
+const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-platform-form-visuals");
 fs.mkdirSync(output, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -34,7 +34,7 @@ async function capture(name, pathname, viewport) {
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
-  assert.equal(metrics.contextColor, "rgb(79, 49, 143)", `${name} uses the solid SuqPage purple context`);
+  assert.equal(metrics.contextColor, "rgb(79, 49, 143)", `${name} uses the solid MirtPage purple context`);
   assert.equal(metrics.contextImage, "none", `${name} does not use a promotional gradient`);
   assert.equal(metrics.formVisible, true, `${name} keeps its form visible`);
   assert.ok(

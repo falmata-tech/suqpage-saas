@@ -58,7 +58,7 @@
 - Approved logo/name treatment:
 - Facade material and color:
 - Product/craft cue:
-- Required shared City Suq language:
+- Required shared City Showroom language:
 - Generated image authorized: yes/no
 
 ## Acceptance Notes

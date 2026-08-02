@@ -1,4 +1,4 @@
-# SuqPage controlled-pilot roadmap
+# MirtPage controlled-pilot roadmap
 
 This roadmap controls sequencing; accepted specs control behavior. It prevents a
 valid-looking implementation from becoming the wrong next product investment.
@@ -22,7 +22,7 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 ## Completed foundation — managed client request operations
 
 - Outcome: clients submit onboarding/change requests and approve private
-  previews while assigned SuqPage staff structure content and managers control
+  previews while assigned MirtPage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
 - Delivered: attachment-free legacy public interest, review-gated public client
@@ -132,11 +132,12 @@ being listed here; it must first be promoted to **Now** and specified.
   external onboarding.
 - Post-pilot refinements to the staff roles and operational permissions being
   introduced under the current managed-request initiative.
-- A real Malikt Board adapter and callback/reconciliation contract.
+- Any future logistics capability requires a new accepted spec and ADR; none is
+  part of the current roadmap.
 - Expanded public localization based on validated pilot demand.
 
 Each item requires a new spec and, when it changes a long-lived boundary or
-topology, an ADR. The mock delivery adapter must not be presented as live while
+topology and an ADR. Retired logistics code must not be presented as live while
 it remains in this lane.
 
 ## Explicitly not now

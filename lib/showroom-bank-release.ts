@@ -412,7 +412,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "content.process-steps@1",
       name: "Process steps",
-      description: "A structured sequence for production, preparation, finishing, or quality workflow.",
+      description: "A structured production, preparation, finishing, or quality sequence that also presents the approved business process video when available.",
     },
     {
       id: "content.material-focus@1",
@@ -427,7 +427,7 @@ export const SHOWROOM_BANK_COMPONENT_SEEDS = {
     {
       id: "content.production-metrics@1",
       name: "Production overview",
-      description: "A structured facts layout that displays only supplied business information.",
+      description: "A structured process-and-capacity layout that displays supplied business information and the approved process video when available.",
     },
     {
       id: "content.editorial-quote@1",
@@ -559,9 +559,9 @@ export const SHOWROOM_BANK_1_2_ADDITIONAL_SEEDS = {
   content: [
     { id: "content.lookbook-chapter@1", name: "Lookbook chapter", description: "An expressive editorial chapter with generous media and a paced narrative." },
     { id: "content.exploded-feature@1", name: "Exploded feature", description: "A layered feature breakdown for supplied construction, parts, or functional details." },
-    { id: "content.ritual-steps@1", name: "Guided-use steps", description: "A refined sequence for preparation, use, care, handling, or customer education." },
+    { id: "content.ritual-steps@1", name: "Guided-use steps", description: "A refined process sequence for preparation, use, care, handling, or customer education, with the approved business process video when available." },
     { id: "content.swatch-story@1", name: "Swatch story", description: "A tactile color, texture, finish, or material narrative with optional supporting media." },
-    { id: "content.controlled-film@1", name: "Controlled film chapter", description: "A reviewed widescreen video chapter for process or product demonstration." },
+    { id: "content.controlled-film@1", name: "Legacy controlled film", description: "A compatibility-only video chapter for retained designs. New canonical showrooms place business video inside the Process section instead." },
   ],
   catalog: [
     { id: "catalog.beauty-swatch@1", name: "Sculptural swatch catalog", description: "Soft sculptural product cards that emphasize color variation and compact imagery." },

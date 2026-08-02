@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import {
-  admitRecipeImageAction,
   admitRecipeYouTubeAction,
   importShowroomRecipeAction,
 } from "@/app/revision-actions";
@@ -11,17 +10,21 @@ export default function RecipeStudio({
   requestId,
   revisionId,
   brief,
+  briefIntent,
+  currentRecipe,
   initialRecipe,
   youtubeEnabled,
 }: {
   requestId: number;
   revisionId: number;
   brief: string;
+  briefIntent: "initial_showroom" | "showroom_change";
+  currentRecipe: string;
   initialRecipe: string;
   youtubeEnabled: boolean;
 }) {
   const [recipe, setRecipe] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"brief" | "current" | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const download = (contents: string, name: string) => {
     const url = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
@@ -35,8 +38,14 @@ export default function RecipeStudio({
   return (
     <div className="recipe-studio">
       <nav className="studio-progress" aria-label="Showroom production stages">
-        {["Brief", "Blueprint", "Media", "Preview", "Review"].map((label, index) => (
-          <a href={index === 2 ? "#media-plan" : `#studio-${index + 1}`} key={label}>
+        {[
+          ["Brief", "#studio-1"],
+          ["Import", "#studio-2"],
+          ["Images", "#media-plan"],
+          ["Edit", "#showroom-editing"],
+          ["Preview", "#showroom-preview-action"],
+        ].map(([label, href], index) => (
+          <a href={href} key={label}>
             <span>{index + 1}</span>
             {label}
           </a>
@@ -47,11 +56,11 @@ export default function RecipeStudio({
         <span className="step-number">1</span>
         <div>
           <p className="eyebrow">Brief</p>
-          <h2>Give the AI the complete showroom contract</h2>
+          <h2>{briefIntent === "initial_showroom" ? "Prepare the AI initial design brief" : "Prepare the AI change brief"}</h2>
           <p>
-            The brief includes the current content, dynamic limits, component
-            bank, source facts, and allowed private media descriptors. It
-            excludes credentials, storage paths, and other tenants.
+            The brief includes current content, design choices, image options,
+            and all required rules. It excludes credentials, private storage
+            details, and information from other businesses.
           </p>
           <div className="inline-actions">
             <button
@@ -59,21 +68,49 @@ export default function RecipeStudio({
               className="btn brand"
               onClick={async () => {
                 await navigator.clipboard.writeText(brief);
-                setCopied(true);
+                setCopied("brief");
               }}
             >
-              {copied ? "Brief copied" : "Copy AI brief"}
+              {copied === "brief" ? "Brief copied" : "Copy AI brief"}
             </button>
             <button
               type="button"
               className="btn secondary"
-              onClick={() => download(brief, `suqpage-brief-${requestId}.json`)}
+              onClick={() => download(brief, `mirtpage-brief-${requestId}.json`)}
             >
               Download brief
             </button>
           </div>
+          <div className="studio-current-export">
+            <p className="eyebrow">Current showroom</p>
+            <h3>Continue from the latest design</h3>
+            <p>
+              This complete design file includes the latest staff, client,
+              offering, content, and media changes. Give it to the AI
+              with the change brief when revising an existing showroom.
+            </p>
+            <div className="inline-actions">
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(currentRecipe);
+                  setCopied("current");
+                }}
+              >
+                {copied === "current" ? "Current design copied" : "Copy current design"}
+              </button>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => download(currentRecipe, `mirtpage-current-showroom-${requestId}.json`)}
+              >
+                Download current design
+              </button>
+            </div>
+          </div>
           <details className="studio-details">
-            <summary>Complete valid recipe example</summary>
+            <summary>Complete design-file example</summary>
             <pre className="recipe-code">{initialRecipe}</pre>
           </details>
         </div>
@@ -85,14 +122,14 @@ export default function RecipeStudio({
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="revisionId" value={revisionId} />
           <div className="field full">
-            <p className="eyebrow">Blueprint</p>
-            <h2>Import the AI&apos;s complete plan</h2>
+            <p className="eyebrow">Showroom design</p>
+            <h2>Import the AI&apos;s complete design</h2>
             <p>
               The AI can choose dynamic products, sections, and labeled image
-              destinations. Images that do not exist yet belong in the media
-              plan, so the layout can be reviewed before photography is ready.
+              spaces. Images that do not exist yet remain on the image checklist,
+              so the layout can be reviewed before photography is ready.
             </p>
-            <label htmlFor="recipe-file">Choose recipe JSON</label>
+            <label htmlFor="recipe-file">Choose showroom design file</label>
             <input
               ref={fileInput}
               id="recipe-file"
@@ -105,7 +142,7 @@ export default function RecipeStudio({
             />
           </div>
           <div className="field full">
-            <label htmlFor="showroom-recipe">Recipe JSON</label>
+            <label htmlFor="showroom-recipe">Showroom design JSON</label>
             <textarea
               id="showroom-recipe"
               name="recipe"
@@ -118,37 +155,19 @@ export default function RecipeStudio({
             <small>{new Blob([recipe]).size.toLocaleString()} bytes · maximum 1 MiB</small>
           </div>
           <div className="field full">
-            <button className="btn brand">Validate blueprint and open preview</button>
+            <button className="btn brand">Check design and open preview</button>
           </div>
         </form>
       </section>
 
-      <details className="panel reference-media">
-        <summary>Add reference media before blueprinting</summary>
+      {youtubeEnabled ? <details className="panel reference-media">
+        <summary>Connect a business video</summary>
         <p>
-          This is optional. Use it when the AI should assign an image that the
-          client has already approved; otherwise import the blueprint first and
-          fill its labeled slots below.
+          Use this after import when the design includes a process or offering
+          video. MirtPage validates the YouTube link; select it later from the
+          relevant showroom or offering field.
         </p>
-        <form action={admitRecipeImageAction} className="form-grid">
-          <input type="hidden" name="requestId" value={requestId} />
-          <input type="hidden" name="revisionId" value={revisionId} />
-          <div className="field">
-            <label htmlFor="recipe-media-label">Reference label</label>
-            <input id="recipe-media-label" name="label" required maxLength={120} placeholder="Approved workshop photograph" />
-          </div>
-          <div className="field">
-            <label htmlFor="recipe-media-file">JPEG, PNG, or WebP</label>
-            <input id="recipe-media-file" name="image" type="file" required accept="image/jpeg,image/png,image/webp" />
-          </div>
-          <label className="check-field full">
-            <input type="checkbox" name="rights" required />
-            Authorized for this showroom and the approved AI conversation
-          </label>
-          <div className="field full"><button className="btn secondary">Verify reference image</button></div>
-        </form>
-        {youtubeEnabled ? (
-          <form action={admitRecipeYouTubeAction} className="form-grid">
+        <form action={admitRecipeYouTubeAction} className="form-grid">
             <input type="hidden" name="requestId" value={requestId} />
             <input type="hidden" name="revisionId" value={revisionId} />
             <div className="field">
@@ -164,9 +183,8 @@ export default function RecipeStudio({
               Authorized for this showroom
             </label>
             <div className="field full"><button className="btn secondary">Validate video</button></div>
-          </form>
-        ) : null}
-      </details>
+        </form>
+      </details> : null}
     </div>
   );
 }

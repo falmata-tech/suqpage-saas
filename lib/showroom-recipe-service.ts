@@ -33,6 +33,10 @@ import {
   SHOWROOM_TEMPLATES,
 } from "./showroom-guidance";
 import {
+  mediaPlanFromRecipeMetadata,
+  type BlueprintMediaSlot,
+} from "./showroom-blueprint";
+import {
   SHOWROOM_CONTENT_SCHEMA_VERSION,
   SHOWROOM_RECIPE_SCHEMA_VERSION,
   ShowroomRecipeError,
@@ -53,14 +57,14 @@ import showroomDesignSystemSchema from "../showroom-sdk/showroom-design-system.s
 import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "./product-detail-patterns";
 
 export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
-  brief: "suqpage.recipe-brief@1",
-  recipe: "suqpage.showroom-recipe@1",
-  content: "suqpage.showroom-content@1",
-  contentBlocks: "suqpage.showroom-content-blocks@1",
-  design: "suqpage.showroom-design@2",
-  componentBankSchema: "suqpage.component-bank@2",
+  brief: "mirtpage.recipe-brief@1",
+  recipe: "mirtpage.showroom-recipe@1",
+  content: "mirtpage.showroom-content@1",
+  contentBlocks: "mirtpage.showroom-content-blocks@1",
+  design: "mirtpage.showroom-design@2",
+  componentBankSchema: "mirtpage.component-bank@2",
   componentBankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
-  designSystems: "suqpage.showroom-design-systems@2",
+  designSystems: "mirtpage.showroom-design-systems@2",
 });
 
 const opaque = (prefix: string, requestId: number, value: string) =>
@@ -279,7 +283,7 @@ export async function admitRecipeImage(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that SuqPage may use this image for the client showroom.",
+      message: "Confirm that MirtPage may use this image for the client showroom.",
     }]);
   }
   if (!(file instanceof File) || file.size < 1) {
@@ -334,7 +338,7 @@ export async function admitRecipeImage(
       };
     });
   } catch (error) {
-    store.remove([stored.storageKey]);
+    await store.remove([stored.storageKey]);
     throw error;
   }
 }
@@ -357,7 +361,7 @@ export function admitRecipeYouTube(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that SuqPage may use this video for the client showroom.",
+      message: "Confirm that MirtPage may use this video for the client showroom.",
     }]);
   }
   const label = mediaLabel(labelInput, "video");
@@ -676,10 +680,68 @@ export function buildShowroomRecipeBrief(
   const assets = assetMaps(state.request.id, snapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, snapshot);
   const sources = sourceManifest(state.request.id, state.request);
+  const exportableSnapshot: RevisionSnapshotV4 = {
+    ...snapshot,
+    collections: [],
+    categories: snapshot.categories.map((category) => ({
+      ...category,
+      collectionKey: null,
+    })),
+    products: snapshot.products.map((product) => ({
+      ...product,
+      collectionKey: null,
+    })),
+  };
   const portableSnapshot = mapSnapshotRelationshipKeys(
-    mapSnapshotAssets(snapshot, assets.actualToOpaque),
+    mapSnapshotAssets(exportableSnapshot, assets.actualToOpaque),
     relationships.actualToOpaque,
+  ) as RevisionSnapshotV4;
+  const currentMediaPlan = mediaPlanFromRecipeMetadata(
+    state.revision.recipe_metadata_json,
+    snapshot,
   );
+  const portableMediaPlan = currentMediaPlan.map((slot): BlueprintMediaSlot => ({
+    ...slot,
+    ownerKey: slot.ownerType === "product"
+      ? relationships.actualToOpaque.get(slot.ownerKey) || slot.ownerKey
+      : slot.ownerKey,
+  }));
+  const { designManifest, schemaVersion: _snapshotSchemaVersion, ...portableContent } = portableSnapshot;
+  const currentRecipeInput = {
+    schemaVersion: SHOWROOM_RECIPE_SCHEMA_VERSION,
+    baseContentVersion: state.revision.base_content_version,
+    content: {
+      schemaVersion: SHOWROOM_CONTENT_SCHEMA_VERSION,
+      ...(() => {
+        const { designManifest: _designManifest, schemaVersion: _schemaVersion, ...content } = exportableSnapshot;
+        return content;
+      })(),
+    },
+    design: exportableSnapshot.designManifest,
+    summary: state.revision.summary || `Current showroom design for ${state.business.name}.`,
+    rationale: "Complete current private showroom state for an authorized staff-reviewed update.",
+    questions: [],
+    warnings: [],
+    mediaPlan: currentMediaPlan,
+    declaredRemovals: { collections: [], categories: [], products: [] },
+    provenance: [],
+  };
+  const validatedCurrentRecipe = validateShowroomRecipe(currentRecipeInput, {
+    baseContentVersion: state.revision.base_content_version,
+    baseSnapshot: exportableSnapshot,
+    allowedAssetKeys: new Set(["", ...assets.actualToOpaque.keys()]),
+    allowedSourceKeys: new Set(sources.sources.map((source) => source.key)),
+    assetDetails: assets.details,
+  }).recipe;
+  const currentRecipe = {
+    ...validatedCurrentRecipe,
+    content: {
+      schemaVersion: SHOWROOM_CONTENT_SCHEMA_VERSION,
+      ...portableContent,
+    },
+    design: designManifest,
+    mediaPlan: portableMediaPlan,
+  };
   const example = syntheticExampleRecipe();
   const componentById = new Map(
     SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
@@ -734,6 +796,9 @@ export function buildShowroomRecipeBrief(
       contractManifest: SHOWROOM_RECIPE_BRIEF_CONTRACTS,
       exportedAt: new Date().toISOString(),
       requestReference: state.request.public_ref,
+      briefIntent: state.request.request_type === "onboarding"
+        ? "initial_showroom" as const
+        : "showroom_change" as const,
       baseContentVersion: state.revision.base_content_version,
       requiredRecipeSchemaVersion: SHOWROOM_RECIPE_SCHEMA_VERSION,
       requiredContentSchemaVersion: SHOWROOM_CONTENT_SCHEMA_VERSION,
@@ -789,6 +854,7 @@ export function buildShowroomRecipeBrief(
       sourceFacts: sources.sources,
       mediaManifest: assets.descriptors,
       currentContent: portableSnapshot,
+      currentRecipe,
       instructions: [
         "Treat each @version in contractManifest as belonging only to its named contract. Return recipe@1 containing content@1, content-blocks@1, and design@2; do not normalize or align independent version numbers.",
         "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, or component choices. Its seven-role section order is canonical and must be preserved. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
@@ -804,6 +870,7 @@ export function buildShowroomRecipeBrief(
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one admitted design foundation and compatible section anatomy before choosing component IDs.",
         "Use compositionGuidance.canonicalNormalShowroom exactly for section roles and order: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Choose any admitted surfaceRole per section; no exact color-role sequence is required.",
+        "Place currentContent.business.processVideoRef only in the canonical Process experience. Every compatible highlights component presents that approved business video automatically when it exists. Do not create a separate video content block or choose content.controlled-film@1 merely to make the process video visible.",
         "For unrestricted colors, keep tokenPack as the typography, spacing, geometry, density, and media foundation and add design.customPalette with every color role from the design schema. Use six-digit hex values and readable foreground/background pairs. Omit customPalette only when an admitted palette already fits.",
         "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Use signature treatments deliberately; several are allowed when the complete preview remains coherent.",
         "Use each component's renderedAnatomy, idealWhen, avoidWhen, content limits, and compatibleMediaIntegrations. Do not infer visual behavior from the component ID and do not choose a component whose renderer anatomy contradicts the available content or media.",

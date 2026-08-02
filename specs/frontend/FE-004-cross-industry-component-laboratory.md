@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-SuqPage staff need to understand and compare a broad reusable showroom bank
+MirtPage staff need to understand and compare a broad reusable showroom bank
 without experimenting on a client revision or live renderer. The outcome is an
 authenticated visual laboratory that proves the bank can present products for
 fashion, agriculture, food, coffee, honey, furniture, manufacturing, importing,

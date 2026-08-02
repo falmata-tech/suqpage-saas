@@ -134,11 +134,3 @@ export function getInquiry(id: number, businessId: number) {
   inquiry.items = getDb().prepare("SELECT * FROM inquiry_items WHERE inquiry_id=? ORDER BY id").all(id) as any[];
   return inquiry;
 }
-
-export function listDeliveryRequests(businessId: number) {
-  return getDb().prepare(`SELECT d.*,i.customer_name inquiry_customer FROM delivery_requests d LEFT JOIN inquiries i ON i.id=d.inquiry_id WHERE d.business_id=? ORDER BY d.created_at DESC`).all(businessId) as any[];
-}
-
-export function listDeliveryCompanies() {
-  return getDb().prepare("SELECT * FROM delivery_companies WHERE active=1 ORDER BY name").all() as any[];
-}

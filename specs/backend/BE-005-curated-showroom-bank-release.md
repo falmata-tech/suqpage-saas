@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-The composition contract is useful only when SuqPage has a broad, reviewed,
+The composition contract is useful only when MirtPage has a broad, reviewed,
 versioned bank whose components can be rendered without database, network, or
 tenant-specific assumptions. The outcome is the first immutable production bank
 release with enough orthogonal coverage for thousands of distinct product

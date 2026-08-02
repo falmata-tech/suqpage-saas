@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
+import { demoProcessVideoFor } from "../lib/demo-process-videos";
 import type { DenseDemoOfferingKind } from "../lib/dense-demo-seed";
 import { DISCOVERY_INDUSTRIES } from "../lib/discovery";
 import {
@@ -41,7 +42,6 @@ if (count > 0) {
   process.exit(0);
 }
 
-const SEED_VIDEO_REF = "youtube:M7lc1UVf-VE";
 const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,process_video_ref,is_live,live_platform,live_url,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,@process_video_ref,@is_live,@live_platform,@live_url,'active')`);
 const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
 const addProduct = db.prepare(`INSERT INTO products(
@@ -96,7 +96,7 @@ const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
   hero_title: business.heroTitle,
   hero_subtitle: business.heroSubtitle,
   hero_image_path: business.heroPath,
-  contact_email: `${business.handle}@demo.suqpage.local`,
+  contact_email: `${business.handle}@demo.mirtpage.local`,
   whatsapp: "",
   telegram: "",
   tiktok: "",
@@ -180,13 +180,18 @@ function seedOfferingProfile(handle: string, product: any) {
 
 const seeded = new Map<string, number>();
 for (const business of businesses) {
+  const processVideo = demoProcessVideoFor(
+    business.handle,
+    business.name,
+    business.description,
+  );
   seeded.set(
     business.handle,
     Number(
       addBusiness.run({
         ...business,
         design_manifest_json: "{}",
-        process_video_ref: SEED_VIDEO_REF,
+        process_video_ref: processVideo.ref,
         is_live: business.handle === "nova-assembly" ? 1 : 0,
         live_platform: business.handle === "nova-assembly" ? "youtube" : "",
         live_url: business.handle === "nova-assembly" ? "https://www.youtube.com/watch?v=M7lc1UVf-VE" : "",
@@ -217,7 +222,7 @@ function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
       p.minimumOrderSummary ?? profile.minimumOrderSummary,
       p.leadTimeSummary ?? profile.leadTimeSummary,
       i,
-      p.videoRef || SEED_VIDEO_REF,
+      p.videoRef || demoProcessVideoFor(handle, p.name, p.category, p.description).ref,
       p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35_000 + i * 12_500),
       p.quantityUnit || (profile.offeringKind === "production_supply" ? "kg" : profile.offeringKind === "manufacturing_capability" ? "project" : "piece"),
       JSON.stringify(p.highlights || [p.eyebrow || p.category, profile.offeringKind === "standard_product" ? "Available for direct inquiry" : "Requirements confirmed before production"]),
@@ -464,7 +469,7 @@ const seedSubscription = db.prepare(`
   INSERT INTO business_subscriptions(
     business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
     current_period_end,grace_ends_at,updated_at
-  ) VALUES(?,'SuqPage monthly',NULL,'ETB',?,?,?,?,?)
+  ) VALUES(?,'MirtPage monthly',NULL,'ETB',?,?,?,?,?)
   ON CONFLICT(business_id) DO UPDATE SET
     starts_at=excluded.starts_at,
     current_period_start=excluded.current_period_start,
@@ -495,8 +500,8 @@ DISCOVERY_INDUSTRIES.forEach((industry, index) => {
 const seedDiscoveryProfile = db.prepare(`
   INSERT INTO business_discovery_profiles(
     business_id,booth_image_path,city,zone,region,latitude,longitude,
-    fallback_style,is_featured,is_excluded,approved_at,updated_at
-  ) VALUES(?,?,?,?,?,?,?,?,?,0,?,?)
+    fallback_style,production_scale,is_featured,is_excluded,approved_at,updated_at
+  ) VALUES(?,?,?,?,?,?,?,?,?,?,0,?,?)
 `);
 const seedBusinessIndustry = db.prepare(`
   INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)
@@ -514,6 +519,7 @@ for (const [handle, businessId] of seeded) {
   const industryKeys = profile?.industryKeys.filter((key) => key in fallbackByIndustry) || [];
   if (!profile || !industryKeys.length) continue;
   const industryKey = industryKeys[0];
+  const productionScale = SCALE_DEMO_BUSINESSES.find((business) => business.handle === handle)?.productionScale ?? "workshop";
   seedDiscoveryProfile.run(
     businessId,
     seededExpoBoothPath(handle),
@@ -523,11 +529,49 @@ for (const [handle, businessId] of seeded) {
     profile.latitude,
     profile.longitude,
     fallbackByIndustry[industryKey],
+    productionScale,
     isSeededFeatured(handle) ? 1 : 0,
     subscriptionNow,
     subscriptionNow,
   );
   for (const key of industryKeys) seedBusinessIndustry.run(businessId, key);
+}
+
+const eligibleDiscoveryBusinesses = db.prepare(`
+  SELECT b.id
+  FROM business_industries i
+  JOIN businesses b ON b.id=i.business_id
+  JOIN business_discovery_profiles p ON p.business_id=b.id
+  WHERE i.industry_key=? AND b.status='active' AND p.is_excluded=0 AND p.approved_at > 0
+  ORDER BY b.id
+  LIMIT 5
+`);
+const sundayDiscoveryBusinesses = db.prepare(`
+  SELECT b.id
+  FROM business_industries i
+  JOIN businesses b ON b.id=i.business_id
+  JOIN business_discovery_profiles p ON p.business_id=b.id
+  WHERE i.industry_key=? AND b.status='active' AND p.is_excluded=0 AND p.approved_at > 0
+  ORDER BY b.id DESC
+  LIMIT 5
+`);
+const seedSponsorship = db.prepare(`
+  INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
+  VALUES(?,?,1,?)
+  ON CONFLICT(business_id) DO UPDATE SET
+    position=excluded.position,active=1,updated_at=excluded.updated_at
+`);
+const seedSundaySelection = db.prepare(`
+  INSERT INTO sunday_showcase_selections(industry_key,business_id,position,active,updated_at)
+  VALUES(?,?,?,1,?)
+  ON CONFLICT(industry_key,business_id) DO UPDATE SET
+    position=excluded.position,active=1,updated_at=excluded.updated_at
+`);
+for (const industry of DISCOVERY_INDUSTRIES) {
+  const sponsored = eligibleDiscoveryBusinesses.all(industry.key) as Array<{ id: number }>;
+  sponsored.forEach((business, index) => seedSponsorship.run(business.id, index + 1, subscriptionNow));
+  const sundaySelections = sundayDiscoveryBusinesses.all(industry.key) as Array<{ id: number }>;
+  sundaySelections.forEach((business, index) => seedSundaySelection.run(industry.key, business.id, index + 1, subscriptionNow));
 }
 
 
@@ -542,23 +586,23 @@ function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client"|"tea
   generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : accessRole === "client" ? "CLIENT" : "STAFF",business,email,password});
   return userId;
 }
-const adminUserId = seedUser("admin","platform_admin","SuqPage",process.env.SEED_ADMIN_EMAIL||"admin@suqpage.local","SuqPage Admin",null);
+const adminUserId = seedUser("admin","platform_admin","MirtPage",process.env.SEED_ADMIN_EMAIL||"admin@mirtpage.local","MirtPage Admin",null);
 const clientUsersByHandle = new Map<string, number>();
 for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
   clientUsersByHandle.set(business.handle, seedUser(
     "owner",
     "client",
     business.name,
-    `${business.handle}@suqpage.local`,
+    `${business.handle}@mirtpage.local`,
     `${business.name} Client`,
     seeded.get(business.handle)!,
   ));
 }
 
 const operationsStaff = ["Mekdes Operations", "Samuel Operations", "Rahel Operations", "Dawit Operations"]
-  .map((name, index) => seedUser("admin", "operations_manager", "SuqPage", `operations-${index + 1}@demo.suqpage.local`, name, null));
+  .map((name, index) => seedUser("admin", "operations_manager", "MirtPage", `operations-${index + 1}@demo.mirtpage.local`, name, null));
 const teamStaff = ["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
-  .map((name, index) => seedUser("admin", "team_member", "SuqPage", `team-${index + 1}@demo.suqpage.local`, name, null));
+  .map((name, index) => seedUser("admin", "team_member", "MirtPage", `team-${index + 1}@demo.mirtpage.local`, name, null));
 
 const subscriptionStateHandles = [
   SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "fashion-textiles"),
@@ -695,7 +739,7 @@ supportHandles.forEach((handle, index) => {
     const reply = addSupportMessage.run(
       conversationId,
       assigned,
-      "Thanks. The SuqPage team has reviewed this fictional demo request and will follow up here.",
+      "Thanks. The MirtPage team has reviewed this fictional demo request and will follow up here.",
       `demo-support-staff-${index + 1}`,
       replyAt,
     );
@@ -770,7 +814,7 @@ for (let index = 0; index < 66; index += 1) {
     clientUserId,
     status,
     `${handle} client`,
-    `${handle}@suqpage.local`,
+    `${handle}@mirtpage.local`,
     businesses.find((business) => business.handle === handle)!.name,
     `Fictional ${status.replaceAll("_", " ")} showroom request used to exercise the operations queue.`,
     clientUserId,
@@ -810,9 +854,6 @@ for (let index = 0; index < 66; index += 1) {
   }
 }
 
-const addCompany = db.prepare("INSERT INTO delivery_companies(name,slug,service_area) VALUES(?,?,?)");
-[["Malikt Express","malikt-express","Addis Ababa and surrounding areas"],["Addis Courier","addis-courier","Addis Ababa"],["Swift Delivery","swift-delivery","Major Ethiopian cities"],["CityDrop","citydrop","Same-day urban delivery"]].forEach((c) => addCompany.run(...c));
-
 const inquiry = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,idempotency_key) VALUES(?,?,?,?,?,?,?)");
 const inquiryItem = db.prepare(`INSERT INTO inquiry_items(
   inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,
@@ -825,7 +866,6 @@ for (const [handle, customer] of businesses.slice(0, 4).map((business, index) =>
   inquiryItem.run(iid, product.id, product.name, null, "1 unit", product.offering_kind, product.quantity_mode, JSON.stringify({}));
 }
 
-const denseInquiryIds: number[] = [];
 const denseInquiryBusinessId = seeded.get("selam-weave")!;
 const denseInquiryProduct = db.prepare(
   "SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 1",
@@ -846,7 +886,6 @@ for (let index = 1; index <= 36; index += 1) {
     inquiryStatuses[(index - 1) % inquiryStatuses.length],
     `scale-inquiry-${index}`,
   ).lastInsertRowid);
-  denseInquiryIds.push(inquiryId);
   inquiryItem.run(
     inquiryId,
     denseInquiryProduct.id,
@@ -859,41 +898,10 @@ for (let index = 1; index <= 36; index += 1) {
   );
 }
 
-const addDelivery = db.prepare(`
-  INSERT INTO delivery_requests(
-    business_id,inquiry_id,customer_name,phone,pickup_address,delivery_address,
-    package_count,note,status,external_request_id
-  ) VALUES(?,?,?,?,?,?,?,?,?,?)
-`);
-const addDeliveryCompany = db.prepare(
-  "INSERT INTO delivery_request_companies(delivery_request_id,company_id,status) VALUES(?,?,'sent')",
-);
-const primaryDeliveryCompany = (
-  db.prepare("SELECT id FROM delivery_companies ORDER BY id LIMIT 1").get() as {
-    id: number;
-  }
-).id;
-const deliveryStatuses = ["submitted", "viewed", "accepted", "driver_assigned", "picked_up", "delivered", "cancelled"] as const;
-for (let index = 1; index <= 28; index += 1) {
-  const deliveryId = Number(addDelivery.run(
-    denseInquiryBusinessId,
-    denseInquiryIds[index - 1],
-    `Demo Buyer ${String(index).padStart(2, "0")}`,
-    `251911${String(index).padStart(6, "0")}`,
-    "Selam Weave demo pickup",
-    `Demo destination ${index}, Addis Ababa`,
-    (index % 4) + 1,
-    "Fictional delivery history for pagination testing.",
-    deliveryStatuses[(index - 1) % deliveryStatuses.length],
-    `DEMO-DELIVERY-${String(index).padStart(4, "0")}`,
-  ).lastInsertRowid);
-  addDeliveryCompany.run(deliveryId, primaryDeliveryCompany);
-}
-
-const credentialPath=path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));
+const credentialPath=path.resolve(process.env.MIRTPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));
 fs.mkdirSync(path.dirname(credentialPath),{recursive:true});
-const credentialText=["SuqPage temporary local credentials","Change every password on first login.","",...generatedCredentials.map(c=>`${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
+const credentialText=["MirtPage temporary local credentials","Change every password on first login.","",...generatedCredentials.map(c=>`${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
 fs.writeFileSync(credentialPath,credentialText,{mode:0o600});
-console.log(`SuqPage database created at ${dbPath}`);
+console.log(`MirtPage database created at ${dbPath}`);
 console.log(`Temporary credentials written to ${credentialPath}`);
-if (process.env.SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT !== "1") console.log(credentialText);
+if (process.env.MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT !== "1") console.log(credentialText);

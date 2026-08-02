@@ -2,7 +2,7 @@
 id: FE-013
 title: Unified platform identity and workspace shell
 status: done
-related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE_BASE]
+related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE_BASE]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L1
@@ -14,14 +14,14 @@ change_level: L1
 
 Public pages and authenticated workspaces currently use different marks,
 colors, and navigation structures. Staff and clients need one recognizable
-SuqPage identity and a calm role-aware shell that keeps complex operations
+MirtPage identity and a calm role-aware shell that keeps complex operations
 findable on desktop and mobile.
 
 ## Scope
 
 ### In scope
 
-- One project-owned SuqPage mark and wordmark component for platform-owned
+- One project-owned MirtPage mark and wordmark component for platform-owned
   public and authenticated surfaces.
 - A neutral platform palette shared by the public marketplace and workspace
   shell while preserving tenant showroom identity inside showroom renderers.
@@ -41,8 +41,8 @@ findable on desktop and mobile.
 
 ## Domain language and invariants
 
-- **Platform identity:** the SuqPage mark, wordmark, colors, and navigation
-  presentation on surfaces owned by SuqPage.
+- **Platform identity:** the MirtPage mark, wordmark, colors, and navigation
+  presentation on surfaces owned by MirtPage.
 - **Workspace context:** the authenticated actor role and optional selected
   business shown independently from platform identity.
 - Navigation visibility is a convenience layer only. Existing server-side
@@ -56,7 +56,7 @@ findable on desktop and mobile.
   intake, login, legal pages, and authenticated workspace shell.
 - Every public navigation link to `/request` is labeled **Sign up** on desktop,
   mobile, and footer navigation. Promotional calls to action may retain their
-  purposeful **Build your Suq** or **Start your Suq** wording.
+  purposeful **Build your Showroom** or **Start your Showroom** wording.
 - Login and public intake use the same platform header, compact geometry,
   semantic palette, form controls, and focus treatment as the current homepage
   and About page. Their distinct tasks remain immediately clear.
@@ -82,10 +82,10 @@ findable on desktop and mobile.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor recognizes SuqPage across platform surfaces
+Scenario: Visitor recognizes MirtPage across platform surfaces
   GIVEN a visitor moves between the homepage, Bazaar, intake, login, and legal pages
   WHEN each platform header or identity area renders
-  THEN the same SuqPage mark and wordmark identify the service
+  THEN the same MirtPage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
 
 Scenario: Visitor finds business signup consistently
@@ -97,7 +97,7 @@ Scenario: Visitor finds business signup consistently
 Scenario: Visitor uses a public platform task on a phone
   GIVEN a visitor opens login or the expression-of-interest form at 320 or 390 CSS pixels
   WHEN the page and form controls render
-  THEN the SuqPage header and solid platform palette match the homepage and About page
+  THEN the MirtPage header and solid platform palette match the homepage and About page
   AND the task heading, fields, primary action, and recovery copy remain clear
   AND controls are at least 44 CSS pixels high with no horizontal overflow
 
@@ -172,7 +172,7 @@ production-browser identity test passed across all public surfaces, and
 scale, security, trace privacy, and zero-vulnerability gates. No route, signup
 behavior, schema, or tenant data changed.
 
-- `public/brand/suqpage-mark.svg` and `components/SuqPageBrand.tsx` provide one
+- `public/brand/mirtpage-mark.svg` and `components/MirtPageBrand.tsx` provide one
   project-owned platform identity on the homepage, Bazaar, intake, login, legal,
   favicon, and authenticated workspace surfaces. Tenant showroom marks remain
   unchanged.

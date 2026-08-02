@@ -29,7 +29,7 @@ export default async function OnBehalfRequestPage({
   const clients = listManagedClientsPage(query);
   return <DashboardShell user={user} business={null}>
     <NavigationTrail items={[{label:"Operations",href:"/dashboard/requests"},{label:"On-behalf request"}]} fallback="/dashboard/requests"/>
-    <div className="dashboard-head"><div><h1>Record a request for a client</h1><p>Find an existing client or continue with no selection to capture a new prospect. SuqPage is shown as the submitter.</p></div></div>
+    <div className="dashboard-head"><div><h1>Record a request for a client</h1><p>Find an existing client or continue with no selection to capture a new prospect. MirtPage is shown as the submitter.</p></div></div>
     <section className="panel client-picker">
       <div className="dashboard-head"><div><h2>Who is this for?</h2><p>Only matching accounts are loaded. Leave the selection empty for a new prospect.</p></div>{selectedClient ? <Link className="small-btn" href="/dashboard/requests/on-behalf">Use new prospect</Link> : null}</div>
       <CollectionToolbar action="/dashboard/requests/on-behalf" search={query.q || ""} placeholder="Client, email, business, or handle" hidden={{client:selectedClient?.id}}/>

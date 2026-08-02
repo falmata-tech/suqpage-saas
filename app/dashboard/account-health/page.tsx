@@ -80,12 +80,12 @@ export default async function AccountHealthPage({
       <section className={`account-status-panel ${subscription.state}`}>
         <div><span className="eyebrow">Manual renewal record</span><h2>{subscription.state === "active" ? "Current period" : subscription.state === "grace" ? "Renewal due" : "Renewal overdue"}</h2></div>
         <div className="account-dates"><span><small>Current period</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>Grace deadline</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
-        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact SuqPage to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: a published active Suq remains public unless an administrator explicitly suspends it.</p>
+        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact MirtPage to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: a published active showroom remains public unless an administrator explicitly suspends it.</p>
       </section>
       <div className="cards account-insights">
         <article className="metric"><span>Unique visits</span><strong>{insights.totalVisitors}</strong><small>All recorded showroom sources</small></article>
         <article className="metric"><span>From discovery</span><strong>{insights.directoryVisitors}</strong><small>Visitors who entered through the map or list</small></article>
-        <article className="metric"><span>Direct visits</span><strong>{insights.directVisitors}</strong><small>Visitors who opened the Suq directly</small></article>
+        <article className="metric"><span>Direct visits</span><strong>{insights.directVisitors}</strong><small>Visitors who opened the showroom directly</small></article>
         <article className="metric"><span>Last 30 days</span><strong>{insights.last30Days}</strong><small>Deduplicated daily visits</small></article>
       </div>
       {operations ? (
@@ -99,7 +99,7 @@ export default async function AccountHealthPage({
       ) : null}
       <section className="panel">
         <h2>Payment history</h2>
-        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>Renewal recorded by SuqPage</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">No renewal records have been added yet.</p>}
+        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>Renewal recorded by MirtPage</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">No renewal records have been added yet.</p>}
       </section>
     </DashboardShell>
   );

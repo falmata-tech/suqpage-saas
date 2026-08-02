@@ -2,7 +2,7 @@
 id: BE-003
 title: Managed request, permission, and publication security
 status: done
-related: [FE-003, BE-007, BE-008, BE-009, BE-015, BE-020, DEP-002, DEP-003, ADR-0004, ADR-0006]
+related: [FE-003, BE-007, BE-008, BE-009, BE-015, BE-020, BE-025, DEP-002, DEP-003, ADR-0004, ADR-0006]
 owners: [backend, security]
 last_updated: 2026-07-28
 change_level: L3
@@ -30,7 +30,7 @@ publish only the exact client-approved revision.
 - Canonical revision validation, optimistic base-version conflict detection,
   atomic publication, audit, and rollback metadata.
 - Client provisioning without a lead, clarification events, operational
-  inquiry/delivery authority, and complete owner-to-client permission cutover.
+  inquiry authority, and complete owner-to-client permission cutover.
 
 ### Non-goals
 
@@ -114,8 +114,8 @@ option, settings, design, deletion, and full-showroom work.
   obsolete business scope is removed only when no other active assignment needs
   it. Team members cannot invite, assign, submit on behalf, or mutate live
   catalog/settings/design data.
-- Manager on-behalf intake accepts the same bounded private image contract as an
-  authenticated client. Existing-client requests bind to the selected client
+- Manager on-behalf and authenticated client intake reject generic image files.
+  Existing-client requests bind to the selected client
   and business; prospect onboarding captures bounded contact/business data and
   creates no account by itself.
 - Client and existing-client manager intake ignore any submitted request type
@@ -125,8 +125,8 @@ option, settings, design, deletion, and full-showroom work.
   tenant/assignment authorized, and safely attributed. Staff questions move
   active work to `needs_information`; a client response returns it to
   `under_review` without rewriting the original request.
-- `operations:manage` authorizes tenant-selected inquiry status and delivery
-  initiation through dedicated operational checks. It does not authorize live
+- `operations:manage` authorizes tenant-selected inquiry status through
+  dedicated operational checks. It does not authorize live
   business/catalog/design mutation.
 - Assignment, request transition, clarification, approval, rejection,
   publication, rollback, and privileged reads write audit events with safe
@@ -264,7 +264,7 @@ Scenario: Previous published content is rolled back safely
 ## Quality impact
 
 - Security and tenant isolation: capability plus assignment checks protect every
-  request, attachment, preview, inquiry, delivery, and publication operation.
+  request, attachment, preview, inquiry, and publication operation.
 - Privacy and data retention: contact/request contents are private fields with
   explicit retention/deletion and attachment cleanup behavior.
 - Accessibility and responsive behavior: owned by `FE-003`.
@@ -292,7 +292,7 @@ contents, invitation tokens, or customer data.
 | Manager-only on-behalf/invite/assign/publish | security/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Exact custom-mutation origins including current Codespaces | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |
 | Exact approval, stale conflict, atomic publish, rollback | integration | `scripts/test-revisions.ts` |
-| Operations inquiry/delivery authority and client read-only isolation | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
+| Operations inquiry authority and client read-only isolation | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 | Request-free invitations and inferred request type | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Clarification authorization and immutability | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 
@@ -333,13 +333,13 @@ revision, migration, and production-browser tests below.
   own represented requests.
 - Migration 4 adds access profiles and hashed invitation lifecycle records.
   Regeneration revokes unused predecessors, redemption is atomic/non-replayable,
-  and the client profile cannot mutate catalog, settings, inquiries, or delivery
-  requests.
+  and the client profile cannot mutate catalog, settings, or inquiries.
 - Migration 5 adds manager-request idempotency. Individual staff provisioning,
   manager on-behalf intake, and request/business assignment scope are active;
   reassignment removes obsolete scope when no other open assignment needs it.
-- Authenticated client and manager on-behalf requests are tenant-bound and
-  idempotent with bounded, sanitized private images. Team members can read and
+- Authenticated client and manager on-behalf requests are tenant-bound,
+  idempotent, and attachment-free. Post-import labeled media slots use the
+  request-scoped sanitized image boundary. Team members can read and
   transition only assigned requests and cannot mutate live business state.
 - Migration 6 adds content versions, immutable numbered revisions, and retained
   published snapshots. Revision payloads are bounded and validated against
@@ -355,7 +355,7 @@ revision, migration, and production-browser tests below.
 - Clarification events retain internal actor attribution, enforce request scope,
   preserve the original instruction, and apply needs-information/resume-review
   transitions.
-- Customer inquiry and delivery mutations require customer-operations authority.
+- Customer inquiry mutations require customer-operations authority.
   Clients and team members are denied; platform and operations managers are
   covered through browser/API tests.
 - Migration 7 removes `legacy_owner` from the allowed profile contract, maps

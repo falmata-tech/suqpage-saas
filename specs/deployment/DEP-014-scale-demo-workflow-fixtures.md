@@ -21,7 +21,8 @@ or lifecycle usability problems.
 
 The outcome is a deterministic disposable reset with at least 15 eligible Expo
 participants per weekday and enough fictional clients, staff, assignments,
-requests, inquiries, and deliveries to exercise every paginated workspace.
+requests, inquiries, support conversations, and account attention to exercise
+every paginated workspace.
 
 ## Scope
 
@@ -136,7 +137,7 @@ Evidence: implemented and verified on 2026-07-30:
 
 - `npm run reset` created 120 active fictional showrooms, 403 offerings, 52
   client accounts, four operations managers, eight team members, 66 service
-  requests, 40 inquiries, and 28 delivery requests with no foreign-key errors.
+  requests, 40 inquiries, and 30 support conversations with no foreign-key errors.
 - Requests cover all 11 supported lifecycle states. The reset includes
   assignments, retained review/approval/publication revisions, a 25-offering
   product stress tenant, and 36 inquiries for one tenant.

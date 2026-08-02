@@ -24,3 +24,4 @@ public/uploads/runtime/
 *.tsbuildinfo
 test-results/
 playwright-report/
+artifacts/

@@ -2,7 +2,7 @@
 id: DEP-017
 title: Local geography and public onboarding rollout
 status: done
-related: [FE-021, BE-020, DEP-003, DEP-015, DEP-016, ADR-0011]
+related: [FE-021, FE-024, BE-020, BE-023, DEP-003, DEP-015, DEP-016, DEP-020, ADR-0011]
 owners: [deployment, operations, security, qa]
 last_updated: 2026-08-01
 change_level: L3
@@ -32,7 +32,7 @@ self-service onboarding release.
 - Browser and release gates for weekly Expo selection, deep exact-coordinate
   cluster expansion, and server-bounded List pagination.
 - Desktop/390px/320px gates for counted city gateways and one continuous,
-  map-backed, touch-pannable virtual City Suq floor.
+  map-backed, touch-pannable virtual City Showroom floor.
 - Desktop/390px/320px gates for one continuous Expo floor, non-today anonymous
   booth outlines, the timed return to distinctly highlighted today, and
   zoom-end geographic rendering without device stalls.
@@ -129,7 +129,7 @@ additive and harmless when unused.
 Evidence: completed locally on 2026-08-01. Desktop, 390px, and 320px captures
 prove one bounded transformed Expo floor, anonymous future outlines, complete
 today booths, persistent Today emphasis, touch-sized controls, enriched City
-Suq/Expo environments, and no document overflow. Browser acceptance passed all
+Showroom/Expo environments, and no document overflow. Browser acceptance passed all
 10 workflows, including the timed return and lower city zoom. `npm run check`
 and `npm run release` passed with production build, HTTP smoke, scale, security,
 trace privacy, and zero vulnerabilities. No production rollout or data migration

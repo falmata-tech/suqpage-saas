@@ -1,6 +1,6 @@
 # Bora Highland Farm showroom brief
 
-> Fictional disposable client used to exercise the SuqPage design workflow. All copy and imagery are demonstration material, not verified business claims.
+> Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
@@ -14,7 +14,7 @@
 
 - Primary customer: households and small kitchens
 - Main visitor decision: identify the closest offering and decide what requirement to send
-- Inquiry outcome: one direct SuqPage inquiry with optional quantity and practical context
+- Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
 - Information that must appear early: what the business makes or does, who it serves, and the four available starting points
 
@@ -74,7 +74,7 @@
 ## Booth Direction
 
 - Approved logo/name treatment: generated mark plus exact business name
-- Facade material and color: shared clean City Suq architecture with the final primary and secondary roles
+- Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
 - Product/craft cue: two terraced field lines forming a B
 - Generated image authorized: yes, for disposable demonstration use
 

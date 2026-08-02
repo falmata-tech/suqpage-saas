@@ -25,7 +25,7 @@ export default function DashboardShell({ user, business, children }: { user:Sess
       : operations
         ? "Operations workspace"
         : teamMember
-          ? "Assigned work"
+          ? "Assigned businesses"
           : "Private workspace";
 
   const groups = [
@@ -35,24 +35,22 @@ export default function DashboardShell({ user, business, children }: { user:Sess
       canMaintainProducts ? { href: `/dashboard/products${query}`, label: "My offerings" } : null,
       client ? { href: "/dashboard/requests", label: "Requests" } : null,
       client && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
-      client && business ? { href: `/dashboard/deliveries${query}`, label: "Delivery activity" } : null,
       client && business ? { href: "/dashboard/account-health", label: "Account & insights" } : null,
       client && business ? { href: `/preview/@${business.handle}`, label: "Preview / review" } : null,
       teamMember ? { href: "/dashboard/requests", label: "Assigned requests" } : null,
-      teamMember && business ? { href: `/preview/@${business.handle}`, label: "Live showroom context" } : null,
-      { href: "/dashboard/support", label: client ? "SuqPage support" : "Support inbox" },
+      teamMember && business ? { href: `/preview/@${business.handle}`, label: "View live showroom" } : null,
+      { href: "/dashboard/support", label: client ? "MirtPage support" : "Support inbox" },
     ]),
     group("Client work", [
       operations ? { href: "/dashboard/requests", label: "Client requests" } : null,
-      operations ? { href: "/dashboard/requests/on-behalf", label: "Record on behalf" } : null,
+      operations ? { href: "/dashboard/requests/on-behalf", label: "Create client request" } : null,
       operations ? { href: "/dashboard/clients/new", label: "Create client workspace" } : null,
       operations ? { href: `/dashboard/account-health${query}`, label: business ? "Account & insights" : "Monthly accounts" } : null,
       operations && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
-      operations && business ? { href: `/dashboard/deliveries${query}`, label: "Delivery operations" } : null,
-      operations && business ? { href: `/preview/@${business.handle}`, label: "Showroom context", external: true } : null,
+      operations && business ? { href: `/preview/@${business.handle}`, label: "View showroom", external: true } : null,
     ]),
     group("Design tools", [
-      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Component bank" } : null,
+      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library" } : null,
     ]),
     group("Administration", [
       platformAdmin ? { href: "/dashboard/admin", label: "Platform administration" } : null,

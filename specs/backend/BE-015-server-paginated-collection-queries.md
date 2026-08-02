@@ -2,7 +2,7 @@
 id: BE-015
 title: Server-paginated collection queries
 status: done
-related: [FE-017, FE-018, BE-003, BE-009, BE-012, BE-014, BE-017, BE-018, BE-019, BE-020, DEP-014]
+related: [FE-017, FE-018, BE-003, BE-009, BE-012, BE-014, BE-017, BE-018, BE-019, BE-020, BE-023, DEP-014]
 owners: [backend, security, operations]
 last_updated: 2026-07-30
 change_level: L2
@@ -22,7 +22,7 @@ scoped SQL queries that remain predictable with hundreds or thousands of rows.
 
 - A framework-independent page request/result contract.
 - Parameterized count and row queries for public showrooms, businesses, clients,
-  staff, requests, offerings, inquiries, deliveries, and Expo profiles.
+  staff, requests, offerings, inquiries, support conversations, and Expo profiles.
 - Additive indexes for stable scoped ordering and common filters.
 - Aggregate and `EXISTS` queries that replace homepage and inquiry N+1 reads.
 

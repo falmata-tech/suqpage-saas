@@ -1,7 +1,7 @@
 # Client showroom design workflow
 
 Use this workflow whenever the user asks to design, redesign, review, or create
-media for a client Suq. The design system remains the implementation boundary;
+media for a client Showroom. The design system remains the implementation boundary;
 this folder holds the evidence that makes each result specific to the brand.
 
 ## Start a project
@@ -15,7 +15,7 @@ this folder holds the evidence that makes each result specific to the brand.
    or unapproved third-party media in this folder.
 
 The command `Design the client showroom for <handle>` means: read this workflow,
-read that handle's complete project folder, inspect the existing Suq and current
+read that handle's complete project folder, inspect the existing Showroom and current
 recipe, implement a private candidate, review it in browsers, correct it, and
 report the evidence. It never grants publication authority.
 
@@ -45,7 +45,7 @@ report the evidence. It never grants publication authority.
   responsive behavior, and unsuitable conditions. Component IDs and industries
   are not design recommendations.
 
-### 3. Compose the private Suq
+### 3. Compose the private Showroom
 
 - Preserve the canonical journey: header, hero, story/about, process, products
   or capabilities, inquiry call-to-action, footer.
@@ -59,7 +59,7 @@ report the evidence. It never grants publication authority.
 
 ### 4. Create a coordinated booth when requested
 
-Every City Suq booth should look like part of the same well-managed virtual
+Every City Showroom booth should look like part of the same well-managed virtual
 venue while remaining unmistakably tied to its business.
 
 Shared booth language:

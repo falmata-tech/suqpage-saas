@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-bazaar-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "bazaar.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
-  process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-bazaar-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "bazaar.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
 
   const { closeDbForTests, getDb } = await import("../lib/db");
   const {

@@ -2,7 +2,7 @@
 id: BE-020
 title: Public client bootstrap and unified discovery projection
 status: done
-related: [BE-002, BE-003, BE-015, BE-017, BE-019, FE-021, DEP-017, ADR-0011]
+related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, FE-021, DEP-017, ADR-0011]
 owners: [backend, security, operations]
 last_updated: 2026-08-01
 change_level: L3
@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 Invitation-only account creation adds avoidable onboarding delay, while the
-current City Suq projection rewrites business locations and mixes geographic and
+current City Showroom projection rewrites business locations and mixes geographic and
 virtual-venue concerns. The system needs a secure self-service bootstrap and one
 public business projection that independently powers geographic discovery and
 the weekly industry Expo program.

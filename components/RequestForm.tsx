@@ -27,7 +27,7 @@ export default function RequestForm() {
   }
 
   if (state.kind === "success") {
-    return <div className="form-card platform-interest-form request-success" role="status"><span className="eyebrow">Request received</span><h2>We’ll review it with you.</h2><p>Your private reference is <strong>{state.reference}</strong>.</p><p>This confirms receipt only. Nothing has been accepted, designed, or published yet. SuqPage will contact you using the details you provided.</p></div>;
+    return <div className="form-card platform-interest-form request-success" role="status"><span className="eyebrow">Request received</span><h2>We’ll review it with you.</h2><p>Your private reference is <strong>{state.reference}</strong>.</p><p>This confirms receipt only. Nothing has been accepted, designed, or published yet. MirtPage will contact you using the details you provided.</p></div>;
   }
 
   return <form className="form-card platform-interest-form" onSubmit={submit}><div className="form-grid">
@@ -35,9 +35,9 @@ export default function RequestForm() {
     <div className="field"><label htmlFor="request-contact-value">Email, phone, or WhatsApp</label><input id="request-contact-value" name="contactValue" required minLength={5} maxLength={160}/></div>
     <div className="field full"><label htmlFor="request-business-name">Business name <span className="optional">(optional)</span></label><input id="request-business-name" name="businessName" maxLength={120}/></div>
     <div className="field full"><label htmlFor="request-text">What are you interested in?</label><textarea id="request-text" name="requestText" required minLength={10} maxLength={2000} rows={6} placeholder="Tell us what your business makes, grows, supplies, or can manufacture and the showroom you are interested in."/><small>No catalog setup or images are needed yet. If we accept the project, we’ll invite you to a private client workspace for the full request.</small></div>
-    <div className="field full consent-field"><label><input name="consent" type="checkbox" required/> SuqPage may use these contact and business details to review my interest and contact me.</label></div>
+    <div className="field full consent-field"><label><input name="consent" type="checkbox" required/> MirtPage may use these contact and business details to review my interest and contact me.</label></div>
     <div aria-hidden="true" className="honeypot"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
     {state.kind === "error" && <div className="field full error" role="alert">{state.message}</div>}
-    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending"}>{state.kind === "sending" ? "Sending…" : "Tell SuqPage I’m interested"}</button></div>
+    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending"}>{state.kind === "sending" ? "Sending…" : "Tell MirtPage I’m interested"}</button></div>
   </div></form>;
 }

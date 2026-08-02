@@ -77,7 +77,7 @@ showrooms remain recoverable throughout the transition.
   that origin only. Arbitrary frames, scripts, trackers, and providers remain
   denied.
 - Operators must confirm media usage rights and manually supply any approved
-  private images to the external AI conversation. SuqPage does not upload image
+  private images to the external AI conversation. MirtPage does not upload image
   bytes or provider links to an AI service in the manual phase.
 - Migration starts from an integrity-clean backup, is transactional/idempotent,
   preserves tenant/request/revision/publication/inquiry/delivery authority, and
@@ -202,7 +202,7 @@ approved restore; it is never silently overwritten.
 Implementation checkpoint: additive recipe metadata/media migrations, release
 gate admission, private staff studio routes, verified-image persistence,
 backup/restore row coverage, and the manual import boundary are implemented.
-`SUQPAGE_RECIPE_STUDIO_ENABLED=0` denies the recipe application boundary and
+`MIRTPAGE_RECIPE_STUDIO_ENABLED=0` denies the recipe application boundary and
 returns new staff drafts to the retained administrative editor.
 The standard check, production release, 7/7 browser acceptance, container
 privacy/build, and operations restore gates pass for this checkpoint.

@@ -25,9 +25,9 @@ export default async function RequestsPage({
   const requests = listRequestsPage(user, query);
   const business = client && user.business_id ? getBusinessById(user.business_id) || null : null;
   const title = manager ? "Client requests" : client ? "My requests" : "Assigned requests";
-  const description = manager ? "Review, record, and assign private onboarding and showroom-change work." : client ? "Track every request SuqPage is handling for your showroom." : "Only work explicitly assigned to you appears here.";
+  const description = manager ? "Review, record, and assign private onboarding and showroom-change work." : client ? "Track every request MirtPage is handling for your showroom." : "Only work explicitly assigned to you appears here.";
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{manager ? <Link className="btn brand" href="/dashboard/requests/on-behalf">Record on behalf</Link> : client ? <Link className="btn brand" href="/dashboard/requests/new">New request</Link> : null}</div>
+    <div className="dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{manager ? <Link className="btn brand" href="/dashboard/requests/on-behalf">Create client request</Link> : client ? <Link className="btn brand" href="/dashboard/requests/new">New request</Link> : null}</div>
     <section className="panel">
       <div className="collection-heading">
         <div>
@@ -78,7 +78,7 @@ export default async function RequestsPage({
           />
         </>
       ) : (
-        <div className="empty-state">{manager ? "No requests match this view." : client ? "No requests yet. Use New request when you want SuqPage to update your showroom." : "No assigned work matches this view."}</div>
+        <div className="empty-state">{manager ? "No requests match this view." : client ? "No requests yet. Use New request when you want MirtPage to update your showroom." : "No assigned work matches this view."}</div>
       )}
     </section>
   </DashboardShell>;

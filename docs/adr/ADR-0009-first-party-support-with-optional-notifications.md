@@ -3,7 +3,7 @@ id: ADR-0009
 title: First-party support with optional notifications
 status: accepted
 date: 2026-07-30
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-019, BE-018, DEP-015, ADR-0001, ADR-0002]
 ---
 
@@ -11,7 +11,7 @@ related: [FE-019, BE-018, DEP-015, ADR-0001, ADR-0002]
 
 ## Context
 
-SuqPage clients and staff are already authenticated in one tenant-aware
+MirtPage clients and staff are already authenticated in one tenant-aware
 application. Commercial support SaaS pricing is not viable for the pilot, while
 self-hosting a separate Chatwoot stack adds PostgreSQL, Redis, workers, storage,
 email, upgrades, backups, and materially more memory than the application
@@ -20,7 +20,7 @@ itself.
 ## Decision drivers
 
 - No required per-agent USD subscription.
-- Existing SuqPage roles and tenant boundaries remain authoritative.
+- Existing MirtPage roles and tenant boundaries remain authoritative.
 - A queue must work even when external messaging providers fail.
 - The current single-instance SQLite pilot cannot honestly promise distributed
   websocket presence.
@@ -37,7 +37,7 @@ itself.
 
 ## Decision
 
-Build the authenticated customer-to-team support queue inside SuqPage. Use
+Build the authenticated customer-to-team support queue inside MirtPage. Use
 bounded polling in the SQLite pilot. Telegram may notify staff that a queue item
 exists, but receives no message body and is never authoritative. WhatsApp may be
 offered as an explicit handoff link only; unofficial automation is prohibited.
@@ -54,7 +54,7 @@ the support domain contract.
 
 ### Negative / debt
 
-- SuqPage owns moderation, retention, spam controls, backups, and inbox UX.
+- MirtPage owns moderation, retention, spam controls, backups, and inbox UX.
 - Polling is appropriate only for the single-instance pilot and should be
   replaced when concurrent usage justifies managed realtime.
 

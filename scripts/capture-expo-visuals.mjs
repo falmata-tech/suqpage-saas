@@ -2,10 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseUrl = process.env.SUQPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
+const baseUrl = process.env.MIRTPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
 const outputDir =
-  process.env.SUQPAGE_VISUAL_OUTPUT_DIR ||
-  path.join("/tmp", "suqpage-expo-visuals");
+  process.env.MIRTPAGE_VISUAL_OUTPUT_DIR ||
+  path.join("/tmp", "mirtpage-expo-visuals");
 const scenarios = [
   { name: "home-desktop", path: "/", viewport: { width: 1440, height: 1000 } },
   { name: "home-mobile", path: "/", viewport: { width: 390, height: 844 } },

@@ -68,7 +68,7 @@ function buildMessage(catalog: Catalog, cart: CartLine[]) {
     "Please confirm availability and the next steps.",
     "",
     `Showroom reference: @${catalog.business.handle}`,
-    `https://suqpage.com/@${catalog.business.handle}`,
+    `https://mirtpage.com/@${catalog.business.handle}`,
   ]
     .join("\n");
 }
@@ -105,7 +105,7 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
 }
 
 export default function ShowroomApp({ catalog, previewMode = false }: { catalog: Catalog; previewMode?: boolean }) {
-  const storageKey = `suqpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
+  const storageKey = `mirtpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -657,7 +657,7 @@ function InquiryDrawer({
           <div className="drawer-actions">
             <form className="platform-inquiry" onSubmit={sendInquiry}>
               <div className="drawer-action-heading">
-                <span className="eyebrow">Send through SuqPage</span>
+                <span className="eyebrow">Send through MirtPage</span>
                 <h3>Send to {catalog.business.name}</h3>
                 <p>Add a phone number so the business can reply to your inquiry.</p>
               </div>

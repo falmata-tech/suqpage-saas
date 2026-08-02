@@ -6,7 +6,7 @@ import { databasePath, mediaRoot } from "../lib/config";
 const sourceArg = process.argv.find((arg) => arg.startsWith("--from="));
 if (!sourceArg) throw new Error("Use npm run restore -- --from=/absolute/path/to/backup");
 const source = path.resolve(sourceArg.slice(7));
-const sourceDb = path.join(source, "suqpage.db");
+const sourceDb = path.join(source, "mirtpage.db");
 if (!fs.existsSync(sourceDb)) throw new Error("Backup database not found.");
 
 const validation = new DatabaseSync(sourceDb, { readOnly: true });

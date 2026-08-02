@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { assertProductionConfiguration, databasePath, mediaRoot } from "../lib/config";
+import { assertProductionConfiguration, databasePath, mediaRoot, mediaStorageDriver } from "../lib/config";
 import { getDb } from "../lib/db";
 assertProductionConfiguration();
 const db=getDb();
@@ -9,6 +9,6 @@ const admins=(db.prepare("SELECT COUNT(*) total FROM users WHERE role='admin'").
 if(!admins)throw new Error("At least one administrator account is required.");
 const temporary=(db.prepare("SELECT COUNT(*) total FROM users WHERE must_change_password=1").get() as any).total;
 console.log(`Preflight passed. Database: ${databasePath()}`);
-console.log(`Media: ${mediaRoot()}`);
+console.log(`Media provider: ${mediaStorageDriver()}${mediaStorageDriver()==="filesystem"?` (${mediaRoot()})`:""}`);
 if(temporary)console.warn(`Warning: ${temporary} account(s) still use a temporary password.`);
 fs.accessSync(databasePath(),fs.constants.R_OK|fs.constants.W_OK);

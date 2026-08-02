@@ -18,21 +18,21 @@ assert.equal(normalizeSearch(`\u0000${"x".repeat(200)}`).length, 120);
 assert.deepEqual(pageWindow(0, normalizePageRequest({ page: 99 })), {
   page: 1,
   totalPages: 1,
-  limit: 20,
+  limit: 10,
   offset: 0,
 });
 assert.deepEqual(pageWindow(41, normalizePageRequest({ page: 99 })), {
-  page: 3,
-  totalPages: 3,
-  limit: 20,
+  page: 5,
+  totalPages: 5,
+  limit: 10,
   offset: 40,
 });
 assert.deepEqual(pageResult(["last"], 41, normalizePageRequest({ page: 99 })), {
   items: ["last"],
   totalItems: 41,
-  page: 3,
-  pageSize: 20,
-  totalPages: 3,
+  page: 5,
+  pageSize: 10,
+  totalPages: 5,
   firstItem: 41,
   lastItem: 41,
 });

@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-expo-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "expo.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
-  process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-expo-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "expo.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
 
   const { closeDbForTests, getDb } = await import("../lib/db");
   const { seedDefaultBazaarConfig } = await import("../lib/bazaar");

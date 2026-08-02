@@ -17,7 +17,7 @@ remain the final authority.
 ## Durable boundaries
 
 - External AI proposes declarative JSON; it never supplies executable tenant
-  code or writes SuqPage persistence.
+  code or writes MirtPage persistence.
 - Component code, schemas, fixtures, screenshots, compatibility metadata, and
   tests are versioned in the repository.
 - A revision stores or references the exact immutable bank release and design
@@ -166,12 +166,12 @@ remain immutable while additive v4/bank-1.2 work proceeds.
 - Do not export credentials, database IDs, storage paths, unrelated tenant
   data, customer inquiries, invitation/session data, or image bytes.
 - If the external AI needs to inspect images, staff manually supplies the same
-  approved files in that conversation. SuqPage performs no automatic media
+  approved files in that conversation. MirtPage performs no automatic media
   transfer to the AI provider.
 
 #### 4.3 Strict manual import and cross-validation
 
-- Import JSON manually from the team's approved external AI account; SuqPage
+- Import JSON manually from the team's approved external AI account; MirtPage
   performs no provider call in this phase.
 - Validate content, design, and envelope independently, then cross-validate
   component/content-block types, bindings, required/optional media slots, media
@@ -228,7 +228,7 @@ fresh cutover rather than visual parity with obsolete renderers.
 - Browser-test visitor, client, assigned team member, operations manager, and
   administrator paths.
 - All four example showrooms use distinct curated compositions and retain their
-  handles, catalog content, client access, requests, inquiries, deliveries,
+  handles, catalog content, client access, requests, inquiries, support,
   content versions, and retained revision history.
 
 Exit: the bank is the default production path. Former renderers remain only as

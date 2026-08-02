@@ -1268,7 +1268,7 @@ export function migrateDatabase(
       db.exec(`
         CREATE TABLE IF NOT EXISTS business_subscriptions (
           business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
-          plan_name TEXT NOT NULL DEFAULT 'SuqPage monthly',
+          plan_name TEXT NOT NULL DEFAULT 'MirtPage monthly',
           amount_minor INTEGER CHECK(amount_minor IS NULL OR amount_minor >= 0),
           currency TEXT NOT NULL DEFAULT 'ETB' CHECK(length(currency)=3),
           starts_at INTEGER NOT NULL,
@@ -1318,7 +1318,7 @@ export function migrateDatabase(
             business_id,plan_name,amount_minor,currency,starts_at,
             current_period_start,current_period_end,grace_ends_at,updated_at
           ) VALUES(
-            NEW.id,'SuqPage monthly',NULL,'ETB',
+            NEW.id,'MirtPage monthly',NULL,'ETB',
             CAST(strftime('%s','now') AS INTEGER)*1000,
             CAST(strftime('%s','now') AS INTEGER)*1000,
             CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
@@ -1331,7 +1331,7 @@ export function migrateDatabase(
           current_period_start,current_period_end,grace_ends_at,updated_at
         )
         SELECT
-          id,'SuqPage monthly',NULL,'ETB',
+          id,'MirtPage monthly',NULL,'ETB',
           CAST(strftime('%s','now') AS INTEGER)*1000,
           CAST(strftime('%s','now') AS INTEGER)*1000,
           CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
@@ -1436,10 +1436,10 @@ export function migrateDatabase(
     }
   }
 
-  const citySuqDiscoveryApplied = db
+  const cityShowroomDiscoveryApplied = db
     .prepare("SELECT 1 FROM schema_migrations WHERE version=23")
     .get();
-  if (!citySuqDiscoveryApplied) {
+  if (!cityShowroomDiscoveryApplied) {
     db.exec("BEGIN IMMEDIATE");
     try {
       db.exec(`
@@ -1501,6 +1501,70 @@ export function migrateDatabase(
       addColumn(db, "products", "quantity_unit TEXT NOT NULL DEFAULT '' CHECK(length(quantity_unit) <= 40)");
       addColumn(db, "products", "highlights_json TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(highlights_json))");
       db.prepare("INSERT INTO schema_migrations(version) VALUES(24)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const productionScaleDiscoveryApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=25")
+    .get();
+  if (!productionScaleDiscoveryApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      addColumn(
+        db,
+        "business_discovery_profiles",
+        "production_scale TEXT NOT NULL DEFAULT 'workshop' CHECK(production_scale IN ('workshop','growing_factory'))",
+      );
+      db.exec(`
+        CREATE INDEX IF NOT EXISTS discovery_profile_scale_idx
+          ON business_discovery_profiles(production_scale,is_excluded,is_featured,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(25)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const discoveryProgramsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=26")
+    .get();
+  if (!discoveryProgramsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS discovery_sponsorships (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          position INTEGER NOT NULL DEFAULT 100 CHECK(position BETWEEN 1 AND 999),
+          active INTEGER NOT NULL DEFAULT 0 CHECK(active IN (0,1)),
+          updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS discovery_sponsorship_active_idx
+          ON discovery_sponsorships(active,position,business_id);
+
+        CREATE TABLE IF NOT EXISTS sunday_showcase_selections (
+          industry_key TEXT NOT NULL REFERENCES discovery_industries(key) ON DELETE CASCADE,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          position INTEGER NOT NULL DEFAULT 100 CHECK(position BETWEEN 1 AND 999),
+          active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)),
+          updated_at INTEGER NOT NULL,
+          PRIMARY KEY(industry_key,business_id)
+        );
+        CREATE INDEX IF NOT EXISTS sunday_showcase_active_idx
+          ON sunday_showcase_selections(industry_key,active,position,business_id);
+
+        INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
+        SELECT business_id,100,1,updated_at
+        FROM business_discovery_profiles
+        WHERE is_featured=1
+        ON CONFLICT(business_id) DO NOTHING;
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(26)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

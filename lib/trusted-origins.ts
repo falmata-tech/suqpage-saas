@@ -37,7 +37,7 @@ export function trustedOriginPolicy(environment: OriginEnvironment = process.env
 
   const canonical = environment.NEXT_PUBLIC_APP_URL?.trim();
   if (canonical) add(canonical, "https:");
-  for (const configured of (environment.SUQPAGE_SERVER_ACTION_ORIGINS || "").split(",")) {
+  for (const configured of (environment.MIRTPAGE_SERVER_ACTION_ORIGINS || "").split(",")) {
     add(configured, development ? "http:" : "https:");
   }
 

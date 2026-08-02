@@ -13,10 +13,10 @@ import { migrateDatabase } from "../lib/schema";
 import { assertDestructiveMigrationCheckpoint } from "../lib/migration-checkpoint";
 import { curatedManifestForLegacyDesign } from "../lib/showroom-manifests";
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-stockless-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-stockless-"));
 const databasePath = path.join(root, "stockless.db");
-process.env.SUQPAGE_DB_PATH = databasePath;
-process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
+process.env.MIRTPAGE_DB_PATH = databasePath;
+process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
 const db = new DatabaseSync(databasePath);
 
 const tableColumns = (table: string) =>
@@ -189,11 +189,11 @@ try {
   );
   db.exec("PRAGMA wal_checkpoint(FULL)");
   const checkpoint = path.join(
-    process.env.SUQPAGE_BACKUP_ROOT,
+    process.env.MIRTPAGE_BACKUP_ROOT,
     "stockless-checkpoint",
   );
   fs.mkdirSync(checkpoint, { recursive: true });
-  const checkpointDatabase = path.join(checkpoint, "suqpage.db");
+  const checkpointDatabase = path.join(checkpoint, "mirtpage.db");
   fs.copyFileSync(databasePath, checkpointDatabase);
   const databaseBytes = fs.statSync(checkpointDatabase).size;
   const databaseSha256 = crypto
@@ -211,7 +211,7 @@ try {
       databaseSha256,
     }),
   );
-  process.env.SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS = "1";
+  process.env.MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS = "1";
   migrateDatabase(db, { assertDestructiveMigrationCheckpoint });
   assert.equal(tableColumns("products").includes("stock_count"), false);
   assert.equal(tableColumns("option_values").includes("stock_count"), false);

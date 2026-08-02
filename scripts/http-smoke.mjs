@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'suqpage-http-'));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mirtpage-http-'));
 const port = await new Promise((resolve, reject) => {
   const server = net.createServer();
   server.unref();
@@ -20,10 +20,10 @@ const port = await new Promise((resolve, reject) => {
 const baseUrl = `http://127.0.0.1:${port}`;
 const env = {
   ...process.env,
-  SUQPAGE_DB_PATH: path.join(root, 'app.db'),
-  SUQPAGE_MEDIA_ROOT: path.join(root, 'media'),
-  SUQPAGE_CREDENTIAL_PATH: path.join(root, 'seed-credentials.txt'),
-  SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1',
+  MIRTPAGE_DB_PATH: path.join(root, 'app.db'),
+  MIRTPAGE_MEDIA_ROOT: path.join(root, 'media'),
+  MIRTPAGE_CREDENTIAL_PATH: path.join(root, 'seed-credentials.txt'),
+  MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1',
   PRIVACY_SALT: 'http-test-privacy-salt-long-enough',
   NEXT_PUBLIC_APP_URL: baseUrl,
   PORT: String(port),
@@ -36,12 +36,12 @@ const setup = spawnSync(
 );
 if (setup.status !== 0) process.exit(setup.status || 1);
 
-const db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+const db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
 db.prepare("UPDATE businesses SET status='draft' WHERE handle='koba-leather'").run();
-fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
+fs.mkdirSync(env.MIRTPAGE_MEDIA_ROOT, { recursive: true });
 const mediaName = 'product-11111111-1111-4111-8111-111111111111.png';
 fs.writeFileSync(
-  path.join(env.SUQPAGE_MEDIA_ROOT, mediaName),
+  path.join(env.MIRTPAGE_MEDIA_ROOT, mediaName),
   Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=',
     'base64',
@@ -137,7 +137,8 @@ try {
   assert.equal((await fetch(`${baseUrl}/@selam-weave`)).status, 200);
   assert.equal((await fetch(`${baseUrl}/@koba-leather`)).status, 404);
   assert.equal((await fetch(`${baseUrl}/media/${mediaName}`)).status, 200);
-  assert.equal((await fetch(`${baseUrl}/api/malikt/requests`)).status, 401);
+  assert.equal((await fetch(`${baseUrl}/api/malikt/companies`)).status, 404);
+  assert.equal((await fetch(`${baseUrl}/api/malikt/requests`)).status, 404);
   assert.equal(
     (
       await fetch(`${baseUrl}/api/malikt/requests`, {
@@ -146,12 +147,12 @@ try {
         body: '{}',
       })
     ).status,
-    401,
+    404,
   );
 
   const requestPayload = {
     contactName: 'HTTP Prospect', contactValue: 'http-prospect@example.test', businessName: 'HTTP Market',
-    requestText: 'I am interested in a managed SuqPage showroom.', idempotencyKey: 'http-request-key-0001', consent: true,
+    requestText: 'I am interested in a managed MirtPage showroom.', idempotencyKey: 'http-request-key-0001', consent: true,
   };
   const requestCreated = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
   assert.equal(requestCreated.status, 201);
@@ -161,9 +162,9 @@ try {
   assert.equal((await requestDuplicate.json()).duplicate, true);
   const publicUpload = new FormData();
   publicUpload.set('contactName', 'Upload Attempt');
-  publicUpload.set('images', new File([fs.readFileSync(path.join(process.cwd(), 'public/uploads/seed/suqpage/icon.png'))], 'blocked.png', { type: 'image/png' }));
+  publicUpload.set('images', new File([fs.readFileSync(path.join(process.cwd(), 'public/uploads/seed/mirtpage/icon.png'))], 'blocked.png', { type: 'image/png' }));
   assert.equal((await fetch(`${baseUrl}/api/requests`, { method: 'POST', body: publicUpload })).status, 415);
-  const requestDb = new DatabaseSync(env.SUQPAGE_DB_PATH, { readOnly: true });
+  const requestDb = new DatabaseSync(env.MIRTPAGE_DB_PATH, { readOnly: true });
   assert.equal(requestDb.prepare("SELECT COUNT(*) count FROM request_attachments a JOIN service_requests r ON r.id=a.request_id WHERE r.submitter_kind='public'").get().count, 0);
   requestDb.close();
   const crossOrigin = await fetch(`${baseUrl}/api/requests`, { method: 'POST', headers: { origin: 'https://attacker.example', 'x-forwarded-host': 'attacker.example', 'content-type': 'application/json' }, body: JSON.stringify(requestPayload) });
@@ -187,7 +188,7 @@ try {
   assert.match(signupResult.reference, /^REQ-[A-F0-9]{12}$/);
   assert.match(signupResult.destination, /^\/dashboard\/requests\/\d+$/);
   const sessionCookie = signup.headers.get('set-cookie');
-  assert.match(sessionCookie || '', /^suqpage_session=/);
+  assert.match(sessionCookie || '', /^mirtpage_session=/);
   const privateRequest = await fetch(`${baseUrl}${signupResult.destination}`, { headers: { cookie: sessionCookie.split(';', 1)[0] } });
   assert.equal(privateRequest.status, 200);
   assert.equal((await fetch(`${baseUrl}/@http-client-workshop`)).status, 404);

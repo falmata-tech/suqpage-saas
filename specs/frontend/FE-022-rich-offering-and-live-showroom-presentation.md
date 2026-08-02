@@ -40,7 +40,7 @@ recipes choose one reviewed detail pattern without supplying executable code.
 - Checkout, payment collection, tax, discounts, inventory, price negotiation,
   unit conversion, livestream hosting, presence detection, or video uploads.
 - Treating a displayed price, capacity, highlight, or live state as verified by
-  SuqPage.
+  MirtPage.
 - Arbitrary iframe markup, arbitrary remote video providers, tenant CSS, or
   tenant-authored components.
 
@@ -132,6 +132,6 @@ scale fixtures passed deterministic admission. Twenty desktop/mobile benchmark
 pages and their product-detail dialogs passed with zero browser, overflow,
 broken-media, focus-boundary, or token-pattern failures; all four detail
 patterns exercised controlled Photo/Video switching. Homepage discovery, City
-Suq, Expo, List, 390px, and 320px visual captures also passed. `npm run check`,
+Showroom, Expo, List, 390px, and 320px visual captures also passed. `npm run check`,
 all ten production acceptance workflows, and `npm run release` passed. No
 production publication or rollout is included.

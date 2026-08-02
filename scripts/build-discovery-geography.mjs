@@ -10,7 +10,7 @@ if (!source || !fs.existsSync(source)) {
 }
 
 const root = process.cwd();
-const temp = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-geography-"));
+const temp = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-geography-"));
 const roadsPbf = path.join(temp, "roads.osm.pbf");
 const roadsJson = path.join(temp, "roads.geojson");
 const placesPbf = path.join(temp, "places.osm.pbf");

@@ -174,7 +174,7 @@ unused until a later verified rollout.
 Implemented locally on 2026-07-26 as an additive pilot rollout slice. Migration
 15 creates Bazaar tables without destructive data movement. Reset/setup seeds
 the default weekly schedule and booth profiles. Acceptance uses
-`SUQPAGE_BAZAAR_NOW` to keep the mobile Sunday Bazaar browser evidence
+`MIRTPAGE_BAZAAR_NOW` to keep the mobile Sunday Bazaar browser evidence
 deterministic.
 
 Evidence:

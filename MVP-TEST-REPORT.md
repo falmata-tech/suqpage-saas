@@ -1,4 +1,4 @@
-# SuqPage SaaS MVP — Launch Verification Report
+# MirtPage SaaS MVP — Launch Verification Report
 
 **Release:** `1.0.0-mvp-launch`
 **Verified:** 2026-07-20

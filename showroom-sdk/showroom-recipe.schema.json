@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/showroom-recipe.schema.json",
-  "title": "SuqPage complete showroom recipe envelope",
+  "$id": "https://mirtpage.com/schemas/showroom-recipe.schema.json",
+  "title": "MirtPage complete showroom recipe envelope",
   "description": "One complete replacement content-and-design proposal. Server authorization, supplied-provenance integrity, asset, reconciliation, and semantic validation remain authoritative.",
   "type": "object",
   "additionalProperties": false,

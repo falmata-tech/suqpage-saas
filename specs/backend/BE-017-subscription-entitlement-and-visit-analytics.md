@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-SuqPage needs a monthly account lifecycle and useful showroom traffic evidence
+MirtPage needs a monthly account lifecycle and useful showroom traffic evidence
 before pricing is decided, while collecting useful traffic evidence without
 invasive visitor data.
 
@@ -60,7 +60,7 @@ invasive visitor data.
 - Only authorized operations staff can record that a renewal was received.
 - Renewal amount is nullable and not collected by the current UI. The account
   lifecycle works without a configured price and the client is directed to
-  contact SuqPage.
+  contact MirtPage.
 
 ## Scenarios
 

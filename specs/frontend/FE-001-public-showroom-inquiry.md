@@ -14,7 +14,7 @@ change_level: L2
 
 Customers need to discover a seller, select exact catalog options, preserve a
 shortlist, and either prepare one clear inquiry message without identity fields
-or send the structured inquiry into the business's SuqPage inbox with a usable
+or send the structured inquiry into the business's MirtPage inbox with a usable
 phone number for a reply.
 
 ## Scope and non-goals
@@ -22,7 +22,7 @@ phone number for a reply.
 Includes intentional directory discovery, distinct composed showrooms, product
 search, option selection, cart persistence, optional free-form desired quantity,
 copy-first message preparation, configured WhatsApp/Telegram handoff, and a
-phone-required `Send inquiry` action that saves to the tenant's SuqPage inbox.
+phone-required `Send inquiry` action that saves to the tenant's MirtPage inbox.
 Excludes payment, checkout, pricing guarantees, variant-combination inventory,
 automatic fulfillment, native share menus, TikTok handoff, and mandatory
 identity/contact/note capture for copy or social-app handoff.
@@ -64,14 +64,14 @@ Scenario: Configured direct handoff
   THEN only the configured WhatsApp and Telegram handoff actions are shown
   AND Copy inquiry remains available without requiring personal details
 
-Scenario: Customer sends through SuqPage
+Scenario: Customer sends through MirtPage
   GIVEN one or more inquiry-eligible offerings are selected
   WHEN the customer enters a usable phone number and activates Send inquiry
   THEN the structured inquiry is saved to that business's Customer inquiries inbox
   AND the customer sees a clear sent state
   AND no unrelated tenant receives the inquiry
 
-Scenario: Platform delivery requires a phone
+Scenario: Platform inquiry submission requires a phone
   GIVEN one or more inquiry-eligible offerings are selected
   WHEN the customer omits or enters an invalid phone number
   THEN Send inquiry does not create a dashboard row
@@ -112,16 +112,16 @@ Scenario: Customer returns to a growing inquiry while browsing
   characters so visitors may include units, packs, pallets, ranges, or another
   concise production quantity description.
 - Copy and social-app message preparation store no customer identity or contact
-  data. Direct SuqPage delivery stores the submitted phone only in the
+  data. Direct MirtPage inquiry submission stores the submitted phone only in the
   canonical tenant-scoped inquiry.
-- Copy/share preparation is not represented as delivery and does not create a
+- Copy/share preparation is not represented as submission and does not create a
   canonical dashboard inquiry without an explicit customer reply path.
 - Modern clipboard access has a legacy-copy and visible selectable-text fallback.
 
 ## Test plan and evidence
 
 - Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, direct
-  SuqPage delivery, owner inbox, focus, and 320/390px mobile-sheet and
+  MirtPage submission, owner inbox, focus, and 320/390px mobile-sheet and
   persistent-trigger scenarios.
 - HTTP/security: `scripts/http-smoke.mjs`, `scripts/test-security.ts`.
 - Design contract: `scripts/validate-designs.ts`.
@@ -135,7 +135,7 @@ Scenario: Customer returns to a growing inquiry while browsing
   `npm run check` and `npm run release` passed with zero production
   vulnerabilities.
 
-The phone-required direct-delivery revision passed on 2026-08-01. Typecheck,
+The phone-required direct-submission revision passed on 2026-08-01. Typecheck,
 production build, security integration, production HTTP smoke, and 10/10
 browser acceptance passed. Browser evidence covers malformed-phone rejection
 without a row, normalized phone persistence, the sent state, mobile controls,

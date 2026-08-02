@@ -2,7 +2,6 @@ import type { ServiceRequestStatus, ServiceRequestType } from "./types";
 
 export const MAX_REQUEST_TEXT = 10_000;
 export const MAX_PUBLIC_INTEREST_TEXT = 2_000;
-export const MAX_REQUEST_IMAGES = 10;
 export const REQUEST_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
   "submitted", "under_review", "needs_information", "approved_for_work",
   "in_progress", "client_review", "client_approved", "published",
@@ -71,6 +70,6 @@ export function parsePublicInterestInput(raw: Record<string, unknown>): PublicIn
   if (requestText.length < 10) throw new RequestError("Tell us briefly what kind of showroom you are interested in.");
   if (requestText.length > MAX_PUBLIC_INTEREST_TEXT) throw new RequestError(`Keep the interest message to ${MAX_PUBLIC_INTEREST_TEXT.toLocaleString("en-US")} characters or fewer.`);
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new RequestError("The request session is invalid. Refresh and try again.");
-  if (!consent) throw new RequestError("Confirm that SuqPage may use this information to review your request.");
+  if (!consent) throw new RequestError("Confirm that MirtPage may use this information to review your request.");
   return { contactName, contactValue, businessName, requestText, idempotencyKey, consent };
 }

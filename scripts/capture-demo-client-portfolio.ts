@@ -20,16 +20,16 @@ const allHandles = [
   ...benchmarkHandles,
   ...SCALE_DEMO_BUSINESSES.map((business) => business.handle),
 ];
-const offset = Number.parseInt(process.env.SUQPAGE_VISUAL_OFFSET || "0", 10);
-const limit = Number.parseInt(process.env.SUQPAGE_VISUAL_LIMIT || String(allHandles.length), 10);
+const offset = Number.parseInt(process.env.MIRTPAGE_VISUAL_OFFSET || "0", 10);
+const limit = Number.parseInt(process.env.MIRTPAGE_VISUAL_LIMIT || String(allHandles.length), 10);
 const handles = allHandles.slice(offset, offset + limit);
-const baseUrl = process.env.SUQPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
-const outputDir = process.env.SUQPAGE_VISUAL_OUTPUT_DIR || path.join("/tmp", "suqpage-demo-client-portfolio");
+const baseUrl = process.env.MIRTPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
+const outputDir = process.env.MIRTPAGE_VISUAL_OUTPUT_DIR || path.join("/tmp", "mirtpage-demo-client-portfolio");
 const viewports = {
   desktop: { width: 1440, height: 1000 },
   mobile: { width: 390, height: 844 },
 };
-const selectedViewport = process.env.SUQPAGE_VISUAL_VIEWPORT;
+const selectedViewport = process.env.MIRTPAGE_VISUAL_VIEWPORT;
 const selectedViewports = Object.fromEntries(
   Object.entries(viewports).filter(([name]) => !selectedViewport || name === selectedViewport),
 );

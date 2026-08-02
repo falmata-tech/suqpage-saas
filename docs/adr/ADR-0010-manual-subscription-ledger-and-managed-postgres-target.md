@@ -3,7 +3,7 @@ id: ADR-0010
 title: Manual subscription ledger and managed PostgreSQL target
 status: superseded
 date: 2026-07-30
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-018, BE-017, DEP-015, ADR-0001, ADR-0002, ADR-0011]
 ---
 
@@ -11,7 +11,7 @@ related: [FE-018, BE-017, DEP-015, ADR-0001, ADR-0002, ADR-0011]
 
 ## Context
 
-Monthly showroom access must be enforceable before SuqPage sets pricing or
+Monthly showroom access must be enforceable before MirtPage sets pricing or
 chooses any payment process. The current application uses synchronous
 `node:sqlite` adapters throughout. Claiming an immediate Supabase switch would
 hide a substantial data, auth, media, job, and operations migration.

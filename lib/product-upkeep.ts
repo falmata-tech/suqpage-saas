@@ -15,7 +15,7 @@ export type ProductUpkeepResult = {
 export interface StagedProductImage {
   imageRef: string;
   digest: string;
-  discard(): void;
+  discard(): Promise<void>;
 }
 
 export interface BasicProductUpkeepPort {
@@ -37,12 +37,12 @@ const commandHash = (
     .update(JSON.stringify({ ...command, imageDigest }))
     .digest("hex");
 
-export function executeBasicProductUpkeep(
+export async function executeBasicProductUpkeep(
   port: BasicProductUpkeepPort,
   user: SessionUser,
   rawCommand: Record<string, unknown>,
   stagedImage: StagedProductImage | null,
-): ProductUpkeepResult {
+): Promise<ProductUpkeepResult> {
   try {
     const command = parseBasicProductCommand(rawCommand);
     port.assertAuthorized(user, command);
@@ -62,10 +62,10 @@ export function executeBasicProductUpkeep(
       stagedImage,
       commandHash(command, stagedImage?.digest || ""),
     );
-    if (result.duplicate) stagedImage?.discard();
+    if (result.duplicate) await stagedImage?.discard();
     return result;
   } catch (error) {
-    stagedImage?.discard();
+    await stagedImage?.discard();
     throw error;
   }
 }

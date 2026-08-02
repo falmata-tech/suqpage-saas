@@ -8,7 +8,7 @@ function privacySalt() {
   if (process.env.NODE_ENV === "production" && (!value || value.length < 24)) {
     throw new Error("PRIVACY_SALT must be at least 24 characters in production.");
   }
-  return value || "suqpage-development-privacy-salt";
+  return value || "mirtpage-development-privacy-salt";
 }
 
 export function hashPrivateValue(value: string) {

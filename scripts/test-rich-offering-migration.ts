@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-rich-offering-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "rich-offering.db");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-rich-offering-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "rich-offering.db");
   try {
     const { closeDbForTests, getDb } = await import("../lib/db");
     const db = getDb();

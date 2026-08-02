@@ -11,7 +11,7 @@ change_level: L2
 # BE-016 - Balanced regional Expo allocation
 
 Deprecated by BE-019. Artificially balanced host counts are replaced by nearest
-qualifying City Suq assignment.
+qualifying City Showroom assignment.
 
 ## Problem and outcome
 

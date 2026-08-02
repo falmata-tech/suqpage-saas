@@ -19,7 +19,7 @@ semantics, provider security, or retained-version recovery.
 ## Domain invariants
 
 - `price_minor` is nullable or an integer from 0 through 999,999,999 and its
-  currency is `ETB`. It is display context, never an amount charged by SuqPage.
+  currency is `ETB`. It is display context, never an amount charged by MirtPage.
 - `quantity_unit` is optional normalized plain text of at most 40 characters.
 - `highlights_json` parses to an ordered unique array of at most six strings,
   each containing 1-80 characters.

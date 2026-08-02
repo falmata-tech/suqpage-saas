@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 The pilot must be repeatably installed, verified, backed up, restored, and run on
-persistent storage without implying horizontal scale or live Malikt integration.
+persistent storage without implying horizontal scale or logistics integration.
 
 ## Scenarios
 

@@ -3,7 +3,7 @@ id: ADR-0007
 title: Additive revision v4 and immutable multi-release showroom banks
 status: accepted
 date: 2026-07-24
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-007, FE-009, BE-008, BE-010, DEP-007, DEP-009, ADR-0005, ADR-0006]
 ---
 
@@ -59,7 +59,7 @@ For this cutover only:
 - code that existed only to keep obsolete fake seed snapshots live may be
   removed after tests prove the v4 path covers the controlled pilot workflows.
 
-This amendment does not weaken SuqPage's production migration rule. Before any
+This amendment does not weaken MirtPage's production migration rule. Before any
 future major feature switch where deployed/customer data may matter, operators
 and agents must explicitly confirm whether the existing data must be preserved.
 If it must be preserved, the original additive migration, backup, restore,

@@ -1,6 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import {
-  controlledYouTubeWatchUrl,
   privacyEnhancedYouTubeEmbedUrl,
 } from "@/lib/youtube-provider";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
@@ -114,8 +113,14 @@ function blockItems(block: BankSectionRendererProps["contentBlock"]) {
   return block.items;
 }
 
-function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"] }) {
-  const asset = mediaAsset(block, "video");
+function ControlledVideoFrame({
+  asset,
+  title,
+}: {
+  asset: string;
+  title: string;
+}) {
+  const [playing, setPlaying] = useState(false);
   if (!asset) return null;
   let src = "";
   try {
@@ -124,15 +129,34 @@ function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"]
     return null;
   }
   return (
-    <div className={styles.videoFrame}>
-      <iframe
-        src={src}
-        title={block?.title || "Showroom video"}
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-      />
+    <div className={styles.videoFrame} data-playing={playing ? "true" : "false"}>
+      {playing ? (
+        <iframe
+          src={src}
+          title={title}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        <button type="button" onClick={() => setPlaying(true)} aria-label={`Play ${title}`}>
+          <i aria-hidden="true" />
+          <span>
+            <strong>Watch the process</strong>
+            <small>Play securely on this page</small>
+          </span>
+        </button>
+      )}
     </div>
+  );
+}
+
+function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"] }) {
+  return (
+    <ControlledVideoFrame
+      asset={mediaAsset(block, "video")}
+      title={block?.title || "Showroom video"}
+    />
   );
 }
 
@@ -163,12 +187,6 @@ export function BankHeaderSection({
   surfaceRole,
 }: BankSectionRendererProps) {
   const variant = variantName(definition.id);
-  let processVideoUrl = "";
-  try {
-    processVideoUrl = context.business.processVideoRef
-      ? controlledYouTubeWatchUrl(context.business.processVideoRef)
-      : "";
-  } catch {}
   return (
     <header
       className={`${styles.section} ${styles.header}`}
@@ -200,7 +218,7 @@ export function BankHeaderSection({
       {properties?.show_tagline !== false ? (
         <span className={styles.headerTagline}>{context.business.tagline}</span>
       ) : null}
-      {context.business.isLive || processVideoUrl ? (
+      {context.business.isLive ? (
         <span className={styles.headerMediaActions}>
           {context.business.isLive && context.business.livePlatform && context.business.liveUrl ? (
             <a
@@ -211,11 +229,6 @@ export function BankHeaderSection({
             >
               <i aria-hidden="true" />
               Live on: {LIVE_PLATFORM_LABELS[context.business.livePlatform]}
-            </a>
-          ) : null}
-          {processVideoUrl ? (
-            <a href={processVideoUrl} target="_blank" rel="noreferrer">
-              Watch our process
             </a>
           ) : null}
         </span>
@@ -345,6 +358,10 @@ export function BankContentSection({
       : { title: item.title, body: item.body },
   );
   const storyImage = mediaAsset(contentBlock, "story_image");
+  const processVideoRef =
+    contentBlock?.type === "highlights"
+      ? context.business.processVideoRef
+      : "";
   if (contentBlock?.type === "video") {
     return (
       <SectionRoot
@@ -383,6 +400,15 @@ export function BankContentSection({
         <h2>{contentBlock?.title || context.business.name}</h2>
       </div>
       <div className={styles.contentBody}>
+        {processVideoRef ? (
+          <div className={styles.processVideo}>
+            <span>Inside the process</span>
+            <ControlledVideoFrame
+              asset={processVideoRef}
+              title={`${context.business.name} process video`}
+            />
+          </div>
+        ) : null}
         {storyImage ? (
           <div className={styles.storyVisual}>
             <img className={styles.storyImage} src={storyImage} alt="" />

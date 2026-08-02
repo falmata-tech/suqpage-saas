@@ -13,8 +13,8 @@ import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 const activeBusinesses = getAllBusinesses().filter((business) => business.status === "active");
 const offeringKinds = new Set<string>();
 const quantityModes = new Set<string>();
-assert.equal(activeBusinesses.length, 58, "reset creates 58 active small-business demo showrooms");
-assert.equal(SCALE_DEMO_BUSINESSES.length, 48, "discovery fixture registry contains 48 businesses");
+assert.equal(activeBusinesses.length, 66, "reset creates 66 Made-in-Ethiopia demo showrooms");
+assert.equal(SCALE_DEMO_BUSINESSES.length, 56, "discovery fixture registry contains 56 authored businesses");
 assert.equal(
   Number((getDb().prepare("SELECT COUNT(*) total FROM business_discovery_profiles").get() as { total: number }).total),
   activeBusinesses.length,
@@ -193,4 +193,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("Fifty-eight designed discovery showrooms with four offerings and ten validated benchmark compositions passed.");
+console.log("Sixty-six designed discovery showrooms with four offerings and ten validated benchmark compositions passed.");

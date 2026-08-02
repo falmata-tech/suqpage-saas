@@ -5,9 +5,9 @@ import path from "node:path";
 import sharp from "sharp";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-requests-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "requests.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-requests-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "requests.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
   process.env.PRIVACY_SALT = "request-test-privacy-salt-long-enough";
 
   const { getDb, getUserById, closeDbForTests } = await import("../lib/db");
@@ -91,11 +91,18 @@ async function main() {
     clientForm.set("requestType","change");
     clientForm.set("requestText","Please replace the hero image and add the new summer collection.");
     clientForm.set("idempotencyKey","client_request_key_123456");
-    clientForm.append("images",new File([new Uint8Array(png)],"summer-reference.png",{type:"image/png"}));
+    const blockedClientImages = new FormData();
+    blockedClientImages.set("requestText", "Please replace the hero and create the next showroom design.");
+    blockedClientImages.set("idempotencyKey", "client_images_blocked_123456");
+    blockedClientImages.append("images",new File([new Uint8Array(png)],"summer-reference.png",{type:"image/png"}));
+    await assert.rejects(
+      () => createAuthenticatedClientRequest(client, blockedClientImages),
+      (error: unknown) => error instanceof RequestError && /labeled checklist/.test(error.message),
+    );
     const clientRequest = await createAuthenticatedClientRequest(client,clientForm);
     const clientDetail = getRequestDetail(clientRequest.id)!;
     assert.equal(clientDetail.request_type,"onboarding");
-    assert.equal(clientDetail.attachments.length,1);
+    assert.equal(clientDetail.attachments.length,0);
     assert.equal(canAccessRequest(client,clientDetail),true);
     assert.equal(listClientRequests(client).some((request)=>request.id===clientRequest.id),true);
     const otherClient = {...client,id:client.id+100,business_id:redeemed.businessId+100};
@@ -136,15 +143,23 @@ async function main() {
     const managerForm = new FormData();
     managerForm.set("clientUserId",String(client.id));
     managerForm.set("requestType","change");
-    managerForm.set("requestText","The client asked SuqPage to prepare a new private hero and catalog arrangement.");
+    managerForm.set("requestText","The client asked MirtPage to prepare a new private hero and catalog arrangement.");
     managerForm.set("idempotencyKey","manager_request_key_123456");
-    managerForm.append("images",new File([new Uint8Array(png)],"manager-reference.png",{type:"image/png"}));
+    const blockedManagerImages = new FormData();
+    blockedManagerImages.set("clientUserId",String(client.id));
+    blockedManagerImages.set("requestText", "The client asked MirtPage to prepare a complete private showroom.");
+    blockedManagerImages.set("idempotencyKey", "manager_images_blocked_123456");
+    blockedManagerImages.append("images",new File([new Uint8Array(png)],"manager-reference.png",{type:"image/png"}));
+    await assert.rejects(
+      () => createOnBehalfRequest(manager, blockedManagerImages),
+      (error: unknown) => error instanceof RequestError && /labeled checklist/.test(error.message),
+    );
     const managerRequest = await createOnBehalfRequest(manager,managerForm);
     const managerDetail = getRequestDetail(managerRequest.id)!;
     assert.equal(managerDetail.submitter_kind,"manager");
     assert.equal(managerDetail.represented_client_user_id,client.id);
     assert.equal(managerDetail.business_id,client.business_id);
-    assert.equal(managerDetail.attachments.length,1);
+    assert.equal(managerDetail.attachments.length,0);
     assert.equal(canAccessRequest(client,managerDetail),true);
     await assert.rejects(()=>createOnBehalfRequest(teamOne,managerForm),(error:unknown)=>error instanceof RequestError&&error.status===403);
     const managerRepeated = await createOnBehalfRequest(manager,managerForm);
@@ -173,7 +188,7 @@ async function main() {
     assert.match(assignmentEvent.detail,/^team_member:\d+$/);
     assert.deepEqual(presentRequestEvent(assignmentEvent,true),{
       label:"Team assigned",
-      detail:"A SuqPage team member was assigned to this request.",
+      detail:"A MirtPage team member was assigned to this request.",
     });
     assert.deepEqual(presentRequestEvent(assignmentEvent,false),{
       label:"Assigned",
@@ -188,7 +203,7 @@ async function main() {
       detail:"Revision 3 was sent for your review.",
     });
     const unknownClientEvent = presentRequestEvent({event_type:"internal_test",detail:"staff:42;storage:secret"},true);
-    assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"SuqPage recorded progress on this request."});
+    assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"MirtPage recorded progress on this request."});
     assert.doesNotMatch(`${unknownClientEvent.label} ${unknownClientEvent.detail}`,/42|secret|staff:/);
     assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
     const assignedToTwo = getRequestDetail(managerRequest.id)!;
@@ -221,7 +236,7 @@ async function main() {
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

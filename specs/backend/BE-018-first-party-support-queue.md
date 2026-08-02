@@ -2,7 +2,7 @@
 id: BE-018
 title: First-party customer support queue
 status: done
-related: [FE-019, BE-002, BE-015, DEP-015, ADR-0009]
+related: [FE-019, BE-002, BE-015, BE-023, DEP-015, ADR-0009]
 owners: [backend, security, customer-support]
 last_updated: 2026-07-30
 change_level: L2
@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Clients need free in-app support and SuqPage team members need a shared queue
+Clients need free in-app support and MirtPage team members need a shared queue
 without adopting a costly per-agent SaaS or operating a second large support
 platform.
 
@@ -21,7 +21,7 @@ platform.
 ### In scope
 
 - Tenant-safe conversations and messages between authenticated clients and
-  authorized SuqPage staff.
+  authorized MirtPage staff.
 - Waiting, open, and closed states; claim, assignment, close, and reopen.
 - Configurable per-agent open-conversation limits, transactional least-loaded
   assignment, and a visible waiting queue when every enabled agent is full.

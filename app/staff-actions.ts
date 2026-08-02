@@ -51,7 +51,11 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
       city: formData.get("city"), zone: formData.get("zone"), region: formData.get("region"),
       latitude: formData.get("latitude"), longitude: formData.get("longitude"),
       fallbackStyle: formData.get("fallbackStyle"),
-      featured: formData.get("featured") === "on",
+      productionScale: formData.get("productionScale"),
+      sponsored: formData.get("sponsored") === "on",
+      sponsorPosition: formData.get("sponsorPosition"),
+      sundayIndustryKeys: formData.getAll("sundayIndustryKeys"),
+      sundayPosition: formData.get("sundayPosition"),
       excluded: formData.get("excluded") === "on",
     });
     audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });

@@ -6,11 +6,11 @@ import path from "node:path";
 import sharp from "sharp";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-upkeep-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "upkeep.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
-  process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
-  process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "1";
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-upkeep-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "upkeep.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
+  process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "1";
   try {
     const { closeDbForTests, getCatalogByBusinessId, getDb, getUserById } =
       await import("../lib/db");
@@ -133,12 +133,12 @@ async function main() {
     );
     db.exec("PRAGMA wal_checkpoint(FULL)");
     const checkpoint = path.join(
-      process.env.SUQPAGE_BACKUP_ROOT,
+      process.env.MIRTPAGE_BACKUP_ROOT,
       "product-upkeep-checkpoint",
     );
     fs.mkdirSync(checkpoint, { recursive: true });
-    const checkpointDatabase = path.join(checkpoint, "suqpage.db");
-    fs.copyFileSync(process.env.SUQPAGE_DB_PATH, checkpointDatabase);
+    const checkpointDatabase = path.join(checkpoint, "mirtpage.db");
+    fs.copyFileSync(process.env.MIRTPAGE_DB_PATH, checkpointDatabase);
     const databaseBytes = fs.statSync(checkpointDatabase).size;
     const databaseSha256 = crypto
       .createHash("sha256")
@@ -148,14 +148,14 @@ async function main() {
       path.join(checkpoint, "backup.json"),
       JSON.stringify({
         createdAt: new Date().toISOString(),
-        sourceDatabase: process.env.SUQPAGE_DB_PATH,
+        sourceDatabase: process.env.MIRTPAGE_DB_PATH,
         integrity: "ok",
         foreignKeyFailures: 0,
         databaseBytes,
         databaseSha256,
       }),
     );
-    process.env.SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS = "1";
+    process.env.MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS = "1";
     migrateDatabase(db, { assertDestructiveMigrationCheckpoint });
     assert.equal(
       db
@@ -247,7 +247,7 @@ async function main() {
       error instanceof ProductUpkeepError && error.code === code;
 
     let invalidImageDiscarded = false;
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -255,7 +255,7 @@ async function main() {
           {
             imageRef: "/media/uncommitted-invalid.png",
             digest: "invalid-upload-digest",
-            discard: () => {
+            discard: async () => {
               invalidImageDiscarded = true;
             },
           },
@@ -263,7 +263,7 @@ async function main() {
       /Product name is required/,
     );
     assert.equal(invalidImageDiscarded, true);
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -272,7 +272,7 @@ async function main() {
         ),
       /valid offering type/,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -286,7 +286,7 @@ async function main() {
         .quantityMode,
       "optional",
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -307,7 +307,7 @@ async function main() {
       /no more than six/,
     );
 
-    const created = executeBasicProductUpkeep(clientA, command(), null);
+    const created = await executeBasicProductUpkeep(clientA, command(), null);
     assert.deepEqual(
       { version: created.contentVersion, duplicate: created.duplicate },
       { version: 2, duplicate: false },
@@ -349,7 +349,7 @@ async function main() {
       "product_upkeep",
     );
 
-    const retry = executeBasicProductUpkeep(clientA, command(), null);
+    const retry = await executeBasicProductUpkeep(clientA, command(), null);
     assert.deepEqual(
       { id: retry.productId, duplicate: retry.duplicate },
       { id: created.productId, duplicate: true },
@@ -360,7 +360,7 @@ async function main() {
       )?.content_version,
       2,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -369,7 +369,7 @@ async function main() {
         ),
       throwsCode("idempotency_conflict"),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -381,7 +381,7 @@ async function main() {
         ),
       throwsCode("stale_version"),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientB,
@@ -394,7 +394,7 @@ async function main() {
       (error: unknown) =>
         error instanceof ProductUpkeepError && error.status === 403,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           unassignedTeam,
@@ -408,7 +408,7 @@ async function main() {
       (error: unknown) =>
         error instanceof ProductUpkeepError && error.status === 403,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           assignedTeam,
@@ -422,7 +422,7 @@ async function main() {
         ),
       throwsCode("service_note_required"),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -435,7 +435,7 @@ async function main() {
         ),
       throwsCode("unsupported_fields"),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -451,7 +451,7 @@ async function main() {
       throwsCode("structure_not_found"),
     );
 
-    const teamUpdate = executeBasicProductUpkeep(
+    const teamUpdate = await executeBasicProductUpkeep(
       assignedTeam,
       command({
         kind: "update",
@@ -507,7 +507,7 @@ async function main() {
       "product",
     );
     assert.ok(replacement);
-    const managerUpdate = executeBasicProductUpkeep(
+    const managerUpdate = await executeBasicProductUpkeep(
       manager,
       command({
         kind: "update",
@@ -529,7 +529,7 @@ async function main() {
       )?.image_path,
     );
     const retainedImageFile = path.join(
-      process.env.SUQPAGE_MEDIA_ROOT,
+      process.env.MIRTPAGE_MEDIA_ROOT,
       path.basename(retainedImageRef),
     );
     assert.match(retainedImageRef, /^\/media\/product-/);
@@ -541,10 +541,10 @@ async function main() {
     );
     assert.ok(staleImage);
     const staleFile = path.join(
-      process.env.SUQPAGE_MEDIA_ROOT,
+      process.env.MIRTPAGE_MEDIA_ROOT,
       path.basename(staleImage.imageRef),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           admin,
@@ -562,7 +562,7 @@ async function main() {
     );
     assert.equal(fs.existsSync(staleFile), false);
 
-    const removed = executeBasicProductUpkeep(
+    const removed = await executeBasicProductUpkeep(
       admin,
       command({
         kind: "update",
@@ -595,8 +595,8 @@ async function main() {
       true,
     );
 
-    process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "0";
-    assert.throws(
+    process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "0";
+    await assert.rejects(
       () =>
         executeBasicProductUpkeep(
           clientA,
@@ -610,7 +610,7 @@ async function main() {
         ),
       throwsCode("feature_disabled"),
     );
-    process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "1";
+    process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "1";
 
     assert.equal(db.prepare("PRAGMA foreign_key_check").all().length, 0);
     assert.equal(

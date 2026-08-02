@@ -1,10 +1,10 @@
 ---
 id: FE-003
 title: Managed client request and review workspace
-status: done
-related: [BE-003, BE-007, DEP-003, FE-006, FE-007, FE-008, FE-013, FE-017, FE-021, ADR-0004, ADR-0006]
+status: in_progress
+related: [BE-003, BE-007, BE-025, DEP-003, FE-006, FE-007, FE-008, FE-013, FE-017, FE-021, FE-025, ADR-0004, ADR-0006]
 owners: [product, frontend]
-last_updated: 2026-07-26
+last_updated: 2026-08-02
 change_level: L3
 ---
 
@@ -13,9 +13,9 @@ change_level: L3
 ## Problem and outcome
 
 Clients should be able to describe onboarding or showroom changes without
-learning SuqPage's catalog and design model. Staff need a clear operations queue,
-and clients need a minimal private workspace for requests, inquiries, deliveries,
-previews, and approval.
+learning MirtPage's catalog and design model. Staff need a clear operations queue,
+and clients need a minimal private workspace for requests, inquiries, offerings,
+support, previews, and approval.
 
 The outcome is a request-led client experience in which unfinished work stays
 private and no showroom change becomes public without client approval.
@@ -29,15 +29,15 @@ private and no showroom change becomes public without client approval.
 - Authenticated client change requests and request history.
 - Client clarification responses, status, private preview, approve, and reject
   with comments.
-- Existing client inquiry, delivery, and account-security access.
+- Existing client inquiry, offering, support, and account-security access.
 - Assigned team-member work queues and manager-wide operations queue.
 - Manager-only onboarding/change submission on behalf of a prospect or client.
 - Manager/admin creation of a draft client workspace and single-use invitation
   without requiring a public interest or an existing service request.
 - Attributable client/staff clarification messages on each request.
-- Operations-manager inquiry status and delivery initiation tools, while client
-  inquiry and delivery views remain read-only.
-- Clear attribution when SuqPage submits a request for a client.
+- Operations-manager inquiry-status tools, while client inquiry views remain
+  read-only.
+- Clear attribution when MirtPage submits a request for a client.
 - Separate private draft and public/live showroom states.
 - Complete removal of legacy-owner navigation and direct live-content editing.
 
@@ -78,12 +78,11 @@ publication authority.
 
 - Public intake requires name, a usable email/phone/WhatsApp contact, an interest
   message of 10–2,000 characters, consent, and a stable idempotency key.
-- Public intake accepts no files. Detailed instructions and up to ten JPEG, PNG,
-  or WebP reference images become available only after SuqPage accepts the lead,
-  creates an account, and the invited client authenticates.
+- Public, client, and on-behalf request intake accepts no files. Staff add media
+  only after the imported design creates exact labeled destinations.
 - The success state returns a non-secret public reference and explains that
   submission is not acceptance or publication.
-- A client account exposes Requests, Customer inquiries, Delivery activity,
+- A client account exposes Requests, My offerings, Customer inquiries, Support,
   Preview/review, and Account security only.
 - Authorized operations staff can create a draft client workspace without a
   prior lead. The client still establishes their own password through the same
@@ -92,7 +91,7 @@ publication authority.
 - Request type is explanatory, not client-selectable: the UI shows New showroom
   for a never-published draft and Showroom change after publication/live
   history; the server derives the same value independently.
-- Staff-created requests visibly state that SuqPage submitted them for the
+- Staff-created requests visibly state that MirtPage submitted them for the
   client; internal staff identity is not exposed beyond what operations policy
   permits.
 - Preview identifies the exact revision and request. Approve/reject actions are
@@ -101,9 +100,9 @@ publication authority.
   presentation/contact fields, collections, categories, products, availability,
   stock, and up to four option groups. It is not a raw JSON or generic page-
   builder interface.
-- Staff may reuse an existing tenant image or select one of the request's
-  private reference images for revision image fields. A private reference does
-  not become public merely because it appears in a preview.
+- Staff may reuse existing tenant media or fulfill an imported design's labeled
+  private image slot. A private upload does not become public merely because it
+  appears in a preview.
 - Saving changes affects only a mutable draft. Sending for review freezes that
   numbered revision; further work creates a new numbered revision.
 - Client rejection requires a comment. Approval and rejection identify the
@@ -115,11 +114,11 @@ publication authority.
   staff account must change its password before entering a workspace.
 - Operations managers see the full request queue and may submit an onboarding
   request for a prospect or an onboarding/change request for an existing client.
-  A manager-created request visibly identifies SuqPage as the submitter.
-- Operations managers process customer-inquiry status and initiate delivery
-  work for a selected business. Clients see the same activity read-only.
+  A manager-created request visibly identifies MirtPage as the submitter.
+- Operations managers process customer-inquiry status for a selected business.
+  Clients see the same activity read-only.
 - Every request detail provides a bounded clarification composer and an
-  attributable thread. Clients see their own messages and a generic SuqPage
+  attributable thread. Clients see their own messages and a generic MirtPage
   team identity; internal staff retain named attribution for audit/workflow.
 - Assignment selects one team member and, when the request has a business,
   grants that member request/business view scope. Reassignment removes obsolete
@@ -132,7 +131,7 @@ publication authority.
   request detail links back to the queue; invitation/client/request detail
   screens provide a visible breadcrumb and a back action with a deterministic
   parent fallback when browser history is unavailable.
-- Inside an authenticated workspace, the SuqPage brand returns to that actor's
+- Inside an authenticated workspace, the MirtPage brand returns to that actor's
   dashboard context rather than silently exiting to the public site. A separate
   clearly labeled Public site link opens the public experience.
 - Role-appropriate destinations remain reachable through a grouped desktop
@@ -157,7 +156,7 @@ publication authority.
 Scenario: Prospect expresses interest without an account
   GIVEN a prospect without an account or business
   WHEN they submit valid contact, a short interest message, and consent
-  THEN SuqPage stores one private onboarding lead with no attachments
+  THEN MirtPage stores one private onboarding lead with no attachments
   AND shows a reference without creating an account or exposing the internal queue
 
 Scenario: Prospect attempts a public upload
@@ -168,9 +167,10 @@ Scenario: Prospect attempts a public upload
 
 Scenario: Client requests a catalog change
   GIVEN an authenticated client
-  WHEN they submit instructions and images
+  WHEN they submit written instructions
   THEN the request is linked to only their business
   AND it appears in their request history
+  AND it contains no generic pre-design image attachments
 
 Scenario: Operator follows and reverses a deep link
   GIVEN an operator opens a request or invitation screen from a copied URL
@@ -180,7 +180,7 @@ Scenario: Operator follows and reverses a deep link
 
 Scenario: Authenticated user follows workspace navigation
   GIVEN a valid authenticated session in a dashboard
-  WHEN the user activates the SuqPage brand or another permitted workspace menu
+  WHEN the user activates the MirtPage brand or another permitted workspace menu
   THEN the destination remains authenticated and role-appropriate
   AND public-site navigation is exposed separately and explicitly
 
@@ -199,7 +199,7 @@ Scenario: Client follows private revision progress
 Scenario: Manager submits on behalf of a client
   GIVEN an operations manager and a selected client
   WHEN the manager records the client's change request
-  THEN the client sees it as submitted for them by SuqPage
+  THEN the client sees it as submitted for them by MirtPage
   AND a normal team member never sees the on-behalf control
 
 Scenario: Manager creates a client workspace without a lead
@@ -221,11 +221,11 @@ Scenario: Client and staff clarify a request
   THEN both messages append without changing the original instruction
   AND each actor sees the permitted attribution and updated request state
 
-Scenario: Operations handles customer activity
+Scenario: Operations handles customer inquiries
   GIVEN an operations manager selects a client business
-  WHEN they update an inquiry or initiate a delivery request
+  WHEN they update an inquiry
   THEN the operation is available and audited
-  AND the client sees the resulting activity without mutation controls
+  AND the client sees the resulting inquiry state without mutation controls
 
 Scenario: Assigned team member prepares work
   GIVEN a team member assigned to one request
@@ -270,11 +270,11 @@ Scenario: Manager publishes the exact approved preview
   previews are actor- and tenant-authorized on the server.
 - Privacy and data retention: intake explains retention/processing and never
   exposes contact or attachments through public references.
-- Accessibility and responsive behavior: forms, attachment errors, queues,
+- Accessibility and responsive behavior: forms, media-slot errors, queues,
   messages, and preview decisions are labeled, keyboard usable, and mobile safe.
 - Localization and merchant-entered values: interface copy may localize;
   submitted and structured merchant values remain exact.
-- Performance and limits: bounded text, attachment count/size/pixels, queue
+- Performance and limits: bounded text, post-import image count/size/pixels, queue
   pagination, and request history pagination.
 - Failure recovery and idempotency: repeat submits do not duplicate a request;
   notification failure never loses a committed request.
@@ -330,12 +330,13 @@ workspace-navigation and client-safe presentation corrections were verified on
 - Administrators can review the original interest message and move it only
   through pre-preview review statuses.
 - Operators can create a displayed-once 72-hour invitation; accepted clients
-  receive a restricted workspace with request history, read-only inquiry and
-  delivery activity, preview, and account security.
+  receive a restricted workspace with request history, read-only inquiry
+  activity, offering upkeep, support, preview, and account security.
 - Operators can also create a draft client workspace and displayed-once
   invitation without a prior lead or fabricated service request.
-- Clients can submit bounded unstructured requests with up to ten private
-  sanitized images. The server derives first-showroom versus change type from
+- Clients can submit bounded unstructured written requests. Imported designs
+  create labeled media destinations that use private sanitized uploads. The
+  server derives first-showroom versus change type from
   publication state. Nested request, invitation, and request-create screens
   include breadcrumbs and deterministic Back behavior.
 - Platform administrators can provision individual operations-manager and team-
@@ -344,8 +345,8 @@ workspace-navigation and client-safe presentation corrections were verified on
   assign them; team members see only their assigned queue and read-only business
   context.
 - `tests/acceptance/app.spec.ts` proves operator invitation, account redemption,
-  manager on-behalf intake, assignment, the restricted role navigation, private
-  images, and direct management/API denial in a production build.
+  manager on-behalf intake, assignment, the restricted role navigation, the
+  absence of generic intake files, and direct management/API denial in a production build.
 - Assigned staff use a labeled structured revision editor. Clients review and
   approve an exact numbered private showroom preview; operations managers then
   publish that approved snapshot. Preview cart/inquiry actions are disabled and
@@ -364,7 +365,7 @@ workspace-navigation and client-safe presentation corrections were verified on
   targets, and 320/390-pixel overflow evidence under `FE-013`.
 - Migration 7 converts every former compatibility owner, including all four
   examples, to the same restricted client workspace. Direct live settings,
-  catalog, design, inquiry-status, and delivery-create client controls are gone.
+  catalog, design, and inquiry-status client controls are gone.
 - The seven-scenario production browser suite passed on 2026-07-22 and covers
   every role, direct and lead-based invitations, clarification, authorization,
   client approval, publication, customer operations, public UX, and API headers.

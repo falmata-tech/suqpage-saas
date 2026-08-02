@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/component-bank-v2.schema.json",
-  "title": "SuqPage typed-content component-bank release",
+  "$id": "https://mirtpage.com/schemas/component-bank-v2.schema.json",
+  "title": "MirtPage typed-content component-bank release",
   "description": "Portable bank 1.2 guidance. Server release, compatibility, media, tenant, and publication validation remains authoritative.",
   "type": "object",
   "additionalProperties": false,

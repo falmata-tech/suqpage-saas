@@ -2,7 +2,7 @@
 id: DEP-019
 title: Complete demo portfolio admission
 status: done
-related: [FE-023, BE-022, DEP-011, DEP-018]
+related: [FE-023, FE-024, BE-022, BE-023, DEP-011, DEP-018, DEP-020]
 owners: [operations, engineering, design]
 last_updated: 2026-08-02
 change_level: L2

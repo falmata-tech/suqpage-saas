@@ -9,7 +9,7 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   use: {
-    baseURL: process.env.SUQPAGE_TEST_BASE_URL,
+    baseURL: process.env.MIRTPAGE_TEST_BASE_URL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

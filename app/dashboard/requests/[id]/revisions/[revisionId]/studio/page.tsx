@@ -86,16 +86,16 @@ export default async function RecipeStudioPage({
             label: data.workspace.requestReference,
             href: `/dashboard/requests/${requestId}`,
           },
-          { label: `Revision ${data.workspace.revisionNumber} studio` },
+          { label: `Revision ${data.workspace.revisionNumber} design` },
         ]}
         fallback={`/dashboard/requests/${requestId}`}
       />
       <div className="dashboard-head">
         <div>
-          <p className="eyebrow">AI-assisted production</p>
-          <h1>Showroom recipe studio</h1>
+          <p className="eyebrow">AI-assisted design</p>
+          <h1>Showroom design workspace</h1>
           <p>
-            One complete content-and-design recipe for{" "}
+            Prepare one complete content and design plan for{" "}
             {data.workspace.businessName}. The live showroom remains unchanged.
           </p>
         </div>
@@ -108,8 +108,8 @@ export default async function RecipeStudioPage({
       ) : null}
       {query.media ? (
         <p className="notice">
-          Private {query.media === "youtube" ? "video" : "image"} verified and
-          admitted. Export a fresh brief to include its opaque asset key.
+          Private {query.media === "youtube" ? "video" : "image"} added.
+          Export a new brief so the AI can use it in the design.
         </p>
       ) : null}
       {query.slot ? (
@@ -119,16 +119,45 @@ export default async function RecipeStudioPage({
         requestId={requestId}
         revisionId={revisionId}
         brief={JSON.stringify(data.brief, null, 2)}
+        briefIntent={data.brief.briefIntent}
+        currentRecipe={JSON.stringify(data.brief.currentRecipe, null, 2)}
         initialRecipe={JSON.stringify(data.brief.completeExample, null, 2)}
         youtubeEnabled={controlledYouTubeAdmissionEnabled()}
       />
+      <BlueprintMediaBoard
+        requestId={requestId}
+        revisionId={revisionId}
+        slots={mediaSlots}
+        readiness={readiness}
+      />
+      <section className="panel showroom-editing" id="showroom-editing">
+        <div className="blueprint-section-head">
+          <div>
+            <p className="eyebrow">Edit the private draft</p>
+            <h2>Choose the part you need to change</h2>
+            <p>Every change stays in this revision until the client approves it and MirtPage publishes it.</p>
+          </div>
+        </div>
+        <div className="showroom-editing-grid">
+          {[
+            ["settings", "Showroom settings", "Business identity, logo, hero, contact, live status, and page details."],
+            ["design", "Layout and style", "Components, colors, section surfaces, image treatment, and motion."],
+            ["content", "Page content", "Headlines, story, process, calls to action, and section media."],
+            ["offerings", "Offerings", "Categories, products, capabilities, prices, images, videos, and details."],
+          ].map(([area, label, description]) => (
+            <Link className="showroom-editing-link" href={`/dashboard/requests/${requestId}/revisions/${revisionId}/edit?area=${area}`} key={area}>
+              <strong>{label}</strong><span>{description}</span><b>Open editor</b>
+            </Link>
+          ))}
+        </div>
+      </section>
       <section className="panel blueprint-fitness">
         <div>
-          <p className="eyebrow">Composition fitness</p>
-          <h2>{fitness.score}/100 · {fitness.allowed ? "review path open" : "correction required"}</h2>
+          <p className="eyebrow">Design quality check</p>
+          <h2>{fitness.score}/100 · {fitness.allowed ? "ready to continue" : "changes required"}</h2>
           <p>
-            The blueprint is checked for catalog fit, duplicate navigation,
-            excessive signature sections, and intentional media fallbacks.
+            The design is checked for catalog fit, duplicate navigation,
+            excessive visual effects, and appropriate image fallbacks.
           </p>
         </div>
         {fitness.issues.length ? (
@@ -143,25 +172,19 @@ export default async function RecipeStudioPage({
           <p className="notice">No composition conflicts detected.</p>
         )}
       </section>
-      <BlueprintMediaBoard
-        requestId={requestId}
-        revisionId={revisionId}
-        slots={mediaSlots}
-        readiness={readiness}
-      />
-      <details className="panel advanced-recovery">
-        <summary>Advanced recovery</summary>
-        <p>
-          Use the full revision form only for administrative recovery or a
-          correction the focused studio cannot express.
-        </p>
+      <section className="panel review-submit" id="showroom-preview-action">
+        <div>
+          <p className="eyebrow">Preview</p>
+          <h2>Review the complete showroom</h2>
+          <p>Check desktop and mobile presentation before sending this revision to the client.</p>
+        </div>
         <Link
-          className="btn secondary"
-          href={`/dashboard/requests/${requestId}/revisions/${revisionId}/edit`}
+          className="btn brand"
+          href={`/dashboard/requests/${requestId}/revisions/${revisionId}/preview`}
         >
-          Open recovery editor
+          Open private preview
         </Link>
-      </details>
+      </section>
     </DashboardShell>
   );
 }

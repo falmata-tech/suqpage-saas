@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { logoutAction } from "@/app/actions";
-import SuqPageBrand from "@/components/SuqPageBrand";
+import MirtPageBrand from "@/components/MirtPageBrand";
 
 export type WorkspaceNavItem = {
   href: string;
@@ -124,12 +124,12 @@ export default function WorkspaceNavigation({
   return (
     <>
       <aside className="sidebar">
-        <SuqPageBrand href={dashboardHref} className="workspace-brand" />
+        <MirtPageBrand href={dashboardHref} className="workspace-brand" />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>
       <header className="workspace-mobile-header">
-        <SuqPageBrand href={dashboardHref} className="workspace-brand" />
+        <MirtPageBrand href={dashboardHref} className="workspace-brand" />
         <button
           className="workspace-menu-button"
           type="button"

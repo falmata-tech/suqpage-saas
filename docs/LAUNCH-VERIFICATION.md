@@ -1,23 +1,26 @@
-# SuqPage SaaS MVP — Launch Verification
+# MirtPage SaaS MVP — Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-07-22
-**Reviewed input:** the uploaded SuqPage SaaS MVP and independent launch audit
+**Verification date:** 2026-08-02 local candidate verification
+**Reviewed input:** current MirtPage launch candidate and data-preserving rollout plan
 
 ## Verdict
 
-The corrected package is suitable for a **controlled four-client public MVP pilot on one persistent server** after completing the deployment checklist in the ZIP.
-
-It is no longer the unsafe prototype described in the independent audit. The critical authentication, tenant-isolation, public API, upload, draft-publication, rate-limit, dependency, migration, backup, and test failures were repaired.
+The current package is a **locally verified soft-launch candidate for one
+persistent application instance**. Final approval remains pending production
+configuration, optional Supabase media-copy verification when that adapter is
+selected, publication, and terminal remote CI. No production launch was
+performed during this verification.
 
 This approval has two explicit boundaries:
 
 1. The MVP uses SQLite and persistent local media, so only one application instance should run.
-2. Malikt Board remains a secured mock adapter until the real external API is available.
+2. The former Delivery/Malikt demonstration is retired; dormant legacy tables
+   are retained only for a non-destructive rollback window.
 
-## Release gate
+## Current local release evidence
 
-The final `npm run release` completed successfully and ran:
+The final local candidate gates passed on 2026-08-02:
 
 - Next.js production build
 - output-file trace privacy validation
@@ -25,11 +28,18 @@ The final `npm run release` completed successfully and ran:
 - TypeScript validation
 - four-renderer integration validation
 - security and tenant-isolation tests
-- production dependency audit
+- production dependency audit with zero production vulnerabilities
+- ordered production-browser acceptance: 10/10 scenarios
+- operations, migration, backup, and verified restore checks
+- clean production-container install, build, trace, non-root runtime,
+  persistence preflight, and health checks
 
-**Dependency audit:** 0 vulnerabilities.
+The current `npm run backup` rehearsal wrote a preserved snapshot under
+`backups/2026-08-02T20-49-30-395Z`; runtime backup contents remain excluded from
+Git. The optional copy-only Supabase migration correctly refused to run without
+private bucket credentials, so no remote media or customer data were touched.
 
-## Delivery hardening evidence
+## Prior release-pipeline evidence
 
 DEP-002 was completed from a clean tracked worktree on Node 22.16 or newer:
 
@@ -55,16 +65,29 @@ jobs on the dependency-remediation commit. A repository administrator must
 still require those checks and block branch deletion and force-push before merge
 protection is considered active.
 
-## Production HTTP evidence
+The replacement remote run for this candidate is pending commit and push. Prior
+run evidence is historical and is not a substitute for terminal checks on the
+current commit.
 
-The application was started with `next start` using an isolated database and media directory. The following checks passed:
+## Demonstration evidence
+
+Two reviewed 1280x720 H.264/AAC videos were generated from the local candidate:
+
+- a 55-second public marketplace overview
+- a 110-second marketplace, showroom, inquiry, and staff-workflow walkthrough
+
+They use fictional demo data and are retained as ignored local artifacts rather
+than release binaries.
+
+## Required production HTTP evidence
+
+The isolated production smoke run must prove:
 
 - active client showroom: HTTP 200
 - draft client showroom: HTTP 404
 - persistent media route: HTTP 200
 - CSP and frame-denial headers present
-- unauthenticated delivery list: HTTP 401
-- unauthenticated delivery creation: HTTP 401
+- retired Delivery page and Malikt APIs: HTTP 404
 - forged cross-tenant inquiry: HTTP 400
 - valid canonical inquiry: HTTP 201
 - repeated inquiry with the same idempotency key: deduplicated
@@ -79,7 +102,8 @@ The application was started with `next start` using an isolated database and med
 - Removed exposed and prefilled credentials.
 - Added unique generated temporary passwords and mandatory first-login password change.
 - Replaced forgeable client-contained sessions with opaque, revocable server-side sessions.
-- Protected delivery APIs and enforced tenant scope.
+- Retired Delivery navigation, pages, APIs, actions, mock adapters, and fresh
+  seed data while preserving dormant legacy tables.
 - Validated inquiry products, ownership, publication, availability, stock, quantity, and option values.
 - Added inquiry idempotency, persistent rate limits, honeypot handling, and request-size limits.
 - Moved runtime uploads outside the Next.js static build.
@@ -126,14 +150,17 @@ Before opening the site publicly:
 1. Configure an HTTPS production domain.
 2. Use absolute persistent database, media, and backup paths.
 3. generate a private `PRIVACY_SALT`.
-4. Run `npm ci`, then `npm run reset` for a new installation or `npm run migrate` for the old database.
+4. Run `npm ci`, then `npm run setup` for a new installation or `npm run migrate` for the existing database. Never reset the preserved demo database.
 5. Run `npm run release` on the deployment machine.
 6. Change every temporary or migrated password.
 7. Enter each business’s real WhatsApp, Telegram, TikTok, and notification email.
-8. Submit and review one private onboarding request, including an image.
+8. Submit and review one private onboarding request, import a design, fulfill a
+   generated image slot, edit an offering, and verify the exported current recipe.
 9. Keep only approved businesses active.
 10. Create a backup and perform a restore test.
 
 ## Remaining post-pilot work
 
-Before broad external SaaS onboarding or horizontal scaling, migrate to managed PostgreSQL and object storage, strengthen account recovery and monitoring, connect the real Malikt Board API and callbacks, and expand public localization.
+Before broad external SaaS onboarding or horizontal scaling, migrate to managed
+PostgreSQL, complete object-storage rollout, strengthen account recovery and
+monitoring, and expand public localization.

@@ -24,12 +24,12 @@ export default function BlueprintMediaBoard({
     <section className="panel blueprint-media" id="media-plan">
       <div className="blueprint-section-head">
         <div>
-          <p className="eyebrow">Media</p>
-          <h2>Fill the recipe&apos;s image slots</h2>
+          <p className="eyebrow">Showroom images</p>
+          <h2>Complete the image checklist</h2>
           <p>
-            Upload directly to the destination the AI selected. Required images
-            must be complete before client review; optional slots can use their
-            reviewed no-media treatment.
+            Upload each image where the design requires it. Required images
+            must be ready before client review; optional spaces may use their
+            approved fallback design.
           </p>
         </div>
         <div className="blueprint-progress" aria-label="Media completion">
@@ -59,7 +59,7 @@ export default function BlueprintMediaBoard({
                 <h3>{slot.label}</h3>
                 <p>{slot.purpose}</p>
                 {slot.classification === "illustrative" ? (
-                  <small>Illustrative until staff accepts or replaces it.</small>
+                  <small>Illustrative image. Review or replace it before publication.</small>
                 ) : null}
               </div>
               <form action={fulfillBlueprintMediaSlotAction} className="media-slot-form">
@@ -82,7 +82,7 @@ export default function BlueprintMediaBoard({
                   Authorized for this showroom
                 </label>
                 <button className="btn secondary">
-                  {slot.complete ? "Replace" : "Add to slot"}
+                    {slot.complete ? "Replace" : "Add image"}
                 </button>
               </form>
             </article>
@@ -90,10 +90,10 @@ export default function BlueprintMediaBoard({
         </div>
       ) : (
         <div className="media-plan-empty">
-          <strong>No image checklist yet</strong>
+          <strong>The image checklist is not ready yet</strong>
           <p>
-            Import the blueprint first. The AI recipe will create labeled image
-            destinations here based on its chosen products and sections.
+            Import the showroom design first. MirtPage will then show every
+            labeled image needed for its products and sections.
           </p>
         </div>
       )}

@@ -49,7 +49,7 @@ export default async function SettingsPage({
         <div className="field full">
           <label>Process YouTube video <span className="optional">(optional)</span></label>
           <input aria-label="Process YouTube video" type="url" name="processVideoUrl" defaultValue={videoUrl(business.process_video_ref)} placeholder="https://www.youtube.com/watch?v=..." />
-          <small>Shown as a compact process link in the showroom header.</small>
+          <small>Shown as a responsive video inside the showroom Process section.</small>
         </div>
         <div className="field">
           <label>Live platform</label>

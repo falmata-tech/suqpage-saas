@@ -15,11 +15,13 @@ const boothRefs = new Set<string>();
 const offeringRefs = new Set<string>();
 const rationales = new Set<string>();
 const paletteSignatures = new Set<string>();
+const processVideoRefs = new Set<string>();
 
-assert.equal(active.length, 58, "portfolio contains 58 active fictional clients");
-assert.equal(SCALE_DEMO_BUSINESSES.length, 48, "48 clients use complete explicit creative records");
-assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.creative.customerRequest)).size, 48, "scale clients have independent customer requests");
-assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.heroTitle)).size, 48, "scale clients have independent hero direction");
+assert.equal(active.length, 66, "portfolio contains 66 active fictional clients");
+assert.equal(SCALE_DEMO_BUSINESSES.length, 56, "56 clients use complete explicit creative records");
+assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.creative.customerRequest)).size, 56, "scale clients have independent customer requests");
+assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.heroTitle)).size, 56, "scale clients have independent hero direction");
+assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "growing_factory").length, 8, "eight growing factories broaden the portfolio");
 
 for (const business of active) {
   const catalog = getCatalogByBusinessId(business.id);
@@ -27,6 +29,7 @@ for (const business of active) {
   assert.equal(catalog.products.length, 4, `${business.handle} publishes exactly four offerings`);
   assert.ok(business.logo_path.startsWith("/"), `${business.handle} has a managed logo`);
   assert.ok(business.hero_image_path.startsWith("/"), `${business.handle} has managed hero media`);
+  assert.match(business.process_video_ref, /^youtube:[A-Za-z0-9_-]{11}$/, `${business.handle} has a controlled process video`);
 
   const boothPath = seededExpoBoothPath(business.handle);
   for (const reference of [business.logo_path, business.hero_image_path, boothPath]) {
@@ -59,6 +62,7 @@ for (const business of active) {
       assert.ok(fs.statSync(absolute).size <= 150 * 1024, `${business.handle}/${product.slug} generated offering stays within 150 KiB`);
     }
     offeringRefs.add(product.image_path);
+    assert.equal(product.video_ref, business.process_video_ref, `${business.handle}/${product.slug} has a relevant demo video`);
   }
 
   const snapshot = catalogToRevisionSnapshotV4(catalog);
@@ -73,13 +77,15 @@ for (const business of active) {
   boothRefs.add(boothPath);
   rationales.add(snapshot.designManifest.rationale);
   paletteSignatures.add(JSON.stringify(snapshot.designManifest.customPalette));
+  processVideoRefs.add(business.process_video_ref);
 }
 
-assert.equal(logoRefs.size, 58, "every fictional client has an independent logo path");
-assert.equal(heroRefs.size, 58, "every fictional client has an independent hero path");
-assert.equal(boothRefs.size, 58, "every fictional client has an independent booth path");
-assert.equal(offeringRefs.size, 232, "every offering has an independent managed image slot");
-assert.equal(rationales.size, 58, "every design manifest retains a client-specific rationale");
+assert.equal(logoRefs.size, 66, "every fictional client has an independent logo path");
+assert.equal(heroRefs.size, 66, "every fictional client has an independent hero path");
+assert.equal(boothRefs.size, 66, "every fictional client has an independent booth path");
+assert.equal(offeringRefs.size, 264, "every offering has an independent managed image slot");
+assert.equal(rationales.size, 66, "every design manifest retains a client-specific rationale");
 assert.ok(paletteSignatures.size >= 40, "the portfolio exercises broad client-specific color direction");
+assert.ok(processVideoRefs.size >= 10, "the portfolio uses varied production-relevant video references");
 
-console.log("Complete demo portfolio passed: 58 briefs, logos, heroes, booths, admitted palettes, and 232 imaged offerings.");
+console.log("Complete demo portfolio passed: 66 briefs, logos, heroes, booths, videos, admitted palettes, and 264 imaged offerings.");

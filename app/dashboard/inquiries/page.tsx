@@ -40,7 +40,6 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
           return <div key={item.id}><strong>{item.product_name_snapshot}</strong><div>Desired quantity: {quantityIntent || "Open for discussion"}</div>{item.options_json !== "{}" ? <div>{Object.entries(JSON.parse(item.options_json)).map(([key,value]) => `${key}: ${value}`).join(" · ")}</div> : null}</div>;
         })}</div>
         {inquiry.note ? <p className="hint">{inquiry.note}</p> : null}
-        {!client ? <a className="btn secondary" href={`/dashboard/deliveries?business=${business.id}&inquiry=${inquiry.id}`}>Create delivery request</a> : null}
       </section>;
     })}</div> : <div className="empty-state">No customer inquiries match this view.</div>}
     <PaginationNav

@@ -29,7 +29,7 @@ if (foreignKeyFailures.length) {
 }
 source.exec("PRAGMA wal_checkpoint(FULL)");
 source.close();
-const databaseBackup = path.join(destination, "suqpage.db");
+const databaseBackup = path.join(destination, "mirtpage.db");
 fs.copyFileSync(databasePath(), databaseBackup);
 try { fs.chmodSync(databaseBackup, 0o600); } catch {}
 const databaseBytes = fs.statSync(databaseBackup).size;

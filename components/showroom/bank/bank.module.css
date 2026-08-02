@@ -1783,11 +1783,79 @@
   aspect-ratio: 16 / 9;
 }
 
+.videoFrame > button {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  border: 0;
+  background: var(--bank-ink);
+  color: var(--bank-surface);
+  cursor: pointer;
+  text-align: left;
+}
+
+.videoFrame > button:hover,
+.videoFrame > button:focus-visible {
+  background: color-mix(in srgb, var(--bank-ink) 88%, var(--bank-accent));
+  outline: 3px solid var(--bank-accent);
+  outline-offset: -5px;
+}
+
+.videoFrame > button > i {
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-left: 20px solid var(--bank-accent);
+}
+
+.videoFrame > button span {
+  display: grid;
+  gap: 3px;
+}
+
+.videoFrame > button strong {
+  color: var(--bank-surface);
+  font-family: var(--bank-display);
+  font-size: 1rem;
+}
+
+.videoFrame > button small {
+  color: color-mix(in srgb, var(--bank-surface) 72%, transparent);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
 .videoFrame iframe {
   display: block;
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.processVideo {
+  margin: 0 0 18px;
+}
+
+.processVideo > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--bank-ink);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.processVideo .videoFrame {
+  overflow: hidden;
+  border: 0;
+  border-radius: min(var(--bank-radius), 8px);
+  background: var(--bank-ink);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--bank-ink) 15%, transparent);
 }
 
 .catalog[data-variant="beauty-swatch"] .productCard {

@@ -58,7 +58,7 @@ export default async function Admin({
       <div className="dashboard-head">
         <div>
           <span className="eyebrow">Platform operations</span>
-          <h1>SaaS administration</h1>
+          <h1>Platform administration</h1>
           <p>Find one account or business, then take one clear administrative action.</p>
         </div>
         <Link className="btn brand" href="/dashboard/clients/new">
@@ -89,7 +89,7 @@ export default async function Admin({
       {view === "businesses" && businesses ? (
         <section className="panel">
           <div className="collection-heading">
-            <div><h2>Businesses</h2><p>Search publication state without loading every tenant workspace.</p></div>
+            <div><h2>Businesses</h2><p>Search showroom and account status without loading every business workspace.</p></div>
           </div>
           <CollectionToolbar action="/dashboard/admin" search={query.q || ""} placeholder="Business, handle, or client email" hidden={{ view }} activeFilters={Boolean(query.q || query.status)}>
             <label><span>Status</span><select name="status" defaultValue={query.status || ""}><option value="">All statuses</option><option>active</option><option>draft</option><option>suspended</option></select></label>

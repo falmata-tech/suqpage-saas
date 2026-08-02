@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Public input is untrusted. SuqPage must retain useful inquiries without allowing
+Public input is untrusted. MirtPage must retain useful inquiries without allowing
 forged products/options, cross-tenant references, excessive quantities, duplicate
 records, or uncontrolled spam.
 
@@ -64,7 +64,7 @@ categories. Full contact values and notes must not be general log fields.
 ## Test plan and evidence
 
 - `scripts/test-security.ts`: canonical validation, tenant, options, quantities,
-  idempotency, media, delivery isolation.
+  idempotency, media, and inquiry isolation.
 - `scripts/http-smoke.mjs`: HTTP forged/valid/duplicate/rate-limit behavior.
 - `tests/acceptance/app.spec.ts`: browser persistence and owner visibility.
 - Prior evidence: security, HTTP, all-role browser, type, build,
@@ -72,7 +72,7 @@ categories. Full contact values and notes must not be general log fields.
 - Current revision evidence: security integration, production HTTP smoke, and
   10/10 browser acceptance passed 2026-08-01, including normalized phones,
   rejection of non-phone and malformed contact without committed rows,
-  idempotent delivery, and visibility in the correct tenant inbox.
+  idempotent submission, and visibility in the correct tenant inbox.
 
 ## Rollout and rollback
 

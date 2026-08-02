@@ -2,7 +2,7 @@
 id: FE-019
 title: Responsive client and staff support inbox
 status: done
-related: [BE-018, DEP-015, ADR-0009]
+related: [FE-024, BE-018, DEP-015, ADR-0009]
 owners: [frontend, customer-support]
 last_updated: 2026-07-30
 change_level: L2
@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Clients need a simple place to ask SuqPage for help, and team members need a
+Clients need a simple place to ask MirtPage for help, and team members need a
 stupid-proof queue that remains usable on phones and with many conversations.
 
 ## Scope

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/showroom-proposal-v2.schema.json",
-  "title": "SuqPage typed-content showroom design proposal",
+  "$id": "https://mirtpage.com/schemas/showroom-proposal-v2.schema.json",
+  "title": "MirtPage typed-content showroom design proposal",
   "description": "Portable syntactic guidance. The server verifies the exact bank release, content compatibility, media, tenant, revision, and publication authority.",
   "type": "object",
   "additionalProperties": false,

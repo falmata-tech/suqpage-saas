@@ -1,10 +1,8 @@
 import crypto from "node:crypto";
-import fs from "node:fs";
-import path from "node:path";
 import { hasCapability } from "./capabilities";
-import { mediaRoot } from "./config";
 import { getCatalogByBusinessId, getDb, inTransaction } from "./db";
-import { resolveRequestAttachment } from "./request-media";
+import { getMediaObjectStore } from "./media-storage";
+import { readRequestAttachment } from "./request-media";
 import { canAccessRequest, getRequestDetail } from "./request-sqlite";
 import { RevisionError, snapshotToCatalog } from "./revision-domain";
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
@@ -477,7 +475,7 @@ export function decideRevision(
     .slice(0, 1000);
   if (decision === "reject" && comment.length < 5) {
     throw new RevisionError(
-      "Tell SuqPage what should change in at least 5 characters.",
+      "Tell MirtPage what should change in at least 5 characters.",
     );
   }
   return inTransaction(() => {
@@ -509,41 +507,51 @@ export function decideRevision(
   });
 }
 
-function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: number) {
+async function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: number) {
   const replacements = new Map<string, string>();
   const staged: string[] = [];
-  fs.mkdirSync(mediaRoot(), { recursive: true });
-  for (const ref of new Set(
-    snapshotAssetRefs(snapshot).filter((value) =>
-      value.startsWith("request-attachment:"),
-    ),
-  )) {
-    const attachmentId = Number(ref.split(":")[1]);
-    const attachment = getDb()
-      .prepare(
-        "SELECT storage_key,mime_type FROM request_attachments WHERE id=? AND request_id=?",
-      )
-      .get(attachmentId, requestId) as
-      | { storage_key: string; mime_type: string }
-      | undefined;
-    const source = attachment
-      ? resolveRequestAttachment(attachment.storage_key)
-      : null;
-    if (!attachment || !source || !fs.existsSync(source)) {
-      throw new RevisionError("A selected private image is unavailable.", 409);
+  const store = getMediaObjectStore();
+  try {
+    for (const ref of new Set(
+      snapshotAssetRefs(snapshot).filter((value) =>
+        value.startsWith("request-attachment:"),
+      ),
+    )) {
+      const attachmentId = Number(ref.split(":")[1]);
+      const attachment = getDb()
+        .prepare(
+          "SELECT storage_key,mime_type FROM request_attachments WHERE id=? AND request_id=?",
+        )
+        .get(attachmentId, requestId) as
+        | { storage_key: string; mime_type: string }
+        | undefined;
+      const source = attachment
+        ? await readRequestAttachment(attachment.storage_key, attachment.mime_type)
+        : null;
+      if (!attachment || !source) {
+        throw new RevisionError("A selected private image is unavailable.", 409);
+      }
+      const ext =
+        attachment.mime_type === "image/png"
+          ? "png"
+          : attachment.mime_type === "image/webp"
+            ? "webp"
+            : "jpg";
+      const filename = `revision-${crypto.randomUUID()}.${ext}`;
+      await store.put("public", filename, source.bytes, attachment.mime_type);
+      staged.push(filename);
+      replacements.set(ref, `/media/${filename}`);
     }
-    const ext =
-      attachment.mime_type === "image/png"
-        ? "png"
-        : attachment.mime_type === "image/webp"
-          ? "webp"
-          : "jpg";
-    const filename = `revision-${crypto.randomUUID()}.${ext}`;
-    const destination = path.join(mediaRoot(), filename);
-    fs.copyFileSync(source, destination, fs.constants.COPYFILE_EXCL);
-    fs.chmodSync(destination, 0o640);
-    staged.push(destination);
-    replacements.set(ref, `/media/${filename}`);
+  } catch (error) {
+    try {
+      await store.remove("public", staged);
+    } catch {
+      console.error("revision.media_cleanup_failed", {
+        provider: store.provider,
+        count: staged.length,
+      });
+    }
+    throw error;
   }
   const replaced = JSON.parse(
     JSON.stringify(snapshot),
@@ -555,6 +563,7 @@ function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: number) {
   return {
     snapshot: requireRevisionSnapshotV4(replaced, SHOWROOM_COMPONENT_BANK_LATEST),
     staged,
+    store,
   };
 }
 
@@ -693,7 +702,7 @@ function replaceCanonicalCatalog(
   }
 }
 
-export function publishApprovedRevision(
+export async function publishApprovedRevision(
   user: SessionUser,
   revisionId: number,
 ) {
@@ -723,7 +732,7 @@ export function publishApprovedRevision(
     revision.request_id,
     revision.business_id,
   );
-  const staged = stagePrivateImages(validated, revision.request_id);
+  const staged = await stagePrivateImages(validated, revision.request_id);
   try {
     return inTransaction(() => {
       const now = getCatalogByBusinessId(revision.business_id, true)!;
@@ -783,7 +792,14 @@ export function publishApprovedRevision(
       };
     });
   } catch (error) {
-    for (const file of staged.staged) fs.rmSync(file, { force: true });
+    try {
+      await staged.store.remove("public", staged.staged);
+    } catch {
+      console.error("revision.media_cleanup_failed", {
+        provider: staged.store.provider,
+        count: staged.staged.length,
+      });
+    }
     throw error;
   }
 }

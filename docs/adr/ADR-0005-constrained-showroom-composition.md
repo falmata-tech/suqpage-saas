@@ -3,7 +3,7 @@ id: ADR-0005
 title: Constrained showroom composition instead of tenant-generated code
 status: accepted
 date: 2026-07-24
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-009, BE-010, FE-004, FE-005, FE-006, FE-007, FE-008, FE-009, DEP-004, DEP-005, DEP-006, DEP-007, DEP-008, DEP-009, ADR-0001, ADR-0004, ADR-0006, ADR-0007]
 ---
 
@@ -11,7 +11,7 @@ related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-009, BE-010, FE-004, FE-005
 
 ## Context
 
-SuqPage needs to produce many visually distinct showrooms quickly and
+MirtPage needs to produce many visually distinct showrooms quickly and
 consistently from unstructured client requests. A team-operated external AI tool
 can help select designs and map supplied material, but allowing that tool to
 write or execute tenant-specific React, JavaScript, CSS, database operations, or
@@ -44,7 +44,7 @@ current SDK describes per-client code generation.
    untrusted input and bypasses compatibility, tenant, factual, and publication
    authority.
 3. Maintain a versioned bank of reviewed components and accept only strict
-   declarative composition proposals. SuqPage validates and renders proposals
+   declarative composition proposals. MirtPage validates and renders proposals
    deterministically inside the existing revision workflow.
 
 ## Decision
@@ -83,7 +83,7 @@ Adopt option 3 as the default future production path.
   credentials, tenant-wide export, approval, or publication capability.
 - The exported media manifest contains safe descriptors, not storage paths or
   file bytes. When image understanding is useful, staff manually supplies the
-  same approved files to the external AI conversation; SuqPage performs no
+  same approved files to the external AI conversation; MirtPage performs no
   automatic media transfer in the manual phase.
 - Server-side schema, semantic, compatibility, provenance, tenant, revision,
   and publication validation remain authoritative.
@@ -139,7 +139,7 @@ recovery inputs, not selectable product modes.
 
 ### Negative / debt
 
-- SuqPage must build portable content/recipe schemas, typed section-content
+- MirtPage must build portable content/recipe schemas, typed section-content
   contracts, provenance/reconciliation, recipe import, focused correction UI,
   preview/diff behavior, revision-v3 compatibility, and additional release
   evidence before the complete recipe workflow is operational.

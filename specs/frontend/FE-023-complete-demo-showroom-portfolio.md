@@ -2,7 +2,7 @@
 id: FE-023
 title: Complete demo showroom portfolio
 status: done
-related: [FE-014, FE-022, BE-013, BE-022, DEP-011, DEP-019]
+related: [FE-014, FE-022, FE-024, BE-013, BE-022, DEP-011, DEP-019]
 owners: [product, frontend, design]
 last_updated: 2026-08-02
 change_level: L2

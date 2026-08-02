@@ -1,4 +1,4 @@
-# SuqPage spec-driven development playbook
+# MirtPage spec-driven development playbook
 
 This is the practical workflow behind `AGENTS.md`. It adapts the SpecDevs
 FE/BE/DEP model to an existing, security-sensitive SaaS rather than treating the
@@ -115,7 +115,7 @@ input, or failure whenever those risks exist.
 4. Before production, back up, validate migration compatibility, run
    `npm run release`, then production preflight.
    If a reverse proxy rewrites host headers, configure exact trusted hosts through
-   `SUQPAGE_SERVER_ACTION_ORIGINS`; never use an unrestricted wildcard.
+   `MIRTPAGE_SERVER_ACTION_ORIGINS`; never use an unrestricted wildcard.
 5. Deploy one pilot instance, run health/smoke checks, verify the spec's operator
    signals, and monitor the rollout window.
 6. Roll back using the spec's exact code/data compatibility plan.

@@ -1,0 +1,86 @@
+# Wabi Bottled Water showroom brief
+
+> Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
+
+## Identity
+
+- Business name: Wabi Bottled Water
+- Permanent handle: `demo-wabi-bottled-water`
+- Location: Jimma, Oromia
+- Existing logo/mark: generated geometric mark based on a W formed by two meeting water lines
+- Short description: Build confidence around dependable local water supply and multiple pack formats without inventing certifications.
+
+## Customer And Goal
+
+- Primary customer: retailers, offices, hospitality buyers, schools, and event organizers
+- Main visitor decision: identify the closest offering and decide what requirement to send
+- Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
+- Product, production, or custom-work mode: mixed as recorded per offering
+- Information that must appear early: what the business makes or does, who it serves, and the four available starting points
+
+## Brand Direction
+
+- Customer color request: clear blue, deep blue, and mint
+- Designer advice: Clear blue leads product recognition while dark navy grounds logistics and mint is used sparingly for freshness.
+- Logo concept: a W formed by two meeting water lines
+- Visual thesis: Crisp pack photography, generous white space, and direct delivery-format comparison.
+- Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
+
+## Final Palette
+
+- canvas: `#ffffff`
+- surface: `#f3f6f8`
+- layer: `#e4eaf0`
+- text: `#17212b`
+- textMuted: `#596572`
+- inverse: `#111820`
+- onInverse: `#ffffff`
+- border: `#c7d0d8`
+- primary: `#0284c7`
+- primarySoft: `#d7eef9`
+- secondary: `#173b6c`
+- secondarySoft: `#dbe4f1`
+- onSecondary: `#ffffff`
+- strong: `#173b6c`
+- onStrong: `#ffffff`
+
+## Content Inventory
+
+- Products or capabilities: Retail Water Cases (Bottled Water); Dispenser Jar Supply (Bulk Water); Hospitality Bottle Packs (Hospitality Supply); Event Label Water Run (Custom Packaging)
+- Required inquiry details: intended use, format or specification, timing, and optional quantity
+- Unknowns: all operational facts remain provisional because this is a fictional client
+
+## Media Authority
+
+| File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
+|---|---|---|---|---|
+| `/uploads/seed/portfolio/demo-wabi-bottled-water/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
+| `/uploads/seed/portfolio/demo-wabi-bottled-water/product-1.webp` | Retail Water Cases | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-wabi-bottled-water/product-2.webp` | Dispenser Jar Supply | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-wabi-bottled-water/product-3.webp` | Hospitality Bottle Packs | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-wabi-bottled-water/product-4.webp` | Event Label Water Run | illustrative demo artwork | yes | offering |
+| `/landing/showroom-booths/demo-wabi-bottled-water.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
+
+## Composition Direction
+
+- Foundation choice: `ocean-trade`
+- Foundation reason: ocean-trade supplies the typography, spacing, geometry, and media behavior because the brief fits utility content anatomy; the palette is independently authored from the brand direction.
+- Header and hero needs: compact identity, immediate offer, and integrated wide media with protected copy space
+- Story/process distinction: opposing alignment and contrasting semantic surfaces without divider clutter
+- Catalog density and media behavior: exactly four comparable cards with bounded 4:3 media
+- Inquiry CTA and floating control: persistent but clear of phone content
+- Footer needs: identity and contact close without category navigation
+
+## Booth Direction
+
+- Approved logo/name treatment: generated mark plus exact business name
+- Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
+- Product/craft cue: a W formed by two meeting water lines
+- Generated image authorized: yes, for disposable demonstration use
+
+## Acceptance Notes
+
+- Desktop priorities: integrated hero, clean section rhythm, visible product comparison, decisive CTA
+- Phone priorities: no horizontal overflow, readable logo, 44px actions, unobstructed inquiry control
+- Accessibility/localization risks: long business names, custom palette contrast, reduced motion
+- Client review questions: replace every provisional fact and illustration before any real-client publication

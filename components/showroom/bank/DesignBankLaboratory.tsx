@@ -220,7 +220,7 @@ export default function DesignBankLaboratory({
 
   return (
     <div className={styles.laboratory}>
-      <div className={styles.labSummary} aria-label="Component bank coverage">
+      <div className={styles.labSummary} aria-label="Design library coverage">
         <div className={styles.labMetric}>
           <strong>{bank.components.length}</strong>
           <span>reviewed component variants</span>

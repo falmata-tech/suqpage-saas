@@ -5,7 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { migrateDatabase } from "../lib/schema";
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-offerings-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-offerings-"));
 const databasePath = path.join(root, "offerings.db");
 const db = new DatabaseSync(databasePath);
 

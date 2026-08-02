@@ -2,9 +2,9 @@
 id: BE-002
 title: Authentication and external adapter failure boundaries
 status: done
-related: [BE-018, BE-020]
+related: [BE-018, BE-020, BE-025]
 owners: [backend, security]
-last_updated: 2026-07-22
+last_updated: 2026-08-02
 change_level: L2
 ---
 
@@ -25,8 +25,6 @@ without leaking internal error details or delaying committed inquiries indefinit
   interface links never grant authority.
 - Failed attempts remain persistently limited and return the existing generic
   credential error.
-- Delivery API request bodies are bounded before JSON parsing.
-- Unexpected delivery failures return a generic error and server-side safe log.
 - Inquiry email notification has a finite timeout and reports non-2xx responses
   as provider failure without rolling back the committed inquiry.
 
@@ -44,11 +42,6 @@ Scenario: Signed-in user reaches the login route
   THEN the user returns to the authenticated dashboard
   AND no second sign-in form is shown
 
-Scenario: Oversized authenticated delivery request
-  GIVEN an authenticated owner
-  WHEN the owner sends a body above the documented API limit
-  THEN the API returns 413 before parsing or writing delivery data
-
 Scenario: Notification provider fails
   GIVEN a committed inquiry and configured email provider
   WHEN the provider times out or returns a non-success status
@@ -64,7 +57,6 @@ bodies, customer contact, or inquiry notes.
 ## Test plan and evidence
 
 - Security integration test for reset-on-success rate-limit behavior.
-- Authenticated browser/API regression for oversized delivery body.
 - Notification adapter test for non-2xx and timeout-safe failure.
 - Existing HTTP, security, acceptance, and release gates.
 - Evidence: on 2026-07-20, `npm run check`, `npm run test:acceptance`,

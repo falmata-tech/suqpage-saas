@@ -3,7 +3,7 @@ id: ADR-0003
 title: Specs precede material behavior changes
 status: accepted
 date: 2026-07-20
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE_BASE, BE_BASE, DEP-002]
 ---
 

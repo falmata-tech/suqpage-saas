@@ -1,17 +1,19 @@
 import type { DatabaseSync } from "node:sqlite";
 import { getDb } from "./db";
+import { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
+
+export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
 export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics & devices", icon: "circuit", code: "ELC" },
-  { key: "beauty-wellness", label: "Beauty & body care", icon: "leaf", code: "BEA" },
-  { key: "food-farming", label: "Food, farms & ingredients", icon: "sprout", code: "FOD" },
-  { key: "machinery-tools", label: "Metalwork, tools & equipment", icon: "tool", code: "MCH" },
-  { key: "home-living", label: "Furniture, home & craft", icon: "home", code: "HOM" },
-  { key: "fashion-textiles", label: "Clothing, textiles & leather", icon: "thread", code: "FSH" },
+  { key: "electronics", label: "Electronics, electrical & appliances", icon: "circuit", code: "ELC" },
+  { key: "beauty-wellness", label: "Beauty, hygiene & household care", icon: "leaf", code: "BEA" },
+  { key: "food-farming", label: "Food, farms & beverages", icon: "sprout", code: "FOD" },
+  { key: "machinery-tools", label: "Machinery, metalwork & industrial inputs", icon: "tool", code: "MCH" },
+  { key: "home-living", label: "Furniture, home goods & building materials", icon: "home", code: "HOM" },
+  { key: "fashion-textiles", label: "Textiles, garments, leather & paper", icon: "thread", code: "FSH" },
 ] as const;
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
-
 export const EXPO_WEEK = [
   { weekday: 1, dayLabel: "Monday", industryKey: "electronics" },
   { weekday: 2, dayLabel: "Tuesday", industryKey: "beauty-wellness" },
@@ -39,10 +41,12 @@ type DiscoveryRow = {
   latitude: number;
   longitude: number;
   fallback_style: string;
-  is_featured: number;
+  is_sponsored: number;
+  sponsor_position: number;
+  production_scale: ProductionScale;
 };
 
-export type DiscoverySuq = {
+export type DiscoveryShowroom = {
   id: number;
   handle: string;
   name: string;
@@ -55,7 +59,8 @@ export type DiscoverySuq = {
   latitude: number;
   longitude: number;
   fallbackStyle: string;
-  featured: boolean;
+  sponsored: boolean;
+  productionScale: ProductionScale;
 };
 
 export type ExpoBooth = {
@@ -63,10 +68,10 @@ export type ExpoBooth = {
   reference: string;
 } & ({
   revealed: true;
-  suq: DiscoverySuq;
+  showroom: DiscoveryShowroom;
 } | {
   revealed: false;
-  suq: null;
+  showroom: null;
 });
 
 export type DiscoveryCityGroup = {
@@ -76,7 +81,7 @@ export type DiscoveryCityGroup = {
   latitude: number;
   longitude: number;
   count: number;
-  suqs: DiscoverySuq[];
+  showrooms: DiscoveryShowroom[];
 };
 
 export type WeeklyExpoDay = {
@@ -109,14 +114,15 @@ export type DiscoveryView = {
   industry: DiscoveryIndustry;
   industries: readonly DiscoveryIndustry[];
   query: string;
+  productionScale: ProductionScale | "";
   view: "map" | "list";
   total: number;
-  featuredCount: number;
+  sponsoredCount: number;
   locationCount: number;
-  suqs: DiscoverySuq[];
+  showrooms: DiscoveryShowroom[];
   cityGroups: DiscoveryCityGroup[];
   list: {
-    items: DiscoverySuq[];
+    items: DiscoveryShowroom[];
     page: number;
     pageCount: number;
     pageSize: number;
@@ -129,6 +135,10 @@ function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
 }
 
+function normalizeProductionScale(value: string | undefined): ProductionScale | "" {
+  return PRODUCTION_SCALES.some((scale) => scale.key === value) ? value as ProductionScale : "";
+}
+
 function normalizePositiveInteger(value: string | number | undefined, fallback: number) {
   const parsed = typeof value === "number" ? value : Number.parseInt(value || "", 10);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
@@ -139,7 +149,7 @@ function normalizeWeekday(value: string | number | undefined, fallback: number) 
   return Number.isInteger(parsed) && parsed >= 0 && parsed <= 6 ? parsed : fallback;
 }
 
-function toSuq(row: DiscoveryRow): DiscoverySuq {
+function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
   return {
     id: row.id,
     handle: row.handle,
@@ -153,7 +163,8 @@ function toSuq(row: DiscoveryRow): DiscoverySuq {
     latitude: row.latitude,
     longitude: row.longitude,
     fallbackStyle: row.fallback_style,
-    featured: Boolean(row.is_featured),
+    sponsored: Boolean(row.is_sponsored),
+    productionScale: row.production_scale,
   };
 }
 
@@ -162,17 +173,19 @@ function selectSql(extraWhere: string, suffix = "") {
     SELECT
       b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
       p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
-      p.fallback_style,p.is_featured
+      p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
+      COALESCE(s.position,999) AS sponsor_position,p.production_scale
     FROM business_industries i
     JOIN businesses b ON b.id=i.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
     WHERE i.industry_key=?
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
       ${extraWhere}
-    ORDER BY p.is_featured DESC,b.name COLLATE NOCASE,b.id
+    ORDER BY is_sponsored DESC,sponsor_position,b.name COLLATE NOCASE,b.id
     ${suffix}
   `;
 }
@@ -193,6 +206,14 @@ function searchParameters(industryKey: string, query: string) {
   return [industryKey, query, search, search, search, search, search, search, search, search];
 }
 
+function discoveryWhere(productionScale: ProductionScale | "") {
+  return `${SEARCH_WHERE} AND (?='' OR p.production_scale=?)`;
+}
+
+function discoveryParameters(industryKey: string, query: string, productionScale: ProductionScale | "") {
+  return [...searchParameters(industryKey, query), productionScale, productionScale];
+}
+
 function ethiopiaDateParts(now: Date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: ETHIOPIA_TIME_ZONE,
@@ -202,6 +223,15 @@ function ethiopiaDateParts(now: Date) {
   }).formatToParts(now);
   const value = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value);
   return { year: value("year"), month: value("month"), day: value("day") };
+}
+
+function rotatingSundayIndustry(date: Date) {
+  const dayNumber = Math.floor(date.getTime() / 86_400_000);
+  const daysSinceMonday = (date.getUTCDay() + 6) % 7;
+  const weekIndex = Math.floor((dayNumber - daysSinceMonday) / 7);
+  const industryIndex = ((weekIndex % DISCOVERY_INDUSTRIES.length) + DISCOVERY_INDUSTRIES.length)
+    % DISCOVERY_INDUSTRIES.length;
+  return DISCOVERY_INDUSTRIES[industryIndex];
 }
 
 function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[] } {
@@ -214,39 +244,40 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
     const date = new Date(today);
     date.setUTCDate(today.getUTCDate() + index);
     const entry = EXPO_WEEK.find((candidate) => candidate.weekday === date.getUTCDay()) || EXPO_WEEK[0];
-    const industry = entry.industryKey ? normalizeIndustry(entry.industryKey) : null;
+    const isSunday = entry.weekday === 0;
+    const industry = isSunday ? rotatingSundayIndustry(date) : normalizeIndustry(entry.industryKey || undefined);
     return {
       weekday: entry.weekday,
       dayLabel: entry.dayLabel,
       dateIso: date.toISOString().slice(0, 10),
       dateLabel: labelFormatter.format(date),
-      mode: industry ? "expo" : "livestream",
-      industryKey: industry?.key || null,
-      industryLabel: industry?.label || "SuqPage TikTok Live",
-      industryIcon: industry?.icon || "live",
+      mode: isSunday ? "livestream" : "expo",
+      industryKey: industry.key,
+      industryLabel: industry.label,
+      industryIcon: industry.icon,
       isToday: index === 0,
     };
   });
   return { todayWeekday, days };
 }
 
-function groupCities(suqs: DiscoverySuq[]): DiscoveryCityGroup[] {
+function groupCities(showrooms: DiscoveryShowroom[]): DiscoveryCityGroup[] {
   const groups = new Map<string, DiscoveryCityGroup>();
-  for (const suq of suqs) {
-    const key = `${suq.city.trim().toLocaleLowerCase()}\u0000${suq.region.trim().toLocaleLowerCase()}`;
+  for (const showroom of showrooms) {
+    const key = `${showroom.city.trim().toLocaleLowerCase()}\u0000${showroom.region.trim().toLocaleLowerCase()}`;
     const group = groups.get(key) || {
       key,
-      city: suq.city,
-      region: suq.region,
+      city: showroom.city,
+      region: showroom.region,
       latitude: 0,
       longitude: 0,
       count: 0,
-      suqs: [],
+      showrooms: [],
     };
-    group.latitude += suq.latitude;
-    group.longitude += suq.longitude;
+    group.latitude += showroom.latitude;
+    group.longitude += showroom.longitude;
     group.count += 1;
-    group.suqs.push(suq);
+    group.showrooms.push(showroom);
     groups.set(key, group);
   }
   return [...groups.values()]
@@ -259,8 +290,8 @@ function groupCities(suqs: DiscoverySuq[]): DiscoveryCityGroup[] {
     .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
 }
 
-function expoEligibleCount(db: DatabaseSync, industryKey: string | null) {
-  if (industryKey) {
+function expoEligibleCount(db: DatabaseSync, industryKey: string, mode: WeeklyExpoDay["mode"]) {
+  if (mode === "expo") {
     return (db.prepare(`
       SELECT COUNT(DISTINCT b.id) AS total
       FROM business_industries i
@@ -276,15 +307,17 @@ function expoEligibleCount(db: DatabaseSync, industryKey: string | null) {
   }
   return (db.prepare(`
     SELECT COUNT(*) AS total
-    FROM businesses b
+    FROM sunday_showcase_selections selection
+    JOIN businesses b ON b.id=selection.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
-    WHERE b.status='active'
+    WHERE selection.industry_key=?
+      AND selection.active=1
+      AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
-      AND p.is_featured=1
       AND p.booth_image_path LIKE '/%'
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-  `).get() as { total: number }).total;
+  `).get(industryKey) as { total: number }).total;
 }
 
 export function getDiscoveryView(
@@ -294,6 +327,7 @@ export function getDiscoveryView(
     page?: string | number;
     view?: string;
     expoDay?: string | number;
+    scale?: string;
     now?: Date;
     db?: DatabaseSync;
   } = {},
@@ -301,7 +335,9 @@ export function getDiscoveryView(
   const db = options.db || getDb();
   const industry = normalizeIndustry(options.industry);
   const query = (options.q || "").trim().slice(0, 80);
-  const params = searchParameters(industry.key, query);
+  const productionScale = normalizeProductionScale(options.scale);
+  const where = discoveryWhere(productionScale);
+  const params = discoveryParameters(industry.key, query, productionScale);
   const countRow = db.prepare(`
     SELECT COUNT(DISTINCT b.id) AS total
     FROM business_industries i
@@ -312,65 +348,72 @@ export function getDiscoveryView(
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-      ${SEARCH_WHERE}
+      ${where}
   `).get(...params) as { total: number };
   const total = countRow.total;
   const pageCount = Math.max(1, Math.ceil(total / LIST_PAGE_SIZE));
   const page = Math.min(normalizePositiveInteger(options.page, 1), pageCount);
-  const rows = db.prepare(selectSql(SEARCH_WHERE)).all(...params) as DiscoveryRow[];
-  const listRows = db.prepare(selectSql(SEARCH_WHERE, "LIMIT ? OFFSET ?"))
+  const rows = db.prepare(selectSql(where)).all(...params) as DiscoveryRow[];
+  const listRows = db.prepare(selectSql(where, "LIMIT ? OFFSET ?"))
     .all(...params, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE) as DiscoveryRow[];
-  const suqs = rows.map(toSuq);
-  const cityGroups = groupCities(suqs);
+  const showrooms = rows.map(toShowroom);
+  const cityGroups = groupCities(showrooms);
 
   const schedule = weeklySchedule(options.now || new Date());
   const selectedWeekday = normalizeWeekday(options.expoDay, schedule.todayWeekday);
   const selectedDay = schedule.days.find((entry) => entry.weekday === selectedWeekday) || schedule.days[0];
-  const expoIndustry = selectedDay.industryKey ? normalizeIndustry(selectedDay.industryKey) : null;
+  const expoIndustry = normalizeIndustry(selectedDay.industryKey || undefined);
   const revealExpo = selectedDay.isToday;
   const expoRows = revealExpo
-    ? expoIndustry
+    ? selectedDay.mode === "expo"
       ? db.prepare(selectSql("AND p.booth_image_path LIKE '/%' ")).all(expoIndustry.key) as DiscoveryRow[]
       : db.prepare(`
         SELECT
           b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
           p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
-          p.fallback_style,p.is_featured
-        FROM businesses b
+          p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
+          COALESCE(s.position,999) AS sponsor_position,p.production_scale
+        FROM sunday_showcase_selections selection
+        JOIN businesses b ON b.id=selection.business_id
         JOIN business_discovery_profiles p ON p.business_id=b.id
-        WHERE b.status='active'
+        LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
+        WHERE selection.industry_key=?
+          AND selection.active=1
+          AND b.status='active'
           AND p.is_excluded=0
           AND p.approved_at > 0
-          AND p.is_featured=1
           AND p.booth_image_path LIKE '/%'
           AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-        ORDER BY b.name COLLATE NOCASE,b.id
-      `).all() as DiscoveryRow[]
+        ORDER BY selection.position,b.name COLLATE NOCASE,b.id
+      `).all(expoIndustry.key) as DiscoveryRow[]
     : [];
-  const expoSuqs = expoRows.map((row) => ({ ...toSuq(row), imagePath: row.booth_image_path }));
-  const boothCount = revealExpo ? expoSuqs.length : expoEligibleCount(db, selectedDay.industryKey);
+  const expoShowrooms = expoRows.map((row) => ({ ...toShowroom(row), imagePath: row.booth_image_path }));
+  const boothCount = revealExpo
+    ? expoShowrooms.length
+    : expoEligibleCount(db, expoIndustry.key, selectedDay.mode);
   const booths = Array.from({ length: boothCount }, (_, index): ExpoBooth => {
     const slot = index + 1;
     const reference = selectedDay.mode === "livestream"
       ? `LIVE-${String(slot).padStart(2, "0")}`
       : `${expoIndustry?.code}-B${String(slot).padStart(2, "0")}`;
     return revealExpo
-      ? { revealed: true, suq: expoSuqs[index], slot, reference }
-      : { revealed: false, suq: null, slot, reference };
+      ? { revealed: true, showroom: expoShowrooms[index], slot, reference }
+      : { revealed: false, showroom: null, slot, reference };
   });
 
   return {
     industry,
     industries: DISCOVERY_INDUSTRIES,
     query,
+    productionScale,
     view: options.view === "list" ? "list" : "map",
     total,
-    featuredCount: suqs.filter((suq) => suq.featured).length,
-    locationCount: new Set(suqs.map((suq) => `${suq.city}\u0000${suq.region}`)).size,
-    suqs,
+    sponsoredCount: showrooms.filter((showroom) => showroom.sponsored).length,
+    locationCount: new Set(showrooms.map((showroom) => `${showroom.city}\u0000${showroom.region}`)).size,
+    showrooms,
     cityGroups,
     list: {
-      items: listRows.map(toSuq),
+      items: listRows.map(toShowroom),
       page,
       pageCount,
       pageSize: LIST_PAGE_SIZE,
@@ -378,8 +421,8 @@ export function getDiscoveryView(
     },
     expo: {
       mode: selectedDay.mode,
-      title: selectedDay.mode === "livestream" ? "Sunday Suq Live" : `${expoIndustry?.label} Expo`,
-      industryCode: selectedDay.mode === "livestream" ? "LIVE" : expoIndustry?.code || "SUQ",
+      title: selectedDay.mode === "livestream" ? `Featured Enterprises: ${expoIndustry.label}` : `${expoIndustry.label} Expo`,
+      industryCode: selectedDay.mode === "livestream" ? "LIVE" : expoIndustry.code,
       industryIcon: selectedDay.industryIcon,
       selectedWeekday,
       isToday: selectedDay.isToday,

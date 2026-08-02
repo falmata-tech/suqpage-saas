@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/showroom-content-blocks.schema.json",
-  "title": "SuqPage typed showroom content blocks",
+  "$id": "https://mirtpage.com/schemas/showroom-content-blocks.schema.json",
+  "title": "MirtPage typed showroom content blocks",
   "description": "Portable syntactic guidance. Server content, provenance, component, media, tenant, and authorization validation remains authoritative.",
   "type": "object",
   "additionalProperties": false,

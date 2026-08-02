@@ -1,6 +1,6 @@
-# SuqPage AI Showroom Integration Contract
+# MirtPage AI Showroom Integration Contract
 
-SuqPage accepts a bounded, declarative showroom recipe. The AI chooses reviewed
+MirtPage accepts a bounded, declarative showroom recipe. The AI chooses reviewed
 components, writes provisional content, selects media behavior, and supplies a
 semantic color palette. It never returns executable code or publishes a site.
 

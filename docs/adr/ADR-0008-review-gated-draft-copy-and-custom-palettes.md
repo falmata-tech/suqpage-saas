@@ -3,7 +3,7 @@ id: ADR-0008
 title: Review-gated draft copy and custom showroom palettes
 status: accepted
 date: 2026-07-29
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-007, FE-009, BE-008, BE-010, DEP-007, DEP-009, ADR-0005, ADR-0007]
 ---
 
@@ -14,7 +14,7 @@ related: [FE-007, FE-009, BE-008, BE-010, DEP-007, DEP-009, ADR-0005, ADR-0007]
 The initial recipe contract treated exported source facts and admitted token
 packs as import authority. That reduced factual and color risk, but it also made
 private draft creation depend on complete intake data and constrained every
-showroom to a small set of preselected color combinations. SuqPage already has
+showroom to a small set of preselected color combinations. MirtPage already has
 an authorized private revision, staff editing, client review, approval, and
 manager publication boundary.
 

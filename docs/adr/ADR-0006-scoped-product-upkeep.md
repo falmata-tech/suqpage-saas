@@ -3,7 +3,7 @@ id: ADR-0006
 title: Scoped product upkeep within the managed-service model
 status: accepted
 date: 2026-07-24
-deciders: [SuqPage]
+deciders: [MirtPage]
 related: [FE-008, BE-009, DEP-008, FE-003, BE-003, ADR-0001, ADR-0004, ADR-0005]
 ---
 
@@ -20,14 +20,14 @@ full request, staff revision, client approval, and manager publication cycle
 adds cost without protecting a structural or visual decision.
 
 The prior product model stored numeric stock and used it to constrain inquiries.
-SuqPage is an inquiry showroom, not an inventory system; keeping a count implied
+MirtPage is an inquiry showroom, not an inventory system; keeping a count implied
 operational accuracy the platform does not maintain.
 
 ## Decision drivers
 
 - Keep the client workspace simple while giving clients useful control over
   everyday product truth.
-- Let assigned SuqPage team members provide the same upkeep as customer service
+- Let assigned MirtPage team members provide the same upkeep as customer service
   without granting cross-tenant or manager authority.
 - Preserve curated collection/category structure, options, page content, and
   design as managed work.
@@ -92,7 +92,7 @@ Adopt option 3.
 - Clients can keep routine product truth fresh without learning showroom
   architecture or waiting for service fulfillment.
 - Team members can provide extra customer service through the same safe path.
-- SuqPage retains high-value managed design/structure work and exact approval.
+- MirtPage retains high-value managed design/structure work and exact approval.
 - Product publications remain versioned, conflict-safe, attributable, and
   recoverable.
 - The active product model stops making unsupported inventory claims.

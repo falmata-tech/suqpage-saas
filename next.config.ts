@@ -2,13 +2,13 @@ import type { NextConfig } from "next";
 import { trustedOriginPolicy } from "./lib/trusted-origins";
 
 const isDev = process.env.NODE_ENV !== "production";
-const distDir = process.env.SUQPAGE_NEXT_DIST_DIR || ".next";
-if (distDir !== ".next" && !/^\.next-acceptance\/suqpage-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
-  throw new Error("SUQPAGE_NEXT_DIST_DIR must identify a generated SuqPage acceptance directory");
+const distDir = process.env.MIRTPAGE_NEXT_DIST_DIR || ".next";
+if (distDir !== ".next" && !/^\.next-acceptance\/mirtpage-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
+  throw new Error("MIRTPAGE_NEXT_DIST_DIR must identify a generated MirtPage acceptance directory");
 }
-const tsconfigPath = process.env.SUQPAGE_NEXT_TSCONFIG || "tsconfig.json";
-if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-suqpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
-  throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated SuqPage acceptance config");
+const tsconfigPath = process.env.MIRTPAGE_NEXT_TSCONFIG || "tsconfig.json";
+if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-mirtpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
+  throw new Error("MIRTPAGE_NEXT_TSCONFIG must identify a generated MirtPage acceptance config");
 }
 const serverActionOrigins = trustedOriginPolicy(process.env).serverActionHosts;
 const csp = [

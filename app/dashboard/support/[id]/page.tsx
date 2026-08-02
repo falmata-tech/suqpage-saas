@@ -74,7 +74,7 @@ export default async function SupportThread({
       </div>
       {query.error ? <p className="error">{query.error}</p> : null}
       {query.sent ? <p className="notice">Reply sent.</p> : null}
-      <section className="support-thread" aria-label="Support message history">
+      <section className="support-thread" aria-label="Support message history" tabIndex={0}>
         {data.messages.map((message) => (
           <article className={`support-message ${message.senderRole === "client" ? "client" : "staff"}`} key={message.id}>
             <header><strong>{message.senderName}</strong><time dateTime={new Date(message.createdAt).toISOString()}>{dateTime(message.createdAt)}</time></header>

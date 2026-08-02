@@ -5,11 +5,11 @@ import path from "node:path";
 import sharp from "sharp";
 
 async function main() {
-  process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
-  process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "1";
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-recipe-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "recipe.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+  process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
+  process.env.MIRTPAGE_YOUTUBE_ADMISSION_ENABLED = "1";
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-recipe-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "recipe.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
   try {
     const { closeDbForTests, getDb, getUserById } = await import("../lib/db");
     const { createDraftRevision, getContentRevision } = await import(
@@ -167,6 +167,20 @@ async function main() {
     const serializedBrief = JSON.stringify(exported.brief);
     assert.equal(serializedBrief.includes("password_hash"), false);
     assert.equal(serializedBrief.includes("session"), false);
+    assert.equal(exported.brief.briefIntent, "showroom_change");
+    assert.equal(exported.brief.currentRecipe.schemaVersion, 1);
+    assert.equal(
+      exported.brief.currentRecipe.baseContentVersion,
+      exported.brief.baseContentVersion,
+    );
+    assert.equal(
+      exported.brief.currentRecipe.content.business.name,
+      exported.brief.currentContent.business.name,
+    );
+    assert.deepEqual(
+      exported.brief.currentRecipe.design,
+      exported.brief.currentContent.designManifest,
+    );
     assert.equal(exported.brief.mediaManifest.length, 2);
     assert.equal(
       exported.brief.mediaManifest.some(
@@ -183,14 +197,14 @@ async function main() {
       SHOWROOM_RECIPE_BRIEF_CONTRACTS,
     );
     assert.deepEqual(exported.brief.contractManifest, {
-      brief: "suqpage.recipe-brief@1",
-      recipe: "suqpage.showroom-recipe@1",
-      content: "suqpage.showroom-content@1",
-      contentBlocks: "suqpage.showroom-content-blocks@1",
-      design: "suqpage.showroom-design@2",
-      componentBankSchema: "suqpage.component-bank@2",
+      brief: "mirtpage.recipe-brief@1",
+      recipe: "mirtpage.showroom-recipe@1",
+      content: "mirtpage.showroom-content@1",
+      contentBlocks: "mirtpage.showroom-content-blocks@1",
+      design: "mirtpage.showroom-design@2",
+      componentBankSchema: "mirtpage.component-bank@2",
       componentBankRelease: "showroom-bank@1.2.0",
-      designSystems: "suqpage.showroom-design-systems@2",
+      designSystems: "mirtpage.showroom-design-systems@2",
     });
     assert.equal(exported.brief.requiredRecipeSchemaVersion, 1);
     assert.equal(exported.brief.requiredContentSchemaVersion, 1);
@@ -236,6 +250,11 @@ async function main() {
     assert.ok(
       exported.brief.instructions.some((instruction) =>
         /compatibility transport for public offerings/.test(instruction),
+      ),
+    );
+    assert.ok(
+      exported.brief.instructions.some((instruction) =>
+        /processVideoRef only in the canonical Process experience/.test(instruction),
       ),
     );
     assert.equal(exported.brief.examplePolicy.importable, false);
@@ -493,6 +512,24 @@ async function main() {
     );
     assert.match(getContentRevision(draft.id)?.recipe_import_hash || "", /^[a-f0-9]{64}$/);
     assert.equal(importShowroomRecipe(team, draft.id, recipe).duplicate, true);
+    const refreshedExport = buildShowroomRecipeBrief(team, draft.id);
+    assert.equal(
+      refreshedExport.brief.currentRecipe.content.business.heroTitle,
+      "Recipe-approved public hero",
+    );
+    assert.equal(
+      refreshedExport.brief.currentRecipe.summary,
+      "Validated imported showroom recipe.",
+    );
+    assert.deepEqual(
+      refreshedExport.brief.currentRecipe.design.customPalette,
+      recipe.design.customPalette,
+    );
+    assert.equal(refreshedExport.brief.currentRecipe.mediaPlan.length, 1);
+    assert.equal(
+      refreshedExport.brief.currentRecipe.mediaPlan[0].ownerKey,
+      refreshedExport.brief.currentRecipe.content.products[0].key,
+    );
 
     const withCollection = structuredClone(recipe);
     withCollection.content.collections.push({} as never);
@@ -571,14 +608,14 @@ async function main() {
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
-    process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "0";
+    process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "0";
     assert.throws(
       () => buildShowroomRecipeBrief(manager, draft.id),
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
-    process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
-    process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
+    process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
+    process.env.MIRTPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
     assert.throws(
       () =>
         admitRecipeYouTube(

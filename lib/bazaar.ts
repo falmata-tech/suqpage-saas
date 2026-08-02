@@ -13,7 +13,7 @@ import {
   seededExpoBoothPath,
 } from "./expo-seed";
 
-const DEFAULT_TIMEZONE = process.env.SUQPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
+const DEFAULT_TIMEZONE = process.env.MIRTPAGE_BAZAAR_TIMEZONE || "Africa/Addis_Ababa";
 const MIN_FLOOR_WIDTH = 720;
 const FLOOR_PADDING = 70;
 const MAX_FLOOR_COLUMNS = 8;
@@ -588,7 +588,7 @@ function assignBoothReferences(booths: BazaarBoothView[]) {
 
 export function getCurrentBazaar(options: BazaarOptions = {}): CurrentBazaarView {
   const db = options.db || getDb();
-  const now = options.now || (process.env.SUQPAGE_BAZAAR_NOW ? new Date(process.env.SUQPAGE_BAZAAR_NOW) : new Date());
+  const now = options.now || (process.env.MIRTPAGE_BAZAAR_NOW ? new Date(process.env.MIRTPAGE_BAZAAR_NOW) : new Date());
   seedDefaultBazaarConfig(db);
   const { date, theme } = currentTheme(db, now);
   if (!theme) {

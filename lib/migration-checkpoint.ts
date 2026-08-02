@@ -13,9 +13,9 @@ type BackupManifest = {
 };
 
 export function assertDestructiveMigrationCheckpoint(label: string) {
-  if (process.env.SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS !== "1") {
+  if (process.env.MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS !== "1") {
     throw new Error(
-      `${label} requires a stopped single-instance deployment, npm run backup, and SUQPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS=1.`,
+      `${label} requires a stopped single-instance deployment, npm run backup, and MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS=1.`,
     );
   }
   const root = backupRoot();
@@ -61,7 +61,7 @@ export function assertDestructiveMigrationCheckpoint(label: string) {
   }
   const backupDatabase = path.join(
     path.dirname(candidate.manifestPath),
-    "suqpage.db",
+    "mirtpage.db",
   );
   if (!fs.existsSync(backupDatabase)) {
     throw new Error(`${label} backup database is missing.`);

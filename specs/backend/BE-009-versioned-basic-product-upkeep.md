@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 The current managed-service cutover denies every role direct catalog mutation,
-and the catalog couples inquiry eligibility to numeric stock. SuqPage now needs
+and the catalog couples inquiry eligibility to numeric stock. MirtPage now needs
 a narrowly authorized product-upkeep use case without restoring the former broad
 owner editor or bypassing content-version conflict and rollback guarantees.
 
@@ -146,7 +146,7 @@ Scenario: Inquiry requests more than an unknown stock amount
   GIVEN a published available product with no inventory-count field
   WHEN a visitor requests a quantity allowed by the offering's BE-014 policy
   THEN canonical availability permits the inquiry
-  AND SuqPage stores requested intent without claiming or decrementing stock
+  AND MirtPage stores requested intent without claiming or decrementing stock
 
 Scenario: Historical stock snapshot is recovered
   GIVEN a retained v2 snapshot contains product and option stock counts

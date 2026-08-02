@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 Four ecommerce-oriented disposable seeds do not exercise the producer,
-manufacturer, farm, sparse-media, or RFQ paths that SuqPage intends to support.
+manufacturer, farm, sparse-media, or RFQ paths that MirtPage intends to support.
 A reset-only 28-showroom benchmark must prove blueprint, bank, homepage, and
 Expo behavior before these features are considered complete. The 18 additional
 showrooms must use explicit business briefs rather than a shared fallback profile.

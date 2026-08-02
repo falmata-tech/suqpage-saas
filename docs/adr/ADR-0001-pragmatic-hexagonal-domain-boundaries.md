@@ -3,15 +3,15 @@ id: ADR-0001
 title: Pragmatic hexagonal and domain boundaries
 status: accepted
 date: 2026-07-20
-deciders: [SuqPage]
-related: [BE_BASE, FE_BASE]
+deciders: [MirtPage]
+related: [BE_BASE, FE_BASE, BE-025]
 ---
 
 # ADR-0001 — Pragmatic hexagonal and domain boundaries
 
 ## Context
 
-SuqPage has real domain invariants and external adapters, but the controlled MVP
+MirtPage has real domain invariants and external adapters, but the controlled MVP
 is a compact Next.js application. A mandatory enterprise class hierarchy would
 add migration risk without improving behavior.
 
@@ -27,7 +27,7 @@ incrementally; do not rewrite the application solely for architectural purity.
 ## Consequences
 
 - Domain logic becomes easier to test without Next.js or SQLite.
-- Resend, media storage, persistence, and Malikt Board can be replaced behind
+- Resend, media storage, and persistence can be replaced behind
   explicit contracts.
 - Some existing modules temporarily combine application and adapter concerns.
 - Any broad restructuring requires its own approved spec and regression plan.

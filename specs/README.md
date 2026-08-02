@@ -1,4 +1,4 @@
-# SuqPage specification system
+# MirtPage specification system
 
 Specifications are the behavioral source of truth between the master product
 brief and implementation. They prevent chat history, generated code, and stale
@@ -45,7 +45,7 @@ docs/adr/          accepted architectural decisions
 - Tenant isolation and negative paths are covered when relevant.
 - Documentation, metadata, migrations, and operator steps are current.
 - A completed change to product roles, capabilities, workflow, terminology, or
-  deployment boundaries is reflected in `SUQPAGE-MASTER-PROMPT.md`; future
+  deployment boundaries is reflected in `MIRTPAGE-MASTER-PROMPT.md`; future
   behavior remains explicitly labeled and linked to a draft spec or roadmap.
 - Observability and safe failure behavior exist where applicable.
 - Rollback is possible and documented for deployment/data changes.

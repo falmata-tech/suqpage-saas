@@ -26,6 +26,10 @@ const registrySource = fs.readFileSync(
   path.join(process.cwd(), "components/showroom/bank/registry.tsx"),
   "utf8",
 );
+const sectionSource = fs.readFileSync(
+  path.join(process.cwd(), "components/showroom/bank/sections.tsx"),
+  "utf8",
+);
 
 assert.equal(SHOWROOM_COMPONENT_BANK, SHOWROOM_COMPONENT_BANK_1_1);
 assert.equal(resolveShowroomComponentBank("showroom-bank@1.1.0"), SHOWROOM_COMPONENT_BANK_1_1);
@@ -65,6 +69,10 @@ assert.doesNotMatch(
   appSource,
   /compositionManifest[\s\S]{0,200}\|\|\s*NovaTechDesign/,
 );
+assert.match(sectionSource, /contentBlock\?\.type === "highlights"/);
+assert.match(sectionSource, /className=\{styles\.processVideo\}/);
+assert.match(sectionSource, /privacyEnhancedYouTubeEmbedUrl/);
+assert.doesNotMatch(sectionSource, /Watch our process/);
 
 console.log(
   "Deterministic static composition renderer and fail-closed callback boundary tests passed.",

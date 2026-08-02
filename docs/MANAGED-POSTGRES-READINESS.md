@@ -1,7 +1,9 @@
 # Managed PostgreSQL readiness
 
-SuqPage currently supports one Node.js application instance with persistent
-SQLite and media volumes. Docker does not make this build horizontally scalable.
+MirtPage currently supports one Node.js application instance with persistent
+SQLite. Media can use a persistent filesystem or the implemented private
+Supabase Storage adapter. Docker and object storage do not make this SQLite
+build horizontally scalable.
 Support polling, account entitlement, visit attribution, Expo allocation, and
 all tenant workflows use the same authoritative database.
 
@@ -26,8 +28,10 @@ all tenant workflows use the same authoritative database.
    `INSERT OR IGNORE`, triggers, synchronous transactions, and query-plan tests.
 3. Rehearse copy, row-count reconciliation, foreign-key validation, tenant
    sampling, and rollback from a production-like backup.
-4. Move mutable media to object storage with tenant-safe signed reads and
-   retention/backup policy.
+4. Configure the existing media-storage port for the target private object
+   bucket, copy local objects with `npm run migrate:media`, verify hashes, and
+   exercise authorized private and stable published reads. This storage step may
+   be completed before the database migration.
 5. Choose connection mode and pool size for the deployed runtime. Do not place a
    transaction pooler underneath code that assumes session state.
 6. Add scheduled jobs for visit retention, account warnings, and adapter retries;
@@ -39,5 +43,8 @@ all tenant workflows use the same authoritative database.
    observability, slow-query thresholds, and a monitored single-instance
    cutover before enabling replicas.
 
-Supabase is a candidate managed PostgreSQL host, not a current runtime mode.
-Setting a connection string alone cannot migrate this application safely.
+Supabase Storage is a current optional media runtime mode described by
+ADR-0012. Supabase remains only a candidate managed PostgreSQL host. Choosing it
+for the database requires a separate ADR and a rehearsed, reconciled, observable,
+and reversible migration. Setting a connection string alone cannot migrate this
+application safely.

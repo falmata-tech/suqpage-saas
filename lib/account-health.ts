@@ -89,7 +89,7 @@ export function ensureBusinessSubscription(
     INSERT OR IGNORE INTO business_subscriptions(
       business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
       current_period_end,grace_ends_at,updated_at
-    ) VALUES(?,'SuqPage monthly',?,'ETB',?,?,?,?,?)
+    ) VALUES(?,'MirtPage monthly',?,'ETB',?,?,?,?,?)
   `).run(
     businessId,
     options.amountMinor ?? null,

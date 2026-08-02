@@ -109,7 +109,7 @@ export default function ProductForm({
           onChange={(event) => setPrice(event.target.value)}
           placeholder="Example: 1250"
         />
-        <small>Informational only. SuqPage does not collect payment.</small>
+        <small>Informational only. MirtPage does not collect payment.</small>
       </div>
 
       <div className="field">

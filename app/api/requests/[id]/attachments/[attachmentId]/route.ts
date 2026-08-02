@@ -1,7 +1,6 @@
-import fs from "node:fs";
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
-import { resolveRequestAttachment } from "@/lib/request-media";
+import { readRequestAttachment } from "@/lib/request-media";
 import { canAccessRequest, getRequestAttachment, getRequestDetail } from "@/lib/request-sqlite";
 
 export const runtime = "nodejs";
@@ -17,7 +16,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const requestRecord = getRequestDetail(requestId);
   if (!requestRecord || !canAccessRequest(user, requestRecord)) return hidden();
   const attachment = getRequestAttachment(requestId, attachmentId);
-  const fullPath = attachment ? resolveRequestAttachment(attachment.storage_key) : null;
-  if (!attachment || !fullPath || !fs.existsSync(fullPath)) return hidden();
-  return new NextResponse(new Uint8Array(fs.readFileSync(fullPath)), { headers: { "Content-Type": attachment.mime_type, "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", "Content-Disposition": "inline" } });
+  if (!attachment) return hidden();
+  const media = await readRequestAttachment(attachment.storage_key, attachment.mime_type);
+  if (!media) return hidden();
+  return new NextResponse(new Uint8Array(media.bytes), { headers: { "Content-Type": media.contentType, "Content-Length": String(media.contentLength), "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", "Content-Disposition": "inline" } });
 }

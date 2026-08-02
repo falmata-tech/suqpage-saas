@@ -12,13 +12,13 @@ change_level: L3
 
 ## Problem and outcome
 
-After SuqPage publishes a client's first showroom, routine product facts change
+After MirtPage publishes a client's first showroom, routine product facts change
 more often than its structure or design. Requiring a service request for every
 new product, image replacement, description correction, or availability change
 creates avoidable work for both the client and team.
 
 The outcome is a mobile-first **My offerings** workflow that lets a client, or
-authorized SuqPage staff serving that client, create and maintain basic product
+authorized MirtPage staff serving that client, create and maintain basic product
 information without exposing catalog architecture or showroom design.
 
 ## Scope
@@ -97,7 +97,7 @@ information without exposing catalog architecture or showroom design.
   never overwrites a newer client/staff/revision publication.
 - When staff perform upkeep for a client, the UI labels the represented
   business and captures a short customer-service reason or request reference.
-  The resulting history identifies SuqPage as the actor.
+  The resulting history identifies MirtPage as the actor.
 - Any pending full showroom revision based on the previous live version becomes
   visibly stale and must be rebased before approval/publication.
 - At 320 pixels, fields remain single-column, actions remain reachable, media

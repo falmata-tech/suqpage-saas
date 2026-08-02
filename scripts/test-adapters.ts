@@ -5,8 +5,8 @@ import path from "node:path";
 import type { Business } from "../lib/types";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-adapter-test-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "test.db");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-adapter-test-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "test.db");
   process.env.RESEND_API_KEY = "test-key";
   process.env.NOTIFICATION_FROM_EMAIL = "test@example.com";
 

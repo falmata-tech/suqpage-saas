@@ -475,80 +475,14 @@ export function listInquiriesPage(
   } satisfies PageResult<InquiryListRow>;
 }
 
-export type DeliveryListRow = {
-  id: number;
-  external_request_id: string;
-  customer_name: string;
-  phone: string;
-  pickup_address: string;
-  delivery_address: string;
-  package_count: number;
-  status: string;
-  created_at: string;
-  inquiry_customer: string | null;
-};
-
-export function listDeliveriesPage(
-  businessId: number,
-  input: PageInput & { status?: unknown },
-) {
-  const request = normalizePageRequest({ page: input.page, search: input.q });
-  const params: QueryValue[] = [businessId];
-  let where = " WHERE delivery.business_id=?";
-  const status = String(input.status ?? "").trim();
-  if (status) {
-    where += " AND delivery.status=?";
-    params.push(status);
-  }
-  where += searchClause(
-    request.search,
-    [
-      "delivery.external_request_id",
-      "delivery.customer_name",
-      "delivery.phone",
-      "delivery.pickup_address",
-      "delivery.delivery_address",
-    ],
-    params,
-  );
-  const from = `
-    FROM delivery_requests delivery
-    LEFT JOIN inquiries inquiry ON inquiry.id=delivery.inquiry_id${where}`;
-  return pageRows<DeliveryListRow>(
-    `SELECT COUNT(*) total ${from}`,
-    `SELECT delivery.*,inquiry.customer_name inquiry_customer ${from}
-     ORDER BY delivery.created_at DESC,delivery.id DESC
-     LIMIT ? OFFSET ?`,
-    params,
-    { page: request.page, q: request.search },
-  );
-}
-
-export function listRecentInquiryChoices(businessId: number, selectedId?: number) {
-  return getDb().prepare(`
-    SELECT id,customer_name,created_at,status
-    FROM inquiries
-    WHERE business_id=? AND (status NOT IN ('closed','cancelled') OR id=?)
-    ORDER BY id=? DESC,created_at DESC,id DESC
-    LIMIT 20
-  `).all(businessId, selectedId || 0, selectedId || 0) as Array<{
-    id: number;
-    customer_name: string;
-    created_at: string;
-    status: string;
-  }>;
-}
-
 export function getBusinessActivityCounts(businessId: number) {
   return getDb().prepare(`
     SELECT
       (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
-      (SELECT COUNT(*) FROM delivery_requests WHERE business_id=?) deliveries,
       (SELECT COUNT(*) FROM products WHERE business_id=?) offerings,
       (SELECT COUNT(*) FROM service_requests WHERE business_id=?) requests
-  `).get(businessId, businessId, businessId, businessId) as {
+  `).get(businessId, businessId, businessId) as {
     inquiries: number;
-    deliveries: number;
     offerings: number;
     requests: number;
   };

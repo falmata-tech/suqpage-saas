@@ -29,10 +29,10 @@ const expectedDetailPatterns = {
   "nova-assembly": "technical",
 };
 
-const baseUrl = process.env.SUQPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
+const baseUrl = process.env.MIRTPAGE_VISUAL_BASE_URL || "http://127.0.0.1:3001";
 const outputDir =
-  process.env.SUQPAGE_VISUAL_OUTPUT_DIR ||
-  path.join("/tmp", "suqpage-showroom-benchmarks");
+  process.env.MIRTPAGE_VISUAL_OUTPUT_DIR ||
+  path.join("/tmp", "mirtpage-showroom-benchmarks");
 const viewports = {
   desktop: { width: 1440, height: 1000 },
   mobile: { width: 390, height: 844 },

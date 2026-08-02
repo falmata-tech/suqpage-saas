@@ -5,11 +5,11 @@ import path from "node:path";
 import type { SessionUser } from "../lib/types";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-support-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "test.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
-  delete process.env.SUQPAGE_TELEGRAM_BOT_TOKEN;
-  delete process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID;
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-support-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "test.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+  delete process.env.MIRTPAGE_TELEGRAM_BOT_TOKEN;
+  delete process.env.MIRTPAGE_TELEGRAM_SUPPORT_CHAT_ID;
   const { closeDbForTests, getDb } = await import("../lib/db");
   const {
     claimSupportConversation,
@@ -48,6 +48,7 @@ async function main() {
   const agentOne = user(agentOneId, "team_member", null, "Agent One");
   const agentTwo = user(agentTwoId, "team_member", null, "Agent Two");
   const operations = user(operationsId, "operations_manager", null, "Operations");
+  const { getDashboardAttention } = await import("../lib/dashboard-attention");
   updateSupportAgentSetting(operations, { userId: agentOneId, enabled: true, maxOpenConversations: 1 });
   updateSupportAgentSetting(operations, { userId: agentTwoId, enabled: true, maxOpenConversations: 2 });
 
@@ -60,6 +61,9 @@ async function main() {
   const second = await create(clientB, 2);
   const third = await create(clientA, 3);
   const fourth = await create(clientB, 4);
+  assert.equal(getDashboardAttention(operations).supportReplies, 4, "operations sees waiting and client-authored unread support");
+  assert.equal(getDashboardAttention(agentOne).supportReplies, 2, "an agent sees assigned unread work plus the shared waiting queue");
+  assert.equal(getDashboardAttention(clientA, businessA).supportReplies, 0, "a client does not see their own opening messages as unread replies");
   assert.equal(getSupportConversation(operations, first.id).conversation.assignedUserId, agentOneId);
   assert.equal(getSupportConversation(operations, second.id).conversation.assignedUserId, agentTwoId);
   assert.equal(getSupportConversation(operations, third.id).conversation.assignedUserId, agentTwoId);

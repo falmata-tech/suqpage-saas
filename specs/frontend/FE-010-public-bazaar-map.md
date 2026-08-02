@@ -11,7 +11,7 @@ change_level: L2
 # FE-010 — Public daily Expo geographic map
 
 Deprecated by FE-020. Retained as historical evidence for the date-driven Expo
-experience; it is not current behavior after the City Suq cutover.
+experience; it is not current behavior after the City Showroom cutover.
 
 ## Problem and outcome
 
@@ -132,7 +132,7 @@ Scenario: Visitor returns from a city Expo to the country overview
 
 ## Domain language and invariants
 
-- **Bazaar:** a SuqPage discovery surface for a themed daily group of businesses.
+- **Bazaar:** a MirtPage discovery surface for a themed daily group of businesses.
 - **Bazaar floor:** the visual map for one active occurrence.
 - **Booth:** a positioned preview entry that links to one permanent showroom.
 - **Bazaar List:** the semantic directory equivalent of the map for the same

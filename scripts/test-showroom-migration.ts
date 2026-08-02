@@ -8,7 +8,7 @@ import { parseRevisionSnapshot } from "../lib/revision-domain";
 import { parsePublishedDesignManifest } from "../lib/showroom-manifests";
 
 const root = fs.mkdtempSync(
-  path.join(os.tmpdir(), "suqpage-showroom-migration-"),
+  path.join(os.tmpdir(), "mirtpage-showroom-migration-"),
 );
 
 function legacySnapshot(designKey: string, name: string) {

@@ -1,14 +1,14 @@
-# SuqPage agent operating contract
+# MirtPage agent operating contract
 
 This file is mandatory for every human or AI change in this repository. Read it
-with `SUQPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
+with `MIRTPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
 feature specs before editing code.
 
 ## Order of authority
 
 1. The user's newest explicit instruction.
 2. Security, tenant isolation, privacy, and data-integrity requirements.
-3. `SUQPAGE-MASTER-PROMPT.md` product rules.
+3. `MIRTPAGE-MASTER-PROMPT.md` product rules.
 4. Accepted specs and architecture decision records (ADRs).
 5. Existing implementation details.
 
@@ -21,7 +21,7 @@ silently change product behavior to match convenient code.
    architecture.
 2. Find the controlling specs with `npm run specs:list` or the traceability map.
 3. For a behavior change, create or update specs before production code and
-   identify every section of `SUQPAGE-MASTER-PROMPT.md` whose statement of
+   identify every section of `MIRTPAGE-MASTER-PROMPT.md` whose statement of
    current product behavior will be affected.
 4. Confirm Definition of Ready in `specs/README.md`.
 5. Write a short implementation plan linked to spec IDs and acceptance criteria.
@@ -63,11 +63,10 @@ or treat generated illustrative media as a factual product photograph.
 
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,
   HTTP, cookies, SQLite, email vendors, or filesystem details.
-- Treat routes, server actions, database modules, media storage, Resend, and the
-  Malikt Board simulation as adapters around explicit application/domain
-  contracts.
+- Treat routes, server actions, database modules, media storage, and Resend as
+  adapters around explicit application/domain contracts.
 - Apply DDD where the domain has identity or invariants: Tenant, Product,
-  Inquiry, Session, and Delivery Request are entities; handles, availability,
+  Inquiry, and Session are entities; handles, availability,
   quantities, contact methods, and idempotency keys are value concepts.
 - Value objects may be validated TypeScript types/functions. Do not manufacture
   classes, repositories, or dependency-injection containers without a concrete

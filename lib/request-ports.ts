@@ -22,7 +22,7 @@ export interface RequestRepository {
 
 export interface RequestAttachmentStore {
   save(input: RequestImageInput): Promise<StoredRequestImage>;
-  remove(storageKeys: string[]): void;
+  remove(storageKeys: string[]): Promise<void>;
 }
 
 export interface RequestRateLimiter {

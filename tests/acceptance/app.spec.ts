@@ -3,17 +3,17 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-type AcceptanceProbe = "inquiryByCustomer" | "deliveryByAddress";
+type AcceptanceProbe = "inquiryByCustomer";
 const readAcceptanceRow = (probe: AcceptanceProbe, value: string) =>
   JSON.parse(
     execFileSync(
       process.execPath,
-      [path.join(process.cwd(), "scripts/acceptance-db-probe.mjs"), process.env.SUQPAGE_TEST_DB!, probe, value],
+      [path.join(process.cwd(), "scripts/acceptance-db-probe.mjs"), process.env.MIRTPAGE_TEST_DB!, probe, value],
       { encoding: "utf8" },
     ),
   ) as Record<string, unknown> | null;
 
-const credentials = fs.readFileSync(process.env.SUQPAGE_TEST_CREDENTIALS!, "utf8");
+const credentials = fs.readFileSync(process.env.MIRTPAGE_TEST_CREDENTIALS!, "utf8");
 const passwordFor = (email: string) => {
   const line = credentials.split("\n").find((entry) => entry.includes(`| ${email} |`));
   if (!line) throw new Error(`No seeded credential for ${email}`);
@@ -23,7 +23,7 @@ const installControlledVideoFixture = (handle = "selam-weave") =>
   JSON.parse(
     execFileSync(
       process.execPath,
-      [path.join(process.cwd(), "scripts/acceptance-video-fixture.mjs"), process.env.SUQPAGE_TEST_DB!, handle],
+      [path.join(process.cwd(), "scripts/acceptance-video-fixture.mjs"), process.env.MIRTPAGE_TEST_DB!, handle],
       { encoding: "utf8" },
     ),
   ) as { handle: string; updated: boolean };
@@ -97,17 +97,17 @@ test("business creates a private client workspace without public uploads", async
   const errors = monitor(page);
   await page.goto("/request");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Start your Suq in one clear step");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Start your MirtPage showroom.");
   await page.getByLabel("Your name").fill("Acceptance Prospect");
   await page.getByLabel("Email").fill("prospect@example.test");
   await page.getByLabel("Phone or WhatsApp").fill("+251911000111");
   await page.getByLabel("Business name").fill("Acceptance Self Signup");
-  await page.getByLabel("Preferred Suq address").fill("acceptance-self-signup");
+  await page.getByLabel("Preferred Showroom address").fill("acceptance-self-signup");
   await page.getByLabel("Password", { exact: true }).fill("Acceptance-Workspace-2026!");
   await page.getByLabel("Confirm password").fill("Acceptance-Workspace-2026!");
   await page.getByLabel("What do you make, grow, or produce?").fill("We make durable household storage and woven market baskets for local retailers.");
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
-  await page.getByLabel(/Create my private SuqPage workspace/).check();
+  await page.getByLabel(/Create my private MirtPage workspace/).check();
   await page.getByRole("button", { name: "Create my workspace" }).click();
   await expect(page).toHaveURL(/\/dashboard\/requests\/\d+$/);
   await expect(page.getByText("Acceptance Self Signup", { exact: false }).first()).toBeVisible();
@@ -122,18 +122,18 @@ test("business creates a private client workspace without public uploads", async
     consent: true,
   } });
   expect(legacyLead.status()).toBe(201);
-  const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png")) } } });
+  const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/mirtpage/icon.png")) } } });
   expect(publicUpload.status()).toBe(415);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
-test("geographic discovery, weekly Expo, benchmark Suqs, and copy-first inquiry", async ({ page }) => {
+test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inquiry", async ({ page }) => {
   const errors = monitor(page);
-  await page.goto("/?expoDay=1");
+  await page.goto("/?expoDay=0");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome to SuqPage. Discover what Ethiopia makes.");
-  await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Made in Ethiopia. Find the people who make it.");
+  await expect(page.getByRole("heading", { name: "Find the people and factories behind the product." })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
   await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Map" })).toBeVisible();
@@ -141,32 +141,42 @@ test("geographic discovery, weekly Expo, benchmark Suqs, and copy-first inquiry"
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
   await expect(page.locator(".discovery-roads path")).toHaveCount(4);
   expect(await page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
-  await expect(page.getByRole("heading", { name: "How SuqPage works" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "How MirtPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
   await expect(page.locator(".landing-hero-image")).toHaveCount(0);
-  const featuredShortcuts = await page.locator(".discovery-featured-rail > a").count();
-  expect(featuredShortcuts).toBeGreaterThan(0);
-  expect(featuredShortcuts).toBeLessThanOrEqual(5);
+  const sponsoredShortcuts = await page.locator(".discovery-sponsored-rail > a").count();
+  expect(sponsoredShortcuts).toBeGreaterThanOrEqual(5);
+  await expect(page.getByText("Paid placement", { exact: true })).toBeVisible();
+  const sponsoredRail = page.locator(".discovery-sponsored-rail");
+  const sponsoredStart = await sponsoredRail.evaluate((element) => element.scrollLeft);
+  await page.waitForTimeout(5_200);
+  expect(await sponsoredRail.evaluate((element) => element.scrollLeft)).toBeGreaterThan(sponsoredStart);
+  await page.getByRole("button", { name: "Pause sponsored showrooms" }).click();
+  await expect(page.getByRole("button", { name: "Resume sponsored showrooms" })).toBeVisible();
   const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
   expect(desktopMap?.y).toBeLessThan(720);
   await expect(page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link")).toHaveCount(7);
-  await expect(page.getByRole("heading", { name: "Electronics & devices Expo" })).toBeVisible();
-  await page.locator(".expo-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
-  const previewBooths = await page.locator(".expo-booth").count();
+  await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Mon/ }).click();
+  await expect(page.getByRole("heading", { name: "Electronics, electrical & appliances Expo" })).toBeVisible();
+  await expect(page.getByText("Preview only", { exact: true })).toBeVisible();
+  const previewOutlines = page.locator(".expo-booth-outline");
+  await expect(previewOutlines.first()).toBeVisible();
+  const previewBooths = await previewOutlines.count();
   expect(previewBooths).toBeGreaterThan(0);
   await expect(page.locator(".expo-hall-controls")).toHaveCount(0);
-  await expect(page.locator(".expo-booth-outline")).toHaveCount(previewBooths);
+  await expect(page.locator(".expo-booth")).toHaveCount(previewBooths);
   await expect(page.locator(".expo-booth[data-business-id], .expo-booth img")).toHaveCount(0);
+  await expect(page.getByText("Featured today", { exact: true })).toBeVisible({ timeout: 8_000 });
+  await expect(page).toHaveURL(/expoDay=0/);
   await page.goto("/?expoDay=1");
-  await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty & body care/ }).click();
+  await page.getByRole("navigation", { name: "Industries" }).getByRole("link", { name: /Beauty, hygiene & household care/ }).click();
   await expect(page).toHaveURL(/industry=beauty-wellness/);
   await expect(page).toHaveURL(/expoDay=1/);
-  await expect(page.getByRole("heading", { name: "Electronics & devices Expo" })).toBeVisible();
   await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Tue/ }).click();
-  await expect(page.getByRole("heading", { name: "Beauty & body care Expo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Beauty, hygiene & household care Expo" })).toBeVisible();
   await page.getByRole("tab", { name: "List" }).click();
   expect(await page.locator(".discovery-list article").count()).toBe(5);
-  await expect(page.getByRole("link", { name: "Visit Suq" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
+  await expect(page.getByRole("link", { name: "Open showroom" }).first()).toHaveAttribute("href", /\?ref=discovery$/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/?expoDay=1");
   const phoneMap = await page.locator(".discovery-map-stage").boundingBox();
@@ -499,7 +509,7 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   await page.goto("/expo");
   await expect(page).toHaveURL(/\/discover$/);
   await page.goto("/discover?industry=electronics&expoDay=1");
-  await expect(page.getByRole("heading", { name: "Choose an industry. Find a Suq." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Find the people and factories behind the product." })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
   await expect(page.locator(".discovery-roads path")).toHaveCount(4);
   const visibleMarkerIndex = (selector: string) => page.locator(selector).evaluateAll((markers) => {
@@ -518,8 +528,8 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   await expect(isolatedPoint).toHaveAttribute("data-latitude", /^-?\d+(\.\d+)?$/);
   await expect(isolatedPoint).toHaveAttribute("data-longitude", /^-?\d+(\.\d+)?$/);
   await isolatedPoint.click();
-  await expect(page.locator(".discovery-preview").getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
-  await page.getByRole("button", { name: "Close business preview" }).click();
+  await expect(page.locator(".discovery-preview").getByRole("link", { name: "Open showroom" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
+  await page.getByRole("button", { name: "Close showroom preview" }).click();
 
   for (let attempt = 0; attempt < 7; attempt += 1) {
     if (await visibleMarkerIndex(".discovery-city-gateway") >= 0) break;
@@ -536,19 +546,19 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   expect(gatewayCount).toBeGreaterThan(1);
   const mapTransform = await page.locator(".discovery-map > g").getAttribute("transform");
   await gateway.click();
-  const cityDialog = page.getByRole("dialog", { name: /City Suq$/ });
+  const cityDialog = page.getByRole("dialog", { name: /^Made near / });
   await expect(cityDialog).toBeVisible();
-  await expect(cityDialog.locator(".city-suq-shop")).toHaveCount(gatewayCount);
-  await expect(cityDialog.getByRole("link", { name: /Visit Suq/ })).toHaveCount(gatewayCount);
+  await expect(cityDialog.locator(".city-showroom-shop")).toHaveCount(gatewayCount);
+  await expect(cityDialog.getByRole("link", { name: /Open showroom/ })).toHaveCount(gatewayCount);
   await expect(cityDialog.getByText(/Hall \d/)).toHaveCount(0);
   await expect(cityDialog.getByRole("navigation", { name: /pages/i })).toHaveCount(0);
-  const cityControlSizes = await cityDialog.locator(".city-suq-actions button").evaluateAll((controls) => controls.map((control) => ({ width: control.getBoundingClientRect().width, height: control.getBoundingClientRect().height })));
+  const cityControlSizes = await cityDialog.locator(".city-showroom-actions button").evaluateAll((controls) => controls.map((control) => ({ width: control.getBoundingClientRect().width, height: control.getBoundingClientRect().height })));
   expect(cityControlSizes.every((size) => size.width >= 44 && size.height >= 44)).toBe(true);
-  const initialZoom = await cityDialog.locator(".city-suq-actions > span").textContent();
-  await cityDialog.getByRole("button", { name: "Zoom in to City Suq" }).click();
-  await expect.poll(() => cityDialog.locator(".city-suq-actions > span").textContent()).not.toBe(initialZoom);
-  await cityDialog.getByRole("button", { name: "Fit City Suq to view" }).click();
-  await cityDialog.getByRole("button", { name: "Close City Suq" }).click();
+  const initialZoom = await cityDialog.locator(".city-showroom-actions > span").textContent();
+  await cityDialog.getByRole("button", { name: "Zoom in to city marketplace" }).click();
+  await expect.poll(() => cityDialog.locator(".city-showroom-actions > span").textContent()).not.toBe(initialZoom);
+  await cityDialog.getByRole("button", { name: "Fit city marketplace to view" }).click();
+  await cityDialog.getByRole("button", { name: "Close city marketplace" }).click();
   await expect(cityDialog).toHaveCount(0);
   await expect(page.locator(".discovery-map > g")).toHaveAttribute("transform", mapTransform || "");
   await expect(page.locator(".discovery-map").getByText(/Hall \d/)).toHaveCount(0);
@@ -563,14 +573,15 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
     const booth = page.locator(".expo-booth[data-business-id]").first();
     await expect(booth).toBeVisible();
     const boothLabel = (await booth.getAttribute("aria-label")) || "";
-    const boothMatch = boothLabel.match(/^([A-Z]{3}-B\d{2}), (.+)$/);
+    const boothMatch = boothLabel.match(/^([A-Z]+-(?:B)?\d{2}), (.+)$/);
     expect(boothMatch).not.toBeNull();
     const boothReference = boothMatch?.[1] || "";
     await booth.click();
     const preview = page.locator(".discovery-preview");
     await expect(preview).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(`^${boothReference},`) })).toHaveClass(/selected/);
-    await expect(preview.getByRole("link", { name: "Visit Suq" })).toHaveAttribute("href", /\/@[^?]+\?ref=expo$/);
+    await expect(preview.getByRole("link", { name: "Open showroom" })).toHaveAttribute("href", /\/@[^?]+\?ref=expo$/);
+    await preview.getByRole("button", { name: "Close showroom preview" }).click();
     const expoControls = page.locator(".expo-floor-actions button");
     await expect(expoControls).toHaveCount(3);
     const expoControlSizes = await expoControls.evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
@@ -587,25 +598,25 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   await page.getByRole("tab", { name: "List" }).click();
   const listCount = await page.locator(".discovery-list article").count();
   expect(listCount).toBe(5);
-  await expect(page.locator(".discovery-list").getByRole("link", { name: "Visit Suq" })).toHaveCount(listCount);
-  const firstPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-suq-id")));
-  await page.getByRole("navigation", { name: "Suq list pages" }).getByRole("link", { name: "Next" }).click();
+  await expect(page.locator(".discovery-list").getByRole("link", { name: "Open showroom" })).toHaveCount(listCount);
+  const firstPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-showroom-id")));
+  await page.getByRole("navigation", { name: "Showroom list pages" }).getByRole("link", { name: "Next" }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page).toHaveURL(/view=list/);
-  await expect(page.getByRole("navigation", { name: "Suq list pages" })).toContainText("Page 2 of");
+  await expect(page.getByRole("navigation", { name: "Showroom list pages" })).toContainText("Page 2 of");
   const secondPageCount = await page.locator(".discovery-list article").count();
   expect(secondPageCount).toBeGreaterThan(0);
   expect(secondPageCount).toBeLessThanOrEqual(5);
-  const secondPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-suq-id")));
+  const secondPageIds = await page.locator(".discovery-list article").evaluateAll((rows) => rows.map((row) => row.getAttribute("data-showroom-id")));
   expect(secondPageIds.some((id) => firstPageIds.includes(id))).toBe(false);
   await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Sun/ }).click();
-  await expect(page.getByRole("heading", { name: "Sunday Suq Live" })).toBeVisible();
-  await expect(page.locator(".expo-floor")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /^Featured Enterprises:/ })).toBeVisible();
+  await expect(page.locator(".expo-floor")).toHaveCount(1);
   const sundayIsToday = await page.locator(".expo-week a[aria-current='date']").evaluate((link) => link.classList.contains("today"));
-  if (sundayIsToday) expect(await page.locator(".expo-live-businesses > a").count()).toBeGreaterThan(0);
+  if (sundayIsToday) expect(await page.locator(".expo-booth[data-business-id]").count()).toBeGreaterThan(0);
   else {
-    expect(await page.locator(".expo-live-slot").count()).toBeGreaterThan(0);
-    await expect(page.locator(".expo-live-businesses > a")).toHaveCount(0);
+    expect(await page.locator(".expo-booth-outline").count()).toBeGreaterThan(0);
+    await expect(page.locator(".expo-booth[data-business-id]")).toHaveCount(0);
     const todayHref = await page.locator(".expo-week a.today").getAttribute("href") || "";
     const todayDay = todayHref.match(/expoDay=(\d)/)?.[1] || "";
     await expect(page).toHaveURL(new RegExp(`expoDay=${todayDay}`), { timeout: 8_000 });
@@ -619,23 +630,23 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   const failureErrors = monitor(failurePage);
   await failurePage.route("**/geo/ethiopia-admin1-2023.geojson", (route) => route.fulfill({ status: 503, body: "" }));
   await failurePage.goto("/discover?expoDay=1");
-  await expect(failurePage.getByText("The map could not load, but every Suq is still available.")).toBeVisible();
+  await expect(failurePage.getByText("The map could not load, but every Showroom is still available.")).toBeVisible();
   await expect(failurePage.getByRole("heading", { name: /Expo$/ })).toBeVisible();
   await failurePage.getByRole("button", { name: "Open list" }).click();
   expect(await failurePage.locator(".discovery-list article").count()).toBe(5);
-  await expect(failurePage.getByRole("link", { name: "Visit Suq" }).first()).toBeVisible();
+  await expect(failurePage.getByRole("link", { name: "Open showroom" }).first()).toBeVisible();
   expect(failureErrors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
   await failurePage.close();
   expect(errors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
 });
 
-test("platform surfaces share the SuqPage identity", async ({ page }) => {
+test("platform surfaces share the MirtPage identity", async ({ page }) => {
   const errors = monitor(page);
   for (const pathName of ["/", "/about", "/expo", "/request", "/login", "/privacy", "/terms"]) {
     await page.goto(pathName);
-    const brand = page.locator('.suqpage-brand img[src="/brand/suqpage-mark.svg"]').first();
+    const brand = page.locator('.mirtpage-brand img[src="/brand/mirtpage-mark.svg"]').first();
     await expect(brand).toBeVisible();
-    await expect(brand.locator("..")).toHaveAccessibleName("SuqPage home");
+    await expect(brand.locator("..")).toHaveAccessibleName("MirtPage home");
     if (["/", "/about", "/login"].includes(pathName)) {
       const signupLinks = page.locator('nav a[href="/request"]');
       expect(await signupLinks.count()).toBeGreaterThan(0);
@@ -660,13 +671,13 @@ test("platform surfaces share the SuqPage identity", async ({ page }) => {
 
 test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
   const errors = monitor(page);
-  await loginAndChangePassword(page, "admin@suqpage.local", "AdminAcceptance123!");
+  await loginAndChangePassword(page, "admin@mirtpage.local", "AdminAcceptance123!");
   await page.goto("/login");
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Private workspace" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "SuqPage home" })).toHaveAttribute("href", "/dashboard");
+  await expect(page.getByRole("link", { name: "MirtPage home" })).toHaveAttribute("href", "/dashboard");
   await expect(page.getByRole("link", { name: "Public site", exact: true })).toHaveAttribute("target", "_blank");
-  await page.getByRole("link", { name: "SuqPage home" }).click();
+  await page.getByRole("link", { name: "MirtPage home" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole("link", { name: "Discovery profiles" }).click();
   await expect(page.getByRole("heading", { name: "Discovery profiles" })).toBeVisible();
@@ -675,15 +686,15 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   const profileRow = page.getByRole("row").filter({ hasText: "Meda Furniture Studio" }).first();
   await expect(profileRow.getByText("discoverable")).toBeVisible();
   await profileRow.getByRole("link", { name: "Edit profile" }).click();
-  await page.getByLabel("Featured Suq").check();
+  await page.getByLabel("Sponsored placement (paid)").check();
   await page.getByRole("button", { name: "Save discovery profile" }).click();
   await expect(page.getByText("Discovery profile saved")).toBeVisible();
   await page.goto("/discover?industry=home-living");
   await page.getByRole("tab", { name: "List" }).click();
-  await expect(page.locator(".discovery-list article").filter({ hasText: "Meda Furniture Studio" }).getByText(/Featured/)).toBeVisible();
+  await expect(page.locator(".discovery-list article").filter({ hasText: "Meda Furniture Studio" }).getByText(/Sponsored/)).toBeVisible();
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Component bank" }).click();
-  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toBeVisible();
+  await page.getByRole("link", { name: "Design library" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom design library" })).toBeVisible();
   await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Heroes 13" }).click();
   await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(13);
@@ -752,7 +763,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.getByRole("button", { name: "Accept lead and create invitation" }).click();
   await expect(page.getByText("Invitation created.")).toBeVisible();
   const invitationUrl = await page.getByLabel("Single-use invitation link").inputValue();
-  expect(invitationUrl).toMatch(/^https:\/\/suqpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
+  expect(invitationUrl).toMatch(/^https:\/\/mirtpage\.test\/invite\/[A-Za-z0-9_-]{40,100}$/);
   await page.goto("/dashboard/admin?view=staff");
   await expectVisibleControlsNamed(page);
   let staffPanel = page.locator("section.panel").filter({has:page.getByRole("heading",{name:"Staff access"})});
@@ -780,7 +791,7 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await page.getByLabel("Client email").fill("flowers@example.test");
   await page.getByRole("button", { name: "Create client workspace and invitation" }).click();
   await expect(page.getByText("Client workspace created.")).toBeVisible();
-  await expect(page.getByLabel("Single-use client workspace invitation")).toHaveValue(/^https:\/\/suqpage\.test\/invite\//);
+  await expect(page.getByLabel("Single-use client workspace invitation")).toHaveValue(/^https:\/\/mirtpage\.test\/invite\//);
   expect((await page.request.get("/@acceptanceflowers")).status()).toBe(404);
   await page.goto("/preview/@acceptanceflowers");
   await expect(page.locator(".showroom")).toBeVisible();
@@ -793,14 +804,14 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
     "Please prepare a more expressive private showroom direction for administrator review.",
   );
   await page.getByRole("button", { name: "Record request for client" }).click();
-  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
-  await page.getByRole("button", { name: "Prepare first recipe" }).click();
-  await expect(page.getByRole("heading", { name: "Showroom recipe studio" })).toBeVisible();
-  await expect(page.getByText("Advanced recovery")).toBeVisible();
+  await expect(page.getByText("The client's request was created.")).toBeVisible();
+  await page.getByRole("button", { name: "Prepare first revision" }).click();
+  await expect(page.getByRole("heading", { name: "Showroom design workspace" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Complete the image checklist" })).toBeVisible();
   await page.goto("/dashboard");
   for (let attempt = 0; attempt < 6; attempt += 1) {
     await page.getByRole("button", { name: "Sign out" }).click();
-    await page.getByLabel("Email").fill("admin@suqpage.local");
+    await page.getByLabel("Email").fill("admin@mirtpage.local");
     await page.getByLabel("Password").fill("AdminAcceptance123!");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
@@ -820,22 +831,19 @@ test("administrator onboards and previews a publicly hidden draft tenant", async
   await expect(page).toHaveURL(/\/dashboard\/requests\/new/);
   await page.goto("/dashboard/design-bank");
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { name: "Showroom component bank" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Showroom design library" })).toHaveCount(0);
   await page.getByRole("link", { name:"Make a request" }).click();
   await expect(page.getByRole("heading", { name:"Request your first showroom" })).toBeVisible();
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
   await expect(page.getByLabel("Request type")).toHaveCount(0);
-  await page.getByLabel("Products, capabilities, story, and requested outcome").fill("Please use this reference to update the private showroom hero and product categories.");
-  await page.getByLabel(/Available reference images/).setInputFiles(path.join(process.cwd(), "public/uploads/seed/suqpage/icon.png"));
-  await page.getByRole("button", { name:"Send request to SuqPage" }).click();
+  await page.getByLabel("Products, capabilities, story, and requested outcome").fill("Please create a private showroom hero and clear product categories from this brief.");
+  await expect(page.getByLabel(/reference images/i)).toHaveCount(0);
+  await page.getByRole("button", { name:"Send request to MirtPage" }).click();
   await expect(page.getByRole("heading", { name:/REQ-/ })).toBeVisible();
-  await expect(page.locator(".request-image-grid img")).toHaveCount(1);
+  await expect(page.getByText("Private reference images")).toHaveCount(0);
   await page.goto("/dashboard/settings");
   await expect(page).toHaveURL(/\/dashboard$/);
-  const clientSession = (await page.context().cookies()).find((cookie) => cookie.name === "suqpage_session");
-  const origin = await page.evaluate(() => location.origin);
-  const deniedMutation = await page.request.post("/api/malikt/requests", { headers:{ Origin:origin, Cookie:`suqpage_session=${clientSession!.value}` }, data:{ businessId:5, customerName:"Denied", phone:"12345", pickupAddress:"A", deliveryAddress:"B", packageCount:1, companyIds:[1], idempotencyKey:"denied_client_123456" } });
-  expect(deniedMutation.status()).toBe(403);
+  expect((await page.request.get("/api/malikt/requests")).status()).toBe(404);
   expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
 });
 
@@ -843,26 +851,26 @@ test("operations manager records on behalf and team member sees only assigned wo
   const errors=monitor(page);
   await loginAndChangeKnownPassword(page,"operations@example.test","OperationsTemp123!","OperationsReady123!");
   await page.goto("/dashboard/design-bank");
-  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Showroom design library"})).toBeVisible();
   await page.goto("/dashboard?business=5");
-  await expect(page.getByRole("link",{name:"Showroom context",exact:true})).toHaveCount(1);
-  await page.getByRole("link",{name:"Submit on behalf of client"}).click();
+  await expect(page.getByRole("link",{name:"View showroom",exact:true})).toHaveCount(1);
+  await page.getByRole("link",{name:"Create client request"}).click();
   await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
   await page.goto("/dashboard/requests");
-  await expect(page.getByRole("link",{name:"Record on behalf"}).first()).toBeVisible();
+  await expect(page.getByRole("link",{name:"Create client request"}).first()).toBeVisible();
   await expect(page.getByRole("link",{name:"SaaS administration"})).toHaveCount(0);
-  await page.getByRole("link",{name:"Record on behalf"}).first().click();
+  await page.getByRole("link",{name:"Create client request"}).first().click();
   await expect(page.getByRole("heading",{name:"Record a request for a client"})).toBeVisible();
   const clientPicker = page.locator(".client-picker");
   await clientPicker.getByLabel("Search").fill("Acceptance Market");
   await clientPicker.getByRole("button",{name:"Apply"}).click();
   await page.getByRole("row").filter({hasText:"Acceptance Market"}).getByRole("link",{name:"Select"}).click();
   await expect(page.getByText("New showroom request",{exact:true})).toBeVisible();
-  await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and featured collection for review.");
-  await page.getByLabel(/Available reference images/).setInputFiles(path.join(process.cwd(),"public/uploads/seed/suqpage/icon.png"));
+  await page.getByLabel("Client’s instruction").fill("The client asked us to prepare a revised private hero and product categories for review.");
+  await expect(page.getByLabel(/reference images/i)).toHaveCount(0);
   await page.getByRole("button",{name:"Record request for client"}).click();
-  await expect(page.getByText("The request was recorded on behalf of the client.")).toBeVisible();
-  await expect(page.getByText("SuqPage for client")).toBeVisible();
+  await expect(page.getByText("The client's request was created.")).toBeVisible();
+  await expect(page.getByText("MirtPage for client")).toBeVisible();
   const assignedRequestUrl=page.url();
   await page.getByLabel("Ask or answer a clarification").fill("Which hero message should the team prioritize?");
   await page.getByRole("button",{name:"Add clarification"}).click();
@@ -873,8 +881,8 @@ test("operations manager records on behalf and team member sees only assigned wo
 
   await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
   await page.goto(assignedRequestUrl);
-  await expect(page.getByText("SuqPage team",{exact:true})).toBeVisible();
-  await page.getByLabel("Reply to SuqPage").fill("Please prioritize our handmade origin story.");
+  await expect(page.getByText("MirtPage team",{exact:true})).toBeVisible();
+  await page.getByLabel("Reply to MirtPage").fill("Please prioritize our handmade origin story.");
   await page.getByRole("button",{name:"Add clarification"}).click();
   await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
   await page.getByRole("button",{name:"Sign out"}).click();
@@ -890,25 +898,25 @@ test("operations manager records on behalf and team member sees only assigned wo
 
   await loginAndChangeKnownPassword(page,"team@example.test","TeamMemberTemp123!","TeamMemberReady123!");
   await page.goto("/dashboard/design-bank");
-  await expect(page.getByRole("heading",{name:"Showroom component bank"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Showroom design library"})).toBeVisible();
   await page.goto("/dashboard/requests");
   await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
-  await expect(page.getByRole("link",{name:"Record on behalf"})).toHaveCount(0);
+  await expect(page.getByRole("link",{name:"Create client request"})).toHaveCount(0);
   await page.goto(assignedRequestUrl);
   await expect(page.getByRole("main").getByText("Acceptance Team",{exact:true})).toBeVisible();
   await page.getByLabel("Status").selectOption("under_review");
   await page.getByRole("button",{name:"Update status"}).click();
   await expect(page.getByText("Request status updated.")).toBeVisible();
   await expect(page.getByText("Team assignment")).toHaveCount(0);
-  await page.getByRole("button",{name:"Prepare first recipe"}).click();
-  await expect(page.getByRole("heading",{name:"Showroom recipe studio"})).toBeVisible();
+  await page.getByRole("button",{name:"Prepare first revision"}).click();
+  await expect(page.getByRole("heading",{name:"Showroom design workspace"})).toBeVisible();
   const recipeStudioUrl=page.url();
   await expectVisibleControlsNamed(page);
   await page.getByRole("button",{name:"Sign out"}).click();
 
   await loginWithKnownPassword(page,"acceptance-client@example.test","InvitedClient123!");
   await page.goto(assignedRequestUrl);
-  await expect(page.getByText("SuqPage is preparing this revision.")).toBeVisible();
+  await expect(page.getByText("MirtPage is preparing this revision.")).toBeVisible();
   await expect(page.getByRole("link",{name:"View preview"})).toHaveCount(0);
   await expect(page.getByText("Team assigned",{exact:true})).toBeVisible();
   await expect(page.getByText(/team_member:\d+/)).toHaveCount(0);
@@ -917,6 +925,11 @@ test("operations manager records on behalf and team member sees only assigned wo
 
   await loginWithKnownPassword(page,"team@example.test","TeamMemberReady123!");
   await page.goto(recipeStudioUrl);
+  await expect(page.getByRole("button", { name: "Copy AI brief" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy current design" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Complete the image checklist" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Offerings/ })).toBeVisible();
+  await expect(page.getByText(/approved images|reference images/i)).toHaveCount(0);
   const [briefDownload] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("button", { name: "Download brief" }).click(),
@@ -924,7 +937,7 @@ test("operations manager records on behalf and team member sees only assigned wo
   const briefPath = await briefDownload.path();
   expect(briefPath).toBeTruthy();
   const brief = JSON.parse(fs.readFileSync(briefPath!, "utf8"));
-  await page.getByText("Complete valid recipe example").click();
+  await page.getByText("Complete design-file example").click();
   const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
   const {
     schemaVersion: _snapshotSchemaVersion,
@@ -958,26 +971,50 @@ test("operations manager records on behalf and team member sees only assigned wo
   ];
   recipe.summary="A freely drafted private showroom with a custom color direction.";
   recipe.content.business.heroTitle="Acceptance approved showroom";
-  await page.getByRole("textbox", { name: "Recipe JSON" }).fill(JSON.stringify(recipe));
-  await page.getByRole("button",{name:"Validate blueprint and open preview"}).click();
+  await page.getByRole("textbox", { name: "Showroom design JSON" }).fill(JSON.stringify(recipe));
+  await page.getByRole("button",{name:"Check design and open preview"}).click();
   await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
   await expect(page.locator('[data-custom-palette="true"]')).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Validated recipe difference"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Imported design changes"})).toBeVisible();
   const privatePreviewUrl = page.url();
   const recoveryEditorUrl = new URL(privatePreviewUrl);
   recoveryEditorUrl.pathname = recoveryEditorUrl.pathname.replace(/\/preview$/, "/edit");
-  recoveryEditorUrl.search = "";
+  recoveryEditorUrl.search = "?area=design";
   await page.goto(recoveryEditorUrl.toString());
-  await expect(page.getByRole("heading",{name:"Manual revision editor"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Edit showroom"})).toBeVisible();
+  await expect(page.getByRole("button", { name: "Layout and style" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Showroom settings" }).click();
   await expect(page.getByLabel("Use a custom showroom palette")).toBeChecked();
   await page.getByLabel("Primary accent hex value").fill("#14532D");
   const heroSection = recipe.design.sections.find(
     (section: { component: string }) => section.component.startsWith("hero."),
   );
   expect(heroSection).toBeTruthy();
-  await page.getByLabel(`${heroSection.key} surface`).selectOption("inverse");
+  await page.getByRole("button", { name: "Layout and style" }).click();
+  const heroSurface = page.getByLabel(`${recipe.content.business.heroTitle} surface`);
+  const heroDisclosure = page.locator("details").filter({ has: heroSurface });
+  await heroDisclosure.locator("summary").click();
+  await heroSurface.selectOption("inverse");
+  await page.getByRole("button", { name: "Offerings" }).click();
+  await expect(page.getByRole("heading", { name: "Products & capabilities" })).toBeVisible();
+  await page.getByRole("button", { name: "Add offering" }).click();
+  await page.getByLabel("Product 1 name").fill("Staff-created showroom offering");
+  await page.getByLabel("Product 1 slug").fill("staff-created-showroom-offering");
+  await page.getByLabel("Product 1 description").fill("A staff-edited offering retained in the current showroom design.");
   await page.getByRole("button",{name:"Save private draft"}).click();
   await expect(page.getByText("Private draft saved.")).toBeVisible();
+  await page.goto(recipeStudioUrl);
+  const [currentDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download current design" }).click(),
+  ]);
+  const currentPath = await currentDownload.path();
+  expect(currentPath).toBeTruthy();
+  const currentDesign = JSON.parse(fs.readFileSync(currentPath!, "utf8"));
+  expect(currentDesign.design.customPalette.primary).toBe("#14532D");
+  expect(currentDesign.content.products[0].description).toBe(
+    "A staff-edited offering retained in the current showroom design.",
+  );
   await page.goto(privatePreviewUrl);
   const customShowroom = page.locator('[data-custom-palette="true"]');
   await expect(customShowroom).toBeVisible();
@@ -1000,8 +1037,8 @@ test("operations manager records on behalf and team member sees only assigned wo
   expect(deniedStudio?.status()).toBe(404);
   await page.goto(assignedRequestUrl);
   await page.getByRole("link",{name:"View preview"}).click();
-  await expect(page.getByRole("button",{name:"Approve this exact revision"})).toBeVisible();
-  await page.getByRole("button",{name:"Approve this exact revision"}).click();
+  await expect(page.getByRole("button",{name:"Approve this revision"})).toBeVisible();
+  await page.getByRole("button",{name:"Approve this revision"}).click();
   await expect(page.getByText("Your approve decision was recorded")).toBeVisible();
   await page.getByRole("button",{name:"Sign out"}).click();
 
@@ -1047,7 +1084,7 @@ test("operations manager records on behalf and team member sees only assigned wo
 
 test("seeded client is restricted while operations manages customer activity", async ({ page }) => {
   const errors = monitor(page);
-  await loginAndChangePassword(page, "selam-weave@suqpage.local", "ClientAcceptance123!");
+  await loginAndChangePassword(page, "selam-weave@mirtpage.local", "ClientAcceptance123!");
   await page.goto("/dashboard");
   await expect(page.getByText("Client workspace",{exact:true})).toBeVisible();
   await page.goto("/dashboard/admin");
@@ -1088,7 +1125,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await expect(page.getByRole("button",{name:"Close workspace menu"})).toBeFocused();
   await expect(workspaceMenu.getByRole("link",{name:"Requests",exact:true})).toBeVisible();
   await expect(workspaceMenu.getByRole("link",{name:"Customer inquiries"})).toBeVisible();
-  await expect(workspaceMenu.getByRole("link",{name:"Delivery activity"})).toBeVisible();
+  await expect(workspaceMenu.getByRole("link",{name:"Delivery activity"})).toHaveCount(0);
   await expect(workspaceMenu.getByRole("link",{name:"Account security"})).toBeVisible();
   const smallWorkspaceTargets = await workspaceMenu.locator("a, button").evaluateAll((targets) => targets.flatMap((target) => {
     const rect=target.getBoundingClientRect();
@@ -1121,7 +1158,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await expect(page.getByRole("heading",{name:"How can we help?"})).toBeVisible();
   await page.getByLabel("Subject").fill("Acceptance support question");
   await page.getByLabel("Message").fill("Please help us verify the new support workflow.");
-  await page.getByRole("button",{name:"Send to SuqPage support"}).click();
+  await page.getByRole("button",{name:"Send to MirtPage support"}).click();
   await expect(page.getByRole("heading",{name:"Acceptance support question"})).toBeVisible();
   await expect(page.getByText("waiting",{exact:true})).toBeVisible();
   expect(
@@ -1134,7 +1171,7 @@ test("seeded client is restricted while operations manages customer activity", a
   await page.goto("/dashboard/account-health");
   await expect(page.getByRole("heading",{name:"Monthly accounts"})).toBeVisible();
   await expect(page.getByLabel("Renewal state")).toBeVisible();
-  await expect(page.getByText(/Showing 1-20 of \d+/)).toBeVisible();
+  await expect(page.getByText(/Showing 1-10 of \d+/)).toBeVisible();
   await page.goto("/dashboard/support?status=waiting");
   await expect(page.getByRole("heading",{name:"Support inbox"})).toBeVisible();
   await expect(page.getByText("Agent workload and assignment limits")).toBeVisible();
@@ -1148,25 +1185,8 @@ test("seeded client is restricted while operations manages customer activity", a
   await row.getByRole("combobox").selectOption("confirmed");
   await row.getByRole("button", { name: "Update" }).click();
   await expect(page.getByText("Inquiry status updated")).toBeVisible();
-  await row.getByRole("link", { name: "Create delivery request" }).click();
-  await expectVisibleControlsNamed(page);
-  const sessionCookie = (await page.context().cookies()).find((cookie) => cookie.name === "suqpage_session");
-  expect(sessionCookie).toBeDefined();
-  const oversized = await page.request.post("/api/malikt/requests", {
-    headers: {
-      Origin: "https://suqpage.test",
-      "Content-Type": "application/json",
-      Cookie: `suqpage_session=${sessionCookie!.value}`,
-    },
-    data: "x".repeat(65 * 1024),
-  });
-  expect(oversized.status()).toBe(413);
-  await page.locator('input[name="pickupAddress"]').fill("Acceptance pickup");
-  await page.locator('input[name="deliveryAddress"]').fill("Acceptance destination");
-  await page.getByRole("button", { name: "Submit to Malikt Board" }).click();
-  await expect(page.getByText(/submitted to the mock Malikt Board/)).toBeVisible();
+  await expect(row.getByRole("link", { name: /delivery/i })).toHaveCount(0);
   expect(readAcceptanceRow("inquiryByCustomer", "Hana")).toMatchObject({ status: "confirmed" });
-  expect(readAcceptanceRow("deliveryByAddress", "Acceptance destination")).toEqual({ status: "submitted" });
   expect(errors).toEqual([]);
 });
 
@@ -1174,10 +1194,8 @@ test("API authorization, validation, health, and security headers", async ({ req
   const health = await request.get("/api/health");
   expect(health.status()).toBe(200);
   expect(await health.json()).toMatchObject({ status: "ok" });
-  const companies = await request.get("/api/malikt/companies");
-  expect(companies.status()).toBe(200);
-  expect((await companies.json()).companies).toHaveLength(4);
-  expect((await request.get("/api/malikt/requests")).status()).toBe(401);
+  expect((await request.get("/api/malikt/companies")).status()).toBe(404);
+  expect((await request.get("/api/malikt/requests")).status()).toBe(404);
   expect((await request.post("/api/inquiries", { data: { businessId: 1, customerName: "X", contact: "12345", items: [] } })).status()).toBe(400);
   const home = await request.get("/");
   expect(home.headers()["x-frame-options"]).toBe("DENY");
@@ -1193,10 +1211,17 @@ test("controlled provider video uses narrow CSP and privacy-enhanced browser emb
   expect(csp).toContain("frame-src 'self' https://www.youtube-nocookie.com");
   expect(csp).not.toContain("https://www.youtube.com");
   await page.goto("/@selam-weave");
-  const frame = page.locator('iframe[title="Approved process film"]');
+  const processSection = page.locator('[data-slot="content"]').filter({
+    hasText: "Inside the process",
+  });
+  await expect(processSection).toBeVisible();
+  await expect(page.locator('[data-slot="header"] iframe, [data-slot="header"] button[aria-label*="process video"]')).toHaveCount(0);
+  await expect(processSection.locator("iframe")).toHaveCount(0);
+  await processSection.getByRole("button", { name: "Play Selam Weave Studio process video" }).click();
+  const frame = processSection.locator('iframe[title="Selam Weave Studio process video"]');
   await expect(frame).toBeVisible();
   await expect(frame).toHaveAttribute("loading", "lazy");
   await expect(frame).toHaveAttribute("allow", /encrypted-media/);
-  await expect(frame).toHaveAttribute("src", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  await expect(frame).toHaveAttribute("src", "https://www.youtube-nocookie.com/embed/wJV9EDe_sFc");
   expect(await page.locator('iframe[src*="youtube.com/embed"]').count()).toBe(0);
 });

@@ -12,7 +12,7 @@ change_level: L1
 
 ## Problem and outcome
 
-SuqPage needs a repeatable way to describe distinct showrooms from an approved
+MirtPage needs a repeatable way to describe distinct showrooms from an approved
 bank of reusable components without trusting external AI output as code or
 business authority.
 
@@ -44,7 +44,7 @@ preview, or publication workflow can use it.
   database persistence, revision schema migration, or migration of the four
   current renderers.
 - Automatic application of customer content, direct AI-provider integration,
-  AI access to SuqPage credentials or persistence, or publication of AI output.
+  AI access to MirtPage credentials or persistence, or publication of AI output.
 - Treating JSON Schema alone as proof that a proposal is compatible, complete,
   factually accurate, tenant-authorized, or safe to publish.
 

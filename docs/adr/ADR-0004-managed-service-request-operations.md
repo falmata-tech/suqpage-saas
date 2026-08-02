@@ -3,8 +3,8 @@ id: ADR-0004
 title: Managed-service requests and versioned publication
 status: accepted
 date: 2026-07-22
-deciders: [SuqPage]
-related: [FE-003, BE-003, DEP-003, ADR-0001, ADR-0002, ADR-0006]
+deciders: [MirtPage]
+related: [FE-003, BE-003, BE-025, DEP-003, ADR-0001, ADR-0002, ADR-0006]
 ---
 
 # ADR-0004 — Managed-service requests and versioned publication
@@ -12,7 +12,7 @@ related: [FE-003, BE-003, DEP-003, ADR-0001, ADR-0002, ADR-0006]
 ## Context
 
 Before this decision, the controlled pilot gave business owners direct catalog,
-settings, inquiry, and delivery controls. SuqPage moved to a managed-service model in
+settings and inquiry controls. MirtPage moved to a managed-service model in
 which clients describe onboarding or changes in their own words and authorized
 staff translate those requests into canonical business data and custom designs.
 
@@ -53,14 +53,14 @@ Adopt option 3.
   authorized staff may also create a client workspace directly for a referral.
   Passwordless access remains future work.
 - Clients can submit and track requests, answer clarifications, use their
-  inquiry/delivery workspace, preview proposed revisions, and approve or reject
+  inquiry workspace, preview proposed revisions, and approve or reject
   them. They do not directly manage business settings, catalog structure,
   products, options, design, or publication.
 - Team members work only on assigned tenants/requests and cannot onboard or
   submit on behalf of clients, manage roles, approve as the client, or publish.
 - Operations managers can view the operations queue, submit requests on behalf
   of clients, create client workspaces, accept prospects, invite clients, assign
-  staff, manage inquiry/delivery activity, and publish a client-approved
+  staff, manage inquiry activity, and publish a client-approved
   revision. The server derives request type for existing clients.
 - Platform administrators retain explicit system-wide authority.
 - The original request is immutable business input. Only server-validated staff
@@ -78,9 +78,9 @@ Adopt option 3.
 ## Cutover amendment — 2026-07-22
 
 The four current tenants are example clients, not external compatibility
-customers. SuqPage therefore completes the planned cutover now: authorized
+customers. MirtPage therefore completes the planned cutover now: authorized
 staff can create a client workspace without a lead, request type is derived from
-publication state, operations managers replace owner inquiry/delivery actions,
+publication state, operations managers replace owner inquiry actions,
 and no account retains direct live catalog/settings/design authority. This
 amendment narrows compatibility debt without changing the versioned-publication
 architecture selected above.
@@ -89,8 +89,8 @@ architecture selected above.
 
 ### Positive
 
-- Clients receive a substantially simpler experience without losing inquiry and
-  delivery visibility.
+- Clients receive a substantially simpler experience without losing inquiry
+  visibility.
 - Live showrooms remain stable while work is prepared and reviewed.
 - Staff responsibility, client approval, and publication are attributable.
 - The domain keeps unstructured requests separate from canonical catalog truth.
@@ -118,3 +118,10 @@ upkeep after first publication. Until `FE-008`, `BE-009`, and `DEP-008` reach
 done with mapped evidence, this ADR's verified no-direct-product-edit runtime
 behavior remains current. The exception does not supersede managed requests,
 client approval, or manager publication for structural and visual work.
+
+## Logistics retirement amendment — 2026-08-02
+
+`BE-025` retires the former demonstration Delivery surface. This changes no
+request, revision, approval, or publication decision in this ADR. Operations
+managers retain inquiry authority but no logistics action; dormant legacy
+tables remain only for the data-preserving rollback window.

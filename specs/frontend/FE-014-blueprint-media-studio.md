@@ -81,7 +81,7 @@ slots before client review.
 Scenario: Staff imports a blueprint before all photography exists
   GIVEN an assigned staff member has a client request with incomplete media
   WHEN a valid AI recipe declares bounded product and section media slots
-  THEN SuqPage stores a private blueprint candidate
+  THEN MirtPage stores a private blueprint candidate
   AND the Media step shows each unresolved slot with its purpose and guidance
   AND client review remains unavailable while required slots are unresolved
 

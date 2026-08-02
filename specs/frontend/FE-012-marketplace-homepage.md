@@ -11,7 +11,7 @@ change_level: L1
 # FE-012 - Visual marketplace homepage
 
 Deprecated by FE-020. Retained as historical evidence for the Expo-led landing
-page that permanent City Suq discovery replaces.
+page that permanent City Showroom discovery replaces.
 
 ## Problem and outcome
 
@@ -94,7 +94,7 @@ Scenario: Landing page feels like one public product
 
 ## Domain language and invariants
 
-- The permanent `/@handle` showroom remains SuqPage's primary product.
+- The permanent `/@handle` showroom remains MirtPage's primary product.
 - The daily Bazaar is included discovery; it is not checkout and normal
   participation is not presented as paid placement.
 - Featured businesses are visually and semantically separate from ordinary

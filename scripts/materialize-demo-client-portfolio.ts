@@ -134,7 +134,7 @@ function boothSvg(name: string, primary: string, secondary: string, concept: str
   <path d="M420 470h560l-38-55H458z" fill="${primary}"/>
   ${props[variant]}
   <text x="600" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#ffffff">${escapedName}</text>
-  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">SUQPAGE SHOWROOM</text>
+  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">MIRTPAGE SHOWROOM</text>
   <text x="700" y="602" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#ffffff" opacity=".82">${escapedConcept}</text>
 </svg>\n`;
 }
@@ -180,7 +180,7 @@ function briefDocument(input: {
   const productRows = input.offerings.map((offering) => `| \`${offering.imagePath}\` | ${offering.name} | illustrative demo artwork | yes | offering |`).join("\n");
   return `# ${input.name} showroom brief
 
-> Fictional disposable client used to exercise the SuqPage design workflow. All copy and imagery are demonstration material, not verified business claims.
+> Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
@@ -194,7 +194,7 @@ function briefDocument(input: {
 
 - Primary customer: ${input.customer}
 - Main visitor decision: identify the closest offering and decide what requirement to send
-- Inquiry outcome: one direct SuqPage inquiry with optional quantity and practical context
+- Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
 - Information that must appear early: what the business makes or does, who it serves, and the four available starting points
 
@@ -237,7 +237,7 @@ ${productRows}
 ## Booth Direction
 
 - Approved logo/name treatment: generated mark plus exact business name
-- Facade material and color: shared clean City Suq architecture with the final primary and secondary roles
+- Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
 - Product/craft cue: ${input.logoConcept}
 - Generated image authorized: yes, for disposable demonstration use
 

@@ -4,15 +4,14 @@ import os from "node:os";
 import path from "node:path";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-scale-queries-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "queries.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
-  process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-scale-queries-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "queries.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
   try {
     const { closeDbForTests, getDb } = await import("../lib/db");
     const {
       listBusinessesPage,
-      listDeliveriesPage,
       listInquiriesPage,
       listManagedClientsPage,
       listProductsPage,
@@ -123,17 +122,6 @@ async function main() {
           offering_kind_snapshot,quantity_mode_snapshot,options_json
         ) VALUES(?,?,?,'1 ton','standard_product','optional','{}')
       `).run(inquiryId, productIds[0], "Widget 1");
-      db.prepare(`
-        INSERT INTO delivery_requests(
-          business_id,inquiry_id,customer_name,phone,pickup_address,
-          delivery_address,status,external_request_id
-        ) VALUES(?,?,?,'251911000000','Pickup','Destination','submitted',?)
-      `).run(
-        businessIds[0],
-        inquiryId,
-        `Buyer ${index}`,
-        `QUERY-DELIVERY-${index}`,
-      );
     }
 
     for (let index = 1; index <= 25; index += 1) {
@@ -163,23 +151,19 @@ async function main() {
     assert.equal(publicLast.items.length, 5);
 
     const businesses = listBusinessesPage({ page: 2 });
-    assert.equal(businesses.items.length, 20);
+    assert.equal(businesses.items.length, 10);
     assert.equal(businesses.page, 2);
     assert.equal(businesses.totalItems, 45);
-    assert.equal(listManagedClientsPage({ page: 2 }).items.length, 5);
-    assert.equal(listStaffPage({ page: 2 }).items.length, 5);
-    assert.equal(listProductsPage(businessIds[0], { page: 1 }).items.length, 20);
-    assert.equal(listProductsPage(businessIds[0], { page: 2 }).items.length, 5);
+    assert.equal(listManagedClientsPage({ page: 2 }).items.length, 10);
+    assert.equal(listStaffPage({ page: 2 }).items.length, 10);
+    assert.equal(listProductsPage(businessIds[0], { page: 1 }).items.length, 10);
+    assert.equal(listProductsPage(businessIds[0], { page: 2 }).items.length, 10);
 
     const inquiries = listInquiriesPage(businessIds[0], { page: 1, q: "widget" });
-    assert.equal(inquiries.items.length, 20);
+    assert.equal(inquiries.items.length, 10);
     assert.equal(inquiries.totalItems, 25);
     assert.equal(inquiries.items[0].items.length, 1);
     assert.equal(inquiries.items[0].items[0].quantity_intent, "1 ton");
-    const deliveries = listDeliveriesPage(businessIds[0], { page: 2 });
-    assert.equal(deliveries.items.length, 5);
-    assert.equal(deliveries.totalItems, 25);
-
     const clientOne = {
       id: clientIds[0],
       email: "client-1@example.test",

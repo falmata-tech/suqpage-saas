@@ -189,7 +189,7 @@ inside a showroom.
 
 The YouTube normalizer and request-scoped persistence adapter are implemented
 without network access. Admission is independently disabled by default through
-`SUQPAGE_YOUTUBE_ADMISSION_ENABLED=0`; stored exports expose only opaque asset
+`MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=0`; stored exports expose only opaque asset
 keys. CSP enablement and browser rendering are covered by the production-like
 acceptance scenario for the privacy-enhanced `youtube-nocookie.com` iframe.
 The additive revision-v4 domain document is now validated independently of the

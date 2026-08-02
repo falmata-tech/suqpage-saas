@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/component-bank.schema.json",
-  "title": "SuqPage showroom component-bank release",
+  "$id": "https://mirtpage.com/schemas/component-bank.schema.json",
+  "title": "MirtPage showroom component-bank release",
   "type": "object",
   "additionalProperties": false,
   "required": [

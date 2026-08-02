@@ -2,7 +2,7 @@
 id: FE-017
 title: Scalable operations workspace
 status: done
-related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, FE-021, BE-015, DEP-014]
+related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, FE-021, FE-024, FE-025, BE-015, BE-025, DEP-014]
 owners: [product, frontend, operations]
 last_updated: 2026-07-30
 change_level: L2
@@ -26,7 +26,7 @@ rows with one clear next action; full forms edit one selected record.
 ### In scope
 
 - Server-paginated showroom discovery, business selection, requests, products,
-  inquiries, deliveries, client accounts, staff accounts, and Expo profiles.
+  inquiries, client accounts, staff accounts, support, and Expo profiles.
 - Compact tables or rows with search, relevant status filters, result counts,
   empty states, and accessible previous/next navigation.
 - Focused client-password and Expo-profile editing without bulk dropdowns or a
@@ -67,8 +67,8 @@ rows with one clear next action; full forms edit one selected record.
 - Product upkeep is a compact paginated list with stable media dimensions.
   Search runs on the server and keeps the current business context.
 - Inquiry list queries include item summaries without one query per row.
-  Delivery creation uses a bounded recent-inquiry choice and delivery history is
-  paginated.
+- Support and account-attention queues use bounded server pages and focused
+  record screens.
 - Phone layouts keep filters, rows, pagination, and primary actions operable at
   320 and 390 CSS pixels with no horizontal document overflow.
 
@@ -157,7 +157,7 @@ Evidence: implemented and verified on 2026-07-30:
   schema migration 20 provide bounded, indexed pages with shared authorization
   predicates and deterministic ordering.
 - Public discovery renders five database-filtered showrooms. Workspace business,
-  client, staff, request, product, inquiry, delivery, and Expo collections
+  client, staff, request, product, inquiry, support, and Expo collections
   render at most 20 records with URL-preserved search/filter state.
 - Administration uses separate Businesses, Clients, and Staff views; client
   recovery and Expo editing load one focused record. Mobile product records
@@ -165,4 +165,4 @@ Evidence: implemented and verified on 2026-07-30:
 - `npm run check`, `npm run test:acceptance` (10/10), and `npm run release`
   passed. Acceptance covered 390px document overflow, focused Expo editing,
   paginated client selection, request assignment, offering search, inquiry
-  search/status continuity, and delivery handoff.
+  search/status continuity, and support queue navigation.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suqpage.com/schemas/showroom-proposal.schema.json",
-  "title": "SuqPage non-executable showroom design proposal",
-  "description": "Syntactic guidance only. SuqPage server-side bank, compatibility, tenant, revision, and publication validation remains authoritative.",
+  "$id": "https://mirtpage.com/schemas/showroom-proposal.schema.json",
+  "title": "MirtPage non-executable showroom design proposal",
+  "description": "Syntactic guidance only. MirtPage server-side bank, compatibility, tenant, revision, and publication validation remains authoritative.",
   "type": "object",
   "additionalProperties": false,
   "required": [

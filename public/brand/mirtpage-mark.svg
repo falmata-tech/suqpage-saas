@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img">
+  <title>MirtPage</title>
+  <rect width="40" height="40" rx="8" fill="#5632A8"/>
+  <path d="M9 29V11l11 9 11-9v18" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="20" cy="29" r="3" fill="#46B98A"/>
+</svg>

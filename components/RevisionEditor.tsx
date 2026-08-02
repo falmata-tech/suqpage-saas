@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   saveRevisionDraftAction,
   submitRevisionAction,
@@ -22,6 +22,15 @@ import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "@/lib/product-detail-pattern
 import { LIVE_PLATFORMS, LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
 type MediaOption = { value: string; label: string; kind: "image" | "video" };
+type EditorArea = "settings" | "design" | "content" | "offerings";
+
+const EDITOR_AREAS: Array<{ key: EditorArea; label: string }> = [
+  { key: "settings", label: "Showroom settings" },
+  { key: "design", label: "Layout and style" },
+  { key: "content", label: "Page content" },
+  { key: "offerings", label: "Offerings" },
+];
+const EDITOR_PAGE_SIZE = 8;
 
 const uid = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 
@@ -117,7 +126,7 @@ function MediaChoice({
   const choices = options.filter((item) => item.kind === kind);
   const visible =
     value && !choices.some((item) => item.value === value)
-      ? [{ value, label: kind === "video" ? "Current controlled video" : "Current tenant image", kind }, ...choices]
+      ? [{ value, label: kind === "video" ? "Current approved video" : "Current showroom image", kind }, ...choices]
       : choices;
   return (
     <div className="field">
@@ -127,7 +136,7 @@ function MediaChoice({
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">Use the reviewed no-media treatment</option>
+        <option value="">Use this section's image-free design</option>
         {visible.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}
@@ -172,15 +181,20 @@ export default function RevisionEditor({
   initial,
   summary: initialSummary,
   imageOptions,
+  initialArea,
 }: {
   requestId: number;
   revisionId: number;
   initial: RevisionSnapshotV4;
   summary: string;
   imageOptions: MediaOption[];
+  initialArea: EditorArea;
 }) {
   const [snapshot, setSnapshot] = useState(initial);
   const [summary, setSummary] = useState(initialSummary);
+  const [activeArea, setActiveArea] = useState<EditorArea>(initialArea);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [productPage, setProductPage] = useState(1);
   const business = snapshot.business;
   const foundation =
     SHOWROOM_DESIGN_SYSTEMS[snapshot.designManifest.tokenPack] ||
@@ -287,6 +301,10 @@ export default function RevisionEditor({
     }
     updateBlock(block.key, { media: nextMedia } as Partial<ShowroomContentBlock>);
   };
+  const categoryPages = Math.max(1, Math.ceil(snapshot.categories.length / EDITOR_PAGE_SIZE));
+  const productPages = Math.max(1, Math.ceil(snapshot.products.length / EDITOR_PAGE_SIZE));
+  useEffect(() => setCategoryPage((page) => Math.min(page, categoryPages)), [categoryPages]);
+  useEffect(() => setProductPage((page) => Math.min(page, productPages)), [productPages]);
 
   return (
     <div className="revision-workspace">
@@ -295,7 +313,21 @@ export default function RevisionEditor({
         <input type="hidden" name="revisionId" value={revisionId} />
         <input type="hidden" name="snapshot" value={JSON.stringify(snapshot)} />
 
-        <section className="panel">
+        <nav className="editor-area-tabs" aria-label="Showroom editing areas">
+          {EDITOR_AREAS.map((area) => (
+            <button
+              type="button"
+              key={area.key}
+              className={activeArea === area.key ? "active" : ""}
+              aria-pressed={activeArea === area.key}
+              onClick={() => setActiveArea(area.key)}
+            >
+              {area.label}
+            </button>
+          ))}
+        </nav>
+
+        <section className="panel" hidden={activeArea !== "settings"}>
           <h2>Revision summary</h2>
           <div className="field">
             <label htmlFor="revision-summary">What changed for the client?</label>
@@ -310,8 +342,8 @@ export default function RevisionEditor({
           </div>
         </section>
 
-        <section className="panel">
-          <h2>Business and showroom</h2>
+        <section className="panel" hidden={activeArea !== "settings"}>
+          <h2>Showroom settings and visual foundation</h2>
           <div className="form-grid">
             <Field value={business.name} onChange={(value) => setBusiness("name", value)} label="Business name" max={100} />
             <div className="field">
@@ -407,8 +439,8 @@ export default function RevisionEditor({
           </div>
         </section>
 
-        <section className="panel">
-          <h2>Focused design controls</h2>
+        <section className="panel" hidden={activeArea !== "design"}>
+          <h2>Layout and style</h2>
           <div className="form-grid">
             {snapshot.designManifest.sections.map((section, index) => {
               const block = section.contentBlockKey
@@ -420,12 +452,15 @@ export default function RevisionEditor({
                 if (!block) return component.acceptedContentTypes.length === 0;
                 return component.acceptedContentTypes.includes(block.type);
               });
+              const sectionName = block?.title || current?.slot || section.key;
               return (
-                <div className="revision-item form-grid" key={section.key}>
+                <details className="revision-item editor-disclosure" key={section.key} open={index === 0}>
+                  <summary><span><strong>{sectionName}</strong><small>{current?.name || "Section design"}</small></span><b>Edit</b></summary>
+                  <div className="form-grid editor-disclosure-body">
                   <div className="field">
-                    <label>{section.key} component</label>
+                    <label>Section design</label>
                     <select
-                      aria-label={`${section.key} component`}
+                      aria-label={`${sectionName} component`}
                       value={section.component}
                       onChange={(event) => updateSection(index, { component: event.target.value })}
                     >
@@ -438,9 +473,9 @@ export default function RevisionEditor({
                   </div>
                   {current?.properties.some((property) => property.key === "motion_intensity") ? (
                     <div className="field">
-                      <label>{section.key} motion</label>
+                      <label>Motion</label>
                       <select
-                        aria-label={`${section.key} motion`}
+                        aria-label={`${sectionName} motion`}
                         value={String(section.properties.motion_intensity || "balanced")}
                         onChange={(event) => updateSectionProperty(index, "motion_intensity", event.target.value)}
                       >
@@ -450,9 +485,9 @@ export default function RevisionEditor({
                   ) : null}
                   {current?.properties.some((property) => property.key === "decorative_depth") ? (
                     <div className="field">
-                      <label>{section.key} decoration</label>
+                      <label>Visual detail</label>
                       <select
-                        aria-label={`${section.key} decoration`}
+                        aria-label={`${sectionName} decoration`}
                         value={String(section.properties.decorative_depth || "subtle")}
                         onChange={(event) => updateSectionProperty(index, "decorative_depth", event.target.value)}
                       >
@@ -462,9 +497,9 @@ export default function RevisionEditor({
                   ) : null}
                   {current?.slot === "hero" || current?.slot === "content" ? (
                     <div className="field">
-                      <label>{section.key} media treatment</label>
+                      <label>Image treatment</label>
                       <select
-                        aria-label={`${section.key} media treatment`}
+                        aria-label={`${sectionName} media treatment`}
                         value={section.mediaIntegration || "natural"}
                         onChange={(event) => updateSection(index, {
                           mediaIntegration: event.target.value as typeof section.mediaIntegration,
@@ -485,9 +520,9 @@ export default function RevisionEditor({
                     </div>
                   ) : null}
                   <div className="field">
-                    <label>{section.key} surface</label>
+                    <label>Section color role</label>
                     <select
-                      aria-label={`${section.key} surface`}
+                      aria-label={`${sectionName} surface`}
                       value={section.surfaceRole || "canvas"}
                       onChange={(event) =>
                         updateSection(index, {
@@ -505,9 +540,9 @@ export default function RevisionEditor({
                   </div>
                   {typeof section.properties.height === "number" ? (
                     <div className="field">
-                      <label>{section.key} height</label>
+                      <label>Section height</label>
                       <input
-                        aria-label={`${section.key} height`}
+                        aria-label={`${sectionName} height`}
                         type="number"
                         min={320}
                         max={760}
@@ -516,35 +551,39 @@ export default function RevisionEditor({
                       />
                     </div>
                   ) : null}
-                </div>
+                  </div>
+                </details>
               );
             })}
           </div>
         </section>
 
-        <section className="panel">
-          <h2>Focused content blocks</h2>
-          {snapshot.contentBlocks.blocks.map((block) => (
-            <div className="revision-item form-grid" key={block.key}>
-              <Field value={block.kicker} onChange={(value) => updateBlock(block.key, { kicker: value })} label={`${block.key} kicker`} max={100} />
-              <Field value={block.title} onChange={(value) => updateBlock(block.key, { title: value })} label={`${block.key} title`} max={180} />
+        <section className="panel" hidden={activeArea !== "content"}>
+          <h2>Page content</h2>
+          {snapshot.contentBlocks.blocks.map((block, index) => {
+            const sectionName = block.title || `${block.type} section`;
+            return <details className="revision-item editor-disclosure" key={block.key} open={index === 0}>
+              <summary><span><strong>{sectionName}</strong><small>{block.type.replaceAll("_", " ")}</small></span><b>Edit</b></summary>
+              <div className="form-grid editor-disclosure-body">
+              <Field value={block.kicker} onChange={(value) => updateBlock(block.key, { kicker: value })} label={`${sectionName} short label`} max={100} />
+              <Field value={block.title} onChange={(value) => updateBlock(block.key, { title: value })} label={`${sectionName} heading`} max={180} />
               <div className="field full">
-                <label>{block.key} body</label>
-                <textarea aria-label={`${block.key} body`} value={block.body} maxLength={3000} onChange={(event) => updateBlock(block.key, { body: event.target.value })} />
+                <label>Body copy</label>
+                <textarea aria-label={`${sectionName} body`} value={block.body} maxLength={3000} onChange={(event) => updateBlock(block.key, { body: event.target.value })} />
               </div>
-              {"quote" in block ? <Field value={block.quote} onChange={(value) => updateBlock(block.key, { quote: value } as Partial<ShowroomContentBlock>)} label={`${block.key} quote`} max={500} /> : null}
-              {"actionLabel" in block ? <Field value={block.actionLabel} onChange={(value) => updateBlock(block.key, { actionLabel: value } as Partial<ShowroomContentBlock>)} label={`${block.key} action label`} max={80} /> : null}
+              {"quote" in block ? <Field value={block.quote} onChange={(value) => updateBlock(block.key, { quote: value } as Partial<ShowroomContentBlock>)} label={`${sectionName} quote`} max={500} /> : null}
+              {"actionLabel" in block ? <Field value={block.actionLabel} onChange={(value) => updateBlock(block.key, { actionLabel: value } as Partial<ShowroomContentBlock>)} label={`${sectionName} action label`} max={80} /> : null}
               {"transcript" in block ? (
                 <div className="field full">
-                  <label>{block.key} transcript</label>
-                  <textarea aria-label={`${block.key} transcript`} value={block.transcript} maxLength={4000} onChange={(event) => updateBlock(block.key, { transcript: event.target.value } as Partial<ShowroomContentBlock>)} />
+                  <label>Video transcript</label>
+                  <textarea aria-label={`${sectionName} transcript`} value={block.transcript} maxLength={4000} onChange={(event) => updateBlock(block.key, { transcript: event.target.value } as Partial<ShowroomContentBlock>)} />
                 </div>
               ) : null}
               {"items" in block ? (
                 <div className="field full">
-                  <label>{block.key} items</label>
+                  <label>Section items</label>
                   <textarea
-                    aria-label={`${block.key} items`}
+                    aria-label={`${sectionName} items`}
                     value={itemLines(block)}
                     onChange={(event) => updateBlock(block.key, { items: parseItemLines(block, event.target.value) } as Partial<ShowroomContentBlock>)}
                   />
@@ -552,41 +591,54 @@ export default function RevisionEditor({
                 </div>
               ) : null}
               {block.type === "hero" ? (
-                <MediaChoice label={`${block.key} hero media`} value={mediaValue(block, "hero_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "hero_image", value)} />
+                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "hero_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "hero_image", value)} />
               ) : null}
               {["story", "highlights", "information"].includes(block.type) ? (
-                <MediaChoice label={`${block.key} story media`} value={mediaValue(block, "story_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "story_image", value)} />
+                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "story_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "story_image", value)} />
               ) : null}
               {block.type === "video" ? (
-                <MediaChoice label={`${block.key} controlled video`} value={mediaValue(block, "video")} options={imageOptions} kind="video" onChange={(value) => setBlockMedia(block, "video", value)} />
+                <MediaChoice label={`${sectionName} video`} value={mediaValue(block, "video")} options={imageOptions} kind="video" onChange={(value) => setBlockMedia(block, "video", value)} />
               ) : null}
-            </div>
-          ))}
+              </div>
+            </details>;
+          })}
         </section>
 
-        <section className="panel">
+        <section className="panel" hidden={activeArea !== "offerings"}>
           <div className="dashboard-head">
             <div><h2>Categories</h2><p>Categories drive showroom filters.</p></div>
-            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, categories: [...current.categories, { key: uid("category"), collectionKey: null, name: "New category", slug: "", sortOrder: current.categories.length, active: true }] }))}>Add category</button>
+            <button type="button" className="small-btn" onClick={() => { setSnapshot((current) => ({ ...current, categories: [...current.categories, { key: uid("category"), collectionKey: null, name: "New category", slug: "", sortOrder: current.categories.length, active: true }] })); setCategoryPage(Math.ceil((snapshot.categories.length + 1) / EDITOR_PAGE_SIZE)); }}>Add category</button>
           </div>
-          {snapshot.categories.map((item, index) => (
-            <div className="revision-item form-grid" key={item.key}>
+          {snapshot.categories
+            .slice((categoryPage - 1) * EDITOR_PAGE_SIZE, categoryPage * EDITOR_PAGE_SIZE)
+            .map((item, offset) => {
+            const index = (categoryPage - 1) * EDITOR_PAGE_SIZE + offset;
+            return <details className="revision-item editor-disclosure" key={item.key} open={offset === 0}>
+              <summary><span><strong>{item.name || "Untitled category"}</strong><small>Category {index + 1}</small></span><b>Edit</b></summary>
+              <div className="form-grid editor-disclosure-body">
               <Field value={item.name} onChange={(value) => updateCategory(index, { name: value })} label={`Category ${index + 1} name`} max={100} />
               <Field value={item.slug} onChange={(value) => updateCategory(index, { slug: value })} label={`Category ${index + 1} slug`} max={80} />
               <div className="field"><label>Sort order</label><input aria-label={`Category ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateCategory(index, { sortOrder: Number(event.target.value) })} /></div>
               <label className="check-field"><input type="checkbox" checked={item.active} onChange={(event) => updateCategory(index, { active: event.target.checked })} /> Active</label>
               <button type="button" className="small-btn danger" onClick={() => removeCategory(index)}>Remove category</button>
-            </div>
-          ))}
+              </div>
+            </details>;
+          })}
+          {categoryPages > 1 ? <div className="editor-pagination" aria-label="Category pages"><button type="button" className="small-btn" disabled={categoryPage === 1} onClick={() => setCategoryPage((page) => page - 1)}>Previous</button><span>Page {categoryPage} of {categoryPages}</span><button type="button" className="small-btn" disabled={categoryPage === categoryPages} onClick={() => setCategoryPage((page) => page + 1)}>Next</button></div> : null}
         </section>
 
-        <section className="panel">
+        <section className="panel" hidden={activeArea !== "offerings"}>
           <div className="dashboard-head">
             <div><h2>Products &amp; capabilities</h2><p>Structured offerings remain private until this revision is approved and published.</p></div>
-            <button type="button" className="small-btn" onClick={() => setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New offering", slug: "", eyebrow: "", description: "", imageRef: "", videoRef: "", priceMinor: null, currency: "ETB", quantityUnit: "", highlights: [], availability: "available", offeringKind: "standard_product", quantityMode: "optional", capacitySummary: "", minimumOrderSummary: "", leadTimeSummary: "", published: true, sortOrder: current.products.length, optionGroups: [] }] }))}>Add offering</button>
+            <button type="button" className="small-btn" onClick={() => { setSnapshot((current) => ({ ...current, products: [...current.products, { key: uid("product"), collectionKey: null, categoryKey: null, name: "New offering", slug: "", eyebrow: "", description: "", imageRef: "", videoRef: "", priceMinor: null, currency: "ETB", quantityUnit: "", highlights: [], availability: "available", offeringKind: "standard_product", quantityMode: "optional", capacitySummary: "", minimumOrderSummary: "", leadTimeSummary: "", published: true, sortOrder: current.products.length, optionGroups: [] }] })); setProductPage(Math.ceil((snapshot.products.length + 1) / EDITOR_PAGE_SIZE)); }}>Add offering</button>
           </div>
-          {snapshot.products.map((item, index) => (
-            <div className="revision-item form-grid" key={item.key}>
+          {snapshot.products
+            .slice((productPage - 1) * EDITOR_PAGE_SIZE, productPage * EDITOR_PAGE_SIZE)
+            .map((item, offset) => {
+            const index = (productPage - 1) * EDITOR_PAGE_SIZE + offset;
+            return <details className="revision-item editor-disclosure" key={item.key} open={offset === 0}>
+              <summary><span><strong>{item.name || "Untitled offering"}</strong><small>{item.offeringKind.replaceAll("_", " ")}</small></span><b>Edit</b></summary>
+              <div className="form-grid editor-disclosure-body">
               <Field value={item.name} onChange={(value) => updateProduct(index, { name: value })} label={`Product ${index + 1} name`} max={140} />
               <Field value={item.slug} onChange={(value) => updateProduct(index, { slug: value })} label={`Product ${index + 1} slug`} max={80} />
               <Field value={item.eyebrow} onChange={(value) => updateProduct(index, { eyebrow: value })} label={`Product ${index + 1} short label`} max={100} />
@@ -616,8 +668,10 @@ export default function RevisionEditor({
                 <small>One group per line: Name: value, value. Up to four groups.</small>
               </div>
               <button type="button" className="small-btn danger" onClick={() => setSnapshot((current) => ({ ...current, products: current.products.filter((_, i) => i !== index) }))}>Remove offering</button>
-            </div>
-          ))}
+              </div>
+            </details>;
+          })}
+          {productPages > 1 ? <div className="editor-pagination" aria-label="Offering pages"><button type="button" className="small-btn" disabled={productPage === 1} onClick={() => setProductPage((page) => page - 1)}>Previous</button><span>Page {productPage} of {productPages}</span><button type="button" className="small-btn" disabled={productPage === productPages} onClick={() => setProductPage((page) => page + 1)}>Next</button></div> : null}
         </section>
 
         <div className="sticky-actions">

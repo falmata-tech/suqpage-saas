@@ -69,4 +69,4 @@ node node_modules/tsx/dist/cli.mjs scripts/test-revisions.ts
 printf '\n=== Production dependency audit ===\n'
 npm audit --omit=dev --audit-level=moderate
 
-printf '\nAll SuqPage release checks passed.\n'
+printf '\nAll MirtPage release checks passed.\n'

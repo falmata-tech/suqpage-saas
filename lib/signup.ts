@@ -41,12 +41,12 @@ export function parseSignupInput(raw: Record<string, unknown>): SignupInput {
   if (email.length > 160 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new SignupError("Enter a valid email address.");
   if (phone.length < 5 || phone.length > 40) throw new SignupError("Enter a usable phone or WhatsApp number.");
   if (businessName.length < 2 || businessName.length > 120) throw new SignupError("Enter your business name using 2–120 characters.");
-  if (handle.length < 3 || handle.length > 80) throw new SignupError("Choose a Suq address using at least 3 letters or numbers.");
+  if (handle.length < 3 || handle.length > 80) throw new SignupError("Choose a showroom address using at least 3 letters or numbers.");
   if (!isStrongPassword(password)) throw new SignupError("Use at least 12 characters with upper-case, lower-case, and a number.");
   if (password !== confirmPassword) throw new SignupError("Passwords do not match.");
   if (requestText.length < 20 || requestText.length > 4_000) throw new SignupError("Describe what you make and the showroom you need using 20–4,000 characters.");
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new SignupError("The signup session is invalid. Refresh and try again.");
-  if (!consent) throw new SignupError("Confirm that SuqPage may use these details to create your private workspace.");
+  if (!consent) throw new SignupError("Confirm that MirtPage may use these details to create your private workspace.");
   return { name, email, phone, businessName, handle, password, requestText, idempotencyKey };
 }
 
@@ -57,7 +57,7 @@ export function createPublicClientWorkspace(raw: Record<string, unknown>) {
     throw new SignupError("An account already uses this email. Sign in instead.", 409, "email_conflict");
   }
   if (db.prepare("SELECT 1 FROM businesses WHERE lower(handle)=?").get(input.handle)) {
-    throw new SignupError("That Suq address is already in use. Choose another.", 409, "handle_conflict");
+    throw new SignupError("That showroom address is already in use. Choose another.", 409, "handle_conflict");
   }
 
   try {
@@ -96,7 +96,7 @@ export function createPublicClientWorkspace(raw: Record<string, unknown>) {
       throw new SignupError("An account already uses this email. Sign in instead.", 409, "email_conflict");
     }
     if (error instanceof Error && /businesses\.handle|UNIQUE constraint failed: businesses\.handle/i.test(error.message)) {
-      throw new SignupError("That Suq address is already in use. Choose another.", 409, "handle_conflict");
+      throw new SignupError("That showroom address is already in use. Choose another.", 409, "handle_conflict");
     }
     throw new SignupError("Your private workspace could not be created.", 500, "unexpected");
   }

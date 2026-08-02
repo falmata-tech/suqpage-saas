@@ -11,7 +11,7 @@ last_updated: 2026-07-20
 
 ## Purpose
 
-Define the stable UI contract for the SuqPage platform, four custom showrooms,
+Define the stable UI contract for the MirtPage platform, four custom showrooms,
 and authenticated operations dashboard.
 
 ## Architecture
@@ -25,7 +25,7 @@ and authenticated operations dashboard.
 
 ## Routing and access
 
-- `/` is the SuqPage platform landing page and intentional directory.
+- `/` is the MirtPage platform landing page and intentional directory.
 - `/@handle` resolves active public showrooms only.
 - `/preview/@handle` requires authentication and authorization.
 - `/dashboard/**` requires a session; temporary-password accounts are restricted

@@ -68,7 +68,7 @@ approval, publication, tenant, media, and rollback invariants.
   new monotonic v2 publication rather than restoring an old key as live state.
 - Migration is idempotent and transactional. It preserves business IDs,
   handles, client users, assignments, requests, revision IDs/statuses,
-  published version numbers, catalog IDs/content, inquiries, and deliveries.
+  published version numbers, catalog IDs/content, inquiries, and support state.
 - After migration, zero active business, revision, or retained publication rows
   remain in v1/legacy-key form.
 

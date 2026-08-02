@@ -54,9 +54,9 @@ workspace.
 
 - The public interest endpoint accepts bounded JSON only and never initializes
   attachment writes; multipart/file input is rejected before decoding or storage.
-- Authenticated client requests may contain up to ten images, each at most 5 MB
-  and 20 megapixels; only decoded JPEG/PNG/WebP is stored after
-  metadata-removing re-encoding.
+- Authenticated request intake rejects generic files. After design import, each
+  labeled image slot accepts one image of at most 5 MB and 20 megapixels; only
+  decoded JPEG/PNG/WebP is stored after metadata-removing re-encoding.
 - Authenticated multipart/request limits reject oversized input before
   unbounded buffering.
 - Storage keys are random and original filenames are private metadata, never URL
@@ -92,8 +92,8 @@ workspace.
 ## Scenarios
 
 ```gherkin
-Scenario: Request attachment stays private
-  GIVEN an authenticated client request with an accepted sanitized image
+Scenario: Design-slot image stays private
+  GIVEN an imported private design with an accepted sanitized slot image
   WHEN an unauthenticated or unauthorized actor requests its identifier
   THEN no attachment content or private metadata is disclosed
 
@@ -114,7 +114,7 @@ Scenario: Client permission cutover is controlled
   WHEN owners are migrated to the client permission set
   THEN their existing sessions are revoked
   AND catalog/settings/design mutations are denied
-  AND request, inquiry, delivery, preview, and account workflows remain available
+  AND request, inquiry, support, preview, and account workflows remain available
 
 Scenario: Existing example showrooms survive cutover
   GIVEN four active example businesses with owner accounts and live catalog data
@@ -212,8 +212,8 @@ backup/restore, release, container, and production-browser gates below.
 - Schema migration 6 additively stores monotonic business content versions,
   bounded revision snapshots, immutable decision/publication metadata, and
   retained published versions.
-- Sanitized request images use random keys below the persistent private media
-  root, outside the public/build tree.
+- Sanitized design-slot images use random keys below the persistent private
+  media root, outside the public/build tree.
 - `scripts/test-operations.mjs` proves request rows, events, metadata, and private
   attachment files plus revision/version rows survive backup and restore. New
   invited clients and individually provisioned staff use explicit restrictive

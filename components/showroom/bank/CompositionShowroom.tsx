@@ -187,7 +187,7 @@ export function InvalidComposition() {
         <h1>This design could not be verified.</h1>
         <p>
           No substitute design was loaded. Please try again later or contact
-          SuqPage support.
+          MirtPage support.
         </p>
       </div>
     </main>

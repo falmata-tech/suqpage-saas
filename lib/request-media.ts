@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
-import fs from "node:fs";
 import path from "node:path";
 import { requestAttachmentRoot } from "./config";
 import { prepareUploadedImage } from "./media";
+import { assertMediaObjectKey, getMediaObjectStore } from "./media-storage";
 import { RequestError, type RequestImageInput } from "./request-domain";
 import type { RequestAttachmentStore, StoredRequestImage } from "./request-ports";
 
@@ -19,22 +19,27 @@ export class FileRequestAttachmentStore implements RequestAttachmentStore {
       throw new RequestError(error instanceof Error ? error.message : "The image could not be processed.");
     }
     const storageKey = `${crypto.randomUUID()}.${prepared.ext}`;
-    fs.mkdirSync(requestAttachmentRoot(), { recursive: true });
-    fs.writeFileSync(path.join(/* turbopackIgnore: true */ requestAttachmentRoot(), storageKey), prepared.buffer, { flag: "wx", mode: 0o640 });
+    await getMediaObjectStore().put("requests", storageKey, prepared.buffer, prepared.mime);
     return { ...prepared, storageKey, originalName: safeOriginalName(input.originalName) };
   }
 
-  remove(storageKeys: string[]) {
-    for (const storageKey of storageKeys) {
-      const full = resolveRequestAttachment(storageKey);
-      if (full) fs.rmSync(full, { force: true });
-    }
+  async remove(storageKeys: string[]) {
+    await getMediaObjectStore().remove("requests", storageKeys);
   }
 }
 
 export function resolveRequestAttachment(storageKey: string) {
-  if (!/^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(storageKey)) return null;
+  try { assertMediaObjectKey(storageKey); } catch { return null; }
   const root = requestAttachmentRoot();
   const full = path.resolve(/* turbopackIgnore: true */ root, storageKey);
   return full.startsWith(`${root}${path.sep}`) ? full : null;
+}
+
+export async function readRequestAttachment(storageKey: string, mime: string) {
+  try {
+    assertMediaObjectKey(storageKey);
+  } catch {
+    return null;
+  }
+  return getMediaObjectStore().read("requests", storageKey, mime);
 }

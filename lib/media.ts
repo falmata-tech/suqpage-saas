@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
-import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { mediaRoot } from "./config";
+import { assertMediaObjectKey, getMediaObjectStore } from "./media-storage";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGE_PIXELS = 20_000_000;
@@ -11,7 +11,7 @@ export type PreparedImage = { buffer: Buffer; ext: VerifiedImage["ext"]; mime: V
 export type StagedImage = {
   imageRef: string;
   digest: string;
-  discard: () => void;
+  discard: () => Promise<void>;
 };
 
 function jpegDimensions(buffer: Buffer) {
@@ -99,23 +99,31 @@ export async function stageUploadedImage(
   if (!(file instanceof File) || file.size === 0) return null;
   const buffer = Buffer.from(await file.arrayBuffer());
   const prepared = await prepareUploadedImage(buffer, file.type);
-  fs.mkdirSync(mediaRoot(), { recursive: true });
   const filename = `${prefix}-${crypto.randomUUID()}.${prepared.ext}`;
-  const fullPath = path.join(mediaRoot(), filename);
-  fs.writeFileSync(fullPath, prepared.buffer, { flag: "wx", mode: 0o640 });
+  const store = getMediaObjectStore();
+  await store.put("public", filename, prepared.buffer, prepared.mime);
   return {
     imageRef: `/media/${filename}`,
     digest: crypto.createHash("sha256").update(prepared.buffer).digest("hex"),
-    discard: () => fs.rmSync(fullPath, { force: true }),
+    discard: () => store.remove("public", [filename]),
   };
 }
 
 export function resolveMediaFile(filename: string) {
-  if (!/^[a-z0-9-]+-[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(filename)) return null;
+  try { assertMediaObjectKey(filename); } catch { return null; }
   const root = mediaRoot();
   const full = path.resolve(/* turbopackIgnore: true */ root, filename);
   if (!full.startsWith(`${root}${path.sep}`)) return null;
   return full;
+}
+
+export async function readPublishedMedia(filename: string) {
+  try {
+    assertMediaObjectKey(filename);
+  } catch {
+    return null;
+  }
+  return getMediaObjectStore().read("public", filename, mediaMime(filename));
 }
 
 export function mediaMime(filename: string) {

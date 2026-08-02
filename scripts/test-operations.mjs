@@ -5,13 +5,13 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-operations-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-operations-"));
 const env = {
   ...process.env,
-  SUQPAGE_DB_PATH: path.join(root, "data", "app.db"),
-  SUQPAGE_MEDIA_ROOT: path.join(root, "data", "media"),
-  SUQPAGE_BACKUP_ROOT: path.join(root, "backups"),
-  SUQPAGE_CREDENTIAL_PATH: path.join(root, "credentials.txt"),
+  MIRTPAGE_DB_PATH: path.join(root, "data", "app.db"),
+  MIRTPAGE_MEDIA_ROOT: path.join(root, "data", "media"),
+  MIRTPAGE_BACKUP_ROOT: path.join(root, "backups"),
+  MIRTPAGE_CREDENTIAL_PATH: path.join(root, "credentials.txt"),
   PRIVACY_SALT: "operations-test-privacy-salt-long-enough",
 };
 const tsx = ["node_modules/tsx/dist/cli.mjs"];
@@ -23,7 +23,7 @@ function run(script, args = []) {
 
 try {
   run("scripts/setup.ts", ["--reset"]);
-  let db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  let db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
   const preCutover = {
     businesses: db.prepare("SELECT COUNT(*) count FROM businesses").get().count,
     products: db.prepare("SELECT COUNT(*) count FROM products").get().count,
@@ -47,7 +47,7 @@ try {
   `);
   db.close();
   run("scripts/migrate.ts");
-  db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM businesses").get().count,preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM products").get().count,preCutover.products);
   assert.equal(db.prepare("SELECT COUNT(*) count FROM user_access_profiles WHERE access_role='client'").get().count,preCutover.clients);
@@ -57,12 +57,12 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) count FROM support_conversations").get().count,0);
   assert.equal(db.prepare("PRAGMA foreign_key_check").all().length,0);
   db.close();
-  fs.mkdirSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true });
-  fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "media restore proof");
-  fs.mkdirSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests"), { recursive: true });
+  fs.mkdirSync(env.MIRTPAGE_MEDIA_ROOT, { recursive: true });
+  fs.writeFileSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "restore-proof.txt"), "media restore proof");
+  fs.mkdirSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "requests"), { recursive: true });
   const requestStorageKey = "11111111-1111-4111-8111-111111111111.png";
-  fs.writeFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "private request attachment");
-  db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  fs.writeFileSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "requests", requestStorageKey), "private request attachment");
+  db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
   const owner = db.prepare("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client' ORDER BY u.id LIMIT 1").get();
   const admin = db.prepare("SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='platform_admin' LIMIT 1").get();
   db.prepare("INSERT INTO client_invitations(request_id,business_id,email,name,token_hash,expires_at,created_by_user_id,created_at) VALUES(NULL,?,'backup-invite@example.test','Backup Invite','backup-invitation-hash',?,?,?)").run(owner.business_id,Date.now()+60_000,admin.id,Date.now());
@@ -79,19 +79,19 @@ try {
   const expectedRevisionCount = preCutover.revisions + 1;
   db.close();
   run("scripts/backup.ts");
-  const backup = path.join(env.SUQPAGE_BACKUP_ROOT, fs.readdirSync(env.SUQPAGE_BACKUP_ROOT).sort().at(-1));
+  const backup = path.join(env.MIRTPAGE_BACKUP_ROOT, fs.readdirSync(env.MIRTPAGE_BACKUP_ROOT).sort().at(-1));
 
-  db = new DatabaseSync(env.SUQPAGE_DB_PATH);
+  db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, expectedRequestCount);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM content_revisions").get().count, expectedRevisionCount);
   db.exec("DELETE FROM businesses");
   db.close();
-  fs.rmSync(env.SUQPAGE_MEDIA_ROOT, { recursive: true, force: true });
+  fs.rmSync(env.MIRTPAGE_MEDIA_ROOT, { recursive: true, force: true });
 
   run("scripts/restore.ts", [`--from=${backup}`]);
-  db = new DatabaseSync(env.SUQPAGE_DB_PATH, { readOnly: true });
+  db = new DatabaseSync(env.MIRTPAGE_DB_PATH, { readOnly: true });
   assert.equal(db.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM businesses").get().count, preCutover.businesses);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM service_requests").get().count, expectedRequestCount);
@@ -103,8 +103,8 @@ try {
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE version IN (21,22)").get().count, 2);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM client_invitations WHERE request_id IS NULL AND token_hash='backup-invitation-hash'").get().count, 1);
   db.close();
-  assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");
-  assert.equal(fs.readFileSync(path.join(env.SUQPAGE_MEDIA_ROOT, "requests", requestStorageKey), "utf8"), "private request attachment");
+  assert.equal(fs.readFileSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "restore-proof.txt"), "utf8"), "media restore proof");
+  assert.equal(fs.readFileSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "requests", requestStorageKey), "utf8"), "private request attachment");
   console.log("Migration, database integrity, request attachment/revision backup, and restore tests passed.");
 } finally {
   fs.rmSync(root, { recursive: true, force: true });

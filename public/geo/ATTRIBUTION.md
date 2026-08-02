@@ -28,5 +28,5 @@ it is not a routable street database.
 - Geofabrik attribution: https://www.geofabrik.de/geofabrik/geofabrik.html
 
 The local copies retain only the names, classifications, coordinates, and
-geometry needed for the SuqPage Expo overview. They are visual discovery aids,
+geometry needed for the MirtPage Expo overview. They are visual discovery aids,
 not authoritative legal boundaries, navigation instructions, or a live map.

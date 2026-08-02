@@ -1,12 +1,10 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
-import { createDeliveryRequest } from "@/lib/deliveries";
 import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
 import { saveUploadedImage, stageUploadedImage } from "@/lib/media";
 import { isStrongPassword } from "@/lib/passwords";
@@ -175,7 +173,7 @@ export async function basicProductUpkeepAction(formData:FormData){
     const priceValue=priceInput===""?null:Number(priceInput);
     if(priceValue!==null&&(!Number.isFinite(priceValue)||priceValue<0||priceValue>9999999.99))throw new ProductUpkeepError("Price must be a valid non-negative ETB amount.");
     const videoInput=text(formData,"videoUrl",500);
-    result=executeBasicProductUpkeep(sqliteProductUpkeepPort,user,{
+    result=await executeBasicProductUpkeep(sqliteProductUpkeepPort,user,{
       kind:text(formData,"kind",20),
       businessId,
       productId,
@@ -212,10 +210,3 @@ export async function basicProductUpkeepAction(formData:FormData){
 }
 
 export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");getDb().prepare("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?").run(status,int(formData,"inquiryId"),businessId);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined});}
-
-export async function createDeliveryRequestAction(formData:FormData){
-  const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));
-  let result:{externalRequestId:string};
-  try{result=createDeliveryRequest({businessId,inquiryId:int(formData,"inquiryId")||null,customerName:text(formData,"customerName",80),phone:text(formData,"phone",40),pickupAddress:text(formData,"pickupAddress",300),deliveryAddress:text(formData,"deliveryAddress",300),packageCount:int(formData,"packageCount",1),note:text(formData,"note",1000),companyIds:formData.getAll("companyIds"),idempotencyKey:crypto.randomUUID()},user.business_id,hasCapability(user,"operations:manage"));}catch(error){go("/dashboard/deliveries",{business:businessId,error:error instanceof Error?error.message:"Could not create delivery request."});}
-  audit("delivery.created",{userId:user.id,businessId,detail:result});revalidatePath("/dashboard/deliveries");revalidatePath("/dashboard/inquiries");go("/dashboard/deliveries",{business:businessId,created:result.externalRequestId});
-}

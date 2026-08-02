@@ -5,9 +5,9 @@ import path from "node:path";
 import type { SessionUser } from "../lib/types";
 
 async function main() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-account-health-"));
-  process.env.SUQPAGE_DB_PATH = path.join(root, "test.db");
-  process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-account-health-"));
+  process.env.MIRTPAGE_DB_PATH = path.join(root, "test.db");
+  process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
   process.env.PRIVACY_SALT = "account-health-test-salt-long-enough";
   const { closeDbForTests, getBusinessByHandle, getDb } = await import("../lib/db");
   const {

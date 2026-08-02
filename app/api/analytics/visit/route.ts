@@ -4,7 +4,7 @@ import { recordShowroomVisit } from "@/lib/account-health";
 import { assertSameOrigin } from "@/lib/security";
 
 export const runtime = "nodejs";
-const COOKIE = "suqpage_visitor";
+const COOKIE = "mirtpage_visitor";
 const MAX_BODY = 2048;
 
 export async function POST(request: NextRequest) {

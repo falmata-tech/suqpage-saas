@@ -25,8 +25,8 @@ export async function notifyNewInquiry(
       body: JSON.stringify({
         from,
         to: [business.contact_email],
-        subject: `New SuqPage inquiry #${inquiryId}`,
-        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to SuqPage to review it.`,
+        subject: `New MirtPage inquiry #${inquiryId}`,
+        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to MirtPage to review it.`,
       }),
     });
     if (!response.ok) throw new Error("provider_non_success");

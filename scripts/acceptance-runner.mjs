@@ -12,7 +12,7 @@ const port = await new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve(selected));
   });
 });
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-acceptance-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-acceptance-"));
 const runId = path.basename(root);
 const distDir = path.posix.join(".next-acceptance", runId);
 const buildOutputPath = path.join(process.cwd(), distDir);
@@ -24,21 +24,21 @@ const env = {
   ...process.env,
   NODE_ENV: "production",
   NEXT_TELEMETRY_DISABLED: "1",
-  NEXT_PUBLIC_APP_URL: "https://suqpage.test",
-  SUQPAGE_DB_PATH: path.join(root, "acceptance.db"),
-  SUQPAGE_MEDIA_ROOT: path.join(root, "media"),
-  SUQPAGE_BACKUP_ROOT: path.join(root, "backups"),
-  SUQPAGE_CREDENTIAL_PATH: credentialsPath,
+  NEXT_PUBLIC_APP_URL: "https://mirtpage.test",
+  MIRTPAGE_DB_PATH: path.join(root, "acceptance.db"),
+  MIRTPAGE_MEDIA_ROOT: path.join(root, "media"),
+  MIRTPAGE_BACKUP_ROOT: path.join(root, "backups"),
+  MIRTPAGE_CREDENTIAL_PATH: credentialsPath,
   PRIVACY_SALT: "acceptance-test-privacy-salt-long-enough",
   PORT: String(port),
-  SUQPAGE_TEST_BASE_URL: baseURL,
-  SUQPAGE_TEST_CREDENTIALS: credentialsPath,
-  SUQPAGE_TEST_DB: path.join(root, "acceptance.db"),
-  SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
-  SUQPAGE_SERVER_ACTION_ORIGINS: baseURL,
-  SUQPAGE_NEXT_DIST_DIR: distDir,
-  SUQPAGE_NEXT_TSCONFIG: tsconfigName,
-  SUQPAGE_BAZAAR_NOW: "2026-07-26T10:00:00.000Z",
+  MIRTPAGE_TEST_BASE_URL: baseURL,
+  MIRTPAGE_TEST_CREDENTIALS: credentialsPath,
+  MIRTPAGE_TEST_DB: path.join(root, "acceptance.db"),
+  MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
+  MIRTPAGE_SERVER_ACTION_ORIGINS: baseURL,
+  MIRTPAGE_NEXT_DIST_DIR: distDir,
+  MIRTPAGE_NEXT_TSCONFIG: tsconfigName,
+  MIRTPAGE_BAZAAR_NOW: "2026-07-26T10:00:00.000Z",
 };
 
 function run(command, args, { capture = false } = {}) {
@@ -67,7 +67,7 @@ try {
   fs.writeFileSync(tsconfigPath, `${JSON.stringify({ extends: "./tsconfig.json", include: ["next-env.d.ts", "**/*.ts", "**/*.tsx"] }, null, 2)}\n`, { flag: "wx" });
   const setupOutput = run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"], { capture: true });
   if (/^(?:ADMIN|CLIENT) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
-  for (const line of setupOutput.split("\n").filter((value) => value.startsWith("SuqPage database") || value.startsWith("Temporary credentials"))) console.log(line);
+  for (const line of setupOutput.split("\n").filter((value) => value.startsWith("MirtPage database") || value.startsWith("Temporary credentials"))) console.log(line);
   run(process.execPath, ["node_modules/next/dist/bin/next", "build"]);
 
   app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port)], {

@@ -5,13 +5,13 @@ import { geoContains } from "d3-geo";
 const root = process.cwd();
 const admin1Path = path.join(root, "public/geo/ethiopia-admin1-2023.geojson");
 const admin2Source =
-  process.env.SUQPAGE_ADMIN2_SOURCE ||
+  process.env.MIRTPAGE_ADMIN2_SOURCE ||
   "/tmp/ethiopia-admin2-2023-source.geojson";
 const placesSource =
-  process.env.SUQPAGE_OSM_PLACES_SOURCE ||
+  process.env.MIRTPAGE_OSM_PLACES_SOURCE ||
   "/tmp/ethiopia-osm-places.json";
 const roadsSource =
-  process.env.SUQPAGE_OSM_ROADS_SOURCE ||
+  process.env.MIRTPAGE_OSM_ROADS_SOURCE ||
   "/tmp/ethiopia-osm-major-roads.json";
 
 function readJson(file) {

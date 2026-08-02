@@ -54,7 +54,7 @@ export default function ClientRequestForm({
   }
 
   return (
-    <form className="panel form-grid intake-form" onSubmit={submit} encType="multipart/form-data">
+    <form className="panel form-grid intake-form" onSubmit={submit}>
       <input type="hidden" name="idempotencyKey" value={key} />
       <div className="field full">
         <span className="eyebrow">
@@ -62,8 +62,9 @@ export default function ClientRequestForm({
         </span>
         <h2>Tell us what exists today</h2>
         <p>
-          SuqPage will choose a suitable page structure and the number of
-          product, capability, and image slots. You do not need to prepare a website layout.
+          MirtPage will choose a suitable page structure and the number of
+          product, capability, and image slots. Images are added to the labeled
+          checklist after the design is imported.
         </p>
       </div>
       <div className="field">
@@ -84,9 +85,9 @@ export default function ClientRequestForm({
       <div className="field full">
         <label htmlFor="client-photography-stage">Photography</label>
         <select id="client-photography-stage" name="photographyStage" defaultValue="Some images exist; create labeled slots for the rest">
-          <option>Images are ready to attach</option>
+          <option>Images are ready for the design checklist</option>
           <option>Some images exist; create labeled slots for the rest</option>
-          <option>Photography will be added after the blueprint</option>
+          <option>Photography will be added during design</option>
         </select>
       </div>
       <div className="field full">
@@ -100,15 +101,10 @@ export default function ClientRequestForm({
           placeholder="List what you sell, make, grow, supply, or can manufacture. Add known capacity, minimum order, lead time, categories, and common customer questions. A simple list is fine; leave unknown facts out."
         />
       </div>
-      <div className="field full">
-        <label htmlFor="client-request-images">Available reference images <span className="optional">optional</span></label>
-        <input id="client-request-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple />
-        <small>Up to 10 private JPEG, PNG, or WebP references. Missing photography becomes a labeled recipe slot later.</small>
-      </div>
       {error ? <p className="error field full" role="alert">{error}</p> : null}
       <div className="field full">
         <button className="btn brand" disabled={pending}>
-          {pending ? "Sending request..." : "Send request to SuqPage"}
+          {pending ? "Sending request..." : "Send request to MirtPage"}
         </button>
       </div>
     </form>
