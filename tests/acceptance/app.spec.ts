@@ -165,13 +165,16 @@ test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inq
   await expoSchedule.locator("a:not(.today)").first().click();
   await expect(page.locator("#daily-expo-title")).toBeVisible();
   await expect(page.getByText("Preview only", { exact: true })).toBeVisible();
-  const previewOutlines = page.locator(".expo-booth-outline");
-  await expect(previewOutlines.first()).toBeVisible();
-  const previewBooths = await previewOutlines.count();
-  expect(previewBooths).toBeGreaterThan(0);
-  await expect(page.locator(".expo-hall-controls")).toHaveCount(0);
-  await expect(page.locator(".expo-booth")).toHaveCount(previewBooths);
-  await expect(page.locator(".expo-booth[data-business-id], .expo-booth img")).toHaveCount(0);
+  const previewState = await page.locator(".daily-expo").evaluate((section) => ({
+    boothCount: section.querySelectorAll(".expo-booth").length,
+    outlineCount: section.querySelectorAll(".expo-booth-outline").length,
+    revealedCount: section.querySelectorAll(".expo-booth[data-business-id], .expo-booth img").length,
+    hallControlCount: section.querySelectorAll(".expo-hall-controls").length,
+  }));
+  expect(previewState.outlineCount).toBeGreaterThan(0);
+  expect(previewState.boothCount).toBe(previewState.outlineCount);
+  expect(previewState.revealedCount).toBe(0);
+  expect(previewState.hallControlCount).toBe(0);
   await expect(page.locator(".expo-status-badge.open")).toContainText(/Open today|Featured today/, { timeout: 8_000 });
   await expect(page).toHaveURL(new RegExp(`expoDay=${todayDay}`));
   await page.goto("/?expoDay=1");
