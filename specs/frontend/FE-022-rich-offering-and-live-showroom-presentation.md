@@ -2,7 +2,7 @@
 id: FE-022
 title: Rich offering and live showroom presentation
 status: done
-related: [BE-021, DEP-018]
+related: [FE-023, BE-021, DEP-018]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L3
@@ -32,7 +32,8 @@ recipes choose one reviewed detail pattern without supplying executable code.
 - Reviewed product-detail patterns selected by the design recipe and rendered
   from the active showroom token roles.
 - Business-specific briefs and published disposable fixtures for all ten
-  curated visual benchmark showrooms; 48 lighter fixtures remain scale data.
+  curated visual benchmark showrooms; FE-023 extends the same complete workflow
+  contract to the other 48 scale fixtures.
 
 ### Non-goals
 

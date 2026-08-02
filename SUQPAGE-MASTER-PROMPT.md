@@ -90,8 +90,9 @@ SuqPage organizes the catalog into a professional branded showroom and adds a st
   Expo, and enter each business's permanent `/@handle` digital showroom;
 - a controlled SaaS pilot with 58 fictional local showrooms spanning makers,
   growers, processors, workshops, natural-care producers, and home brands; ten
-  are curated visual benchmarks and 48 lightweight fixtures exercise discovery
-  and high-volume operations workflows.
+  are curated benchmark identities and all 58 have durable fictional briefs,
+  advised palettes, independent logos and heroes, coordinated booths, and four
+  imaged offerings while exercising discovery and high-volume operations.
 
 ### SuqPage is not
 
@@ -356,12 +357,14 @@ components, catalog modes, and mobile behaviors intentionally vary. Generated
 benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
-The wider disposable seed contains 48 lightweight small-business showrooms
-distributed across six industries and reviewed Ethiopian locations. Reset
-creates 58 total businesses, exactly ten featured profiles, approved discovery
-media, exact map coordinates, and complete dynamically sized Expo floors.
-These are workflow and demonstration fixtures, not finished client designs or
-evidence of real businesses.
+The wider disposable seed contains 48 additional authored small-business
+showrooms distributed across six industries and reviewed Ethiopian locations.
+Reset creates 58 total businesses with 232 imaged offerings, exactly ten
+featured profiles, approved discovery media, exact map coordinates, and
+complete dynamically sized Expo floors. Each has a durable fictional client
+brief, palette advice, a component rationale, independent identity/media paths,
+and desktop/mobile review evidence. These remain illustrative workflow and
+demonstration fixtures, not evidence of real businesses or verified products.
 
 These seeds may be replaced by `npm run reset` only because the product owner
 confirmed the local data is disposable. Any production or data-important

@@ -2,7 +2,7 @@
 id: BE-021
 title: Rich offering and live showroom contract
 status: done
-related: [FE-022, DEP-018]
+related: [FE-022, BE-022, DEP-018]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L3

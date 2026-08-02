@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Illustrative booth for Bora Highland Farm">
+  <rect width="1200" height="800" fill="#edf0f4"/>
+  <path d="M0 655L600 535l600 120v145H0z" fill="#d8dde3"/>
+  <path d="M120 170h960v500H120z" fill="#ffffff" stroke="#c5ccd4" stroke-width="8"/>
+  <path d="M120 170h960v122H120z" fill="#285f85"/>
+  <path d="M120 292h35v378h-35zM1045 292h35v378h-35z" fill="#3d7b42"/>
+  <rect x="390" y="390" width="620" height="205" rx="12" fill="#f4f6f8" stroke="#d2d8df" stroke-width="6"/>
+  <rect x="420" y="470" width="560" height="160" rx="8" fill="#285f85"/>
+  <path d="M420 470h560l-38-55H458z" fill="#3d7b42"/>
+  <rect x="195" y="485" width="145" height="115" rx="10" fill="#ffffff" stroke="#3d7b42" stroke-width="12"/><path d="M215 555h105" stroke="#285f85" stroke-width="18"/>
+  <text x="600" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#ffffff">Bora Highland Farm</text>
+  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">SUQPAGE SHOWROOM</text>
+  <text x="700" y="602" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#ffffff" opacity=".82">two terraced field lines forming a B</text>
+</svg>

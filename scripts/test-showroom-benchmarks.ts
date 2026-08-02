@@ -34,7 +34,7 @@ assert.deepEqual(
 );
 for (const business of activeBusinesses) {
   const catalog = getCatalogByBusinessId(business.id);
-  assert.ok(catalog && catalog.products.length >= 3, `${business.handle} has an inquiry-ready catalog`);
+  assert.equal(catalog?.products.length, 4, `${business.handle} has exactly four designed offerings`);
   for (const product of catalog.products) {
     offeringKinds.add(product.offering_kind);
     quantityModes.add(product.quantity_mode);
@@ -73,7 +73,6 @@ const benchmarkHandles = new Set([
 ]);
 const businesses = activeBusinesses.filter((business) => benchmarkHandles.has(business.handle));
 assert.equal(businesses.length, 10, "ten design benchmark showrooms remain available");
-const productCounts = new Set<number>();
 const tokenPacks = new Set<string>();
 const heroTreatments = new Set<string>();
 const headerComponents = new Set<string>();
@@ -95,8 +94,7 @@ for (const business of businesses) {
     catalog.products.every((product) => product.collection_id === null),
     `${business.handle} products use the category-only taxonomy`,
   );
-  assert.ok(catalog.products.length >= 4, `${business.handle} has a useful catalog`);
-  productCounts.add(catalog.products.length);
+  assert.equal(catalog.products.length, 4, `${business.handle} has four designed offerings`);
   const snapshot = catalogToRevisionSnapshotV4(catalog);
   assert.equal(snapshot.collections.length, 0, `${business.handle} snapshot has no collections`);
   assert.ok(
@@ -169,15 +167,14 @@ for (const business of businesses) {
   );
   assert.equal(
     catalogSection.properties.show_search,
-    catalog.products.length > 6,
-    `${business.handle} enables search only for a larger catalog`,
+    business.handle === "addis-metalworks" || catalog.products.length > 6,
+    `${business.handle} uses search only for scale or the specification-lookup benchmark`,
   );
   for (const ref of [business.hero_image_path, ...catalog.products.map((product) => product.image_path)].filter(Boolean)) {
     const absolute = path.join(process.cwd(), "public", ref);
     assert.ok(fs.existsSync(absolute), `${business.handle} media exists: ${ref}`);
   }
 }
-assert.ok(productCounts.size >= 4, "benchmark catalogs vary their product count");
 assert.ok(tokenPacks.size >= 8, "benchmarks exercise at least eight semantic token systems");
 assert.ok(heroTreatments.size >= 6, "benchmarks exercise at least six hero media treatments");
 assert.equal(headerComponents.size, 7, "benchmarks exercise all seven header anatomies");
@@ -196,4 +193,4 @@ assert.deepEqual(
   "all benchmarks introduce both palette families before the strong close",
 );
 
-console.log("Fifty-eight discovery showrooms, 48 lightweight fixtures, and ten validated design benchmarks passed.");
+console.log("Fifty-eight designed discovery showrooms with four offerings and ten validated benchmark compositions passed.");

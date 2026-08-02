@@ -2,7 +2,7 @@
 id: DEP-018
 title: Rich showroom presentation rollout
 status: done
-related: [FE-022, BE-021]
+related: [FE-022, BE-021, DEP-019]
 owners: [operations, engineering]
 last_updated: 2026-08-01
 change_level: L3
@@ -68,7 +68,7 @@ Scenario: Disposable benchmark reset completes
 
 Evidence: completed locally on 2026-08-01 against the explicitly disposable database.
 Reset published 58 active fixtures, exactly ten featured profiles, 58 process
-videos, 217 product videos, 215 priced offerings, and all four product-detail
+videos, 232 product videos, 231 priced offerings, and all four product-detail
 patterns. `npm run check`, the ten-workflow production acceptance suite, the
 desktop/mobile browser suites, and `npm run release` passed; the release gate
 included production build, HTTP smoke, trace privacy, scale, security, and a

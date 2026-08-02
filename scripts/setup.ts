@@ -92,7 +92,7 @@ const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
   name: business.name,
   tagline: business.tagline,
   description: business.description,
-  logo_path: "",
+  logo_path: business.logoPath,
   hero_title: business.heroTitle,
   hero_subtitle: business.heroSubtitle,
   hero_image_path: business.heroPath,
@@ -103,7 +103,10 @@ const scaleDemoBusinessRows = SCALE_DEMO_BUSINESSES.map((business) => ({
 }));
 
 const businesses = [
-  ...benchmarkBusinesses,
+  ...benchmarkBusinesses.map((business) => ({
+    ...business,
+    logo_path: `/uploads/seed/portfolio/${business.handle}/logo.svg`,
+  })),
   ...scaleDemoBusinessRows,
 ];
 const productionSupplyBusinesses = new Set([
@@ -230,7 +233,7 @@ function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
 
 type BenchmarkProduct = { name:string; category:string; eyebrow:string; description:string; image?:number; availability?:string };
 function benchmarkCatalog(handle:string, categories:string[], products:BenchmarkProduct[]) {
-  seedCatalog(handle, categories, products.map((product, index) => ({
+  seedCatalog(handle, categories, products.slice(0, 4).map((product, index) => ({
     ...product,
     slug: product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
     image: product.image ? `/uploads/seed/benchmarks/${handle}/product-${product.image}.jpg` : "",
@@ -378,16 +381,6 @@ function denseOfferingProfile(kind: DenseDemoOfferingKind) {
 
 for (const business of SCALE_DEMO_BUSINESSES) {
   const offerings = [...business.offerings];
-  if (business === SCALE_DEMO_BUSINESSES[0]) {
-    for (let index = 1; index <= 22; index += 1) {
-      offerings.push({
-        name: `Production Input ${String(index).padStart(2, "0")}`,
-        category: "Inputs",
-        description: `A fictional repeat electrical input used to exercise a multi-page offering catalog (${index}).`,
-        kind: "production_supply",
-      });
-    }
-  }
   seedCatalog(
     business.handle,
     [...new Set(offerings.map((offering) => offering.category))],
@@ -400,7 +393,7 @@ for (const business of SCALE_DEMO_BUSINESSES) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, ""),
-      image: "",
+      image: offering.imagePath,
       offeringKind: offering.kind,
       quantityMode: "optional",
       ...denseOfferingProfile(offering.kind),

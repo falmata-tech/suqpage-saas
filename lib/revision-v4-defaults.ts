@@ -35,7 +35,11 @@ import {
   type DenseDemoDesignVariant,
 } from "./dense-demo-seed";
 import { scaleDemoBusiness } from "./scale-demo-seed";
-import type { SectionMediaIntegration } from "./showroom-design-systems";
+import type {
+  SectionMediaIntegration,
+  ShowroomColorPalette,
+} from "./showroom-design-systems";
+import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
 import type { Catalog } from "./types";
 import type { ProductDetailPattern } from "./product-detail-patterns";
 import {
@@ -58,6 +62,8 @@ type DefaultProfile = {
   heroMediaIntegration: SectionMediaIntegration;
   storyMediaIntegration: SectionMediaIntegration;
   productDetailPattern?: ProductDetailPattern;
+  customPalette?: ShowroomColorPalette;
+  catalogSearch?: boolean;
 };
 
 const DEFAULT_PROFILES: Record<string, DefaultProfile> = {
@@ -283,16 +289,25 @@ const DENSE_DEMO_PROFILES: Record<DenseDemoDesignVariant, DefaultProfile> = {
 
 function profileFor(catalog: Catalog) {
   const authored = ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle];
-  if (authored) return authored.profile;
+  if (authored) return completePalette(authored.profile);
   const denseDemo = denseDemoBusiness(catalog.business.handle);
-  if (denseDemo) return DENSE_DEMO_PROFILES[denseDemo.designVariant];
+  if (denseDemo) return completePalette(DENSE_DEMO_PROFILES[denseDemo.designVariant]);
   const scaleDemo = scaleDemoBusiness(catalog.business.handle);
-  if (scaleDemo) return DENSE_DEMO_PROFILES[scaleDemo.designVariant];
-  return DEFAULT_PROFILES[catalog.business.handle] || FALLBACK_PROFILE;
+  if (scaleDemo) return completePalette(scaleDemo.brief.profile);
+  return completePalette(DEFAULT_PROFILES[catalog.business.handle] || FALLBACK_PROFILE);
+}
+
+function completePalette(profile: DefaultProfile): DefaultProfile {
+  if (profile.customPalette) return profile;
+  const system = SHOWROOM_DESIGN_SYSTEMS[profile.tokenPack];
+  if (!system) throw new Error(`Showroom token pack ${profile.tokenPack} is missing.`);
+  return { ...profile, customPalette: system.colors };
 }
 
 function briefFor(catalog: Catalog): SeedShowroomBrief | null {
-  return ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle] || null;
+  return ADDITIONAL_SEED_SHOWROOM_BRIEFS[catalog.business.handle] ||
+    scaleDemoBusiness(catalog.business.handle)?.brief ||
+    null;
 }
 
 function componentById(id: string) {
@@ -465,6 +480,7 @@ function buildDesignManifest(
       schemaVersion: 2,
       bankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
       tokenPack: profile.tokenPack,
+      ...(profile.customPalette ? { customPalette: profile.customPalette } : {}),
       rationale: brief
         ? `${brief.objective} Composition direction: ${brief.template}`
         : "Reset-only development cutover to the typed-content showroom bank 1.2 composition.",
@@ -497,7 +513,7 @@ function buildDesignManifest(
           surfaceRole: "secondary-soft",
         }),
         section("catalog-1", profile.catalog, profile, null, {
-          show_search: catalog.products.length > 6,
+          show_search: profile.catalogSearch ?? catalog.products.length > 6,
           show_filters: catalog.categories.length > 1,
         }, {
           surfaceRole: "canvas",

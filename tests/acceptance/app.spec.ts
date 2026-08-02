@@ -446,7 +446,8 @@ test("mobile search, persistent cart, quantity, and overflow", async ({ page }) 
   await firstQuantity.fill("1 ton");
   await expect(firstQuantity).toHaveValue("1 ton");
   await page.getByRole("button", { name: "Close inquiry" }).click();
-  await page.getByLabel("Search products and capabilities").fill("Short-Run");
+  await page.getByLabel("Search products and capabilities").fill("Precision Bracket");
+  await expect(page.locator(".sr-card")).toHaveCount(1);
   await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
   await page.getByRole("button", { name: "Add selected item" }).click();
   await floatingInquiry.click();

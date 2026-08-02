@@ -2,7 +2,7 @@
 id: FE-014
 title: Recipe blueprint media studio
 status: done
-related: [FE-007, FE-009, FE-016, BE-008, BE-010, BE-013, DEP-009, DEP-011, ADR-0005, ADR-0007]
+related: [FE-007, FE-009, FE-016, FE-023, BE-008, BE-010, BE-013, DEP-009, DEP-011, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
 last_updated: 2026-07-28
 change_level: L3

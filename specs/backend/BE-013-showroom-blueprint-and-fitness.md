@@ -2,7 +2,7 @@
 id: BE-013
 title: Showroom blueprint media plan and composition fitness
 status: done
-related: [FE-007, FE-009, FE-014, FE-015, BE-008, BE-010, BE-011, BE-014, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007, ADR-0008]
+related: [FE-007, FE-009, FE-014, FE-015, FE-023, BE-008, BE-010, BE-011, BE-014, BE-022, DEP-009, DEP-010, DEP-011, ADR-0005, ADR-0007, ADR-0008]
 owners: [product, backend, security]
 last_updated: 2026-07-29
 change_level: L3

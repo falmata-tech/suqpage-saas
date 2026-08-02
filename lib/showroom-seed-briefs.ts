@@ -2,7 +2,10 @@ import type {
   ShowroomDecorativeDepth,
   ShowroomMotionIntensity,
 } from "./showroom-experience";
-import type { SectionMediaIntegration } from "./showroom-design-systems";
+import type {
+  SectionMediaIntegration,
+  ShowroomColorPalette,
+} from "./showroom-design-systems";
 import type { ProductDetailPattern } from "./product-detail-patterns";
 
 export type SeedShowroomBrief = {
@@ -23,6 +26,8 @@ export type SeedShowroomBrief = {
     heroMediaIntegration: SectionMediaIntegration;
     storyMediaIntegration: SectionMediaIntegration;
     productDetailPattern?: ProductDetailPattern;
+    customPalette?: ShowroomColorPalette;
+    catalogSearch?: boolean;
   };
   story: {
     kicker: string;
@@ -100,6 +105,7 @@ export const ADDITIONAL_SEED_SHOWROOM_BRIEFS: Record<string, SeedShowroomBrief> 
       footer: "footer.technical-directory@1", ctaVariant: "technical-brief",
       heroMediaIntegration: "split_bleed", storyMediaIntegration: "natural",
       productDetailPattern: "technical",
+      catalogSearch: true,
     },
     story: { kicker: "Fabrication floor", title: "Built from reviewed dimensions, material, and finish", quote: "The drawing and the working environment belong in the same brief." },
     process: { title: "From requirement to inspected fabrication", body: "Material, dimensions, joints, finish, and quantity are reviewed before cutting begins.", items: ["Review drawing and duty", "Cut, form, and join", "Inspect finish and fit"] },
@@ -192,7 +198,7 @@ export const ADDITIONAL_SEED_SHOWROOM_BRIEFS: Record<string, SeedShowroomBrief> 
       tokenPack: "chrome-future", motion: "balanced", decoration: "clean",
       header: "header.technical-marquee@1", hero: "hero.technology-cinematic@1",
       story: "content.editorial-quote@1", highlights: "content.production-metrics@1",
-      catalog: "catalog.technology-spec@1", cta: "call-to-action.technical-brief@1",
+      catalog: "catalog.minimal-list@1", cta: "call-to-action.technical-brief@1",
       footer: "footer.technical-directory@1", ctaVariant: "technical-brief",
       heroMediaIntegration: "surface_blend", storyMediaIntegration: "natural",
       productDetailPattern: "technical",

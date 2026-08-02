@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Aster Device Workshop mark">
+  <rect width="128" height="128" rx="18" fill="#ffffff"/>
+  <circle cx="64" cy="64" r="48" fill="#087ea4"/><path d="M30 65h68M64 31v68" stroke="#17427a" stroke-width="10" stroke-linecap="round"/>
+  <text x="64" y="75" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800" fill="#ffffff">A</text>
+</svg>

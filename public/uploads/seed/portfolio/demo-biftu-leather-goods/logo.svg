@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Biftu Leather Goods mark">
+  <rect width="128" height="128" rx="18" fill="#ffffff"/>
+  <path d="M64 17l42 24v48l-42 24-42-24V41z" fill="#a23d55"/><circle cx="64" cy="64" r="25" fill="#3d59b7"/>
+  <text x="64" y="75" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800" fill="#ffffff">B</text>
+</svg>

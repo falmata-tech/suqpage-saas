@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Illustrative booth for Tana Cloth House">
+  <rect width="1200" height="800" fill="#edf0f4"/>
+  <path d="M0 655L600 535l600 120v145H0z" fill="#d8dde3"/>
+  <path d="M120 170h960v500H120z" fill="#ffffff" stroke="#c5ccd4" stroke-width="8"/>
+  <path d="M120 170h960v122H120z" fill="#17616a"/>
+  <path d="M120 292h35v378h-35zM1045 292h35v378h-35z" fill="#c9592c"/>
+  <rect x="390" y="390" width="620" height="205" rx="12" fill="#f4f6f8" stroke="#d2d8df" stroke-width="6"/>
+  <rect x="420" y="470" width="560" height="160" rx="8" fill="#17616a"/>
+  <path d="M420 470h560l-38-55H458z" fill="#c9592c"/>
+  <path d="M205 590l70-125 70 125z" fill="#c9592c"/><circle cx="275" cy="535" r="24" fill="#17616a"/>
+  <text x="600" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#ffffff">Tana Cloth House</text>
+  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">SUQPAGE SHOWROOM</text>
+  <text x="700" y="602" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#ffffff" opacity=".82">a folded T made from a measured cloth roll</text>
+</svg>

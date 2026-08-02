@@ -9,7 +9,7 @@ assert.equal(getAllBusinesses().filter((business) => business.status === "active
 assert.equal(SCALE_DEMO_BUSINESSES.length, 48);
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM products").get() as { total: number }).total),
-  217,
+  232,
 );
 assert.equal(
   Number((db.prepare("SELECT COUNT(*) total FROM service_requests").get() as { total: number }).total),
