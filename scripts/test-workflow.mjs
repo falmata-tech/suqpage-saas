@@ -45,8 +45,8 @@ assert.match(postgres, /node-version: 24\.18\.1/, "PostgreSQL CI must use the su
 assert.match(postgres, /- run: npm run test:postgres-readiness/, "PostgreSQL CI must run the disposable migration rehearsal");
 
 for (const [action, tag] of [
-  ["actions/checkout", "v4"],
-  ["actions/setup-node", "v4"],
+  ["actions/checkout", "v7.0.1"],
+  ["actions/setup-node", "v7.0.0"],
   ["actions/upload-artifact", "v4"],
 ]) {
   const references = [...workflow.matchAll(new RegExp(`uses: ${action}@([^\\s]+) # (${tag})`, "g"))];
