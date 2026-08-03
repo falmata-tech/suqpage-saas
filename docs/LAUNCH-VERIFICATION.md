@@ -6,11 +6,11 @@
 
 ## Verdict
 
-The current package is a **locally verified soft-launch candidate for one
-persistent application instance**. Final approval remains pending the new
-five-job remote workflow, required branch rules, production configuration,
-optional Supabase media-copy verification when that adapter is selected, and
-publication. No production launch was performed during this verification.
+The current package is a **locally and remotely verified soft-launch candidate
+for one persistent application instance**. Final approval remains pending
+required branch rules, production configuration, optional Supabase media-copy
+verification when that adapter is selected, and publication. No production
+launch was performed during this verification.
 
 This approval has two explicit boundaries:
 
@@ -80,9 +80,12 @@ GitHub Actions run `30795553451` passed its prior `core`, `browser`, and `contai
 jobs on commit `38e45d5`. The run exercised the isolated release fixture,
 operations checks, clean production container, and all 10 ordered browser
 workflows on Ubuntu. This is candidate verification only; it is not evidence of
-a production deployment. The current workflow adds separate `dependency` and
-`postgres` jobs; all five jobs still need to pass remotely for the exact new
-commit before DEP-022 can be completed.
+a production deployment.
+
+GitHub Actions run `30810736356` passed the new `core`, `browser`, `container`,
+`dependency`, and `postgres` jobs on commit `b5619be` on 2026-08-03. Public
+branch metadata still reported `main` as unprotected, so the checks are verified
+but not yet enforced as merge requirements.
 
 ## Demonstration evidence
 

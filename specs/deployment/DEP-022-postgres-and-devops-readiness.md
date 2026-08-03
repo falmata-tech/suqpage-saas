@@ -157,6 +157,8 @@ cutover remains disabled while 42 declared direct SQLite modules await bounded
 repository-port work.
 
 The pinned five-job GitHub workflow and `docs/DEVOPS-RUNBOOK.md` are complete.
-This spec remains in progress until the exact committed candidate passes the
-new `core`, `browser`, `container`, `dependency`, and `postgres` jobs remotely
-and repository branch rules require them.
+GitHub Actions run `30810736356` passed `core`, `browser`, `container`,
+`dependency`, and `postgres` on commit `b5619be` on 2026-08-03. This spec
+remains in progress because public branch metadata still reports `main` as
+unprotected; repository rules must require those five checks and reject force
+pushes and branch deletion.
