@@ -1,16 +1,16 @@
 # MirtPage SaaS MVP — Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-08-02 local candidate verification
+**Verification date:** 2026-08-03 local and remote candidate verification
 **Reviewed input:** current MirtPage launch candidate and data-preserving rollout plan
 
 ## Verdict
 
-The current package is a **locally verified soft-launch candidate for one
-persistent application instance**. Final approval remains pending production
+The current package is a **locally and remotely verified soft-launch candidate
+for one persistent application instance**. Final approval remains pending production
 configuration, optional Supabase media-copy verification when that adapter is
-selected, publication, and terminal remote CI. No production launch was
-performed during this verification.
+selected, and publication. No production launch was performed during this
+verification.
 
 This approval has two explicit boundaries:
 
@@ -65,9 +65,11 @@ jobs on the dependency-remediation commit. A repository administrator must
 still require those checks and block branch deletion and force-push before merge
 protection is considered active.
 
-The replacement remote run for this candidate is pending commit and push. Prior
-run evidence is historical and is not a substitute for terminal checks on the
-current commit.
+GitHub Actions run `30795553451` passed its `core`, `browser`, and `container`
+jobs on commit `38e45d5`. The run exercised the isolated release fixture,
+operations checks, clean production container, and all 10 ordered browser
+workflows on Ubuntu. This is candidate verification only; it is not evidence of
+a production deployment.
 
 ## Demonstration evidence
 

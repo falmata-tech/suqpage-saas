@@ -4,7 +4,7 @@ title: Data-preserving launch hardening
 status: in_progress
 related: [FE-009, FE-024, FE-025, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, ADR-0012]
 owners: [deployment, operations, security, product]
-last_updated: 2026-08-02
+last_updated: 2026-08-03
 change_level: L3
 ---
 
@@ -157,10 +157,11 @@ generated and inspected.
 GitHub run `30768276026` exposed a clean-checkout dependency on the operator's
 seeded database in the release scale assertion. The release gate now provisions
 and removes an isolated temporary fixture database. The corrected gate passed
-both in the working tree and in a clean `.env`-free checkout; replacement remote
-evidence remains required.
+both in the working tree and in a clean `.env`-free checkout. GitHub Actions run
+`30795553451` then passed `core`, `browser`, and `container` on commit `38e45d5`,
+including all 10 ordered production-browser workflows on Ubuntu.
 
 This rollout remains in progress because MirtPage is not launching yet. A real
 HTTPS deployment configuration, credential rotation, optional Supabase private
-bucket copy/hash verification, scoped commit and push, and terminal GitHub
-Actions evidence remain required before a launch claim.
+bucket copy/hash verification when selected, and an explicitly approved
+production rollout remain required before a launch claim.
