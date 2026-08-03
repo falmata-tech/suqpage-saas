@@ -162,8 +162,10 @@ test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inq
   const todayHref = (await todayLink.getAttribute("href")) || "";
   const todayDay = todayHref.match(/expoDay=(\d)/)?.[1] || "";
   expect(todayDay).not.toBe("");
-  await expoSchedule.locator("a:not(.today)").first().click();
-  await expect(page.locator("#daily-expo-title")).toBeVisible();
+  const previewHref = (await expoSchedule.locator("a:not(.today)").first().getAttribute("href")) || "";
+  expect(previewHref).not.toBe("");
+  await page.goto(previewHref);
+  await expect(page.locator(".expo-week a[aria-current='date']")).toHaveAttribute("href", previewHref);
   await expect(page.getByText("Preview only", { exact: true })).toBeVisible();
   const previewState = await page.locator(".daily-expo").evaluate((section) => ({
     boothCount: section.querySelectorAll(".expo-booth").length,
