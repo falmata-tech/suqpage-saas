@@ -1,7 +1,7 @@
 ---
 id: DEP-022
 title: PostgreSQL and guarded delivery readiness
-status: in_progress
+status: done
 related: [FE-026, BE-024, BE-026, DEP-001, DEP-002, DEP-015, DEP-021, ADR-0012, ADR-0013]
 owners: [deployment, operations, security, backend]
 last_updated: 2026-08-03
@@ -140,7 +140,7 @@ deadline, and approver.
 - [x] Test plan and rollback boundary explicit
 - [x] Production cutover remains separately approved
 
-## Completion evidence
+## Evidence:
 
 Local readiness implementation passed on 2026-08-03. Node 24.18.1 is pinned in
 nvm, package engines, Docker by immutable image digest, and all five GitHub
@@ -159,6 +159,9 @@ repository-port work.
 The pinned five-job GitHub workflow and `docs/DEVOPS-RUNBOOK.md` are complete.
 GitHub Actions run `30810736356` passed `core`, `browser`, `container`,
 `dependency`, and `postgres` on commit `b5619be` on 2026-08-03. This spec
-remains in progress because public branch metadata still reports `main` as
-unprotected; repository rules must require those five checks and reject force
-pushes and branch deletion.
+was followed by exact-main run `30811139517`, which passed the same five jobs on
+commit `a134a12`. Main protection now requires all five checks on an up-to-date
+pull request, enforces administrators, resolves conversations, and requires
+linear history. Force pushes and branch deletion are disabled. The approval
+count is zero while MirtPage has one maintainer; it must increase when an
+independent reviewer joins.
