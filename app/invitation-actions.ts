@@ -61,7 +61,7 @@ export async function redeemInvitationAction(formData: FormData) {
   const path = `/invite/${encodeURIComponent(token)}`;
   if (password !== confirm) redirect(`${path}?error=mismatch`);
   try {
-    const redeemed = redeemClientInvitation({ token, name:cleanText(formData.get("name"), 100), password });
+    const redeemed = await redeemClientInvitation({ token, name:cleanText(formData.get("name"), 100), password });
     await setSession(redeemed.userId);
     audit("client_invitation.accepted", { userId:redeemed.userId, businessId:redeemed.businessId, detail:redeemed.requestId === null ? {} : { requestId:redeemed.requestId } });
   } catch (error) {

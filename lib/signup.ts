@@ -50,7 +50,7 @@ export function parseSignupInput(raw: Record<string, unknown>): SignupInput {
   return { name, email, phone, businessName, handle, password, requestText, idempotencyKey };
 }
 
-export function createPublicClientWorkspace(raw: Record<string, unknown>) {
+export async function createPublicClientWorkspace(raw: Record<string, unknown>) {
   const input = parseSignupInput(raw);
   const db = getDb();
   if (db.prepare("SELECT 1 FROM users WHERE lower(email)=?").get(input.email)) {
@@ -60,6 +60,7 @@ export function createPublicClientWorkspace(raw: Record<string, unknown>) {
     throw new SignupError("That showroom address is already in use. Choose another.", 409, "handle_conflict");
   }
 
+  const passwordHash = await bcrypt.hash(input.password, 12);
   try {
     return inTransaction(() => {
       const manifest = JSON.stringify(curatedManifestForLegacyDesign("novatech"));
@@ -75,7 +76,7 @@ export function createPublicClientWorkspace(raw: Record<string, unknown>) {
           email,password_hash,name,role,business_id,must_change_password,
           password_updated_at,created_at
         ) VALUES(?,?,?,'owner',?,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-      `).run(input.email, bcrypt.hashSync(input.password, 12), input.name, businessId);
+      `).run(input.email, passwordHash, input.name, businessId);
       const userId = Number(userResult.lastInsertRowid);
       db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(userId);
       const publicRef = `REQ-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;

@@ -4,7 +4,7 @@ title: Provider-neutral immutable media storage
 status: accepted
 date: 2026-08-02
 deciders: [MirtPage]
-related: [FE-025, BE-024, DEP-002, DEP-015, DEP-021]
+related: [FE-025, BE-024, BE-026, DEP-002, DEP-015, DEP-021, DEP-022, ADR-0013]
 ---
 
 # ADR-0012 - Provider-neutral immutable media storage

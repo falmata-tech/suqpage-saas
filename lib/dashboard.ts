@@ -46,6 +46,23 @@ export function resolveProductBusiness(
   return business;
 }
 
+export function hasClientReviewableRevision(userId: number, businessId: number) {
+  return Boolean(getDb().prepare(`
+    SELECT 1
+    FROM service_requests r
+    JOIN content_revisions revision ON revision.request_id=r.id
+    WHERE r.represented_client_user_id=?
+      AND r.business_id=?
+      AND revision.status='awaiting_review'
+      AND revision.id=(
+        SELECT latest.id FROM content_revisions latest
+        WHERE latest.request_id=r.id
+        ORDER BY latest.revision_number DESC LIMIT 1
+      )
+    LIMIT 1
+  `).get(userId, businessId));
+}
+
 function getAssignedBusiness(userId: number, businessId: number) {
   // Kept local so capability rules remain framework-independent while assignment is an adapter concern.
   return getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(userId, businessId);

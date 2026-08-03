@@ -84,7 +84,64 @@ async function main() {
         !error.message.includes(secret),
     );
 
-    console.log("Filesystem and Supabase media storage adapter parity, traversal denial, immutable paths, and bounded provider failures passed.");
+    const hanging = new SupabaseMediaObjectStore({
+      url: "https://project.supabase.co",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+      requestTimeoutMs: 20,
+    }, async (_input, init = {}) => new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+    }));
+    const started = Date.now();
+    await assert.rejects(
+      () => hanging.read("public", key, "image/webp"),
+      (error: unknown) =>
+        error instanceof MediaStorageError && error.code === "provider_read_failed",
+    );
+    assert.ok(Date.now() - started < 1_000, "provider timeout is bounded");
+
+    const oversized = new SupabaseMediaObjectStore({
+      url: "https://project.supabase.co",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+    }, async () => new Response("x", {
+      status: 200,
+      headers: { "content-length": String(5 * 1024 * 1024 + 1) },
+    }));
+    await assert.rejects(
+      () => oversized.read("public", key, "image/webp"),
+      (error: unknown) =>
+        error instanceof MediaStorageError && error.code === "provider_response_invalid",
+    );
+
+    const chunkedOversized = new SupabaseMediaObjectStore({
+      url: "https://project.supabase.co",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+    }, async () => new Response(new Uint8Array(5 * 1024 * 1024 + 1)));
+    await assert.rejects(
+      () => chunkedOversized.read("public", key, "image/webp"),
+      (error: unknown) =>
+        error instanceof MediaStorageError && error.code === "provider_response_invalid",
+    );
+
+    const stalledBody = new SupabaseMediaObjectStore({
+      url: "https://project.supabase.co",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+      requestTimeoutMs: 20,
+    }, async (_input, init = {}) => new Response(new ReadableStream({
+      start(controller) {
+        init.signal?.addEventListener("abort", () => controller.error(new Error("aborted")), { once: true });
+      },
+    })));
+    await assert.rejects(
+      () => stalledBody.read("public", key, "image/webp"),
+      (error: unknown) =>
+        error instanceof MediaStorageError && error.code === "provider_read_failed",
+    );
+
+    console.log("Filesystem and Supabase media storage adapter parity, traversal denial, immutable paths, full-response deadlines, streaming response bounds, and safe provider failures passed.");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

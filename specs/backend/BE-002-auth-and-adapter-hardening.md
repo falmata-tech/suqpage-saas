@@ -2,7 +2,7 @@
 id: BE-002
 title: Authentication and external adapter failure boundaries
 status: done
-related: [BE-018, BE-020, BE-025]
+related: [BE-018, BE-020, BE-025, BE-026, ADR-0013]
 owners: [backend, security]
 last_updated: 2026-08-02
 change_level: L2

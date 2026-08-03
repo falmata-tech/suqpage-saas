@@ -18,6 +18,16 @@ all tenant workflows use the same authoritative database.
   persisted; one venue floor is shown at a time.
 - SQLite uses WAL, foreign keys, a five-second busy timeout, integrity checks,
   persistent volumes, and tested backup/restore commands.
+- `npm run test:postgres-readiness` now creates a disposable PostgreSQL 17
+  target, translates the complete current SQLite schema, copies all rows,
+  installs reviewed constraints, indexes, and 14 triggers, and reconciles
+  per-table counts and fingerprints while proving the source is byte-identical.
+- `architecture/sqlite-boundaries.json` and
+  `npm run check:database-boundaries` currently identify 42 approved runtime
+  modules that still need repository-port migration. New direct SQLite coupling
+  fails the standard check.
+- `MIRTPAGE_DATABASE_DRIVER=postgres` is intentionally rejected until those
+  ports and target-adapter security tests are complete.
 
 ## Required before multiple application instances
 
@@ -44,7 +54,7 @@ all tenant workflows use the same authoritative database.
    cutover before enabling replicas.
 
 Supabase Storage is a current optional media runtime mode described by
-ADR-0012. Supabase remains only a candidate managed PostgreSQL host. Choosing it
-for the database requires a separate ADR and a rehearsed, reconciled, observable,
-and reversible migration. Setting a connection string alone cannot migrate this
-application safely.
+ADR-0012. ADR-0013 accepts Supabase as a candidate managed PostgreSQL host while
+keeping application-owned authentication for the first database cutover.
+`docs/DEVOPS-RUNBOOK.md` contains the current rehearsal and operations sequence.
+Setting a connection string alone cannot migrate this application safely.

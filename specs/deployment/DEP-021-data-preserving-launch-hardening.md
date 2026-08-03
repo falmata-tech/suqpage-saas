@@ -2,7 +2,7 @@
 id: DEP-021
 title: Data-preserving launch hardening
 status: in_progress
-related: [FE-009, FE-024, FE-025, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, ADR-0012]
+related: [FE-009, FE-024, FE-025, FE-026, BE-008, BE-010, BE-024, BE-025, BE-026, DEP-015, DEP-020, DEP-022, ADR-0012, ADR-0013]
 owners: [deployment, operations, security, product]
 last_updated: 2026-08-03
 change_level: L3

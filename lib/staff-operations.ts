@@ -47,7 +47,7 @@ export function listManagedClients(): ManagedClient[] {
   }));
 }
 
-export function createStaffAccount(raw: { name:unknown; email:unknown; password:unknown; accessRole:unknown }) {
+export async function createStaffAccount(raw: { name:unknown; email:unknown; password:unknown; accessRole:unknown }) {
   const name = clean(raw.name, 100);
   const email = clean(raw.email, 160).toLowerCase();
   const password = String(raw.password ?? "");
@@ -55,12 +55,13 @@ export function createStaffAccount(raw: { name:unknown; email:unknown; password:
   if (!name || !/^\S+@\S+\.\S+$/.test(email) || !["team_member", "operations_manager"].includes(accessRole) || !isStrongPassword(password)) {
     throw new StaffOperationError("Complete every staff field and use a 12+ character temporary password with upper-case, lower-case, and a number.");
   }
+  const passwordHash = await bcrypt.hash(password, 12);
   try {
     return inTransaction(() => {
       const inserted = getDb().prepare(`
         INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,created_at)
         VALUES(?,?,?,'admin',NULL,1,CURRENT_TIMESTAMP)
-      `).run(email, bcrypt.hashSync(password, 12), name);
+      `).run(email, passwordHash, name);
       const userId = Number(inserted.lastInsertRowid);
       getDb().prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)").run(userId, accessRole);
       return { userId, accessRole };

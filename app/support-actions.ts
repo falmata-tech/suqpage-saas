@@ -108,10 +108,11 @@ export async function updateSupportAgentSettingAction(formData: FormData) {
     });
     audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
   } catch (error) {
-    failure("/dashboard/support", error);
+    failure("/dashboard/support/agents", error);
   }
+  revalidatePath("/dashboard/support/agents");
   revalidatePath("/dashboard/support");
-  redirect("/dashboard/support?saved=agent");
+  redirect("/dashboard/support/agents?saved=agent");
 }
 
 export async function reassignSupportConversationAction(formData: FormData) {

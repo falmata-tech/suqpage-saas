@@ -25,7 +25,7 @@ try {
     consent: true,
   };
 
-  const created = createPublicClientWorkspace(valid);
+  const created = await createPublicClientWorkspace(valid);
   const db = getDb();
   assert.equal(created.businessId > 0 && created.userId > 0 && created.requestId > 0, true);
   assert.deepEqual({ ...(db.prepare("SELECT handle,name,status,contact_email,whatsapp FROM businesses WHERE id=?").get(created.businessId) as object) }, {
@@ -57,12 +57,12 @@ try {
     requests: Number((db.prepare("SELECT COUNT(*) count FROM service_requests").get() as { count: number }).count),
   });
   const beforeConflict = counts();
-  assert.throws(
+  await assert.rejects(
     () => createPublicClientWorkspace({ ...valid, handle: "different", idempotencyKey: "signup-test-key-0002" }),
     (error: unknown) => error instanceof SignupError && error.status === 409 && error.code === "email_conflict",
   );
   assert.deepEqual(counts(), beforeConflict, "duplicate email creates no partial tenant state");
-  assert.throws(
+  await assert.rejects(
     () => createPublicClientWorkspace({ ...valid, email: "other@example.test", idempotencyKey: "signup-test-key-0003" }),
     (error: unknown) => error instanceof SignupError && error.status === 409 && error.code === "handle_conflict",
   );

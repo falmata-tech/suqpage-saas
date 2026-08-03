@@ -10,6 +10,15 @@ async function main() {
   process.env.RESEND_API_KEY = "test-key";
   process.env.NOTIFICATION_FROM_EMAIL = "test@example.com";
 
+  const { databaseDriver } = await import("../lib/config");
+  assert.equal(databaseDriver(), "sqlite");
+  process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
+  assert.throws(
+    () => databaseDriver(),
+    /PostgreSQL runtime remains blocked/,
+  );
+  process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
+
   const { consumeRateLimit, resetRateLimit } = await import("../lib/rate-limit");
   const { notifyNewInquiry } = await import("../lib/notifications");
   const { closeDbForTests } = await import("../lib/db");

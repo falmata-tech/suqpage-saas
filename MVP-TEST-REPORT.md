@@ -1,66 +1,49 @@
-# MirtPage SaaS MVP — Launch Verification Report
+# MirtPage SaaS MVP - Current Verification Report
 
 **Release:** `1.0.0-mvp-launch`
-**Verified:** 2026-07-20
-**Runtime:** Node.js 22.16.0, Next.js 16.2.10
 
-## Release-gate result
+**Verified locally:** 2026-08-03
 
-`npm run release` completed successfully after a clean production build.
+**Runtime:** Node.js 24.18.1, npm 11.16.0, Next.js 16.2.12
 
-The release gate includes:
+## Result
 
-- Next.js production build
-- production HTTP smoke tests
-- TypeScript validation
-- custom-showroom integration validation
-- security and tenant-isolation integration tests
-- production dependency audit
+The current commit candidate passes the complete local release, browser,
+operations, container, and PostgreSQL-readiness gates. The npm production audit
+reports zero vulnerabilities. This is strong local release evidence; it is not
+a production deployment or a completed PostgreSQL cutover.
 
-The production dependency audit reported **0 vulnerabilities**.
+## Verified Gates
 
-## Production HTTP checks
+- `npm run check`: specifications, runtime consistency, database boundaries,
+  type checking, tenant/security contracts, media, support, pagination,
+  showroom design, revisions, and request workflows.
+- `npm run release`: production build, trace privacy, HTTP smoke, scale fixture,
+  security, adapter, request, revision, and dependency-audit gates.
+- `npm run test:acceptance`: 10/10 ordered production-browser workflows across
+  public discovery, Expo, inquiries, administrator, operations, team-member,
+  client, mobile, API, CSP, and controlled-video behavior.
+- `npm run test:operations`: migration, integrity, request attachment/revision
+  backup, and verified restore behavior.
+- `npm run test:container`: immutable Node image, locked install, build-time
+  origin validation, non-root execution, persistent-path preflight, trace
+  privacy, and health checks.
+- `npm run test:postgres-readiness`: disposable PostgreSQL 17 rehearsal of 44
+  tables and 2,849 rows with constraints, indexes, triggers, sequences,
+  per-table fingerprints, invariant probes, and byte-preserved SQLite source.
 
-Verified against `next start` with an isolated temporary database and media directory:
+## Current Boundaries
 
-- active showroom returned HTTP 200
-- draft showroom returned HTTP 404
-- runtime media route returned HTTP 200
-- security headers included CSP and frame denial
-- unauthenticated Malikt Board request listing returned HTTP 401
-- unauthenticated Malikt Board request creation returned HTTP 401
-- forged cross-tenant inquiry returned HTTP 400
-- valid canonical inquiry returned HTTP 201
-- duplicate inquiry returned the original record instead of creating another
-- inquiry abuse threshold returned HTTP 429
+- SQLite remains the only enabled database runtime and supports one application
+  replica. PostgreSQL is a tested migration target, not yet the write authority.
+- MirtPage-owned bcrypt identities and opaque revocable sessions remain active.
+  Supabase Auth is not configured or implied by Supabase Storage support.
+- Private Supabase Storage is available behind the media port, but a real bucket
+  copy and reconciliation require deployment credentials and operator approval.
+- GitHub Actions now defines `core`, `browser`, `container`, `dependency`, and
+  `postgres` jobs. This candidate still needs a remote run and required branch
+  rules before remote delivery evidence is complete.
 
-## Security and data-integrity checks
-
-Verified:
-
-- cross-tenant collection/product relationships are rejected by SQLite triggers
-- public inquiry quantities are limited and checked against stock
-- invalid option names and values are rejected
-- draft businesses cannot be resolved by the public catalog lookup
-- delivery requests cannot be created for another owner’s tenant
-- HTML disguised as an image is rejected
-- valid images are decoded, stripped of metadata, and re-encoded before storage
-- runtime uploads use persistent media storage instead of the Next.js build directory
-- opaque server-side sessions are revocable and contain no user identity in the cookie
-- temporary-password accounts cannot use dashboard or authenticated API workflows until the password is changed
-
-## Seed validation
-
-A reset creates:
-
-- four separately rendered test businesses
-- one administrator and four owner accounts
-- unique generated temporary passwords
-- collections, categories, products, option groups, and values
-- four mock delivery companies
-
-Generated credentials are written to `.local/seed-credentials.txt`, which is excluded from source control and the release ZIP. Every seeded user must change the temporary password.
-
-## Deployment boundary
-
-This release is approved for a **controlled four-client pilot on one persistent server**. It is not approved for horizontal scaling because the MVP intentionally uses SQLite and local persistent media. The Malikt Board integration remains a secured local simulation until the external API is available.
+Operational setup and rollback instructions live in
+`docs/DEVOPS-RUNBOOK.md`; the detailed release record is
+`docs/LAUNCH-VERIFICATION.md`.

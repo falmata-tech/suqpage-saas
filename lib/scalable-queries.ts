@@ -17,6 +17,7 @@ type PageInput = {
 };
 
 type QueryValue = string | number | null;
+const ADMIN_DIRECTORY_PAGE_SIZE = 6;
 
 function total(sql: string, params: QueryValue[]) {
   return Number(
@@ -210,6 +211,7 @@ export function listBusinessesPage(input: PageInput & { status?: unknown }) {
      LIMIT ? OFFSET ?`,
     params,
     { page: request.page, q: request.search },
+    ADMIN_DIRECTORY_PAGE_SIZE,
   );
 }
 
@@ -250,6 +252,7 @@ export function listManagedClientsPage(input: PageInput) {
      LIMIT ? OFFSET ?`,
     params,
     { page: request.page, q: request.search },
+    ADMIN_DIRECTORY_PAGE_SIZE,
   );
 }
 
@@ -310,6 +313,7 @@ export function listStaffPage(input: PageInput & { role?: unknown }) {
      LIMIT ? OFFSET ?`,
     params,
     { page: request.page, q: request.search },
+    ADMIN_DIRECTORY_PAGE_SIZE,
   );
 }
 

@@ -49,7 +49,7 @@ export async function loginAction(formData:FormData) {
   const rate=consumeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
   if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
   const user=getUserByEmail(email);
-  if(!user||password.length>200||!bcrypt.compareSync(password,user.password_hash)){
+  if(!user||password.length>200||!await bcrypt.compare(password,user.password_hash)){
     audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
     go("/login",{error:"Invalid email or password."});
   }
@@ -66,11 +66,12 @@ export async function changePasswordAction(formData:FormData){
   const current=String(formData.get("currentPassword")||"");
   const password=String(formData.get("newPassword")||"");
   const confirm=String(formData.get("confirmPassword")||"");
-  const stored=getDb().prepare("SELECT password_hash FROM users WHERE id=?").get(user.id) as any;
-  if(!stored||!bcrypt.compareSync(current,stored.password_hash))go("/dashboard/account",{error:"Current password is incorrect."});
+  const stored=getDb().prepare("SELECT password_hash FROM users WHERE id=?").get(user.id) as {password_hash:string}|undefined;
+  if(!stored||!await bcrypt.compare(current,stored.password_hash))go("/dashboard/account",{error:"Current password is incorrect."});
   if(!isStrongPassword(password))go("/dashboard/account",{error:"Use at least 12 characters with upper-case, lower-case, and a number."});
   if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
-  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?").run(bcrypt.hashSync(password,12),user.id);
+  const passwordHash=await bcrypt.hash(password,12);
+  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?").run(passwordHash,user.id);
   revokeAllUserSessions(user.id);
   await setSession(user.id);
   audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
@@ -99,20 +100,21 @@ export async function updateBusinessAction(formData:FormData){
 export async function adminUpdateBusinessAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const businessId=int(formData,"businessId"),status=text(formData,"status",20),business=getBusinessById(businessId);
-  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin",{view:"businesses",error:"Only an established showroom can be suspended or restored."});
+  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin/businesses",{error:"Only an established showroom can be suspended or restored."});
   getDb().prepare("UPDATE businesses SET status=? WHERE id=?").run(status,businessId);
   audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
-  revalidatePath("/");go("/dashboard/admin",{view:"businesses",saved:1});
+  revalidatePath("/");revalidatePath("/dashboard/admin/businesses");go("/dashboard/admin/businesses",{saved:1});
 }
 
 export async function adminResetClientPasswordAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
   const target=getDb().prepare("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'").get(userId) as any;
-  if(!target||!isStrongPassword(password))go("/dashboard/admin",{view:"clients",error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
-  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(bcrypt.hashSync(password,12),userId);
+  if(!target||!isStrongPassword(password))go("/dashboard/admin/clients",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
+  const passwordHash=await bcrypt.hash(password,12);
+  getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(passwordHash,userId);
   revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
-  go("/dashboard/admin",{view:"clients",saved:"password"});
+  revalidatePath("/dashboard/admin/clients");go("/dashboard/admin/clients",{saved:"password"});
 }
 
 export async function createCategoryAction(formData:FormData){

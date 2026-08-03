@@ -2,6 +2,7 @@ import Link from "next/link";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
 import { hasCapability, isClient } from "@/lib/capabilities";
 import { hasRetainedPublication } from "@/lib/db";
+import { hasClientReviewableRevision } from "@/lib/dashboard";
 import type { Business, SessionUser } from "@/lib/types";
 
 const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
@@ -11,13 +12,14 @@ const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceN
 
 export default function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
   const query = business ? `?business=${business.id}` : "";
-  const dashboardHref = `/dashboard${query}`;
   const client = isClient(user);
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
   const established = business ? hasRetainedPublication(business.id) : false;
   const canMaintainProducts = Boolean(business && established && hasCapability(user, "basic-product:maintain"));
+  const reviewable = Boolean(client && business && hasClientReviewableRevision(user.id, business.id));
+  const dashboardHref = platformAdmin && !business ? "/dashboard/admin" : `/dashboard${query}`;
   const identityContext = business
     ? business.name
     : platformAdmin
@@ -28,33 +30,48 @@ export default function DashboardShell({ user, business, children }: { user:Sess
           ? "Assigned businesses"
           : "Private workspace";
 
-  const groups = [
+  const groups = platformAdmin && !business ? [
+    group("Platform", [
+      { href: "/dashboard/admin", label: "Overview", icon: "overview" },
+      { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses" },
+      { href: "/dashboard/admin/clients", label: "Clients", icon: "clients" },
+      { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
+    ]),
+    group("Operations", [
+      { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" },
+      { href: "/dashboard/support", label: "Support inbox", icon: "support" },
+      { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" },
+      { href: "/dashboard/account-health", label: "Monthly accounts", icon: "account" },
+    ]),
+    group("Showroom system", [
+      { href: "/dashboard/admin/discovery", label: "Discovery profiles", icon: "discovery" },
+      { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
+    ]),
+  ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [
     group("Workspace", [
-      { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : operations ? "Businesses" : "Overview" },
-      operations && business ? { href: "/dashboard", label: "Switch business" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "My offerings" } : null,
-      client ? { href: "/dashboard/requests", label: "Requests" } : null,
-      client && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
-      client && business ? { href: "/dashboard/account-health", label: "Account & insights" } : null,
-      client && business ? { href: `/preview/@${business.handle}`, label: "Preview / review" } : null,
-      teamMember ? { href: "/dashboard/requests", label: "Assigned requests" } : null,
-      teamMember && business ? { href: `/preview/@${business.handle}`, label: "View live showroom" } : null,
-      { href: "/dashboard/support", label: client ? "MirtPage support" : "Support inbox" },
+      { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
+      operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: client ? "My offerings" : "Offerings", icon: "offerings" } : null,
+      client ? { href: "/dashboard/requests", label: "Requests", icon: "requests" } : null,
+      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
+      operations ? { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" } : null,
+      (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
+      (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Account & insights", icon: "insights" } : null,
+      reviewable ? { href: `/preview/@${business!.handle}`, label: "Review showroom", icon: "workspace" } : null,
+      (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View showroom", icon: "public", external: true } : null,
+      { href: "/dashboard/support", label: client ? "MirtPage support" : "Support inbox", icon: "support" },
     ]),
-    group("Client work", [
-      operations ? { href: "/dashboard/requests", label: "Client requests" } : null,
-      operations ? { href: "/dashboard/requests/on-behalf", label: "Create client request" } : null,
-      operations ? { href: "/dashboard/clients/new", label: "Create client workspace" } : null,
-      operations ? { href: `/dashboard/account-health${query}`, label: business ? "Account & insights" : "Monthly accounts" } : null,
-      operations && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries" } : null,
-      operations && business ? { href: `/preview/@${business.handle}`, label: "View showroom", external: true } : null,
+    group("Customer operations", [
+      operations ? { href: "/dashboard/clients/new", label: "Create client workspace", icon: "clients" } : null,
+      operations ? { href: "/dashboard/requests/on-behalf", label: "Create client request", icon: "requests" } : null,
+      operations ? { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" } : null,
+      operations && !business ? { href: "/dashboard/account-health", label: "Monthly accounts", icon: "account" } : null,
     ]),
-    group("Design tools", [
-      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library" } : null,
+    group("Design", [
+      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library", icon: "design" } : null,
     ]),
-    group("Administration", [
-      platformAdmin ? { href: "/dashboard/admin", label: "Platform administration" } : null,
-      platformAdmin ? { href: "/dashboard/admin/discovery", label: "Discovery profiles" } : null,
+    group("Platform", [
+      platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item));
 

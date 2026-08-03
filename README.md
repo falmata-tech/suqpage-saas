@@ -34,7 +34,7 @@ The visual pages remain separately designed. Products, categories, options, inqu
 
 ## Requirements
 
-- Node.js 22.16 or newer
+- Node.js 24.18.1 (use `nvm use`)
 - npm
 - A single persistent server or container for this SQLite pilot
 - HTTPS for production
@@ -98,6 +98,17 @@ To build and exercise the production image with disposable Docker resources:
 npm run test:container
 ```
 
+To verify the complete current SQLite schema and retained rows against a
+disposable PostgreSQL 17 target without enabling database cutover:
+
+```bash
+npm run test:postgres-readiness
+```
+
+Deployment, Supabase Storage, GitHub protection, and rollback procedures are in
+`docs/DEVOPS-RUNBOOK.md`. PostgreSQL is not yet an application runtime; SQLite
+remains authoritative and one application instance is required.
+
 ## Production environment
 
 Create a production `.env` with absolute persistent paths:
@@ -106,6 +117,7 @@ Create a production `.env` with absolute persistent paths:
 NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://mirtpage.com
 MIRTPAGE_DB_PATH=/srv/mirtpage/data/mirtpage.db
+MIRTPAGE_DATABASE_DRIVER=sqlite
 MIRTPAGE_MEDIA_DRIVER=filesystem
 MIRTPAGE_MEDIA_ROOT=/srv/mirtpage/data/media
 MIRTPAGE_BACKUP_ROOT=/srv/mirtpage/backups

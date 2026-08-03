@@ -840,10 +840,13 @@ Current verified behavior:
   see staff authors as the MirtPage team while internal views retain attribution.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
-- Authenticated workspace navigation keeps each actor in the role-appropriate
-  dashboard. The public site is a separate, explicit link, and an authenticated
-  visit to the login route returns to the dashboard instead of showing a second
-  sign-in form.
+- Authenticated workspace navigation keeps each actor in a role-oriented,
+  icon-supported workspace. Platform overview, businesses, clients, staff
+  access, support inbox, and support-agent capacity use stable destinations;
+  server-paginated collections become compact records on narrow screens. The
+  public site is a separate, explicit link, and an authenticated visit to the
+  login route returns to the dashboard instead of showing a second sign-in
+  form.
 - High-volume dashboard collections use bounded server queries: five public
   showroom cards or 10 authorized workspace rows per page. Businesses, clients,
   staff, requests, products, inquiries, support conversations, and discovery profiles have
@@ -1159,7 +1162,7 @@ Current controlled-launch stack:
 Next.js 16
 React 19
 TypeScript
-Node.js 22+
+Node.js 24.18.1 LTS
 SQLite via node:sqlite
 Sharp for verified image processing
 Server-rendered routes and server actions
@@ -1262,6 +1265,9 @@ Security requirements are product requirements, not optional cleanup.
 - Filesystem storage remains the local/default adapter. A private Supabase
   Storage bucket is the optional production adapter; its service credential is
   server-only and all public/private reads remain behind MirtPage routes.
+- Remote object-storage operations use a bounded configurable deadline and
+  bounded response reads. A database-derived manifest reconciles every retained
+  public and private reference without printing object keys or provider data.
 - Preserve stable `/media/<opaque-key>` and private request-attachment
   references across providers. Object-storage migration is copy-only,
   hash-verified, repeatable, and never deletes local sources or rewrites the
@@ -1316,10 +1322,14 @@ Current SQLite requirements:
 - appropriate file permissions.
 
 Do not horizontally scale the SQLite build across multiple application instances.
-`docs/MANAGED-POSTGRES-READINESS.md` records the required SQL-adapter, migration,
-job, realtime, backup, and monitored-cutover work. Supabase Storage is an
-implemented optional media adapter; Supabase PostgreSQL remains a future
-database target rather than a current runtime mode.
+`docs/MANAGED-POSTGRES-READINESS.md`, `docs/DEVOPS-RUNBOOK.md`, and ADR-0013
+record the required SQL-adapter, migration, job, realtime, backup, and
+monitored-cutover work. The current disposable PostgreSQL rehearsal translates
+the complete schema, copies rows, installs reviewed constraints, indexes, and
+triggers, and reconciles counts and fingerprints while leaving SQLite
+byte-identical. A boundary manifest prevents new direct SQLite coupling, but 42
+approved runtime modules remain to be ported. Supabase Storage is an implemented
+optional media adapter; Supabase PostgreSQL is not a current runtime mode.
 
 Before broad external rollout or multi-instance production scale, migrate to:
 

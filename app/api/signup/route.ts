@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const ipRate = consumeRateLimit(`signup:ip:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
     const emailRate = consumeRateLimit(`signup:email:${emailHash}`, 3, 60 * 60 * 1000, 60 * 60 * 1000);
     if (!ipRate.allowed || !emailRate.allowed) throw new SignupError("Too many signup attempts. Try again later.", 429, "rate_limited");
-    const created = createPublicClientWorkspace(body);
+    const created = await createPublicClientWorkspace(body);
     await setSession(created.userId);
     audit("client.self_signup_created", { userId: created.userId, businessId: created.businessId, detail: { requestId: created.requestId }, ipHash });
     return NextResponse.json({ destination: `/dashboard/requests/${created.requestId}`, reference: created.publicRef }, { status: 201, headers: { "Cache-Control": "no-store" } });

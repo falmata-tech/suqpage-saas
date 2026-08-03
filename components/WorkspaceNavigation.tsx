@@ -3,14 +3,87 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+  BarChart3,
+  BookOpen,
+  Building2,
+  CircleUserRound,
+  ClipboardList,
+  ExternalLink,
+  Headphones,
+  House,
+  Inbox,
+  LayoutDashboard,
+  LockKeyhole,
+  LogOut,
+  MapPinned,
+  Menu,
+  MessageSquareText,
+  Package,
+  Palette,
+  RefreshCw,
+  ShieldCheck,
+  Store,
+  UserCog,
+  Users,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import MirtPageBrand from "@/components/MirtPageBrand";
 
 export type WorkspaceNavItem = {
   href: string;
   label: string;
+  icon?: WorkspaceNavIcon;
   external?: boolean;
 };
+
+export type WorkspaceNavIcon =
+  | "account"
+  | "businesses"
+  | "clients"
+  | "design"
+  | "discovery"
+  | "inquiries"
+  | "insights"
+  | "library"
+  | "offerings"
+  | "overview"
+  | "public"
+  | "requests"
+  | "security"
+  | "staff"
+  | "support"
+  | "supportAgents"
+  | "switch"
+  | "workspace";
+
+const icons: Record<WorkspaceNavIcon, LucideIcon> = {
+  account: CircleUserRound,
+  businesses: Building2,
+  clients: Users,
+  design: Palette,
+  discovery: MapPinned,
+  inquiries: Inbox,
+  insights: BarChart3,
+  library: BookOpen,
+  offerings: Package,
+  overview: LayoutDashboard,
+  public: ExternalLink,
+  requests: ClipboardList,
+  security: LockKeyhole,
+  staff: UserCog,
+  support: MessageSquareText,
+  supportAgents: Headphones,
+  switch: RefreshCw,
+  workspace: Store,
+};
+
+function NavIcon({ name }: { name?: WorkspaceNavIcon }) {
+  const Icon = name ? icons[name] : House;
+  return <Icon aria-hidden="true" size={17} strokeWidth={2} />;
+}
 
 export type WorkspaceNavGroup = {
   label: string;
@@ -47,7 +120,9 @@ function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[];
                 rel={item.external ? "noreferrer" : undefined}
                 onClick={onNavigate}
               >
-                {item.label}{item.external ? <span aria-hidden="true"> ↗</span> : null}
+                <NavIcon name={item.icon} />
+                <span>{item.label}</span>
+                {item.external ? <ExternalLink className="workspace-nav-external" aria-hidden="true" size={14} /> : null}
               </Link>
             );
           })}
@@ -55,9 +130,9 @@ function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[];
       ))}
       <div className="workspace-nav-group workspace-nav-utility">
         <span className="workspace-nav-label">Account</span>
-        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}>Account security</Link>
-        <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}>Public site <span aria-hidden="true">↗</span></Link>
-        <form action={logoutAction}><button type="submit">Sign out</button></form>
+        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>Account security</span></Link>
+        <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>Public site</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
+        <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>Sign out</span></button></form>
       </div>
     </nav>
   );
@@ -139,7 +214,7 @@ export default function WorkspaceNavigation({
           onClick={() => setOpen(true)}
           ref={openerRef}
         >
-          <span /><span /><span />
+          <Menu aria-hidden="true" size={22}/>
         </button>
       </header>
       {open ? (
@@ -147,7 +222,7 @@ export default function WorkspaceNavigation({
           <div className="workspace-drawer" id="workspace-mobile-menu" role="dialog" aria-modal="true" aria-label="Workspace menu" ref={dialogRef}>
             <div className="workspace-drawer-head">
               <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
-              <button className="workspace-menu-close" type="button" aria-label="Close workspace menu" onClick={() => setOpen(false)}>×</button>
+              <button className="workspace-menu-close" type="button" aria-label="Close workspace menu" onClick={() => setOpen(false)}><X aria-hidden="true" size={22}/></button>
             </div>
             <NavigationGroups groups={groups} onNavigate={() => setOpen(false)} />
           </div>

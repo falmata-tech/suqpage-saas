@@ -2,9 +2,9 @@
 id: DEP-002
 title: Reproducible delivery and repository hygiene
 status: in_progress
-related: [BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010]
+related: [BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022]
 owners: [operations, security]
-last_updated: 2026-07-24
+last_updated: 2026-08-03
 change_level: L3
 ---
 
@@ -38,7 +38,7 @@ four-tenant application behavior and single-instance pilot boundary.
   framework and application security layers.
 - Treat `next-env.d.ts` as generated output and generate framework types before
   standalone TypeScript checks without dirtying Git.
-- Use Node 22.16 or newer consistently in documentation, package metadata, and
+- Use Node 24.18.1 consistently in documentation, package metadata, Docker, and
   CI evidence.
 - Bound or explicitly document the media-route output-file trace without
   weakening persistent media isolation.
@@ -79,8 +79,9 @@ four-tenant application behavior and single-instance pilot boundary.
 
 - `npm run release` remains the single core release contract. CI invokes it
   rather than maintaining a partial duplicate.
-- CI additionally invokes operations, Chromium acceptance, and an isolated
-  container smoke command in separate bounded jobs.
+- CI additionally invokes operations, Chromium acceptance, an isolated
+  container smoke command, dependency audit, and PostgreSQL migration rehearsal
+  in separate bounded jobs.
 - The container smoke command creates unique temporary resources, suppresses
   setup credential rows, verifies the runtime user and `/api/health`, and removes
   only resources it created even after failure.
@@ -104,8 +105,9 @@ four-tenant application behavior and single-instance pilot boundary.
 - The Next.js PostCSS override is at or above 8.5.18, the first release patched
   for `GHSA-r28c-9q8g-f849`; remediation must not accept npm's breaking
   downgrade suggestion.
-- Required GitHub merge checks are `core`, `browser`, and `container`; enforcing
-  repository rules is an explicit administrator operation outside a code commit.
+- Required GitHub merge checks are `core`, `browser`, `container`, `dependency`,
+  and `postgres`; enforcing repository rules is an explicit administrator
+  operation outside a code commit.
 
 ## Scenarios
 

@@ -1,9 +1,9 @@
-FROM node:22-alpine AS deps
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund --fetch-retries=2 --fetch-timeout=60000
 
-FROM node:22-alpine AS builder
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_APP_URL
 ARG MIRTPAGE_SERVER_ACTION_ORIGINS=""
@@ -14,7 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine AS runner
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup -S mirtpage && adduser -S mirtpage -G mirtpage

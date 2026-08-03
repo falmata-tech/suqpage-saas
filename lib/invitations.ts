@@ -90,13 +90,17 @@ export function getActiveInvitation(token: string, now = Date.now()): Invitation
   `).get(hashInvitationToken(token), now) as InvitationView | undefined;
 }
 
-export function redeemClientInvitation(raw: { token:string; name:string; password:string }, now = Date.now()) {
+export async function redeemClientInvitation(raw: { token:string; name:string; password:string }, now = Date.now()) {
   const token = String(raw.token || "");
   if (!/^[A-Za-z0-9_-]{40,100}$/.test(token)) throw new InvitationError("This invitation is not valid.");
   const name = clean(raw.name, 100);
   if (!name) throw new InvitationError("Enter your name.");
   if (!isStrongPassword(raw.password)) throw new InvitationError("Use at least 12 characters with upper-case, lower-case, and a number.");
   const tokenHash = hashInvitationToken(token);
+  if (!getActiveInvitation(token, now)) {
+    throw new InvitationError("This invitation is invalid, expired, or already used.");
+  }
+  const passwordHash = await bcrypt.hash(raw.password, 12);
   return inTransaction(() => {
     const invitation = getDb().prepare(`
       SELECT * FROM client_invitations WHERE token_hash=?
@@ -109,7 +113,7 @@ export function redeemClientInvitation(raw: { token:string; name:string; passwor
     const inserted = getDb().prepare(`
       INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,password_updated_at,created_at)
       VALUES(?,?,?,'owner',?,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-    `).run(invitation.email, bcrypt.hashSync(raw.password, 12), name, invitation.business_id);
+    `).run(invitation.email, passwordHash, name, invitation.business_id);
     const userId = Number(inserted.lastInsertRowid);
     getDb().prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(userId);
     const accepted = getDb().prepare("UPDATE client_invitations SET accepted_at=?,accepted_user_id=? WHERE id=? AND accepted_at IS NULL AND revoked_at IS NULL").run(now, userId, invitation.id);

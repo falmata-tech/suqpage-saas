@@ -151,11 +151,11 @@ async function main() {
     assert.equal(publicLast.items.length, 5);
 
     const businesses = listBusinessesPage({ page: 2 });
-    assert.equal(businesses.items.length, 10);
+    assert.equal(businesses.items.length, 6);
     assert.equal(businesses.page, 2);
     assert.equal(businesses.totalItems, 45);
-    assert.equal(listManagedClientsPage({ page: 2 }).items.length, 10);
-    assert.equal(listStaffPage({ page: 2 }).items.length, 10);
+    assert.equal(listManagedClientsPage({ page: 2 }).items.length, 6);
+    assert.equal(listStaffPage({ page: 2 }).items.length, 6);
     assert.equal(listProductsPage(businessIds[0], { page: 1 }).items.length, 10);
     assert.equal(listProductsPage(businessIds[0], { page: 2 }).items.length, 10);
 

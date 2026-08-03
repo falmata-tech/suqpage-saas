@@ -1,44 +1,20 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
-import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import {
+  databasePath,
   mediaRoot,
   requestAttachmentRoot,
   supabaseMediaStorageConfig,
 } from "../lib/config";
-import { mediaMime } from "../lib/media";
 import {
-  assertMediaObjectKey,
+  buildMediaReferenceManifest,
+  listLocalMediaObjects,
+  mediaObjectIdentity,
+} from "../lib/media-manifest";
+import {
   SupabaseMediaObjectStore,
-  type MediaNamespace,
 } from "../lib/media-storage";
-
-type PlannedObject = {
-  namespace: MediaNamespace;
-  key: string;
-  fullPath: string;
-  contentType: string;
-};
-
-function filesIn(root: string, namespace: MediaNamespace): PlannedObject[] {
-  if (!fs.existsSync(root)) return [];
-  return fs
-    .readdirSync(root, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .flatMap((entry) => {
-      try {
-        assertMediaObjectKey(entry.name);
-      } catch {
-        return [];
-      }
-      return [{
-        namespace,
-        key: entry.name,
-        fullPath: path.join(root, entry.name),
-        contentType: mediaMime(entry.name),
-      }];
-    });
-}
 
 const digest = (bytes: Buffer) =>
   crypto.createHash("sha256").update(bytes).digest("hex");
@@ -50,14 +26,27 @@ async function main() {
     .filter((value) => !["--execute", "--dry-run"].includes(value));
   if (unexpected.length) throw new Error("Use --dry-run or --execute.");
 
-  const planned = [
-    ...filesIn(mediaRoot(), "public"),
-    ...filesIn(requestAttachmentRoot(), "requests"),
-  ];
+  const db = new DatabaseSync(databasePath(), { readOnly: true });
+  const manifest = buildMediaReferenceManifest(db);
+  db.close();
+  if (manifest.invalidReferenceCount || manifest.malformedDocumentCount) {
+    throw new Error("The database media manifest contains invalid retained references.");
+  }
+  const planned = listLocalMediaObjects(mediaRoot(), requestAttachmentRoot());
+  const localByIdentity = new Map(
+    planned.map((item) => [mediaObjectIdentity(item.namespace, item.key), item]),
+  );
+  const expected = new Set(
+    manifest.references.map((reference) =>
+      mediaObjectIdentity(reference.namespace, reference.key),
+    ),
+  );
   const target = new SupabaseMediaObjectStore(supabaseMediaStorageConfig());
   let copied = 0;
   let retained = 0;
   let bytesChecked = 0;
+  let missing = 0;
+  let conflicting = 0;
 
   for (const item of planned) {
     const source = fs.readFileSync(item.fullPath);
@@ -65,7 +54,8 @@ async function main() {
     const existing = await target.read(item.namespace, item.key, item.contentType);
     if (existing) {
       if (digest(existing.bytes) !== digest(source)) {
-        throw new Error("Object-storage verification found a conflicting immutable media object.");
+        conflicting += 1;
+        continue;
       }
       retained += 1;
       continue;
@@ -79,12 +69,35 @@ async function main() {
     copied += 1;
   }
 
+  for (const reference of manifest.references) {
+    const id = mediaObjectIdentity(reference.namespace, reference.key);
+    if (localByIdentity.has(id)) continue;
+    const existing = await target.read(
+      reference.namespace,
+      reference.key,
+      reference.contentType,
+    );
+    if (!existing) missing += 1;
+  }
+
+  if (missing || conflicting) {
+    throw new Error(
+      "Object-storage reconciliation found missing or conflicting authoritative media.",
+    );
+  }
+
   console.log(JSON.stringify({
     mode: execute ? "execute" : "dry-run",
     planned: planned.length,
     copied,
     alreadyVerified: retained,
     bytesChecked,
+    referenced: expected.size,
+    sourceUnreferenced: planned.filter(
+      (item) => !expected.has(mediaObjectIdentity(item.namespace, item.key)),
+    ).length,
+    missing,
+    conflicting,
     sourceDeleted: false,
     databaseChanged: false,
   }));

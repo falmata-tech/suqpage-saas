@@ -16,7 +16,9 @@ async function main() {
     closeSupportConversation,
     createSupportConversation,
     getSupportConversation,
+    getSupportAgentSummary,
     listSupportAgentWorkloads,
+    listSupportAgentWorkloadsPage,
     postSupportMessage,
     reassignSupportConversation,
     reopenSupportConversation,
@@ -113,12 +115,24 @@ async function main() {
     listSupportAgentWorkloads(operations).filter((agent) => agent.enabled).map((agent) => agent.openConversations).sort(),
     [1, 2],
   );
+  assert.equal(listSupportAgentWorkloadsPage(operations, { status:"enabled" }).totalItems,2);
+  assert.equal(listSupportAgentWorkloadsPage(operations, {}).pageSize,5);
+  assert.equal(listSupportAgentWorkloadsPage(operations, { q:"Agent One" }).items[0]?.userId,agentOneId);
+  assert.equal(listSupportAgentWorkloadsPage(operations, { status:"disabled" }).totalItems,1);
+  assert.deepEqual(getSupportAgentSummary(operations),{
+    totalAgents:3,
+    enabledAgents:2,
+    availableAgents:0,
+    fullAgents:2,
+    openAssignments:3,
+    waitingConversations:1,
+  });
   assert.equal((db.prepare("SELECT COUNT(*) total FROM support_assignments").get() as { total: number }).total, 6);
   assert.ok((db.prepare("SELECT COUNT(*) total FROM support_events").get() as { total: number }).total >= 16);
   assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
   closeDbForTests();
   fs.rmSync(root, { recursive: true, force: true });
-  console.log("Support tenant scope, least-loaded assignment, capacity, queue, messaging, claim, close, reopen, and reassignment passed.");
+  console.log("Support tenant scope, least-loaded assignment, paginated agent management, capacity, queue, messaging, claim, close, reopen, and reassignment passed.");
 }
 
 main().catch((error) => {

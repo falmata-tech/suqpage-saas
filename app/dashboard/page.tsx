@@ -5,7 +5,7 @@ import PaginationNav from "@/components/PaginationNav";
 import { requireUser } from "@/lib/auth";
 import { hasCapability, isClient } from "@/lib/capabilities";
 import { hasRetainedPublication } from "@/lib/db";
-import { resolveBusiness } from "@/lib/dashboard";
+import { hasClientReviewableRevision, resolveBusiness } from "@/lib/dashboard";
 import { getDashboardAttention, type DashboardAttention } from "@/lib/dashboard-attention";
 import {
   getBusinessActivityCounts,
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 function AttentionCards({ attention, businessId, platform = false }: { attention: DashboardAttention; businessId?: number; platform?: boolean }) {
   const cards = [
-    platform && attention.newAccounts !== undefined ? { label: "New client accounts", value: attention.newAccounts, detail: "Draft workspaces to review", href: "/dashboard/admin?view=businesses&status=draft" } : null,
+    platform && attention.newAccounts !== undefined ? { label: "New client accounts", value: attention.newAccounts, detail: "Draft workspaces to review", href: "/dashboard/admin/businesses?status=draft" } : null,
     { label: platform ? "New showroom requests" : "Showroom requests", value: attention.showroomRequests, detail: platform ? "Submitted and waiting for review" : "Needs your next action", href: "/dashboard/requests" },
     attention.customerInquiries !== undefined ? { label: "New customer inquiries", value: attention.customerInquiries, detail: "Sent directly from your showroom", href: `/dashboard/inquiries?business=${businessId}` } : null,
     { label: "Support needing reply", value: attention.supportReplies, detail: platform ? "Waiting or unread conversations" : "Unread support activity", href: "/dashboard/support" },
@@ -48,11 +48,16 @@ export default async function Dashboard({ searchParams }: { searchParams:Promise
   const activity = getBusinessActivityCounts(business.id);
   const attention = getDashboardAttention(user, business.id);
   if (isClient(user)) {
+    const reviewable = hasClientReviewableRevision(user.id,business.id);
     return <DashboardShell user={user} business={business}>
-      <div className="dashboard-head"><div><span className="eyebrow">Client workspace</span><h1>Welcome to {business.name}</h1><p>Send requests in your own words and follow the work MirtPage manages for you.</p></div><Link className="btn brand" href="/dashboard/requests/new">Make a request</Link></div>
+      <div className="dashboard-head"><div><span className="eyebrow">Client workspace</span><h1>{business.name}</h1><p>Manage offerings, follow showroom work, and respond to customer activity.</p></div>{reviewable ? <Link className="btn brand" href={`/preview/@${business.handle}`}>Review showroom</Link> : <Link className="btn brand" href="/dashboard/requests/new">Make a request</Link>}</div>
       <AttentionCards attention={attention} businessId={business.id}/>
-      <div className="cards client-metrics"><Link className="metric" href="/dashboard/requests"><span>Requests</span><strong>{activity.requests}</strong><small>View request history</small></Link><Link className="metric" href={`/dashboard/inquiries?business=${business.id}`}><span>Customer inquiries</span><strong>{activity.inquiries}</strong><small>View showroom activity</small></Link><Link className="metric" href="/dashboard/account-health"><span>Account &amp; insights</span><strong>View</strong><small>Monthly access and showroom visitors</small></Link></div>
-      <section className="panel client-next"><h2>Manage your showroom</h2><p>{established ? "Use My offerings to update products, capabilities, production details, images, availability, and existing categories. " : "Your first showroom starts with a request in your own words. "}For new categories, settings, or visual changes, send a request and approve the private preview before publication.</p><div className="hero-actions">{established ? <Link className="btn brand" href={`/dashboard/products?business=${business.id}`}>Edit offerings</Link> : <Link className="btn brand" href="/dashboard/requests/new">Request your first showroom</Link>}<Link className="btn secondary" href="/dashboard/requests/new">{established ? "Request a larger change" : "Open request form"}</Link><Link className="btn secondary" href={`/preview/@${business.handle}`}>Open private preview</Link></div></section>
+      <section className="client-workspace-actions" aria-label="Showroom workspace">
+        <Link href={established ? `/dashboard/products?business=${business.id}` : "/dashboard/requests/new"}><span><strong>{established ? "Offerings" : "Start your showroom"}</strong><small>{established ? "Update products, capabilities, images, and production details." : "Tell MirtPage what you make and what the showroom should achieve."}</small></span><b>{established ? "Manage" : "Start"}</b></Link>
+        <Link href="/dashboard/requests"><span><strong>Showroom requests</strong><small>{activity.requests} request{activity.requests === 1 ? "" : "s"} in your history.</small></span><b>View</b></Link>
+        <Link href="/dashboard/account-health"><span><strong>Account &amp; insights</strong><small>Review monthly access and aggregate showroom visits.</small></span><b>Open</b></Link>
+      </section>
+      <section className="panel client-next"><h2>Need a larger change?</h2><p>New categories, business details, and visual changes go through a request and private review before publication.</p><div className="hero-actions"><Link className="btn secondary" href="/dashboard/requests/new">Request a showroom change</Link>{reviewable ? <Link className="btn brand" href={`/preview/@${business.handle}`}>Review current draft</Link> : null}</div></section>
     </DashboardShell>;
   }
   if (hasCapability(user, "operations:manage")) {

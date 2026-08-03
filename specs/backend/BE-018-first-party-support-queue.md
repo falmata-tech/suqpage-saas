@@ -2,7 +2,7 @@
 id: BE-018
 title: First-party customer support queue
 status: done
-related: [FE-019, BE-002, BE-015, BE-023, DEP-015, ADR-0009]
+related: [FE-019, FE-026, BE-002, BE-015, BE-023, BE-026, DEP-015, ADR-0009]
 owners: [backend, security, customer-support]
 last_updated: 2026-07-30
 change_level: L2

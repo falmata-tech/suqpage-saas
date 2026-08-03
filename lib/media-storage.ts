@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  mediaRequestTimeoutMs,
   mediaRoot,
   mediaStorageDriver,
   requestAttachmentRoot,
@@ -38,7 +39,8 @@ export class MediaStorageError extends Error {
       | "invalid_key"
       | "provider_read_failed"
       | "provider_write_failed"
-      | "provider_delete_failed",
+      | "provider_delete_failed"
+      | "provider_response_invalid",
   ) {
     super(message);
   }
@@ -103,9 +105,43 @@ export type SupabaseMediaStorageConfig = {
   url: string;
   serviceRoleKey: string;
   bucket: string;
+  requestTimeoutMs?: number;
 };
 
 type FetchLike = typeof fetch;
+const MAX_MEDIA_RESPONSE_BYTES = 5 * 1024 * 1024;
+
+async function readBoundedResponse(response: Response) {
+  const declaredLength = Number(response.headers.get("content-length") || 0);
+  if (declaredLength > MAX_MEDIA_RESPONSE_BYTES) {
+    throw new MediaStorageError(
+      "Media storage returned an invalid object.",
+      "provider_response_invalid",
+    );
+  }
+  if (!response.body) return Buffer.alloc(0);
+  const reader = response.body.getReader();
+  const chunks: Buffer[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_MEDIA_RESPONSE_BYTES) {
+        await reader.cancel();
+        throw new MediaStorageError(
+          "Media storage returned an invalid object.",
+          "provider_response_invalid",
+        );
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks, total);
+}
 
 function normalizedSupabaseConfig(
   input: SupabaseMediaStorageConfig,
@@ -119,6 +155,7 @@ function normalizedSupabaseConfig(
       "invalid_configuration",
     );
   }
+  const requestTimeoutMs = input.requestTimeoutMs ?? mediaRequestTimeoutMs();
   if (
     url.protocol !== "https:" ||
     url.username ||
@@ -126,7 +163,10 @@ function normalizedSupabaseConfig(
     url.search ||
     url.hash ||
     !/^[a-z0-9][a-z0-9_-]{1,62}$/i.test(input.bucket) ||
-    input.serviceRoleKey.length < 20
+    input.serviceRoleKey.length < 20 ||
+    !Number.isSafeInteger(requestTimeoutMs) ||
+    requestTimeoutMs < 1 ||
+    requestTimeoutMs > 30_000
   ) {
     throw new MediaStorageError(
       "Supabase media storage is not configured correctly.",
@@ -137,6 +177,7 @@ function normalizedSupabaseConfig(
     url: url.toString().replace(/\/$/, ""),
     serviceRoleKey: input.serviceRoleKey,
     bucket: input.bucket,
+    requestTimeoutMs,
   };
 }
 
@@ -164,15 +205,30 @@ export class SupabaseMediaObjectStore implements MediaObjectStore {
     return encodeURIComponent(this.config.bucket);
   }
 
+  private async request<T>(operation: (signal: AbortSignal) => Promise<T>): Promise<T | null> {
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      this.config.requestTimeoutMs,
+    );
+    try {
+      return await operation(controller.signal);
+    } catch (error) {
+      if (error instanceof MediaStorageError) throw error;
+      return null;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   async put(
     namespace: MediaNamespace,
     key: string,
     bytes: Buffer,
     contentType: string,
   ) {
-    const response = await this.fetcher(
-      `${this.config.url}/storage/v1/object/${this.bucketPath()}/${encodedObjectPath(namespace, key)}`,
-      {
+    const response = await this.request((signal) =>
+      this.fetcher(`${this.config.url}/storage/v1/object/${this.bucketPath()}/${encodedObjectPath(namespace, key)}`, {
         method: "POST",
         headers: this.headers({
           "Content-Type": contentType,
@@ -180,8 +236,9 @@ export class SupabaseMediaObjectStore implements MediaObjectStore {
           "x-upsert": "false",
         }),
         body: new Uint8Array(bytes),
-      },
-    ).catch(() => null);
+        signal,
+      }),
+    );
     if (!response?.ok) {
       throw new MediaStorageError(
         "Media storage is temporarily unavailable. Try the upload again.",
@@ -195,37 +252,50 @@ export class SupabaseMediaObjectStore implements MediaObjectStore {
     key: string,
     contentType: string,
   ): Promise<StoredMediaObject | null> {
-    const response = await this.fetcher(
-      `${this.config.url}/storage/v1/object/authenticated/${this.bucketPath()}/${encodedObjectPath(namespace, key)}`,
-      { method: "GET", headers: this.headers() },
-    ).catch(() => null);
-    if (response?.status === 404) return null;
-    if (!response?.ok) {
+    const result = await this.request(async (signal) => {
+      const response = await this.fetcher(
+        `${this.config.url}/storage/v1/object/authenticated/${this.bucketPath()}/${encodedObjectPath(namespace, key)}`,
+        { method: "GET", headers: this.headers(), signal },
+      );
+      if (response.status === 404) return { kind: "missing" as const };
+      if (!response.ok) {
+        throw new MediaStorageError(
+          "Media storage is temporarily unavailable.",
+          "provider_read_failed",
+        );
+      }
+      return {
+        kind: "object" as const,
+        bytes: await readBoundedResponse(response),
+        contentType: response.headers.get("content-type") || contentType,
+      };
+    });
+    if (!result) {
       throw new MediaStorageError(
         "Media storage is temporarily unavailable.",
         "provider_read_failed",
       );
     }
-    const bytes = Buffer.from(await response.arrayBuffer());
+    if (result.kind === "missing") return null;
     return {
-      bytes,
-      contentType: response.headers.get("content-type") || contentType,
-      contentLength: bytes.byteLength,
+      bytes: result.bytes,
+      contentType: result.contentType,
+      contentLength: result.bytes.byteLength,
     };
   }
 
   async remove(namespace: MediaNamespace, keys: string[]) {
     if (!keys.length) return;
-    const response = await this.fetcher(
-      `${this.config.url}/storage/v1/object/${this.bucketPath()}`,
-      {
+    const response = await this.request((signal) =>
+      this.fetcher(`${this.config.url}/storage/v1/object/${this.bucketPath()}`, {
         method: "DELETE",
         headers: this.headers({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           prefixes: keys.map((key) => `${namespace}/${assertMediaObjectKey(key)}`),
         }),
-      },
-    ).catch(() => null);
+        signal,
+      }),
+    );
     if (!response?.ok) {
       throw new MediaStorageError(
         "Media cleanup could not be confirmed.",

@@ -12,13 +12,14 @@ export async function createStaffAccountAction(formData: FormData) {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   try {
-    const created = createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
+    const created = await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
     audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
   } catch (error) {
-    redirect(`/dashboard/admin?view=staff&error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
+    redirect(`/dashboard/admin/staff?error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
   }
   revalidatePath("/dashboard/admin");
-  redirect("/dashboard/admin?view=staff&saved=staff");
+  revalidatePath("/dashboard/admin/staff");
+  redirect("/dashboard/admin/staff?saved=staff");
 }
 
 export async function assignRequestAction(formData: FormData) {

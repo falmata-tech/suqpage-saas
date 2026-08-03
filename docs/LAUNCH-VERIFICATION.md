@@ -1,26 +1,32 @@
 # MirtPage SaaS MVP — Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-08-03 local and remote candidate verification
+**Verification date:** 2026-08-03 local candidate verification
 **Reviewed input:** current MirtPage launch candidate and data-preserving rollout plan
 
 ## Verdict
 
-The current package is a **locally and remotely verified soft-launch candidate
-for one persistent application instance**. Final approval remains pending production
-configuration, optional Supabase media-copy verification when that adapter is
-selected, and publication. No production launch was performed during this
-verification.
+The current package is a **locally verified soft-launch candidate for one
+persistent application instance**. Final approval remains pending the new
+five-job remote workflow, required branch rules, production configuration,
+optional Supabase media-copy verification when that adapter is selected, and
+publication. No production launch was performed during this verification.
 
 This approval has two explicit boundaries:
 
-1. The MVP uses SQLite and persistent local media, so only one application instance should run.
-2. The former Delivery/Malikt demonstration is retired; dormant legacy tables
+1. The enabled runtime uses SQLite, so only one application instance should run.
+   Private Supabase Storage is supported but is not configured by repository
+   code alone.
+2. PostgreSQL portability is rehearsed, but PostgreSQL runtime mode is
+   deliberately rejected until every repository port and parity gate passes.
+3. MirtPage-owned authentication remains authoritative; Supabase Auth is not enabled.
+4. The former Delivery/Malikt demonstration is retired; dormant legacy tables
    are retained only for a non-destructive rollback window.
 
 ## Current local release evidence
 
-The final local candidate gates passed on 2026-08-02:
+The final local candidate gates passed on 2026-08-03 with Node 24.18.1, npm
+11.16.0, and Next.js 16.2.12:
 
 - Next.js production build
 - output-file trace privacy validation
@@ -33,6 +39,11 @@ The final local candidate gates passed on 2026-08-02:
 - operations, migration, backup, and verified restore checks
 - clean production-container install, build, trace, non-root runtime,
   persistence preflight, and health checks
+- disposable PostgreSQL 17 rehearsal of 44 tables and 2,849 rows, including 83
+  checks, 79 foreign keys, 78 indexes, 14 triggers, 44 reconciled fingerprints,
+  four invariant probes, and byte preservation of the SQLite source
+- reviewed administrator/client workspace captures at 1440, 390, and 320 CSS
+  pixels with bounded collections and no horizontal overflow
 
 The current `npm run backup` rehearsal wrote a preserved snapshot under
 `backups/2026-08-02T20-49-30-395Z`; runtime backup contents remain excluded from
@@ -65,11 +76,13 @@ jobs on the dependency-remediation commit. A repository administrator must
 still require those checks and block branch deletion and force-push before merge
 protection is considered active.
 
-GitHub Actions run `30795553451` passed its `core`, `browser`, and `container`
+GitHub Actions run `30795553451` passed its prior `core`, `browser`, and `container`
 jobs on commit `38e45d5`. The run exercised the isolated release fixture,
 operations checks, clean production container, and all 10 ordered browser
 workflows on Ubuntu. This is candidate verification only; it is not evidence of
-a production deployment.
+a production deployment. The current workflow adds separate `dependency` and
+`postgres` jobs; all five jobs still need to pass remotely for the exact new
+commit before DEP-022 can be completed.
 
 ## Demonstration evidence
 
@@ -122,7 +135,7 @@ The isolated production smoke run must prove:
 - Fixed the landing-page “All businesses” filter.
 - Preserved custom manual renderers for Al Haya, USAshopET, NovaTech, and HomeVibe.
 
-## Upgrade test
+## Historical prototype upgrade test
 
 The database from the uploaded prototype was copied and migrated with the corrected code.
 
@@ -163,6 +176,8 @@ Before opening the site publicly:
 
 ## Remaining post-pilot work
 
-Before broad external SaaS onboarding or horizontal scaling, migrate to managed
-PostgreSQL, complete object-storage rollout, strengthen account recovery and
-monitoring, and expand public localization.
+Before broad external SaaS onboarding or horizontal scaling, port the 42
+declared direct SQLite runtime modules behind asynchronous repositories, run all
+authorization and workflow tests against PostgreSQL, perform an approved
+managed cutover, complete object-storage rollout, strengthen account recovery
+and monitoring, and expand public localization.

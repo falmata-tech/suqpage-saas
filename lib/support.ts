@@ -51,6 +51,15 @@ export type SupportAgentWorkload = {
   openConversations: number;
 };
 
+export type SupportAgentSummary = {
+  totalAgents: number;
+  enabledAgents: number;
+  availableAgents: number;
+  fullAgents: number;
+  openAssignments: number;
+  waitingConversations: number;
+};
+
 export class SupportError extends Error {
   constructor(message: string, public readonly code: string) {
     super(message);
@@ -514,6 +523,112 @@ export function listSupportAgentWorkloads(user: SessionUser): SupportAgentWorklo
       openConversations: value.open_count,
     };
   });
+}
+
+function supportAgentRows() {
+  return `
+    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,
+      COALESCE(s.max_open_conversations,3) max_open_conversations,
+      COUNT(c.id) open_count
+    FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+    LEFT JOIN support_agent_settings s ON s.user_id=u.id
+    LEFT JOIN support_conversations c
+      ON c.assigned_user_id=u.id AND c.status='open'
+    WHERE p.access_role IN ('team_member','operations_manager')
+    GROUP BY u.id,u.name,u.email,s.enabled,s.max_open_conversations
+  `;
+}
+
+function workloadView(row: {
+  user_id: number;
+  name: string;
+  email: string;
+  enabled: number;
+  max_open_conversations: number;
+  open_count: number;
+}): SupportAgentWorkload {
+  return {
+    userId: row.user_id,
+    name: row.name,
+    email: row.email,
+    enabled: Boolean(row.enabled),
+    maxOpenConversations: row.max_open_conversations,
+    openConversations: row.open_count,
+  };
+}
+
+export function listSupportAgentWorkloadsPage(
+  user: SessionUser,
+  input: { page?: unknown; q?: unknown; status?: unknown },
+): PageResult<SupportAgentWorkload> {
+  if (!hasCapability(user, "operations:manage")) {
+    throw new SupportError("Operations access is required.", "forbidden");
+  }
+  const request = normalizePageRequest({ page: input.page, search: input.q }, 5);
+  const status = cleanText(input.status, 20);
+  const conditions: string[] = [];
+  const values: Array<string | number> = [];
+  if (request.search) {
+    conditions.push("(lower(name) LIKE ? ESCAPE '\\' OR lower(email) LIKE ? ESCAPE '\\')");
+    const pattern = likePattern(request.search);
+    values.push(pattern, pattern);
+  }
+  if (status === "enabled") conditions.push("enabled=1");
+  if (status === "disabled") conditions.push("enabled=0");
+  if (status === "available") conditions.push("enabled=1 AND open_count<max_open_conversations");
+  if (status === "full") conditions.push("enabled=1 AND open_count>=max_open_conversations");
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const total = Number((getDb().prepare(`
+    WITH workloads AS (${supportAgentRows()})
+    SELECT COUNT(*) count FROM workloads ${where}
+  `).get(...values) as { count: number }).count);
+  const window = pageWindow(total, request);
+  const rows = getDb().prepare(`
+    WITH workloads AS (${supportAgentRows()})
+    SELECT * FROM workloads ${where}
+    ORDER BY enabled DESC,open_count,lower(name),user_id
+    LIMIT ? OFFSET ?
+  `).all(...values, window.limit, window.offset) as Array<{
+    user_id: number;
+    name: string;
+    email: string;
+    enabled: number;
+    max_open_conversations: number;
+    open_count: number;
+  }>;
+  return pageResult(rows.map(workloadView), total, request);
+}
+
+export function getSupportAgentSummary(user: SessionUser): SupportAgentSummary {
+  if (!hasCapability(user, "operations:manage")) {
+    throw new SupportError("Operations access is required.", "forbidden");
+  }
+  const row = getDb().prepare(`
+    WITH workloads AS (${supportAgentRows()})
+    SELECT
+      COUNT(*) total_agents,
+      SUM(CASE WHEN enabled=1 THEN 1 ELSE 0 END) enabled_agents,
+      SUM(CASE WHEN enabled=1 AND open_count<max_open_conversations THEN 1 ELSE 0 END) available_agents,
+      SUM(CASE WHEN enabled=1 AND open_count>=max_open_conversations THEN 1 ELSE 0 END) full_agents,
+      SUM(open_count) open_assignments,
+      (SELECT COUNT(*) FROM support_conversations WHERE status='waiting') waiting_conversations
+    FROM workloads
+  `).get() as {
+    total_agents: number;
+    enabled_agents: number;
+    available_agents: number;
+    full_agents: number;
+    open_assignments: number;
+    waiting_conversations: number;
+  };
+  return {
+    totalAgents: Number(row.total_agents || 0),
+    enabledAgents: Number(row.enabled_agents || 0),
+    availableAgents: Number(row.available_agents || 0),
+    fullAgents: Number(row.full_agents || 0),
+    openAssignments: Number(row.open_assignments || 0),
+    waitingConversations: Number(row.waiting_conversations || 0),
+  };
 }
 
 export function updateSupportAgentSetting(

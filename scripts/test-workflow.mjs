@@ -24,18 +24,25 @@ function job(name, nextName) {
 
 const core = job("core", "browser");
 const browser = job("browser", "container");
-const container = job("container");
+const container = job("container", "dependency");
+const dependency = job("dependency", "postgres");
+const postgres = job("postgres");
 
-assert.match(core, /node-version: 22\.16\.0/, "Core CI must use the supported Node baseline");
+assert.match(workflow, /workflow_dispatch:/, "GitHub Actions must support an operator-triggered run");
+assert.match(core, /node-version: 24\.18\.1/, "Core CI must use the supported Node baseline");
 assert.match(core, /- run: npm run release/, "Core CI must invoke the canonical release contract");
 assert.match(core, /- run: npm run test:operations/, "Core CI must retain independent recovery evidence");
 assert(!core.includes("- run: npm run build"), "Core CI must not drift into a partial duplicate of the release script");
 assert(!core.includes("- run: npm run check"), "Core CI must not drift into a partial duplicate of the release script");
 
-assert.match(browser, /node-version: 22\.16\.0/, "Browser CI must use the supported Node baseline");
+assert.match(browser, /node-version: 24\.18\.1/, "Browser CI must use the supported Node baseline");
 assert.match(browser, /- run: npm run test:acceptance/, "Browser CI must run Chromium acceptance");
-assert.match(container, /node-version: 22\.16\.0/, "Container CI must use the supported Node baseline");
+assert.match(container, /node-version: 24\.18\.1/, "Container CI must use the supported Node baseline");
 assert.match(container, /- run: npm run test:container/, "Container CI must exercise the production image");
+assert.match(dependency, /node-version: 24\.18\.1/, "Dependency CI must use the supported Node baseline");
+assert.match(dependency, /npm audit --omit=dev --audit-level=moderate/, "Dependency CI must reject production advisories");
+assert.match(postgres, /node-version: 24\.18\.1/, "PostgreSQL CI must use the supported Node baseline");
+assert.match(postgres, /- run: npm run test:postgres-readiness/, "PostgreSQL CI must run the disposable migration rehearsal");
 
 for (const [action, tag] of [
   ["actions/checkout", "v4"],
@@ -58,7 +65,7 @@ assert.equal(packageJson.scripts["test:experience"], "tsx scripts/test-showroom-
 assert.match(packageJson.scripts.check, /npm run test:experience/, "Standard check must admit the mobile experience system");
 assert.match(releaseScript, /node scripts\/test-build-trace\.mjs/, "Release must reject private output-file traces");
 assert.equal(packageJson.scripts.typecheck, "node scripts/typecheck.mjs");
-assert.equal(packageJson.engines.node, ">=22.16.0");
+assert.equal(packageJson.engines.node, ">=24.18.1 <25");
 for (const [packagePath, entry] of Object.entries(packageLock.packages)) {
   if (!entry.integrity) continue;
   const [algorithm, encoded] = entry.integrity.split("-", 2);

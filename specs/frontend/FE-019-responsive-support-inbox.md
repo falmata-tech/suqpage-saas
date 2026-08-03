@@ -2,7 +2,7 @@
 id: FE-019
 title: Responsive client and staff support inbox
 status: done
-related: [FE-024, BE-018, DEP-015, ADR-0009]
+related: [FE-024, FE-026, BE-018, DEP-015, ADR-0009]
 owners: [frontend, customer-support]
 last_updated: 2026-07-30
 change_level: L2

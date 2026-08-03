@@ -9,12 +9,22 @@ const COOKIE = "mirtpage_session";
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
+type SessionRow = {
+  id: number;
+  user_id: number;
+  last_seen_at: number;
+};
+
 export async function currentUser(): Promise<SessionUser | null> {
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token || token.length < 40) return null;
   const now = Date.now();
-  const session = getDb().prepare("SELECT * FROM sessions WHERE token_hash=? AND revoked_at IS NULL AND expires_at>?").get(hashToken(token), now) as any;
+  const session = getDb().prepare(`
+    SELECT id,user_id,last_seen_at
+    FROM sessions
+    WHERE token_hash=? AND revoked_at IS NULL AND expires_at>?
+  `).get(hashToken(token), now) as SessionRow | undefined;
   if (!session) return null;
   if (now - Number(session.last_seen_at) > 15 * 60 * 1000) {
     getDb().prepare("UPDATE sessions SET last_seen_at=? WHERE id=?").run(now, session.id);
@@ -52,6 +62,7 @@ export async function setSession(userId: number) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: SESSION_MS / 1000,
+    priority: "high",
   });
 }
 

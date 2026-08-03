@@ -78,13 +78,13 @@ async function main() {
     createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_100, token:secondToken });
     assert.equal(getActiveInvitation(firstToken,1_000_101),undefined);
     assert.ok(getActiveInvitation(secondToken,1_000_101));
-    const redeemed = redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_200);
+    const redeemed = await redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_200);
     const client = getDb().prepare(`SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?`).get(redeemed.userId) as any;
     assert.equal(client.access_role,"client");
     assert.equal(client.must_change_password,0);
     assert.equal(canViewBusiness(client,redeemed.businessId),true);
     assert.equal(canManageBusiness(client,redeemed.businessId),false);
-    assert.throws(()=>redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_201),InvitationError);
+    await assert.rejects(()=>redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_201),InvitationError);
     assert.equal((getDb().prepare("SELECT COUNT(*) count FROM users WHERE lower(email)='amina@example.test'").get() as {count:number}).count,1);
 
     const clientForm = new FormData();
@@ -114,9 +114,9 @@ async function main() {
     assert.equal(repeatedClientRequest.id,clientRequest.id);
     assert.equal(repeatedClientRequest.duplicate,true);
 
-    const managerAccount = createStaffAccount({name:"Operations Manager",email:"manager@example.test",password:"ManagerPassword123!",accessRole:"operations_manager"});
-    const teamOneAccount = createStaffAccount({name:"Team One",email:"team-one@example.test",password:"TeamPassword123!",accessRole:"team_member"});
-    const teamTwoAccount = createStaffAccount({name:"Team Two",email:"team-two@example.test",password:"TeamPassword123!",accessRole:"team_member"});
+    const managerAccount = await createStaffAccount({name:"Operations Manager",email:"manager@example.test",password:"ManagerPassword123!",accessRole:"operations_manager"});
+    const teamOneAccount = await createStaffAccount({name:"Team One",email:"team-one@example.test",password:"TeamPassword123!",accessRole:"team_member"});
+    const teamTwoAccount = await createStaffAccount({name:"Team Two",email:"team-two@example.test",password:"TeamPassword123!",accessRole:"team_member"});
     const manager = getUserById(managerAccount.userId)!;
     const teamOne = getUserById(teamOneAccount.userId)!;
     const teamTwo = getUserById(teamTwoAccount.userId)!;
@@ -127,7 +127,7 @@ async function main() {
     const directToken = "D".repeat(43);
     const directInvitation = createClientInvitation({requestId:null,clientName:"Direct Client",email:"direct@example.test",businessName:"Direct Market",handle:"direct-market",designKey:"alhaya",actorUserId:manager.id},{now:2_000_000,token:directToken});
     assert.equal(getActiveInvitation(directToken,2_000_001)?.request_id,null);
-    const directRedemption = redeemClientInvitation({token:directToken,name:"Direct Client",password:"DirectClient123!"},2_000_100);
+    const directRedemption = await redeemClientInvitation({token:directToken,name:"Direct Client",password:"DirectClient123!"},2_000_100);
     assert.equal(directRedemption.requestId,null);
     const directClient = getUserById(directRedemption.userId)!;
     const directForm = new FormData();

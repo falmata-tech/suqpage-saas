@@ -2,9 +2,9 @@
 id: DEP-001
 title: Controlled pilot release and recovery
 status: done
-related: [FE-001, BE-001, DEP-006, DEP-008, DEP-012, ADR-0002]
+related: [FE-001, BE-001, DEP-006, DEP-008, DEP-012, DEP-022, ADR-0002]
 owners: [operations, security]
-last_updated: 2026-07-24
+last_updated: 2026-08-03
 change_level: L3
 ---
 
@@ -34,8 +34,8 @@ Scenario: Release candidate
   WHEN the release gate runs
   THEN build, HTTP, type, design, security, spec, and dependency gates pass
 
-Scenario: Browser acceptance on the supported Node 22 baseline
-  GIVEN GitHub Actions runs Playwright on a supported Node 22 release
+Scenario: Browser acceptance on the supported Node 24 baseline
+  GIVEN GitHub Actions runs Playwright on Node 24.18.1
   WHEN the acceptance suite loads its SQLite persistence assertions
   THEN all browser scenarios are discovered and executed
   AND the test transform loader does not intercept the experimental SQLite module
@@ -58,9 +58,12 @@ stopping writes and validating the backup.
 
 - `scripts/preflight.ts`, `scripts/release.sh`, `scripts/test-operations.mjs`.
 - `tests/acceptance/app.spec.ts`, `scripts/acceptance-db-probe.mjs`, and
-  `scripts/acceptance-runner.mjs` on Node 22.
+  `scripts/acceptance-runner.mjs` on Node 24.18.1.
 - Docker persistent volume and health check in `docker-compose.yml`.
-- Evidence: exact Node 22.16 discovery and all five browser scenarios,
+- Historical evidence: exact Node 22.16 discovery and all five browser scenarios,
   `npm run check`, `npm run test:operations`, `npm run test:http`, and
   `npm run release` passed on 2026-07-21; automated setup output contained no
   credential values.
+- DEP-022 raises the current runtime baseline to Node 24.18.1 and adds the
+  independent dependency and PostgreSQL rehearsal jobs without changing this
+  single-instance pilot boundary.
