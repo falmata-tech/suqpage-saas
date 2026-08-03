@@ -8,9 +8,9 @@
 
 The current package is a **locally and remotely verified soft-launch candidate
 for one persistent application instance**. Final approval remains pending
-required branch rules, production configuration, optional Supabase media-copy
-verification when that adapter is selected, and publication. No production
-launch was performed during this verification.
+production configuration, optional Supabase media-copy verification when that
+adapter is selected, and publication. No production launch was performed during
+this verification.
 
 This approval has two explicit boundaries:
 
@@ -84,8 +84,14 @@ a production deployment.
 
 GitHub Actions run `30810736356` passed the new `core`, `browser`, `container`,
 `dependency`, and `postgres` jobs on commit `b5619be` on 2026-08-03. Public
-branch metadata still reported `main` as unprotected, so the checks are verified
-but not yet enforced as merge requirements.
+branch metadata still reported `main` as unprotected at that checkpoint.
+
+Exact-main run `30811139517` then passed the same five jobs on commit `a134a12`.
+Main protection is now active with strict required checks, administrator
+enforcement, pull requests, resolved conversations, and linear history. Force
+pushes and branch deletion are blocked. The required approval count remains zero
+for the current solo-maintainer period and must be raised when an independent
+reviewer joins.
 
 ## Demonstration evidence
 
