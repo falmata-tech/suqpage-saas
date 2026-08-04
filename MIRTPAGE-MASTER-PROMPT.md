@@ -246,9 +246,9 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The MirtPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, and `FE-028` define the current composition, narrative, and venue art direction: a compact
-purple visitor welcome introduces one integrated,
-application-first discovery workspace combining industry and reviewed production-scale selection, search, a
+and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`, and `FE-029` define the current composition, narrative, venue art direction, and platform visual system: a compact
+midnight-and-teal visitor welcome introduces one integrated,
+application-first discovery workspace combining industry selection, search, a
 disclosed paid-sponsorship rail, exact-location Ethiopia map, and server-paginated
 five-row List. A separate weekly country-wide Expo program follows the map inside
 the same workspace. Monday through Saturday each have one stable assigned
@@ -267,7 +267,26 @@ merchant education and conversion remain secondary content below the public
 discovery experience. Platform copy must not claim verified tax, employment,
 certification, import-substitution, sales, or other outcomes for every listed
 business, and MirtPage mission copy must not be injected into client-owned
-showrooms.
+showrooms. Every public showroom and private preview is framed by one compact,
+platform-owned **Powered by MirtPage** band with a concise visible **Back**
+action whose accessible name identifies the MirtPage marketplace destination.
+This host chrome sits outside the tenant renderer and must not replace,
+obscure, or visually compete with the tenant's logo, header,
+navigation, or content. Its surface, border, text, and focus colors may derive
+from the approved tenant palette so the compact band belongs beside the site;
+the MirtPage mark, host wording, and Marketplace action remain controlled
+platform identity.
+
+MirtPage-owned surfaces use one semantic identity system derived from midnight
+navy `#0B1D3A`, deep teal `#0D6B6E`, bright teal `#27A5A1`, saffron
+`#F2B01E`, and cool gray `#F3F5F7`. Navy carries identity and structure, teal
+carries primary actions and selection, and saffron is reserved for bounded
+warning or exceptional attention states, never the Expo Today treatment. Sponsored placement uses bright-teal accents and
+an explicit paid label over a restrained midnight patterned field instead of a
+warning color. Public pages, task forms, discovery, and
+authenticated workspaces share the same vector mark and split-color wordmark.
+Client showroom logos and approved or custom showroom palettes remain
+independent and are never replaced by the platform palette.
 
 Expo and City Showroom floors use a locally stored, optimized architectural hall
 shell: a cohesive overhead interior with light walls, glass entrance, reception
@@ -291,21 +310,27 @@ Nearby markers form numbered zoom-dependent clusters. Repeated activation zooms
 to either an isolated exact-coordinate marker or, when two or more matching
 businesses share a reviewed city and region, one close-zoom counted city
 gateway. The gateway centroid is only a discovery affordance and does not change
-any business address. Activating it opens a map-backed virtual City Showroom in place:
+any business address. Activating it replaces the map inside the same frame with
+a virtual City Showroom:
 every grouped business occupies one dynamically sized floor that visitors can
 pan and zoom, with no halls, pagination, route change, or hidden overflow.
-Closing it restores the same map state. Location controls show only places with
+The geographic renderer is suspended while this floor is open, and **Back to
+map** restores the same map state. Isolated business pins use the same teal
+identity as numbered clusters while retaining their distinct pin shape.
+Location controls show only places with
 matching businesses, and the center control restores the country view.
 
 The Monday-through-Saturday Expo is a virtual presentation, not a physical
 location claim. It uses one dynamically sized top-view floor, restrained
 architectural context, no people, and direct pan/zoom/fit controls. Every booth
 remains on that floor; there are no halls, pages, or hidden overflow records.
-The rolling seven-date selector begins with Ethiopia-local today, never a past
-date. Today retains the strongest persistent visual emphasis. Selecting another
-date opens a six-second anonymous preview and then returns to today; selecting a
-different preview restarts that timer without changing map filters. The selected
-calendar date, not map filters, chooses its industry. Monday is Electronics, Tuesday Beauty &
+The seven-date selector remains in fixed Monday-through-Sunday order for the
+current Ethiopia-local calendar week. Its midnight-and-teal **Today** indicator
+moves to the current weekday without reordering the cards or using saffron.
+Selecting another date opens a six-second anonymous preview and then returns to
+today; selecting a different preview restarts that timer without changing map
+filters. The selected calendar date, not map filters, chooses its industry.
+Monday is Electronics, Tuesday Beauty &
 Care, Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home &
 Living, and Saturday Fashion & Textiles. Today's Expo reveals each business's
 identity, approved account-owned booth image, preview, and permanent Visit Showroom
@@ -650,7 +675,7 @@ MirtPage’s directory must scale without dumping every tenant onto the page by 
 Default behavior:
 
 - show no more than five active public showrooms on the current page;
-- provide search plus simple Industry pills, beginning with **All industries**;
+- provide live search plus simple Industry controls;
 - do not expose category filters or duplicate all-business/reset navigation;
 - reset to page one when search or Industry changes;
 - fetch no more than five List records per response page using database count,
@@ -658,8 +683,11 @@ Default behavior:
 - show previous/next pagination only when more than five records match;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
-- compose reviewed **Workshop / producer** and **Growing factory** scale filters
-  with industry, search, map/list state, and pagination without changing Expo scheduling;
+- keep reviewed **Workshop / producer** and **Growing factory** scale metadata
+  available to authorized administrators without exposing it as a public filter;
+- place live search, available-location jump, map/list mode, and zoom/center
+  controls in one compact teal command area immediately above the map;
+- ignore legacy public `scale` query state so no invisible filter narrows results;
 - ensure mobile usability and keyboard accessibility.
 
 ---

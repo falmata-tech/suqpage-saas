@@ -2,7 +2,7 @@
 id: FE-026
 title: Role-oriented workspace navigation
 status: done
-related: [FE-013, FE-017, FE-019, FE-025, BE-018, BE-026, DEP-021, DEP-022, ADR-0013]
+related: [FE-013, FE-017, FE-019, FE-025, FE-029, BE-018, BE-026, DEP-021, DEP-022, ADR-0013]
 owners: [product, frontend, operations, design]
 last_updated: 2026-08-03
 change_level: L2

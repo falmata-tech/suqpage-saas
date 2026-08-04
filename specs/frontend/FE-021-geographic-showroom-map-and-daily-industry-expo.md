@@ -19,8 +19,8 @@ the physical map.
 
 The outcome is an application-first marketplace where the map clusters nearby
 businesses until a visitor reaches an isolated exact-location pin or a counted
-multi-business city gateway. A gateway opens one continuous virtual City Showroom
-over the map, with every matching city business reachable by pan and zoom and
+multi-business city gateway. A gateway replaces the map inside its existing frame
+with one continuous virtual City Showroom, where every matching city business is reachable by pan and zoom and
 no hall or page changes. Below it, a separate weekly
 country-wide program presents Monday through Saturday industry Expos and a
 Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
@@ -33,13 +33,15 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
 - Numbered, zoom-dependent clusters and click/tap-to-expand behavior.
 - Counted close-zoom city gateways for two or more businesses sharing a reviewed
   city and region, while isolated businesses remain exact-coordinate pins.
-- One map-backed virtual City Showroom dialog containing every grouped business on a
+- One map-frame virtual City Showroom panel containing every grouped business on a
   dynamically sized, pannable and zoomable floor without halls or pagination.
 - Local region, zone, city/town, and road context with no runtime map service.
 - Search, industry, featured, map, and list controls over one eligible result set.
+- One compact teal map command area containing result context, Map/List mode,
+  live search, location jump, and map controls directly above the map.
 - Server-paginated List results with at most five businesses per response page.
-- A rolling date-labeled selector beginning today and exposing the next six
-  dates: Monday through Saturday each have one stable assigned industry, while
+- A fixed Monday-through-Sunday date selector for the Ethiopia-local calendar
+  week: Monday through Saturday each have one stable assigned industry, while
   Sunday is a TikTok livestream showcase of selected featured businesses.
 - One dynamically sized, pannable and zoomable Expo floor with every booth on
   the same surface, stable numbered references, and no halls or pagination.
@@ -63,6 +65,8 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
 ## Domain language and invariants
 
 - **Geographic Showroom marker:** one eligible business at its reviewed coordinates.
+  It uses the same teal identity as a numbered cluster while its pin shape
+  distinguishes an individual business from an aggregate.
 - **Cluster:** a zoom-dependent aggregate of two or more nearby markers. Its
   number is the exact number of represented businesses.
 - **City gateway:** a close-zoom aggregate for two or more eligible businesses
@@ -103,20 +107,26 @@ Sunday TikTok livestream showcase on calm, bounded presentation surfaces.
 - The stable weekly assignment is Monday Electronics, Tuesday Beauty & Care,
   Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home & Living,
   Saturday Fashion & Textiles, and Sunday TikTok livestream.
-- The seven-date selector begins with Ethiopia-local today and moves forward six
-  dates; it never presents a past date as an upcoming preview.
-- Today's date retains the strongest persistent visual emphasis even while a
-  different date has temporary selected styling. A non-today preview returns to
-  today after six seconds; choosing another non-today date restarts that timer
-  while preserving map industry, search, and view state.
+- The seven-date selector remains in fixed Monday-through-Sunday order and
+  labels the current Ethiopia-local calendar week. The cards never reorder as
+  the week advances; the persistent **Today** indicator moves to the applicable
+  fixed weekday.
+- Today uses the same strong teal treatment as the active industry card without
+  saffron or warning color. A different selected date uses a separate temporary soft treatment and
+  returns to today after six seconds; choosing another non-today date restarts
+  that timer while preserving map industry, search, and view state.
 - Map and floor controls use familiar zoom/reset icons with accessible names.
   Industry and view modes use labeled segmented or tab controls.
 - At 320px and 390px, all primary controls are at least 44px, horizontal rails
   are bounded, the document has no horizontal overflow, and the map remains
   pannable without trapping page scrolling outside its stage.
-- The City Showroom uses one transformed floor layer, lazy dimensioned media, bounded
-  zoom, reduced-motion behavior, native modal focus containment, Escape/Close,
-  and fit-to-view initialization. Drag/zoom is useful only when floor overflow
+- The map command area avoids duplicate filter rows and keeps the map within the
+  first painted mobile and desktop viewport.
+- The City Showroom replaces the map inside the same bounded frame while open,
+  suspending the geographic renderer instead of layering two interactive surfaces.
+  It uses one transformed floor layer, lazy dimensioned media, bounded zoom,
+  reduced-motion behavior, a clear **Back to map** action, and fit-to-view
+  initialization. Drag/zoom is useful only when floor overflow
   exists; a small floor remains centered and stable.
 - The Expo uses the same one-layer performance contract, with restrained
   architectural context, direct transforms, fit-to-view initialization, and no
@@ -140,10 +150,10 @@ Scenario: Visitor enters a multi-business City Showroom
   GIVEN two or more eligible businesses share a reviewed city and region
   AND the visitor has expanded the geographic cluster to close city zoom
   WHEN the visitor activates the counted city gateway
-  THEN one map-backed virtual City Showroom opens without route navigation
+  THEN the virtual City Showroom replaces the map inside the same frame without route navigation
   AND every represented business is reachable on one continuous floor
   AND no hall, page selector, or duplicate individual city pin is shown
-  AND Close or Escape returns to the same map state
+  AND Back to map returns to the same map state
 
 Scenario: Isolated business remains independently discoverable
   GIVEN one eligible business is not near another at the active zoom
@@ -171,6 +181,13 @@ Scenario: Visitor previews another Expo date
   AND no business name, image, handle, preview, or showroom link is exposed
   AND the schedule clearly identifies today's live Expo
   AND after six seconds the selected Expo returns to today
+
+Scenario: Weekly schedule keeps stable positions
+  GIVEN the Ethiopia-local day advances during the week
+  WHEN the Expo schedule renders
+  THEN its cards remain ordered Monday through Sunday
+  AND only the selected-teal Today indicator moves to the current weekday
+  AND no saffron highlight is used for the current date
 
 Scenario: Sunday presents selected businesses live
   GIVEN Sunday is selected
@@ -245,7 +262,7 @@ this pre-launch change.
 ## Evidence
 
 Evidence: completed locally on 2026-08-01. Focused discovery tests prove the
-rolling Ethiopia-local seven-date schedule, sequential one-floor references,
+fixed Ethiopia-local Monday-through-Sunday schedule, sequential one-floor references,
 business-owned booth media, media-gated Expo eligibility, and identity/media
 redaction for every non-today date. Browser acceptance passed all 10 workflows,
 including the six-second return to persistently highlighted today, continuous

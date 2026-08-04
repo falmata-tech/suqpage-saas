@@ -2,7 +2,7 @@
 id: FE-013
 title: Unified platform identity and workspace shell
 status: done
-related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE_BASE]
+related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE-029, FE_BASE]
 owners: [product, frontend]
 last_updated: 2026-08-04
 change_level: L1
@@ -26,7 +26,7 @@ findable on desktop and mobile.
 - A neutral platform palette shared by the public marketplace and workspace
   shell while preserving tenant showroom identity inside showroom renderers.
 - Purposeful public task surfaces for login and expression-of-interest intake
-  using the homepage/About solid purple, white, charcoal, and cool-neutral
+  using the homepage/About midnight, teal, white, saffron, and cool-neutral
   language without promotional gradients or oversized rounded cards.
 - Grouped, role-aware workspace navigation with one primary destination for
   each workflow and an accessible mobile drawer.
@@ -49,18 +49,25 @@ findable on desktop and mobile.
   authorization remains authoritative for every route and action.
 - Tenant showroom logos and visual systems are never replaced by the platform
   mark inside the tenant's public showroom.
+- A compact platform-owned host band may frame the showroom above its tenant
+  renderer when its controlled MirtPage identity remains clear. Its neutral
+  chrome may adapt to the approved tenant palette to avoid a pasted-on strip.
 
 ## Contracts
 
 - The same accessible brand component appears on the homepage, Bazaar, public
   intake, login, legal pages, and authenticated workspace shell.
+- Public showrooms and private previews include a compact **Powered by
+  MirtPage** band with a visible **Back** action whose accessible name identifies
+  the marketplace destination. It remains in
+  normal document flow and does not replace or cover tenant navigation.
 - Every public navigation link to `/request` is labeled **Sign up** on desktop,
   mobile, and footer navigation. Promotional calls to action may retain their
   purposeful **Build your Showroom** or **Start your Showroom** wording.
 - Login and public intake use the same platform header, compact geometry,
   semantic palette, form controls, and focus treatment as the current homepage
   and About page. Their distinct tasks remain immediately clear.
-- On desktop, each public task may pair one solid-purple context panel with one
+- On desktop, each public task may pair one solid-midnight context panel with one
   white form panel. On phones the panels stack in semantic reading order, all
   inputs remain visible, and no fixed navigation covers form controls.
 - Activating the workspace brand returns to the actor's role-appropriate
@@ -87,6 +94,12 @@ Scenario: Visitor recognizes MirtPage across platform surfaces
   WHEN each platform header or identity area renders
   THEN the same MirtPage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
+
+Scenario: Visitor returns from a tenant showroom
+  GIVEN a visitor opened a published showroom from MirtPage discovery
+  WHEN the showroom renders with its tenant-owned identity
+  THEN a visually separate MirtPage host band links directly to the marketplace
+  AND the band does not cover tenant navigation or showroom content
 
 Scenario: Visitor finds business signup consistently
   GIVEN a visitor opens the homepage, About page, or login page
@@ -166,13 +179,15 @@ component, CSS, and platform mark references in one deployment.
 
 Evidence: verified on 2026-08-01. Homepage desktop/mobile/footer, About
 desktop/mobile, and Login desktop/mobile navigation all label `/request` as
-**Sign up**; no public navigation retains **For businesses**. The focused
+  **Sign up**; no public navigation retains **For businesses**. FE-029 later
+  replaced the original purple presentation with the supplied midnight, teal,
+  saffron, and cool-gray platform identity. The focused
 production-browser identity test passed across all public surfaces, and
 `npm run check` plus `npm run release` passed with production build, HTTP smoke,
 scale, security, trace privacy, and zero-vulnerability gates. No route, signup
 behavior, schema, or tenant data changed.
 
-- `public/brand/mirtpage-mark.svg` and `components/MirtPageBrand.tsx` provide one
+- `public/brand/mirtpage-mark-v2.svg` and `components/MirtPageBrand.tsx` provide one
   project-owned platform identity on the homepage, Bazaar, intake, login, legal,
   favicon, and authenticated workspace surfaces. Tenant showroom marks remain
   unchanged.
@@ -182,11 +197,12 @@ behavior, schema, or tenant data changed.
   Escape, focus containment/restoration, backdrop close, scroll locking, and
   route-change close behavior.
 - `/login` and `/request` now use the current public header and one bounded
-  solid-purple context/white-form composition. Their phone layouts stack in
+  solid-midnight context/white-form composition. Their phone layouts stack in
   semantic order without changing login actions, intake fields, consent,
   no-upload behavior, or success handling.
 - `scripts/capture-platform-form-visuals.mjs` passed five 1440px, 390px, and
-  320px captures with exact document widths, solid `rgb(79, 49, 143)` context
+  320px captures with exact document widths; current FE-029 captures replace
+  the original color assertion with solid `rgb(11, 29, 58)` context
   panels, no background gradients, 44-134px visible controls, and no browser
   errors.
 - The production-browser suite proved the shared identity across six public

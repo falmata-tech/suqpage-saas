@@ -238,12 +238,13 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
   const { year, month, day } = ethiopiaDateParts(now);
   const today = new Date(Date.UTC(year, month - 1, day));
   const todayWeekday = today.getUTCDay();
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() - ((todayWeekday + 6) % 7));
   const labelFormatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
-  const days = Array.from({ length: 7 }, (_, index): WeeklyExpoDay => {
-    const date = new Date(today);
-    date.setUTCDate(today.getUTCDate() + index);
-    const entry = EXPO_WEEK.find((candidate) => candidate.weekday === date.getUTCDay()) || EXPO_WEEK[0];
+  const days = EXPO_WEEK.map((entry, index): WeeklyExpoDay => {
+    const date = new Date(monday);
+    date.setUTCDate(monday.getUTCDate() + index);
     const isSunday = entry.weekday === 0;
     const industry = isSunday ? rotatingSundayIndustry(date) : normalizeIndustry(entry.industryKey || undefined);
     return {
@@ -255,7 +256,7 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyExpoDay[
       industryKey: industry.key,
       industryLabel: industry.label,
       industryIcon: industry.icon,
-      isToday: index === 0,
+      isToday: entry.weekday === todayWeekday,
     };
   });
   return { todayWeekday, days };

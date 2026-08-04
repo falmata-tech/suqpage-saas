@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-    searchParams: Promise<{ industry?: string; scale?: string; q?: string; showroom?: string; page?: string; view?: string; expoDay?: string }>;
+    searchParams: Promise<{ industry?: string; q?: string; showroom?: string; page?: string; view?: string; expoDay?: string }>;
 }) {
   const query = await searchParams;
-  const discovery = getDiscoveryView({ industry: query.industry, scale: query.scale, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
+  const discovery = getDiscoveryView({ industry: query.industry, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
   return (
     <div className="landing-home" id="top">
       <header className="landing-header">

@@ -2,7 +2,7 @@
 id: FE-028
 title: Producer story and scalable venue art direction
 status: done
-related: [FE-021, FE-024, FE-025, FE-027]
+related: [FE-021, FE-024, FE-025, FE-027, FE-029]
 owners: [product, frontend, design]
 last_updated: 2026-08-04
 change_level: L1

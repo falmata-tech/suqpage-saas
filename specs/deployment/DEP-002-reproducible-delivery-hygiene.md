@@ -102,9 +102,10 @@ four-tenant application behavior and single-instance pilot boundary.
 - The installed dependency graph contains one supported `sharp` version at or
   above the first version patched for current libvips advisories; Next.js must
   not retain a vulnerable optional nested copy.
-- The Next.js PostCSS override is at or above 8.5.18, the first release patched
-  for `GHSA-r28c-9q8g-f849`; remediation must not accept npm's breaking
-  downgrade suggestion.
+- The Next.js PostCSS override is at or above 8.5.23, the first release outside
+  the affected range for the source-map path disclosure advisory reported as
+  `GHSA-fxqj-rqcc-2cmp`, and remains patched for `GHSA-r28c-9q8g-f849`;
+  remediation must not accept npm's breaking framework downgrade suggestion.
 - Required GitHub merge checks are `core`, `browser`, `container`, `dependency`,
   and `postgres`; enforcing repository rules is an explicit administrator
   operation outside a code commit.
@@ -173,7 +174,7 @@ Scenario: A new native image advisory blocks release
 
 Scenario: A transitive CSS processor advisory blocks release
   GIVEN the locked Next.js graph resolves PostCSS at a vulnerable version
-  WHEN the production dependency audit reports GHSA-r28c-9q8g-f849
+  WHEN the production dependency audit reports a known PostCSS advisory
   THEN the exact PostCSS override is raised to the first compatible patched release
   AND Next.js is not downgraded or replaced
   AND the complete build, CSS, browser, and dependency gates pass
@@ -336,3 +337,15 @@ New advisory checkpoint on 2026-07-24:
   passed against the patched graph.
 - This spec remains `in_progress` only until replacement remote `core`,
   `browser`, and `container` checks pass.
+
+Source-map advisory checkpoint on 2026-08-04:
+
+- The release audit reported the newer PostCSS source-map path disclosure
+  advisory against the exact `postcss@8.5.18` override while Next.js remained
+  current and otherwise passed its production build.
+- The bounded remediation raises only the exact override to `postcss@8.5.25`,
+  above the advisory's affected `<=8.5.22` range. The framework version and
+  application dependency surface remain unchanged.
+- `npm ls postcss next` resolves one overridden `postcss@8.5.25` beneath
+  unchanged `next@16.2.12`; `npm run release` passes the production build,
+  HTTP smoke, scale fixtures, security suites, and zero-vulnerability audit.

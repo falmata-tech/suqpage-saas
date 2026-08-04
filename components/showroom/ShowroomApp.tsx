@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import {
   useEffect,
   useMemo,
@@ -303,10 +305,25 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
   );
 
   return (
-    <div
-      className={`runtime-root theme-${catalog.business.design_key}`}
-      style={runtimeTokenVariables as CSSProperties | undefined}
-    >
+    <>
+      <nav
+        className="showroom-host-bar"
+        aria-label="MirtPage showroom host navigation"
+        style={runtimeTokenVariables as CSSProperties | undefined}
+      >
+        <Link href="/" className="showroom-host-back" aria-label="Back to MirtPage marketplace">
+          <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
+          <span>Back</span>
+        </Link>
+        <span className="showroom-host-identity">
+          <img src="/brand/mirtpage-mark-v2.svg" alt="" width="24" height="24" />
+          <span>Powered by <strong>MirtPage</strong></span>
+        </span>
+      </nav>
+      <div
+        className={`runtime-root theme-${catalog.business.design_key}`}
+        style={runtimeTokenVariables as CSSProperties | undefined}
+      >
       {compositionManifest ? (
         <CompositionShowroom
           {...designProps}
@@ -444,7 +461,8 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           {toast}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

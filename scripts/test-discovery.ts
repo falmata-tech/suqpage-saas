@@ -20,9 +20,9 @@ assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
 assert.match(discoveryUiSource, /router\.replace/);
 assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
-assert.match(discoveryCssSource, /venue-hall-shell-v1\.webp/);
+assert.match(discoveryCssSource, /venue-hall-shell-v2\.webp/);
 assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
-const venueShell = path.join(process.cwd(), "public/landing/venue-hall-shell-v1.webp");
+const venueShell = path.join(process.cwd(), "public/landing/venue-hall-shell-v2.webp");
 assert.ok(fs.existsSync(venueShell), "the local architectural venue shell exists");
 assert.ok(fs.statSync(venueShell).size <= 300_000, "the architectural venue shell stays under 300 KB");
 
@@ -99,7 +99,7 @@ try {
         WHERE business_id=?
       `).run(now - 40 * 86_400_000, now - 35 * 86_400_000, now - 5 * 86_400_000, now - 86_400_000, id);
     } else {
-      db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?").run(future, id);
+      db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?").run(future + 5 * 24 * 60 * 60 * 1000, id);
     }
     addProfile.run(
       id,
@@ -176,6 +176,7 @@ try {
   assert.equal(view.expo.isToday, true);
   assert.equal(view.expo.selectedWeekday, 1);
   assert.equal(view.expo.schedule.length, 7);
+  assert.deepEqual(view.expo.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "schedule positions remain fixed from Monday through Sunday");
   assert.equal(view.expo.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
   assert.ok(view.expo.booths.every((booth) => booth.revealed && booth.showroom.imagePath === `/booths/${booth.showroom.handle}.webp`), "today's Expo uses each business's approved booth profile image");
   assert.deepEqual(view.expo.booths.map((booth) => booth.slot), Array.from({ length: 19 }, (_, index) => index + 1), "every Expo business receives one continuous floor slot");
@@ -205,6 +206,12 @@ try {
   assert.equal(tuesday.expo.boothCount, 1);
   assert.ok(tuesday.expo.booths.every((booth) => !booth.revealed && booth.showroom === null), "non-today Expo slots contain no business projection");
   assert.equal(JSON.stringify(tuesday.expo.booths).includes("sheger-soap"), false, "non-today page data does not leak a business handle");
+
+  const wednesday = getDiscoveryView({ db, industry: "electronics", expoDay: 3, now: new Date("2026-07-29T09:00:00+03:00") });
+  assert.deepEqual(wednesday.expo.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "advancing today does not reorder weekday cards");
+  assert.equal(wednesday.expo.schedule.find((day) => day.isToday)?.dayLabel, "Wednesday", "today indicator moves within the fixed week");
+  assert.equal(wednesday.expo.schedule[0].dateIso, "2026-07-27");
+  assert.equal(wednesday.expo.schedule[2].dateIso, "2026-07-29");
 
   const sunday = getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
   assert.equal(sunday.expo.mode, "livestream");
