@@ -8,7 +8,7 @@
 
 ## 1. Your role
 
-You are working on **MirtPage**, a multi-tenant SaaS platform for Ethiopian makers, growers, processors, workshops, home-based product businesses, and growing factories that primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and B2B relationships.
+You are working on **MirtPage**, a multi-tenant SaaS platform for small and growing Ethiopian makers, growers, processors, workshops, home-based product businesses, and factories that still need practical market access and primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and B2B relationships.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
@@ -59,7 +59,16 @@ The showroom is designed to turn passive browsing into a structured product inqu
 
 ## 3. The problem MirtPage solves
 
-Many social sellers have products spread across posts, stories, image galleries, chats, and status updates. Customers struggle to understand:
+MirtPage exists for the people who choose to make, grow, and process products
+locally. Small and growing Ethiopian producers put time, savings, land, tools,
+skill, and reputation behind that choice. Their work can develop practical
+skills, support jobs and local supply, and give buyers more Ethiopian-made
+options, yet it is often difficult to discover or evaluate beyond scattered
+social posts and word of mouth.
+
+Many of these businesses have products and production capabilities spread
+across posts, stories, image galleries, chats, and status updates. Consumer and
+wholesale buyers struggle to understand:
 
 - what the business sells;
 - which items are currently available;
@@ -68,7 +77,12 @@ Many social sellers have products spread across posts, stories, image galleries,
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
 - how the business can retain the inquiry if a social-app handoff fails.
 
-MirtPage organizes the catalog into a professional branded showroom and adds a structured inquiry workflow without forcing the business into full ecommerce operations.
+MirtPage gives that real production a professional public presence. It organizes
+the business's products, capabilities, process, reviewed location, and story
+inside a permanent branded showroom; helps consumer and wholesale buyers
+discover it by product or place; and adds a structured direct inquiry workflow
+without forcing the business into full ecommerce operations. The producer keeps
+its identity, customer relationship, and control of the conversation.
 
 ---
 
@@ -232,7 +246,7 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The MirtPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-021` and `FE-024` define the current composition: a compact
+and other in-app browsers. `FE-021`, `FE-024`, and `FE-027` define the current composition and narrative: a compact
 purple visitor welcome introduces one integrated,
 application-first discovery workspace combining industry and reviewed production-scale selection, search, a
 disclosed paid-sponsorship rail, exact-location Ethiopia map, and server-paginated
@@ -243,9 +257,17 @@ deterministically rotating industry through MirtPage social livestreams.
 Long platform education lives on `/about`, signup lives on `/request`, and only
 a restrained merchant call-to-action follows the marketplace. There is no
 duplicated all-business directory or browser-side full-catalog List fan-out.
-The welcome names the marketplace, invites immediate exploration, and visually
-connects to the workspace; merchant education and conversion remain secondary
-content below the public discovery experience.
+The welcome honors small and growing local producers, tells visitors they can
+find the people behind Ethiopian-made products, invites immediate exploration,
+and visually connects to the workspace. It explains discovery by product and
+place, professional showrooms, and direct consumer or wholesale inquiry without
+displacing the marketplace with a marketing hero. The fuller story of producer
+investment, practical skill, jobs, and local supply belongs on `/about`;
+merchant education and conversion remain secondary content below the public
+discovery experience. Platform copy must not claim verified tax, employment,
+certification, import-substitution, sales, or other outcomes for every listed
+business, and MirtPage mission copy must not be injected into client-owned
+showrooms.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.

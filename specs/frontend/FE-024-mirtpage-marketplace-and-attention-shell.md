@@ -2,9 +2,9 @@
 id: FE-024
 title: MirtPage marketplace and attention shell
 status: done
-related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
+related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, FE-027, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-02
+last_updated: 2026-08-04
 change_level: L3
 ---
 

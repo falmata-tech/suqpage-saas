@@ -243,7 +243,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   const showCityGateways = clusterZoom >= CITY_GATEWAY_ZOOM;
   return <section className="discovery" id="discover" aria-labelledby="discovery-title">
     <div className="discovery-switcher">
-      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Made in Ethiopia, ready to discover</span><h2 id="discovery-title">Find the people and factories behind the product.</h2></div><p>Explore makers, growers, workshops, and growing factories by what they produce and where they work.</p></div>
+      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Local production, closer than you think</span><h2 id="discovery-title">Find the people behind what Ethiopia makes.</h2></div><p>Explore small and growing makers, growers, workshops, processors, and factories by what they produce and where they work.</p></div>
       <nav className="discovery-industries" aria-label="Industries">
         {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={discoveryHref(action, { industry: industry.key, scale: discovery.productionScale, expoDay: discovery.expo.selectedWeekday, view })} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
       </nav>

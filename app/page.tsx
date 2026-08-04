@@ -39,8 +39,8 @@ export default async function Home({
         {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">That showroom is temporarily unavailable. Discover active businesses below.</div> : null}
         <div className="landing-container landing-market-shell">
           <section className="landing-market-banner" aria-labelledby="landing-title">
-            <div><span>Ethiopian products, made visible</span><h1 id="landing-title">Made in Ethiopia. Find the people who make it.</h1></div>
-            <p>Search growers, makers, workshops, processors, and factories by product, industry, or location, then visit each business&apos;s digital showroom.</p>
+            <div><span>For the people who choose to make here</span><h1 id="landing-title">Made in Ethiopia. Find the people who make it.</h1></div>
+            <p>Discover small and growing Ethiopian producers. Search by product or place, visit their professional showrooms, and inquire directly for personal or wholesale needs.</p>
             <a href="#discover">Explore showrooms</a>
           </section>
           <section className="landing-discovery-section" aria-label="MirtPage marketplace">
@@ -51,11 +51,11 @@ export default async function Home({
         <section className="landing-closing" aria-labelledby="closing-title">
           <div className="landing-container landing-closing-inner">
             <div>
-              <span className="landing-eyebrow">Your work deserves a clear front door</span>
-              <h2 id="closing-title">Make it easier for the right customer to understand what you do.</h2>
-              <p>Whether you grow by the season, make by hand, or run a growing production floor, we shape a professional showroom around your products, capacity, capabilities, and brand.</p>
+              <span className="landing-eyebrow">You took the risk to make it here</span>
+              <h2 id="closing-title">Your products deserve a market beyond word of mouth.</h2>
+              <p>MirtPage gives small and growing Ethiopian producers a professional presence: a permanent showroom, local discovery, useful product and capability pages, and direct inquiries from consumer and wholesale buyers.</p>
             </div>
-            <div className="landing-closing-actions"><Link className="landing-closing-action" href="/request">Start your showroom</Link><Link href="/about">How MirtPage works</Link></div>
+            <div className="landing-closing-actions"><Link className="landing-closing-action" href="/request">Build your showroom</Link><Link href="/about">Why MirtPage exists</Link></div>
           </div>
         </section>
       </main>
@@ -68,7 +68,7 @@ export default async function Home({
 
       <footer className="landing-footer">
         <div className="landing-container landing-footer-grid">
-          <div><MirtPageBrand className="landing-brand" /><p>Permanent digital showrooms for Ethiopia&apos;s makers, growers, workshops, processors, and growing factories.</p></div>
+          <div><MirtPageBrand className="landing-brand" /><p>Professional showrooms and local discovery for Ethiopia&apos;s small and growing producers.</p></div>
           <nav aria-label="Footer navigation"><Link href="/discover">Explore Showrooms</Link><Link href="/about">About MirtPage</Link><Link href="/request">Sign up</Link><Link href="/login">Login</Link></nav>
           <div className="landing-legal"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 MirtPage</span></div>
         </div>
