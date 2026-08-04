@@ -96,13 +96,13 @@ async function loginWithKnownPassword(page:Page,email:string,password:string){aw
 test("business creates a private client workspace without public uploads", async ({ page }) => {
   const errors = monitor(page);
   await page.goto("/about");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("The people who make locally deserve to be found.");
-  await expect(page.getByRole("heading", { name: "Producing locally is a commitment worth backing." })).toBeVisible();
-  await expect(page.getByText("Consumer and wholesale buyers can discover the business", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Production is a bet on Ethiopia.");
+  await expect(page.getByRole("heading", { name: "Good products cannot grow if buyers cannot find them." })).toBeVisible();
+  await expect(page.getByText("MirtPage gives each participating producer a permanent showroom", { exact: false })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.goto("/request");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Give your products a professional place to be found.");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Put your production where buyers can find it.");
   await page.getByLabel("Your name").fill("Acceptance Prospect");
   await page.getByLabel("Email").fill("prospect@example.test");
   await page.getByLabel("Phone or WhatsApp").fill("+251911000111");
@@ -137,9 +137,9 @@ test("geographic discovery, weekly Expo, benchmark Showrooms, and copy-first inq
   const errors = monitor(page);
   await page.goto("/?expoDay=0");
   await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Made in Ethiopia. Find the people who make it.");
-  await expect(page.getByRole("heading", { name: "Find the people behind what Ethiopia makes." })).toBeVisible();
-  await expect(page.getByText("Discover small and growing Ethiopian producers.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Find what Ethiopia makes.");
+  await expect(page.getByRole("heading", { name: "Search Ethiopia's production, not another product feed." })).toBeVisible();
+  await expect(page.getByText("Search workshops, growers, processors, and growing factories", { exact: false })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Industries" }).getByRole("link")).toHaveCount(6);
   await expect(page.getByRole("tablist", { name: "Discovery view" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Map" })).toBeVisible();
@@ -526,7 +526,7 @@ test("mobile clustered map, continuous Expo floor, list parity, and legacy redir
   await page.goto("/expo");
   await expect(page).toHaveURL(/\/discover$/);
   await page.goto("/discover?industry=electronics&expoDay=1");
-  await expect(page.getByRole("heading", { name: "Find the people behind what Ethiopia makes." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Search Ethiopia's production, not another product feed." })).toBeVisible();
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
   await expect(page.locator(".discovery-roads path")).toHaveCount(4);
   const visibleMarkerIndex = (selector: string) => page.locator(selector).evaluateAll((markers) => {

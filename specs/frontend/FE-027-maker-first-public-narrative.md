@@ -2,7 +2,7 @@
 id: FE-027
 title: Maker-first public narrative
 status: done
-related: [FE-013, FE-021, FE-024, FE-025]
+related: [FE-013, FE-021, FE-024, FE-025, FE-028]
 owners: [product, frontend, design]
 last_updated: 2026-08-04
 change_level: L1

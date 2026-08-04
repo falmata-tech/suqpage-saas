@@ -136,7 +136,7 @@
 .discovery-preview-close { position: absolute; z-index: 2; top: 10px; right: 10px; width: 44px; height: 44px; border: 1px solid #d8d4dc; border-radius: 50%; background: rgb(255 255 255 / 94%); color: var(--d-ink); font-size: 1.25rem; cursor: pointer; box-shadow: 0 4px 14px rgb(35 28 42 / 16%); }
 .discovery-preview-close:hover, .discovery-preview-close:focus-visible { border-color: var(--d-purple); outline: 3px solid rgb(104 71 186 / 22%); }
 
-.city-showroom-dialog { width: calc(100% - 40px); max-width: 1280px; height: calc(100dvh - 40px); max-height: 900px; margin: auto; padding: 0; overflow: hidden; border: 1px solid #b9cdca; border-radius: 7px; background: #e4efed; color: var(--d-ink); box-shadow: 0 28px 80px rgb(18 12 25 / 38%); }
+.city-showroom-dialog { width: calc(100% - 40px); max-width: 1280px; height: calc(100dvh - 40px); max-height: 900px; margin: auto; padding: 0; overflow: hidden; border: 1px solid #9fb4ad; border-radius: 7px; background: #c8d7d1; color: var(--d-ink); box-shadow: 0 28px 80px rgb(18 12 25 / 38%); }
 .city-showroom-dialog::backdrop { background: rgb(27 20 35 / 72%); backdrop-filter: blur(3px); }
 .city-showroom-shell { display: grid; height: 100%; grid-template-rows: auto minmax(0, 1fr); }
 .city-showroom-head { display: flex; position: relative; z-index: 4; align-items: center; justify-content: space-between; gap: 20px; min-height: 92px; padding: 14px 18px; border-bottom: 1px solid #cbdad8; background: #fff; }
@@ -147,19 +147,19 @@
 .city-showroom-actions button { width: 44px; height: 44px; border: 1px solid #d5d0dc; border-radius: 5px; background: #f8f7f9; color: #31263e; font-size: 1.05rem; font-weight: 900; cursor: pointer; }
 .city-showroom-actions button:hover, .city-showroom-actions button:focus-visible { border-color: #8f78c3; background: #eee9f8; outline: 0; }
 .city-showroom-actions .city-showroom-close { margin-left: 5px; border-color: #34263f; background: #34263f; color: #fff; }
-.city-showroom-stage { position: relative; min-height: 0; overflow: hidden; border: 10px solid #e7ecea; background: #cbd8d5; cursor: grab; touch-action: none; box-shadow: inset 0 0 0 1px #b4c5c1; }
+.city-showroom-stage { position: relative; min-height: 0; overflow: hidden; border: 6px solid #dce6e1; background: #b9cbc4; cursor: grab; touch-action: none; box-shadow: inset 0 0 0 1px #91aaa1; }
 .city-showroom-stage:active { cursor: grabbing; }
-.city-showroom-floor { position: absolute; overflow: hidden; border: 1px solid #9fb3af; border-radius: 6px; background: #fbfbf8; box-shadow: inset 0 0 0 18px #edf1ef, inset 0 0 0 19px #c5d1ce, 0 18px 42px rgb(35 55 53 / 16%); contain: layout paint style; will-change: transform; }
-.city-showroom-floor::before { position: absolute; top: 0; bottom: 0; left: 50%; width: 112px; border-inline: 10px solid #f0f3f1; background: #e0e9e6; box-shadow: inset 1px 0 #c6d4d1, inset -1px 0 #c6d4d1; content: ""; transform: translateX(-50%); }
-.city-showroom-floor::after { position: absolute; top: 50%; left: 50%; width: 76%; height: 116px; border: 10px solid #f0f3f1; border-radius: 58px; background: #e0e9e6; box-shadow: inset 0 0 0 1px #bdcec9; content: ""; transform: translate(-50%, -50%); }
-.city-showroom-court { display: flex; position: absolute; z-index: 1; top: 50%; left: 50%; align-items: center; justify-content: center; width: 214px; height: 82px; gap: 16px; border: 1px solid #9fb7b2; border-radius: 7px; background: #fff; color: var(--d-teal); box-shadow: 0 9px 22px rgb(31 70 67 / 12%); transform: translate(-50%, -50%); }
+.city-showroom-floor { position: absolute; overflow: hidden; border: 2px solid #809a91; border-radius: 8px; background-color: #f4f1e9; background-image: url("/landing/venue-floor-stone-v2.webp"); background-position: center; background-size: 820px 820px; box-shadow: 0 0 0 5px rgb(255 255 255 / 48%), 0 22px 52px rgb(35 55 53 / 24%); contain: layout paint style; will-change: transform; }
+.city-showroom-floor::before { position: absolute; z-index: 0; inset: 0; background: rgb(242 247 244 / 20%); box-shadow: inset 0 0 68px rgb(47 74 66 / 10%); content: ""; pointer-events: none; }
+.city-showroom-floor::after { position: absolute; z-index: 1; top: 112px; right: 24px; left: 24px; height: 38px; border: 1px solid rgb(83 112 101 / 18%); border-radius: 22px; background: rgb(255 255 255 / 42%); box-shadow: inset 0 1px rgb(255 255 255 / 72%); content: ""; pointer-events: none; }
+.city-showroom-court { display: flex; position: absolute; z-index: 2; bottom: 24px; left: 50%; align-items: center; justify-content: center; width: 230px; height: 58px; gap: 15px; border: 1px solid #8da69c; border-radius: 30px; background: rgb(255 255 255 / 90%); color: var(--d-teal); box-shadow: 0 8px 20px rgb(31 70 67 / 14%); transform: translateX(-50%); }
 .city-showroom-court span { font-size: .54rem; font-weight: 900; text-transform: uppercase; }
-.city-showroom-court i { width: 24px; height: 24px; border: 6px solid #dbe4df; border-radius: 50%; background: #4d7d67; box-shadow: 0 0 0 3px #fff; }
+.city-showroom-court i { width: 26px; height: 26px; border: 5px solid #e8e3d9; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #f2ca65 0 12%, #b25f7d 13% 28%, #4f7862 30% 66%, #315645 68%); box-shadow: 0 0 0 2px #fff; }
 .city-showroom-place { display: grid; position: absolute; z-index: 2; top: 26px; left: 50%; min-width: 210px; min-height: 70px; place-content: center; padding: 10px 24px; border: 1px solid #a9bfbc; border-top: 5px solid var(--d-teal); border-radius: 5px; background: #fff; color: #233332; text-align: center; box-shadow: 0 8px 20px rgb(31 70 67 / 11%); transform: translateX(-50%); }
 .city-showroom-place span { color: var(--d-teal); font-size: .58rem; font-weight: 900; text-transform: uppercase; }
 .city-showroom-place b { margin-top: 2px; font-size: .92rem; }
 .city-showroom-place small { margin-top: 2px; color: #77717d; font-size: .57rem; }
-.city-showroom-shop { display: grid; position: absolute; z-index: 3; grid-template-rows: 80px minmax(0, 1fr); overflow: hidden; border: 1px solid #aaaeb2; border-top: 4px solid #6847ba; border-radius: 4px; background: #fff; color: var(--d-ink); box-shadow: 0 5px 13px rgb(38 36 42 / 15%); }
+.city-showroom-shop { display: grid; position: absolute; z-index: 3; grid-template-rows: 80px minmax(0, 1fr); overflow: hidden; border: 1px solid #929c98; border-top: 4px solid #6847ba; border-radius: 6px; background: #fff; color: var(--d-ink); box-shadow: 0 8px 18px rgb(38 36 42 / 19%); }
 .city-showroom-shop:hover, .city-showroom-shop:focus-visible { border-color: #6847ba; outline: 4px solid rgb(104 71 186 / 22%); outline-offset: 1px; }
 .city-showroom-shop > img, .city-showroom-shop > .discovery-image-fallback { width: 100%; height: 80px; object-fit: cover; }
 .city-showroom-shop > span:last-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; padding: 6px 8px; }
@@ -167,6 +167,24 @@
 .city-showroom-shop strong { overflow: hidden; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; }
 .city-showroom-shop small { grid-column: 1 / -1; overflow: hidden; margin-top: 1px; color: #77717d; font-size: .54rem; text-overflow: ellipsis; white-space: nowrap; }
 .city-showroom-shop em { align-self: center; color: #4c2c89; font-size: .55rem; font-style: normal; font-weight: 900; }
+
+.venue-landscaping { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
+.venue-planter { display: flex; position: absolute; top: 34px; width: 126px; height: 50px; align-items: center; justify-content: center; gap: 5px; border: 1px solid #869b92; border-radius: 27px; background: #f8f5ed; box-shadow: 0 7px 16px rgb(35 56 49 / 16%), inset 0 -6px #dfdbd0; }
+.venue-planter::before { position: absolute; inset: 7px 10px 11px; border-radius: 20px; background: #315c49; box-shadow: inset 0 0 0 3px #426f59; content: ""; }
+.venue-planter-left { left: 28px; }
+.venue-planter-right { right: 28px; }
+.venue-planter i { position: relative; width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at center, #efc961 0 14%, #b65d7d 15% 32%, #6f3754 33% 40%, #527b63 42% 72%, transparent 74%); }
+.venue-planter i:nth-child(2) { transform: scale(.82) translateY(-3px); }
+.venue-planter i:nth-child(3) { background: radial-gradient(circle at center, #f2d586 0 14%, #ede4d2 15% 31%, #9d7257 32% 39%, #527b63 41% 72%, transparent 74%); transform: scale(.9) translateY(2px); }
+.venue-planter i:nth-child(4) { transform: scale(.76) translateY(-2px); }
+.venue-bench { position: absolute; bottom: 31px; width: 94px; height: 20px; border: 1px solid #755640; border-radius: 5px; background: #99745a; box-shadow: inset 0 -5px #704f3c, 0 5px 10px rgb(47 35 28 / 16%); }
+.venue-bench::before, .venue-bench::after { position: absolute; bottom: -6px; width: 7px; height: 7px; border-radius: 0 0 2px 2px; background: #5e493c; content: ""; }
+.venue-bench::before { left: 15px; }
+.venue-bench::after { right: 15px; }
+.venue-bench-left { left: 42px; }
+.venue-bench-right { right: 42px; }
+.venue-landscaping-expo .venue-planter { border-color: color-mix(in srgb, var(--expo-accent) 36%, #869b92); }
+.venue-landscaping-expo .venue-planter::before { background: #365f4d; }
 
 .discovery-list-wrap { padding-bottom: 20px; background: #f7f7f8; }
 .discovery-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 16px 26px; }
@@ -212,24 +230,24 @@
 .expo-status-badge { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; padding: 9px 13px; border: 1px solid #c5d4d1; border-radius: 5px; background: #fff; color: #40514f; font-size: .76rem; font-weight: 850; }
 .expo-status-badge i { width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #b9afc4; }
 .expo-status-badge.open i { background: #69c492; box-shadow: 0 0 0 5px rgb(105 196 146 / 16%); }
-.expo-floor-wrap { position: relative; overflow: hidden; border: 1px solid #b1c3bf; border-radius: 7px; background: #d5e1de; box-shadow: 0 18px 42px rgb(26 58 55 / 14%); }
-.expo-floor-stage { position: relative; height: 590px; overflow: hidden; border: 12px solid #e7ecea; background: #cbd8d5; cursor: grab; touch-action: none; box-shadow: inset 0 0 0 1px #b4c5c1; }
+.expo-floor-wrap { position: relative; overflow: hidden; border: 1px solid #9eb2aa; border-radius: 8px; background: #c7d6d0; box-shadow: 0 18px 42px rgb(26 58 55 / 18%); }
+.expo-floor-stage { position: relative; height: 590px; overflow: hidden; border: 6px solid #dce6e1; background: #b9cbc4; cursor: grab; touch-action: none; box-shadow: inset 0 0 0 1px #91aaa1; }
 .expo-floor-stage:active { cursor: grabbing; }
 .expo-floor-actions { display: flex; position: absolute; z-index: 8; top: 14px; right: 14px; align-items: center; gap: 5px; padding: 5px; border: 1px solid #c8cdd0; border-radius: 6px; background: rgb(255 255 255 / 94%); box-shadow: 0 7px 20px rgb(25 28 32 / 18%); }
 .expo-floor-actions > span { min-width: 42px; color: #69636d; font-size: .67rem; font-weight: 850; text-align: center; }
 .expo-floor-actions button { width: 44px; height: 44px; border: 1px solid #d0d3d5; border-radius: 5px; background: #f7f8f8; color: #31263e; font-size: 1.05rem; font-weight: 900; cursor: pointer; }
 .expo-floor-actions button:hover, .expo-floor-actions button:focus-visible { border-color: var(--expo-accent); background: var(--expo-soft); outline: 0; }
-.expo-floor { position: absolute; overflow: hidden; border: 1px solid #98aea9; border-radius: 7px; background: #fbfbf8; box-shadow: inset 0 0 0 20px #edf1ef, inset 0 0 0 21px #c5d1ce, 0 20px 48px rgb(31 62 59 / 18%); contain: layout paint style; will-change: transform; }
-.expo-floor::before { position: absolute; z-index: 0; top: 0; bottom: 0; left: 50%; width: 122px; border-inline: 12px solid #f0f3f1; background: #dce7e4; box-shadow: inset 1px 0 #bfcfcb, inset -1px 0 #bfcfcb; content: ""; transform: translateX(-50%); }
-.expo-floor::after { position: absolute; z-index: 0; top: 47%; left: 50%; width: 78%; height: 124px; border: 12px solid #f0f3f1; border-radius: 62px; background: #dce7e4; box-shadow: inset 0 0 0 1px #b7cbc6; content: ""; transform: translate(-50%, -50%); }
-.expo-pavilion { display: grid; position: absolute; z-index: 2; top: 28px; left: 50%; min-width: 228px; height: 94px; place-content: center; justify-items: center; border: 1px solid #9ba9a7; border-top: 6px solid var(--expo-accent); border-radius: 6px; background: #fff; color: #31263e; text-align: center; box-shadow: 0 9px 24px rgb(40 34 47 / 14%); transform: translateX(-50%); }
+.expo-floor { position: absolute; overflow: hidden; border: 2px solid #809a91; border-radius: 8px; background-color: #f4f1e9; background-image: url("/landing/venue-floor-stone-v2.webp"); background-position: center; background-size: 820px 820px; box-shadow: 0 0 0 5px rgb(255 255 255 / 48%), 0 22px 52px rgb(31 62 59 / 25%); contain: layout paint style; will-change: transform; }
+.expo-floor::before { position: absolute; z-index: 0; inset: 0; background: color-mix(in srgb, var(--expo-soft) 18%, transparent); box-shadow: inset 0 0 72px rgb(47 74 66 / 9%); content: ""; pointer-events: none; }
+.expo-floor::after { position: absolute; z-index: 1; top: 130px; right: 24px; left: 24px; height: 42px; border: 1px solid color-mix(in srgb, var(--expo-accent) 20%, transparent); border-radius: 24px; background: rgb(255 255 255 / 44%); box-shadow: inset 0 1px rgb(255 255 255 / 76%); content: ""; pointer-events: none; }
+.expo-pavilion { display: grid; position: absolute; z-index: 3; top: 25px; left: 50%; min-width: 228px; height: 102px; place-content: center; justify-items: center; border: 1px solid #899b95; border-top: 6px solid var(--expo-accent); border-radius: 8px; background: rgb(255 255 255 / 94%); color: #31263e; text-align: center; box-shadow: 0 10px 24px rgb(40 34 47 / 17%); transform: translateX(-50%); }
 .expo-canopy { width: 58px; height: 31px; margin-bottom: 8px; border: 6px solid var(--expo-accent); border-bottom: 0; border-radius: 30px 30px 3px 3px; background: var(--expo-soft); box-shadow: inset 0 0 0 6px #fff; }
 .expo-pavilion strong { font-size: .9rem; }
 .expo-pavilion small { margin-top: 1px; color: #77717d; font-size: .56rem; font-weight: 850; text-transform: uppercase; }
-.expo-promenade { display: flex; position: absolute; z-index: 1; top: 128px; left: 50%; align-items: center; justify-content: center; width: 300px; gap: 14px; color: #62596a; transform: translateX(-50%); }
+.expo-promenade { display: flex; position: absolute; z-index: 3; top: 139px; left: 50%; align-items: center; justify-content: center; width: 300px; gap: 14px; color: #514959; transform: translateX(-50%); }
 .expo-promenade span { font-size: .56rem; font-weight: 900; text-transform: uppercase; }
-.expo-promenade i { width: 26px; height: 26px; border: 6px solid #dbe4df; border-radius: 50%; background: #4d7d67; box-shadow: 0 0 0 3px #fff; }
-.expo-booth { display: grid; position: absolute; z-index: 3; grid-template-rows: 104px minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; padding: 0; border: 1px solid #92999d; border-top: 5px solid var(--expo-accent); border-radius: 4px; background: #fff; color: var(--d-ink); cursor: pointer; text-align: left; box-shadow: 0 5px 14px rgb(32 34 36 / 17%); }
+.expo-promenade i { width: 27px; height: 27px; border: 5px solid #e8e3d9; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #f2ca65 0 12%, #b25f7d 13% 28%, #4f7862 30% 66%, #315645 68%); box-shadow: 0 0 0 2px #fff; }
+.expo-booth { display: grid; position: absolute; z-index: 4; grid-template-rows: 104px minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; padding: 0; border: 1px solid #89928e; border-top: 5px solid var(--expo-accent); border-radius: 6px; background: #fff; color: var(--d-ink); cursor: pointer; text-align: left; box-shadow: 0 8px 18px rgb(32 34 36 / 21%); }
 .expo-booth.selected, .expo-booth:focus-visible { border-color: var(--expo-accent); outline: 3px solid color-mix(in srgb, var(--expo-accent) 30%, transparent); outline-offset: 1px; }
 .expo-booth > img, .expo-booth > .discovery-image-fallback { width: 100%; height: 100%; min-height: 0; object-fit: cover; }
 .expo-booth > span:last-child { display: grid; min-width: 0; padding: 6px 8px; }
@@ -309,7 +327,7 @@
   .discovery-preview-copy { padding: 22px 18px 18px; }
   .discovery-preview h3 { font-size: 1.3rem; }
   .discovery-preview a { margin-top: 16px; }
-  .city-showroom-dialog { width: 100%; height: 100dvh; max-height: none; border: 0; border-radius: 0; }
+  .city-showroom-dialog { position: fixed; inset: 0; width: 100%; height: 100dvh; max-height: none; margin: 0; border: 0; border-radius: 0; }
   .city-showroom-head { align-items: start; flex-direction: column; gap: 10px; min-height: 0; padding: 12px 10px 10px; }
   .city-showroom-head h2 { font-size: 1.2rem; }
   .city-showroom-actions { width: 100%; }

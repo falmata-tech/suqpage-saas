@@ -2,7 +2,7 @@
 id: FE-021
 title: Geographic Showroom map and weekly industry Expo
 status: done
-related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-024, FE-027, BE-019, BE-020, DEP-016, DEP-017, ADR-0011]
+related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-024, FE-027, FE-028, BE-019, BE-020, DEP-016, DEP-017, ADR-0011]
 owners: [product, frontend, design]
 last_updated: 2026-08-04
 change_level: L3

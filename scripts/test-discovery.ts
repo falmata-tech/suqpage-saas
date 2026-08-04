@@ -19,6 +19,13 @@ assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
 assert.match(discoveryUiSource, /router\.replace/);
 assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
+assert.match(discoveryUiSource, /VenueLandscaping variant="city"/);
+assert.match(discoveryUiSource, /VenueLandscaping variant="expo"/);
+assert.match(discoveryCssSource, /venue-floor-stone-v2\.webp/);
+assert.match(discoveryCssSource, /\.venue-planter/);
+const venueTexture = path.join(process.cwd(), "public/landing/venue-floor-stone-v2.webp");
+assert.ok(fs.existsSync(venueTexture), "the local architectural venue texture exists");
+assert.ok(fs.statSync(venueTexture).size <= 300_000, "the architectural venue texture stays under 300 KB");
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
 const db = new DatabaseSync(path.join(root, "discovery.db"));

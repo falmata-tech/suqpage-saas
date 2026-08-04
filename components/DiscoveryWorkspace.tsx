@@ -243,7 +243,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   const showCityGateways = clusterZoom >= CITY_GATEWAY_ZOOM;
   return <section className="discovery" id="discover" aria-labelledby="discovery-title">
     <div className="discovery-switcher">
-      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Local production, closer than you think</span><h2 id="discovery-title">Find the people behind what Ethiopia makes.</h2></div><p>Explore small and growing makers, growers, workshops, processors, and factories by what they produce and where they work.</p></div>
+      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Made closer than you think</span><h2 id="discovery-title">Search Ethiopia&apos;s production, not another product feed.</h2></div><p>Find workshops, growers, processors, and growing factories by what they make and where they operate.</p></div>
       <nav className="discovery-industries" aria-label="Industries">
         {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={discoveryHref(action, { industry: industry.key, scale: discovery.productionScale, expoDay: discovery.expo.selectedWeekday, view })} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
       </nav>
@@ -381,6 +381,15 @@ function ShowroomPreview({ showroom, source, onClose, label }: { showroom: Disco
   return <dialog ref={dialogRef} className="discovery-preview" aria-labelledby={`showroom-preview-${showroom.id}`} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === dialogRef.current) onClose(); }}><article><button className="discovery-preview-close" type="button" onClick={onClose} aria-label="Close showroom preview">×</button><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span>{label || (showroom.sponsored ? "Sponsored showroom" : showroom.productionScale === "growing_factory" ? "Growing factory" : "Workshop / producer")}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3><p>{showroom.tagline}</p><small>{showroom.city} · {showroom.zone} · {showroom.region}</small><Link href={`/@${showroom.handle}?ref=${source}`}>Open showroom <b aria-hidden="true">→</b></Link></div></article></dialog>;
 }
 
+function VenueLandscaping({ variant }: { variant: "city" | "expo" }) {
+  return <div className={`venue-landscaping venue-landscaping-${variant}`} aria-hidden="true">
+    <span className="venue-planter venue-planter-left"><i /><i /><i /><i /></span>
+    <span className="venue-planter venue-planter-right"><i /><i /><i /><i /></span>
+    <span className="venue-bench venue-bench-left" />
+    <span className="venue-bench venue-bench-right" />
+  </div>;
+}
+
 function cityFloorLayout(count: number) {
   const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
   const rows = Math.ceil(count / columns);
@@ -389,8 +398,8 @@ function cityFloorLayout(count: number) {
   const gapX = 48;
   const gapY = 78;
   const paddingX = 52;
-  const paddingTop = 132;
-  const paddingBottom = 92;
+  const paddingTop = 172;
+  const paddingBottom = 112;
   return {
     columns,
     cardWidth,
@@ -495,6 +504,7 @@ function CityMarketplaceDialog({ group, onClose }: { group: DiscoveryCityGroup; 
       <header className="city-showroom-head"><div><span className="discovery-kicker">{group.region} marketplace</span><h2 id="city-showroom-title">Made near {group.city}</h2><p>{group.count} independent showrooms in one place.</p></div><div className="city-showroom-actions" aria-label="City marketplace controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to city marketplace">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of city marketplace">−</button><button type="button" onClick={resetFloor} title="Fit city marketplace" aria-label="Fit city marketplace to view">◎</button><button className="city-showroom-close" type="button" onClick={onClose} title="Close" aria-label="Close city marketplace">×</button></div></header>
       <div ref={stageRef} className="city-showroom-stage" aria-label={`${group.city} virtual marketplace floor`}>
         <div ref={floorRef} className="city-showroom-floor" style={{ width: layout.width, height: layout.height }}>
+          <VenueLandscaping variant="city" />
           <div className="city-showroom-court" aria-hidden="true"><i /><span>Meet · Browse · Inquire</span><i /></div>
           <div className="city-showroom-place" aria-hidden="true"><span>{group.city}</span><b>Local makers</b><small>{group.count} showrooms</small></div>
           {group.showrooms.map((showroom, index) => {
@@ -530,8 +540,8 @@ function expoFloorLayout(count: number) {
   const gapX = 56;
   const gapY = 78;
   const paddingX = 58;
-  const paddingTop = 172;
-  const paddingBottom = 92;
+  const paddingTop = 194;
+  const paddingBottom = 112;
   return {
     columns,
     cardWidth,
@@ -556,6 +566,7 @@ function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
     <div className="expo-floor-actions" aria-label="Expo floor controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to Expo floor">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of Expo floor">−</button><button type="button" onClick={resetFloor} title="Fit Expo floor" aria-label="Fit Expo floor to view">◎</button></div>
     <div ref={stageRef} className="expo-floor-stage" aria-label={`${expo.title}, one continuous virtual floor`}>
       <div ref={floorRef} className="expo-floor" style={{ width: layout.width, height: layout.height }}>
+        <VenueLandscaping variant="expo" />
         <div className="expo-pavilion" aria-hidden="true"><span className="expo-canopy" /><strong>{expo.industryCode}</strong><small>{expo.isToday ? "Open today" : "Floor preview"}</small></div>
         <div className="expo-promenade" aria-hidden="true"><i /><span>{expo.mode === "livestream" ? "MirtPage Featured Enterprises" : "MirtPage Maker Expo"}</span><i /></div>
         {expo.booths.map((booth, index) => {

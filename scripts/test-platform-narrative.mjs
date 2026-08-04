@@ -13,24 +13,26 @@ const login = read("app/login/page.tsx");
 const metadata = read("app/layout.tsx");
 const publicNarrative = [home, discovery, about, signup, login, metadata].join("\n");
 
-assert.match(home, /For the people who choose to make here/);
-assert.match(home, /small and growing Ethiopian producers/);
-assert.match(home, /personal or wholesale needs/);
-assert.match(discovery, /Find the people behind what Ethiopia makes/);
-assert.match(discovery, /by what they produce and where they work/);
+assert.match(home, /A marketplace for Ethiopian production/);
+assert.match(home, /Find what Ethiopia makes/);
+assert.match(home, /direct retail or wholesale inquiry/);
+assert.match(home, /You built the product\. We build the place buyers find it/);
+assert.match(discovery, /Search Ethiopia&apos;s production, not another product feed/);
+assert.match(discovery, /by what they make and where they operate/);
 
-for (const commitment of ["time", "savings", "land", "tools", "skill", "reputation"]) {
+for (const commitment of ["equipment", "materials", "land", "training", "wages", "discipline"]) {
   assert.match(about, new RegExp(`\\b${commitment}\\b`), `About must acknowledge producer ${commitment}`);
 }
-assert.match(about, /supports jobs and local supply/);
-assert.match(about, /permanent professional showroom/);
-assert.match(about, /Consumer and wholesale buyers/);
-assert.match(about, /The producer keeps its identity, customer relationship, and control of the conversation/);
+assert.match(about, /Production is a bet on Ethiopia/);
+assert.match(about, /Good products cannot grow if buyers cannot find them/);
+assert.match(about, /permanent showroom and a place on a searchable national map/);
+assert.match(about, /The relationship stays directly with the producer/);
 
-assert.match(signup, /You have already invested in making, growing, or processing something here/);
+assert.match(signup, /Put your production where buyers can find it/);
+assert.match(signup, /MirtPage&apos;s discovery marketplace/);
 assert.match(signup, /Nothing appears publicly until you approve the design and MirtPage publishes it/);
-assert.match(login, /Manage the professional presence behind your work/);
-assert.match(metadata, /Discover small and growing Ethiopian producers/);
+assert.match(login, /Manage your showroom, customer inquiries, design requests/);
+assert.match(metadata, /Search what Ethiopia makes/);
 
 for (const overclaim of [
   /guaranteed sales/i,
@@ -47,9 +49,9 @@ const showroomFiles = fs.readdirSync("components/showroom", { recursive: true })
   .map((file) => read(`components/showroom/${file}`))
   .join("\n");
 for (const platformSlogan of [
-  "For the people who choose to make here",
-  "MirtPage closes that visibility gap",
-  "Producing locally is a commitment worth backing",
+  "Production is a bet on Ethiopia",
+  "You built the product. We build the place buyers find it",
+  "Good products cannot grow if buyers cannot find them",
 ]) {
   assert.doesNotMatch(showroomFiles, new RegExp(platformSlogan), `Platform narrative leaked into client showrooms: ${platformSlogan}`);
 }

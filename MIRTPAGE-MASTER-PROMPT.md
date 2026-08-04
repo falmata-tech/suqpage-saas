@@ -59,12 +59,12 @@ The showroom is designed to turn passive browsing into a structured product inqu
 
 ## 3. The problem MirtPage solves
 
-MirtPage exists for the people who choose to make, grow, and process products
-locally. Small and growing Ethiopian producers put time, savings, land, tools,
-skill, and reputation behind that choice. Their work can develop practical
-skills, support jobs and local supply, and give buyers more Ethiopian-made
-options, yet it is often difficult to discover or evaluate beyond scattered
-social posts and word of mouth.
+MirtPage begins from a simple belief: **production is a bet on Ethiopia**.
+Workshops, growers, processors, and growing factories commit equipment,
+materials, land, training, wages, and daily discipline long before the first
+sale. That work develops skills, supports livelihoods, strengthens local supply,
+and gives buyers another Ethiopian-made option, yet it is often difficult to
+discover or evaluate beyond scattered social posts and word of mouth.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -246,7 +246,7 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The MirtPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-021`, `FE-024`, and `FE-027` define the current composition and narrative: a compact
+and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, and `FE-028` define the current composition, narrative, and venue art direction: a compact
 purple visitor welcome introduces one integrated,
 application-first discovery workspace combining industry and reviewed production-scale selection, search, a
 disclosed paid-sponsorship rail, exact-location Ethiopia map, and server-paginated
@@ -257,17 +257,25 @@ deterministically rotating industry through MirtPage social livestreams.
 Long platform education lives on `/about`, signup lives on `/request`, and only
 a restrained merchant call-to-action follows the marketplace. There is no
 duplicated all-business directory or browser-side full-catalog List fan-out.
-The welcome honors small and growing local producers, tells visitors they can
-find the people behind Ethiopian-made products, invites immediate exploration,
-and visually connects to the workspace. It explains discovery by product and
-place, professional showrooms, and direct consumer or wholesale inquiry without
-displacing the marketplace with a marketing hero. The fuller story of producer
-investment, practical skill, jobs, and local supply belongs on `/about`;
+The welcome uses short, confident, concrete language: visitors can search what
+Ethiopia makes by product or place, inspect a professional showroom, and begin a
+direct retail or wholesale inquiry. It avoids motivational clichés, generic SaaS
+claims, and childish slogans while visually connecting directly to the
+workspace. The fuller story of production risk, practical skill, livelihoods,
+and local supply belongs on `/about`;
 merchant education and conversion remain secondary content below the public
 discovery experience. Platform copy must not claim verified tax, employment,
 certification, import-substitution, sales, or other outcomes for every listed
 business, and MirtPage mission copy must not be injected into client-owned
 showrooms.
+
+Expo and City Showroom floors use a locally stored, optimized architectural
+stone/terrazzo material plus a constant number of CSS-only landscaped entry
+details. Flower planters, benches, pavilion/city identity, and circulation
+surfaces remain decorative, pointer-inert, and behind every interactive card.
+No business, booth, text, people, or fixed floor plan is encoded in the image.
+Computed floor dimensions and card positions remain authoritative as the result
+count grows; a missing decorative asset falls back to the base surface color.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.

@@ -13,10 +13,10 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
     <main className="platform-task-main">
       <section className="platform-task-shell login-task-shell" aria-labelledby="login-title">
         <div className="platform-task-context">
-          <span className="platform-task-eyebrow">Producer workspace</span>
+          <span className="platform-task-eyebrow">Business workspace</span>
           <h1 id="login-title">Welcome back to MirtPage.</h1>
-          <p>Manage the professional presence behind your work: showroom requests, customer inquiries, private previews, and support conversations in one protected workspace.</p>
-          <div className="platform-context-note"><strong>Want your products to be found?</strong><span>Create a private business workspace and begin your first showroom without waiting for an invitation.</span></div>
+          <p>Manage your showroom, customer inquiries, design requests, private previews, and support conversations in one protected workspace.</p>
+          <div className="platform-context-note"><strong>Not on MirtPage yet?</strong><span>Create a private workspace and brief your first showroom without waiting for an invitation.</span></div>
         </div>
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>Account access</span><h2>Sign in</h2><p>Use the email and password connected to your MirtPage account.</p></div>
@@ -27,7 +27,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
             <button type="submit">Sign in</button>
             <p className="platform-form-note">Staff-created temporary passwords must be changed after the first sign-in.</p>
           </form>
-          <div className="platform-form-footer"><span>Need a professional showroom?</span><Link href="/request">Create your account</Link></div>
+          <div className="platform-form-footer"><span>Need a showroom?</span><Link href="/request">Create your account</Link></div>
           <Link className="platform-return-link" href="/">Return to marketplace</Link>
         </div>
       </section>

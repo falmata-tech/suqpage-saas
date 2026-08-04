@@ -179,7 +179,7 @@ try {
   });
   await capture("showroom-preview-mobile-390", { width: 390, height: 844 }, async (page) => {
     await page.locator(".expo-week a.today").click();
-    await page.locator(".expo-booth[data-business-id]").first().click();
+    await page.locator(".expo-booth[data-business-id]").first().evaluate((booth) => (booth instanceof HTMLElement ? booth.click() : undefined));
     await page.locator(".discovery-preview[open]").waitFor();
   });
   await capture("sunday-showcase-mobile-390", { width: 390, height: 844 }, async (page) => {
