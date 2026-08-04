@@ -5,6 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { DISCOVERY_INDUSTRIES, getDiscoveryView } from "../lib/discovery";
 import { updateDiscoveryProfile } from "../lib/discovery-admin";
+import { buildPerimeterVenueLayout } from "../lib/discovery-venue-layout";
 import { migrateDatabase } from "../lib/schema";
 
 const discoveryUiSource = fs.readFileSync(
@@ -19,13 +20,31 @@ assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
 assert.match(discoveryUiSource, /router\.replace/);
 assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
-assert.match(discoveryUiSource, /VenueLandscaping variant="city"/);
-assert.match(discoveryUiSource, /VenueLandscaping variant="expo"/);
-assert.match(discoveryCssSource, /venue-floor-stone-v2\.webp/);
-assert.match(discoveryCssSource, /\.venue-planter/);
-const venueTexture = path.join(process.cwd(), "public/landing/venue-floor-stone-v2.webp");
-assert.ok(fs.existsSync(venueTexture), "the local architectural venue texture exists");
-assert.ok(fs.statSync(venueTexture).size <= 300_000, "the architectural venue texture stays under 300 KB");
+assert.match(discoveryCssSource, /venue-hall-shell-v1\.webp/);
+assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
+const venueShell = path.join(process.cwd(), "public/landing/venue-hall-shell-v1.webp");
+assert.ok(fs.existsSync(venueShell), "the local architectural venue shell exists");
+assert.ok(fs.statSync(venueShell).size <= 300_000, "the architectural venue shell stays under 300 KB");
+
+for (const count of [1, 5, 10, 11, 20, 37]) {
+  const layout = buildPerimeterVenueLayout(count, 224, 164);
+  assert.equal(layout.positions.length, count, `${count} businesses receive exactly one perimeter position`);
+  assert.equal(new Set(layout.positions.map((position) => `${position.left}:${position.top}`)).size, count, `${count} perimeter positions remain unique`);
+  assert.ok(layout.clearWidth > 0 && layout.clearHeight > 0, `${count} businesses retain an empty central court`);
+  const clearLeft = layout.centerX - layout.clearWidth / 2;
+  const clearRight = layout.centerX + layout.clearWidth / 2;
+  const clearTop = layout.centerY - layout.clearHeight / 2;
+  const clearBottom = layout.centerY + layout.clearHeight / 2;
+  layout.positions.forEach((position, index) => {
+    assert.ok(position.left >= 0 && position.top >= 0 && position.left + layout.cardWidth <= layout.width && position.top + layout.cardHeight <= layout.height, `${count}:${index} stays inside the hall`);
+    const outsideCenter = position.left + layout.cardWidth <= clearLeft || position.left >= clearRight || position.top + layout.cardHeight <= clearTop || position.top >= clearBottom;
+    assert.ok(outsideCenter, `${count}:${index} stays outside the central court`);
+    layout.positions.slice(index + 1).forEach((other, otherIndex) => {
+      const separated = position.left + layout.cardWidth <= other.left || other.left + layout.cardWidth <= position.left || position.top + layout.cardHeight <= other.top || other.top + layout.cardHeight <= position.top;
+      assert.ok(separated, `${count}:${index} does not overlap ${index + otherIndex + 1}`);
+    });
+  });
+}
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
 const db = new DatabaseSync(path.join(root, "discovery.db"));

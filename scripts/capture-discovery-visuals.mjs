@@ -19,6 +19,7 @@ async function capture(name, viewport, action) {
   });
   await page.goto(`${baseURL}/?expoDay=1`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.locator(".discovery-regions path").first().waitFor();
+  await page.locator(".discovery-roads path").nth(3).waitFor();
   if (action) await action(page);
   const metrics = await page.evaluate(() => {
     const mapStage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
@@ -138,6 +139,11 @@ async function openVisibleCityShowroom(page) {
   throw new Error("No visible multi-business city gateway was reachable");
 }
 
+async function openTodayExpo(page) {
+  await page.locator(".expo-week a.today").click();
+  await page.locator(".expo-floor .expo-booth[data-business-id]").first().waitFor();
+}
+
 try {
   await capture("home-desktop", { width: 1440, height: 1000 });
   await capture("home-mobile-390", { width: 390, height: 844 });
@@ -168,17 +174,15 @@ try {
     await page.locator(".daily-expo").scrollIntoViewIfNeeded();
   });
   await capture("expo-today-desktop", { width: 1440, height: 1000 }, async (page) => {
-    await page.locator(".expo-week a.today").click();
-    await page.locator(".expo-floor").waitFor();
+    await openTodayExpo(page);
     await page.locator(".daily-expo").scrollIntoViewIfNeeded();
   });
   await capture("expo-today-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await page.locator(".expo-week a.today").click();
-    await page.locator(".expo-floor").waitFor();
+    await openTodayExpo(page);
     await page.locator(".daily-expo").scrollIntoViewIfNeeded();
   });
   await capture("showroom-preview-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await page.locator(".expo-week a.today").click();
+    await openTodayExpo(page);
     await page.locator(".expo-booth[data-business-id]").first().evaluate((booth) => (booth instanceof HTMLElement ? booth.click() : undefined));
     await page.locator(".discovery-preview[open]").waitFor();
   });

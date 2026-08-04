@@ -269,13 +269,19 @@ certification, import-substitution, sales, or other outcomes for every listed
 business, and MirtPage mission copy must not be injected into client-owned
 showrooms.
 
-Expo and City Showroom floors use a locally stored, optimized architectural
-stone/terrazzo material plus a constant number of CSS-only landscaped entry
-details. Flower planters, benches, pavilion/city identity, and circulation
-surfaces remain decorative, pointer-inert, and behind every interactive card.
-No business, booth, text, people, or fixed floor plan is encoded in the image.
-Computed floor dimensions and card positions remain authoritative as the result
-count grows; a missing decorative asset falls back to the base surface color.
+Expo and City Showroom floors use a locally stored, optimized architectural hall
+shell: a cohesive overhead interior with light walls, glass entrance, reception
+architecture, integrated planting, lighting, and a quiet open floor. The artwork
+contains no people, seating, businesses, booths, products, text, or fixed
+business positions. If it is unavailable, the floor falls back to a neutral
+surface without affecting discovery.
+
+Business cards are placed by a deterministic rectangular-perimeter layout. They
+run around all four sides of the hall while the central court remains empty. As
+participation grows, the hall and its side-slot count expand systematically;
+every business receives one unique non-overlapping position. Computed floor
+dimensions and positions remain authoritative, and the architectural image
+never determines business placement.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.

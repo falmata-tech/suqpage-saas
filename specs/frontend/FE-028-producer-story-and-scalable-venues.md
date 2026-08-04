@@ -28,6 +28,11 @@ feel designed without becoming busy or tying booth placement to a static image.
 - Distinct Expo and City Showroom art direction with landscaped entry plazas,
   restrained flower planters, clear circulation, dimensional edges, and quiet
   neutral surfaces.
+- A cohesive architectural hall shell with real walls, glass entrance,
+  integrated planting, lighting, and reception architecture around a quiet
+  open floor.
+- Automatic rectangular booth/shop circulation around the four sides of the
+  hall, preserving an empty central court as the perimeter expands.
 - Dynamic floor dimensions and computed booth/shop placement for every result.
 - Desktop, 390px, and 320px browser review of both venues.
 
@@ -63,6 +68,13 @@ feel designed without becoming busy or tying booth placement to a static image.
 - Landscaped decoration stays behind interactive cards, remains outside their
   placement cells, ignores pointer events, and does not expand the DOM with the
   business count.
+- Venue artwork contains no seating, people, businesses, booths, claims, or
+  interaction. Its architecture and props form one visual system rather than
+  disconnected CSS ornaments.
+- Every booth/shop position is computed on the rectangular perimeter. The
+  central court remains empty at every supported business count, and adding
+  businesses never changes the architectural image or assigns two businesses
+  to one position.
 - Floor stage and venue edges read as intentional architectural context rather
   than a thick frame or empty gray area.
 - At 320px and 390px, controls remain at least 44px, venue cards remain legible,
@@ -147,6 +159,14 @@ Evidence: completed locally on 2026-08-04:
 - `npm run test:discovery-visual` passed at 1440px, 390px, and 320px with no
   document overflow, complete booth/shop counts, usable 44px-or-larger mobile
   controls, and working showroom previews.
+- The final architectural-shell implementation passed `npm run check` and a
+  fresh `npm run test:discovery-visual` on 2026-08-04. Focused geometry tests
+  cover 1, 5, 10, 11, 20, and 37 businesses with one unique non-overlapping
+  perimeter position per business and an untouched central court.
+- Reviewed final captures show the complete enclosed hall at desktop, 390px,
+  and 320px. The responsive overview preserves the entrance, reception,
+  integrated perimeter planting, four-sided business circulation, zoom/pan,
+  and empty center.
 - Reviewed captures in `/tmp/mirtpage-discovery-visuals/` confirm the Expo and
   City Showroom use a quiet architectural floor, restrained planted focal
   points, readable dynamic cards, and pannable mobile layouts without encoding

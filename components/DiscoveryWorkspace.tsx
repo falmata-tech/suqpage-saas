@@ -10,6 +10,7 @@ import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zo
 import Supercluster from "supercluster";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PRODUCTION_SCALES } from "@/lib/discovery-contract";
+import { buildPerimeterVenueLayout } from "@/lib/discovery-venue-layout";
 import type { DiscoveryCityGroup, DiscoveryShowroom, DiscoveryView, WeeklyIndustryExpo } from "@/lib/discovery";
 
 const MAP_WIDTH = 900;
@@ -381,36 +382,8 @@ function ShowroomPreview({ showroom, source, onClose, label }: { showroom: Disco
   return <dialog ref={dialogRef} className="discovery-preview" aria-labelledby={`showroom-preview-${showroom.id}`} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === dialogRef.current) onClose(); }}><article><button className="discovery-preview-close" type="button" onClick={onClose} aria-label="Close showroom preview">×</button><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span>{label || (showroom.sponsored ? "Sponsored showroom" : showroom.productionScale === "growing_factory" ? "Growing factory" : "Workshop / producer")}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3><p>{showroom.tagline}</p><small>{showroom.city} · {showroom.zone} · {showroom.region}</small><Link href={`/@${showroom.handle}?ref=${source}`}>Open showroom <b aria-hidden="true">→</b></Link></div></article></dialog>;
 }
 
-function VenueLandscaping({ variant }: { variant: "city" | "expo" }) {
-  return <div className={`venue-landscaping venue-landscaping-${variant}`} aria-hidden="true">
-    <span className="venue-planter venue-planter-left"><i /><i /><i /><i /></span>
-    <span className="venue-planter venue-planter-right"><i /><i /><i /><i /></span>
-    <span className="venue-bench venue-bench-left" />
-    <span className="venue-bench venue-bench-right" />
-  </div>;
-}
-
 function cityFloorLayout(count: number) {
-  const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
-  const rows = Math.ceil(count / columns);
-  const cardWidth = 218;
-  const cardHeight = 148;
-  const gapX = 48;
-  const gapY = 78;
-  const paddingX = 52;
-  const paddingTop = 172;
-  const paddingBottom = 112;
-  return {
-    columns,
-    cardWidth,
-    cardHeight,
-    gapX,
-    gapY,
-    paddingX,
-    paddingTop,
-    width: paddingX * 2 + columns * cardWidth + (columns - 1) * gapX,
-    height: paddingTop + rows * cardHeight + Math.max(0, rows - 1) * gapY + paddingBottom,
-  };
+  return buildPerimeterVenueLayout(count, 218, 148);
 }
 
 function useFloorNavigation(width: number, height: number, itemCount: number) {
@@ -442,7 +415,7 @@ function useFloorNavigation(width: number, height: number, itemCount: number) {
     const fitFloor = () => {
       const bounds = stage.getBoundingClientRect();
       const fit = Math.min(1, (bounds.width - 24) / width, (bounds.height - 24) / height);
-      const phoneMinimum = itemCount <= 8 ? .88 : .58;
+      const phoneMinimum = itemCount <= 10 ? .4 : fit;
       const scale = bounds.width < 620
         ? Math.min(1, Math.max(fit, phoneMinimum))
         : itemCount <= 6 ? fit : Math.max(fit, .55);
@@ -504,13 +477,10 @@ function CityMarketplaceDialog({ group, onClose }: { group: DiscoveryCityGroup; 
       <header className="city-showroom-head"><div><span className="discovery-kicker">{group.region} marketplace</span><h2 id="city-showroom-title">Made near {group.city}</h2><p>{group.count} independent showrooms in one place.</p></div><div className="city-showroom-actions" aria-label="City marketplace controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to city marketplace">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of city marketplace">−</button><button type="button" onClick={resetFloor} title="Fit city marketplace" aria-label="Fit city marketplace to view">◎</button><button className="city-showroom-close" type="button" onClick={onClose} title="Close" aria-label="Close city marketplace">×</button></div></header>
       <div ref={stageRef} className="city-showroom-stage" aria-label={`${group.city} virtual marketplace floor`}>
         <div ref={floorRef} className="city-showroom-floor" style={{ width: layout.width, height: layout.height }}>
-          <VenueLandscaping variant="city" />
-          <div className="city-showroom-court" aria-hidden="true"><i /><span>Meet · Browse · Inquire</span><i /></div>
           <div className="city-showroom-place" aria-hidden="true"><span>{group.city}</span><b>Local makers</b><small>{group.count} showrooms</small></div>
           {group.showrooms.map((showroom, index) => {
-            const column = index % layout.columns;
-            const row = Math.floor(index / layout.columns);
-            return <Link key={showroom.id} className="city-showroom-shop" data-showroom-id={showroom.id} href={`/@${showroom.handle}?ref=discovery`} style={{ left: layout.paddingX + column * (layout.cardWidth + layout.gapX), top: layout.paddingTop + row * (layout.cardHeight + layout.gapY), width: layout.cardWidth, height: layout.cardHeight }}><ShowroomImage showroom={showroom} /><span><b>{showroom.sponsored ? "Sponsored showroom" : `${group.city} maker`}</b><strong>{showroom.name}</strong><small>{showroom.tagline}</small><em>Open showroom</em></span></Link>;
+            const position = layout.positions[index];
+            return <Link key={showroom.id} className="city-showroom-shop" data-showroom-id={showroom.id} href={`/@${showroom.handle}?ref=discovery`} style={{ left: position.left, top: position.top, width: layout.cardWidth, height: layout.cardHeight }}><ShowroomImage showroom={showroom} /><span><b>{showroom.sponsored ? "Sponsored showroom" : `${group.city} maker`}</b><strong>{showroom.name}</strong><small>{showroom.tagline}</small><em>Open showroom</em></span></Link>;
           })}
         </div>
       </div>
@@ -533,26 +503,7 @@ function DiscoveryList({ discovery, action }: { discovery: DiscoveryView; action
 }
 
 function expoFloorLayout(count: number) {
-  const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
-  const rows = Math.ceil(count / columns);
-  const cardWidth = 224;
-  const cardHeight = 164;
-  const gapX = 56;
-  const gapY = 78;
-  const paddingX = 58;
-  const paddingTop = 194;
-  const paddingBottom = 112;
-  return {
-    columns,
-    cardWidth,
-    cardHeight,
-    gapX,
-    gapY,
-    paddingX,
-    paddingTop,
-    width: paddingX * 2 + columns * cardWidth + Math.max(0, columns - 1) * gapX,
-    height: paddingTop + rows * cardHeight + Math.max(0, rows - 1) * gapY + paddingBottom,
-  };
+  return buildPerimeterVenueLayout(count, 224, 164);
 }
 
 function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
@@ -566,13 +517,10 @@ function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
     <div className="expo-floor-actions" aria-label="Expo floor controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to Expo floor">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of Expo floor">−</button><button type="button" onClick={resetFloor} title="Fit Expo floor" aria-label="Fit Expo floor to view">◎</button></div>
     <div ref={stageRef} className="expo-floor-stage" aria-label={`${expo.title}, one continuous virtual floor`}>
       <div ref={floorRef} className="expo-floor" style={{ width: layout.width, height: layout.height }}>
-        <VenueLandscaping variant="expo" />
-        <div className="expo-pavilion" aria-hidden="true"><span className="expo-canopy" /><strong>{expo.industryCode}</strong><small>{expo.isToday ? "Open today" : "Floor preview"}</small></div>
-        <div className="expo-promenade" aria-hidden="true"><i /><span>{expo.mode === "livestream" ? "MirtPage Featured Enterprises" : "MirtPage Maker Expo"}</span><i /></div>
+        <div className="expo-pavilion" aria-hidden="true"><strong>{expo.industryCode}</strong><small>{expo.isToday ? "Open today" : "Floor preview"}</small></div>
         {expo.booths.map((booth, index) => {
-          const column = index % layout.columns;
-          const row = Math.floor(index / layout.columns);
-          const style = { left: layout.paddingX + column * (layout.cardWidth + layout.gapX), top: layout.paddingTop + row * (layout.cardHeight + layout.gapY), width: layout.cardWidth, height: layout.cardHeight };
+          const position = layout.positions[index];
+          const style = { left: position.left, top: position.top, width: layout.cardWidth, height: layout.cardHeight };
           if (!booth.revealed) return <div key={booth.reference} data-expo-slot={booth.slot} style={style} className="expo-booth expo-booth-outline" aria-label={`${booth.reference}, booth preview`}><span className="expo-booth-placeholder" aria-hidden="true"><i /><i /><i /></span><span><b>{booth.reference}</b><strong>Reserved booth</strong><small>Revealed on {expo.dayLabel}</small></span></div>;
           const showroom = booth.showroom;
           return <button key={showroom.id} data-business-id={showroom.id} type="button" style={style} className={`expo-booth${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={`${booth.reference}, ${showroom.name}`}><ShowroomImage showroom={showroom} /><span><b>{booth.reference}</b><strong>{showroom.name}</strong><small>{showroom.city}</small></span></button>;
