@@ -1,12 +1,8 @@
 import crypto from "node:crypto";
 import { controlledYouTubeAdmissionEnabled, recipeStudioEnabled } from "./config";
-import { canAccessRequest, getRequestDetail } from "./request-sqlite";
-import {
-  getBusinessById,
-  getCatalogByBusinessId,
-  getDb,
-  inTransaction,
-} from "./db";
+import { runtimeBusinessById, runtimeCatalogByBusinessId } from "./catalog-runtime";
+import { canAccessRequest, runtimeRequestDetail } from "./request-runtime";
+import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { FileRequestAttachmentStore } from "./request-media";
 import {
   requireRevisionSnapshotV4,
@@ -74,21 +70,21 @@ const opaque = (prefix: string, requestId: number, value: string) =>
     .digest("hex")
     .slice(0, 20)}`;
 
-function workspace(user: SessionUser, revisionId: number) {
+async function workspace(user: SessionUser, revisionId: number) {
   if (!recipeStudioEnabled()) {
     throw new ShowroomRecipeError(
       [{ category: "tenant_asset", path: "$", message: "Recipe studio is temporarily unavailable." }],
       404,
     );
   }
-  const revision = getContentRevision(revisionId);
+  const revision = await getContentRevision(revisionId);
   if (!revision) {
     throw new ShowroomRecipeError(
       [{ category: "tenant_asset", path: "$", message: "Recipe workspace not found." }],
       404,
     );
   }
-  const request = getRequestDetail(revision.request_id);
+  const request = await runtimeRequestDetail(revision.request_id);
   if (
     !request ||
     !request.business_id ||
@@ -110,8 +106,8 @@ function workspace(user: SessionUser, revisionId: number) {
       409,
     );
   }
-  const business = getBusinessById(request.business_id);
-  const catalog = getCatalogByBusinessId(request.business_id, true);
+  const business = await runtimeBusinessById(request.business_id);
+  const catalog = await runtimeCatalogByBusinessId(request.business_id, true);
   if (!business || !catalog) {
     throw new ShowroomRecipeError(
       [{ category: "tenant_asset", path: "$", message: "Business catalog not found." }],
@@ -131,10 +127,10 @@ function workspace(user: SessionUser, revisionId: number) {
   return { revision, request, business, catalog };
 }
 
-function assetMaps(
+async function assetMaps(
   requestId: number,
   snapshot: RevisionSnapshotV4,
-  attachments: ReturnType<typeof getRequestDetail> extends infer T
+  attachments: Awaited<ReturnType<typeof runtimeRequestDetail>> extends infer T
     ? T extends { attachments: infer A }
       ? A
       : never
@@ -157,14 +153,13 @@ function assetMaps(
   >();
   const admitted = new Map(
     (
-      getDb()
-        .prepare(
-          "SELECT asset_key,request_attachment_id FROM recipe_media_assets WHERE request_id=? AND kind='image'",
-        )
-        .all(requestId) as Array<{
+      await runtimeAll<{
         asset_key: string;
         request_attachment_id: number;
-      }>
+      }>(
+        "SELECT asset_key,request_attachment_id FROM recipe_media_assets WHERE request_id=? AND kind='image'",
+        [requestId],
+      )
     ).map((asset) => [asset.request_attachment_id, asset.asset_key]),
   );
   const currentImages = [
@@ -231,15 +226,14 @@ function assetMaps(
       height: attachment.height,
     });
   }
-  const providers = getDb()
-    .prepare(
-      "SELECT asset_key,label,provider_id FROM recipe_media_assets WHERE request_id=? AND kind='youtube' ORDER BY id",
-    )
-    .all(requestId) as Array<{
+  const providers = await runtimeAll<{
     asset_key: string;
     label: string;
     provider_id: string;
-  }>;
+  }>(
+    "SELECT asset_key,label,provider_id FROM recipe_media_assets WHERE request_id=? AND kind='youtube' ORDER BY id",
+    [requestId],
+  );
   for (const provider of providers) {
     const ref = `youtube:${provider.provider_id}`;
     actualToOpaque.set(ref, provider.asset_key);
@@ -278,7 +272,7 @@ export async function admitRecipeImage(
   labelInput: unknown,
   rightsAcknowledged: boolean,
 ) {
-  const state = workspace(user, revisionId);
+  const state = await workspace(user, revisionId);
   if (!rightsAcknowledged) {
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
@@ -301,15 +295,12 @@ export async function admitRecipeImage(
     bytes: Buffer.from(await file.arrayBuffer()),
   });
   try {
-    return inTransaction(() => {
-      const attachmentId = Number(
-        getDb()
-          .prepare(
-            `INSERT INTO request_attachments(
+    return runtimeTransaction(async () => {
+      const attachment = await runtimeGet<{ id: number }>(
+        `INSERT INTO request_attachments(
               request_id,storage_key,original_name,mime_type,byte_size,width,height
-            ) VALUES(?,?,?,?,?,?,?)`,
-          )
-          .run(
+            ) VALUES(?,?,?,?,?,?,?) RETURNING id`,
+        [
             state.request.id,
             stored.storageKey,
             stored.originalName,
@@ -317,17 +308,17 @@ export async function admitRecipeImage(
             stored.buffer.byteLength,
             stored.width,
             stored.height,
-          ).lastInsertRowid,
+        ],
       );
+      const attachmentId = Number(attachment!.id);
       const assetKey = `asset_${crypto.randomBytes(10).toString("hex")}`;
-      getDb()
-        .prepare(
-          `INSERT INTO recipe_media_assets(
+      await runtimeRun(
+        `INSERT INTO recipe_media_assets(
             request_id,asset_key,kind,label,request_attachment_id,
             rights_acknowledged,added_by_user_id
           ) VALUES(?,?,'image',?,?,1,?)`,
-        )
-        .run(state.request.id, assetKey, label, attachmentId, user.id);
+        [state.request.id, assetKey, label, attachmentId, user.id],
+      );
       return {
         requestId: state.request.id,
         revisionId,
@@ -343,7 +334,7 @@ export async function admitRecipeImage(
   }
 }
 
-export function admitRecipeYouTube(
+export async function admitRecipeYouTube(
   user: SessionUser,
   revisionId: number,
   urlInput: unknown,
@@ -356,7 +347,7 @@ export function admitRecipeYouTube(
       404,
     );
   }
-  const state = workspace(user, revisionId);
+  const state = await workspace(user, revisionId);
   if (!rightsAcknowledged) {
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
@@ -378,12 +369,11 @@ export function admitRecipeYouTube(
           : "Enter a supported YouTube URL.",
     }]);
   }
-  return inTransaction(() => {
-    const existing = getDb()
-      .prepare(
-        "SELECT asset_key FROM recipe_media_assets WHERE request_id=? AND kind='youtube' AND provider_id=? LIMIT 1",
-      )
-      .get(state.request.id, providerId) as { asset_key: string } | undefined;
+  return runtimeTransaction(async () => {
+    const existing = await runtimeGet<{ asset_key: string }>(
+      "SELECT asset_key FROM recipe_media_assets WHERE request_id=? AND kind='youtube' AND provider_id=? LIMIT 1",
+      [state.request.id, providerId],
+    );
     if (existing) {
       return {
         requestId: state.request.id,
@@ -393,19 +383,21 @@ export function admitRecipeYouTube(
       };
     }
     const assetKey = `asset_${crypto.randomBytes(10).toString("hex")}`;
-    getDb()
-      .prepare(
-        `INSERT INTO recipe_media_assets(
+    await runtimeRun(
+      `INSERT INTO recipe_media_assets(
           request_id,asset_key,kind,label,provider_id,
           rights_acknowledged,added_by_user_id
         ) VALUES(?,?,'youtube',?,?,1,?)`,
-      )
-      .run(state.request.id, assetKey, label, providerId, user.id);
+      [state.request.id, assetKey, label, providerId, user.id],
+    );
     return { requestId: state.request.id, revisionId, assetKey, duplicate: false };
   });
 }
 
-function sourceManifest(requestId: number, request: NonNullable<ReturnType<typeof getRequestDetail>>) {
+function sourceManifest(
+  requestId: number,
+  request: NonNullable<Awaited<ReturnType<typeof runtimeRequestDetail>>>,
+) {
   const requestKey = opaque("source", requestId, "request-instruction");
   const currentKey = opaque("source", requestId, "current-showroom");
   const aiDraftKey = opaque("source", requestId, "ai-draft");
@@ -668,16 +660,16 @@ function syntheticExampleRecipe() {
   };
 }
 
-export function buildShowroomRecipeBrief(
+export async function buildShowroomRecipeBrief(
   user: SessionUser,
   revisionId: number,
 ) {
-  const state = workspace(user, revisionId);
+  const state = await workspace(user, revisionId);
   const snapshot = requireRevisionSnapshotV4(
     state.revision.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,
   );
-  const assets = assetMaps(state.request.id, snapshot, state.request.attachments);
+  const assets = await assetMaps(state.request.id, snapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, snapshot);
   const sources = sourceManifest(state.request.id, state.request);
   const exportableSnapshot: RevisionSnapshotV4 = {
@@ -1039,17 +1031,17 @@ function synchronizeBusinessHeroContentBlock(
   return input;
 }
 
-export function importShowroomRecipe(
+export async function importShowroomRecipe(
   user: SessionUser,
   revisionId: number,
   input: unknown,
-): ValidatedShowroomRecipe {
-  const state = workspace(user, revisionId);
+): Promise<ValidatedShowroomRecipe> {
+  const state = await workspace(user, revisionId);
   const baseSnapshot = requireRevisionSnapshotV4(
     state.revision.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,
   );
-  const assets = assetMaps(state.request.id, baseSnapshot, state.request.attachments);
+  const assets = await assetMaps(state.request.id, baseSnapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, baseSnapshot);
   const sources = sourceManifest(state.request.id, state.request);
   const normalized = normalizeImportedAssets(
@@ -1068,7 +1060,7 @@ export function importShowroomRecipe(
     allowedSourceKeys: new Set(sources.sources.map((source) => source.key)),
     assetDetails: assets.details,
   });
-  const saved = saveRecipeDraftRevision(
+  const saved = await saveRecipeDraftRevision(
     user,
     revisionId,
     validated.snapshot,

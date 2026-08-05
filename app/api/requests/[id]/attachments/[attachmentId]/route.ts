@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
 import { readRequestAttachment } from "@/lib/request-media";
-import { canAccessRequest, getRequestAttachment, getRequestDetail } from "@/lib/request-sqlite";
+import { canAccessRequest, runtimeRequestAttachment, runtimeRequestDetail } from "@/lib/request-runtime";
 
 export const runtime = "nodejs";
 const hidden = () => NextResponse.json({ error: "Not found." }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
@@ -13,9 +13,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const requestId = Number.parseInt(values.id, 10);
   const attachmentId = Number.parseInt(values.attachmentId, 10);
   if (!Number.isInteger(requestId) || !Number.isInteger(attachmentId)) return hidden();
-  const requestRecord = getRequestDetail(requestId);
+  const requestRecord = await runtimeRequestDetail(requestId);
   if (!requestRecord || !canAccessRequest(user, requestRecord)) return hidden();
-  const attachment = getRequestAttachment(requestId, attachmentId);
+  const attachment = await runtimeRequestAttachment(requestId, attachmentId);
   if (!attachment) return hidden();
   const media = await readRequestAttachment(attachment.storage_key, attachment.mime_type);
   if (!media) return hidden();

@@ -25,3 +25,4 @@ public/uploads/runtime/
 test-results/
 playwright-report/
 artifacts/
+.vercel

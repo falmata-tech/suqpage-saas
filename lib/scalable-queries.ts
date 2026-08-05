@@ -1,5 +1,6 @@
 import { INDUSTRY_LABELS } from "./bazaar";
-import { getDb } from "./db";
+import { postgresRuntimeEnabled } from "./postgres-runtime-services";
+import { runtimeAll, runtimeGet } from "./runtime-sql";
 import {
   likePattern,
   normalizePageRequest,
@@ -19,32 +20,24 @@ type PageInput = {
 type QueryValue = string | number | null;
 const ADMIN_DIRECTORY_PAGE_SIZE = 6;
 
-function total(sql: string, params: QueryValue[]) {
-  return Number(
-    (
-      getDb()
-        .prepare(sql)
-        .get(...params) as { total: number }
-    ).total,
-  );
+async function total(sql: string, params: QueryValue[]) {
+  return Number((await runtimeGet<{ total: number }>(sql, params))?.total || 0);
 }
 
-function pageRows<T>(
+async function pageRows<T>(
   countSql: string,
   rowsSql: string,
   params: QueryValue[],
   input: PageInput,
   pageSize = WORKSPACE_PAGE_SIZE,
-): PageResult<T> {
+): Promise<PageResult<T>> {
   const request = normalizePageRequest(
     { page: input.page, search: input.q, pageSize },
     pageSize,
   );
-  const totalItems = total(countSql, params);
+  const totalItems = await total(countSql, params);
   const window = pageWindow(totalItems, request);
-  const items = getDb()
-    .prepare(rowsSql)
-    .all(...params, window.limit, window.offset) as T[];
+  const items = await runtimeAll<T>(rowsSql, [...params, window.limit, window.offset]);
   return pageResult(items, totalItems, request);
 }
 
@@ -74,21 +67,24 @@ export type PublicShowroomRow = {
   featured: boolean;
 };
 
-export function listPublicIndustries() {
-  const rows = getDb().prepare(`
-    SELECT DISTINCT COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community') industry_key
+export async function listPublicIndustries() {
+  const industry = postgresRuntimeEnabled()
+    ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
+    : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
+  const rows = await runtimeAll<{ industry_key: string }>(`
+    SELECT DISTINCT ${industry} industry_key
     FROM businesses b
     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
     WHERE b.status='active'
     ORDER BY industry_key
-  `).all() as Array<{ industry_key: string }>;
+  `);
   return rows.map(({ industry_key: key }) => ({
     key,
     label: INDUSTRY_LABELS[key] || "Enterprise & Export Showcase",
   }));
 }
 
-export function listPublicShowrooms(input: PageInput & {
+export async function listPublicShowrooms(input: PageInput & {
   industry?: unknown;
   sort?: unknown;
 }) {
@@ -98,10 +94,13 @@ export function listPublicShowrooms(input: PageInput & {
   );
   const industry = String(input.industry ?? "").trim();
   const sort = input.sort === "handle" ? "handle" : "name";
+  const industryExpression = postgresRuntimeEnabled()
+    ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
+    : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
   const params: QueryValue[] = [];
   let where = " WHERE b.status='active'";
   if (industry && industry !== "all") {
-    where += " AND COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')=?";
+    where += ` AND ${industryExpression}=?`;
     params.push(industry);
   }
   where += searchClause(
@@ -127,7 +126,7 @@ export function listPublicShowrooms(input: PageInput & {
       )`,
     ],
   );
-  const totalItems = total(
+  const totalItems = await total(
     `SELECT COUNT(*) total
      FROM businesses b
      LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id${where}`,
@@ -135,17 +134,7 @@ export function listPublicShowrooms(input: PageInput & {
   );
   const window = pageWindow(totalItems, request);
   const order = sort === "handle" ? "lower(b.handle),b.id" : "lower(b.name),b.id";
-  const rows = getDb().prepare(`
-    SELECT b.id,b.handle,b.name,b.tagline,
-      COALESCE(NULLIF(b.hero_image_path,''),b.logo_path,'') image_url,
-      COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community') industry_key,
-      COALESCE(p.is_featured,0) featured
-    FROM businesses b
-    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-    ${where}
-    ORDER BY COALESCE(p.is_featured,0) DESC,${order}
-    LIMIT ? OFFSET ?
-  `).all(...params, window.limit, window.offset) as Array<{
+  const rows = await runtimeAll<{
     id: number;
     handle: string;
     name: string;
@@ -153,7 +142,17 @@ export function listPublicShowrooms(input: PageInput & {
     image_url: string;
     industry_key: string;
     featured: number;
-  }>;
+  }>(`
+    SELECT b.id,b.handle,b.name,b.tagline,
+      COALESCE(NULLIF(b.hero_image_path,''),b.logo_path,'') image_url,
+      ${industryExpression} industry_key,
+      COALESCE(p.is_featured,0) featured
+    FROM businesses b
+    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
+    ${where}
+    ORDER BY COALESCE(p.is_featured,0) DESC,${order}
+    LIMIT ? OFFSET ?
+  `, [...params, window.limit, window.offset]);
   return pageResult<PublicShowroomRow>(
     rows.map((item) => ({
       id: item.id,
@@ -176,7 +175,7 @@ export type AdminBusinessRow = Business & {
   request_count: number;
 };
 
-export function listBusinessesPage(input: PageInput & { status?: unknown }) {
+export async function listBusinessesPage(input: PageInput & { status?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["active", "draft", "suspended"].includes(String(input.status))
     ? String(input.status)
@@ -225,7 +224,7 @@ export type ManagedClientRow = {
   request_type: "onboarding" | "change";
 };
 
-export function listManagedClientsPage(input: PageInput) {
+export async function listManagedClientsPage(input: PageInput) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const params: QueryValue[] = [];
   const search = searchClause(
@@ -256,8 +255,8 @@ export function listManagedClientsPage(input: PageInput) {
   );
 }
 
-export function getManagedClient(userId: number) {
-  const client = getDb().prepare(`
+export async function getManagedClient(userId: number) {
+  const client = await runtimeGet<ManagedClientRow>(`
     SELECT u.id,u.email,u.name,u.business_id,b.name business_name,
       b.status business_status,
       CASE WHEN b.status='draft' AND b.content_version=1
@@ -269,7 +268,7 @@ export function getManagedClient(userId: number) {
     JOIN user_access_profiles p ON p.user_id=u.id
     JOIN businesses b ON b.id=u.business_id
     WHERE u.id=? AND p.access_role='client'
-  `).get(userId) as ManagedClientRow | undefined;
+  `, [userId]);
   return client ? { ...client } : undefined;
 }
 
@@ -283,7 +282,7 @@ export type StaffRow = {
   open_requests: number;
 };
 
-export function listStaffPage(input: PageInput & { role?: unknown }) {
+export async function listStaffPage(input: PageInput & { role?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const role = ["team_member", "operations_manager"].includes(String(input.role))
     ? String(input.role)
@@ -317,7 +316,7 @@ export function listStaffPage(input: PageInput & { role?: unknown }) {
   );
 }
 
-export function listTeamMemberChoices(search: unknown, selectedId?: number | null) {
+export async function listTeamMemberChoices(search: unknown, selectedId?: number | null) {
   const value = normalizePageRequest({ search }).search;
   const params: QueryValue[] = [];
   const choices: string[] = [];
@@ -336,22 +335,22 @@ export function listTeamMemberChoices(search: unknown, selectedId?: number | nul
   const where = `WHERE p.access_role='team_member'${
     choices.length ? ` AND (${choices.join(" OR ")})` : ""
   }`;
-  return getDb().prepare(`
-    SELECT u.id,u.email,u.name,u.must_change_password,p.access_role
-    FROM users u JOIN user_access_profiles p ON p.user_id=u.id
-    ${where}
-    ORDER BY u.id=? DESC,lower(u.name),u.id
-    LIMIT 20
-  `).all(...params, selectedId || 0) as Array<{
+  return runtimeAll<{
     id: number;
     email: string;
     name: string;
     must_change_password: number;
     access_role: "team_member";
-  }>;
+  }>(`
+    SELECT u.id,u.email,u.name,u.must_change_password,p.access_role
+    FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+    ${where}
+    ORDER BY u.id=? DESC,lower(u.name),u.id
+    LIMIT 20
+  `, [...params, selectedId || 0]);
 }
 
-export function listAssignedBusinessesPage(userId: number, input: PageInput) {
+export async function listAssignedBusinessesPage(userId: number, input: PageInput) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const params: QueryValue[] = [userId];
   const search = searchClause(request.search, ["b.name", "b.handle"], params);
@@ -369,7 +368,7 @@ export function listAssignedBusinessesPage(userId: number, input: PageInput) {
   );
 }
 
-export function listProductsPage(
+export async function listProductsPage(
   businessId: number,
   input: PageInput,
   includeDrafts = true,
@@ -425,7 +424,7 @@ export type InquiryListRow = {
   items: InquiryListItem[];
 };
 
-export function listInquiriesPage(
+export async function listInquiriesPage(
   businessId: number,
   input: PageInput & { status?: unknown },
 ) {
@@ -450,59 +449,70 @@ export function listInquiriesPage(
       )`,
     ],
   );
-  const result = pageRows<Omit<InquiryListRow, "items"> & { items_json: string }>(
+  const result = await pageRows<Omit<InquiryListRow, "items">>(
     `SELECT COUNT(*) total FROM inquiries i${where}`,
     `SELECT i.*,
-      (SELECT COUNT(*) FROM inquiry_items count_item WHERE count_item.inquiry_id=i.id) item_count,
-      COALESCE((
-        SELECT json_group_array(json_object(
-          'id',item.id,
-          'product_name_snapshot',item.product_name_snapshot,
-          'quantity',item.quantity,
-          'quantity_intent',item.quantity_intent,
-          'options_json',item.options_json
-        ))
-        FROM inquiry_items item WHERE item.inquiry_id=i.id
-      ),'[]') items_json
+      (SELECT COUNT(*) FROM inquiry_items count_item WHERE count_item.inquiry_id=i.id) item_count
      FROM inquiries i${where}
      ORDER BY i.created_at DESC,i.id DESC
      LIMIT ? OFFSET ?`,
     params,
     { page: request.page, q: request.search },
   );
+  const ids = result.items.map((row) => row.id);
+  const itemRows = ids.length
+    ? await runtimeAll<InquiryListItem & { inquiry_id: number }>(
+        `SELECT inquiry_id,id,product_name_snapshot,quantity,quantity_intent,options_json
+         FROM inquiry_items WHERE inquiry_id IN (${ids.map(() => "?").join(",")})
+         ORDER BY id`,
+        ids,
+      )
+    : [];
+  const itemsByInquiry = new Map<number, InquiryListItem[]>();
+  for (const { inquiry_id: inquiryId, ...item } of itemRows) {
+    const items = itemsByInquiry.get(inquiryId) || [];
+    items.push(item);
+    itemsByInquiry.set(inquiryId, items);
+  }
   return {
     ...result,
-    items: result.items.map(({ items_json, ...row }) => ({
-      ...row,
-      items: JSON.parse(items_json) as InquiryListItem[],
-    })),
+    items: result.items.map((row) => ({ ...row, items: itemsByInquiry.get(row.id) || [] })),
   } satisfies PageResult<InquiryListRow>;
 }
 
-export function getBusinessActivityCounts(businessId: number) {
-  return getDb().prepare(`
+export async function getBusinessActivityCounts(businessId: number) {
+  return runtimeGet<{
+    inquiries: number;
+    offerings: number;
+    requests: number;
+  }>(`
     SELECT
       (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
       (SELECT COUNT(*) FROM products WHERE business_id=?) offerings,
       (SELECT COUNT(*) FROM service_requests WHERE business_id=?) requests
-  `).get(businessId, businessId, businessId) as {
+  `, [businessId, businessId, businessId]) as Promise<{
     inquiries: number;
     offerings: number;
     requests: number;
-  };
+  }>;
 }
 
-export function getPlatformCounts() {
-  return getDb().prepare(`
+export async function getPlatformCounts() {
+  return runtimeGet<{
+    businesses: number;
+    clients: number;
+    staff: number;
+    open_requests: number;
+  }>(`
     SELECT
       (SELECT COUNT(*) FROM businesses) businesses,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client') clients,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role IN ('team_member','operations_manager')) staff,
       (SELECT COUNT(*) FROM service_requests WHERE status NOT IN ('completed','rejected','cancelled')) open_requests
-  `).get() as {
+  `) as Promise<{
     businesses: number;
     clients: number;
     staff: number;
     open_requests: number;
-  };
+  }>;
 }

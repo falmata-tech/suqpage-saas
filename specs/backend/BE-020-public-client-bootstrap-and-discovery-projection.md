@@ -75,8 +75,9 @@ the weekly industry Expo program.
   projection; there is no hall partition.
 - Approved `booth_image_path` remains business-owned profile configuration and
   is projected only with that business's revealed booth on today's Expo.
-- Schedule dates are calculated in `Africa/Addis_Ababa`, beginning today and
-  continuing through the next six dates while preserving weekday assignments.
+- Schedule dates are calculated in `Africa/Addis_Ababa` for the current
+  Monday-through-Sunday calendar week. Entries remain in fixed weekday order
+  and exactly one entry is identified as today.
 
 ## Contracts
 
@@ -146,6 +147,12 @@ Scenario: Weekly Expo is projected
     one deterministic continuous floor
   AND map filters do not alter the assignment
   AND Sunday instead returns selected featured businesses for TikTok live
+
+Scenario: Weekly Expo positions remain stable
+  GIVEN discovery is projected on any Ethiopia-local weekday
+  WHEN the weekly schedule is returned
+  THEN its entries remain ordered Monday through Sunday
+  AND the current weekday alone is identified as today
 
 Scenario: Non-today Expo identity is redacted
   GIVEN the visitor selects a schedule date that is not today

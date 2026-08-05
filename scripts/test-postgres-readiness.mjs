@@ -23,6 +23,7 @@ function run(command, args, options = {}) {
 }
 
 function waitForPostgres() {
+  let consecutiveReady = 0;
   for (let attempt = 0; attempt < 30; attempt += 1) {
     const result = spawnSync("docker", [
       "exec",
@@ -33,14 +34,15 @@ function waitForPostgres() {
       "-d",
       "mirtpage",
     ], { encoding: "utf8", stdio: "ignore" });
-    if (result.status === 0) return;
-    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1_000);
+    consecutiveReady = result.status === 0 ? consecutiveReady + 1 : 0;
+    if (consecutiveReady >= 2) return;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500);
   }
   throw new Error("The disposable PostgreSQL service did not become ready.");
 }
 
 try {
-  run("npm", ["run", "reset"], {
+  run(process.execPath, ["--import", "tsx", "scripts/setup.ts", "--reset"], {
     env: {
       MIRTPAGE_DB_PATH: path.join(root, "source.db"),
       MIRTPAGE_MEDIA_ROOT: path.join(root, "media"),
@@ -68,10 +70,23 @@ try {
   const mapping = run("docker", ["port", container, "5432/tcp"], { capture: true });
   const port = mapping.match(/:(\d+)$/)?.[1];
   if (!port) throw new Error("Could not resolve the disposable PostgreSQL port.");
-  run("npm", ["exec", "tsx", "--", "scripts/rehearse-postgres.ts", "--reset-target"], {
+  run(process.execPath, ["--import", "tsx", "scripts/rehearse-postgres.ts", "--reset-target"], {
     env: {
       MIRTPAGE_DB_PATH: path.join(root, "source.db"),
       MIRTPAGE_POSTGRES_REHEARSAL_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
+    },
+  });
+  run(process.execPath, ["--import", "tsx", "scripts/test-postgres-runtime.ts"], {
+    env: {
+      MIRTPAGE_POSTGRES_REHEARSAL_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
+    },
+  });
+  run(process.execPath, ["--import", "tsx", "scripts/rehearse-postgres.ts", "--production-copy"], {
+    env: {
+      MIRTPAGE_DB_PATH: path.join(root, "source.db"),
+      MIRTPAGE_POSTGRES_DIRECT_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
+      MIRTPAGE_POSTGRES_MIGRATION_ROLE: "mirtpage",
+      MIRTPAGE_APPROVE_PRODUCTION_COPY: "COPY_TO_EMPTY_SUPABASE",
     },
   });
   console.log("Disposable PostgreSQL 17 schema, data, constraints, triggers, sequences, invariants, fingerprints, and read-only source rehearsal passed.");

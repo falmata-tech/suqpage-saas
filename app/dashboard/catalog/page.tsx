@@ -6,7 +6,7 @@ import {
 import DashboardShell from "@/components/DashboardShell";
 import { requireUser } from "@/lib/auth";
 import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
-import { getCatalogByBusinessId } from "@/lib/db";
+import { runtimeCatalogByBusinessId } from "@/lib/catalog-runtime";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +21,9 @@ export default async function CatalogPage({
 }) {
   const user = await requireUser();
   const query = await searchParams;
-  const business = resolveBusiness(user, query.business);
+  const business = await resolveBusiness(user, query.business);
   if (!business) return null;
-  const catalog = getCatalogByBusinessId(business.id, true)!;
+  const catalog = (await runtimeCatalogByBusinessId(business.id, true))!;
 
   return (
     <DashboardShell user={user} business={business}>

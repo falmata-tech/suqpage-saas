@@ -13,7 +13,7 @@ export async function createStaffAccountAction(formData: FormData) {
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   try {
     const created = await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
-    audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
+    await audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
   } catch (error) {
     redirect(`/dashboard/admin/staff?error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
   }
@@ -30,8 +30,8 @@ export async function assignRequestAction(formData: FormData) {
   const teamMemberId = rawTeamMember ? Number.parseInt(rawTeamMember, 10) : null;
   if (!Number.isInteger(requestId) || teamMemberId !== null && !Number.isInteger(teamMemberId)) redirect("/dashboard/requests?error=assignment");
   try {
-    const assigned = assignRequestToTeamMember(requestId, teamMemberId, user.id);
-    audit("service_request.assigned", { userId:user.id, businessId:assigned.businessId, detail:{ requestId, assignedUserId:assigned.assignedUserId, previousUserId:assigned.previousUserId } });
+    const assigned = await assignRequestToTeamMember(requestId, teamMemberId, user.id);
+    await audit("service_request.assigned", { userId:user.id, businessId:assigned.businessId, detail:{ requestId, assignedUserId:assigned.assignedUserId, previousUserId:assigned.previousUserId } });
   } catch (error) {
     redirect(`/dashboard/requests/${requestId}?error=assignment`);
   }
@@ -45,7 +45,7 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   const businessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
   try {
-    const result = updateDiscoveryProfile({
+    const result = await updateDiscoveryProfile({
       businessId,
       industryKeys: formData.getAll("industryKeys"),
       boothImagePath: formData.get("boothImagePath"),
@@ -59,7 +59,7 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
       sundayPosition: formData.get("sundayPosition"),
       excluded: formData.get("excluded") === "on",
     });
-    audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
+    await audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
   } catch (error) {
     const message = error instanceof DiscoveryAdminError ? error.message : "Could not save the discovery profile.";
     redirect(`/dashboard/admin/discovery/${businessId}?error=${encodeURIComponent(message)}`);

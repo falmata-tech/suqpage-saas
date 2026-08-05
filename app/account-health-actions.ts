@@ -11,13 +11,13 @@ export async function recordManualPaymentAction(formData: FormData) {
   const user = await requireUser();
   const businessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
   try {
-    const result = recordManualPayment(user, {
+    const result = await recordManualPayment(user, {
       businessId,
       amount: formData.get("amount"),
       paidAt: formData.get("paidAt"),
       idempotencyKey: formData.get("idempotencyKey") || crypto.randomBytes(16).toString("hex"),
     });
-    audit("subscription.payment_recorded", {
+    await audit("subscription.payment_recorded", {
       userId: user.id,
       businessId,
       detail: { paymentId: result.id },

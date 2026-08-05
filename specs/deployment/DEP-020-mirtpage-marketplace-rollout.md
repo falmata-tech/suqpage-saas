@@ -43,7 +43,8 @@ reset; production rollout and domain/DNS changes are excluded.
 - No active public/dashboard UI contains the retired platform identity or labels
   a showroom with the retired marketplace destination term.
 - Existing `/@handle` routes continue to resolve.
-- Scale filters and attention summaries pass scope and query-plan tests.
+- Reviewed scale metadata/projection and attention summaries pass scope and
+  query-plan tests; public routes expose no scale filter.
 - Preview dialogs and primary marketplace workflows pass 1440/390/320 browser
   evidence with no overflow, focus trap, unreadable action, or console error.
 - Sunday and weekday program surfaces share one coherent visual floor language.

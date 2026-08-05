@@ -18,7 +18,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const businessId = Number.parseInt((await params).businessId, 10);
   if (!Number.isInteger(businessId)) notFound();
-  const profile = getDiscoveryProfileAdminView(businessId);
+  const profile = await getDiscoveryProfileAdminView(businessId);
   if (!profile) notFound();
   const query = await searchParams;
   return <DashboardShell user={user} business={null}>

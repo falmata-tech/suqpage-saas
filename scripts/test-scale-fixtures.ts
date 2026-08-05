@@ -4,6 +4,7 @@ import { DISCOVERY_INDUSTRIES, EXPO_WEEK, getDiscoveryView } from "../lib/discov
 import { SEEDED_FEATURED_HANDLES } from "../lib/expo-seed";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 
+async function main() {
 const db = getDb();
 assert.equal(getAllBusinesses().filter((business) => business.status === "active").length, 66);
 assert.equal(SCALE_DEMO_BUSINESSES.length, 56);
@@ -60,7 +61,7 @@ const industryCounts: number[] = [];
 for (const industry of DISCOVERY_INDUSTRIES) {
   const expoDay = EXPO_WEEK.find((day) => day.industryKey === industry.key)?.weekday;
   assert.notEqual(expoDay, undefined, `${industry.label} has one stable weekday assignment`);
-  const discovery = getDiscoveryView({ db, industry: industry.key, expoDay });
+  const discovery = await getDiscoveryView({ db, industry: industry.key, expoDay });
   industryCounts.push(discovery.total);
   assert.ok(discovery.total >= 8, `${industry.label} has a useful active fixture cohort`);
   assert.ok(discovery.sponsoredCount >= 5, `${industry.label} has at least five paid sponsored placements`);
@@ -75,9 +76,9 @@ for (const industry of DISCOVERY_INDUSTRIES) {
   assert.equal(discovery.expo.booths.length, discovery.showrooms.length, `${industry.label} Expo includes the complete result set`);
   assert.deepEqual(discovery.expo.booths.map((booth) => booth.slot), Array.from({ length: discovery.expo.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
   assert.equal(new Set(discovery.expo.booths.map((booth) => booth.reference)).size, discovery.expo.boothCount, `${industry.label} floor references remain unique`);
-  assert.ok(getDiscoveryView({ db, industry: industry.key, scale: "growing_factory" }).total >= 1, `${industry.label} has a growing-factory fixture`);
+  assert.ok((await getDiscoveryView({ db, industry: industry.key, scale: "growing_factory" })).total >= 1, `${industry.label} has a growing-factory fixture`);
 }
-const searchedMonday = getDiscoveryView({ db, industry: "electronics", q: "Nova Assembly", expoDay: 1 });
+const searchedMonday = await getDiscoveryView({ db, industry: "electronics", q: "Nova Assembly", expoDay: 1 });
 assert.equal(searchedMonday.total, 1, "map search narrows geographic results");
 assert.equal(searchedMonday.expo.booths.length, industryCounts[0], "map search does not shrink the date-selected Expo");
 assert.equal(industryCounts.reduce((total, count) => total + count, 0), 66);
@@ -96,3 +97,9 @@ assert.equal(
 assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
 
 console.log("Scale fixtures passed: 66 showrooms, paid sponsorship in every industry, curated Sunday cohorts, both production scales, all lifecycle states, and six discovery industries.");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

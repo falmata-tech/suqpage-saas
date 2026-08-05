@@ -6,8 +6,8 @@ import NavigationTrail from "@/components/NavigationTrail";
 import ShowroomApp from "@/components/showroom/ShowroomApp";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
-import { getBusinessById } from "@/lib/db";
-import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
+import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { snapshotToCatalog } from "@/lib/revision-domain";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
@@ -40,8 +40,8 @@ export default async function RevisionPreviewPage({
   const query = await searchParams;
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
-  const request = getRequestDetail(requestId);
-  const revision = getContentRevision(revisionId);
+  const request = await runtimeRequestDetail(requestId);
+  const revision = await getContentRevision(revisionId);
   if (
     !request ||
     !revision ||
@@ -50,9 +50,9 @@ export default async function RevisionPreviewPage({
     !canAccessRequest(user, request) ||
     (user.access_role === "client" && revision.status === "draft")
   ) notFound();
-  const business = getBusinessById(request.business_id);
+  const business = await runtimeBusinessById(request.business_id);
   if (!business) notFound();
-  const latest = listContentRevisions(requestId)[0]?.id === revision.id;
+  const latest = (await listContentRevisions(requestId))[0]?.id === revision.id;
   const snapshot = requireRevisionSnapshotV4(
     revision.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,

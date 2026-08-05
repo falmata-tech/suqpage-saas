@@ -15,7 +15,7 @@ export default async function DiscoveryAdminPage({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  const profiles = listDiscoveryProfilesPage(query);
+  const profiles = await listDiscoveryProfilesPage(query);
   return <DashboardShell user={user} business={null}>
     <div className="dashboard-head"><div><span className="eyebrow">Public marketplace</span><h1>Discovery profiles</h1><p>Manage origin, visibility, paid sponsorship, and Sunday Featured Enterprise selections.</p></div><Link className="btn secondary" href="/discover" target="_blank">Open discovery</Link></div>
     <section className="panel">

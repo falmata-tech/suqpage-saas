@@ -34,7 +34,7 @@ async function capture(name, pathname, viewport) {
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
-  assert.equal(metrics.contextColor, "rgb(79, 49, 143)", `${name} uses the solid MirtPage purple context`);
+  assert.equal(metrics.contextColor, "rgb(11, 29, 58)", `${name} uses the solid MirtPage midnight context`);
   assert.equal(metrics.contextImage, "none", `${name} does not use a promotional gradient`);
   assert.equal(metrics.formVisible, true, `${name} keeps its form visible`);
   assert.ok(

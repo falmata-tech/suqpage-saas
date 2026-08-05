@@ -33,8 +33,8 @@ export default async function AdminOverview({
     redirect(`${destination}${next.size ? `?${next}` : ""}`);
   }
 
-  const counts = getPlatformCounts();
-  const attention = getDashboardAttention(user);
+  const counts = await getPlatformCounts();
+  const attention = await getDashboardAttention(user);
   const destinations = [
     {
       href: "/dashboard/admin/businesses",

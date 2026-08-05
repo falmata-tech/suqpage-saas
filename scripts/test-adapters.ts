@@ -10,14 +10,67 @@ async function main() {
   process.env.RESEND_API_KEY = "test-key";
   process.env.NOTIFICATION_FROM_EMAIL = "test@example.com";
 
-  const { databaseDriver } = await import("../lib/config");
+  const { assertProductionConfiguration, databaseDriver } = await import("../lib/config");
   assert.equal(databaseDriver(), "sqlite");
   process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
-  assert.throws(
-    () => databaseDriver(),
-    /PostgreSQL runtime remains blocked/,
-  );
+  assert.equal(databaseDriver(), "postgres");
+  process.env.MIRTPAGE_DATABASE_DRIVER = "invalid";
+  assert.throws(() => databaseDriver(), /must be sqlite or postgres/);
   process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
+
+  const previousNodeEnv = process.env.NODE_ENV;
+  Reflect.set(process.env, "NODE_ENV", "production");
+  process.env.NEXT_PUBLIC_APP_URL = "https://mirtpage.example.test";
+  process.env.MIRTPAGE_CANONICAL_URL = "https://mirtpage.example.test";
+  process.env.PRIVACY_SALT = "postgres-production-privacy-salt";
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
+  process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
+  process.env.MIRTPAGE_POSTGRES_URL =
+    "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require";
+  process.env.MIRTPAGE_MEDIA_DRIVER = "supabase";
+  process.env.MIRTPAGE_SUPABASE_URL = "https://project.supabase.co";
+  process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY = "service-role-key-long-enough";
+  assert.doesNotThrow(() => assertProductionConfiguration());
+  process.env.MIRTPAGE_MEDIA_DRIVER = "filesystem";
+  assert.throws(
+    () => assertProductionConfiguration(),
+    /must be supabase in PostgreSQL production mode/,
+  );
+  if (previousNodeEnv === undefined) Reflect.deleteProperty(process.env, "NODE_ENV");
+  else Reflect.set(process.env, "NODE_ENV", previousNodeEnv);
+  process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
+  delete process.env.MIRTPAGE_POSTGRES_URL;
+  delete process.env.MIRTPAGE_MEDIA_DRIVER;
+
+  const { postgresRuntimeConfig, sqliteParametersToPostgres } = await import("../lib/postgres-runtime");
+  assert.equal(postgresRuntimeConfig(), null);
+  const postgresConfig = postgresRuntimeConfig({
+    MIRTPAGE_POSTGRES_URL: "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require",
+    MIRTPAGE_POSTGRES_POOL_MAX: "5",
+    MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "6000",
+    MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "9000",
+  });
+  assert.deepEqual(postgresConfig, {
+    connectionString: "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require",
+    poolMax: 5,
+    connectionTimeoutMs: 6000,
+    statementTimeoutMs: 9000,
+  });
+  assert.throws(
+    () => postgresRuntimeConfig({ MIRTPAGE_POSTGRES_URL: "not-a-url" }),
+    /valid PostgreSQL connection URL/,
+  );
+  assert.throws(
+    () => postgresRuntimeConfig({
+      MIRTPAGE_POSTGRES_URL: "postgresql://mirtpage:secret@db.example.test/mirtpage",
+      MIRTPAGE_POSTGRES_POOL_MAX: "99",
+    }),
+    /MIRTPAGE_POSTGRES_POOL_MAX/,
+  );
+  assert.equal(
+    sqliteParametersToPostgres("SELECT ? AS value, '?' AS literal, \"?\" AS quoted"),
+    "SELECT $1 AS value, '?' AS literal, \"?\" AS quoted",
+  );
 
   const { consumeRateLimit, resetRateLimit } = await import("../lib/rate-limit");
   const { notifyNewInquiry } = await import("../lib/notifications");

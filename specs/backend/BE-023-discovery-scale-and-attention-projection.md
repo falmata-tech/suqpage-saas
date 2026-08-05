@@ -21,10 +21,12 @@ preserve tenant isolation and predictable query cost.
 
 - `production_scale` is exactly `workshop` or `growing_factory`; existing rows
   default to `workshop` and authorized discovery managers may edit it.
-- Public filtering accepts only an allowlisted production-scale value. Unknown
-  values behave as no scale filter and never become SQL fragments.
-- Public rows, total counts, city groups, featured rows, and map points share the
-  same industry/search/scale eligibility predicate.
+- The application projection accepts only an allowlisted production-scale
+  value for controlled internal use. Unknown values behave as no scale filter
+  and never become SQL fragments.
+- Public homepage and discovery route adapters do not forward scale query state;
+  public rows, total counts, city groups, featured rows, and map points share
+  the same industry/search eligibility predicate.
 - Platform attention includes: draft businesses with client accounts, submitted
   or needs-information requests, waiting or staff-unread support conversations,
   and received customer inquiries.
@@ -38,9 +40,10 @@ preserve tenant isolation and predictable query cost.
 ## Contracts
 
 - Additive schema migration 25 adds the checked profile field and an index for
-  public scale filtering; no existing business, route, or publication is removed.
-- `getDiscoveryView` accepts `scale`, returns the selected allowlisted value, and
-  projects scale with every public business.
+  bounded controlled projection; no existing business, route, or publication is removed.
+- `getDiscoveryView` retains its bounded `scale` capability for internal and
+  compatibility callers and projects reviewed scale metadata with every public
+  business. Public page adapters always request the unfiltered projection.
 - `getDashboardAttention(user, businessId?)` returns only non-sensitive integer
   aggregates and role-appropriate destinations.
 - Aggregate queries are parameterized, bounded to one row, and do not load
@@ -53,10 +56,10 @@ preserve tenant isolation and predictable query cost.
 ## Scenarios
 
 ```gherkin
-Scenario: Scale filter is composed with discovery
+Scenario: Controlled scale projection remains bounded
   GIVEN eligible workshops and growing factories in one industry
-  WHEN growing_factory is selected with a search term
-  THEN public totals and rows include only matching growing factories
+  WHEN an internal caller selects growing_factory with a search term
+  THEN projected totals and rows include only matching growing factories
   AND pagination and city groups use the identical predicate
 
 Scenario: Invalid scale reaches the adapter
@@ -64,6 +67,12 @@ Scenario: Invalid scale reaches the adapter
   WHEN discovery is built
   THEN the value is ignored safely
   AND the SQL remains parameterized
+
+Scenario: Public route receives legacy scale state
+  GIVEN a visitor opens the homepage or discovery route with a scale query
+  WHEN the public adapter builds discovery
+  THEN the scale query is ignored
+  AND no hidden filter narrows the marketplace results
 
 Scenario: Attention projection enforces scope
   GIVEN activity exists for tenants A and B

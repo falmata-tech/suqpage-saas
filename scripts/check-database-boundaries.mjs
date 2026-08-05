@@ -18,7 +18,11 @@ function sourceFiles(directory) {
   });
 }
 
-const actual = [...sourceFiles(path.join(root, "app")), ...sourceFiles(path.join(root, "lib"))]
+const actual = [
+  ...sourceFiles(path.join(root, "app")),
+  ...sourceFiles(path.join(root, "components")),
+  ...sourceFiles(path.join(root, "lib")),
+]
   .filter((file) => directDatabaseBoundary.test(fs.readFileSync(file, "utf8")))
   .map((file) => path.relative(root, file))
   .sort();

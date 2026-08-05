@@ -82,7 +82,7 @@ explicitly disposable installation only. Existing data uses `npm run migrate`.
 7. Retain the filesystem source through the rollback window. Rollback changes
    the driver to `filesystem`; it does not delete copied objects.
 
-## PostgreSQL rehearsal
+## PostgreSQL rehearsal and initial copy
 
 The automated gate starts a disposable PostgreSQL 17 container:
 
@@ -99,25 +99,64 @@ MIRTPAGE_POSTGRES_REHEARSAL_URL='postgresql://...' \
   npm run rehearse:postgres -- --reset-target
 ```
 
-The command opens SQLite read-only, creates only the named rehearsal schema,
+The rehearsal command opens SQLite read-only, creates only the named rehearsal schema,
 copies rows transactionally, resets sequences, installs reviewed constraints,
-indexes, and triggers, and verifies counts plus fingerprints. It never enables
-runtime PostgreSQL. `MIRTPAGE_DATABASE_DRIVER=postgres` is intentionally
-rejected while direct SQLite boundaries remain in
-`architecture/sqlite-boundaries.json`.
+indexes, and triggers, and verifies counts plus fingerprints.
 
-A later cutover requires its own approved L4 plan: named Supabase project,
-connection mode, backup and restore identifiers, quiescence window, completed
-repository adapters, tenant/security tests against PostgreSQL, media parity,
-monitoring, rollback owner, and point of no return.
+After a verified backup and quiescence, the initial copy to an empty Supabase
+project uses the direct database URL for one command only:
+
+```bash
+MIRTPAGE_POSTGRES_DIRECT_URL='postgresql://...' \
+MIRTPAGE_POSTGRES_MIGRATION_ROLE='postgres' \
+MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
+  npm run cutover:postgres
+```
+
+For a project already linked with an authenticated Supabase CLI, prefer the
+temporary-credential wrapper. It keeps the issued password in process memory,
+assumes the Supabase owner role transaction-locally, and writes no secret file:
+
+```bash
+MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
+  npm run cutover:supabase-linked
+```
+
+After a reconciled copy, provision and verify the least-privilege runtime login:
+
+```bash
+MIRTPAGE_APPROVE_RUNTIME_ROLE=PROVISION_MIRTPAGE_RUNTIME \
+  npm run provision:supabase-runtime
+```
+
+The command rotates the fixed `mirtpage_runtime` login, grants only schema use,
+table DML, and sequence use, verifies the transaction-pooler login, and writes
+the runtime URL plus Storage secrets to ignored
+`.local/production-secrets.json` with mode `0600`. It never prints a credential.
+
+The command refuses `--reset-target`, refuses existing MirtPage tables, performs
+all writes in one transaction, reconciles every table fingerprint and sequence,
+and leaves SQLite byte-identical. `MIRTPAGE_POSTGRES_MIGRATION_ROLE` is optional;
+use it only when a provider-issued migration login must assume a named owner role.
+The command accepts a PostgreSQL identifier, applies it transaction-locally, and
+fails closed when role assumption is unavailable. It also disables the provider
+statement timeout only for that guarded copy transaction; runtime queries retain
+their bounded timeout. Never configure the direct URL or migration role in Vercel.
+Fingerprint reconciliation canonicalizes only SQLite REAL/PostgreSQL double
+precision values to 12 decimal places; every other column is compared exactly.
 
 ## Deployment secrets and configuration
 
 Keep these outside GitHub artifacts and the repository:
 
 - `NEXT_PUBLIC_APP_URL`
+- `MIRTPAGE_CANONICAL_URL`
 - `MIRTPAGE_SERVER_ACTION_ORIGINS`
-- `MIRTPAGE_DB_PATH`
+- `MIRTPAGE_DATABASE_DRIVER`
+- `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler in Vercel)
+- `MIRTPAGE_POSTGRES_DIRECT_URL` (operator environment only)
+- `MIRTPAGE_POSTGRES_MIGRATION_ROLE` (operator command only, when required)
+- `MIRTPAGE_DB_PATH` (SQLite only)
 - `MIRTPAGE_MEDIA_ROOT` when using filesystem media
 - `MIRTPAGE_SUPABASE_URL`
 - `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY`
@@ -125,9 +164,14 @@ Keep these outside GitHub artifacts and the repository:
 - `PRIVACY_SALT`
 - notification provider credentials
 
-Production must use HTTPS, an absolute persistent database path, a persistent
-backup destination, one application replica while SQLite is authoritative, and
-health monitoring on `/api/health`.
+Production must use HTTPS, private Supabase Storage, bounded PostgreSQL pooling,
+a retained rollback source, and health monitoring on `/api/health`.
+The Next.js configuration explicitly includes its source-map runtime and relative
+LRU cache dependency in every Vercel function trace. A deployment that logs a
+missing framework runtime file fails smoke checks and must not receive the custom
+domain. Do not add a broad `./lib/**/*` output-tracing exclusion: Vercel applies
+it to Next.js's own server library. The release trace test enforces privacy for
+the project's source paths without deleting framework runtime files.
 
 ## Backup, deploy, and rollback
 

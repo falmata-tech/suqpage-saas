@@ -14,7 +14,7 @@ export async function acceptProspectAction(_state: InvitationActionState, formDa
   const user = await requireUser();
   if (!hasCapability(user, "operations:manage")) return { error: "Operations manager access is required." };
   try {
-    const created = createClientInvitation({
+    const created = await createClientInvitation({
       requestId: Number(cleanText(formData.get("requestId"), 20)),
       clientName: cleanText(formData.get("clientName"), 100),
       email: cleanText(formData.get("email"), 160),
@@ -23,7 +23,7 @@ export async function acceptProspectAction(_state: InvitationActionState, formDa
       designKey: cleanText(formData.get("designKey"), 40),
       actorUserId: user.id,
     });
-    audit("service_request.invitation_created", { userId:user.id, businessId:created.businessId, detail:{ requestId:Number(formData.get("requestId")), invitationId:created.invitationId } });
+    await audit("service_request.invitation_created", { userId:user.id, businessId:created.businessId, detail:{ requestId:Number(formData.get("requestId")), invitationId:created.invitationId } });
     revalidatePath("/dashboard/requests");
     revalidatePath(`/dashboard/requests/${formData.get("requestId")}`);
     return { invitationUrl: `${appUrl()}/invite/${encodeURIComponent(created.token)}` };
@@ -36,7 +36,7 @@ export async function createClientWorkspaceAction(_state: InvitationActionState,
   const user = await requireUser();
   if (!hasCapability(user, "operations:manage")) return { error: "Operations manager access is required." };
   try {
-    const created = createClientInvitation({
+    const created = await createClientInvitation({
       requestId: null,
       clientName: cleanText(formData.get("clientName"), 100),
       email: cleanText(formData.get("email"), 160),
@@ -45,7 +45,7 @@ export async function createClientWorkspaceAction(_state: InvitationActionState,
       designKey: cleanText(formData.get("designKey"), 40),
       actorUserId: user.id,
     });
-    audit("client_workspace.invitation_created", { userId:user.id, businessId:created.businessId, detail:{ invitationId:created.invitationId } });
+    await audit("client_workspace.invitation_created", { userId:user.id, businessId:created.businessId, detail:{ invitationId:created.invitationId } });
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/admin");
     return { invitationUrl: `${appUrl()}/invite/${encodeURIComponent(created.token)}` };
@@ -63,7 +63,7 @@ export async function redeemInvitationAction(formData: FormData) {
   try {
     const redeemed = await redeemClientInvitation({ token, name:cleanText(formData.get("name"), 100), password });
     await setSession(redeemed.userId);
-    audit("client_invitation.accepted", { userId:redeemed.userId, businessId:redeemed.businessId, detail:redeemed.requestId === null ? {} : { requestId:redeemed.requestId } });
+    await audit("client_invitation.accepted", { userId:redeemed.userId, businessId:redeemed.businessId, detail:redeemed.requestId === null ? {} : { requestId:redeemed.requestId } });
   } catch (error) {
     redirect(`${path}?error=${error instanceof InvitationError ? error.code : "invalid"}`);
   }

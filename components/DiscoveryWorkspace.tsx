@@ -9,7 +9,7 @@ import "d3-transition";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import Supercluster from "supercluster";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PRODUCTION_SCALES } from "@/lib/discovery-contract";
+import { buildPerimeterVenueLayout } from "@/lib/discovery-venue-layout";
 import type { DiscoveryCityGroup, DiscoveryShowroom, DiscoveryView, WeeklyIndustryExpo } from "@/lib/discovery";
 
 const MAP_WIDTH = 900;
@@ -78,12 +78,13 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   const svgRef = useRef<SVGSVGElement | null>(null);
   const groupRef = useRef<SVGGElement | null>(null);
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const mapTransformRef = useRef<ZoomTransform>(zoomIdentity);
 
   useEffect(() => {
     setSelectedShowroomId(null);
     setActiveCityKey(null);
     setView(discovery.view);
-  }, [discovery.industry.key, discovery.productionScale, discovery.query, discovery.view]);
+  }, [discovery.industry.key, discovery.query, discovery.view]);
 
   useEffect(() => {
     setSearchInput(discovery.query);
@@ -95,14 +96,13 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
     const timer = window.setTimeout(() => {
       router.replace(discoveryHref(action, {
         industry: discovery.industry.key,
-        scale: discovery.productionScale,
         q: nextQuery,
         expoDay: discovery.expo.selectedWeekday,
         view,
       }), { scroll: false });
     }, 420);
     return () => window.clearTimeout(timer);
-  }, [action, discovery.expo.selectedWeekday, discovery.industry.key, discovery.productionScale, discovery.query, router, searchInput, view]);
+  }, [action, discovery.expo.selectedWeekday, discovery.industry.key, discovery.query, router, searchInput, view]);
 
   useEffect(() => {
     let active = true;
@@ -190,20 +190,23 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   }, [discovery.showrooms]);
 
   useEffect(() => {
+    if (activeCityKey) return;
     if (!svgRef.current || !groupRef.current || !projection) return;
     const behavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, MAX_MAP_SCALE])
       .extent([[0, 0], [MAP_WIDTH, MAP_HEIGHT]])
       .translateExtent([[-90, -75], [MAP_WIDTH + 90, MAP_HEIGHT + 75]])
       .on("zoom", (event: { transform: ZoomTransform }) => {
+        mapTransformRef.current = event.transform;
         select(groupRef.current).attr("transform", event.transform.toString());
       })
       .on("end", (event: { transform: ZoomTransform }) => setZoomLevel(event.transform.k));
     const svg = select(svgRef.current);
     zoomRef.current = behavior;
     svg.call(behavior).on("dblclick.zoom", null);
+    svg.call(behavior.transform, mapTransformRef.current);
     return () => { svg.on(".zoom", null); zoomRef.current = null; };
-  }, [projection]);
+  }, [activeCityKey, projection]);
 
   function animate(transform: ZoomTransform) {
     if (!svgRef.current || !zoomRef.current) return;
@@ -225,6 +228,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   }
 
   function resetMap() {
+    setActiveCityKey(null);
     setSelectedShowroomId(null);
     animate(zoomIdentity);
   }
@@ -241,30 +245,34 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
   }
 
   const showCityGateways = clusterZoom >= CITY_GATEWAY_ZOOM;
-  return <section className="discovery" id="discover" aria-labelledby="discovery-title">
+  return <section className="discovery" id="discover" aria-label="MirtPage showroom marketplace">
     <div className="discovery-switcher">
-      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Made in Ethiopia, ready to discover</span><h2 id="discovery-title">Find the people and factories behind the product.</h2></div><p>Explore makers, growers, workshops, and growing factories by what they produce and where they work.</p></div>
+      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Made closer than you think</span><h2 id="discovery-title">Search Ethiopia&apos;s production, not another product feed.</h2></div><p>Find workshops, growers, processors, and growing factories by what they make and where they operate.</p></div>
       <nav className="discovery-industries" aria-label="Industries">
-        {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={discoveryHref(action, { industry: industry.key, scale: discovery.productionScale, expoDay: discovery.expo.selectedWeekday, view })} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
+        {discovery.industries.map((industry) => <Link key={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} href={discoveryHref(action, { industry: industry.key, expoDay: discovery.expo.selectedWeekday, view })} aria-current={industry.key === discovery.industry.key ? "page" : undefined}><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
       </nav>
-      <div className="discovery-commandbar">
+    </div>
+
+    <div className="discovery-summary">
+      <div className="discovery-summary-row">
+        <div className="discovery-summary-copy"><span className="discovery-kicker">{discovery.industry.label}</span><strong>{discovery.total} Showrooms across {discovery.locationCount} {discovery.locationCount === 1 ? "location" : "locations"}</strong><small>Search or zoom into clusters to reveal businesses at their reviewed locations.</small></div>
+        <div className="discovery-tabs" role="tablist" aria-label="Discovery view"><button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Map</button><button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => { setActiveCityKey(null); setView("list"); }}>List</button></div>
+      </div>
+      <div className={`discovery-map-tools${view === "list" ? " list-only" : activeCity ? " city-open" : ""}`}>
         <div className="discovery-search" role="search"><label><span className="sr-only">Search this industry. Results update as you type.</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.5-4.5M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input name="q" type="search" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} maxLength={80} placeholder="Business, product, capability, or place" /></label>{searchInput ? <button className="discovery-search-clear" type="button" onClick={() => setSearchInput("")} aria-label="Clear marketplace search" title="Clear search">×</button> : null}</div>
-        <nav className="discovery-scale" aria-label="Production scale"><span>Production scale</span><Link className={!discovery.productionScale ? "active" : ""} href={discoveryHref(action, { industry: discovery.industry.key, q: discovery.query, expoDay: discovery.expo.selectedWeekday, view })}>All</Link>{PRODUCTION_SCALES.map((scale) => <Link key={scale.key} className={discovery.productionScale === scale.key ? "active" : ""} href={discoveryHref(action, { industry: discovery.industry.key, scale: scale.key, q: discovery.query, expoDay: discovery.expo.selectedWeekday, view })}>{scale.label}</Link>)}</nav>
+        {view === "map" && !activeCity ? <>
+          <label className="discovery-location-picker"><span className="sr-only">Jump to a location</span><select aria-label="Jump to a location" defaultValue="" onChange={(event) => {
+            if (!event.target.value) { resetMap(); return; }
+            const location = locations[Number(event.target.value)];
+            if (location) framePoint(location.longitude, location.latitude, CITY_GATEWAY_SCALE);
+          }}><option value="">All Ethiopia</option>{locations.map((location, index) => <option key={`${location.city}-${location.region}`} value={index}>Near {location.city}, {location.region} ({location.count})</option>)}</select></label>
+          <div className="discovery-zoom" aria-label="Map controls"><button type="button" onClick={() => zoomBy(1.5)} title="Zoom in" aria-label="Zoom in">+</button><button type="button" onClick={() => zoomBy(1 / 1.5)} title="Zoom out" aria-label="Zoom out">−</button><button type="button" onClick={resetMap} title="Center Ethiopia" aria-label="Center Ethiopia">◎</button></div>
+        </> : null}
       </div>
     </div>
 
-    <div className="discovery-summary"><div><span className="discovery-kicker">{discovery.industry.label}</span><strong>{discovery.total} Showrooms across {discovery.locationCount} {discovery.locationCount === 1 ? "location" : "locations"}</strong><small>Zoom into clusters to reveal each business at its reviewed location.</small></div><div className="discovery-tabs" role="tablist" aria-label="Discovery view"><button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Map</button><button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "active" : ""} onClick={() => setView("list")}>List</button></div></div>
-
     {view === "list" ? <DiscoveryList discovery={discovery} action={action} /> : <div className="discovery-map-shell">
-      <div className="discovery-map-tools">
-        <label className="discovery-location-picker"><span>Jump to a location</span><select defaultValue="" onChange={(event) => {
-          if (!event.target.value) { resetMap(); return; }
-          const location = locations[Number(event.target.value)];
-          if (location) framePoint(location.longitude, location.latitude, CITY_GATEWAY_SCALE);
-        }}><option value="">All Ethiopia</option>{locations.map((location, index) => <option key={`${location.city}-${location.region}`} value={index}>Near {location.city}, {location.region} ({location.count})</option>)}</select></label>
-        <div className="discovery-zoom" aria-label="Map controls"><button type="button" onClick={() => zoomBy(1.5)} title="Zoom in" aria-label="Zoom in">+</button><button type="button" onClick={() => zoomBy(1 / 1.5)} title="Zoom out" aria-label="Zoom out">−</button><button type="button" onClick={resetMap} title="Center Ethiopia" aria-label="Center Ethiopia">◎</button></div>
-      </div>
-      <div className="discovery-map-stage">
+      {activeCity ? <CityMarketplacePanel group={activeCity} onBack={() => setActiveCityKey(null)} /> : <div className="discovery-map-stage">
         {mapFailed ? <div className="discovery-map-fallback"><p>The map could not load, but every showroom is still available.</p><button type="button" onClick={() => setView("list")}>Open list</button></div> : null}
         {!mapFailed && !path ? <div className="discovery-map-loading">Loading Ethiopia map...</div> : null}
         {!mapFailed && path && projection ? <svg ref={svgRef} className="discovery-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-label="Interactive Ethiopia map with clustered showroom locations" tabIndex={0}>
@@ -281,7 +289,7 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
             <g className="discovery-markers">{showCityGateways ? <>
               {discovery.cityGroups.map((group) => {
                 const point = projection([group.longitude, group.latitude]);
-                return point ? <g key={group.key} data-city-key={group.key} className="discovery-city-gateway" transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${group.city} marketplace, ${group.count} businesses. Open virtual floor.`} onClick={() => setActiveCityKey(group.key)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setActiveCityKey(group.key); }}><circle className="city-gateway-halo" r="34" /><path d="M-20 15V-10L0-22l20 12v25M-13 15V-7h26v22M-7-1h5v6h-5zM2-1h5v6H2zM-7 9h14v6H-7z" /><circle className="city-gateway-count" cx="18" cy="-18" r="13" /><text className="city-gateway-number" x="18" y="-14" textAnchor="middle">{group.count}</text><text className="city-gateway-name" y="34" textAnchor="middle">{group.city}</text></g> : null;
+                return point ? <g key={group.key} data-city-key={group.key} className="discovery-city-gateway" transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${group.city} marketplace, ${group.count} businesses. Open virtual floor.`} onClick={() => { setSelectedShowroomId(null); setActiveCityKey(group.key); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { setSelectedShowroomId(null); setActiveCityKey(group.key); } }}><circle className="city-gateway-halo" r="34" /><path d="M-20 15V-10L0-22l20 12v25M-13 15V-7h26v22M-7-1h5v6h-5zM2-1h5v6H2zM-7 9h14v6H-7z" /><circle className="city-gateway-count" cx="18" cy="-18" r="13" /><text className="city-gateway-number" x="18" y="-14" textAnchor="middle">{group.count}</text><text className="city-gateway-name" y="34" textAnchor="middle">{group.city}</text></g> : null;
               })}
               {discovery.showrooms.filter((showroom) => !groupedShowroomIds.has(showroom.id)).map(renderShowroomPoint)}
             </> : markers.map((marker) => {
@@ -299,21 +307,18 @@ export default function DiscoveryWorkspace({ discovery, embedded = false }: { di
         </svg> : null}
         <a className="discovery-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Map data © OpenStreetMap contributors · Boundaries: FEWS NET</a>
         {selectedShowroom ? <ShowroomPreview showroom={selectedShowroom} source="discovery" onClose={() => setSelectedShowroomId(null)} /> : null}
-      </div>
+      </div>}
     </div>}
-
-    {activeCity ? <CityMarketplaceDialog group={activeCity} onClose={() => setActiveCityKey(null)} /> : null}
 
     <SponsoredRail showrooms={sponsoredShowrooms} industryLabel={discovery.industry.label} />
 
-    <WeeklyExpo expo={discovery.expo} action={action} mapIndustry={discovery.industry.key} productionScale={discovery.productionScale} query={discovery.query} view={view} />
+    <WeeklyExpo expo={discovery.expo} action={action} mapIndustry={discovery.industry.key} query={discovery.query} view={view} />
   </section>;
 }
 
 function SponsoredRail({ showrooms, industryLabel }: { showrooms: DiscoveryShowroom[]; industryLabel: string }) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const activeIndexRef = useRef(0);
-  const [paused, setPaused] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -327,7 +332,7 @@ function SponsoredRail({ showrooms, industryLabel }: { showrooms: DiscoveryShowr
 
   useEffect(() => {
     const rail = railRef.current;
-    if (!rail || showrooms.length < 2 || paused || interacting || reducedMotion) return;
+    if (!rail || showrooms.length < 2 || interacting || reducedMotion) return;
     const interval = window.setInterval(() => {
       if (document.visibilityState !== "visible") return;
       const cards = Array.from(rail.querySelectorAll<HTMLElement>("a[data-sponsored-card]"));
@@ -337,13 +342,13 @@ function SponsoredRail({ showrooms, industryLabel }: { showrooms: DiscoveryShowr
       rail.scrollTo({ left: card.offsetLeft - rail.offsetLeft, behavior: "smooth" });
     }, 4_800);
     return () => window.clearInterval(interval);
-  }, [interacting, paused, reducedMotion, showrooms.length]);
+  }, [interacting, reducedMotion, showrooms.length]);
 
   if (!showrooms.length) return null;
   return <section className="discovery-sponsored" aria-labelledby="sponsored-showroom-title">
     <header className="discovery-sponsored-heading">
       <div><span>Sponsored</span><h2 id="sponsored-showroom-title">Showrooms worth a closer look</h2><p>{industryLabel}</p></div>
-      <div className="discovery-sponsored-meta"><small>Paid placement</small>{showrooms.length > 1 ? <button type="button" className={paused ? "is-paused" : ""} aria-label={paused ? "Resume sponsored showrooms" : "Pause sponsored showrooms"} title={paused ? "Resume sponsored showrooms" : "Pause sponsored showrooms"} onClick={() => setPaused((current) => !current)}><span aria-hidden="true" /></button> : null}</div>
+      <div className="discovery-sponsored-meta"><small>Paid placement</small></div>
     </header>
     <div
       className="discovery-sponsored-rail"
@@ -382,26 +387,7 @@ function ShowroomPreview({ showroom, source, onClose, label }: { showroom: Disco
 }
 
 function cityFloorLayout(count: number) {
-  const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
-  const rows = Math.ceil(count / columns);
-  const cardWidth = 218;
-  const cardHeight = 148;
-  const gapX = 48;
-  const gapY = 78;
-  const paddingX = 52;
-  const paddingTop = 132;
-  const paddingBottom = 92;
-  return {
-    columns,
-    cardWidth,
-    cardHeight,
-    gapX,
-    gapY,
-    paddingX,
-    paddingTop,
-    width: paddingX * 2 + columns * cardWidth + (columns - 1) * gapX,
-    height: paddingTop + rows * cardHeight + Math.max(0, rows - 1) * gapY + paddingBottom,
-  };
+  return buildPerimeterVenueLayout(count, 218, 148);
 }
 
 function useFloorNavigation(width: number, height: number, itemCount: number) {
@@ -433,7 +419,7 @@ function useFloorNavigation(width: number, height: number, itemCount: number) {
     const fitFloor = () => {
       const bounds = stage.getBoundingClientRect();
       const fit = Math.min(1, (bounds.width - 24) / width, (bounds.height - 24) / height);
-      const phoneMinimum = itemCount <= 8 ? .88 : .58;
+      const phoneMinimum = itemCount <= 10 ? .4 : fit;
       const scale = bounds.width < 620
         ? Math.min(1, Math.max(fit, phoneMinimum))
         : itemCount <= 6 ? fit : Math.max(fit, .55);
@@ -478,42 +464,31 @@ function useFloorNavigation(width: number, height: number, itemCount: number) {
   return { stageRef, floorRef, zoomLabelRef, zoomFloor, resetFloor };
 }
 
-function CityMarketplaceDialog({ group, onClose }: { group: DiscoveryCityGroup; onClose: () => void }) {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
+function CityMarketplacePanel({ group, onBack }: { group: DiscoveryCityGroup; onBack: () => void }) {
   const layout = useMemo(() => cityFloorLayout(group.count), [group.count]);
   const { stageRef, floorRef, zoomLabelRef, zoomFloor, resetFloor } = useFloorNavigation(layout.width, layout.height, group.count);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    dialog.showModal();
-    return () => { if (dialog.open) dialog.close(); };
-  }, []);
-
-  return <dialog ref={dialogRef} className="city-showroom-dialog" aria-labelledby="city-showroom-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
+  return <section className="city-showroom-panel" aria-labelledby="city-showroom-title">
     <section className="city-showroom-shell">
-      <header className="city-showroom-head"><div><span className="discovery-kicker">{group.region} marketplace</span><h2 id="city-showroom-title">Made near {group.city}</h2><p>{group.count} independent showrooms in one place.</p></div><div className="city-showroom-actions" aria-label="City marketplace controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to city marketplace">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of city marketplace">−</button><button type="button" onClick={resetFloor} title="Fit city marketplace" aria-label="Fit city marketplace to view">◎</button><button className="city-showroom-close" type="button" onClick={onClose} title="Close" aria-label="Close city marketplace">×</button></div></header>
+      <header className="city-showroom-head"><div><span className="discovery-kicker">{group.region} marketplace</span><h2 id="city-showroom-title">Made near {group.city}</h2><p>{group.count} independent showrooms in one place.</p></div><div className="city-showroom-actions" aria-label="City marketplace controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to city marketplace">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of city marketplace">−</button><button type="button" onClick={resetFloor} title="Fit city marketplace" aria-label="Fit city marketplace to view">◎</button><button className="city-showroom-back" type="button" onClick={onBack}>Back to map</button></div></header>
       <div ref={stageRef} className="city-showroom-stage" aria-label={`${group.city} virtual marketplace floor`}>
         <div ref={floorRef} className="city-showroom-floor" style={{ width: layout.width, height: layout.height }}>
-          <div className="city-showroom-court" aria-hidden="true"><i /><span>Meet · Browse · Inquire</span><i /></div>
           <div className="city-showroom-place" aria-hidden="true"><span>{group.city}</span><b>Local makers</b><small>{group.count} showrooms</small></div>
           {group.showrooms.map((showroom, index) => {
-            const column = index % layout.columns;
-            const row = Math.floor(index / layout.columns);
-            return <Link key={showroom.id} className="city-showroom-shop" data-showroom-id={showroom.id} href={`/@${showroom.handle}?ref=discovery`} style={{ left: layout.paddingX + column * (layout.cardWidth + layout.gapX), top: layout.paddingTop + row * (layout.cardHeight + layout.gapY), width: layout.cardWidth, height: layout.cardHeight }}><ShowroomImage showroom={showroom} /><span><b>{showroom.sponsored ? "Sponsored showroom" : `${group.city} maker`}</b><strong>{showroom.name}</strong><small>{showroom.tagline}</small><em>Open showroom</em></span></Link>;
+            const position = layout.positions[index];
+            return <Link key={showroom.id} className="city-showroom-shop" data-showroom-id={showroom.id} href={`/@${showroom.handle}?ref=discovery`} style={{ left: position.left, top: position.top, width: layout.cardWidth, height: layout.cardHeight }}><ShowroomImage showroom={showroom} /><span><b>{showroom.sponsored ? "Sponsored showroom" : `${group.city} maker`}</b><strong>{showroom.name}</strong><small>{showroom.tagline}</small><em>Open showroom</em></span></Link>;
           })}
         </div>
       </div>
     </section>
-  </dialog>;
+  </section>;
 }
 
 function DiscoveryList({ discovery, action }: { discovery: DiscoveryView; action: string }) {
   const { list } = discovery;
-  if (!list.items.length) return <div className="discovery-empty"><h3>No showrooms match this search yet.</h3><p>Try another word, scale, or industry.</p></div>;
+  if (!list.items.length) return <div className="discovery-empty"><h3>No showrooms match this search yet.</h3><p>Try another word or industry.</p></div>;
   const pageHref = (page: number) => discoveryHref(action, {
     industry: discovery.industry.key,
-    scale: discovery.productionScale,
     q: discovery.query,
     expoDay: discovery.expo.selectedWeekday,
     view: "list",
@@ -523,26 +498,7 @@ function DiscoveryList({ discovery, action }: { discovery: DiscoveryView; action
 }
 
 function expoFloorLayout(count: number) {
-  const columns = Math.min(7, Math.max(2, Math.ceil(Math.sqrt(count))));
-  const rows = Math.ceil(count / columns);
-  const cardWidth = 224;
-  const cardHeight = 164;
-  const gapX = 56;
-  const gapY = 78;
-  const paddingX = 58;
-  const paddingTop = 172;
-  const paddingBottom = 92;
-  return {
-    columns,
-    cardWidth,
-    cardHeight,
-    gapX,
-    gapY,
-    paddingX,
-    paddingTop,
-    width: paddingX * 2 + columns * cardWidth + Math.max(0, columns - 1) * gapX,
-    height: paddingTop + rows * cardHeight + Math.max(0, rows - 1) * gapY + paddingBottom,
-  };
+  return buildPerimeterVenueLayout(count, 224, 164);
 }
 
 function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
@@ -556,12 +512,10 @@ function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
     <div className="expo-floor-actions" aria-label="Expo floor controls"><span ref={zoomLabelRef} aria-live="polite">100%</span><button type="button" onClick={() => zoomFloor(1.25)} title="Zoom in" aria-label="Zoom in to Expo floor">+</button><button type="button" onClick={() => zoomFloor(.8)} title="Zoom out" aria-label="Zoom out of Expo floor">−</button><button type="button" onClick={resetFloor} title="Fit Expo floor" aria-label="Fit Expo floor to view">◎</button></div>
     <div ref={stageRef} className="expo-floor-stage" aria-label={`${expo.title}, one continuous virtual floor`}>
       <div ref={floorRef} className="expo-floor" style={{ width: layout.width, height: layout.height }}>
-        <div className="expo-pavilion" aria-hidden="true"><span className="expo-canopy" /><strong>{expo.industryCode}</strong><small>{expo.isToday ? "Open today" : "Floor preview"}</small></div>
-        <div className="expo-promenade" aria-hidden="true"><i /><span>{expo.mode === "livestream" ? "MirtPage Featured Enterprises" : "MirtPage Maker Expo"}</span><i /></div>
+        <div className="expo-pavilion" aria-hidden="true"><strong>{expo.industryCode}</strong><small>{expo.isToday ? "Open today" : "Floor preview"}</small></div>
         {expo.booths.map((booth, index) => {
-          const column = index % layout.columns;
-          const row = Math.floor(index / layout.columns);
-          const style = { left: layout.paddingX + column * (layout.cardWidth + layout.gapX), top: layout.paddingTop + row * (layout.cardHeight + layout.gapY), width: layout.cardWidth, height: layout.cardHeight };
+          const position = layout.positions[index];
+          const style = { left: position.left, top: position.top, width: layout.cardWidth, height: layout.cardHeight };
           if (!booth.revealed) return <div key={booth.reference} data-expo-slot={booth.slot} style={style} className="expo-booth expo-booth-outline" aria-label={`${booth.reference}, booth preview`}><span className="expo-booth-placeholder" aria-hidden="true"><i /><i /><i /></span><span><b>{booth.reference}</b><strong>Reserved booth</strong><small>Revealed on {expo.dayLabel}</small></span></div>;
           const showroom = booth.showroom;
           return <button key={showroom.id} data-business-id={showroom.id} type="button" style={style} className={`expo-booth${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={`${booth.reference}, ${showroom.name}`}><ShowroomImage showroom={showroom} /><span><b>{booth.reference}</b><strong>{showroom.name}</strong><small>{showroom.city}</small></span></button>;
@@ -572,18 +526,18 @@ function ExpoFloor({ expo }: { expo: WeeklyIndustryExpo }) {
   </div>;
 }
 
-function WeeklyExpo({ expo, action, mapIndustry, productionScale, query, view }: { expo: WeeklyIndustryExpo; action: string; mapIndustry: string; productionScale: string; query: string; view: "map" | "list" }) {
+function WeeklyExpo({ expo, action, mapIndustry, query, view }: { expo: WeeklyIndustryExpo; action: string; mapIndustry: string; query: string; view: "map" | "list" }) {
   const router = useRouter();
   const today = expo.schedule.find((day) => day.isToday);
   useEffect(() => {
     if (expo.isToday || !today) return;
     const timer = window.setTimeout(() => {
-      router.replace(discoveryHref(action, { industry: mapIndustry, scale: productionScale, q: query, view, expoDay: today.weekday }, "daily-expo-title"), { scroll: false });
+      router.replace(discoveryHref(action, { industry: mapIndustry, q: query, view, expoDay: today.weekday }, "daily-expo-title"), { scroll: false });
     }, 6000);
     return () => window.clearTimeout(timer);
-  }, [action, expo.isToday, expo.selectedWeekday, mapIndustry, productionScale, query, router, today, view]);
+  }, [action, expo.isToday, expo.selectedWeekday, mapIndustry, query, router, today, view]);
   return <section className={`daily-expo expo-theme-${expo.industryCode.toLowerCase()}`} aria-labelledby="daily-expo-title">
-    <nav className="expo-week" aria-label="Weekly Expo schedule">{expo.schedule.map((day) => <Link key={day.weekday} href={discoveryHref(action, { industry: mapIndustry, scale: productionScale, q: query, view, expoDay: day.weekday }, "daily-expo-title")} className={[day.weekday === expo.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === expo.selectedWeekday ? "date" : undefined}><span><IndustryIcon name={day.industryIcon} /></span><b>{day.dayLabel.slice(0, 3)}</b><small>{day.dateLabel}</small><em>{day.mode === "livestream" ? `Featured Enterprises · ${day.industryLabel}` : day.industryLabel}</em>{day.isToday ? <mark>Today</mark> : null}</Link>)}</nav>
+    <nav className="expo-week" aria-label="Weekly Expo schedule">{expo.schedule.map((day) => <Link key={day.weekday} href={discoveryHref(action, { industry: mapIndustry, q: query, view, expoDay: day.weekday }, "daily-expo-title")} className={[day.weekday === expo.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === expo.selectedWeekday ? "date" : undefined}><span><IndustryIcon name={day.industryIcon} /></span><b>{day.dayLabel.slice(0, 3)}</b><small>{day.dateLabel}</small><em>{day.mode === "livestream" ? `Featured Enterprises · ${day.industryLabel}` : day.industryLabel}</em>{day.isToday ? <mark>Today</mark> : null}</Link>)}</nav>
     <header className="daily-expo-head"><div><span className="discovery-kicker">{expo.dayLabel} · {expo.dateLabel} · Country-wide</span><h2 id="daily-expo-title">{expo.title}</h2><p>{expo.isToday ? expo.mode === "livestream" ? "Meet businesses selected by MirtPage, hear directly from their founders in our social livestream, and continue into their permanent showrooms." : `Explore ${expo.title.toLowerCase()} businesses from across Ethiopia on one continuous floor, then continue into any permanent showroom.` : expo.mode === "livestream" ? "Preview this week’s Featured Enterprises floor. MirtPage reveals the selected founders when Sunday’s program opens." : "Preview the floor and plan your visit. Business names and booth designs are revealed when this program opens."}</p></div><span className={`expo-status-badge${expo.isToday ? " open" : ""}`}><i />{expo.isToday ? expo.mode === "livestream" ? "Featured today" : "Open today" : "Preview only"}</span></header>
     <ExpoFloor expo={expo} />
   </section>;

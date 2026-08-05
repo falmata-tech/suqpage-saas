@@ -76,7 +76,7 @@ async function main() {
       "INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active) VALUES(?,?,?,1)",
     ).run(team.id, businessId, manager.id);
 
-    const draft = createDraftRevision(team, requestId);
+    const draft = await createDraftRevision(team, requestId);
     const wideImage = await sharp({
       create: {
         width: 1200,
@@ -106,7 +106,7 @@ async function main() {
       true,
     );
     assert.match(admitted.assetKey, /^asset_[a-f0-9]{20}$/);
-    assert.throws(
+    await assert.rejects(
       () =>
         admitRecipeYouTube(
           team,
@@ -119,7 +119,7 @@ async function main() {
         error instanceof ShowroomRecipeError &&
         error.issues[0]?.path === "$.media.url",
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         admitRecipeYouTube(
           team,
@@ -132,7 +132,7 @@ async function main() {
         error instanceof ShowroomRecipeError &&
         error.issues[0]?.path === "$.media.rights",
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         admitRecipeYouTube(
           outsider,
@@ -144,7 +144,7 @@ async function main() {
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
-    const video = admitRecipeYouTube(
+    const video = await admitRecipeYouTube(
       team,
       draft.id,
       "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=12",
@@ -154,7 +154,7 @@ async function main() {
     assert.match(video.assetKey, /^asset_[a-f0-9]{20}$/);
     assert.equal(video.duplicate, false);
     assert.deepEqual(
-      admitRecipeYouTube(
+      await admitRecipeYouTube(
         team,
         draft.id,
         "https://youtu.be/dQw4w9WgXcQ?si=discarded",
@@ -163,7 +163,7 @@ async function main() {
       ),
       { ...video, duplicate: true },
     );
-    const exported = buildShowroomRecipeBrief(team, draft.id);
+    const exported = await buildShowroomRecipeBrief(team, draft.id);
     const serializedBrief = JSON.stringify(exported.brief);
     assert.equal(serializedBrief.includes("password_hash"), false);
     assert.equal(serializedBrief.includes("session"), false);
@@ -436,7 +436,7 @@ async function main() {
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         importShowroomRecipe(
           team,
@@ -478,7 +478,7 @@ async function main() {
       exported.brief.designSystems.find(
         (system) => system.id === "maker-indigo",
       )!.colors;
-    const imported = importShowroomRecipe(team, draft.id, recipe);
+    const imported = await importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
     assert.equal(imported.difference.designSections.after, 7);
     assert.equal(imported.recipe.content.collections.length, 0);
@@ -502,17 +502,17 @@ async function main() {
       productDestination.ownerKey,
     );
     assert.equal(
-      getContentRevision(draft.id)?.summary,
+      (await getContentRevision(draft.id))?.summary,
       "Validated imported showroom recipe.",
     );
     assert.equal(
-      JSON.parse(getContentRevision(draft.id)!.snapshot_json).contentBlocks.blocks
+      JSON.parse((await getContentRevision(draft.id))!.snapshot_json).contentBlocks.blocks
         .find((block: { key: string }) => block.key === "hero-main").title,
       "Recipe-approved public hero",
     );
-    assert.match(getContentRevision(draft.id)?.recipe_import_hash || "", /^[a-f0-9]{64}$/);
-    assert.equal(importShowroomRecipe(team, draft.id, recipe).duplicate, true);
-    const refreshedExport = buildShowroomRecipeBrief(team, draft.id);
+    assert.match((await getContentRevision(draft.id))?.recipe_import_hash || "", /^[a-f0-9]{64}$/);
+    assert.equal((await importShowroomRecipe(team, draft.id, recipe)).duplicate, true);
+    const refreshedExport = await buildShowroomRecipeBrief(team, draft.id);
     assert.equal(
       refreshedExport.brief.currentRecipe.content.business.heroTitle,
       "Recipe-approved public hero",
@@ -533,7 +533,7 @@ async function main() {
 
     const withCollection = structuredClone(recipe);
     withCollection.content.collections.push({} as never);
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, withCollection),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
@@ -542,7 +542,7 @@ async function main() {
     const withCollectionRelationship = structuredClone(recipe);
     withCollectionRelationship.content.products[0].collectionKey =
       `collection-${collectionId}`;
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, withCollectionRelationship),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
@@ -553,7 +553,7 @@ async function main() {
       content: { products: Array<Record<string, unknown>> };
     };
     withInventory.content.products[0].stock = 9;
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, withInventory),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
@@ -562,7 +562,7 @@ async function main() {
     const silentRemoval = structuredClone(recipe);
     silentRemoval.content.products = [];
     silentRemoval.mediaPlan = [];
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, silentRemoval),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
@@ -574,7 +574,7 @@ async function main() {
     > & { questions: string[] };
     unresolved.questions = ["Which certification is authorized?"];
     assert.deepEqual(
-      importShowroomRecipe(team, draft.id, unresolved).recipe.questions,
+      (await importShowroomRecipe(team, draft.id, unresolved)).recipe.questions,
       unresolved.questions,
     );
     const unreadablePalette = structuredClone(recipe);
@@ -584,7 +584,7 @@ async function main() {
       textMuted: "#ffffff",
       primary: "#ffffff",
     };
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, unreadablePalette),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
@@ -592,31 +592,31 @@ async function main() {
     );
     const unknownComponent = structuredClone(recipe);
     unknownComponent.design.sections[0].component = "hero.unknown@1";
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(team, draft.id, unknownComponent),
       (error: unknown) =>
         error instanceof ShowroomRecipeError &&
         error.issues[0]?.category === "design",
     );
-    assert.throws(
+    await assert.rejects(
       () => buildShowroomRecipeBrief(client, draft.id),
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
-    assert.throws(
+    await assert.rejects(
       () => importShowroomRecipe(outsider, draft.id, recipe),
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
     process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "0";
-    assert.throws(
+    await assert.rejects(
       () => buildShowroomRecipeBrief(manager, draft.id),
       (error: unknown) =>
         error instanceof ShowroomRecipeError && error.status === 404,
     );
     process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
     process.env.MIRTPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
-    assert.throws(
+    await assert.rejects(
       () =>
         admitRecipeYouTube(
           team,

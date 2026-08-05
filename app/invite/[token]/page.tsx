@@ -12,7 +12,7 @@ const maskEmail = (email:string) => {
 export default async function InvitationPage({ params, searchParams }: { params:Promise<{token:string}>; searchParams:Promise<{error?:string}> }) {
   const token = (await params).token;
   const query = await searchParams;
-  const invitation = getActiveInvitation(token);
+  const invitation = await getActiveInvitation(token);
   const errors: Record<string,string> = {
     mismatch: "The passwords do not match.",
     expired: "This invitation expired or was replaced. Ask MirtPage for a new link.",

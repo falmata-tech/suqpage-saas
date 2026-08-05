@@ -27,6 +27,11 @@ function normalizePhone(value: unknown) {
 }
 
 export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
+  const { postgresRuntimeEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
+  if (postgresRuntimeEnabled()) {
+    const { createPostgresPublicInquiry } = await import("./inquiries-postgres");
+    return createPostgresPublicInquiry(postgresRuntimeServices().runner, input, ipHash);
+  }
   if (cleanText(input.website, 100)) return { inquiryId: null, duplicate: false, trapped: true };
   const businessId = Number(input.businessId);
   const business = Number.isInteger(businessId) ? getBusinessById(businessId) : undefined;

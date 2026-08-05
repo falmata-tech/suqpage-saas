@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { getDb, inTransaction } from "./db";
 import { hasCapability } from "./capabilities";
 import {
   likePattern,
@@ -9,6 +8,7 @@ import {
   type PageResult,
 } from "./pagination";
 import { cleanText, hashPrivateValue } from "./security";
+import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import type { SessionUser } from "./types";
 
 export const SUBSCRIPTION_GRACE_DAYS = 4;
@@ -79,18 +79,19 @@ function view(row: SubscriptionRow, now: number): SubscriptionView {
   };
 }
 
-export function ensureBusinessSubscription(
+export async function ensureBusinessSubscription(
   businessId: number,
   options: { now?: number; amountMinor?: number | null } = {},
 ) {
   const now = options.now ?? Date.now();
   const end = addMonth(now);
-  getDb().prepare(`
-    INSERT OR IGNORE INTO business_subscriptions(
+  await runtimeRun(`
+    INSERT INTO business_subscriptions(
       business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
       current_period_end,grace_ends_at,updated_at
     ) VALUES(?,'MirtPage monthly',?,'ETB',?,?,?,?,?)
-  `).run(
+    ON CONFLICT (business_id) DO NOTHING
+  `, [
     businessId,
     options.amountMinor ?? null,
     now,
@@ -98,24 +99,24 @@ export function ensureBusinessSubscription(
     end,
     end + SUBSCRIPTION_GRACE_DAYS * DAY_MS,
     now,
-  );
+  ]);
 }
 
-export function getBusinessSubscription(
+export async function getBusinessSubscription(
   businessId: number,
   now = Date.now(),
-): SubscriptionView | null {
-  ensureBusinessSubscription(businessId, { now });
-  const row = getDb().prepare(`
+): Promise<SubscriptionView | null> {
+  await ensureBusinessSubscription(businessId, { now });
+  const row = await runtimeGet<SubscriptionRow>(`
     SELECT s.*,b.name business_name,b.handle
     FROM business_subscriptions s JOIN businesses b ON b.id=s.business_id
     WHERE s.business_id=?
-  `).get(businessId) as SubscriptionRow | undefined;
+  `, [businessId]);
   return row ? view(row, now) : null;
 }
 
-export function hasPublicEntitlement(businessId: number, now = Date.now()) {
-  const subscription = getBusinessSubscription(businessId, now);
+export async function hasPublicEntitlement(businessId: number, now = Date.now()) {
+  const subscription = await getBusinessSubscription(businessId, now);
   return Boolean(subscription && subscription.state !== "inactive");
 }
 
@@ -129,7 +130,7 @@ function addMonth(value: number) {
   return date.getTime();
 }
 
-export function recordManualPayment(
+export async function recordManualPayment(
   user: SessionUser,
   input: {
     businessId: unknown;
@@ -160,25 +161,25 @@ export function recordManualPayment(
     throw new AccountHealthError("Payment date is invalid.", "invalid_date");
   }
 
-  return inTransaction(() => {
-    ensureBusinessSubscription(businessId, { now });
-    const existing = getDb().prepare(`
+  return runtimeTransaction(async () => {
+    await ensureBusinessSubscription(businessId, { now });
+    const existing = await runtimeGet<{ id: number; public_ref: string }>(`
       SELECT id,public_ref FROM subscription_payments
       WHERE business_id=? AND idempotency_key=?
-    `).get(businessId, idempotencyKey) as { id: number; public_ref: string } | undefined;
+    `, [businessId, idempotencyKey]);
     if (existing) return { ...existing, duplicate: true };
 
-    const current = getBusinessSubscription(businessId, now);
+    const current = await getBusinessSubscription(businessId, now);
     if (!current) throw new AccountHealthError("Subscription was not found.", "missing");
     const periodStart = Math.max(now, current.currentPeriodEnd);
     const periodEnd = addMonth(periodStart);
     const publicRef = `PAY-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
-    const result = getDb().prepare(`
+    const result = await runtimeGet<{ id: number }>(`
       INSERT INTO subscription_payments(
         public_ref,business_id,amount_minor,currency,idempotency_key,paid_at,
         recorded_by_user_id,created_at
-      ) VALUES(?,?,?,'ETB',?,?,?,?)
-    `).run(
+      ) VALUES(?,?,?,'ETB',?,?,?,?) RETURNING id
+    `, [
       publicRef,
       businessId,
       amount === null ? null : Math.round(amount * 100),
@@ -186,25 +187,25 @@ export function recordManualPayment(
       paidAt,
       user.id,
       now,
-    );
-    getDb().prepare(`
+    ]);
+    await runtimeRun(`
       UPDATE business_subscriptions
       SET amount_minor=?,current_period_start=?,current_period_end=?,
         grace_ends_at=?,updated_at=?
       WHERE business_id=?
-    `).run(
+    `, [
       amount === null ? null : Math.round(amount * 100),
       periodStart,
       periodEnd,
       periodEnd + SUBSCRIPTION_GRACE_DAYS * DAY_MS,
       now,
       businessId,
-    );
-    return { id: Number(result.lastInsertRowid), public_ref: publicRef, duplicate: false };
+    ]);
+    return { id: Number(result!.id), public_ref: publicRef, duplicate: false };
   });
 }
 
-export function listSubscriptionPayments(user: SessionUser, businessId: number) {
+export async function listSubscriptionPayments(user: SessionUser, businessId: number) {
   if (
     user.access_role === "client" && user.business_id !== businessId ||
     user.access_role === "team_member" ||
@@ -212,29 +213,35 @@ export function listSubscriptionPayments(user: SessionUser, businessId: number) 
   ) {
     throw new AccountHealthError("Payment history is unavailable.", "forbidden");
   }
-  return getDb().prepare(`
-    SELECT id,public_ref,amount_minor,currency,paid_at,created_at
-    FROM subscription_payments
-    WHERE business_id=?
-    ORDER BY created_at DESC,id DESC LIMIT 24
-  `).all(businessId) as Array<{
+  return runtimeAll<{
     id: number;
     public_ref: string;
     amount_minor: number | null;
     currency: string;
     paid_at: number | null;
     created_at: number;
-  }>;
+  }>(`
+    SELECT id,public_ref,amount_minor,currency,paid_at,created_at
+    FROM subscription_payments
+    WHERE business_id=?
+    ORDER BY created_at DESC,id DESC LIMIT 24
+  `, [businessId]);
 }
 
-export function getShowroomInsights(user: SessionUser, businessId: number, now = Date.now()): ShowroomInsights {
+export async function getShowroomInsights(user: SessionUser, businessId: number, now = Date.now()): Promise<ShowroomInsights> {
   if (
     user.access_role === "client" && user.business_id !== businessId ||
     user.access_role === "team_member"
   ) {
     throw new AccountHealthError("Showroom insights are unavailable.", "forbidden");
   }
-  const values = getDb().prepare(`
+  const values = (await runtimeGet<{
+    total: number;
+    expo: number | null;
+    directory: number | null;
+    direct: number | null;
+    recent: number | null;
+  }>(`
     SELECT
       COUNT(*) total,
       SUM(CASE WHEN source='expo' THEN 1 ELSE 0 END) expo,
@@ -242,13 +249,7 @@ export function getShowroomInsights(user: SessionUser, businessId: number, now =
       SUM(CASE WHEN source='direct' THEN 1 ELSE 0 END) direct,
       SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) recent
     FROM showroom_visits WHERE business_id=?
-  `).get(now - 30 * DAY_MS, businessId) as {
-    total: number;
-    expo: number | null;
-    directory: number | null;
-    direct: number | null;
-    recent: number | null;
-  };
+  `, [now - 30 * DAY_MS, businessId]))!;
   return {
     totalVisitors: values.total,
     expoVisitors: values.expo || 0,
@@ -258,11 +259,11 @@ export function getShowroomInsights(user: SessionUser, businessId: number, now =
   };
 }
 
-export function listAccountHealthPage(
+export async function listAccountHealthPage(
   user: SessionUser,
   input: { page?: unknown; q?: unknown; status?: unknown },
   now = Date.now(),
-): PageResult<SubscriptionView> {
+): Promise<PageResult<SubscriptionView>> {
   if (!hasCapability(user, "operations:manage")) {
     throw new AccountHealthError("Operations access is required.", "forbidden");
   }
@@ -287,21 +288,21 @@ export function listAccountHealthPage(
     where += " AND s.grace_ends_at<?";
     params.push(now);
   }
-  const total = (getDb().prepare(`
+  const total = Number((await runtimeGet<{ total: number }>(`
     SELECT COUNT(*) total FROM business_subscriptions s
     JOIN businesses b ON b.id=s.business_id${where}
-  `).get(...params) as { total: number }).total;
+  `, params))?.total || 0);
   const window = pageWindow(total, request);
-  const rows = getDb().prepare(`
+  const rows = await runtimeAll<SubscriptionRow>(`
     SELECT s.*,b.name business_name,b.handle
     FROM business_subscriptions s JOIN businesses b ON b.id=s.business_id${where}
     ORDER BY s.grace_ends_at,lower(b.name),b.id
     LIMIT ? OFFSET ?
-  `).all(...params, window.limit, window.offset) as SubscriptionRow[];
+  `, [...params, window.limit, window.offset]);
   return pageResult(rows.map((row) => view(row, now)), total, request);
 }
 
-export function recordShowroomVisit(input: {
+export async function recordShowroomVisit(input: {
   handle: unknown;
   visitorToken: string;
   source: unknown;
@@ -314,24 +315,24 @@ export function recordShowroomVisit(input: {
     ? String(input.source) as "expo" | "directory"
     : "direct";
   const now = input.now ?? Date.now();
-  const business = getDb().prepare(`
+  const business = await runtimeGet<{ id: number }>(`
     SELECT id FROM businesses
     WHERE lower(handle)=? AND status='active'
-  `).get(handle) as { id: number } | undefined;
+  `, [handle]);
   if (!business) return { recorded: false };
   const date = new Date(now).toISOString().slice(0, 10);
   const visitorHash = hashPrivateValue(`${input.visitorToken}|${date}`);
   const occurrenceId = Number.parseInt(String(input.occurrenceId ?? ""), 10);
   const validOccurrenceId = source === "expo" && Number.isInteger(occurrenceId) &&
-    getDb().prepare("SELECT 1 FROM bazaar_occurrences WHERE id=?").get(occurrenceId)
+    await runtimeGet("SELECT 1 FROM bazaar_occurrences WHERE id=?", [occurrenceId])
     ? occurrenceId
     : null;
   const hubKey = cleanText(input.hubKey, 80).toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const result = getDb().prepare(`
-    INSERT OR IGNORE INTO showroom_visits(
+  const result = await runtimeRun(`
+    INSERT INTO showroom_visits(
       business_id,visitor_hash,visit_date,source,expo_occurrence_id,expo_hub_key,created_at
-    ) VALUES(?,?,?,?,?,?,?)
-  `).run(
+    ) VALUES(?,?,?,?,?,?,?) ON CONFLICT DO NOTHING
+  `, [
     business.id,
     visitorHash,
     date,
@@ -339,6 +340,6 @@ export function recordShowroomVisit(input: {
     validOccurrenceId,
     source === "expo" ? hubKey : "",
     now,
-  );
+  ]);
   return { recorded: result.changes > 0 };
 }

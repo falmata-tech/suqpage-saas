@@ -16,9 +16,9 @@ export default async function AdminClients({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  const clients = listManagedClientsPage(query);
+  const clients = await listManagedClientsPage(query);
   const selectedId = Number.parseInt(query.client || "",10);
-  const selected = Number.isInteger(selectedId) ? getManagedClient(selectedId) : undefined;
+  const selected = Number.isInteger(selectedId) ? await getManagedClient(selectedId) : undefined;
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Clients</strong></nav>
     <div className="dashboard-head"><div><span className="eyebrow">Customer access</span><h1>Clients</h1><p>Review private workspaces and handle one account action at a time.</p></div><Link className="btn brand" href="/dashboard/clients/new">Create client workspace</Link></div>

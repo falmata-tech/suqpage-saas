@@ -146,7 +146,7 @@ async function fullPlatformTour(page) {
     await locationPicker.selectOption({ index: 1 });
     await sleep(2500);
     await clickAndSettle(page.locator(".discovery-city-gateway"), 3900);
-    await clickAndSettle(page.getByRole("button", { name: "Close city marketplace" }), 1100);
+    await clickAndSettle(page.getByRole("button", { name: "Back to map" }).first(), 1100);
   }
 
   await clickAndSettle(page.getByRole("tab", { name: "List" }), 2500);

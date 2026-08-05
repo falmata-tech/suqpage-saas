@@ -13,6 +13,9 @@
     "migrate:media": "tsx scripts/migrate-media-to-object-storage.ts",
     "reconcile:media": "tsx scripts/reconcile-media.ts",
     "rehearse:postgres": "tsx scripts/rehearse-postgres.ts",
+    "cutover:postgres": "tsx scripts/rehearse-postgres.ts --production-copy",
+    "cutover:supabase-linked": "node scripts/cutover-linked-supabase.mjs",
+    "provision:supabase-runtime": "node scripts/provision-linked-supabase-runtime.mjs",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
     "typecheck": "node scripts/typecheck.mjs",
@@ -47,6 +50,7 @@
     "test:rich-offering-migration": "tsx scripts/test-rich-offering-migration.ts",
     "test:discovery": "tsx scripts/test-discovery.ts",
     "test:identity": "node scripts/test-platform-identity.mjs",
+    "test:narrative": "node scripts/test-platform-narrative.mjs",
     "test:discovery-geography": "node scripts/test-discovery-geography.mjs",
     "test:pagination": "tsx scripts/test-pagination.ts",
     "test:scalable-queries": "tsx scripts/test-scalable-queries.ts",
@@ -69,7 +73,7 @@
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
-    "check": "npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:workflow && npm run test:identity && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:requests && npm run test:signup && npm run test:revisions",
+    "check": "npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:requests && npm run test:signup && npm run test:revisions",
     "build:discovery-geography": "node scripts/build-discovery-geography.mjs",
     "release": "bash scripts/release.sh"
   },
@@ -106,7 +110,7 @@
   },
   "overrides": {
     "next": {
-      "postcss": "8.5.18",
+      "postcss": "8.5.25",
       "sharp": "0.35.3"
     }
   }

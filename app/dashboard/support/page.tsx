@@ -6,7 +6,7 @@ import PaginationNav from "@/components/PaginationNav";
 import { createSupportConversationAction } from "@/app/support-actions";
 import { requireUser } from "@/lib/auth";
 import { supportWhatsAppUrl } from "@/lib/config";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { listSupportConversations } from "@/lib/support";
 
 export const dynamic = "force-dynamic";
@@ -18,8 +18,8 @@ export default async function SupportInbox({
 }) {
   const user = await requireUser();
   const query = await searchParams;
-  const business = user.business_id ? getBusinessById(user.business_id) || null : null;
-  const result = listSupportConversations(user, query);
+  const business = user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
+  const result = await listSupportConversations(user, query);
   const client = user.access_role === "client";
   const emergencyWhatsApp = supportWhatsAppUrl();
   const operations = user.access_role === "operations_manager" || user.access_role === "platform_admin";

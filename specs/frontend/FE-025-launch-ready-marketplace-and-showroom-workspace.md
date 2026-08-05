@@ -2,9 +2,9 @@
 id: FE-025
 title: Launch-ready marketplace and showroom workspace
 status: done
-related: [FE-003, FE-009, FE-017, FE-024, FE-026, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, DEP-021, ADR-0012]
+related: [FE-003, FE-009, FE-017, FE-024, FE-026, FE-027, FE-028, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, DEP-021, ADR-0012]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-02
+last_updated: 2026-08-04
 change_level: L3
 ---
 

@@ -51,6 +51,11 @@ export function parseSignupInput(raw: Record<string, unknown>): SignupInput {
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>) {
+  const { postgresRuntimeEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
+  if (postgresRuntimeEnabled()) {
+    const { createPostgresPublicClientWorkspace } = await import("./signup-postgres");
+    return createPostgresPublicClientWorkspace(postgresRuntimeServices().runner, raw);
+  }
   const input = parseSignupInput(raw);
   const db = getDb();
   if (db.prepare("SELECT 1 FROM users WHERE lower(email)=?").get(input.email)) {

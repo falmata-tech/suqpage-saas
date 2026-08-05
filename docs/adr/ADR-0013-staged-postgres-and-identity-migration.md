@@ -4,7 +4,7 @@ title: Staged PostgreSQL and identity migration
 status: accepted
 date: 2026-08-03
 deciders: [MirtPage]
-related: [FE-026, BE-002, BE-024, BE-026, DEP-021, DEP-022, ADR-0012]
+related: [FE-026, BE-002, BE-024, BE-026, BE-027, DEP-021, DEP-022, DEP-023, ADR-0012]
 ---
 
 # ADR-0013 - Staged PostgreSQL and identity migration
@@ -83,4 +83,8 @@ both adapters until SQLite retirement receives its own accepted rollout spec.
 The first executable rehearsal passed on 2026-08-03 for 44 tables and 2,849
 rows, including translated constraints, indexes, triggers, sequences, stable
 fingerprints, invariant probes, and byte preservation of the SQLite source.
-The runtime guard still rejects PostgreSQL mode, as required by this decision.
+On 2026-08-05, all authoritative runtime workflows passed the disposable
+PostgreSQL adapter suite and the guarded empty-target production-copy rehearsal.
+`MIRTPAGE_DATABASE_DRIVER=postgres` is now an accepted fail-closed runtime mode;
+SQLite remains the current local authority until DEP-023 completes the real
+Supabase copy and monitored switch. MirtPage authentication remains unchanged.

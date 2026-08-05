@@ -3,6 +3,7 @@ import { PublicRequestRateLimiter } from "@/lib/request-rate-limit";
 import { createPublicInterest } from "@/lib/request-service";
 import { RequestError } from "@/lib/request-domain";
 import { SqliteRequestRepository } from "@/lib/request-sqlite";
+import { postgresRuntimeEnabled, postgresRuntimeServices } from "@/lib/postgres-runtime-services";
 import { assertSameOrigin, hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
 
 export const runtime = "nodejs";
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ reference: "REQ-RECEIVED" }, { status: 201, headers: { "Cache-Control": "no-store" } });
     }
     const result = await createPublicInterest(values, hashPrivateValue(requestIpFromHeaders(request.headers)), {
-      repository: new SqliteRequestRepository(), rateLimiter: new PublicRequestRateLimiter(),
+      repository: postgresRuntimeEnabled() ? postgresRuntimeServices().requests : new SqliteRequestRepository(), rateLimiter: new PublicRequestRateLimiter(),
     });
     return NextResponse.json({ reference: result.publicRef, duplicate: result.duplicate }, { status: result.duplicate ? 200 : 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {

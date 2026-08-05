@@ -13,10 +13,10 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
     <main className="platform-task-main">
       <section className="platform-task-shell login-task-shell" aria-labelledby="login-title">
         <div className="platform-task-context">
-          <span className="platform-task-eyebrow">Private workspace</span>
+          <span className="platform-task-eyebrow">Business workspace</span>
           <h1 id="login-title">Welcome back to MirtPage.</h1>
-          <p>Follow showroom requests, customer inquiries, support conversations, and private previews in one protected workspace.</p>
-          <div className="platform-context-note"><strong>New to MirtPage?</strong><span>Create a private business workspace and submit your first showroom request without waiting for an invitation.</span></div>
+          <p>Manage your showroom, customer inquiries, design requests, private previews, and support conversations in one protected workspace.</p>
+          <div className="platform-context-note"><strong>Not on MirtPage yet?</strong><span>Create a private workspace and brief your first showroom without waiting for an invitation.</span></div>
         </div>
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>Account access</span><h2>Sign in</h2><p>Use the email and password connected to your MirtPage account.</p></div>

@@ -70,14 +70,14 @@ async function main() {
 
     const firstToken = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     const secondToken = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
-    const invitation = createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_000, token:firstToken });
-    assert.equal(getActiveInvitation(firstToken,1_000_001)?.business_name,"Amina Market");
+    const invitation = await createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_000, token:firstToken });
+    assert.equal((await getActiveInvitation(firstToken,1_000_001))?.business_name,"Amina Market");
     const storedInvitation = getDb().prepare("SELECT token_hash FROM client_invitations WHERE id=?").get(invitation.invitationId) as {token_hash:string};
     assert.equal(storedInvitation.token_hash,hashInvitationToken(firstToken));
     assert.notEqual(storedInvitation.token_hash,firstToken);
-    createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_100, token:secondToken });
-    assert.equal(getActiveInvitation(firstToken,1_000_101),undefined);
-    assert.ok(getActiveInvitation(secondToken,1_000_101));
+    await createClientInvitation({ requestId:first.id, clientName:"Amina Client", email:"amina@example.test", businessName:"Amina Market", handle:"amina-market", designKey:"homevibe", actorUserId:adminId }, { now:1_000_100, token:secondToken });
+    assert.equal(await getActiveInvitation(firstToken,1_000_101),undefined);
+    assert.ok(await getActiveInvitation(secondToken,1_000_101));
     const redeemed = await redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_200);
     const client = getDb().prepare(`SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?`).get(redeemed.userId) as any;
     assert.equal(client.access_role,"client");
@@ -125,8 +125,8 @@ async function main() {
     assert.equal(canManageBusiness(manager,redeemed.businessId),false);
 
     const directToken = "D".repeat(43);
-    const directInvitation = createClientInvitation({requestId:null,clientName:"Direct Client",email:"direct@example.test",businessName:"Direct Market",handle:"direct-market",designKey:"alhaya",actorUserId:manager.id},{now:2_000_000,token:directToken});
-    assert.equal(getActiveInvitation(directToken,2_000_001)?.request_id,null);
+    const directInvitation = await createClientInvitation({requestId:null,clientName:"Direct Client",email:"direct@example.test",businessName:"Direct Market",handle:"direct-market",designKey:"alhaya",actorUserId:manager.id},{now:2_000_000,token:directToken});
+    assert.equal((await getActiveInvitation(directToken,2_000_001))?.request_id,null);
     const directRedemption = await redeemClientInvitation({token:directToken,name:"Direct Client",password:"DirectClient123!"},2_000_100);
     assert.equal(directRedemption.requestId,null);
     const directClient = getUserById(directRedemption.userId)!;
@@ -136,7 +136,7 @@ async function main() {
     directForm.set("idempotencyKey","direct_client_key_123456");
     const directRequest = await createAuthenticatedClientRequest(directClient,directForm);
     assert.equal(getRequestDetail(directRequest.id)?.request_type,"onboarding");
-    const managedClients = listManagedClients();
+    const managedClients = await listManagedClients();
     assert.equal(Object.getPrototypeOf(managedClients[0]),Object.prototype);
     assert.equal(managedClients.some((managedClient)=>managedClient.id===client.id),true);
 
@@ -176,14 +176,14 @@ async function main() {
     assert.deepEqual(clarificationEvents.map((event)=>event.actor_access_role),["operations_manager","client"]);
     assert.deepEqual(clarificationEvents.map((event)=>event.detail),["Which hero message should the team prioritize?","Please prioritize our handmade origin story."]);
 
-    assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
+    await assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
     const assignedToOne = getRequestDetail(managerRequest.id)!;
     assert.equal(canAccessRequest(teamOne,assignedToOne),true);
     assert.equal(canAccessRequest(teamTwo,assignedToOne),false);
     assert.equal(canViewBusiness(teamOne,redeemed.businessId,true),true);
     assert.equal(canManageBusiness(teamOne,redeemed.businessId,true),false);
     assert.equal(listAssignedRequests(teamOne.id).some((request)=>request.id===managerRequest.id),true);
-    assert.equal(listAssignedBusinesses(teamOne.id).some((business)=>business.id===redeemed.businessId),true);
+    assert.equal((await listAssignedBusinesses(teamOne.id)).some((business)=>business.id===redeemed.businessId),true);
     const assignmentEvent = assignedToOne.events.find((event)=>event.event_type==="assigned")!;
     assert.match(assignmentEvent.detail,/^team_member:\d+$/);
     assert.deepEqual(presentRequestEvent(assignmentEvent,true),{
@@ -205,12 +205,12 @@ async function main() {
     const unknownClientEvent = presentRequestEvent({event_type:"internal_test",detail:"staff:42;storage:secret"},true);
     assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"MirtPage recorded progress on this request."});
     assert.doesNotMatch(`${unknownClientEvent.label} ${unknownClientEvent.detail}`,/42|secret|staff:/);
-    assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
+    await assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
     const assignedToTwo = getRequestDetail(managerRequest.id)!;
     assert.equal(canAccessRequest(teamOne,assignedToTwo),false);
     assert.equal(canAccessRequest(teamTwo,assignedToTwo),true);
-    assert.equal(listAssignedBusinesses(teamOne.id).length,0);
-    assert.equal(listAssignedBusinesses(teamTwo.id).some((business)=>business.id===redeemed.businessId),true);
+    assert.equal((await listAssignedBusinesses(teamOne.id)).length,0);
+    assert.equal((await listAssignedBusinesses(teamTwo.id)).some((business)=>business.id===redeemed.businessId),true);
 
     const prospectForm = new FormData();
     prospectForm.set("requestType","change");
@@ -224,8 +224,8 @@ async function main() {
     assert.equal(prospectDetail.request_type,"onboarding");
     assert.equal(prospectDetail.business_id,null);
     assert.equal(prospectDetail.represented_client_user_id,null);
-    const prospectInvitation = createClientInvitation({requestId:prospectRequest.id,clientName:"Prospect Served",email:"prospect-served@example.test",businessName:"Prospect Served Market",handle:"prospect-served-market",designKey:"novatech",actorUserId:manager.id},{now:3_000_000,token:"C".repeat(43)});
-    assert.equal(getActiveInvitation("C".repeat(43),3_000_001)?.business_id,prospectInvitation.businessId);
+    const prospectInvitation = await createClientInvitation({requestId:prospectRequest.id,clientName:"Prospect Served",email:"prospect-served@example.test",businessName:"Prospect Served Market",handle:"prospect-served-market",designKey:"novatech",actorUserId:manager.id},{now:3_000_000,token:"C".repeat(43)});
+    assert.equal((await getActiveInvitation("C".repeat(43),3_000_001))?.business_id,prospectInvitation.businessId);
     const prospectBusiness=getDb().prepare("SELECT design_key,design_manifest_json FROM businesses WHERE id=?").get(prospectInvitation.businessId) as {design_key:string;design_manifest_json:string};
     assert.equal(prospectBusiness.design_key,"composition");
     assert.equal(JSON.parse(prospectBusiness.design_manifest_json).tokenPack,"technology-mono");

@@ -5,7 +5,7 @@ import NavigationTrail from "@/components/NavigationTrail";
 import RecipeStudio from "@/components/RecipeStudio";
 import BlueprintMediaBoard from "@/components/BlueprintMediaBoard";
 import { requireUser } from "@/lib/auth";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import {
   blueprintReadiness,
   blueprintSlotValue,
@@ -36,9 +36,9 @@ export default async function RecipeStudioPage({
   if (!recipeStudioEnabled()) {
     redirect(`/dashboard/requests/${requestId}/revisions/${revisionId}/edit`);
   }
-  let data: ReturnType<typeof buildShowroomRecipeBrief>;
+  let data: Awaited<ReturnType<typeof buildShowroomRecipeBrief>>;
   try {
-    data = buildShowroomRecipeBrief(user, revisionId);
+    data = await buildShowroomRecipeBrief(user, revisionId);
   } catch (error) {
     if (error instanceof ShowroomRecipeError && error.status === 409) {
       redirect(`/dashboard/requests/${requestId}`);
@@ -46,8 +46,8 @@ export default async function RecipeStudioPage({
     notFound();
   }
   if (data.workspace.requestId !== requestId) notFound();
-  const business = getBusinessById(data.workspace.businessId) || null;
-  const revision = getContentRevision(revisionId);
+  const business = (await runtimeBusinessById(data.workspace.businessId)) || null;
+  const revision = await getContentRevision(revisionId);
   if (!revision) notFound();
   const snapshot = requireRevisionSnapshotV4(
     revision.snapshot_json,

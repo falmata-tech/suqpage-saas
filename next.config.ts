@@ -42,6 +42,12 @@ const nextConfig: NextConfig = {
   typescript: { tsconfigPath },
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  outputFileTracingIncludes: {
+    "/*": [
+      "./node_modules/next/dist/server/lib/source-maps.js",
+      "./node_modules/next/dist/server/lib/lru-cache.js",
+    ],
+  },
   outputFileTracingExcludes: {
     "/*": [
       "./.env*",
@@ -54,7 +60,6 @@ const nextConfig: NextConfig = {
       "./playwright-report/**/*",
       "./app/**/*",
       "./docs/**/*",
-      "./lib/**/*",
       "./scripts/**/*",
       "./showroom-sdk/**/*",
       "./specs/**/*",

@@ -16,7 +16,7 @@ export default async function AdminStaff({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  const staff = listStaffPage(query);
+  const staff = await listStaffPage(query);
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Staff &amp; access</strong></nav>
     <div className="dashboard-head"><div><span className="eyebrow">Platform access</span><h1>Staff &amp; access</h1><p>Provision individual accounts and review role-scoped workload.</p></div><Link className="small-btn" href="/dashboard/support/agents">Support agents</Link></div>

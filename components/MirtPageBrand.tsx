@@ -9,8 +9,8 @@ export default function MirtPageBrand({
 }) {
   return (
     <Link className={`mirtpage-brand ${className}`.trim()} href={href} aria-label="MirtPage home">
-      <img src="/brand/mirtpage-mark.svg" alt="" width="40" height="40" />
-      <span>MirtPage</span>
+      <img src="/brand/mirtpage-mark-v2.svg" alt="" width="40" height="40" />
+      <span className="mirtpage-wordmark"><span>Mirt</span><span>Page</span></span>
     </Link>
   );
 }

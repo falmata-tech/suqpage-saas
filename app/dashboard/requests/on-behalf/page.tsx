@@ -24,9 +24,9 @@ export default async function OnBehalfRequestPage({
   const query = await searchParams;
   const selectedId = Number.parseInt(query.client || "", 10);
   const selectedClient = Number.isInteger(selectedId)
-    ? getManagedClient(selectedId)
+    ? await getManagedClient(selectedId)
     : undefined;
-  const clients = listManagedClientsPage(query);
+  const clients = await listManagedClientsPage(query);
   return <DashboardShell user={user} business={null}>
     <NavigationTrail items={[{label:"Operations",href:"/dashboard/requests"},{label:"On-behalf request"}]} fallback="/dashboard/requests"/>
     <div className="dashboard-head"><div><h1>Record a request for a client</h1><p>Find an existing client or continue with no selection to capture a new prospect. MirtPage is shown as the submitter.</p></div></div>

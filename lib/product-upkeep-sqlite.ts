@@ -17,7 +17,6 @@ import type {
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
-import { audit } from "./security";
 import type { Category, SessionUser } from "./types";
 
 type StoredCommand = {
@@ -386,10 +385,11 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
           productId,
           nextVersion,
         );
-      audit("product.basic_upkeep_published", {
-        userId: user.id,
-        businessId: command.businessId,
-        detail: {
+      getDb().prepare("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,?,?,?)").run(
+        user.id,
+        command.businessId,
+        "product.basic_upkeep_published",
+        JSON.stringify({
           productId,
           kind: command.kind,
           changedFields: [
@@ -411,8 +411,9 @@ export const sqliteProductUpkeepPort: BasicProductUpkeepPort = {
           serviceAttribution: Boolean(command.serviceNote),
           baseVersion: business.content_version,
           contentVersion: nextVersion,
-        },
-      });
+        }),
+        "",
+      );
       return { productId, contentVersion: nextVersion, duplicate: false };
     });
   },

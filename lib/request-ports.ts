@@ -16,8 +16,8 @@ export type PublicRequestRecord = {
 };
 
 export interface RequestRepository {
-  findPublicDuplicate(ipHash: string, idempotencyKey: string): PublicRequestRecord | undefined;
-  createPublicInterest(input: PublicInterestInput, ipHash: string): PublicRequestRecord;
+  findPublicDuplicate(ipHash: string, idempotencyKey: string): PublicRequestRecord | undefined | Promise<PublicRequestRecord | undefined>;
+  createPublicInterest(input: PublicInterestInput, ipHash: string): PublicRequestRecord | Promise<PublicRequestRecord>;
 }
 
 export interface RequestAttachmentStore {
@@ -26,5 +26,5 @@ export interface RequestAttachmentStore {
 }
 
 export interface RequestRateLimiter {
-  consume(ipHash: string): { allowed: boolean; retryAfterSeconds: number };
+  consume(ipHash: string): { allowed: boolean; retryAfterSeconds: number } | Promise<{ allowed: boolean; retryAfterSeconds: number }>;
 }

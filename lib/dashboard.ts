@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getBusinessById, getDb, hasRetainedPublication } from "./db";
+import { runtimeBusinessById, runtimeHasRetainedPublication } from "./catalog-runtime";
 import {
   canMaintainBasicProducts,
   canManageBusiness,
@@ -7,36 +7,37 @@ import {
   hasCapability,
 } from "./capabilities";
 import type { SessionUser } from "./types";
+import { runtimeGet } from "./runtime-sql";
 
-export function resolveBusiness(user: SessionUser, requested?: string | number | null) {
+export async function resolveBusiness(user: SessionUser, requested?: string | number | null) {
   const id = hasCapability(user, "operations:manage") || user.access_role === "team_member" ? Number(requested || 0) : user.business_id;
   if (!id) return null;
-  const assigned = user.access_role === "team_member" && Boolean(getAssignedBusiness(user.id, id));
+  const assigned = user.access_role === "team_member" && Boolean(await getAssignedBusiness(user.id, id));
   if (!canViewBusiness(user, id, assigned)) redirect("/dashboard");
-  return getBusinessById(id) || null;
+  return (await runtimeBusinessById(id)) || null;
 }
 
-export function resolveManagedBusiness(user: SessionUser, requested?: string | number | null) {
-  const business = resolveBusiness(user, requested);
+export async function resolveManagedBusiness(user: SessionUser, requested?: string | number | null) {
+  const business = await resolveBusiness(user, requested);
   if (!business) return null;
-  const assigned = user.access_role === "team_member" && Boolean(getAssignedBusiness(user.id, business.id));
+  const assigned = user.access_role === "team_member" && Boolean(await getAssignedBusiness(user.id, business.id));
   if (!canManageBusiness(user, business.id, assigned)) redirect("/dashboard");
   return business;
 }
 
-export function resolveProductBusiness(
+export async function resolveProductBusiness(
   user: SessionUser,
   requested?: string | number | null,
 ) {
-  const business = resolveBusiness(user, requested);
+  const business = await resolveBusiness(user, requested);
   if (!business) return null;
   const assigned =
     user.access_role === "team_member" &&
-    Boolean(getAssignedBusiness(user.id, business.id));
+    Boolean(await getAssignedBusiness(user.id, business.id));
   if (!canMaintainBasicProducts(user, business.id, assigned)) {
     redirect("/dashboard");
   }
-  if (!hasRetainedPublication(business.id)) {
+  if (!(await runtimeHasRetainedPublication(business.id))) {
     redirect(
       user.access_role === "client"
         ? "/dashboard/requests/new"
@@ -46,8 +47,8 @@ export function resolveProductBusiness(
   return business;
 }
 
-export function hasClientReviewableRevision(userId: number, businessId: number) {
-  return Boolean(getDb().prepare(`
+export async function hasClientReviewableRevision(userId: number, businessId: number) {
+  return Boolean(await runtimeGet(`
     SELECT 1
     FROM service_requests r
     JOIN content_revisions revision ON revision.request_id=r.id
@@ -60,10 +61,10 @@ export function hasClientReviewableRevision(userId: number, businessId: number) 
         ORDER BY latest.revision_number DESC LIMIT 1
       )
     LIMIT 1
-  `).get(userId, businessId));
+  `, [userId, businessId]));
 }
 
-function getAssignedBusiness(userId: number, businessId: number) {
+async function getAssignedBusiness(userId: number, businessId: number) {
   // Kept local so capability rules remain framework-independent while assignment is an adapter concern.
-  return getDb().prepare("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1").get(userId, businessId);
+  return runtimeGet("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1", [userId, businessId]);
 }

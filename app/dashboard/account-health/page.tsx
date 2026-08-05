@@ -40,10 +40,10 @@ export default async function AccountHealthPage({
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
   const operations = hasCapability(user, "operations:manage");
-  const business = resolveBusiness(user, query.business);
+  const business = await resolveBusiness(user, query.business);
 
   if (operations && !business) {
-    const accounts = listAccountHealthPage(user, query);
+    const accounts = await listAccountHealthPage(user, query);
     return (
       <DashboardShell user={user} business={null}>
         <div className="dashboard-head"><div><span className="eyebrow">Platform health</span><h1>Monthly accounts</h1><p>Find upcoming and overdue manual renewal records without loading every business at once. Renewal dates do not control publication.</p></div></div>
@@ -65,10 +65,10 @@ export default async function AccountHealthPage({
   }
   if (!business) return null;
 
-  const subscription = getBusinessSubscription(business.id);
+  const subscription = await getBusinessSubscription(business.id);
   if (!subscription) return null;
-  const insights = getShowroomInsights(user, business.id);
-  const payments = listSubscriptionPayments(user, business.id);
+  const insights = await getShowroomInsights(user, business.id);
+  const payments = await listSubscriptionPayments(user, business.id);
   return (
     <DashboardShell user={user} business={business}>
       <div className="dashboard-head">

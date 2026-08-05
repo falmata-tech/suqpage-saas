@@ -22,9 +22,9 @@ export default async function ProductsPage({
 }) {
   const user = await requireUser();
   const query = await searchParams;
-  const business = resolveProductBusiness(user, query.business);
+  const business = await resolveProductBusiness(user, query.business);
   if (!business) return null;
-  const products = listProductsPage(business.id, query, true);
+  const products = await listProductsPage(business.id, query, true);
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">

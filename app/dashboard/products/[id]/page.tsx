@@ -6,7 +6,7 @@ import ProductForm from "@/components/ProductForm";
 import { basicProductUpkeepAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import { resolveProductBusiness } from "@/lib/dashboard";
-import { getCatalogByBusinessId } from "@/lib/db";
+import { runtimeCatalogByBusinessId } from "@/lib/catalog-runtime";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +25,9 @@ export default async function EditProduct({
   const user = await requireUser();
   const query = await searchParams;
   const route = await params;
-  const business = resolveProductBusiness(user, query.business);
+  const business = await resolveProductBusiness(user, query.business);
   if (!business) return null;
-  const catalog = getCatalogByBusinessId(business.id, true)!;
+  const catalog = (await runtimeCatalogByBusinessId(business.id, true))!;
   const product = catalog.products.find(
     (candidate) => candidate.id === Number(route.id),
   );

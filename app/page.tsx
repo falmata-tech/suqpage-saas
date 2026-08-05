@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-    searchParams: Promise<{ industry?: string; scale?: string; q?: string; showroom?: string; page?: string; view?: string; expoDay?: string }>;
+    searchParams: Promise<{ industry?: string; q?: string; showroom?: string; page?: string; view?: string; expoDay?: string }>;
 }) {
   const query = await searchParams;
-  const discovery = getDiscoveryView({ industry: query.industry, scale: query.scale, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
+  const discovery = await getDiscoveryView({ industry: query.industry, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
   return (
     <div className="landing-home" id="top">
       <header className="landing-header">
@@ -39,8 +39,8 @@ export default async function Home({
         {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">That showroom is temporarily unavailable. Discover active businesses below.</div> : null}
         <div className="landing-container landing-market-shell">
           <section className="landing-market-banner" aria-labelledby="landing-title">
-            <div><span>Ethiopian products, made visible</span><h1 id="landing-title">Made in Ethiopia. Find the people who make it.</h1></div>
-            <p>Search growers, makers, workshops, processors, and factories by product, industry, or location, then visit each business&apos;s digital showroom.</p>
+            <div><span>A marketplace for Ethiopian production</span><h1 id="landing-title">Find what Ethiopia makes.</h1></div>
+            <p>Search workshops, growers, processors, and growing factories by product or place. See the work, visit the showroom, and start a direct retail or wholesale inquiry.</p>
             <a href="#discover">Explore showrooms</a>
           </section>
           <section className="landing-discovery-section" aria-label="MirtPage marketplace">
@@ -51,11 +51,11 @@ export default async function Home({
         <section className="landing-closing" aria-labelledby="closing-title">
           <div className="landing-container landing-closing-inner">
             <div>
-              <span className="landing-eyebrow">Your work deserves a clear front door</span>
-              <h2 id="closing-title">Make it easier for the right customer to understand what you do.</h2>
-              <p>Whether you grow by the season, make by hand, or run a growing production floor, we shape a professional showroom around your products, capacity, capabilities, and brand.</p>
+              <span className="landing-eyebrow">For people who bet on making locally</span>
+              <h2 id="closing-title">You built the product. We build the place buyers find it.</h2>
+              <p>Get a professional showroom, a reviewed location on the national marketplace, and a direct path to retail and wholesale buyers without taking on the machinery of an ecommerce operation.</p>
             </div>
-            <div className="landing-closing-actions"><Link className="landing-closing-action" href="/request">Start your showroom</Link><Link href="/about">How MirtPage works</Link></div>
+            <div className="landing-closing-actions"><Link className="landing-closing-action" href="/request">Build your showroom</Link><Link href="/about">Why MirtPage exists</Link></div>
           </div>
         </section>
       </main>
@@ -68,7 +68,7 @@ export default async function Home({
 
       <footer className="landing-footer">
         <div className="landing-container landing-footer-grid">
-          <div><MirtPageBrand className="landing-brand" /><p>Permanent digital showrooms for Ethiopia&apos;s makers, growers, workshops, processors, and growing factories.</p></div>
+          <div><MirtPageBrand className="landing-brand" /><p>The discovery marketplace for products made, grown, and processed in Ethiopia.</p></div>
           <nav aria-label="Footer navigation"><Link href="/discover">Explore Showrooms</Link><Link href="/about">About MirtPage</Link><Link href="/request">Sign up</Link><Link href="/login">Login</Link></nav>
           <div className="landing-legal"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:falmata.dawano@gmail.com">Contact</a><span>© 2026 MirtPage</span></div>
         </div>

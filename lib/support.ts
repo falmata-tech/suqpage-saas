@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { hasCapability } from "./capabilities";
-import { getDb, inTransaction } from "./db";
+import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import {
   likePattern,
   normalizePageRequest,
@@ -124,8 +124,8 @@ function canRead(user: SessionUser, row: Pick<ConversationRow, "business_id" | "
   return false;
 }
 
-function requireConversation(user: SessionUser, conversationId: number) {
-  const row = getDb().prepare(`${baseSelect()} WHERE c.id=?`).get(conversationId) as ConversationRow | undefined;
+async function requireConversation(user: SessionUser, conversationId: number) {
+  const row = await runtimeGet<ConversationRow>(`${baseSelect()} WHERE c.id=?`, [conversationId]);
   if (!row || !canRead(user, row)) {
     throw new SupportError("Support conversation was not found.", "not_found");
   }
@@ -140,21 +140,26 @@ function idempotency(value: unknown) {
   return key;
 }
 
-function supportAgentWorkload(userId: number) {
-  return getDb().prepare(`
+async function supportAgentWorkload(userId: number) {
+  return runtimeGet<{
+    enabled: number;
+    max_open_conversations: number;
+    open_count: number;
+  }>(`
     SELECT s.enabled,s.max_open_conversations,
       (SELECT COUNT(*) FROM support_conversations c
        WHERE c.assigned_user_id=s.user_id AND c.status='open') open_count
     FROM support_agent_settings s WHERE s.user_id=?
-  `).get(userId) as {
-    enabled: number;
-    max_open_conversations: number;
-    open_count: number;
-  } | undefined;
+  `, [userId]);
 }
 
-function leastLoadedAgent() {
-  return getDb().prepare(`
+async function leastLoadedAgent() {
+  return runtimeGet<{
+    id: number;
+    name: string;
+    max_open_conversations: number;
+    open_count: number;
+  }>(`
     SELECT u.id,u.name,s.max_open_conversations,
       COUNT(c.id) open_count
     FROM support_agent_settings s
@@ -167,39 +172,34 @@ function leastLoadedAgent() {
     HAVING COUNT(c.id)<s.max_open_conversations
     ORDER BY COUNT(c.id),u.id
     LIMIT 1
-  `).get() as {
-    id: number;
-    name: string;
-    max_open_conversations: number;
-    open_count: number;
-  } | undefined;
+  `);
 }
 
-function assignConversation(
+async function assignConversation(
   conversationId: number,
   assignedUserId: number,
   assignedByUserId: number | null,
   reason: "automatic" | "claimed" | "reassigned" | "reopened",
   now: number,
 ) {
-  getDb().prepare(`
+  await runtimeRun(`
     UPDATE support_assignments SET released_at=?
     WHERE conversation_id=? AND released_at IS NULL
-  `).run(now, conversationId);
-  getDb().prepare(`
+  `, [now, conversationId]);
+  await runtimeRun(`
     INSERT INTO support_assignments(
       conversation_id,assigned_user_id,assigned_by_user_id,reason,assigned_at
     ) VALUES(?,?,?,?,?)
-  `).run(conversationId, assignedUserId, assignedByUserId, reason, now);
-  getDb().prepare(`
+  `, [conversationId, assignedUserId, assignedByUserId, reason, now]);
+  await runtimeRun(`
     UPDATE support_conversations
     SET status='open',assigned_user_id=?,updated_at=?,closed_at=NULL
     WHERE id=?
-  `).run(assignedUserId, now, conversationId);
-  getDb().prepare(`
+  `, [assignedUserId, now, conversationId]);
+  await runtimeRun(`
     INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
     VALUES(?,?,'assigned',?,?)
-  `).run(conversationId, assignedByUserId, `agent:${assignedUserId};reason:${reason}`, now);
+  `, [conversationId, assignedByUserId, `agent:${assignedUserId};reason:${reason}`, now]);
 }
 
 export async function createSupportConversation(
@@ -216,39 +216,38 @@ export async function createSupportConversation(
   if (!subject) throw new SupportError("Add a short subject.", "subject_required");
   if (!message) throw new SupportError("Write a support message.", "message_required");
 
-  const created = inTransaction(() => {
-    const duplicate = getDb().prepare(`
+  const created = await runtimeTransaction(async () => {
+    const duplicate = await runtimeGet<{ id: number; public_ref: string; business_name: string }>(`
       SELECT c.id,c.public_ref,b.name business_name
       FROM support_messages m
       JOIN support_conversations c ON c.id=m.conversation_id
       JOIN businesses b ON b.id=c.business_id
       WHERE m.sender_user_id=? AND m.idempotency_key=?
-    `).get(user.id, key) as { id: number; public_ref: string; business_name: string } | undefined;
+    `, [user.id, key]);
     if (duplicate) return { ...duplicate, assigned_user_name: null, duplicate: true };
     const publicRef = `SUP-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
-    const result = getDb().prepare(`
+    const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_conversations(
         public_ref,business_id,opened_by_user_id,subject,status,
         created_at,updated_at,last_message_at
-      ) VALUES(?,?,?,?,'waiting',?,?,?)
-    `).run(publicRef, user.business_id, user.id, subject, now, now, now);
-    const conversationId = Number(result.lastInsertRowid);
-    const messageResult = getDb().prepare(`
+      ) VALUES(?,?,?,?,'waiting',?,?,?) RETURNING id
+    `, [publicRef, user.business_id, user.id, subject, now, now, now]);
+    const conversationId = Number(result!.id);
+    const messageResult = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(
         conversation_id,sender_user_id,body,idempotency_key,created_at
-      ) VALUES(?,?,?,?,?)
-    `).run(conversationId, user.id, message, key, now);
-    getDb().prepare(`
+      ) VALUES(?,?,?,?,?) RETURNING id
+    `, [conversationId, user.id, message, key, now]);
+    await runtimeRun(`
       UPDATE support_conversations SET client_last_read_message_id=? WHERE id=?
-    `).run(Number(messageResult.lastInsertRowid), conversationId);
-    getDb().prepare(`
+    `, [Number(messageResult!.id), conversationId]);
+    await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'created','client support conversation',?)
-    `).run(conversationId, user.id, now);
-    const agent = leastLoadedAgent();
-    if (agent) assignConversation(conversationId, agent.id, null, "automatic", now);
-    const business = getDb().prepare("SELECT name FROM businesses WHERE id=?")
-      .get(user.business_id) as { name: string };
+    `, [conversationId, user.id, now]);
+    const agent = await leastLoadedAgent();
+    if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
+    const business = (await runtimeGet<{ name: string }>("SELECT name FROM businesses WHERE id=?", [user.business_id]))!;
     return {
       id: conversationId,
       public_ref: publicRef,
@@ -272,10 +271,10 @@ export async function createSupportConversation(
   };
 }
 
-export function listSupportConversations(
+export async function listSupportConversations(
   user: SessionUser,
   input: { page?: unknown; q?: unknown; status?: unknown },
-): PageResult<SupportConversation> {
+): Promise<PageResult<SupportConversation>> {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["waiting", "open", "closed"].includes(String(input.status))
     ? String(input.status) as SupportStatus
@@ -301,31 +300,23 @@ export function listSupportConversations(
     where += " AND (lower(c.subject) LIKE ? ESCAPE '\\' OR lower(c.public_ref) LIKE ? ESCAPE '\\' OR lower(b.name) LIKE ? ESCAPE '\\')";
     params.push(pattern, pattern, pattern);
   }
-  const total = (getDb().prepare(`
+  const total = Number((await runtimeGet<{ total: number }>(`
     SELECT COUNT(*) total FROM support_conversations c
     JOIN businesses b ON b.id=c.business_id${where}
-  `).get(...params) as { total: number }).total;
+  `, params))?.total || 0);
   const window = pageWindow(total, request);
-  const rows = getDb().prepare(`
+  const rows = await runtimeAll<ConversationRow>(`
     ${baseSelect()}${where}
     ORDER BY CASE c.status WHEN 'waiting' THEN 0 WHEN 'open' THEN 1 ELSE 2 END,
       c.last_message_at DESC,c.id DESC
     LIMIT ? OFFSET ?
-  `).all(...params, window.limit, window.offset) as ConversationRow[];
+  `, [...params, window.limit, window.offset]);
   return pageResult(rows.map((row) => conversationView(row, user)), total, request);
 }
 
-export function getSupportConversation(user: SessionUser, conversationId: number) {
-  const row = requireConversation(user, conversationId);
-  const messages = getDb().prepare(`
-    SELECT m.id,m.conversation_id,m.sender_user_id,u.name sender_name,
-      COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) sender_role,
-      m.body,m.created_at
-    FROM support_messages m JOIN users u ON u.id=m.sender_user_id
-    LEFT JOIN user_access_profiles p ON p.user_id=u.id
-    WHERE m.conversation_id=?
-    ORDER BY m.id DESC LIMIT 100
-  `).all(conversationId).reverse() as Array<{
+export async function getSupportConversation(user: SessionUser, conversationId: number) {
+  const row = await requireConversation(user, conversationId);
+  const messages = (await runtimeAll<{
     id: number;
     conversation_id: number;
     sender_user_id: number;
@@ -333,15 +324,22 @@ export function getSupportConversation(user: SessionUser, conversationId: number
     sender_role: string;
     body: string;
     created_at: number;
-  }>;
+  }>(`
+    SELECT m.id,m.conversation_id,m.sender_user_id,u.name sender_name,
+      COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) sender_role,
+      m.body,m.created_at
+    FROM support_messages m JOIN users u ON u.id=m.sender_user_id
+    LEFT JOIN user_access_profiles p ON p.user_id=u.id
+    WHERE m.conversation_id=?
+    ORDER BY m.id DESC LIMIT 100
+  `, [conversationId])).reverse();
   const lastId = messages.at(-1)?.id || 0;
-  getDb().prepare(`
+  const readColumn = user.access_role === "client" ? "client_last_read_message_id" : "staff_last_read_message_id";
+  await runtimeRun(`
     UPDATE support_conversations
-    SET ${user.access_role === "client" ? "client_last_read_message_id" : "staff_last_read_message_id"}=MAX(
-      ${user.access_role === "client" ? "client_last_read_message_id" : "staff_last_read_message_id"},?
-    )
+    SET ${readColumn}=CASE WHEN ${readColumn}<? THEN ? ELSE ${readColumn} END
     WHERE id=?
-  `).run(lastId, conversationId);
+  `, [lastId, lastId, conversationId]);
   return {
     conversation: conversationView({ ...row, last_message_id: lastId }, user),
     messages: messages.map((message): SupportMessage => ({
@@ -356,7 +354,7 @@ export function getSupportConversation(user: SessionUser, conversationId: number
   };
 }
 
-export function postSupportMessage(
+export async function postSupportMessage(
   user: SessionUser,
   conversationId: number,
   input: { message: unknown; idempotencyKey: unknown },
@@ -365,45 +363,45 @@ export function postSupportMessage(
   const body = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   if (!body) throw new SupportError("Write a support message.", "message_required");
-  return inTransaction(() => {
-    const row = requireConversation(user, conversationId);
+  return runtimeTransaction(async () => {
+    const row = await requireConversation(user, conversationId);
     if (row.status === "closed") throw new SupportError("Reopen this conversation before replying.", "closed");
     if (user.access_role !== "client" && row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Claim this conversation before replying.", "unassigned");
     }
-    const existing = getDb().prepare(`
+    const existing = await runtimeGet<{ id: number }>(`
       SELECT id FROM support_messages WHERE sender_user_id=? AND idempotency_key=?
-    `).get(user.id, key) as { id: number } | undefined;
+    `, [user.id, key]);
     if (existing) return { id: existing.id, duplicate: true };
-    const result = getDb().prepare(`
+    const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(conversation_id,sender_user_id,body,idempotency_key,created_at)
-      VALUES(?,?,?,?,?)
-    `).run(conversationId, user.id, body, key, now);
-    const messageId = Number(result.lastInsertRowid);
+      VALUES(?,?,?,?,?) RETURNING id
+    `, [conversationId, user.id, body, key, now]);
+    const messageId = Number(result!.id);
     const readColumn = user.access_role === "client"
       ? "client_last_read_message_id"
       : "staff_last_read_message_id";
-    getDb().prepare(`
+    await runtimeRun(`
       UPDATE support_conversations
       SET updated_at=?,last_message_at=?,${readColumn}=?
       WHERE id=?
-    `).run(now, now, messageId, conversationId);
-    getDb().prepare(`
+    `, [now, now, messageId, conversationId]);
+    await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'message','message posted',?)
-    `).run(conversationId, user.id, now);
+    `, [conversationId, user.id, now]);
     return { id: messageId, duplicate: false };
   });
 }
 
-function activeAssignmentCount(userId: number) {
-  return (getDb().prepare(`
+async function activeAssignmentCount(userId: number) {
+  return Number((await runtimeGet<{ total: number }>(`
     SELECT COUNT(*) total FROM support_conversations
     WHERE assigned_user_id=? AND status='open'
-  `).get(userId) as { total: number }).total;
+  `, [userId]))?.total || 0);
 }
 
-export function claimSupportConversation(
+export async function claimSupportConversation(
   user: SessionUser,
   conversationId: number,
   now = Date.now(),
@@ -411,27 +409,27 @@ export function claimSupportConversation(
   if (user.access_role !== "team_member" && !hasCapability(user, "operations:manage")) {
     throw new SupportError("Staff access is required.", "forbidden");
   }
-  return inTransaction(() => {
-    const row = requireConversation(user, conversationId);
+  return runtimeTransaction(async () => {
+    const row = await requireConversation(user, conversationId);
     if (row.status !== "waiting") {
       if (row.assigned_user_id === user.id && row.status === "open") return { duplicate: true };
       throw new SupportError("This conversation is already assigned.", "already_assigned");
     }
-    const workload = supportAgentWorkload(user.id);
+    const workload = await supportAgentWorkload(user.id);
     if (!workload?.enabled) {
       throw new SupportError("This account is not enabled for support assignments.", "not_support_agent");
     }
     if (workload.open_count >= workload.max_open_conversations) {
       throw new SupportError("Close a current conversation before claiming another.", "capacity");
     }
-    assignConversation(conversationId, user.id, user.id, "claimed", now);
+    await assignConversation(conversationId, user.id, user.id, "claimed", now);
     return { duplicate: false };
   });
 }
 
-export function closeSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
-  return inTransaction(() => {
-    const row = requireConversation(user, conversationId);
+export async function closeSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
+  return runtimeTransaction(async () => {
+    const row = await requireConversation(user, conversationId);
     if (
       user.access_role !== "client" &&
       row.assigned_user_id !== user.id &&
@@ -439,62 +437,69 @@ export function closeSupportConversation(user: SessionUser, conversationId: numb
     ) {
       throw new SupportError("Only the assigned team member can close this conversation.", "forbidden");
     }
-    getDb().prepare(`
+    await runtimeRun(`
       UPDATE support_conversations SET status='closed',closed_at=?,updated_at=? WHERE id=?
-    `).run(now, now, conversationId);
-    getDb().prepare(`
+    `, [now, now, conversationId]);
+    await runtimeRun(`
       UPDATE support_assignments SET released_at=?
       WHERE conversation_id=? AND released_at IS NULL
-    `).run(now, conversationId);
-    getDb().prepare(`
+    `, [now, conversationId]);
+    await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'closed','conversation closed',?)
-    `).run(conversationId, user.id, now);
+    `, [conversationId, user.id, now]);
   });
 }
 
-export function reopenSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
-  return inTransaction(() => {
-    const row = requireConversation(user, conversationId);
+export async function reopenSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
+  return runtimeTransaction(async () => {
+    const row = await requireConversation(user, conversationId);
     if (row.status !== "closed") return;
     if (user.access_role === "client") {
-      const agent = leastLoadedAgent();
+      const agent = await leastLoadedAgent();
       if (agent) {
-        assignConversation(conversationId, agent.id, user.id, "reopened", now);
+        await assignConversation(conversationId, agent.id, user.id, "reopened", now);
       } else {
-        getDb().prepare(`
+        await runtimeRun(`
           UPDATE support_conversations
           SET status='waiting',assigned_user_id=NULL,closed_at=NULL,updated_at=?
           WHERE id=?
-        `).run(now, conversationId);
+        `, [now, conversationId]);
       }
-      getDb().prepare(`
+      await runtimeRun(`
         INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
         VALUES(?,?,'reopened','client reopened',?)
-      `).run(conversationId, user.id, now);
+      `, [conversationId, user.id, now]);
       return;
     }
     if (row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Only the assigned team member can reopen this conversation.", "forbidden");
     }
-    const workload = row.assigned_user_id ? supportAgentWorkload(row.assigned_user_id) : null;
+    const workload = row.assigned_user_id ? await supportAgentWorkload(row.assigned_user_id) : null;
     if (row.assigned_user_id && (!workload?.enabled || workload.open_count >= workload.max_open_conversations)) {
       throw new SupportError("The assigned team member is at capacity.", "capacity");
     }
     if (!row.assigned_user_id) throw new SupportError("Assign an agent before reopening.", "unassigned");
-    assignConversation(conversationId, row.assigned_user_id, user.id, "reopened", now);
-    getDb().prepare(`
+    await assignConversation(conversationId, row.assigned_user_id, user.id, "reopened", now);
+    await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'reopened','staff reopened',?)
-    `).run(conversationId, user.id, now);
+    `, [conversationId, user.id, now]);
   });
 }
 
-export function listSupportAgentWorkloads(user: SessionUser): SupportAgentWorkload[] {
+export async function listSupportAgentWorkloads(user: SessionUser): Promise<SupportAgentWorkload[]> {
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
-  return getDb().prepare(`
+  return (await runtimeAll<{
+    user_id: number;
+    name: string;
+    email: string;
+    enabled: number;
+    max_open_conversations: number;
+    open_count: number;
+  }>(`
     SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,
       COALESCE(s.max_open_conversations,3) max_open_conversations,
       COUNT(c.id) open_count
@@ -505,15 +510,7 @@ export function listSupportAgentWorkloads(user: SessionUser): SupportAgentWorklo
     WHERE p.access_role IN ('team_member','operations_manager')
     GROUP BY u.id,u.name,u.email,s.enabled,s.max_open_conversations
     ORDER BY COALESCE(s.enabled,0) DESC,COUNT(c.id),lower(u.name)
-  `).all().map((row) => {
-    const value = row as {
-      user_id: number;
-      name: string;
-      email: string;
-      enabled: number;
-      max_open_conversations: number;
-      open_count: number;
-    };
+  `)).map((value) => {
     return {
       userId: value.user_id,
       name: value.name,
@@ -557,10 +554,10 @@ function workloadView(row: {
   };
 }
 
-export function listSupportAgentWorkloadsPage(
+export async function listSupportAgentWorkloadsPage(
   user: SessionUser,
   input: { page?: unknown; q?: unknown; status?: unknown },
-): PageResult<SupportAgentWorkload> {
+): Promise<PageResult<SupportAgentWorkload>> {
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
@@ -578,32 +575,39 @@ export function listSupportAgentWorkloadsPage(
   if (status === "available") conditions.push("enabled=1 AND open_count<max_open_conversations");
   if (status === "full") conditions.push("enabled=1 AND open_count>=max_open_conversations");
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-  const total = Number((getDb().prepare(`
+  const total = Number((await runtimeGet<{ count: number }>(`
     WITH workloads AS (${supportAgentRows()})
     SELECT COUNT(*) count FROM workloads ${where}
-  `).get(...values) as { count: number }).count);
+  `, values))?.count || 0);
   const window = pageWindow(total, request);
-  const rows = getDb().prepare(`
-    WITH workloads AS (${supportAgentRows()})
-    SELECT * FROM workloads ${where}
-    ORDER BY enabled DESC,open_count,lower(name),user_id
-    LIMIT ? OFFSET ?
-  `).all(...values, window.limit, window.offset) as Array<{
+  const rows = await runtimeAll<{
     user_id: number;
     name: string;
     email: string;
     enabled: number;
     max_open_conversations: number;
     open_count: number;
-  }>;
+  }>(`
+    WITH workloads AS (${supportAgentRows()})
+    SELECT * FROM workloads ${where}
+    ORDER BY enabled DESC,open_count,lower(name),user_id
+    LIMIT ? OFFSET ?
+  `, [...values, window.limit, window.offset]);
   return pageResult(rows.map(workloadView), total, request);
 }
 
-export function getSupportAgentSummary(user: SessionUser): SupportAgentSummary {
+export async function getSupportAgentSummary(user: SessionUser): Promise<SupportAgentSummary> {
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
-  const row = getDb().prepare(`
+  const row = (await runtimeGet<{
+    total_agents: number;
+    enabled_agents: number;
+    available_agents: number;
+    full_agents: number;
+    open_assignments: number;
+    waiting_conversations: number;
+  }>(`
     WITH workloads AS (${supportAgentRows()})
     SELECT
       COUNT(*) total_agents,
@@ -613,14 +617,7 @@ export function getSupportAgentSummary(user: SessionUser): SupportAgentSummary {
       SUM(open_count) open_assignments,
       (SELECT COUNT(*) FROM support_conversations WHERE status='waiting') waiting_conversations
     FROM workloads
-  `).get() as {
-    total_agents: number;
-    enabled_agents: number;
-    available_agents: number;
-    full_agents: number;
-    open_assignments: number;
-    waiting_conversations: number;
-  };
+  `))!;
   return {
     totalAgents: Number(row.total_agents || 0),
     enabledAgents: Number(row.enabled_agents || 0),
@@ -631,7 +628,7 @@ export function getSupportAgentSummary(user: SessionUser): SupportAgentSummary {
   };
 }
 
-export function updateSupportAgentSetting(
+export async function updateSupportAgentSetting(
   user: SessionUser,
   input: { userId: unknown; enabled: unknown; maxOpenConversations: unknown },
   now = Date.now(),
@@ -645,12 +642,12 @@ export function updateSupportAgentSetting(
   if (!Number.isInteger(userId) || !Number.isInteger(maximum) || maximum < 1 || maximum > 20) {
     throw new SupportError("Support agent settings are invalid.", "invalid_setting");
   }
-  const staff = getDb().prepare(`
+  const staff = await runtimeGet(`
     SELECT 1 FROM user_access_profiles
     WHERE user_id=? AND access_role IN ('team_member','operations_manager')
-  `).get(userId);
+  `, [userId]);
   if (!staff) throw new SupportError("Support agent was not found.", "invalid_agent");
-  const openConversations = activeAssignmentCount(userId);
+  const openConversations = await activeAssignmentCount(userId);
   if (openConversations > maximum) {
     throw new SupportError(
       `Reassign or close ${openConversations - maximum} conversation(s) before lowering this limit.`,
@@ -663,7 +660,7 @@ export function updateSupportAgentSetting(
       "capacity",
     );
   }
-  getDb().prepare(`
+  await runtimeRun(`
     INSERT INTO support_agent_settings(
       user_id,enabled,max_open_conversations,updated_by_user_id,updated_at
     ) VALUES(?,?,?,?,?)
@@ -672,10 +669,10 @@ export function updateSupportAgentSetting(
       max_open_conversations=excluded.max_open_conversations,
       updated_by_user_id=excluded.updated_by_user_id,
       updated_at=excluded.updated_at
-  `).run(userId, enabled ? 1 : 0, maximum, user.id, now);
+  `, [userId, enabled ? 1 : 0, maximum, user.id, now]);
 }
 
-export function reassignSupportConversation(
+export async function reassignSupportConversation(
   user: SessionUser,
   conversationId: number,
   assignedUserId: number | null,
@@ -684,28 +681,28 @@ export function reassignSupportConversation(
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
-  return inTransaction(() => {
-    requireConversation(user, conversationId);
+  return runtimeTransaction(async () => {
+    await requireConversation(user, conversationId);
     if (assignedUserId === null) {
-      getDb().prepare(`
+      await runtimeRun(`
         UPDATE support_assignments SET released_at=?
         WHERE conversation_id=? AND released_at IS NULL
-      `).run(now, conversationId);
-      getDb().prepare(`
+      `, [now, conversationId]);
+      await runtimeRun(`
         UPDATE support_conversations
         SET assigned_user_id=NULL,status='waiting',closed_at=NULL,updated_at=?
         WHERE id=?
-      `).run(now, conversationId);
+      `, [now, conversationId]);
     } else {
-      const workload = supportAgentWorkload(assignedUserId);
+      const workload = await supportAgentWorkload(assignedUserId);
       if (!workload?.enabled || workload.open_count >= workload.max_open_conversations) {
         throw new SupportError("That support agent is unavailable or at capacity.", "capacity");
       }
-      assignConversation(conversationId, assignedUserId, user.id, "reassigned", now);
+      await assignConversation(conversationId, assignedUserId, user.id, "reassigned", now);
     }
-    getDb().prepare(`
+    await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'reassigned',?,?)
-    `).run(conversationId, user.id, assignedUserId === null ? "waiting" : `agent:${assignedUserId}`, now);
+    `, [conversationId, user.id, assignedUserId === null ? "waiting" : `agent:${assignedUserId}`, now]);
   });
 }

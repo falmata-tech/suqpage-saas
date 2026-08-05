@@ -8,10 +8,10 @@ import { assignRequestAction } from "@/app/staff-actions";
 import { createRevisionDraftAction, rollbackRevisionAction } from "@/app/revision-actions";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { presentRequestEvent } from "@/lib/request-presentation";
 import { REVIEW_REQUEST_STATUSES } from "@/lib/request-domain";
-import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
+import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { listTeamMemberChoices } from "@/lib/scalable-queries";
 import { listContentRevisions } from "@/lib/revision-service";
 
@@ -22,18 +22,18 @@ export default async function RequestDetailPage({ params, searchParams }: { para
   const requestId = Number.parseInt((await params).id, 10);
   const query = await searchParams;
   if (!Number.isInteger(requestId)) notFound();
-  const request = getRequestDetail(requestId);
+  const request = await runtimeRequestDetail(requestId);
   if (!request) notFound();
   if (!canAccessRequest(user, request)) notFound();
   const manager = hasCapability(user, "operations:manage");
   const teamMember = user.access_role === "team_member";
   const client = user.access_role === "client";
   const businessId = !manager ? request.business_id : null;
-  const business = !manager && businessId ? getBusinessById(businessId) || null : null;
+  const business = !manager && businessId ? (await runtimeBusinessById(businessId)) || null : null;
   const teamMembers = manager
-    ? listTeamMemberChoices(query.staffQ, request.assigned_user_id)
+    ? await listTeamMemberChoices(query.staffQ, request.assigned_user_id)
     : [];
-  const revisions = request.business_id ? listContentRevisions(request.id) : [];
+  const revisions = request.business_id ? await listContentRevisions(request.id) : [];
   const clarifications=request.events.filter((event)=>event.event_type==="client_clarification"||event.event_type==="staff_clarification");
   const history=request.events.filter((event)=>event.event_type!=="client_clarification"&&event.event_type!=="staff_clarification");
   const clarificationOpen=!["published","completed","rejected","cancelled"].includes(request.status);

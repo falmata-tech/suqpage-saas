@@ -49,7 +49,7 @@ try {
     submitter_kind: "client",
     submitted_by_user_id: created.userId,
   });
-  assert.equal(getDiscoveryView({ db, industry: "food-farming" }).total, 0, "a self-created draft is never public");
+  assert.equal((await getDiscoveryView({ db, industry: "food-farming" })).total, 0, "a self-created draft is never public");
 
   const counts = () => ({
     businesses: Number((db.prepare("SELECT COUNT(*) count FROM businesses").get() as { count: number }).count),

@@ -5,6 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { DISCOVERY_INDUSTRIES, getDiscoveryView } from "../lib/discovery";
 import { updateDiscoveryProfile } from "../lib/discovery-admin";
+import { buildPerimeterVenueLayout } from "../lib/discovery-venue-layout";
 import { migrateDatabase } from "../lib/schema";
 
 const discoveryUiSource = fs.readFileSync(
@@ -19,10 +20,36 @@ assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
 assert.match(discoveryUiSource, /router\.replace/);
 assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
+assert.match(discoveryCssSource, /venue-hall-shell-v2\.webp/);
+assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
+const venueShell = path.join(process.cwd(), "public/landing/venue-hall-shell-v2.webp");
+assert.ok(fs.existsSync(venueShell), "the local architectural venue shell exists");
+assert.ok(fs.statSync(venueShell).size <= 300_000, "the architectural venue shell stays under 300 KB");
+
+for (const count of [1, 5, 10, 11, 20, 37]) {
+  const layout = buildPerimeterVenueLayout(count, 224, 164);
+  assert.equal(layout.positions.length, count, `${count} businesses receive exactly one perimeter position`);
+  assert.equal(new Set(layout.positions.map((position) => `${position.left}:${position.top}`)).size, count, `${count} perimeter positions remain unique`);
+  assert.ok(layout.clearWidth > 0 && layout.clearHeight > 0, `${count} businesses retain an empty central court`);
+  const clearLeft = layout.centerX - layout.clearWidth / 2;
+  const clearRight = layout.centerX + layout.clearWidth / 2;
+  const clearTop = layout.centerY - layout.clearHeight / 2;
+  const clearBottom = layout.centerY + layout.clearHeight / 2;
+  layout.positions.forEach((position, index) => {
+    assert.ok(position.left >= 0 && position.top >= 0 && position.left + layout.cardWidth <= layout.width && position.top + layout.cardHeight <= layout.height, `${count}:${index} stays inside the hall`);
+    const outsideCenter = position.left + layout.cardWidth <= clearLeft || position.left >= clearRight || position.top + layout.cardHeight <= clearTop || position.top >= clearBottom;
+    assert.ok(outsideCenter, `${count}:${index} stays outside the central court`);
+    layout.positions.slice(index + 1).forEach((other, otherIndex) => {
+      const separated = position.left + layout.cardWidth <= other.left || other.left + layout.cardWidth <= position.left || position.top + layout.cardHeight <= other.top || other.top + layout.cardHeight <= position.top;
+      assert.ok(separated, `${count}:${index} does not overlap ${index + otherIndex + 1}`);
+    });
+  });
+}
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
 const db = new DatabaseSync(path.join(root, "discovery.db"));
 
+async function main() {
 try {
   migrateDatabase(db, { assertDestructiveMigrationCheckpoint: () => {} });
 
@@ -73,7 +100,7 @@ try {
         WHERE business_id=?
       `).run(now - 40 * 86_400_000, now - 35 * 86_400_000, now - 5 * 86_400_000, now - 86_400_000, id);
     } else {
-      db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?").run(future, id);
+      db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?").run(future + 5 * 24 * 60 * 60 * 1000, id);
     }
     addProfile.run(
       id,
@@ -131,7 +158,7 @@ try {
   }
 
   const monday = new Date("2026-07-27T09:00:00+03:00");
-  const view = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const view = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.sponsoredCount, 2);
   assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
@@ -150,6 +177,7 @@ try {
   assert.equal(view.expo.isToday, true);
   assert.equal(view.expo.selectedWeekday, 1);
   assert.equal(view.expo.schedule.length, 7);
+  assert.deepEqual(view.expo.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "schedule positions remain fixed from Monday through Sunday");
   assert.equal(view.expo.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
   assert.ok(view.expo.booths.every((booth) => booth.revealed && booth.showroom.imagePath === `/booths/${booth.showroom.handle}.webp`), "today's Expo uses each business's approved booth profile image");
   assert.deepEqual(view.expo.booths.map((booth) => booth.slot), Array.from({ length: 19 }, (_, index) => index + 1), "every Expo business receives one continuous floor slot");
@@ -158,46 +186,52 @@ try {
 
   assert.equal(view.list.items.length, 5, "the database-backed List response is capped at five rows");
   assert.equal(view.list.pageCount, 4);
-  const secondPage = getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", expoDay: 1, now: monday });
+  const secondPage = await getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", expoDay: 1, now: monday });
   assert.equal(secondPage.list.page, 2);
   assert.equal(secondPage.list.items.length, 5);
   assert.equal(secondPage.view, "list");
   assert.equal(secondPage.list.items.some((item) => view.list.items.some((first) => first.id === item.id)), false, "List pages do not repeat rows");
-  const clampedPage = getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", expoDay: 1, now: monday });
+  const clampedPage = await getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", expoDay: 1, now: monday });
   assert.equal(clampedPage.list.page, 4, "an out-of-range page is clamped to the final page");
   assert.equal(clampedPage.list.items.length, 4);
 
-  const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
+  const search = await getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
   assert.equal(search.total, 1, "published offering text is searchable");
   assert.equal(search.showrooms[0].city, "Addis Ababa");
   assert.equal(search.cityGroups.length, 0, "a single searched result remains an isolated exact-coordinate pin");
   assert.equal(search.expo.booths.length, 19, "map search does not narrow the independently scheduled Expo");
 
-  const tuesday = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
+  const tuesday = await getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
   assert.equal(tuesday.expo.title, "Beauty, hygiene & household care Expo");
   assert.equal(tuesday.expo.isToday, false);
   assert.equal(tuesday.expo.boothCount, 1);
   assert.ok(tuesday.expo.booths.every((booth) => !booth.revealed && booth.showroom === null), "non-today Expo slots contain no business projection");
   assert.equal(JSON.stringify(tuesday.expo.booths).includes("sheger-soap"), false, "non-today page data does not leak a business handle");
 
-  const sunday = getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
+  const wednesday = await getDiscoveryView({ db, industry: "electronics", expoDay: 3, now: new Date("2026-07-29T09:00:00+03:00") });
+  assert.deepEqual(wednesday.expo.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "advancing today does not reorder weekday cards");
+  assert.equal(wednesday.expo.schedule.find((day) => day.isToday)?.dayLabel, "Wednesday", "today indicator moves within the fixed week");
+  assert.equal(wednesday.expo.schedule[0].dateIso, "2026-07-27");
+  assert.equal(wednesday.expo.schedule[2].dateIso, "2026-07-29");
+
+  const sunday = await getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
   assert.equal(sunday.expo.mode, "livestream");
   assert.equal(sunday.expo.title, "Featured Enterprises: Textiles, garments, leather & paper");
   assert.equal(sunday.expo.boothCount, 3);
   assert.ok(sunday.expo.booths.every((booth) => !booth.revealed && booth.showroom === null), "the future Sunday lineup is also redacted");
   assert.ok(sunday.expo.booths.every((booth) => /^LIVE-\d{2}$/.test(booth.reference)));
-  const sundayIndustries = Array.from({ length: 7 }, (_, week) => getDiscoveryView({
+  const sundayIndustries = await Promise.all(Array.from({ length: 7 }, async (_, week) => (await getDiscoveryView({
     db,
     expoDay: 0,
     now: new Date(monday.getTime() + week * 7 * 86_400_000),
-  }).expo.title);
+  })).expo.title));
   assert.equal(new Set(sundayIndustries.slice(0, 6)).size, 6, "Sunday rotates through all six industries");
   assert.equal(sundayIndustries[6], sundayIndustries[0], "Sunday industry rotation loops after six weeks");
-  const sundayToday = getDiscoveryView({ db, expoDay: 0, now: new Date("2026-08-02T09:00:00+03:00") });
+  const sundayToday = await getDiscoveryView({ db, expoDay: 0, now: new Date("2026-08-02T09:00:00+03:00") });
   assert.equal(sundayToday.expo.booths.length, 3);
   assert.ok(sundayToday.expo.booths.every((booth) => booth.revealed), "today's Sunday floor reveals only selected enterprises");
 
-  const invalidIndustry = getDiscoveryView({ db, industry: "not-real" });
+  const invalidIndustry = await getDiscoveryView({ db, industry: "not-real" });
   assert.equal(invalidIndustry.industry.key, DISCOVERY_INDUSTRIES[0].key, "invalid industry resolves to the first allowlisted industry");
 
   const plan = db.prepare("EXPLAIN QUERY PLAN SELECT business_id FROM business_industries WHERE industry_key=?").all("electronics") as Array<{ detail: string }>;
@@ -208,7 +242,7 @@ try {
     "the controlled industry vocabulary has six entries",
   );
 
-  updateDiscoveryProfile({
+  await updateDiscoveryProfile({
     businessId: firstAddisBusinessId,
     industryKeys: ["electronics", "machinery-tools"],
     boothImagePath: "/booths/admin-approved.webp",
@@ -244,7 +278,7 @@ try {
     [{ industry_key: "electronics", position: 3 }],
     "admin discovery updates persist MirtPage's Sunday selection independently",
   );
-  const refreshedToday = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const refreshedToday = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   const updatedBooth = refreshedToday.expo.booths.find((booth) => booth.revealed && booth.showroom.id === firstAddisBusinessId);
   assert.equal(updatedBooth?.revealed ? updatedBooth.showroom.imagePath : null, "/booths/admin-approved.webp", "the public booth reads its image from the owning business profile");
   assert.deepEqual(
@@ -252,7 +286,7 @@ try {
     ["electronics", "machinery-tools"],
     "admin discovery updates replace indexed industry membership atomically",
   );
-  assert.throws(() => updateDiscoveryProfile({
+  await assert.rejects(() => updateDiscoveryProfile({
     businessId: firstAddisBusinessId,
     industryKeys: ["electronics"],
     boothImagePath: "/booths/admin-approved.webp",
@@ -270,7 +304,7 @@ try {
     excluded: false,
   }, db), /Sunday selections must match/, "Sunday curation cannot assign a business outside its reviewed industries");
   db.prepare("UPDATE business_discovery_profiles SET booth_image_path='' WHERE business_id=(SELECT id FROM businesses WHERE handle='bishoftu-repair')").run();
-  const missingBoothMedia = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const missingBoothMedia = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   assert.equal(missingBoothMedia.total, 19, "missing booth setup does not erase an otherwise eligible geographic Showroom");
   assert.equal(missingBoothMedia.expo.boothCount, 18, "a business without its own approved booth image does not receive an Expo slot");
 
@@ -279,3 +313,9 @@ try {
   db.close();
   fs.rmSync(root, { recursive: true, force: true });
 }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

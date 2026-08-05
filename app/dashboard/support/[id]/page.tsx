@@ -10,7 +10,7 @@ import {
 import DashboardShell from "@/components/DashboardShell";
 import SupportThreadRefresh from "@/components/SupportThreadRefresh";
 import { requireUser } from "@/lib/auth";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { getSupportConversation, listSupportAgentWorkloads } from "@/lib/support";
 
 export const dynamic = "force-dynamic";
@@ -33,11 +33,11 @@ export default async function SupportThread({
   const user = await requireUser();
   const id = Number.parseInt((await params).id, 10);
   const query = await searchParams;
-  const data = getSupportConversation(user, id);
-  const business = user.business_id ? getBusinessById(user.business_id) || null : null;
+  const data = await getSupportConversation(user, id);
+  const business = user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
   const client = user.access_role === "client";
   const operations = user.access_role === "operations_manager" || user.access_role === "platform_admin";
-  const agents = operations ? listSupportAgentWorkloads(user).filter((agent) => agent.enabled) : [];
+  const agents = operations ? (await listSupportAgentWorkloads(user)).filter((agent) => agent.enabled) : [];
   const canReply = data.conversation.status === "open"
     ? client || data.conversation.assignedUserId === user.id || user.access_role === "operations_manager" || user.access_role === "platform_admin"
     : data.conversation.status === "waiting" && client;

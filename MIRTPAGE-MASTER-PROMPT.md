@@ -8,7 +8,7 @@
 
 ## 1. Your role
 
-You are working on **MirtPage**, a multi-tenant SaaS platform for Ethiopian makers, growers, processors, workshops, home-based product businesses, and growing factories that primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and B2B relationships.
+You are working on **MirtPage**, a multi-tenant SaaS platform for small and growing Ethiopian makers, growers, processors, workshops, home-based product businesses, and factories that still need practical market access and primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and B2B relationships.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
@@ -59,7 +59,16 @@ The showroom is designed to turn passive browsing into a structured product inqu
 
 ## 3. The problem MirtPage solves
 
-Many social sellers have products spread across posts, stories, image galleries, chats, and status updates. Customers struggle to understand:
+MirtPage begins from a simple belief: **production is a bet on Ethiopia**.
+Workshops, growers, processors, and growing factories commit equipment,
+materials, land, training, wages, and daily discipline long before the first
+sale. That work develops skills, supports livelihoods, strengthens local supply,
+and gives buyers another Ethiopian-made option, yet it is often difficult to
+discover or evaluate beyond scattered social posts and word of mouth.
+
+Many of these businesses have products and production capabilities spread
+across posts, stories, image galleries, chats, and status updates. Consumer and
+wholesale buyers struggle to understand:
 
 - what the business sells;
 - which items are currently available;
@@ -68,7 +77,12 @@ Many social sellers have products spread across posts, stories, image galleries,
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
 - how the business can retain the inquiry if a social-app handoff fails.
 
-MirtPage organizes the catalog into a professional branded showroom and adds a structured inquiry workflow without forcing the business into full ecommerce operations.
+MirtPage gives that real production a professional public presence. It organizes
+the business's products, capabilities, process, reviewed location, and story
+inside a permanent branded showroom; helps consumer and wholesale buyers
+discover it by product or place; and adds a structured direct inquiry workflow
+without forcing the business into full ecommerce operations. The producer keeps
+its identity, customer relationship, and control of the conversation.
 
 ---
 
@@ -232,9 +246,9 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 The MirtPage landing page must not look like any client showroom. It is a polished,
 mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-021` and `FE-024` define the current composition: a compact
-purple visitor welcome introduces one integrated,
-application-first discovery workspace combining industry and reviewed production-scale selection, search, a
+and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`, and `FE-029` define the current composition, narrative, venue art direction, and platform visual system: a compact
+midnight-and-teal visitor welcome introduces one integrated,
+application-first discovery workspace combining industry selection, search, a
 disclosed paid-sponsorship rail, exact-location Ethiopia map, and server-paginated
 five-row List. A separate weekly country-wide Expo program follows the map inside
 the same workspace. Monday through Saturday each have one stable assigned
@@ -243,9 +257,50 @@ deterministically rotating industry through MirtPage social livestreams.
 Long platform education lives on `/about`, signup lives on `/request`, and only
 a restrained merchant call-to-action follows the marketplace. There is no
 duplicated all-business directory or browser-side full-catalog List fan-out.
-The welcome names the marketplace, invites immediate exploration, and visually
-connects to the workspace; merchant education and conversion remain secondary
-content below the public discovery experience.
+The welcome uses short, confident, concrete language: visitors can search what
+Ethiopia makes by product or place, inspect a professional showroom, and begin a
+direct retail or wholesale inquiry. It avoids motivational clichés, generic SaaS
+claims, and childish slogans while visually connecting directly to the
+workspace. The fuller story of production risk, practical skill, livelihoods,
+and local supply belongs on `/about`;
+merchant education and conversion remain secondary content below the public
+discovery experience. Platform copy must not claim verified tax, employment,
+certification, import-substitution, sales, or other outcomes for every listed
+business, and MirtPage mission copy must not be injected into client-owned
+showrooms. Every public showroom and private preview is framed by one compact,
+platform-owned **Powered by MirtPage** band with a concise visible **Back**
+action whose accessible name identifies the MirtPage marketplace destination.
+This host chrome sits outside the tenant renderer and must not replace,
+obscure, or visually compete with the tenant's logo, header,
+navigation, or content. Its surface, border, text, and focus colors may derive
+from the approved tenant palette so the compact band belongs beside the site;
+the MirtPage mark, host wording, and Marketplace action remain controlled
+platform identity.
+
+MirtPage-owned surfaces use one semantic identity system derived from midnight
+navy `#0B1D3A`, deep teal `#0D6B6E`, bright teal `#27A5A1`, saffron
+`#F2B01E`, and cool gray `#F3F5F7`. Navy carries identity and structure, teal
+carries primary actions and selection, and saffron is reserved for bounded
+warning or exceptional attention states, never the Expo Today treatment. Sponsored placement uses bright-teal accents and
+an explicit paid label over a restrained midnight patterned field instead of a
+warning color. Public pages, task forms, discovery, and
+authenticated workspaces share the same vector mark and split-color wordmark.
+Client showroom logos and approved or custom showroom palettes remain
+independent and are never replaced by the platform palette.
+
+Expo and City Showroom floors use a locally stored, optimized architectural hall
+shell: a cohesive overhead interior with light walls, glass entrance, reception
+architecture, integrated planting, lighting, and a quiet open floor. The artwork
+contains no people, seating, businesses, booths, products, text, or fixed
+business positions. If it is unavailable, the floor falls back to a neutral
+surface without affecting discovery.
+
+Business cards are placed by a deterministic rectangular-perimeter layout. They
+run around all four sides of the hall while the central court remains empty. As
+participation grows, the hall and its side-slot count expand systematically;
+every business receives one unique non-overlapping position. Computed floor
+dimensions and positions remain authoritative, and the architectural image
+never determines business placement.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.
@@ -255,21 +310,27 @@ Nearby markers form numbered zoom-dependent clusters. Repeated activation zooms
 to either an isolated exact-coordinate marker or, when two or more matching
 businesses share a reviewed city and region, one close-zoom counted city
 gateway. The gateway centroid is only a discovery affordance and does not change
-any business address. Activating it opens a map-backed virtual City Showroom in place:
+any business address. Activating it replaces the map inside the same frame with
+a virtual City Showroom:
 every grouped business occupies one dynamically sized floor that visitors can
 pan and zoom, with no halls, pagination, route change, or hidden overflow.
-Closing it restores the same map state. Location controls show only places with
+The geographic renderer is suspended while this floor is open, and **Back to
+map** restores the same map state. Isolated business pins use the same teal
+identity as numbered clusters while retaining their distinct pin shape.
+Location controls show only places with
 matching businesses, and the center control restores the country view.
 
 The Monday-through-Saturday Expo is a virtual presentation, not a physical
 location claim. It uses one dynamically sized top-view floor, restrained
 architectural context, no people, and direct pan/zoom/fit controls. Every booth
 remains on that floor; there are no halls, pages, or hidden overflow records.
-The rolling seven-date selector begins with Ethiopia-local today, never a past
-date. Today retains the strongest persistent visual emphasis. Selecting another
-date opens a six-second anonymous preview and then returns to today; selecting a
-different preview restarts that timer without changing map filters. The selected
-calendar date, not map filters, chooses its industry. Monday is Electronics, Tuesday Beauty &
+The seven-date selector remains in fixed Monday-through-Sunday order for the
+current Ethiopia-local calendar week. Its midnight-and-teal **Today** indicator
+moves to the current weekday without reordering the cards or using saffron.
+Selecting another date opens a six-second anonymous preview and then returns to
+today; selecting a different preview restarts that timer without changing map
+filters. The selected calendar date, not map filters, chooses its industry.
+Monday is Electronics, Tuesday Beauty &
 Care, Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home &
 Living, and Saturday Fashion & Textiles. Today's Expo reveals each business's
 identity, approved account-owned booth image, preview, and permanent Visit Showroom
@@ -614,7 +675,7 @@ MirtPage’s directory must scale without dumping every tenant onto the page by 
 Default behavior:
 
 - show no more than five active public showrooms on the current page;
-- provide search plus simple Industry pills, beginning with **All industries**;
+- provide live search plus simple Industry controls;
 - do not expose category filters or duplicate all-business/reset navigation;
 - reset to page one when search or Industry changes;
 - fetch no more than five List records per response page using database count,
@@ -622,8 +683,11 @@ Default behavior:
 - show previous/next pagination only when more than five records match;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
-- compose reviewed **Workshop / producer** and **Growing factory** scale filters
-  with industry, search, map/list state, and pagination without changing Expo scheduling;
+- keep reviewed **Workshop / producer** and **Growing factory** scale metadata
+  available to authorized administrators without exposing it as a public filter;
+- place live search, available-location jump, map/list mode, and zoom/center
+  controls in one compact teal command area immediately above the map;
+- ignore legacy public `scale` query state so no invisible filter narrows results;
 - ensure mobile usability and keyboard accessibility.
 
 ---
@@ -1303,8 +1367,8 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
-The controlled MVP is intended for a small managed client cohort on one
-persistent server or one persistent container.
+The controlled MVP supports SQLite for local development and retained rollback,
+and managed PostgreSQL for the production runtime.
 
 Current SQLite requirements:
 
@@ -1321,15 +1385,24 @@ Current SQLite requirements:
 - database integrity checks;
 - appropriate file permissions.
 
-Do not horizontally scale the SQLite build across multiple application instances.
+Do not horizontally scale a SQLite deployment across multiple application instances.
 `docs/MANAGED-POSTGRES-READINESS.md`, `docs/DEVOPS-RUNBOOK.md`, and ADR-0013
 record the required SQL-adapter, migration, job, realtime, backup, and
-monitored-cutover work. The current disposable PostgreSQL rehearsal translates
-the complete schema, copies rows, installs reviewed constraints, indexes, and
-triggers, and reconciles counts and fingerprints while leaving SQLite
-byte-identical. A boundary manifest prevents new direct SQLite coupling, but 42
-approved runtime modules remain to be ported. Supabase Storage is an implemented
-optional media adapter; Supabase PostgreSQL is not a current runtime mode.
+monitored-cutover work. The disposable PostgreSQL gate translates the complete
+schema, copies rows, installs reviewed constraints, indexes, and triggers,
+reconciles counts and fingerprints while leaving SQLite byte-identical, and runs
+every authoritative workflow through PostgreSQL adapters. A boundary manifest
+prevents new direct SQLite coupling and records the retained local/rollback
+adapters. The guarded production copy can transaction-locally assume an
+explicit, identifier-safe provider migration role when a temporary Supabase CLI
+login requires it. Supabase Storage and PostgreSQL are implemented runtime modes.
+
+The production-only Supabase PostgreSQL and Vercel cutover is controlled by
+BE-027 and DEP-023. Runtime parity, the real reconciled Supabase copy, private
+Storage verification, least-privilege runtime preflight, exact release checks,
+and generated-host Vercel smoke tests are complete. The custom domains are
+attached to the production project, but external DNS verification and rollback
+monitoring must pass before the deployment is described as production-ready.
 
 Before broad external rollout or multi-instance production scale, migrate to:
 
@@ -1339,7 +1412,10 @@ Before broad external rollout or multi-instance production scale, migrate to:
 - full observability and alerting;
 - stronger account recovery and staff roles;
 
-Production environment must use absolute persistent paths and HTTPS. Follow `.env.example`, `README.md`, Docker configuration, and preflight checks.
+SQLite production requires absolute persistent paths. PostgreSQL production
+requires the managed connection URL and private Supabase Storage. All production
+environments require HTTPS. Follow `.env.example`, `README.md`, Docker
+configuration, and preflight checks.
 
 ---
 
