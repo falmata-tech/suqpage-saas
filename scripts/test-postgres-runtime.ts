@@ -413,6 +413,19 @@ async function main() {
         }>("SELECT id,email,name,role,business_id,must_change_password FROM users WHERE id=?", [redeemedInvitation.userId])).rows[0];
       });
       const supportClient = { ...supportClientRow, access_role: "client" as const };
+      const { createAuthenticatedClientRequest } = await import("../lib/client-request-service");
+      const clientRequestForm = new FormData();
+      clientRequestForm.set("requestText", "Create a PostgreSQL-backed showroom request from the authenticated client workspace.");
+      clientRequestForm.set("idempotencyKey", `postgres-client-request-${Date.now()}`);
+      const clientRequest = await createAuthenticatedClientRequest(supportClient, clientRequestForm);
+      assert.equal(clientRequest.duplicate, false);
+      const { createOnBehalfRequest } = await import("../lib/on-behalf-request-service");
+      const onBehalfForm = new FormData();
+      onBehalfForm.set("clientUserId", String(supportClient.id));
+      onBehalfForm.set("requestText", "Record a PostgreSQL-backed showroom request on behalf of this managed client.");
+      onBehalfForm.set("idempotencyKey", `postgres-manager-request-${Date.now()}`);
+      const onBehalfRequest = await createOnBehalfRequest(operationsUser, onBehalfForm);
+      assert.equal(onBehalfRequest.duplicate, false);
       const supportConversation = await createSupportConversation(supportClient, {
         subject: "PostgreSQL runtime support",
         message: "Verify the native support queue on PostgreSQL.",
