@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb, getUserById } from "./db";
 import { runtimeUserById } from "./catalog-runtime";
-import { postgresRuntimePreviewEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
+import { postgresRuntimeEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
 import { currentRequestIdentity } from "./security";
 import type { SessionUser } from "./types";
 
@@ -22,7 +22,7 @@ export async function currentUser(): Promise<SessionUser | null> {
   const token = jar.get(COOKIE)?.value;
   if (!token || token.length < 40) return null;
   const now = Date.now();
-  const session = postgresRuntimePreviewEnabled()
+  const session = postgresRuntimeEnabled()
     ? await postgresRuntimeServices().sessions.findActive(hashToken(token), now)
     : getDb().prepare(`
     SELECT id,user_id,last_seen_at
@@ -31,10 +31,10 @@ export async function currentUser(): Promise<SessionUser | null> {
   `).get(hashToken(token), now) as SessionRow | undefined;
   if (!session) return null;
   if (now - Number(session.last_seen_at) > 15 * 60 * 1000) {
-    if (postgresRuntimePreviewEnabled()) await postgresRuntimeServices().sessions.touch(session.id, now);
+    if (postgresRuntimeEnabled()) await postgresRuntimeServices().sessions.touch(session.id, now);
     else getDb().prepare("UPDATE sessions SET last_seen_at=? WHERE id=?").run(now, session.id);
   }
-  return postgresRuntimePreviewEnabled() ? (await runtimeUserById(Number(session.user_id))) || null : getUserById(Number(session.user_id)) || null;
+  return postgresRuntimeEnabled() ? (await runtimeUserById(Number(session.user_id))) || null : getUserById(Number(session.user_id)) || null;
 }
 
 export async function requireUser(options: { allowTemporaryPassword?: boolean } = {}) {
@@ -56,7 +56,7 @@ export async function setSession(userId: number) {
   const token = crypto.randomBytes(32).toString("base64url");
   const now = Date.now();
   const identity = await currentRequestIdentity();
-  if (postgresRuntimePreviewEnabled()) {
+  if (postgresRuntimeEnabled()) {
     await postgresRuntimeServices().sessions.create({ tokenHash: hashToken(token), userId, expiresAt: now + SESSION_MS, now, ipHash: identity.ipHash, userAgent: identity.userAgent });
   } else {
     getDb().prepare("DELETE FROM sessions WHERE expires_at<=? OR revoked_at IS NOT NULL").run(now);
@@ -77,13 +77,13 @@ export async function clearSession() {
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (token) {
-    if (postgresRuntimePreviewEnabled()) await postgresRuntimeServices().sessions.revokeByToken(hashToken(token), Date.now());
+    if (postgresRuntimeEnabled()) await postgresRuntimeServices().sessions.revokeByToken(hashToken(token), Date.now());
     else getDb().prepare("UPDATE sessions SET revoked_at=? WHERE token_hash=?").run(Date.now(), hashToken(token));
   }
   jar.delete(COOKIE);
 }
 
 export async function revokeAllUserSessions(userId: number) {
-  if (postgresRuntimePreviewEnabled()) await postgresRuntimeServices().sessions.revokeAllForUser(userId, Date.now());
+  if (postgresRuntimeEnabled()) await postgresRuntimeServices().sessions.revokeAllForUser(userId, Date.now());
   else getDb().prepare("UPDATE sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL").run(Date.now(), userId);
 }

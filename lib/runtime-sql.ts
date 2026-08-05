@@ -1,20 +1,20 @@
 import { getDb } from "./db";
-import { postgresRuntimePreviewEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
+import { postgresRuntimeEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
 
 export type RuntimeSqlValue = string | number | bigint | Uint8Array | null;
 
 export async function runtimeGet<T>(sql: string, values: readonly RuntimeSqlValue[] = []): Promise<T | undefined> {
-  if (postgresRuntimePreviewEnabled()) return (await postgresRuntimeServices().runner.query<T & Record<string, unknown>>(sql, values)).rows[0] as T | undefined;
+  if (postgresRuntimeEnabled()) return (await postgresRuntimeServices().runner.query<T & Record<string, unknown>>(sql, values)).rows[0] as T | undefined;
   return getDb().prepare(sql).get(...values) as T | undefined;
 }
 
 export async function runtimeAll<T>(sql: string, values: readonly RuntimeSqlValue[] = []): Promise<T[]> {
-  if (postgresRuntimePreviewEnabled()) return (await postgresRuntimeServices().runner.query<T & Record<string, unknown>>(sql, values)).rows as T[];
+  if (postgresRuntimeEnabled()) return (await postgresRuntimeServices().runner.query<T & Record<string, unknown>>(sql, values)).rows as T[];
   return getDb().prepare(sql).all(...values) as T[];
 }
 
 export async function runtimeRun(sql: string, values: readonly RuntimeSqlValue[] = []) {
-  if (postgresRuntimePreviewEnabled()) {
+  if (postgresRuntimeEnabled()) {
     const result = await postgresRuntimeServices().runner.query(sql, values);
     return { changes: result.rowCount };
   }
@@ -24,7 +24,7 @@ export async function runtimeRun(sql: string, values: readonly RuntimeSqlValue[]
 let sqliteTransactionQueue: Promise<void> = Promise.resolve();
 
 export async function runtimeTransaction<T>(operation: () => Promise<T>): Promise<T> {
-  if (postgresRuntimePreviewEnabled()) return postgresRuntimeServices().runner.transaction(operation);
+  if (postgresRuntimeEnabled()) return postgresRuntimeServices().runner.transaction(operation);
   const previous = sqliteTransactionQueue;
   let release = () => {};
   sqliteTransactionQueue = new Promise<void>((resolve) => { release = resolve; });

@@ -82,7 +82,7 @@ explicitly disposable installation only. Existing data uses `npm run migrate`.
 7. Retain the filesystem source through the rollback window. Rollback changes
    the driver to `filesystem`; it does not delete copied objects.
 
-## PostgreSQL rehearsal
+## PostgreSQL rehearsal and initial copy
 
 The automated gate starts a disposable PostgreSQL 17 container:
 
@@ -99,25 +99,34 @@ MIRTPAGE_POSTGRES_REHEARSAL_URL='postgresql://...' \
   npm run rehearse:postgres -- --reset-target
 ```
 
-The command opens SQLite read-only, creates only the named rehearsal schema,
+The rehearsal command opens SQLite read-only, creates only the named rehearsal schema,
 copies rows transactionally, resets sequences, installs reviewed constraints,
-indexes, and triggers, and verifies counts plus fingerprints. It never enables
-runtime PostgreSQL. `MIRTPAGE_DATABASE_DRIVER=postgres` is intentionally
-rejected while direct SQLite boundaries remain in
-`architecture/sqlite-boundaries.json`.
+indexes, and triggers, and verifies counts plus fingerprints.
 
-A later cutover requires its own approved L4 plan: named Supabase project,
-connection mode, backup and restore identifiers, quiescence window, completed
-repository adapters, tenant/security tests against PostgreSQL, media parity,
-monitoring, rollback owner, and point of no return.
+After a verified backup and quiescence, the initial copy to an empty Supabase
+project uses the direct database URL for one command only:
+
+```bash
+MIRTPAGE_POSTGRES_DIRECT_URL='postgresql://...' \
+MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
+  npm run cutover:postgres
+```
+
+The command refuses `--reset-target`, refuses existing MirtPage tables, performs
+all writes in one transaction, reconciles every table fingerprint and sequence,
+and leaves SQLite byte-identical. Never configure the direct URL in Vercel.
 
 ## Deployment secrets and configuration
 
 Keep these outside GitHub artifacts and the repository:
 
 - `NEXT_PUBLIC_APP_URL`
+- `MIRTPAGE_CANONICAL_URL`
 - `MIRTPAGE_SERVER_ACTION_ORIGINS`
-- `MIRTPAGE_DB_PATH`
+- `MIRTPAGE_DATABASE_DRIVER`
+- `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler in Vercel)
+- `MIRTPAGE_POSTGRES_DIRECT_URL` (operator environment only)
+- `MIRTPAGE_DB_PATH` (SQLite only)
 - `MIRTPAGE_MEDIA_ROOT` when using filesystem media
 - `MIRTPAGE_SUPABASE_URL`
 - `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY`
@@ -125,9 +134,8 @@ Keep these outside GitHub artifacts and the repository:
 - `PRIVACY_SALT`
 - notification provider credentials
 
-Production must use HTTPS, an absolute persistent database path, a persistent
-backup destination, one application replica while SQLite is authoritative, and
-health monitoring on `/api/health`.
+Production must use HTTPS, private Supabase Storage, bounded PostgreSQL pooling,
+a retained rollback source, and health monitoring on `/api/health`.
 
 ## Backup, deploy, and rollback
 

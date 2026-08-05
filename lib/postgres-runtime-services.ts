@@ -13,15 +13,15 @@ type RuntimeServices = {
 
 let services: RuntimeServices | null = null;
 
-export function postgresRuntimePreviewEnabled() {
-  return process.env.MIRTPAGE_DATABASE_DRIVER === "postgres" && process.env.MIRTPAGE_POSTGRES_RUNTIME_PREVIEW === "1";
+export function postgresRuntimeEnabled() {
+  return process.env.MIRTPAGE_DATABASE_DRIVER === "postgres";
 }
 
 export function postgresRuntimeServices() {
-  if (!postgresRuntimePreviewEnabled()) throw new Error("PostgreSQL runtime preview is not enabled.");
+  if (!postgresRuntimeEnabled()) throw new Error("PostgreSQL runtime is not enabled.");
   if (services) return services;
   const config = postgresRuntimeConfig();
-  if (!config) throw new Error("MIRTPAGE_POSTGRES_URL is required for PostgreSQL runtime preview.");
+  if (!config) throw new Error("MIRTPAGE_POSTGRES_URL is required for PostgreSQL runtime.");
   const pool = createPostgresPool(config);
   const runner = new PostgresTransactionRunner(pool);
   services = {

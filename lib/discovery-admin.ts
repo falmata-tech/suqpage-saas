@@ -3,7 +3,7 @@ import { DISCOVERY_INDUSTRIES } from "./discovery";
 import type { ProductionScale } from "./discovery";
 import { likePattern, normalizePageRequest, pageResult, pageWindow } from "./pagination";
 import { cleanText } from "./security";
-import { postgresRuntimePreviewEnabled } from "./postgres-runtime-services";
+import { postgresRuntimeEnabled } from "./postgres-runtime-services";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 
 export class DiscoveryAdminError extends Error {}
@@ -77,7 +77,7 @@ function mapProfile(row: ProfileRow): DiscoveryProfileAdminView {
 }
 
 const selectProfile = () => {
-  const aggregate = postgresRuntimePreviewEnabled() ? "string_agg" : "group_concat";
+  const aggregate = postgresRuntimeEnabled() ? "string_agg" : "group_concat";
   return `
   SELECT b.id business_id,b.name business_name,b.handle,b.status,
     p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,

@@ -27,8 +27,8 @@ function normalizePhone(value: unknown) {
 }
 
 export async function createPublicInquiry(input: InquiryInput, ipHash: string) {
-  const { postgresRuntimePreviewEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
-  if (postgresRuntimePreviewEnabled()) {
+  const { postgresRuntimeEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
+  if (postgresRuntimeEnabled()) {
     const { createPostgresPublicInquiry } = await import("./inquiries-postgres");
     return createPostgresPublicInquiry(postgresRuntimeServices().runner, input, ipHash);
   }

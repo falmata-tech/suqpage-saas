@@ -4,7 +4,7 @@ title: Supabase and Vercel production cutover
 status: in_progress
 related: [BE-027, ADR-0013]
 owners: [deployment, operations, security, backend]
-last_updated: 2026-08-04
+last_updated: 2026-08-05
 change_level: L4
 ---
 
@@ -131,3 +131,10 @@ reverse copy or dual-write merge is allowed.
 - [x] Positive, failure, reconciliation, and rollback scenarios are present
 - [x] Gates, observability, authority switch, and rollback ownership are planned
 - [x] No material implementation decision remains unresolved
+- [x] PostgreSQL runtime selection and production startup validation implemented
+- [x] Guarded empty-target production copy and full reconciliation implemented
+- [x] Private Supabase Storage adapter and copy/hash verification implemented
+- [ ] Real Supabase database and Storage copy completed
+- [ ] Exact release commit passes local and remote gates
+- [ ] Vercel production deployment and generated-host smoke checks pass
+- [ ] `mirtpage.com` DNS is attached and monitored through the rollback window

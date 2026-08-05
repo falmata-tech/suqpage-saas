@@ -1,5 +1,5 @@
 import { INDUSTRY_LABELS } from "./bazaar";
-import { postgresRuntimePreviewEnabled } from "./postgres-runtime-services";
+import { postgresRuntimeEnabled } from "./postgres-runtime-services";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
 import {
   likePattern,
@@ -68,7 +68,7 @@ export type PublicShowroomRow = {
 };
 
 export async function listPublicIndustries() {
-  const industry = postgresRuntimePreviewEnabled()
+  const industry = postgresRuntimeEnabled()
     ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
     : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
   const rows = await runtimeAll<{ industry_key: string }>(`
@@ -94,7 +94,7 @@ export async function listPublicShowrooms(input: PageInput & {
   );
   const industry = String(input.industry ?? "").trim();
   const sort = input.sort === "handle" ? "handle" : "name";
-  const industryExpression = postgresRuntimePreviewEnabled()
+  const industryExpression = postgresRuntimeEnabled()
     ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
     : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
   const params: QueryValue[] = [];

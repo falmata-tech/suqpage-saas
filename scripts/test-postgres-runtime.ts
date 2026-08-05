@@ -166,8 +166,10 @@ async function main() {
     const runtimeUrl = new URL(process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL!);
     runtimeUrl.searchParams.set("options", "-c search_path=mirtpage_rehearsal");
     process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
-    process.env.MIRTPAGE_POSTGRES_RUNTIME_PREVIEW = "1";
     process.env.MIRTPAGE_POSTGRES_URL = runtimeUrl.toString();
+    process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY = "1";
+    const { preflight } = await import("./preflight");
+    await preflight();
     const {
       listBusinessesPage,
       listInquiriesPage,

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { postgresRuntimeConfig } from "./postgres-runtime";
 
 const DEFAULT_MEDIA_REQUEST_TIMEOUT_MS = 8_000;
 const MIN_MEDIA_REQUEST_TIMEOUT_MS = 1_000;
@@ -14,12 +15,10 @@ export function databasePath() {
 
 export function databaseDriver() {
   const value = (process.env.MIRTPAGE_DATABASE_DRIVER || "sqlite").trim();
-  if (value !== "sqlite") {
-    throw new Error(
-      "MIRTPAGE_DATABASE_DRIVER must be sqlite. PostgreSQL runtime remains blocked until repository-port migration and parity gates are complete.",
-    );
+  if (value !== "sqlite" && value !== "postgres") {
+    throw new Error("MIRTPAGE_DATABASE_DRIVER must be sqlite or postgres.");
   }
-  return "sqlite" as const;
+  return value as "sqlite" | "postgres";
 }
 
 export function mediaRoot() {
@@ -98,12 +97,14 @@ export function ensureRuntimeDirectories() {
 
 export function assertProductionConfiguration() {
   if (process.env.NODE_ENV !== "production") return;
-  databaseDriver();
-  const url = process.env.NEXT_PUBLIC_APP_URL || "";
+  const database = databaseDriver();
+  const url = process.env.MIRTPAGE_CANONICAL_URL || process.env.NEXT_PUBLIC_APP_URL || "";
   if (!/^https:\/\//i.test(url)) {
-    throw new Error("NEXT_PUBLIC_APP_URL must be an HTTPS URL in production.");
+    throw new Error(
+      "MIRTPAGE_CANONICAL_URL must be an HTTPS URL in production.",
+    );
   }
-  if (!process.env.MIRTPAGE_DB_PATH) {
+  if (database === "sqlite" && !process.env.MIRTPAGE_DB_PATH) {
     throw new Error(
       "MIRTPAGE_DB_PATH is required in production and must point to persistent storage.",
     );
@@ -113,6 +114,16 @@ export function assertProductionConfiguration() {
   }
   const driver = mediaStorageDriver();
   mediaRequestTimeoutMs();
+  if (database === "postgres") {
+    if (!postgresRuntimeConfig()) {
+      throw new Error("MIRTPAGE_POSTGRES_URL is required in PostgreSQL mode.");
+    }
+    if (driver !== "supabase") {
+      throw new Error(
+        "MIRTPAGE_MEDIA_DRIVER must be supabase in PostgreSQL production mode.",
+      );
+    }
+  }
   if (driver === "filesystem" && !process.env.MIRTPAGE_MEDIA_ROOT) {
     throw new Error(
       "MIRTPAGE_MEDIA_ROOT is required for filesystem media in production and must point to persistent storage.",
@@ -148,12 +159,16 @@ export function assertProductionConfiguration() {
       throw new Error("MIRTPAGE_SUPABASE_STORAGE_BUCKET is invalid.");
     }
   }
-  fs.mkdirSync(path.dirname(databasePath()), { recursive: true });
-  fs.mkdirSync(backupRoot(), { recursive: true });
-  fs.accessSync(
-    path.dirname(databasePath()),
-    fs.constants.R_OK | fs.constants.W_OK,
-  );
+  if (database === "sqlite") {
+    fs.mkdirSync(path.dirname(databasePath()), { recursive: true });
+    fs.mkdirSync(backupRoot(), { recursive: true });
+  }
+  if (database === "sqlite") {
+    fs.accessSync(
+      path.dirname(databasePath()),
+      fs.constants.R_OK | fs.constants.W_OK,
+    );
+  }
   if (driver === "filesystem") {
     fs.mkdirSync(mediaRoot(), { recursive: true });
     fs.mkdirSync(requestAttachmentRoot(), { recursive: true });

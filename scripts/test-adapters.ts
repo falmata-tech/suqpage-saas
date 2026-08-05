@@ -10,14 +10,37 @@ async function main() {
   process.env.RESEND_API_KEY = "test-key";
   process.env.NOTIFICATION_FROM_EMAIL = "test@example.com";
 
-  const { databaseDriver } = await import("../lib/config");
+  const { assertProductionConfiguration, databaseDriver } = await import("../lib/config");
   assert.equal(databaseDriver(), "sqlite");
   process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
-  assert.throws(
-    () => databaseDriver(),
-    /PostgreSQL runtime remains blocked/,
-  );
+  assert.equal(databaseDriver(), "postgres");
+  process.env.MIRTPAGE_DATABASE_DRIVER = "invalid";
+  assert.throws(() => databaseDriver(), /must be sqlite or postgres/);
   process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
+
+  const previousNodeEnv = process.env.NODE_ENV;
+  Reflect.set(process.env, "NODE_ENV", "production");
+  process.env.NEXT_PUBLIC_APP_URL = "https://mirtpage.example.test";
+  process.env.MIRTPAGE_CANONICAL_URL = "https://mirtpage.example.test";
+  process.env.PRIVACY_SALT = "postgres-production-privacy-salt";
+  process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
+  process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
+  process.env.MIRTPAGE_POSTGRES_URL =
+    "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require";
+  process.env.MIRTPAGE_MEDIA_DRIVER = "supabase";
+  process.env.MIRTPAGE_SUPABASE_URL = "https://project.supabase.co";
+  process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY = "service-role-key-long-enough";
+  assert.doesNotThrow(() => assertProductionConfiguration());
+  process.env.MIRTPAGE_MEDIA_DRIVER = "filesystem";
+  assert.throws(
+    () => assertProductionConfiguration(),
+    /must be supabase in PostgreSQL production mode/,
+  );
+  if (previousNodeEnv === undefined) Reflect.deleteProperty(process.env, "NODE_ENV");
+  else Reflect.set(process.env, "NODE_ENV", previousNodeEnv);
+  process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
+  delete process.env.MIRTPAGE_POSTGRES_URL;
+  delete process.env.MIRTPAGE_MEDIA_DRIVER;
 
   const { postgresRuntimeConfig, sqliteParametersToPostgres } = await import("../lib/postgres-runtime");
   assert.equal(postgresRuntimeConfig(), null);

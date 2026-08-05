@@ -4,7 +4,7 @@ title: PostgreSQL runtime adapters and persistence parity
 status: in_progress
 related: [DEP-023, ADR-0013]
 owners: [backend, security, operations]
-last_updated: 2026-08-04
+last_updated: 2026-08-05
 change_level: L4
 ---
 
@@ -93,7 +93,7 @@ Scenario: A public write is retried
 
 ## Rollout and rollback
 
-Adapters ship dark while SQLite remains authoritative. DEP-023 owns the one-time
+Adapters are driver-selectable, while DEP-023 owns the one-time real Supabase
 copy, reconciliation, authority switch, monitoring, and rollback deadline. No
 dual-write mode is permitted.
 
@@ -104,3 +104,20 @@ dual-write mode is permitted.
 - [x] Positive, negative, retry, and failure scenarios are present
 - [x] Test, observability, rollout, and rollback ownership are defined
 - [x] Identity migration is explicitly excluded
+
+## Current implementation evidence
+
+All authoritative application workflows now select asynchronous PostgreSQL
+adapters when `MIRTPAGE_DATABASE_DRIVER=postgres`; the preview guard has been
+removed. The disposable PostgreSQL 17 gate runs catalog, identity/session,
+request, revision, recipe persistence, publication, inquiry, signup, product,
+discovery, subscription, analytics, staff, invitation, support, audit, rate
+limit, transaction, and production-preflight workflows. The same gate verifies
+the guarded production-copy path against an empty `public` schema and reconciles
+44 tables, 2,849 rows, 83 checks, 79 foreign keys, 78 indexes, 14 triggers, 307
+not-null columns, sequences, fingerprints, and four negative invariant probes.
+
+BE-027 remains `in_progress` until DEP-023 records the real Supabase copy,
+PostgreSQL-backed production acceptance/security evidence, and monitored
+authority switch. SQLite adapters remain explicit local-development and rollback
+implementations; they are not dual-written.

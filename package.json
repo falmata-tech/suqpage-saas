@@ -13,6 +13,7 @@
     "migrate:media": "tsx scripts/migrate-media-to-object-storage.ts",
     "reconcile:media": "tsx scripts/reconcile-media.ts",
     "rehearse:postgres": "tsx scripts/rehearse-postgres.ts",
+    "cutover:postgres": "tsx scripts/rehearse-postgres.ts --production-copy",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
     "typecheck": "node scripts/typecheck.mjs",

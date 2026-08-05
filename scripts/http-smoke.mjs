@@ -25,7 +25,8 @@ const env = {
   MIRTPAGE_CREDENTIAL_PATH: path.join(root, 'seed-credentials.txt'),
   MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1',
   PRIVACY_SALT: 'http-test-privacy-salt-long-enough',
-  NEXT_PUBLIC_APP_URL: baseUrl,
+  NEXT_PUBLIC_APP_URL: 'https://mirtpage.test',
+  MIRTPAGE_CANONICAL_URL: 'https://mirtpage.test',
   PORT: String(port),
 };
 

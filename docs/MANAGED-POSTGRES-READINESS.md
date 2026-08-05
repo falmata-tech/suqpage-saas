@@ -1,9 +1,9 @@
 # Managed PostgreSQL readiness
 
-MirtPage currently supports one Node.js application instance with persistent
-SQLite. Media can use a persistent filesystem or the implemented private
-Supabase Storage adapter. Docker and object storage do not make this SQLite
-build horizontally scalable.
+MirtPage supports SQLite for local development/rollback and managed PostgreSQL
+for the production runtime. Media can use a persistent filesystem in SQLite
+mode or the implemented private Supabase Storage adapter. PostgreSQL mode does
+not use a local database file and requires Supabase Storage in production.
 Support polling, account entitlement, visit attribution, Expo allocation, and
 all tenant workflows use the same authoritative database.
 
@@ -22,34 +22,30 @@ all tenant workflows use the same authoritative database.
   target, translates the complete current SQLite schema, copies all rows,
   installs reviewed constraints, indexes, and 14 triggers, and reconciles
   per-table counts and fingerprints while proving the source is byte-identical.
-- `architecture/sqlite-boundaries.json` and
-  `npm run check:database-boundaries` currently identify 42 approved runtime
-  modules that still need repository-port migration. New direct SQLite coupling
-  fails the standard check.
-- `MIRTPAGE_DATABASE_DRIVER=postgres` is intentionally rejected until those
-  ports and target-adapter security tests are complete.
+- `architecture/sqlite-boundaries.json` records 15 reviewed SQLite source,
+  local-development, injected-test, migration, or rollback modules. Active
+  production workflows select asynchronous runtime adapters, and new direct
+  SQLite coupling fails the standard check.
+- `MIRTPAGE_DATABASE_DRIVER=postgres` enables PostgreSQL without dual writes and
+  fails closed when the managed URL is absent or invalid.
 
-## Required before multiple application instances
+## Required operationally before public production
 
-1. Define PostgreSQL ports for businesses, auth sessions, revisions, inquiries,
-   Expo, subscriptions, analytics, and support. Remove direct `node:sqlite`
-   assumptions from application services.
-2. Translate migrations and SQLite-specific SQL, including `json_extract`,
-   `INSERT OR IGNORE`, triggers, synchronous transactions, and query-plan tests.
-3. Rehearse copy, row-count reconciliation, foreign-key validation, tenant
-   sampling, and rollback from a production-like backup.
-4. Configure the existing media-storage port for the target private object
+1. Back up and quiesce the retained SQLite source; record the exact release.
+2. Run the guarded copy against an empty Supabase target and retain its complete
+   count/fingerprint/constraint/sequence reconciliation evidence.
+3. Configure the existing media-storage port for the target private object
    bucket, copy local objects with `npm run migrate:media`, verify hashes, and
    exercise authorized private and stable published reads. This storage step may
    be completed before the database migration.
-5. Choose connection mode and pool size for the deployed runtime. Do not place a
-   transaction pooler underneath code that assumes session state.
-6. Add scheduled jobs for visit retention, account warnings, and adapter retries;
+4. Use the Supabase transaction pooler for Vercel with a bounded application
+   pool; reserve the direct URL for the one-time operator copy.
+5. Add scheduled jobs for visit retention, account warnings, and adapter retries;
    jobs must be idempotent and single-owner.
-7. Replace support polling only after PostgreSQL is authoritative. Supabase
+6. Replace support polling only after PostgreSQL is authoritative. Supabase
    Realtime Broadcast is a candidate adapter; authorization and bounded payloads
    remain server-owned.
-8. Define database backups, point-in-time recovery, restore drills,
+7. Define database backups, point-in-time recovery, restore drills,
    observability, slow-query thresholds, and a monitored single-instance
    cutover before enabling replicas.
 

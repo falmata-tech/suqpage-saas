@@ -81,6 +81,13 @@ try {
       MIRTPAGE_POSTGRES_REHEARSAL_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
     },
   });
+  run(process.execPath, ["--import", "tsx", "scripts/rehearse-postgres.ts", "--production-copy"], {
+    env: {
+      MIRTPAGE_DB_PATH: path.join(root, "source.db"),
+      MIRTPAGE_POSTGRES_DIRECT_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
+      MIRTPAGE_APPROVE_PRODUCTION_COPY: "COPY_TO_EMPTY_SUPABASE",
+    },
+  });
   console.log("Disposable PostgreSQL 17 schema, data, constraints, triggers, sequences, invariants, fingerprints, and read-only source rehearsal passed.");
 } finally {
   spawnSync("docker", ["stop", container], { stdio: "ignore" });

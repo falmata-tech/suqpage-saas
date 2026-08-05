@@ -5,14 +5,14 @@
 - [ ] Confirm all release-affecting specs are `done` and `npm run validate:specs` passes.
 - [ ] Confirm traceability includes implementation, tests, rollout and rollback evidence.
 - [ ] Set a production HTTPS `NEXT_PUBLIC_APP_URL`.
-- [ ] Set an absolute persistent `MIRTPAGE_DB_PATH` and backup path. In
-      filesystem media mode, also set a persistent `MIRTPAGE_MEDIA_ROOT`.
+- [ ] Set `MIRTPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
+      pooler URL in Vercel. Keep the direct URL only in the operator environment.
 - [ ] If using Supabase Storage, create a private bucket, configure server-only
       credentials, complete the copy-only hash verification, and retain local
       source media through the rollback window.
 - [ ] Generate a private `PRIVACY_SALT` of at least 24 characters.
-- [ ] Run `npm ci`, `npm run migrate`, and `npm run release` against an existing
-      database. Use `npm run reset` only for a new empty installation.
+- [ ] Back up and quiesce SQLite, run `npm run cutover:postgres` against an empty
+      target, and retain the successful reconciliation output. Never use reset.
 - [ ] Change every temporary or migrated account password.
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.

@@ -51,8 +51,8 @@ export function parseSignupInput(raw: Record<string, unknown>): SignupInput {
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>) {
-  const { postgresRuntimePreviewEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
-  if (postgresRuntimePreviewEnabled()) {
+  const { postgresRuntimeEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
+  if (postgresRuntimeEnabled()) {
     const { createPostgresPublicClientWorkspace } = await import("./signup-postgres");
     return createPostgresPublicClientWorkspace(postgresRuntimeServices().runner, raw);
   }

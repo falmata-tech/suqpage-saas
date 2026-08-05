@@ -1367,8 +1367,8 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
-The controlled MVP is intended for a small managed client cohort on one
-persistent server or one persistent container.
+The controlled MVP supports SQLite for local development and retained rollback,
+and managed PostgreSQL for the production runtime.
 
 Current SQLite requirements:
 
@@ -1385,20 +1385,21 @@ Current SQLite requirements:
 - database integrity checks;
 - appropriate file permissions.
 
-Do not horizontally scale the SQLite build across multiple application instances.
+Do not horizontally scale a SQLite deployment across multiple application instances.
 `docs/MANAGED-POSTGRES-READINESS.md`, `docs/DEVOPS-RUNBOOK.md`, and ADR-0013
 record the required SQL-adapter, migration, job, realtime, backup, and
-monitored-cutover work. The current disposable PostgreSQL rehearsal translates
-the complete schema, copies rows, installs reviewed constraints, indexes, and
-triggers, and reconciles counts and fingerprints while leaving SQLite
-byte-identical. A boundary manifest prevents new direct SQLite coupling, but 42
-approved runtime modules remain to be ported. Supabase Storage is an implemented
-optional media adapter; Supabase PostgreSQL is not a current runtime mode.
+monitored-cutover work. The disposable PostgreSQL gate translates the complete
+schema, copies rows, installs reviewed constraints, indexes, and triggers,
+reconciles counts and fingerprints while leaving SQLite byte-identical, and runs
+every authoritative workflow through PostgreSQL adapters. A boundary manifest
+prevents new direct SQLite coupling and records the retained local/rollback
+adapters. Supabase Storage and PostgreSQL are implemented runtime modes.
 
 The production-only Supabase PostgreSQL and Vercel cutover is planned under
-BE-027 and DEP-023. Until their PostgreSQL parity, reconciliation, security,
-release, and rollback gates pass, SQLite remains authoritative and no Vercel
-deployment may be described as production-ready.
+BE-027 and DEP-023. Runtime parity and guarded copy rehearsal are complete, but
+the real Supabase copy, Storage verification, exact release checks, Vercel smoke
+tests, DNS switch, and rollback monitoring must pass before the deployment is
+described as production-ready.
 
 Before broad external rollout or multi-instance production scale, migrate to:
 
@@ -1408,7 +1409,10 @@ Before broad external rollout or multi-instance production scale, migrate to:
 - full observability and alerting;
 - stronger account recovery and staff roles;
 
-Production environment must use absolute persistent paths and HTTPS. Follow `.env.example`, `README.md`, Docker configuration, and preflight checks.
+SQLite production requires absolute persistent paths. PostgreSQL production
+requires the managed connection URL and private Supabase Storage. All production
+environments require HTTPS. Follow `.env.example`, `README.md`, Docker
+configuration, and preflight checks.
 
 ---
 

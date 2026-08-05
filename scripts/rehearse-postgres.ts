@@ -43,8 +43,13 @@ type SqliteIndexColumn = {
 };
 
 const TARGET_SCHEMA_PATTERN = /^mirtpage_rehearsal(?:_[a-z0-9_]+)?$/;
-const POSTGRES_URL = process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL || "";
-const TARGET_SCHEMA = process.env.MIRTPAGE_POSTGRES_REHEARSAL_SCHEMA || "mirtpage_rehearsal";
+const PRODUCTION_COPY = process.argv.includes("--production-copy");
+const POSTGRES_URL = PRODUCTION_COPY
+  ? process.env.MIRTPAGE_POSTGRES_DIRECT_URL || ""
+  : process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL || "";
+const TARGET_SCHEMA = PRODUCTION_COPY
+  ? "public"
+  : process.env.MIRTPAGE_POSTGRES_REHEARSAL_SCHEMA || "mirtpage_rehearsal";
 const RESET_TARGET = process.argv.includes("--reset-target");
 const INSERT_BATCH_SIZE = 200;
 
@@ -272,12 +277,27 @@ async function expectPostgresRejection(
 }
 
 async function main() {
-  if (!POSTGRES_URL) throw new Error("MIRTPAGE_POSTGRES_REHEARSAL_URL is required.");
+  if (!POSTGRES_URL) {
+    throw new Error(
+      PRODUCTION_COPY
+        ? "MIRTPAGE_POSTGRES_DIRECT_URL is required."
+        : "MIRTPAGE_POSTGRES_REHEARSAL_URL is required.",
+    );
+  }
   const parsed = new URL(POSTGRES_URL);
   if (!/^postgres(?:ql)?:$/.test(parsed.protocol) || parsed.password.length < 8) {
     throw new Error("The PostgreSQL rehearsal URL is invalid.");
   }
-  if (!TARGET_SCHEMA_PATTERN.test(TARGET_SCHEMA)) {
+  if (PRODUCTION_COPY) {
+    if (RESET_TARGET) {
+      throw new Error("Production copy never accepts --reset-target.");
+    }
+    if (process.env.MIRTPAGE_APPROVE_PRODUCTION_COPY !== "COPY_TO_EMPTY_SUPABASE") {
+      throw new Error(
+        "Set MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE for this one command.",
+      );
+    }
+  } else if (!TARGET_SCHEMA_PATTERN.test(TARGET_SCHEMA)) {
     throw new Error("The rehearsal schema must begin with mirtpage_rehearsal.");
   }
 
@@ -303,14 +323,20 @@ async function main() {
     await target.connect();
     await target.query("BEGIN");
     const existing = await target.query<{ count: string }>(
-      "SELECT count(*)::text count FROM information_schema.tables WHERE table_schema=$1",
-      [TARGET_SCHEMA],
+      `SELECT count(*)::text count
+       FROM information_schema.tables
+       WHERE table_schema=$1 AND table_name = ANY($2::text[])`,
+      [TARGET_SCHEMA, tables.map((table) => table.name)],
     );
     if (Number(existing.rows[0].count) && !RESET_TARGET) {
-      throw new Error("The rehearsal target schema is not empty. Use --reset-target for a disposable target.");
+      throw new Error(
+        PRODUCTION_COPY
+          ? "The production target already contains MirtPage tables; no copy was attempted."
+          : "The rehearsal target schema is not empty. Use --reset-target for a disposable target.",
+      );
     }
     if (RESET_TARGET) await target.query(`DROP SCHEMA IF EXISTS ${q(TARGET_SCHEMA)} CASCADE`);
-    await target.query(`CREATE SCHEMA ${q(TARGET_SCHEMA)}`);
+    if (!PRODUCTION_COPY) await target.query(`CREATE SCHEMA ${q(TARGET_SCHEMA)}`);
 
     let expectedChecks = 0;
     let expectedForeignKeys = 0;
@@ -431,7 +457,7 @@ async function main() {
     if (sourceBefore !== sourceAfter) throw new Error("The SQLite source changed during rehearsal.");
     console.log(JSON.stringify({
       source: "sqlite-read-only",
-      target: "postgresql-rehearsal-schema",
+      target: PRODUCTION_COPY ? "supabase-postgresql-production" : "postgresql-rehearsal-schema",
       schema: TARGET_SCHEMA,
       tables: tables.length,
       rows: totalRows,
@@ -443,7 +469,7 @@ async function main() {
       fingerprintsReconciled: tables.length,
       invariantsProbed: 4,
       sourceBytePreserved: true,
-      runtimeCutoverEnabled: false,
+      runtimeCutoverEnabled: PRODUCTION_COPY,
     }));
   } catch (error) {
     await target.query("ROLLBACK").catch(() => undefined);

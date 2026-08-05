@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "decision": "ADR-0013",
-  "runtimeStatus": "sqlite-authoritative",
+  "runtimeStatus": "driver-selectable",
   "allowedDirectSqliteModules": [
     "lib/auth.ts",
     "lib/bazaar.ts",
