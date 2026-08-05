@@ -54,7 +54,9 @@ a tested rollback before public DNS changes.
    security, acceptance, and all required GitHub Actions checks.
 2. The source SQLite database is quiesced and copied read-only. Target counts,
    fingerprints, sequences, constraints, and representative tenant relationships
-   reconcile before PostgreSQL receives writes.
+   reconcile before PostgreSQL receives writes. REAL geographic coordinates use
+   a 12-decimal canonical representation so provider serialization differences
+   do not produce false mismatches; all non-REAL fields remain exact.
 3. Media copy is immutable and private; every database-referenced object is
    present before the media driver changes.
 4. Production secrets exist only in Supabase/Vercel secret stores and local
@@ -63,6 +65,16 @@ a tested rollback before public DNS changes.
    tenant, inquiry, upload, support, and mobile smoke checks.
 6. After authority changes, SQLite is retained read-only for rollback and no
    dual writes occur.
+7. A provider-issued temporary migration login may assume an explicitly named,
+   identifier-safe database owner role only inside the guarded copy transaction;
+   the role is never inferred from untrusted input or retained as a runtime secret.
+   The linked-project wrapper parses that credential in memory and never prints
+   or persists it. Provider statement timeout is disabled only inside this
+   guarded copy transaction; runtime statement timeouts remain bounded.
+8. Production uses a dedicated `mirtpage_runtime` login with schema usage,
+   application-table DML, and sequence use rather than the database owner. Its
+   generated credential is verified through the transaction pooler and retained
+   only in ignored mode-0600 operator storage and the deployment secret store.
 
 ## Scenarios
 
@@ -103,6 +115,15 @@ Vercel deployment ID, health and workflow smoke results, DNS records, monitoring
 window, and rollback deadline. Secrets, row contents, and customer messages are
 never evidence artifacts.
 
+On 2026-08-05 the linked `mirtpage` project received a transactionally reconciled
+copy of 44 tables and 3,030 rows with 83 checks, 79 foreign keys, 78 indexes, 14
+triggers, 307 not-null columns, 44 fingerprints, four negative invariants, and a
+byte-identical retained SQLite source. The private `mirtpage-media` bucket was
+created; the source manifest contained zero mutable objects and reconciled with
+zero missing or conflicting objects. The least-privilege runtime login and
+production preflight passed through Supabase's transaction pooler. Vercel,
+generated-host workflow smoke checks, DNS, and monitoring remain pending.
+
 ## Test plan
 
 | Gate | Evidence |
@@ -134,7 +155,7 @@ reverse copy or dual-write merge is allowed.
 - [x] PostgreSQL runtime selection and production startup validation implemented
 - [x] Guarded empty-target production copy and full reconciliation implemented
 - [x] Private Supabase Storage adapter and copy/hash verification implemented
-- [ ] Real Supabase database and Storage copy completed
+- [x] Real Supabase database and Storage copy completed
 - [ ] Exact release commit passes local and remote gates
 - [ ] Vercel production deployment and generated-host smoke checks pass
 - [ ] `mirtpage.com` DNS is attached and monitored through the rollback window

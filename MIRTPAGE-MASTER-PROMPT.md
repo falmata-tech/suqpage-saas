@@ -1393,13 +1393,15 @@ schema, copies rows, installs reviewed constraints, indexes, and triggers,
 reconciles counts and fingerprints while leaving SQLite byte-identical, and runs
 every authoritative workflow through PostgreSQL adapters. A boundary manifest
 prevents new direct SQLite coupling and records the retained local/rollback
-adapters. Supabase Storage and PostgreSQL are implemented runtime modes.
+adapters. The guarded production copy can transaction-locally assume an
+explicit, identifier-safe provider migration role when a temporary Supabase CLI
+login requires it. Supabase Storage and PostgreSQL are implemented runtime modes.
 
-The production-only Supabase PostgreSQL and Vercel cutover is planned under
-BE-027 and DEP-023. Runtime parity and guarded copy rehearsal are complete, but
-the real Supabase copy, Storage verification, exact release checks, Vercel smoke
-tests, DNS switch, and rollback monitoring must pass before the deployment is
-described as production-ready.
+The production-only Supabase PostgreSQL and Vercel cutover is controlled by
+BE-027 and DEP-023. Runtime parity, the real reconciled Supabase copy, private
+Storage verification, and least-privilege runtime preflight are complete. Exact
+release checks, Vercel smoke tests, DNS switch, and rollback monitoring must pass
+before the deployment is described as production-ready.
 
 Before broad external rollout or multi-instance production scale, migrate to:
 

@@ -14,6 +14,8 @@
     "reconcile:media": "tsx scripts/reconcile-media.ts",
     "rehearse:postgres": "tsx scripts/rehearse-postgres.ts",
     "cutover:postgres": "tsx scripts/rehearse-postgres.ts --production-copy",
+    "cutover:supabase-linked": "node scripts/cutover-linked-supabase.mjs",
+    "provision:supabase-runtime": "node scripts/provision-linked-supabase-runtime.mjs",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
     "typecheck": "node scripts/typecheck.mjs",

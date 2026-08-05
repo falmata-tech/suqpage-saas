@@ -114,10 +114,15 @@ request, revision, recipe persistence, publication, inquiry, signup, product,
 discovery, subscription, analytics, staff, invitation, support, audit, rate
 limit, transaction, and production-preflight workflows. The same gate verifies
 the guarded production-copy path against an empty `public` schema and reconciles
-44 tables, 2,849 rows, 83 checks, 79 foreign keys, 78 indexes, 14 triggers, 307
+44 tables, 2,849 fixture rows, 83 checks, 79 foreign keys, 78 indexes, 14 triggers, 307
 not-null columns, sequences, fingerprints, and four negative invariant probes.
 
-BE-027 remains `in_progress` until DEP-023 records the real Supabase copy,
-PostgreSQL-backed production acceptance/security evidence, and monitored
-authority switch. SQLite adapters remain explicit local-development and rollback
-implementations; they are not dual-written.
+On 2026-08-05 the guarded live copy reconciled the then-current 44 tables and
+3,030 rows into Supabase `public`. A dedicated least-privilege runtime login was
+provisioned and verified through the transaction pooler, and production preflight
+passed against that login and private Supabase Storage.
+
+BE-027 remains `in_progress` until DEP-023 records PostgreSQL-backed production
+acceptance/security evidence and the monitored authority switch. SQLite adapters
+remain explicit local-development and rollback implementations; they are not
+dual-written.

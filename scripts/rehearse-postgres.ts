@@ -52,6 +52,7 @@ const TARGET_SCHEMA = PRODUCTION_COPY
   : process.env.MIRTPAGE_POSTGRES_REHEARSAL_SCHEMA || "mirtpage_rehearsal";
 const RESET_TARGET = process.argv.includes("--reset-target");
 const INSERT_BATCH_SIZE = 200;
+const MIGRATION_ROLE = (process.env.MIRTPAGE_POSTGRES_MIGRATION_ROLE || "").trim();
 
 function q(identifier: string) {
   if (!/^[a-z_][a-z0-9_]*$/i.test(identifier)) {
@@ -62,6 +63,10 @@ function q(identifier: string) {
 
 function qualified(schema: string, table: string) {
   return `${q(schema)}.${q(table)}`;
+}
+
+function reportProductionStage(stage: string) {
+  if (PRODUCTION_COPY) console.log(`Production copy stage: ${stage}`);
 }
 
 function sqliteColumns(db: DatabaseSync, table: string) {
@@ -218,24 +223,50 @@ function postgresIndexes(db: DatabaseSync, table: string, schema: string) {
     });
 }
 
-function normalizedRow(row: Record<string, unknown>, columns: string[]) {
+function normalizedRow(
+  row: Record<string, unknown>,
+  columns: string[],
+  realColumns: ReadonlySet<string> = new Set(),
+) {
   return JSON.stringify(
     columns.map((column) => {
       const value = row[column];
       if (value === null || value === undefined) return null;
       if (Buffer.isBuffer(value)) return `base64:${value.toString("base64")}`;
+      if (realColumns.has(column)) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) throw new Error(`Invalid REAL value in ${column}.`);
+        return `float:${numeric.toFixed(12)}`;
+      }
       return String(value);
     }),
   );
 }
 
-function fingerprint(rows: Record<string, unknown>[], columns: string[]) {
+function fingerprint(
+  rows: Record<string, unknown>[],
+  columns: string[],
+  realColumns: ReadonlySet<string> = new Set(),
+) {
   const hash = crypto.createHash("sha256");
-  rows.map((row) => normalizedRow(row, columns)).sort().forEach((row) => {
+  rows.map((row) => normalizedRow(row, columns, realColumns)).sort().forEach((row) => {
     hash.update(row);
     hash.update("\n");
   });
   return hash.digest("hex");
+}
+
+function mismatchedColumns(
+  actual: Record<string, unknown>[],
+  expected: Record<string, unknown>[],
+  columns: string[],
+  realColumns: ReadonlySet<string>,
+) {
+  return columns.filter(
+    (column) =>
+      fingerprint(actual, [column], realColumns) !==
+      fingerprint(expected, [column], realColumns),
+  );
 }
 
 async function insertRows(
@@ -297,6 +328,9 @@ async function main() {
         "Set MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE for this one command.",
       );
     }
+    if (MIGRATION_ROLE && !/^[a-z_][a-z0-9_]*$/i.test(MIGRATION_ROLE)) {
+      throw new Error("MIRTPAGE_POSTGRES_MIGRATION_ROLE must be a PostgreSQL identifier.");
+    }
   } else if (!TARGET_SCHEMA_PATTERN.test(TARGET_SCHEMA)) {
     throw new Error("The rehearsal schema must begin with mirtpage_rehearsal.");
   }
@@ -304,7 +338,11 @@ async function main() {
   const sourcePath = databasePath();
   const sourceBefore = crypto.createHash("sha256").update(fs.readFileSync(sourcePath)).digest("hex");
   const source = new DatabaseSync(sourcePath, { readOnly: true });
-  const target = new Client({ connectionString: POSTGRES_URL });
+  const target = new Client({
+    connectionString: POSTGRES_URL,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
+  });
   try {
     const integrity = source.prepare("PRAGMA integrity_check").get() as { integrity_check: string };
     if (integrity.integrity_check !== "ok") throw new Error("SQLite source integrity check failed.");
@@ -322,6 +360,12 @@ async function main() {
 
     await target.connect();
     await target.query("BEGIN");
+    if (MIGRATION_ROLE) {
+      await target.query(`SET LOCAL ROLE ${q(MIGRATION_ROLE)}`);
+    }
+    if (PRODUCTION_COPY) {
+      await target.query("SET LOCAL statement_timeout = 0");
+    }
     const existing = await target.query<{ count: string }>(
       `SELECT count(*)::text count
        FROM information_schema.tables
@@ -337,6 +381,7 @@ async function main() {
     }
     if (RESET_TARGET) await target.query(`DROP SCHEMA IF EXISTS ${q(TARGET_SCHEMA)} CASCADE`);
     if (!PRODUCTION_COPY) await target.query(`CREATE SCHEMA ${q(TARGET_SCHEMA)}`);
+    reportProductionStage("target verified empty");
 
     let expectedChecks = 0;
     let expectedForeignKeys = 0;
@@ -344,6 +389,7 @@ async function main() {
     let totalRows = 0;
     const sourceRows = new Map<string, Record<string, unknown>[]>();
     const tableColumns = new Map<string, string[]>();
+    const tableRealColumns = new Map<string, ReadonlySet<string>>();
 
     for (const table of tables) {
       const columns = sqliteColumns(source, table.name);
@@ -351,6 +397,14 @@ async function main() {
       await target.query(createTableSql(table, columns, TARGET_SCHEMA));
       const names = columns.map((column) => column.name);
       tableColumns.set(table.name, names);
+      tableRealColumns.set(
+        table.name,
+        new Set(
+          columns
+            .filter((column) => /REAL|FLOA|DOUB/i.test(column.type))
+            .map((column) => column.name),
+        ),
+      );
       const rows = source.prepare(
         `SELECT ${names.map(q).join(", ")} FROM ${q(table.name)}`,
       ).all() as Record<string, unknown>[];
@@ -358,12 +412,14 @@ async function main() {
       totalRows += rows.length;
       await insertRows(target, table.name, names, rows, TARGET_SCHEMA);
     }
+    reportProductionStage("tables and rows copied");
 
     for (const table of tables) {
       const indexes = postgresIndexes(source, table.name, TARGET_SCHEMA);
       expectedIndexes += indexes.length;
       for (const sql of indexes) await target.query(sql);
     }
+    reportProductionStage("indexes installed");
     for (const table of tables) {
       const foreignKeys = groupedForeignKeys(sqliteForeignKeys(source, table.name));
       expectedForeignKeys += foreignKeys.length;
@@ -371,6 +427,7 @@ async function main() {
         await target.query(foreignKeySql(table.name, foreignKey, TARGET_SCHEMA));
       }
     }
+    reportProductionStage("foreign keys installed");
 
     for (const table of tables) {
       const columns = sqliteColumns(source, table.name);
@@ -382,8 +439,10 @@ async function main() {
         [`${TARGET_SCHEMA}.${table.name}`, column],
       );
     }
+    reportProductionStage("sequences reconciled");
 
     await target.query(postgresTriggerDefinitions(TARGET_SCHEMA));
+    reportProductionStage("triggers installed");
 
     for (const table of tables) {
       const columns = tableColumns.get(table.name)!;
@@ -391,13 +450,25 @@ async function main() {
         `SELECT ${columns.map(q).join(", ")} FROM ${qualified(TARGET_SCHEMA, table.name)}`,
       );
       const expected = sourceRows.get(table.name)!;
+      const realColumns = tableRealColumns.get(table.name)!;
       if (
         targetResult.rows.length !== expected.length ||
-        fingerprint(targetResult.rows, columns) !== fingerprint(expected, columns)
+        fingerprint(targetResult.rows, columns, realColumns) !==
+          fingerprint(expected, columns, realColumns)
       ) {
-        throw new Error(`PostgreSQL row reconciliation failed for ${table.name}.`);
+        const columnsWithDifferences = mismatchedColumns(
+          targetResult.rows,
+          expected,
+          columns,
+          realColumns,
+        );
+        throw new Error(
+          `PostgreSQL row reconciliation failed for ${table.name}` +
+            `${columnsWithDifferences.length ? ` in columns: ${columnsWithDifferences.join(", ")}` : ""}.`,
+        );
       }
     }
+    reportProductionStage("row fingerprints reconciled");
 
     const targetCounts = await target.query<{
       tables: string;
@@ -436,6 +507,7 @@ async function main() {
       `UPDATE ${qualified(TARGET_SCHEMA, "businesses")} SET status='invalid' WHERE id=(SELECT min(id) FROM ${qualified(TARGET_SCHEMA, "businesses")})`,
       "23514",
     );
+    reportProductionStage("schema counts and invariants verified");
     await expectPostgresRejection(
       target,
       `UPDATE ${qualified(TARGET_SCHEMA, "users")} SET business_id=-1 WHERE id=(SELECT min(id) FROM ${qualified(TARGET_SCHEMA, "users")})`,
