@@ -30,12 +30,12 @@ export default async function Dashboard({ searchParams }: { searchParams:Promise
   const params = await searchParams;
   const business = await resolveBusiness(user, params.business);
   if (user.access_role === "team_member" && !business) {
-    const assignedBusinesses = listAssignedBusinessesPage(user.id, params);
+    const assignedBusinesses = await listAssignedBusinessesPage(user.id, params);
     const attention = await getDashboardAttention(user);
     return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Assigned businesses</h1><p>Only businesses connected to your active request assignments appear here.</p></div><Link className="btn" href="/dashboard/requests">Assigned requests</Link></div><AttentionCards attention={attention}/><CollectionToolbar action="/dashboard" search={params.q || ""} placeholder="Business or handle"/>{assignedBusinesses.items.length ? <><div className="compact-business-list">{assignedBusinesses.items.map((tenant)=><Link className="compact-business-row" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><span><strong>{tenant.name}</strong><small>@{tenant.handle}</small></span><span className={`badge ${tenant.status}`}>{tenant.status}</span><b>Open business</b></Link>)}</div><PaginationNav result={assignedBusinesses} pathname="/dashboard" params={{q:params.q}}/></> : <div className="empty-state">No assigned business matches this view.</div>}</DashboardShell>;
   }
   if (hasCapability(user, "operations:manage") && !business) {
-    const businesses = listBusinessesPage(params);
+    const businesses = await listBusinessesPage(params);
     const platformAdmin = hasCapability(user,"platform:admin");
     const attention = await getDashboardAttention(user);
     return <DashboardShell user={user} business={null}><div className="dashboard-head"><div><h1>Business workspaces</h1><p>{platformAdmin ? "Find a business and open its workspace." : "Find an assigned business and review its requests."}</p></div></div><AttentionCards attention={attention} platform/><CollectionToolbar action="/dashboard" search={params.q || ""} placeholder="Business, handle, or client email"/>{businesses.items.length ? <><div className="compact-business-list">{businesses.items.map((tenant) => <Link className="compact-business-row" href={`/dashboard?business=${tenant.id}`} key={tenant.id}><span><strong>{tenant.name}</strong><small>@{tenant.handle} · {tenant.client_email || "No client account"}</small></span><span className={`badge ${tenant.status}`}>{tenant.status}</span><b>{platformAdmin ? "Open workspace" : "Open business"}</b></Link>)}</div><PaginationNav result={businesses} pathname="/dashboard" params={{q:params.q}}/></> : <div className="empty-state">No businesses match this search.</div>}</DashboardShell>;
@@ -45,7 +45,7 @@ export default async function Dashboard({ searchParams }: { searchParams:Promise
   if (user.access_role === "team_member") {
     return <DashboardShell user={user} business={business}><div className="dashboard-head"><div><span className="eyebrow">Assigned context</span><h1>{business.name}</h1><p>Prepare client-approved showroom revisions{established ? ", or provide basic offering upkeep when the client asks for direct customer service" : ""}.</p></div><Link className="btn" href={`/preview/@${business.handle}`} target="_blank">View live showroom</Link></div><section className="panel"><h2>Work within your assignment</h2><p>Settings, design, categories, and full showroom publication stay inside the request/revision workflow.{established ? " Basic product and capability details can be maintained with a recorded service note." : " Offering upkeep becomes available after the first showroom publication."}</p><div className="hero-actions"><Link className="btn brand" href="/dashboard/requests">Open assigned requests</Link>{established ? <Link className="btn secondary" href={`/dashboard/products?business=${business.id}`}>Maintain offerings</Link> : null}</div></section></DashboardShell>;
   }
-  const activity = getBusinessActivityCounts(business.id);
+  const activity = await getBusinessActivityCounts(business.id);
   const attention = await getDashboardAttention(user, business.id);
   if (isClient(user)) {
     const reviewable = await hasClientReviewableRevision(user.id,business.id);

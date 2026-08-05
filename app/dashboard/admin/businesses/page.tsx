@@ -16,7 +16,7 @@ export default async function AdminBusinesses({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  const businesses = listBusinessesPage(query);
+  const businesses = await listBusinessesPage(query);
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Businesses</strong></nav>
     <div className="dashboard-head"><div><span className="eyebrow">Platform accounts</span><h1>Businesses</h1><p>Find a showroom, review account state, or open its working context.</p></div><Link className="btn brand" href="/dashboard/clients/new">Create client workspace</Link></div>

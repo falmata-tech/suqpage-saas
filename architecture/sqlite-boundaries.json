@@ -21,7 +21,6 @@
     "lib/request-sqlite.ts",
     "lib/revision-service.ts",
     "lib/runtime-sql.ts",
-    "lib/scalable-queries.ts",
     "lib/schema.ts",
     "lib/security.ts",
     "lib/showroom-recipe-service.ts",

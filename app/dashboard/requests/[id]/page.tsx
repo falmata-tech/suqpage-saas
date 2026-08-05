@@ -31,7 +31,7 @@ export default async function RequestDetailPage({ params, searchParams }: { para
   const businessId = !manager ? request.business_id : null;
   const business = !manager && businessId ? (await runtimeBusinessById(businessId)) || null : null;
   const teamMembers = manager
-    ? listTeamMemberChoices(query.staffQ, request.assigned_user_id)
+    ? await listTeamMemberChoices(query.staffQ, request.assigned_user_id)
     : [];
   const revisions = request.business_id ? listContentRevisions(request.id) : [];
   const clarifications=request.events.filter((event)=>event.event_type==="client_clarification"||event.event_type==="staff_clarification");

@@ -162,6 +162,40 @@ async function main() {
       assert.equal(blocked.remaining, 0);
       assert.ok(blocked.retryAfterSeconds > 0);
     });
+
+    const runtimeUrl = new URL(process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL!);
+    runtimeUrl.searchParams.set("options", "-c search_path=mirtpage_rehearsal");
+    process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
+    process.env.MIRTPAGE_POSTGRES_RUNTIME_PREVIEW = "1";
+    process.env.MIRTPAGE_POSTGRES_URL = runtimeUrl.toString();
+    const {
+      listBusinessesPage,
+      listInquiriesPage,
+      listPublicIndustries,
+      listPublicShowrooms,
+    } = await import("../lib/scalable-queries");
+    const { closePostgresRuntimeForTests } = await import("../lib/postgres-runtime-services");
+    try {
+      const businesses = await listBusinessesPage({ page: 1 });
+      assert.ok(businesses.items.length > 0, "Expected PostgreSQL business pagination results.");
+      const industries = await listPublicIndustries();
+      assert.ok(industries.length > 0, "Expected PostgreSQL JSON industry extraction results.");
+      const showrooms = await listPublicShowrooms({ page: 1, industry: industries[0].key });
+      assert.ok(showrooms.totalItems > 0, "Expected PostgreSQL public showroom results.");
+      const inquiryBusiness = (await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{ business_id: number }>(
+          "SELECT business_id FROM inquiries ORDER BY id DESC LIMIT 1",
+        )).rows[0];
+      }))?.business_id;
+      if (inquiryBusiness) {
+        const inquiries = await listInquiriesPage(inquiryBusiness, { page: 1 });
+        assert.ok(inquiries.items.length > 0, "Expected PostgreSQL inquiry pagination results.");
+        assert.ok(inquiries.items[0].items.length > 0, "Expected scoped PostgreSQL inquiry item hydration.");
+      }
+    } finally {
+      await closePostgresRuntimeForTests();
+    }
     console.log("PostgreSQL runtime pool, placeholder, and transaction tests passed.");
   } finally {
     await pool.end();

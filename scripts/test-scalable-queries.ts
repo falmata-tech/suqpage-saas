@@ -141,25 +141,25 @@ async function main() {
       );
     }
 
-    const publicFirst = listPublicShowrooms({ q: "widget", page: 1 });
+    const publicFirst = await listPublicShowrooms({ q: "widget", page: 1 });
     assert.equal(publicFirst.items.length, 5);
     assert.equal(publicFirst.totalItems, 45);
     assert.equal(publicFirst.totalPages, 9);
     assert.ok(publicFirst.items.every((item) => item.industryKey === "electronics"));
-    const publicLast = listPublicShowrooms({ q: "widget", page: 999 });
+    const publicLast = await listPublicShowrooms({ q: "widget", page: 999 });
     assert.equal(publicLast.page, 9);
     assert.equal(publicLast.items.length, 5);
 
-    const businesses = listBusinessesPage({ page: 2 });
+    const businesses = await listBusinessesPage({ page: 2 });
     assert.equal(businesses.items.length, 6);
     assert.equal(businesses.page, 2);
     assert.equal(businesses.totalItems, 45);
-    assert.equal(listManagedClientsPage({ page: 2 }).items.length, 6);
-    assert.equal(listStaffPage({ page: 2 }).items.length, 6);
-    assert.equal(listProductsPage(businessIds[0], { page: 1 }).items.length, 10);
-    assert.equal(listProductsPage(businessIds[0], { page: 2 }).items.length, 10);
+    assert.equal((await listManagedClientsPage({ page: 2 })).items.length, 6);
+    assert.equal((await listStaffPage({ page: 2 })).items.length, 6);
+    assert.equal((await listProductsPage(businessIds[0], { page: 1 })).items.length, 10);
+    assert.equal((await listProductsPage(businessIds[0], { page: 2 })).items.length, 10);
 
-    const inquiries = listInquiriesPage(businessIds[0], { page: 1, q: "widget" });
+    const inquiries = await listInquiriesPage(businessIds[0], { page: 1, q: "widget" });
     assert.equal(inquiries.items.length, 10);
     assert.equal(inquiries.totalItems, 25);
     assert.equal(inquiries.items[0].items.length, 1);
