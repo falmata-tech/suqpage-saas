@@ -5,6 +5,7 @@ import { PostgresCatalogRepository } from "../lib/postgres-catalog-repository";
 import { PostgresSessionRepository } from "../lib/postgres-session-repository";
 import { createPostgresPublicInquiry } from "../lib/inquiries-postgres";
 import { createPostgresPublicClientWorkspace } from "../lib/signup-postgres";
+import { PostgresRequestRepository } from "../lib/postgres-request-repository";
 
 async function main() {
   const config = postgresRuntimeConfig({
@@ -105,6 +106,27 @@ async function main() {
         assert.equal(repeated.duplicate, true);
         assert.equal(repeated.inquiryId, first.inquiryId);
       }
+    });
+
+    await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      const requests = new PostgresRequestRepository(runner);
+      const key = `postgres-request-${Date.now()}`;
+      const input = { contactName: "PostgreSQL request", contactValue: "+251911123456", businessName: "PostgreSQL Works", requestText: "We need a professional showroom for the products made in our workshop.", idempotencyKey: key, consent: true };
+      const created = await requests.createPublicInterest(input, "postgres-request-ip");
+      assert.ok(created.id && created.publicRef);
+      assert.equal((await requests.createPublicInterest(input, "postgres-request-ip")).id, created.id);
+      const detail = await requests.getRequestDetail(created.id);
+      assert.equal(detail?.id, created.id);
+      assert.equal(detail?.events.length, 1);
+      const admin = (await runner.query<{ id: number; email: string; name: string; role: "admin"; business_id: null; must_change_password: number; access_role: "platform_admin" }>("SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,'platform_admin' access_role FROM users u WHERE u.role='admin' ORDER BY id LIMIT 1")).rows[0];
+      assert.ok(admin, "Expected an administrator fixture.");
+      const page = await requests.listRequestsPage(admin, { page: 1, q: "postgresql request" });
+      assert.ok(page.items.some((item) => item.id === created.id));
+      const changed = await requests.updateStatus(created.id, "under_review", admin.id);
+      assert.equal(changed?.businessId, null);
+      const updated = await requests.getRequestDetail(created.id);
+      assert.equal(updated?.status, "under_review");
     });
 
     await runner.transaction(async () => {
