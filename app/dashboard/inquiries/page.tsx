@@ -14,7 +14,7 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   const user = await requireUser();
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
-  const business = resolveBusiness(user, query.business);
+  const business = await resolveBusiness(user, query.business);
   if (!business) return null;
   const client = isClient(user);
   const inquiries = listInquiriesPage(business.id, query);

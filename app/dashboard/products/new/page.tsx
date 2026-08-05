@@ -16,7 +16,7 @@ export default async function NewProduct({
 }) {
   const user = await requireUser();
   const query = await searchParams;
-  const business = resolveProductBusiness(user, query.business);
+  const business = await resolveProductBusiness(user, query.business);
   if (!business) return null;
   const catalog = (await runtimeCatalogByBusinessId(business.id, true))!;
   return (

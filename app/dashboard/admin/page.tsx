@@ -34,7 +34,7 @@ export default async function AdminOverview({
   }
 
   const counts = getPlatformCounts();
-  const attention = getDashboardAttention(user);
+  const attention = await getDashboardAttention(user);
   const destinations = [
     {
       href: "/dashboard/admin/businesses",

@@ -1,4 +1,4 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { runtimeGet } from "@/lib/runtime-sql";
 export const runtime="nodejs";
-export function GET(){try{getDb().prepare("SELECT 1 ok").get();return NextResponse.json({status:"ok"},{headers:{"Cache-Control":"no-store"}})}catch{return NextResponse.json({status:"unhealthy"},{status:503})}}
+export async function GET(){try{await runtimeGet("SELECT 1 ok");return NextResponse.json({status:"ok"},{headers:{"Cache-Control":"no-store"}})}catch{return NextResponse.json({status:"unhealthy"},{status:503})}}

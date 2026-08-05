@@ -63,9 +63,9 @@ async function main() {
   const second = await create(clientB, 2);
   const third = await create(clientA, 3);
   const fourth = await create(clientB, 4);
-  assert.equal(getDashboardAttention(operations).supportReplies, 4, "operations sees waiting and client-authored unread support");
-  assert.equal(getDashboardAttention(agentOne).supportReplies, 2, "an agent sees assigned unread work plus the shared waiting queue");
-  assert.equal(getDashboardAttention(clientA, businessA).supportReplies, 0, "a client does not see their own opening messages as unread replies");
+  assert.equal((await getDashboardAttention(operations)).supportReplies, 4, "operations sees waiting and client-authored unread support");
+  assert.equal((await getDashboardAttention(agentOne)).supportReplies, 2, "an agent sees assigned unread work plus the shared waiting queue");
+  assert.equal((await getDashboardAttention(clientA, businessA)).supportReplies, 0, "a client does not see their own opening messages as unread replies");
   assert.equal(getSupportConversation(operations, first.id).conversation.assignedUserId, agentOneId);
   assert.equal(getSupportConversation(operations, second.id).conversation.assignedUserId, agentTwoId);
   assert.equal(getSupportConversation(operations, third.id).conversation.assignedUserId, agentTwoId);

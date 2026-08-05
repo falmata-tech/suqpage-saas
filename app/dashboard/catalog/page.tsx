@@ -21,7 +21,7 @@ export default async function CatalogPage({
 }) {
   const user = await requireUser();
   const query = await searchParams;
-  const business = resolveBusiness(user, query.business);
+  const business = await resolveBusiness(user, query.business);
   if (!business) return null;
   const catalog = (await runtimeCatalogByBusinessId(business.id, true))!;
 

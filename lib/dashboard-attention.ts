@@ -1,5 +1,5 @@
 import { hasCapability } from "./capabilities";
-import { getDb } from "./db";
+import { runtimeGet } from "./runtime-sql";
 import type { SessionUser } from "./types";
 
 export type DashboardAttention = {
@@ -9,17 +9,17 @@ export type DashboardAttention = {
   supportReplies: number;
 };
 
-function count(sql: string, ...params: Array<string | number>) {
-  return Number((getDb().prepare(sql).get(...params) as { total: number }).total);
+async function count(sql: string, ...params: Array<string | number>) {
+  return Number(((await runtimeGet<{ total: number }>(sql, params)) as { total: number }).total);
 }
 
-export function getDashboardAttention(
+export async function getDashboardAttention(
   user: SessionUser,
   businessId?: number | null,
-): DashboardAttention {
+): Promise<DashboardAttention> {
   if (hasCapability(user, "operations:manage") && !businessId) {
     return {
-      newAccounts: count(`
+      newAccounts: await count(`
         SELECT COUNT(*) total FROM businesses b
         WHERE b.status='draft'
           AND EXISTS(
@@ -28,8 +28,8 @@ export function getDashboardAttention(
             WHERE u.business_id=b.id AND p.access_role='client'
           )
       `),
-      showroomRequests: count("SELECT COUNT(*) total FROM service_requests WHERE status='submitted'"),
-      supportReplies: count(`
+      showroomRequests: await count("SELECT COUNT(*) total FROM service_requests WHERE status='submitted'"),
+      supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
           OR (c.status='open' AND EXISTS(
@@ -46,12 +46,12 @@ export function getDashboardAttention(
 
   if (user.access_role === "team_member") {
     return {
-      showroomRequests: count(`
+      showroomRequests: await count(`
         SELECT COUNT(*) total FROM service_requests
         WHERE assigned_user_id=?
           AND status IN ('submitted','under_review','approved_for_work','in_progress')
       `, user.id),
-      supportReplies: count(`
+      supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
           OR (c.assigned_user_id=? AND c.status='open' AND EXISTS(
@@ -70,16 +70,16 @@ export function getDashboardAttention(
   if (!scopedBusinessId) return { showroomRequests: 0, supportReplies: 0 };
   const client = user.access_role === "client";
   return {
-    showroomRequests: count(
+    showroomRequests: await count(
       `SELECT COUNT(*) total FROM service_requests
        WHERE business_id=? AND status IN (${client ? "'needs_information','client_review'" : "'submitted','client_approved'"})`,
       scopedBusinessId,
     ),
-    customerInquiries: count(
+    customerInquiries: await count(
       "SELECT COUNT(*) total FROM inquiries WHERE business_id=? AND status='new'",
       scopedBusinessId,
     ),
-    supportReplies: count(`
+    supportReplies: await count(`
       SELECT COUNT(*) total FROM support_conversations c
       WHERE c.business_id=? AND c.status!='closed'
         AND EXISTS(

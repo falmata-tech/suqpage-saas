@@ -19,7 +19,7 @@ export default async function SettingsPage({
 }) {
   const user = await requireUser();
   const params = await searchParams;
-  const business = resolveBusiness(user, params.business);
+  const business = await resolveBusiness(user, params.business);
   if (!business) return null;
   return (
     <DashboardShell user={user} business={business}>

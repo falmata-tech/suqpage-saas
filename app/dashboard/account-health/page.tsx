@@ -40,7 +40,7 @@ export default async function AccountHealthPage({
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
   const operations = hasCapability(user, "operations:manage");
-  const business = resolveBusiness(user, query.business);
+  const business = await resolveBusiness(user, query.business);
 
   if (operations && !business) {
     const accounts = listAccountHealthPage(user, query);
