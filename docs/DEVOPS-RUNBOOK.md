@@ -169,7 +169,9 @@ a retained rollback source, and health monitoring on `/api/health`.
 The Next.js configuration explicitly includes its source-map runtime and relative
 LRU cache dependency in every Vercel function trace. A deployment that logs a
 missing framework runtime file fails smoke checks and must not receive the custom
-domain.
+domain. Do not add a broad `./lib/**/*` output-tracing exclusion: Vercel applies
+it to Next.js's own server library. The release trace test enforces privacy for
+the project's source paths without deleting framework runtime files.
 
 ## Backup, deploy, and rollback
 

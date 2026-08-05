@@ -60,7 +60,6 @@ const nextConfig: NextConfig = {
       "./playwright-report/**/*",
       "./app/**/*",
       "./docs/**/*",
-      "./lib/**/*",
       "./scripts/**/*",
       "./showroom-sdk/**/*",
       "./specs/**/*",

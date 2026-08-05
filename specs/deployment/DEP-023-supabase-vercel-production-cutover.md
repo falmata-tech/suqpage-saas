@@ -134,6 +134,11 @@ The second candidate (`dpl_3N3WJbFvumZ7ZsfEgxm9NBiwj8fs`) proved Vercel does not
 follow relative dependencies from an explicit include and failed closed on
 `server/lib/lru-cache.js`; the guarded include and trace assertion now cover both
 files. The domain remained unattached.
+The third candidate (`dpl_2Yc3wi1dJTFQhUNNSLvqGEsTLGHx`) then failed closed on
+`server/lib/parse-stack.js`, proving the root cause was the broad `./lib/**/*`
+trace exclusion removing Next.js's own server library. That exclusion is removed;
+the release trace privacy gate remains responsible for rejecting project-private
+source paths. The domain remained unattached.
 
 ## Test plan
 
