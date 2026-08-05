@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
-import { getDb } from "./db";
 import { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
+import { runtimeAll, runtimeGet } from "./runtime-sql";
 
 export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
@@ -185,7 +185,7 @@ function selectSql(extraWhere: string, suffix = "") {
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
       ${extraWhere}
-    ORDER BY is_sponsored DESC,sponsor_position,b.name COLLATE NOCASE,b.id
+    ORDER BY is_sponsored DESC,sponsor_position,lower(b.name),b.id
     ${suffix}
   `;
 }
@@ -291,9 +291,12 @@ function groupCities(showrooms: DiscoveryShowroom[]): DiscoveryCityGroup[] {
     .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
 }
 
-function expoEligibleCount(db: DatabaseSync, industryKey: string, mode: WeeklyExpoDay["mode"]) {
+async function expoEligibleCount(db: DatabaseSync | undefined, industryKey: string, mode: WeeklyExpoDay["mode"]) {
+  const get = async (sql: string, values: Array<string | number>) => db
+    ? db.prepare(sql).get(...values) as { total: number }
+    : (await runtimeGet<{ total: number }>(sql, values))!;
   if (mode === "expo") {
-    return (db.prepare(`
+    return (await get(`
       SELECT COUNT(DISTINCT b.id) AS total
       FROM business_industries i
       JOIN businesses b ON b.id=i.business_id
@@ -304,9 +307,9 @@ function expoEligibleCount(db: DatabaseSync, industryKey: string, mode: WeeklyEx
         AND p.approved_at > 0
         AND p.booth_image_path LIKE '/%'
         AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-    `).get(industryKey) as { total: number }).total;
+    `, [industryKey])).total;
   }
-  return (db.prepare(`
+  return (await get(`
     SELECT COUNT(*) AS total
     FROM sunday_showcase_selections selection
     JOIN businesses b ON b.id=selection.business_id
@@ -318,10 +321,10 @@ function expoEligibleCount(db: DatabaseSync, industryKey: string, mode: WeeklyEx
       AND p.approved_at > 0
       AND p.booth_image_path LIKE '/%'
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-  `).get(industryKey) as { total: number }).total;
+  `, [industryKey])).total;
 }
 
-export function getDiscoveryView(
+export async function getDiscoveryView(
   options: {
     industry?: string;
     q?: string;
@@ -332,14 +335,20 @@ export function getDiscoveryView(
     now?: Date;
     db?: DatabaseSync;
   } = {},
-): DiscoveryView {
-  const db = options.db || getDb();
+): Promise<DiscoveryView> {
+  const db = options.db;
+  const get = async <T>(sql: string, values: Array<string | number>) => db
+    ? db.prepare(sql).get(...values) as T | undefined
+    : runtimeGet<T>(sql, values);
+  const all = async <T>(sql: string, values: Array<string | number>) => db
+    ? db.prepare(sql).all(...values) as T[]
+    : runtimeAll<T>(sql, values);
   const industry = normalizeIndustry(options.industry);
   const query = (options.q || "").trim().slice(0, 80);
   const productionScale = normalizeProductionScale(options.scale);
   const where = discoveryWhere(productionScale);
   const params = discoveryParameters(industry.key, query, productionScale);
-  const countRow = db.prepare(`
+  const countRow = (await get<{ total: number }>(`
     SELECT COUNT(DISTINCT b.id) AS total
     FROM business_industries i
     JOIN businesses b ON b.id=i.business_id
@@ -350,13 +359,13 @@ export function getDiscoveryView(
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
       ${where}
-  `).get(...params) as { total: number };
-  const total = countRow.total;
+  `, params))!;
+  const total = Number(countRow.total);
   const pageCount = Math.max(1, Math.ceil(total / LIST_PAGE_SIZE));
   const page = Math.min(normalizePositiveInteger(options.page, 1), pageCount);
-  const rows = db.prepare(selectSql(where)).all(...params) as DiscoveryRow[];
-  const listRows = db.prepare(selectSql(where, "LIMIT ? OFFSET ?"))
-    .all(...params, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE) as DiscoveryRow[];
+  const rows = await all<DiscoveryRow>(selectSql(where), params);
+  const listRows = await all<DiscoveryRow>(selectSql(where, "LIMIT ? OFFSET ?"),
+    [...params, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE]);
   const showrooms = rows.map(toShowroom);
   const cityGroups = groupCities(showrooms);
 
@@ -367,8 +376,8 @@ export function getDiscoveryView(
   const revealExpo = selectedDay.isToday;
   const expoRows = revealExpo
     ? selectedDay.mode === "expo"
-      ? db.prepare(selectSql("AND p.booth_image_path LIKE '/%' ")).all(expoIndustry.key) as DiscoveryRow[]
-      : db.prepare(`
+      ? await all<DiscoveryRow>(selectSql("AND p.booth_image_path LIKE '/%' "), [expoIndustry.key])
+      : await all<DiscoveryRow>(`
         SELECT
           b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
           p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
@@ -385,13 +394,13 @@ export function getDiscoveryView(
           AND p.approved_at > 0
           AND p.booth_image_path LIKE '/%'
           AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-        ORDER BY selection.position,b.name COLLATE NOCASE,b.id
-      `).all(expoIndustry.key) as DiscoveryRow[]
+        ORDER BY selection.position,lower(b.name),b.id
+      `, [expoIndustry.key])
     : [];
   const expoShowrooms = expoRows.map((row) => ({ ...toShowroom(row), imagePath: row.booth_image_path }));
   const boothCount = revealExpo
     ? expoShowrooms.length
-    : expoEligibleCount(db, expoIndustry.key, selectedDay.mode);
+    : await expoEligibleCount(db, expoIndustry.key, selectedDay.mode);
   const booths = Array.from({ length: boothCount }, (_, index): ExpoBooth => {
     const slot = index + 1;
     const reference = selectedDay.mode === "livestream"

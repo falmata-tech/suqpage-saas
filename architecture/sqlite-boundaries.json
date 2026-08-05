@@ -8,7 +8,6 @@
     "lib/catalog-runtime.ts",
     "lib/db.ts",
     "lib/discovery-admin.ts",
-    "lib/discovery.ts",
     "lib/expo.ts",
     "lib/inquiries.ts",
     "lib/media-manifest.ts",

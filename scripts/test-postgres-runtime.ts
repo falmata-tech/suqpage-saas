@@ -182,6 +182,10 @@ async function main() {
       assert.ok(industries.length > 0, "Expected PostgreSQL JSON industry extraction results.");
       const showrooms = await listPublicShowrooms({ page: 1, industry: industries[0].key });
       assert.ok(showrooms.totalItems > 0, "Expected PostgreSQL public showroom results.");
+      const { getDiscoveryView } = await import("../lib/discovery");
+      const discovery = await getDiscoveryView({ industry: "electronics", expoDay: 1 });
+      assert.ok(discovery.total > 0, "Expected PostgreSQL geographic discovery results.");
+      assert.ok(discovery.expo.schedule.length === 7, "Expected the complete PostgreSQL-backed Expo schedule.");
       const {
         runtimeListRequestsPage,
         runtimeRequestAttachment,

@@ -49,6 +49,7 @@ for (const count of [1, 5, 10, 11, 20, 37]) {
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
 const db = new DatabaseSync(path.join(root, "discovery.db"));
 
+async function main() {
 try {
   migrateDatabase(db, { assertDestructiveMigrationCheckpoint: () => {} });
 
@@ -157,7 +158,7 @@ try {
   }
 
   const monday = new Date("2026-07-27T09:00:00+03:00");
-  const view = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const view = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.sponsoredCount, 2);
   assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
@@ -185,52 +186,52 @@ try {
 
   assert.equal(view.list.items.length, 5, "the database-backed List response is capped at five rows");
   assert.equal(view.list.pageCount, 4);
-  const secondPage = getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", expoDay: 1, now: monday });
+  const secondPage = await getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", expoDay: 1, now: monday });
   assert.equal(secondPage.list.page, 2);
   assert.equal(secondPage.list.items.length, 5);
   assert.equal(secondPage.view, "list");
   assert.equal(secondPage.list.items.some((item) => view.list.items.some((first) => first.id === item.id)), false, "List pages do not repeat rows");
-  const clampedPage = getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", expoDay: 1, now: monday });
+  const clampedPage = await getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", expoDay: 1, now: monday });
   assert.equal(clampedPage.list.page, 4, "an out-of-range page is clamped to the final page");
   assert.equal(clampedPage.list.items.length, 4);
 
-  const search = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
+  const search = await getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 1, now: monday });
   assert.equal(search.total, 1, "published offering text is searchable");
   assert.equal(search.showrooms[0].city, "Addis Ababa");
   assert.equal(search.cityGroups.length, 0, "a single searched result remains an isolated exact-coordinate pin");
   assert.equal(search.expo.booths.length, 19, "map search does not narrow the independently scheduled Expo");
 
-  const tuesday = getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
+  const tuesday = await getDiscoveryView({ db, industry: "electronics", q: "Needle signal", expoDay: 2, now: monday });
   assert.equal(tuesday.expo.title, "Beauty, hygiene & household care Expo");
   assert.equal(tuesday.expo.isToday, false);
   assert.equal(tuesday.expo.boothCount, 1);
   assert.ok(tuesday.expo.booths.every((booth) => !booth.revealed && booth.showroom === null), "non-today Expo slots contain no business projection");
   assert.equal(JSON.stringify(tuesday.expo.booths).includes("sheger-soap"), false, "non-today page data does not leak a business handle");
 
-  const wednesday = getDiscoveryView({ db, industry: "electronics", expoDay: 3, now: new Date("2026-07-29T09:00:00+03:00") });
+  const wednesday = await getDiscoveryView({ db, industry: "electronics", expoDay: 3, now: new Date("2026-07-29T09:00:00+03:00") });
   assert.deepEqual(wednesday.expo.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "advancing today does not reorder weekday cards");
   assert.equal(wednesday.expo.schedule.find((day) => day.isToday)?.dayLabel, "Wednesday", "today indicator moves within the fixed week");
   assert.equal(wednesday.expo.schedule[0].dateIso, "2026-07-27");
   assert.equal(wednesday.expo.schedule[2].dateIso, "2026-07-29");
 
-  const sunday = getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
+  const sunday = await getDiscoveryView({ db, industry: "electronics", expoDay: 0, now: monday });
   assert.equal(sunday.expo.mode, "livestream");
   assert.equal(sunday.expo.title, "Featured Enterprises: Textiles, garments, leather & paper");
   assert.equal(sunday.expo.boothCount, 3);
   assert.ok(sunday.expo.booths.every((booth) => !booth.revealed && booth.showroom === null), "the future Sunday lineup is also redacted");
   assert.ok(sunday.expo.booths.every((booth) => /^LIVE-\d{2}$/.test(booth.reference)));
-  const sundayIndustries = Array.from({ length: 7 }, (_, week) => getDiscoveryView({
+  const sundayIndustries = await Promise.all(Array.from({ length: 7 }, async (_, week) => (await getDiscoveryView({
     db,
     expoDay: 0,
     now: new Date(monday.getTime() + week * 7 * 86_400_000),
-  }).expo.title);
+  })).expo.title));
   assert.equal(new Set(sundayIndustries.slice(0, 6)).size, 6, "Sunday rotates through all six industries");
   assert.equal(sundayIndustries[6], sundayIndustries[0], "Sunday industry rotation loops after six weeks");
-  const sundayToday = getDiscoveryView({ db, expoDay: 0, now: new Date("2026-08-02T09:00:00+03:00") });
+  const sundayToday = await getDiscoveryView({ db, expoDay: 0, now: new Date("2026-08-02T09:00:00+03:00") });
   assert.equal(sundayToday.expo.booths.length, 3);
   assert.ok(sundayToday.expo.booths.every((booth) => booth.revealed), "today's Sunday floor reveals only selected enterprises");
 
-  const invalidIndustry = getDiscoveryView({ db, industry: "not-real" });
+  const invalidIndustry = await getDiscoveryView({ db, industry: "not-real" });
   assert.equal(invalidIndustry.industry.key, DISCOVERY_INDUSTRIES[0].key, "invalid industry resolves to the first allowlisted industry");
 
   const plan = db.prepare("EXPLAIN QUERY PLAN SELECT business_id FROM business_industries WHERE industry_key=?").all("electronics") as Array<{ detail: string }>;
@@ -277,7 +278,7 @@ try {
     [{ industry_key: "electronics", position: 3 }],
     "admin discovery updates persist MirtPage's Sunday selection independently",
   );
-  const refreshedToday = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const refreshedToday = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   const updatedBooth = refreshedToday.expo.booths.find((booth) => booth.revealed && booth.showroom.id === firstAddisBusinessId);
   assert.equal(updatedBooth?.revealed ? updatedBooth.showroom.imagePath : null, "/booths/admin-approved.webp", "the public booth reads its image from the owning business profile");
   assert.deepEqual(
@@ -303,7 +304,7 @@ try {
     excluded: false,
   }, db), /Sunday selections must match/, "Sunday curation cannot assign a business outside its reviewed industries");
   db.prepare("UPDATE business_discovery_profiles SET booth_image_path='' WHERE business_id=(SELECT id FROM businesses WHERE handle='bishoftu-repair')").run();
-  const missingBoothMedia = getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
+  const missingBoothMedia = await getDiscoveryView({ db, industry: "electronics", expoDay: 1, now: monday });
   assert.equal(missingBoothMedia.total, 19, "missing booth setup does not erase an otherwise eligible geographic Showroom");
   assert.equal(missingBoothMedia.expo.boothCount, 18, "a business without its own approved booth image does not receive an Expo slot");
 
@@ -312,3 +313,9 @@ try {
   db.close();
   fs.rmSync(root, { recursive: true, force: true });
 }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
