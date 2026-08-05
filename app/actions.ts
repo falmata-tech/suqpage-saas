@@ -5,13 +5,14 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
-import { getBusinessById, getDb, getUserByEmail, inTransaction } from "@/lib/db";
+import { getBusinessById, getDb, inTransaction } from "@/lib/db";
+import { runtimeUserByEmail } from "@/lib/catalog-runtime";
 import { saveUploadedImage, stageUploadedImage } from "@/lib/media";
 import { isStrongPassword } from "@/lib/passwords";
 import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
 import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
 import { sqliteProductUpkeepPort } from "@/lib/product-upkeep-sqlite";
-import { consumeRateLimit, resetRateLimit } from "@/lib/rate-limit";
+import { consumeRuntimeRateLimit, resetRuntimeRateLimit } from "@/lib/rate-limit-runtime";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
 import { validateLiveSettings } from "@/lib/live-showroom";
@@ -46,14 +47,14 @@ export async function loginAction(formData:FormData) {
   const email=text(formData,"email",160).toLowerCase();
   const password=String(formData.get("password")||"");
   const identity=await currentRequestIdentity();
-  const rate=consumeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
+  const rate=await consumeRuntimeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
   if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
-  const user=getUserByEmail(email);
+  const user=await runtimeUserByEmail(email);
   if(!user||password.length>200||!await bcrypt.compare(password,user.password_hash)){
     audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
     go("/login",{error:"Invalid email or password."});
   }
-  resetRateLimit(`login:${identity.ipHash}:${email}`);
+  await resetRuntimeRateLimit(`login:${identity.ipHash}:${email}`);
   await setSession(user.id);
   audit("auth.login_success",{userId:user.id,businessId:user.business_id,ipHash:identity.ipHash});
   redirect(user.must_change_password?"/dashboard/account?required=1":"/dashboard");
@@ -72,7 +73,7 @@ export async function changePasswordAction(formData:FormData){
   if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
   const passwordHash=await bcrypt.hash(password,12);
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?").run(passwordHash,user.id);
-  revokeAllUserSessions(user.id);
+  await revokeAllUserSessions(user.id);
   await setSession(user.id);
   audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
   go("/dashboard/account",{saved:1});
@@ -113,7 +114,7 @@ export async function adminResetClientPasswordAction(formData:FormData){
   if(!target||!isStrongPassword(password))go("/dashboard/admin/clients",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
   const passwordHash=await bcrypt.hash(password,12);
   getDb().prepare("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?").run(passwordHash,userId);
-  revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
+  await revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
   revalidatePath("/dashboard/admin/clients");go("/dashboard/admin/clients",{saved:"password"});
 }
 

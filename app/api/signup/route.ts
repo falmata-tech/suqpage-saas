@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { setSession } from "@/lib/auth";
-import { consumeRateLimit } from "@/lib/rate-limit";
+import { consumeRuntimeRateLimit } from "@/lib/rate-limit-runtime";
 import { assertSameOrigin, audit, hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
 import { createPublicClientWorkspace, SignupError } from "@/lib/signup";
 
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
     const body = await readBody(request);
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new SignupError("The signup request is invalid.");
     const emailHash = hashPrivateValue(String(body.email || "").trim().toLowerCase());
-    const ipRate = consumeRateLimit(`signup:ip:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
-    const emailRate = consumeRateLimit(`signup:email:${emailHash}`, 3, 60 * 60 * 1000, 60 * 60 * 1000);
+    const ipRate = await consumeRuntimeRateLimit(`signup:ip:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
+    const emailRate = await consumeRuntimeRateLimit(`signup:email:${emailHash}`, 3, 60 * 60 * 1000, 60 * 60 * 1000);
     if (!ipRate.allowed || !emailRate.allowed) throw new SignupError("Too many signup attempts. Try again later.", 429, "rate_limited");
     const created = await createPublicClientWorkspace(body);
     await setSession(created.userId);

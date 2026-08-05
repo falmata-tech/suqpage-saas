@@ -1,8 +1,8 @@
-import { consumeRateLimit } from "./rate-limit";
+import { consumeRuntimeRateLimit } from "./rate-limit-runtime";
 import type { RequestRateLimiter } from "./request-ports";
 
 export class PublicRequestRateLimiter implements RequestRateLimiter {
   consume(ipHash: string) {
-    return consumeRateLimit(`public-request:${ipHash}`, 3, 60 * 60 * 1000, 60 * 60 * 1000);
+    return consumeRuntimeRateLimit(`public-request:${ipHash}`, 3, 60 * 60 * 1000, 60 * 60 * 1000);
   }
 }
