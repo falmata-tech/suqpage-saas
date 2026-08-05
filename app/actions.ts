@@ -11,7 +11,7 @@ import { saveUploadedImage, stageUploadedImage } from "@/lib/media";
 import { isStrongPassword } from "@/lib/passwords";
 import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
 import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
-import { sqliteProductUpkeepPort } from "@/lib/product-upkeep-sqlite";
+import { runtimeProductUpkeepPort } from "@/lib/product-upkeep-runtime";
 import { consumeRuntimeRateLimit, resetRuntimeRateLimit } from "@/lib/rate-limit-runtime";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
@@ -176,7 +176,7 @@ export async function basicProductUpkeepAction(formData:FormData){
     const priceValue=priceInput===""?null:Number(priceInput);
     if(priceValue!==null&&(!Number.isFinite(priceValue)||priceValue<0||priceValue>9999999.99))throw new ProductUpkeepError("Price must be a valid non-negative ETB amount.");
     const videoInput=text(formData,"videoUrl",500);
-    result=await executeBasicProductUpkeep(sqliteProductUpkeepPort,user,{
+    result=await executeBasicProductUpkeep(runtimeProductUpkeepPort(),user,{
       kind:text(formData,"kind",20),
       businessId,
       productId,

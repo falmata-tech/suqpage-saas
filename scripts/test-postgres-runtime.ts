@@ -193,6 +193,67 @@ async function main() {
         assert.ok(inquiries.items.length > 0, "Expected PostgreSQL inquiry pagination results.");
         assert.ok(inquiries.items[0].items.length > 0, "Expected scoped PostgreSQL inquiry item hydration.");
       }
+
+      const upkeepTarget = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{
+          business_id: number;
+          content_version: number;
+          category_id: number;
+          user_id: number;
+          email: string;
+          name: string;
+          role: "owner";
+          must_change_password: number;
+        }>(`
+          SELECT b.id business_id,b.content_version,c.id category_id,u.id user_id,u.email,u.name,u.role,u.must_change_password
+          FROM businesses b
+          JOIN categories c ON c.business_id=b.id
+          JOIN users u ON u.business_id=b.id
+          JOIN user_access_profiles p ON p.user_id=u.id AND p.access_role='client'
+          WHERE b.status='active'
+            AND EXISTS(SELECT 1 FROM published_catalog_versions v WHERE v.business_id=b.id)
+          ORDER BY b.id,c.id,u.id LIMIT 1
+        `)).rows[0];
+      });
+      assert.ok(upkeepTarget, "Expected a published client showroom for PostgreSQL upkeep.");
+      const { executeBasicProductUpkeep } = await import("../lib/product-upkeep");
+      const { runtimeProductUpkeepPort } = await import("../lib/product-upkeep-runtime");
+      const upkeepKey = `postgres-upkeep-${Date.now()}`;
+      const upkeepCommand = {
+        kind: "create",
+        businessId: upkeepTarget.business_id,
+        productId: null,
+        expectedContentVersion: upkeepTarget.content_version,
+        idempotencyKey: upkeepKey,
+        name: "PostgreSQL Runtime Offering",
+        description: "A production capability created during the disposable PostgreSQL runtime rehearsal.",
+        availability: "available",
+        offeringKind: "manufacturing_capability",
+        quantityMode: "optional",
+        capacitySummary: "Capacity discussed with each buyer",
+        minimumOrderSummary: "Flexible trial order",
+        leadTimeSummary: "Confirmed after specification review",
+        priceMinor: null,
+        quantityUnit: "",
+        highlights: ["Made in Ethiopia", "Buyer specifications accepted"],
+        videoRef: "",
+        categoryId: upkeepTarget.category_id,
+        imageAction: "keep",
+        serviceNote: "",
+      };
+      const upkeepUser = {
+        id: upkeepTarget.user_id,
+        email: upkeepTarget.email,
+        name: upkeepTarget.name,
+        role: upkeepTarget.role,
+        access_role: "client" as const,
+        business_id: upkeepTarget.business_id,
+        must_change_password: upkeepTarget.must_change_password,
+      };
+      const upkeep = await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null);
+      assert.equal(upkeep.contentVersion, upkeepTarget.content_version + 1);
+      assert.equal((await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null)).duplicate, true);
     } finally {
       await closePostgresRuntimeForTests();
     }
