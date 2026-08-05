@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "../lib/postgres-runtime";
+import { consumePostgresRateLimit, resetPostgresRateLimit } from "../lib/rate-limit-postgres";
+import { PostgresCatalogRepository } from "../lib/postgres-catalog-repository";
 
 async function main() {
   const config = postgresRuntimeConfig({
@@ -28,6 +30,38 @@ async function main() {
     });
     assert.ok(evidence.activeBusinesses > 0);
     assert.ok(evidence.backendPid > 0);
+
+    await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      const repository = new PostgresCatalogRepository(runner);
+      const businesses = await repository.getAllBusinesses();
+      const business = businesses[0];
+      assert.ok(business, "Expected a rehearsed business.");
+      assert.equal((await repository.getBusinessByHandle(`@${business.handle}`))?.id, business.id);
+      assert.equal((await repository.getBusinessByHandleAny(business.handle))?.id, business.id);
+      const catalog = await repository.getCatalogByBusinessId(business.id, true);
+      assert.equal(catalog?.business.id, business.id);
+      assert.ok(catalog?.categories.length);
+      const user = (await runner.query<{ id: number; email: string }>(
+        "SELECT id,email FROM users WHERE business_id=? ORDER BY id LIMIT 1",
+        [business.id],
+      )).rows[0];
+      if (user) {
+        assert.equal((await repository.getUserById(user.id))?.id, user.id);
+        assert.equal((await repository.getUserByEmail(user.email))?.id, user.id);
+      }
+    });
+
+    await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      await resetPostgresRateLimit(runner, "postgres-runtime-test");
+      assert.equal((await consumePostgresRateLimit(runner, "postgres-runtime-test", 2, 60_000)).remaining, 1);
+      assert.equal((await consumePostgresRateLimit(runner, "postgres-runtime-test", 2, 60_000)).remaining, 0);
+      const blocked = await consumePostgresRateLimit(runner, "postgres-runtime-test", 2, 60_000, 120_000);
+      assert.equal(blocked.allowed, false);
+      assert.equal(blocked.remaining, 0);
+      assert.ok(blocked.retryAfterSeconds > 0);
+    });
     console.log("PostgreSQL runtime pool, placeholder, and transaction tests passed.");
   } finally {
     await pool.end();

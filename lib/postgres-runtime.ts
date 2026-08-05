@@ -23,6 +23,11 @@ export type PostgresQueryResult<T> = {
 
 type Queryable = Pick<Pool, "query"> | Pick<PoolClient, "query">;
 
+type TransactionContext = {
+  client: PoolClient;
+  queue: Promise<void>;
+};
+
 function boundedInteger(
   raw: string | undefined,
   fallback: number,
@@ -136,7 +141,7 @@ export function createPostgresPool(config: PostgresRuntimeConfig) {
 }
 
 export class PostgresTransactionRunner {
-  private readonly currentClient = new AsyncLocalStorage<PoolClient>();
+  private readonly currentTransaction = new AsyncLocalStorage<TransactionContext>();
 
   constructor(private readonly pool: Pool) {}
 
@@ -144,19 +149,35 @@ export class PostgresTransactionRunner {
     sql: string,
     values: readonly unknown[] = [],
   ): Promise<PostgresQueryResult<T>> {
-    const executor: Queryable = this.currentClient.getStore() || this.pool;
-    const result = await executor.query<T>(sqliteParametersToPostgres(sql), [...values]);
+    const transaction = this.currentTransaction.getStore();
+    const execute = async (executor: Queryable) =>
+      executor.query<T>(sqliteParametersToPostgres(sql), [...values]);
+    if (!transaction) {
+      const result = await execute(this.pool);
+      return { rows: result.rows, rowCount: result.rowCount || 0 };
+    }
+    // pg clients accept one query at a time. This queue preserves the transaction
+    // connection even when an adapter independently awaits several reads.
+    const queued = transaction.queue.then(
+      () => execute(transaction.client),
+      () => execute(transaction.client),
+    );
+    transaction.queue = queued.then(
+      () => undefined,
+      () => undefined,
+    );
+    const result = await queued;
     return { rows: result.rows, rowCount: result.rowCount || 0 };
   }
 
   async transaction<T>(operation: () => Promise<T>): Promise<T> {
-    const active = this.currentClient.getStore();
+    const active = this.currentTransaction.getStore();
     if (active) return operation();
 
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
-      const result = await this.currentClient.run(client, operation);
+      const result = await this.currentTransaction.run({ client, queue: Promise.resolve() }, operation);
       await client.query("COMMIT");
       return result;
     } catch (error) {
