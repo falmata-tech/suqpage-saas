@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "../lib/postgres-runtime";
 import { consumePostgresRateLimit, resetPostgresRateLimit } from "../lib/rate-limit-postgres";
 import { PostgresCatalogRepository } from "../lib/postgres-catalog-repository";
+import { PostgresSessionRepository } from "../lib/postgres-session-repository";
 
 async function main() {
   const config = postgresRuntimeConfig({
@@ -49,6 +50,23 @@ async function main() {
       if (user) {
         assert.equal((await repository.getUserById(user.id))?.id, user.id);
         assert.equal((await repository.getUserByEmail(user.email))?.id, user.id);
+
+        const sessions = new PostgresSessionRepository(runner);
+        const now = Date.now();
+        const tokenHash = `postgres-runtime-${now}`;
+        const sessionId = await sessions.create({
+          tokenHash,
+          userId: user.id,
+          expiresAt: now + 60_000,
+          now,
+          ipHash: "test-ip-hash",
+          userAgent: "PostgreSQL runtime test",
+        });
+        assert.equal((await sessions.findActive(tokenHash, now))?.id, sessionId);
+        await sessions.touch(sessionId, now + 1);
+        assert.equal((await sessions.findActive(tokenHash, now + 1))?.last_seen_at, now + 1);
+        await sessions.revokeByToken(tokenHash, now + 2);
+        assert.equal(await sessions.findActive(tokenHash, now + 2), undefined);
       }
     });
 
