@@ -7,7 +7,7 @@ import ShowroomApp from "@/components/showroom/ShowroomApp";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
-import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
+import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { snapshotToCatalog } from "@/lib/revision-domain";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
@@ -40,7 +40,7 @@ export default async function RevisionPreviewPage({
   const query = await searchParams;
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
-  const request = getRequestDetail(requestId);
+  const request = await runtimeRequestDetail(requestId);
   const revision = getContentRevision(revisionId);
   if (
     !request ||

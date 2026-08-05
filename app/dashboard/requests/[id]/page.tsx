@@ -11,7 +11,7 @@ import { hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { presentRequestEvent } from "@/lib/request-presentation";
 import { REVIEW_REQUEST_STATUSES } from "@/lib/request-domain";
-import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
+import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { listTeamMemberChoices } from "@/lib/scalable-queries";
 import { listContentRevisions } from "@/lib/revision-service";
 
@@ -22,7 +22,7 @@ export default async function RequestDetailPage({ params, searchParams }: { para
   const requestId = Number.parseInt((await params).id, 10);
   const query = await searchParams;
   if (!Number.isInteger(requestId)) notFound();
-  const request = getRequestDetail(requestId);
+  const request = await runtimeRequestDetail(requestId);
   if (!request) notFound();
   if (!canAccessRequest(user, request)) notFound();
   const manager = hasCapability(user, "operations:manage");

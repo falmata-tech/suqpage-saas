@@ -182,6 +182,37 @@ async function main() {
       assert.ok(industries.length > 0, "Expected PostgreSQL JSON industry extraction results.");
       const showrooms = await listPublicShowrooms({ page: 1, industry: industries[0].key });
       assert.ok(showrooms.totalItems > 0, "Expected PostgreSQL public showroom results.");
+      const {
+        runtimeListRequestsPage,
+        runtimeRequestAttachment,
+        runtimeRequestDetail,
+        runtimeRequestTypeForBusiness,
+      } = await import("../lib/request-runtime");
+      const runtimeAdmin = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{
+          id: number;
+          email: string;
+          name: string;
+          role: "admin";
+          must_change_password: number;
+        }>("SELECT id,email,name,role,must_change_password FROM users WHERE role='admin' ORDER BY id LIMIT 1")).rows[0];
+      });
+      const runtimeAdminUser = { ...runtimeAdmin, access_role: "platform_admin" as const, business_id: null };
+      const requestPage = await runtimeListRequestsPage(runtimeAdminUser, { page: 1 });
+      assert.ok(requestPage.items.length > 0, "Expected runtime-facade request results.");
+      assert.equal((await runtimeRequestDetail(requestPage.items[0].id))?.id, requestPage.items[0].id);
+      const requestBusinessId = requestPage.items.find((item) => item.business_id)?.business_id;
+      if (requestBusinessId) assert.ok(await runtimeRequestTypeForBusiness(requestBusinessId));
+      const attachmentTarget = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{ id: number; request_id: number }>(
+          "SELECT id,request_id FROM request_attachments ORDER BY id LIMIT 1",
+        )).rows[0];
+      });
+      if (attachmentTarget) {
+        assert.equal((await runtimeRequestAttachment(attachmentTarget.request_id, attachmentTarget.id))?.id, attachmentTarget.id);
+      }
       const inquiryBusiness = (await runner.transaction(async () => {
         await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
         return (await runner.query<{ business_id: number }>(

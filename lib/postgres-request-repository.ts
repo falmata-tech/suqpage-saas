@@ -84,6 +84,13 @@ export class PostgresRequestRepository {
     return request;
   }
 
+  async getRequestAttachment(requestId: number, attachmentId: number) {
+    return (await this.runner.query<RequestAttachment>(
+      "SELECT * FROM request_attachments WHERE id=? AND request_id=?",
+      [attachmentId, requestId],
+    )).rows[0];
+  }
+
   async addClarification(user: SessionUser, requestId: number, rawMessage: unknown) {
     const message = String(rawMessage ?? "").trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
     if (!message || message.length > 2_000) throw new RequestError("Clarification messages must be 1–2,000 characters.");

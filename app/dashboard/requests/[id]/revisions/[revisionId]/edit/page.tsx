@@ -6,7 +6,7 @@ import RevisionEditor from "@/components/RevisionEditor";
 import { requireUser } from "@/lib/auth";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { runtimeAll } from "@/lib/runtime-sql";
-import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
+import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import { getContentRevision } from "@/lib/revision-service";
@@ -25,7 +25,7 @@ export default async function EditRevisionPage({
   const query = await searchParams;
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
-  const request = getRequestDetail(requestId);
+  const request = await runtimeRequestDetail(requestId);
   const revision = getContentRevision(revisionId);
   if (
     !request ||

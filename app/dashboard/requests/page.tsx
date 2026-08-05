@@ -6,7 +6,7 @@ import PaginationNav from "@/components/PaginationNav";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
-import { listRequestsPage } from "@/lib/request-sqlite";
+import { runtimeListRequestsPage } from "@/lib/request-runtime";
 import { REQUEST_STATUSES } from "@/lib/request-domain";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export default async function RequestsPage({
   const client = user.access_role === "client";
   const teamMember = user.access_role === "team_member";
   if (!manager && !client && !teamMember) redirect("/dashboard");
-  const requests = listRequestsPage(user, query);
+  const requests = await runtimeListRequestsPage(user, query);
   const business = client && user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
   const title = manager ? "Client requests" : client ? "My requests" : "Assigned requests";
   const description = manager ? "Review, record, and assign private onboarding and showroom-change work." : client ? "Track every request MirtPage is handling for your showroom." : "Only work explicitly assigned to you appears here.";
