@@ -307,6 +307,29 @@ async function main() {
         source: "directory",
       })).recorded, true);
       assert.ok((await getShowroomInsights(operationsUser, accountTarget.business.id)).directoryVisitors > 0);
+
+      const {
+        assignRequestToTeamMember,
+        createStaffAccount,
+        listAssignedBusinesses,
+      } = await import("../lib/staff-operations");
+      const staffUnique = Date.now();
+      const staff = await createStaffAccount({
+        name: "PostgreSQL Runtime Team Member",
+        email: `postgres-staff-${staffUnique}@example.test`,
+        password: "PostgresStaff123",
+        accessRole: "team_member",
+      });
+      const assignableRequest = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{ id: number; business_id: number }>(
+          "SELECT id,business_id FROM service_requests WHERE business_id IS NOT NULL ORDER BY id LIMIT 1",
+        )).rows[0];
+      });
+      assert.ok(assignableRequest, "Expected a business-scoped request for assignment rehearsal.");
+      const assignment = await assignRequestToTeamMember(assignableRequest.id, staff.userId, operationsUser.id);
+      assert.equal(assignment.assignedUserId, staff.userId);
+      assert.ok((await listAssignedBusinesses(staff.userId)).some((business) => business.id === assignableRequest.business_id));
     } finally {
       await closePostgresRuntimeForTests();
     }

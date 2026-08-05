@@ -24,7 +24,6 @@
     "lib/security.ts",
     "lib/showroom-recipe-service.ts",
     "lib/signup.ts",
-    "lib/staff-operations.ts",
     "lib/support.ts"
   ],
   "knownDialectWork": [

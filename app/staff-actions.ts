@@ -30,7 +30,7 @@ export async function assignRequestAction(formData: FormData) {
   const teamMemberId = rawTeamMember ? Number.parseInt(rawTeamMember, 10) : null;
   if (!Number.isInteger(requestId) || teamMemberId !== null && !Number.isInteger(teamMemberId)) redirect("/dashboard/requests?error=assignment");
   try {
-    const assigned = assignRequestToTeamMember(requestId, teamMemberId, user.id);
+    const assigned = await assignRequestToTeamMember(requestId, teamMemberId, user.id);
     audit("service_request.assigned", { userId:user.id, businessId:assigned.businessId, detail:{ requestId, assignedUserId:assigned.assignedUserId, previousUserId:assigned.previousUserId } });
   } catch (error) {
     redirect(`/dashboard/requests/${requestId}?error=assignment`);

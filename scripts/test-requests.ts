@@ -136,7 +136,7 @@ async function main() {
     directForm.set("idempotencyKey","direct_client_key_123456");
     const directRequest = await createAuthenticatedClientRequest(directClient,directForm);
     assert.equal(getRequestDetail(directRequest.id)?.request_type,"onboarding");
-    const managedClients = listManagedClients();
+    const managedClients = await listManagedClients();
     assert.equal(Object.getPrototypeOf(managedClients[0]),Object.prototype);
     assert.equal(managedClients.some((managedClient)=>managedClient.id===client.id),true);
 
@@ -176,14 +176,14 @@ async function main() {
     assert.deepEqual(clarificationEvents.map((event)=>event.actor_access_role),["operations_manager","client"]);
     assert.deepEqual(clarificationEvents.map((event)=>event.detail),["Which hero message should the team prioritize?","Please prioritize our handmade origin story."]);
 
-    assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
+    await assignRequestToTeamMember(managerRequest.id,teamOne.id,manager.id);
     const assignedToOne = getRequestDetail(managerRequest.id)!;
     assert.equal(canAccessRequest(teamOne,assignedToOne),true);
     assert.equal(canAccessRequest(teamTwo,assignedToOne),false);
     assert.equal(canViewBusiness(teamOne,redeemed.businessId,true),true);
     assert.equal(canManageBusiness(teamOne,redeemed.businessId,true),false);
     assert.equal(listAssignedRequests(teamOne.id).some((request)=>request.id===managerRequest.id),true);
-    assert.equal(listAssignedBusinesses(teamOne.id).some((business)=>business.id===redeemed.businessId),true);
+    assert.equal((await listAssignedBusinesses(teamOne.id)).some((business)=>business.id===redeemed.businessId),true);
     const assignmentEvent = assignedToOne.events.find((event)=>event.event_type==="assigned")!;
     assert.match(assignmentEvent.detail,/^team_member:\d+$/);
     assert.deepEqual(presentRequestEvent(assignmentEvent,true),{
@@ -205,12 +205,12 @@ async function main() {
     const unknownClientEvent = presentRequestEvent({event_type:"internal_test",detail:"staff:42;storage:secret"},true);
     assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"MirtPage recorded progress on this request."});
     assert.doesNotMatch(`${unknownClientEvent.label} ${unknownClientEvent.detail}`,/42|secret|staff:/);
-    assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
+    await assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
     const assignedToTwo = getRequestDetail(managerRequest.id)!;
     assert.equal(canAccessRequest(teamOne,assignedToTwo),false);
     assert.equal(canAccessRequest(teamTwo,assignedToTwo),true);
-    assert.equal(listAssignedBusinesses(teamOne.id).length,0);
-    assert.equal(listAssignedBusinesses(teamTwo.id).some((business)=>business.id===redeemed.businessId),true);
+    assert.equal((await listAssignedBusinesses(teamOne.id)).length,0);
+    assert.equal((await listAssignedBusinesses(teamTwo.id)).some((business)=>business.id===redeemed.businessId),true);
 
     const prospectForm = new FormData();
     prospectForm.set("requestType","change");
