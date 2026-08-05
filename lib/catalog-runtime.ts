@@ -1,4 +1,4 @@
-import { getBusinessByHandle, getBusinessByHandleAny, getCatalogByBusinessId, getCatalogByHandle, getUserByEmail, getUserById } from "./db";
+import { getBusinessByHandle, getBusinessByHandleAny, getBusinessById, getCatalogByBusinessId, getCatalogByHandle, getUserByEmail, getUserById } from "./db";
 import { postgresRuntimePreviewEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
 
 export async function runtimeBusinessByHandle(handle: string) {
@@ -7,6 +7,10 @@ export async function runtimeBusinessByHandle(handle: string) {
 
 export async function runtimeBusinessByHandleAny(handle: string) {
   return postgresRuntimePreviewEnabled() ? postgresRuntimeServices().catalog.getBusinessByHandleAny(handle) : getBusinessByHandleAny(handle);
+}
+
+export async function runtimeBusinessById(id: number) {
+  return postgresRuntimePreviewEnabled() ? postgresRuntimeServices().catalog.getBusinessById(id) : getBusinessById(id);
 }
 
 export async function runtimeCatalogByHandle(handle: string) {
