@@ -47,7 +47,7 @@ export async function postSupportMessageAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
   try {
-    postSupportMessage(user, id, {
+    await postSupportMessage(user, id, {
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
     });
@@ -63,7 +63,7 @@ export async function claimSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
   try {
-    claimSupportConversation(user, id);
+    await claimSupportConversation(user, id);
     await audit("support.conversation_claimed", { userId: user.id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
@@ -76,7 +76,7 @@ export async function closeSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
   try {
-    closeSupportConversation(user, id);
+    await closeSupportConversation(user, id);
     await audit("support.conversation_closed", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
@@ -89,7 +89,7 @@ export async function reopenSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
   try {
-    reopenSupportConversation(user, id);
+    await reopenSupportConversation(user, id);
     await audit("support.conversation_reopened", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
@@ -101,7 +101,7 @@ export async function reopenSupportConversationAction(formData: FormData) {
 export async function updateSupportAgentSettingAction(formData: FormData) {
   const user = await requireUser();
   try {
-    updateSupportAgentSetting(user, {
+    await updateSupportAgentSetting(user, {
       userId: formData.get("userId"),
       enabled: formData.get("enabled"),
       maxOpenConversations: formData.get("maxOpenConversations"),
@@ -121,7 +121,7 @@ export async function reassignSupportConversationAction(formData: FormData) {
   const raw = String(formData.get("assignedUserId") || "");
   const assignedUserId = raw ? Number.parseInt(raw, 10) : null;
   try {
-    reassignSupportConversation(user, id, assignedUserId);
+    await reassignSupportConversation(user, id, assignedUserId);
     await audit("support.conversation_reassigned", { userId: user.id, detail: { conversationId: id, assignedUserId } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);

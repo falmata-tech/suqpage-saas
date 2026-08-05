@@ -356,6 +356,49 @@ async function main() {
       assert.equal(redeemedInvitation.businessId, invitation.businessId);
       assert.equal(await getActiveInvitation(invitationToken), undefined);
 
+      const {
+        closeSupportConversation,
+        createSupportConversation,
+        getSupportConversation,
+        listSupportConversations,
+        postSupportMessage,
+        reopenSupportConversation,
+        updateSupportAgentSetting,
+      } = await import("../lib/support");
+      await updateSupportAgentSetting(operationsUser, {
+        userId: staff.userId,
+        enabled: true,
+        maxOpenConversations: 2,
+      });
+      const supportClientRow = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{
+          id: number;
+          email: string;
+          name: string;
+          role: "owner";
+          business_id: number;
+          must_change_password: number;
+        }>("SELECT id,email,name,role,business_id,must_change_password FROM users WHERE id=?", [redeemedInvitation.userId])).rows[0];
+      });
+      const supportClient = { ...supportClientRow, access_role: "client" as const };
+      const supportConversation = await createSupportConversation(supportClient, {
+        subject: "PostgreSQL runtime support",
+        message: "Verify the native support queue on PostgreSQL.",
+        idempotencyKey: `postgres-support-${Date.now()}`,
+      });
+      assert.equal((await getSupportConversation(supportClient, supportConversation.id)).conversation.assignedUserId, staff.userId);
+      await postSupportMessage(operationsUser, supportConversation.id, {
+        message: "The PostgreSQL support queue is responding.",
+        idempotencyKey: `postgres-support-reply-${Date.now()}`,
+      });
+      assert.ok((await getSupportConversation(supportClient, supportConversation.id)).messages.length >= 2);
+      await closeSupportConversation(operationsUser, supportConversation.id);
+      await reopenSupportConversation(supportClient, supportConversation.id);
+      assert.ok((await listSupportConversations(operationsUser, { q: "PostgreSQL runtime" })).items.some(
+        (conversation) => conversation.id === supportConversation.id,
+      ));
+
       const { audit } = await import("../lib/security");
       const auditAction = `postgres.runtime.${Date.now()}`;
       await audit(auditAction, {

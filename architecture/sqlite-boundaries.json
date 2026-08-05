@@ -21,8 +21,7 @@
     "lib/runtime-sql.ts",
     "lib/schema.ts",
     "lib/showroom-recipe-service.ts",
-    "lib/signup.ts",
-    "lib/support.ts"
+    "lib/signup.ts"
   ],
   "knownDialectWork": [
     "synchronous DatabaseSync call sites",

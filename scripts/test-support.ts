@@ -51,8 +51,8 @@ async function main() {
   const agentTwo = user(agentTwoId, "team_member", null, "Agent Two");
   const operations = user(operationsId, "operations_manager", null, "Operations");
   const { getDashboardAttention } = await import("../lib/dashboard-attention");
-  updateSupportAgentSetting(operations, { userId: agentOneId, enabled: true, maxOpenConversations: 1 });
-  updateSupportAgentSetting(operations, { userId: agentTwoId, enabled: true, maxOpenConversations: 2 });
+  await updateSupportAgentSetting(operations, { userId: agentOneId, enabled: true, maxOpenConversations: 1 });
+  await updateSupportAgentSetting(operations, { userId: agentTwoId, enabled: true, maxOpenConversations: 2 });
 
   const create = (client: SessionUser, index: number) => createSupportConversation(client, {
     subject: `Support subject ${index}`,
@@ -66,11 +66,11 @@ async function main() {
   assert.equal((await getDashboardAttention(operations)).supportReplies, 4, "operations sees waiting and client-authored unread support");
   assert.equal((await getDashboardAttention(agentOne)).supportReplies, 2, "an agent sees assigned unread work plus the shared waiting queue");
   assert.equal((await getDashboardAttention(clientA, businessA)).supportReplies, 0, "a client does not see their own opening messages as unread replies");
-  assert.equal(getSupportConversation(operations, first.id).conversation.assignedUserId, agentOneId);
-  assert.equal(getSupportConversation(operations, second.id).conversation.assignedUserId, agentTwoId);
-  assert.equal(getSupportConversation(operations, third.id).conversation.assignedUserId, agentTwoId);
-  assert.equal(getSupportConversation(operations, fourth.id).conversation.status, "waiting");
-  assert.throws(
+  assert.equal((await getSupportConversation(operations, first.id)).conversation.assignedUserId, agentOneId);
+  assert.equal((await getSupportConversation(operations, second.id)).conversation.assignedUserId, agentTwoId);
+  assert.equal((await getSupportConversation(operations, third.id)).conversation.assignedUserId, agentTwoId);
+  assert.equal((await getSupportConversation(operations, fourth.id)).conversation.status, "waiting");
+  await assert.rejects(
     () => updateSupportAgentSetting(operations, {
       userId: agentTwoId,
       enabled: true,
@@ -78,7 +78,7 @@ async function main() {
     }),
     SupportError,
   );
-  assert.throws(
+  await assert.rejects(
     () => updateSupportAgentSetting(operations, {
       userId: agentOneId,
       enabled: false,
@@ -86,40 +86,40 @@ async function main() {
     }),
     SupportError,
   );
-  assert.throws(() => getSupportConversation(clientA, second.id), SupportError);
-  assert.throws(
+  await assert.rejects(() => getSupportConversation(clientA, second.id), SupportError);
+  await assert.rejects(
     () => postSupportMessage(clientA, second.id, {
       message: "This cross-tenant reply must not be saved.",
       idempotencyKey: "support-denied-0001",
     }),
     SupportError,
   );
-  assert.throws(() => claimSupportConversation(agentOne, fourth.id), SupportError);
-  assert.throws(() => claimSupportConversation(agentTwo, fourth.id), SupportError);
+  await assert.rejects(() => claimSupportConversation(agentOne, fourth.id), SupportError);
+  await assert.rejects(() => claimSupportConversation(agentTwo, fourth.id), SupportError);
 
-  postSupportMessage(agentOne, first.id, {
+  await postSupportMessage(agentOne, first.id, {
     message: "We are reviewing this request.",
     idempotencyKey: "support-reply-0001",
   });
-  closeSupportConversation(agentOne, first.id);
-  claimSupportConversation(agentOne, fourth.id);
-  assert.equal(getSupportConversation(clientB, fourth.id).conversation.status, "open");
-  closeSupportConversation(agentOne, fourth.id);
-  reopenSupportConversation(clientB, fourth.id);
-  assert.equal(getSupportConversation(operations, fourth.id).conversation.assignedUserId, agentOneId);
-  reassignSupportConversation(operations, fourth.id, null);
-  assert.equal(getSupportConversation(operations, fourth.id).conversation.status, "waiting");
+  await closeSupportConversation(agentOne, first.id);
+  await claimSupportConversation(agentOne, fourth.id);
+  assert.equal((await getSupportConversation(clientB, fourth.id)).conversation.status, "open");
+  await closeSupportConversation(agentOne, fourth.id);
+  await reopenSupportConversation(clientB, fourth.id);
+  assert.equal((await getSupportConversation(operations, fourth.id)).conversation.assignedUserId, agentOneId);
+  await reassignSupportConversation(operations, fourth.id, null);
+  assert.equal((await getSupportConversation(operations, fourth.id)).conversation.status, "waiting");
   const fifth = await create(clientA, 5);
-  assert.equal(getSupportConversation(operations, fifth.id).conversation.assignedUserId, agentOneId);
+  assert.equal((await getSupportConversation(operations, fifth.id)).conversation.assignedUserId, agentOneId);
   assert.deepEqual(
-    listSupportAgentWorkloads(operations).filter((agent) => agent.enabled).map((agent) => agent.openConversations).sort(),
+    (await listSupportAgentWorkloads(operations)).filter((agent) => agent.enabled).map((agent) => agent.openConversations).sort(),
     [1, 2],
   );
-  assert.equal(listSupportAgentWorkloadsPage(operations, { status:"enabled" }).totalItems,2);
-  assert.equal(listSupportAgentWorkloadsPage(operations, {}).pageSize,5);
-  assert.equal(listSupportAgentWorkloadsPage(operations, { q:"Agent One" }).items[0]?.userId,agentOneId);
-  assert.equal(listSupportAgentWorkloadsPage(operations, { status:"disabled" }).totalItems,1);
-  assert.deepEqual(getSupportAgentSummary(operations),{
+  assert.equal((await listSupportAgentWorkloadsPage(operations, { status:"enabled" })).totalItems,2);
+  assert.equal((await listSupportAgentWorkloadsPage(operations, {})).pageSize,5);
+  assert.equal((await listSupportAgentWorkloadsPage(operations, { q:"Agent One" })).items[0]?.userId,agentOneId);
+  assert.equal((await listSupportAgentWorkloadsPage(operations, { status:"disabled" })).totalItems,1);
+  assert.deepEqual(await getSupportAgentSummary(operations),{
     totalAgents:3,
     enabledAgents:2,
     availableAgents:0,

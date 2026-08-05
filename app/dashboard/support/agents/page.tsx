@@ -19,8 +19,8 @@ export default async function SupportAgents({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user,"operations:manage")) redirect("/dashboard/support");
   const query = await searchParams;
-  const result = listSupportAgentWorkloadsPage(user,query);
-  const summary = getSupportAgentSummary(user);
+  const result = await listSupportAgentWorkloadsPage(user,query);
+  const summary = await getSupportAgentSummary(user);
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/support">Support inbox</Link><span>/</span><strong>Agents</strong></nav>
     <div className="dashboard-head"><div><span className="eyebrow">Support operations</span><h1>Support agents</h1><p>Set who receives new conversations and keep workload within a clear limit.</p></div><Link className="small-btn" href="/dashboard/support">Open inbox</Link></div>
