@@ -74,6 +74,11 @@ try {
       MIRTPAGE_POSTGRES_REHEARSAL_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
     },
   });
+  run("npm", ["exec", "tsx", "--", "scripts/test-postgres-runtime.ts"], {
+    env: {
+      MIRTPAGE_POSTGRES_REHEARSAL_URL: `postgresql://mirtpage:${password}@127.0.0.1:${port}/mirtpage`,
+    },
+  });
   console.log("Disposable PostgreSQL 17 schema, data, constraints, triggers, sequences, invariants, fingerprints, and read-only source rehearsal passed.");
 } finally {
   spawnSync("docker", ["stop", container], { stdio: "ignore" });

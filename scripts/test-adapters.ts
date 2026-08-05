@@ -19,6 +19,36 @@ async function main() {
   );
   process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
 
+  const { postgresRuntimeConfig, sqliteParametersToPostgres } = await import("../lib/postgres-runtime");
+  assert.equal(postgresRuntimeConfig(), null);
+  const postgresConfig = postgresRuntimeConfig({
+    MIRTPAGE_POSTGRES_URL: "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require",
+    MIRTPAGE_POSTGRES_POOL_MAX: "5",
+    MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "6000",
+    MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "9000",
+  });
+  assert.deepEqual(postgresConfig, {
+    connectionString: "postgresql://mirtpage:secret@db.example.test:5432/mirtpage?sslmode=require",
+    poolMax: 5,
+    connectionTimeoutMs: 6000,
+    statementTimeoutMs: 9000,
+  });
+  assert.throws(
+    () => postgresRuntimeConfig({ MIRTPAGE_POSTGRES_URL: "not-a-url" }),
+    /valid PostgreSQL connection URL/,
+  );
+  assert.throws(
+    () => postgresRuntimeConfig({
+      MIRTPAGE_POSTGRES_URL: "postgresql://mirtpage:secret@db.example.test/mirtpage",
+      MIRTPAGE_POSTGRES_POOL_MAX: "99",
+    }),
+    /MIRTPAGE_POSTGRES_POOL_MAX/,
+  );
+  assert.equal(
+    sqliteParametersToPostgres("SELECT ? AS value, '?' AS literal, \"?\" AS quoted"),
+    "SELECT $1 AS value, '?' AS literal, \"?\" AS quoted",
+  );
+
   const { consumeRateLimit, resetRateLimit } = await import("../lib/rate-limit");
   const { notifyNewInquiry } = await import("../lib/notifications");
   const { closeDbForTests } = await import("../lib/db");
