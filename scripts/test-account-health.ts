@@ -34,23 +34,23 @@ async function main() {
   const now = Date.now();
   db.prepare("UPDATE business_subscriptions SET starts_at=?,current_period_start=?,current_period_end=?,grace_ends_at=? WHERE business_id=?")
     .run(now - 90 * 86_400_000, now - 31 * 86_400_000, now - 2 * 86_400_000, now + 2 * 86_400_000, businessA);
-  assert.equal(getBusinessSubscription(businessA, now)?.state, "grace");
+  assert.equal((await getBusinessSubscription(businessA, now))?.state, "grace");
   assert.ok(getBusinessByHandle("tenant-a"));
   db.prepare("UPDATE business_subscriptions SET grace_ends_at=? WHERE business_id=?")
     .run(now - 1, businessA);
-  assert.equal(getBusinessSubscription(businessA, now)?.state, "inactive");
+  assert.equal((await getBusinessSubscription(businessA, now))?.state, "inactive");
   assert.ok(getBusinessByHandle("tenant-a"), "an advisory renewal date does not hide an active showroom");
   db.prepare("UPDATE businesses SET status='suspended' WHERE id=?").run(businessA);
   assert.equal(getBusinessByHandle("tenant-a"), undefined, "explicit suspension hides the showroom");
   db.prepare("UPDATE businesses SET status='active' WHERE id=?").run(businessA);
 
-  const renewed = recordManualPayment(operations, {
+  const renewed = await recordManualPayment(operations, {
     businessId: businessA,
     amount: "",
     paidAt: new Date(now).toISOString(),
     idempotencyKey: "account-renewal-0001",
   }, now);
-  const duplicate = recordManualPayment(operations, {
+  const duplicate = await recordManualPayment(operations, {
     businessId: businessA,
     amount: "",
     paidAt: new Date(now).toISOString(),
@@ -58,20 +58,20 @@ async function main() {
   }, now);
   assert.equal(renewed.duplicate, false);
   assert.equal(duplicate.duplicate, true);
-  assert.equal(getBusinessSubscription(businessA, now)?.amountMinor, null);
-  assert.equal(getBusinessSubscription(businessA, now)?.state, "active");
+  assert.equal((await getBusinessSubscription(businessA, now))?.amountMinor, null);
+  assert.equal((await getBusinessSubscription(businessA, now))?.state, "active");
 
-  assert.equal(recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now }).recorded, true);
-  assert.equal(recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now }).recorded, false);
-  assert.equal(recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "directory", now }).recorded, true);
-  assert.deepEqual(getShowroomInsights(clientA, businessA, now), {
+  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now })).recorded, true);
+  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now })).recorded, false);
+  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "directory", now })).recorded, true);
+  assert.deepEqual(await getShowroomInsights(clientA, businessA, now), {
     totalVisitors: 2,
     expoVisitors: 1,
     directoryVisitors: 1,
     directVisitors: 0,
     last30Days: 2,
   });
-  assert.throws(() => getShowroomInsights(clientB, businessA), /unavailable/);
+  await assert.rejects(() => getShowroomInsights(clientB, businessA), /unavailable/);
   assert.equal((db.prepare("SELECT COUNT(*) total FROM subscription_payments WHERE business_id=?").get(businessA) as { total: number }).total, 1);
   assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
   closeDbForTests();

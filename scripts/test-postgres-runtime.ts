@@ -254,6 +254,59 @@ async function main() {
       const upkeep = await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null);
       assert.equal(upkeep.contentVersion, upkeepTarget.content_version + 1);
       assert.equal((await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null)).duplicate, true);
+
+      process.env.PRIVACY_SALT = "postgres-runtime-privacy-salt-long-enough";
+      const {
+        getBusinessSubscription,
+        getShowroomInsights,
+        recordManualPayment,
+        recordShowroomVisit,
+      } = await import("../lib/account-health");
+      const accountTarget = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        const business = (await runner.query<{ id: number; handle: string }>(
+          "SELECT id,handle FROM businesses WHERE status='active' ORDER BY id LIMIT 1",
+        )).rows[0];
+        const operations = (await runner.query<{
+          id: number;
+          email: string;
+          name: string;
+          role: "admin";
+          must_change_password: number;
+        }>(`
+          SELECT u.id,u.email,u.name,u.role,u.must_change_password
+          FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+          WHERE p.access_role='operations_manager' ORDER BY u.id LIMIT 1
+        `)).rows[0];
+        return { business, operations };
+      });
+      assert.ok(accountTarget.business && accountTarget.operations, "Expected account-health rehearsal fixtures.");
+      const operationsUser = {
+        ...accountTarget.operations,
+        access_role: "operations_manager" as const,
+        business_id: null,
+      };
+      const subscription = await getBusinessSubscription(accountTarget.business.id);
+      assert.equal(subscription?.businessId, accountTarget.business.id);
+      const paymentKey = `postgres-payment-${Date.now()}`;
+      const payment = await recordManualPayment(operationsUser, {
+        businessId: accountTarget.business.id,
+        amount: "",
+        idempotencyKey: paymentKey,
+      });
+      assert.equal(payment.duplicate, false);
+      assert.equal((await recordManualPayment(operationsUser, {
+        businessId: accountTarget.business.id,
+        amount: "",
+        idempotencyKey: paymentKey,
+      })).duplicate, true);
+      const visitToken = `postgres-visitor-${Date.now()}`;
+      assert.equal((await recordShowroomVisit({
+        handle: accountTarget.business.handle,
+        visitorToken: visitToken,
+        source: "directory",
+      })).recorded, true);
+      assert.ok((await getShowroomInsights(operationsUser, accountTarget.business.id)).directoryVisitors > 0);
     } finally {
       await closePostgresRuntimeForTests();
     }

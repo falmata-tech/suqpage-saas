@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
     const body = JSON.parse(raw) as Record<string, unknown>;
     const visitorToken = request.cookies.get(COOKIE)?.value || crypto.randomUUID();
-    const result = recordShowroomVisit({
+    const result = await recordShowroomVisit({
       handle: body.handle,
       source: body.source,
       occurrenceId: body.occurrenceId,

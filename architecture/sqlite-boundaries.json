@@ -3,7 +3,6 @@
   "decision": "ADR-0013",
   "runtimeStatus": "sqlite-authoritative",
   "allowedDirectSqliteModules": [
-    "lib/account-health.ts",
     "lib/auth.ts",
     "lib/bazaar.ts",
     "lib/catalog-runtime.ts",
