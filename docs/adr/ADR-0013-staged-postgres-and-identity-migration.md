@@ -4,7 +4,7 @@ title: Staged PostgreSQL and identity migration
 status: accepted
 date: 2026-08-03
 deciders: [MirtPage]
-related: [FE-026, BE-002, BE-024, BE-026, DEP-021, DEP-022, ADR-0012]
+related: [FE-026, BE-002, BE-024, BE-026, BE-027, DEP-021, DEP-022, DEP-023, ADR-0012]
 ---
 
 # ADR-0013 - Staged PostgreSQL and identity migration

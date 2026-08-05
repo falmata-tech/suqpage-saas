@@ -1395,6 +1395,11 @@ byte-identical. A boundary manifest prevents new direct SQLite coupling, but 42
 approved runtime modules remain to be ported. Supabase Storage is an implemented
 optional media adapter; Supabase PostgreSQL is not a current runtime mode.
 
+The production-only Supabase PostgreSQL and Vercel cutover is planned under
+BE-027 and DEP-023. Until their PostgreSQL parity, reconciliation, security,
+release, and rollback gates pass, SQLite remains authoritative and no Vercel
+deployment may be described as production-ready.
+
 Before broad external rollout or multi-instance production scale, migrate to:
 
 - managed PostgreSQL or another production multi-instance database;
