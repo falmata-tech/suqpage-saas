@@ -45,7 +45,7 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   const businessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
   try {
-    const result = updateDiscoveryProfile({
+    const result = await updateDiscoveryProfile({
       businessId,
       industryKeys: formData.getAll("industryKeys"),
       boothImagePath: formData.get("boothImagePath"),

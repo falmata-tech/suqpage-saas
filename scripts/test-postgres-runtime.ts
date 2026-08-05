@@ -187,6 +187,34 @@ async function main() {
       assert.ok(discovery.total > 0, "Expected PostgreSQL geographic discovery results.");
       assert.ok(discovery.expo.schedule.length === 7, "Expected the complete PostgreSQL-backed Expo schedule.");
       const {
+        getDiscoveryProfileAdminView,
+        listDiscoveryProfilesPage,
+        updateDiscoveryProfile,
+      } = await import("../lib/discovery-admin");
+      const discoveryProfiles = await listDiscoveryProfilesPage({ page: 1 });
+      const editableProfile = discoveryProfiles.items.find((profile) =>
+        profile.boothImagePath.startsWith("/") && profile.industryKeys.length > 0,
+      );
+      assert.ok(editableProfile, "Expected a complete PostgreSQL discovery profile.");
+      const updatedProfile = await updateDiscoveryProfile({
+        businessId: editableProfile.businessId,
+        industryKeys: editableProfile.industryKeys,
+        boothImagePath: editableProfile.boothImagePath,
+        city: editableProfile.city,
+        zone: editableProfile.zone,
+        region: editableProfile.region,
+        latitude: editableProfile.latitude,
+        longitude: editableProfile.longitude,
+        fallbackStyle: editableProfile.fallbackStyle,
+        productionScale: editableProfile.productionScale,
+        sponsored: editableProfile.sponsored,
+        sponsorPosition: editableProfile.sponsorPosition,
+        sundayIndustryKeys: editableProfile.sundayIndustryKeys,
+        sundayPosition: editableProfile.sundayPosition,
+        excluded: editableProfile.excluded,
+      });
+      assert.equal((await getDiscoveryProfileAdminView(updatedProfile.businessId))?.businessId, updatedProfile.businessId);
+      const {
         runtimeListRequestsPage,
         runtimeRequestAttachment,
         runtimeRequestDetail,

@@ -242,7 +242,7 @@ try {
     "the controlled industry vocabulary has six entries",
   );
 
-  updateDiscoveryProfile({
+  await updateDiscoveryProfile({
     businessId: firstAddisBusinessId,
     industryKeys: ["electronics", "machinery-tools"],
     boothImagePath: "/booths/admin-approved.webp",
@@ -286,7 +286,7 @@ try {
     ["electronics", "machinery-tools"],
     "admin discovery updates replace indexed industry membership atomically",
   );
-  assert.throws(() => updateDiscoveryProfile({
+  await assert.rejects(() => updateDiscoveryProfile({
     businessId: firstAddisBusinessId,
     industryKeys: ["electronics"],
     boothImagePath: "/booths/admin-approved.webp",

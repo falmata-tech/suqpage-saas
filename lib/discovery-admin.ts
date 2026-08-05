@@ -1,9 +1,10 @@
 import type { DatabaseSync } from "node:sqlite";
-import { getDb } from "./db";
 import { DISCOVERY_INDUSTRIES } from "./discovery";
 import type { ProductionScale } from "./discovery";
 import { likePattern, normalizePageRequest, pageResult, pageWindow } from "./pagination";
 import { cleanText } from "./security";
+import { postgresRuntimePreviewEnabled } from "./postgres-runtime-services";
+import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 
 export class DiscoveryAdminError extends Error {}
 
@@ -75,19 +76,22 @@ function mapProfile(row: ProfileRow): DiscoveryProfileAdminView {
   };
 }
 
-const selectProfile = `
+const selectProfile = () => {
+  const aggregate = postgresRuntimePreviewEnabled() ? "string_agg" : "group_concat";
+  return `
   SELECT b.id business_id,b.name business_name,b.handle,b.status,
     p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
     p.fallback_style,p.is_excluded,p.approved_at,p.production_scale,
     COALESCE((SELECT active FROM discovery_sponsorships s WHERE s.business_id=b.id),0) is_sponsored,
     (SELECT position FROM discovery_sponsorships s WHERE s.business_id=b.id) sponsor_position,
-    (SELECT group_concat(selection.industry_key,',') FROM sunday_showcase_selections selection WHERE selection.business_id=b.id AND selection.active=1) sunday_industry_keys,
+    (SELECT ${aggregate}(selection.industry_key,',') FROM sunday_showcase_selections selection WHERE selection.business_id=b.id AND selection.active=1) sunday_industry_keys,
     (SELECT MIN(selection.position) FROM sunday_showcase_selections selection WHERE selection.business_id=b.id AND selection.active=1) sunday_position,
-    (SELECT group_concat(i.industry_key,',') FROM business_industries i WHERE i.business_id=b.id) industry_keys
+    (SELECT ${aggregate}(i.industry_key,',') FROM business_industries i WHERE i.business_id=b.id) industry_keys
   FROM businesses b
   LEFT JOIN business_discovery_profiles p ON p.business_id=b.id`;
+};
 
-export function listDiscoveryProfilesPage(input: { page?: unknown; q?: unknown; status?: unknown }) {
+export async function listDiscoveryProfilesPage(input: { page?: unknown; q?: unknown; status?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["active", "draft", "suspended"].includes(String(input.status)) ? String(input.status) : "";
   const params: Array<string | number> = [];
@@ -98,18 +102,18 @@ export function listDiscoveryProfilesPage(input: { page?: unknown; q?: unknown; 
     where += " AND (lower(b.name) LIKE ? ESCAPE '\\' OR lower(b.handle) LIKE ? ESCAPE '\\' OR lower(COALESCE(p.city,'')) LIKE ? ESCAPE '\\' OR lower(COALESCE(p.zone,'')) LIKE ? ESCAPE '\\' OR lower(COALESCE(p.region,'')) LIKE ? ESCAPE '\\')";
     params.push(pattern, pattern, pattern, pattern, pattern);
   }
-  const total = Number((getDb().prepare(`SELECT COUNT(*) total FROM businesses b LEFT JOIN business_discovery_profiles p ON p.business_id=b.id${where}`).get(...params) as { total: number }).total);
+  const total = Number((await runtimeGet<{ total: number }>(`SELECT COUNT(*) total FROM businesses b LEFT JOIN business_discovery_profiles p ON p.business_id=b.id${where}`, params))?.total || 0);
   const window = pageWindow(total, request);
-  const rows = getDb().prepare(`${selectProfile}${where} ORDER BY p.is_excluded,lower(b.name),b.id LIMIT ? OFFSET ?`).all(...params, window.limit, window.offset) as ProfileRow[];
+  const rows = await runtimeAll<ProfileRow>(`${selectProfile()}${where} ORDER BY p.is_excluded,lower(b.name),b.id LIMIT ? OFFSET ?`, [...params, window.limit, window.offset]);
   return pageResult(rows.map(mapProfile), total, request);
 }
 
-export function getDiscoveryProfileAdminView(businessId: number) {
-  const row = getDb().prepare(`${selectProfile} WHERE b.id=?`).get(businessId) as ProfileRow | undefined;
+export async function getDiscoveryProfileAdminView(businessId: number) {
+  const row = await runtimeGet<ProfileRow>(`${selectProfile()} WHERE b.id=?`, [businessId]);
   return row ? mapProfile(row) : undefined;
 }
 
-export function updateDiscoveryProfile(input: {
+export async function updateDiscoveryProfile(input: {
   businessId: unknown;
   industryKeys: unknown[];
   boothImagePath: unknown;
@@ -125,7 +129,7 @@ export function updateDiscoveryProfile(input: {
   sundayIndustryKeys: unknown[];
   sundayPosition: unknown;
   excluded: boolean;
-}, db: DatabaseSync = getDb()) {
+}, db?: DatabaseSync) {
   const businessId = Number.parseInt(String(input.businessId), 10);
   const allowedIndustries = new Set(DISCOVERY_INDUSTRIES.map((industry) => industry.key));
   const industryKeys = [...new Set(input.industryKeys.map((value) => cleanText(value, 40)).filter((value) => allowedIndustries.has(value as never)))];
@@ -141,7 +145,10 @@ export function updateDiscoveryProfile(input: {
   const sponsorPosition = Number.parseInt(String(input.sponsorPosition), 10);
   const sundayPosition = Number.parseInt(String(input.sundayPosition), 10);
   const allowedFallbacks = new Set(["workshop", "botanical", "textile", "food", "home", "technical"]);
-  if (!Number.isInteger(businessId) || !db.prepare("SELECT 1 FROM businesses WHERE id=?").get(businessId)) throw new DiscoveryAdminError("Business not found.");
+  const businessExists = db
+    ? db.prepare("SELECT 1 FROM businesses WHERE id=?").get(businessId)
+    : await runtimeGet("SELECT 1 FROM businesses WHERE id=?", [businessId]);
+  if (!Number.isInteger(businessId) || !businessExists) throw new DiscoveryAdminError("Business not found.");
   if (!industryKeys.length) throw new DiscoveryAdminError("Choose at least one industry.");
   if (!boothImagePath.startsWith("/")) throw new DiscoveryAdminError("Use an approved local booth image path.");
   if (!city || !zone || !region) throw new DiscoveryAdminError("City, zone, and region are required.");
@@ -152,6 +159,7 @@ export function updateDiscoveryProfile(input: {
   if (!Number.isInteger(sundayPosition) || sundayPosition < 1 || sundayPosition > 999) throw new DiscoveryAdminError("Sunday position must be between 1 and 999.");
   if (sundayIndustryKeys.some((key) => !industryKeys.includes(key))) throw new DiscoveryAdminError("Sunday selections must match an assigned business industry.");
   const now = Date.now();
+  if (db) {
   db.exec("BEGIN IMMEDIATE");
   try {
     db.prepare(`
@@ -185,5 +193,32 @@ export function updateDiscoveryProfile(input: {
     db.exec("ROLLBACK");
     throw error;
   }
+  return { businessId };
+  }
+
+  await runtimeTransaction(async () => {
+    await runtimeRun(`
+      INSERT INTO business_discovery_profiles(
+        business_id,booth_image_path,city,zone,region,latitude,longitude,
+        fallback_style,production_scale,is_featured,is_excluded,approved_at,updated_at
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(business_id) DO UPDATE SET
+        booth_image_path=excluded.booth_image_path,city=excluded.city,zone=excluded.zone,
+        region=excluded.region,latitude=excluded.latitude,longitude=excluded.longitude,
+        fallback_style=excluded.fallback_style,production_scale=excluded.production_scale,is_featured=excluded.is_featured,
+        is_excluded=excluded.is_excluded,approved_at=excluded.approved_at,updated_at=excluded.updated_at
+    `, [businessId, boothImagePath, city, zone, region, latitude, longitude, fallbackStyle, productionScale, input.sponsored ? 1 : 0, input.excluded ? 1 : 0, now, now]);
+    await runtimeRun("DELETE FROM business_industries WHERE business_id=?", [businessId]);
+    for (const key of industryKeys) await runtimeRun("INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)", [businessId, key]);
+    await runtimeRun(`
+      INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
+      VALUES(?,?,?,?) ON CONFLICT(business_id) DO UPDATE SET
+        position=excluded.position,active=excluded.active,updated_at=excluded.updated_at
+    `, [businessId, sponsorPosition, input.sponsored ? 1 : 0, now]);
+    await runtimeRun("DELETE FROM sunday_showcase_selections WHERE business_id=?", [businessId]);
+    for (const key of sundayIndustryKeys) {
+      await runtimeRun("INSERT INTO sunday_showcase_selections(industry_key,business_id,position,active,updated_at) VALUES(?,?,?,1,?)", [key, businessId, sundayPosition, now]);
+    }
+  });
   return { businessId };
 }
