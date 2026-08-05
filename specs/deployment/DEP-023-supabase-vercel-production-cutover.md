@@ -139,6 +139,11 @@ The third candidate (`dpl_2Yc3wi1dJTFQhUNNSLvqGEsTLGHx`) then failed closed on
 trace exclusion removing Next.js's own server library. That exclusion is removed;
 the release trace privacy gate remains responsible for rejecting project-private
 source paths. The domain remained unattached.
+The healthy public candidate then exposed a retained synchronous SQLite call in
+the authenticated dashboard shell; client login succeeded, but the shell failed
+closed when Vercel correctly denied `/var/task/data` creation. The shell now
+awaits the driver-selectable publication and revision ports, and component-level
+database-boundary scanning guards the fix. The domain remained unattached.
 
 ## Test plan
 

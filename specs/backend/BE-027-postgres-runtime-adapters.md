@@ -43,6 +43,8 @@ the domain to Supabase or changing MirtPage-owned authentication.
 
 - PostgreSQL is accessed through application-facing ports; UI and domain modules
   never receive a `pg` client, SQL string, or Supabase SDK.
+- Application and component modules never import the synchronous SQLite adapter;
+  shared server components await driver-selectable runtime ports.
 - Every tenant-owned read and mutation carries and enforces its business scope.
 - Multi-write operations use one PostgreSQL transaction and preserve existing
   all-or-nothing behavior. Retried public writes preserve idempotency.
@@ -121,6 +123,9 @@ On 2026-08-05 the guarded live copy reconciled the then-current 44 tables and
 3,030 rows into Supabase `public`. A dedicated least-privilege runtime login was
 provisioned and verified through the transaction pooler, and production preflight
 passed against that login and private Supabase Storage.
+Production authenticated smoke testing found and removed one retained direct
+SQLite call in the shared dashboard shell. The database-boundary gate now scans
+`components/` as well as `app/` and `lib/` to prevent recurrence.
 
 BE-027 remains `in_progress` until DEP-023 records PostgreSQL-backed production
 acceptance/security evidence and the monitored authority switch. SQLite adapters

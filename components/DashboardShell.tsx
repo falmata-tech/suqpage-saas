@@ -1,7 +1,7 @@
 import Link from "next/link";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
 import { hasCapability, isClient } from "@/lib/capabilities";
-import { hasRetainedPublication } from "@/lib/db";
+import { runtimeHasRetainedPublication } from "@/lib/catalog-runtime";
 import { hasClientReviewableRevision } from "@/lib/dashboard";
 import type { Business, SessionUser } from "@/lib/types";
 
@@ -10,15 +10,15 @@ const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceN
   return visible.length ? { label, items: visible } : null;
 };
 
-export default function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
+export default async function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
   const query = business ? `?business=${business.id}` : "";
   const client = isClient(user);
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
-  const established = business ? hasRetainedPublication(business.id) : false;
+  const established = business ? await runtimeHasRetainedPublication(business.id) : false;
   const canMaintainProducts = Boolean(business && established && hasCapability(user, "basic-product:maintain"));
-  const reviewable = Boolean(client && business && hasClientReviewableRevision(user.id, business.id));
+  const reviewable = Boolean(client && business && await hasClientReviewableRevision(user.id, business.id));
   const dashboardHref = platformAdmin && !business ? "/dashboard/admin" : `/dashboard${query}`;
   const identityContext = business
     ? business.name
