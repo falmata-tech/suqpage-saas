@@ -166,6 +166,10 @@ Keep these outside GitHub artifacts and the repository:
 
 Production must use HTTPS, private Supabase Storage, bounded PostgreSQL pooling,
 a retained rollback source, and health monitoring on `/api/health`.
+The Next.js configuration explicitly includes
+`next/dist/server/lib/source-maps.js` in every Vercel function trace. A deployment
+that logs a missing framework runtime file fails smoke checks and must not receive
+the custom domain.
 
 ## Backup, deploy, and rollback
 

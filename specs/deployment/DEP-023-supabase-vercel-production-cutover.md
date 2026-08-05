@@ -124,6 +124,13 @@ zero missing or conflicting objects. The least-privilege runtime login and
 production preflight passed through Supabase's transaction pooler. Vercel,
 generated-host workflow smoke checks, DNS, and monitoring remain pending.
 
+The first Vercel candidate (`dpl_9wor7DAet3w8jcphoeSasW8MDBv9`) built but failed
+closed on every dynamic route because the platform function bundle omitted
+Next.js `server/lib/source-maps.js` even though Next's NFT manifest traced it.
+No custom domain was attached. The deployment config now explicitly includes
+that framework runtime file for every dynamic route, and release trace validation
+guards the inclusion before redeployment.
+
 ## Test plan
 
 | Gate | Evidence |

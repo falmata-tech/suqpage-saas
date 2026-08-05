@@ -42,6 +42,9 @@ const nextConfig: NextConfig = {
   typescript: { tsconfigPath },
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/next/dist/server/lib/source-maps.js"],
+  },
   outputFileTracingExcludes: {
     "/*": [
       "./.env*",

@@ -19,12 +19,16 @@ assert(manifests.length > 0, "Production build did not emit output-file trace ma
 
 const forbidden = /^(?:\.env(?:$|\.)|\.git(?:\/|$)|\.local(?:\/|$)|app(?:\/|$)|backups(?:\/|$)|data(?:\/|$)|docs(?:\/|$)|lib(?:\/|$)|public(?:\/|$)|scripts(?:\/|$)|showroom-sdk(?:\/|$)|specs(?:\/|$)|test-results(?:\/|$)|playwright-report(?:\/|$)|.*\.md$|Dockerfile$|docker-compose\.yml$|next\.config\.ts$|package-lock\.json$)/i;
 const findings = [];
+let nextSourceMapsTraced = false;
 for (const manifest of manifests) {
   const trace = JSON.parse(fs.readFileSync(manifest, "utf8"));
   assert(Array.isArray(trace.files), `${path.relative(root, manifest)} has no files array`);
   for (const referenced of trace.files) {
     const absolute = path.resolve(path.dirname(manifest), referenced);
     const projectRelative = path.relative(root, absolute).replaceAll("\\", "/");
+    if (projectRelative === "node_modules/next/dist/server/lib/source-maps.js") {
+      nextSourceMapsTraced = true;
+    }
     if (
       !projectRelative.startsWith("../") &&
       !projectRelative.startsWith(".next/") &&
@@ -35,6 +39,11 @@ for (const manifest of manifests) {
     }
   }
 }
+
+assert(
+  nextSourceMapsTraced,
+  "Output-file traces omitted the Next.js source-map runtime required by Vercel functions",
+);
 
 assert.equal(
   findings.length,
