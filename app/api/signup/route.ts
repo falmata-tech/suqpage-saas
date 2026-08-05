@@ -32,11 +32,11 @@ export async function POST(request: Request) {
     if (!ipRate.allowed || !emailRate.allowed) throw new SignupError("Too many signup attempts. Try again later.", 429, "rate_limited");
     const created = await createPublicClientWorkspace(body);
     await setSession(created.userId);
-    audit("client.self_signup_created", { userId: created.userId, businessId: created.businessId, detail: { requestId: created.requestId }, ipHash });
+    await audit("client.self_signup_created", { userId: created.userId, businessId: created.businessId, detail: { requestId: created.requestId }, ipHash });
     return NextResponse.json({ destination: `/dashboard/requests/${created.requestId}`, reference: created.publicRef }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const known = error instanceof SignupError ? error : new SignupError("Your private workspace could not be created.", 500, "unexpected");
-    audit("client.self_signup_failed", { detail: { code: known.code }, ipHash });
+    await audit("client.self_signup_failed", { detail: { code: known.code }, ipHash });
     return NextResponse.json({ error: known.message }, { status: known.status, headers: { "Cache-Control": "no-store", ...(known.status === 429 ? { "Retry-After": "3600" } : {}) } });
   }
 }

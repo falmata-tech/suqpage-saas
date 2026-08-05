@@ -35,7 +35,7 @@ export async function createSupportConversationAction(formData: FormData) {
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
     });
-    audit("support.conversation_created", { userId: user.id, businessId: user.business_id, detail: { conversationId: created.id } });
+    await audit("support.conversation_created", { userId: user.id, businessId: user.business_id, detail: { conversationId: created.id } });
   } catch (error) {
     failure("/dashboard/support", error);
   }
@@ -51,7 +51,7 @@ export async function postSupportMessageAction(formData: FormData) {
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
     });
-    audit("support.message_posted", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
+    await audit("support.message_posted", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
   }
@@ -64,7 +64,7 @@ export async function claimSupportConversationAction(formData: FormData) {
   const id = conversationId(formData);
   try {
     claimSupportConversation(user, id);
-    audit("support.conversation_claimed", { userId: user.id, detail: { conversationId: id } });
+    await audit("support.conversation_claimed", { userId: user.id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
   }
@@ -77,7 +77,7 @@ export async function closeSupportConversationAction(formData: FormData) {
   const id = conversationId(formData);
   try {
     closeSupportConversation(user, id);
-    audit("support.conversation_closed", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
+    await audit("support.conversation_closed", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
   }
@@ -90,7 +90,7 @@ export async function reopenSupportConversationAction(formData: FormData) {
   const id = conversationId(formData);
   try {
     reopenSupportConversation(user, id);
-    audit("support.conversation_reopened", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
+    await audit("support.conversation_reopened", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
   }
@@ -106,7 +106,7 @@ export async function updateSupportAgentSettingAction(formData: FormData) {
       enabled: formData.get("enabled"),
       maxOpenConversations: formData.get("maxOpenConversations"),
     });
-    audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
+    await audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
   } catch (error) {
     failure("/dashboard/support/agents", error);
   }
@@ -122,7 +122,7 @@ export async function reassignSupportConversationAction(formData: FormData) {
   const assignedUserId = raw ? Number.parseInt(raw, 10) : null;
   try {
     reassignSupportConversation(user, id, assignedUserId);
-    audit("support.conversation_reassigned", { userId: user.id, detail: { conversationId: id, assignedUserId } });
+    await audit("support.conversation_reassigned", { userId: user.id, detail: { conversationId: id, assignedUserId } });
   } catch (error) {
     failure(`/dashboard/support/${id}`, error);
   }

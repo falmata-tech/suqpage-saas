@@ -355,6 +355,22 @@ async function main() {
       });
       assert.equal(redeemedInvitation.businessId, invitation.businessId);
       assert.equal(await getActiveInvitation(invitationToken), undefined);
+
+      const { audit } = await import("../lib/security");
+      const auditAction = `postgres.runtime.${Date.now()}`;
+      await audit(auditAction, {
+        userId: operationsUser.id,
+        businessId: accountTarget.business.id,
+        detail: { evidence: "runtime" },
+      });
+      const auditRow = await runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        return (await runner.query<{ action: string }>(
+          "SELECT action FROM audit_logs WHERE action=? ORDER BY id DESC LIMIT 1",
+          [auditAction],
+        )).rows[0];
+      });
+      assert.equal(auditRow?.action, auditAction);
     } finally {
       await closePostgresRuntimeForTests();
     }

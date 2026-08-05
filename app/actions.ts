@@ -51,16 +51,16 @@ export async function loginAction(formData:FormData) {
   if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
   const user=await runtimeUserByEmail(email);
   if(!user||password.length>200||!await bcrypt.compare(password,user.password_hash)){
-    audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
+    await audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
     go("/login",{error:"Invalid email or password."});
   }
   await resetRuntimeRateLimit(`login:${identity.ipHash}:${email}`);
   await setSession(user.id);
-  audit("auth.login_success",{userId:user.id,businessId:user.business_id,ipHash:identity.ipHash});
+  await audit("auth.login_success",{userId:user.id,businessId:user.business_id,ipHash:identity.ipHash});
   redirect(user.must_change_password?"/dashboard/account?required=1":"/dashboard");
 }
 
-export async function logoutAction(){const user=await requireUser({allowTemporaryPassword:true});audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
+export async function logoutAction(){const user=await requireUser({allowTemporaryPassword:true});await audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
 
 export async function changePasswordAction(formData:FormData){
   const user=await requireUser({allowTemporaryPassword:true});
@@ -75,7 +75,7 @@ export async function changePasswordAction(formData:FormData){
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?",[passwordHash,user.id]);
   await revokeAllUserSessions(user.id);
   await setSession(user.id);
-  audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
+  await audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
   go("/dashboard/account",{saved:1});
 }
 
@@ -92,7 +92,7 @@ export async function updateBusinessAction(formData:FormData){
     await runtimeRun(`UPDATE businesses SET name=?,tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,process_video_ref=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`,[
       text(formData,"name",100),text(formData,"tagline",180),text(formData,"description",1200),logoPath,text(formData,"heroTitle",180),text(formData,"heroSubtitle",300),heroImage,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),processVideoRef,live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
     ]);
-    audit("business.updated",{userId:user.id,businessId});
+    await audit("business.updated",{userId:user.id,businessId});
   }catch(error){go("/dashboard/settings",{business:businessId,error:error instanceof Error?error.message:"Could not save settings."});}
   revalidatePath("/");revalidatePath(`/@${existing.handle}`);revalidatePath("/dashboard/settings");
   go("/dashboard/settings",{business:businessId,saved:1});
@@ -103,7 +103,7 @@ export async function adminUpdateBusinessAction(formData:FormData){
   const businessId=int(formData,"businessId"),status=text(formData,"status",20),business=await runtimeBusinessById(businessId);
   if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin/businesses",{error:"Only an established showroom can be suspended or restored."});
   await runtimeRun("UPDATE businesses SET status=? WHERE id=?",[status,businessId]);
-  audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
+  await audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
   revalidatePath("/");revalidatePath("/dashboard/admin/businesses");go("/dashboard/admin/businesses",{saved:1});
 }
 
@@ -114,24 +114,24 @@ export async function adminResetClientPasswordAction(formData:FormData){
   if(!target||!isStrongPassword(password))go("/dashboard/admin/clients",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?",[passwordHash,userId]);
-  await revokeAllUserSessions(userId);audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
+  await revokeAllUserSessions(userId);await audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
   revalidatePath("/dashboard/admin/clients");go("/dashboard/admin/clients",{saved:"password"});
 }
 
 export async function createCategoryAction(formData:FormData){
   const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100);
-  try{await runtimeRun("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,NULL,?,?,?,1)",[businessId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder")]);audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
+  try{await runtimeRun("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,NULL,?,?,?,1)",[businessId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder")]);await audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
   revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
 }
 
 export async function updateCategoryAction(formData:FormData){
   const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId"),name=text(formData,"name",100);
   if(!await runtimeGet("SELECT id FROM categories WHERE id=? AND business_id=?",[id,businessId]))throw new Error("Category not found.");
-  await runtimeRun("UPDATE categories SET collection_id=NULL,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?",[name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId]);audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
+  await runtimeRun("UPDATE categories SET collection_id=NULL,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?",[name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId]);await audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
 }
 
 export async function deleteCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId");await runtimeTransaction(async()=>{await runtimeRun("UPDATE products SET category_id=NULL WHERE business_id=? AND category_id=?",[businessId,id]);await runtimeRun("DELETE FROM categories WHERE id=? AND business_id=?",[id,businessId]);});audit("category.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
+  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId");await runtimeTransaction(async()=>{await runtimeRun("UPDATE products SET category_id=NULL WHERE business_id=? AND category_id=?",[businessId,id]);await runtimeRun("DELETE FROM categories WHERE id=? AND business_id=?",[id,businessId]);});await audit("category.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
 }
 
 const productFormFields = new Set([
@@ -212,4 +212,4 @@ export async function basicProductUpkeepAction(formData:FormData){
   go(`/dashboard/products/${result.productId}`,{business:businessId,saved:1,version:result.contentVersion});
 }
 
-export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");await runtimeRun("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?",[status,int(formData,"inquiryId"),businessId]);audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined});}
+export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");await runtimeRun("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?",[status,int(formData,"inquiryId"),businessId]);await audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined});}

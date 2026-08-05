@@ -17,7 +17,7 @@ export async function recordManualPaymentAction(formData: FormData) {
       paidAt: formData.get("paidAt"),
       idempotencyKey: formData.get("idempotencyKey") || crypto.randomBytes(16).toString("hex"),
     });
-    audit("subscription.payment_recorded", {
+    await audit("subscription.payment_recorded", {
       userId: user.id,
       businessId,
       detail: { paymentId: result.id },

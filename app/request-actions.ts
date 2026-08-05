@@ -19,7 +19,7 @@ export async function updateServiceRequestStatusAction(formData: FormData) {
   try {
     const result = updateRequestStatus(requestId, status, user.id);
     if (!result) redirect("/dashboard/requests?error=missing");
-    audit("service_request.status_updated", { userId: user.id, businessId: result.businessId, detail: { requestId, status } });
+    await audit("service_request.status_updated", { userId: user.id, businessId: result.businessId, detail: { requestId, status } });
   } catch (error) {
     if (error instanceof RequestError) redirect(`/dashboard/requests/${requestId}?error=transition`);
     throw error;
@@ -35,7 +35,7 @@ export async function addRequestClarificationAction(formData: FormData) {
   if (!Number.isInteger(requestId)) redirect("/dashboard/requests?error=invalid");
   try {
     const result = addRequestClarification(user,requestId,formData.get("message"));
-    audit("service_request.clarification_added", { userId:user.id, businessId:result.businessId, detail:{ requestId, messageLength:result.messageLength, status:result.status } });
+    await audit("service_request.clarification_added", { userId:user.id, businessId:result.businessId, detail:{ requestId, messageLength:result.messageLength, status:result.status } });
   } catch (error) {
     redirect(`/dashboard/requests/${requestId}?error=${error instanceof RequestError ? "clarification" : "unknown"}`);
   }

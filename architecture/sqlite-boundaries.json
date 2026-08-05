@@ -20,7 +20,6 @@
     "lib/revision-service.ts",
     "lib/runtime-sql.ts",
     "lib/schema.ts",
-    "lib/security.ts",
     "lib/showroom-recipe-service.ts",
     "lib/signup.ts",
     "lib/support.ts"
