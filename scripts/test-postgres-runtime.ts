@@ -3,6 +3,7 @@ import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } 
 import { consumePostgresRateLimit, resetPostgresRateLimit } from "../lib/rate-limit-postgres";
 import { PostgresCatalogRepository } from "../lib/postgres-catalog-repository";
 import { PostgresSessionRepository } from "../lib/postgres-session-repository";
+import { createPostgresPublicInquiry } from "../lib/inquiries-postgres";
 
 async function main() {
   const config = postgresRuntimeConfig({
@@ -67,6 +68,41 @@ async function main() {
         assert.equal((await sessions.findActive(tokenHash, now + 1))?.last_seen_at, now + 1);
         await sessions.revokeByToken(tokenHash, now + 2);
         assert.equal(await sessions.findActive(tokenHash, now + 2), undefined);
+      }
+
+      const product = (await runner.query<{ id: number }>(
+        "SELECT id FROM products WHERE business_id=? AND is_published=1 AND availability IN ('available','limited') ORDER BY id LIMIT 1",
+        [business.id],
+      )).rows[0];
+      if (product) {
+        const groups = (await runner.query<{ id: number; name: string }>("SELECT id,name FROM option_groups WHERE product_id=? ORDER BY position,id", [product.id])).rows;
+        const options: Record<string, string> = {};
+        for (const group of groups) {
+          const value = (await runner.query<{ value: string }>("SELECT value FROM option_values WHERE option_group_id=? ORDER BY id LIMIT 1", [group.id])).rows[0];
+          assert.ok(value, `Expected an option value for ${group.name}.`);
+          options[group.name] = value.value;
+        }
+        const key = `postgres-inquiry-${Date.now()}`;
+        const first = await createPostgresPublicInquiry(runner, {
+          businessId: business.id,
+          customerName: "PostgreSQL rehearsal visitor",
+          contact: "+251911123456",
+          contactMethod: "phone",
+          note: "Rehearsal inquiry",
+          idempotencyKey: key,
+          items: [{ productId: product.id, quantity: "20 kg", options }],
+        }, "postgres-rehearsal-ip", async () => undefined);
+        assert.equal(first.duplicate, false);
+        const repeated = await createPostgresPublicInquiry(runner, {
+          businessId: business.id,
+          customerName: "PostgreSQL rehearsal visitor",
+          contact: "+251911123456",
+          contactMethod: "phone",
+          idempotencyKey: key,
+          items: [{ productId: product.id, options }],
+        }, "postgres-rehearsal-ip", async () => undefined);
+        assert.equal(repeated.duplicate, true);
+        assert.equal(repeated.inquiryId, first.inquiryId);
       }
     });
 

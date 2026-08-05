@@ -1,7 +1,7 @@
 ---
 id: BE-027
 title: PostgreSQL runtime adapters and persistence parity
-status: ready
+status: in_progress
 related: [DEP-023, ADR-0013]
 owners: [backend, security, operations]
 last_updated: 2026-08-04

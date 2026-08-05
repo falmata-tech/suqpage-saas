@@ -1,7 +1,7 @@
 ---
 id: DEP-023
 title: Supabase and Vercel production cutover
-status: ready
+status: in_progress
 related: [BE-027, ADR-0013]
 owners: [deployment, operations, security, backend]
 last_updated: 2026-08-04
