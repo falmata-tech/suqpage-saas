@@ -1399,9 +1399,10 @@ login requires it. Supabase Storage and PostgreSQL are implemented runtime modes
 
 The production-only Supabase PostgreSQL and Vercel cutover is controlled by
 BE-027 and DEP-023. Runtime parity, the real reconciled Supabase copy, private
-Storage verification, and least-privilege runtime preflight are complete. Exact
-release checks, Vercel smoke tests, DNS switch, and rollback monitoring must pass
-before the deployment is described as production-ready.
+Storage verification, least-privilege runtime preflight, exact release checks,
+and generated-host Vercel smoke tests are complete. The custom domains are
+attached to the production project, but external DNS verification and rollback
+monitoring must pass before the deployment is described as production-ready.
 
 Before broad external rollout or multi-instance production scale, migrate to:
 

@@ -121,8 +121,9 @@ triggers, 307 not-null columns, 44 fingerprints, four negative invariants, and a
 byte-identical retained SQLite source. The private `mirtpage-media` bucket was
 created; the source manifest contained zero mutable objects and reconciled with
 zero missing or conflicting objects. The least-privilege runtime login and
-production preflight passed through Supabase's transaction pooler. Vercel,
-generated-host workflow smoke checks, DNS, and monitoring remain pending.
+production preflight passed through Supabase's transaction pooler. Commit
+`e3f3d0a` passed `npm run release` and every required check in GitHub Actions
+run `31044968522`.
 
 The first Vercel candidate (`dpl_9wor7DAet3w8jcphoeSasW8MDBv9`) built but failed
 closed on every dynamic route because the platform function bundle omitted
@@ -143,7 +144,24 @@ The healthy public candidate then exposed a retained synchronous SQLite call in
 the authenticated dashboard shell; client login succeeded, but the shell failed
 closed when Vercel correctly denied `/var/task/data` creation. The shell now
 awaits the driver-selectable publication and revision ports, and component-level
-database-boundary scanning guards the fix. The domain remained unattached.
+database-boundary scanning guards the fix.
+
+The corrected exact-commit production deployment
+`dpl_6MgbbKDKyYQ1km23maMk3Tw8GhdE` is ready at
+`https://mirtpage.vercel.app`. Public health and showroom requests returned 200.
+An authenticated temporary-password client rendered the PostgreSQL-backed
+account shell and protected workspace handoff without the prior filesystem
+failure. A separate read-only production probe proved that the same client's
+latest awaiting-review revision passes request authorization, revision lookup,
+schema-v4 validation, and four-offering catalog construction. The browser probe
+did not alter that seeded client's password or bypass the required first-login
+password change.
+
+Vercel owns and has attached `mirtpage.com` and `www.mirtpage.com` to the
+production project. External DNS remains unconfigured. The registrar must add
+apex A records for `216.198.79.1` and `64.29.17.1`, plus a `www` CNAME to
+`c5e46d2721b36922.vercel-dns-017.com`, before verification, canonical-domain
+smoke checks, and rollback-window monitoring can begin.
 
 ## Test plan
 
@@ -177,6 +195,6 @@ reverse copy or dual-write merge is allowed.
 - [x] Guarded empty-target production copy and full reconciliation implemented
 - [x] Private Supabase Storage adapter and copy/hash verification implemented
 - [x] Real Supabase database and Storage copy completed
-- [ ] Exact release commit passes local and remote gates
-- [ ] Vercel production deployment and generated-host smoke checks pass
+- [x] Exact release commit passes local and remote gates
+- [x] Vercel production deployment and generated-host smoke checks pass
 - [ ] `mirtpage.com` DNS is attached and monitored through the rollback window
