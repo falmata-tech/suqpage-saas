@@ -4,6 +4,7 @@ import { consumePostgresRateLimit, resetPostgresRateLimit } from "../lib/rate-li
 import { PostgresCatalogRepository } from "../lib/postgres-catalog-repository";
 import { PostgresSessionRepository } from "../lib/postgres-session-repository";
 import { createPostgresPublicInquiry } from "../lib/inquiries-postgres";
+import { createPostgresPublicClientWorkspace } from "../lib/signup-postgres";
 
 async function main() {
   const config = postgresRuntimeConfig({
@@ -104,6 +105,29 @@ async function main() {
         assert.equal(repeated.duplicate, true);
         assert.equal(repeated.inquiryId, first.inquiryId);
       }
+    });
+
+    await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      const unique = `${Date.now()}${Math.floor(Math.random() * 10_000)}`;
+      const input = {
+        name: "PostgreSQL Signup",
+        email: `postgres-${unique}@example.test`,
+        phone: "+251911123456",
+        businessName: `PostgreSQL Works ${unique}`,
+        handle: `postgres-works-${unique}`,
+        password: "PostgresSignup123",
+        confirmPassword: "PostgresSignup123",
+        requestText: "We make durable goods and need a clear public showroom for local buyers.",
+        idempotencyKey: `postgres-signup-${unique}`,
+        consent: true,
+      };
+      const signup = await createPostgresPublicClientWorkspace(runner, input);
+      assert.ok(signup.userId && signup.businessId && signup.requestId);
+      await assert.rejects(
+        () => createPostgresPublicClientWorkspace(runner, { ...input, handle: `other-${unique}`, idempotencyKey: `again-${unique}` }),
+        /already uses this email/,
+      );
     });
 
     await runner.transaction(async () => {
