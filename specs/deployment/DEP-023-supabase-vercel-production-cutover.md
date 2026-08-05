@@ -130,6 +130,10 @@ Next.js `server/lib/source-maps.js` even though Next's NFT manifest traced it.
 No custom domain was attached. The deployment config now explicitly includes
 that framework runtime file for every dynamic route, and release trace validation
 guards the inclusion before redeployment.
+The second candidate (`dpl_3N3WJbFvumZ7ZsfEgxm9NBiwj8fs`) proved Vercel does not
+follow relative dependencies from an explicit include and failed closed on
+`server/lib/lru-cache.js`; the guarded include and trace assertion now cover both
+files. The domain remained unattached.
 
 ## Test plan
 

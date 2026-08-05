@@ -43,7 +43,10 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
   outputFileTracingIncludes: {
-    "/*": ["./node_modules/next/dist/server/lib/source-maps.js"],
+    "/*": [
+      "./node_modules/next/dist/server/lib/source-maps.js",
+      "./node_modules/next/dist/server/lib/lru-cache.js",
+    ],
   },
   outputFileTracingExcludes: {
     "/*": [
