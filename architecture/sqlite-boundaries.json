@@ -8,16 +8,15 @@
     "lib/catalog-runtime.ts",
     "lib/db.ts",
     "lib/discovery-admin.ts",
+    "lib/discovery.ts",
     "lib/expo.ts",
     "lib/inquiries.ts",
     "lib/media-manifest.ts",
     "lib/product-upkeep-sqlite.ts",
     "lib/rate-limit.ts",
     "lib/request-sqlite.ts",
-    "lib/revision-service.ts",
     "lib/runtime-sql.ts",
     "lib/schema.ts",
-    "lib/showroom-recipe-service.ts",
     "lib/signup.ts"
   ],
   "knownDialectWork": [

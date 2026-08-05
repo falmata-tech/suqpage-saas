@@ -41,7 +41,7 @@ export default async function RevisionPreviewPage({
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
   const request = await runtimeRequestDetail(requestId);
-  const revision = getContentRevision(revisionId);
+  const revision = await getContentRevision(revisionId);
   if (
     !request ||
     !revision ||
@@ -52,7 +52,7 @@ export default async function RevisionPreviewPage({
   ) notFound();
   const business = await runtimeBusinessById(request.business_id);
   if (!business) notFound();
-  const latest = listContentRevisions(requestId)[0]?.id === revision.id;
+  const latest = (await listContentRevisions(requestId))[0]?.id === revision.id;
   const snapshot = requireRevisionSnapshotV4(
     revision.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,

@@ -36,9 +36,9 @@ export default async function RecipeStudioPage({
   if (!recipeStudioEnabled()) {
     redirect(`/dashboard/requests/${requestId}/revisions/${revisionId}/edit`);
   }
-  let data: ReturnType<typeof buildShowroomRecipeBrief>;
+  let data: Awaited<ReturnType<typeof buildShowroomRecipeBrief>>;
   try {
-    data = buildShowroomRecipeBrief(user, revisionId);
+    data = await buildShowroomRecipeBrief(user, revisionId);
   } catch (error) {
     if (error instanceof ShowroomRecipeError && error.status === 409) {
       redirect(`/dashboard/requests/${requestId}`);
@@ -47,7 +47,7 @@ export default async function RecipeStudioPage({
   }
   if (data.workspace.requestId !== requestId) notFound();
   const business = (await runtimeBusinessById(data.workspace.businessId)) || null;
-  const revision = getContentRevision(revisionId);
+  const revision = await getContentRevision(revisionId);
   if (!revision) notFound();
   const snapshot = requireRevisionSnapshotV4(
     revision.snapshot_json,

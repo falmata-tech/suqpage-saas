@@ -26,7 +26,7 @@ export default async function EditRevisionPage({
   const requestId = Number(values.id);
   const revisionId = Number(values.revisionId);
   const request = await runtimeRequestDetail(requestId);
-  const revision = getContentRevision(revisionId);
+  const revision = await getContentRevision(revisionId);
   if (
     !request ||
     !revision ||

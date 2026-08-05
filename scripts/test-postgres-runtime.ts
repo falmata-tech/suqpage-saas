@@ -451,6 +451,38 @@ async function main() {
       clientRequestForm.set("idempotencyKey", `postgres-client-request-${Date.now()}`);
       const clientRequest = await createAuthenticatedClientRequest(supportClient, clientRequestForm);
       assert.equal(clientRequest.duplicate, false);
+      process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
+      const {
+        createDraftRevision,
+        decideRevision,
+        getContentRevision,
+        publishApprovedRevision,
+        saveRecipeDraftRevision,
+        submitRevisionForReview,
+      } = await import("../lib/revision-service");
+      const { buildShowroomRecipeBrief } = await import("../lib/showroom-recipe-service");
+      const revision = await createDraftRevision(operationsUser, clientRequest.id);
+      const brief = await buildShowroomRecipeBrief(operationsUser, revision.id);
+      const savedRecipe = await saveRecipeDraftRevision(
+        operationsUser,
+        revision.id,
+        revision.snapshot_json,
+        "PostgreSQL recipe persistence rehearsal",
+        "a".repeat(64),
+        { recipeSchemaVersion: 1, rehearsal: true },
+      );
+      assert.equal(savedRecipe.duplicate, false);
+      assert.equal(brief.workspace.businessId, supportClient.business_id);
+      await submitRevisionForReview(operationsUser, revision.id);
+      await decideRevision(
+        supportClient,
+        revision.id,
+        "approve",
+        "Approved during PostgreSQL rehearsal.",
+      );
+      const publication = await publishApprovedRevision(operationsUser, revision.id);
+      assert.ok(publication.contentVersion > revision.base_content_version);
+      assert.equal((await getContentRevision(revision.id))?.status, "published");
       const { createOnBehalfRequest } = await import("../lib/on-behalf-request-service");
       const onBehalfForm = new FormData();
       onBehalfForm.set("clientUserId", String(supportClient.id));

@@ -33,7 +33,7 @@ export default async function RequestDetailPage({ params, searchParams }: { para
   const teamMembers = manager
     ? await listTeamMemberChoices(query.staffQ, request.assigned_user_id)
     : [];
-  const revisions = request.business_id ? listContentRevisions(request.id) : [];
+  const revisions = request.business_id ? await listContentRevisions(request.id) : [];
   const clarifications=request.events.filter((event)=>event.event_type==="client_clarification"||event.event_type==="staff_clarification");
   const history=request.events.filter((event)=>event.event_type!=="client_clarification"&&event.event_type!=="staff_clarification");
   const clarificationOpen=!["published","completed","rejected","cancelled"].includes(request.status);
