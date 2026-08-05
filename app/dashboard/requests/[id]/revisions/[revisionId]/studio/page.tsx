@@ -5,7 +5,7 @@ import NavigationTrail from "@/components/NavigationTrail";
 import RecipeStudio from "@/components/RecipeStudio";
 import BlueprintMediaBoard from "@/components/BlueprintMediaBoard";
 import { requireUser } from "@/lib/auth";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import {
   blueprintReadiness,
   blueprintSlotValue,
@@ -46,7 +46,7 @@ export default async function RecipeStudioPage({
     notFound();
   }
   if (data.workspace.requestId !== requestId) notFound();
-  const business = getBusinessById(data.workspace.businessId) || null;
+  const business = (await runtimeBusinessById(data.workspace.businessId)) || null;
   const revision = getContentRevision(revisionId);
   if (!revision) notFound();
   const snapshot = requireRevisionSnapshotV4(

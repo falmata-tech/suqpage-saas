@@ -8,7 +8,7 @@ import { assignRequestAction } from "@/app/staff-actions";
 import { createRevisionDraftAction, rollbackRevisionAction } from "@/app/revision-actions";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { presentRequestEvent } from "@/lib/request-presentation";
 import { REVIEW_REQUEST_STATUSES } from "@/lib/request-domain";
 import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
@@ -29,7 +29,7 @@ export default async function RequestDetailPage({ params, searchParams }: { para
   const teamMember = user.access_role === "team_member";
   const client = user.access_role === "client";
   const businessId = !manager ? request.business_id : null;
-  const business = !manager && businessId ? getBusinessById(businessId) || null : null;
+  const business = !manager && businessId ? (await runtimeBusinessById(businessId)) || null : null;
   const teamMembers = manager
     ? listTeamMemberChoices(query.staffQ, request.assigned_user_id)
     : [];

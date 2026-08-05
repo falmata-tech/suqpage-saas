@@ -1,4 +1,4 @@
-import { getBusinessByHandle, getBusinessByHandleAny, getBusinessById, getCatalogByBusinessId, getCatalogByHandle, getUserByEmail, getUserById } from "./db";
+import { getBusinessByHandle, getBusinessByHandleAny, getBusinessById, getCatalogByBusinessId, getCatalogByHandle, getUserByEmail, getUserById, hasRetainedPublication } from "./db";
 import { postgresRuntimePreviewEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
 
 export async function runtimeBusinessByHandle(handle: string) {
@@ -27,4 +27,8 @@ export async function runtimeUserByEmail(email: string) {
 
 export async function runtimeUserById(id: number) {
   return postgresRuntimePreviewEnabled() ? postgresRuntimeServices().catalog.getUserById(id) : getUserById(id);
+}
+
+export async function runtimeHasRetainedPublication(businessId: number) {
+  return postgresRuntimePreviewEnabled() ? postgresRuntimeServices().catalog.hasRetainedPublication(businessId) : hasRetainedPublication(businessId);
 }

@@ -6,7 +6,7 @@ import NavigationTrail from "@/components/NavigationTrail";
 import ShowroomApp from "@/components/showroom/ShowroomApp";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
-import { getBusinessById } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
 import { snapshotToCatalog } from "@/lib/revision-domain";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
@@ -50,7 +50,7 @@ export default async function RevisionPreviewPage({
     !canAccessRequest(user, request) ||
     (user.access_role === "client" && revision.status === "draft")
   ) notFound();
-  const business = getBusinessById(request.business_id);
+  const business = await runtimeBusinessById(request.business_id);
   if (!business) notFound();
   const latest = listContentRevisions(requestId)[0]?.id === revision.id;
   const snapshot = requireRevisionSnapshotV4(

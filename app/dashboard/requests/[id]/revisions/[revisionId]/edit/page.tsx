@@ -4,7 +4,8 @@ import DashboardShell from "@/components/DashboardShell";
 import NavigationTrail from "@/components/NavigationTrail";
 import RevisionEditor from "@/components/RevisionEditor";
 import { requireUser } from "@/lib/auth";
-import { getBusinessById, getDb } from "@/lib/db";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
+import { runtimeAll } from "@/lib/runtime-sql";
 import { canAccessRequest, getRequestDetail } from "@/lib/request-sqlite";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
@@ -37,16 +38,14 @@ export default async function EditRevisionPage({
   if (revision.status !== "draft") {
     redirect(`/dashboard/requests/${requestId}/revisions/${revisionId}/preview`);
   }
-  const business = getBusinessById(request.business_id);
+  const business = await runtimeBusinessById(request.business_id);
   if (!business) notFound();
-  const approvedMedia = getDb()
-    .prepare("SELECT asset_key,label,kind,request_attachment_id FROM recipe_media_assets WHERE request_id=? ORDER BY id")
-    .all(requestId) as Array<{
+  const approvedMedia = await runtimeAll<{
       asset_key: string;
       label: string;
       kind: "image" | "youtube";
       request_attachment_id: number | null;
-    }>;
+    }>("SELECT asset_key,label,kind,request_attachment_id FROM recipe_media_assets WHERE request_id=? ORDER BY id",[requestId]);
   const attachmentIds = new Set(request.attachments.map((attachment) => attachment.id));
   const imageOptions = [
     ...request.attachments.map((attachment) => ({
