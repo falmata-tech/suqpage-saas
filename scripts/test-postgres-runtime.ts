@@ -330,6 +330,31 @@ async function main() {
       const assignment = await assignRequestToTeamMember(assignableRequest.id, staff.userId, operationsUser.id);
       assert.equal(assignment.assignedUserId, staff.userId);
       assert.ok((await listAssignedBusinesses(staff.userId)).some((business) => business.id === assignableRequest.business_id));
+
+      const {
+        createClientInvitation,
+        getActiveInvitation,
+        redeemClientInvitation,
+      } = await import("../lib/invitations");
+      const invitationUnique = Date.now();
+      const invitationToken = `I${String(invitationUnique).padStart(42, "0")}`;
+      const invitation = await createClientInvitation({
+        requestId: null,
+        clientName: "PostgreSQL Invited Client",
+        email: `postgres-invite-${invitationUnique}@example.test`,
+        businessName: `PostgreSQL Invitation Works ${invitationUnique}`,
+        handle: `postgres-invitation-${invitationUnique}`,
+        designKey: "alhaya",
+        actorUserId: operationsUser.id,
+      }, { token: invitationToken });
+      assert.equal((await getActiveInvitation(invitationToken))?.business_id, invitation.businessId);
+      const redeemedInvitation = await redeemClientInvitation({
+        token: invitationToken,
+        name: "PostgreSQL Invited Client",
+        password: "PostgresInvite123",
+      });
+      assert.equal(redeemedInvitation.businessId, invitation.businessId);
+      assert.equal(await getActiveInvitation(invitationToken), undefined);
     } finally {
       await closePostgresRuntimeForTests();
     }

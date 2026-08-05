@@ -12,7 +12,6 @@
     "lib/discovery.ts",
     "lib/expo.ts",
     "lib/inquiries.ts",
-    "lib/invitations.ts",
     "lib/media-manifest.ts",
     "lib/on-behalf-request-service.ts",
     "lib/product-upkeep-sqlite.ts",

@@ -14,7 +14,7 @@ export async function acceptProspectAction(_state: InvitationActionState, formDa
   const user = await requireUser();
   if (!hasCapability(user, "operations:manage")) return { error: "Operations manager access is required." };
   try {
-    const created = createClientInvitation({
+    const created = await createClientInvitation({
       requestId: Number(cleanText(formData.get("requestId"), 20)),
       clientName: cleanText(formData.get("clientName"), 100),
       email: cleanText(formData.get("email"), 160),
@@ -36,7 +36,7 @@ export async function createClientWorkspaceAction(_state: InvitationActionState,
   const user = await requireUser();
   if (!hasCapability(user, "operations:manage")) return { error: "Operations manager access is required." };
   try {
-    const created = createClientInvitation({
+    const created = await createClientInvitation({
       requestId: null,
       clientName: cleanText(formData.get("clientName"), 100),
       email: cleanText(formData.get("email"), 160),
