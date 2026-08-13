@@ -83,6 +83,11 @@ task-oriented client workflow from instruction through publication.
   from the current unsaved snapshot below the editing forms. Staff can jump to
   it from the save controls and inspect desktop-width or phone-width output
   without first saving, submitting, or mutating the live showroom.
+- Palette background controls keep their paired foreground role readable when
+  possible. While a typed hex value or color combination is incomplete or
+  fails the design contract, the editor retains the last valid preview, names
+  the correction, and disables draft save instead of rendering the public
+  unavailable-showroom state.
 - Every editable image destination provides an in-place JPEG, PNG, or WebP
   replacement upload, including logo, hero, browser icon, story/process media,
   and offering images. Story/process and offering video destinations accept a
@@ -139,6 +144,13 @@ Scenario: Staff checks an unsaved edit
   THEN the preview reflects the current in-memory snapshot
   AND the staff member can compare desktop and phone widths
   AND no live or persisted showroom data changes
+
+Scenario: Staff enters an incomplete or low-contrast palette value
+  GIVEN an authorized staff member is editing a valid showroom revision
+  WHEN the current palette no longer passes its format or contrast contract
+  THEN the last valid showroom remains visible in the unsaved preview
+  AND the editor identifies the palette correction
+  AND draft save remains unavailable until the snapshot is valid
 
 Scenario: Staff replaces media while editing
   GIVEN an authorized staff member is editing a private revision
