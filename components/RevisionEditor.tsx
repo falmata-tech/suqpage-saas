@@ -12,13 +12,17 @@ import type { ShowroomPrimitive } from "@/lib/showroom-composition";
 import {
   SHOWROOM_CUSTOM_PALETTE_KEYS,
   SHOWROOM_SECTION_SURFACE_ROLES,
+  showroomColorContrast,
   type ShowroomSectionV2,
 } from "@/lib/showroom-composition-v2";
 import {
   SHOWROOM_DESIGN_SYSTEMS,
   type ShowroomColorPalette,
 } from "@/lib/showroom-design-systems";
-import type { RevisionSnapshotV4 } from "@/lib/revision-v4-domain";
+import {
+  parseRevisionSnapshotV4,
+  type RevisionSnapshotV4,
+} from "@/lib/revision-v4-domain";
 import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "@/lib/product-detail-patterns";
 import { snapshotToCatalog } from "@/lib/revision-domain";
 import type { Business } from "@/lib/types";
@@ -37,6 +41,15 @@ const EDITOR_AREAS: Array<{ key: EditorArea; label: string }> = [
 const EDITOR_PAGE_SIZE = 8;
 
 const uid = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
+
+function readableForeground(background: string, current: string) {
+  if (showroomColorContrast(current, background) >= 4.5) return current;
+  return ["#111111", "#ffffff"].sort(
+    (first, second) =>
+      showroomColorContrast(second, background) -
+      showroomColorContrast(first, background),
+  )[0];
+}
 
 function Field({
   value,
@@ -245,7 +258,32 @@ export default function RevisionEditor({
   const [productPage, setProductPage] = useState(1);
   const [mediaOptions, setMediaOptions] = useState(imageOptions);
   const [previewViewport, setPreviewViewport] = useState<"desktop" | "phone">("desktop");
-  const deferredSnapshot = useDeferredValue(snapshot);
+  const previewValidation = useMemo(() => {
+    try {
+      return {
+        snapshot: parseRevisionSnapshotV4(
+          snapshot,
+          SHOWROOM_COMPONENT_BANK_LATEST,
+        ),
+        error: "",
+      };
+    } catch (error) {
+      return {
+        snapshot: null,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Complete the palette correction to update the preview.",
+      };
+    }
+  }, [snapshot]);
+  const [lastValidPreview, setLastValidPreview] = useState(initial);
+  useEffect(() => {
+    if (previewValidation.snapshot) setLastValidPreview(previewValidation.snapshot);
+  }, [previewValidation.snapshot]);
+  const deferredSnapshot = useDeferredValue(
+    previewValidation.snapshot || lastValidPreview,
+  );
   const business = snapshot.business;
   const foundation =
     SHOWROOM_DESIGN_SYSTEMS[snapshot.designManifest.tokenPack] ||
@@ -341,8 +379,28 @@ export default function RevisionEditor({
     key: keyof ShowroomColorPalette,
     value: string,
   ) => {
-    const palette = snapshot.designManifest.customPalette || foundation.colors;
-    setCustomPalette({ ...palette, [key]: value });
+    setSnapshot((current) => {
+      const currentFoundation =
+        SHOWROOM_DESIGN_SYSTEMS[current.designManifest.tokenPack] ||
+        Object.values(SHOWROOM_DESIGN_SYSTEMS)[0];
+      const palette = {
+        ...(current.designManifest.customPalette || currentFoundation.colors),
+        [key]: value,
+      };
+      if (key === "secondary" && /^#[0-9a-fA-F]{6}$/.test(value)) {
+        palette.onSecondary = readableForeground(value, palette.onSecondary);
+      }
+      if (key === "strong" && /^#[0-9a-fA-F]{6}$/.test(value)) {
+        palette.onStrong = readableForeground(value, palette.onStrong);
+      }
+      if (key === "inverse" && /^#[0-9a-fA-F]{6}$/.test(value)) {
+        palette.onInverse = readableForeground(value, palette.onInverse);
+      }
+      return {
+        ...current,
+        designManifest: { ...current.designManifest, customPalette: palette },
+      };
+    });
   };
   const updateBlock = (key: string, patch: Partial<ShowroomContentBlock>) =>
     setSnapshot((current) => {
@@ -730,7 +788,7 @@ export default function RevisionEditor({
         </section>
 
         <div className="sticky-actions editor-save-actions">
-          <button className="btn brand">Save private draft</button>
+          <button className="btn brand" disabled={!previewValidation.snapshot}>Save private draft</button>
           <button className="btn secondary" type="button" onClick={() => document.getElementById("revision-live-preview")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Eye aria-hidden="true"/> Preview changes</button>
         </div>
       </form>
@@ -743,6 +801,11 @@ export default function RevisionEditor({
             <button type="button" className={previewViewport === "phone" ? "active" : ""} aria-pressed={previewViewport === "phone"} onClick={() => setPreviewViewport("phone")}><Smartphone aria-hidden="true"/> Phone</button>
           </div>
         </div>
+        {previewValidation.error ? (
+          <p className="error" role="alert">
+            Preview kept on the last valid design. {previewValidation.error}
+          </p>
+        ) : null}
         <div className={`editor-preview-stage ${previewViewport}`}>
           <div className="editor-preview-frame"><ShowroomApp catalog={previewCatalog} previewMode embedded privateMediaRequestId={requestId} /></div>
         </div>

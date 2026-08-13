@@ -1123,6 +1123,17 @@ test("operations manager records on behalf and team member sees only assigned wo
   await page.getByRole("button", { name: "Design foundation" }).click();
   await expect(page.getByLabel("Use a custom showroom palette")).toBeChecked();
   await page.getByLabel("Primary accent hex value").fill("#14532D");
+  await page.getByLabel("Secondary accent hex value").fill("#FCEFEA");
+  await expect(page.getByLabel("Text on secondary hex value")).toHaveValue("#111111");
+  await expect(page.getByText("Showroom temporarily unavailable")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save private draft" })).toBeEnabled();
+  await page.getByLabel("Secondary soft surface hex value").fill("#17212B");
+  await expect(page.getByText(/Preview kept on the last valid design/)).toBeVisible();
+  await expect(page.getByText("Showroom temporarily unavailable")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save private draft" })).toBeDisabled();
+  await page.getByLabel("Secondary soft surface hex value").fill("#F6DDD5");
+  await expect(page.getByText(/Preview kept on the last valid design/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save private draft" })).toBeEnabled();
   const heroSection = recipe.design.sections.find(
     (section: { component: string }) => section.component.startsWith("hero."),
   );
