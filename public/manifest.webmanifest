@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "MirtPage",
+  "short_name": "MirtPage",
+  "description": "Find online showrooms from Ethiopian workshops, growers, producers, and manufacturers.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F3F5F7",
+  "theme_color": "#0B1D3A",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "shopping"],
+  "icons": [
+    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Explore showrooms", "short_name": "Market", "url": "/#discover", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Daily featured showrooms", "short_name": "Featured", "url": "/featured#daily-featured-title", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Get a showroom", "short_name": "Join", "url": "/request", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

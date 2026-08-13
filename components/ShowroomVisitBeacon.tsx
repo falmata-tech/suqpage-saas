@@ -9,7 +9,7 @@ export default function ShowroomVisitBeacon({
   hubKey,
 }: {
   handle: string;
-  source: "direct" | "expo" | "directory";
+  source: "direct" | "featured" | "directory";
   occurrenceId?: string;
   hubKey?: string;
 }) {

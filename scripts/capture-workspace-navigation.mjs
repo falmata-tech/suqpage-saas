@@ -58,7 +58,10 @@ try {
   const desktop = await desktopContext.newPage();
   await desktop.goto(`${baseURL}/dashboard/admin`, { waitUntil: "networkidle" });
   await desktop.getByRole("heading", { name: /Good (morning|afternoon|evening)/ }).waitFor();
-  assert.equal(await desktop.locator(".admin-command").count(), 6);
+  assert.deepEqual(
+    await desktop.locator(".admin-command strong").allTextContents(),
+    ["Businesses", "Showroom requests", "Support inbox", "Staff & access", "Featured schedule", "Renewals", "Design library"],
+  );
   await assertNoOverflow(desktop, "desktop administrator overview");
   await desktop.screenshot({ path: path.join(output, "admin-overview-1440.png"), fullPage: true });
   await desktopContext.close();
@@ -86,14 +89,16 @@ try {
   const clientContext = await contextFor(browser, sessions[1], { width: 390, height: 844 });
   const clientPage = await clientContext.newPage();
   await clientPage.goto(`${baseURL}/dashboard`, { waitUntil: "networkidle" });
-  await clientPage.getByText("Client workspace", { exact: true }).waitFor();
-  await assertNoOverflow(clientPage, "390px client workspace");
+  await clientPage.getByRole("main").getByText("Business workspace", { exact: true }).waitFor();
+  await clientPage.locator(".client-workspace-actions").getByText("Project history", { exact: true }).waitFor();
+  assert.equal(await clientPage.locator(".client-workspace-actions").getByText("Showroom project", { exact: true }).count(), 0);
+  await assertNoOverflow(clientPage, "390px business workspace");
   await clientPage.screenshot({ path: path.join(output, "client-workspace-390.png"), fullPage: true });
-  await clientPage.getByRole("button", { name: "Open workspace menu" }).click();
+  await clientPage.getByRole("button", { name: "Open all workspace navigation" }).click();
   const drawer = clientPage.getByRole("dialog", { name: "Workspace menu" });
   await drawer.waitFor();
   await clientPage.getByRole("button", { name: "Close workspace menu" }).waitFor();
-  await assertNoOverflow(clientPage, "390px client workspace menu");
+  await assertNoOverflow(clientPage, "390px business workspace menu");
   await clientPage.screenshot({ path: path.join(output, "client-menu-390.png") });
   await clientContext.close();
 

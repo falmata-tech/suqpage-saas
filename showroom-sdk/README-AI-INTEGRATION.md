@@ -10,8 +10,8 @@ admission, payload limits, private preview, approval, and publication.
 
 ## What the AI may choose
 
-1. Freely drafted business, product, capability, story, process, hero, and call
-   to action copy within the schema limits.
+1. Freely drafted business, product, capability, hero, combined story-and-process,
+   and call-to-action copy within the schema limits.
 2. Any compatible reviewed component for each canonical page role.
 3. Any admitted semantic `surfaceRole` for each section.
 4. Any compatible reviewed `mediaIntegration` treatment.
@@ -34,6 +34,9 @@ supplied, its paths and exported source keys must be valid.
    content to a renderer; it is not a factual-source requirement.
 4. Keep the normal page roles in their exported order. Vary the component
    anatomy, alignment, density, surface, palette, and media treatment.
+   Use exactly one `highlights` block for business context, process steps, an
+   optional chapter image, and the approved process video. Do not add a
+   standalone `story` or `video` block.
 5. Do not invent media references. Use admitted opaque asset keys or declared
    planned-media destinations only.
 6. Do not invent relationship keys. Preserve retained keys, declare intended

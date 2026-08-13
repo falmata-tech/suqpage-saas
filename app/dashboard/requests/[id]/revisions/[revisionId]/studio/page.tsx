@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import DashboardShell from "@/components/DashboardShell";
+import ClientWorkflowNav from "@/components/ClientWorkflowNav";
 import NavigationTrail from "@/components/NavigationTrail";
 import RecipeStudio from "@/components/RecipeStudio";
 import BlueprintMediaBoard from "@/components/BlueprintMediaBoard";
@@ -17,6 +18,7 @@ import { ShowroomRecipeError } from "@/lib/showroom-recipe-domain";
 import { controlledYouTubeAdmissionEnabled, recipeStudioEnabled } from "@/lib/config";
 import { getContentRevision } from "@/lib/revision-service";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
+import { withAuthoritativeBusinessSettings } from "@/lib/revision-domain";
 import { evaluateCompositionFitness } from "@/lib/showroom-guidance";
 
 export const dynamic = "force-dynamic";
@@ -49,10 +51,12 @@ export default async function RecipeStudioPage({
   const business = (await runtimeBusinessById(data.workspace.businessId)) || null;
   const revision = await getContentRevision(revisionId);
   if (!revision) notFound();
-  const snapshot = requireRevisionSnapshotV4(
-    revision.snapshot_json,
-    SHOWROOM_COMPONENT_BANK_LATEST,
-  );
+  const snapshot = business
+    ? withAuthoritativeBusinessSettings(
+        requireRevisionSnapshotV4(revision.snapshot_json, SHOWROOM_COMPONENT_BANK_LATEST),
+        business,
+      )
+    : requireRevisionSnapshotV4(revision.snapshot_json, SHOWROOM_COMPONENT_BANK_LATEST);
   const mediaPlan = mediaPlanFromRecipeMetadata(
     revision.recipe_metadata_json,
     snapshot,
@@ -90,6 +94,7 @@ export default async function RecipeStudioPage({
         ]}
         fallback={`/dashboard/requests/${requestId}`}
       />
+      <ClientWorkflowNav requestId={requestId} revisionId={revisionId} active="design" />
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">AI-assisted design</p>
@@ -140,9 +145,9 @@ export default async function RecipeStudioPage({
         </div>
         <div className="showroom-editing-grid">
           {[
-            ["settings", "Showroom settings", "Business identity, logo, hero, contact, live status, and page details."],
+            ["settings", "Design foundation", "Token system, custom palette, product-detail presentation, and revision summary."],
             ["design", "Layout and style", "Components, colors, section surfaces, image treatment, and motion."],
-            ["content", "Page content", "Headlines, story, process, calls to action, and section media."],
+            ["content", "Page content", "Headlines, the combined story and process chapter, calls to action, and section media."],
             ["offerings", "Offerings", "Categories, products, capabilities, prices, images, videos, and details."],
           ].map(([area, label, description]) => (
             <Link className="showroom-editing-link" href={`/dashboard/requests/${requestId}/revisions/${revisionId}/edit?area=${area}`} key={area}>

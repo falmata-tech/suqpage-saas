@@ -58,19 +58,20 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 
 ## Now — make the controlled pilot trustworthy
 
-### Build the mobile daily Bazaar map
+### Operate the mobile marketplace and Daily Featured program
 
-- Outcome: make the Daily Bazaar a real public discovery surface centered on a
-  mobile-friendly visual floor, stable booth placement, booth previews, and a
-  complete Bazaar List fallback that always leads visitors into permanent
+- Outcome: keep the Market as MirtPage's primary public application, with a
+  mobile-friendly geographic map, grouped City Markets, showroom inspectors,
+  and a complete paginated List view that always leads visitors into permanent
   `/@handle` showrooms.
-- Controlling specs: `FE-010`, `BE-011`, and `DEP-010`.
-- Current delivery mode: the Bazaar map is promoted ahead of the broader public
-  homepage redesign. The route and data foundation ship first; homepage
-  promotion follows only after mobile browser evidence passes.
-- Sequence: add the active Bazaar and booth contract, build `/bazaar` as the
-  first surface, prove 320/390-pixel map/list usability, then integrate the
-  homepage callout and larger All Showrooms work.
+- Controlling specs: `FE-021`, `FE-030`, `FE-033`, `FE-036`, `BE-023`, and
+  `BE-029`.
+- Current delivery mode: `/` owns the geographic Market, `/featured` owns the
+  seven-day Daily Featured program, and both share one responsive application
+  shell. Retired event routes own no page or redirect.
+- Sequence: protect public eligibility and tenant boundaries, keep map/List/City
+  projections server-bounded, verify 320/390-pixel usability, then admit each
+  release through accessibility, acceptance, PostgreSQL, and production gates.
 - Non-goals: checkout marketplace behavior, paid sponsorship auctions, separate
   booth pages, WebGL/3D/game-engine map rendering, and replacing permanent
   showroom identity.

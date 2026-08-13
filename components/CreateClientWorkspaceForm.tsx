@@ -15,7 +15,7 @@ export default function CreateClientWorkspaceForm() {
     <div className="field"><label htmlFor="workspace-client-email">Client email</label><input id="workspace-client-email" name="email" type="email" required maxLength={160}/></div>
     <div className="field full"><small>This creates a private draft workspace, not a request or public showroom. The client submits detailed instructions after accepting the invitation.</small></div>
     {state.error ? <p className="error field full" role="alert">{state.error}</p> : null}
-    {state.invitationUrl ? <div className="notice field full" role="status"><strong>Client workspace created.</strong><p>This 72-hour link is shown once. Copy it now and deliver it securely.</p><input aria-label="Single-use client workspace invitation" readOnly value={state.invitationUrl} onFocus={(event)=>event.currentTarget.select()}/><small>The draft remains private until a client-approved showroom revision is published.</small></div> : null}
-    <div className="field full"><button className="btn brand" disabled={pending}>{pending ? "Creating workspace…" : "Create client workspace and invitation"}</button></div>
+    {state.invitationUrl ? <div className="notice field full" role="status"><strong>Business workspace created.</strong><p>This 72-hour link is shown once. Copy it now and deliver it securely.</p><input aria-label="Single-use business access invitation" readOnly value={state.invitationUrl} onFocus={(event)=>event.currentTarget.select()}/><small>The draft remains private until an approved showroom revision is published.</small></div> : null}
+    <div className="field full"><button className="btn brand" disabled={pending}>{pending ? "Creating workspace…" : "Create business and invitation"}</button></div>
   </form>;
 }

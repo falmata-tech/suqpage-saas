@@ -68,7 +68,7 @@ creative bank without rewriting retained revisions or widening trusted input.
   repeated generic compositions, one-hue pages, abrupt unintended image blocks,
   unreadable overlay headers, unbounded product media, dishonest component
   anatomy, or a dense manufacturer catalog rendered as a sparse lifestyle page.
-- Every benchmark uses the same canonical hero/about/process/products/inquiry
+- Every benchmark uses the same canonical hero/story-and-process/products/inquiry
   order. Admission rejects an extra trust/information chapter, changed order,
   or adjacent filler sections. Palette and surface choices are free within the
   safe semantic contract; monotony and weak color pacing are review findings,
@@ -188,9 +188,11 @@ catalog anatomies, six hero treatments, and no exact component repetition
 inside a showroom.
 
 The YouTube normalizer and request-scoped persistence adapter are implemented
-without network access. Admission is independently disabled by default through
-`MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=0`; stored exports expose only opaque asset
-keys. CSP enablement and browser rendering are covered by the production-like
+without network access. Admission is enabled in the documented launch
+configuration and retains `MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=0` as an
+independent operational kill switch; stored AI exports expose only opaque asset
+keys. Saved revision fields use normalized `youtube:<provider-id>` references.
+CSP enablement and browser rendering are covered by the production-like
 acceptance scenario for the privacy-enhanced `youtube-nocookie.com` iframe.
 The additive revision-v4 domain document is now validated independently of the
 retained v1-v3 reader and is included in local/release gates. The reset-only

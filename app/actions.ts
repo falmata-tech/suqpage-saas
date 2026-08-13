@@ -84,13 +84,10 @@ export async function updateBusinessAction(formData:FormData){
   const existing=(await runtimeBusinessById(businessId))!;
   try{
     const logoPath=await saveUploadedImage(formData.get("logo"),existing.logo_path,"logo");
-    const heroImage=await saveUploadedImage(formData.get("heroImage"),existing.hero_image_path,"hero");
     const favicon=await saveUploadedImage(formData.get("favicon"),existing.favicon_path,"favicon");
-    const processVideoUrl=text(formData,"processVideoUrl",500);
-    const processVideoRef=processVideoUrl?normalizeControlledYouTubeUrl(processVideoUrl).managedRef:"";
     const live=validateLiveSettings({isLive:formData.get("isLive"),platform:text(formData,"livePlatform",30),url:text(formData,"liveUrl",500)});
-    await runtimeRun(`UPDATE businesses SET name=?,tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,process_video_ref=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`,[
-      text(formData,"name",100),text(formData,"tagline",180),text(formData,"description",1200),logoPath,text(formData,"heroTitle",180),text(formData,"heroSubtitle",300),heroImage,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),processVideoRef,live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
+    await runtimeRun(`UPDATE businesses SET name=?,logo_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`,[
+      text(formData,"name",100),logoPath,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
     ]);
     await audit("business.updated",{userId:user.id,businessId});
   }catch(error){go("/dashboard/settings",{business:businessId,error:error instanceof Error?error.message:"Could not save settings."});}
@@ -100,22 +97,26 @@ export async function updateBusinessAction(formData:FormData){
 
 export async function adminUpdateBusinessAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
-  const businessId=int(formData,"businessId"),status=text(formData,"status",20),business=await runtimeBusinessById(businessId);
-  if(!business||business.status==="draft"||!operationalStatuses.has(status))go("/dashboard/admin/businesses",{error:"Only an established showroom can be suspended or restored."});
+  const businessId=int(formData,"businessId"),returnBusiness=int(formData,"returnBusiness"),status=text(formData,"status",20),business=await runtimeBusinessById(businessId);
+  const returnPath=returnBusiness===businessId?"/dashboard":"/dashboard/admin/businesses";
+  const returnParams=returnBusiness===businessId?{business:businessId,error:"Only an established showroom can be suspended or restored."}:{error:"Only an established showroom can be suspended or restored."};
+  if(!business||business.status==="draft"||!operationalStatuses.has(status))go(returnPath,returnParams);
   await runtimeRun("UPDATE businesses SET status=? WHERE id=?",[status,businessId]);
   await audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});
-  revalidatePath("/");revalidatePath("/dashboard/admin/businesses");go("/dashboard/admin/businesses",{saved:1});
+  revalidatePath("/");revalidatePath("/dashboard/admin/businesses");revalidatePath("/dashboard");
+  if(returnBusiness===businessId)go("/dashboard",{business:businessId,saved:"status"});
+  go("/dashboard/admin/businesses",{saved:1});
 }
 
 export async function adminResetClientPasswordAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
-  const userId=int(formData,"userId"),password=String(formData.get("temporaryPassword")||"");
+  const userId=int(formData,"userId"),businessId=int(formData,"businessId"),password=String(formData.get("temporaryPassword")||"");
   const target=await runtimeGet<{id:number;business_id:number|null}>("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'",[userId]);
-  if(!target||!isStrongPassword(password))go("/dashboard/admin/clients",{error:"Choose a client and use a 12+ character password with upper-case, lower-case, and a number."});
+  if(!target||target.business_id!==businessId||!isStrongPassword(password))go("/dashboard/settings",{business:businessId,accessError:"Choose the authorized owner and use a 12+ character password with upper-case, lower-case, and a number."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?",[passwordHash,userId]);
   await revokeAllUserSessions(userId);await audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
-  revalidatePath("/dashboard/admin/clients");go("/dashboard/admin/clients",{saved:"password"});
+  revalidatePath("/dashboard/settings");go("/dashboard/settings",{business:businessId,saved:"password"});
 }
 
 export async function createCategoryAction(formData:FormData){

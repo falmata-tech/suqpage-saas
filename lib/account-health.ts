@@ -32,7 +32,7 @@ export type SubscriptionView = {
 
 export type ShowroomInsights = {
   totalVisitors: number;
-  expoVisitors: number;
+  featuredVisitors: number;
   directoryVisitors: number;
   directVisitors: number;
   last30Days: number;
@@ -237,14 +237,16 @@ export async function getShowroomInsights(user: SessionUser, businessId: number,
   }
   const values = (await runtimeGet<{
     total: number;
-    expo: number | null;
+    featured: number | null;
     directory: number | null;
     direct: number | null;
     recent: number | null;
   }>(`
     SELECT
       COUNT(*) total,
-      SUM(CASE WHEN source='expo' THEN 1 ELSE 0 END) expo,
+      -- The retained SQL value predates Daily Featured. Keep it adapter-local
+      -- until a backup-backed constrained-table migration can replace it.
+      SUM(CASE WHEN source='expo' THEN 1 ELSE 0 END) featured,
       SUM(CASE WHEN source='directory' THEN 1 ELSE 0 END) directory,
       SUM(CASE WHEN source='direct' THEN 1 ELSE 0 END) direct,
       SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) recent
@@ -252,7 +254,7 @@ export async function getShowroomInsights(user: SessionUser, businessId: number,
   `, [now - 30 * DAY_MS, businessId]))!;
   return {
     totalVisitors: values.total,
-    expoVisitors: values.expo || 0,
+    featuredVisitors: values.featured || 0,
     directoryVisitors: values.directory || 0,
     directVisitors: values.direct || 0,
     last30Days: values.recent || 0,
@@ -311,8 +313,8 @@ export async function recordShowroomVisit(input: {
   now?: number;
 }) {
   const handle = cleanText(input.handle, 80).replace(/^@/, "").toLowerCase();
-  const source = ["expo", "directory"].includes(String(input.source))
-    ? String(input.source) as "expo" | "directory"
+  const source = ["featured", "directory"].includes(String(input.source))
+    ? String(input.source) as "featured" | "directory"
     : "direct";
   const now = input.now ?? Date.now();
   const business = await runtimeGet<{ id: number }>(`
@@ -323,11 +325,9 @@ export async function recordShowroomVisit(input: {
   const date = new Date(now).toISOString().slice(0, 10);
   const visitorHash = hashPrivateValue(`${input.visitorToken}|${date}`);
   const occurrenceId = Number.parseInt(String(input.occurrenceId ?? ""), 10);
-  const validOccurrenceId = source === "expo" && Number.isInteger(occurrenceId) &&
-    await runtimeGet("SELECT 1 FROM bazaar_occurrences WHERE id=?", [occurrenceId])
-    ? occurrenceId
-    : null;
+  const validOccurrenceId = null;
   const hubKey = cleanText(input.hubKey, 80).toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const storedSource = source === "featured" ? "expo" : source;
   const result = await runtimeRun(`
     INSERT INTO showroom_visits(
       business_id,visitor_hash,visit_date,source,expo_occurrence_id,expo_hub_key,created_at
@@ -336,9 +336,9 @@ export async function recordShowroomVisit(input: {
     business.id,
     visitorHash,
     date,
-    source,
+    storedSource,
     validOccurrenceId,
-    source === "expo" ? hubKey : "",
+    source === "featured" ? hubKey : "",
     now,
   ]);
   return { recorded: result.changes > 0 };

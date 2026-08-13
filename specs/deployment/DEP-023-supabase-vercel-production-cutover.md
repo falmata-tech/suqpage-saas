@@ -2,9 +2,9 @@
 id: DEP-023
 title: Supabase and Vercel production cutover
 status: in_progress
-related: [BE-027, ADR-0013]
+related: [BE-027, BE-028, BE-029, FE-031, FE-032, FE-033, FE-034, FE-037, DEP-024, DEP-025, ADR-0013]
 owners: [deployment, operations, security, backend]
-last_updated: 2026-08-05
+last_updated: 2026-08-10
 change_level: L4
 ---
 
@@ -66,15 +66,20 @@ a tested rollback before public DNS changes.
 6. After authority changes, SQLite is retained read-only for rollback and no
    dual writes occur.
 7. A provider-issued temporary migration login may assume an explicitly named,
-   identifier-safe database owner role only inside the guarded copy transaction;
-   the role is never inferred from untrusted input or retained as a runtime secret.
-   The linked-project wrapper parses that credential in memory and never prints
-   or persists it. Provider statement timeout is disabled only inside this
-   guarded copy transaction; runtime statement timeouts remain bounded.
+   identifier-safe database owner role only inside the guarded copy or additive
+   migration transaction; the role is never inferred from untrusted input or
+   retained as a runtime secret. The linked-project wrapper parses that
+   credential in memory and never prints or persists it. Provider statement
+   timeout is disabled only inside the guarded copy transaction; runtime
+   statement timeouts remain bounded.
 8. Production uses a dedicated `mirtpage_runtime` login with schema usage,
    application-table DML, and sequence use rather than the database owner. Its
    generated credential is verified through the transaction pooler and retained
    only in ignored mode-0600 operator storage and the deployment secret store.
+9. PostgreSQL schema migration 31 reconciles any pre-existing overlapping
+   current showroom projects, records the supersession events, and installs the
+   partial unique business guard before `MIRTPAGE_DATABASE_DRIVER=postgres` is
+   enabled for this release. Production preflight fails closed if it is absent.
 
 ## Scenarios
 
@@ -94,6 +99,11 @@ Scenario: Migration reconciliation differs
   WHEN any required count, fingerprint, constraint, sequence, or media check differs
   THEN PostgreSQL does not become authoritative
   AND the discrepancy is corrected or the target is recreated from the retained source
+
+Scenario: Current-project guard is absent
+  GIVEN PostgreSQL schema migration 31 has not been recorded
+  WHEN production preflight evaluates the Postgres runtime
+  THEN startup fails closed before authoritative workflow traffic is accepted
 
 Scenario: Production smoke checks pass
   GIVEN the exact release runs on Vercel against reconciled PostgreSQL and private Storage

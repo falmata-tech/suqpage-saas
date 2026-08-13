@@ -87,7 +87,7 @@ export function listAssignedRequests(userId: number, limit = 100): OperationsReq
 
 export function listRequestsPage(
   user: SessionUser,
-  input: { page?: unknown; q?: unknown; status?: unknown },
+  input: { page?: unknown; q?: unknown; status?: unknown; business?: unknown; project?: unknown },
 ): PageResult<OperationsRequest> {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const statuses = [...REQUEST_STATUSES];
@@ -108,9 +108,19 @@ export function listRequestsPage(
   } else {
     return pageResult([], 0, request);
   }
+  const businessId = Number.parseInt(String(input.business ?? ""), 10);
+  if (Number.isInteger(businessId) && businessId > 0 && user.access_role !== "client") {
+    where += " AND r.business_id=?";
+    params.push(businessId);
+  }
   if (status) {
     where += " AND r.status=?";
     params.push(status);
+  }
+  if (input.project === "current") {
+    where += " AND r.status IN ('submitted','under_review','needs_information','approved_for_work','in_progress','client_review','client_approved')";
+  } else if (input.project === "history") {
+    where += " AND r.status IN ('published','completed','rejected','cancelled')";
   }
   if (request.search) {
     const pattern = likePattern(request.search);

@@ -121,6 +121,15 @@ option, settings, design, deletion, and full-showroom work.
 - Client and existing-client manager intake ignore any submitted request type
   and derive onboarding only for a never-published draft business; active,
   suspended, previously published, or versioned businesses derive change.
+- A partial unique database index permits at most one business-bound request in
+  `submitted`, `under_review`, `needs_information`, `approved_for_work`,
+  `in_progress`, `client_review`, or `client_approved`. Application checks give
+  callers the existing current project; the database index remains the final
+  authority under concurrent SQLite or PostgreSQL writes.
+- The additive migration retains all historical rows, keeps the newest active
+  request per business as current, marks older conflicting active rows
+  `cancelled`, and appends a non-sensitive `project_superseded` audit event that
+  identifies the retained request by safe numeric identifier.
 - Clarifications are 1–2,000 characters, stored as immutable request events,
   tenant/assignment authorized, and safely attributed. Staff questions move
   active work to `needs_information`; a client response returns it to
@@ -200,6 +209,18 @@ Scenario: Client cannot forge request classification
   WHEN the client submits a browser field claiming the request is a change
   THEN the stored request type is onboarding
   AND a live business submitted as onboarding is stored as change
+
+Scenario: Concurrent project creation is serialized
+  GIVEN a business has no current showroom project
+  WHEN two authorized actors concurrently start showroom work
+  THEN exactly one active service request is committed for that business
+  AND the other actor is directed to that current project
+
+Scenario: Existing conflicting active rows are reconciled additively
+  GIVEN a pre-migration business has more than one active service request
+  WHEN the one-current-project migration runs
+  THEN the newest request remains active
+  AND older rows remain in history as cancelled with an audit event
 
 Scenario: Legacy live mutation is denied after cutover
   GIVEN any migrated client, team member, operations manager, or administrator
@@ -295,6 +316,7 @@ contents, invitation tokens, or customer data.
 | Operations inquiry authority and client read-only isolation | regression | `scripts/test-security.ts`, `tests/acceptance/app.spec.ts` |
 | Request-free invitations and inferred request type | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
 | Clarification authorization and immutability | integration/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
+| One active project per business and additive conflict reconciliation | migration/integration/PostgreSQL | `scripts/test-requests.ts`, `scripts/test-postgres-runtime.ts` |
 
 ## Rollout and rollback
 

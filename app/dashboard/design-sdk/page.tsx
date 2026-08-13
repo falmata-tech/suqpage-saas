@@ -1,54 +1,5 @@
-import DashboardShell from "@/components/DashboardShell";
-import { requireUser } from "@/lib/auth";
-import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
+import { redirect } from "next/navigation";
 
-export default async function DesignSdk({
-  searchParams,
-}: {
-  searchParams: Promise<{ business?: string }>;
-}) {
-  const user = await requireUser();
-  const params = await searchParams;
-  const business = await resolveBusiness(user, params.business);
-  if (!business) return null;
-
-  const sample = `export default function CustomShowroom({ catalog }: DesignProps) {
-  return (
-    <ShowroomProvider catalog={catalog}>
-      {/* Replace every visual section. Keep smart components connected. */}
-      <YourCustomHero business={catalog.business} />
-      <YourProductGrid products={catalog.products}>
-        {(product) => <SmartAddButton product={product} />}
-      </YourProductGrid>
-      <SmartInquiryDrawer />
-    </ShowroomProvider>
-  );
-}`;
-
-  return (
-    <DashboardShell user={user} business={business}>
-      <div className="dashboard-head">
-        <div>
-          <h1>AI-ready design SDK</h1>
-          <p>Give a designer or AI the template, sample data and strict integration contract.</p>
-        </div>
-      </div>
-      <section className="panel">
-        <h2>Architecture rule</h2>
-        <div className="notice">
-          <strong>Design owns presentation. MirtPage owns data and workflow.</strong> Custom pages never write directly to the database or duplicate inquiry logic.
-        </div>
-        <h3>Stable integration example</h3>
-        <pre className="sdk-code">{sample}</pre>
-        <h3>Required boundaries</h3>
-        <ul>
-          <li>Do not hard-code products, categories, options, stock or business contacts.</li>
-          <li>Do not translate merchant-entered product names or option values.</li>
-          <li>Keep inquiry submission behind shared MirtPage components.</li>
-          <li>Return a design manifest and preserve the supplied TypeScript props.</li>
-        </ul>
-        <p>The complete portable template is included in the ZIP under <code>/showroom-sdk</code>.</p>
-      </section>
-    </DashboardShell>
-  );
+export default function LegacyDesignSdkRedirect() {
+  redirect("/dashboard/design-bank");
 }

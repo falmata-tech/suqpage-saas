@@ -26,8 +26,7 @@ export function canViewBusiness(user: SessionUser, businessId: number, assigned 
 }
 
 export function canManageBusiness(user: SessionUser, businessId: number, _assigned = false) {
-  void user; void businessId;
-  return false;
+  return businessId > 0 && hasCapability(user, "platform:admin");
 }
 
 export function canMaintainBasicProducts(

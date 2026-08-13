@@ -4,7 +4,7 @@ MirtPage supports SQLite for local development/rollback and managed PostgreSQL
 for the production runtime. Media can use a persistent filesystem in SQLite
 mode or the implemented private Supabase Storage adapter. PostgreSQL mode does
 not use a local database file and requires Supabase Storage in production.
-Support polling, account entitlement, visit attribution, Expo allocation, and
+Support polling, account entitlement, visit attribution, Daily Featured allocation, and
 all tenant workflows use the same authoritative database.
 
 ## Current scale controls
@@ -14,7 +14,7 @@ all tenant workflows use the same authoritative database.
 - Support thread history is bounded to 100 messages and refreshes every five
   seconds only while open.
 - Showroom visits deduplicate by business, opaque daily visitor hash, and source.
-- Expo assignments are calculated once per changed occurrence membership and
+- Daily Featured assignments are calculated once per changed occurrence membership and
   persisted; one venue floor is shown at a time.
 - SQLite uses WAL, foreign keys, a five-second busy timeout, integrity checks,
   persistent volumes, and tested backup/restore commands.

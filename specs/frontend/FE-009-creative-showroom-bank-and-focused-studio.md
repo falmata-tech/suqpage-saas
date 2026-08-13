@@ -2,7 +2,7 @@
 id: FE-009
 title: Creative showroom bank and focused v4 studio
 status: in_progress
-related: [FE-004, FE-005, FE-006, FE-007, FE-014, FE-025, FE-029, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, BE-024, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, DEP-021, ADR-0005, ADR-0007, ADR-0008, ADR-0012]
+related: [FE-004, FE-005, FE-006, FE-007, FE-014, FE-025, FE-029, FE-031, BE-005, BE-006, BE-007, BE-008, BE-010, BE-013, BE-024, BE-028, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, DEP-021, ADR-0005, ADR-0007, ADR-0008, ADR-0012]
 owners: [product, frontend, design]
 last_updated: 2026-07-29
 change_level: L3
@@ -50,13 +50,14 @@ parity with the pixels rendered by that choice.
 - Free provisional written content in private recipes without mandatory source
   references. Staff and clients review and correct the candidate before the
   unchanged approval/publication path can make it public.
-- Twenty-eight fictional Expo showrooms used as a cross-content visual
+- Twenty-eight fictional Daily Featured showrooms used as a cross-content visual
   evaluation, including ten retained deep benchmarks and 18 additional
   business-specific authored briefs spanning sparse makers and dense
   manufacturer/RFQ catalogs.
 - One canonical public-showroom information architecture for normal recipes:
-  header, hero, about/story, process, products, inquiry CTA, and footer. Header
-  and footer are page chrome; the five content sections each have one clear job.
+  header, hero, one combined story-and-process chapter, products, inquiry CTA,
+  and footer. Header and footer are page chrome; the four content sections each
+  have one clear job.
 
 ### Non-goals
 
@@ -166,7 +167,7 @@ parity with the pixels rendered by that choice.
   describe composition and pacing rather than prescribing an industry or one
   exact component sequence.
 - Normal recipes always use this exact semantic order: one hero block, one
-  about/story block, one process/highlights block, one catalog, and one inquiry
+  combined story-and-process highlights block, one catalog, and one inquiry
   CTA, surrounded by one header and one footer. Templates and AI choices vary
   anatomy, alignment, density, typography, media treatment, and component
   variant without adding filler sections or changing that order. Standalone
@@ -179,11 +180,10 @@ parity with the pixels rendered by that choice.
 - Benchmark showrooms exercise every admitted header and footer anatomy. Header
   and footer variation must be visible in layout, spacing, hierarchy, and mobile
   behavior rather than a one-pixel rule or color-only difference.
-- The adjacent about and process sections use opposite heading/body placement
-  at desktop widths and reset to semantic reading order on phones. When both
-  sections contain media, their media/text axes alternate. Their current
-  surface roles are `surface` then `secondary-soft`, while the hero uses
-  `accent-soft` so both palette families appear before the strong close.
+- The combined chapter uses a distinct heading/body composition at desktop
+  widths and resets to semantic reading order on phones. Its current surface
+  role is `secondary-soft`, while the hero uses `accent-soft` so both palette
+  families appear before the strong close.
 - Repeating plaid, pinstripe, graph-paper, and center-divider backgrounds are
   prohibited in normal showrooms. Accent color may identify labels, controls,
   a small edge treatment, or the final CTA; it cannot paint repeated decorative
@@ -278,13 +278,13 @@ Scenario: AI composes a coherent page instead of choosing isolated sections
 Scenario: Every normal showroom has a purposeful fixed spine
   GIVEN any valid normal showroom recipe
   WHEN its design sections are validated
-  THEN the semantic order is header, hero, about, process, products, inquiry CTA, footer
+  THEN the semantic order is header, hero, story and process, products, inquiry CTA, footer
   AND no standalone trust, information, navigation, or decorative filler section is present
 
 Scenario: Neutral layers and paired emphasis colors render
   GIVEN any admitted semantic design system
-  WHEN about, process, products, inquiry CTA, and footer render in sequence
-  THEN the hero and process introduce accent-soft and secondary-soft around neutral story and catalog layers
+  WHEN the combined chapter, products, inquiry CTA, and footer render in sequence
+  THEN the hero and combined chapter introduce accent-soft and secondary-soft around the neutral catalog layer
   AND strong/onStrong plus inverse/onInverse meet contrast against their exact backgrounds
 
 Scenario: AI chooses a header and footer from honest anatomy
@@ -293,14 +293,14 @@ Scenario: AI chooses a header and footer from honest anatomy
   THEN every choice has a distinct visual description, layout family, and suitability boundary
   AND no choice is recommended from an industry or business-archetype label
 
-Scenario: Adjacent story and process chapters remain distinct
-  GIVEN a normal showroom has story followed by process
+Scenario: The combined story and process chapter remains distinct
+  GIVEN a normal showroom has one combined chapter
   WHEN it renders at desktop width
-  THEN heading and body placement alternate across the two sections
-  AND surface then soft provides a neutral contrast between their purposes
-  AND no repeating stripe, plaid, graph, or center-divider decoration joins them visually
+  THEN its heading, body, process steps, image, and optional video form one coherent section
+  AND its surface distinguishes it from the hero and catalog
+  AND no repeating stripe, plaid, graph, or center-divider decoration joins sections visually
   WHEN it renders at phone width
-  THEN both chapters return to heading-first reading order without horizontal overflow
+  THEN the chapter returns to heading-first reading order without horizontal overflow
 
 Scenario: A design-system value is exported to the AI
   GIVEN an admitted design system declares typography, spacing, layout, and media values

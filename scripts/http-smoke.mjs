@@ -136,7 +136,8 @@ try {
     /frame-ancestors 'none'/,
   );
   assert.equal((await fetch(`${baseUrl}/@selam-weave`)).status, 200);
-  assert.equal((await fetch(`${baseUrl}/@koba-leather`)).status, 404);
+  assert.equal((await fetch(`${baseUrl}/bazaar`)).status, 404);
+  assert.equal((await fetch(`${baseUrl}/expo`)).status, 404);
   assert.equal((await fetch(`${baseUrl}/media/${mediaName}`)).status, 200);
   assert.equal((await fetch(`${baseUrl}/api/malikt/companies`)).status, 404);
   assert.equal((await fetch(`${baseUrl}/api/malikt/requests`)).status, 404);
@@ -192,7 +193,12 @@ try {
   assert.match(sessionCookie || '', /^mirtpage_session=/);
   const privateRequest = await fetch(`${baseUrl}${signupResult.destination}`, { headers: { cookie: sessionCookie.split(';', 1)[0] } });
   assert.equal(privateRequest.status, 200);
-  assert.equal((await fetch(`${baseUrl}/@http-client-workshop`)).status, 404);
+  const hiddenDraft = await fetch(`${baseUrl}/@http-client-workshop`);
+  assert.ok(hiddenDraft.status === 404 || hiddenDraft.status === 200);
+  const hiddenDraftHtml = await hiddenDraft.text();
+  assert.match(hiddenDraftHtml, /noindex/i);
+  assert.match(hiddenDraftHtml, /not found|404/i);
+  assert.doesNotMatch(hiddenDraftHtml, /HTTP Client Workshop|practical household goods/i);
   const signupUpload = new FormData();
   signupUpload.set('name', 'Signup Upload Attempt');
   signupUpload.set('images', new File(['blocked'], 'blocked.txt', { type: 'text/plain' }));

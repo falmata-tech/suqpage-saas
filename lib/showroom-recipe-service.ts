@@ -51,6 +51,7 @@ import showroomComponentBankSchema from "../showroom-sdk/component-bank-v2.schem
 import showroomRecipeSchema from "../showroom-sdk/showroom-recipe.schema.json";
 import showroomDesignSystemSchema from "../showroom-sdk/showroom-design-system.schema.json";
 import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "./product-detail-patterns";
+import { withAuthoritativeBusinessSettings } from "./revision-domain";
 
 export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
   brief: "mirtpage.recipe-brief@1",
@@ -151,6 +152,11 @@ async function assetMaps(
     string,
     { kind: "image" | "video"; width?: number; height?: number }
   >();
+  const removeDescriptor = (key: string) => {
+    const index = descriptors.findIndex((descriptor) => descriptor.key === key);
+    if (index >= 0) descriptors.splice(index, 1);
+    opaqueToActual.delete(key);
+  };
   const admitted = new Map(
     (
       await runtimeAll<{
@@ -209,6 +215,8 @@ async function assetMaps(
   for (const attachment of attachments || []) {
     const ref = `request-attachment:${attachment.id}`;
     const key = admitted.get(attachment.id) || opaque("asset", requestId, ref);
+    const existingKey = actualToOpaque.get(ref);
+    if (existingKey && existingKey !== key) removeDescriptor(existingKey);
     actualToOpaque.set(ref, key);
     opaqueToActual.set(key, ref);
     descriptors.push({
@@ -236,6 +244,8 @@ async function assetMaps(
   );
   for (const provider of providers) {
     const ref = `youtube:${provider.provider_id}`;
+    const existingKey = actualToOpaque.get(ref);
+    if (existingKey && existingKey !== provider.asset_key) removeDescriptor(existingKey);
     actualToOpaque.set(ref, provider.asset_key);
     opaqueToActual.set(provider.asset_key, ref);
     descriptors.push({
@@ -379,6 +389,7 @@ export async function admitRecipeYouTube(
         requestId: state.request.id,
         revisionId,
         assetKey: existing.asset_key,
+        managedRef: `youtube:${providerId}`,
         duplicate: true,
       };
     }
@@ -390,7 +401,7 @@ export async function admitRecipeYouTube(
         ) VALUES(?,?,'youtube',?,?,1,?)`,
       [state.request.id, assetKey, label, providerId, user.id],
     );
-    return { requestId: state.request.id, revisionId, assetKey, duplicate: false };
+    return { requestId: state.request.id, revisionId, assetKey, managedRef: `youtube:${providerId}`, duplicate: false };
   });
 }
 
@@ -665,9 +676,12 @@ export async function buildShowroomRecipeBrief(
   revisionId: number,
 ) {
   const state = await workspace(user, revisionId);
-  const snapshot = requireRevisionSnapshotV4(
-    state.revision.snapshot_json,
-    SHOWROOM_COMPONENT_BANK_LATEST,
+  const snapshot = withAuthoritativeBusinessSettings(
+    requireRevisionSnapshotV4(
+      state.revision.snapshot_json,
+      SHOWROOM_COMPONENT_BANK_LATEST,
+    ),
+    state.business,
   );
   const assets = await assetMaps(state.request.id, snapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, snapshot);
@@ -735,8 +749,20 @@ export async function buildShowroomRecipeBrief(
     mediaPlan: portableMediaPlan,
   };
   const example = syntheticExampleRecipe();
+  const authoringComponents = SHOWROOM_COMPONENT_BANK_LATEST.components
+    .filter((component) => component.id !== "content.controlled-film@1")
+    .map((component) => ({
+      ...component,
+      acceptedContentTypes: component.acceptedContentTypes.filter(
+        (type) => type !== "story" && type !== "video",
+      ),
+    }));
+  const authoringComponentBank = {
+    ...SHOWROOM_COMPONENT_BANK_LATEST,
+    components: authoringComponents,
+  };
   const componentById = new Map(
-    SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
+    authoringComponents.map((component) => [
       component.id,
       component,
     ]),
@@ -744,14 +770,14 @@ export async function buildShowroomRecipeBrief(
   const blockAssignments = portableSnapshot.contentBlocks.blocks.map((block) => ({
     blockKey: block.key,
     blockType: block.type,
-    compatibleComponents: SHOWROOM_COMPONENT_BANK_LATEST.components
-      .filter((component) => component.acceptedContentTypes.includes(block.type))
+    compatibleComponents: authoringComponents
+      .filter((component) =>
+        (component.acceptedContentTypes as readonly string[]).includes(block.type),
+      )
       .map((component) => component.id),
   }));
   const allowedMediaDestinations = [
-    { ownerType: "business", ownerKey: "business", slotKey: "logo", label: "Business logo" },
     { ownerType: "business", ownerKey: "business", slotKey: "hero_image", label: "Business hero image" },
-    { ownerType: "business", ownerKey: "business", slotKey: "favicon", label: "Browser icon" },
     ...portableSnapshot.products.map((product) => ({
       ownerType: "product",
       ownerKey: product.key,
@@ -806,7 +832,7 @@ export async function buildShowroomRecipeBrief(
         designSystem: showroomDesignSystemSchema,
         recipe: showroomRecipeSchema,
       },
-      componentBank: SHOWROOM_COMPONENT_BANK_LATEST,
+      componentBank: authoringComponentBank,
       designSystems: Object.values(SHOWROOM_DESIGN_SYSTEMS),
       compositionGuidance: {
         designProcess: SHOWROOM_DESIGN_PROCESS,
@@ -822,8 +848,7 @@ export async function buildShowroomRecipeBrief(
           sectionOrder: [
             "header",
             "hero",
-            "about_story",
-            "process",
+            "story_and_process",
             "products",
             "inquiry_call_to_action",
             "footer",
@@ -835,7 +860,7 @@ export async function buildShowroomRecipeBrief(
         mediaTreatments: SHOWROOM_MEDIA_TREATMENTS,
         productDetailPatterns: PRODUCT_DETAIL_PATTERN_DEFINITIONS,
         components: Object.fromEntries(
-          SHOWROOM_COMPONENT_BANK_LATEST.components.map((component) => [
+          authoringComponents.map((component) => [
             component.id,
             guidanceForComponent(component),
           ]),
@@ -849,8 +874,9 @@ export async function buildShowroomRecipeBrief(
       currentRecipe,
       instructions: [
         "Treat each @version in contractManifest as belonging only to its named contract. Return recipe@1 containing content@1, content-blocks@1, and design@2; do not normalize or align independent version numbers.",
-        "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, or component choices. Its seven-role section order is canonical and must be preserved. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
+        "completeExample is a synthetic structural reference only. Never copy its business text, counts, stable keys, source/media keys, token pack, template, or component choices. Its six-role section order is canonical and must be preserved. Build the actual recipe from currentContent, sourceFacts, mediaManifest, blockAssignmentChecklist, and allowedMediaDestinations.",
         "Return one complete replacement recipe, never a partial patch.",
+        "Business name, logoRef, contactEmail, whatsapp, telegram, tiktok, isLive, livePlatform, liveUrl, siteTitle, siteDescription, and faviconRef are authoritative Business details. Preserve their currentContent values exactly; recipe import cannot replace them. Hero copy, heroImageRef, processVideoRef, products, section content, and visual design remain revision-owned.",
         "You may freely write provisional business, product, and section copy for this private candidate. provenance is optional review metadata and may be an empty array. When you do cite a source_fact, use only source keys present in this brief.",
         "Do not add stock, inventory, checkout behavior, code, HTML, CSS, iframe markup, remote image URLs, or database IDs. Optional priceMinor is informational ETB context only.",
         "Use questions and warnings as non-blocking notes for staff review. They do not prevent private import.",
@@ -861,14 +887,14 @@ export async function buildShowroomRecipeBrief(
         "You may draft capacity, minimum-order, lead-time, availability, and marketing copy when the intake is incomplete, but state it provisionally and flag consequential assumptions in warnings for human review.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",
         "Follow compositionGuidance.designProcess in order. Choose objective content needs and commerce shape, then one page template, then one admitted design foundation and compatible section anatomy before choosing component IDs.",
-        "Use compositionGuidance.canonicalNormalShowroom exactly for section roles and order: header, hero, about/story, process, products, inquiry call-to-action, footer. Do not add standalone navigation, trust, information, video, or decorative filler sections. Choose any admitted surfaceRole per section; no exact color-role sequence is required.",
-        "Place currentContent.business.processVideoRef only in the canonical Process experience. Every compatible highlights component presents that approved business video automatically when it exists. Do not create a separate video content block or choose content.controlled-film@1 merely to make the process video visible.",
+        "Use compositionGuidance.canonicalNormalShowroom exactly for section roles and order: header, hero, one combined story-and-process chapter, products, inquiry call-to-action, footer. Do not add a standalone story, process, navigation, trust, information, video, or decorative filler section. Choose any admitted surfaceRole per section; no exact color-role sequence is required.",
+        "Create exactly one highlights content block for the combined story-and-process chapter. Its body provides business context, its items explain the process, and its optional story_image supports the chapter. currentContent.business.processVideoRef appears there automatically when approved. Do not create a story or video content block or choose content.controlled-film@1 for a new recipe.",
         "For unrestricted colors, keep tokenPack as the typography, spacing, geometry, density, and media foundation and add design.customPalette with every color role from the design schema. Use six-digit hex values and readable foreground/background pairs. Omit customPalette only when an admitted palette already fits.",
         "Choose mediaIntegration from compositionGuidance.mediaTreatments by its described visual result and prerequisites, not by component or industry names. natural is the neutral default; surface_blend is the homepage-like full-section treatment; ambient_overlay is legacy-only. Use signature treatments deliberately; several are allowed when the complete preview remains coherent.",
         "Use each component's renderedAnatomy, idealWhen, avoidWhen, content limits, and compatibleMediaIntegrations. Do not infer visual behavior from the component ID and do not choose a component whose renderer anatomy contradicts the available content or media.",
         "Choose header and footer independently by their rendered anatomy and available content. Do not default to one familiar pair, and do not infer suitability from an industry; the footer does not need to mirror the header.",
         "Choose design.productDetailPattern from compositionGuidance.productDetailPatterns by layout, media behavior, density, and content fit. Do not infer the choice from an industry label.",
-        "Keep adjacent about/story and process sections compositionally distinct through alignment, density, media, typography, or surface contrast. Avoid plaid, pinstripes, graph-paper grids, and repeated straight divider motifs.",
+        "Make the combined story-and-process chapter distinct from both the hero and catalog through alignment, density, media, typography, or surface contrast. Avoid plaid, pinstripes, graph-paper grids, and repeated straight divider motifs.",
         "Catalog filters are the only category-browsing owner in a normal showroom. Keep hero factual media free of product-link overlays.",
         "Before returning JSON, evaluate the complete design against the composition rules: exact canonical role order, useful catalog controls only, no repeated adjacent anatomy, deliberate but freely chosen semantic surfaces and media treatments, compatible media prerequisites, and an appropriate catalog density.",
         "Declare every intentionally removed stable key.",
@@ -1037,9 +1063,12 @@ export async function importShowroomRecipe(
   input: unknown,
 ): Promise<ValidatedShowroomRecipe> {
   const state = await workspace(user, revisionId);
-  const baseSnapshot = requireRevisionSnapshotV4(
-    state.revision.snapshot_json,
-    SHOWROOM_COMPONENT_BANK_LATEST,
+  const baseSnapshot = withAuthoritativeBusinessSettings(
+    requireRevisionSnapshotV4(
+      state.revision.snapshot_json,
+      SHOWROOM_COMPONENT_BANK_LATEST,
+    ),
+    state.business,
   );
   const assets = await assetMaps(state.request.id, baseSnapshot, state.request.attachments);
   const relationships = relationshipKeyMaps(state.request.id, baseSnapshot);
@@ -1060,16 +1089,20 @@ export async function importShowroomRecipe(
     allowedSourceKeys: new Set(sources.sources.map((source) => source.key)),
     assetDetails: assets.details,
   });
+  const authoritativeSnapshot = withAuthoritativeBusinessSettings(
+    validated.snapshot,
+    state.business,
+  );
   const saved = await saveRecipeDraftRevision(
     user,
     revisionId,
-    validated.snapshot,
+    authoritativeSnapshot,
     validated.recipe.summary,
     validated.importHash,
     {
       recipeSchemaVersion: validated.recipe.schemaVersion,
       contentSchemaVersion: validated.recipe.content.schemaVersion,
-      bankRelease: validated.snapshot.designManifest.bankRelease,
+      bankRelease: authoritativeSnapshot.designManifest.bankRelease,
       counts: {
         collections: validated.difference.collections.after,
         categories: validated.difference.categories.after,
@@ -1079,8 +1112,8 @@ export async function importShowroomRecipe(
       warningCount:
         validated.recipe.warnings.length + validated.recipe.questions.length,
       mediaPlan: validated.recipe.mediaPlan,
-      fitness: evaluateCompositionFitness(validated.snapshot),
+      fitness: evaluateCompositionFitness(authoritativeSnapshot),
     },
   );
-  return { ...validated, duplicate: saved.duplicate };
+  return { ...validated, snapshot: authoritativeSnapshot, duplicate: saved.duplicate };
 }

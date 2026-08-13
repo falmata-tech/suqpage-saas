@@ -36,11 +36,11 @@ export default async function ProductsPage({
       </div>
       <div className="dashboard-head">
         <div>
-          <p className="eyebrow">Simple catalog upkeep</p>
-          <h1>Products &amp; capabilities</h1>
+          <p className="eyebrow">Your market offer</p>
+          <h1>Custom work, ready products &amp; wholesale supply</h1>
           <p>
-            Keep products, made-to-order work, capabilities, supply, and production facts
-            current without opening the showroom design system.
+            Keep every made-to-order capability, finished product, wholesale offer, and
+            production fact current without opening the showroom design system.
           </p>
         </div>
         <Link

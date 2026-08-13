@@ -7,6 +7,25 @@ export const REQUEST_STATUSES: ReadonlySet<ServiceRequestStatus> = new Set([
   "in_progress", "client_review", "client_approved", "published",
   "completed", "rejected", "cancelled",
 ]);
+export const ACTIVE_SHOWROOM_PROJECT_STATUSES: readonly ServiceRequestStatus[] = [
+  "submitted",
+  "under_review",
+  "needs_information",
+  "approved_for_work",
+  "in_progress",
+  "client_review",
+  "client_approved",
+];
+export const TERMINAL_SHOWROOM_PROJECT_STATUSES: readonly ServiceRequestStatus[] = [
+  "published",
+  "completed",
+  "rejected",
+  "cancelled",
+];
+
+export function isActiveShowroomProjectStatus(status: ServiceRequestStatus) {
+  return ACTIVE_SHOWROOM_PROJECT_STATUSES.includes(status);
+}
 export const REVIEW_REQUEST_STATUSES: readonly ServiceRequestStatus[] = [
   "submitted", "under_review", "needs_information", "approved_for_work",
   "in_progress", "rejected", "cancelled",

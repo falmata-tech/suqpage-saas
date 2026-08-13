@@ -1,21 +1,15 @@
-import Link from "next/link";
-import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
-import MirtPageBrand from "@/components/MirtPageBrand";
-import { getDiscoveryView } from "@/lib/discovery";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-export const metadata = {
-  title: "Discover Showrooms | MirtPage",
-  description: "Discover Ethiopian makers, growers, workshops, processors, and growing factories by industry, reviewed location, and weekly virtual Expo.",
-};
-
-export default async function DiscoverPage({ searchParams }: {
-  searchParams: Promise<{ industry?: string; q?: string; page?: string; view?: string; expoDay?: string }>;
+export default async function DiscoverRedirect({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const query = await searchParams;
-  const discovery = await getDiscoveryView({ industry: query.industry, q: query.q, page: query.page, view: query.view, expoDay: query.expoDay });
-  return <div className="discover-page">
-    <header className="landing-header"><div className="landing-container landing-nav"><MirtPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Home</Link><Link href="/request">Get a showroom</Link><Link className="landing-login" href="/login">Login</Link></nav></div></header>
-    <main className="landing-container discover-page-main"><DiscoveryWorkspace discovery={discovery} /></main>
-  </div>;
+  const target = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(query)) {
+    if (Array.isArray(value)) value.forEach((item) => target.append(key, item));
+    else if (value !== undefined) target.set(key, value);
+  }
+
+  redirect(target.size > 0 ? `/?${target.toString()}` : "/");
 }

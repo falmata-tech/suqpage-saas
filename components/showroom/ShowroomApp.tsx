@@ -1,7 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  BookOpen,
+  Home,
+  LayoutGrid,
+  MessageCircle,
+  ShoppingBag,
+} from "lucide-react";
 import {
   useEffect,
   useMemo,
@@ -13,7 +20,11 @@ import {
 } from "react";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import { parseShowroomDesignProposalV2 } from "@/lib/showroom-composition-v2";
-import { parseShowroomContentBlocks } from "@/lib/showroom-content-blocks";
+import {
+  parseShowroomContentBlocks,
+  type ShowroomContentBlocksDocument,
+} from "@/lib/showroom-content-blocks";
+import { canonicalizeShowroomChapters } from "@/lib/showroom-chapters";
 import { parsePublishedDesignManifest } from "@/lib/showroom-manifests";
 import type { Catalog, Product } from "@/lib/types";
 import {
@@ -47,6 +58,27 @@ function legacyCopy(value: string) {
   } catch {
     return false;
   }
+}
+
+function resolvePrivateContentMedia(
+  document: ShowroomContentBlocksDocument,
+  requestId?: number,
+): ShowroomContentBlocksDocument {
+  if (!requestId) return document;
+  return {
+    ...document,
+    blocks: document.blocks.map((block) => ({
+      ...block,
+      media: block.media.map((media) => ({
+        ...media,
+        assetKeys: media.assetKeys.map((asset) =>
+          asset.startsWith("request-attachment:")
+            ? `/api/requests/${requestId}/attachments/${asset.split(":")[1]}`
+            : asset,
+        ),
+      })),
+    })),
+  } as ShowroomContentBlocksDocument;
 }
 
 function buildMessage(catalog: Catalog, cart: CartLine[]) {
@@ -106,7 +138,8 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
   }
 }
 
-export default function ShowroomApp({ catalog, previewMode = false }: { catalog: Catalog; previewMode?: boolean }) {
+export default function ShowroomApp({ catalog, previewMode = false, embedded = false, privateMediaRequestId }: { catalog: Catalog; previewMode?: boolean; embedded?: boolean; privateMediaRequestId?: number }) {
+  const router = useRouter();
   const storageKey = `mirtpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
@@ -290,6 +323,24 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           compositionContentBlocks,
           "managed",
         );
+        const canonical = canonicalizeShowroomChapters(
+          compositionContentBlocks,
+          compositionManifest,
+        );
+        compositionContentBlocks = parseShowroomContentBlocks(
+          canonical.contentBlocks,
+          "managed",
+        );
+        compositionManifest = parseShowroomDesignProposalV2(
+          canonical.designManifest,
+          SHOWROOM_COMPONENT_BANK_LATEST,
+          compositionContentBlocks,
+          "managed",
+        );
+        compositionContentBlocks = resolvePrivateContentMedia(
+          compositionContentBlocks,
+          privateMediaRequestId,
+        );
       } else {
         compositionManifest = parsePublishedDesignManifest(manifestInput);
       }
@@ -303,6 +354,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       ? compositionManifest.productDetailPattern
       : undefined,
   );
+  const ShowroomRoot = embedded ? "div" : "main";
 
   return (
     <>
@@ -311,19 +363,28 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         aria-label="MirtPage showroom host navigation"
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
-        <Link href="/" className="showroom-host-back" aria-label="Back to MirtPage marketplace">
+        <button type="button" className="showroom-host-back" aria-label="Back to MirtPage marketplace" onClick={() => {
+          const referrer = document.referrer ? new URL(document.referrer) : null;
+          if (referrer?.origin === window.location.origin && (referrer.pathname === "/" || referrer.pathname === "/discover")) {
+            router.back();
+            return;
+          }
+          const remembered = window.sessionStorage.getItem("mirtpage:last-marketplace-url:v1") || "/";
+          router.push(remembered.startsWith("/") && !remembered.startsWith("//") ? remembered : "/");
+        }}>
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
           <span>Back</span>
-        </Link>
+        </button>
         <span className="showroom-host-identity">
           <img src="/brand/mirtpage-mark-v2.svg" alt="" width="24" height="24" />
           <span>Powered by <strong>MirtPage</strong></span>
         </span>
       </nav>
-      <div
-        className={`runtime-root theme-${catalog.business.design_key}`}
+      <ShowroomRoot
+        className={`runtime-root theme-${catalog.business.design_key}${compositionManifest && !previewMode && !embedded ? " has-showroom-mobile-nav" : ""}`}
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
+      {!embedded ? <h1 className="sr-only">{catalog.business.name} online showroom</h1> : null}
       {compositionManifest ? (
         <CompositionShowroom
           {...designProps}
@@ -336,7 +397,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
       ) : (
         <InvalidComposition />
       )}
-      <button
+      {!previewMode ? <button
         type="button"
         className={`floating-inquiry-trigger${cartCount ? " has-items" : ""}`}
         aria-label={`Inquiry, ${cartCount} selected ${cartCount === 1 ? "item" : "items"}`}
@@ -348,7 +409,19 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         {cartCount ? (
           <span className="floating-inquiry-count" aria-hidden="true">{cartCount}</span>
         ) : null}
-      </button>
+      </button> : null}
+      {compositionManifest && !previewMode && !embedded ? (
+        <nav className="showroom-mobile-nav" aria-label="Showroom sections">
+          <a href="#showroom-home"><Home aria-hidden="true" /><span>Home</span></a>
+          <a href="#showroom-story"><BookOpen aria-hidden="true" /><span>Story</span></a>
+          <a href="#showroom-catalog"><LayoutGrid aria-hidden="true" /><span>Offerings</span></a>
+          <a href="#showroom-contact"><MessageCircle aria-hidden="true" /><span>Contact</span></a>
+          <button type="button" onClick={openCart} aria-label={`Inquiry, ${cartCount} selected ${cartCount === 1 ? "item" : "items"}`}>
+            <span className="showroom-mobile-nav-icon"><ShoppingBag aria-hidden="true" />{cartCount ? <b aria-hidden="true">{cartCount}</b> : null}</span>
+            <span>Inquiry</span>
+          </button>
+        </nav>
+      ) : null}
       {selected && (
         <div
           ref={productDialog}
@@ -445,7 +518,7 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
           </div>
         </div>
       )}
-      <InquiryDrawer
+      {!previewMode ? <InquiryDrawer
         open={drawer}
         close={() => setDrawer(false)}
         opener={drawerOpener}
@@ -455,13 +528,13 @@ export default function ShowroomApp({ catalog, previewMode = false }: { catalog:
         remove={(index) => setCart((current) => current.filter((_, lineIndex) => lineIndex !== index))}
         clear={() => setCart([])}
         show={show}
-      />
+      /> : null}
       {toast && (
         <div className="toast" role="status">
           {toast}
         </div>
       )}
-      </div>
+      </ShowroomRoot>
     </>
   );
 }

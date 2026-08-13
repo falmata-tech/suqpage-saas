@@ -118,6 +118,12 @@ export function CompositionShowroom({
     query: props.query,
     selectedCategory,
     cartCount: props.cartCount,
+    sectionAnchorIds: {
+      home: "showroom-home",
+      story: "showroom-story",
+      offerings: "showroom-catalog",
+      contact: "showroom-contact",
+    },
     onQueryChange: props.setQuery,
     onCategoryChange: changeCategory,
     onOpenProduct: productAction(props.openProduct),

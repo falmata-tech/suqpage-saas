@@ -130,8 +130,8 @@ const failures = results.filter((entry) => {
     result.horizontalOverflow ||
     result.brokenImages.length > 0 ||
     result.textOverflow.length > 0 ||
-    result.sectionSlots.join(">") !== "header>hero>content>content>catalog>callToAction>footer" ||
-    result.surfaces.join(">") !== "surface>accent-soft>surface>secondary-soft>canvas>strong>inverse" ||
+    result.sectionSlots.join(">") !== "header>hero>content>catalog>callToAction>footer" ||
+    result.surfaces.join(">") !== "surface>accent-soft>secondary-soft>canvas>strong>inverse" ||
     result.productCount !== 4 ||
     result.productImageCount !== 4 ||
     !result.logoLoaded ||

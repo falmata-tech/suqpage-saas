@@ -61,12 +61,12 @@ async function main() {
   assert.equal((await getBusinessSubscription(businessA, now))?.amountMinor, null);
   assert.equal((await getBusinessSubscription(businessA, now))?.state, "active");
 
-  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now })).recorded, true);
-  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "expo", occurrenceId: 1, hubKey: "addis-ababa", now })).recorded, false);
+  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "featured", now })).recorded, true);
+  assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "featured", now })).recorded, false);
   assert.equal((await recordShowroomVisit({ handle: "tenant-a", visitorToken: "visitor-a", source: "directory", now })).recorded, true);
   assert.deepEqual(await getShowroomInsights(clientA, businessA, now), {
     totalVisitors: 2,
-    expoVisitors: 1,
+    featuredVisitors: 1,
     directoryVisitors: 1,
     directVisitors: 0,
     last30Days: 2,

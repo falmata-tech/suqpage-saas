@@ -1,5 +1,5 @@
 import type { DenseDemoOfferingKind } from "./dense-demo-seed";
-import type { SeededExpoProfile } from "./expo-seed";
+import type { SeededMarketplaceProfile } from "./marketplace-seed";
 import type { SeedShowroomBrief } from "./showroom-seed-briefs";
 import type { ShowroomColorPalette } from "./showroom-design-systems";
 
@@ -57,7 +57,7 @@ export type ScaleDemoBusiness = {
   logoPath: string;
   heroPath: string;
   boothPath: string;
-  profile: SeededExpoProfile;
+  profile: SeededMarketplaceProfile;
   brief: SeedShowroomBrief;
   creative: {
     customer: string;
@@ -77,7 +77,7 @@ export type ScaleDemoBusiness = {
   }>;
 };
 
-const locations: readonly SeededExpoProfile[] = [
+const locations: readonly SeededMarketplaceProfile[] = [
   { industryKeys: [], city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.018, longitude: 38.748 },
   { industryKeys: [], city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 8.982, longitude: 38.781 },
   { industryKeys: [], city: "Adama", zone: "East Shewa", region: "Oromia", latitude: 8.545, longitude: 39.272 },
@@ -234,28 +234,31 @@ function foundationReason(style: StyleKey) {
 export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGroups, ...growingFactoryGroups].flatMap(
   ({ industryKey, clients }, groupIndex) => clients.map((raw, index) => {
     const handle = `demo-${slug(raw.name)}`;
+    const assignedIndustryKey = industryKey === "food-farming" && /(farm|orchard|seed-grower)/.test(handle)
+      ? "agriculture-growers"
+      : industryKey;
     const location = locations[locationPlans[industryKey][index]];
     const customPalette = palette(raw);
     const profile: SeedShowroomBrief["profile"] = {
       ...styleProfiles[raw.style],
       customPalette,
     };
-    const description = `${raw.tagline} This fictional ${raw.name} showroom is designed for ${raw.customer}.`;
+    const description = `${raw.tagline} Browse the work by product, production approach, and the questions that matter to ${raw.customer}.`;
     return {
       handle,
-      productionScale: raw.productionScale ?? "workshop",
+      productionScale: raw.productionScale ?? (handle === "demo-laga-grain-mill" ? "growing_factory" : "workshop"),
       name: raw.name,
       tagline: raw.tagline,
       description,
       heroTitle: raw.heroTitle,
       heroSubtitle: raw.heroSubtitle,
-      industryKey,
+      industryKey: assignedIndustryKey,
       logoPath: `/uploads/seed/portfolio/${handle}/logo.svg`,
       heroPath: `/uploads/seed/portfolio/${handle}/hero.webp`,
       boothPath: `/landing/showroom-booths/${handle}.svg`,
       profile: {
         ...location,
-        industryKeys: [industryKey],
+        industryKeys: [assignedIndustryKey],
         latitude: location.latitude + groupIndex * 0.0004 + index * 0.0001,
         longitude: location.longitude + groupIndex * 0.0004 + index * 0.0001,
       },
@@ -270,7 +273,7 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
         },
         process: {
           title: `How ${raw.name} takes the work from question to handoff`,
-          body: "The fictional process is provisional demonstration copy and is reviewed with a real customer before use.",
+          body: "Follow the main stages of the work, then ask about specifications, timing, and the handoff that fits your request.",
           items: [...raw.process],
         },
         cta: {

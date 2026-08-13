@@ -2,9 +2,9 @@
 id: FE-005
 title: Mobile-first showroom experience system
 status: done
-related: [BE-006, DEP-004, DEP-005, FE-004, FE-006, FE-009, BE-005, ADR-0005, ADR-0007]
+related: [BE-006, DEP-004, DEP-005, FE-004, FE-006, FE-009, FE-034, FE-035, BE-005, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-24
+last_updated: 2026-08-11
 change_level: L2
 ---
 

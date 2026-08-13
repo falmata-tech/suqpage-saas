@@ -4,7 +4,7 @@ title: Complete demo portfolio admission
 status: done
 related: [FE-023, FE-024, BE-022, BE-023, DEP-011, DEP-018, DEP-020]
 owners: [operations, engineering, design]
-last_updated: 2026-08-02
+last_updated: 2026-08-11
 change_level: L2
 ---
 
@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and scope
 
-Admit the complete 58-client fictional portfolio into the disposable local
+Admit the complete 66-client fictional portfolio into the disposable local
 environment with committed briefs and reviewed media, then prove that the richer
 fixtures remain valid, responsive, and operationally bounded.
 
@@ -22,7 +22,7 @@ fixtures remain valid, responsive, and operationally bounded.
 2. Verify every managed logo, hero, offering, and booth asset exists and stays
    within fixture size limits.
 3. Reset the explicitly disposable local database.
-4. Verify 58 active showrooms, four offerings each, and admitted recipes.
+4. Verify 66 active showrooms, four offerings each, and admitted recipes.
 5. Capture every showroom at 1440 and 390 CSS pixels and inspect contact sheets.
 6. Correct blocking overflow, contrast, broken media, or repeated-profile defects.
 7. Run `npm run check`, `npm run test:acceptance`, and `npm run release`.
@@ -38,7 +38,7 @@ data, remote services, and migrations are outside this rollout.
 Scenario: Portfolio admission succeeds
   GIVEN committed creative profiles and media are complete
   WHEN the reset and admission gates run
-  THEN all 58 showrooms publish with four imaged offerings
+  THEN all 66 showrooms publish with four imaged offerings
   AND desktop and mobile captures complete without browser or overflow failures
 
 Scenario: Media is missing or oversized
@@ -65,8 +65,13 @@ Scenario: Media is missing or oversized
 
 ## Evidence
 
-Evidence: completed locally on 2026-08-02. Eight bounded browser batches covered all 58
-showrooms at 1440px and 390px with zero automated failures and reviewed contact
+Evidence: the original 58-showroom release admission passed on 2026-08-02. The
+expanded 66-showroom fixture and media contract passed its focused portfolio
+gate on 2026-08-11; updated browser and release evidence remains to be recorded
+by this audit.
+
+The original admission completed locally on 2026-08-02. Eight bounded browser batches covered all 58
+showrooms then present at 1440px and 390px with zero automated failures and reviewed contact
 sheets. `npm run check`, the ordered ten-workflow production-browser acceptance
 suite, and `npm run release` passed, including production build, HTTP smoke,
 trace privacy, tenant security, additive migrations, and a zero-vulnerability

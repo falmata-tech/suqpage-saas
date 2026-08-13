@@ -12,6 +12,7 @@ async function main() {
     const { closeDbForTests, getDb } = await import("../lib/db");
     const {
       listBusinessesPage,
+      listBusinessClientAccess,
       listInquiriesPage,
       listManagedClientsPage,
       listProductsPage,
@@ -20,6 +21,10 @@ async function main() {
     } = await import("../lib/scalable-queries");
     const { listRequestsPage } = await import("../lib/request-sqlite");
     const db = getDb();
+    db.prepare(`
+      INSERT INTO discovery_industries(key,label,icon,position,active)
+      VALUES('electronics','Electronics','circuit',1,1)
+    `).run();
     const businessIds: number[] = [];
     const productIds: number[] = [];
     for (let index = 1; index <= 45; index += 1) {
@@ -31,12 +36,18 @@ async function main() {
       );
       businessIds.push(businessId);
       db.prepare(`
-        INSERT INTO bazaar_booth_profiles(
-          business_id,industry_keys_json,booth_image_path,city,zone,region,
-          latitude,longitude,is_featured,approved_at
-        ) VALUES(?,'["electronics"]','/demo.webp','Addis Ababa','Addis Ababa',
-          'Addis Ababa',9.02,38.75,?,CURRENT_TIMESTAMP)
-      `).run(businessId, index <= 3 ? 1 : 0);
+        INSERT INTO business_discovery_profiles(
+          business_id,booth_image_path,city,zone,region,latitude,longitude,approved_at,updated_at
+        ) VALUES(?,'/demo.webp',?,?,?,9.02,38.75,?,?)
+      `).run(businessId, `Market City ${index}`, `Market Zone ${index}`, `Market Region ${index}`, Date.now(), Date.now());
+      db.prepare(`
+        INSERT INTO business_industries(business_id,industry_key)
+        VALUES(?,'electronics')
+      `).run(businessId);
+      if (index <= 3) db.prepare(`
+        INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
+        VALUES(?,?,1,?)
+      `).run(businessId, index, Date.now());
       const categoryId = Number(
         db.prepare(
           "INSERT INTO categories(business_id,name,slug,sort_order) VALUES(?,?,?,0)",
@@ -130,12 +141,13 @@ async function main() {
           public_ref,business_id,represented_client_user_id,request_type,status,
           contact_name,contact_value,business_name,request_text,submitter_kind,
           submitted_by_user_id,idempotency_key,notification_state
-        ) VALUES(?,?,?,'change','submitted','Client','client@example.test',
+        ) VALUES(?,?,?,'change',?,'Client','client@example.test',
           'Query Business','Pagination request','client',?,?,'not_required')
       `).run(
         `QUERY-REQUEST-${index}`,
         index === 25 ? businessIds[1] : businessIds[0],
         index === 25 ? clientIds[1] : clientIds[0],
+        index >= 24 ? "submitted" : "published",
         index === 25 ? clientIds[1] : clientIds[0],
         `query-request-${index}`,
       );
@@ -154,6 +166,10 @@ async function main() {
     assert.equal(businesses.items.length, 6);
     assert.equal(businesses.page, 2);
     assert.equal(businesses.totalItems, 45);
+    assert.ok(businesses.items.every((business) => business.marketplace_approved_at));
+    assert.equal((await listBusinessesPage({ q: "client-1@example.test" })).totalItems, 1);
+    assert.equal((await listBusinessesPage({ q: "market city 45" })).totalItems, 1);
+    assert.equal((await listBusinessClientAccess(businessIds[0])).length, 1);
     assert.equal((await listManagedClientsPage({ page: 2 })).items.length, 6);
     assert.equal((await listStaffPage({ page: 2 })).items.length, 6);
     assert.equal((await listProductsPage(businessIds[0], { page: 1 })).items.length, 10);
@@ -176,6 +192,18 @@ async function main() {
     const clientRequests = listRequestsPage(clientOne, { page: 1 });
     assert.equal(clientRequests.totalItems, 24);
     assert.ok(clientRequests.items.every((request) => request.business_id === businessIds[0]));
+    const manager = {
+      id: 999,
+      email: "manager@example.test",
+      name: "Manager",
+      role: "admin" as const,
+      access_role: "operations_manager" as const,
+      business_id: null,
+      must_change_password: 0,
+    };
+    const selectedBusinessRequests = listRequestsPage(manager, { page: 1, business: businessIds[1] });
+    assert.equal(selectedBusinessRequests.totalItems, 1);
+    assert.ok(selectedBusinessRequests.items.every((request) => request.business_id === businessIds[1]));
 
     assert.ok(
       db.prepare("SELECT 1 FROM schema_migrations WHERE version=20").get(),

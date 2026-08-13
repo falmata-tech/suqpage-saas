@@ -23,8 +23,6 @@ export type DiscoveryProfileAdminView = {
   fallbackStyle: string;
   sponsored: boolean;
   sponsorPosition: number;
-  sundayIndustryKeys: string[];
-  sundayPosition: number;
   excluded: boolean;
   approved: boolean;
   productionScale: ProductionScale;
@@ -45,8 +43,6 @@ type ProfileRow = {
   fallback_style: string | null;
   is_sponsored: number | null;
   sponsor_position: number | null;
-  sunday_industry_keys: string | null;
-  sunday_position: number | null;
   is_excluded: number | null;
   approved_at: number | null;
   production_scale: ProductionScale | null;
@@ -68,8 +64,6 @@ function mapProfile(row: ProfileRow): DiscoveryProfileAdminView {
     fallbackStyle: row.fallback_style || "workshop",
     sponsored: Boolean(row.is_sponsored),
     sponsorPosition: row.sponsor_position || 100,
-    sundayIndustryKeys: row.sunday_industry_keys?.split(",").filter(Boolean) || [],
-    sundayPosition: row.sunday_position || 100,
     excluded: Boolean(row.is_excluded),
     approved: Boolean(row.approved_at),
     productionScale: row.production_scale || "workshop",
@@ -84,8 +78,6 @@ const selectProfile = () => {
     p.fallback_style,p.is_excluded,p.approved_at,p.production_scale,
     COALESCE((SELECT active FROM discovery_sponsorships s WHERE s.business_id=b.id),0) is_sponsored,
     (SELECT position FROM discovery_sponsorships s WHERE s.business_id=b.id) sponsor_position,
-    (SELECT ${aggregate}(selection.industry_key,',') FROM sunday_showcase_selections selection WHERE selection.business_id=b.id AND selection.active=1) sunday_industry_keys,
-    (SELECT MIN(selection.position) FROM sunday_showcase_selections selection WHERE selection.business_id=b.id AND selection.active=1) sunday_position,
     (SELECT ${aggregate}(i.industry_key,',') FROM business_industries i WHERE i.business_id=b.id) industry_keys
   FROM businesses b
   LEFT JOIN business_discovery_profiles p ON p.business_id=b.id`;
@@ -126,14 +118,11 @@ export async function updateDiscoveryProfile(input: {
   productionScale: unknown;
   sponsored: boolean;
   sponsorPosition: unknown;
-  sundayIndustryKeys: unknown[];
-  sundayPosition: unknown;
   excluded: boolean;
 }, db?: DatabaseSync) {
   const businessId = Number.parseInt(String(input.businessId), 10);
   const allowedIndustries = new Set(DISCOVERY_INDUSTRIES.map((industry) => industry.key));
   const industryKeys = [...new Set(input.industryKeys.map((value) => cleanText(value, 40)).filter((value) => allowedIndustries.has(value as never)))];
-  const sundayIndustryKeys = [...new Set(input.sundayIndustryKeys.map((value) => cleanText(value, 40)).filter((value) => allowedIndustries.has(value as never)))];
   const boothImagePath = cleanText(input.boothImagePath, 300);
   const city = cleanText(input.city, 100);
   const zone = cleanText(input.zone, 100);
@@ -143,7 +132,6 @@ export async function updateDiscoveryProfile(input: {
   const fallbackStyle = cleanText(input.fallbackStyle, 30);
   const productionScale = cleanText(input.productionScale, 30);
   const sponsorPosition = Number.parseInt(String(input.sponsorPosition), 10);
-  const sundayPosition = Number.parseInt(String(input.sundayPosition), 10);
   const allowedFallbacks = new Set(["workshop", "botanical", "textile", "food", "home", "technical"]);
   const businessExists = db
     ? db.prepare("SELECT 1 FROM businesses WHERE id=?").get(businessId)
@@ -156,8 +144,6 @@ export async function updateDiscoveryProfile(input: {
   if (!allowedFallbacks.has(fallbackStyle)) throw new DiscoveryAdminError("Choose an approved fallback style.");
   if (productionScale !== "workshop" && productionScale !== "growing_factory") throw new DiscoveryAdminError("Choose an approved production scale.");
   if (!Number.isInteger(sponsorPosition) || sponsorPosition < 1 || sponsorPosition > 999) throw new DiscoveryAdminError("Sponsored position must be between 1 and 999.");
-  if (!Number.isInteger(sundayPosition) || sundayPosition < 1 || sundayPosition > 999) throw new DiscoveryAdminError("Sunday position must be between 1 and 999.");
-  if (sundayIndustryKeys.some((key) => !industryKeys.includes(key))) throw new DiscoveryAdminError("Sunday selections must match an assigned business industry.");
   const now = Date.now();
   if (db) {
   db.exec("BEGIN IMMEDIATE");
@@ -182,12 +168,6 @@ export async function updateDiscoveryProfile(input: {
       ON CONFLICT(business_id) DO UPDATE SET
         position=excluded.position,active=excluded.active,updated_at=excluded.updated_at
     `).run(businessId, sponsorPosition, input.sponsored ? 1 : 0, now);
-    db.prepare("DELETE FROM sunday_showcase_selections WHERE business_id=?").run(businessId);
-    const addSundaySelection = db.prepare(`
-      INSERT INTO sunday_showcase_selections(industry_key,business_id,position,active,updated_at)
-      VALUES(?,?,?,1,?)
-    `);
-    sundayIndustryKeys.forEach((key) => addSundaySelection.run(key, businessId, sundayPosition, now));
     db.exec("COMMIT");
   } catch (error) {
     db.exec("ROLLBACK");
@@ -215,10 +195,6 @@ export async function updateDiscoveryProfile(input: {
       VALUES(?,?,?,?) ON CONFLICT(business_id) DO UPDATE SET
         position=excluded.position,active=excluded.active,updated_at=excluded.updated_at
     `, [businessId, sponsorPosition, input.sponsored ? 1 : 0, now]);
-    await runtimeRun("DELETE FROM sunday_showcase_selections WHERE business_id=?", [businessId]);
-    for (const key of sundayIndustryKeys) {
-      await runtimeRun("INSERT INTO sunday_showcase_selections(industry_key,business_id,position,active,updated_at) VALUES(?,?,?,1,?)", [key, businessId, sundayPosition, now]);
-    }
   });
   return { businessId };
 }

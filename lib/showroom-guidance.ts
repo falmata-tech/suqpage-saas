@@ -156,7 +156,7 @@ export const SHOWROOM_DESIGN_PROCESS = Object.freeze({
   ],
   rules: [
     "Choose one page template before individual component variants.",
-    "Preserve the canonical hero, about, process, products, and inquiry order.",
+    "Preserve the canonical hero, combined story/process, products, and inquiry order.",
     "Choose semantic design roles by purpose, never by industry words in an ID.",
     "Use signature treatments wherever they improve the complete composition, then review the result for visual competition.",
     "Treat media layout and media blending as separate decisions.",
@@ -277,8 +277,7 @@ export const SHOWROOM_MEDIA_TREATMENTS: Readonly<
 const STANDARD_SECTION_PLAN: ShowroomTemplateSection[] = [
   { role: "identity and primary actions", slot: "header", required: true, visualWeight: "quiet" },
   { role: "opening proposition", slot: "hero", required: true, visualWeight: "signature" },
-  { role: "about or story", slot: "content", required: true, visualWeight: "supporting" },
-  { role: "process", slot: "content", required: true, visualWeight: "supporting" },
+  { role: "business story and process", slot: "content", required: true, visualWeight: "supporting" },
   { role: "product discovery", slot: "catalog", required: true, visualWeight: "prominent" },
   { role: "inquiry conversion", slot: "call_to_action", required: true, visualWeight: "prominent" },
   { role: "identity and contact close", slot: "footer", required: true, visualWeight: "quiet" },
@@ -313,7 +312,7 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     mediaCondition: "optional",
     visualTones: ["editorial", "quiet"],
     pacingRules: [
-      "Keep the opening concise, then move through about and process before products.",
+      "Keep the opening concise, then use one story-and-process chapter before products.",
       "Use no more than one image-dominant narrative section after the hero.",
     ],
     avoidWhen: ["the catalog is primarily specification comparison", "there is no useful process or material story"],
@@ -328,8 +327,8 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     mediaCondition: "optional",
     visualTones: ["organic", "quiet"],
     pacingRules: [
-      "Use the about section for supplied source context and the process section for how work or inquiries move.",
-      "Keep both sections concise before the compact product shelf.",
+      "Use one concise chapter for supplied source context and how work or inquiries move.",
+      "Keep the combined chapter concise before the compact product shelf.",
     ],
     avoidWhen: ["source or provenance facts are unavailable", "side-by-side specification comparison is essential"],
   }),
@@ -389,7 +388,7 @@ export const SHOWROOM_TEMPLATES: readonly ShowroomTemplate[] = Object.freeze([
     visualTones: ["organic", "editorial"],
     pacingRules: [
       "Connect approved source context to meaningful product categories.",
-      "Do not repeat the same source paragraph in the hero and about section.",
+      "Do not repeat the same source paragraph in the hero and combined story-and-process chapter.",
     ],
     avoidWhen: ["categories are arbitrary or missing", "source claims would need to be inferred"],
   }),
@@ -997,7 +996,6 @@ export function evaluateCompositionFitness(
   const canonicalSections = [
     { prefix: "header.", contentType: null },
     { prefix: "hero.", contentType: "hero" },
-    { prefix: "content.", contentType: "story" },
     { prefix: "content.", contentType: "highlights" },
     { prefix: "catalog.", contentType: null },
     { prefix: "call-to-action.", contentType: "call_to_action" },
@@ -1008,7 +1006,7 @@ export function evaluateCompositionFitness(
       severity: "error",
       code: "noncanonical_section_count",
       message:
-        "Normal showrooms use exactly seven sections: header, hero, about, process, products, inquiry CTA, and footer.",
+        "Normal showrooms use exactly six sections: header, hero, story and process, products, inquiry CTA, and footer.",
     });
   } else {
     canonicalSections.forEach((expected, index) => {
@@ -1025,7 +1023,7 @@ export function evaluateCompositionFitness(
           code: "noncanonical_section_order",
           sectionKey: section.key,
           message:
-            "Use this exact order and assignment: header, hero, about/story, process/highlights, products, inquiry CTA, footer.",
+            "Use this exact order and assignment: header, hero, story/process highlights, products, inquiry CTA, footer.",
         });
       }
     });

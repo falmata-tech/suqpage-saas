@@ -1571,4 +1571,251 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const sevenIndustryExpoApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=27")
+    .get();
+  if (!sevenIndustryExpoApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        INSERT INTO discovery_industries(key,label,icon,position,active)
+        VALUES('agriculture-growers','Agriculture, livestock & primary produce','sprout',2,1)
+        ON CONFLICT(key) DO UPDATE SET
+          label=excluded.label,icon=excluded.icon,position=excluded.position,active=1;
+
+        UPDATE discovery_industries
+        SET label='Food & beverage production',icon='bowl',position=3
+        WHERE key='food-farming';
+        UPDATE discovery_industries SET position=0 WHERE key='electronics';
+        UPDATE discovery_industries SET position=1 WHERE key='beauty-wellness';
+        UPDATE discovery_industries SET position=4 WHERE key='machinery-tools';
+        UPDATE discovery_industries SET position=5 WHERE key='home-living';
+        UPDATE discovery_industries SET position=6 WHERE key='fashion-textiles';
+
+        INSERT OR IGNORE INTO business_industries(business_id,industry_key)
+        SELECT i.business_id,'agriculture-growers'
+        FROM business_industries i
+        JOIN businesses b ON b.id=i.business_id
+        WHERE i.industry_key='food-farming'
+          AND (
+            lower(b.handle) LIKE '%farm%'
+            OR lower(b.handle) LIKE '%apiary%'
+            OR lower(b.handle) LIKE '%orchard%'
+            OR lower(b.handle) LIKE '%seed-grower%'
+            OR lower(b.name) LIKE '%coffee%'
+            OR lower(b.name) LIKE '%nursery%'
+          );
+        DELETE FROM business_industries
+        WHERE industry_key='food-farming'
+          AND business_id IN (
+            SELECT business_id FROM business_industries
+            WHERE industry_key='agriculture-growers'
+          );
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(27)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const discoveryCrossListingsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=28")
+    .get();
+  if (!discoveryCrossListingsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        INSERT OR IGNORE INTO business_industries(business_id,industry_key)
+        SELECT id,'agriculture-growers' FROM businesses
+        WHERE handle IN ('demo-laga-grain-mill','demo-wabi-flour-mill');
+        INSERT OR IGNORE INTO business_industries(business_id,industry_key)
+        SELECT id,'food-farming' FROM businesses
+        WHERE handle IN ('blue-nile-apiary','green-terrace-farm');
+
+        INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
+        SELECT id,5,1,CAST(strftime('%s','now') AS INTEGER) * 1000
+        FROM businesses WHERE handle='demo-wabi-flour-mill'
+        ON CONFLICT(business_id) DO UPDATE SET active=1,updated_at=excluded.updated_at;
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(28)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const agricultureScaleFixtureApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=29")
+    .get();
+  if (!agricultureScaleFixtureApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        UPDATE business_discovery_profiles
+        SET production_scale='growing_factory'
+        WHERE business_id=(SELECT id FROM businesses WHERE handle='demo-laga-grain-mill');
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(29)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const globalSponsorPoolApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=30")
+    .get();
+  if (!globalSponsorPoolApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        UPDATE discovery_sponsorships
+        SET active=0,updated_at=CAST(strftime('%s','now') AS INTEGER) * 1000
+        WHERE active=1
+          AND business_id NOT IN (
+            SELECT business_id
+            FROM discovery_sponsorships
+            WHERE active=1
+            ORDER BY position,updated_at,business_id
+            LIMIT 5
+          );
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(30)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const oneCurrentShowroomProjectApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=31")
+    .get();
+  if (!oneCurrentShowroomProjectApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        INSERT INTO request_events(request_id,event_type,detail)
+        SELECT older.id,'project_superseded','current_project:' || (
+          SELECT current.id
+          FROM service_requests current
+          WHERE current.business_id=older.business_id
+            AND current.status IN (
+              'submitted','under_review','needs_information','approved_for_work',
+              'in_progress','client_review','client_approved'
+            )
+          ORDER BY current.updated_at DESC,current.id DESC
+          LIMIT 1
+        )
+        FROM service_requests older
+        WHERE older.business_id IS NOT NULL
+          AND older.status IN (
+            'submitted','under_review','needs_information','approved_for_work',
+            'in_progress','client_review','client_approved'
+          )
+          AND older.id<>(
+            SELECT current.id
+            FROM service_requests current
+            WHERE current.business_id=older.business_id
+              AND current.status IN (
+                'submitted','under_review','needs_information','approved_for_work',
+                'in_progress','client_review','client_approved'
+              )
+            ORDER BY current.updated_at DESC,current.id DESC
+            LIMIT 1
+          );
+
+        UPDATE service_requests AS older
+        SET status='cancelled',updated_at=CURRENT_TIMESTAMP
+        WHERE older.business_id IS NOT NULL
+          AND older.status IN (
+            'submitted','under_review','needs_information','approved_for_work',
+            'in_progress','client_review','client_approved'
+          )
+          AND older.id<>(
+            SELECT current.id
+            FROM service_requests current
+            WHERE current.business_id=older.business_id
+              AND current.status IN (
+                'submitted','under_review','needs_information','approved_for_work',
+                'in_progress','client_review','client_approved'
+              )
+            ORDER BY current.updated_at DESC,current.id DESC
+            LIMIT 1
+          );
+
+        CREATE UNIQUE INDEX IF NOT EXISTS one_active_showroom_project_per_business_idx
+          ON service_requests(business_id)
+          WHERE business_id IS NOT NULL
+            AND status IN (
+              'submitted','under_review','needs_information','approved_for_work',
+              'in_progress','client_review','client_approved'
+            );
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(31)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const featuredProgramScheduleApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=32")
+    .get();
+  if (!featuredProgramScheduleApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS featured_program_policy (
+          id INTEGER PRIMARY KEY CHECK(id=1),
+          morning_start_minute INTEGER NOT NULL CHECK(morning_start_minute BETWEEN 0 AND 1439),
+          morning_end_minute INTEGER NOT NULL CHECK(morning_end_minute BETWEEN 1 AND 1439),
+          afternoon_start_minute INTEGER NOT NULL CHECK(afternoon_start_minute BETWEEN 1 AND 1439),
+          afternoon_end_minute INTEGER NOT NULL CHECK(afternoon_end_minute BETWEEN 1 AND 1439),
+          changeover_minutes INTEGER NOT NULL CHECK(changeover_minutes BETWEEN 2 AND 20),
+          sponsor_break_every INTEGER NOT NULL CHECK(sponsor_break_every BETWEEN 2 AND 8),
+          sponsor_break_minutes INTEGER NOT NULL CHECK(sponsor_break_minutes BETWEEN 5 AND 30),
+          sponsor_break_label TEXT NOT NULL CHECK(length(sponsor_break_label) BETWEEN 2 AND 60),
+          intermission_label TEXT NOT NULL CHECK(length(intermission_label) BETWEEN 2 AND 60),
+          updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          updated_at INTEGER NOT NULL,
+          CHECK(morning_start_minute < morning_end_minute),
+          CHECK(morning_end_minute + 30 <= afternoon_start_minute),
+          CHECK(afternoon_start_minute < afternoon_end_minute)
+        );
+        INSERT OR IGNORE INTO featured_program_policy(
+          id,morning_start_minute,morning_end_minute,afternoon_start_minute,
+          afternoon_end_minute,changeover_minutes,sponsor_break_every,
+          sponsor_break_minutes,sponsor_break_label,intermission_label,updated_at
+        ) VALUES(1,480,780,1020,1320,5,3,10,'Sponsor break','Lunch and program break',0);
+
+        CREATE TABLE IF NOT EXISTS featured_program_days (
+          date_iso TEXT PRIMARY KEY CHECK(length(date_iso)=10),
+          mode TEXT NOT NULL CHECK(mode IN ('automatic','manual')),
+          updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          updated_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS featured_program_lineup (
+          date_iso TEXT NOT NULL REFERENCES featured_program_days(date_iso) ON DELETE CASCADE,
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+          position INTEGER NOT NULL CHECK(position BETWEEN 1 AND 100),
+          PRIMARY KEY(date_iso,business_id),
+          UNIQUE(date_iso,position)
+        );
+        CREATE INDEX IF NOT EXISTS featured_program_lineup_date_idx
+          ON featured_program_lineup(date_iso,position,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(32)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

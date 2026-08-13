@@ -27,6 +27,7 @@ function SectionRoot({
   properties,
   mediaIntegration,
   surfaceRole,
+  anchorId,
   children,
 }: {
   slot: string;
@@ -36,6 +37,7 @@ function SectionRoot({
   properties?: BankSectionRendererProps["properties"];
   mediaIntegration?: string;
   surfaceRole?: BankSectionRendererProps["surfaceRole"];
+  anchorId?: string;
   children: ReactNode;
 }) {
   const style = {
@@ -50,7 +52,7 @@ function SectionRoot({
   } as CSSProperties;
   return (
     <section
-      id={slot === "catalog" ? "showroom-catalog" : undefined}
+      id={anchorId}
       className={`${styles.section} ${styles[slot] || ""}`}
       data-slot={slot}
       data-variant={variant}
@@ -179,6 +181,28 @@ function BrandMark({ context }: { context: BankPresentationContext }) {
   );
 }
 
+function ShowroomSectionNavigation({
+  context,
+}: {
+  context: BankPresentationContext;
+}) {
+  const links = [
+    ["Home", context.sectionAnchorIds.home],
+    ["Story", context.sectionAnchorIds.story],
+    ["Offerings", context.sectionAnchorIds.offerings],
+    ["Contact", context.sectionAnchorIds.contact],
+  ] as const;
+  return (
+    <nav className={styles.showroomSectionNav} aria-label="Showroom sections">
+      {links.map(([label, anchorId]) => (
+        <a key={anchorId} href={`#${anchorId}`}>
+          {label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 export function BankHeaderSection({
   context,
   definition,
@@ -215,9 +239,7 @@ export function BankHeaderSection({
       aria-label={`${definition.name} preview`}
     >
       <BrandMark context={context} />
-      {properties?.show_tagline !== false ? (
-        <span className={styles.headerTagline}>{context.business.tagline}</span>
-      ) : null}
+      <ShowroomSectionNavigation context={context} />
       {context.business.isLive ? (
         <span className={styles.headerMediaActions}>
           {context.business.isLive && context.business.livePlatform && context.business.liveUrl ? (
@@ -264,6 +286,7 @@ export function BankHeroSection({
     undefined;
   return (
     <SectionRoot
+      anchorId={context.sectionAnchorIds.home}
       slot="hero"
       variant={variant}
       label={`${definition.name} preview`}
@@ -276,14 +299,13 @@ export function BankHeroSection({
         <span className={styles.kicker}>{contentBlock?.kicker || context.business.tagline}</span>
         <h2>{contentBlock?.title || context.business.heroTitle}</h2>
         <p>{contentBlock?.body || context.business.heroSubtitle}</p>
-        <a href="#showroom-catalog" onClick={() => context.onCategoryChange("all")}>
+        <a href={`#${context.sectionAnchorIds.offerings}`} onClick={() => context.onCategoryChange("all")}>
           Explore products
         </a>
       </div>
       <div
         className={styles.heroVisual}
         data-media-planes={usesMultiPlaneMedia ? "multiple" : "single"}
-        aria-label="Featured product presentation"
       >
         {heroImage ? (
           <img src={heroImage} alt="" />
@@ -365,6 +387,7 @@ export function BankContentSection({
   if (contentBlock?.type === "video") {
     return (
       <SectionRoot
+        anchorId={context.sectionAnchorIds.story}
         slot="content"
         variant={variant}
         label={`${definition.name} preview`}
@@ -387,6 +410,7 @@ export function BankContentSection({
   }
   return (
     <SectionRoot
+      anchorId={context.sectionAnchorIds.story}
       slot="content"
       variant={variant}
       label={`${definition.name} preview`}
@@ -400,6 +424,12 @@ export function BankContentSection({
         <h2>{contentBlock?.title || context.business.name}</h2>
       </div>
       <div className={styles.contentBody}>
+        {storyImage ? (
+          <div className={styles.storyVisual}>
+            <img className={styles.storyImage} src={storyImage} alt="" />
+          </div>
+        ) : null}
+        <p>{contentBlock?.body || context.business.description}</p>
         {processVideoRef ? (
           <div className={styles.processVideo}>
             <span>Inside the process</span>
@@ -409,12 +439,6 @@ export function BankContentSection({
             />
           </div>
         ) : null}
-        {storyImage ? (
-          <div className={styles.storyVisual}>
-            <img className={styles.storyImage} src={storyImage} alt="" />
-          </div>
-        ) : null}
-        <p>{contentBlock?.body || context.business.description}</p>
         <ol>
           {statements.map((statement, index) => (
             <li key={`${statement.title}-${index}`}>
@@ -501,6 +525,7 @@ export function BankCatalogSection({
       experience={experience}
       properties={properties}
       surfaceRole={surfaceRole}
+      anchorId={context.sectionAnchorIds.offerings}
     >
       <div className={styles.catalogHeading}>
         <div>
@@ -641,6 +666,7 @@ export function BankCallToActionSection({
     contentBlock?.type === "call_to_action" ? contentBlock.actionLabel : copy.button;
   return (
     <SectionRoot
+      anchorId={context.sectionAnchorIds.contact}
       slot="callToAction"
       variant={variant}
       label={`${definition.name} preview`}

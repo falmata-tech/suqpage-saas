@@ -2,7 +2,7 @@
 id: BE-017
 title: Manual subscription records and visit analytics
 status: done
-related: [FE-018, BE-001, BE-011, BE-015, BE-019, BE-020, DEP-015, ADR-0010, ADR-0011]
+related: [FE-018, FE-032, FE-037, BE-001, BE-011, BE-015, BE-019, BE-020, DEP-015, ADR-0010, ADR-0011]
 owners: [backend, security, operations]
 last_updated: 2026-08-01
 change_level: L2
@@ -26,7 +26,7 @@ invasive visitor data.
 - Active, grace, and inactive account-record evaluation for client and
   operations visibility without automatic public enforcement.
 - Operations payment recording and period renewal.
-- Privacy-conscious showroom visit recording and Expo attribution.
+- Privacy-conscious showroom visit recording and Daily Featured attribution.
 - Tenant-scoped and platform aggregate traffic summaries.
 
 ### Non-goals
@@ -46,7 +46,7 @@ invasive visitor data.
   the period from the later of now or the previous period end.
 - Subscription state is advisory. Active published showrooms remain public
   until an administrator explicitly suspends them.
-- A visit contains an opaque daily visitor hash, business, source, optional Expo
+- A visit contains an opaque daily visitor hash, business, source, optional Daily Featured
   occurrence/hub, and timestamp. Raw IP addresses are never persisted.
 
 ## Contracts
@@ -56,7 +56,7 @@ invasive visitor data.
 - Public `/api/analytics/visit` accepts a bounded business handle and an
   allowlisted source (`direct`, `expo`, `directory`) and deduplicates one visitor
   per business/source/day.
-- Expo showroom links carry `ref=expo`, occurrence, and hub identifiers.
+- Daily Featured showroom links carry `ref=featured`, occurrence, and hub identifiers.
 - Only authorized operations staff can record that a renewal was received.
 - Renewal amount is nullable and not collected by the current UI. The account
   lifecycle works without a configured price and the client is directed to
@@ -72,10 +72,10 @@ Scenario: Grace expiry remains advisory
   THEN the showroom remains public and discoverable
   AND an explicit administrator suspension is still enforced
 
-Scenario: Expo visit is attributed without personal data
+Scenario: Daily Featured visit is attributed without personal data
   GIVEN a visitor follows a booth link
   WHEN the showroom records its first visit for that day
-  THEN the business receives one Expo-attributed unique visit
+  THEN the business receives one Daily Featured-attributed unique visit
   AND no raw IP address or contact value is stored
 
 Scenario: Client cannot read another tenant's analytics
@@ -102,7 +102,7 @@ Scenario: Client cannot read another tenant's analytics
 |---|---|---|
 | Active/grace/inactive boundaries | unit/integration | `scripts/test-account-health.ts` |
 | Payment renewal idempotency | integration | `scripts/test-account-health.ts` |
-| Visit deduplication and Expo attribution | security/integration | `scripts/test-account-health.ts` |
+| Visit deduplication and Daily Featured attribution | security/integration | `scripts/test-account-health.ts` |
 | Tenant analytics denial | security | `scripts/test-security.ts`, `scripts/test-account-health.ts` |
 
 ## Rollout and rollback
@@ -130,7 +130,7 @@ Migration 21, `lib/account-health.ts`, the same-origin visit endpoint, advisory
 renewal records, and explicit active/suspended publication controls are implemented.
 `scripts/test-account-health.ts` proves active/grace/inactive boundaries,
 amount-free idempotent renewal, tenant denial, daily visit deduplication, and
-Expo attribution without raw IP storage. `scripts/test-scale-fixtures.ts`
+Daily Featured attribution without raw IP storage. `scripts/test-scale-fixtures.ts`
 proves 398 subscription rows and 3,184 aggregate demo visits. Ordered browser
 acceptance proves client insights, operations pagination, and explicit suspended
 public redirect. Renewal-date public filters were removed from canonical

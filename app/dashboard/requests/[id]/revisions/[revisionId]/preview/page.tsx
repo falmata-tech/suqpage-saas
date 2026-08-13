@@ -2,13 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { decideRevisionAction, publishRevisionAction, submitRevisionAction } from "@/app/revision-actions";
 import DashboardShell from "@/components/DashboardShell";
+import ClientWorkflowNav from "@/components/ClientWorkflowNav";
 import NavigationTrail from "@/components/NavigationTrail";
 import ShowroomApp from "@/components/showroom/ShowroomApp";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
-import { snapshotToCatalog } from "@/lib/revision-domain";
+import { snapshotToCatalog, withAuthoritativeBusinessSettings } from "@/lib/revision-domain";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import { getContentRevision, listContentRevisions } from "@/lib/revision-service";
@@ -53,9 +54,9 @@ export default async function RevisionPreviewPage({
   const business = await runtimeBusinessById(request.business_id);
   if (!business) notFound();
   const latest = (await listContentRevisions(requestId))[0]?.id === revision.id;
-  const snapshot = requireRevisionSnapshotV4(
-    revision.snapshot_json,
-    SHOWROOM_COMPONENT_BANK_LATEST,
+  const snapshot = withAuthoritativeBusinessSettings(
+    requireRevisionSnapshotV4(revision.snapshot_json, SHOWROOM_COMPONENT_BANK_LATEST),
+    business,
   );
   const readiness = blueprintReadiness(
     snapshot,
@@ -86,6 +87,7 @@ export default async function RevisionPreviewPage({
         ]}
         fallback={`/dashboard/requests/${requestId}`}
       />
+      <ClientWorkflowNav requestId={requestId} revisionId={revisionId} active="preview" canEdit={user.access_role !== "client"} />
       <section className="panel revision-preview-head">
         <div>
           <span className={`badge ${revision.status}`}>{revision.status.replaceAll("_", " ")}</span>
@@ -93,14 +95,6 @@ export default async function RevisionPreviewPage({
           <p>Request {request.public_ref} · based on live showroom version {revision.base_content_version}</p>
           {revision.summary ? <p><strong>What changed:</strong> {revision.summary}</p> : null}
         </div>
-        {revision.status === "draft" ? (
-          <div className="inline-actions">
-            <Link className="btn brand" href={`/dashboard/requests/${requestId}/revisions/${revision.id}/studio`}>Continue design</Link>
-            {hasCapability(user, "operations:manage") ? (
-              <Link className="btn secondary" href={`/dashboard/requests/${requestId}/revisions/${revision.id}/edit`}>Detailed editor</Link>
-            ) : null}
-          </div>
-        ) : null}
       </section>
       {query.recipe ? (
         <section className="panel recipe-difference">
@@ -166,7 +160,7 @@ export default async function RevisionPreviewPage({
         <section className="panel"><h2>Client decision note</h2><p className="request-copy">{revision.decision_comment}</p></section>
       ) : null}
       <section className="revision-showroom" aria-label={`Revision ${revision.revision_number} showroom preview`}>
-        <ShowroomApp catalog={catalog} previewMode />
+        <ShowroomApp catalog={catalog} previewMode embedded privateMediaRequestId={requestId} />
       </section>
     </DashboardShell>
   );

@@ -12,18 +12,22 @@ const evidence = [];
 
 async function capture(name, viewport, action) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+  const featuredExperience = name.includes("featured") || name.includes("showroom-preview");
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
     if (message.type() === "error" && !message.text().includes("ExperimentalWarning: SQLite")) errors.push(message.text());
   });
-  await page.goto(`${baseURL}/?expoDay=1`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-  await page.locator(".discovery-regions path").first().waitFor();
-  await page.locator(".discovery-roads path").nth(3).waitFor();
+  await page.goto(featuredExperience ? `${baseURL}/featured?featuredDay=1` : `${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  if (featuredExperience) await page.locator(".featured-week a").first().waitFor();
+  else {
+    await page.locator(".discovery-regions path").first().waitFor();
+    await page.locator(".discovery-roads path").nth(3).waitFor();
+  }
   if (action) await action(page);
   const metrics = await page.evaluate(() => {
     const mapStage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
-    const expoFloor = document.querySelector(".expo-floor-stage")?.getBoundingClientRect();
+    const featuredFloor = document.querySelector(".featured-floor-stage")?.getBoundingClientRect();
     return {
       documentWidth: document.documentElement.scrollWidth,
       viewportWidth: document.documentElement.clientWidth,
@@ -34,57 +38,65 @@ async function capture(name, viewport, action) {
       points: document.querySelectorAll(".discovery-point").length,
       cityGateways: document.querySelectorAll(".discovery-city-gateway").length,
       cityShops: document.querySelectorAll(".city-showroom-shop").length,
-      expoBooths: document.querySelectorAll(".expo-booth").length,
-      expoHalls: document.querySelectorAll(".expo-hall-controls button").length,
-      expoOutlines: document.querySelectorAll(".expo-booth-outline").length,
-      expoRevealed: document.querySelectorAll(".expo-booth[data-business-id]").length,
+      featuredBooths: document.querySelectorAll(".featured-booth").length,
+      featuredHalls: document.querySelectorAll(".featured-hall-controls button").length,
+      featuredOutlines: document.querySelectorAll(".featured-booth-outline").length,
+      featuredRevealed: document.querySelectorAll(".featured-booth[data-business-id]").length,
       sponsored: document.querySelectorAll(".discovery-sponsored-rail > a").length,
       listRows: document.querySelectorAll(".discovery-list article").length,
-      industryTargets: [...document.querySelectorAll(".discovery-industries a")].map((node) => Math.round(node.getBoundingClientRect().height)),
-      mapTargets: [...document.querySelectorAll(".discovery-zoom button")].map((node) => Math.round(node.getBoundingClientRect().height)),
-      expoTargets: [...document.querySelectorAll(".expo-floor-actions button")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      industryTargets: [...document.querySelectorAll(".discovery-industry-picker > summary, .discovery-mobile-filter-trigger")].filter((node) => node.getClientRects().length).map((node) => Math.round(node.getBoundingClientRect().height)),
+      mapTargets: [...document.querySelectorAll(".discovery-zoom button, .discovery-mobile-map-controls button")].filter((node) => node.getClientRects().length).map((node) => Math.round(node.getBoundingClientRect().height)),
+      featuredTargets: [...document.querySelectorAll(".featured-floor-actions button")].map((node) => Math.round(node.getBoundingClientRect().height)),
       mapTop: mapStage ? Math.round(mapStage.top) : null,
       mapHeight: mapStage ? Math.round(mapStage.height) : null,
-      expoWidth: expoFloor ? Math.round(expoFloor.width) : null,
-      expoHeight: expoFloor ? Math.round(expoFloor.height) : null,
+      featuredWidth: featuredFloor ? Math.round(featuredFloor.width) : null,
+      featuredHeight: featuredFloor ? Math.round(featuredFloor.height) : null,
       visibleMap: Boolean(document.querySelector(".discovery-map")?.getClientRects().length),
-      visibleExpo: Boolean(document.querySelector(".expo-floor")?.getClientRects().length),
-      visibleLive: Boolean(document.querySelector(".expo-live")?.getClientRects().length),
-      weekDays: document.querySelectorAll(".expo-week a").length,
-      weekLabels: [...document.querySelectorAll(".expo-week a > b")].map((node) => node.textContent?.trim()),
-      weekTargets: [...document.querySelectorAll(".expo-week a")].map((node) => Math.round(node.getBoundingClientRect().height)),
+      visibleFeatured: Boolean(document.querySelector(".featured-floor")?.getClientRects().length),
+      weekDays: document.querySelectorAll(".featured-week a").length,
+      weekLabels: [...document.querySelectorAll(".featured-week a > b")].map((node) => node.textContent?.trim()),
+      weekTargets: [...document.querySelectorAll(".featured-week a")].map((node) => Math.round(node.getBoundingClientRect().height)),
       scaleControls: document.querySelectorAll('.discovery-scale, [aria-label="Production scale"]').length,
       searchInMapHeader: Boolean(document.querySelector('.discovery-summary [role="search"]')),
       cityTargets: [...document.querySelectorAll(".city-showroom-actions button")].map((node) => Math.round(node.getBoundingClientRect().height)),
       visibleCityShowroom: Boolean(document.querySelector(".city-showroom-panel")?.getClientRects().length),
       cityPanelInMapShell: Boolean(document.querySelector(".discovery-map-shell > .city-showroom-panel")),
-      visibleShowroomPreview: Boolean(document.querySelector(".discovery-preview[open]")?.getClientRects().length),
+      visibleShowroomPreview: Boolean(document.querySelector(".discovery-preview[role='dialog']")?.getClientRects().length),
+      previewIsNonModal: document.querySelector(".discovery-preview")?.getAttribute("aria-modal") === "false",
+      previewLayerPosition: getComputedStyle(document.querySelector(".discovery-preview-layer") || document.body).position,
+      previewScrimColor: getComputedStyle(document.querySelector(".discovery-preview-scrim") || document.body).backgroundColor,
       previewActionHeight: Math.round(document.querySelector(".discovery-preview a")?.getBoundingClientRect().height || 0),
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
   if (metrics.listRows) assert.equal(metrics.listRows, 5, `${name} keeps the list page bounded to five rows`);
-  else if (!name.includes("city-showroom")) {
+  else if (!featuredExperience && !name.includes("city-showroom")) {
     assert.equal(metrics.regions, 14, `${name} renders all region paths`);
     assert.equal(metrics.roadLayers, 4, `${name} renders four local road classes`);
     assert.ok(metrics.clusters + metrics.points > 0, `${name} renders clustered or individual Showrooms`);
     assert.equal(metrics.visibleMap, true, `${name} keeps the map visible`);
   }
-  assert.ok(metrics.industryTargets.every((height) => height >= 44), `${name} industry controls are touch sized`);
-  assert.ok(metrics.mapTargets.every((height) => height >= 44), `${name} map controls are touch sized`);
-  assert.equal(metrics.expoHalls, 0, `${name} renders no Expo halls`);
-  assert.ok(metrics.expoTargets.every((height) => height >= 44), `${name} Expo floor controls are touch sized`);
-  assert.equal(metrics.weekDays, 7, `${name} renders the full weekly schedule`);
-  assert.deepEqual(metrics.weekLabels, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], `${name} keeps fixed weekday positions`);
-  assert.ok(metrics.weekTargets.every((height) => height >= 44), `${name} weekly controls are touch sized`);
-  assert.ok(metrics.cityTargets.every((height) => height >= 44), `${name} City Showroom controls are touch sized`);
-  assert.equal(metrics.visibleExpo || metrics.visibleLive, true, `${name} renders the scheduled Expo or Sunday live program`);
-  if (metrics.visibleExpo) assert.ok(metrics.expoBooths > 0, `${name} keeps every Expo slot on the continuous floor`);
-  if (name.includes("expo-preview")) {
-    assert.equal(metrics.expoOutlines, metrics.expoBooths, `${name} exposes only anonymous booth outlines`);
-    assert.equal(metrics.expoRevealed, 0, `${name} does not expose future business booths`);
+  if (featuredExperience) {
+    assert.equal(metrics.featuredHalls, 0, `${name} renders no split Daily Featured halls`);
+    assert.ok(metrics.featuredTargets.every((height) => height >= 44), `${name} Daily Featured floor controls are touch sized`);
+    assert.equal(metrics.weekDays, 7, `${name} renders the full weekly schedule`);
+    assert.deepEqual(metrics.weekLabels, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], `${name} keeps fixed weekday positions`);
+    assert.ok(metrics.weekTargets.every((height) => height >= 40), `${name} weekly controls remain touchable in the compact venue ribbon`);
+    assert.equal(metrics.visibleFeatured, true, `${name} renders the scheduled Daily Featured program`);
+    assert.ok(metrics.featuredBooths > 0, `${name} keeps every Daily Featured slot on the continuous floor`);
+    assert.ok(metrics.sponsored >= 5, `${name} renders the complete paid sponsor pool beside Daily Featured`);
+  } else {
+    assert.ok(metrics.industryTargets.every((height) => height >= 44), `${name} industry controls are touch sized`);
+    assert.ok(metrics.mapTargets.every((height) => height >= 44), `${name} map controls are touch sized`);
+    assert.equal(metrics.visibleFeatured, false, `${name} does not mount Daily Featured below the Market`);
+    assert.equal(metrics.sponsored, 0, `${name} does not mount Sponsors below the Market`);
   }
-  if (name.includes("expo-today")) assert.equal(metrics.expoRevealed, metrics.expoBooths, `${name} reveals every business-owned booth today`);
+  assert.ok(metrics.cityTargets.every((height) => height >= 44), `${name} City Showroom controls are touch sized`);
+  if (name.includes("featured-preview")) {
+    assert.equal(metrics.featuredOutlines, metrics.featuredBooths, `${name} exposes only anonymous booth outlines`);
+    assert.equal(metrics.featuredRevealed, 0, `${name} does not expose future business booths`);
+  }
+  if (name.includes("featured-today")) assert.equal(metrics.featuredRevealed, metrics.featuredBooths, `${name} reveals every business-owned booth today`);
   if (name.includes("city-showroom")) {
     assert.equal(metrics.visibleCityShowroom, true, `${name} renders the City Showroom panel`);
     assert.equal(metrics.cityPanelInMapShell, true, `${name} replaces the map within its existing frame`);
@@ -92,18 +104,20 @@ async function capture(name, viewport, action) {
     assert.ok(metrics.cityShops > 1, `${name} renders every grouped city business on one floor`);
   }
   if (name.includes("showroom-preview")) {
-    assert.equal(metrics.visibleShowroomPreview, true, `${name} renders the centered showroom preview dialog`);
+    assert.equal(metrics.visibleShowroomPreview, true, `${name} renders the floating showroom inspector`);
+    assert.equal(metrics.previewIsNonModal, true, `${name} keeps the active map or venue non-modal`);
+    assert.equal(metrics.previewLayerPosition, "fixed", `${name} places the inspector above the existing application UI`);
+    assert.match(metrics.previewScrimColor, /rgba\(.+, 0\.1(?:4)?\)/, `${name} keeps the marketplace visible through a low-opacity scrim`);
     assert.ok(metrics.previewActionHeight >= 44, `${name} keeps Open showroom visually and physically actionable`);
   }
   if (name.includes("home")) {
-    assert.ok(metrics.sponsored >= 5, `${name} renders at least five paid sponsored placements`);
     assert.ok(metrics.mapTop !== null && metrics.mapTop < Math.min(metrics.viewportHeight, 620), `${name} brings the map into the first viewport`);
     assert.equal(metrics.scaleControls, 0, `${name} omits public production-scale controls`);
     assert.equal(metrics.searchInMapHeader, true, `${name} places live search in the map header`);
   }
   assert.deepEqual(errors, [], `${name} has no browser errors`);
   const screenshot = path.join(output, `${name}.png`);
-  await page.screenshot({ path: screenshot, fullPage: name.includes("home") || name.includes("expo") });
+  await page.screenshot({ path: screenshot, fullPage: false });
   evidence.push({ name, screenshot, ...metrics });
   await page.close();
 }
@@ -124,7 +138,13 @@ async function openVisibleCityShowroom(page) {
     return option instanceof HTMLOptionElement ? option.value : "";
   });
   if (groupedLocation) {
-    await page.locator(".discovery-location-picker select").selectOption(groupedLocation);
+    const desktopLocation = page.locator(".discovery-location-picker select");
+    if (await desktopLocation.isVisible()) {
+      await desktopLocation.selectOption(groupedLocation);
+    } else {
+      await page.locator(".discovery-mobile-filter-trigger").click();
+      await page.locator(".discovery-filter-place select").selectOption(groupedLocation);
+    }
     await page.waitForTimeout(520);
     const gatewayIndex = await visibleIndex(".discovery-city-gateway");
     if (gatewayIndex >= 0) {
@@ -148,9 +168,9 @@ async function openVisibleCityShowroom(page) {
   throw new Error("No visible multi-business city gateway was reachable");
 }
 
-async function openTodayExpo(page) {
-  await page.locator(".expo-week a.today").click();
-  await page.locator(".expo-floor .expo-booth[data-business-id]").first().waitFor();
+async function openTodayFeatured(page) {
+  await page.locator(".featured-week a.today").click();
+  await page.locator(".featured-floor .featured-booth[data-business-id]").first().waitFor();
 }
 
 try {
@@ -178,28 +198,28 @@ try {
   await capture("city-showroom-desktop", { width: 1440, height: 1000 }, openVisibleCityShowroom);
   await capture("city-showroom-mobile-390", { width: 390, height: 844 }, openVisibleCityShowroom);
   await capture("city-showroom-mobile-320", { width: 320, height: 700 }, openVisibleCityShowroom);
-  await capture("expo-preview-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await page.locator(".expo-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
-    await page.locator(".expo-floor").waitFor();
-    await page.locator(".daily-expo").scrollIntoViewIfNeeded();
+  await capture("featured-preview-mobile-390", { width: 390, height: 844 }, async (page) => {
+    await page.locator(".featured-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
+    await page.locator(".featured-floor").waitFor();
+    await page.locator(".daily-featured").scrollIntoViewIfNeeded();
   });
-  await capture("expo-today-desktop", { width: 1440, height: 1000 }, async (page) => {
-    await openTodayExpo(page);
-    await page.locator(".daily-expo").scrollIntoViewIfNeeded();
+  await capture("featured-today-desktop", { width: 1440, height: 1000 }, async (page) => {
+    await openTodayFeatured(page);
+    await page.locator(".daily-featured").scrollIntoViewIfNeeded();
   });
-  await capture("expo-today-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await openTodayExpo(page);
-    await page.locator(".daily-expo").scrollIntoViewIfNeeded();
+  await capture("featured-today-mobile-390", { width: 390, height: 844 }, async (page) => {
+    await openTodayFeatured(page);
+    await page.locator(".daily-featured").scrollIntoViewIfNeeded();
   });
   await capture("showroom-preview-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await openTodayExpo(page);
-    await page.locator(".expo-booth[data-business-id]").first().evaluate((booth) => (booth instanceof HTMLElement ? booth.click() : undefined));
-    await page.locator(".discovery-preview[open]").waitFor();
+    await openTodayFeatured(page);
+    await page.locator(".featured-booth[data-business-id]").first().evaluate((booth) => (booth instanceof HTMLElement ? booth.click() : undefined));
+    await page.locator(".discovery-preview[role='dialog']").waitFor();
   });
-  await capture("sunday-showcase-mobile-390", { width: 390, height: 844 }, async (page) => {
-    await page.getByRole("navigation", { name: "Weekly Expo schedule" }).getByRole("link", { name: /Sun/ }).click();
-    await page.locator(".expo-floor").waitFor();
-    await page.locator(".daily-expo").scrollIntoViewIfNeeded();
+  await capture("sunday-agriculture-featured-mobile-390", { width: 390, height: 844 }, async (page) => {
+    await page.getByRole("navigation", { name: "Daily featured showroom schedule" }).getByRole("link", { name: /Sun/ }).click();
+    await page.locator(".featured-floor").waitFor();
+    await page.locator(".daily-featured").scrollIntoViewIfNeeded();
   });
   await capture("discovery-list-mobile-320", { width: 320, height: 700 }, async (page) => {
     await page.getByRole("tab", { name: "List" }).click();

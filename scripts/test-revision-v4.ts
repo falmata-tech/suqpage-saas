@@ -89,6 +89,57 @@ assert.equal(
   "opening",
 );
 
+const storyComponent = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.find(
+  (component) => component.slot === "content" && component.acceptedContentTypes.includes("story"),
+)!;
+const highlightsComponent = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.find(
+  (component) => component.slot === "content" && component.acceptedContentTypes.includes("highlights"),
+)!;
+const ctaComponent = SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.components.find(
+  (component) => component.slot === "call_to_action" && component.acceptedContentTypes.includes("call_to_action"),
+)!;
+const legacyStory = {
+  key: "legacy-story", type: "story", kicker: "Our work", title: "Built with care",
+  body: "A retained business story.", media: [], quote: "Made for useful work.",
+} as const;
+const process = {
+  key: "legacy-process", type: "highlights", kicker: "Process", title: "How the work moves",
+  body: "A retained process introduction.", media: [], items: [{ title: "Confirm", body: "Confirm the supplied requirement." }],
+} as const;
+const next = {
+  key: "next", type: "call_to_action", kicker: "Next", title: "Start an inquiry",
+  body: "Continue directly with the business.", media: [], action: "inquiry", actionLabel: "Inquire",
+} as const;
+const legacySections = [
+  requiredComponents[0],
+  requiredComponents[1],
+  storyComponent,
+  highlightsComponent,
+  requiredComponents[2],
+  ctaComponent,
+  requiredComponents[3],
+].map((component, index) => ({
+  key: `legacy-${component.slot}-${index}`,
+  component: component.id,
+  ...required(component),
+  contentBlockKey:
+    component.slot === "hero" ? block.key
+      : index === 2 ? legacyStory.key
+        : index === 3 ? process.key
+          : component.slot === "call_to_action" ? next.key
+            : null,
+}));
+const canonicalLegacy = parseRevisionSnapshotV4({
+  ...input,
+  contentBlocks: { schemaVersion: 1, blocks: [block, legacyStory, process, next] },
+  designManifest: { ...input.designManifest, sections: legacySections },
+}, SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE);
+assert.equal(canonicalLegacy.contentBlocks.blocks.some((entry) => entry.type === "story"), false);
+assert.equal(canonicalLegacy.designManifest.sections.length, 6);
+const canonicalChapter = canonicalLegacy.contentBlocks.blocks.find((entry) => entry.type === "highlights");
+assert.ok(canonicalChapter && canonicalChapter.body.includes("A retained business story."));
+assert.ok(canonicalChapter && canonicalChapter.body.includes("A retained process introduction."));
+
 assert.throws(
   () => parseRevisionSnapshotV4({ ...input, unexpected: true }, SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE),
   RevisionError,

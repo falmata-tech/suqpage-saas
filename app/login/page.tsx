@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/app/actions";
 import MirtPageBrand from "@/components/MirtPageBrand";
+import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import { currentUser } from "@/lib/auth";
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
@@ -16,7 +17,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
           <span className="platform-task-eyebrow">Business workspace</span>
           <h1 id="login-title">Welcome back to MirtPage.</h1>
           <p>Manage your showroom, customer inquiries, design requests, private previews, and support conversations in one protected workspace.</p>
-          <div className="platform-context-note"><strong>Not on MirtPage yet?</strong><span>Create a private workspace and brief your first showroom without waiting for an invitation.</span></div>
+          <div className="platform-context-note"><strong>Not on MirtPage yet?</strong><span>Create a private workspace and present your custom work, ready products, or wholesale supply in one showroom.</span></div>
         </div>
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>Account access</span><h2>Sign in</h2><p>Use the email and password connected to your MirtPage account.</p></div>
@@ -32,5 +33,6 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         </div>
       </section>
     </main>
+    <PublicMobileNavigation />
   </div>;
 }

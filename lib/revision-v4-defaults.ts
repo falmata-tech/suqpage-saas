@@ -413,27 +413,21 @@ function buildContentBlocks(
       media: imageMedia("hero_image", business.hero_image_path, business.name),
     },
     {
-      key: "brand-story",
-      type: "story",
-      kicker: brief?.story.kicker || "Showroom story",
-      title: brief?.story.title || `How ${business.name} approaches the work`,
-      body: firstText(
-        [business.description],
-        "A focused product showroom with a direct inquiry path.",
-      ),
-      media: [],
-      quote: brief?.story.quote || firstText([business.tagline], "Selected with care."),
-    },
-    {
-      key: "showroom-highlights",
+      key: "story-process",
       type: "highlights",
-      kicker: "Process",
-      title: brief?.process.title || "From product selection to a clear inquiry",
-      body: brief?.process.body || "A simple path for turning supplied catalog details into a useful conversation.",
+      kicker: brief?.story.kicker || "Story and process",
+      title: brief?.story.title || brief?.process.title || `How ${business.name} approaches the work`,
+      body: [
+        firstText(
+          [business.description],
+          "A focused product showroom with a direct inquiry path.",
+        ),
+        brief?.process.body,
+      ].filter(Boolean).join("\n\n"),
       media: [],
       items: brief ? brief.process.items.map((title) => ({
         title,
-        body: `Confirm ${title.toLowerCase()} before production or supply is quoted.`,
+        body: `This stage is used to ${title.toLowerCase()} before production or supply is quoted.`,
       })) : [
         {
           title: "Explore the range",
@@ -501,15 +495,10 @@ function buildDesignManifest(
           mediaIntegration: profile.heroMediaIntegration,
           surfaceRole: "accent-soft",
         }),
-        section("content-story", profile.story, profile, "brand-story", {
+        section("content-story-process", profile.highlights, profile, "story-process", {
           alignment: "start",
         }, {
           mediaIntegration: profile.storyMediaIntegration,
-          surfaceRole: "surface",
-        }),
-        section("content-process", profile.highlights, profile, "showroom-highlights", {
-          alignment: "end",
-        }, {
           surfaceRole: "secondary-soft",
         }),
         section("catalog-1", profile.catalog, profile, null, {

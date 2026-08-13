@@ -4,7 +4,7 @@ title: Complete demo showroom portfolio
 status: done
 related: [FE-014, FE-022, FE-024, BE-013, BE-022, DEP-011, DEP-019]
 owners: [product, frontend, design]
-last_updated: 2026-08-02
+last_updated: 2026-08-11
 change_level: L2
 ---
 
@@ -12,11 +12,10 @@ change_level: L2
 
 ## Problem and outcome
 
-The disposable local portfolio proves marketplace scale, but 48 of its 58
-showrooms still look like repeated test records: they share broad copy, media,
-component profiles, and three generic offerings. A team member therefore cannot
-use the reset environment as a credible example of the intended customer-to-
-designer workflow.
+The earlier disposable local portfolio proved marketplace scale, but most of
+its records looked like repeated test data. The expanded portfolio must remain
+a credible example of the intended customer-to-designer workflow as fixtures
+are added.
 
 The outcome is a complete fictional portfolio in which every active showroom is
 traceable to an authored customer brief and an advised art direction. Every
@@ -47,10 +46,15 @@ preferences.
 
 ## Contracts
 
-- The fixture portfolio contains exactly 58 active fictional showrooms and
+- The fixture portfolio contains exactly 66 active fictional showrooms and
   exactly four published offerings per showroom after reset.
+- The 56 expanded creative records include exactly nine growing-factory
+  profiles alongside workshop and producer profiles.
 - Every fixture references a non-empty logo, hero, booth, and four non-empty
   offering images that exist under managed public fixture paths.
+- Every showroom and offering resolves to a reviewed production-video family;
+  unknown content fails fixture admission instead of inheriting an unrelated
+  default, and an offering may use a more specific video than its showroom.
 - Each showroom recipe remains valid under the current immutable component-bank,
   typed-content, custom-palette, contrast, media-authority, and publication rules.
 - Catalog search and filters remain explicit recipe properties; the compact
@@ -58,6 +62,9 @@ preferences.
 - Every project brief records the fictional customer's request, customer goal,
   palette advice, final palette, logo idea, visual direction, composition reason,
   media plan, and review state.
+- Internal fixture briefs and audit records identify demonstration businesses as
+  fictional. Public showroom descriptions use polished, neutral language and do
+  not expose seed, provisional-copy, or test-fixture terminology.
 - Motion may vary by brief but must use admitted values and retain the existing
   reduced-motion behavior.
 - Generated media is demonstration artwork and must not be represented as a
@@ -83,6 +90,13 @@ Scenario: Visitor uses a fixture on a small screen
   WHEN it is opened at 390 CSS pixels or with reduced motion enabled
   THEN content remains readable without horizontal overflow
   AND motion never blocks browsing, product review, or inquiry
+
+Scenario: Visitor reads a demonstration showroom
+  GIVEN the business is an explicitly fictional local fixture
+  WHEN its published showroom is rendered
+  THEN the customer-facing copy reads as a coherent showroom presentation
+  AND fixture provenance remains available to staff without appearing as
+  development or provisional-copy language on the public page
 ```
 
 ## Quality impact
@@ -98,7 +112,9 @@ Scenario: Visitor uses a fixture on a small screen
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| 58 briefs, complete media, four offerings | fixture/integration | `scripts/test-demo-client-portfolio.ts` |
+| 66 briefs, complete media, four offerings | fixture/integration | `scripts/test-demo-client-portfolio.ts` |
+| Natural public copy with explicit internal provenance | fixture/integration | `scripts/test-demo-client-portfolio.ts` |
+| Reviewed showroom and offering video families | fixture/integration | `scripts/test-demo-client-portfolio.ts` |
 | Valid distinct recipes and palettes | contract | `scripts/test-showroom-benchmarks.ts`, `scripts/test-demo-client-portfolio.ts` |
 | Desktop/mobile presentation | production browser | `scripts/capture-demo-client-portfolio.ts` |
 | Existing inquiry, tenant, and recipe behavior | regression/security | `npm run check`, `npm run test:acceptance` |
@@ -119,10 +135,11 @@ no production data rollout.
 
 ## Evidence
 
-Evidence: completed locally on 2026-08-02 against the explicitly disposable database.
-Reset and `scripts/test-demo-client-portfolio.ts` proved 58 active fictional
-showrooms, 58 briefs/logos/heroes/booths, at least 40 palette signatures, and
-232 independent imaged offerings. All 58 showrooms passed 1440px and 390px
-browser capture with no broken media, overflow, browser-console, section-order,
-or floating-inquiry failures. `npm run check`, all ten acceptance workflows, and
-`npm run release` passed. Production customer publication remains excluded.
+Evidence: `scripts/test-demo-client-portfolio.ts` passed on 2026-08-11 for the
+66-showroom, 264-offering portfolio and its controlled production-video mapping.
+
+The original 58-showroom admission passed on 2026-08-02. The current expanded
+contract is 66 active fictional showrooms, 66 briefs/logos/heroes/booths, at
+least 40 palette signatures, nine growing factories, and 264 independent imaged
+offerings. Current browser and release evidence is recorded in traceability;
+production customer publication remains excluded.

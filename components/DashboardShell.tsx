@@ -30,42 +30,62 @@ export default async function DashboardShell({ user, business, children }: { use
           ? "Assigned businesses"
           : "Private workspace";
 
-  const groups = platformAdmin && !business ? [
+  const globalGroups = platformAdmin && !business ? [
     group("Platform", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
       { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses" },
-      { href: "/dashboard/admin/clients", label: "Clients", icon: "clients" },
       { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
     ]),
     group("Operations", [
       { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" },
       { href: "/dashboard/support", label: "Support inbox", icon: "support" },
-      { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" },
-      { href: "/dashboard/account-health", label: "Monthly accounts", icon: "account" },
+      { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" },
     ]),
     group("Showroom system", [
-      { href: "/dashboard/admin/discovery", label: "Discovery profiles", icon: "discovery" },
+      { href: "/dashboard/admin/featured-schedule", label: "Featured schedule", icon: "schedule" },
       { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
     ]),
-  ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [
-    group("Workspace", [
+  ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;
+  const focusedStaffGroups = business && (operations || teamMember) ? [
+    group("Business workspace", [
+      { href: dashboardHref, label: "Overview", icon: "overview" },
+      platformAdmin ? { href: `/dashboard/settings${query}`, label: "Business details", icon: "settings" } : null,
+      { href: `/dashboard/requests${query}`, label: "Showroom project", icon: "requests" },
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Offerings", icon: "offerings" } : null,
+      { href: `/preview/@${business.handle}`, label: "View showroom", icon: "public", external: true },
+    ]),
+    group("Customers & discovery", [
+      platformAdmin ? { href: `/dashboard/admin/discovery/${business.id}`, label: "Marketplace", icon: "discovery" } : null,
+      operations ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
+    ]),
+    group("Business administration", [
+      operations ? { href: `/dashboard/account-health${query}`, label: "Renewal", icon: "renewal" } : null,
+    ]),
+    group("Leave business workspace", [
+      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
+      { href: platformAdmin ? "/dashboard/admin/businesses" : "/dashboard", label: "Switch business", icon: "switch" },
+      platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
+    ]),
+  ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;
+  const standardGroups = [
+    group(business ? "Business workspace" : "Workspace", [
       { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
       operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
       canMaintainProducts ? { href: `/dashboard/products${query}`, label: client ? "My offerings" : "Offerings", icon: "offerings" } : null,
-      client ? { href: "/dashboard/requests", label: "Requests", icon: "requests" } : null,
+      client ? { href: "/dashboard/requests", label: "Showroom project", icon: "requests" } : null,
       teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
-      operations ? { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" } : null,
+      operations && !business ? { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" } : null,
       (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
-      (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Account & insights", icon: "insights" } : null,
+      (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
       reviewable ? { href: `/preview/@${business!.handle}`, label: "Review showroom", icon: "workspace" } : null,
       (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View showroom", icon: "public", external: true } : null,
       { href: "/dashboard/support", label: client ? "MirtPage support" : "Support inbox", icon: "support" },
     ]),
     group("Customer operations", [
-      operations ? { href: "/dashboard/clients/new", label: "Create client workspace", icon: "clients" } : null,
-      operations ? { href: "/dashboard/requests/on-behalf", label: "Create client request", icon: "requests" } : null,
+      operations ? { href: "/dashboard/clients/new", label: "Add business", icon: "businesses" } : null,
+      operations && !business ? { href: "/dashboard/requests/on-behalf", label: "Record a request", icon: "requests" } : null,
       operations ? { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" } : null,
-      operations && !business ? { href: "/dashboard/account-health", label: "Monthly accounts", icon: "account" } : null,
+      operations && !business ? { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" } : null,
     ]),
     group("Design", [
       hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library", icon: "design" } : null,
@@ -74,6 +94,7 @@ export default async function DashboardShell({ user, business, children }: { use
       platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const groups = globalGroups || focusedStaffGroups || standardGroups;
 
   return <div className="dashboard">
     <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={identityContext} groups={groups} />
