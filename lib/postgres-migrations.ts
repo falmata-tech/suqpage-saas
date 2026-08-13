@@ -7,11 +7,18 @@ function quotedSchema(schema: string) {
   return `"${schema}"`;
 }
 
+function quotedRole(role: string) {
+  if (!SCHEMA_NAME.test(role)) throw new Error("The PostgreSQL migration role is invalid.");
+  return `"${role}"`;
+}
+
 export async function migratePostgresDatabase(
   runner: PostgresTransactionRunner,
   schema = "public",
+  migrationRole = "",
 ) {
   return runner.transaction(async () => {
+    if (migrationRole) await runner.query(`SET LOCAL ROLE ${quotedRole(migrationRole)}`);
     await runner.query(`SET LOCAL search_path TO ${quotedSchema(schema)}`);
     await runner.query("SELECT pg_advisory_xact_lock(6870619271341)");
     const migration31 = await runner.query<{ version: number }>(

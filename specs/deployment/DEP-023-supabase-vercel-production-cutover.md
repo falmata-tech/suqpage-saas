@@ -66,11 +66,12 @@ a tested rollback before public DNS changes.
 6. After authority changes, SQLite is retained read-only for rollback and no
    dual writes occur.
 7. A provider-issued temporary migration login may assume an explicitly named,
-   identifier-safe database owner role only inside the guarded copy transaction;
-   the role is never inferred from untrusted input or retained as a runtime secret.
-   The linked-project wrapper parses that credential in memory and never prints
-   or persists it. Provider statement timeout is disabled only inside this
-   guarded copy transaction; runtime statement timeouts remain bounded.
+   identifier-safe database owner role only inside the guarded copy or additive
+   migration transaction; the role is never inferred from untrusted input or
+   retained as a runtime secret. The linked-project wrapper parses that
+   credential in memory and never prints or persists it. Provider statement
+   timeout is disabled only inside the guarded copy transaction; runtime
+   statement timeouts remain bounded.
 8. Production uses a dedicated `mirtpage_runtime` login with schema usage,
    application-table DML, and sequence use rather than the database owner. Its
    generated credential is verified through the transaction pooler and retained

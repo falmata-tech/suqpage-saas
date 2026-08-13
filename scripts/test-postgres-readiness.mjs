@@ -89,6 +89,25 @@ try {
       MIRTPAGE_APPROVE_PRODUCTION_COPY: "COPY_TO_EMPTY_SUPABASE",
     },
   });
+  run("docker", [
+    "exec",
+    container,
+    "psql",
+    "-U",
+    "mirtpage",
+    "-d",
+    "mirtpage",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-c",
+    "CREATE ROLE migration_login LOGIN PASSWORD 'migration-only'; GRANT mirtpage TO migration_login;",
+  ]);
+  run(process.execPath, ["--import", "tsx", "scripts/migrate-postgres.ts"], {
+    env: {
+      MIRTPAGE_POSTGRES_DIRECT_URL: `postgresql://migration_login:migration-only@127.0.0.1:${port}/mirtpage`,
+      MIRTPAGE_POSTGRES_MIGRATION_ROLE: "mirtpage",
+    },
+  });
   console.log("Disposable PostgreSQL 17 schema, data, constraints, triggers, sequences, invariants, fingerprints, and read-only source rehearsal passed.");
 } finally {
   spawnSync("docker", ["stop", container], { stdio: "ignore" });

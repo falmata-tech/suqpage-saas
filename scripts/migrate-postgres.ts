@@ -24,6 +24,7 @@ async function main() {
     const result = await migratePostgresDatabase(
       new PostgresTransactionRunner(pool),
       process.env.MIRTPAGE_POSTGRES_MIGRATION_SCHEMA || "public",
+      process.env.MIRTPAGE_POSTGRES_MIGRATION_ROLE || "",
     );
     console.log(
       result.applied.length
