@@ -29,16 +29,21 @@ silently change product behavior to match convenient code.
    showroom identity.
 7. Add tests that prove every changed acceptance criterion. Security and data
    integrity fixes require regression tests.
-8. Run `npm run check`; use `npm run release` for release-affecting changes and
-   `npm run test:acceptance` for user workflows.
-9. Update spec status, traceability, ADRs, operational documentation, and every
+8. For visual work, run focused tests and capture the affected desktop/phone
+   states first. Give the user the live local URL or focused screenshots and
+   wait for explicit visual approval before running expensive full-suite,
+   release, container, or remote CI gates. Security, data-integrity, and
+   non-visual emergency fixes may proceed directly when delay would add risk.
+9. After visual approval, run `npm run check`; use `npm run release` for
+   release-affecting changes and `npm run test:acceptance` for user workflows.
+10. Update spec status, traceability, ADRs, operational documentation, and every
    affected master-prompt section so they describe the verified implementation
    rather than the previous or merely planned behavior.
-10. Review and commit only the files belonging to the current task, following
+11. Review and commit only the files belonging to the current task, following
     the task-isolation rules below.
-11. Report evidence, commit hash, limitations, mocks, and remaining rollout
+12. Report evidence, commit hash, limitations, mocks, and remaining rollout
     steps.
-12. After a major change is pushed and every required remote check passes,
+13. After a major change is pushed and every required remote check passes,
     compact the working context before starting unrelated work. Preserve durable
     decisions and evidence in the controlling spec, ADR, traceability, or
     operational document, then retain a concise handoff containing the current

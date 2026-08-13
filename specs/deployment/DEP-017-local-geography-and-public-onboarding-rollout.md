@@ -29,11 +29,11 @@ self-service onboarding release.
   the application image or Git history.
 - Signup endpoint rate-limit, audit, backup/restore, browser, and release gates.
 - Compatibility for existing admin invitation onboarding and `/request` links.
-- Browser and release gates for weekly Expo selection, deep exact-coordinate
+- Browser and release gates for weekly Daily Featured selection, deep exact-coordinate
   cluster expansion, and server-bounded List pagination.
 - Desktop/390px/320px gates for counted city gateways and one continuous,
   map-backed, touch-pannable virtual City Showroom floor.
-- Desktop/390px/320px gates for one continuous Expo floor, non-today anonymous
+- Desktop/390px/320px gates for one continuous Daily Featured floor, non-today anonymous
   booth outlines, the timed return to distinctly highlighted today, and
   zoom-end geographic rendering without device stalls.
 
@@ -103,7 +103,7 @@ text, session tokens, IP addresses, and raw geographic source metadata.
 |---|---|---|
 | Deterministic local geography and asset budget | operations | `scripts/test-discovery-geography.mjs` |
 | No remote map runtime requests | browser | `tests/acceptance/app.spec.ts` |
-| Weekly selector, Expo floor/redaction, city gateway/floor, exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
+| Weekly selector, Daily Featured floor/redaction, city gateway/floor, exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Signup backup/restore and security | operations/security | `scripts/test-operations.mjs`, `scripts/test-signup.ts` |
 | Production build and HTTP surface | release | `npm run release` |
 
@@ -127,9 +127,9 @@ additive and harmless when unused.
 ## Evidence
 
 Evidence: completed locally on 2026-08-01. Desktop, 390px, and 320px captures
-prove one bounded transformed Expo floor, anonymous future outlines, complete
+prove one bounded transformed Daily Featured floor, anonymous future outlines, complete
 today booths, persistent Today emphasis, touch-sized controls, enriched City
-Showroom/Expo environments, and no document overflow. Browser acceptance passed all
+Showroom/Daily Featured environments, and no document overflow. Browser acceptance passed all
 10 workflows, including the timed return and lower city zoom. `npm run check`
 and `npm run release` passed with production build, HTTP smoke, scale, security,
 trace privacy, and zero vulnerabilities. No production rollout or data migration

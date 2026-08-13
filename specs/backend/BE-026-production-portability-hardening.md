@@ -2,7 +2,7 @@
 id: BE-026
 title: Production portability hardening
 status: done
-related: [BE-002, BE-018, BE-024, FE-026, DEP-021, DEP-022, ADR-0012, ADR-0013]
+related: [BE-002, BE-018, BE-024, BE-028, FE-026, DEP-021, DEP-022, ADR-0012, ADR-0013]
 owners: [backend, security, operations]
 last_updated: 2026-08-03
 change_level: L3

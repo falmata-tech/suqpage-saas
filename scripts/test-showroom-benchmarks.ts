@@ -5,8 +5,8 @@ import { getAllBusinesses, getCatalogByBusinessId, getDb } from "../lib/db";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import {
   SEEDED_FEATURED_HANDLES,
-  seededExpoBoothPath,
-} from "../lib/expo-seed";
+  seededMarketplaceBoothPath,
+} from "../lib/marketplace-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 
@@ -44,7 +44,7 @@ for (const business of activeBusinesses) {
     }
   }
   assert.ok(
-    fs.existsSync(path.join(process.cwd(), "public", seededExpoBoothPath(business.handle))),
+    fs.existsSync(path.join(process.cwd(), "public", seededMarketplaceBoothPath(business.handle))),
     `${business.handle} has a generated booth image`,
   );
 }
@@ -78,8 +78,7 @@ const heroTreatments = new Set<string>();
 const headerComponents = new Set<string>();
 const footerComponents = new Set<string>();
 const catalogComponents = new Set<string>();
-const storyComponents = new Set<string>();
-const processComponents = new Set<string>();
+const storyProcessComponents = new Set<string>();
 const middleSequences = new Set<string>();
 const surfaceSequences = new Set<string>();
 for (const business of businesses) {
@@ -109,7 +108,7 @@ for (const business of businesses) {
   const componentIds = snapshot.designManifest.sections.map(
     (section) => section.component,
   );
-  assert.equal(componentIds.length, 7, `${business.handle} has the canonical section count`);
+  assert.equal(componentIds.length, 6, `${business.handle} has the canonical section count`);
   assert.equal(
     new Set(componentIds).size,
     componentIds.length,
@@ -141,14 +140,11 @@ for (const business of businesses) {
   const catalogSection = snapshot.designManifest.sections.find((section) =>
     section.component.startsWith("catalog."),
   );
-  const storySection = snapshot.designManifest.sections[2];
-  const processSection = snapshot.designManifest.sections[3];
-  assert.equal(storySection.properties.alignment, "start", `${business.handle} story starts`);
-  assert.equal(processSection.properties.alignment, "end", `${business.handle} process alternates`);
+  const storyProcessSection = snapshot.designManifest.sections[2];
+  assert.equal(storyProcessSection.properties.alignment, "start", `${business.handle} story and process chapter starts`);
   assert.ok(catalogSection, `${business.handle} has one catalog`);
   catalogComponents.add(catalogSection.component);
-  storyComponents.add(storySection.component);
-  processComponents.add(processSection.component);
+  storyProcessComponents.add(storyProcessSection.component);
   middleSequences.add(
     snapshot.designManifest.sections
       .slice(2, -2)
@@ -180,16 +176,15 @@ assert.ok(heroTreatments.size >= 6, "benchmarks exercise at least six hero media
 assert.equal(headerComponents.size, 7, "benchmarks exercise all seven header anatomies");
 assert.equal(footerComponents.size, 6, "benchmarks exercise all six footer anatomies");
 assert.ok(catalogComponents.size >= 7, "benchmarks exercise at least seven catalog anatomies");
-assert.ok(storyComponents.size >= 4, "benchmarks exercise at least four story anatomies");
-assert.ok(processComponents.size >= 3, "benchmarks exercise at least three process anatomies");
+assert.ok(storyProcessComponents.size >= 3, "benchmarks exercise at least three combined story and process anatomies");
 assert.deepEqual(
   [...middleSequences],
-  ["content-story>content-process>catalog-1"],
-  "all benchmarks preserve story, process, then products",
+  ["content-story-process>catalog-1"],
+  "all benchmarks preserve one story and process chapter before products",
 );
 assert.deepEqual(
   [...surfaceSequences],
-  ["surface>accent-soft>surface>secondary-soft>canvas>strong>inverse"],
+  ["surface>accent-soft>secondary-soft>canvas>strong>inverse"],
   "all benchmarks introduce both palette families before the strong close",
 );
 

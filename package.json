@@ -10,6 +10,7 @@
     "setup": "tsx scripts/setup.ts",
     "reset": "tsx scripts/setup.ts --reset",
     "migrate": "tsx scripts/migrate.ts",
+    "migrate:postgres": "tsx scripts/migrate-postgres.ts",
     "migrate:media": "tsx scripts/migrate-media-to-object-storage.ts",
     "reconcile:media": "tsx scripts/reconcile-media.ts",
     "rehearse:postgres": "tsx scripts/rehearse-postgres.ts",
@@ -49,8 +50,14 @@
     "test:live-showroom": "tsx scripts/test-live-showroom.ts",
     "test:rich-offering-migration": "tsx scripts/test-rich-offering-migration.ts",
     "test:discovery": "tsx scripts/test-discovery.ts",
+    "test:featured-schedule": "tsx scripts/test-featured-schedule.ts",
     "test:identity": "node scripts/test-platform-identity.mjs",
     "test:narrative": "node scripts/test-platform-narrative.mjs",
+    "test:homepage": "node scripts/test-homepage-composition.mjs",
+    "test:pwa": "node scripts/test-pwa-shell.mjs",
+    "test:pwa-visual": "node scripts/capture-pwa-shell.mjs",
+    "test:public-app-visual": "node scripts/capture-public-app-shell.mjs",
+    "test:accessibility": "node scripts/test-accessibility-audit.mjs",
     "test:discovery-geography": "node scripts/test-discovery-geography.mjs",
     "test:pagination": "tsx scripts/test-pagination.ts",
     "test:scalable-queries": "tsx scripts/test-scalable-queries.ts",
@@ -69,10 +76,12 @@
     "test:discovery-visual": "node scripts/capture-discovery-visuals.mjs",
     "test:platform-forms-visual": "node scripts/capture-platform-form-visuals.mjs",
     "test:workspace-visual": "node scripts/capture-workspace-navigation.mjs",
+    "test:focused-release-visual": "node scripts/capture-focused-release-visuals.mjs",
     "test:workflow": "node scripts/test-workflow.mjs",
     "validate:designs": "tsx scripts/validate-designs.ts",
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
+    "precheck": "npm run test:homepage",
     "check": "npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:requests && npm run test:signup && npm run test:revisions",
     "build:discovery-geography": "node scripts/build-discovery-geography.mjs",
     "release": "bash scripts/release.sh"
@@ -92,6 +101,7 @@
     "supercluster": "^8.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.62.1",
     "@types/d3-geo": "^3.1.1",
     "@types/d3-selection": "^3.0.11",
@@ -109,6 +119,7 @@
     "node": ">=24.18.1 <25"
   },
   "overrides": {
+    "nanoid": "3.3.17",
     "next": {
       "postcss": "8.5.25",
       "sharp": "0.35.3"

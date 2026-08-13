@@ -1,4 +1,4 @@
-# Ethiopia Expo geography attribution
+# Ethiopia discovery geography attribution
 
 `ethiopia-admin1-2023.geojson` is a property-reduced and coordinate-quantized
 copy of **ET_Admin1_2023**, downloaded from the FEWS NET Data Warehouse:
@@ -11,7 +11,7 @@ copy of **ET_Admin1_2023**, downloaded from the FEWS NET Data Warehouse:
 **ET_Admin2_2023** from the same dataset:
 
 - Source layer: https://fdw.fews.net/api/feature.geojson?layer=4696
-- Generated with: `npm run build:expo-geography`
+- Generated with: `npm run build:discovery-geography`
 
 `ethiopia-places-osm.geojson` and `ethiopia-major-roads-osm.geojson` are
 property-reduced, coordinate-quantized, and display-simplified derivatives of
@@ -28,5 +28,5 @@ it is not a routable street database.
 - Geofabrik attribution: https://www.geofabrik.de/geofabrik/geofabrik.html
 
 The local copies retain only the names, classifications, coordinates, and
-geometry needed for the MirtPage Expo overview. They are visual discovery aids,
+geometry needed for MirtPage discovery and Daily Featured Showrooms. They are visual discovery aids,
 not authoritative legal boundaries, navigation instructions, or a live map.

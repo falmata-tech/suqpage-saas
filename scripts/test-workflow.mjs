@@ -78,6 +78,7 @@ assert.match(typecheckScript, /path\.join\(process\.cwd\(\), "\.next", "dev", "t
 assert.match(typecheckScript, /next\/dist\/bin\/next", "typegen"/, "Typecheck must regenerate framework route types");
 assert.match(acceptanceRunner, /MIRTPAGE_NEXT_DIST_DIR: distDir/, "Acceptance must use its isolated Next.js output");
 assert.match(acceptanceRunner, /MIRTPAGE_NEXT_TSCONFIG: tsconfigName/, "Acceptance must isolate generated TypeScript configuration");
+assert.match(acceptanceRunner, /exclude: \["node_modules", "\.next", "\.next-\*"\]/, "Acceptance TypeScript must exclude generated build trees");
 assert.match(acceptanceRunner, /fs\.rmSync\(buildOutputPath/, "Acceptance must clean only its isolated Next.js output");
 assert.match(acceptanceRunner, /fs\.rmSync\(tsconfigPath/, "Acceptance must clean its generated TypeScript configuration");
 assert.match(agentContract, /showroom-projects\/WORKFLOW\.md/, "Agent contract must require the client-showroom workflow");

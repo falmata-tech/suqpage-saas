@@ -14,7 +14,6 @@
       "items": {
         "oneOf": [
           { "$ref": "#/$defs/hero" },
-          { "$ref": "#/$defs/story" },
           { "$ref": "#/$defs/highlights" },
           { "$ref": "#/$defs/information" },
           { "$ref": "#/$defs/callToAction" },
@@ -59,11 +58,6 @@
       "type": "object", "additionalProperties": false,
       "required": ["key", "type", "kicker", "title", "body", "media"],
       "properties": { "key": { "$ref": "#/$defs/key" }, "type": { "const": "hero" }, "kicker": { "type": "string", "maxLength": 100 }, "title": { "type": "string", "minLength": 1, "maxLength": 180 }, "body": { "type": "string", "maxLength": 3000 }, "media": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/media" } } }
-    },
-    "story": {
-      "type": "object", "additionalProperties": false,
-      "required": ["key", "type", "kicker", "title", "body", "media", "quote"],
-      "properties": { "key": { "$ref": "#/$defs/key" }, "type": { "const": "story" }, "kicker": { "type": "string", "maxLength": 100 }, "title": { "type": "string", "minLength": 1, "maxLength": 180 }, "body": { "type": "string", "maxLength": 3000 }, "media": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/media" } }, "quote": { "type": "string", "maxLength": 500 } }
     },
     "highlightItem": { "type": "object", "additionalProperties": false, "required": ["title", "body"], "properties": { "title": { "type": "string", "minLength": 1, "maxLength": 120 }, "body": { "type": "string", "minLength": 1, "maxLength": 600 } } },
     "highlights": {

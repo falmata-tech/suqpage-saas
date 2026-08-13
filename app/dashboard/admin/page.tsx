@@ -4,9 +4,9 @@ import {
   Building2,
   ClipboardList,
   Headphones,
-  MapPinned,
+  Palette,
   UserCog,
-  Users,
+  CalendarClock,
 } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import { requireUser } from "@/lib/auth";
@@ -24,8 +24,8 @@ export default async function AdminOverview({
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  if (["businesses", "clients", "staff"].includes(query.view || "")) {
-    const destination = `/dashboard/admin/${query.view}`;
+  if (["businesses", "clients", "discovery", "staff"].includes(query.view || "")) {
+    const destination = query.view === "clients" || query.view === "discovery" ? "/dashboard/admin/businesses" : `/dashboard/admin/${query.view}`;
     const next = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
       if (key !== "view" && value) next.set(key, value);
@@ -42,13 +42,6 @@ export default async function AdminOverview({
       value: counts.businesses,
       detail: `${attention.newAccounts || 0} draft account${attention.newAccounts === 1 ? "" : "s"} need review`,
       icon: Building2,
-    },
-    {
-      href: "/dashboard/admin/clients",
-      label: "Client accounts",
-      value: counts.clients,
-      detail: "Access, workspace, and password recovery",
-      icon: Users,
     },
     {
       href: "/dashboard/requests",
@@ -72,11 +65,25 @@ export default async function AdminOverview({
       icon: UserCog,
     },
     {
-      href: "/dashboard/admin/discovery",
-      label: "Discovery profiles",
+      href: "/dashboard/admin/featured-schedule",
+      label: "Featured schedule",
+      value: "Daily",
+      detail: "Automatic timing and date-specific lineups",
+      icon: CalendarClock,
+    },
+    {
+      href: "/dashboard/account-health",
+      label: "Renewals",
       value: "Open",
-      detail: "Location, sponsorship, and Sunday selection",
-      icon: MapPinned,
+      detail: "Manual service periods and renewal records",
+      icon: CalendarClock,
+    },
+    {
+      href: "/dashboard/design-bank",
+      label: "Design library",
+      value: "67",
+      detail: "Approved showroom components and patterns",
+      icon: Palette,
     },
   ];
 
@@ -85,10 +92,10 @@ export default async function AdminOverview({
       <div className="dashboard-head admin-overview-head">
         <div>
           <span className="eyebrow">Platform overview</span>
-          <h1>Good afternoon, {user.name.split(" ")[0]}.</h1>
+          <h1>Good afternoon.</h1>
           <p>Start with work that needs a decision, then move into the relevant queue.</p>
         </div>
-        <Link className="btn brand" href="/dashboard/clients/new">Create client workspace</Link>
+        <Link className="btn brand" href="/dashboard/clients/new">Add business</Link>
       </div>
       <section className="admin-command-grid" aria-label="Platform work areas">
         {destinations.map(({ icon: Icon, ...destination }) => (
@@ -102,7 +109,7 @@ export default async function AdminOverview({
       <section className="admin-quick-actions" aria-labelledby="admin-quick-title">
         <div><span className="eyebrow">Common actions</span><h2 id="admin-quick-title">Keep work moving</h2></div>
         <div>
-          <Link className="small-btn" href="/dashboard/requests/on-behalf">Record a client request</Link>
+          <Link className="small-btn" href="/dashboard/requests/on-behalf">Record a request</Link>
           <Link className="small-btn" href="/dashboard/support/agents">Manage support capacity</Link>
           <Link className="small-btn" href="/dashboard/account-health">Review monthly accounts</Link>
         </div>

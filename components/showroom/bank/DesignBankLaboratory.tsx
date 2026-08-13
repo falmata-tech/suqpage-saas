@@ -207,6 +207,12 @@ export default function DesignBankLaboratory({
     query,
     selectedCategory,
     cartCount: 3,
+    sectionAnchorIds: {
+      home: "showroom-home",
+      story: "showroom-story",
+      offerings: "showroom-catalog",
+      contact: "showroom-contact",
+    },
     onQueryChange: setQuery,
     onCategoryChange: setSelectedCategory,
     onOpenProduct: (product) =>
@@ -369,6 +375,16 @@ export default function DesignBankLaboratory({
         {definitions.map((definition) => {
           const Renderer = SHOWROOM_BANK_REGISTRY[definition.id];
           if (!Renderer) return null;
+          const anchorNamespace = definition.id.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+          const previewContext: BankPresentationContext = {
+            ...context,
+            sectionAnchorIds: {
+              home: `${anchorNamespace}-home`,
+              story: `${anchorNamespace}-story`,
+              offerings: `${anchorNamespace}-catalog`,
+              contact: `${anchorNamespace}-contact`,
+            },
+          };
           const guidance = hasTypedContentMedia(definition)
             ? guidanceForComponent(definition)
             : null;
@@ -451,7 +467,7 @@ export default function DesignBankLaboratory({
               >
                 <div className={styles.previewCanvas}>
                   <Renderer
-                    context={context}
+                    context={previewContext}
                     definition={definition}
                     experience={experience}
                     properties={previewProperties}

@@ -12,10 +12,10 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "../lib/showroom-bank-release";
 
 assert.equal(SHOWROOM_TEMPLATES.length, 8);
 for (const template of SHOWROOM_TEMPLATES) {
-  assert.equal(template.sectionPlan.length, 7);
+  assert.equal(template.sectionPlan.length, 6);
   assert.deepEqual(
     template.sectionPlan.map((section) => section.slot),
-    ["header", "hero", "content", "content", "catalog", "call_to_action", "footer"],
+    ["header", "hero", "content", "catalog", "call_to_action", "footer"],
   );
   assert.ok(template.description.length > 20);
   assert.ok(template.contentNeeds.length > 0);
@@ -157,7 +157,6 @@ const alternateRoleOrder = [
   "surface",
   "secondary-soft",
   "accent-soft",
-  "soft",
 ] as const;
 alternateSurfaces.designManifest.sections.forEach((section, index) => {
   section.surfaceRole = alternateRoleOrder[index];
@@ -173,9 +172,9 @@ assert.equal(
 const expressiveComposition = structuredClone(snapshot);
 expressiveComposition.designManifest.sections[0].component =
   "header.transparent-overlay@1";
-expressiveComposition.designManifest.sections[5].component =
+expressiveComposition.designManifest.sections[4].component =
   "call-to-action.magazine-close@1";
-expressiveComposition.designManifest.sections[6].component =
+expressiveComposition.designManifest.sections[5].component =
   "footer.magazine-masthead@1";
 const expressiveResult = evaluateCompositionFitness(expressiveComposition);
 assert.equal(expressiveResult.allowed, true);

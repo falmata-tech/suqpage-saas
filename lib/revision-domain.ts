@@ -57,6 +57,30 @@ export type RevisionBusiness = {
   faviconRef: string;
 };
 
+export function withAuthoritativeBusinessSettings<T extends { business: RevisionBusiness }>(
+  snapshot: T,
+  business: Business,
+): T {
+  return {
+    ...snapshot,
+    business: {
+      ...snapshot.business,
+      name: business.name,
+      logoRef: business.logo_path,
+      contactEmail: business.contact_email,
+      whatsapp: business.whatsapp,
+      telegram: business.telegram,
+      tiktok: business.tiktok,
+      isLive: Boolean(business.is_live),
+      livePlatform: business.live_platform || "",
+      liveUrl: business.live_url || "",
+      siteTitle: business.site_title,
+      siteDescription: business.site_description,
+      faviconRef: business.favicon_path,
+    },
+  };
+}
+
 export type RevisionCollection = {
   key: string;
   name: string;

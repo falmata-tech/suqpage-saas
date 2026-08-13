@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import DashboardShell from "@/components/DashboardShell";
+import ClientWorkflowNav from "@/components/ClientWorkflowNav";
 import NavigationTrail from "@/components/NavigationTrail";
 import RevisionEditor from "@/components/RevisionEditor";
 import { requireUser } from "@/lib/auth";
@@ -8,6 +8,7 @@ import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { runtimeAll } from "@/lib/runtime-sql";
 import { canAccessRequest, runtimeRequestDetail } from "@/lib/request-runtime";
 import { requireRevisionSnapshotV4 } from "@/lib/revision-v4-domain";
+import { withAuthoritativeBusinessSettings } from "@/lib/revision-domain";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import { getContentRevision } from "@/lib/revision-service";
 
@@ -45,7 +46,8 @@ export default async function EditRevisionPage({
       label: string;
       kind: "image" | "youtube";
       request_attachment_id: number | null;
-    }>("SELECT asset_key,label,kind,request_attachment_id FROM recipe_media_assets WHERE request_id=? ORDER BY id",[requestId]);
+      provider_id: string | null;
+    }>("SELECT asset_key,label,kind,request_attachment_id,provider_id FROM recipe_media_assets WHERE request_id=? ORDER BY id",[requestId]);
   const attachmentIds = new Set(request.attachments.map((attachment) => attachment.id));
   const imageOptions = [
     ...request.attachments.map((attachment) => ({
@@ -61,7 +63,7 @@ export default async function EditRevisionPage({
       .map((asset) => ({
         value: asset.kind === "image"
           ? `request-attachment:${asset.request_attachment_id}`
-          : asset.asset_key,
+          : `youtube:${asset.provider_id}`,
         label: asset.label,
         kind: (asset.kind === "youtube" ? "video" : "image") as "image" | "video",
       })),
@@ -77,24 +79,26 @@ export default async function EditRevisionPage({
         ]}
         fallback={`/dashboard/requests/${requestId}`}
       />
+      <ClientWorkflowNav requestId={requestId} revisionId={revisionId} active="edit" />
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">Private draft</p>
-          <h1>Edit showroom</h1>
-          <p>Change one focused area, save the private draft, and review the complete result before it reaches the client.</p>
+          <h1>Edit current showroom</h1>
+          <p>Change only what needs attention, save the private draft, and review the complete result before it reaches the client.</p>
         </div>
-        <Link className="btn brand" href={`/dashboard/requests/${requestId}/revisions/${revisionId}/studio`}>
-          Open design workspace
-        </Link>
       </div>
       {query.saved ? <p className="notice">Private draft saved.</p> : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       <RevisionEditor
         requestId={requestId}
         revisionId={revisionId}
-        initial={requireRevisionSnapshotV4(revision.snapshot_json, SHOWROOM_COMPONENT_BANK_LATEST)}
+        initial={withAuthoritativeBusinessSettings(
+          requireRevisionSnapshotV4(revision.snapshot_json, SHOWROOM_COMPONENT_BANK_LATEST),
+          business,
+        )}
         summary={revision.summary}
         imageOptions={imageOptions}
+        previewBusiness={business}
         initialArea={(["settings", "design", "content", "offerings"] as const).includes(query.area as "settings" | "design" | "content" | "offerings") ? query.area as "settings" | "design" | "content" | "offerings" : "settings"}
       />
     </DashboardShell>

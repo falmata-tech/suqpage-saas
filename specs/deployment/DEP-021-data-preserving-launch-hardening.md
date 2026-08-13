@@ -77,7 +77,7 @@ ignores them safely.
 Scenario: Launch hardening preserves demo data
   GIVEN the populated pre-launch SQLite database and local media tree
   WHEN migration, release, and container gates run
-  THEN business, user, request, showroom, offering, Expo, support, and media counts remain reconciled
+  THEN business, user, request, showroom, offering, Daily Featured, support, and media counts remain reconciled
   AND no reset command or destructive migration is used
 
 Scenario: Release validation is independent of operator data

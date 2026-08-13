@@ -2,9 +2,9 @@
 id: FE-013
 title: Unified platform identity and workspace shell
 status: done
-related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE-029, FE_BASE]
+related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE-029, FE-034, FE-035, FE_BASE]
 owners: [product, frontend]
-last_updated: 2026-08-04
+last_updated: 2026-08-11
 change_level: L1
 ---
 
@@ -55,7 +55,7 @@ findable on desktop and mobile.
 
 ## Contracts
 
-- The same accessible brand component appears on the homepage, Bazaar, public
+- The same accessible brand component appears on the homepage, Marketplace, public
   intake, login, legal pages, and authenticated workspace shell.
 - Public showrooms and private previews include a compact **Powered by
   MirtPage** band with a visible **Back** action whose accessible name identifies
@@ -90,7 +90,7 @@ findable on desktop and mobile.
 
 ```gherkin
 Scenario: Visitor recognizes MirtPage across platform surfaces
-  GIVEN a visitor moves between the homepage, Bazaar, intake, login, and legal pages
+  GIVEN a visitor moves between the homepage, Marketplace, intake, login, and legal pages
   WHEN each platform header or identity area renders
   THEN the same MirtPage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
@@ -188,7 +188,7 @@ scale, security, trace privacy, and zero-vulnerability gates. No route, signup
 behavior, schema, or tenant data changed.
 
 - `public/brand/mirtpage-mark-v2.svg` and `components/MirtPageBrand.tsx` provide one
-  project-owned platform identity on the homepage, Bazaar, intake, login, legal,
+  project-owned platform identity on the homepage, Marketplace, intake, login, legal,
   favicon, and authenticated workspace surfaces. Tenant showroom marks remain
   unchanged.
 - `DashboardShell` derives grouped destinations from the authenticated role and

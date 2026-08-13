@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { getAllBusinesses, getCatalogByBusinessId } from "../lib/db";
-import { seededExpoBoothPath } from "../lib/expo-seed";
+import { DEMO_PROCESS_VIDEOS, demoOfferingVideoFor, demoProcessVideoFor } from "../lib/demo-process-videos";
+import { seededMarketplaceBoothPath } from "../lib/marketplace-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
@@ -16,12 +17,29 @@ const offeringRefs = new Set<string>();
 const rationales = new Set<string>();
 const paletteSignatures = new Set<string>();
 const processVideoRefs = new Set<string>();
+const publicFixtureLanguage = /\b(?:fictional|provisional demonstration|seed data|seeded demo|test fixture)\b/i;
+
+function publicBlockText(blocks: ReturnType<typeof catalogToRevisionSnapshotV4>["contentBlocks"]) {
+  return blocks.blocks.flatMap((block) => [
+    block.kicker,
+    block.title,
+    block.body,
+    ...block.media.flatMap((media) => [media.altText, media.caption]),
+    ...(block.type === "highlights" ? block.items.flatMap((item) => [item.title, item.body]) : []),
+    ...(block.type === "call_to_action" ? [block.actionLabel] : []),
+  ]).filter(Boolean).join("\n");
+}
+const approvedProcessVideoRefs = new Set<string>(
+  Object.values(DEMO_PROCESS_VIDEOS)
+    .filter((video) => video.family !== "unknown")
+    .map((video) => video.ref),
+);
 
 assert.equal(active.length, 66, "portfolio contains 66 active fictional clients");
 assert.equal(SCALE_DEMO_BUSINESSES.length, 56, "56 clients use complete explicit creative records");
 assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.creative.customerRequest)).size, 56, "scale clients have independent customer requests");
 assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.heroTitle)).size, 56, "scale clients have independent hero direction");
-assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "growing_factory").length, 8, "eight growing factories broaden the portfolio");
+assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "growing_factory").length, 9, "nine growing factories broaden the portfolio");
 
 for (const business of active) {
   const catalog = getCatalogByBusinessId(business.id);
@@ -29,9 +47,14 @@ for (const business of active) {
   assert.equal(catalog.products.length, 4, `${business.handle} publishes exactly four offerings`);
   assert.ok(business.logo_path.startsWith("/"), `${business.handle} has a managed logo`);
   assert.ok(business.hero_image_path.startsWith("/"), `${business.handle} has managed hero media`);
+  assert.doesNotMatch(business.description, publicFixtureLanguage, `${business.handle} public description does not expose fixture terminology`);
   assert.match(business.process_video_ref, /^youtube:[A-Za-z0-9_-]{11}$/, `${business.handle} has a controlled process video`);
+  const expectedBusinessVideo = demoProcessVideoFor(business.handle, business.name, business.description);
+  assert.notEqual(expectedBusinessVideo.family, "unknown", `${business.handle} resolves to a reviewed production family`);
+  assert.equal(business.process_video_ref, expectedBusinessVideo.ref, `${business.handle} uses its reviewed process-video family`);
+  assert.ok(approvedProcessVideoRefs.has(business.process_video_ref), `${business.handle} uses an approved process video`);
 
-  const boothPath = seededExpoBoothPath(business.handle);
+  const boothPath = seededMarketplaceBoothPath(business.handle);
   for (const reference of [business.logo_path, business.hero_image_path, boothPath]) {
     const absolute = path.join(root, "public", reference);
     assert.ok(fs.existsSync(absolute), `${business.handle} media exists: ${reference}`);
@@ -62,10 +85,20 @@ for (const business of active) {
       assert.ok(fs.statSync(absolute).size <= 150 * 1024, `${business.handle}/${product.slug} generated offering stays within 150 KiB`);
     }
     offeringRefs.add(product.image_path);
-    assert.equal(product.video_ref, business.process_video_ref, `${business.handle}/${product.slug} has a relevant demo video`);
+    const expectedProductVideo = demoOfferingVideoFor(
+      expectedBusinessVideo,
+      product.name,
+      product.category_name || "",
+      product.description,
+    );
+    assert.notEqual(expectedProductVideo.family, "unknown", `${business.handle}/${product.slug} resolves to a reviewed production family`);
+    assert.equal(product.video_ref, expectedProductVideo.ref, `${business.handle}/${product.slug} has a relevant demo video`);
+    assert.ok(approvedProcessVideoRefs.has(product.video_ref), `${business.handle}/${product.slug} uses an approved process video`);
   }
 
   const snapshot = catalogToRevisionSnapshotV4(catalog);
+  assert.doesNotMatch(publicBlockText(snapshot.contentBlocks), publicFixtureLanguage, `${business.handle} public content does not expose fixture terminology`);
+  assert.doesNotMatch(publicBlockText(snapshot.contentBlocks), /\b(\w+)\s+\1\b/i, `${business.handle} public content has no adjacent duplicate word`);
   assert.ok(snapshot.designManifest.customPalette, `${business.handle} has a complete custom palette`);
   assert.equal(evaluateCompositionFitness(snapshot).allowed, true, `${business.handle} composition is admitted`);
   if (business.handle === "addis-metalworks") {

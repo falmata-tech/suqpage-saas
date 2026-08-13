@@ -1,10 +1,10 @@
 ---
 id: FE-026
 title: Role-oriented workspace navigation
-status: done
-related: [FE-013, FE-017, FE-019, FE-025, FE-029, BE-018, BE-026, DEP-021, DEP-022, ADR-0013]
+status: in_progress
+related: [FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, BE-018, BE-026, BE-028, DEP-021, DEP-022, ADR-0013]
 owners: [product, frontend, operations, design]
-last_updated: 2026-08-03
+last_updated: 2026-08-11
 change_level: L2
 ---
 
@@ -25,9 +25,11 @@ work, exposes attention counts, and provides a predictable way back.
 
 - A role-oriented desktop sidebar and focus-contained mobile drawer with icons,
   active states, concise groups, and one consistent account/public-site area.
-- Dedicated administrator destinations for overview, businesses, clients,
-  staff access, and support-agent capacity instead of query-string tabs inside
-  one overloaded page.
+- Dedicated administrator destinations for overview, businesses, staff access,
+  and support-agent capacity instead of query-string tabs inside one overloaded
+  page. FE-032 supersedes the separate Clients directory with business-scoped
+  Access and the Discovery directory with business-scoped Marketplace. FE-033
+  adds the Daily Featured schedule as a distinct platform work area.
 - A support-agent management screen with bounded staff rows, capacity and
   availability controls, workload summaries, and links into assigned work.
 - Contextual dashboard actions and attention summaries that appear only when
@@ -71,6 +73,15 @@ work, exposes attention counts, and provides a predictable way back.
   cannot be made unavailable in a way that silently deletes assignments.
 - Client overview actions are state-aware. Preview appears only for a revision
   actually sent for review; offering upkeep appears only after publication.
+- The client overview presents one primary action for the current showroom
+  project. Supporting status rows may link to the same project but must not
+  repeat a second promotional callout for the identical action.
+- Staff business workspaces keep client destinations together. Global queues,
+  support administration, design-library exploration, and platform overview do
+  not compete with the active client workflow and are separated as leaving the
+  current business context.
+- Request, Design, Edit, and Preview expose one request-scoped workflow control
+  under FE-031 rather than repeated unrelated action buttons.
 
 ## Scenarios
 
@@ -149,8 +160,8 @@ does not revert staff, support, customer, or showroom data.
 ## Evidence:
 
 Implemented stable administrator routes for overview, businesses, clients,
-staff, and support-agent capacity; role-grouped icon navigation; state-aware
-client actions; six-row administrator pages; five-row support-agent pages; and
+staff, Daily Featured scheduling, and support-agent capacity; role-grouped icon
+navigation; state-aware client actions; bounded administrator pages; five-row support-agent pages; and
 compact mobile table rows. Legacy administration query routes retain supported
 filters while redirecting to the stable destination.
 

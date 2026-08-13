@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Eye, Monitor, Smartphone } from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   saveRevisionDraftAction,
   submitRevisionAction,
@@ -19,13 +20,16 @@ import {
 } from "@/lib/showroom-design-systems";
 import type { RevisionSnapshotV4 } from "@/lib/revision-v4-domain";
 import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "@/lib/product-detail-patterns";
-import { LIVE_PLATFORMS, LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
+import { snapshotToCatalog } from "@/lib/revision-domain";
+import type { Business } from "@/lib/types";
+import ShowroomApp from "@/components/showroom/ShowroomApp";
 
 type MediaOption = { value: string; label: string; kind: "image" | "video" };
+type AdmittedMedia = MediaOption & { previewUrl?: string };
 type EditorArea = "settings" | "design" | "content" | "offerings";
 
 const EDITOR_AREAS: Array<{ key: EditorArea; label: string }> = [
-  { key: "settings", label: "Showroom settings" },
+  { key: "settings", label: "Design foundation" },
   { key: "design", label: "Layout and style" },
   { key: "content", label: "Page content" },
   { key: "offerings", label: "Offerings" },
@@ -115,34 +119,76 @@ function MediaChoice({
   value,
   options,
   kind,
+  requestId,
+  revisionId,
   onChange,
+  onAdmitted,
 }: {
   label: string;
   value: string;
   options: MediaOption[];
   kind: "image" | "video";
+  requestId: number;
+  revisionId: number;
   onChange: (value: string) => void;
+  onAdmitted: (media: AdmittedMedia) => void;
 }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const choices = options.filter((item) => item.kind === kind);
   const visible =
     value && !choices.some((item) => item.value === value)
       ? [{ value, label: kind === "video" ? "Current approved video" : "Current showroom image", kind }, ...choices]
       : choices;
+  const previewUrl = value.startsWith("request-attachment:")
+    ? `/api/requests/${requestId}/attachments/${value.split(":")[1]}`
+    : kind === "image" ? value : "";
+  const admit = async (form: FormData) => {
+    setBusy(true);
+    setError("");
+    try {
+      form.set("label", label);
+      const response = await fetch(`/api/requests/${requestId}/revisions/${revisionId}/media`, {
+        method: "POST",
+        credentials: "same-origin",
+        body: form,
+      });
+      const result = await response.json() as { error?: string; ref?: string; previewUrl?: string; label?: string; kind?: "image" | "youtube" };
+      if (!response.ok || !result.ref) throw new Error(result.error || "The media could not be added.");
+      const admitted: AdmittedMedia = {
+        value: result.ref,
+        label: `${result.kind === "youtube" ? "Added" : "Uploaded"} · ${result.label || label}`,
+        kind: result.kind === "youtube" ? "video" : "image",
+        previewUrl: result.previewUrl,
+      };
+      onAdmitted(admitted);
+      onChange(admitted.value);
+      if (kind === "video") setYoutubeUrl("");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "The media could not be added.");
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
-    <div className="field">
+    <div className="field editor-media-field">
       <label>{label}</label>
+      {previewUrl ? <img className="editor-media-thumbnail" src={previewUrl} alt={`${label} preview`} /> : null}
       <select
         aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">Use this section's image-free design</option>
+        <option value="">{kind === "video" ? "No video" : "Use this section's image-free design"}</option>
         {visible.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}
           </option>
         ))}
       </select>
+      {kind === "image" ? <label className="editor-inline-upload"><span>{busy ? "Uploading image..." : "Upload replacement image"}</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; const form = new FormData(); form.set("kind", "image"); form.set("file", file); void admit(form); event.currentTarget.value = ""; }}/></label> : <div className="editor-youtube-upload"><input type="url" aria-label={`${label} YouTube URL`} value={youtubeUrl} disabled={busy} placeholder="https://www.youtube.com/watch?v=..." onChange={(event) => setYoutubeUrl(event.target.value)}/><button type="button" className="small-btn" disabled={busy || !youtubeUrl.trim()} onClick={() => { const form = new FormData(); form.set("kind", "youtube"); form.set("url", youtubeUrl); void admit(form); }}>{busy ? "Adding..." : "Add YouTube video"}</button></div>}
+      {error ? <small className="field-error" role="alert">{error}</small> : <small>{kind === "image" ? "The selected file appears in this draft immediately and becomes public only after approved publication." : "YouTube links are validated and embedded with the controlled privacy-enhanced player."}</small>}
     </div>
   );
 }
@@ -181,6 +227,7 @@ export default function RevisionEditor({
   initial,
   summary: initialSummary,
   imageOptions,
+  previewBusiness,
   initialArea,
 }: {
   requestId: number;
@@ -188,6 +235,7 @@ export default function RevisionEditor({
   initial: RevisionSnapshotV4;
   summary: string;
   imageOptions: MediaOption[];
+  previewBusiness: Business;
   initialArea: EditorArea;
 }) {
   const [snapshot, setSnapshot] = useState(initial);
@@ -195,6 +243,9 @@ export default function RevisionEditor({
   const [activeArea, setActiveArea] = useState<EditorArea>(initialArea);
   const [categoryPage, setCategoryPage] = useState(1);
   const [productPage, setProductPage] = useState(1);
+  const [mediaOptions, setMediaOptions] = useState(imageOptions);
+  const [previewViewport, setPreviewViewport] = useState<"desktop" | "phone">("desktop");
+  const deferredSnapshot = useDeferredValue(snapshot);
   const business = snapshot.business;
   const foundation =
     SHOWROOM_DESIGN_SYSTEMS[snapshot.designManifest.tokenPack] ||
@@ -209,6 +260,20 @@ export default function RevisionEditor({
       ),
     [],
   );
+  const previewCatalog = useMemo(
+    () => snapshotToCatalog(
+      deferredSnapshot,
+      previewBusiness,
+      (ref) => ref.startsWith("request-attachment:")
+        ? `/api/requests/${requestId}/attachments/${ref.split(":")[1]}`
+        : ref,
+    ),
+    [deferredSnapshot, previewBusiness, requestId],
+  );
+  const addMediaOption = (media: AdmittedMedia) => setMediaOptions((current) => [
+    { value: media.value, label: media.label, kind: media.kind },
+    ...current.filter((item) => item.value !== media.value),
+  ]);
 
   const setBusiness = (key: keyof typeof business, value: string) =>
     setSnapshot((current) => ({
@@ -280,15 +345,28 @@ export default function RevisionEditor({
     setCustomPalette({ ...palette, [key]: value });
   };
   const updateBlock = (key: string, patch: Partial<ShowroomContentBlock>) =>
-    setSnapshot((current) => ({
-      ...current,
-      contentBlocks: {
-        ...current.contentBlocks,
-        blocks: current.contentBlocks.blocks.map((block) =>
-          block.key === key ? ({ ...block, ...patch } as ShowroomContentBlock) : block,
-        ),
-      },
-    }));
+    setSnapshot((current) => {
+      let nextBusiness = current.business;
+      const blocks = current.contentBlocks.blocks.map((block) => {
+        if (block.key !== key) return block;
+        const nextBlock = { ...block, ...patch } as ShowroomContentBlock;
+        if (nextBlock.type === "hero") {
+          nextBusiness = {
+            ...nextBusiness,
+            tagline: nextBlock.kicker,
+            heroTitle: nextBlock.title,
+            heroSubtitle: nextBlock.body,
+            heroImageRef: mediaValue(nextBlock, "hero_image"),
+          };
+        }
+        return nextBlock;
+      });
+      return {
+        ...current,
+        business: nextBusiness,
+        contentBlocks: { ...current.contentBlocks, blocks },
+      };
+    });
   const setBlockMedia = (block: ShowroomContentBlock, slotKey: string, value: string) => {
     const nextMedia = block.media.filter((media) => media.slotKey !== slotKey);
     if (value) {
@@ -343,9 +421,8 @@ export default function RevisionEditor({
         </section>
 
         <section className="panel" hidden={activeArea !== "settings"}>
-          <h2>Showroom settings and visual foundation</h2>
+          <h2>Design foundation</h2>
           <div className="form-grid">
-            <Field value={business.name} onChange={(value) => setBusiness("name", value)} label="Business name" max={100} />
             <div className="field">
               <label>Token system</label>
               <select
@@ -368,38 +445,6 @@ export default function RevisionEditor({
                 ))}
               </select>
             </div>
-            <Field value={business.tagline} onChange={(value) => setBusiness("tagline", value)} label="Tagline" max={180} />
-            <Field value={business.heroTitle} onChange={(value) => setBusiness("heroTitle", value)} label="Hero title" max={180} />
-            <div className="field full">
-              <label>Description</label>
-              <textarea aria-label="Business description" value={business.description} maxLength={1200} onChange={(event) => setBusiness("description", event.target.value)} />
-            </div>
-            <div className="field full">
-              <label>Hero subtitle</label>
-              <textarea aria-label="Hero subtitle" value={business.heroSubtitle} maxLength={300} onChange={(event) => setBusiness("heroSubtitle", event.target.value)} />
-            </div>
-            <MediaChoice label="Logo image" value={business.logoRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("logoRef", value)} />
-            <MediaChoice label="Hero image" value={business.heroImageRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("heroImageRef", value)} />
-            <MediaChoice label="Process video" value={business.processVideoRef} options={imageOptions} kind="video" onChange={(value) => setBusiness("processVideoRef", value)} />
-            <Field value={business.contactEmail} onChange={(value) => setBusiness("contactEmail", value)} label="Notification email" max={160} />
-            <Field value={business.whatsapp} onChange={(value) => setBusiness("whatsapp", value)} label="WhatsApp" max={40} />
-            <Field value={business.telegram} onChange={(value) => setBusiness("telegram", value)} label="Telegram" max={80} />
-            <Field value={business.tiktok} onChange={(value) => setBusiness("tiktok", value)} label="TikTok" max={80} />
-            <div className="field">
-              <label>Live platform</label>
-              <select aria-label="Live platform" value={business.livePlatform} onChange={(event) => setBusiness("livePlatform", event.target.value)}>
-                <option value="">Not configured</option>
-                {LIVE_PLATFORMS.map((platform) => <option key={platform} value={platform}>{LIVE_PLATFORM_LABELS[platform]}</option>)}
-              </select>
-            </div>
-            <Field value={business.liveUrl} onChange={(value) => setBusiness("liveUrl", value)} label="Live-session link" max={500} />
-            <label className="check-field"><input type="checkbox" checked={business.isLive} onChange={(event) => setSnapshot((current) => ({ ...current, business: { ...current.business, isLive: event.target.checked } }))} /> Show as live now</label>
-            <Field value={business.siteTitle} onChange={(value) => setBusiness("siteTitle", value)} label="Page title" max={120} />
-            <div className="field full">
-              <label>Search and sharing description</label>
-              <textarea aria-label="Search and sharing description" value={business.siteDescription} maxLength={240} onChange={(event) => setBusiness("siteDescription", event.target.value)} />
-            </div>
-            <MediaChoice label="Browser icon" value={business.faviconRef} options={imageOptions} kind="image" onChange={(value) => setBusiness("faviconRef", value)} />
           </div>
           <div className="revision-item">
             <div className="field">
@@ -560,10 +605,17 @@ export default function RevisionEditor({
 
         <section className="panel" hidden={activeArea !== "content"}>
           <h2>Page content</h2>
+          <div className="field full">
+            <label>Public business summary</label>
+            <textarea aria-label="Public business summary" value={business.description} maxLength={1200} onChange={(event) => setBusiness("description", event.target.value)} />
+          </div>
           {snapshot.contentBlocks.blocks.map((block, index) => {
             const sectionName = block.title || `${block.type} section`;
+            const sectionTypeLabel = block.type === "highlights"
+              ? "story and process"
+              : block.type.replaceAll("_", " ");
             return <details className="revision-item editor-disclosure" key={block.key} open={index === 0}>
-              <summary><span><strong>{sectionName}</strong><small>{block.type.replaceAll("_", " ")}</small></span><b>Edit</b></summary>
+              <summary><span><strong>{sectionName}</strong><small>{sectionTypeLabel}</small></span><b>Edit</b></summary>
               <div className="form-grid editor-disclosure-body">
               <Field value={block.kicker} onChange={(value) => updateBlock(block.key, { kicker: value })} label={`${sectionName} short label`} max={100} />
               <Field value={block.title} onChange={(value) => updateBlock(block.key, { title: value })} label={`${sectionName} heading`} max={180} />
@@ -591,13 +643,16 @@ export default function RevisionEditor({
                 </div>
               ) : null}
               {block.type === "hero" ? (
-                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "hero_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "hero_image", value)} />
+                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "hero_image")} options={mediaOptions} kind="image" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => setBlockMedia(block, "hero_image", value)} />
               ) : null}
               {["story", "highlights", "information"].includes(block.type) ? (
-                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "story_image")} options={imageOptions} kind="image" onChange={(value) => setBlockMedia(block, "story_image", value)} />
+                <MediaChoice label={`${sectionName} image`} value={mediaValue(block, "story_image")} options={mediaOptions} kind="image" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => setBlockMedia(block, "story_image", value)} />
+              ) : null}
+              {block.type === "highlights" ? (
+                <MediaChoice label="Process video" value={business.processVideoRef} options={mediaOptions} kind="video" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => setBusiness("processVideoRef", value)} />
               ) : null}
               {block.type === "video" ? (
-                <MediaChoice label={`${sectionName} video`} value={mediaValue(block, "video")} options={imageOptions} kind="video" onChange={(value) => setBlockMedia(block, "video", value)} />
+                <MediaChoice label={`${sectionName} video`} value={mediaValue(block, "video")} options={mediaOptions} kind="video" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => setBlockMedia(block, "video", value)} />
               ) : null}
               </div>
             </details>;
@@ -647,8 +702,8 @@ export default function RevisionEditor({
               <div className="field"><label>Offering type</label><select aria-label={`Product ${index + 1} offering type`} value={item.offeringKind} onChange={(event) => updateProduct(index, { offeringKind: event.target.value })}><option value="standard_product">Standard product</option><option value="made_to_order">Made to order</option><option value="manufacturing_capability">Manufacturing capability</option><option value="production_supply">Production supply</option></select></div>
               <div className="field"><label>Desired quantity</label><p>Optional for the buyer</p></div>
               <div className="field"><label>Sort order</label><input aria-label={`Product ${index + 1} sort order`} type="number" value={item.sortOrder} onChange={(event) => updateProduct(index, { sortOrder: Number(event.target.value) })} /></div>
-              <MediaChoice label={`Product ${index + 1} image`} value={item.imageRef} options={imageOptions} kind="image" onChange={(value) => updateProduct(index, { imageRef: value })} />
-              <MediaChoice label={`Product ${index + 1} video`} value={item.videoRef} options={imageOptions} kind="video" onChange={(value) => updateProduct(index, { videoRef: value })} />
+              <MediaChoice label={`Product ${index + 1} image`} value={item.imageRef} options={mediaOptions} kind="image" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => updateProduct(index, { imageRef: value })} />
+              <MediaChoice label={`Product ${index + 1} video`} value={item.videoRef} options={mediaOptions} kind="video" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => updateProduct(index, { videoRef: value })} />
               <div className="field"><label>Price in ETB</label><input aria-label={`Product ${index + 1} price in ETB`} type="number" min="0" step="0.01" value={item.priceMinor === null ? "" : item.priceMinor / 100} onChange={(event) => updateProduct(index, { priceMinor: event.target.value === "" ? null : Math.round(Number(event.target.value) * 100), currency: "ETB" })} /></div>
               <Field value={item.quantityUnit} onChange={(value) => updateProduct(index, { quantityUnit: value })} label={`Product ${index + 1} offered by`} max={40} />
               <label className="check-field"><input type="checkbox" checked={item.published} onChange={(event) => updateProduct(index, { published: event.target.checked })} /> Show in showroom</label>
@@ -674,10 +729,24 @@ export default function RevisionEditor({
           {productPages > 1 ? <div className="editor-pagination" aria-label="Offering pages"><button type="button" className="small-btn" disabled={productPage === 1} onClick={() => setProductPage((page) => page - 1)}>Previous</button><span>Page {productPage} of {productPages}</span><button type="button" className="small-btn" disabled={productPage === productPages} onClick={() => setProductPage((page) => page + 1)}>Next</button></div> : null}
         </section>
 
-        <div className="sticky-actions">
+        <div className="sticky-actions editor-save-actions">
           <button className="btn brand">Save private draft</button>
+          <button className="btn secondary" type="button" onClick={() => document.getElementById("revision-live-preview")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Eye aria-hidden="true"/> Preview changes</button>
         </div>
       </form>
+
+      <section className="panel revision-live-preview" id="revision-live-preview">
+        <div className="dashboard-head editor-preview-toolbar">
+          <div><span className="eyebrow">Unsaved preview</span><h2>See your changes</h2><p>This uses the current editor values. It does not save or publish anything.</p></div>
+          <div className="preview-viewport-control" role="group" aria-label="Preview width">
+            <button type="button" className={previewViewport === "desktop" ? "active" : ""} aria-pressed={previewViewport === "desktop"} onClick={() => setPreviewViewport("desktop")}><Monitor aria-hidden="true"/> Desktop</button>
+            <button type="button" className={previewViewport === "phone" ? "active" : ""} aria-pressed={previewViewport === "phone"} onClick={() => setPreviewViewport("phone")}><Smartphone aria-hidden="true"/> Phone</button>
+          </div>
+        </div>
+        <div className={`editor-preview-stage ${previewViewport}`}>
+          <div className="editor-preview-frame"><ShowroomApp catalog={previewCatalog} previewMode embedded privateMediaRequestId={requestId} /></div>
+        </div>
+      </section>
 
       <form action={submitRevisionAction} className="panel review-submit">
         <input type="hidden" name="requestId" value={requestId} />

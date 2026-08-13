@@ -22,6 +22,13 @@ export async function preflight() {
       throw new Error("Database integrity check failed.");
     }
     fs.accessSync(databasePath(), fs.constants.R_OK | fs.constants.W_OK);
+  } else {
+    const currentProjectMigration = await runtimeGet<{ version: number }>(
+      "SELECT version FROM schema_migrations WHERE version=32",
+    );
+    if (!currentProjectMigration) {
+      throw new Error("PostgreSQL migration 32 is required before this release can serve traffic.");
+    }
   }
 
   const admins = await runtimeGet<{ total: number }>(

@@ -34,8 +34,8 @@ async function capture(name, pathname, viewport) {
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
-  assert.equal(metrics.contextColor, "rgb(11, 29, 58)", `${name} uses the solid MirtPage midnight context`);
-  assert.equal(metrics.contextImage, "none", `${name} does not use a promotional gradient`);
+  assert.equal(metrics.contextColor, "rgb(243, 246, 245)", `${name} uses the reviewed light production context`);
+  assert.match(metrics.contextImage, /mirtpage-workspace-context-v2\.webp/, `${name} uses the reviewed production artwork`);
   assert.equal(metrics.formVisible, true, `${name} keeps its form visible`);
   assert.ok(
     metrics.controls.length > 0 && metrics.controls.every((height) => height >= 44),

@@ -2,7 +2,7 @@
 id: FE-018
 title: Account health and showroom insights
 status: done
-related: [FE-021, BE-017, BE-015, DEP-015, ADR-0010, ADR-0011]
+related: [FE-021, FE-032, BE-017, BE-015, DEP-015, ADR-0010, ADR-0011]
 owners: [frontend, operations]
 last_updated: 2026-08-01
 change_level: L2
@@ -13,7 +13,7 @@ change_level: L2
 ## Problem and outcome
 
 Clients need a clear monthly account record and useful evidence that their
-showroom and Expo participation are being visited. Operations needs a compact,
+showroom and Daily Featured participation are being visited. Operations needs a compact,
 searchable way to record manual renewals without making an undecided commercial
 schedule an automatic public-availability switch.
 
@@ -22,7 +22,7 @@ schedule an automatic public-availability switch.
 ### In scope
 
 - Client account-health page with period status, renewal history,
-  and total/Expo/directory visit summary.
+  and total/Daily Featured/directory visit summary.
 - Operations business context with the same health state and a manual ETB
   payment-recording control.
 - Platform account-health list with search, status filter, and pagination.

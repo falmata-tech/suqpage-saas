@@ -21,11 +21,14 @@ try {
     await page.goto(`${baseURL}/@addis-metalworks`, { waitUntil: "domcontentloaded" });
     const host = page.getByRole("navigation", { name: "MirtPage showroom host navigation" });
     await host.waitFor();
-    assert.equal(await host.getByRole("link", { name: "Back to MirtPage marketplace" }).getAttribute("href"), "/");
+    await host.getByRole("button", { name: "Back to MirtPage marketplace" }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
     await page.screenshot({ path: path.join(output, `${name}-entry.png`), fullPage: false });
 
-    await page.locator(".floating-inquiry-trigger").evaluate((button) => {
+    const inquiryTrigger = viewport.width <= 620
+      ? page.getByRole("navigation", { name: "Showroom sections" }).getByRole("button", { name: /Inquiry/ })
+      : page.locator(".floating-inquiry-trigger");
+    await inquiryTrigger.evaluate((button) => {
       if (button instanceof HTMLButtonElement) button.click();
     });
     const drawer = page.locator(".inquiry-drawer.open");

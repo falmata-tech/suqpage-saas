@@ -16,13 +16,14 @@
 - [ ] Change every temporary or migrated account password.
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.
+- [ ] Configure `NEXT_PUBLIC_MIRTPAGE_TIKTOK_URL` and `NEXT_PUBLIC_MIRTPAGE_YOUTUBE_URL` with MirtPage's exact public profiles before promoting Daily Featured Showrooms broadcasts.
 - [ ] Confirm only approved businesses are `active`; keep unfinished showrooms `draft`.
 - [ ] Submit a public expression of interest and confirm an administrator can
       review it with zero attachments; confirm public multipart upload is rejected.
 - [ ] Confirm marketplace search updates without a submit button and preserves
-      industry, production scale, map/list, and Expo day state.
-- [ ] Confirm one process video loads only after activation inside a showroom
-      Process section and only from `youtube-nocookie.com`.
+      industry, region/city, map/list, and Daily Featured Showrooms day state.
+- [ ] Confirm one process video loads only after activation inside the combined
+      Story and process chapter and only from `youtube-nocookie.com`.
 - [ ] Confirm the imported design creates a labeled image checklist, an authorized
       staff member can fulfill a slot, and the live showroom remains unchanged.
 - [ ] Confirm staff can edit imported settings, layout/style, page content, and

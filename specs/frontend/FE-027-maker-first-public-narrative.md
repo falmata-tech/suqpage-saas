@@ -1,10 +1,10 @@
 ---
 id: FE-027
 title: Maker-first public narrative
-status: done
-related: [FE-013, FE-021, FE-024, FE-025, FE-028]
+status: in_progress
+related: [FE-013, FE-021, FE-024, FE-025, FE-028, FE-030, FE-036]
 owners: [product, frontend, design]
-last_updated: 2026-08-04
+last_updated: 2026-08-09
 change_level: L1
 ---
 
@@ -13,27 +13,39 @@ change_level: L1
 ## Problem and outcome
 
 MirtPage's public pages explain digital showrooms and discovery, but they do not
-yet tell a coherent story about the people the platform exists to serve. Small
-and growing Ethiopian producers invest time, savings, land, tools, skill, and
-reputation to make locally while often remaining difficult for nearby consumers
-and wholesale buyers to find and evaluate. The public experience must honor that
-commitment and explain how MirtPage turns real production into a credible,
-discoverable presence without overstating verified business outcomes.
+yet give buyers one clear model for the different offers found across Ethiopian
+production. A workshop may make doors, windows, furniture, equipment, or other
+work to specification. A producer may sell finished goods that a household can
+buy or a retailer can stock. A manufacturer may need recurring wholesale and
+distribution relationships. MirtPage must unite these as three understandable
+buying paths—custom work, ready products, and wholesale supply—without implying
+that every business supports every path or claiming guaranteed outcomes.
 
 ## Scope
 
 ### In scope
 
-- One consistent maker-first narrative across the homepage, discovery
+- One consistent production-to-market narrative across the homepage, discovery
   introduction, About page, business signup, login support copy, footer, and
   platform metadata.
 - Primary audience language for small and growing Ethiopian makers, growers,
   workshops, processors, and factories that still need practical market access.
-- Buyer language covering local discovery, reviewed location, professional
-  showrooms, product and production-capability context, and direct consumer or
-  wholesale inquiry.
-- Concise homepage messaging with the fuller economic and human story on the
-  About page and a producer-focused invitation on signup.
+- Buyer language covering national and local sourcing, reviewed location,
+  professional showrooms, product and production-capability context, and direct
+  consumer, retail, distribution, or wholesale inquiry.
+- Customer-facing copy calls showrooms **online showrooms** and explains their
+  utility: discovering workshops, growers, producers, and manufacturers that a
+  visitor may not already know nearby or elsewhere in Ethiopia; understanding
+  what they make, their skills and capabilities, and available supply context;
+  and starting a direct inquiry. It does not assume every visitor understands
+  the platform from the word "showroom" alone.
+- One controlled three-offer vocabulary: **custom work**, **ready products**,
+  and **wholesale supply**. These terms clarify marketplace capabilities in
+  supporting copy and functional labels; they are not repeated as slogans or
+  used as a substitute for a clear customer outcome. Growers and processors fit
+  ready-product or wholesale-supply offers according to their approved content.
+- Concise homepage messaging with the fuller Ethiopian supply-chain story on
+  the About page and a producer-focused invitation on signup.
 - Automated assertions for the narrative's required claims and prohibited
   overclaims.
 
@@ -59,33 +71,57 @@ discoverable presence without overstating verified business outcomes.
 - **Professional presence** means a permanent branded showroom with useful
   product, capability, process, location, and inquiry information. It does not
   imply certification or platform ownership of the customer relationship.
-- Public copy may state that local production supports skills, jobs, local
-  supply, and wider buyer choice as a platform mission. It must not attribute a
-  specific unverified impact to every listed business.
+- Public copy may state that connecting Ethiopian production to households,
+  retailers, distributors, and wholesale buyers can strengthen local supply,
+  widen buyer choice, and keep more trade activity within Ethiopian businesses.
+  It must not attribute a specific unverified impact to every listing.
+- MirtPage connects participants and forwards inquiries. It does not set,
+  compare, guarantee, or process prices, transactions, delivery, or quality.
+- **Custom work** means made-to-order work based on the buyer's measurements,
+  specification, configuration, or brief. **Ready products** are finished goods
+  presented for direct or retail inquiry. **Wholesale supply** covers repeat or
+  bulk supply for retailers, wholesalers, distributors, and organizations.
+- A showroom may support one, two, or all three paths. Platform copy describes
+  the marketplace as a whole and never assigns an unsupported mode to a listing.
 - The public homepage remains an application-first marketplace. Narrative copy
   introduces and frames discovery without displacing it with a marketing hero.
 - Client showrooms retain their own identity and approved business claims.
 
 ## Contracts
 
-- The homepage names the people behind Ethiopian products and immediately
-  directs visitors into search, industry, map, list, sponsored, and Expo
-  discovery.
-- Homepage supporting copy identifies small and growing local producers and
-  explains that visitors can search by product or place, inspect a professional
-  showroom, and inquire directly for personal or wholesale needs.
-- The About page leads with the producer's decision to make locally, names the
-  risks and work involved, explains the public-value mission, and then connects
-  that story to MirtPage's actual capabilities.
-- Signup copy begins from work the producer already does and explains the value
-  of a professional showroom without implying automatic publication or sales.
+- The homepage presents one Ethiopian production market and immediately directs
+  visitors into search, industry, map, list, sponsored, and Daily Featured
+  Showrooms discovery.
+- The homepage headline promises direct discovery of the people and businesses
+  that make what a visitor needs. Supporting copy immediately identifies the
+  destination as online showrooms, explains local and country-wide discovery,
+  and connects business skills, products, customization, supply, and direct
+  contact. Functional benefit labels retain custom, ready-product, and wholesale
+  distinctions where useful. Supporting copy makes clear that households can
+  find products or skilled custom work and that retailers, distributors,
+  organizations, and wholesale buyers can source for their own markets from
+  anywhere in Ethiopia.
+- The About page explains the broken connection between production and demand,
+  shows how a product can move from producer to household, retailer,
+  distributor, or wholesale buyer, and then connects that story to MirtPage's
+  actual showroom, map, search, and inquiry capabilities.
+- About-page steps describe observable buyer actions: search for the need,
+  compare what businesses can deliver, understand the producer, and start a
+  direct conversation. They do not frame internal offer taxonomy as a vague
+  instruction to "choose a path."
+- Signup copy asks whether the business takes custom orders, sells ready
+  products, supplies in bulk, or seeks distributors, and explains the value of
+  one professional showroom without implying automatic publication or sales.
 - Login support copy remains task-focused while identifying the workspace as the
   place where producers manage their showroom, inquiries, requests, and support.
-- Footer and metadata use the same small-and-growing producer audience and
-  discovery/inquiry purpose.
-- Copy uses **consumer and wholesale buyers** where both audiences matter,
-  **inquiry** instead of order or checkout, and **reviewed location** instead of
-  unsupported distance or proximity guarantees.
+- Footer and metadata use the same production-to-market audience and direct
+  connection purpose.
+- Copy uses **households, retailers, distributors, organizations, and wholesale
+  buyers** where the wider trade chain matters, **connect** or **inquiry** instead
+  of platform checkout, and **reviewed location** instead of unsupported
+  distance or proximity guarantees.
+- Public copy may describe avoiding unnecessary import and intermediary layers,
+  but it must not promise a lower price or a specific logistics saving.
 - Active platform-owned public surfaces do not use giant-enterprise targeting,
   broad importer/reseller language, or unverified phrases such as "every
   business pays taxes" or "guaranteed sales."
@@ -93,18 +129,31 @@ discoverable presence without overstating verified business outcomes.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor understands who MirtPage is for
+Scenario: Visitor understands the trade MirtPage enables
   GIVEN the public marketplace is open
   WHEN a visitor reads the welcome and discovery introduction
-  THEN small and growing Ethiopian producers are the named focus
-  AND the visitor is invited to discover them by product and place
-  AND professional showrooms and direct inquiry are clear next steps
+  THEN the destination is identified as online showrooms for Ethiopian production
+  AND custom work, ready products, and wholesale supply are available as useful distinctions
+  AND Ethiopian producers and the buyers at the next step in their market are named
+  AND visiting a showroom and making direct contact are clear next steps
 
-Scenario: Producer understands why the platform exists
+Scenario: Platform language does not overstate one business's offer
+  GIVEN a listed business may support only one buying path
+  WHEN MirtPage describes the overall marketplace
+  THEN it presents the three paths as choices available across the platform
+  AND it does not claim that every listing accepts custom, retail, and wholesale orders
+
+Scenario: Producer understands how MirtPage connects the market
   GIVEN a local maker, grower, processor, workshop, or growing factory opens About
   WHEN they read the MirtPage story
-  THEN their investment and commitment to producing locally are acknowledged
+  THEN the page explains the path from production to households and trade buyers
   AND MirtPage's contribution is limited to presentation, discovery, and inquiry
+
+Scenario: Public copy does not guarantee transaction economics
+  GIVEN MirtPage does not set product prices or operate delivery
+  WHEN a visitor reads about buying closer to the source
+  THEN the copy does not promise a better price, savings amount, quality, or delivery outcome
+  AND it may explain the value of reducing unnecessary market layers as a platform purpose
 
 Scenario: Producer begins signup without a false promise
   GIVEN a producer opens business signup
@@ -176,3 +225,11 @@ client showroom identity.
 login/signup captures with no horizontal overflow, visible forms, and touch-size
 controls. Focused Chromium captures of the homepage and About page at 1440 and
 390 CSS pixels were reviewed without clipped or overlapping narrative text.
+
+Reopened narrative evidence on 2026-08-09: `npm run test:narrative`,
+`npm run test:homepage`, `npm run typecheck`, and `npm run validate:specs`
+pass after identifying the customer-facing product as online showrooms and
+replacing vague buying-path slogans with direct discovery, capability, and
+contact outcomes. Focused Chromium captures at 1440, 390, and 320 CSS pixels
+show the complete homepage explanation and About buyer journey with zero
+horizontal overflow. Full release gates remain pending visual approval.

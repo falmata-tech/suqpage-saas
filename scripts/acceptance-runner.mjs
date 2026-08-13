@@ -38,7 +38,6 @@ const env = {
   MIRTPAGE_SERVER_ACTION_ORIGINS: baseURL,
   MIRTPAGE_NEXT_DIST_DIR: distDir,
   MIRTPAGE_NEXT_TSCONFIG: tsconfigName,
-  MIRTPAGE_BAZAAR_NOW: "2026-07-26T10:00:00.000Z",
 };
 
 function run(command, args, { capture = false } = {}) {
@@ -64,7 +63,20 @@ async function stop() {
 }
 
 try {
-  fs.writeFileSync(tsconfigPath, `${JSON.stringify({ extends: "./tsconfig.json", include: ["next-env.d.ts", "**/*.ts", "**/*.tsx"] }, null, 2)}\n`, { flag: "wx" });
+  fs.writeFileSync(tsconfigPath, `${JSON.stringify({
+    extends: "./tsconfig.json",
+    include: [
+      "next-env.d.ts",
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "components/**/*.ts",
+      "components/**/*.tsx",
+      "lib/**/*.ts",
+      "scripts/**/*.ts",
+      "tests/**/*.ts",
+    ],
+    exclude: ["node_modules", ".next", ".next-*"],
+  }, null, 2)}\n`, { flag: "wx" });
   const setupOutput = run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"], { capture: true });
   if (/^(?:ADMIN|CLIENT) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
   for (const line of setupOutput.split("\n").filter((value) => value.startsWith("MirtPage database") || value.startsWith("Temporary credentials"))) console.log(line);

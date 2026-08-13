@@ -1,10 +1,10 @@
 ---
 id: BE-020
 title: Public client bootstrap and unified discovery projection
-status: done
-related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, FE-021, DEP-017, ADR-0011]
+status: in_progress
+related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, BE-029, FE-021, DEP-017, ADR-0011]
 owners: [backend, security, operations]
-last_updated: 2026-08-01
+last_updated: 2026-08-09
 change_level: L3
 ---
 
@@ -16,7 +16,7 @@ Invitation-only account creation adds avoidable onboarding delay, while the
 current City Showroom projection rewrites business locations and mixes geographic and
 virtual-venue concerns. The system needs a secure self-service bootstrap and one
 public business projection that independently powers geographic discovery and
-the weekly industry Expo program.
+the weekly industry Daily Featured program.
 
 ## Scope
 
@@ -30,8 +30,10 @@ the weekly industry Expo program.
 - Existing admin invitation onboarding as a supported parallel path.
 - Indexed eligible business projection including reviewed coordinates.
 - SQL-counted, limit/offset List pages capped at five rows.
-- Deterministic weekday-industry Expo floor-slot assignment and a Sunday
-  selected-featured-business livestream projection.
+- Deterministic weekday-industry Daily Featured floor-slot assignment for seven stable
+  industry groups across all seven days.
+- Bounded reviewed region/city filtering shared by Map counts, Map rows, city
+  groups, and SQL-paginated List results.
 - Detailed booth projection only when the selected schedule date is today;
   non-today selections return count-preserving anonymous slots without client
   identity, media paths, handles, or showroom destinations.
@@ -45,7 +47,8 @@ the weekly industry Expo program.
 - Automatic design generation, approval, publication, payment, or staff access.
 - Public staff registration, email verification claims, passwordless login, or
   an external identity provider.
-- Browser-authoritative coordinates, industry membership, booth media, featured
+- Browser-authoritative business coordinates, visitor-coordinate persistence,
+  industry membership, booth media, featured
   status, publication state, or tenant identifiers.
 
 ## Domain language and invariants
@@ -53,7 +56,7 @@ the weekly industry Expo program.
 - **Client bootstrap:** one transaction that creates a private draft tenant,
   client identity, explicit client access profile, and onboarding request.
 - The new account can authenticate immediately. The draft showroom is not public
-  and contributes to no discovery or Expo result until an authorized manager
+  and contributes to no discovery or Daily Featured result until an authorized manager
   publishes an approved revision.
 - Publication activates the business. An administrator can later suspend or
   restore that established business.
@@ -69,12 +72,15 @@ the weekly industry Expo program.
   and search filtering. A group contains each eligible business exactly once,
   exposes an exact count and centroid, and retains every member's authoritative
   coordinates for direct discovery data.
-- Map filters and search do not narrow the independently date-selected Expo.
-- Today's Expo ordering is featured first, then normalized business name and ID.
+- Map filters and search do not narrow the independently date-selected Daily Featured.
+- A place filter matches an allowlisted reviewed region or normalized reviewed
+  city present in the eligible projection. It is applied in SQL before Map rows,
+  city grouping, totals, and List pagination are derived.
+- Today's Daily Featured ordering is featured first, then normalized business name and ID.
   Every entry has one sequential stable floor reference for an unchanged
   projection; there is no hall partition.
 - Approved `booth_image_path` remains business-owned profile configuration and
-  is projected only with that business's revealed booth on today's Expo.
+  is projected only with that business's revealed booth on today's Daily Featured.
 - Schedule dates are calculated in `Africa/Addis_Ababa` for the current
   Monday-through-Sunday calendar week. Entries remain in fixed weekday order
   and exactly one entry is identified as today.
@@ -107,7 +113,7 @@ Scenario: Prospect creates a private client workspace
   THEN one draft business, client account, access profile, and onboarding request
     commit atomically
   AND the prospect receives an authenticated private workspace
-  AND no public showroom, marker, list row, featured card, or Expo booth exists
+  AND no public showroom, marker, list row, featured card, or Daily Featured booth exists
 
 Scenario: Duplicate or partial signup is rejected
   GIVEN an existing email or handle, invalid input, or a failed transaction
@@ -118,7 +124,7 @@ Scenario: Duplicate or partial signup is rejected
 Scenario: Published active business becomes discoverable
   GIVEN a self-created draft has an approved discovery profile and revision
   WHEN an authorized manager publishes the exact approved revision
-  THEN the business becomes active and appears once in map, list, and Expo
+  THEN the business becomes active and appears once in map, list, and Daily Featured
   AND no payment or subscription date is consulted
 
 Scenario: Administrator suspends a published showroom
@@ -140,23 +146,28 @@ Scenario: Public List is requested at scale
   THEN SQL count and limit/offset queries return at most five rows
   AND an out-of-range page is clamped to the final available page
 
-Scenario: Weekly Expo is projected
-  GIVEN an Ethiopia-local Monday-through-Saturday date is selected
+Scenario: Weekly Daily Featured is projected
+  GIVEN any Ethiopia-local weekday is selected
   WHEN discovery is projected
   THEN every eligible business in today's stable industry is assigned once on
     one deterministic continuous floor
   AND map filters do not alter the assignment
-  AND Sunday instead returns selected featured businesses for TikTok live
 
-Scenario: Weekly Expo positions remain stable
+Scenario: Place filter is applied consistently
+  GIVEN eligible businesses span multiple reviewed cities and regions
+  WHEN a bounded reviewed place filter is supplied
+  THEN the total, Map rows, city groups, and SQL-paginated List use the same predicate
+  AND an unknown place safely resolves to the unfiltered national view
+
+Scenario: Weekly Daily Featured positions remain stable
   GIVEN discovery is projected on any Ethiopia-local weekday
   WHEN the weekly schedule is returned
   THEN its entries remain ordered Monday through Sunday
   AND the current weekday alone is identified as today
 
-Scenario: Non-today Expo identity is redacted
+Scenario: Non-today Daily Featured identity is redacted
   GIVEN the visitor selects a schedule date that is not today
-  WHEN the public Expo projection is built
+  WHEN the public Daily Featured projection is built
   THEN it returns the eligible booth count and stable anonymous slot references
   AND it returns no business identity, media path, handle, or destination
 
@@ -178,7 +189,7 @@ Scenario: Matching city businesses form one gateway
 - Localization and merchant-entered values: bounded Unicode display values;
   normalized ASCII handle and lower-case email authority.
 - Performance and limits: indexed industry/search predicates, one linear city-
-  grouping pass, bounded five-row List pages, count-only non-today Expo queries,
+  grouping pass, bounded five-row List pages, count-only non-today Daily Featured queries,
   and no occurrence or hall fan-out.
 - Failure recovery and idempotency: transaction rollback, safe duplicate
   response, revocable session, and additive migration only if required.
@@ -195,7 +206,7 @@ session token, or request body.
 |---|---|---|
 | Atomic bootstrap, conflicts, rate limit, tenant binding | security/integration | `scripts/test-signup.ts`, `scripts/test-security.ts` |
 | Public eligibility without subscription gating | integration | `scripts/test-discovery.ts`, `scripts/test-account-health.ts` |
-| Exact coordinates, deterministic city groups, bounded List pages, weekly schedule, Expo slots/redaction | integration | `scripts/test-discovery.ts` |
+| Exact coordinates, deterministic city groups, bounded List pages, weekly schedule, Daily Featured slots/redaction | integration | `scripts/test-discovery.ts` |
 | Exact-origin/body/session behavior | HTTP/browser | `scripts/http-smoke.mjs`, `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
@@ -219,7 +230,7 @@ production rollout requires abuse monitoring, backup, and reconciled migration.
 
 Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` proves one stable
 sequential floor-slot projection, approved booth-image ownership, missing-media
-exclusion from Expo without geographic exclusion, rolling schedule dates, and
+exclusion from Daily Featured without geographic exclusion, rolling schedule dates, and
 count-preserving non-today slots containing no business, handle, destination,
 or media projection. Scale fixtures prove complete unique slot sequences across
 all six industries. All 10 browser workflows, `npm run check`, and

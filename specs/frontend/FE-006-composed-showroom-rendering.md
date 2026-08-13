@@ -1,10 +1,10 @@
 ---
 id: FE-006
 title: Deterministic composed showroom rendering
-status: done
+status: in_progress
 related: [BE-007, DEP-004, DEP-005, DEP-006, FE-001, FE-003, FE-005, FE-007, FE-009, BE-004, BE-005, BE-006, ADR-0005, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-24
+last_updated: 2026-08-12
 change_level: L3
 ---
 
@@ -64,6 +64,20 @@ to own canonical content and smart-showroom actions.
 - Platform callbacks remain the only way to open product detail, add or remove
   inquiry items, open the inquiry drawer, search, or filter.
 - Canonical content is displayed without being rewritten by the manifest.
+- Every composed showroom exposes one stable section-navigation model owned by
+  the renderer: Home, Story, Offerings, and Contact target the rendered hero,
+  combined story-and-process chapter, catalog, and inquiry call-to-action.
+  Desktop headers carry those links beside tenant identity instead of repeating
+  a promotional descriptor. Phone showrooms expose the same destinations in a
+  fixed bottom application bar with Inquiry as a named action and item count.
+- The platform-owned **Powered by MirtPage** and **Back** host bar remains above
+  tenant-controlled presentation. Tenant manifests may vary header anatomy and
+  colors but cannot remove, rename, or intercept platform navigation or the
+  Inquiry action.
+- Fixed phone navigation respects safe-area insets, does not cover showroom
+  content, remains usable at 320 CSS pixels, and is omitted from embedded staff
+  previews where it would obscure editing controls. The existing desktop
+  floating Inquiry action remains available outside phone widths.
 - The four seeded clients use different valid manifests and all expose the
   mandatory product-detail, add-to-inquiry, and inquiry-cart capabilities.
 - Private-preview controls remain outside the showroom canvas and preserve
@@ -78,6 +92,15 @@ Scenario: Visitor uses a migrated composed showroom
   THEN the exact manifest is rendered from the static bank
   AND the visitor can search or filter, inspect a product, add it to an inquiry,
   and submit through the existing inquiry workflow
+
+Scenario: Visitor navigates one showroom as an application
+  GIVEN a public composed showroom is open
+  WHEN the visitor chooses Home, Story, Offerings, or Contact in the desktop
+  header or phone bottom navigation
+  THEN focus moves to the corresponding canonical rendered section
+  AND the tenant header does not repeat the business tagline as navigation copy
+  AND choosing Inquiry opens the existing tenant-scoped inquiry drawer
+  AND the MirtPage host bar remains the topmost navigation context
 
 Scenario: Client reviews the exact composed revision
   GIVEN the latest submitted schema-v2 revision for the client's business
@@ -125,6 +148,7 @@ credentials, contacts, or complete snapshot JSON.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Static deterministic renderer and platform callbacks | unit/browser | `scripts/test-showroom-renderer.ts`, `tests/acceptance/app.spec.ts` |
+| Stable desktop and phone section navigation plus Inquiry | browser/accessibility | `tests/acceptance/app.spec.ts`, focused 1440px/390px/320px showroom captures |
 | Four distinct client manifests | contract/browser | `scripts/test-showroom-migration.ts`, `tests/acceptance/app.spec.ts` |
 | Private preview and exact approval/publication | integration/browser | `scripts/test-revisions.ts`, `tests/acceptance/app.spec.ts` |
 | Invalid manifest fails closed | unit/security | `scripts/test-showroom-renderer.ts`, `scripts/test-security.ts` |

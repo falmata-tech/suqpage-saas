@@ -312,7 +312,13 @@ const sectionSource = fs.readFileSync(
 assert.doesNotMatch(sectionSource, /heroProducts|featured\.map/);
 assert.doesNotMatch(sectionSource, /product\.name\.slice/);
 assert.match(sectionSource, /placeholderTexture/);
-assert.match(sectionSource, /href="#showroom-catalog"/);
+assert.match(sectionSource, /function ShowroomSectionNavigation/);
+for (const anchor of ["home", "story", "offerings", "contact"]) {
+  assert.match(sectionSource, new RegExp(`context\\.sectionAnchorIds\\.${anchor}`));
+}
+assert.match(sectionSource, /<a href=\{`#\$\{context\.sectionAnchorIds\.offerings\}`\}/);
+assert.match(sectionSource, /anchorId=\{context\.sectionAnchorIds\.offerings\}/);
+assert.doesNotMatch(sectionSource, /context\.catalogAnchorId/);
 assert.match(sectionSource, /data-media-integration/);
 assert.match(sectionSource, /data-surface/);
 assert.match(sectionSource, /data-media-planes/);

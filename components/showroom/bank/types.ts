@@ -63,6 +63,12 @@ export type BankPresentationContext = {
   query: string;
   selectedCategory: string;
   cartCount: number;
+  sectionAnchorIds: {
+    home: string;
+    story: string;
+    offerings: string;
+    contact: string;
+  };
   onQueryChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onOpenProduct: (product: BankProductView) => void;

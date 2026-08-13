@@ -1,10 +1,10 @@
 ---
 id: FE-007
 title: AI showroom recipe import and focused staff studio
-status: ready
-related: [FE-003, FE-006, FE-008, FE-009, FE-014, FE-016, BE-008, BE-009, BE-010, BE-013, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
+status: in_progress
+related: [FE-003, FE-006, FE-008, FE-009, FE-014, FE-016, FE-031, BE-008, BE-009, BE-010, BE-013, DEP-007, DEP-009, DEP-011, ADR-0005, ADR-0006, ADR-0007]
 owners: [product, frontend, design]
-last_updated: 2026-07-27
+last_updated: 2026-08-10
 change_level: L3
 ---
 
@@ -12,17 +12,15 @@ change_level: L3
 
 ## Problem and outcome
 
-Staff currently prepare a revision through a large structured form while its
-showroom composition is read-only. That repeats the work an external AI can do
-from the client's request, supplied facts, private asset references, current
-showroom snapshot, component bank, schemas, and complete examples.
+Initial builds and complete redesigns benefit from one complete AI-assisted
+showroom recipe, but bounded updates should not force staff through brief export,
+schema import, and full-composition replacement. The authoring tool must follow
+the requested outcome while preserving one private revision and approval model.
 
-The primary staff workflow must become one complete showroom recipe: export a
-sanitized brief, discuss the desired result with the team's external AI, import
-its bounded JSON, resolve validation exceptions, inspect the exact private
-preview, and send that revision to the client. Routine staff must not manually
-enter every collection, category, product, hero field, story block, or design
-choice.
+Staff therefore choose between two first-class tools inside the same revision:
+direct focused editing for bounded content, media, offering, component, palette,
+or motion changes, and AI-assisted recipe import for a new complete composition.
+Neither tool changes the live showroom or weakens review controls.
 
 ## Scope
 
@@ -45,9 +43,9 @@ choice.
 - Focused staff controls for approved component, foundation, custom palette,
   section surface, motion, decoration, and content-block associations after a
   valid import.
-- Re-import as the default correction path for catalog/content errors; the
-  current field-heavy editor becomes a clearly labeled administrative recovery
-  tool rather than routine production workflow.
+- Re-import as the correction path for errors in an AI-produced complete recipe.
+- A first-class focused editor for bounded updates to the current showroom
+  without exporting a brief or importing a complete recipe.
 - Structured count/difference summaries for collections, categories, products,
   content blocks, media assignments, and design sections.
 
@@ -102,6 +100,10 @@ choice.
 - For a first showroom, the AI returns a complete desired content proposal. For
   a change request, the brief includes the authorized current snapshot and the
   AI returns a complete replacement proposal, not an ambiguous patch.
+- AI recipe work is optional for an established showroom update. **Edit current
+  showroom** starts from the retained live snapshot; **AI-assisted redesign**
+  uses the same draft and complete-recipe contract. Staff may move between the
+  tools without creating a second project or revision.
 - The portable/current product contract is availability-only. Recipe examples,
   forms, diffs, and returned JSON contain no product or option stock count;
   requested inquiry quantity remains separate customer intent.
@@ -152,6 +154,13 @@ Scenario: Staff imports a complete change recipe
   WHEN the AI returns a full desired snapshot preserving retained stable keys
   THEN additions, removals, content changes, and design changes are explicit
   AND the existing public showroom remains unchanged
+
+Scenario: Staff performs a bounded update without AI import
+  GIVEN an established showroom has a private update draft
+  WHEN assigned staff choose Edit current showroom and change approved content,
+  media, offerings, components, palette roles, or motion
+  THEN the current snapshot is edited directly without a new AI brief or recipe
+  AND the exact result still requires private preview, client approval, and manager publication
 
 Scenario: Staff exports a client-independent structural example
   GIVEN recipe briefs are exported for unrelated clients

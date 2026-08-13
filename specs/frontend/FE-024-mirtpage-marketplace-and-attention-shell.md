@@ -1,10 +1,10 @@
 ---
 id: FE-024
 title: MirtPage marketplace and attention shell
-status: done
-related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, FE-027, FE-028, FE-029, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
+status: in_progress
+related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, FE-027, FE-028, FE-029, FE-030, FE-033, FE-036, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-04
+last_updated: 2026-08-09
 change_level: L3
 ---
 
@@ -28,20 +28,22 @@ and an immediately actionable dashboard summary.
   factories serving consumer and B2B buyers.
 - Reviewed production-scale metadata retained for administration and internal
   projection, without exposing a public scale filter or hidden scale URL state.
-- Clear hierarchy between industry selection, the map command area, sponsored showrooms, map
-  summary, map/list mode, weekly Expo, and Sunday showcase.
-- A centered, focus-safe showroom preview dialog with a visually dominant
-  **Open showroom** action on maps and floors.
+- Clear hierarchy between one icon-led industry selection, the map command area,
+  map summary, map/list mode, integrated sponsored showrooms, and the seven-day
+  weekly Daily Featured.
+- A non-modal, focus-safe floating showroom inspector with a visually dominant
+  **Open showroom** action on maps and floors while the active map or venue
+  remains visible.
 - Role-scoped dashboard attention cards for actionable requests, accounts,
   inquiries, and support messages.
 - A clearly disclosed **Sponsored showrooms** section whose paid placements are
-  visually prominent, ordered by reviewed priority, and independent from
-  editorial Sunday selection.
-- A weekly **Featured Enterprises** Sunday program: one industry rotates each
-  week, MirtPage selects its participating founders, and the public copy
-  explains that MirtPage interviews and streams them through its own channels.
-- Administrator controls for paid sponsorship and industry-specific Sunday
-  selections without changing showroom publication authority.
+  visually prominent, ordered by reviewed priority, and independent from Daily Featured
+  eligibility or editorial endorsement.
+- Seven stable industry groups, one assigned to each Daily Featured weekday, with
+  Agriculture & Primary Produce on Sunday.
+- Administrator controls for paid sponsorship without changing showroom
+  publication authority. Retained Sunday-selection records are legacy data and
+  no longer affect the public marketplace.
 - Eight additional authored growing-factory demonstrations, each with a brief,
   identity, booth, hero, four offerings, and desktop/mobile review evidence.
 
@@ -60,16 +62,14 @@ and an immediately actionable dashboard summary.
 - **Production scale** is reviewed administrative metadata: `workshop` or
   `growing_factory`. It does not represent revenue, staffing, legal form, or
   eligibility for credit, and it is not a public marketplace filter.
-- Industry and live search preserve map/list, pagination, and Expo-date state.
+- Industry and live search preserve map/list, pagination, and Daily Featured-date state.
   Public homepage and discovery routes ignore a supplied scale query so results
   cannot be narrowed by an invisible control.
 - A platform attention count includes only records that currently require the
   signed-in actor's role to act; it is not a cumulative metric.
 - Sponsorship is paid placement and must be labeled as sponsored. It does not
   imply endorsement, certification, or Sunday selection.
-- Sunday Featured Enterprises is an editorial MirtPage selection. The active
-  industry advances deterministically once per Ethiopia calendar week through
-  all six industries, then repeats.
+- Sponsorship does not alter Daily Featured eligibility or booth order.
 
 ## Scenarios
 
@@ -89,9 +89,10 @@ Scenario: Marketplace opens with one compact command hierarchy
   AND the map begins within the first mobile and desktop viewport
 
 Scenario: Visitor opens a business from a dense visual floor
-  GIVEN a map, city floor, or Expo booth is visible
+  GIVEN a map, city floor, or Daily Featured booth is visible
   WHEN the visitor activates one business
-  THEN a distinct centered dialog identifies the business and location
+  THEN a distinct floating inspector identifies the business and location without obscuring the whole screen
+  AND the map or venue remains visible and is not dimmed or made inert
   AND Open showroom is the visually dominant action
   AND close, Escape, focus, and mobile layout remain usable
 
@@ -108,25 +109,18 @@ Scenario: Client opens the dashboard
   AND platform-wide account and request counts remain hidden
 
 Scenario: Visitor sees paid placement
-  GIVEN at least five active sponsored showrooms in the selected industry
+  GIVEN five eligible businesses have been manually selected as global sponsors
   WHEN the marketplace loads
-  THEN the section is labeled Sponsored showrooms
+  THEN the Daily Featured workspace contains a clearly labeled Sponsors rail independent of the selected industry, date, search, and place
   AND its cards expose useful identity and location cues with a clear showroom action
-  AND the rail advances automatically without a visible pause or dismiss control
-  AND reduced-motion preference and direct pointer or keyboard interaction suspend motion
-
-Scenario: Visitor opens the Sunday program
-  GIVEN MirtPage administrators selected enterprises for this week's industry
-  WHEN Sunday is selected
-  THEN the schedule names the rotating industry
-  AND the shared floor contains only the curated enterprises for that industry
-  AND copy explains MirtPage's founder interview and livestream format
+  AND no horizontal scrolling is required to reach a paid placement
+  AND the responsive card grid remains usable beside or above the Daily Featured floor
 
 Scenario: Administrator manages marketplace programs
   GIVEN an authorized platform administrator opens a discovery profile
-  WHEN sponsorship or Sunday industry selections are changed
-  THEN the paid and editorial programs persist independently
-  AND unauthorized staff cannot change either program
+  WHEN sponsorship is changed
+  THEN paid placement persists independently from industry assignment and Daily Featured eligibility
+  AND unauthorized staff cannot change it
 ```
 
 ## Quality impact
@@ -147,12 +141,12 @@ Scenario: Administrator manages marketplace programs
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Identity, controls, preview dialog, and mobile hierarchy | browser | `tests/acceptance/app.spec.ts`, `scripts/capture-discovery-visuals.mjs` |
+| Identity, controls, floating preview inspector, and mobile hierarchy | browser | `tests/acceptance/app.spec.ts`, `scripts/capture-discovery-visuals.mjs` |
 | Internal production-scale projection and public-filter omission | integration/browser | `scripts/test-discovery.ts`, `scripts/test-scalable-queries.ts`, `tests/acceptance/app.spec.ts` |
 | Role-scoped attention cards | integration/security | `scripts/test-support.ts`, `scripts/test-security.ts` |
 | Active-copy legacy-name denial | contract | `scripts/test-platform-identity.mjs` |
-| Sponsored and Sunday admin controls | integration/security | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
-| Expo, city floor, modal, and sponsored visual hierarchy | browser | `scripts/capture-discovery-visuals.mjs` |
+| Sponsorship controls and Daily Featured projection | integration/security | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
+| Daily Featured, city floor, floating inspector, and sponsored visual hierarchy | browser | `scripts/capture-discovery-visuals.mjs` |
 
 ## Rollout and rollback
 

@@ -63,7 +63,24 @@ try {
   const requestStorageKey = "11111111-1111-4111-8111-111111111111.png";
   fs.writeFileSync(path.join(env.MIRTPAGE_MEDIA_ROOT, "requests", requestStorageKey), "private request attachment");
   db = new DatabaseSync(env.MIRTPAGE_DB_PATH);
-  const owner = db.prepare("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client' ORDER BY u.id LIMIT 1").get();
+  const owner = db.prepare(`
+    SELECT u.id,u.business_id
+    FROM users u
+    JOIN user_access_profiles p ON p.user_id=u.id
+    WHERE p.access_role='client'
+      AND u.business_id IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM service_requests request
+        WHERE request.business_id=u.business_id
+          AND request.status IN (
+            'submitted','under_review','needs_information','approved_for_work',
+            'in_progress','client_review','client_approved'
+          )
+      )
+    ORDER BY u.id
+    LIMIT 1
+  `).get();
+  assert.ok(owner, "operations backup fixture requires a client without an active showroom project");
   const admin = db.prepare("SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='platform_admin' LIMIT 1").get();
   db.prepare("INSERT INTO client_invitations(request_id,business_id,email,name,token_hash,expires_at,created_by_user_id,created_at) VALUES(NULL,?,'backup-invite@example.test','Backup Invite','backup-invitation-hash',?,?,?)").run(owner.business_id,Date.now()+60_000,admin.id,Date.now());
   const requestId = Number(db.prepare("INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,ip_hash) VALUES('REQ-BACKUP000001',?,?,'change','submitted','Backup Client','private@example.test','Backup Business','Please preserve this private authenticated request during backup and restore.','client',?,'operations-backup-key','private-hash')").run(owner.business_id,owner.id,owner.id).lastInsertRowid);

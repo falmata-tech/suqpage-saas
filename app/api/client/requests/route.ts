@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     if (!Number.isFinite(length) || length <= 0) throw new RequestError("A bounded content length is required.", 411);
     if (length > MAX_MULTIPART_BYTES) throw new RequestError("The request is too large.", 413);
     const result = await createAuthenticatedClientRequest(user, await request.formData());
-    return NextResponse.json({ reference:result.publicRef, id:result.id, duplicate:result.duplicate }, { status:result.duplicate?200:201, headers:{"Cache-Control":"no-store"} });
+    return NextResponse.json({ reference:result.publicRef, id:result.id, duplicate:result.duplicate, existingProject:result.existingProject || false }, { status:result.duplicate||result.existingProject?200:201, headers:{"Cache-Control":"no-store"} });
   } catch (error) {
     if (error instanceof RequestError) return NextResponse.json({error:error.message},{status:error.status,headers:{"Cache-Control":"no-store"}});
     return NextResponse.json({error:"The request could not be saved."},{status:500,headers:{"Cache-Control":"no-store"}});

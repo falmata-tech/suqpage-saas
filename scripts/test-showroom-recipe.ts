@@ -12,7 +12,7 @@ async function main() {
   process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
   try {
     const { closeDbForTests, getDb, getUserById } = await import("../lib/db");
-    const { createDraftRevision, getContentRevision } = await import(
+    const { createDraftRevision, getContentRevision, saveDraftRevision } = await import(
       "../lib/revision-service"
     );
     const {
@@ -152,6 +152,7 @@ async function main() {
       true,
     );
     assert.match(video.assetKey, /^asset_[a-f0-9]{20}$/);
+    assert.equal(video.managedRef, "youtube:dQw4w9WgXcQ");
     assert.equal(video.duplicate, false);
     assert.deepEqual(
       await admitRecipeYouTube(
@@ -163,6 +164,13 @@ async function main() {
       ),
       { ...video, duplicate: true },
     );
+    const inlineMediaSnapshot = JSON.parse((await getContentRevision(draft.id))!.snapshot_json);
+    inlineMediaSnapshot.business.processVideoRef = video.managedRef;
+    inlineMediaSnapshot.products[0].videoRef = video.managedRef;
+    await saveDraftRevision(team, draft.id, inlineMediaSnapshot, "Added controlled inline videos");
+    const savedInlineMedia = JSON.parse((await getContentRevision(draft.id))!.snapshot_json);
+    assert.equal(savedInlineMedia.business.processVideoRef, video.managedRef);
+    assert.equal(savedInlineMedia.products[0].videoRef, video.managedRef);
     const exported = await buildShowroomRecipeBrief(team, draft.id);
     const serializedBrief = JSON.stringify(exported.brief);
     assert.equal(serializedBrief.includes("password_hash"), false);
@@ -254,7 +262,7 @@ async function main() {
     );
     assert.ok(
       exported.brief.instructions.some((instruction) =>
-        /processVideoRef only in the canonical Process experience/.test(instruction),
+        /processVideoRef appears there automatically/.test(instruction),
       ),
     );
     assert.equal(exported.brief.examplePolicy.importable, false);
@@ -337,7 +345,7 @@ async function main() {
     assert.ok(
       exported.brief.completeExample.design.sections
         .filter((section) =>
-          ["hero-main", "brand-story"].includes(section.contentBlockKey || ""),
+          ["hero-main", "story-process"].includes(section.contentBlockKey || ""),
         )
         .every((section) => section.mediaIntegration),
     );
@@ -361,9 +369,9 @@ async function main() {
         (template) =>
           !("tokenPack" in template) &&
           !("components" in template) &&
-          template.sectionPlan.length === 7 &&
+          template.sectionPlan.length === 6 &&
           template.sectionPlan.map((section) => section.slot).join(">") ===
-            "header>hero>content>content>catalog>call_to_action>footer" &&
+            "header>hero>content>catalog>call_to_action>footer" &&
           template.surfaceGuidance.length >= 2,
       ),
     );
@@ -373,8 +381,7 @@ async function main() {
         sectionOrder: [
           "header",
           "hero",
-          "about_story",
-          "process",
+          "story_and_process",
           "products",
           "inquiry_call_to_action",
           "footer",
@@ -395,7 +402,15 @@ async function main() {
     );
     assert.equal(
       Object.keys(exported.brief.compositionGuidance.components).length,
-      67,
+      66,
+    );
+    assert.equal(
+      exported.brief.componentBank.components.some(
+        (component) => component.id === "content.controlled-film@1" ||
+          (component.acceptedContentTypes as readonly string[]).includes("story") ||
+          (component.acceptedContentTypes as readonly string[]).includes("video"),
+      ),
+      false,
     );
     assert.equal(
       exported.brief.schemas.designSystem.items.properties.shape.properties.radius.maximum,
@@ -432,6 +447,13 @@ async function main() {
     );
     assert.ok(heroIntegrations.size >= 6);
     assert.equal(heroIntegrations.has("surface_blend"), true);
+    assert.equal(
+      exported.brief.allowedMediaDestinations.some(
+        (destination) => ["logo", "favicon"].includes(destination.slotKey),
+      ),
+      false,
+      "Business details media is not exposed as a recipe destination",
+    );
     assert.equal(
       JSON.stringify(exported.brief.mediaManifest).includes("storage_key"),
       false,
@@ -471,6 +493,10 @@ async function main() {
       },
     ];
     recipe.summary = "Validated imported showroom recipe.";
+    recipe.content.business.name = "AI must not rename the business";
+    recipe.content.business.logoRef = admitted.assetKey;
+    recipe.content.business.contactEmail = "ai-overwrite@test.local";
+    recipe.content.business.siteTitle = "AI must not replace settings";
     recipe.content.business.heroTitle = "Recipe-approved public hero";
     recipe.content.business.heroImageRef = admitted.assetKey;
     recipe.design.sections[1].component = "hero.room-scene@1";
@@ -478,9 +504,25 @@ async function main() {
       exported.brief.designSystems.find(
         (system) => system.id === "maker-indigo",
       )!.colors;
+    const legacyAuthoredRecipe = structuredClone(recipe) as unknown as {
+      content: { contentBlocks: { blocks: Array<Record<string, unknown>> } };
+    };
+    const authoredChapter = legacyAuthoredRecipe.content.contentBlocks.blocks.find(
+      (block) => block.type === "highlights",
+    );
+    assert.ok(authoredChapter);
+    authoredChapter.type = "story";
+    authoredChapter.quote = "Compatibility-only story.";
+    delete authoredChapter.items;
+    await assert.rejects(
+      () => importShowroomRecipe(team, draft.id, legacyAuthoredRecipe),
+      (error: unknown) =>
+        error instanceof ShowroomRecipeError &&
+        /compatibility-only/.test(error.issues[0]?.message || ""),
+    );
     const imported = await importShowroomRecipe(team, draft.id, recipe);
     assert.equal(imported.difference.products.after, 1);
-    assert.equal(imported.difference.designSections.after, 7);
+    assert.equal(imported.difference.designSections.after, 6);
     assert.equal(imported.recipe.content.collections.length, 0);
     assert.equal(imported.recipe.content.products[0].collectionKey, null);
     assert.equal(
@@ -493,6 +535,10 @@ async function main() {
       imported.snapshot.designManifest.customPalette,
       recipe.design.customPalette,
     );
+    assert.equal(imported.snapshot.business.name, "Recipe Test");
+    assert.equal(imported.snapshot.business.logoRef, "");
+    assert.equal(imported.snapshot.business.contactEmail, "");
+    assert.equal(imported.snapshot.business.siteTitle, "");
     assert.equal(
       imported.recipe.mediaPlan[0].ownerKey,
       imported.snapshot.products[0].key,

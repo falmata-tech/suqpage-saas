@@ -22,6 +22,8 @@ import {
   Package,
   Palette,
   RefreshCw,
+  CalendarClock,
+  Settings2,
   ShieldCheck,
   Store,
   UserCog,
@@ -41,6 +43,7 @@ export type WorkspaceNavItem = {
 
 export type WorkspaceNavIcon =
   | "account"
+  | "access"
   | "businesses"
   | "clients"
   | "design"
@@ -53,14 +56,18 @@ export type WorkspaceNavIcon =
   | "public"
   | "requests"
   | "security"
+  | "settings"
   | "staff"
   | "support"
   | "supportAgents"
+  | "renewal"
+  | "schedule"
   | "switch"
   | "workspace";
 
 const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   account: CircleUserRound,
+  access: Users,
   businesses: Building2,
   clients: Users,
   design: Palette,
@@ -73,9 +80,12 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   public: ExternalLink,
   requests: ClipboardList,
   security: LockKeyhole,
+  settings: Settings2,
   staff: UserCog,
   support: MessageSquareText,
   supportAgents: Headphones,
+  renewal: CalendarClock,
+  schedule: CalendarClock,
   switch: RefreshCw,
   workspace: Store,
 };
@@ -83,6 +93,29 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
 function NavIcon({ name }: { name?: WorkspaceNavIcon }) {
   const Icon = name ? icons[name] : House;
   return <Icon aria-hidden="true" size={17} strokeWidth={2} />;
+}
+
+const mobileLabels: Record<string, string> = {
+  "Business details": "Details",
+  "Customer inquiries": "Inquiries",
+  "My offerings": "Offerings",
+  "Platform overview": "Overview",
+  "Showroom project": "Showroom",
+  "Showroom requests": "Requests",
+  "Support inbox": "Support",
+};
+
+function activeNavigationHref(groups: WorkspaceNavGroup[], pathname: string, businessId: string | null) {
+  return groups
+    .flatMap((group) => group.items)
+    .filter((item) => {
+      const [path, query = ""] = item.href.split("?");
+      if (path === "/dashboard" && pathname === path) {
+        return new URLSearchParams(query).get("business") === businessId;
+      }
+      return pathname === path || pathname.startsWith(`${path}/`);
+    })
+    .sort((left, right) => right.href.split("?")[0].length - left.href.split("?")[0].length)[0]?.href;
 }
 
 export type WorkspaceNavGroup = {
@@ -93,16 +126,7 @@ export type WorkspaceNavGroup = {
 function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[]; onNavigate?: () => void }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeHref = groups
-    .flatMap((group) => group.items)
-    .filter((item) => {
-      const [path, query = ""] = item.href.split("?");
-      if (path === "/dashboard" && pathname === path) {
-        return new URLSearchParams(query).get("business") === searchParams.get("business");
-      }
-      return pathname === path || pathname.startsWith(`${path}/`);
-    })
-    .sort((left, right) => right.href.split("?")[0].length - left.href.split("?")[0].length)[0]?.href;
+  const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
   return (
     <nav className="workspace-nav" aria-label="Workspace">
       {groups.map((group) => (
@@ -156,6 +180,19 @@ export default function WorkspaceNavigation({
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
   const previousRoute = useRef(routeKey);
+  const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
+  const allItems = groups.flatMap((group) => group.items);
+  const priority: WorkspaceNavIcon[] = ["overview", "businesses", "offerings", "requests", "inquiries", "support"];
+  const primaryItems = priority
+    .map((icon) => allItems.find((item) => item.icon === icon && !item.external))
+    .filter((item): item is WorkspaceNavItem => Boolean(item))
+    .filter((item, index, items) => items.findIndex((candidate) => candidate.href === item.href) === index)
+    .slice(0, 4);
+  for (const item of allItems) {
+    if (primaryItems.length >= 4) break;
+    if (!item.external && !primaryItems.some((candidate) => candidate.href === item.href)) primaryItems.push(item);
+  }
+  const primaryContainsActive = primaryItems.some((item) => item.href === activeHref);
 
   useEffect(() => {
     if (previousRoute.current !== routeKey) setOpen(false);
@@ -203,20 +240,28 @@ export default function WorkspaceNavigation({
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>
-      <header className="workspace-mobile-header">
-        <MirtPageBrand href={dashboardHref} className="workspace-brand" />
+      <nav className="workspace-mobile-tabs" aria-label="Workspace application navigation">
+        {primaryItems.map((item) => {
+          const active = item.href === activeHref;
+          return <Link key={`mobile-${item.href}-${item.label}`} href={item.href} aria-current={active ? "page" : undefined} aria-label={item.label}>
+            <NavIcon name={item.icon} />
+            <span>{mobileLabels[item.label] || item.label}</span>
+          </Link>;
+        })}
         <button
           className="workspace-menu-button"
           type="button"
-          aria-label="Open workspace menu"
+          aria-label="Open all workspace navigation"
           aria-expanded={open}
           aria-controls="workspace-mobile-menu"
+          data-active={open || !primaryContainsActive || undefined}
           onClick={() => setOpen(true)}
           ref={openerRef}
         >
           <Menu aria-hidden="true" size={22}/>
+          <span>More</span>
         </button>
-      </header>
+      </nav>
       {open ? (
         <div className="workspace-drawer-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
           <div className="workspace-drawer" id="workspace-mobile-menu" role="dialog" aria-modal="true" aria-label="Workspace menu" ref={dialogRef}>

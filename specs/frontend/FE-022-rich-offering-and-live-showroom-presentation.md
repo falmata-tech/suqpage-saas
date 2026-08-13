@@ -2,7 +2,7 @@
 id: FE-022
 title: Rich offering and live showroom presentation
 status: done
-related: [FE-023, BE-021, DEP-018]
+related: [FE-021, FE-023, FE-030, BE-021, DEP-018]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L3
@@ -132,6 +132,6 @@ scale fixtures passed deterministic admission. Twenty desktop/mobile benchmark
 pages and their product-detail dialogs passed with zero browser, overflow,
 broken-media, focus-boundary, or token-pattern failures; all four detail
 patterns exercised controlled Photo/Video switching. Homepage discovery, City
-Showroom, Expo, List, 390px, and 320px visual captures also passed. `npm run check`,
+Showroom, Daily Featured, List, 390px, and 320px visual captures also passed. `npm run check`,
 all ten production acceptance workflows, and `npm run release` passed. No
 production publication or rollout is included.

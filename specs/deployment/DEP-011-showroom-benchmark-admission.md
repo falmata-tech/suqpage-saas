@@ -1,10 +1,10 @@
 ---
 id: DEP-011
 title: Twenty-eight-showroom benchmark and visual admission
-status: done
-related: [FE-007, FE-009, FE-010, FE-012, FE-014, FE-015, FE-016, FE-023, BE-008, BE-010, BE-011, BE-013, DEP-009, DEP-010, DEP-012, DEP-013, DEP-016, DEP-019]
+status: in_progress
+related: [FE-007, FE-009, FE-010, FE-012, FE-014, FE-015, FE-016, FE-023, FE-031, BE-008, BE-010, BE-011, BE-013, BE-028, DEP-009, DEP-010, DEP-012, DEP-013, DEP-016, DEP-019]
 owners: [operations, product, design]
-last_updated: 2026-07-29
+last_updated: 2026-08-10
 change_level: L3
 ---
 
@@ -15,7 +15,7 @@ change_level: L3
 Four ecommerce-oriented disposable seeds do not exercise the producer,
 manufacturer, farm, sparse-media, or RFQ paths that MirtPage intends to support.
 A reset-only 28-showroom benchmark must prove blueprint, bank, homepage, and
-Expo behavior before these features are considered complete. The 18 additional
+Daily Featured behavior before these features are considered complete. The 18 additional
 showrooms must use explicit business briefs rather than a shared fallback profile.
 
 ## Scope
@@ -31,7 +31,7 @@ showrooms must use explicit business briefs rather than a shared fallback profil
 - Cover sparse/dense catalogs, varied image counts, long content, optional-media
   fallbacks, and at least eight reviewed composition templates.
 - Capture desktop and 390px browser evidence for every public showroom, plus
-  representative 320px homepage/Expo evidence.
+  representative 320px homepage/Daily Featured evidence.
 
 ## Contracts
 
@@ -41,7 +41,7 @@ showrooms must use explicit business briefs rather than a shared fallback profil
 - Seed fixtures contain no real credentials, customer facts, copyrighted brand
   catalog, or unreviewed remote assets.
 - Generated product or decorative imagery is internally marked illustrative.
-- Every seeded business has a unique handle, contact policy, Industry, Expo
+- Every seeded business has a unique handle, contact policy, Industry, Daily Featured
   booth reference, dynamic catalog, and validated showroom recipe.
 - All 18 additional briefs have unique full design signatures and narrative
   titles. Together they exercise all seven header anatomies, all six footer
@@ -63,10 +63,9 @@ showrooms must use explicit business briefs rather than a shared fallback profil
 - The 28-showroom matrix exercises all seven header and all six footer
   anatomies. Browser evidence proves that their hierarchy is materially distinct
   and that catalog/inquiry actions remain visible and touch-safe on phones.
-- Adjacent story/process bands must use opposite desktop heading/body placement,
-  preserve semantic reading order on phones, and render the exact neutral
-  `surface` then `soft` pair. Repeating plaid, stripe, graph-paper, and
-  center-divider motifs fail admission.
+- The combined story-and-process chapter must preserve semantic reading order
+  on phones and remain visibly distinct from the hero and catalog. Repeating
+  plaid, stripe, graph-paper, and center-divider motifs fail admission.
 - The inquiry cart is captured open at desktop and 390px. Admission requires a
   floating bounded desktop panel, a bottom-anchored phone sheet, internal task
   scrolling, safe-area spacing, focus containment/restoration, background scroll
@@ -79,7 +78,7 @@ Scenario: Operator resets the disposable benchmark environment
   GIVEN the product owner has confirmed that the local seed data is not important
   WHEN the operator runs the reset setup
   THEN exactly 28 fictional validated benchmark showrooms are created
-  AND their recipes, media, Expo placements, and public routes pass admission
+  AND their recipes, media, Daily Featured placements, and public routes pass admission
 
 Scenario: Benchmark media or composition is defective
   GIVEN a seeded showroom has a broken image, unexplained initial, overflow, or hard fitness failure
@@ -93,11 +92,11 @@ Scenario: Benchmark showroom duplicates navigation or clips shaped copy
   THEN exactly one category-browsing surface is present
   AND no hero overlay, doorway geometry, clipped copy, or text overflow is admitted
 
-Scenario: Benchmark chrome or adjacent chapters collapse into one generic design
+Scenario: Benchmark chrome or the combined chapter collapses into one generic design
   GIVEN the 28 generated showroom recipes
-  WHEN header, story, process, footer, and open-inquiry captures are compared
+  WHEN header, combined story/process, footer, and open-inquiry captures are compared
   THEN all admitted header and footer anatomies appear with honest responsive behavior
-  AND story/process placement alternates without repeating stripe or divider motifs
+  AND the combined chapter remains distinct without repeating stripe or divider motifs
   AND the inquiry remains a bounded floating task at desktop and phone widths
 ```
 
@@ -107,7 +106,7 @@ Scenario: Benchmark chrome or adjacent chapters collapse into one generic design
 |---|---|---|
 | Twenty-eight deterministic validated seeds and 18 authored briefs | integration | `scripts/test-showroom-benchmarks.ts` |
 | Reset idempotency and no private leakage | operations/security | `npm run reset`, `scripts/test-security.ts` |
-| Homepage/Expo benchmark coverage | browser | `tests/acceptance/app.spec.ts` |
+| Homepage/Daily Featured benchmark coverage | browser | `tests/acceptance/app.spec.ts` |
 | Showroom desktop/mobile matrix, single navigation, contrast, and text fit | browser/automated/manual | `tests/acceptance/app.spec.ts`, benchmark Playwright screenshot runner |
 | Seven header/six footer anatomies, alternating chapters, and prohibited motif scan | contract/browser | `scripts/test-showroom-bank.ts`, `scripts/test-showroom-benchmarks.ts`, benchmark Playwright screenshot runner |
 | Floating desktop and mobile inquiry geometry, scroll lock, focus, and touch targets | browser | `tests/acceptance/app.spec.ts` |
@@ -131,12 +130,19 @@ DEP-010.
 Evidence: implemented and verified on 2026-07-29.
 
 - `npm run reset` creates exactly 28 fictional benchmark businesses with varied
-  catalogs, complete Expo profiles, approved booth media, and business-specific
+  catalogs, complete Daily Featured profiles, approved booth media, and business-specific
   showroom media across the required business types.
+- Clean reset industry seeding is authoritative and idempotent when additive
+  schema migrations have already created or updated an industry key.
+- Seeded workflow scale may include earlier terminal projects, but it creates no
+  more than one current showroom project for any fictional business.
+- In-progress fixture projects retain editable draft revisions; review,
+  decision, and publication timestamps appear only after the corresponding
+  lifecycle transition.
 - Eighteen additional businesses use authored briefs instead of the generic
   fallback. Contract evidence proves 18 unique full signatures, at least 12
   token systems, 11 hero anatomies, eight catalog anatomies, five CTA
-  anatomies, all seven headers, all six footers, and unique story/process copy.
+  anatomies, all seven headers, all six footers, and unique combined chapter copy.
 - Fifty project-owned generated benchmark images were reviewed with desktop and
   mobile screenshots for every handle. Narrow split heroes and 320px map fit
   were corrected from that review.

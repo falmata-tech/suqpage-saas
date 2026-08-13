@@ -5,7 +5,11 @@ import { getMediaObjectStore } from "./media-storage";
 import { readRequestAttachment } from "./request-media";
 import { canAccessRequest, runtimeRequestDetail } from "./request-runtime";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
-import { RevisionError, snapshotToCatalog } from "./revision-domain";
+import {
+  RevisionError,
+  snapshotToCatalog,
+  withAuthoritativeBusinessSettings,
+} from "./revision-domain";
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import {
   assignBlueprintSlot,
@@ -93,8 +97,9 @@ async function allowedAssetRefs(requestId: number, businessId: number) {
   for (const attachment of await runtimeAll<{ id: number }>("SELECT id FROM request_attachments WHERE request_id=?", [requestId])) {
     allowed.add(`request-attachment:${attachment.id}`);
   }
-  for (const media of await runtimeAll<{ asset_key: string }>("SELECT asset_key FROM recipe_media_assets WHERE request_id=?", [requestId])) {
+  for (const media of await runtimeAll<{ asset_key: string; provider_id: string | null }>("SELECT asset_key,provider_id FROM recipe_media_assets WHERE request_id=?", [requestId])) {
     allowed.add(media.asset_key);
+    if (media.provider_id) allowed.add(`youtube:${media.provider_id}`);
   }
   return allowed;
 }
@@ -117,7 +122,9 @@ async function validatedV4ForRequest(
       );
     }
   }
-  return snapshot;
+  const catalog = await runtimeCatalogByBusinessId(businessId, true);
+  if (!catalog) throw new RevisionError("Business catalog not found.", 404);
+  return withAuthoritativeBusinessSettings(snapshot, catalog.business);
 }
 
 async function latestDraftSnapshot(
@@ -559,35 +566,20 @@ async function replaceCanonicalCatalog(
   const catalog = snapshotToCatalog(snapshot, business as never);
   await runtimeRun(
     `UPDATE businesses
-       SET name=?,design_key=?,design_manifest_json=?,content_blocks_json=?,
-         tagline=?,description=?,logo_path=?,hero_title=?,hero_subtitle=?,
-         hero_image_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,
-         process_video_ref=?,is_live=?,live_platform=?,live_url=?,
-         site_title=?,site_description=?,favicon_path=?,status='active',
-         content_version=?
+       SET design_key=?,design_manifest_json=?,content_blocks_json=?,
+         tagline=?,description=?,hero_title=?,hero_subtitle=?,hero_image_path=?,
+         process_video_ref=?,status='active',content_version=?
        WHERE id=?`,
     [
-      catalog.business.name,
       catalog.business.design_key,
       catalog.business.design_manifest_json,
       catalog.business.content_blocks_json,
       catalog.business.tagline,
       catalog.business.description,
-      catalog.business.logo_path,
       catalog.business.hero_title,
       catalog.business.hero_subtitle,
       catalog.business.hero_image_path,
-      catalog.business.contact_email,
-      catalog.business.whatsapp,
-      catalog.business.telegram,
-      catalog.business.tiktok,
       catalog.business.process_video_ref,
-      catalog.business.is_live,
-      catalog.business.live_platform,
-      catalog.business.live_url,
-      catalog.business.site_title,
-      catalog.business.site_description,
-      catalog.business.favicon_path,
       newVersion,
       businessId,
     ],
@@ -732,7 +724,7 @@ export async function publishApprovedRevision(
         [
           revision.business_id,
           nextVersion,
-          JSON.stringify(staged.snapshot),
+          JSON.stringify(catalogToRevisionSnapshotV4((await runtimeCatalogByBusinessId(revision.business_id, true))!)),
           revision.id,
           user.id,
         ],
@@ -812,7 +804,7 @@ export async function rollbackCatalogVersion(
     await replaceCanonicalCatalog(snapshot, businessId, nextVersion);
     await runtimeRun(
       "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,?,?,'rollback',?)",
-      [businessId, nextVersion, JSON.stringify(snapshot), user.id],
+      [businessId, nextVersion, JSON.stringify(catalogToRevisionSnapshotV4((await runtimeCatalogByBusinessId(businessId, true))!)), user.id],
     );
     return { businessId, contentVersion: nextVersion, targetVersion };
   });

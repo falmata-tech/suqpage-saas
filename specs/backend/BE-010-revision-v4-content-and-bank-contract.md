@@ -2,7 +2,7 @@
 id: BE-010
 title: Revision v4 typed content and multi-release bank contract
 status: in_progress
-related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, BE-024, FE-007, FE-009, FE-014, FE-025, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, DEP-021, ADR-0005, ADR-0007, ADR-0008, ADR-0012]
+related: [BE-004, BE-005, BE-006, BE-007, BE-008, BE-013, BE-024, BE-028, FE-007, FE-009, FE-014, FE-025, FE-031, DEP-004, DEP-005, DEP-006, DEP-007, DEP-009, DEP-011, DEP-013, DEP-021, ADR-0005, ADR-0007, ADR-0008, ADR-0012]
 owners: [backend, security, product]
 last_updated: 2026-07-28
 change_level: L3
@@ -86,7 +86,7 @@ additive v4 domain boundary that preserves all retained releases.
   rhythm, signature budget, and content/media requirements. They do not bind an
   industry, tenant type, token pack, or one mandatory sequence of component IDs.
 - The normal generated-page profile has one immutable semantic section order:
-  header, hero, about/story content, process/highlights content, catalog,
+  header, hero, one combined story-and-process highlights chapter, catalog,
   call-to-action, and footer. Fitness rejects missing, extra, duplicated, or
   reordered slots and rejects standalone navigation/trust sections for this
   profile. Component IDs may vary only within the compatible slot and typed
@@ -101,7 +101,7 @@ additive v4 domain boundary that preserves all retained releases.
   inverse/onInverse pairs. Runtime variables and contrast validation use those
   pairs directly; a child cannot keep onSecondary text when its parent renders
   on inverse or strong.
-- The canonical seven section roles and their order remain fixed, but their
+- The canonical six section roles and their order remain fixed, but their
   semantic surface roles are not one mandatory color sequence. Fitness warns on
   monotony and repeated adjacent roles rather than rejecting a valid reviewed
   composition merely because it uses a different color rhythm.
@@ -168,7 +168,7 @@ Scenario: AI supplies a custom color palette
   AND typography, spacing, shape, media bounds, component validation, and publication authority remain controlled
 
 Scenario: AI chooses a different section color rhythm
-  GIVEN the canonical seven section roles remain complete and ordered
+  GIVEN the canonical six section roles remain complete and ordered
   WHEN their valid semantic surface roles differ from the recommended examples
   THEN the recipe remains importable
   AND fitness reports monotony or repeated-role concerns as review warnings rather than a fixed-sequence error
@@ -180,7 +180,7 @@ Scenario: Exported guidance and runtime drift
   AND the AI is not offered fictional visual capabilities
 
 Scenario: Normal recipe adds a filler section
-  GIVEN a normal design-v2 recipe already contains the canonical seven sections
+  GIVEN a normal design-v2 recipe already contains the canonical six sections
   WHEN it adds a trust panel, standalone navigation, second story, or another catalog
   THEN composition fitness rejects the recipe with the unexpected section key
   AND no private candidate is marked review-ready

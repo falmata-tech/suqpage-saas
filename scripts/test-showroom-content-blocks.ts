@@ -45,7 +45,8 @@ const portableSchema = JSON.parse(
 assert.equal(portableSchema.$schema, "https://json-schema.org/draft/2020-12/schema");
 assert.equal(portableSchema.additionalProperties, false);
 assert.equal(portableSchema.properties?.blocks?.maxItems, MAX_SHOWROOM_CONTENT_BLOCKS);
-assert.equal(portableSchema.properties?.blocks?.items?.oneOf?.length, 6);
+assert.equal(portableSchema.properties?.blocks?.items?.oneOf?.length, 5);
+assert.equal(JSON.stringify(portableSchema).includes('"const":"story"'), false);
 assert.equal(portableSchema.$defs?.videoMedia?.properties?.assetKeys?.minItems, 1);
 assert.equal(portableSchema.$defs?.videoMedia?.properties?.assetKeys?.maxItems, 1);
 console.log("Typed showroom content-block parsing, media modes, limits, and unsafe-input denial passed.");

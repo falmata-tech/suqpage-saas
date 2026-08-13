@@ -370,6 +370,26 @@ export function validateShowroomRecipe(
   context: RecipeValidationContext,
 ): ValidatedShowroomRecipe {
   const recipe = parseEnvelope(input);
+  const proposedBlocks = Array.isArray(recipe.content.contentBlocks?.blocks)
+    ? recipe.content.contentBlocks.blocks
+    : [];
+  const legacyStoryIndex = proposedBlocks.findIndex(
+    (block) => block && typeof block === "object" && "type" in block && block.type === "story",
+  );
+  if (legacyStoryIndex >= 0) {
+    issue(
+      "content",
+      `$.content.contentBlocks.blocks[${legacyStoryIndex}].type`,
+      "New recipes use one highlights block for the business story, process steps, and process video. Standalone story blocks are compatibility-only.",
+    );
+  }
+  if (proposedBlocks.filter((block) => block?.type === "highlights").length !== 1) {
+    issue(
+      "content",
+      "$.content.contentBlocks.blocks",
+      "Include exactly one highlights block for the combined business story and process chapter.",
+    );
+  }
   if (recipe.baseContentVersion !== context.baseContentVersion) {
     throw new ShowroomRecipeError(
       [{

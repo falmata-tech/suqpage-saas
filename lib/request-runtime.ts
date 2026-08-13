@@ -8,6 +8,8 @@ import {
   requestTypeForBusiness as sqliteRequestTypeForBusiness,
   updateRequestStatus as updateSqliteRequestStatus,
 } from "./request-sqlite";
+import { runtimeGet } from "./runtime-sql";
+import type { ServiceRequest } from "./types";
 
 export { canAccessRequest };
 
@@ -21,6 +23,20 @@ export async function runtimeRequestTypeForBusiness(businessId: number) {
   return postgresRuntimeEnabled()
     ? postgresRuntimeServices().requests.requestTypeForBusiness(businessId)
     : sqliteRequestTypeForBusiness(businessId);
+}
+
+export async function runtimeCurrentShowroomProject(businessId: number) {
+  if (!Number.isInteger(businessId) || businessId < 1) return undefined;
+  return runtimeGet<ServiceRequest>(`
+    SELECT * FROM service_requests
+    WHERE business_id=?
+      AND status IN (
+        'submitted','under_review','needs_information','approved_for_work',
+        'in_progress','client_review','client_approved'
+      )
+    ORDER BY updated_at DESC,id DESC
+    LIMIT 1
+  `, [businessId]);
 }
 
 export async function runtimeRequestDetail(id: number) {

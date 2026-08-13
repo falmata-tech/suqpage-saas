@@ -1,5 +1,3 @@
-import { INDUSTRY_LABELS } from "./bazaar";
-import { postgresRuntimeEnabled } from "./postgres-runtime-services";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
 import {
   likePattern,
@@ -68,19 +66,24 @@ export type PublicShowroomRow = {
 };
 
 export async function listPublicIndustries() {
-  const industry = postgresRuntimeEnabled()
-    ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
-    : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
-  const rows = await runtimeAll<{ industry_key: string }>(`
-    SELECT DISTINCT ${industry} industry_key
-    FROM businesses b
-    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
-    WHERE b.status='active'
-    ORDER BY industry_key
+  const rows = await runtimeAll<{ industry_key: string; label: string }>(`
+    SELECT industry.key industry_key,industry.label
+    FROM discovery_industries industry
+    WHERE industry.active=1 AND EXISTS(
+      SELECT 1
+      FROM business_industries membership
+      JOIN businesses b ON b.id=membership.business_id
+      JOIN business_discovery_profiles profile ON profile.business_id=b.id
+      WHERE membership.industry_key=industry.key
+        AND b.status='active'
+        AND profile.is_excluded=0
+        AND profile.approved_at>0
+    )
+    ORDER BY industry.position,industry.key
   `);
-  return rows.map(({ industry_key: key }) => ({
+  return rows.map(({ industry_key: key, label }) => ({
     key,
-    label: INDUSTRY_LABELS[key] || "Enterprise & Export Showcase",
+    label,
   }));
 }
 
@@ -94,11 +97,24 @@ export async function listPublicShowrooms(input: PageInput & {
   );
   const industry = String(input.industry ?? "").trim();
   const sort = input.sort === "handle" ? "handle" : "name";
-  const industryExpression = postgresRuntimeEnabled()
-    ? "COALESCE((p.industry_keys_json::jsonb)->>0,'community')"
-    : "COALESCE(json_extract(p.industry_keys_json,'$[0]'),'community')";
+  const industryExpression = `COALESCE((
+    SELECT membership.industry_key
+    FROM business_industries membership
+    JOIN discovery_industries industry ON industry.key=membership.industry_key
+    WHERE membership.business_id=b.id AND industry.active=1
+    ORDER BY industry.position,industry.key
+    LIMIT 1
+  ),'all')`;
+  const industryLabelExpression = `COALESCE((
+    SELECT industry.label
+    FROM business_industries membership
+    JOIN discovery_industries industry ON industry.key=membership.industry_key
+    WHERE membership.business_id=b.id AND industry.active=1
+    ORDER BY industry.position,industry.key
+    LIMIT 1
+  ),'All industries')`;
   const params: QueryValue[] = [];
-  let where = " WHERE b.status='active'";
+  let where = " WHERE b.status='active' AND p.is_excluded=0 AND p.approved_at>0";
   if (industry && industry !== "all") {
     where += ` AND ${industryExpression}=?`;
     params.push(industry);
@@ -129,7 +145,7 @@ export async function listPublicShowrooms(input: PageInput & {
   const totalItems = await total(
     `SELECT COUNT(*) total
      FROM businesses b
-     LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id${where}`,
+     JOIN business_discovery_profiles p ON p.business_id=b.id${where}`,
     params,
   );
   const window = pageWindow(totalItems, request);
@@ -141,16 +157,19 @@ export async function listPublicShowrooms(input: PageInput & {
     tagline: string;
     image_url: string;
     industry_key: string;
+    industry_label: string;
     featured: number;
   }>(`
     SELECT b.id,b.handle,b.name,b.tagline,
       COALESCE(NULLIF(b.hero_image_path,''),b.logo_path,'') image_url,
       ${industryExpression} industry_key,
-      COALESCE(p.is_featured,0) featured
+      ${industryLabelExpression} industry_label,
+      COALESCE(s.active,0) featured
     FROM businesses b
-    LEFT JOIN bazaar_booth_profiles p ON p.business_id=b.id
+    JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
     ${where}
-    ORDER BY COALESCE(p.is_featured,0) DESC,${order}
+    ORDER BY COALESCE(s.active,0) DESC,${order}
     LIMIT ? OFFSET ?
   `, [...params, window.limit, window.offset]);
   return pageResult<PublicShowroomRow>(
@@ -161,8 +180,7 @@ export async function listPublicShowrooms(input: PageInput & {
       tagline: item.tagline,
       imageUrl: item.image_url,
       industryKey: item.industry_key,
-      industry:
-        INDUSTRY_LABELS[item.industry_key] || "Enterprise & Export Showcase",
+      industry: item.industry_label,
       featured: Boolean(item.featured),
     })),
     totalItems,
@@ -171,8 +189,16 @@ export async function listPublicShowrooms(input: PageInput & {
 }
 
 export type AdminBusinessRow = Business & {
+  client_id: number | null;
+  client_name: string | null;
   client_email: string | null;
+  client_count: number;
   request_count: number;
+  marketplace_city: string | null;
+  marketplace_region: string | null;
+  marketplace_approved_at: number | null;
+  marketplace_excluded: number;
+  marketplace_sponsored: number;
 };
 
 export async function listBusinessesPage(input: PageInput & { status?: unknown }) {
@@ -193,17 +219,53 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
       WHERE su.business_id=b.id AND sp.access_role='client'
         AND lower(su.email) LIKE ? ESCAPE '\\'
     )`,
+    `EXISTS(
+      SELECT 1 FROM users su
+      JOIN user_access_profiles sp ON sp.user_id=su.id
+      WHERE su.business_id=b.id AND sp.access_role='client'
+        AND lower(su.name) LIKE ? ESCAPE '\\'
+    )`,
+    `EXISTS(
+      SELECT 1 FROM business_discovery_profiles location
+      WHERE location.business_id=b.id AND lower(COALESCE(location.city,'')) LIKE ? ESCAPE '\\'
+    )`,
+    `EXISTS(
+      SELECT 1 FROM business_discovery_profiles location
+      WHERE location.business_id=b.id AND lower(COALESCE(location.zone,'')) LIKE ? ESCAPE '\\'
+    )`,
+    `EXISTS(
+      SELECT 1 FROM business_discovery_profiles location
+      WHERE location.business_id=b.id AND lower(COALESCE(location.region,'')) LIKE ? ESCAPE '\\'
+    )`,
   ]);
   return pageRows<AdminBusinessRow>(
     `SELECT COUNT(*) total FROM businesses b${where}`,
     `SELECT b.*,
+      (
+        SELECT u.id FROM users u
+        JOIN user_access_profiles profile ON profile.user_id=u.id
+        WHERE u.business_id=b.id AND profile.access_role='client'
+        ORDER BY u.id LIMIT 1
+      ) client_id,
+      (
+        SELECT u.name FROM users u
+        JOIN user_access_profiles profile ON profile.user_id=u.id
+        WHERE u.business_id=b.id AND profile.access_role='client'
+        ORDER BY u.id LIMIT 1
+      ) client_name,
       (
         SELECT u.email FROM users u
         JOIN user_access_profiles profile ON profile.user_id=u.id
         WHERE u.business_id=b.id AND profile.access_role='client'
         ORDER BY u.id LIMIT 1
       ) client_email,
-      (SELECT COUNT(*) FROM service_requests r WHERE r.business_id=b.id) request_count
+      (SELECT COUNT(*) FROM users u JOIN user_access_profiles profile ON profile.user_id=u.id WHERE u.business_id=b.id AND profile.access_role='client') client_count,
+      (SELECT COUNT(*) FROM service_requests r WHERE r.business_id=b.id) request_count,
+      (SELECT city FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_city,
+      (SELECT region FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_region,
+      (SELECT approved_at FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_approved_at,
+      COALESCE((SELECT is_excluded FROM business_discovery_profiles location WHERE location.business_id=b.id),0) marketplace_excluded,
+      COALESCE((SELECT active FROM discovery_sponsorships sponsor WHERE sponsor.business_id=b.id),0) marketplace_sponsored
      FROM businesses b${where}
      ORDER BY CASE b.status WHEN 'draft' THEN 0 WHEN 'active' THEN 1 ELSE 2 END,
        lower(b.name),b.id
@@ -212,6 +274,23 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
     { page: request.page, q: request.search },
     ADMIN_DIRECTORY_PAGE_SIZE,
   );
+}
+
+export async function listBusinessClientAccess(businessId: number) {
+  if (!Number.isInteger(businessId) || businessId < 1) return [];
+  return runtimeAll<{
+    id: number;
+    name: string;
+    email: string;
+    must_change_password: number;
+  }>(`
+    SELECT u.id,u.name,u.email,u.must_change_password
+    FROM users u
+    JOIN user_access_profiles profile ON profile.user_id=u.id
+    WHERE u.business_id=? AND profile.access_role='client'
+    ORDER BY lower(u.name),u.id
+    LIMIT 20
+  `, [businessId]);
 }
 
 export type ManagedClientRow = {

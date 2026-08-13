@@ -2,7 +2,7 @@
 id: FE-029
 title: MirtPage platform visual system refresh
 status: done
-related: [FE-009, FE-013, FE-024, FE-026, FE-028]
+related: [FE-009, FE-013, FE-024, FE-026, FE-028, FE-030]
 owners: [product, frontend, design]
 last_updated: 2026-08-04
 change_level: L1
@@ -26,12 +26,12 @@ teal point as the universal platform identity.
 - One semantic token system for platform-owned public and authenticated UI.
 - The supplied mark and two-color wordmark treatment across public headers,
   footers, forms, workspace navigation, metadata, and favicon.
-- Coordinated marketplace, map, City Showroom, Expo, login, signup, admin,
+- Coordinated marketplace, map, City Showroom, Daily Featured, login, signup, admin,
   staff, support, and client-workspace colors and interaction states.
 - A compact platform-owned host band above every public showroom and private
   preview, with a direct return to the MirtPage marketplace.
-- An Expo and City architectural shell recolored to the same visual system
-  without changing dynamic perimeter placement or the empty central court.
+- An Daily Featured and City architectural shell recolored to the same visual system
+  while keeping data-driven placement separate from decorative venue artwork.
 - Accessible focus, hover, selected, status, warning, error, and inverse states.
 
 ### Non-goals
@@ -56,11 +56,11 @@ teal point as the universal platform identity.
   host wording, and marketplace action remain platform-controlled. It must not
   replace or imply ownership of the tenant's logo, header, navigation, or content.
 - Saffron communicates bounded attention or warning; it is not a general
-  surface fill, body-text color, or Expo current-day treatment.
+  surface fill, body-text color, or Daily Featured current-day treatment.
 - Sponsored placement uses bright-teal accents and an explicit paid-placement
   label over a restrained midnight patterned field, not warning-colored
   saffron.
-- Expo today state uses the same selected teal field as the active industry
+- Daily Featured today state uses the same selected teal field as the active industry
   card while its weekday cards remain in a fixed Monday-through-Sunday order.
 - Color never serves as the only indication of state.
 
@@ -77,7 +77,7 @@ teal point as the universal platform identity.
 - Public and workspace surfaces use cool gray canvas, white working surfaces,
   clear borders, restrained shadows, and radii no larger than eight pixels for
   operational cards and panels.
-- Expo and City venue architecture uses navy, teal, saffron, cool-gray, and
+- Daily Featured and City venue architecture uses navy, teal, saffron, cool-gray, and
   natural neutral materials while business cards remain readable and the
   decorative image contains no business data or fixed positions.
 - Focus indicators reach visible contrast on light and dark surfaces, controls
@@ -96,7 +96,7 @@ teal point as the universal platform identity.
 
 ```gherkin
 Scenario: Visitor moves through the public platform
-  GIVEN the homepage, discovery workspace, Expo, login, signup, and About page
+  GIVEN the homepage, discovery workspace, Daily Featured, login, signup, and About page
   WHEN MirtPage-owned surfaces render
   THEN the same mark and semantic navy, teal, saffron, and cool-gray system is used
   AND no retired purple platform treatment remains
@@ -151,7 +151,7 @@ Evidence:
 - `npm run test:acceptance` passed all 10 production-build workflows, including
   the adaptive showroom host band and fixed inquiry overlay regression.
 - `/tmp/mirtpage-final-discovery-v6` records passing desktop, 390px, and 320px
-  marketplace, inline City Showroom, Expo, preview, and List captures with no
+  marketplace, inline City Showroom, Daily Featured, preview, and List captures with no
   horizontal overflow.
 - `/tmp/mirtpage-final-showroom-v3` records the adaptive **Back** / **Powered by
   MirtPage** band and fixed inquiry drawer at desktop and phone widths.

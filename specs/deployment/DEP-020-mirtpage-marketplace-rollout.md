@@ -1,10 +1,10 @@
 ---
 id: DEP-020
 title: MirtPage marketplace rollout
-status: done
-related: [FE-024, FE-025, BE-023, DEP-017, DEP-019, DEP-021]
+status: in_progress
+related: [FE-024, FE-025, FE-033, FE-034, BE-023, BE-029, DEP-017, DEP-019, DEP-021, DEP-024, DEP-025]
 owners: [operations, engineering, design]
-last_updated: 2026-08-02
+last_updated: 2026-08-09
 change_level: L3
 ---
 
@@ -23,14 +23,13 @@ local pre-launch environment without changing stable showroom routes.
 3. Reset disposable fixtures with existing showrooms plus authored growing
    factories and reviewed discovery scale.
 4. Verify public filter composition and role-scoped attention counts.
-5. Capture homepage, map preview, Expo, Sunday showcase, login, intake, and
+5. Capture homepage, map preview, Daily Featured, login, intake, and
    dashboard at desktop, 390px, and 320px widths.
 6. Run `npm run check`, `npm run test:acceptance`, and `npm run release`.
-7. Apply additive migration 26, seed five sponsored showrooms per industry, and
-   seed independently curated Sunday enterprises for every rotating industry.
-8. Replace desktop/mobile evidence for the sponsored rail, detailed schedule,
-   weekday Expo, Sunday Featured Enterprises floor, city marketplace, and
-   centered showroom modal.
+7. Apply additive migrations 26 through 29 for sponsorship, seven-industry
+   taxonomy, retained-fixture cross-listing, and corrected production scale.
+8. Replace desktop/mobile evidence for the integrated sponsored rail, attached
+   seven-day schedule, row-based Daily Featured, city marketplace, and centered showroom modal.
 
 ## Rollback
 
@@ -47,10 +46,10 @@ reset; production rollout and domain/DNS changes are excluded.
   query-plan tests; public routes expose no scale filter.
 - Preview dialogs and primary marketplace workflows pass 1440/390/320 browser
   evidence with no overflow, focus trap, unreadable action, or console error.
-- Sunday and weekday program surfaces share one coherent visual floor language.
+- Every weekday, including Sunday, uses one coherent Daily Featured floor contract.
 - Every industry has at least five disclosed sponsored placements in fixtures.
-- Sunday industry rotation and admin-curated participants remain independent
-  from sponsorship and pass authorization tests.
+- The fixed seven-day industry schedule remains independent from sponsorship;
+  retained Sunday-program rows have no public or administrative effect.
 
 ## Scenarios
 
@@ -76,7 +75,7 @@ Scenario: Application rollback is required
 | Identity and dashboard projections | `scripts/test-platform-identity.mjs`, `scripts/test-support.ts` |
 | Desktop/mobile public workflows | `scripts/capture-discovery-visuals.mjs`, `tests/acceptance/app.spec.ts` |
 | Complete repository regression | `npm run check`, `npm run test:acceptance`, `npm run release` |
-| Sponsored and Sunday program migration | `scripts/test-discovery.ts`, `scripts/test-scale-fixtures.ts` |
+| Sponsorship and seven-day industry migrations | `scripts/test-discovery.ts`, `scripts/test-scale-fixtures.ts` |
 
 ## Readiness checklist
 

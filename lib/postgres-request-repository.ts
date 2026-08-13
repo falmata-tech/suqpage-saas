@@ -37,7 +37,7 @@ export class PostgresRequestRepository {
     });
   }
 
-  async listRequestsPage(user: SessionUser, input: { page?: unknown; q?: unknown; status?: unknown }): Promise<PageResult<OperationsRequest>> {
+  async listRequestsPage(user: SessionUser, input: { page?: unknown; q?: unknown; status?: unknown; business?: unknown; project?: unknown }): Promise<PageResult<OperationsRequest>> {
     const request = normalizePageRequest({ page: input.page, search: input.q });
     const status = REQUEST_STATUSES.has(input.status as ServiceRequestStatus) ? String(input.status) : "";
     const params: Array<string | number | null> = [];
@@ -51,7 +51,17 @@ export class PostgresRequestRepository {
       where += " AND r.assigned_user_id=?";
       params.push(user.id);
     } else return pageResult([], 0, request);
+    const businessId = Number.parseInt(String(input.business ?? ""), 10);
+    if (Number.isInteger(businessId) && businessId > 0 && user.access_role !== "client") {
+      where += " AND r.business_id=?";
+      params.push(businessId);
+    }
     if (status) { where += " AND r.status=?"; params.push(status); }
+    if (input.project === "current") {
+      where += " AND r.status IN ('submitted','under_review','needs_information','approved_for_work','in_progress','client_review','client_approved')";
+    } else if (input.project === "history") {
+      where += " AND r.status IN ('published','completed','rejected','cancelled')";
+    }
     if (request.search) {
       const pattern = likePattern(request.search);
       where += " AND (lower(r.public_ref) LIKE ? ESCAPE '\\' OR lower(r.contact_name) LIKE ? ESCAPE '\\' OR lower(COALESCE(r.business_name,'')) LIKE ? ESCAPE '\\' OR lower(COALESCE(b.name,'')) LIKE ? ESCAPE '\\' OR lower(COALESCE(u.name,'')) LIKE ? ESCAPE '\\')";

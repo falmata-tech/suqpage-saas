@@ -44,7 +44,7 @@ Primary support contact:
 falmata.dawano@gmail.com
 ```
 
-MirtPage gives each business a polished digital showroom at a handle-based route such as:
+MirtPage gives each business a polished online showroom at a handle-based route such as:
 
 ```text
 /@selam-weave
@@ -59,12 +59,11 @@ The showroom is designed to turn passive browsing into a structured product inqu
 
 ## 3. The problem MirtPage solves
 
-MirtPage begins from a simple belief: **production is a bet on Ethiopia**.
-Workshops, growers, processors, and growing factories commit equipment,
-materials, land, training, wages, and daily discipline long before the first
-sale. That work develops skills, supports livelihoods, strengthens local supply,
-and gives buyers another Ethiopian-made option, yet it is often difficult to
-discover or evaluate beyond scattered social posts and word of mouth.
+MirtPage exists to connect Ethiopian production to its next market. Makers,
+growers, processors, workshops, and growing factories need practical routes to
+households, retailers, distributors, organizations, and wholesale buyers.
+Those buyers need a clear way to find and assess Ethiopian products directly,
+whether the right producer is nearby or elsewhere in the country.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -77,12 +76,17 @@ wholesale buyers struggle to understand:
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
 - how the business can retain the inquiry if a social-app handoff fails.
 
-MirtPage gives that real production a professional public presence. It organizes
-the business's products, capabilities, process, reviewed location, and story
-inside a permanent branded showroom; helps consumer and wholesale buyers
-discover it by product or place; and adds a structured direct inquiry workflow
-without forcing the business into full ecommerce operations. The producer keeps
-its identity, customer relationship, and control of the conversation.
+MirtPage gives that production a professional online showroom and public
+presence. It organizes the
+business's products, capabilities, process, reviewed location, and story inside
+a permanent branded showroom; helps visitors discover skilled workshops,
+producers, and manufacturers they may not already know nearby or elsewhere in
+Ethiopia; helps households connect for personal purchases;
+helps retailers, distributors, organizations, and wholesale buyers source at
+the scale they need; and adds a structured direct inquiry workflow without
+forcing the business into full ecommerce operations. The producer keeps its
+identity, customer relationship, and control of the conversation. MirtPage does
+not set or guarantee prices, savings, quality, availability, delivery, or sales.
 
 ---
 
@@ -101,7 +105,8 @@ its identity, customer relationship, and control of the conversation.
 - a platform that supports manually designed, highly distinct client pages;
 - a permanent public discovery surface where visitors choose an industry,
   explore exact reviewed business locations or a daily country-wide virtual
-  Expo, and enter each business's permanent `/@handle` digital showroom;
+  Daily Featured Showrooms program, and enter each business's permanent
+  `/@handle` digital showroom;
 - a controlled SaaS pilot with 66 fictional local showrooms spanning makers,
   growers, processors, workshops, natural-care producers, home brands, and
   growing factories; ten are curated benchmark identities and all 66 have durable fictional briefs,
@@ -166,25 +171,28 @@ from industry stereotypes. A candidate is not complete until its 1440-pixel and
 the final recipe remains inside the normal private review/publication boundary.
 
 Normal generated showrooms share one purposeful information architecture:
-header, hero, about/story, process, products, inquiry call-to-action, and
-footer. The AI varies the visual anatomy, media treatment, typography, density,
+header, hero, one combined story-and-process chapter, products, inquiry
+call-to-action, and footer. The AI varies the visual anatomy, media treatment, typography, density,
 and component choice inside those roles; it does not add trust ledgers,
 information summaries, standalone navigation, or other filler chapters, and it
-does not reorder the five content sections.
+does not reorder the four content sections.
 
 All seven admitted headers and all six admitted footers expose distinct,
 industry-neutral machine-readable anatomy and materially different responsive
 layouts. Header and footer are selected independently by identity scale,
-available content, visual weight, and mobile behavior. Headers carry identity
-and at most one concise descriptor; they do not repeat catalog or inquiry
+available content, visual weight, and mobile behavior. Headers carry tenant
+identity and the renderer-owned Home, Story, Offerings, and Contact section
+navigation; they do not repeat a promotional descriptor or product-category
 commands. Footers close with identity, the permanent showroom handle, and the
 configured inquiry/contact destination; they do not repeat product-category
-navigation. The one floating inquiry control owns persistent cart access and
-contracts to an icon-sized, accessibly named control on phones.
-Adjacent about/story and process chapters alternate heading/body placement on
-wider screens, return to semantic heading-first reading order on phones, and
-may use any reviewed semantic surfaces that keep their purposes distinct.
-Normal showrooms do not use
+navigation. The desktop floating Inquiry control owns persistent cart access.
+Phones replace it with a fixed, safe-area-aware showroom application bar that
+exposes Home, Story, Offerings, Contact, and the same tenant-scoped Inquiry
+drawer without covering content. The platform-owned **Powered by MirtPage** and
+**Back** host bar remains above every public tenant presentation.
+The combined story-and-process chapter is visually distinct from both the hero
+and catalog, returns to semantic heading-first reading order on phones, and may
+use any reviewed semantic surface that supports its content. Normal showrooms do not use
 repeating plaid, pinstripe, graph-paper, center-divider, or repeated-rule
 background motifs; one bounded accent plane may provide direction without
 turning the page into a grid.
@@ -244,25 +252,98 @@ autoplay, parallax, and scroll-jacking remain prohibited.
 
 ### 5.2 MirtPage must have its own platform identity
 
-The MirtPage landing page must not look like any client showroom. It is a polished,
-mobile-first discovery surface designed to remain understandable inside TikTok
-and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`, and `FE-029` define the current composition, narrative, venue art direction, and platform visual system: a compact
-midnight-and-teal visitor welcome introduces one integrated,
-application-first discovery workspace combining industry selection, search, a
-disclosed paid-sponsorship rail, exact-location Ethiopia map, and server-paginated
-five-row List. A separate weekly country-wide Expo program follows the map inside
-the same workspace. Monday through Saturday each have one stable assigned
-industry; Sunday presents MirtPage-selected Featured Enterprises from one
-deterministically rotating industry through MirtPage social livestreams.
-Long platform education lives on `/about`, signup lives on `/request`, and only
-a restrained merchant call-to-action follows the marketplace. There is no
-duplicated all-business directory or browser-side full-catalog List fan-out.
-The welcome uses short, confident, concrete language: visitors can search what
-Ethiopia makes by product or place, inspect a professional showroom, and begin a
-direct retail or wholesale inquiry. It avoids motivational clichés, generic SaaS
-claims, and childish slogans while visually connecting directly to the
-workspace. The fuller story of production risk, practical skill, livelihoods,
-and local supply belongs on `/about`;
+The MirtPage public root must not look like any client showroom. It is a polished,
+mobile-first marketplace application designed to remain understandable inside
+TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
+`FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
+venue art direction, and platform visual system. `/` opens directly into the
+geographic Market; there is no intermediate landing lobby or duplicate search.
+A concise heading identifies the marketplace as online showrooms for Ethiopian
+makers and producers, while long platform education remains on `/about`. The
+Market controls and map sit on one quiet, production-led architectural canvas
+instead of looking like unrelated sections or decorative cards. The canvas has
+no people, factual business attribution, unsupported statistics, or tenant
+branding. Its icon-led industry menu begins with **All industries**, followed
+by the seven production groups; live search and the available
+region/city selector are the only homepage result filters; Map/List, the
+privacy-preserving **Near me** map framing action,
+zoom, the exact-location Ethiopia map, and the server-paginated five-row List
+remain within the same bounded surface. On phones, Search, Filters, and compact
+icon-led Map/List controls share one command row; industry and place selection
+open in a modal bottom sheet, while a compact locate, zoom, and reset toolbar
+sits directly above the map without covering markers. Market and an opened City
+Showroom consume the remaining application viewport above fixed phone
+navigation; List results scroll internally instead of extending an empty page.
+Desktop retains the complete side command panel. Its opened industry
+menu matches the trigger width and wraps long labels instead of spanning across
+the map. The menu and phone Filters sheet use one restrained accent for each
+of the seven industries, while **All industries** uses a compact combined
+swatch. The same allowlisted accent identifies an individual showroom marker
+and its paginated List card, plus the structural border, fascia, and display trim of its City Showroom booth;
+white and cool-gray remain the dominant content surfaces, and visible industry text or iconography means
+color is never the only identifier. After two typed characters, search exposes no more than six
+server-authoritative eligible showroom, published offering, and reviewed-place
+suggestions. The combobox supports pointer, touch, and keyboard selection and
+overlays rather than reflows the map. The public program name is always **Daily Featured Showrooms** across
+visible copy and accessible names. Existing `expo` types, query keys, analytics
+values, styles, routes, and persistence fields remain internal compatibility
+identifiers and must never render as visitor language. A disclosed five-business
+global paid-sponsorship pool is attached to Daily Featured; staff selection and
+ordering do not change with industry, search, place, or selected program day.
+Desktop shows all five beside the floor. Phones show two at a time in a compact
+automatically rotating strip without scroll, pause, or carousel controls. Every
+day has one stable assigned industry, including Agriculture on Sunday. The
+Daily Featured capacity windows are 08:00–13:00 and 17:00–22:00 Ethiopia time,
+with five-minute booth changeovers and a ten-minute sponsor break after every
+third presentation in each session. Non-empty sessions target 30 presentation
+minutes per booth and remain at least one hour long. A smaller morning lineup
+contracts toward its 13:00 end and a smaller evening lineup contracts toward
+its 22:00 end; larger lineups expand toward the complete capacity windows. The
+midday interval is never shorter than 13:00–17:00. Automatic mode
+uses the current eligible set; a platform administrator may retain an ordered
+eligible subset for one date. Airtime is recalculated from the authoritative
+policy and lineup. Today's public header includes one compact schedule
+disclosure derived from that same agenda. Its closed state names the actual
+participant-responsive morning and evening windows; its open state lists each
+participating showroom and EAT range, sponsor breaks, and the complete
+intermission. It remains collapsed by default on desktop and phone and does not
+expose future-day business identity. Every booth shows its EAT range; exactly one booth may be
+visibly current during a presentation, while transitions, sponsor breaks, and
+intermission identify no business. The status names the active booth or current
+break and provides the configured recordings destination after 22:00. Provider
+links are never invented.
+On phones, Daily Featured Showrooms avoids a vertical wall of controls: its long
+description is omitted, broadcast status is compact, and all seven fixed weekdays
+fit in one compact segmented row above a dedicated zoom toolbar and the venue.
+The zoom toolbar never covers booth content. City and Daily Featured floors
+measure the available canvas and choose deterministic portrait, balanced, or
+wide booth geometry; after zooming, pointer and touch panning may begin over a
+booth without activating it. Long platform education lives on `/about` and
+signup lives on `/request`. There is no duplicated
+all-business directory or browser-side full-catalog List fan-out. The public
+Daily Featured route is a bounded application workspace rather than a scrolling
+promotional document. Its venue owns the remaining viewport below one compact H1,
+broadcast status, collapsed schedule summary, attached sponsor surface, and fixed
+weekday ribbon. Expanding the schedule scrolls its agenda internally and reduces
+the floor area without lengthening the root page or hiding application navigation.
+The public
+application shell exposes Market, Daily featured, About, and More on phones;
+More contains login/workspace access, showroom signup, direct contact,
+privacy, and terms. Desktop uses one identity header and one leading rail rather
+than repeating the same destinations in two navigation surfaces.
+The welcome uses one short, confident market story across public and onboarding
+surfaces: MirtPage helps buyers find Ethiopian businesses for **custom work**,
+**ready products**, and **wholesale supply**. Custom work covers workshops
+making to measurement, specification, configuration, or brief. Ready products
+cover finished goods for consumers or retailers. Wholesale supply covers repeat
+or bulk relationships with retailers, wholesalers, distributors, and
+organizations. A business may support one, two, or all three paths; platform
+copy must never assign an unsupported mode to an individual listing. Visitors
+search by product, capability, or place, inspect a professional showroom, and
+begin a direct inquiry. It avoids motivational clichés, generic SaaS claims, and childish
+slogans while visually connecting directly to the workspace. The fuller story
+of Ethiopian production moving through households and trade buyers belongs on
+`/about`;
 merchant education and conversion remain secondary content below the public
 discovery experience. Platform copy must not claim verified tax, employment,
 certification, import-substitution, sales, or other outcomes for every listed
@@ -278,27 +359,31 @@ the MirtPage mark, host wording, and Marketplace action remain controlled
 platform identity.
 
 MirtPage-owned surfaces use one semantic identity system derived from midnight
-navy `#0B1D3A`, deep teal `#0D6B6E`, bright teal `#27A5A1`, saffron
-`#F2B01E`, and cool gray `#F3F5F7`. Navy carries identity and structure, teal
-carries primary actions and selection, and saffron is reserved for bounded
-warning or exceptional attention states, never the Expo Today treatment. Sponsored placement uses bright-teal accents and
+navy `#0B1D3A`, deep teal `#0D6B6E`, bright teal `#27A5A1`, cool cobalt
+`#356C9A`, restrained berry `#A44765`, saffron `#F2B01E`, white, and cool gray
+`#F3F5F7`. White and cool gray carry most public page area; navy carries identity
+and structural contrast; teal carries primary actions, selection, and map state;
+cobalt is limited to technical emphasis; berry is limited to sponsored or
+editorial emphasis; and saffron is reserved for bounded warning or exceptional
+attention states, never the current-day Daily Featured treatment. Sponsored placement uses bright-teal accents and
 an explicit paid label over a restrained midnight patterned field instead of a
 warning color. Public pages, task forms, discovery, and
 authenticated workspaces share the same vector mark and split-color wordmark.
 Client showroom logos and approved or custom showroom palettes remain
 independent and are never replaced by the platform palette.
 
-Expo and City Showroom floors use a locally stored, optimized architectural hall
+Daily Featured and City Showroom floors use a locally stored, optimized architectural hall
 shell: a cohesive overhead interior with light walls, glass entrance, reception
 architecture, integrated planting, lighting, and a quiet open floor. The artwork
 contains no people, seating, businesses, booths, products, text, or fixed
 business positions. If it is unavailable, the floor falls back to a neutral
 surface without affecting discovery.
 
-Business cards are placed by a deterministic rectangular-perimeter layout. They
-run around all four sides of the hall while the central court remains empty. As
-participation grows, the hall and its side-slot count expand systematically;
-every business receives one unique non-overlapping position. Computed floor
+Business booths are placed by a deterministic exhibition-row layout with wall
+clearance, regular walking gaps, and wider cross-aisles on larger floors. Booth
+numbers advance left-to-right and then top-to-bottom. As participation grows,
+the floor adds rows systematically; every business receives one unique,
+non-overlapping grounded platform. Computed floor
 dimensions and positions remain authoritative, and the architectural image
 never determines business placement.
 
@@ -314,13 +399,48 @@ any business address. Activating it replaces the map inside the same frame with
 a virtual City Showroom:
 every grouped business occupies one dynamically sized floor that visitors can
 pan and zoom, with no halls, pagination, route change, or hidden overflow.
+Under **All industries**, every primary visual industry occupies exactly one
+contiguous labeled district. District floor area grows with its showroom count
+while storefront footprints remain equal. Deterministic rectangular packing
+creates shared walkways, expands the logical hall when necessary, and keeps
+districts clear of venue walls and props. This primary visual industry does not
+remove cross-list memberships or change filter eligibility. City Market
+storefronts are not numbered because participation may change; this geometry
+does not alter the separate numbered Daily Featured Showrooms floor.
+The all-industry hall remains architecturally neutral so the districts stay
+distinct. When one industry is selected, its allowlisted soft and strong tones
+theme the hall field, floor edge, and city sign without recoloring booth media
+or reducing text contrast.
+List cards use a visible industry edge, labeled swatch, and soft action
+treatment. The all-industry List remains neutral around its mixed cards, while
+a selected-industry List receives only a soft matching field; its five-row
+server pagination and eligibility remain unchanged.
 The geographic renderer is suspended while this floor is open, and **Back to
-map** restores the same map state. Isolated business pins use the same teal
-identity as numbered clusters while retaining their distinct pin shape.
+map** restores the same map state. Isolated businesses use a compact
+industry-accented map-pin containing a familiar upright storefront and the
+actual business name in a bounded multi-line label. A generic Showroom caption
+and horizontally unbounded names are prohibited.
+Perspective platforms or device-like silhouettes are prohibited.
+Activating one below
+local-detail zoom centers and enlarges the map first; activating it at local
+detail opens the richer business preview. The map marker does not load booth
+photography. That preview is a non-modal floating inspector centered over a
+restrained low-opacity dismissible scrim: the map/venue remains visible, and on
+phones it becomes a bounded bottom sheet above app navigation. A counted city
+gateway uses the established market-building symbol with a high-contrast navy
+outline, lightly tinted fill, aggregate halo, count badge, and city label so it
+cannot be mistaken for one business marker.
+Activating a revealed Daily Featured booth opens this same inspector before any
+tenant route change; only its explicit **Open showroom** action navigates.
+Valid tenant-controlled live state appears on clusters, exact showroom markers,
+City Showroom booths, and today's featured booths. The business in MirtPage's current
+Daily Featured walkthrough slot is labeled **Featured now** everywhere it is visible; this
+temporarily overrides only its merchant-live presentation and never changes the
+tenant's saved live setting.
 Location controls show only places with
 matching businesses, and the center control restores the country view.
 
-The Monday-through-Saturday Expo is a virtual presentation, not a physical
+Daily Featured is a seven-day virtual presentation, not a physical
 location claim. It uses one dynamically sized top-view floor, restrained
 architectural context, no people, and direct pan/zoom/fit controls. Every booth
 remains on that floor; there are no halls, pages, or hidden overflow records.
@@ -330,32 +450,30 @@ moves to the current weekday without reordering the cards or using saffron.
 Selecting another date opens a six-second anonymous preview and then returns to
 today; selecting a different preview restarts that timer without changing map
 filters. The selected calendar date, not map filters, chooses its industry.
-Monday is Electronics, Tuesday Beauty &
-Care, Wednesday Food & Farming, Thursday Machinery & Tools, Friday Home &
-Living, and Saturday Fashion & Textiles. Today's Expo reveals each business's
+Monday is Electronics & Appliances, Tuesday Beauty, Hygiene & Household Care,
+Wednesday Food & Beverage Production, Thursday Machinery, Metalwork & Industrial
+Inputs, Friday Furniture, Home Goods & Building Materials, Saturday Textiles,
+Garments, Leather & Paper, and Sunday Agriculture, Livestock & Primary Produce.
+Today's program reveals each business's
 identity, approved account-owned booth image, preview, and permanent Visit Showroom
 link. Selecting any other date returns only count-preserving anonymous booth
 outlines; business identity, handle, media, and destination are not serialized.
-Sunday uses the same coherent floor interaction for Featured Enterprises.
-The active industry advances once per Ethiopia calendar week through all six
-industries and then repeats. Administrators curate each industry's participants
-independently from sponsorship, and public copy identifies MirtPage as the
-founder interviewer and livestream host. The floor reveals its selected
-businesses only on Sunday. Every booth exposes a stable
+Sunday follows the same eligibility, privacy, floor, and interaction rules as
+the other six industry days. Every booth exposes a stable
 `{industry-code}-B{booth-number}` reference. A business must have an
 active published showroom, one published offering, a matching reviewed industry,
 valid reviewed location, an approved discovery profile and media, and no
 discovery exclusion. Subscription or payment dates do not determine public
-eligibility. Map, List, Sponsored, and Expo use the same server-authoritative
+eligibility. Map, List, Sponsored, and Daily Featured use the same server-authoritative
 eligibility rules, while map search/industry selection and the date-selected
-Expo remain independent projections.
+Daily Featured remain independent projections.
 
-Sponsored treatment is paid placement inside this one result set, not a separate
-or duplicated catalog, and is always disclosed as **Paid placement**. Sponsorship
-does not imply endorsement or Sunday selection. The fixture marketplace has at
-least five sponsored showrooms in every industry; all other eligible showrooms
-remain discoverable. List cards, map previews, and
-Expo booths link to the authoritative permanent showroom. Approved booth media
+Sponsored treatment is paid placement, not a separate or duplicated catalog,
+and is always disclosed as **Sponsors**. Platform staff manually select one
+global pool of five eligible businesses; it does not change with map industry,
+search, place, List state, or selected program day. Sponsorship does not imply endorsement
+or Daily Featured eligibility. All other eligible showrooms remain discoverable. List cards, map previews, and
+Daily Featured booths link to the authoritative permanent showroom. Approved booth media
 belongs to its represented business; a generic named booth is only a failed-file
 display fallback and cannot make an incomplete profile eligible. The useful
 product explanation lives on `/about` and in the compact merchant invitation,
@@ -366,7 +484,7 @@ horizontal overflow at 320 and 390 CSS pixels.
 The homepage CTA links to review-gated client signup. Signup creates an
 authenticated private business workspace and onboarding request from bounded
 contact, handle, password, and showroom-description fields. It accepts no public
-file upload and creates no public marker, Expo booth, catalog, or showroom.
+file upload and creates no public marker, Daily Featured booth, catalog, or showroom.
 Existing administrator-created invitations and the attachment-free legacy lead
 endpoint remain supported parallel intake paths. The homepage and request flow
 use professional copy with no development-stage disclaimers. The public
@@ -429,13 +547,13 @@ benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
 The wider disposable seed contains 56 additional authored businesses, including
-eight growing factories, distributed across six industries and reviewed
+nine growing factories, distributed across seven industries and reviewed
 Ethiopian locations. Reset creates 66 total businesses with 264 imaged
-offerings, at least five sponsored placements and five independently curated
-Sunday candidates in every industry, exactly ten retained legacy benchmark flags,
+offerings, exactly five globally selected sponsored placements, exactly ten
+retained legacy benchmark flags,
 approved discovery media, reviewed
 production-scale metadata, exact map coordinates, and
-complete dynamically sized Expo floors. Each has a durable fictional client
+complete dynamically sized Daily Featured floors. Each has a durable fictional client
 brief, palette advice, a component rationale, independent identity/media paths,
 and desktop/mobile review evidence. These remain illustrative workflow and
 demonstration fixtures, not evidence of real businesses or verified products.
@@ -524,8 +642,8 @@ Rules:
 13. Each offering and each showroom may carry one controlled YouTube reference.
     Public rendering derives a privacy-enhanced embed or normal watch link from
     the canonical provider ID; recipes and users cannot supply iframe markup.
-    The showroom-level process video appears inside the canonical Process
-    section and is loaded only after the visitor activates its play control. It
+    The showroom-level process video appears inside the canonical combined
+    story-and-process chapter and is loaded only after the visitor activates its play control. It
     must not appear as a duplicate header action or standalone video section.
 
 Supported availability states:
@@ -675,7 +793,13 @@ MirtPage’s directory must scale without dumping every tenant onto the page by 
 Default behavior:
 
 - show no more than five active public showrooms on the current page;
+- begin geographic map and List discovery with **All industries** selected;
+- de-duplicate businesses with more than one industry membership and keep the
+  Daily Featured Showrooms weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
+- after two characters, provide at most six de-duplicated, public-eligible
+  showroom, published-offering, and reviewed-place suggestions scoped to the
+  active industry and place;
 - do not expose category filters or duplicate all-business/reset navigation;
 - reset to page one when search or Industry changes;
 - fetch no more than five List records per response page using database count,
@@ -685,8 +809,9 @@ Default behavior:
 - support business name, handle, product, industry, and relevant description search;
 - keep reviewed **Workshop / producer** and **Growing factory** scale metadata
   available to authorized administrators without exposing it as a public filter;
-- place live search, available-location jump, map/list mode, and zoom/center
-  controls in one compact teal command area immediately above the map;
+- keep live search, available-location filtering, map/list mode, and zoom/center
+  controls within one discovery workbench; progressively disclose industry and
+  place in a phone bottom sheet and place phone map navigation on the map;
 - ignore legacy public `scale` query state so no invisible filter narrows results;
 - ensure mobile usability and keyboard accessibility.
 
@@ -718,7 +843,7 @@ Requirements:
 - reject multipart/file submissions before storage;
 - ignore or reject browser-supplied publication, location, industry, featured,
   and media authority;
-- keep the draft absent from public showroom, map, list, featured, and Expo
+- keep the draft absent from public showroom, map, list, featured, and Daily Featured
   surfaces until exact authorized publication;
 - retain administrator-created invitations and the legacy attachment-free lead
   endpoint as parallel operations paths.
@@ -750,7 +875,7 @@ The administrator can:
   public interest or service request;
 - reset client passwords and revoke their sessions;
 - provision individual operations-manager and team-member accounts;
-- manage request assignment and customer operations;
+- manage showroom-project intake, request assignment, and customer operations;
 - publish only an exact client-approved revision;
 - suspend or restore an established showroom without editing its content;
 - preview draft showrooms securely;
@@ -763,10 +888,9 @@ A client has a minimal workspace bound to one business. The client can create
 that private workspace through public signup or receive an administrator-issued
 invitation. The client can:
 
-- submit an unstructured first-showroom or change request with private reference
-  images after invitation;
+- start one unstructured showroom setup or update project;
 - read and reply to attributable clarification messages;
-- see their own request history;
+- continue their one current showroom project and see showroom history;
 - review an exact private showroom revision and approve or reject it;
 - view customer inquiries without mutating them;
 - after first publication, use **My offerings** to create products or
@@ -775,7 +899,7 @@ invitation. The client can:
   compatible existing product-category placement;
 - view their showroom and manage their account password.
 - view advisory monthly renewal state, history, and aggregate direct, map/list,
-  and Expo visits;
+  and Daily Featured visits;
 - open, reply to, close, and reopen tenant-scoped MirtPage support conversations.
 
 Clients cannot directly edit business settings, design, categories,
@@ -792,8 +916,8 @@ private revision, exact client approval, and manager publication.
 
 ### Operations manager and team member
 
-Operations managers can create or invite clients, record requests on their
-behalf, review and assign work, ask clarifying questions, manage inquiry
+Operations managers can create or invite clients, start showroom projects on
+their behalf, review and assign the backing requests, ask clarifying questions, manage inquiry
 activity, publish approved revisions, and perform retained-version
 rollback. They can also record a manual monthly renewal without a configured
 price, review account health, configure support-agent limits, inspect workload, and
@@ -827,8 +951,8 @@ member, and operations manager. Every account has an explicit profile.
 
 Current verified behavior:
 
-- Businesses can self-register into a draft private workspace and submit a
-  first-showroom request. A separate attachment-free expression-of-interest
+- Businesses can self-register into a draft private workspace and start a
+  first-showroom setup project. A separate attachment-free expression-of-interest
   path remains available for prospects who prefer staff follow-up.
 - Public interests use random references, idempotency, bounded JSON,
   privacy-preserving rate limits, events, and additive schema migrations.
@@ -844,25 +968,32 @@ Current verified behavior:
   directly for a referred client without fabricating a public lead or request.
 - Invitation redemption atomically creates one business-bound client account
   with the restricted client access profile and cannot be replayed.
-- Invited clients have a minimal private workspace for requests, read-only
+- Invited clients have a minimal private workspace for one current showroom
+  project, showroom history, read-only
   customer inquiries, offering upkeep, support, showroom preview, and
   account security. Before first publication, product upkeep is hidden and a
-  deep link returns to the first-showroom request. After publication, only the
+  deep link returns to the first-showroom setup. After publication, only the
   bounded **My offerings** fields are available; structural catalog,
   business-setting, design, and inquiry-status mutations remain
   hidden and denied on the server.
 - Authenticated clients can submit a 10–10,000 character written instruction.
-  Request intake is attachment-free. The intake captures business archetype,
-  products/capabilities stage, and
-  photography stage while asking what the business sells, makes, grows,
-  supplies, or can manufacture and any known capacity, minimum-order, and
-  lead-time facts. Page structure and dynamic offering/media counts remain with
-  the blueprint workflow. After import, missing photography becomes labeled
+  Request intake is attachment-free. First-showroom setup captures business
+  archetype, products/capabilities stage, and photography stage while asking
+  what the business sells, makes, grows, supplies, or can manufacture and any
+  known capacity, minimum-order, and lead-time facts. Established-showroom
+  updates ask only what should change; owners do not repeat setup context already
+  present in the live showroom. Page structure and dynamic offering/media counts
+  remain with the blueprint workflow. After import, missing photography becomes labeled
   recipe destinations that accept verified private uploads, not an unexplained
   “no images” state.
-  The server derives first-showroom versus change request from retained
-  publication state; the browser cannot choose or forge it. Requests are
-  tenant-bound, idempotent, and visible in the client’s request history.
+  The server derives showroom setup versus showroom update from retained
+  publication state; the browser cannot choose or forge it. The business UI
+  presents **Create showroom**, **Update showroom**, or **Continue showroom
+  setup/update** and keeps terminal work in **Showroom history**. The backing
+  service request is tenant-bound and idempotent. A partial unique database
+  index permits only one active showroom project per business across SQLite and
+  PostgreSQL; concurrent attempts return the current project rather than
+  creating overlapping work.
 - Platform administrators can provision individual operations-manager and team-
   member accounts with a temporary password that must be changed on first use.
   Shared staff credentials and public staff registration are not supported.
@@ -870,9 +1001,9 @@ Current verified behavior:
   and invite prospects, submit a request on behalf of a prospect or client, and
   assign or reassign work. They can also update inquiry status. On-behalf
   request type is server-derived for existing
-  clients. On-behalf intake is attachment-free and records the same business,
-  catalog, and photography context as client intake; images are added only to
-  labeled destinations after design import.
+  clients. On-behalf intake is attachment-free and follows the same setup-versus-
+  update distinction as client intake; images are added only inside the private
+  draft.
 - Team members see only assigned requests and associated business/showroom
   context. Assignment changes add or remove that scope atomically. For an
   established assigned showroom they may perform the same bounded product
@@ -883,10 +1014,11 @@ Current verified behavior:
   staff-only component laboratory. It uses synthetic fixture content, exposes no
   tenant/customer data, and has no revision, AI-provider, or publication action.
   Clients and anonymous visitors cannot access it.
-- Assigned staff prepare bounded structured business/catalog snapshots through
-  the staged recipe blueprint studio, fulfill exact labeled media destinations,
-  inspect deterministic composition fitness, and edit settings, layout/style,
-  page content, and offerings in four focused areas. Drafts do not mutate live rows; submitted
+- Assigned staff can prepare a private draft through **Edit current showroom**
+  for bounded changes or **AI-assisted redesign** for a complete recipe. Initial
+  builds may lead with the staged recipe blueprint studio. Both tools expose the
+  same focused settings, layout/style, page-content, offering, media, fitness,
+  and preview controls. Drafts do not mutate live rows; submitted
   numbered revisions are immutable and later changes create a newer revision.
 - Invited clients can open the exact private showroom preview for their request
   and approve it or reject it with comments. Superseded previews cannot receive
@@ -902,26 +1034,43 @@ Current verified behavior:
   without rewriting the immutable original instruction. A staff question moves
   eligible work to needs-information; a client reply resumes review. Clients
   see staff authors as the MirtPage team while internal views retain attribution.
+- The focused revision editor renders its current unsaved snapshot through the
+  interaction-disabled showroom renderer below the forms. Staff can jump to
+  that preview and switch between desktop and phone widths without saving,
+  publishing, or changing the live showroom.
+- Each editable logo, hero, browser-icon, combined story/process, and offering
+  image field accepts an in-place replacement upload. The combined
+  story/process chapter and every offering also accept a controlled YouTube
+  watch or share URL. New media is selected into the unsaved preview
+  immediately; images remain private request media until approved publication
+  promotes selected references through the configured storage adapter, while
+  video fields retain normalized `youtube:<provider-id>` references.
 - Request, invitation, and new-request screens provide breadcrumbs and a Back
   action with a deterministic parent fallback.
 - Authenticated workspace navigation keeps each actor in a role-oriented,
-  icon-supported workspace. Platform overview, businesses, clients, staff
-  access, support inbox, and support-agent capacity use stable destinations;
-  server-paginated collections become compact records on narrow screens. The
-  public site is a separate, explicit link, and an authenticated visit to the
-  login route returns to the dashboard instead of showing a second sign-in
-  form.
+  icon-supported workspace. Administrators use one server-paginated Businesses
+  directory rather than separate client-account and discovery-profile lists.
+  Selecting a business opens one task-oriented Business workspace grouped into
+  showroom work, customer activity, and business administration. Client access
+  remains a separate authorized record but appears as an Owner sign-in recovery
+  disclosure inside administrator-only Business details. Marketplace
+  configuration remains a business-scoped Marketplace task, privacy-conscious
+  visit aggregates appear on Business Overview, and Renewal remains a distinct
+  administrative destination. Cross-business requests, support, renewals,
+  staff, and design-library work remain global queues. The public site is a
+  separate, explicit link, and an authenticated visit to the login route returns
+  to the dashboard instead of showing a second sign-in form.
 - High-volume dashboard collections use bounded server queries: five public
-  showroom cards or 10 authorized workspace rows per page. Businesses, clients,
-  staff, requests, products, inquiries, support conversations, and discovery profiles have
-  linkable search/filter state, accurate counts, and focused record actions.
-  Business and staff selection never loads the complete account into a dropdown;
-  discovery administration edits one business-specific profile, and inquiry rows
-  include item summaries without per-row follow-up queries.
-- Platform administrators manage paid sponsorship state/order and
-  industry-specific Sunday Featured Enterprise state/order from the same focused
-  discovery profile. These programs persist independently and do not change
-  showroom publication authority.
+  showroom cards, six unified business-directory rows, or 10 authorized
+  workspace rows per page. Businesses, staff, requests, products, inquiries,
+  support conversations, and renewals have linkable search/filter state,
+  accurate counts, and focused record actions. Business and staff selection
+  never loads the complete account into a dropdown; owner recovery and
+  Marketplace edit records for one selected business, and inquiry rows include
+  item summaries without per-row follow-up queries.
+- Platform administrators manage the five-business global paid-sponsorship
+  state/order from each focused discovery profile. Sponsorship does not change
+  showroom publication authority, industry membership, or Daily Featured eligibility.
 - Role-scoped dashboard attention cards summarize new accounts, actionable
   showroom requests, tenant-safe new inquiries, and support conversations that
   need a reply. Counts are live aggregates and link to bounded working queues;
@@ -934,7 +1083,7 @@ Current verified behavior:
   no checkout, payment gateway, automatic debit, or public pricing claim.
 - Showroom visits use an opaque first-party visitor token hashed with the privacy
   salt and deduplicate per business, source, and day. Clients see aggregate
-  direct, map/list discovery, Expo, and recent counts; raw IP addresses are not stored
+  direct, map/list discovery, Daily Featured, and recent counts; raw IP addresses are not stored
   and traffic counts are not billing authority.
 - Authenticated client support is stored inside MirtPage. Enabled agents have
   configurable concurrent limits; new conversations transactionally select the
@@ -945,10 +1094,14 @@ Current verified behavior:
 - Platform-owned homepage, discovery, intake, login, legal, favicon, and workspace
   surfaces use one MirtPage mark and wordmark without replacing any tenant's
   showroom identity. Public intake and login also share the solid platform
-  palette, compact form geometry, and responsive public header. Authenticated
-  navigation groups role-permitted work in a neutral desktop sidebar and
-  exposes the same destinations in a focus-contained mobile drawer rather than
-  a clipped horizontal link strip.
+  palette and compact form geometry. At phone widths, public surfaces remove
+  desktop header and full-footer chrome and expose one safe-area-aware four-tab
+  application bar for Market, Featured, About, and More. Authenticated
+  navigation groups role-permitted work in a neutral desktop sidebar; on phones,
+  up to four authorized primary tasks sit in the bottom application bar and a
+  focus-contained **More** sheet exposes every remaining permitted destination.
+  Hosted showrooms omit their full tenant footer on phones while retaining the
+  tenant identity and compact MirtPage Back/provenance bar.
 - Clients see a revision preview action only after that exact revision is sent
   for review. A staff-only draft is described as being prepared, and client
   request history replaces internal assignment IDs, raw status-transition
@@ -1052,8 +1205,9 @@ remaining AI-assisted delivery sequence is recorded in
 - Approved component implementations, schemas, fixtures, examples,
   compatibility metadata, and tests enter immutable bank releases through the
   repository review and CI workflow.
-- `showroom-bank@1.2.0` currently admits 67 variants across eight section
-  families. Eighteen token systems cover quiet editorial, organic, tactile,
+- `showroom-bank@1.2.0` retains 67 compatible variants across eight section
+  families; the current authoring brief exposes 66 and omits the legacy
+  standalone-film component. Eighteen token systems cover quiet editorial, organic, tactile,
   spatial, precise, high-contrast, utilitarian, and expressive visual
   directions. Their legacy stable IDs are not industry suitability signals.
   Bank 1.1 remains immutable and readable for retained revisions.
@@ -1104,9 +1258,10 @@ remaining AI-assisted delivery sequence is recorded in
   collection arrays/removals are fixed empty and all recipe collection
   relationships are null; the server alone may preserve hidden legacy
   relationships for matching stable entities. Dynamic catalog counts remain
-  bounded, not fixed by examples. Typed hero, story,
-  highlights/trust, information, call-to-action, and video-capable blocks are
-  implemented in revision v4/bank 1.2.
+  bounded, not fixed by examples. Current authoring uses typed hero, one
+  highlights story-and-process chapter, and call-to-action blocks. Story,
+  information, trust, and standalone-video shapes remain managed compatibility
+  input only for retained revision-v4/bank-1.2 content.
 - The studio exports a sanitized request/current-snapshot brief with a named
   contract manifest, current schemas, bank contract, source facts, allowed
   opaque asset keys, expected counts, and one fixed client-independent synthetic
@@ -1133,7 +1288,7 @@ remaining AI-assisted delivery sequence is recorded in
   does not transmit private files to an external AI.
 - Authorized staff can upload and admit a verified image directly from the
   detailed revision editor. The same private draft then exposes it to compatible
-  logo, hero, story, process, icon, and offering selectors without publishing it.
+  logo, hero, combined chapter, process-video, icon, and offering selectors without publishing it.
 - The recipe brief enumerates currently valid media destinations with exact
   owner type, opaque owner key, and slot key. Product photography destinations
   use `product_image`; import normalizes that owner key together with the
@@ -1152,7 +1307,7 @@ remaining AI-assisted delivery sequence is recorded in
   surface rhythm, and signature budget before individual variants are chosen;
   they do not prescribe an industry, token pack, or exact component sequence.
   Every normal template preserves the same semantic order: header, hero,
-  about/story, process, catalog, inquiry CTA, footer. Templates differ in
+  combined story and process, catalog, inquiry CTA, footer. Templates differ in
   anatomy and art direction, not information architecture.
   All seven header and all six footer variants have unique layout families and
   honest rendered-region descriptions. Header and footer are selected
@@ -1175,7 +1330,7 @@ remaining AI-assisted delivery sequence is recorded in
   designs. Every section also selects a semantic `surfaceRole` from `canvas`,
   `surface`, `soft`, `accent-soft`, `secondary-soft`, `strong`, or `inverse`.
   The semantic content order remains fixed, but no one surface-role sequence is
-  mandatory; monotony and weak pacing are review feedback. Hero and story imagery is
+  mandatory; monotony and weak pacing are review feedback. Hero and chapter imagery is
   borderless and connects to its section only when the recipe explicitly
   selects a blend, fade, overlap, or stage; omitted treatments receive a neutral
   readable default. Product imagery remains proportionally bounded and flush
@@ -1183,9 +1338,9 @@ remaining AI-assisted delivery sequence is recorded in
   Catalog-owned category browsing uses compact, touch-sized, horizontally
   scrollable tabs with modest corners; it is one shared catalog control and
   does not change shape merely because the AI selects another catalog variant.
-  About/story and process chapters use distinct desktop composition and semantic
-  single-column phone order. Their independently selected surfaces, media,
-  density, and typography provide separation without repeated rules. Repeating
+  The combined story-and-process chapter uses a distinct desktop composition
+  and semantic single-column phone order. Its selected surface, media, density,
+  and typography separate it from the hero and catalog without repeated rules. Repeating
   plaid, pinstripe, graph-paper,
   and center-divider motifs are rejected by bank and browser admission.
   Product detail presentation is also a design-v2 choice. Recipes select one of
@@ -1480,6 +1635,14 @@ Component-bank phone admission additionally requires:
 - `prefers-reduced-motion` authority over all nonessential animation;
 - scoped decorative layers that cannot cover or capture interaction.
 
+Release admission runs one cross-role browser matrix over public, hosted
+showroom, administrator, operations, team-member, and client routes at desktop
+and phone widths. It fails on admitted WCAG violations, route or browser
+errors, missing primary structure, duplicate IDs, or horizontal page overflow,
+and it includes open navigation, filter, preview, product, inquiry, and
+workspace-menu states. Automated admission is evidence, not a claim of full
+WCAG conformance or a replacement for assistive-technology user testing.
+
 For client sites, visual polish must not come at the expense of inquiry completion.
 
 ---
@@ -1513,9 +1676,9 @@ When adding a new client:
 2. Reserve a unique handle and choose a starting reviewed composition style.
 3. Deliver the displayed-once invitation securely; do not create a public
    request merely to provision access.
-4. Let the client set a strong password and submit their first detailed written
-   request.
-5. Assign an individual team member and resolve clarifications in the request
+4. Let the client set a strong password and start their first showroom setup
+   with a detailed written brief.
+5. Assign an individual team member and resolve clarifications in the project
    thread.
 6. Prepare settings, contacts, catalog, options, descriptive availability,
    images, and design
@@ -1530,11 +1693,14 @@ When adding a new client:
 
 ### Client workflow
 
-The client uses requests for first-showroom, structural, option, setting, and
-visual-design work. The client can follow requests, clarification, inquiries,
-private previews, approvals, support, and account security. A request for a
-business with no retained publication is a first-showroom request; after
-publication it is a change request. The server decides this classification.
+The client uses one current showroom project for first-showroom, structural,
+option, setting, and visual-design work. The client can follow the current
+project, showroom history, clarification, inquiries, private previews,
+approvals, support, and account security. A business with no retained
+publication starts a showroom setup; after publication it starts a showroom
+update. The server decides this classification. Submitted numbered revisions
+are immutable; a rejected revision continues inside the same project as a new
+draft revision rather than creating another project.
 
 After first publication, **My offerings** lets the client create a product or
 capability or maintain its offering type, optional desired-quantity behavior, name,
@@ -1552,16 +1718,16 @@ control this verified exception and its expanded offering contract.
 
 The current workflow stores an exact validated composition in each schema-v2
 revision and renders it consistently in private preview and public publication.
-The structured revision editor remains a bounded content-recovery surface; it
-shows the immutable composition identity instead of offering old renderer keys.
-The implemented workflow under `FE-007`, `FE-014`, `BE-008`, and `BE-013` is
-request, sanitized AI brief, strict full-recipe blueprint import, grouped
-content/design/optional-provenance validation, composition fitness, labeled media-slot
-fulfillment, private preview, focused exception correction, client review, and
-controlled publication.
-Routine staff should not enter every category, item, hero field,
-story block, or design choice manually. A change recipe is a complete desired
-snapshot based on the authorized current version, not an ambiguous patch.
+The structured revision editor is a first-class bounded update surface and shows
+the immutable composition identity instead of offering old renderer keys. The
+implemented workflow under `FE-007`, `FE-014`, `BE-008`, and `BE-013` uses one
+approval-gated private revision with two authoring paths. **Edit current
+showroom** starts from the authorized live snapshot for bounded content, media,
+offering, component, palette, and motion changes. **AI-assisted redesign** adds
+sanitized brief export, strict full-recipe blueprint import, grouped
+content/design/optional-provenance validation, and composition fitness when a
+complete new direction is warranted. A change recipe remains a complete desired
+snapshot, not an ambiguous patch, but an update does not require a recipe.
 Staff may admit available client images and supported media links before import,
 or fulfill exact labeled destinations after the blueprint chooses its dynamic
 composition. The recipe assigns opaque keys to typed component media slots; it

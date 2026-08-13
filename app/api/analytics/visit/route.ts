@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
       });
     }
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Showroom visit recording failed:", error instanceof Error ? error.message : "unknown error");
     return NextResponse.json({ error: "Visit was not recorded." }, { status: 400 });
   }
 }

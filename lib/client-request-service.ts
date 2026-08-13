@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { MAX_REQUEST_TEXT, RequestError } from "./request-domain";
-import { runtimeRequestTypeForBusiness } from "./request-runtime";
+import { runtimeCurrentShowroomProject, runtimeRequestTypeForBusiness } from "./request-runtime";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import type { SessionUser } from "./types";
 
@@ -14,10 +14,14 @@ export async function createAuthenticatedClientRequest(user: SessionUser, formDa
   const files = formData.getAll("images").filter((value): value is File => value instanceof File && value.size > 0);
   if (files.length) throw new RequestError("Add images from the labeled checklist after the showroom design is imported.");
   const duplicate = await runtimeGet<{id:number;public_ref:string}>("SELECT id,public_ref FROM service_requests WHERE submitted_by_user_id=? AND submitter_kind='client' AND idempotency_key=?", [user.id, idempotencyKey]);
-  if (duplicate) return { id:duplicate.id, publicRef:duplicate.public_ref, duplicate:true };
+  if (duplicate) return { id:duplicate.id, publicRef:duplicate.public_ref, duplicate:true, existingProject:false };
 
   try {
     const created = await runtimeTransaction(async () => {
+      const current = await runtimeCurrentShowroomProject(user.business_id!);
+      if (current) {
+        return { id:current.id, publicRef:current.public_ref, duplicate:false, existingProject:true };
+      }
       const publicRef = `REQ-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
       const result = await runtimeGet<{ id: number }>(`
         INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,notification_state)
@@ -29,12 +33,14 @@ export async function createAuthenticatedClientRequest(user: SessionUser, formDa
       if (!result) throw new RequestError("The client account is no longer linked to this business.", 403);
       const requestId = Number(result.id);
       await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'authenticated client request')", [requestId, user.id, "submitted"]);
-      return { id:requestId, publicRef, duplicate:false };
+      return { id:requestId, publicRef, duplicate:false, existingProject:false };
     });
     return created;
   } catch (error) {
     const afterRace = await runtimeGet<{id:number;public_ref:string}>("SELECT id,public_ref FROM service_requests WHERE submitted_by_user_id=? AND submitter_kind='client' AND idempotency_key=?", [user.id, idempotencyKey]);
-    if (afterRace) return { id:afterRace.id, publicRef:afterRace.public_ref, duplicate:true };
+    if (afterRace) return { id:afterRace.id, publicRef:afterRace.public_ref, duplicate:true, existingProject:false };
+    const current = await runtimeCurrentShowroomProject(user.business_id);
+    if (current) return { id:current.id, publicRef:current.public_ref, duplicate:false, existingProject:true };
     if (error instanceof RequestError) throw error;
     throw new RequestError("The request could not be saved.", 500);
   }

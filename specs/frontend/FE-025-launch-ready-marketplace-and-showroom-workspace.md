@@ -2,9 +2,9 @@
 id: FE-025
 title: Launch-ready marketplace and showroom workspace
 status: done
-related: [FE-003, FE-009, FE-017, FE-024, FE-026, FE-027, FE-028, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, DEP-021, ADR-0012]
+related: [FE-003, FE-009, FE-017, FE-024, FE-026, FE-027, FE-028, FE-031, FE-035, FE-036, BE-008, BE-010, BE-024, BE-025, DEP-015, DEP-020, DEP-021, ADR-0012]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-04
+last_updated: 2026-08-11
 change_level: L3
 ---
 
@@ -14,7 +14,7 @@ change_level: L3
 
 The pre-launch application has the right public value proposition, but several
 important interactions still expose implementation history: marketplace search
-requires an unnecessary submit button, Expo and city floors resemble graph
+requires an unnecessary submit button, Daily Featured and city floors resemble graph
 paper, a business process video appears in showroom chrome instead of the
 Process chapter, and the focused revision editor can select admitted images but
 cannot admit a new one in place. MirtPage needs a clear mobile-first public and
@@ -27,7 +27,7 @@ copy or hidden media steps.
 
 - Debounced public marketplace search that updates without a Search button,
   preserves all active filters, and keeps an explicit clear action.
-- Dynamic Expo and city marketplace floors with quiet architectural surfaces,
+- Dynamic Daily Featured and city marketplace floors with quiet architectural surfaces,
   legible aisles, and a useful central place without fine graph-paper grids.
 - Controlled business process video embedded inside the canonical Process
   section, with a responsive privacy-enhanced player and no duplicate header
@@ -39,9 +39,9 @@ copy or hidden media steps.
 - Bounded server-paginated primary collections and compact, collapsible
   secondary history on narrow screens so one record cannot create an
   unbounded dashboard page.
-- An accessible sponsored-showroom rail that advances paid placements
-  automatically, loops through the complete bounded set, pauses for visitor
-  interaction, and respects reduced-motion preferences.
+- An accessible sponsored-showroom area that shows all five bounded placements
+  on desktop and a locked, automatically replacing pair on phones. Sponsor cards
+  remain links; the phone slot has no manual movement or pause controls.
 - Separate copy/download actions for the AI design brief and the exact current
   showroom recipe. Change work starts from the latest private draft snapshot,
   including approved manual content and admitted-media changes.
@@ -54,7 +54,7 @@ copy or hidden media steps.
   palette roles, section surfaces, admitted media treatments, and supported
   motion controls without exposing one uninterrupted recovery form.
 - Browser review of public, administrator, client, revision, showroom, city,
-  Expo, and narrow-phone workflows.
+  Daily Featured, and narrow-phone workflows.
 - One short and one longer MirtPage demonstration video using reviewed demo data
   and clearly provisional/generic media.
 
@@ -82,8 +82,8 @@ copy or hidden media steps.
 - Search starts after 350-500 milliseconds of inactivity when the value is empty
   or contains at least two non-space characters. Stale timers are cancelled.
 - Search URL replacement preserves industry, production scale, map/list mode,
-  and Expo day, does not force page scrolling, and resets result pagination.
-- Expo and city floors contain no repeating fine square grid. Their venue edge,
+  and selected program day, does not force page scrolling, and resets result pagination.
+- Daily Featured and city floors contain no repeating fine square grid. Their venue edge,
   primary circulation, central identity, booth/shop contrast, pan, zoom, fit,
   reduced-motion behavior, and dynamic layout remain visible at 320, 390, and
   1440 CSS pixels.
@@ -105,10 +105,10 @@ copy or hidden media steps.
   discovery returns at most five. Detail histories use a bounded initial view
   or a contained scroll region and do not expand the whole mobile document by
   hundreds of records.
-- The sponsored rail advances one card at a time after a bounded interval and
-  wraps to the first card. Pointer, touch, keyboard focus, document visibility,
-  a visitor pause control, and `prefers-reduced-motion` suspend automatic
-  motion without hiding manual horizontal navigation.
+- The sponsored area is labeled **Sponsors**. Desktop exposes all five cards.
+  At phone widths exactly two distinct cards from the five-item pool are visible;
+  a changed random pair replaces them after a bounded interval. The area cannot
+  scroll, drag, or pause, exposes no carousel controls, and cards remain clickable.
 - The showroom studio labels initial-showroom and showroom-change briefs in
   user language. It separately exposes an importable full current recipe whose
   base version, content, design, and media references match the latest
@@ -139,10 +139,10 @@ copy or hidden media steps.
 
 ```gherkin
 Scenario: Visitor searches as they type
-  GIVEN an industry, production scale, and Expo day are selected
+  GIVEN an industry, production scale, and program day are selected
   WHEN the visitor pauses after entering a search phrase
   THEN matching server results replace the current marketplace state without a Search button
-  AND industry, scale, view, and Expo day remain selected
+  AND industry, scale, view, and program day remain selected
 
 Scenario: Visitor watches how a business works
   GIVEN a showroom has a valid controlled process video
@@ -157,16 +157,17 @@ Scenario: Staff adds missing revision imagery
   AND the live showroom remains unchanged
 
 Scenario: A venue contains many showrooms on a phone
-  GIVEN a dynamic Expo or city marketplace floor
+  GIVEN a dynamic Daily Featured or city marketplace floor
   WHEN it renders at 320 or 390 CSS pixels
   THEN its floor reads as an architectural venue rather than graph paper
   AND pan, zoom, fit, booth activation, close, and native page scrolling remain usable
 
 Scenario: Visitor encounters sponsored placements on a phone
   GIVEN several active paid placements match the selected industry
-  WHEN the visitor leaves the sponsored rail idle
-  THEN each placement advances into view in a bounded loop
-  AND touch, focus, pause, or reduced-motion preference prevents unwanted movement
+  WHEN the sponsor slot renders and its bounded timer advances
+  THEN exactly two distinct clickable sponsors are visible at one time
+  AND the next visible pair includes at least one different sponsor
+  AND the visitor cannot scroll, drag, pause, or manually move the sponsor slot
 
 Scenario: Staff asks AI to revise an existing showroom
   GIVEN authorized staff have made content and media corrections after an earlier AI import
@@ -252,7 +253,7 @@ assets and stable media references.
 Evidence: completed locally on 2026-08-02. `npm run check` passed the complete contract,
 security, pagination, media, recipe, revision, support, and 66-showroom fixture
 suite. Ordered `npm run test:acceptance` passed 10/10 production-browser
-workflows, including sponsored rotation, timed Expo return, 320/390-pixel
+workflows, including sponsored rotation, timed Daily Featured return, 320/390-pixel
 behavior, process-video CSP, role isolation, post-import staff creation of an
 offering, current-design export, client approval, and publication.
 

@@ -1,14 +1,14 @@
 ---
 id: FE-003
-title: Managed client request and review workspace
+title: Managed showroom project and review workspace
 status: in_progress
-related: [BE-003, BE-007, BE-025, DEP-003, FE-006, FE-007, FE-008, FE-013, FE-017, FE-021, FE-025, ADR-0004, ADR-0006]
+related: [BE-003, BE-007, BE-025, DEP-003, FE-006, FE-007, FE-008, FE-013, FE-017, FE-021, FE-025, FE-031, FE-032, ADR-0004, ADR-0006]
 owners: [product, frontend]
-last_updated: 2026-08-02
+last_updated: 2026-08-10
 change_level: L3
 ---
 
-# FE-003 — Managed client request and review workspace
+# FE-003 — Managed showroom project and review workspace
 
 ## Problem and outcome
 
@@ -17,8 +17,11 @@ learning MirtPage's catalog and design model. Staff need a clear operations queu
 and clients need a minimal private workspace for requests, inquiries, offerings,
 support, previews, and approval.
 
-The outcome is a request-led client experience in which unfinished work stays
-private and no showroom change becomes public without client approval.
+The outcome is a project-led client experience in which a business sees one
+current showroom setup or update, completed work remains in showroom history,
+unfinished work stays private, and no showroom change becomes public without
+client approval. Service requests remain an internal intake and audit record;
+they are not the customer's primary mental model.
 
 ## Scope
 
@@ -26,7 +29,7 @@ private and no showroom change becomes public without client approval.
 
 - Public expression-of-interest intake with contact details and one short
   unstructured message. It has no upload or self-sign-up capability.
-- Authenticated client change requests and request history.
+- Authenticated client showroom setup/update projects and showroom history.
 - Client clarification responses, status, private preview, approve, and reject
   with comments.
 - Existing client inquiry, offering, support, and account-security access.
@@ -58,8 +61,14 @@ publication authority.
 
 ## Domain language and invariants
 
-- **Request:** an onboarding or change instruction submitted by a prospect,
-  client, or authorized manager.
+- **Showroom project:** the customer-facing unit of work for one initial showroom
+  setup or one later showroom update.
+- **Current project:** the only non-terminal showroom project for a business.
+  Its mutable draft may be refined until a numbered revision is sent for review.
+- **Showroom history:** terminal projects retained for audit and reference.
+- **Service request:** the internal intake, assignment, and audit record backing
+  a showroom project. It remains visible in global operations queues but is not
+  used as the primary business-facing label.
 - **Clarification:** an attributable message that does not rewrite the original
   request.
 - **Proposed revision:** server-validated staff work available only in preview.
@@ -68,6 +77,12 @@ publication authority.
   published showroom.
 - **Showroom change request:** a request for a business with established
   published/live history.
+- A business has at most one service request in an active project status:
+  `submitted`, `under_review`, `needs_information`, `approved_for_work`,
+  `in_progress`, `client_review`, or `client_approved`.
+- `published`, `completed`, `rejected`, and `cancelled` are terminal project
+  statuses. Rejected preview revisions do not reject the project; they return
+  the same project to `in_progress` for a newer numbered revision.
 - Clients see only their business and pre-account requests proven through their
   accepted invitation.
 - Team members see only assigned work. Manager and administrator capabilities
@@ -80,6 +95,10 @@ publication authority.
   message of 10–2,000 characters, consent, and a stable idempotency key.
 - Public, client, and on-behalf request intake accepts no files. Staff add media
   only after the imported design creates exact labeled destinations.
+- First-showroom setup intake may ask for business type, offering breadth, and
+  photography readiness because those answers shape a new composition. A later
+  showroom update asks only for the desired outcome and does not make the owner
+  repeat onboarding context already present in the live showroom.
 - The success state returns a non-secret public reference and explains that
   submission is not acceptance or publication.
 - A client account exposes Requests, My offerings, Customer inquiries, Support,
@@ -91,6 +110,28 @@ publication authority.
 - Request type is explanatory, not client-selectable: the UI shows New showroom
   for a never-published draft and Showroom change after publication/live
   history; the server derives the same value independently.
+- Business-facing actions are derived from publication and current-project
+  state: **Create showroom** for a never-published business without a current
+  project, **Update showroom** for an established business without a current
+  project, and **Continue showroom setup/update** when a current project exists.
+- Starting a second project for the same business is rejected transactionally.
+  Concurrent attempts resolve to the already-current project and cannot create
+  two active records. Authorized staff may start the first project before owner
+  access exists, but publication still requires the represented owner approval
+  contract.
+- A showroom update is an approval container, not an AI-only workflow. Assigned
+  staff can create or resume its private draft through **Edit current showroom**
+  for bounded content, media, offering, component, palette, or motion changes,
+  or through **AI-assisted redesign** when a complete replacement recipe is
+  useful. Both tools edit the same draft and share preview, approval,
+  publication, and history controls.
+- Staff authoring navigation presents direct editing and AI redesign as peer
+  tools rather than numbered mandatory steps. Clients never see staff-only
+  authoring destinations and receive a preview action only when an exact
+  revision is available for review.
+- Sending a draft for review freezes that numbered revision. Client rejection
+  preserves the decision on that revision and continues the same project with a
+  new draft revision; it does not create a second project.
 - Staff-created requests visibly state that MirtPage submitted them for the
   client; internal staff identity is not exposed beyond what operations policy
   permits.
@@ -165,12 +206,31 @@ Scenario: Prospect attempts a public upload
   THEN the request is rejected before file decoding or storage
   AND no attachment row or media object is created
 
-Scenario: Client requests a catalog change
+Scenario: Client starts a showroom update
   GIVEN an authenticated client
   WHEN they submit written instructions
-  THEN the request is linked to only their business
-  AND it appears in their request history
+  THEN one current update project is linked to only their business
+  AND it appears as the current showroom update rather than a second request list
+  AND the client describes the requested changes without repeating setup-only business, catalog, or photography questions
+
+Scenario: Staff chooses an update tool
+  GIVEN an established showroom has one current update project
+  WHEN assigned staff choose Edit current showroom or AI-assisted redesign
+  THEN both paths create or resume the same private draft revision
+  AND neither path bypasses preview, owner approval, or manager publication
   AND it contains no generic pre-design image attachments
+
+Scenario: Business cannot start overlapping showroom work
+  GIVEN a business already has a current showroom setup or update
+  WHEN the client or an authorized manager attempts to start another project
+  THEN no second active service request is created
+  AND the existing current project is returned as the place to continue work
+
+Scenario: Rejected preview continues the same project
+  GIVEN a client rejects numbered revision 2 with comments
+  WHEN assigned staff resume the showroom work
+  THEN revision 2 remains immutable and rejected
+  AND revision 3 is prepared inside the same current project
 
 Scenario: Operator follows and reverses a deep link
   GIVEN an operator opens a request or invitation screen from a copied URL
@@ -295,6 +355,7 @@ attachment contents, access tokens, or customer inquiry details.
 | Preview approval/rejection without live drift | acceptance | `tests/acceptance/app.spec.ts`, `scripts/test-revisions.ts` |
 | Accessibility and mobile safety | browser | `tests/acceptance/app.spec.ts` |
 | Client-safe draft and event presentation | focused/acceptance | `scripts/test-requests.ts`, `tests/acceptance/app.spec.ts` |
+| One current project, derived setup/update actions, and project history | integration/acceptance | `scripts/test-requests.ts`, `scripts/capture-focused-release-visuals.mjs` |
 
 ## Rollout and rollback
 

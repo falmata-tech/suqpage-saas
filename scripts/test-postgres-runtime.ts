@@ -35,6 +35,7 @@ async function main() {
     assert.ok(evidence.activeBusinesses > 0);
     assert.ok(evidence.backendPid > 0);
 
+    let signupProject: { businessId: number; userId: number } | undefined;
     await runner.transaction(async () => {
       await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       const repository = new PostgresCatalogRepository(runner);
@@ -146,11 +147,38 @@ async function main() {
       };
       const signup = await createPostgresPublicClientWorkspace(runner, input);
       assert.ok(signup.userId && signup.businessId && signup.requestId);
+      signupProject = { businessId: signup.businessId, userId: signup.userId };
       await assert.rejects(
         () => createPostgresPublicClientWorkspace(runner, { ...input, handle: `other-${unique}`, idempotencyKey: `again-${unique}` }),
         /already uses this email/,
       );
     });
+    assert.ok(signupProject);
+    const activeSignupProject = signupProject;
+    await assert.rejects(
+      () => runner.transaction(async () => {
+        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+        await runner.query(`
+          INSERT INTO service_requests(
+            public_ref,business_id,represented_client_user_id,request_type,status,
+            contact_name,contact_value,business_name,request_text,submitter_kind,
+            submitted_by_user_id,notification_state
+          ) VALUES(? ,?,?,'onboarding','submitted','Overlap','overlap@example.test',
+            'PostgreSQL overlap','This second active project must be rejected.',
+            'client',?,'not_required')
+        `, [`REQ-PG-OVERLAP-${Date.now()}`,activeSignupProject.businessId,activeSignupProject.userId,activeSignupProject.userId]);
+      }),
+      (error: unknown) => error instanceof Error && "code" in error && error.code === "23505",
+    );
+    const projectIndex = await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      return (await runner.query<{ indexdef: string }>(`
+        SELECT indexdef FROM pg_indexes
+        WHERE schemaname='mirtpage_rehearsal'
+          AND indexname='one_active_showroom_project_per_business_idx'
+      `)).rows[0];
+    });
+    assert.match(projectIndex?.indexdef || "", /UNIQUE INDEX/);
 
     await runner.transaction(async () => {
       await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
@@ -185,9 +213,9 @@ async function main() {
       const showrooms = await listPublicShowrooms({ page: 1, industry: industries[0].key });
       assert.ok(showrooms.totalItems > 0, "Expected PostgreSQL public showroom results.");
       const { getDiscoveryView } = await import("../lib/discovery");
-      const discovery = await getDiscoveryView({ industry: "electronics", expoDay: 1 });
+      const discovery = await getDiscoveryView({ industry: "electronics", featuredDay: 1 });
       assert.ok(discovery.total > 0, "Expected PostgreSQL geographic discovery results.");
-      assert.ok(discovery.expo.schedule.length === 7, "Expected the complete PostgreSQL-backed Expo schedule.");
+      assert.ok(discovery.featured.schedule.length === 7, "Expected the complete PostgreSQL-backed Daily Featured schedule.");
       const {
         getDiscoveryProfileAdminView,
         listDiscoveryProfilesPage,
@@ -211,8 +239,6 @@ async function main() {
         productionScale: editableProfile.productionScale,
         sponsored: editableProfile.sponsored,
         sponsorPosition: editableProfile.sponsorPosition,
-        sundayIndustryKeys: editableProfile.sundayIndustryKeys,
-        sundayPosition: editableProfile.sundayPosition,
         excluded: editableProfile.excluded,
       });
       assert.equal((await getDiscoveryProfileAdminView(updatedProfile.businessId))?.businessId, updatedProfile.businessId);
@@ -425,6 +451,7 @@ async function main() {
         closeSupportConversation,
         createSupportConversation,
         getSupportConversation,
+        listSupportAgentWorkloads,
         listSupportConversations,
         postSupportMessage,
         reopenSupportConversation,
@@ -497,7 +524,18 @@ async function main() {
         message: "Verify the native support queue on PostgreSQL.",
         idempotencyKey: `postgres-support-${Date.now()}`,
       });
-      assert.equal((await getSupportConversation(supportClient, supportConversation.id)).conversation.assignedUserId, staff.userId);
+      const assignedUserId = (await getSupportConversation(
+        supportClient,
+        supportConversation.id,
+      )).conversation.assignedUserId;
+      assert.ok(Number.isInteger(assignedUserId), "Expected automatic support assignment on PostgreSQL.");
+      assert.equal(
+        (await listSupportAgentWorkloads(operationsUser)).find(
+          (agent) => agent.userId === assignedUserId,
+        )?.enabled,
+        true,
+        "Automatic support assignment must select an enabled agent.",
+      );
       await postSupportMessage(operationsUser, supportConversation.id, {
         message: "The PostgreSQL support queue is responding.",
         idempotencyKey: `postgres-support-reply-${Date.now()}`,

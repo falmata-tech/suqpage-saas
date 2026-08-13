@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-The pilot needs support, billing state, analytics, and a dense Expo without
+The pilot needs support, billing state, analytics, and a dense Daily Featured without
 creating unavoidable USD agent fees or pretending the single-instance SQLite
 runtime is already horizontally scalable.
 
@@ -39,7 +39,7 @@ runtime is already horizontally scalable.
 Scenario: External services are absent
   GIVEN no Telegram credentials
   WHEN the application starts
-  THEN support, manual subscription renewal, analytics, and Expo remain usable
+  THEN support, manual subscription renewal, analytics, and Daily Featured remain usable
   AND health checks do not claim Telegram is configured
 
 Scenario: Operator considers horizontal scaling

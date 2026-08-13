@@ -11,6 +11,7 @@ async function main() {
   process.env.PRIVACY_SALT = "request-test-privacy-salt-long-enough";
 
   const { getDb, getUserById, closeDbForTests } = await import("../lib/db");
+  const { migrateDatabase } = await import("../lib/schema");
   const { FileRequestAttachmentStore, resolveRequestAttachment } = await import("../lib/request-media");
   const { addRequestClarification, SqliteRequestRepository, getRequestDetail, updateRequestStatus } = await import("../lib/request-sqlite");
   const { createPublicInterest } = await import("../lib/request-service");
@@ -84,6 +85,8 @@ async function main() {
     assert.equal(client.must_change_password,0);
     assert.equal(canViewBusiness(client,redeemed.businessId),true);
     assert.equal(canManageBusiness(client,redeemed.businessId),false);
+    const platformAdmin = getUserById(adminId)!;
+    assert.equal(canManageBusiness(platformAdmin,redeemed.businessId),true);
     await assert.rejects(()=>redeemClientInvitation({token:secondToken,name:"Amina Client",password:"ClientPassword123!"},1_000_201),InvitationError);
     assert.equal((getDb().prepare("SELECT COUNT(*) count FROM users WHERE lower(email)='amina@example.test'").get() as {count:number}).count,1);
 
@@ -101,6 +104,8 @@ async function main() {
     );
     const clientRequest = await createAuthenticatedClientRequest(client,clientForm);
     const clientDetail = getRequestDetail(clientRequest.id)!;
+    assert.equal(clientRequest.existingProject,true);
+    assert.equal(clientRequest.id,first.id);
     assert.equal(clientDetail.request_type,"onboarding");
     assert.equal(clientDetail.attachments.length,0);
     assert.equal(canAccessRequest(client,clientDetail),true);
@@ -112,7 +117,15 @@ async function main() {
     assert.equal(listClientRequests(sameBusinessOtherClient).some((request)=>request.id===clientRequest.id),false);
     const repeatedClientRequest = await createAuthenticatedClientRequest(client,clientForm);
     assert.equal(repeatedClientRequest.id,clientRequest.id);
-    assert.equal(repeatedClientRequest.duplicate,true);
+    assert.equal(repeatedClientRequest.existingProject,true);
+    assert.equal(repeatedClientRequest.duplicate,false);
+    assert.throws(() => getDb().prepare(`
+      INSERT INTO service_requests(
+        public_ref,business_id,represented_client_user_id,request_type,status,
+        contact_name,contact_value,business_name,request_text,submitter_kind
+      ) VALUES('REQ-OVERLAP001',?,?,'onboarding','submitted','Overlap','overlap@example.test','Amina Market','This active project must be blocked.','client')
+    `).run(redeemed.businessId,client.id), /one_active_showroom_project|UNIQUE constraint failed/);
+    updateRequestStatus(clientRequest.id,"cancelled",adminId);
 
     const managerAccount = await createStaffAccount({name:"Operations Manager",email:"manager@example.test",password:"ManagerPassword123!",accessRole:"operations_manager"});
     const teamOneAccount = await createStaffAccount({name:"Team One",email:"team-one@example.test",password:"TeamPassword123!",accessRole:"team_member"});
@@ -165,6 +178,26 @@ async function main() {
     const managerRepeated = await createOnBehalfRequest(manager,managerForm);
     assert.equal(managerRepeated.id,managerRequest.id);
     assert.equal(managerRepeated.duplicate,true);
+
+    const businessWithoutOwnerId = Number(
+      getDb().prepare("INSERT INTO businesses(handle,name,design_key,status,contact_email) VALUES('request-no-owner','Request No Owner','composition','draft','owner-pending@example.test')").run().lastInsertRowid,
+    );
+    const businessOnlyForm = new FormData();
+    businessOnlyForm.set("businessId", String(businessWithoutOwnerId));
+    businessOnlyForm.set("requestText", "Start the first design request before owner access is configured.");
+    businessOnlyForm.set("idempotencyKey", "manager_business_only_123456");
+    const businessOnlyRequest = await createOnBehalfRequest(manager, businessOnlyForm);
+    const businessOnlyDetail = getRequestDetail(businessOnlyRequest.id)!;
+    assert.equal(businessOnlyDetail.business_id, businessWithoutOwnerId);
+    assert.equal(businessOnlyDetail.represented_client_user_id, null);
+    assert.equal(businessOnlyDetail.request_type, "onboarding");
+    const secondBusinessOnlyForm = new FormData();
+    secondBusinessOnlyForm.set("businessId", String(businessWithoutOwnerId));
+    secondBusinessOnlyForm.set("requestText", "Attempt to start overlapping showroom work for the same business.");
+    secondBusinessOnlyForm.set("idempotencyKey", "manager_business_only_223456");
+    const existingBusinessProject = await createOnBehalfRequest(manager, secondBusinessOnlyForm);
+    assert.equal(existingBusinessProject.id, businessOnlyRequest.id);
+    assert.equal(existingBusinessProject.existingProject, true);
 
     const staffClarification = addRequestClarification(manager,managerRequest.id,"Which hero message should the team prioritize?");
     assert.equal(staffClarification.status,"needs_information");
@@ -235,8 +268,23 @@ async function main() {
     const deniedRate = { consume: () => ({ allowed: false, retryAfterSeconds: 300 }) };
     await assert.rejects(() => createPublicInterest({ ...input, idempotencyKey: "request_test_key_456789" }, "ip-e", { repository, rateLimiter: deniedRate }), (error: unknown) => error instanceof RequestError && error.status === 429 && error.retryAfter === 300);
 
+    const legacyBusinessId = Number(getDb().prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('legacy-project-conflict','Legacy Project Conflict','composition','draft')").run().lastInsertRowid);
+    getDb().exec("DROP INDEX one_active_showroom_project_per_business_idx");
+    getDb().prepare("DELETE FROM schema_migrations WHERE version=31").run();
+    const olderLegacyRequestId = Number(getDb().prepare(`
+      INSERT INTO service_requests(public_ref,business_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,created_at,updated_at)
+      VALUES('REQ-LEGACYOLD01',?,'onboarding','in_progress','Legacy','legacy@example.test','Legacy Project Conflict','Older active project.','manager','2026-01-01','2026-01-01')
+    `).run(legacyBusinessId).lastInsertRowid);
+    const currentLegacyRequestId = Number(getDb().prepare(`
+      INSERT INTO service_requests(public_ref,business_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,created_at,updated_at)
+      VALUES('REQ-LEGACYNEW01',?,'onboarding','client_review','Legacy','legacy@example.test','Legacy Project Conflict','Newest active project.','manager','2026-02-01','2026-02-01')
+    `).run(legacyBusinessId).lastInsertRowid);
+    migrateDatabase(getDb());
+    assert.equal(getRequestDetail(olderLegacyRequestId)?.status,"cancelled");
+    assert.equal(getRequestDetail(currentLegacyRequestId)?.status,"client_review");
+    assert.equal(getRequestDetail(olderLegacyRequestId)?.events.some((event)=>event.event_type==="project_superseded"&&event.detail===`current_project:${currentLegacyRequestId}`),true);
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]);
+    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]);
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

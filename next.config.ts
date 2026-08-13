@@ -31,7 +31,7 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), payment=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
 ];
@@ -42,6 +42,12 @@ const nextConfig: NextConfig = {
   typescript: { tsconfigPath },
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  async redirects() {
+    return [
+      { source: "/discover", destination: "/", permanent: false },
+      { source: "/sponsors", destination: "/featured", permanent: false },
+    ];
+  },
   outputFileTracingIncludes: {
     "/*": [
       "./node_modules/next/dist/server/lib/source-maps.js",
@@ -70,6 +76,17 @@ const nextConfig: NextConfig = {
       "./package-lock.json",
     ],
   },
-  async headers() { return [{ source: "/(.*)", headers: securityHeaders }]; },
+  async headers() { return [
+    { source: "/sw.js", headers: [
+      ...securityHeaders,
+      { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+      { key: "Service-Worker-Allowed", value: "/" },
+    ] },
+    { source: "/manifest.webmanifest", headers: [
+      ...securityHeaders,
+      { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
+    ] },
+    { source: "/(.*)", headers: securityHeaders },
+  ]; },
 };
 export default nextConfig;

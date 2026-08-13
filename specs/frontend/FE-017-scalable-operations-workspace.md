@@ -2,9 +2,9 @@
 id: FE-017
 title: Scalable operations workspace
 status: done
-related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, FE-021, FE-024, FE-025, FE-026, BE-015, BE-025, DEP-014]
+related: [FE-003, FE-008, FE-011, FE-012, FE-013, FE-020, FE-021, FE-024, FE-025, FE-026, FE-032, FE-035, BE-015, BE-025, DEP-014]
 owners: [product, frontend, operations]
-last_updated: 2026-07-30
+last_updated: 2026-08-11
 change_level: L2
 ---
 
@@ -26,19 +26,19 @@ rows with one clear next action; full forms edit one selected record.
 ### In scope
 
 - Server-paginated showroom discovery, business selection, requests, products,
-  inquiries, client accounts, staff accounts, support, and Expo profiles.
+  inquiries, client accounts, staff accounts, support, and Daily Featured profiles.
 - Compact tables or rows with search, relevant status filters, result counts,
   empty states, and accessible previous/next navigation.
-- Focused client-password and Expo-profile editing without bulk dropdowns or a
+- Focused client-password and Daily Featured-profile editing without bulk dropdowns or a
   complete edit form in every list row.
-- Clear administration views for businesses, clients, staff, and Expo controls.
+- Clear administration views for businesses, clients, staff, and Daily Featured controls.
 - Query-string state that is linkable, reload-safe, and resets invalid pages.
 
 ### Non-goals
 
 - Bulk editing, spreadsheet import, arbitrary page-size controls, or client-side
   virtual scrolling.
-- New staff permissions, publication authority, Expo eligibility rules, or
+- New staff permissions, publication authority, Daily Featured eligibility rules, or
   product fields.
 - Replacing private request detail, revision studio, or product edit forms.
 
@@ -60,10 +60,12 @@ rows with one clear next action; full forms edit one selected record.
   links preserve applicable search, filter, sort, business, and anchor state.
 - Business and staff selectors never render every database row. Selecting an
   entity happens through a paginated result row or a bounded server search.
-- The administration landing page uses explicit Businesses, Clients, and Staff
-  views. It does not query or render all three datasets for every request.
-- Expo administration lists compact eligibility and assignment summaries.
-  Editing the complete Expo profile occurs on a business-specific page.
+- The administration landing page uses bounded customer and staff views. The
+  later FE-032 information architecture consolidates customer-facing Business,
+  Client-access, and Discovery projections into one Businesses directory
+  without weakening the server paging contract.
+- Daily Featured administration lists compact eligibility and assignment summaries.
+  Editing the complete Daily Featured profile occurs on a business-specific page.
 - Product upkeep is a compact paginated list with stable media dimensions.
   Search runs on the server and keeps the current business context.
 - Inquiry list queries include item summaries without one query per row.
@@ -82,8 +84,8 @@ Scenario: Operator navigates a large request queue
   AND pagination preserves the active query
   AND opening a row shows the existing focused request workflow
 
-Scenario: Administrator edits one Expo profile
-  GIVEN more than 100 businesses have Expo profiles
+Scenario: Administrator edits one Daily Featured profile
+  GIVEN more than 100 businesses have Daily Featured profiles
   WHEN an administrator searches for a business and selects Edit profile
   THEN the list contains compact summary rows only
   AND the focused page contains one complete authorized profile form
@@ -129,7 +131,7 @@ contacts, request copy, credentials, or media paths.
 |---|---|---|
 | Page parsing, URL preservation, and bounds | unit | `scripts/test-pagination.ts` |
 | Server pages, counts, N+1 removal, tenant scope | integration/security | `scripts/test-scalable-queries.ts` |
-| Admin, requests, products, and Expo focused workflows | acceptance | `tests/acceptance/app.spec.ts` |
+| Admin, requests, products, and Daily Featured focused workflows | acceptance | `tests/acceptance/app.spec.ts` |
 | Homepage search and five-card page | acceptance | `tests/acceptance/app.spec.ts` |
 | 320/390 responsive controls and overflow | browser | `tests/acceptance/app.spec.ts` |
 
@@ -157,12 +159,12 @@ Evidence: implemented and verified on 2026-07-30:
   schema migration 20 provide bounded, indexed pages with shared authorization
   predicates and deterministic ordering.
 - Public discovery renders five database-filtered showrooms. Workspace business,
-  client, staff, request, product, inquiry, support, and Expo collections
+  client, staff, request, product, inquiry, support, and Daily Featured collections
   render at most 20 records with URL-preserved search/filter state.
 - Administration uses separate Businesses, Clients, and Staff views; client
-  recovery and Expo editing load one focused record. Mobile product records
+  recovery and Daily Featured editing load one focused record. Mobile product records
   replace the wide desktop table at 720px and below.
 - `npm run check`, `npm run test:acceptance` (10/10), and `npm run release`
-  passed. Acceptance covered 390px document overflow, focused Expo editing,
+  passed. Acceptance covered 390px document overflow, focused Daily Featured editing,
   paginated client selection, request assignment, offering search, inquiry
   search/status continuity, and support queue navigation.

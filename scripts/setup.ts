@@ -3,16 +3,15 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { seedDefaultBazaarConfig } from "../lib/bazaar";
 import { databasePath, ensureRuntimeDirectories } from "../lib/config";
-import { demoProcessVideoFor } from "../lib/demo-process-videos";
+import { demoOfferingVideoFor, demoProcessVideoFor, type DemoProcessVideo } from "../lib/demo-process-videos";
 import type { DenseDemoOfferingKind } from "../lib/dense-demo-seed";
 import { DISCOVERY_INDUSTRIES } from "../lib/discovery";
 import {
   isSeededFeatured,
-  SEEDED_EXPO_PROFILES,
-  seededExpoBoothPath,
-} from "../lib/expo-seed";
+  SEEDED_MARKETPLACE_PROFILES,
+  seededMarketplaceBoothPath,
+} from "../lib/marketplace-seed";
 import type { OfferingKind, QuantityMode } from "../lib/offerings";
 import { parseOfferingHighlightsJson } from "../lib/offering-presentation";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
@@ -179,12 +178,14 @@ function seedOfferingProfile(handle: string, product: any) {
 }
 
 const seeded = new Map<string, number>();
+const processVideoByBusiness = new Map<string, DemoProcessVideo>();
 for (const business of businesses) {
   const processVideo = demoProcessVideoFor(
     business.handle,
     business.name,
     business.description,
   );
+  processVideoByBusiness.set(business.handle, processVideo);
   seeded.set(
     business.handle,
     Number(
@@ -222,7 +223,7 @@ function seedCatalog(handle: string, categoryNames: string[], products: any[]) {
       p.minimumOrderSummary ?? profile.minimumOrderSummary,
       p.leadTimeSummary ?? profile.leadTimeSummary,
       i,
-      p.videoRef || demoProcessVideoFor(handle, p.name, p.category, p.description).ref,
+      p.videoRef || demoOfferingVideoFor(processVideoByBusiness.get(handle)!, p.name, p.category, p.description).ref,
       p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35_000 + i * 12_500),
       p.quantityUnit || (profile.offeringKind === "production_supply" ? "kg" : profile.offeringKind === "manufacturing_capability" ? "project" : "piece"),
       JSON.stringify(p.highlights || [p.eyebrow || p.category, profile.offeringKind === "standard_product" ? "Available for direct inquiry" : "Requirements confirmed before production"]),
@@ -488,11 +489,14 @@ for (const businessId of seeded.values()) {
   );
 }
 
-seedDefaultBazaarConfig(db);
-
 const seedIndustry = db.prepare(`
   INSERT INTO discovery_industries(key,label,icon,position,active)
   VALUES(?,?,?,?,1)
+  ON CONFLICT(key) DO UPDATE SET
+    label=excluded.label,
+    icon=excluded.icon,
+    position=excluded.position,
+    active=1
 `);
 DISCOVERY_INDUSTRIES.forEach((industry, index) => {
   seedIndustry.run(industry.key, industry.label, industry.icon, index);
@@ -509,20 +513,27 @@ const seedBusinessIndustry = db.prepare(`
 const fallbackByIndustry: Record<string, string> = {
   electronics: "technical",
   "beauty-wellness": "botanical",
+  "agriculture-growers": "food",
   "food-farming": "food",
   "machinery-tools": "workshop",
   "home-living": "home",
   "fashion-textiles": "textile",
 };
+const discoveryCrossListings: Record<string, string[]> = {
+  "demo-laga-grain-mill": ["agriculture-growers"],
+  "demo-wabi-flour-mill": ["agriculture-growers"],
+  "blue-nile-apiary": ["food-farming"],
+  "green-terrace-farm": ["food-farming"],
+};
 for (const [handle, businessId] of seeded) {
-  const profile = SEEDED_EXPO_PROFILES[handle];
-  const industryKeys = profile?.industryKeys.filter((key) => key in fallbackByIndustry) || [];
+  const profile = SEEDED_MARKETPLACE_PROFILES[handle];
+  const industryKeys = [...new Set([...(profile?.industryKeys || []), ...(discoveryCrossListings[handle] || [])])].filter((key) => key in fallbackByIndustry);
   if (!profile || !industryKeys.length) continue;
   const industryKey = industryKeys[0];
   const productionScale = SCALE_DEMO_BUSINESSES.find((business) => business.handle === handle)?.productionScale ?? "workshop";
   seedDiscoveryProfile.run(
     businessId,
-    seededExpoBoothPath(handle),
+    seededMarketplaceBoothPath(handle),
     profile.city,
     profile.zone,
     profile.region,
@@ -539,20 +550,12 @@ for (const [handle, businessId] of seeded) {
 
 const eligibleDiscoveryBusinesses = db.prepare(`
   SELECT b.id
-  FROM business_industries i
-  JOIN businesses b ON b.id=i.business_id
+  FROM businesses b
   JOIN business_discovery_profiles p ON p.business_id=b.id
-  WHERE i.industry_key=? AND b.status='active' AND p.is_excluded=0 AND p.approved_at > 0
+  WHERE b.status='active' AND p.is_excluded=0 AND p.approved_at > 0
+    AND p.is_featured=1
+    AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
   ORDER BY b.id
-  LIMIT 5
-`);
-const sundayDiscoveryBusinesses = db.prepare(`
-  SELECT b.id
-  FROM business_industries i
-  JOIN businesses b ON b.id=i.business_id
-  JOIN business_discovery_profiles p ON p.business_id=b.id
-  WHERE i.industry_key=? AND b.status='active' AND p.is_excluded=0 AND p.approved_at > 0
-  ORDER BY b.id DESC
   LIMIT 5
 `);
 const seedSponsorship = db.prepare(`
@@ -561,18 +564,8 @@ const seedSponsorship = db.prepare(`
   ON CONFLICT(business_id) DO UPDATE SET
     position=excluded.position,active=1,updated_at=excluded.updated_at
 `);
-const seedSundaySelection = db.prepare(`
-  INSERT INTO sunday_showcase_selections(industry_key,business_id,position,active,updated_at)
-  VALUES(?,?,?,1,?)
-  ON CONFLICT(industry_key,business_id) DO UPDATE SET
-    position=excluded.position,active=1,updated_at=excluded.updated_at
-`);
-for (const industry of DISCOVERY_INDUSTRIES) {
-  const sponsored = eligibleDiscoveryBusinesses.all(industry.key) as Array<{ id: number }>;
-  sponsored.forEach((business, index) => seedSponsorship.run(business.id, index + 1, subscriptionNow));
-  const sundaySelections = sundayDiscoveryBusinesses.all(industry.key) as Array<{ id: number }>;
-  sundaySelections.forEach((business, index) => seedSundaySelection.run(industry.key, business.id, index + 1, subscriptionNow));
-}
+const sponsored = eligibleDiscoveryBusinesses.all() as Array<{ id: number }>;
+sponsored.forEach((business, index) => seedSponsorship.run(business.id, index + 1, subscriptionNow));
 
 
 const generatedCredentials: Array<{ role:string; business:string; email:string; password:string }> = [];
@@ -680,7 +673,7 @@ const seedSupportAgent = db.prepare(`
   ) VALUES(?,?,?,?,?)
 `);
 teamStaff.forEach((userId, index) => {
-  seedSupportAgent.run(userId, index >= 4 ? 1 : 0, 3, adminUserId, subscriptionNow);
+  seedSupportAgent.run(userId, index >= 2 ? 1 : 0, 3, adminUserId, subscriptionNow);
 });
 
 const addSupportConversation = db.prepare(`
@@ -704,9 +697,11 @@ const addSupportEvent = db.prepare(`
   VALUES(?,?,?,?,?)
 `);
 const supportHandles = [...clientUsersByHandle.keys()].slice(0, 30);
+const waitingSupportCount = 4;
+const openSupportCount = 12;
 supportHandles.forEach((handle, index) => {
-  const status = index < 10 ? "waiting" : index < 22 ? "open" : "closed";
-  const assigned = status === "waiting" ? null : teamStaff[4 + ((index - 10) % 4)];
+  const status = index < waitingSupportCount ? "waiting" : index < waitingSupportCount + openSupportCount ? "open" : "closed";
+  const assigned = status === "waiting" ? null : teamStaff[4 + ((index - waitingSupportCount) % 4)];
   const createdAt = subscriptionNow - (30 - index) * 45 * 60 * 1000;
   const closedAt = status === "closed" ? createdAt + 30 * 60 * 1000 : null;
   const conversationId = Number(addSupportConversation.run(
@@ -715,7 +710,7 @@ supportHandles.forEach((handle, index) => {
     clientUsersByHandle.get(handle)!,
     [
       "Help updating showroom information",
-      "Question about Expo participation",
+      "Question about Daily Featured Showrooms",
       "Image replacement request",
       "Monthly account question",
     ][index % 4],
@@ -774,6 +769,13 @@ const lifecycleStatuses = [
   "cancelled",
 ] as const;
 const lifecycleHandles = [...clientUsersByHandle.keys()];
+const lastLifecycleIndexByHandle = new Map<string, number>();
+for (let index = 0; index < 66; index += 1) {
+  lastLifecycleIndexByHandle.set(
+    lifecycleHandles[index % lifecycleHandles.length],
+    index,
+  );
+}
 const addServiceRequest = db.prepare(`
   INSERT INTO service_requests(
     public_ref,business_id,represented_client_user_id,request_type,status,
@@ -797,16 +799,26 @@ const addLifecycleRevision = db.prepare(`
     snapshot_json,snapshot_schema_version,summary,created_by_user_id,
     submitted_at,decided_by_user_id,decision_comment,decided_at,
     published_by_user_id,published_at,published_content_version
-  ) VALUES(?,?,1,1,?,?,4,?,?,CURRENT_TIMESTAMP,?,?,CURRENT_TIMESTAMP,?,?,?)
+  ) VALUES(?,?,1,1,?,?,4,?,?,?,?,?,?,?,?,?)
 `);
 
 for (let index = 0; index < 66; index += 1) {
   const handle = lifecycleHandles[index % lifecycleHandles.length];
   const businessId = seeded.get(handle)!;
   const clientUserId = clientUsersByHandle.get(handle)!;
-  const status = lifecycleStatuses[index % lifecycleStatuses.length];
-  const terminal = ["completed", "rejected", "cancelled"].includes(status);
-  const assignedUserId = terminal ? null : teamStaff[index % teamStaff.length];
+  const status = lastLifecycleIndexByHandle.get(handle) === index
+    ? lifecycleStatuses[index % lifecycleStatuses.length]
+    : "completed";
+  const current = [
+    "submitted",
+    "under_review",
+    "needs_information",
+    "approved_for_work",
+    "in_progress",
+    "client_review",
+    "client_approved",
+  ].includes(status);
+  const assignedUserId = current ? teamStaff[index % teamStaff.length] : null;
   const age = `-${66 - index} hours`;
   const requestId = Number(addServiceRequest.run(
     `DEMO-${String(index + 1).padStart(5, "0")}`,
@@ -816,7 +828,7 @@ for (let index = 0; index < 66; index += 1) {
     `${handle} client`,
     `${handle}@mirtpage.local`,
     businesses.find((business) => business.handle === handle)!.name,
-    `Fictional ${status.replaceAll("_", " ")} showroom request used to exercise the operations queue.`,
+    `Update the showroom with current product, capability, and business information for review.`,
     clientUserId,
     assignedUserId,
     `demo-lifecycle-${index + 1}`,
@@ -828,16 +840,22 @@ for (let index = 0; index < 66; index += 1) {
     addRequestEvent.run(requestId, assignedUserId || operationsStaff[0], "status_changed", `submitted->${status}`, age);
   }
   if (assignedUserId) addAssignment.run(assignedUserId, businessId, adminUserId);
-  if (["client_review", "client_approved", "published"].includes(status)) {
+  if (["in_progress", "client_review", "client_approved", "published"].includes(status)) {
     const retained = db.prepare(
       "SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=1",
     ).get(businessId) as { snapshot_json: string };
     const revisionStatus =
-      status === "client_review"
+      status === "in_progress"
+        ? "draft"
+        : status === "client_review"
         ? "awaiting_review"
         : status === "client_approved"
           ? "approved"
           : "published";
+    const submittedAt = status === "in_progress" ? null : new Date().toISOString();
+    const decidedAt = ["client_approved", "published"].includes(status)
+      ? new Date().toISOString()
+      : null;
     addLifecycleRevision.run(
       requestId,
       businessId,
@@ -845,8 +863,10 @@ for (let index = 0; index < 66; index += 1) {
       retained.snapshot_json,
       `Fictional ${revisionStatus.replaceAll("_", " ")} revision`,
       assignedUserId || teamStaff[index % teamStaff.length],
-      status === "client_review" ? null : clientUserId,
-      status === "client_review" ? "" : "Approved in the fictional demo workflow.",
+      submittedAt,
+      ["client_approved", "published"].includes(status) ? clientUserId : null,
+      ["client_approved", "published"].includes(status) ? "Approved in the fictional demo workflow." : "",
+      decidedAt,
       status === "published" ? operationsStaff[index % operationsStaff.length] : null,
       status === "published" ? new Date().toISOString() : null,
       status === "published" ? 1 : null,

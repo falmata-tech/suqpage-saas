@@ -16,6 +16,7 @@ import {
   parseShowroomContentBlocks,
   type ShowroomContentBlocksDocument,
 } from "./showroom-content-blocks";
+import { canonicalizeShowroomChapters } from "./showroom-chapters";
 
 export const REVISION_SCHEMA_VERSION_V4 = 4;
 
@@ -81,16 +82,37 @@ export function parseRevisionSnapshotV4(
       contentBlocks,
       "managed",
     );
+    const canonical = canonicalizeShowroomChapters(contentBlocks, designManifest);
+    contentBlocks = parseShowroomContentBlocks(canonical.contentBlocks, "managed");
+    designManifest = parseShowroomDesignProposalV2(
+      canonical.designManifest,
+      bank,
+      contentBlocks,
+      "managed",
+    );
   } catch (error) {
     throw new RevisionError(
       error instanceof Error ? error.message : "The revision-v4 composition is invalid.",
     );
   }
-  return {
+  const snapshot: RevisionSnapshotV4 = {
     schemaVersion: REVISION_SCHEMA_VERSION_V4,
     ...content,
     contentBlocks,
     designManifest,
+  };
+  const hero = snapshot.contentBlocks.blocks.find((block) => block.type === "hero");
+  if (!hero) return snapshot;
+  const heroImage = hero.media.find((media) => media.slotKey === "hero_image")?.assetKeys[0] || "";
+  return {
+    ...snapshot,
+    business: {
+      ...snapshot.business,
+      tagline: hero.kicker,
+      heroTitle: hero.title,
+      heroSubtitle: hero.body,
+      heroImageRef: heroImage,
+    },
   };
 }
 

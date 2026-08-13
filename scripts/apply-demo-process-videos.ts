@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import { databasePath } from "../lib/config";
-import { demoProcessVideoFor } from "../lib/demo-process-videos";
+import { demoOfferingVideoFor, demoProcessVideoFor } from "../lib/demo-process-videos";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 
 const benchmarkHandles = [
@@ -27,7 +27,14 @@ const updateBusiness = database.prepare(
   "UPDATE businesses SET process_video_ref=? WHERE id=?",
 );
 const updateProducts = database.prepare(
-  "UPDATE products SET video_ref=? WHERE business_id=?",
+  "UPDATE products SET video_ref=? WHERE id=?",
+);
+const productsForBusiness = database.prepare(
+  `SELECT p.id,p.name,COALESCE(c.name,'') AS category,p.description
+   FROM products p
+   LEFT JOIN categories c ON c.id=p.category_id
+   WHERE p.business_id=?
+   ORDER BY p.id`,
 );
 
 let updated = 0;
@@ -41,7 +48,21 @@ try {
       business.description,
     );
     updateBusiness.run(video.ref, business.id);
-    updateProducts.run(video.ref, business.id);
+    const products = productsForBusiness.all(business.id) as Array<{
+      id: number;
+      name: string;
+      category: string;
+      description: string;
+    }>;
+    for (const product of products) {
+      const productVideo = demoOfferingVideoFor(
+        video,
+        product.name,
+        product.category,
+        product.description,
+      );
+      updateProducts.run(productVideo.ref, product.id);
+    }
     updated += 1;
   }
   database.exec("COMMIT");

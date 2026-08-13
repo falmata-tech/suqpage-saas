@@ -7,14 +7,18 @@ production launch or database cutover.
 ## Current authority
 
 - Node.js `24.18.1` is the repository, nvm, Docker, and CI baseline.
-- SQLite is the only application database runtime. It requires one application
-  instance and a persistent database volume.
-- Supabase Storage is an optional private media adapter. Filesystem storage is
-  the default and remains the rollback source during a storage migration.
+- Runtime persistence is driver-selectable. Local development defaults to
+  SQLite; production is prepared for Supabase PostgreSQL through the bounded
+  transaction pooler and the dedicated least-privilege runtime role.
+- Mutable media is driver-selectable. Local development defaults to the
+  filesystem; production uses the private Supabase Storage adapter. The local
+  source remains the rollback authority through the recorded rollback window.
 - MirtPage owns password hashes, opaque sessions, role profiles, revocation,
   and tenant bindings. Supabase Auth is not enabled.
-- PostgreSQL tooling creates and reconciles a disposable rehearsal target. It
-  does not enable PostgreSQL application traffic.
+- PostgreSQL tooling supports disposable rehearsal and a separately guarded,
+  copy-only production cutover. The linked Supabase target has reconciled data,
+  and the generated Vercel candidate has passed PostgreSQL-backed smoke checks;
+  the exact current release must repeat its gates before custom-domain rollout.
 
 ## Connect Codex and GitHub safely
 
@@ -63,8 +67,10 @@ npm run release
 npm run test:container
 ```
 
-`npm run reset` destroys and reseeds the configured database. It is for an
-explicitly disposable installation only. Existing data uses `npm run migrate`.
+`npm run reset` destroys and reseeds the configured database. Stop every app,
+worker, and test process using the SQLite file before running it, then restart
+those processes so they open the replacement file. Reset is for an explicitly
+disposable local installation only. Existing data uses `npm run migrate`.
 
 ## Supabase Storage
 
@@ -82,7 +88,7 @@ explicitly disposable installation only. Existing data uses `npm run migrate`.
 7. Retain the filesystem source through the rollback window. Rollback changes
    the driver to `filesystem`; it does not delete copied objects.
 
-## PostgreSQL rehearsal and initial copy
+## PostgreSQL rehearsal and controlled copy
 
 The automated gate starts a disposable PostgreSQL 17 container:
 
@@ -123,6 +129,20 @@ MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
 ```
 
 After a reconciled copy, provision and verify the least-privilege runtime login:
+
+For an existing PostgreSQL authority, apply reviewed additive migrations with
+the direct migration credential before deploying application code that requires
+them:
+
+```bash
+MIRTPAGE_POSTGRES_DIRECT_URL='postgresql://...' \
+  npm run migrate:postgres
+```
+
+The command uses a transaction-scoped advisory lock, reconciles legacy active
+showroom-project overlaps into retained cancelled history, installs the partial
+unique index, and records migration 31. Application preflight fails closed when
+migration 31 is absent.
 
 ```bash
 MIRTPAGE_APPROVE_RUNTIME_ROLE=PROVISION_MIRTPAGE_RUNTIME \
@@ -173,12 +193,31 @@ domain. Do not add a broad `./lib/**/*` output-tracing exclusion: Vercel applies
 it to Next.js's own server library. The release trace test enforces privacy for
 the project's source paths without deleting framework runtime files.
 
+## PWA verification and rollback
+
+The production PWA is enabled unless
+`NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED=false` is present at build time. Keep it
+enabled for normal releases and verify over the final HTTPS origin that
+`/manifest.webmanifest` loads, `/sw.js` controls the page after one reload, a
+previously visited public route reaches the branded offline surface without a
+network, and `/api`, `/dashboard`, `/preview`, `/login`, and `/request` never
+appear in Cache Storage.
+
+A service worker survives an ordinary application rollback. To disable the PWA,
+set `NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED=false`, replace `public/sw.js` in the
+rollback release with the reviewed `scripts/pwa-cleanup-worker.js` artifact,
+and deploy that release at the same origin. Confirm the cleanup worker activates,
+deletes only `mirtpage-pwa-` caches, unregisters itself, and leaves subsequent
+navigation network-authoritative. Do not remove the registration component or
+worker route before this cleanup release has reached controlled browsers.
+
 ## Backup, deploy, and rollback
 
 1. Record the exact commit and image digest.
 2. Run `npm run backup` and a restore drill before applying migrations.
-3. Run `npm run migrate`, `npm run release`, and production preflight against
-   the existing database. Never use reset.
+3. Run `npm run migrate` for SQLite or `npm run migrate:postgres` for managed
+   PostgreSQL, then run `npm run release` and production preflight against the
+   existing database. Never use reset for retained production data.
 4. Deploy one replica, check `/api/health`, sign-in, tenant isolation, media,
    inquiry, support, and one draft/public visibility path.
 5. Monitor failed logins, provider failures, request latency, database lock
