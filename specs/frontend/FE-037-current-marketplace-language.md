@@ -4,7 +4,7 @@ title: Current marketplace and Daily Featured language
 status: done
 related: [FE-021, FE-030, FE-033, FE-036, BE-017, BE-029, DEP-023, DEP-025]
 owners: [product, frontend, operations]
-last_updated: 2026-08-13
+last_updated: 2026-08-14
 change_level: L2
 ---
 
@@ -113,4 +113,7 @@ passed. The final production HTTP smoke proves `/bazaar` and `/expo` return an
 immediate 404 before the showroom catch-all or database runs. The complete
 release gate and 10/10 production-browser acceptance workflows also passed.
 Historical SQL values and immutable media keys remain server-only compatibility
-data under the non-goals above.
+data under the non-goals above. On 2026-08-14, production deployment
+`dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` reconfirmed both retired routes return 404
+while current Marketplace, Daily Featured, About, and showroom routes return
+200.

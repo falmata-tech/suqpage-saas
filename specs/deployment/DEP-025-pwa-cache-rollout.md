@@ -1,10 +1,10 @@
 ---
 id: DEP-025
 title: PWA cache and standalone-shell rollout
-status: in_progress
+status: done
 related: [FE-034, FE-036, FE-037, DEP-002, DEP-020, DEP-023, DEP_BASE]
 owners: [operations, security, frontend]
-last_updated: 2026-08-11
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -77,9 +77,25 @@ Keep a documented cleanup-worker artifact for at least one release after PWA
 activation. Restore normal application code only after the cleanup worker has
 removed controlled caches and unregistered itself.
 
+## Evidence
+
+Evidence:
+
+On 2026-08-14, production deployment
+`dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` served the manifest and worker over HTTPS.
+A controlled production browser was worker-controlled after reload, loaded the
+previously visited `/about` route offline, and retained only the three bounded
+`mirtpage-pwa-*` shell, page, and asset caches. Cache inspection found no
+`/api`, `/dashboard`, `/preview`, `/login`, or `/request` entries. The complete
+release, 10/10 browser acceptance workflows, five required remote jobs, and the
+production route/header smoke passed. The reviewed cleanup worker remains the
+rollback artifact.
+
 ## Readiness checklist
 
 - [x] Cache ownership and exclusions explicit
 - [x] Update and rollback behavior explicit
 - [x] Production evidence defined
 - [x] No data migration required
+- [x] Production worker control and offline public navigation verified
+- [x] Protected and mutable route cache exclusions verified
