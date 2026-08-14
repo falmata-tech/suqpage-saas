@@ -1,10 +1,10 @@
 ---
 id: FE-031
 title: Focused client workspace and combined process story
-status: in_progress
+status: done
 related: [FE-003, FE-007, FE-009, FE-025, FE-026, FE-030, FE-032, FE-035, BE-008, BE-010, BE-024, BE-028, DEP-011, DEP-023]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-11
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -212,6 +212,21 @@ Rollback restores the previous renderer, schema guidance, and navigation. Media
 uploaded before rollback remains an immutable valid object and its stored path
 continues to resolve.
 
+## Evidence
+
+Evidence:
+
+On 2026-08-14, focused domain, recipe, renderer, media, navigation, editor,
+palette, type, build, and desktop/phone browser evidence passed. The 10/10
+acceptance run proves one combined story/process chapter, in-place media and
+controlled-video replacement, business-settings ownership, and the unsaved
+desktop/phone preview. A palette regression proves that changing a background
+automatically selects a readable paired foreground when possible; invalid
+in-progress colors retain the last valid preview, identify the correction, and
+disable Save without showing the public unavailable-showroom state. The
+complete release and all five jobs in GitHub Actions run `31750355870` passed,
+and production deployment `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` is ready.
+
 ## Readiness checklist
 
 - [x] Scope and non-goals agreed
@@ -219,3 +234,4 @@ continues to resolve.
 - [x] Legacy compatibility and persistence timing explicit
 - [x] Tenant, media, responsive, and rollback impacts explicit
 - [x] Observable scenarios and evidence mapped
+- [x] Focused, acceptance, release, remote, and production evidence passed

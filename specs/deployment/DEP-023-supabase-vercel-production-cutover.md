@@ -4,7 +4,7 @@ title: Supabase and Vercel production cutover
 status: in_progress
 related: [BE-027, BE-028, BE-029, FE-031, FE-032, FE-033, FE-034, FE-037, DEP-024, DEP-025, ADR-0013]
 owners: [deployment, operations, security, backend]
-last_updated: 2026-08-10
+last_updated: 2026-08-14
 change_level: L4
 ---
 
@@ -76,10 +76,12 @@ a tested rollback before public DNS changes.
    application-table DML, and sequence use rather than the database owner. Its
    generated credential is verified through the transaction pooler and retained
    only in ignored mode-0600 operator storage and the deployment secret store.
-9. PostgreSQL schema migration 31 reconciles any pre-existing overlapping
-   current showroom projects, records the supersession events, and installs the
-   partial unique business guard before `MIRTPAGE_DATABASE_DRIVER=postgres` is
-   enabled for this release. Production preflight fails closed if it is absent.
+9. PostgreSQL schema migrations 31 and 32 are recorded before
+   `MIRTPAGE_DATABASE_DRIVER=postgres` is enabled for this release. Migration 31
+   reconciles overlapping current showroom projects, records supersession
+   events, and installs the partial unique business guard. Migration 32 installs
+   the Daily Featured scheduling policy and indexes. Production preflight fails
+   closed if either required version is absent.
 
 ## Scenarios
 
@@ -173,6 +175,33 @@ apex A records for `216.198.79.1` and `64.29.17.1`, plus a `www` CNAME to
 `c5e46d2721b36922.vercel-dns-017.com`, before verification, canonical-domain
 smoke checks, and rollback-window monitoring can begin.
 
+On 2026-08-14, the final production cutover created and archive-validated an
+operator-held mode-0600 pre-release PostgreSQL backup. A disposable PostgreSQL
+17 restore drill recovered all 44 application tables before the production
+schema changed. Additive migrations 31 and 32 then applied successfully to the
+linked Supabase project, an immediate second migration run reported the schema
+current, and the least-privilege PostgreSQL runtime plus private Supabase media
+preflight passed.
+
+Marketplace release commit `7fb5d04` passed all five required jobs in GitHub
+Actions run `31686699133`. Palette-editor correction commit `5d353be` passed
+the complete local release, 10/10 browser acceptance workflows, a zero-finding
+production dependency audit, and all five jobs in run `31750355870`. The final
+code deployment is `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT`. On the production Vercel
+origin, Market, Daily Featured, About, a representative showroom, manifest, and
+worker returned 200; retired `/bazaar` and `/expo` returned 404; `/api/health`
+returned 200 with status `ok`; and recent Vercel runtime logs contained no
+application errors. The prior ready deployment `dpl_5QDhd2XqgZ6V6KaXVPVoc3T7Gdd4`
+and the pre-release backup are retained through the rollback deadline of
+2026-08-21 02:00 EAT.
+
+Vercel has attached both custom-domain aliases, but public resolver `1.1.1.1`
+returns `NXDOMAIN` for the apex and `www`. Registrar registration, delegation,
+or DNS records must be corrected before canonical-domain verification and the
+custom-domain monitoring window can complete. This external DNS state is the
+only remaining DEP-023 readiness item; production remains available at
+`https://mirtpage.vercel.app`.
+
 ## Test plan
 
 | Gate | Evidence |
@@ -185,13 +214,14 @@ smoke checks, and rollback-window monitoring can begin.
 
 ## Rollout and rollback
 
-The first deployment uses the Vercel-generated hostname while SQLite remains
-authoritative. After backup, quiescence, copy, reconciliation, and smoke evidence,
-PostgreSQL becomes the sole authority. `mirtpage.com` changes only after that
-candidate passes. Until the recorded rollback deadline, the prior deployment and
-read-only SQLite source remain available; rollback restores traffic to that
-deployment and freezes PostgreSQL for explicit reconciliation. No automatic
-reverse copy or dual-write merge is allowed.
+PostgreSQL is the production write authority. SQLite remains only as a retained
+read-only migration source and is not a live fallback database. Until the
+recorded rollback deadline, the prior ready application deployment and the
+pre-release PostgreSQL backup remain available. Application rollback restores
+traffic to the prior deployment without reversing additive migrations; the
+operator freezes PostgreSQL for explicit reconciliation before any resumed
+writes. No automatic reverse copy or dual-write merge is allowed. Custom-domain
+DNS changes only after the Vercel origin and aliases pass their checks.
 
 ## Readiness checklist
 
@@ -207,4 +237,6 @@ reverse copy or dual-write merge is allowed.
 - [x] Real Supabase database and Storage copy completed
 - [x] Exact release commit passes local and remote gates
 - [x] Vercel production deployment and generated-host smoke checks pass
+- [x] Pre-release PostgreSQL backup and disposable restore drill pass
+- [x] Production migrations 31 and 32 and least-privilege preflight pass
 - [ ] `mirtpage.com` DNS is attached and monitored through the rollback window

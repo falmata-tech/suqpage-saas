@@ -1,10 +1,10 @@
 ---
 id: FE-036
 title: Routed public marketplace application
-status: in_progress
+status: done
 related: [FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, BE-023, DEP-025]
 owners: [product, frontend, design]
-last_updated: 2026-08-11
+last_updated: 2026-08-14
 change_level: L2
 ---
 
@@ -179,6 +179,20 @@ compatibility redirect, tenant showrooms, authenticated workspaces, and
 authoritative data remain intact. DEP-025 continues to govern PWA cache
 versioning.
 
+## Evidence
+
+Evidence:
+
+On 2026-08-14, the final desktop, 390px, and 320px routed-application suite,
+88-state accessibility audit, 10/10 acceptance workflows, type/build checks,
+and complete release passed. All five required remote jobs passed for the final
+code release in GitHub Actions run `31750355870`, and the production deployment
+`dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` is ready. Production smoke proves Market,
+Daily Featured, About, and a representative tenant showroom return 200 while
+the retired public routes return 404. The custom-domain DNS blocker remains an
+operations item under DEP-023 and does not change routed application behavior
+at the production Vercel origin.
+
 ## Readiness checklist
 
 - [x] Public and authenticated shell authority is explicit
@@ -186,3 +200,4 @@ versioning.
 - [x] Mobile navigation and accessibility behavior are explicit
 - [x] Unsupported mockup features are excluded
 - [x] Performance outcome and rollback are testable
+- [x] Production routes and exact remote release are verified

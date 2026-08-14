@@ -1,10 +1,10 @@
 ---
 id: FE-034
 title: Installable PWA and mobile application shell
-status: in_progress
+status: done
 related: [FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE_BASE, DEP-020, DEP-023, DEP-025]
 owners: [product, frontend, design]
-last_updated: 2026-08-11
+last_updated: 2026-08-14
 change_level: L2
 ---
 
@@ -137,6 +137,18 @@ DEP-025 governs worker cache versioning, production headers, controlled
 activation, and rollback cleanup. No database or tenant-content migration is
 required.
 
+## Evidence
+
+Evidence:
+
+On 2026-08-14, the approved desktop, 390px, and 320px shell evidence, complete
+release, and 10/10 browser acceptance workflows passed for the exact production
+release. The HTTPS production probe for deployment
+`dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` proved worker control after reload, offline
+public navigation, bounded MirtPage caches, and exclusion of protected, API,
+preview, login, request, and mutation authority. All five required remote jobs
+passed in GitHub Actions run `31750355870`.
+
 ## Readiness checklist
 
 - [x] Scope and non-goals agreed
@@ -144,3 +156,4 @@ required.
 - [x] Mobile navigation authority explicit
 - [x] Accessibility and safe-area behavior explicit
 - [x] Tests, rollout, and rollback planned
+- [x] Production installability and offline public-navigation evidence passed
