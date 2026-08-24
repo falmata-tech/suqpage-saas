@@ -82,6 +82,10 @@ a tested rollback before public DNS changes.
    events, and installs the partial unique business guard. Migration 32 installs
    the Daily Featured scheduling policy and indexes. Production preflight fails
    closed if either required version is absent.
+10. Every Vercel server-function trace that can load image admission code
+    includes Sharp's Linux x64 binary and matching libvips package. A successful
+    build is insufficient evidence when a dynamic route cannot load its native
+    dependency at runtime.
 
 ## Scenarios
 
@@ -111,6 +115,12 @@ Scenario: Production smoke checks pass
   GIVEN the exact release runs on Vercel against reconciled PostgreSQL and private Storage
   WHEN operator smoke checks exercise public, authenticated, tenant, inquiry, upload, and support workflows
   THEN `mirtpage.com` may be attached and monitored
+
+Scenario: A dynamic route loads image admission code
+  GIVEN the Vercel function imports a server module that depends on Sharp
+  WHEN the function starts on Linux x64
+  THEN the traced bundle includes both the Sharp binary and libvips runtime
+  AND the route does not fail with a native-module load error
 
 Scenario: A critical defect occurs before the rollback deadline
   GIVEN the retained SQLite deployment and backup remain available
@@ -201,6 +211,13 @@ or DNS records must be corrected before canonical-domain verification and the
 custom-domain monitoring window can complete. This external DNS state is the
 only remaining DEP-023 readiness item; production remains available at
 `https://mirtpage.vercel.app`.
+
+On 2026-08-24 production deployment `dpl_4r4PHjJj194FeCBcX4TZDyMvqwzS`
+proved the provider-backed Market, showroom, PWA, health, and retired-route
+contracts, but `/login` failed closed because its server-function trace omitted
+Sharp's Linux libvips package. The release trace contract now includes both
+Linux x64 native packages explicitly; runtime login smoke remains required on
+the corrected deployment before this rollout is complete.
 
 ## Test plan
 

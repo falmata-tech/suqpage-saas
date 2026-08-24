@@ -52,6 +52,8 @@ const nextConfig: NextConfig = {
     "/*": [
       "./node_modules/next/dist/server/lib/source-maps.js",
       "./node_modules/next/dist/server/lib/lru-cache.js",
+      "./node_modules/@img/sharp-linux-x64/**/*",
+      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
     ],
   },
   outputFileTracingExcludes: {
