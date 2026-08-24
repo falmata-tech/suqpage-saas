@@ -295,13 +295,16 @@ later controlling DNS at the registrar. Do not paste any secret into chat.
   capacity, not Realtime quota, determines whether the UI says agents are busy.
   Local Realtime remains disabled until that optional notification adapter is
   implemented and covered by provider-backed tests.
-- Do not enable PostGIS merely to draw the map. The current first-party roads,
-  places, and boundaries are static browser geography. At tens of thousands of
+- The launch basemap uses the centralized `osm-standard` provider and the exact
+  `https://tile.openstreetmap.org/{z}/{x}/{y}.png` URL. Tiles load directly in
+  the visitor browser for the visible viewport. Do not add a Netlify function,
+  caching proxy, prefetch job, bulk download, offline tile pack, or service
+  worker route for them. Keep visible OpenStreetMap attribution and the normal
+  browser/provider caching headers. An unknown provider setting fails closed.
+- Do not enable PostGIS merely to draw the basemap. At tens of thousands of
   showrooms, add PostGIS points and spatial indexes behind a viewport/nearby
-  query port so the browser receives bounded markers.
-- Detailed roads and town labels may hide while a pan/zoom gesture is active
-  and return when it settles. This deliberate level-of-detail behavior protects
-  low-end phone input responsiveness. PostGIS cannot change that paint cost.
+  query port so the browser receives bounded MirtPage markers. Search, place
+  filtering, and coordinates remain in Supabase regardless of tile provider.
 
 ## PWA verification and rollback
 

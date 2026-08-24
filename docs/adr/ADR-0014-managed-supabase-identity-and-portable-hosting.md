@@ -4,7 +4,7 @@ title: Managed Supabase identity and portable application hosting
 status: accepted
 date: 2026-08-16
 deciders: [MirtPage]
-related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0015]
+related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0015, ADR-0016]
 ---
 
 # ADR-0014 - Managed Supabase identity and portable application hosting
@@ -51,6 +51,10 @@ Enable Supabase capabilities only where they solve a measured problem:
 - PostGIS may back viewport and nearby-showroom queries once the canonical
   discovery response is too large, but is not a map-tile or road-label service;
 - `pg_trgm` may back measured high-volume free-text discovery later.
+
+ADR-0016 supersedes only this decision's first-party static-basemap assumption;
+the Supabase catalog, future PostGIS threshold, and provider-neutral hosting
+boundaries remain unchanged.
 
 ## Consequences
 

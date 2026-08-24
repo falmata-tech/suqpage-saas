@@ -2,7 +2,7 @@
 id: FE-021
 title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
-related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011]
+related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016]
 owners: [product, frontend, design]
 last_updated: 2026-08-24
 change_level: L3
@@ -37,7 +37,8 @@ day of the week in a calm, bounded media-card gallery.
   the active map and no venue, pagination, internal scrolling, or route
   navigation. Selecting a card replaces the list inside that same inspector;
   it never stacks a second popup over the nearby list.
-- Local region, zone, city/town, and road context with no runtime map service.
+- A policy-compliant OpenStreetMap Standard basemap requested directly by the
+  visitor's browser for the visible viewport through one provider registry.
 - A combined eligible map that loads immediately behind a required initial
   orientation chooser. The visitor explicitly chooses one of seven industries
   or **All industries** as the eighth and final option before continuing.
@@ -72,7 +73,8 @@ day of the week in a calm, bounded media-card gallery.
 - Placing virtual Daily Featured floors over the geographic map.
 - Grouping businesses across different reviewed cities or beyond the bounded
   proximity radius.
-- Remote tile, geocoding, or map-rendering requests from a visitor's browser.
+- Geocoding, routing, tile proxying, prefetching, bulk downloads, offline tile
+  packages, or service-worker caching of third-party map tiles.
 - Hiding a published active showroom because a manual renewal date elapsed.
 - A ranked or paginated public List mode separate from the geographic map.
 
@@ -226,27 +228,17 @@ day of the week in a calm, bounded media-card gallery.
   Today and selected-date states distinct, and does not overlap cards or gallery
   controls. The long selected-day description is visually omitted while its
   title and livestream status remain available.
-- Geographic zoom commits rendered labels and marker detail only after the zoom
-  gesture or animation ends. At terminal neighborhood zoom, a bounded nearby
-  group marker opens its six-card viewer instead of demanding building-level zoom.
-- During a pan or zoom frame, D3 mutates only the existing geographic transform;
-  React state, cluster queries, label selection, and marker reconciliation run
-  once when the gesture or animation commits. The committed viewport plus a
-  small edge buffer bounds Supercluster results, nearby groups, individual
-  markers, and place labels. Off-screen businesses remain in the complete
-  searchable cluster index but do not create off-screen SVG nodes.
-- Place labels are priority-bounded to no more than 180 mounted nodes and are
-  selected from the committed viewport. Country context prefers cities;
-  progressively closer views may add towns and villages without mounting the
-  complete 2,612-place source. At most eight population-prioritized major-city
-  labels remain visible while a gesture transforms the map so visitors retain
-  orientation; all additional city, town, and village labels pause during the
-  gesture.
-- Administrative zones, places, and roads beyond the country outline load only
-  during browser idle time. Country zoom paints only motorway and trunk context;
-  primary and secondary routes are introduced progressively as the visitor
-  zooms closer, so low-end phones do not parse and paint every detail during the
-  first interaction.
+- Leaflet requests the exact policy-approved OpenStreetMap Standard URL only
+  for the active viewport. It uses provider/browser caching, zero retained tile
+  buffer, idle updates, no zoom-animation tile refresh, and no retina duplicate
+  requests. MirtPage never proxies or preloads those tiles.
+- Geographic zoom commits cluster, nearby-group, and individual-marker
+  reconciliation only after movement settles. Supercluster receives the
+  committed Leaflet bounds and a small viewport buffer; off-screen businesses
+  remain searchable but do not create marker DOM nodes.
+- At terminal neighborhood zoom, a bounded nearby-group marker opens its
+  six-card viewer instead of demanding building-level zoom. Leaflet's basemap
+  supplies road and place labels; MirtPage does not mount duplicate local labels.
 - Selecting an individual showroom or booth opens a non-modal floating inspector
   above the existing map or venue. It never dims, blurs, or makes the background
   inert. Desktop centers it over a restrained low-opacity dismissible scrim so
@@ -257,7 +249,8 @@ day of the week in a calm, bounded media-card gallery.
   that width, and the menu remains inside the map command surface at narrower
   desktop/tablet widths. Phone industry selection continues through the bounded
   Filters sheet rather than spanning across the map.
-- Local geographic attribution remains visible and links to the source licence.
+- Visible OpenStreetMap attribution remains inside the map and links to the
+  copyright and licence source on phone and desktop.
 
 ## Scenarios
 
@@ -272,12 +265,18 @@ Scenario: Nearby businesses separate as the map zooms
 Scenario: Large marketplace map remains viewport bounded
   GIVEN the eligible cluster index contains thousands of reviewed showrooms
   WHEN a visitor pans or zooms on a constrained phone
-  THEN the active gesture changes only the existing map transform
-  AND cluster, marker, nearby-group, and label reconciliation occurs after the gesture ends
-  AND only the buffered visible viewport contributes SVG marker nodes
-  AND no more than 180 place labels are mounted
-  AND at most eight major-city labels remain visible while detailed labels pause
-  AND secondary geography waits for idle time and road detail is zoom-tiered
+  THEN Leaflet moves its existing tile and overlay panes during the gesture
+  AND cluster, marker, and nearby-group reconciliation occurs after the gesture ends
+  AND only the bounded visible viewport contributes showroom marker nodes
+  AND map labels come from visible provider tiles rather than duplicate local DOM nodes
+
+Scenario: Browser loads the detailed basemap within provider policy
+  GIVEN the marketplace map is visible
+  WHEN the visitor pans or zooms
+  THEN the browser requests only visible tiles from https://tile.openstreetmap.org/{z}/{x}/{y}.png
+  AND visible OpenStreetMap attribution remains available
+  AND MirtPage does not proxy, prefetch, bulk-download, or service-worker-cache those tiles
+  AND showroom search and place filtering continue to use the Supabase catalog
 
 Scenario: Visitor opens a nearby showroom group
   GIVEN two or more eligible businesses in one city are grouped within the bounded proximity radius
@@ -421,10 +420,11 @@ Scenario: Invalid retained live data reaches discovery
   WHEN public discovery is projected
   THEN no live badge or unsafe destination is serialized for that business
 
-Scenario: Local map assets fail
-  GIVEN a local geographic asset cannot load
+Scenario: Basemap tiles fail
+  GIVEN the configured tile provider cannot load visible map tiles
   WHEN the visitor opens discovery
-  THEN a clear bounded fallback explains that the map is temporarily unavailable and offers retry
+  THEN a clear bounded status explains that map detail is temporarily unavailable
+  AND available showroom markers and controls remain usable over the neutral map surface
   AND Daily Featured and directly addressed permanent Showrooms remain available
 ```
 
@@ -435,17 +435,20 @@ Scenario: Local map assets fail
 - Privacy and data retention: reviewed business coordinates are intentionally
   public discovery data; visitor location is requested only after a clear user
   action, remains in browser memory for map fitting, and is never retained.
+  Direct basemap requests disclose ordinary request metadata to OpenStreetMap as
+  stated in the public Privacy notice; no search, account, or showroom record is
+  included in a tile URL.
 - Accessibility and responsive behavior: keyboard markers/clusters/gateways,
   labeled non-modal preview regions with close and Escape behavior, accessible controls, reduced motion, touch
   targets, and bounded previews.
 - Localization and merchant-entered values: long place/business names truncate
   or wrap without changing marker/control geometry.
 - Performance and limits: indexed marker projection, deterministic 800-meter
-  same-city grouping, zoom-end map rendering, at most six nearby cards with no
-  pagination or internal scroll, one vertically scrolling Daily Featured layer,
-  lazy dimensioned media, and zoom-tiered geography.
-- Failure recovery and idempotency: local assets fail independently; Daily
-  Featured and directly addressed permanent Showrooms do not depend on map initialization.
+  same-city grouping, move-end Supercluster rendering, visible browser tiles,
+  at most six nearby cards with no pagination or internal scroll, and one
+  vertically scrolling Daily Featured layer with lazy dimensioned media.
+- Failure recovery and idempotency: basemap tiles fail independently; Daily
+  Featured and directly addressed permanent Showrooms do not depend on tile availability.
 
 ## Observability
 
@@ -460,14 +463,15 @@ attribute `directory` and `expo` showroom entries.
 | Eligibility, bounded nearby groups, weekly schedule, Daily Featured redaction, and card references | integration | `scripts/test-discovery.ts` |
 | Cluster expansion, nearby viewer, close restoration, marker preview | browser | `tests/acceptance/app.spec.ts` |
 | Desktop/390px/320px map, nearby viewer, and Daily Featured layout | visual/browser | `scripts/capture-discovery-visuals.mjs` |
-| Local geography failure and Daily Featured recovery | browser | `tests/acceptance/app.spec.ts` |
+| Exact tile provider, attribution, CSP, no proxy/prefetch/cache | contract | `scripts/test-discovery-geography.mjs` |
+| Basemap failure and Daily Featured recovery | browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
-The public projection and geography assets are additive. Current disposable
-fixtures may be reset. Rollback deploys the prior city-grouped workspace and leaves
-reviewed discovery profiles intact. Production data conversion remains outside
-this pre-launch change.
+The browser basemap changes no canonical data. Current disposable fixtures may
+be reset. Rollback deploys the prior first-party geography renderer and leaves
+reviewed discovery profiles intact. Inactive local assets remain available only
+through the monitored rollback window.
 
 ## Readiness checklist
 

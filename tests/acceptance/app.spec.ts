@@ -158,9 +158,10 @@ test("geographic discovery, Daily Featured Showrooms, benchmark Showrooms, and c
   await page.goto("/?industry=all&scale=growing_factory");
   await expect(page.locator(".discovery-summary strong")).toHaveText(unfilteredSummary || "");
   await expect(page.getByRole("navigation", { name: "Production scale" })).toHaveCount(0);
-  await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  await expect.poll(() => page.locator(".discovery-roads path").count()).toBeGreaterThan(0);
-  await expect.poll(() => page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
+  await expect(page.locator('.discovery-map[data-map-provider="osm-standard"]')).toBeVisible();
+  await expect.poll(() => page.locator(".discovery-map img.leaflet-tile-loaded").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
+  await expect(page.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
   await expect(page.getByRole("heading", { name: "How MirtPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
   await expect(page.locator(".landing-hero-image")).toHaveCount(0);
@@ -215,7 +216,7 @@ test("geographic discovery, Daily Featured Showrooms, benchmark Showrooms, and c
   await expect(page).toHaveURL(/industry=beauty-wellness/);
   await expect(page).not.toHaveURL(/featuredDay=/);
   await expect(page.locator(".discovery-map-stage")).toBeVisible();
-  expect(await page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
+  expect(await page.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/?featuredDay=1");
   const phoneMap = await page.locator(".discovery-map-stage").boundingBox();
@@ -587,8 +588,10 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
   expect(filterBounds).not.toBeNull();
   expect(filterBounds?.width || 0).toBeLessThanOrEqual(390);
   await filterSheet.getByRole("button", { name: "Close filters" }).click();
-  await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  expect(await page.locator(".discovery-roads path").count()).toBeGreaterThan(0);
+  const streetMap = page.locator('.discovery-map[data-map-provider="osm-standard"]');
+  await expect(streetMap).toBeVisible();
+  await expect.poll(() => streetMap.locator("img.leaflet-tile-loaded").count()).toBeGreaterThan(0);
+  await expect(streetMap.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
   const visibleMarkerIndex = (selector: string) => page.locator(selector).evaluateAll((markers) => {
     const stage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
     if (!stage) return -1;
@@ -599,31 +602,32 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
       return centerX >= stage.left && centerX <= stage.right && centerY >= stage.top && centerY <= stage.bottom;
     });
   });
-  const isolatedPointIndex = await visibleMarkerIndex(".discovery-point");
+  const clusterColor = await page.locator(".mp-map-cluster").first().evaluate((cluster) => getComputedStyle(cluster).backgroundColor);
+  expect(clusterColor).toBe("rgb(13, 107, 110)");
+  const mobileZoomIn = page.getByRole("button", { name: "Zoom in", exact: true });
+  for (let attempt = 0; attempt < 10 && await page.locator(".mp-map-showroom").count() === 0; attempt += 1) {
+    await mobileZoomIn.click();
+    await page.waitForTimeout(240);
+  }
+  const isolatedPointIndex = await visibleMarkerIndex(".mp-map-showroom");
   expect(isolatedPointIndex).toBeGreaterThanOrEqual(0);
-  const isolatedPoint = page.locator(".discovery-point").nth(isolatedPointIndex);
+  const isolatedPoint = page.locator(".mp-map-showroom").nth(isolatedPointIndex);
   await expect(isolatedPoint).toHaveAttribute("data-latitude", /^-?\d+(\.\d+)?$/);
   await expect(isolatedPoint).toHaveAttribute("data-longitude", /^-?\d+(\.\d+)?$/);
-  const isolatedPointName = ((await isolatedPoint.getAttribute("aria-label")) || "").split(",")[0];
-  const isolatedPointLabelLines = await isolatedPoint.locator(".point-showroom-label tspan").allTextContents();
+  const isolatedMarker = isolatedPoint.locator("xpath=..");
+  const isolatedPointName = ((await isolatedMarker.getAttribute("aria-label")) || "").split(",")[0];
+  const isolatedPointLabelLines = await isolatedPoint.locator(":scope > b span").allTextContents();
   expect(isolatedPointLabelLines.length).toBeGreaterThanOrEqual(1);
   expect(isolatedPointLabelLines.length).toBeLessThanOrEqual(3);
   expect(isolatedPointLabelLines.every((line) => line.length <= 13)).toBe(true);
   expect(isolatedPointLabelLines.join(" ")).not.toBe("SHOWROOM");
   expect(isolatedPointName.toLowerCase()).toContain(isolatedPointLabelLines[0].toLowerCase());
-  await expect(isolatedPoint.locator(".point-showroom-store")).toHaveCount(1);
-  await expect(isolatedPoint.locator(".point-hit-target")).toHaveCount(1);
-  await expect(isolatedPoint.locator(".point-halo")).toHaveCount(0);
-  const pointFill = await isolatedPoint.locator(".point-showroom-pin").evaluate((badge) => getComputedStyle(badge).fill);
-  const clusterFill = await page.locator(".discovery-cluster .cluster-core").first().evaluate((cluster) => getComputedStyle(cluster).fill);
-  expect(pointFill).toBe("rgb(13, 107, 110)");
-  expect(clusterFill).toBe("rgb(13, 107, 110)");
-  if (await isolatedPoint.getAttribute("data-presence")) await expect(isolatedPoint.locator(".marker-presence")).toHaveCount(1);
-  await isolatedPoint.click();
-  await page.waitForTimeout(450);
-  await expect(page.locator(".discovery-preview")).toHaveCount(0);
-  const isolatedShowroomId = await isolatedPoint.getAttribute("data-showroom-id");
-  await page.locator(`.discovery-point[data-showroom-id="${isolatedShowroomId}"]`).click();
+  await expect(isolatedPoint.locator(".mp-map-storefront")).toHaveCount(1);
+  await expect(isolatedPoint.locator(".cluster-halo, .point-halo")).toHaveCount(0);
+  const pointColor = await isolatedPoint.locator(".mp-map-storefront").evaluate((storefront) => getComputedStyle(storefront).backgroundColor);
+  expect(pointColor).toBe("rgb(13, 107, 110)");
+  if (await isolatedPoint.getAttribute("data-presence")) await expect(isolatedPoint.locator(".mp-map-status")).toHaveCount(1);
+  await isolatedMarker.click();
   const discoveryPreview = page.locator(".discovery-preview");
   await expect(discoveryPreview).toHaveAttribute("aria-modal", "false");
   await expect(discoveryPreview.getByRole("link", { name: "Open showroom" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
@@ -648,31 +652,29 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
   await page.goto("/discover?industry=electronics&place=city%3AAddis%20Ababa%3AAddis%20Ababa");
   await expect(page.locator(".discovery-map-stage")).toBeVisible();
   await expect(page.locator(".discovery-summary")).toContainText(/\d+ Showrooms across 1 location/);
-  const streetMap = page.locator(".discovery-map");
   expect(Number(await streetMap.getAttribute("data-nearby-group-count"))).toBeGreaterThan(0);
-  await page.locator(".discovery-cluster").first().dispatchEvent("click");
-  await page.waitForTimeout(500);
-  const mobileZoomIn = page.getByRole("button", { name: "Zoom in", exact: true });
   for (let attempt = 0; attempt < 12; attempt += 1) {
-    const mapScale = Number(await page.locator(".discovery-map").getAttribute("data-map-zoom"));
-    if (mapScale >= 700) break;
+    const mapZoom = Number(await streetMap.getAttribute("data-map-zoom"));
+    if (mapZoom >= 14) break;
     await mobileZoomIn.click();
     await page.waitForTimeout(260);
   }
   await page.waitForTimeout(400);
-  expect(Number(await streetMap.getAttribute("data-map-zoom"))).toBeGreaterThanOrEqual(700);
-  expect(Number(await streetMap.getAttribute("data-cluster-zoom"))).toBeGreaterThanOrEqual(14);
-  expect(Number(await streetMap.getAttribute("data-visible-nearby-group-count"))).toBeGreaterThan(0);
-  await expect(page.locator(".discovery-nearby-group")).toBeVisible();
-  const nearbyGroupIndex = await visibleMarkerIndex(".discovery-nearby-group");
+  expect(Number(await streetMap.getAttribute("data-map-zoom"))).toBeGreaterThanOrEqual(14);
+  await expect(page.locator(".mp-map-nearby")).toBeVisible();
+  const nearbyGroupIndex = await visibleMarkerIndex(".mp-map-nearby");
   expect(nearbyGroupIndex).toBeGreaterThanOrEqual(0);
-  const nearbyGroup = page.locator(".discovery-nearby-group").nth(nearbyGroupIndex);
-  const nearbyLabel = await nearbyGroup.getAttribute("aria-label") || "";
+  const nearbyGroup = page.locator(".mp-map-nearby").nth(nearbyGroupIndex);
+  const nearbyMarker = nearbyGroup.locator("xpath=..");
+  const nearbyLabel = await nearbyMarker.getAttribute("aria-label") || "";
   const nearbyCount = Number(nearbyLabel.match(/(\d+) nearby showrooms/)?.[1]);
   expect(nearbyCount).toBeGreaterThanOrEqual(2);
   expect(nearbyCount).toBeLessThanOrEqual(6);
-  const mapTransform = await page.locator(".discovery-map > g").getAttribute("transform");
-  await nearbyGroup.dispatchEvent("keydown", { key: "Enter" });
+  const mapView = {
+    zoom: await streetMap.getAttribute("data-map-zoom"),
+    center: await streetMap.getAttribute("data-map-center"),
+  };
+  await nearbyMarker.press("Enter");
   const nearbyViewer = page.locator(".nearby-showroom-viewer");
   await expect(nearbyViewer).toHaveAttribute("role", "dialog");
   await expect(nearbyViewer).toHaveAccessibleName("Showrooms nearby");
@@ -690,7 +692,8 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
   await expect(nearbyViewer.locator(".nearby-showroom-grid > button")).toHaveCount(nearbyCount);
   await nearbyViewer.getByRole("button", { name: "Close nearby showrooms" }).click();
   await expect(nearbyViewer).toHaveCount(0);
-  await expect(page.locator(".discovery-map > g")).toHaveAttribute("transform", mapTransform || "");
+  await expect(streetMap).toHaveAttribute("data-map-zoom", mapView.zoom || "");
+  await expect(streetMap).toHaveAttribute("data-map-center", mapView.center || "");
 
   await page.goto("/featured?featuredDay=1");
   await page.locator(".featured-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
@@ -742,11 +745,13 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   const failurePage = await page.context().newPage();
   const failureErrors = monitor(failurePage);
-  await failurePage.route("**/geo/ethiopia-admin1-2023.geojson", (route) => route.fulfill({ status: 503, body: "" }));
-  await failurePage.goto("/discover?featuredDay=1");
-  await expect(failurePage.getByText("The marketplace map is temporarily unavailable.")).toBeVisible();
-  await expect(failurePage.getByRole("button", { name: "Retry map" })).toBeVisible();
-  await expect(failurePage.locator(".discovery-list")).toHaveCount(0);
+  await failurePage.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 503, body: "" }));
+  await failurePage.goto("/discover?industry=all");
+  const degradedMap = failurePage.locator('.discovery-map[data-map-provider="osm-standard"]');
+  await expect(degradedMap).toBeVisible();
+  await expect(degradedMap).toHaveAttribute("data-tile-status", "degraded");
+  await expect(degradedMap.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
+  await expect.poll(() => failurePage.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
   expect(failureErrors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
   await failurePage.close();
   expect(errors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);

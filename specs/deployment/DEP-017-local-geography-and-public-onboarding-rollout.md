@@ -2,13 +2,19 @@
 id: DEP-017
 title: Local geography and public onboarding rollout
 status: done
-related: [FE-021, FE-024, BE-020, BE-023, DEP-003, DEP-015, DEP-016, DEP-020, ADR-0011]
+related: [FE-021, FE-024, BE-020, BE-023, DEP-003, DEP-015, DEP-016, DEP-020, ADR-0011, ADR-0016]
 owners: [deployment, operations, security, qa]
-last_updated: 2026-08-01
+last_updated: 2026-08-24
 change_level: L3
 ---
 
 # DEP-017 - Local geography and public onboarding rollout
+
+> Historical rollout record: the local static-geography runtime described below
+> shipped and was verified on 2026-08-01. ADR-0016 and the current FE-021
+> contract supersede only that basemap approach with policy-compliant,
+> browser-to-OSM Standard visible tiles. Public onboarding controls remain
+> governed by this record and their current linked specs.
 
 ## Problem and outcome
 
@@ -101,8 +107,8 @@ text, session tokens, IP addresses, and raw geographic source metadata.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Deterministic local geography and asset budget | operations | `scripts/test-discovery-geography.mjs` |
-| No remote map runtime requests | browser | `tests/acceptance/app.spec.ts` |
+| Historical deterministic local geography and asset budget | operations | Evidence retained below and in Git history |
+| Current exact OSM provider, visible attribution, and no proxy/prefetch/PWA tile cache | contract/browser | `scripts/test-discovery-geography.mjs`, `tests/acceptance/app.spec.ts` |
 | Weekly selector, Daily Featured floor/redaction, city gateway/floor, exact pins, bounded List pages | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Signup backup/restore and security | operations/security | `scripts/test-operations.mjs`, `scripts/test-signup.ts` |
 | Production build and HTTP surface | release | `npm run release` |
