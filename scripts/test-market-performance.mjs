@@ -47,9 +47,9 @@ try {
     await session.send("Profiler.start");
     const startedAt = performance.now();
     for (let index = 0; index < 12; index += 1) {
-      const cluster = page.locator(".discovery-cluster").first();
-      if (await cluster.count()) await cluster.evaluate((element) => element.dispatchEvent(new MouseEvent("click", { bubbles: true })));
-      else if (Number(await map.getAttribute("data-map-zoom")) < 8) await zoomButton.click();
+      const cluster = page.locator(".mp-map-cluster").first();
+      if (await cluster.count()) await cluster.click();
+      else if (Number(await map.getAttribute("data-map-zoom")) < 14) await zoomButton.click();
       else break;
       await page.waitForTimeout(120);
     }
@@ -71,9 +71,8 @@ try {
     const metrics = await map.evaluate((element) => ({
       zoom: Number(element.getAttribute("data-map-zoom") || 0),
       markerCount: Number(element.getAttribute("data-map-marker-count") || 0),
-      labelCount: Number(element.getAttribute("data-map-label-count") || 0),
-      renderedMarkers: element.querySelectorAll(".discovery-markers > *").length,
-      renderedLabels: element.querySelectorAll(".discovery-places text").length,
+      renderedMarkers: element.querySelectorAll(".leaflet-marker-pane > .leaflet-marker-icon").length,
+      loadedTiles: element.querySelectorAll("img.leaflet-tile-loaded").length,
       longTasks: window.__mirtpageLongTasks || [],
       horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     }));
@@ -84,8 +83,8 @@ try {
     writeResults();
 
     assert.equal(errors.length, 0, `${target.name} map reports no page errors: ${errors.join("; ")}`);
-    assert.ok(metrics.zoom >= 8, `${target.name} reaches detailed showroom zoom`);
-    assert.ok(metrics.labelCount <= 180 && metrics.renderedLabels <= 180, `${target.name} keeps place labels bounded`);
+    assert.ok(metrics.zoom >= 12, `${target.name} reaches detailed showroom zoom`);
+    assert.ok(metrics.loadedTiles > 0, `${target.name} loads visible OSM tiles`);
     assert.equal(metrics.renderedMarkers, metrics.markerCount, `${target.name} exposes an accurate mounted marker count`);
     assert.ok(metrics.horizontalOverflow <= 1, `${target.name} map does not create page-level horizontal overflow`);
     assert.ok(durationMs < 15_000, `${target.name} completes repeated throttled zoom commits within 15 seconds`);

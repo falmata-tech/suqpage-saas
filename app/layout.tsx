@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import PwaRegistration from "@/components/PwaRegistration";
 import { appUrl } from "@/lib/app-url";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import "./landing.css";
 import "./discovery.css";

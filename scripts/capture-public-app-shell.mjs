@@ -35,8 +35,8 @@ async function captureMarket(browser, viewport, suffix) {
   await chooser.waitFor();
   assert.equal(await chooser.getByRole("link").count(), 8, `${suffix} exposes seven industries plus All industries`);
   assert.match(await chooser.getByRole("link").last().textContent(), /All industries/, `${suffix} keeps All industries last`);
-  await page.locator(".discovery-cluster,.discovery-point").first().waitFor();
-  assert.ok(await page.locator(".discovery-cluster,.discovery-point").count() > 0, `${suffix} renders combined results behind the reminder`);
+  await page.locator(".mp-map-cluster,.mp-map-showroom").first().waitFor();
+  assert.ok(await page.locator(".mp-map-cluster,.mp-map-showroom").count() > 0, `${suffix} renders combined results behind the reminder`);
   await assertNoHorizontalOverflow(page, `${suffix} orientation reminder`);
   await page.screenshot({ path: path.join(output, `market-orientation-${suffix}.png`), caret: "initial" });
 
@@ -52,7 +52,7 @@ async function captureMarket(browser, viewport, suffix) {
   await page.locator(".discovery-map").hover();
   await page.mouse.wheel(0, -6_000);
   await page.waitForTimeout(300);
-  const nearbyMarker = page.locator(".discovery-nearby-group").first();
+  const nearbyMarker = page.locator(".mp-map-nearby").first();
   await nearbyMarker.waitFor({ state: "attached" });
   await nearbyMarker.dispatchEvent("click");
   const nearbyViewer = page.locator(".nearby-showroom-viewer");

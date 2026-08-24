@@ -3,87 +3,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { geoMercator, geoPath, type GeoPermissibleObjects, type GeoProjection } from "d3-geo";
-import { select } from "d3-selection";
-import "d3-transition";
-import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
-import Supercluster from "supercluster";
 import { ArrowLeft, Crosshair, LocateFixed, Minus, Plus, SlidersHorizontal, X } from "lucide-react";
-import { memo, startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import MarketplaceMap, { type MarketplaceMapController } from "@/components/MarketplaceMap";
 import type { DiscoveryNearbyGroup, DiscoverySearchSuggestion, DiscoveryShowroom, MarketplaceDiscoveryView } from "@/lib/discovery";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
-const MAP_WIDTH = 900;
-const MAP_HEIGHT = 650;
-const BASE_CLUSTER_ZOOM = 5;
-const MAX_CLUSTER_ZOOM = 18;
-const MAX_MAP_ZOOM = 18;
-const MAX_MAP_SCALE = 2 ** (MAX_MAP_ZOOM - BASE_CLUSTER_ZOOM);
-const NEARBY_GROUP_ZOOM = 14;
-const SHOWROOM_DETAIL_SCALE = 8;
 const ETHIOPIA_BOUNDS: [number, number, number, number] = [32, 3, 49, 15];
-const DISCOVERY_SESSION_KEY = "mirtpage:discovery-navigation:v1";
+const DISCOVERY_SESSION_KEY = "mirtpage:discovery-navigation:v2";
 const DISCOVERY_RETURN_KEY = "mirtpage:last-marketplace-url:v1";
-const MAX_PLACE_LABELS = 180;
+
+type MapView = {
+  center: [number, number];
+  zoom: number;
+};
 
 type DiscoverySessionState = {
   scope: string;
   activeNearbyGroupKey: string | null;
-  mapTransform: { x: number; y: number; k: number };
+  mapView: MapView;
   updatedAt: number;
 };
-
-type CommittedMapViewport = {
-  x: number;
-  y: number;
-  k: number;
-};
-
-type ProjectedPath = {
-  key: string;
-  d: string | undefined;
-};
-
-type ProjectedRoadPath = ProjectedPath & {
-  className: string;
-};
-
-const MapGeographyLayers = memo(function MapGeographyLayers({
-  regionPaths,
-  zonePaths,
-  majorRoadPaths,
-  primaryRoadPaths,
-  secondaryRoadPaths,
-  showZones,
-  showPrimaryRoads,
-  showSecondaryRoads,
-}: {
-  regionPaths: ProjectedPath[];
-  zonePaths: ProjectedPath[];
-  majorRoadPaths: ProjectedRoadPath[];
-  primaryRoadPaths: ProjectedRoadPath[];
-  secondaryRoadPaths: ProjectedRoadPath[];
-  showZones: boolean;
-  showPrimaryRoads: boolean;
-  showSecondaryRoads: boolean;
-}) {
-  return <>
-    <g className="discovery-regions">{regionPaths.map((regionPath) => <path key={regionPath.key} d={regionPath.d} />)}</g>
-    <g className="discovery-roads">
-      {majorRoadPaths.map((roadPath) => <path key={roadPath.key} className={roadPath.className} d={roadPath.d} />)}
-      {showPrimaryRoads ? primaryRoadPaths.map((roadPath) => <path key={roadPath.key} className={roadPath.className} d={roadPath.d} />) : null}
-      {showSecondaryRoads ? secondaryRoadPaths.map((roadPath) => <path key={roadPath.key} className={roadPath.className} d={roadPath.d} />) : null}
-    </g>
-    {showZones ? <g className="discovery-zones">{zonePaths.map((zonePath) => <path key={zonePath.key} d={zonePath.d} />)}</g> : null}
-  </>;
-});
 
 function readDiscoverySession(scope: string): DiscoverySessionState | null {
   try {
     const parsed = JSON.parse(window.sessionStorage.getItem(DISCOVERY_SESSION_KEY) || "null") as DiscoverySessionState | null;
     if (!parsed || parsed.scope !== scope || Date.now() - parsed.updatedAt > 2 * 60 * 60 * 1000) return null;
-    if (![parsed.mapTransform.x, parsed.mapTransform.y, parsed.mapTransform.k].every(Number.isFinite)) return null;
+    if (![...parsed.mapView.center, parsed.mapView.zoom].every(Number.isFinite)) return null;
     return parsed;
   } catch {
     return null;
@@ -113,33 +60,6 @@ const compactIndustryLabels: Record<string, string> = {
   "fashion-textiles": "Textiles & apparel",
 };
 
-type MapFeature = {
-  type: "Feature";
-  properties: Record<string, string | number | [number, number]>;
-  geometry: GeoPermissibleObjects;
-};
-
-type MapCollection = {
-  type: "FeatureCollection";
-  features: MapFeature[];
-};
-
-async function fetchMapCollection(path: string) {
-  const response = await fetch(path);
-  return response.ok ? response.json() as Promise<MapCollection> : null;
-}
-
-function projectMapPlaces(collection: MapCollection | null, projection: GeoProjection | null) {
-  return collection && projection ? collection.features.flatMap((feature) => {
-    const coordinates = (feature.geometry as { coordinates?: [number, number] }).coordinates;
-    const point = coordinates ? projection(coordinates) : null;
-    return point ? [{ feature, point }] : [];
-  }) : [];
-}
-
-type MarkerProperties = { showroomId: number; sponsored: boolean; live: boolean; featured: boolean };
-type ClusterProperties = { sponsoredCount: number; liveCount: number; featuredCount: number };
-
 type ShowroomPresence = {
   kind: "featured" | "live" | "";
   label: string;
@@ -152,11 +72,6 @@ function showroomPresence(showroom: DiscoveryShowroom, featuredNowBusinessId: nu
     return { kind: "live", label: `Live on ${LIVE_PLATFORM_LABELS[showroom.livePlatform]}`, shortLabel: "Live" };
   }
   return { kind: "", label: "", shortLabel: "" };
-}
-
-function MarkerPresenceBadge({ kind, text, y }: { kind: "featured" | "live"; text: string; y: number }) {
-  const width = kind === "featured" ? 58 : Math.max(36, 18 + text.length * 5);
-  return <g className={`marker-presence marker-presence-${kind}`} transform={`translate(0 ${y})`} aria-hidden="true"><rect x={-width / 2} y="-9" width={width} height="18" rx="4" /><circle cx={-width / 2 + 9} r="3" /><text x="5" y="3" textAnchor="middle">{text}</text></g>;
 }
 
 const iconPath: Record<string, string> = {
@@ -223,18 +138,6 @@ function IndustryStartChooser({ discovery, action }: { discovery: MarketplaceDis
   </section>;
 }
 
-function mapZoomForScale(scale: number) {
-  return Math.max(BASE_CLUSTER_ZOOM, Math.min(MAX_MAP_ZOOM, Math.floor(BASE_CLUSTER_ZOOM + Math.log2(scale))));
-}
-
-function projectedPointIsVisible(point: [number, number] | null, bounds: { left: number; right: number; top: number; bottom: number }) {
-  return Boolean(point
-    && point[0] >= bounds.left
-    && point[0] <= bounds.right
-    && point[1] >= bounds.top
-    && point[1] <= bounds.bottom);
-}
-
 function discoveryHref(action: string, values: Record<string, string | number | undefined>, hash = "discover") {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(values)) {
@@ -247,44 +150,33 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
   const router = useRouter();
   const action = "/";
   const [searchInput, setSearchInput] = useState(discovery.query);
-  const [regions, setRegions] = useState<MapCollection | null>(null);
-  const [zones, setZones] = useState<MapCollection | null>(null);
-  const [cityPlaces, setCityPlaces] = useState<MapCollection | null>(null);
-  const [townPlaces, setTownPlaces] = useState<MapCollection | null>(null);
-  const [villagePlaces, setVillagePlaces] = useState<MapCollection | null>(null);
-  const [majorRoads, setMajorRoads] = useState<MapCollection | null>(null);
-  const [primaryRoads, setPrimaryRoads] = useState<MapCollection | null>(null);
-  const [secondaryRoads, setSecondaryRoads] = useState<MapCollection | null>(null);
   const [mapFailed, setMapFailed] = useState(false);
   const [selectedShowroomId, setSelectedShowroomId] = useState<number | null>(null);
   const [activeNearbyGroupKey, setActiveNearbyGroupKey] = useState<string | null>(null);
-  const [mapViewport, setMapViewport] = useState<CommittedMapViewport>({ x: 0, y: 0, k: 1 });
+  const [requestedView, setRequestedView] = useState<MapView | null>(null);
   const [nearMeStatus, setNearMeStatus] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const filterDialogRef = useRef<HTMLDialogElement | null>(null);
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const groupRef = useRef<SVGGElement | null>(null);
-  const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
-  const mapTransformRef = useRef<ZoomTransform>(zoomIdentity);
-  const mapPersistenceEnabledRef = useRef(true);
+  const mapRef = useRef<MarketplaceMapController | null>(null);
+  const mapViewRef = useRef<MapView>({ center: [9.145, 40.4897], zoom: 5 });
   const navigationScope = useMemo(() => [action, discovery.industry.key, discovery.query, discovery.place].join("|"), [action, discovery.industry.key, discovery.place, discovery.query]);
 
   useEffect(() => {
     setSelectedShowroomId(null);
     setActiveNearbyGroupKey(null);
-    mapPersistenceEnabledRef.current = true;
   }, [discovery.industry.key, discovery.place, discovery.query]);
 
   useEffect(() => {
     const saved = readDiscoverySession(navigationScope);
     if (saved) {
-      mapTransformRef.current = zoomIdentity.translate(saved.mapTransform.x, saved.mapTransform.y).scale(saved.mapTransform.k);
-      setMapViewport(saved.mapTransform);
+      mapViewRef.current = saved.mapView;
+      setRequestedView(saved.mapView);
       const savedGroup = discovery.nearbyGroups.find((group) => group.key === saved.activeNearbyGroupKey) || null;
       setActiveNearbyGroupKey(savedGroup?.key || null);
     } else {
-      mapTransformRef.current = zoomIdentity;
-      setMapViewport({ x: 0, y: 0, k: 1 });
+      const defaultView: MapView = { center: [9.145, 40.4897], zoom: 5 };
+      mapViewRef.current = defaultView;
+      setRequestedView(defaultView);
     }
     rememberCurrentPublicWorkspace();
   }, [discovery.nearbyGroups, navigationScope]);
@@ -313,11 +205,11 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
     return () => window.clearTimeout(timer);
   }, [action, discovery.industry.key, discovery.place, discovery.query, router, searchInput]);
 
-  function rememberNavigation(activeGroup: string | null, transform = mapTransformRef.current) {
+  function rememberNavigation(activeGroup: string | null, mapView = mapViewRef.current) {
     writeDiscoverySession({
       scope: navigationScope,
       activeNearbyGroupKey: activeGroup,
-      mapTransform: { x: transform.x, y: transform.y, k: transform.k },
+      mapView,
       updatedAt: Date.now(),
     });
   }
@@ -338,238 +230,19 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
     }), { scroll: false });
   }
 
-  useEffect(() => {
-    let active = true;
-    fetch("/geo/ethiopia-admin1-2023.geojson")
-      .then((response) => {
-        if (!response.ok) throw new Error("Map unavailable");
-        return response.json() as Promise<MapCollection>;
-      })
-      .then((data) => { if (active) setRegions(data); })
-      .catch(() => { if (active) setMapFailed(true); });
-    const loadDetails = () => Promise.all([
-        fetchMapCollection("/geo/ethiopia-admin2-2023.geojson"),
-        fetchMapCollection("/geo/ethiopia-places-cities-osm.geojson"),
-        fetchMapCollection("/geo/ethiopia-roads-major-osm.geojson"),
-      ]).then(([zoneData, placeData, roadData]) => {
-        if (!active) return;
-        setZones(zoneData);
-        setCityPlaces(placeData);
-        setMajorRoads(roadData);
-      }).catch(() => undefined);
-    let cancelDetailLoad: () => void;
-    if (typeof window.requestIdleCallback === "function") {
-      const idleId = window.requestIdleCallback(loadDetails, { timeout: 3_000 });
-      cancelDetailLoad = () => window.cancelIdleCallback(idleId);
-    } else {
-      const timeoutId = globalThis.setTimeout(loadDetails, 1_500);
-      cancelDetailLoad = () => globalThis.clearTimeout(timeoutId);
-    }
-    return () => {
-      active = false;
-      cancelDetailLoad();
-    };
-  }, []);
-
-  const loadPrimaryRoads = mapViewport.k >= 1.45;
-  const loadTowns = mapViewport.k >= 1.7;
-  const loadSecondaryRoads = mapViewport.k >= 2.4;
-  const loadVillages = mapViewport.k >= 3.2;
-  useEffect(() => {
-    type DetailTier = "primaryRoads" | "townPlaces" | "secondaryRoads" | "villagePlaces";
-    const requests: Promise<[DetailTier, MapCollection | null]>[] = [];
-    let active = true;
-    if (loadPrimaryRoads && !primaryRoads) requests.push(fetchMapCollection("/geo/ethiopia-roads-primary-osm.geojson").then((data) => ["primaryRoads", data]));
-    if (loadTowns && !townPlaces) requests.push(fetchMapCollection("/geo/ethiopia-places-towns-osm.geojson").then((data) => ["townPlaces", data]));
-    if (loadSecondaryRoads && !secondaryRoads) requests.push(fetchMapCollection("/geo/ethiopia-roads-secondary-osm.geojson").then((data) => ["secondaryRoads", data]));
-    if (loadVillages && !villagePlaces) requests.push(fetchMapCollection("/geo/ethiopia-places-villages-osm.geojson").then((data) => ["villagePlaces", data]));
-    if (requests.length) void Promise.all(requests).then((results) => {
-      if (!active) return;
-      for (const [tier, data] of results) {
-        if (tier === "primaryRoads") setPrimaryRoads(data);
-        else if (tier === "townPlaces") setTownPlaces(data);
-        else if (tier === "secondaryRoads") setSecondaryRoads(data);
-        else setVillagePlaces(data);
-      }
-    });
-    return () => { active = false; };
-  }, [loadPrimaryRoads, loadSecondaryRoads, loadTowns, loadVillages, primaryRoads, secondaryRoads, townPlaces, villagePlaces]);
-
-  const projection = useMemo(() => regions
-    ? geoMercator().fitExtent([[52, 34], [MAP_WIDTH - 52, MAP_HEIGHT - 34]], regions as unknown as GeoPermissibleObjects)
-    : null, [regions]);
-  const path = useMemo(() => projection ? geoPath(projection) : null, [projection]);
-  const regionPaths = useMemo(() => path && regions ? regions.features.map((feature, index) => ({
-    key: `${String(feature.properties.name)}-${index}`,
-    d: path(feature as unknown as GeoPermissibleObjects) || undefined,
-  })) : [], [path, regions]);
-  const zonePaths = useMemo(() => path && zones ? zones.features.map((feature, index) => ({
-    key: `${String(feature.properties.name)}-${index}`,
-    d: path(feature as unknown as GeoPermissibleObjects) || undefined,
-  })) : [], [path, zones]);
-  const majorRoadPaths = useMemo(() => path && majorRoads ? majorRoads.features.map((feature) => ({
-    key: String(feature.properties.highway),
-    className: `road-${String(feature.properties.highway)}`,
-    d: path(feature as unknown as GeoPermissibleObjects) || undefined,
-  })) : [], [majorRoads, path]);
-  const primaryRoadPaths = useMemo(() => path && primaryRoads ? primaryRoads.features.map((feature) => ({
-    key: String(feature.properties.highway),
-    className: `road-${String(feature.properties.highway)}`,
-    d: path(feature as unknown as GeoPermissibleObjects) || undefined,
-  })) : [], [path, primaryRoads]);
-  const secondaryRoadPaths = useMemo(() => path && secondaryRoads ? secondaryRoads.features.map((feature) => ({
-    key: String(feature.properties.highway),
-    className: `road-${String(feature.properties.highway)}`,
-    d: path(feature as unknown as GeoPermissibleObjects) || undefined,
-  })) : [], [path, secondaryRoads]);
-  const zoomLevel = mapViewport.k;
-  const viewportMapBounds = useMemo(() => {
-    const padding = 56;
-    return {
-      left: (-mapViewport.x - padding) / mapViewport.k,
-      right: (MAP_WIDTH - mapViewport.x + padding) / mapViewport.k,
-      top: (-mapViewport.y - padding) / mapViewport.k,
-      bottom: (MAP_HEIGHT - mapViewport.y + padding) / mapViewport.k,
-    };
-  }, [mapViewport]);
-  const viewportGeoBounds = useMemo<[number, number, number, number]>(() => {
-    if (!projection) return ETHIOPIA_BOUNDS;
-    const corners = [
-      projection.invert?.([viewportMapBounds.left, viewportMapBounds.top]),
-      projection.invert?.([viewportMapBounds.right, viewportMapBounds.top]),
-      projection.invert?.([viewportMapBounds.left, viewportMapBounds.bottom]),
-      projection.invert?.([viewportMapBounds.right, viewportMapBounds.bottom]),
-    ].filter((point): point is [number, number] => Boolean(point));
-    if (!corners.length) return ETHIOPIA_BOUNDS;
-    const longitudes = corners.map((point) => point[0]);
-    const latitudes = corners.map((point) => point[1]);
-    return [
-      Math.max(ETHIOPIA_BOUNDS[0], Math.min(...longitudes)),
-      Math.max(ETHIOPIA_BOUNDS[1], Math.min(...latitudes)),
-      Math.min(ETHIOPIA_BOUNDS[2], Math.max(...longitudes)),
-      Math.min(ETHIOPIA_BOUNDS[3], Math.max(...latitudes)),
-    ];
-  }, [projection, viewportMapBounds]);
   const showroomById = useMemo(() => new Map(discovery.showrooms.map((showroom) => [showroom.id, showroom])), [discovery.showrooms]);
   const selectedShowroom = showroomById.get(selectedShowroomId || -1) || null;
   const activeNearbyGroup = discovery.nearbyGroups.find((group) => group.key === activeNearbyGroupKey) || null;
   const activeNearbyShowrooms = useMemo(() => activeNearbyGroup?.showroomIds.map((showroomId) => showroomById.get(showroomId)).filter((showroom): showroom is DiscoveryShowroom => Boolean(showroom)) || [], [activeNearbyGroup, showroomById]);
-  const nearbyShowroomIds = useMemo(() => new Set(discovery.nearbyGroups.flatMap((group) => group.showroomIds)), [discovery.nearbyGroups]);
-
-  const clusterIndex = useMemo(() => {
-    const index = new Supercluster<MarkerProperties, ClusterProperties>({
-      radius: 52,
-      maxZoom: MAX_CLUSTER_ZOOM,
-      minPoints: 2,
-      map: (properties) => ({ sponsoredCount: properties.sponsored ? 1 : 0, liveCount: properties.live && !properties.featured ? 1 : 0, featuredCount: properties.featured ? 1 : 0 }),
-      reduce: (accumulated, properties) => {
-        accumulated.sponsoredCount += properties.sponsoredCount;
-        accumulated.liveCount += properties.liveCount;
-        accumulated.featuredCount += properties.featuredCount;
-      },
-    });
-    index.load(discovery.showrooms.map((showroom) => ({
-      type: "Feature" as const,
-      properties: { showroomId: showroom.id, sponsored: showroom.sponsored, live: showroom.isLive, featured: showroom.id === discovery.featuredNowBusinessId },
-      geometry: { type: "Point" as const, coordinates: [showroom.longitude, showroom.latitude] },
-    })));
-    return index;
-  }, [discovery.featuredNowBusinessId, discovery.showrooms]);
-  const clusterZoom = mapZoomForScale(zoomLevel);
-  const markers = useMemo(() => clusterIndex.getClusters(viewportGeoBounds, clusterZoom), [clusterIndex, clusterZoom, viewportGeoBounds]);
-
-  const projectedCities = useMemo(() => projectMapPlaces(cityPlaces, projection), [cityPlaces, projection]);
-  const projectedTowns = useMemo(() => projectMapPlaces(townPlaces, projection), [townPlaces, projection]);
-  const projectedVillages = useMemo(() => projectMapPlaces(villagePlaces, projection), [villagePlaces, projection]);
-  const rankedCities = useMemo(() => [...projectedCities].sort((left, right) =>
-    Number(right.feature.properties.population || 0) - Number(left.feature.properties.population || 0)
-    || String(left.feature.properties.name).localeCompare(String(right.feature.properties.name)),
-  ), [projectedCities]);
-  const rankedDetailedPlaces = useMemo(() => [...projectedTowns, ...projectedVillages].sort((left, right) =>
-    String(left.feature.properties.place).localeCompare(String(right.feature.properties.place))
-    || String(left.feature.properties.name).localeCompare(String(right.feature.properties.name)),
-  ), [projectedTowns, projectedVillages]);
-  const visibleCityCandidates = useMemo(() => {
-    if (zoomLevel < 1.7) return rankedCities.slice(0, 20);
-    return rankedCities.filter(({ point }) => projectedPointIsVisible(point, viewportMapBounds));
-  }, [rankedCities, viewportMapBounds, zoomLevel]);
-  const visibleCityPlaces = visibleCityCandidates.slice(0, 8);
-  const visibleDetailedPlaces = useMemo(() => {
-    const additionalCities = visibleCityCandidates.slice(8);
-    if (zoomLevel < 1.7) return additionalCities;
-    const candidates = zoomLevel < 3.2 ? projectedTowns : rankedDetailedPlaces;
-    return [...additionalCities, ...candidates]
-      .filter(({ point }) => projectedPointIsVisible(point, viewportMapBounds))
-      .slice(0, Math.max(0, MAX_PLACE_LABELS - visibleCityPlaces.length));
-  }, [projectedTowns, rankedDetailedPlaces, viewportMapBounds, visibleCityCandidates, visibleCityPlaces.length, zoomLevel]);
-  const visiblePlaceCount = visibleCityPlaces.length + visibleDetailedPlaces.length;
-  const visibleNearbyGroups = useMemo(() => discovery.nearbyGroups.filter((group) => projectedPointIsVisible(projection?.([group.longitude, group.latitude]) || null, viewportMapBounds)), [discovery.nearbyGroups, projection, viewportMapBounds]);
-  const visibleUngroupedShowrooms = useMemo(() => discovery.showrooms.filter((showroom) => !nearbyShowroomIds.has(showroom.id) && projectedPointIsVisible(projection?.([showroom.longitude, showroom.latitude]) || null, viewportMapBounds)), [discovery.showrooms, nearbyShowroomIds, projection, viewportMapBounds]);
-
-  useEffect(() => {
-    if (!svgRef.current || !groupRef.current || !projection) return;
-    const behavior = zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, MAX_MAP_SCALE])
-      .extent([[0, 0], [MAP_WIDTH, MAP_HEIGHT]])
-      .translateExtent([[-90, -75], [MAP_WIDTH + 90, MAP_HEIGHT + 75]])
-      .on("start", () => {
-        svgRef.current?.classList.add("map-navigating");
-      })
-      .on("zoom", (event: { transform: ZoomTransform }) => {
-        mapTransformRef.current = event.transform;
-        select(groupRef.current).attr("transform", event.transform.toString());
-      })
-      .on("end", (event: { transform: ZoomTransform }) => {
-        svgRef.current?.classList.remove("map-navigating");
-        startTransition(() => setMapViewport({ x: event.transform.x, y: event.transform.y, k: event.transform.k }));
-        if (mapPersistenceEnabledRef.current) rememberNavigation(null, event.transform);
-      });
-    const svg = select(svgRef.current);
-    zoomRef.current = behavior;
-    svg.call(behavior).on("dblclick.zoom", null);
-    svg.call(behavior.transform, mapTransformRef.current);
-    return () => { svg.on(".zoom", null); svgRef.current?.classList.remove("map-navigating"); zoomRef.current = null; };
-  }, [navigationScope, projection]);
-
-  function animate(transform: ZoomTransform) {
-    if (!svgRef.current || !zoomRef.current) return;
-    const selection = select(svgRef.current);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) selection.call(zoomRef.current.transform, transform);
-    else selection.transition().duration(360).call(zoomRef.current.transform, transform);
-  }
-
-  function framePoint(longitude: number, latitude: number, scale: number) {
-    const point = projection?.([longitude, latitude]);
-    if (!point) return;
-    animate(zoomIdentity.translate(MAP_WIDTH / 2, MAP_HEIGHT / 2).scale(scale).translate(-point[0], -point[1]));
-  }
-
-  function openCluster(clusterId: number, coordinates: [number, number]) {
-    const expansion = clusterIndex.getClusterExpansionZoom(clusterId);
-    const scale = Math.min(MAX_MAP_SCALE, Math.max(1.8, 2 ** (expansion - BASE_CLUSTER_ZOOM)));
-    framePoint(coordinates[0], coordinates[1], scale);
-  }
-
-  function activateShowroom(showroom: DiscoveryShowroom) {
-    if (mapTransformRef.current.k < SHOWROOM_DETAIL_SCALE - 0.01) {
-      setSelectedShowroomId(null);
-      framePoint(showroom.longitude, showroom.latitude, SHOWROOM_DETAIL_SCALE);
-      return;
-    }
-    setSelectedShowroomId(showroom.id);
-  }
-
   function resetMap() {
     setActiveNearbyGroupKey(null);
     setSelectedShowroomId(null);
-    mapPersistenceEnabledRef.current = true;
-    rememberNavigation(null, zoomIdentity);
-    animate(zoomIdentity);
+    mapRef.current?.reset();
   }
 
   function zoomBy(factor: number) {
-    if (!svgRef.current || !zoomRef.current) return;
-    select(svgRef.current).transition().duration(220).call(zoomRef.current.scaleBy, factor);
+    if (factor > 1) mapRef.current?.zoomIn();
+    else mapRef.current?.zoomOut();
   }
 
   function useNearMe() {
@@ -578,17 +251,14 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
       return;
     }
     setNearMeStatus("Finding your general area...");
-    mapPersistenceEnabledRef.current = false;
     navigator.geolocation.getCurrentPosition(({ coords }) => {
       if (coords.longitude < ETHIOPIA_BOUNDS[0] || coords.latitude < ETHIOPIA_BOUNDS[1] || coords.longitude > ETHIOPIA_BOUNDS[2] || coords.latitude > ETHIOPIA_BOUNDS[3]) {
-        mapPersistenceEnabledRef.current = true;
         setNearMeStatus("Your location is outside the current Ethiopia map.");
         return;
       }
-      framePoint(coords.longitude, coords.latitude, 3.2);
+      mapRef.current?.centerAt(coords.latitude, coords.longitude, 11);
       setNearMeStatus("Map centered near your location.");
     }, () => {
-      mapPersistenceEnabledRef.current = true;
       setNearMeStatus("Location was not shared. Choose a region or city instead.");
     }, {
       enableHighAccuracy: false,
@@ -597,56 +267,7 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
     });
   }
 
-  function mapLabelLines(name: string, maxLineLength = 13, maxLines = 3) {
-    const words = name
-      .trim()
-      .split(/\s+/)
-      .flatMap((word) =>
-        word.length <= maxLineLength
-          ? [word]
-          : word.match(new RegExp(`.{1,${maxLineLength}}`, "g")) || [word],
-      );
-    const lines: string[] = [];
-    let truncated = false;
-    for (const word of words) {
-      const current = lines.at(-1);
-      if (current && `${current} ${word}`.length <= maxLineLength) {
-        lines[lines.length - 1] = `${current} ${word}`;
-      } else if (lines.length < maxLines) {
-        lines.push(word);
-      } else {
-        truncated = true;
-        break;
-      }
-    }
-    if (truncated && lines.length) {
-      lines[lines.length - 1] = `${lines.at(-1)?.slice(0, maxLineLength - 1)}…`;
-    }
-    return lines;
-  }
-
-  function renderShowroomPoint(showroom: DiscoveryShowroom) {
-    const point = projection?.([showroom.longitude, showroom.latitude]);
-    if (!point) return null;
-    const detailed = zoomLevel >= SHOWROOM_DETAIL_SCALE - 0.01;
-    const activate = () => activateShowroom(showroom);
-    const presence = showroomPresence(showroom, discovery.featuredNowBusinessId);
-    const labelLines = mapLabelLines(showroom.name);
-    return <g key={`showroom-${showroom.id}`} data-showroom-id={showroom.id} data-industry={showroom.primaryIndustryKey} data-latitude={showroom.latitude} data-longitude={showroom.longitude} data-presence={presence.kind || undefined} className={`discovery-point${showroom.sponsored ? " sponsored" : ""}${presence.kind ? ` ${presence.kind}` : ""}${selectedShowroomId === showroom.id ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}.${presence.label ? ` ${presence.label}.` : ""} ${detailed ? "Open business preview." : "Zoom to business."}`} onClick={activate} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") activate(); }}>
-      <circle className="point-hit-target" cy="-1" r="22" />
-      <path className="point-showroom-pin" d="M0 18C-3 14-14 6-14-5a14 14 0 1 1 28 0C14 6 3 14 0 18Z" />
-      <path className="point-showroom-store" d="M-8-10H8l2 5h-20ZM-8-5V7H8V-5M-3 7V1h6v6M-7-1h4M3-1h4" />
-      <text className="point-showroom-label" y="29" textAnchor="middle">
-        {labelLines.map((line, index) => (
-          <tspan key={`${line}-${index}`} x="0" dy={index === 0 ? 0 : 8}>{line}</tspan>
-        ))}
-      </text>
-      {presence.kind ? <MarkerPresenceBadge kind={presence.kind} text={presence.shortLabel.toUpperCase()} y={-31} /> : null}
-    </g>;
-  }
-
   const industrySelected = Boolean(discovery.industry.key);
-  const showNearbyGroups = industrySelected && clusterZoom >= NEARBY_GROUP_ZOOM;
   return <section className="discovery discovery-marketplace" id="discover" aria-label="MirtPage showroom marketplace">
     {!hideIntro ? <div className="discovery-switcher">
       <div className="discovery-switcher-head"><div><span className="discovery-kicker">Online showrooms across Ethiopian production</span><h2 id="discovery-title">Find businesses equipped to make or supply what you need.</h2></div><p>Search by product, skill, production capability, industry, or reviewed location, then visit the showroom and contact the business directly.</p></div>
@@ -686,38 +307,24 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false }: { d
       {industrySelected ? <div className="discovery-mobile-map-toolbar"><span>{discovery.total} {discovery.total === 1 ? "showroom" : "showrooms"}</span><div aria-label="Map controls"><button type="button" onClick={useNearMe} title="Center the map near me" aria-label="Center the map near me"><LocateFixed aria-hidden="true" /></button><button type="button" onClick={() => zoomBy(1.5)} title="Zoom in" aria-label="Zoom in"><Plus aria-hidden="true" /></button><button type="button" onClick={() => zoomBy(1 / 1.5)} title="Zoom out" aria-label="Zoom out"><Minus aria-hidden="true" /></button><button type="button" onClick={resetMap} title="Center Ethiopia" aria-label="Center Ethiopia"><Crosshair aria-hidden="true" /></button></div></div> : null}
       <div className="discovery-map-stage">
         {mapFailed ? <div className="discovery-map-fallback"><p>The marketplace map is temporarily unavailable.</p><button type="button" onClick={() => window.location.reload()}>Retry map</button></div> : null}
-        {!mapFailed && !path ? <div className="discovery-map-loading">Loading Ethiopia map...</div> : null}
-        {!mapFailed && path && projection ? <svg ref={svgRef} className="discovery-map" data-map-zoom={zoomLevel.toFixed(2)} data-cluster-zoom={clusterZoom} data-nearby-group-count={discovery.nearbyGroups.length} data-visible-nearby-group-count={visibleNearbyGroups.length} data-map-marker-count={showNearbyGroups ? visibleNearbyGroups.length + visibleUngroupedShowrooms.length : markers.length} data-map-label-count={visiblePlaceCount} viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="group" aria-label="Interactive Ethiopia map with clustered showroom locations">
-          <rect className="discovery-map-bg" width={MAP_WIDTH} height={MAP_HEIGHT} />
-          <g ref={groupRef}>
-            <MapGeographyLayers regionPaths={regionPaths} zonePaths={zonePaths} majorRoadPaths={majorRoadPaths} primaryRoadPaths={primaryRoadPaths} secondaryRoadPaths={secondaryRoadPaths} showZones={zoomLevel >= 1.65} showPrimaryRoads={zoomLevel >= 1.45} showSecondaryRoads={zoomLevel >= 2.4} />
-            <g className="discovery-places"><g className="discovery-place-cities">{visibleCityPlaces.map(({ feature, point }, index) => <text key={`${String(feature.properties.name)}-${index}`} className="place-city" transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`}>{String(feature.properties.name)}</text>)}</g><g className="discovery-place-details">{visibleDetailedPlaces.map(({ feature, point }, index) => <text key={`${String(feature.properties.name)}-${index}`} className={`place-${String(feature.properties.place)}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`}>{String(feature.properties.name)}</text>)}</g></g>
-            <g className="discovery-markers">{showNearbyGroups ? <>
-              {visibleNearbyGroups.map((group) => {
-                const point = projection([group.longitude, group.latitude]);
-                const groupShowrooms = group.showroomIds.map((showroomId) => showroomById.get(showroomId)).filter((showroom): showroom is DiscoveryShowroom => Boolean(showroom));
-                const featured = group.showroomIds.includes(discovery.featuredNowBusinessId || -1);
-                const liveCount = groupShowrooms.filter((showroom) => showroom.isLive && showroom.id !== discovery.featuredNowBusinessId).length;
-                const statusLabel = featured ? "Featured now" : liveCount ? `${liveCount} live` : "";
-                return point ? <g key={group.key} data-nearby-group-key={group.key} data-presence={featured ? "featured" : liveCount ? "live" : undefined} className={`discovery-nearby-group${featured ? " featured" : liveCount ? " live" : ""}${activeNearbyGroupKey === group.key ? " selected" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${group.count} nearby showrooms in ${group.city}.${statusLabel ? ` ${statusLabel}.` : ""} Open nearby showrooms.`} onClick={() => openNearbyGroup(group)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openNearbyGroup(group); }}><circle className="cluster-halo" r="27" /><circle className="cluster-core" r="19" /><text textAnchor="middle" y="5">{group.count}</text><text className="nearby-group-name" y="31" textAnchor="middle">Nearby</text>{featured ? <MarkerPresenceBadge kind="featured" text="FEATURED" y={-32} /> : liveCount ? <MarkerPresenceBadge kind="live" text={`${liveCount} LIVE`} y={-32} /> : null}</g> : null;
-              })}
-              {visibleUngroupedShowrooms.map(renderShowroomPoint)}
-            </> : markers.map((marker) => {
-              const point = projection(marker.geometry.coordinates as [number, number]);
-              if (!point) return null;
-              const properties = marker.properties;
-              if ("cluster_id" in properties) {
-                const featuredCount = properties.featuredCount || 0;
-                const liveCount = properties.liveCount || 0;
-                return <g key={`cluster-${properties.cluster_id}`} data-presence={featuredCount ? "featured" : liveCount ? "live" : undefined} className={`discovery-cluster${featuredCount ? " featured" : liveCount ? " live" : ""}`} transform={`translate(${point[0]} ${point[1]}) scale(${1 / zoomLevel})`} role="button" tabIndex={0} aria-label={`${properties.point_count} nearby showrooms.${featuredCount ? " One is featured now." : liveCount ? ` ${liveCount} live now.` : ""} Zoom to reveal.`} onClick={() => openCluster(properties.cluster_id, marker.geometry.coordinates as [number, number])} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openCluster(properties.cluster_id, marker.geometry.coordinates as [number, number]); }}><circle className="cluster-halo" r="27" /><circle className="cluster-core" r="19" /><text textAnchor="middle" y="5">{properties.point_count}</text>{featuredCount ? <MarkerPresenceBadge kind="featured" text="FEATURED" y={-32} /> : liveCount ? <MarkerPresenceBadge kind="live" text={`${liveCount} LIVE`} y={-32} /> : null}</g>;
-              }
-              const showroom = showroomById.get(properties.showroomId);
-              if (!showroom) return null;
-              return renderShowroomPoint(showroom);
-            })}</g>
-          </g>
-        </svg> : null}
-        <a className="discovery-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Map data © OpenStreetMap contributors · Boundaries: FEWS NET</a>
+        {!mapFailed ? <MarketplaceMap
+          ref={mapRef}
+          showrooms={discovery.showrooms}
+          nearbyGroups={discovery.nearbyGroups}
+          featuredNowBusinessId={discovery.featuredNowBusinessId}
+          selectedShowroomId={selectedShowroomId}
+          requestedView={requestedView}
+          onViewChange={(mapView) => {
+            mapViewRef.current = mapView;
+            rememberNavigation(activeNearbyGroupKey, mapView);
+          }}
+          onOpenNearbyGroup={openNearbyGroup}
+          onSelectShowroom={(showroom) => {
+            setSelectedShowroomId(showroom.id);
+            rememberNavigation(activeNearbyGroupKey);
+          }}
+          onError={() => setMapFailed(true)}
+        /> : null}
         {!industrySelected ? <IndustryStartChooser discovery={discovery} action={action} /> : null}
         {activeNearbyGroup ? <NearbyShowroomsViewer group={activeNearbyGroup} showrooms={activeNearbyShowrooms} featuredNowBusinessId={discovery.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} onSelect={(showroomId) => {
           setSelectedShowroomId(showroomId);

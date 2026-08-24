@@ -13,6 +13,10 @@ const discoveryMapSource = fs.readFileSync(
   path.join(process.cwd(), "components/DiscoveryWorkspace.tsx"),
   "utf8",
 );
+const marketplaceMapSource = fs.readFileSync(
+  path.join(process.cwd(), "components/MarketplaceMap.tsx"),
+  "utf8",
+);
 const discoveryCssSource = fs.readFileSync(
   path.join(process.cwd(), "app/discovery.css"),
   "utf8",
@@ -21,7 +25,7 @@ const featuredUiSource = fs.readFileSync(
   path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"),
   "utf8",
 );
-const discoveryUiSource = `${discoveryMapSource}\n${featuredUiSource}`;
+const discoveryUiSource = `${discoveryMapSource}\n${marketplaceMapSource}\n${featuredUiSource}`;
 const featuredPageSource = fs.readFileSync(
   path.join(process.cwd(), "app/featured/page.tsx"),
   "utf8",
@@ -38,7 +42,7 @@ assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
 assert.match(discoveryUiSource, /Filter by region or city/);
 assert.match(discoveryUiSource, /discovery-industry-menu/);
 assert.match(discoveryUiSource, /industry-accent-swatch/);
-assert.match(discoveryUiSource, /data-industry=\{showroom\.primaryIndustryKey\}/);
+assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
 assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
 assert.match(discoveryUiSource, /showroom\.primaryIndustryShortLabel/);
 assert.match(discoveryUiSource, /NEARBY_GROUP_ZOOM = 14/);
@@ -56,37 +60,26 @@ assert.doesNotMatch(discoveryUiSource, /featured-floor|featured-booth-platform|b
 assert.match(discoveryUiSource, /featured-experience/);
 assert.match(discoveryUiSource, /TikTok Live/);
 assert.match(discoveryUiSource, /Livestream ended/);
-assert.match(discoveryUiSource, /point-showroom-store/);
-assert.match(discoveryUiSource, /point-hit-target/);
-assert.doesNotMatch(discoveryUiSource, /className="point-halo"/);
-assert.match(discoveryUiSource, /SHOWROOM_DETAIL_SCALE/);
-assert.match(discoveryMapSource, /getClusters\(viewportGeoBounds, clusterZoom\)/, "cluster projection is bounded to the committed map viewport");
-assert.match(discoveryMapSource, /requestIdleCallback\(loadDetails, \{ timeout: 3_000 \}\)/, "secondary geography waits for browser idle time");
-assert.match(discoveryMapSource, /setTimeout\(loadDetails, 1_500\)/, "browsers without idle callbacks defer secondary geography");
-assert.match(discoveryMapSource, /const MapGeographyLayers = memo/, "static geography is isolated from marker viewport commits");
-assert.match(discoveryMapSource, /showPrimaryRoads=\{zoomLevel >= 1\.45\}/, "primary road detail is progressive by zoom level");
-assert.match(discoveryMapSource, /showSecondaryRoads=\{zoomLevel >= 2\.4\}/, "secondary road detail is progressive by zoom level");
-assert.match(discoveryMapSource, /ethiopia-places-cities-osm\.geojson/, "country context loads the bounded city place tier");
-assert.match(discoveryMapSource, /if \(loadTowns && !townPlaces\)/, "town places load only at their visible zoom tier");
-assert.match(discoveryMapSource, /if \(loadVillages && !villagePlaces\)/, "village places load only at their visible zoom tier");
-assert.match(discoveryMapSource, /Promise\.all\(requests\)/, "detail tiers commit from one batched request group");
-assert.match(discoveryMapSource, /startTransition\(\(\) => setMapViewport/, "viewport projection work is a non-urgent React update");
-assert.match(discoveryMapSource, /const MAX_PLACE_LABELS = 180/, "mounted map place labels retain an explicit upper bound");
-assert.match(discoveryMapSource, /MAX_PLACE_LABELS - visibleCityPlaces\.length/, "detailed labels cannot exceed the remaining mounted-label budget");
-assert.match(discoveryMapSource, /visibleCityCandidates\.slice\(0, 8\)/, "only eight population-prioritized city labels remain in the gesture hot path");
-assert.match(discoveryMapSource, /className="discovery-place-cities"/, "major-city labels use a stable gesture layer");
-assert.match(discoveryCssSource, /\.map-navigating \.discovery-place-details \{ visibility: hidden; \}/, "only detailed place labels pause during active navigation");
-assert.match(discoveryMapSource, /visibleNearbyGroups\.map/, "terminal nearby markers remain viewport bounded");
-assert.match(discoveryMapSource, /visibleUngroupedShowrooms\.map/, "terminal showroom markers remain viewport bounded");
-assert.doesNotMatch(discoveryMapSource, /discovery\.showrooms\.find\(\(candidate\) => candidate\.id === properties\.showroomId\)/, "marker resolution does not scan every showroom");
+assert.match(marketplaceMapSource, /mp-map-storefront/);
+assert.doesNotMatch(marketplaceMapSource, /point-halo|cluster-halo/);
+assert.match(marketplaceMapSource, /SHOWROOM_DETAIL_ZOOM/);
+assert.match(marketplaceMapSource, /getClusters\(viewport, zoom\)/, "cluster projection is bounded to the visible Leaflet viewport");
+assert.match(marketplaceMapSource, /bounds\.contains/, "terminal nearby and showroom markers remain viewport bounded");
+assert.match(marketplaceMapSource, /keepBuffer: 0/, "the browser retains no speculative off-screen tile buffer");
+assert.match(marketplaceMapSource, /updateWhenIdle: true/, "tiles update after a gesture settles on lower-end devices");
+assert.match(marketplaceMapSource, /updateWhenZooming: false/, "zoom gestures do not continuously request intermediate tile layers");
+assert.match(marketplaceMapSource, /detectRetina: false/, "retina overfetch remains disabled for the public tile service");
+assert.doesNotMatch(marketplaceMapSource, /fetch\(|\/api\//, "the map renderer neither proxies nor prefetches basemap tiles");
+assert.doesNotMatch(discoveryMapSource, /\/geo\//, "the active marketplace no longer loads bundled geography layers");
+assert.doesNotMatch(discoveryMapSource, /d3-(?:geo|selection|transition|zoom)|geoMercator|geoPath/, "the gesture path no longer runs the custom D3 geography renderer");
 assert.match(discoveryUiSource, /walkthrough-current/);
 assert.doesNotMatch(discoveryUiSource, /randomSponsorPair/);
 assert.doesNotMatch(discoveryUiSource, /rail\.scrollTo/);
-assert.match(discoveryUiSource, /mirtpage:discovery-navigation:v1/);
+assert.match(discoveryUiSource, /mirtpage:discovery-navigation:v2/);
 assert.match(discoveryUiSource, /mirtpage:last-marketplace-url:v1/);
 assert.match(discoveryUiSource, /rememberCurrentPublicWorkspace/);
 assert.match(nearbyViewerSource, /onClick=\{\(\) => onSelect\(showroom\.id\)\}/);
-assert.match(discoveryUiSource, /mapPersistenceEnabledRef\.current = false/);
+assert.match(discoveryMapSource, /mapViewRef\.current = mapView/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
 assert.match(discoveryCssSource, /\[data-industry="electronics"\]/);
 assert.match(discoveryCssSource, /var\(--industry-accent/);

@@ -441,6 +441,142 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
   .discovery-industry-start > div { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* ADR-0016: direct, viewport-only OSM Standard basemap through Leaflet. */
+.discovery-map.leaflet-container {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: #e8efee;
+  color: var(--mp-navy);
+  font-family: inherit;
+}
+.discovery-map.leaflet-container:focus-visible {
+  outline: 3px solid var(--mp-focus);
+  outline-offset: -3px;
+}
+.discovery-map .leaflet-tile-pane {
+  filter: saturate(.82) contrast(.96) brightness(1.025);
+}
+.discovery-map .leaflet-control-attribution {
+  max-width: calc(100% - 8px);
+  padding: 2px 5px;
+  background: rgb(255 255 255 / 92%);
+  color: #46575b;
+  font-size: .56rem;
+  line-height: 1.25;
+}
+.discovery-map .leaflet-control-attribution a { color: #075d61; font-weight: 750; }
+.mp-map-div-icon { border: 0; background: transparent; }
+.mp-map-cluster,.mp-map-nearby {
+  display: grid;
+  position: relative;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--mp-teal);
+  color: #fff;
+  box-shadow: 0 3px 10px rgb(11 29 58 / 25%);
+}
+.mp-map-cluster b,.mp-map-nearby b { font-size: .76rem; line-height: 1; }
+.mp-map-nearby { width: 58px; height: 58px; grid-template-rows: 1fr auto; padding-block: 10px 7px; }
+.mp-map-nearby b { align-self: end; }
+.mp-map-nearby small { align-self: start; color: #fff; font-size: .43rem; font-weight: 900; text-transform: uppercase; }
+.mp-map-status {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  min-width: max-content;
+  padding: 2px 5px;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  background: var(--mp-teal-hover);
+  color: #fff;
+  font-size: .42rem;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+.mp-map-status-featured { background: var(--mp-berry); }
+.mp-map-showroom {
+  display: grid;
+  position: relative;
+  width: 96px;
+  min-height: 70px;
+  justify-items: center;
+  color: var(--mp-navy);
+  text-align: center;
+  pointer-events: none;
+}
+.mp-map-storefront {
+  display: block;
+  position: relative;
+  width: 28px;
+  height: 25px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  background: var(--mp-teal);
+  box-shadow: 0 2px 7px rgb(11 29 58 / 24%);
+}
+.mp-map-storefront::before {
+  position: absolute;
+  top: -7px;
+  right: -4px;
+  left: -4px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-radius: 3px 3px 1px 1px;
+  background: var(--mp-teal);
+  content: "";
+  clip-path: polygon(9% 0,91% 0,100% 100%,0 100%);
+}
+.mp-map-storefront::after {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  left: 4px;
+  height: 8px;
+  border: 1px solid rgb(255 255 255 / 88%);
+  border-bottom: 0;
+  content: "";
+}
+.mp-map-storefront > i {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  left: 3px;
+  height: 3px;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+.mp-map-showroom > b {
+  display: grid;
+  max-width: 94px;
+  margin-top: 3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 91%);
+  box-shadow: 0 1px 4px rgb(11 29 58 / 14%);
+  font-size: .48rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.mp-map-showroom > b span { display: block; overflow-wrap: anywhere; }
+.mp-map-showroom > .mp-map-status { top: -16px; }
+.mp-map-showroom.is-selected .mp-map-storefront,
+.leaflet-marker-icon:hover .mp-map-storefront,
+.leaflet-marker-icon:focus-visible .mp-map-storefront { background: var(--mp-teal-hover); box-shadow: 0 0 0 3px rgb(39 165 161 / 28%),0 3px 9px rgb(11 29 58 / 26%); }
+.leaflet-marker-icon:focus-visible { outline: 3px solid var(--mp-focus); outline-offset: 4px; }
+
+@media (max-width: 620px) {
+  .discovery-map .leaflet-control-attribution { font-size: .48rem; }
+  .mp-map-showroom { width: 84px; }
+  .mp-map-showroom > b { max-width: 82px; font-size: .44rem; }
+}
+
 @media (max-width: 350px) {
   .discovery-switcher h2 { font-size: 1.25rem; }
   .discovery-summary { gap: 7px; }

@@ -403,16 +403,17 @@ decorative environment. Daily Featured likewise presents up to forty image-led c
 ordinary vertical scrolling and no simulated hall, map-style zoom, pagination,
 or hidden overflow.
 
-The discovery map uses locally stored, attributed Ethiopia region and zone
-boundaries plus an offline-derived OpenStreetMap place and major-road subset.
-Visitor browsers make no runtime request to a tile, geocoding, routing, or map
-provider. Country geometry appears first; detailed administrative boundaries,
-city labels, and major roads are admitted during browser idle time. Primary,
-secondary, town, and village detail is progressively admitted only at useful
-zoom levels. During a pan or zoom gesture, the browser updates one map-group
-transform and defers React viewport state until the gesture ends. Marker and
-label projection is viewport-bounded, and visible place labels are capped at
-180. Each eligible business appears at its reviewed WGS84 coordinates.
+The discovery map uses Leaflet with the centralized `osm-standard` provider.
+The visitor's browser requests only visible basemap tiles from the exact
+OpenStreetMap Standard HTTPS endpoint and retains visible attribution plus the
+provider's normal cache behavior. MirtPage does not proxy, prefetch, scrape,
+bulk-download, package, or service-worker-cache those tiles, and it sends no
+search, account, showroom, or private-location data in tile URLs. OpenStreetMap
+supplies visual road and place context only; Supabase remains authoritative for
+reviewed coordinates, eligibility, industries, search, and place filters.
+Cluster and marker reconciliation occurs after Leaflet movement settles and is
+bounded to the committed viewport. Each eligible business appears at its
+reviewed WGS84 coordinates.
 Nearby markers form numbered zoom-dependent clusters. At neighborhood zoom,
 same-city businesses within 800 meters form deterministic balanced nearby groups
 of at most six. Larger cohorts split into separate markers. Activating one opens

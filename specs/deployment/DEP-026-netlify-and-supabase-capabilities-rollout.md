@@ -2,7 +2,7 @@
 id: DEP-026
 title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
-related: [FE-019, FE-021, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-020, DEP-023, DEP-027, ADR-0014, ADR-0015]
+related: [FE-019, FE-021, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-020, DEP-023, DEP-027, ADR-0014, ADR-0015, ADR-0016]
 owners: [deployment, operations, security]
 last_updated: 2026-08-24
 change_level: L4
@@ -32,14 +32,17 @@ turning every free service into an unconditional runtime dependency.
    Supabase projects, while local development and browser acceptance use
    isolated local Supabase CLI projects.
 2. Netlify configuration contains no secrets and does not pin the OpenNext
-   adapter. Node version follows the repository baseline.
+   adapter. Node version follows the repository baseline. Local Netlify account
+   and site-link state stays ignored, and operator commands use the isolated
+   MirtPage CLI home rather than an ambient account profile.
 3. The free-plan credit hard limit is monitored; unnecessary production deploys
    and globally open serverless polling are prohibited.
 4. Realtime subscribes only while a support thread or staff inbox is visible,
    unsubscribes on close/background, and falls back to bounded polling.
 5. PostGIS is enabled only with an additive point/index migration and a
-   viewport-query adapter. Static local road/place geography remains versioned
-   first-party map data.
+   viewport-query adapter. The launch basemap follows ADR-0016: browser-visible
+   tiles go directly to the exact OpenStreetMap Standard endpoint with
+   attribution and without a Netlify proxy, prefetch, bulk download, or PWA cache.
 6. Public map payloads remain bounded. Before sustained tens-of-thousands of
    showrooms, the server returns viewport rows/clusters instead of the complete
    canonical point set.
@@ -69,10 +72,11 @@ Scenario: Realtime reaches its plan or provider limit
   AND PostgreSQL remains message authority
 
 Scenario: Visitor zooms the map
-  GIVEN locally hosted road and place tiers
+  GIVEN the centralized osm-standard provider is selected
   WHEN the visitor pans or zooms
-  THEN static geography remains available without a third-party tile request
-  AND temporary label reduction may occur during the gesture to protect input responsiveness
+  THEN the browser requests only visible OpenStreetMap Standard tiles
+  AND MirtPage sends no catalog query, private location, or account data in a tile request
+  AND a tile-provider failure does not remove Supabase-backed showroom discovery
 ```
 
 ## Test plan
@@ -123,8 +127,14 @@ than dual writing.
 - Realtime remains a planned visibility-scoped acceleration with polling
   fallback. PostGIS remains deferred until measured public-map scale requires
   server-side viewport queries.
-- Netlify authentication timed out while waiting for browser approval; site connection, candidate deployment,
-  generated-domain smoke, production environment configuration, DNS cutover,
+- On 2026-08-24 the isolated Netlify CLI profile authenticated as the intended
+  account and created only site `mirtpage`
+  (`26c795eb-5560-4a88-b38d-3cc922c2a5e6`). The production context contains
+  the allowlisted PostgreSQL, Supabase Auth, private Storage, canonical-origin,
+  PWA, and `osm-standard` settings. Netlify Free cannot apply paid hidden/scoped
+  secret controls, so the owner explicitly approved ordinary site environment
+  variables across Netlify's standard scopes; values remain outside Git and
+  application logs. Candidate deployment, generated-domain smoke, DNS cutover,
   and monitored rollback evidence remain pending.
 
 ## Readiness checklist
