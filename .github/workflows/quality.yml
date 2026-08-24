@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run release
+        env:
+          MIRTPAGE_DELEGATE_PROVIDER_SMOKE: "1"
       - run: npm run test:operations
 
   browser:

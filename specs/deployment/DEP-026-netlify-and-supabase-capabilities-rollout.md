@@ -117,8 +117,9 @@ than dual writing.
   browser suite passed nine workflows; its remaining request-workflow failure
   exposed redundant route invalidation delaying redirect responses. Status,
   clarification, assignment, and invitation redirects now reload authoritative
-  dynamic destinations without those invalidations. Remote CI is the pending
-  browser confirmation.
+  dynamic destinations without those invalidations. GitHub Actions browser job
+  `97312645834` in run `32686559246` then passed all 10 ordered provider-backed
+  workflows.
 - Realtime remains a planned visibility-scoped acceleration with polling
   fallback. PostGIS remains deferred until measured public-map scale requires
   server-side viewport queries.

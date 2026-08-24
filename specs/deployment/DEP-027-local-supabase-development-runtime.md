@@ -40,6 +40,12 @@ hosted Supabase project.
 - Authoritative HTTP and release smoke tests run through that isolated
   provider-backed browser runtime. The retained SQLite HTTP harness is not a
   release gate.
+- GitHub's required browser job owns the provider-backed smoke. The core release
+  job explicitly delegates that one stage instead of starting a duplicate
+  Supabase/browser stack; local release runs it when the Supabase CLI is present.
+- The standalone container gate proves image integrity and fail-closed startup
+  without provider credentials. Provider-backed runtime health belongs to the
+  browser job, not a SQLite container substitute.
 - Application schema migration remains owned by MirtPage's reviewed PostgreSQL
   migrations; local Supabase startup never substitutes an unreviewed schema.
 
@@ -106,6 +112,10 @@ read-only migration comparison until the explicit retirement cleanup.
   rows, linked all 47 retained identities, and passed production API/security
   smoke on its isolated 563xx port family. Release no longer starts an
   authoritative production smoke server on the SQLite compatibility profile.
+- GitHub Actions browser job `97312645834` in run `32686559246` passed all 10
+  ordered workflows against the disposable Supabase runtime. PostgreSQL and
+  dependency jobs also passed; corrected core/container gate assumptions await
+  the follow-up run.
 
 ## Readiness checklist
 
