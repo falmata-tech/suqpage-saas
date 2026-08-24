@@ -7,6 +7,7 @@ import {
   mediaRoot,
   mediaStorageDriver,
 } from "../lib/config";
+import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import { runtimeGet } from "../lib/runtime-sql";
 
 export async function preflight() {
@@ -69,8 +70,14 @@ export async function preflight() {
 }
 
 if (process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY !== "1") {
-  preflight().catch((error) => {
-    console.error(error instanceof Error ? error.message : "Preflight failed.");
-    process.exitCode = 1;
-  });
+  void (async () => {
+    try {
+      await preflight();
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : "Preflight failed.");
+      process.exitCode = 1;
+    } finally {
+      await closePostgresRuntimeForTests();
+    }
+  })();
 }

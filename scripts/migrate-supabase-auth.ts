@@ -1,4 +1,5 @@
 import { createMirtPageSupabaseAdminClient, finalizeSupabaseIdentity, removePendingSupabaseIdentity } from "../lib/supabase-auth";
+import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import { runtimeAll, runtimeGet, runtimeRun } from "../lib/runtime-sql";
 
 type RetainedUser = { id: number; email: string; name: string; password_hash: string };
@@ -81,7 +82,15 @@ async function main() {
   if (conflicts) process.exitCode = 1;
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : "Supabase identity migration failed.");
-  process.exitCode = 1;
-});
+async function run() {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : "Supabase identity migration failed.");
+    process.exitCode = 1;
+  } finally {
+    await closePostgresRuntimeForTests();
+  }
+}
+
+void run();

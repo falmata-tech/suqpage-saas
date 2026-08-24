@@ -4,7 +4,7 @@ title: Supabase identity bridge and session authority
 status: in_progress
 related: [BE-002, BE-018, BE-026, BE-027, DEP-015, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
-last_updated: 2026-08-16
+last_updated: 2026-08-24
 change_level: L3
 ---
 
@@ -84,6 +84,15 @@ conflicts, and browser evidence proves password login plus client and admin
 authorization into business, project-history, and revision-preview routes.
 Hosted reset, logout, unlinked-user, suspension, Google, and cross-tenant browser
 evidence remains required before rollout.
+
+On 2026-08-24 the hosted migration dry-run reconciled 47 retained users with
+zero conflicts. The approved idempotent migration then created and linked all
+47 provider identities, and production preflight passed against PostgreSQL,
+Supabase Auth, and private Storage. The ignored local seed-credential file no
+longer matches the sampled retained production password hash, so a production
+password-login smoke remains pending deliberate credential rotation. Standalone
+identity migration and production preflight commands now close their PostgreSQL
+pools after completion instead of waiting for the idle timeout.
 
 ## Rollout and rollback
 

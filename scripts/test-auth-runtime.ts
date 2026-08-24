@@ -25,8 +25,12 @@ function main() {
 
     const authSource = fs.readFileSync("lib/auth.ts", "utf8");
     const providerSource = fs.readFileSync("lib/supabase-auth.ts", "utf8");
+    const migrationSource = fs.readFileSync("scripts/migrate-supabase-auth.ts", "utf8");
+    const preflightSource = fs.readFileSync("scripts/preflight.ts", "utf8");
     assert.match(authSource, /currentSupabaseIdentity/);
     assert.match(providerSource, /auth_identity_links/);
+    assert.match(migrationSource, /finally[\s\S]*closePostgresRuntimeForTests/);
+    assert.match(preflightSource, /finally[\s\S]*closePostgresRuntimeForTests/);
     assert.doesNotMatch(providerSource, /user_metadata.*access_role|user_metadata.*business_id/);
 
     db.close();
