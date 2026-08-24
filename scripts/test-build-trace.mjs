@@ -4,7 +4,10 @@ import path from "node:path";
 
 const root = fs.realpathSync(process.cwd());
 const nextRoot = path.join(root, ".next");
+const nextConfig = fs.readFileSync(path.join(root, "next.config.ts"), "utf8");
 assert(fs.existsSync(nextRoot), "Run a production build before checking output-file traces");
+assert.match(nextConfig, /\.\/node_modules\/@img\/sharp-linux-x64\/\*\*\/\*/);
+assert.match(nextConfig, /\.\/node_modules\/@img\/sharp-libvips-linux-x64\/\*\*\/\*/);
 
 const manifests = [];
 function walk(directory) {
