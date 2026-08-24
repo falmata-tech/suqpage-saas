@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
+import { authDriver } from "@/lib/config";
 import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById, runtimeUserByEmail } from "@/lib/catalog-runtime";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "@/lib/runtime-sql";
@@ -16,6 +17,7 @@ import { consumeRuntimeRateLimit, resetRuntimeRateLimit } from "@/lib/rate-limit
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
 import { validateLiveSettings } from "@/lib/live-showroom";
+import { beginGoogleSignIn, signInWithSupabasePassword, updateCurrentSupabasePassword, updateLinkedSupabasePassword } from "@/lib/supabase-auth";
 
 const text = (fd:FormData,key:string,max=500) => cleanText(fd.get(key),max);
 const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt(text(fd,key,30),10); return Number.isFinite(value)?value:fallback; };
@@ -50,14 +52,24 @@ export async function loginAction(formData:FormData) {
   const rate=await consumeRuntimeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
   if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
   const user=await runtimeUserByEmail(email);
-  if(!user||password.length>200||!await bcrypt.compare(password,user.password_hash)){
+  const authenticated=user&&password.length<=200&&(authDriver()==="supabase"
+    ? (await signInWithSupabasePassword(email,password))?.userId===user.id
+    : await bcrypt.compare(password,user.password_hash));
+  if(!authenticated||!user){
     await audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
     go("/login",{error:"Invalid email or password."});
   }
   await resetRuntimeRateLimit(`login:${identity.ipHash}:${email}`);
-  await setSession(user.id);
+  if(authDriver()==="local")await setSession(user.id);
   await audit("auth.login_success",{userId:user.id,businessId:user.business_id,ipHash:identity.ipHash});
   redirect(user.must_change_password?"/dashboard/account?required=1":"/dashboard");
+}
+
+export async function googleLoginAction(){
+  if(authDriver()!=="supabase")go("/login",{error:"Google sign-in is not available yet."});
+  const destination=await beginGoogleSignIn();
+  if(!destination)go("/login",{error:"Google sign-in could not be started."});
+  redirect(destination);
 }
 
 export async function logoutAction(){const user=await requireUser({allowTemporaryPassword:true});await audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
@@ -67,14 +79,18 @@ export async function changePasswordAction(formData:FormData){
   const current=String(formData.get("currentPassword")||"");
   const password=String(formData.get("newPassword")||"");
   const confirm=String(formData.get("confirmPassword")||"");
-  const stored=await runtimeGet<{password_hash:string}>("SELECT password_hash FROM users WHERE id=?",[user.id]);
-  if(!stored||!await bcrypt.compare(current,stored.password_hash))go("/dashboard/account",{error:"Current password is incorrect."});
   if(!isStrongPassword(password))go("/dashboard/account",{error:"Use at least 12 characters with upper-case, lower-case, and a number."});
   if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
+  const stored=await runtimeGet<{password_hash:string}>("SELECT password_hash FROM users WHERE id=?",[user.id]);
+  if(!stored)go("/dashboard/account",{error:"Current password is incorrect."});
+  const currentMatches=authDriver()==="supabase"
+    ? await updateCurrentSupabasePassword(user.email,current,password)
+    : await bcrypt.compare(current,stored.password_hash);
+  if(!currentMatches)go("/dashboard/account",{error:"Current password is incorrect."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?",[passwordHash,user.id]);
   await revokeAllUserSessions(user.id);
-  await setSession(user.id);
+  if(authDriver()==="local")await setSession(user.id);
   await audit("auth.password_changed",{userId:user.id,businessId:user.business_id});
   go("/dashboard/account",{saved:1});
 }
@@ -113,6 +129,7 @@ export async function adminResetClientPasswordAction(formData:FormData){
   const userId=int(formData,"userId"),businessId=int(formData,"businessId"),password=String(formData.get("temporaryPassword")||"");
   const target=await runtimeGet<{id:number;business_id:number|null}>("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'",[userId]);
   if(!target||target.business_id!==businessId||!isStrongPassword(password))go("/dashboard/settings",{business:businessId,accessError:"Choose the authorized owner and use a 12+ character password with upper-case, lower-case, and a number."});
+  if(authDriver()==="supabase"&&!await updateLinkedSupabasePassword(userId,password))go("/dashboard/settings",{business:businessId,accessError:"The managed identity provider could not update this password."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?",[passwordHash,userId]);
   await revokeAllUserSessions(userId);await audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});

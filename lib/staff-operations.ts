@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { isStrongPassword } from "./passwords";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import type { AccessRole, Business } from "./types";
+import { authDriver } from "./config";
+import { finalizeSupabaseIdentity, provisionSupabasePasswordIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
 
 export type StaffRole = Extract<AccessRole, "team_member" | "operations_manager">;
 export type StaffAccount = {
@@ -56,17 +58,26 @@ export async function createStaffAccount(raw: { name:unknown; email:unknown; pas
     throw new StaffOperationError("Complete every staff field and use a 12+ character temporary password with upper-case, lower-case, and a number.");
   }
   const passwordHash = await bcrypt.hash(password, 12);
+  let providerUserId = "";
+  if (authDriver() === "supabase") {
+    try { providerUserId = await provisionSupabasePasswordIdentity({ email, password, name }); }
+    catch { throw new StaffOperationError("That staff email is already in use or managed identity is temporarily unavailable."); }
+  }
   try {
-    return runtimeTransaction(async () => {
+    const result = await runtimeTransaction(async () => {
       const inserted = await runtimeGet<{ id: number }>(`
         INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,created_at)
         VALUES(?,?,?,'admin',NULL,1,CURRENT_TIMESTAMP) RETURNING id
       `, [email, passwordHash, name]);
       const userId = Number(inserted!.id);
       await runtimeRun("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)", [userId, accessRole]);
+      if (providerUserId) await runtimeRun("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, providerUserId, email, Date.now()]);
       return { userId, accessRole };
     });
+    if (providerUserId) await finalizeSupabaseIdentity(providerUserId, result.userId).catch(() => undefined);
+    return result;
   } catch (error) {
+    if (providerUserId) await removePendingSupabaseIdentity(providerUserId).catch(() => false);
     if (error instanceof StaffOperationError) throw error;
     throw new StaffOperationError("That staff email is already in use.");
   }

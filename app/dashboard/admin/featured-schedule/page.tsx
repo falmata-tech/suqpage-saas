@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { CalendarClock } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
+import FeaturedLineupSelector from "@/components/FeaturedLineupSelector";
 import { saveFeaturedProgramDayAction, updateFeaturedProgramPolicyAction } from "@/app/staff-actions";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
-import { featuredProgramAssignment } from "@/lib/discovery";
-import { buildFeaturedProgramAgenda, validateFeaturedProgramDate } from "@/lib/featured-program";
+import { featuredProgramAssignment, getSponsoredShowrooms } from "@/lib/discovery";
+import { buildFeaturedProgramAgenda, MAX_FEATURED_SHOWROOMS, validateFeaturedProgramDate } from "@/lib/featured-program";
 import {
   getFeaturedProgramDaySelection,
   getFeaturedProgramPolicy,
@@ -43,17 +44,19 @@ export default async function FeaturedSchedulePage({ searchParams }: {
   const assignment = featuredProgramAssignment(requestedDate);
   if (!assignment) redirect(`/dashboard/admin/featured-schedule?date=${todayInEthiopia()}&error=${encodeURIComponent("Choose a valid program date.")}`);
 
-  const [policy, selection, eligible] = await Promise.all([
+  const [policy, selection, eligible, sponsorPlacements] = await Promise.all([
     getFeaturedProgramPolicy(),
     getFeaturedProgramDaySelection(requestedDate),
     listFeaturedProgramEligibleBusinesses(assignment.industry.key),
+    getSponsoredShowrooms(),
   ]);
   const eligibleById = new Map(eligible.map((business) => [business.id, business]));
   const retainedManual = selection.businessIds.filter((businessId) => eligibleById.has(businessId));
   const effectiveMode = selection.mode === "manual" && retainedManual.length ? "manual" : "automatic";
-  const effectiveIds = effectiveMode === "manual" ? retainedManual : eligible.map((business) => business.id);
+  const effectiveIds = (effectiveMode === "manual" ? retainedManual : eligible.map((business) => business.id)).slice(0, MAX_FEATURED_SHOWROOMS);
   const effectiveOrder = new Map(effectiveIds.map((businessId, index) => [businessId, index + 1]));
   const agenda = buildFeaturedProgramAgenda(requestedDate, effectiveIds.length, Date.parse(`${requestedDate}T00:00:00+03:00`), policy);
+  const sponsorForSlot = (slot: number | undefined) => slot && sponsorPlacements.length ? sponsorPlacements[(slot - 1) % sponsorPlacements.length] : null;
 
   return (
     <DashboardShell user={user} business={null}>
@@ -79,6 +82,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
         <div><small>Industry</small><strong>{assignment.industry.label}</strong></div>
         <div><small>Current mode</small><strong>{effectiveMode === "manual" ? "Manual lineup" : "Automatic"}</strong></div>
         <div><small>Participants</small><strong>{effectiveIds.length}</strong></div>
+        <div><small>Sponsor placements</small><strong>{sponsorPlacements.length}</strong></div>
       </section>
 
       <details className="panel admin-form-disclosure featured-policy" open={false}>
@@ -100,7 +104,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
 
       <section className="panel featured-lineup-panel">
         <div className="featured-lineup-heading">
-          <div><span className="eyebrow">{requestedDate}</span><h2>{assignment.industry.label}</h2><p>Automatic includes every eligible showroom in name order. Manual lets you choose and reorder this date only.</p></div>
+          <div><span className="eyebrow">{requestedDate}</span><h2>{assignment.industry.label}</h2><p>Automatic schedules the first {MAX_FEATURED_SHOWROOMS} eligible showrooms in name order. Manual lets you choose and reorder up to {MAX_FEATURED_SHOWROOMS} for this date.</p></div>
           <span className="badge active">{effectiveIds.length} scheduled</span>
         </div>
         <form action={saveFeaturedProgramDayAction}>
@@ -110,18 +114,14 @@ export default async function FeaturedSchedulePage({ searchParams }: {
             <label><input type="radio" name="mode" value="automatic" defaultChecked={effectiveMode === "automatic"}/><span><strong>Automatic</strong><small>Always use the current eligible set.</small></span></label>
             <label><input type="radio" name="mode" value="manual" defaultChecked={effectiveMode === "manual"}/><span><strong>Manual</strong><small>Use the checked businesses in the numbered order.</small></span></label>
           </div>
-          {eligible.length ? (
-            <div className="featured-business-list" role="group" aria-label="Eligible featured showrooms">
-              {eligible.map((business, index) => {
-                const selected = effectiveMode === "automatic" || effectiveOrder.has(business.id);
-                return <label className="featured-business-row" key={business.id}>
-                  <input type="checkbox" name="businessId" value={business.id} defaultChecked={selected}/>
-                  <span><strong>{business.name}</strong><small>@{business.handle} · {business.city}, {business.region}</small></span>
-                  <span><small>Order</small><input aria-label={`${business.name} order`} name={`position-${business.id}`} type="number" min="1" max={eligible.length} defaultValue={effectiveOrder.get(business.id) || index + 1}/></span>
-                </label>;
-              })}
-            </div>
-          ) : <div className="empty-state">No eligible showroom has approved discovery details, a booth image, and a published offering for this industry.</div>}
+          {eligible.length ? <FeaturedLineupSelector
+            limit={MAX_FEATURED_SHOWROOMS}
+            businesses={eligible.map((business, index) => ({
+              ...business,
+              selected: effectiveOrder.has(business.id),
+              position: effectiveOrder.get(business.id) || Math.min(index + 1, MAX_FEATURED_SHOWROOMS),
+            }))}
+          /> : <div className="empty-state">No eligible showroom has approved discovery details, a booth image, and a published offering for this industry.</div>}
           <div className="featured-lineup-actions"><p>Eligibility is checked again when you save and whenever the public schedule is read.</p><button className="btn" type="submit" disabled={!eligible.length}>Save lineup</button></div>
         </form>
       </section>
@@ -131,7 +131,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
         <ol tabIndex={0} aria-label="Generated featured showroom broadcast agenda">
           {agenda.map((entry, index) => <li className={`agenda-${entry.kind}`} key={`${entry.kind}-${entry.start}-${index}`}>
             <time>{entry.kind === "booth" ? entry.label : entry.timeLabel}</time>
-            <span>{entry.kind === "booth" ? `Booth ${String(entry.slot).padStart(2, "0")}` : entry.label}</span>
+            <span>{entry.kind === "booth" ? `Booth ${String(entry.slot).padStart(2, "0")}` : entry.kind === "sponsor_break" ? sponsorForSlot(entry.sponsorSlot)?.name || entry.label : entry.label}</span>
             <small>{entry.session === "morning" ? "Morning" : entry.session === "afternoon" ? "Afternoon" : "Intermission"}</small>
           </li>)}
         </ol>

@@ -4,7 +4,7 @@ title: Daily Featured schedule policy and override projection
 status: in_progress
 related: [BE-020, BE-023, BE-027, FE-021, FE-033, FE-037, DEP-020, DEP-023, DEP-024]
 owners: [backend, security, operations]
-last_updated: 2026-08-10
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -53,6 +53,9 @@ SQLite and PostgreSQL behavior.
   Automatic lineup.
 - Public non-today projection contains only booth count, references, generated
   times, and program metadata; identity remains redacted.
+- `MAX_FEATURED_SHOWROOMS` is forty. Automatic projection takes the first forty
+  eligible rows in deterministic order, Manual persistence rejects more than
+  forty IDs, and public projection defensively truncates retained oversized rows.
 
 ## Contracts
 
@@ -61,7 +64,11 @@ SQLite and PostgreSQL behavior.
   minute changeover, sponsor frequency 2–8, and sponsor break 5–30 minutes.
 - `buildFeaturedProgramAgenda(dateIso, boothCount, policy, now)` returns booth,
   changeover, sponsor-break, and intermission entries with epoch bounds, EAT
-  labels, session identity, and one-or-zero current entry.
+  labels, session identity, sequential sponsor slots, and one-or-zero current entry.
+- `featuredProgramDisplayOrder(walkthroughs, now)` returns each slot exactly
+  once in circular order, anchored to the current presentation, otherwise the
+  most recently completed presentation, otherwise slot one. It never mutates
+  persisted lineup order or generated schedule entries.
 - Booths are split proportionally by session duration, with both sessions used
   when at least two booths exist. Remaining presentation minutes are distributed
   deterministically so each session ends exactly at its configured boundary.
@@ -74,6 +81,8 @@ SQLite and PostgreSQL behavior.
   position and cascading cleanup.
 - Global policy and one date's mode/lineup are replaced transactionally and
   audited by the server action.
+- Agenda and session domain functions reject booth counts above forty so internal
+  callers cannot silently produce an unsupported public gallery.
 
 ## Scenarios
 
@@ -81,7 +90,7 @@ SQLite and PostgreSQL behavior.
 Scenario: Automatic projection tracks current eligibility
   GIVEN a date has no manual override
   WHEN eligible showrooms are added or removed
-  THEN its next projection uses the updated deterministic eligible order
+  THEN its next projection uses at most the first forty rows in the updated deterministic eligible order
   AND no schedule materialization job is required
 
 Scenario: Manual lineup rejects another industry's business
@@ -89,6 +98,12 @@ Scenario: Manual lineup rejects another industry's business
   WHEN an administrator submits a business outside that eligible set
   THEN the mutation is rejected atomically
   AND the prior mode and lineup remain unchanged
+
+Scenario: Manual lineup rejects a forty-first participant
+  GIVEN a date already has a valid retained lineup
+  WHEN an administrator submits more than forty eligible business IDs
+  THEN the replacement is rejected before persistence
+  AND the prior date mode and lineup remain unchanged
 
 Scenario: Break time has no active booth
   GIVEN an agenda contains a changeover, sponsor break, or intermission

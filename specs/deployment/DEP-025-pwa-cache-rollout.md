@@ -1,10 +1,10 @@
 ---
 id: DEP-025
 title: PWA cache and standalone-shell rollout
-status: done
+status: in_progress
 related: [FE-034, FE-036, FE-037, DEP-002, DEP-020, DEP-023, DEP_BASE]
 owners: [operations, security, frontend]
-last_updated: 2026-08-14
+last_updated: 2026-08-15
 change_level: L3
 ---
 
@@ -21,6 +21,9 @@ stale API authority, or an unrecoverable worker to interfere with rollout.
   response headers. The manifest may use a short public cache lifetime.
 - Every worker release uses an explicit MirtPage cache version. Activation
   deletes only older caches with the MirtPage cache prefix.
+- The bounded public navigation allowlist includes the current routed public
+  application destinations `/`, `/featured`, and `/about`. Retired or private
+  destinations are not added merely because they once appeared in navigation.
 - Production verification proves manifest validity, icon availability, worker
   control after reload, public network-first fallback, and exclusion of
   `/api`, `/dashboard`, `/preview`, `/login`, and non-GET requests.
@@ -43,6 +46,12 @@ Scenario: New worker replaces an earlier MirtPage cache
   WHEN the new worker activates
   THEN only prior MirtPage-managed caches are removed
   AND unrelated origin caches remain untouched
+
+Scenario: Visitor revisits Daily Featured through the installed application
+  GIVEN the current worker has previously loaded `/featured`
+  WHEN the network is temporarily unavailable
+  THEN the bounded public page cache may serve the last successful Featured response
+  AND no API, account, or dashboard response is served from that cache
 
 Scenario: Protected request is made while offline
   GIVEN a worker controls the client
@@ -80,6 +89,12 @@ removed controlled caches and unregistered itself.
 ## Evidence
 
 Evidence:
+
+The 2026-08-15 performance audit reopened this rollout contract after finding
+that the routed `/featured` destination was absent from the public navigation
+allowlist. Focused worker-contract evidence and a replacement cache version are
+required before this spec returns to `done`; the earlier production evidence
+below remains historical evidence for the initial worker release.
 
 On 2026-08-14, production deployment
 `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` served the manifest and worker over HTTPS.

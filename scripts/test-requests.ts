@@ -284,7 +284,10 @@ async function main() {
     assert.equal(getRequestDetail(currentLegacyRequestId)?.status,"client_review");
     assert.equal(getRequestDetail(olderLegacyRequestId)?.events.some((event)=>event.event_type==="project_superseded"&&event.detail===`current_project:${currentLegacyRequestId}`),true);
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
-    assert.deepEqual(migrations.map((migration) => migration.version), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]);
+    assert.deepEqual(
+      migrations.map((migration) => migration.version),
+      Array.from({ length: 37 }, (_, index) => index + 1),
+    );
     console.log("Managed request integration tests passed.");
   } finally {
     closeDbForTests();

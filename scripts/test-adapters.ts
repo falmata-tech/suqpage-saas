@@ -30,17 +30,21 @@ async function main() {
   process.env.MIRTPAGE_MEDIA_DRIVER = "supabase";
   process.env.MIRTPAGE_SUPABASE_URL = "https://project.supabase.co";
   process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY = "service-role-key-long-enough";
+  process.env.MIRTPAGE_AUTH_DRIVER = "supabase";
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-key-long-enough";
   assert.doesNotThrow(() => assertProductionConfiguration());
   process.env.MIRTPAGE_MEDIA_DRIVER = "filesystem";
   assert.throws(
     () => assertProductionConfiguration(),
-    /must be supabase in PostgreSQL production mode/,
+    /must be supabase in production and deploy previews/,
   );
   if (previousNodeEnv === undefined) Reflect.deleteProperty(process.env, "NODE_ENV");
   else Reflect.set(process.env, "NODE_ENV", previousNodeEnv);
   process.env.MIRTPAGE_DATABASE_DRIVER = "sqlite";
   delete process.env.MIRTPAGE_POSTGRES_URL;
   delete process.env.MIRTPAGE_MEDIA_DRIVER;
+  delete process.env.MIRTPAGE_AUTH_DRIVER;
 
   const { postgresRuntimeConfig, sqliteParametersToPostgres } = await import("../lib/postgres-runtime");
   assert.equal(postgresRuntimeConfig(), null);

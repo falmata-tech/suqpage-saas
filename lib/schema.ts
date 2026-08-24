@@ -1818,4 +1818,248 @@ export function migrateDatabase(
       throw error;
     }
   }
+
+  const anonymousSupportApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=33")
+    .get();
+  if (!anonymousSupportApplied) {
+    db.exec("PRAGMA foreign_keys=OFF");
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        ALTER TABLE support_events RENAME TO support_events_v22;
+        ALTER TABLE support_assignments RENAME TO support_assignments_v22;
+        ALTER TABLE support_messages RENAME TO support_messages_v22;
+        ALTER TABLE support_conversations RENAME TO support_conversations_v22;
+
+        CREATE TABLE support_conversations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          public_ref TEXT UNIQUE NOT NULL,
+          participant_kind TEXT NOT NULL CHECK(participant_kind IN ('client','visitor')),
+          business_id INTEGER REFERENCES businesses(id) ON DELETE CASCADE,
+          opened_by_user_id INTEGER REFERENCES users(id) ON DELETE RESTRICT,
+          visitor_token_hash TEXT UNIQUE,
+          visitor_session_expires_at INTEGER,
+          assistance_category TEXT NOT NULL DEFAULT 'general' CHECK(assistance_category IN (
+            'general','sourcing','document_review','site_visit','shipment_observation'
+          )),
+          requester_label TEXT NOT NULL CHECK(length(requester_label) BETWEEN 1 AND 80),
+          subject TEXT NOT NULL CHECK(length(subject) BETWEEN 1 AND 120),
+          status TEXT NOT NULL DEFAULT 'waiting' CHECK(status IN ('waiting','open','closed')),
+          assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          client_last_read_message_id INTEGER NOT NULL DEFAULT 0,
+          visitor_last_read_message_id INTEGER NOT NULL DEFAULT 0,
+          staff_last_read_message_id INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          last_message_at INTEGER NOT NULL,
+          closed_at INTEGER,
+          CHECK(
+            (participant_kind='client' AND business_id IS NOT NULL AND opened_by_user_id IS NOT NULL
+              AND visitor_token_hash IS NULL AND visitor_session_expires_at IS NULL)
+            OR
+            (participant_kind='visitor' AND business_id IS NULL AND opened_by_user_id IS NULL
+              AND visitor_token_hash IS NOT NULL AND visitor_session_expires_at IS NOT NULL)
+          ),
+          CHECK((status='waiting' AND assigned_user_id IS NULL) OR status IN ('open','closed'))
+        );
+        CREATE TABLE support_messages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          sender_user_id INTEGER REFERENCES users(id) ON DELETE RESTRICT,
+          sender_kind TEXT NOT NULL CHECK(sender_kind IN ('user','visitor')),
+          sender_key TEXT NOT NULL,
+          body TEXT NOT NULL CHECK(length(body) BETWEEN 1 AND 4000),
+          idempotency_key TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          CHECK(
+            (sender_kind='user' AND sender_user_id IS NOT NULL)
+            OR (sender_kind='visitor' AND sender_user_id IS NULL)
+          ),
+          UNIQUE(sender_key,idempotency_key)
+        );
+        CREATE TABLE support_assignments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          assigned_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          assigned_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          reason TEXT NOT NULL CHECK(reason IN ('automatic','claimed','reassigned','reopened')),
+          assigned_at INTEGER NOT NULL,
+          released_at INTEGER
+        );
+        CREATE TABLE support_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+          actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          event_type TEXT NOT NULL CHECK(event_type IN ('created','assigned','reassigned','message','closed','reopened')),
+          detail TEXT NOT NULL DEFAULT '',
+          created_at INTEGER NOT NULL
+        );
+
+        INSERT INTO support_conversations(
+          id,public_ref,participant_kind,business_id,opened_by_user_id,
+          assistance_category,requester_label,subject,status,assigned_user_id,
+          client_last_read_message_id,visitor_last_read_message_id,staff_last_read_message_id,
+          created_at,updated_at,last_message_at,closed_at
+        )
+        SELECT id,public_ref,'client',business_id,opened_by_user_id,'general','MirtPage client',
+          subject,status,assigned_user_id,client_last_read_message_id,0,staff_last_read_message_id,
+          created_at,updated_at,last_message_at,closed_at
+        FROM support_conversations_v22;
+        INSERT INTO support_messages(
+          id,conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+        )
+        SELECT id,conversation_id,sender_user_id,'user','user:' || sender_user_id,
+          body,idempotency_key,created_at
+        FROM support_messages_v22;
+        INSERT INTO support_assignments SELECT * FROM support_assignments_v22;
+        INSERT INTO support_events SELECT * FROM support_events_v22;
+
+        DROP TABLE support_events_v22;
+        DROP TABLE support_assignments_v22;
+        DROP TABLE support_messages_v22;
+        DROP TABLE support_conversations_v22;
+
+        CREATE INDEX support_queue_status_idx ON support_conversations(status,last_message_at DESC,id DESC);
+        CREATE INDEX support_queue_assignee_idx ON support_conversations(assigned_user_id,status,last_message_at DESC,id DESC);
+        CREATE INDEX support_queue_business_idx ON support_conversations(business_id,last_message_at DESC,id DESC);
+        CREATE INDEX support_queue_visitor_idx ON support_conversations(visitor_token_hash,visitor_session_expires_at);
+        CREATE INDEX support_message_thread_idx ON support_messages(conversation_id,id);
+        CREATE INDEX support_assignment_agent_idx ON support_assignments(assigned_user_id,released_at,assigned_at DESC);
+        CREATE INDEX support_assignment_thread_idx ON support_assignments(conversation_id,assigned_at DESC);
+        CREATE INDEX support_event_thread_idx ON support_events(conversation_id,id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(33)").run();
+      db.exec("COMMIT");
+      db.exec("PRAGMA foreign_keys=ON");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      db.exec("PRAGMA foreign_keys=ON");
+      throw error;
+    }
+  }
+
+  const visitorContactsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=34")
+    .get();
+  if (!visitorContactsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        ALTER TABLE support_conversations ADD COLUMN visitor_email TEXT;
+        ALTER TABLE support_conversations ADD COLUMN visitor_phone TEXT;
+        CREATE TRIGGER support_visitor_contact_insert
+        BEFORE INSERT ON support_conversations
+        WHEN NEW.participant_kind='visitor' AND (
+          NEW.visitor_email IS NULL OR length(trim(NEW.visitor_email)) NOT BETWEEN 3 AND 254
+          OR NEW.visitor_phone IS NULL OR length(trim(NEW.visitor_phone)) NOT BETWEEN 7 AND 16
+        )
+        BEGIN
+          SELECT RAISE(ABORT,'visitor contact required');
+        END;
+        CREATE TRIGGER support_visitor_contact_update
+        BEFORE UPDATE OF participant_kind,visitor_email,visitor_phone ON support_conversations
+        WHEN NEW.participant_kind='visitor' AND (
+          NEW.visitor_email IS NULL OR length(trim(NEW.visitor_email)) NOT BETWEEN 3 AND 254
+          OR NEW.visitor_phone IS NULL OR length(trim(NEW.visitor_phone)) NOT BETWEEN 7 AND 16
+        )
+        BEGIN
+          SELECT RAISE(ABORT,'visitor contact required');
+        END;
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(34)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const externalSponsorAdsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=35")
+    .get();
+  if (!externalSponsorAdsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE external_sponsor_ads (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL CHECK(length(name) BETWEEN 2 AND 100),
+          description TEXT NOT NULL CHECK(length(description) BETWEEN 2 AND 180),
+          image_path TEXT NOT NULL CHECK(length(image_path) BETWEEN 2 AND 300 AND substr(image_path,1,1)='/'),
+          website_url TEXT CHECK(website_url IS NULL OR length(website_url) BETWEEN 10 AND 500),
+          phone TEXT CHECK(phone IS NULL OR length(phone) BETWEEN 7 AND 16),
+          position INTEGER NOT NULL DEFAULT 100 CHECK(position BETWEEN 1 AND 999),
+          active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)),
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          CHECK(website_url IS NOT NULL OR phone IS NOT NULL)
+        );
+        CREATE INDEX external_sponsor_ads_active_idx
+          ON external_sponsor_ads(active,position,id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(35)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const supportAttachmentsApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=36")
+    .get();
+  if (!supportAttachmentsApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE support_attachments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          message_id INTEGER NOT NULL UNIQUE REFERENCES support_messages(id) ON DELETE CASCADE,
+          storage_key TEXT NOT NULL UNIQUE CHECK(length(storage_key) BETWEEN 40 AND 120),
+          original_name TEXT NOT NULL CHECK(length(original_name) BETWEEN 1 AND 180),
+          mime_type TEXT NOT NULL CHECK(mime_type IN ('image/jpeg','image/png','image/webp','application/pdf')),
+          byte_size INTEGER NOT NULL CHECK(byte_size BETWEEN 1 AND 5242880),
+          created_at INTEGER NOT NULL
+        );
+        CREATE INDEX support_attachment_message_idx
+          ON support_attachments(message_id,id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(36)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const supabaseIdentityLinksApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=37")
+    .get();
+  if (!supabaseIdentityLinksApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE auth_identity_links (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          provider TEXT NOT NULL CHECK(provider='supabase'),
+          provider_user_id TEXT NOT NULL UNIQUE CHECK(length(provider_user_id) BETWEEN 32 AND 64),
+          email_at_link TEXT NOT NULL CHECK(length(email_at_link) BETWEEN 3 AND 254),
+          created_at INTEGER NOT NULL
+        );
+        CREATE INDEX auth_identity_provider_lookup_idx
+          ON auth_identity_links(provider,provider_user_id,user_id);
+        CREATE TRIGGER auth_identity_link_immutable
+        BEFORE UPDATE OF user_id,provider,provider_user_id ON auth_identity_links
+        BEGIN
+          SELECT RAISE(ABORT,'auth identity link is immutable');
+        END;
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(37)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 }

@@ -4,7 +4,7 @@ title: Search-led marketplace homepage
 status: in_progress
 related: [FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023]
 owners: [product, frontend, design]
-last_updated: 2026-08-10
+last_updated: 2026-08-15
 change_level: L2
 ---
 
@@ -35,29 +35,29 @@ Daily Featured Showrooms next, and producer conversion last.
 - A restrained secondary accent set for industrial and editorial emphasis so
   teal remains the action color without dominating every public surface.
 - A clearer geographic-discovery composition that pairs one command surface
-  with the existing local Ethiopia map or bounded List view.
+  with the local Ethiopia map and a required centered eight-option orientation
+  choice, including **All industries** last.
 - A Daily Featured companion panel with legible paid-placement cards and stable
   access to the complete manually selected five-business pool.
-- The two-session TikTok program is presented as a floor agenda: every booth
+- The two-session TikTok program is presented as a card-gallery agenda: every showroom
   receives a non-overlapping EAT time range around reserved changeovers,
   sponsor moments, and the four-hour intermission. An active booth is named and
   highlighted without requiring a configured outbound profile link.
 - At phone widths, the selected-day heading and compact broadcast strip precede
-  the featured-showroom workspace, while all seven fixed weekday controls become one
-  touch-sized row visually floating across the venue's top edge. Long
-  descriptive copy and category labels do not push the floor down the page.
-- Grounded featured-showroom booths distributed through deterministic numbered exhibition
-  rows inside the existing venue shell, with safe wall insets, walking gaps,
-  and wider cross-aisles as the floor grows.
-- Grounded City Showroom booths with proportional architectural clearance so
+  the featured-showroom gallery, while all seven fixed weekday controls remain a
+  compact touch-sized row inside its header. Long descriptive copy and category
+  labels do not push the gallery down the page.
+- Image-led featured-showroom cards distributed through deterministic responsive
+  rows with no simulated venue shell.
+- Grounded Shared Location storefronts with proportional architectural clearance so
   cards do not touch venue walls, plants, entrances, or other shell props as the
   floor grows.
 - Responsive visual and contract evidence at desktop, 390px, and 320px.
 
 ### Non-goals
 
-- Changing showroom eligibility, clustering, coordinates, venue artwork, List
-  pagination, sponsored ordering, weekly industry/date assignment,
+- Changing showroom eligibility, clustering, exact Shared Location behavior,
+  sponsored ordering, weekly industry/date assignment,
   future-booth redaction, signup, inquiry, or publication behavior.
 - Claiming certification, platform endorsement, verified quality, buyer volume,
   business totals, category totals, ratings, sales, savings, or coverage that
@@ -76,10 +76,10 @@ Daily Featured Showrooms next, and producer conversion last.
   endorsement.
 - The sponsor pool contains five eligible businesses manually selected by
   platform staff. It is global and remains unchanged by industry, date, search,
-  place, and map/List state.
+  and place state.
 - Platform photography is illustrative art direction. It does not identify a
   listed producer, product, certification, transaction, or customer outcome.
-- Search, industry, map, List, City Showroom, sponsored placement, and Daily Featured use
+- Search, industry, map, Shared Location, sponsored placement, and Daily Featured use
   the existing server-authoritative discovery projection.
 
 ## Contracts
@@ -120,45 +120,37 @@ Daily Featured Showrooms next, and producer conversion last.
 - The homepage omits the former non-interactive industry rail. One icon-led
   industry menu inside the map command surface exposes all seven groups and is
   the only homepage industry control.
-- Geographic discovery initially selects **All industries** and projects every
-  eligible published showroom. Choosing one of the seven industry groups
-  narrows map, List, place options, totals, and pagination together. This
-  unfiltered map state does not change the fixed weekday industry used by Daily
-  Featured Showrooms.
+- Geographic discovery initially projects the combined de-duplicated marketplace
+  behind a required eight-option chooser inside the map workspace. Choosing one
+  industry filters its map, place options, and total; choosing **All industries**
+  keeps the combined projection and closes the chooser. The chosen map industry does not change the
+  fixed weekday industry used by Daily Featured Showrooms.
 - The seven industries use one restrained, accessible accent system across the
-  desktop industry menu, phone Filters sheet, individual map showroom markers,
-  paginated List cards, and City Showroom booth borders and fascia. White and cool-gray remain the dominant
+  desktop industry menu, phone Filters sheet, and Shared Location booth borders
+  and fascia. Numbered clusters and individual map markers remain one accessible
+  MirtPage teal. White and cool-gray remain the dominant
   booth content surfaces; color is a clearly visible identifier rather than a full-card wash, and an
   industry name or icon always accompanies it so meaning never depends on color
-  alone. **All industries** uses a coordinated multi-accent swatch instead of
-  pretending to be an eighth industry.
+  alone.
 - At local-detail zoom, an isolated showroom marker names the actual business
   beneath its storefront symbol. The renderer wraps that name into a compact,
   bounded multi-line label so long names remain legible without crossing the
-  map horizontally. The label retains the marker's industry accent and never
+  map horizontally. The marker and label retain the uniform teal treatment and never
   falls back to a generic **Showroom** caption.
-- An all-industry City Market keeps its architectural hall neutral so every
-  industry can occupy one contiguous labeled district. Each district grows
-  with its showroom count, uses equal booth footprints, and remains separated
-  from other districts by shared walkways. The logical hall expands instead of
-  splitting one industry across unrelated floor areas. When one industry is selected,
-  the same controlled accent softly themes the hall field, floor edge, and city
-  sign without recoloring photography, reducing text contrast, or obscuring
-  venue architecture.
-- List cards retain white content surfaces and expose the showroom's primary
-  visual industry through a strong edge, labeled swatch, and restrained action
-  treatment. The all-industry List keeps a neutral field; a selected-industry
-  List uses only a soft matching field so visitors can recognize the active
-  scope without sacrificing card contrast.
+- Opening an exact-coordinate Shared Location under the required selected
+  industry renders that industry's matching businesses directly. Fixed-readable
+  storefronts use responsive columns and vertically growing rows inside
+  the bounded workspace. The controlled
+  accent softly themes the hall field, floor edge, and city sign without
+  recoloring photography, reducing text contrast, or obscuring venue architecture.
 - The routed public shell under FE-036 makes `/` the complete geographic
   workbench. `/discover` is a query-preserving compatibility redirect.
 - Map mode is a bounded remaining-viewport workspace on desktop and phone. Its
-  concise route heading, command row, unobstructed map or City Showroom canvas,
+  concise route heading, command row, unobstructed map or Shared Location canvas,
   and fixed application navigation fit without a document-length empty tail.
-  List mode scrolls its paginated results inside the same workspace.
 - Map mode presents one cohesive command-and-map composition. Its styled
   industry dropdown and live search are the sole homepage result controls;
-  Map/List, location jump, zoom, and reset keep their existing behavior and
+  location jump, zoom, and reset keep their existing behavior and
   accessible names.
 - After two non-whitespace characters, live search presents at most six
   server-authoritative suggestions drawn from eligible showroom names,
@@ -168,70 +160,59 @@ Daily Featured Showrooms next, and producer conversion last.
 - The suggestion surface is an accessible combobox/listbox: keyboard visitors
   can move with Up/Down, apply with Enter, dismiss with Escape, and continue
   typing without focus loss. It overlays the workbench without resizing or
-  pushing the map, List, or phone command row.
+  pushing the map or phone command row.
 - At desktop and tablet widths, the opened industry menu matches the trigger's
   inline width and wraps long labels. It never expands across the map. At phone
   widths, industry choices remain in the existing Filters bottom sheet.
 - At phone widths, the command area progressively discloses secondary controls:
-  one flexible live search, a Filters action, and compact icon-led Map/List
-  controls occupy one command row; industry and available-place selection move
+  one flexible live search and Filters action occupy one command row; industry
+  and available-place selection move
   into a native modal bottom sheet; and locate, zoom, and reset become
   touch-sized controls over the map. Desktop retains the complete side command
-  panel and text-labeled Map/List switch.
+  panel.
 - The scheduled public program is labeled **Daily Featured Showrooms** in every
   visitor-visible and assistive-technology string. Current application
   identifiers, generated links, and URL state use Daily Featured language under
   FE-037; only inert migration and immutable-storage compatibility identifiers
   may retain historical names.
-- Activating a revealed Daily Featured booth opens the same non-blocking
+- Activating a revealed Daily Featured card opens the same non-blocking
   showroom inspector used by discovery before any route change. Navigation to
   the tenant showroom occurs only when the visitor chooses **Open showroom**
   from that inspector; dragging or panning from a booth does not navigate.
 - Compact navigation uses the shorter **Daily featured** label. **Sponsors** is
-  disclosed beside the Daily Featured floor rather than as a primary route.
+  disclosed beside the Daily Featured gallery rather than as a primary route.
 - The map enters the first desktop viewport and remains visibly hinted within
   the first 844px phone viewport. Phone content must not hide the hero image,
   search, selected industry, or map entry.
 - Sponsored cards expose only the Sponsors label, approved image or fallback,
   business name, place, and showroom action. Desktop shows the complete bounded
-  paid pool beside the floor; phones show two cards at a time and rotate through
+  paid pool beside the gallery; phones show two cards at a time and rotate through
   the pool without horizontal scrolling, pause, or movable carousel controls.
 - Showroom selection opens a non-modal floating inspector. The underlying map,
-  City Showroom, or Daily Featured remains visible through a restrained low-opacity scrim.
+  Shared Location, or Daily Featured remains visible through a restrained low-opacity scrim.
   The inspector is centered on larger screens so selection is unmistakable. On phones the
   inspector becomes a bounded bottom sheet above app navigation rather than a
   full-screen takeover.
 - Valid merchant live state is visible on map aggregates, individual showroom
-  pins, City Showroom booths, and today's Daily Featured floor. The current MirtPage Daily Featured
+  pins, Shared Location booths, and today's Daily Featured gallery. The current MirtPage Daily Featured
   walkthrough uses **Featured now** and overrides only that business's merchant
   live presentation for the duration of its slot.
 - Daily Featured retains the fixed weekly selector, truthful selected-day description,
-  dynamic continuous floor, controls, and identity redaction for non-today
+  dynamic continuous gallery, controls, and identity redaction for non-today
   dates. Visual framing may change without changing those contracts.
-- Map, City Showroom, and Daily Featured zoom controls occupy dedicated compact
-  toolbars outside their interactive canvases; they never cover markers,
-  storefronts, booths, or venue architecture. After zooming in, pointer and
-  touch visitors can pan from open floor or booth/storefront surfaces in every
-  direction without accidentally activating a showroom.
-- The Daily Featured heading and fixed weekday selector form the venue's attached
-  header, not a detached page section. On phones the compact segmented selector
-  remains inside the workspace directly above the dedicated zoom toolbar and
-  venue; none of those controls overlap booth content. Initial Daily Featured
-  and City floor scale is the maximum
-  zoomed-out fit that keeps every venue edge visible without cropping; zooming
-  in is always a visitor action and Reset restores that exact fit.
-- Daily Featured booth placement uses unique, deterministic row-major positions. Every
-  booth stays within a safe architectural inset, avoids another booth, and has
-  visible floor contact rather than a floating shadow. Additional booths add
-  rows on the same pannable floor; they never create a hall, page, or wall overlap.
-- City Showroom and Daily Featured booth placement reserve proportional architectural
-  clearance as floors grow. Booths use a flat base treatment without a floating
-  drop shadow and do not cover the shell walls, planting, entrance, or props.
-- City Showroom and Daily Featured floor geometry adapts deterministically to
-  the measured canvas aspect: portrait stages use additional rows, balanced
-  stages use compact grids, and wide stages use additional columns. Initial Fit
-  still reveals every venue edge, all-industry districts remain contiguous,
-  and Daily Featured booth references remain row-major for the active layout.
+- Map zoom controls remain available in the geographic workspace. Shared
+  Locations use ordinary vertical scrolling and fixed-readable storefronts
+  without zoom or sideways panning.
+- The Daily Featured heading and fixed weekday selector form one attached gallery
+  header. On phones the compact segmented selector remains inside that header and
+  never overlaps cards.
+- Daily Featured cards use unique deterministic row-major positions in a native
+  responsive grid. Cards expose dimensioned approved media, reference, business
+  name, location, schedule, and current status. Additional participants add rows;
+  they never create a venue, hall, page selector, or transform surface.
+- The gallery uses one column at narrow phone widths, two where card readability
+  permits, and more columns as available width grows. It never scales text or
+  media below the defined readable card dimensions merely to fit forty entries.
 - The closing invitation is producer-focused and secondary to marketplace use.
   Footer links include only routes or contact methods that exist.
 - Every interactive control remains at least 44 CSS pixels on phones, focus is
@@ -245,38 +226,39 @@ Scenario: Visitor begins with a product, business, or industry search
   GIVEN the public homepage is open
   WHEN the visitor chooses an industry or enters a product, capability, business, or place in the map command surface
   THEN the existing discovery query receives the bounded search term
-  AND the matching map or List remains the authoritative result surface
+  AND the matching map remains the authoritative result surface
 
 Scenario: Visitor chooses a search suggestion
   GIVEN the visitor has entered at least two characters
   WHEN eligible showroom, offering, or reviewed-place suggestions match
-  THEN at most six labeled suggestions appear without moving the map or List
+  THEN at most six labeled suggestions appear without moving the map
   AND pointer, touch, and keyboard visitors can select one
   AND the selected value immediately becomes the authoritative search query
 
 Scenario: Visitor opens geographic discovery without an industry filter
   GIVEN eligible published showrooms exist in multiple industries
   WHEN the homepage or standalone discovery route opens without an industry query
-  THEN All industries is visibly selected
-  AND map, List, available places, totals, and pagination use the combined eligible set
+  THEN the de-duplicated combined showroom map is loaded behind a centered eight-option chooser
+  AND All industries is the final choice rather than an automatic hidden default
+  AND choosing one industry filters the result set
+  AND choosing All industries keeps the combined result and closes the chooser
   AND Daily Featured Showrooms still uses the selected weekday's assigned industry
 
-Scenario: Visitor distinguishes industries in the combined marketplace
-  GIVEN eligible showrooms from several industries are visible under All industries
-  WHEN the visitor opens the industry menu, scans individual map markers, or enters a City Showroom
-  THEN the same restrained accent identifies each showroom's primary visual industry
+Scenario: Visitor changes the selected marketplace industry
+  GIVEN one canonical industry is selected
+  WHEN the visitor opens the industry menu, scans individual map markers, or enters a Shared Location
+  THEN the menu and Shared Location storefronts identify the selected industry
   AND the industry remains named or icon-labeled without relying on color alone
-  AND every City Market industry occupies exactly one labeled contiguous district
-  AND each district grows with its showroom count while booth footprints remain equal
-  AND shared walkways and restrained floor fields distinguish adjacent districts
-  AND the separate Daily Featured Showrooms venue is unchanged
+  AND individual markers and numbered clusters retain the same MirtPage teal
+  AND additional Shared Location storefronts append vertically in stable bounded batches
+  AND the separate Daily Featured Showrooms gallery is unchanged
 
 Scenario: Visitor identifies and previews a single showroom
   GIVEN an isolated showroom is visible at local-detail zoom or on today's
-  Daily Featured floor
-  WHEN the visitor scans the marker or activates the featured booth
+  Daily Featured gallery
+  WHEN the visitor scans the marker or activates the featured card
   THEN the map marker displays the business name in a bounded multi-line label
-  AND the featured booth opens a showroom inspector without changing the route
+  AND the featured card opens a showroom inspector without changing the route
   AND only the inspector's Open showroom action enters the tenant showroom
 
 Scenario: Visitor scans the marketplace on a phone
@@ -285,18 +267,25 @@ Scenario: Visitor scans the marketplace on a phone
   THEN the hero remains concise and visually identifies local production
   AND its product panorama fits the hero width and blends into the white field
   without a framed edge or horizontal overflow
-  AND Search, Filters, Map, and List share one compact command row
+  AND Search and Filters share one compact command row
   AND one Filters action opens touch-sized industry and location controls in a bottom sheet
   AND locate and zoom controls remain available on the map without another toolbar row
   AND the geographic marketplace is visibly introduced without horizontal overflow
 
-Scenario: Phone visitor reaches the Daily Featured floor without control stacking
+Scenario: Phone visitor reaches the Daily Featured gallery without control stacking
   GIVEN the homepage is open at a phone width
   WHEN the Daily Featured enters the viewport
   THEN its description is compact and its broadcast status remains clear
   AND exactly two of the five sponsors occupy one shallow automatically replacing slot
-  AND all seven fixed weekday controls fit in one row attached to the venue
-  AND the venue appears without a multi-row calendar or sponsor wall above it
+  AND all seven fixed weekday controls fit in one row attached to the gallery
+  AND the gallery appears without a multi-row calendar or sponsor wall above it
+
+Scenario: Forty featured showrooms remain readable
+  GIVEN the selected date has the maximum forty participating showrooms
+  WHEN Daily Featured renders on a large screen or phone
+  THEN every revealed business occupies one image-led card in a native responsive grid
+  AND the gallery grows through ordinary page rows without scaling, pagination, or map controls
+  AND a narrow phone uses one column until two columns meet the defined readable card width
 
 Scenario: Marketplace data does not support a promotional claim
   GIVEN the visual reference contains ratings, verification, transaction, or scale claims
@@ -305,23 +294,24 @@ Scenario: Marketplace data does not support a promotional claim
   AND only implemented platform benefits and authoritative discovery totals are shown
 
 Scenario: Existing discovery behavior survives the redesign
-  GIVEN a visitor changes industry, map mode, date, cluster, or city gateway
+  GIVEN a visitor changes industry, date, cluster, or Shared Location gateway
   WHEN the redesigned homepage handles the interaction
   THEN FE-021 and FE-024 behavior remains unchanged
   AND no duplicate directory or hidden result set appears
 
 Scenario: Daily Featured grows beyond one booth row
-  GIVEN the selected Daily Featured contains more booths than one exhibition row supports
-  WHEN the continuous floor is laid out
-  THEN every booth receives one unique grounded position inside the venue walls
-  AND additional numbered rows remain separated by usable walking gaps
-  AND larger floors receive a wider cross-aisle
+  GIVEN the selected Daily Featured contains more cards than one grid row supports
+  WHEN the responsive gallery is laid out
+  THEN every business receives one unique row-major card position
+  AND additional rows retain readable media and text dimensions
+  AND the visitor reaches those rows through ordinary vertical page scrolling
+  AND no zoom or pagination control is required
 
-Scenario: A virtual venue fits around its architecture
-  GIVEN a City Showroom or Daily Featured floor contains a small or large business cohort
-  WHEN the floor is fitted to the viewport
-  THEN every booth remains visibly grounded on the floor
-  AND no booth touches the venue walls, planting, entrance, or shell props
+Scenario: A Shared Location fits around its architecture
+  GIVEN a Shared Location contains a small or large business cohort
+  WHEN its floor is presented in the map workspace
+  THEN every storefront remains visibly grounded with safe architectural clearance
+  AND text remains readable without visitor zoom
 ```
 
 ## Quality impact
@@ -336,8 +326,8 @@ Scenario: A virtual venue fits around its architecture
   copy; existing bounded and escaped merchant strings remain unchanged.
 - Performance and limits: a small optimized local public-image set, existing
   bounded discovery payload, and no new dependency or remote runtime media.
-- Failure recovery and idempotency: image failure leaves readable hero content;
-  geography failure retains the existing List fallback.
+- Failure recovery and idempotency: image failure leaves readable hero and card
+  content; geography failure presents a retry state without inventing results.
 
 ## Observability
 
@@ -352,7 +342,7 @@ added to logs by this presentation change.
 | Truthful homepage claims and required marketplace hierarchy | contract | `scripts/test-platform-narrative.mjs`, `scripts/test-homepage-composition.mjs` |
 | Search and existing discovery behavior | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Desktop and phone hierarchy, touch targets, overflow, map/Daily Featured continuity | browser/visual | `scripts/capture-discovery-visuals.mjs` |
-| Numbered Daily Featured rows, wall clearance, uniqueness, and cross-aisles | unit/browser | `scripts/test-discovery.ts`, `scripts/capture-discovery-visuals.mjs` |
+| Responsive Daily Featured gallery and Shared Location wall clearance | unit/browser | `scripts/test-discovery.ts`, `scripts/capture-discovery-visuals.mjs` |
 | Platform identity and tenant independence | contract/integration | `scripts/test-platform-identity.mjs`, `scripts/test-showroom-renderer.ts` |
 | Public image set is local, optimized, and used without factual attribution | contract/browser | `scripts/test-homepage-composition.mjs`, public visual captures |
 

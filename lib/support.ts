@@ -9,19 +9,43 @@ import {
   type PageResult,
 } from "./pagination";
 import { cleanText } from "./security";
+import { hashPrivateValue } from "./security";
 import { notifySupportQueue } from "./support-notifications";
+import { consumeRuntimeRateLimit } from "./rate-limit-runtime";
+import { assertMediaObjectKey } from "./media-storage";
 import type { SessionUser } from "./types";
 
 export const MAX_OPEN_SUPPORT_CONVERSATIONS = 3;
+export const PUBLIC_SUPPORT_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
+export const PUBLIC_SUPPORT_COOKIE = "mirtpage_public_support";
 
 export type SupportStatus = "waiting" | "open" | "closed";
+export type SupportParticipantKind = "client" | "visitor";
+export type SupportAssistanceCategory = "general" | "sourcing" | "document_review" | "site_visit" | "shipment_observation";
+
+export const PUBLIC_SUPPORT_CATEGORIES: ReadonlyArray<{
+  key: SupportAssistanceCategory;
+  label: string;
+  description: string;
+}> = [
+  { key: "general", label: "General help", description: "Ask how MirtPage or a showroom works." },
+  { key: "sourcing", label: "Find a supplier", description: "Ask us to help identify suitable showrooms." },
+  { key: "document_review", label: "Review documents", description: "Request a bounded review of business or shipment documents." },
+  { key: "site_visit", label: "Arrange a site visit", description: "Ask about a factory, workshop, or quality observation visit." },
+  { key: "shipment_observation", label: "Observe a shipment", description: "Ask about observing prepared goods or loading." },
+] as const;
 
 export type SupportConversation = {
   id: number;
   publicRef: string;
-  businessId: number;
+  participantKind: SupportParticipantKind;
+  businessId: number | null;
   businessName: string;
-  openedByUserId: number;
+  openedByUserId: number | null;
+  assistanceCategory: SupportAssistanceCategory;
+  requesterLabel: string;
+  visitorEmail: string | null;
+  visitorPhone: string | null;
   subject: string;
   status: SupportStatus;
   assignedUserId: number | null;
@@ -35,11 +59,23 @@ export type SupportConversation = {
 export type SupportMessage = {
   id: number;
   conversationId: number;
-  senderUserId: number;
+  senderUserId: number | null;
   senderName: string;
   senderRole: string;
   body: string;
   createdAt: number;
+  attachment: SupportAttachment | null;
+};
+
+export type SupportAttachment = {
+  id: number;
+  originalName: string;
+  mimeType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
+  byteSize: number;
+};
+
+export type SupportAttachmentWrite = Omit<SupportAttachment, "id"> & {
+  storageKey: string;
 };
 
 export type SupportAgentWorkload = {
@@ -69,9 +105,16 @@ export class SupportError extends Error {
 type ConversationRow = {
   id: number;
   public_ref: string;
-  business_id: number;
+  participant_kind: SupportParticipantKind;
+  business_id: number | null;
   business_name: string;
-  opened_by_user_id: number;
+  opened_by_user_id: number | null;
+  visitor_token_hash: string | null;
+  visitor_session_expires_at: number | null;
+  assistance_category: SupportAssistanceCategory;
+  requester_label: string;
+  visitor_email: string | null;
+  visitor_phone: string | null;
   subject: string;
   status: SupportStatus;
   assigned_user_id: number | null;
@@ -84,6 +127,23 @@ type ConversationRow = {
   closed_at: number | null;
 };
 
+type AttachmentColumns = {
+  attachment_id: number | null;
+  attachment_original_name: string | null;
+  attachment_mime_type: SupportAttachment["mimeType"] | null;
+  attachment_byte_size: number | null;
+};
+
+function attachmentView(row: AttachmentColumns): SupportAttachment | null {
+  if (!row.attachment_id || !row.attachment_original_name || !row.attachment_mime_type || !row.attachment_byte_size) return null;
+  return {
+    id: row.attachment_id,
+    originalName: row.attachment_original_name,
+    mimeType: row.attachment_mime_type,
+    byteSize: row.attachment_byte_size,
+  };
+}
+
 function conversationView(row: ConversationRow, user: SessionUser): SupportConversation {
   const lastRead = user.access_role === "client"
     ? row.client_last_read_message_id
@@ -91,9 +151,14 @@ function conversationView(row: ConversationRow, user: SessionUser): SupportConve
   return {
     id: row.id,
     publicRef: row.public_ref,
+    participantKind: row.participant_kind,
     businessId: row.business_id,
     businessName: row.business_name,
     openedByUserId: row.opened_by_user_id,
+    assistanceCategory: row.assistance_category,
+    requesterLabel: row.requester_label,
+    visitorEmail: row.visitor_email,
+    visitorPhone: row.visitor_phone,
     subject: row.subject,
     status: row.status,
     assignedUserId: row.assigned_user_id,
@@ -107,16 +172,16 @@ function conversationView(row: ConversationRow, user: SessionUser): SupportConve
 
 function baseSelect() {
   return `
-    SELECT c.*,b.name business_name,assignee.name assigned_user_name,
+    SELECT c.*,COALESCE(b.name,c.requester_label) business_name,assignee.name assigned_user_name,
       COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id),0) last_message_id
     FROM support_conversations c
-    JOIN businesses b ON b.id=c.business_id
+    LEFT JOIN businesses b ON b.id=c.business_id
     LEFT JOIN users assignee ON assignee.id=c.assigned_user_id
   `;
 }
 
 function canRead(user: SessionUser, row: Pick<ConversationRow, "business_id" | "status" | "assigned_user_id">) {
-  if (user.access_role === "client") return user.business_id === row.business_id;
+  if (user.access_role === "client") return Boolean(row.business_id) && user.business_id === row.business_id;
   if (hasCapability(user, "operations:manage")) return true;
   if (user.access_role === "team_member") {
     return row.status === "waiting" || row.assigned_user_id === user.id;
@@ -138,6 +203,71 @@ function idempotency(value: unknown) {
     throw new SupportError("Message session is invalid. Refresh and try again.", "invalid_idempotency");
   }
   return key;
+}
+
+function supportAttachment(value: SupportAttachmentWrite | null | undefined) {
+  if (!value) return null;
+  let storageKey: string;
+  try {
+    storageKey = assertMediaObjectKey(value.storageKey);
+  } catch {
+    throw new SupportError("The attachment reference is invalid.", "invalid_attachment");
+  }
+  const originalName = cleanText(value.originalName, 180);
+  const mimeType = value.mimeType;
+  const byteSize = Number(value.byteSize);
+  if (!originalName || !["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(mimeType)) {
+    throw new SupportError("The attachment type is not supported.", "invalid_attachment");
+  }
+  if (!Number.isSafeInteger(byteSize) || byteSize < 1 || byteSize > 5 * 1024 * 1024) {
+    throw new SupportError("Attachments must be 5 MB or smaller.", "invalid_attachment");
+  }
+  return { storageKey, originalName, mimeType, byteSize };
+}
+
+async function insertSupportAttachment(messageId: number, value: ReturnType<typeof supportAttachment>, now: number) {
+  if (!value) return;
+  await runtimeRun(`
+    INSERT INTO support_attachments(message_id,storage_key,original_name,mime_type,byte_size,created_at)
+    VALUES(?,?,?,?,?,?)
+  `, [messageId, value.storageKey, value.originalName, value.mimeType, value.byteSize, now]);
+}
+
+function assistanceCategory(value: unknown): SupportAssistanceCategory {
+  const category = cleanText(value, 40) as SupportAssistanceCategory;
+  if (!PUBLIC_SUPPORT_CATEGORIES.some((option) => option.key === category)) {
+    throw new SupportError("Choose how MirtPage can help.", "category_required");
+  }
+  return category;
+}
+
+function visitorEmail(value: unknown) {
+  const email = cleanText(value, 254).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new SupportError("Enter a valid email address.", "email_required");
+  }
+  return email;
+}
+
+function visitorPhone(value: unknown) {
+  const raw = cleanText(value, 40);
+  const phone = raw.replace(/[\s().-]/g, "");
+  if (!/^\+?[0-9]{7,15}$/.test(phone)) {
+    throw new SupportError("Enter a valid phone number.", "phone_required");
+  }
+  return phone;
+}
+
+function publicSupportToken(value: unknown) {
+  const token = cleanText(value, 120);
+  if (!/^[A-Za-z0-9_-]{40,120}$/.test(token)) {
+    throw new SupportError("Support conversation was not found.", "not_found");
+  }
+  return token;
+}
+
+function visitorSenderKey(tokenHash: string) {
+  return `visitor:${tokenHash}`;
 }
 
 async function supportAgentWorkload(userId: number) {
@@ -204,7 +334,7 @@ async function assignConversation(
 
 export async function createSupportConversation(
   user: SessionUser,
-  input: { subject: unknown; message: unknown; idempotencyKey: unknown },
+  input: { subject: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
   now = Date.now(),
 ) {
   if (user.access_role !== "client" || !user.business_id) {
@@ -213,6 +343,7 @@ export async function createSupportConversation(
   const subject = cleanText(input.subject, 120);
   const message = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
+  const attachment = supportAttachment(input.attachment);
   if (!subject) throw new SupportError("Add a short subject.", "subject_required");
   if (!message) throw new SupportError("Write a support message.", "message_required");
 
@@ -222,22 +353,24 @@ export async function createSupportConversation(
       FROM support_messages m
       JOIN support_conversations c ON c.id=m.conversation_id
       JOIN businesses b ON b.id=c.business_id
-      WHERE m.sender_user_id=? AND m.idempotency_key=?
-    `, [user.id, key]);
+      WHERE m.sender_key=? AND m.idempotency_key=?
+    `, [`user:${user.id}`, key]);
     if (duplicate) return { ...duplicate, assigned_user_name: null, duplicate: true };
     const publicRef = `SUP-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
     const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_conversations(
-        public_ref,business_id,opened_by_user_id,subject,status,
+        public_ref,participant_kind,business_id,opened_by_user_id,
+        assistance_category,requester_label,subject,status,
         created_at,updated_at,last_message_at
-      ) VALUES(?,?,?,?,'waiting',?,?,?) RETURNING id
+      ) VALUES(?,'client',?,?, 'general','MirtPage client',?,'waiting',?,?,?) RETURNING id
     `, [publicRef, user.business_id, user.id, subject, now, now, now]);
     const conversationId = Number(result!.id);
     const messageResult = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(
-        conversation_id,sender_user_id,body,idempotency_key,created_at
-      ) VALUES(?,?,?,?,?) RETURNING id
-    `, [conversationId, user.id, message, key, now]);
+        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+      ) VALUES(?,?,'user',?,?,?,?) RETURNING id
+    `, [conversationId, user.id, `user:${user.id}`, message, key, now]);
+    await insertSupportAttachment(Number(messageResult!.id), attachment, now);
     await runtimeRun(`
       UPDATE support_conversations SET client_last_read_message_id=? WHERE id=?
     `, [Number(messageResult!.id), conversationId]);
@@ -271,6 +404,191 @@ export async function createSupportConversation(
   };
 }
 
+export async function createPublicSupportConversation(
+  input: { category: unknown; email: unknown; phone: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  ipHash: string,
+  now = Date.now(),
+) {
+  const category = assistanceCategory(input.category);
+  const email = visitorEmail(input.email);
+  const phone = visitorPhone(input.phone);
+  const message = cleanText(input.message, 4000);
+  const key = idempotency(input.idempotencyKey);
+  const attachment = supportAttachment(input.attachment);
+  if (!message) throw new SupportError("Write a message for the MirtPage team.", "message_required");
+  const rate = await consumeRuntimeRateLimit(`public-support:create:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
+  if (!rate.allowed) throw new SupportError("Too many conversations were started. Please try again later.", "rate_limited");
+
+  const token = crypto.randomBytes(32).toString("base64url");
+  const tokenHash = hashPrivateValue(`public-support:${token}`);
+  const senderKey = visitorSenderKey(tokenHash);
+  const categoryLabel = PUBLIC_SUPPORT_CATEGORIES.find((option) => option.key === category)!.label;
+  const expiresAt = now + PUBLIC_SUPPORT_SESSION_MS;
+  const created = await runtimeTransaction(async () => {
+    const publicRef = `SUP-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
+    const result = await runtimeGet<{ id: number }>(`
+      INSERT INTO support_conversations(
+        public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,
+        assistance_category,requester_label,visitor_email,visitor_phone,
+        subject,status,created_at,updated_at,last_message_at
+      ) VALUES(?,'visitor',?,?,?,?,?,?,?,'waiting',?,?,?) RETURNING id
+    `, [publicRef, tokenHash, expiresAt, category, "Website visitor", email, phone, categoryLabel, now, now, now]);
+    const conversationId = Number(result!.id);
+    const messageResult = await runtimeGet<{ id: number }>(`
+      INSERT INTO support_messages(
+        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+      ) VALUES(?,NULL,'visitor',?,?,?,?) RETURNING id
+    `, [conversationId, senderKey, message, key, now]);
+    await insertSupportAttachment(Number(messageResult!.id), attachment, now);
+    await runtimeRun(`
+      UPDATE support_conversations SET visitor_last_read_message_id=? WHERE id=?
+    `, [Number(messageResult!.id), conversationId]);
+    await runtimeRun(`
+      INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+      VALUES(?,NULL,'created',?,?)
+    `, [conversationId, `public visitor request:${category}`, now]);
+    const agent = await leastLoadedAgent();
+    if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
+    return { id: conversationId, publicRef, assignedUserName: agent?.name || null };
+  });
+  void notifySupportQueue({
+    publicRef: created.publicRef,
+    businessName: "Website visitor",
+    assignedUserName: created.assignedUserName,
+    id: created.id,
+  });
+  return { id: created.id, publicRef: created.publicRef, token, expiresAt };
+}
+
+async function requirePublicConversation(token: unknown, now = Date.now()) {
+  const normalized = publicSupportToken(token);
+  const tokenHash = hashPrivateValue(`public-support:${normalized}`);
+  const row = await runtimeGet<ConversationRow>(`${baseSelect()}
+    WHERE c.participant_kind='visitor' AND c.visitor_token_hash=?
+      AND c.visitor_session_expires_at>=?
+  `, [tokenHash, now]);
+  if (!row) throw new SupportError("Support conversation was not found.", "not_found");
+  return { row, tokenHash };
+}
+
+export async function getPublicSupportConversation(token: unknown, now = Date.now()) {
+  const { row } = await requirePublicConversation(token, now);
+  const messages = (await runtimeAll<{
+    id: number;
+    sender_kind: "user" | "visitor";
+    sender_name: string | null;
+    body: string;
+    created_at: number;
+  } & AttachmentColumns>(`
+    SELECT m.id,m.sender_kind,u.name sender_name,m.body,m.created_at,
+      a.id attachment_id,a.original_name attachment_original_name,
+      a.mime_type attachment_mime_type,a.byte_size attachment_byte_size
+    FROM support_messages m
+    LEFT JOIN users u ON u.id=m.sender_user_id
+    LEFT JOIN support_attachments a ON a.message_id=m.id
+    WHERE m.conversation_id=?
+    ORDER BY m.id DESC LIMIT 100
+  `, [row.id])).reverse();
+  const lastId = messages.at(-1)?.id || 0;
+  await runtimeRun(`
+    UPDATE support_conversations
+    SET visitor_last_read_message_id=CASE WHEN visitor_last_read_message_id<? THEN ? ELSE visitor_last_read_message_id END
+    WHERE id=?
+  `, [lastId, lastId, row.id]);
+  return {
+    id: row.id,
+    publicRef: row.public_ref,
+    category: row.assistance_category,
+    status: row.status,
+    assignedUserName: row.assigned_user_name,
+    messages: messages.map((message) => ({
+      id: message.id,
+      sender: message.sender_kind === "visitor" ? "visitor" as const : "staff" as const,
+      senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "MirtPage support",
+      body: message.body,
+      createdAt: message.created_at,
+      attachment: attachmentView(message),
+    })),
+  };
+}
+
+export async function getPublicSupportAttachment(token: unknown, attachmentId: number, now = Date.now()) {
+  if (!Number.isSafeInteger(attachmentId) || attachmentId < 1) throw new SupportError("Attachment was not found.", "not_found");
+  const { row } = await requirePublicConversation(token, now);
+  const attachment = await runtimeGet<{
+    storage_key: string;
+    original_name: string;
+    mime_type: SupportAttachment["mimeType"];
+    byte_size: number;
+  }>(`
+    SELECT a.storage_key,a.original_name,a.mime_type,a.byte_size
+    FROM support_attachments a
+    JOIN support_messages m ON m.id=a.message_id
+    WHERE a.id=? AND m.conversation_id=?
+  `, [attachmentId, row.id]);
+  if (!attachment) throw new SupportError("Attachment was not found.", "not_found");
+  return attachment;
+}
+
+export async function postPublicSupportMessage(
+  token: unknown,
+  input: { message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  ipHash: string,
+  now = Date.now(),
+) {
+  const body = cleanText(input.message, 4000);
+  const key = idempotency(input.idempotencyKey);
+  const attachment = supportAttachment(input.attachment);
+  if (!body) throw new SupportError("Write a message for the MirtPage team.", "message_required");
+  const { row, tokenHash } = await requirePublicConversation(token, now);
+  if (row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
+  const rate = await consumeRuntimeRateLimit(`public-support:message:${ipHash}:${tokenHash}`, 30, 10 * 60 * 1000, 30 * 60 * 1000);
+  if (!rate.allowed) throw new SupportError("Too many messages were sent. Please try again later.", "rate_limited");
+  const senderKey = visitorSenderKey(tokenHash);
+  return runtimeTransaction(async () => {
+    const existing = await runtimeGet<{ id: number }>(`
+      SELECT id FROM support_messages WHERE sender_key=? AND idempotency_key=?
+    `, [senderKey, key]);
+    if (existing) return { id: existing.id, duplicate: true };
+    const result = await runtimeGet<{ id: number }>(`
+      INSERT INTO support_messages(
+        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+      ) VALUES(?,NULL,'visitor',?,?,?,?) RETURNING id
+    `, [row.id, senderKey, body, key, now]);
+    const messageId = Number(result!.id);
+    await insertSupportAttachment(messageId, attachment, now);
+    await runtimeRun(`
+      UPDATE support_conversations
+      SET updated_at=?,last_message_at=?,visitor_last_read_message_id=?
+      WHERE id=?
+    `, [now, now, messageId, row.id]);
+    await runtimeRun(`
+      INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+      VALUES(?,NULL,'message','public visitor message',?)
+    `, [row.id, now]);
+    return { id: messageId, duplicate: false };
+  });
+}
+
+export async function closePublicSupportConversation(token: unknown, now = Date.now()) {
+  return runtimeTransaction(async () => {
+    const { row } = await requirePublicConversation(token, now);
+    if (row.status === "closed") return { duplicate: true };
+    await runtimeRun(`
+      UPDATE support_conversations SET status='closed',closed_at=?,updated_at=? WHERE id=?
+    `, [now, now, row.id]);
+    await runtimeRun(`
+      UPDATE support_assignments SET released_at=?
+      WHERE conversation_id=? AND released_at IS NULL
+    `, [now, row.id]);
+    await runtimeRun(`
+      INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+      VALUES(?,NULL,'closed','visitor ended conversation',?)
+    `, [row.id, now]);
+    return { duplicate: false };
+  });
+}
+
 export async function listSupportConversations(
   user: SessionUser,
   input: { page?: unknown; q?: unknown; status?: unknown },
@@ -297,12 +615,12 @@ export async function listSupportConversations(
   }
   if (request.search) {
     const pattern = likePattern(request.search);
-    where += " AND (lower(c.subject) LIKE ? ESCAPE '\\' OR lower(c.public_ref) LIKE ? ESCAPE '\\' OR lower(b.name) LIKE ? ESCAPE '\\')";
+    where += " AND (lower(c.subject) LIKE ? ESCAPE '\\' OR lower(c.public_ref) LIKE ? ESCAPE '\\' OR lower(COALESCE(b.name,c.requester_label)) LIKE ? ESCAPE '\\')";
     params.push(pattern, pattern, pattern);
   }
   const total = Number((await runtimeGet<{ total: number }>(`
     SELECT COUNT(*) total FROM support_conversations c
-    JOIN businesses b ON b.id=c.business_id${where}
+    LEFT JOIN businesses b ON b.id=c.business_id${where}
   `, params))?.total || 0);
   const window = pageWindow(total, request);
   const rows = await runtimeAll<ConversationRow>(`
@@ -319,17 +637,24 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
   const messages = (await runtimeAll<{
     id: number;
     conversation_id: number;
-    sender_user_id: number;
+    sender_user_id: number | null;
+    sender_kind: "user" | "visitor";
     sender_name: string;
     sender_role: string;
     body: string;
     created_at: number;
-  }>(`
-    SELECT m.id,m.conversation_id,m.sender_user_id,u.name sender_name,
-      COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) sender_role,
-      m.body,m.created_at
-    FROM support_messages m JOIN users u ON u.id=m.sender_user_id
+  } & AttachmentColumns>(`
+    SELECT m.id,m.conversation_id,m.sender_user_id,m.sender_kind,
+      CASE WHEN m.sender_kind='visitor' THEN c.requester_label ELSE u.name END sender_name,
+      CASE WHEN m.sender_kind='visitor' THEN 'visitor'
+        ELSE COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) END sender_role,
+      m.body,m.created_at,a.id attachment_id,a.original_name attachment_original_name,
+      a.mime_type attachment_mime_type,a.byte_size attachment_byte_size
+    FROM support_messages m
+    JOIN support_conversations c ON c.id=m.conversation_id
+    LEFT JOIN users u ON u.id=m.sender_user_id
     LEFT JOIN user_access_profiles p ON p.user_id=u.id
+    LEFT JOIN support_attachments a ON a.message_id=m.id
     WHERE m.conversation_id=?
     ORDER BY m.id DESC LIMIT 100
   `, [conversationId])).reverse();
@@ -350,18 +675,38 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
       senderRole: message.sender_role,
       body: message.body,
       createdAt: message.created_at,
+      attachment: attachmentView(message),
     })),
   };
+}
+
+export async function getSupportAttachment(user: SessionUser, conversationId: number, attachmentId: number) {
+  if (!Number.isSafeInteger(attachmentId) || attachmentId < 1) throw new SupportError("Attachment was not found.", "not_found");
+  await requireConversation(user, conversationId);
+  const attachment = await runtimeGet<{
+    storage_key: string;
+    original_name: string;
+    mime_type: SupportAttachment["mimeType"];
+    byte_size: number;
+  }>(`
+    SELECT a.storage_key,a.original_name,a.mime_type,a.byte_size
+    FROM support_attachments a
+    JOIN support_messages m ON m.id=a.message_id
+    WHERE a.id=? AND m.conversation_id=?
+  `, [attachmentId, conversationId]);
+  if (!attachment) throw new SupportError("Attachment was not found.", "not_found");
+  return attachment;
 }
 
 export async function postSupportMessage(
   user: SessionUser,
   conversationId: number,
-  input: { message: unknown; idempotencyKey: unknown },
+  input: { message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
   now = Date.now(),
 ) {
   const body = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
+  const attachment = supportAttachment(input.attachment);
   if (!body) throw new SupportError("Write a support message.", "message_required");
   return runtimeTransaction(async () => {
     const row = await requireConversation(user, conversationId);
@@ -370,14 +715,16 @@ export async function postSupportMessage(
       throw new SupportError("Claim this conversation before replying.", "unassigned");
     }
     const existing = await runtimeGet<{ id: number }>(`
-      SELECT id FROM support_messages WHERE sender_user_id=? AND idempotency_key=?
-    `, [user.id, key]);
+      SELECT id FROM support_messages WHERE sender_key=? AND idempotency_key=?
+    `, [`user:${user.id}`, key]);
     if (existing) return { id: existing.id, duplicate: true };
     const result = await runtimeGet<{ id: number }>(`
-      INSERT INTO support_messages(conversation_id,sender_user_id,body,idempotency_key,created_at)
-      VALUES(?,?,?,?,?) RETURNING id
-    `, [conversationId, user.id, body, key, now]);
+      INSERT INTO support_messages(
+        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+      ) VALUES(?,?,'user',?,?,?,?) RETURNING id
+    `, [conversationId, user.id, `user:${user.id}`, body, key, now]);
     const messageId = Number(result!.id);
+    await insertSupportAttachment(messageId, attachment, now);
     const readColumn = user.access_role === "client"
       ? "client_last_read_message_id"
       : "staff_last_read_message_id";

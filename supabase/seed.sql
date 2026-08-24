@@ -1,0 +1,2 @@
+-- MirtPage application rows are copied through the guarded local PostgreSQL
+-- bootstrap so schema and data reconciliation use the same reviewed path.

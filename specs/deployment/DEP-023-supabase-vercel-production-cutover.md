@@ -2,7 +2,7 @@
 id: DEP-023
 title: Supabase and Vercel production cutover
 status: in_progress
-related: [BE-027, BE-028, BE-029, FE-031, FE-032, FE-033, FE-034, FE-037, DEP-024, DEP-025, ADR-0013]
+related: [BE-027, BE-028, BE-029, BE-030, FE-031, FE-032, FE-033, FE-034, FE-037, DEP-024, DEP-025, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [deployment, operations, security, backend]
 last_updated: 2026-08-14
 change_level: L4

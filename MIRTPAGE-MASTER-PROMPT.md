@@ -102,6 +102,16 @@ not set or guarantee prices, savings, quality, availability, delivery, or sales.
   handoff, plus phone-required submission into the business's MirtPage inbox;
 - an inquiry management dashboard;
 - a first-party customer support workspace;
+- an anonymous, token-scoped public support drawer that enters the same staff
+  queue for general help, sourcing assistance, document review, site-visit
+  coordination, or shipment observation, requiring private reconnect email and
+  phone values on the first message without creating a buyer account or
+  implying certification, endorsement, or a guaranteed outcome; visitors may
+  end an active chat, retain its readable transcript, and clear only their
+  browser token to begin a separate conversation; visitors, clients, and
+  authorized staff may attach one private sanitized image or verified PDF up to
+  5 MB to a message, with conversation-scoped reads through the configured media
+  adapter;
 - a platform that supports manually designed, highly distinct client pages;
 - a permanent public discovery surface where visitors choose an industry,
   explore exact reviewed business locations or a daily country-wide virtual
@@ -263,23 +273,27 @@ makers and producers, while long platform education remains on `/about`. The
 Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
-branding. Its icon-led industry menu begins with **All industries**, followed
-by the seven production groups; live search and the available
-region/city selector are the only homepage result filters; Map/List, the
-privacy-preserving **Near me** map framing action,
-zoom, the exact-location Ethiopia map, and the server-paginated five-row List
-remain within the same bounded surface. On phones, Search, Filters, and compact
-icon-led Map/List controls share one command row; industry and place selection
-open in a modal bottom sheet, while a compact locate, zoom, and reset toolbar
-sits directly above the map without covering markers. Market and an opened City
-Showroom consume the remaining application viewport above fixed phone
-navigation; List results scroll internally instead of extending an empty page.
+branding. The combined marketplace map loads immediately, while a centered
+first-use chooser requires an explicit orientation choice before the visitor
+continues: one of seven production industries or **All industries** as the
+eighth and final option. After that choice, live search, the current industry control, the available
+region/city selector, the privacy-preserving **Near me** map framing action,
+zoom, and the exact-location Ethiopia map remain within the same bounded
+surface. On phones, Search and Filters share one command row; industry and place
+selection open in a modal bottom sheet, while a compact locate, zoom, and reset
+toolbar sits directly above the map without covering markers. Market and an
+opened nearby-showroom viewer consume the remaining application viewport above fixed
+phone navigation.
+Opening a permanent showroom records that exact same-tab public workspace, so
+the hosted showroom Back control restores its nearby-group or map state
+before consulting older browser history.
 Desktop retains the complete side command panel. Its opened industry
 menu matches the trigger width and wraps long labels instead of spanning across
-the map. The menu and phone Filters sheet use one restrained accent for each
-of the seven industries, while **All industries** uses a compact combined
-swatch. The same allowlisted accent identifies an individual showroom marker
-and its paginated List card, plus the structural border, fascia, and display trim of its City Showroom booth;
+the map. The menu and phone Filters sheet use one restrained accent for each of
+the seven industries and a neutral combined treatment for **All industries**.
+Industry accents may identify nearby-showroom cards, but individual geographic markers and numbered clusters use one
+consistent MirtPage teal. The isolated marker uses a compact storefront pin smaller than a cluster core,
+with no visible halo and an independent touch-sized transparent target;
 white and cool-gray remain the dominant content surfaces, and visible industry text or iconography means
 color is never the only identifier. After two typed characters, search exposes no more than six
 server-authoritative eligible showroom, published offering, and reviewed-place
@@ -287,10 +301,13 @@ suggestions. The combobox supports pointer, touch, and keyboard selection and
 overlays rather than reflows the map. The public program name is always **Daily Featured Showrooms** across
 visible copy and accessible names. Existing `expo` types, query keys, analytics
 values, styles, routes, and persistence fields remain internal compatibility
-identifiers and must never render as visitor language. A disclosed five-business
-global paid-sponsorship pool is attached to Daily Featured; staff selection and
+identifiers and must never render as visitor language. A disclosed five-placement
+global paid-sponsorship pool is attached to Daily Featured. A placement may be
+an eligible MirtPage showroom or a validated external ad with approved local
+media and an HTTPS website or telephone action; external ads never become fake
+showrooms or map records. Staff selection and
 ordering do not change with industry, search, place, or selected program day.
-Desktop shows all five beside the floor. Phones show two at a time in a compact
+Desktop shows all five beside the gallery. Phones show two at a time in a compact
 automatically rotating strip without scroll, pause, or carousel controls. Every
 day has one stable assigned industry, including Agriculture on Sunday. The
 Daily Featured capacity windows are 08:00–13:00 and 17:00–22:00 Ethiopia time,
@@ -300,37 +317,46 @@ minutes per booth and remain at least one hour long. A smaller morning lineup
 contracts toward its 13:00 end and a smaller evening lineup contracts toward
 its 22:00 end; larger lineups expand toward the complete capacity windows. The
 midday interval is never shorter than 13:00–17:00. Automatic mode
-uses the current eligible set; a platform administrator may retain an ordered
-eligible subset for one date. Airtime is recalculated from the authoritative
+uses the first forty rows in the current deterministic eligible set; a platform
+administrator may retain an ordered eligible subset of at most forty for one
+date. Airtime is recalculated from the authoritative
 policy and lineup. Today's public header includes one compact schedule
 disclosure derived from that same agenda. Its closed state names the actual
 participant-responsive morning and evening windows; its open state lists each
 participating showroom and EAT range, sponsor breaks, and the complete
 intermission. It remains collapsed by default on desktop and phone and does not
-expose future-day business identity. Every booth shows its EAT range; exactly one booth may be
+expose future-day business identity. Every revealed card shows its EAT range; exactly one card may be
 visibly current during a presentation, while transitions, sponsor breaks, and
 intermission identify no business. The status names the active booth or current
 break and provides the configured recordings destination after 22:00. Provider
 links are never invented.
+Today's gallery rotates as a circular schedule queue: the current presentation
+leads; during breaks the most recently completed presentation remains first;
+and the next card leads only when its presentation starts. References, airtime,
+and stored lineup order remain stable. Non-today previews do not rotate.
+Sponsor breaks receive sequential placements from the active five-placement
+pool. Internal schedule previews name each assigned sponsor and exact time;
+during the live segment, public status names the paid sponsor and its rail card
+moves first with a **Sponsor spotlight** treatment.
 On phones, Daily Featured Showrooms avoids a vertical wall of controls: its long
 description is omitted, broadcast status is compact, and all seven fixed weekdays
-fit in one compact segmented row above a dedicated zoom toolbar and the venue.
-The zoom toolbar never covers booth content. City and Daily Featured floors
-measure the available canvas and choose deterministic portrait, balanced, or
-wide booth geometry; after zooming, pointer and touch panning may begin over a
-booth without activating it. Long platform education lives on `/about` and
+fit in one compact segmented row above the gallery. Daily Featured uses an
+ordinary responsive image-card grid that grows downward without venue scaling,
+map-style zoom, or pagination. Nearby groups use at most six fixed-readable
+image cards over the unchanged map. Long platform education lives on `/about` and
 signup lives on `/request`. There is no duplicated
 all-business directory or browser-side full-catalog List fan-out. The public
 Daily Featured route is a bounded application workspace rather than a scrolling
-promotional document. Its venue owns the remaining viewport below one compact H1,
+promotional document. Its gallery owns the available workspace below one compact H1,
 broadcast status, collapsed schedule summary, attached sponsor surface, and fixed
-weekday ribbon. Expanding the schedule scrolls its agenda internally and reduces
-the floor area without lengthening the root page or hiding application navigation.
-The public
-application shell exposes Market, Daily featured, About, and More on phones;
-More contains login/workspace access, showroom signup, direct contact,
-privacy, and terms. Desktop uses one identity header and one leading rail rather
-than repeating the same destinations in two navigation surfaces.
+weekday ribbon. Expanding the schedule scrolls its agenda internally without
+hiding application navigation.
+The public application shell exposes Market, Daily featured, About, and More on
+phones. Desktop and More navigation separate Explore, Account, and
+Information. Anonymous visitors see Sign in only; authenticated visitors see
+Dashboard only; showroom signup remains available from the sign-in route. More
+contains direct contact, privacy, and terms rather than repeating the same
+destinations in two navigation surfaces.
 The welcome uses one short, confident market story across public and onboarding
 surfaces: MirtPage helps buyers find Ethiopian businesses for **custom work**,
 **ready products**, and **wholesale supply**. Custom work covers workshops
@@ -372,52 +398,31 @@ authenticated workspaces share the same vector mark and split-color wordmark.
 Client showroom logos and approved or custom showroom palettes remain
 independent and are never replaced by the platform palette.
 
-Daily Featured and City Showroom floors use a locally stored, optimized architectural hall
-shell: a cohesive overhead interior with light walls, glass entrance, reception
-architecture, integrated planting, lighting, and a quiet open floor. The artwork
-contains no people, seating, businesses, booths, products, text, or fixed
-business positions. If it is unavailable, the floor falls back to a neutral
-surface without affecting discovery.
-
-Business booths are placed by a deterministic exhibition-row layout with wall
-clearance, regular walking gaps, and wider cross-aisles on larger floors. Booth
-numbers advance left-to-right and then top-to-bottom. As participation grows,
-the floor adds rows systematically; every business receives one unique,
-non-overlapping grounded platform. Computed floor
-dimensions and positions remain authoritative, and the architectural image
-never determines business placement.
+Nearby-group viewers use no architectural shell, venue, floor, hall, or
+decorative environment. Daily Featured likewise presents up to forty image-led cards in responsive columns with
+ordinary vertical scrolling and no simulated hall, map-style zoom, pagination,
+or hidden overflow.
 
 The discovery map uses locally stored, attributed Ethiopia region and zone
 boundaries plus an offline-derived OpenStreetMap place and major-road subset.
 Visitor browsers make no runtime request to a tile, geocoding, routing, or map
-provider. Each eligible business appears at its reviewed WGS84 coordinates.
-Nearby markers form numbered zoom-dependent clusters. Repeated activation zooms
-to either an isolated exact-coordinate marker or, when two or more matching
-businesses share a reviewed city and region, one close-zoom counted city
-gateway. The gateway centroid is only a discovery affordance and does not change
-any business address. Activating it replaces the map inside the same frame with
-a virtual City Showroom:
-every grouped business occupies one dynamically sized floor that visitors can
-pan and zoom, with no halls, pagination, route change, or hidden overflow.
-Under **All industries**, every primary visual industry occupies exactly one
-contiguous labeled district. District floor area grows with its showroom count
-while storefront footprints remain equal. Deterministic rectangular packing
-creates shared walkways, expands the logical hall when necessary, and keeps
-districts clear of venue walls and props. This primary visual industry does not
-remove cross-list memberships or change filter eligibility. City Market
-storefronts are not numbered because participation may change; this geometry
-does not alter the separate numbered Daily Featured Showrooms floor.
-The all-industry hall remains architecturally neutral so the districts stay
-distinct. When one industry is selected, its allowlisted soft and strong tones
-theme the hall field, floor edge, and city sign without recoloring booth media
-or reducing text contrast.
-List cards use a visible industry edge, labeled swatch, and soft action
-treatment. The all-industry List remains neutral around its mixed cards, while
-a selected-industry List receives only a soft matching field; its five-row
-server pagination and eligibility remain unchanged.
-The geographic renderer is suspended while this floor is open, and **Back to
-map** restores the same map state. Isolated businesses use a compact
-industry-accented map-pin containing a familiar upright storefront and the
+provider. Country geometry appears first; detailed administrative boundaries,
+city labels, and major roads are admitted during browser idle time. Primary,
+secondary, town, and village detail is progressively admitted only at useful
+zoom levels. During a pan or zoom gesture, the browser updates one map-group
+transform and defers React viewport state until the gesture ends. Marker and
+label projection is viewport-bounded, and visible place labels are capped at
+180. Each eligible business appears at its reviewed WGS84 coordinates.
+Nearby markers form numbered zoom-dependent clusters. At neighborhood zoom,
+same-city businesses within 800 meters form deterministic balanced nearby groups
+of at most six. Larger cohorts split into separate markers. Activating one opens
+a lightweight two-column phone or three-column desktop card viewer over the
+unchanged map, with no pagination, internal scroll, simulated architecture, or
+deeper zoom requirement. Selecting a nearby card replaces that list inside the
+same bounded map inspector and provides **Back to nearby**; it never opens a
+second popup or scrim over the retained list, and persistent support controls do
+not overlap the inspector. Isolated businesses use a compact teal
+map-pin containing a familiar upright storefront and the
 actual business name in a bounded multi-line label. A generic Showroom caption
 and horizontally unbounded names are prohibited.
 Perspective platforms or device-like silhouettes are prohibited.
@@ -425,25 +430,29 @@ Activating one below
 local-detail zoom centers and enlarges the map first; activating it at local
 detail opens the richer business preview. The map marker does not load booth
 photography. That preview is a non-modal floating inspector centered over a
-restrained low-opacity dismissible scrim: the map/venue remains visible, and on
-phones it becomes a bounded bottom sheet above app navigation. A counted city
-gateway uses the established market-building symbol with a high-contrast navy
-outline, lightly tinted fill, aggregate halo, count badge, and city label so it
-cannot be mistaken for one business marker.
+restrained low-opacity dismissible scrim: the map remains visible, and on
+phones it becomes a bounded bottom sheet above app navigation. A counted nearby-group
+group marker uses the same accessible teal cluster language and exact count so
+it cannot be mistaken for one business marker.
 Activating a revealed Daily Featured booth opens this same inspector before any
 tenant route change; only its explicit **Open showroom** action navigates.
-Valid tenant-controlled live state appears on clusters, exact showroom markers,
-City Showroom booths, and today's featured booths. The business in MirtPage's current
+Valid tenant-controlled live state appears on clusters, showroom markers,
+nearby-group cards, and today's featured cards. The business in MirtPage's current
 Daily Featured walkthrough slot is labeled **Featured now** everywhere it is visible; this
 temporarily overrides only its merchant-live presentation and never changes the
 tenant's saved live setting.
 Location controls show only places with
 matching businesses, and the center control restores the country view.
+Identical anonymous non-search Market, Daily Featured, and Sponsor projections
+use a bounded twenty-second server cache. Search remains uncached so arbitrary
+visitor text cannot create unbounded cache keys. The public projection still
+ships the canonical eligible showroom point set to the browser; a measured
+viewport or tile endpoint is required before that payload approaches tens of
+thousands of simultaneous map records.
 
-Daily Featured is a seven-day virtual presentation, not a physical
-location claim. It uses one dynamically sized top-view floor, restrained
-architectural context, no people, and direct pan/zoom/fit controls. Every booth
-remains on that floor; there are no halls, pages, or hidden overflow records.
+Daily Featured is a seven-day virtual presentation, not a physical location
+claim. It uses one responsive image-led card gallery with no physical hall,
+pan/zoom controls, pages, ranking, or hidden overflow records.
 The seven-date selector remains in fixed Monday-through-Sunday order for the
 current Ethiopia-local calendar week. Its midnight-and-teal **Today** indicator
 moves to the current weekday without reordering the cards or using saffron.
@@ -458,22 +467,23 @@ Today's program reveals each business's
 identity, approved account-owned booth image, preview, and permanent Visit Showroom
 link. Selecting any other date returns only count-preserving anonymous booth
 outlines; business identity, handle, media, and destination are not serialized.
-Sunday follows the same eligibility, privacy, floor, and interaction rules as
+Sunday follows the same eligibility, privacy, gallery, and interaction rules as
 the other six industry days. Every booth exposes a stable
 `{industry-code}-B{booth-number}` reference. A business must have an
 active published showroom, one published offering, a matching reviewed industry,
 valid reviewed location, an approved discovery profile and media, and no
 discovery exclusion. Subscription or payment dates do not determine public
-eligibility. Map, List, Sponsored, and Daily Featured use the same server-authoritative
+eligibility. Marketplace, Sponsored, and Daily Featured use the same server-authoritative
 eligibility rules, while map search/industry selection and the date-selected
 Daily Featured remain independent projections.
 
 Sponsored treatment is paid placement, not a separate or duplicated catalog,
-and is always disclosed as **Sponsors**. Platform staff manually select one
-global pool of five eligible businesses; it does not change with map industry,
-search, place, List state, or selected program day. Sponsorship does not imply endorsement
-or Daily Featured eligibility. All other eligible showrooms remain discoverable. List cards, map previews, and
-Daily Featured booths link to the authoritative permanent showroom. Approved booth media
+and is always disclosed as **Sponsors**. Platform staff manually order one
+global pool of five eligible showroom placements and/or validated external ads;
+it does not change with map industry, search, place, or selected
+program day. Sponsorship does not imply endorsement
+or Daily Featured eligibility. All other eligible showrooms remain discoverable. Map previews and
+Daily Featured cards link to the authoritative permanent showroom. Approved booth media
 belongs to its represented business; a generic named booth is only a failed-file
 display fallback and cannot make an incomplete profile eligible. The useful
 product explanation lives on `/about` and in the compact merchant invitation,
@@ -792,8 +802,9 @@ MirtPage’s directory must scale without dumping every tenant onto the page by 
 
 Default behavior:
 
-- show no more than five active public showrooms on the current page;
-- begin geographic map and List discovery with **All industries** selected;
+- load the combined geographic map behind a required first-use orientation
+  chooser with seven industries plus **All industries** as the final option;
+- provide no ranked public List result state;
 - de-duplicate businesses with more than one industry membership and keep the
   Daily Featured Showrooms weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
@@ -801,15 +812,11 @@ Default behavior:
   showroom, published-offering, and reviewed-place suggestions scoped to the
   active industry and place;
 - do not expose category filters or duplicate all-business/reset navigation;
-- reset to page one when search or Industry changes;
-- fetch no more than five List records per response page using database count,
-  limit, and offset queries;
-- show previous/next pagination only when more than five records match;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
 - keep reviewed **Workshop / producer** and **Growing factory** scale metadata
   available to authorized administrators without exposing it as a public filter;
-- keep live search, available-location filtering, map/list mode, and zoom/center
+- keep live search, available-location filtering, and zoom/center
   controls within one discovery workbench; progressively disclose industry and
   place in a phone bottom sheet and place phone map navigation on the map;
 - ignore legacy public `scale` query state so no invisible filter narrows results;
@@ -898,7 +905,7 @@ invitation. The client can:
   description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
 - view their showroom and manage their account password.
-- view advisory monthly renewal state, history, and aggregate direct, map/list,
+- view advisory monthly renewal state, history, and aggregate direct, marketplace,
   and Daily Featured visits;
 - open, reply to, close, and reopen tenant-scoped MirtPage support conversations.
 
@@ -1018,7 +1025,9 @@ Current verified behavior:
   for bounded changes or **AI-assisted redesign** for a complete recipe. Initial
   builds may lead with the staged recipe blueprint studio. Both tools expose the
   same focused settings, layout/style, page-content, offering, media, fitness,
-  and preview controls. Drafts do not mutate live rows; submitted
+  and preview controls. The editor saves and previews the mutable draft; only
+  the exact saved-preview screen can submit it for client review. Drafts do not
+  mutate live rows; submitted
   numbered revisions are immutable and later changes create a newer revision.
 - Invited clients can open the exact private showroom preview for their request
   and approve it or reject it with comments. Superseded previews cannot receive
@@ -1068,8 +1077,9 @@ Current verified behavior:
   never loads the complete account into a dropdown; owner recovery and
   Marketplace edit records for one selected business, and inquiry rows include
   item summaries without per-row follow-up queries.
-- Platform administrators manage the five-business global paid-sponsorship
-  state/order from each focused discovery profile. Sponsorship does not change
+- Platform administrators manage internal showroom sponsorship from each
+  focused discovery profile and external sponsor ads from one bounded Sponsor
+  placements workspace. Sponsorship does not change
   showroom publication authority, industry membership, or Daily Featured eligibility.
 - Role-scoped dashboard attention cards summarize new accounts, actionable
   showroom requests, tenant-safe new inquiries, and support conversations that
@@ -1083,7 +1093,7 @@ Current verified behavior:
   no checkout, payment gateway, automatic debit, or public pricing claim.
 - Showroom visits use an opaque first-party visitor token hashed with the privacy
   salt and deduplicate per business, source, and day. Clients see aggregate
-  direct, map/list discovery, Daily Featured, and recent counts; raw IP addresses are not stored
+  direct, marketplace discovery, Daily Featured, and recent counts; raw IP addresses are not stored
   and traffic counts are not billing authority.
 - Authenticated client support is stored inside MirtPage. Enabled agents have
   configurable concurrent limits; new conversations transactionally select the
@@ -1382,7 +1392,9 @@ Next.js 16
 React 19
 TypeScript
 Node.js 24.18.1 LTS
-SQLite via node:sqlite
+Supabase PostgreSQL 17
+Supabase Auth with application-owned authorization
+Private Supabase Storage through the provider-neutral media port
 Sharp for verified image processing
 Server-rendered routes and server actions
 ```
@@ -1396,7 +1408,7 @@ components/showroom/bank/  Reviewed component bank, registry, tokens, and labora
 lib/                  Authentication, database, security, media, inquiries, support
 showroom-sdk/         AI/manual custom-showroom integration package
 scripts/              Setup, migration, backup, restore, preflight, release tests
-data/                 Runtime database and media when configured locally
+data/                 Compatibility fixtures and retained migration sources only
 ```
 
 Important commands:
@@ -1439,7 +1451,12 @@ Security requirements are product requirements, not optional cleanup.
 - Never ship a shared known password.
 - Generate unique temporary passwords.
 - Force password change for temporary or reset credentials.
-- Use opaque, revocable server-side sessions.
+- Supabase Auth owns managed password/OAuth session validity in normal local,
+  browser-acceptance, Preview, and Production runtimes; application-owned opaque
+  sessions remain compatibility and bounded rollback infrastructure only.
+- A provider session grants no access until its immutable UUID maps to one
+  MirtPage user. Roles, tenant bindings, capabilities, and suspension always
+  come from MirtPage tables, never provider metadata.
 - Do not use a hard-coded fallback session secret.
 - Revoke sessions after password reset or suspected compromise.
 - Rate-limit login attempts.
@@ -1481,8 +1498,10 @@ Security requirements are product requirements, not optional cleanup.
 - Generate server-controlled filenames.
 - Store mutable uploads outside the Next.js build-time public directory through
   the configured asynchronous media-storage port.
-- Filesystem storage remains the local/default adapter. A private Supabase
-  Storage bucket is the optional production adapter; its service credential is
+- Isolated local development and browser-acceptance stacks plus separate remote
+  Preview and Production projects use private Supabase Storage buckets through
+  the provider-neutral media port. Filesystem storage is retained only for
+  compatibility fixtures and bounded rollback. Service credentials are
   server-only and all public/private reads remain behind MirtPage routes.
 - Remote object-storage operations use a bounded configurable deadline and
   bounded response reads. A database-derived manifest reconciles every retained
@@ -1522,25 +1541,28 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
-The controlled MVP supports SQLite for local development and retained rollback,
-and managed PostgreSQL for the production runtime.
+The controlled MVP uses separate Supabase projects for every executable lane:
+an isolated local project for normal development, a disposable local project on
+dedicated ports for production-mode browser acceptance, and separate managed
+projects for Netlify Preview and Production. Every lane applies the same
+reviewed PostgreSQL schema and application-owned authorization model and selects
+Supabase PostgreSQL, Auth, and private Storage. SQLite remains only for
+compatibility fixtures, read-only migration evidence, and the bounded rollback
+window under ADR-0015.
 
-Current SQLite requirements:
+Retained SQLite compatibility requirements:
 
-- one application instance;
-- persistent database volume;
-- persistent media volume when `MIRTPAGE_MEDIA_DRIVER=filesystem`, or a verified
-  private object-storage configuration when the driver is `supabase`;
+- never serve an application runtime from the fixture;
+- create fixtures in isolated temporary paths;
 - WAL mode;
 - busy timeout;
 - foreign keys enabled;
-- migrations before startup when needed;
-- automated backups;
-- tested restore procedure;
+- migrations before use when needed;
 - database integrity checks;
-- appropriate file permissions.
+- appropriate file permissions;
+- copy or inspect retained sources read-only and preserve their bytes.
 
-Do not horizontally scale a SQLite deployment across multiple application instances.
+Do not run the application or horizontally scale a deployment on SQLite.
 `docs/MANAGED-POSTGRES-READINESS.md`, `docs/DEVOPS-RUNBOOK.md`, and ADR-0013
 record the required SQL-adapter, migration, job, realtime, backup, and
 monitored-cutover work. The disposable PostgreSQL gate translates the complete
@@ -1552,23 +1574,23 @@ adapters. The guarded production copy can transaction-locally assume an
 explicit, identifier-safe provider migration role when a temporary Supabase CLI
 login requires it. Supabase Storage and PostgreSQL are implemented runtime modes.
 
-The production-only Supabase PostgreSQL and Vercel cutover is controlled by
-BE-027 and DEP-023. Runtime parity, the real reconciled Supabase copy, private
-Storage verification, least-privilege runtime preflight, exact release checks,
-and generated-host Vercel smoke tests are complete. The custom domains are
-attached to the production project, but external DNS verification and rollback
-monitoring must pass before the deployment is described as production-ready.
+Hosted Supabase PostgreSQL and the Netlify candidate rollout are
+controlled by BE-027, DEP-023, and DEP-026. Runtime parity, the reconciled
+Supabase copy, private Storage verification, least-privilege runtime preflight,
+and historical Vercel smoke evidence exist. Deploy Previews and Production must
+never share database, Auth, Storage, or service-role credentials. The exact
+current release still requires host-candidate smoke, DNS verification, and
+rollback monitoring before it is described as production-ready.
 
-Before broad external rollout or multi-instance production scale, migrate to:
+Before broad external rollout or multi-instance production scale, complete:
 
-- managed PostgreSQL or another production multi-instance database;
-- object storage for media;
 - production email and notification infrastructure;
 - full observability and alerting;
-- stronger account recovery and staff roles;
+- managed Auth recovery and staff security evidence;
+- spatial viewport queries when measured point volume requires them;
 
-SQLite production requires absolute persistent paths. PostgreSQL production
-requires the managed connection URL and private Supabase Storage. All production
+PostgreSQL production requires the managed connection URL and private Supabase
+Storage. SQLite is not an authorized production runtime. All production
 environments require HTTPS. Follow `.env.example`, `README.md`, Docker
 configuration, and preflight checks.
 

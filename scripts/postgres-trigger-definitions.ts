@@ -7,6 +7,7 @@ function q(identifier: string) {
 
 export const POSTGRES_TRIGGER_NAMES = [
   "attached_request_cannot_become_public",
+  "auth_identity_link_immutable",
   "business_subscription_after_insert",
   "category_collection_same_business_insert",
   "category_collection_same_business_update",
@@ -20,6 +21,8 @@ export const POSTGRES_TRIGGER_NAMES = [
   "public_request_attachment_denied",
   "public_request_attachment_move_denied",
   "submitted_revision_content_immutable",
+  "support_visitor_contact_insert",
+  "support_visitor_contact_update",
 ] as const;
 
 export function postgresTriggerDefinitions(schemaName: string) {
@@ -61,6 +64,38 @@ $$;
 CREATE TRIGGER attached_request_cannot_become_public
 BEFORE UPDATE OF submitter_kind ON ${schema}.service_requests
 FOR EACH ROW EXECUTE FUNCTION ${schema}.deny_attached_request_becoming_public();
+
+CREATE FUNCTION ${schema}.enforce_auth_identity_link_immutable() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'auth identity link is immutable';
+END;
+$$;
+
+CREATE TRIGGER auth_identity_link_immutable
+BEFORE UPDATE OF user_id, provider, provider_user_id ON ${schema}.auth_identity_links
+FOR EACH ROW EXECUTE FUNCTION ${schema}.enforce_auth_identity_link_immutable();
+
+CREATE FUNCTION ${schema}.enforce_support_visitor_contact() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.participant_kind = 'visitor' AND (
+    NEW.visitor_email IS NULL OR length(btrim(NEW.visitor_email)) NOT BETWEEN 3 AND 254
+    OR NEW.visitor_phone IS NULL OR length(btrim(NEW.visitor_phone)) NOT BETWEEN 7 AND 16
+  ) THEN
+    RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'visitor contact required';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER support_visitor_contact_insert
+BEFORE INSERT ON ${schema}.support_conversations
+FOR EACH ROW EXECUTE FUNCTION ${schema}.enforce_support_visitor_contact();
+
+CREATE TRIGGER support_visitor_contact_update
+BEFORE UPDATE OF participant_kind, visitor_email, visitor_phone ON ${schema}.support_conversations
+FOR EACH ROW EXECUTE FUNCTION ${schema}.enforce_support_visitor_contact();
 
 CREATE FUNCTION ${schema}.enforce_category_collection_business() RETURNS trigger
 LANGUAGE plpgsql AS $$

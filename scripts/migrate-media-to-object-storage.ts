@@ -5,6 +5,7 @@ import {
   databasePath,
   mediaRoot,
   requestAttachmentRoot,
+  supportAttachmentRoot,
   supabaseMediaStorageConfig,
 } from "../lib/config";
 import {
@@ -32,7 +33,7 @@ async function main() {
   if (manifest.invalidReferenceCount || manifest.malformedDocumentCount) {
     throw new Error("The database media manifest contains invalid retained references.");
   }
-  const planned = listLocalMediaObjects(mediaRoot(), requestAttachmentRoot());
+  const planned = listLocalMediaObjects(mediaRoot(), requestAttachmentRoot(), supportAttachmentRoot());
   const localByIdentity = new Map(
     planned.map((item) => [mediaObjectIdentity(item.namespace, item.key), item]),
   );

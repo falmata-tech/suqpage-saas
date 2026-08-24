@@ -10,6 +10,7 @@ import {
 
 const key = "product-00000000-0000-4000-8000-000000000001.webp";
 const requestKey = "00000000-0000-4000-8000-000000000002.png";
+const supportKey = "support-00000000-0000-4000-8000-000000000003.pdf";
 
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-media-store-"));
@@ -18,8 +19,10 @@ async function main() {
     const local = new FileMediaObjectStore();
     await local.put("public", key, Buffer.from("public-image"), "image/webp");
     await local.put("requests", requestKey, Buffer.from("private-image"), "image/png");
+    await local.put("support", supportKey, Buffer.from("%PDF-1.7\n%%EOF"), "application/pdf");
     assert.equal((await local.read("public", key, "image/webp"))?.bytes.toString(), "public-image");
     assert.equal((await local.read("requests", requestKey, "image/png"))?.bytes.toString(), "private-image");
+    assert.equal((await local.read("support", supportKey, "application/pdf"))?.bytes.toString(), "%PDF-1.7\n%%EOF");
     await local.remove("public", [key]);
     assert.equal(await local.read("public", key, "image/webp"), null);
     await assert.rejects(
@@ -64,12 +67,40 @@ async function main() {
       bucket: "test-bucket",
     }, fakeFetch);
     await remote.put("public", key, Buffer.from("remote-image"), "image/webp");
+    await remote.put("support", supportKey, Buffer.from("remote-pdf"), "application/pdf");
     assert.equal((await remote.read("public", key, "image/webp"))?.bytes.toString(), "remote-image");
+    assert.equal((await remote.read("support", supportKey, "application/pdf"))?.bytes.toString(), "remote-pdf");
     await remote.remove("public", [key]);
     assert.equal(await remote.read("public", key, "image/webp"), null);
     assert.ok(calls.every((call) => call.authorization === `Bearer ${secret}`));
     assert.ok(calls.some((call) => call.url.includes("/storage/v1/object/test-bucket/public/")));
     assert.ok(calls.some((call) => call.url.includes("/storage/v1/object/authenticated/test-bucket/public/")));
+    assert.ok(calls.some((call) => call.url.includes("/storage/v1/object/test-bucket/support/")));
+
+    const localMissing = new SupabaseMediaObjectStore({
+      url: "http://127.0.0.1:54321",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+    }, async () => new Response(JSON.stringify({
+      statusCode: "404",
+      code: "NoSuchKey",
+      message: "Object not found",
+    }), { status: 400, headers: { "content-type": "application/json" } }));
+    assert.equal(await localMissing.read("public", key, "image/webp"), null);
+
+    const malformedMissing = new SupabaseMediaObjectStore({
+      url: "https://project.supabase.co",
+      serviceRoleKey: secret,
+      bucket: "test-bucket",
+    }, async () => new Response(JSON.stringify({ statusCode: "400", code: "BadRequest" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    }));
+    await assert.rejects(
+      () => malformedMissing.read("public", key, "image/webp"),
+      (error: unknown) =>
+        error instanceof MediaStorageError && error.code === "provider_read_failed",
+    );
 
     const denied = new SupabaseMediaObjectStore({
       url: "https://project.supabase.co",

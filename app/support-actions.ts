@@ -14,6 +14,7 @@ import {
   updateSupportAgentSetting,
 } from "@/lib/support";
 import { audit } from "@/lib/security";
+import { stageSupportAttachment, SupportAttachmentError, type StagedSupportAttachment } from "@/lib/support-media";
 
 function conversationId(formData: FormData) {
   const value = Number.parseInt(String(formData.get("conversationId") || ""), 10);
@@ -22,21 +23,29 @@ function conversationId(formData: FormData) {
 }
 
 function failure(path: string, error: unknown): never {
-  const message = error instanceof SupportError ? error.message : "Support could not be updated.";
+  const message = error instanceof SupportError || error instanceof SupportAttachmentError
+    ? error.message
+    : "Support could not be updated.";
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
 }
 
 export async function createSupportConversationAction(formData: FormData) {
   const user = await requireUser();
-  let created: { id: number } | null = null;
+  let created: Awaited<ReturnType<typeof createSupportConversation>> | null = null;
+  let staged: StagedSupportAttachment | null = null;
   try {
+    staged = await stageSupportAttachment(formData.get("attachment"));
     created = await createSupportConversation(user, {
       subject: formData.get("subject"),
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
+      attachment: staged,
     });
+    if (created.duplicate) await staged?.discard();
+    staged = null;
     await audit("support.conversation_created", { userId: user.id, businessId: user.business_id, detail: { conversationId: created.id } });
   } catch (error) {
+    await staged?.discard().catch(() => undefined);
     failure("/dashboard/support", error);
   }
   revalidatePath("/dashboard/support");
@@ -46,13 +55,19 @@ export async function createSupportConversationAction(formData: FormData) {
 export async function postSupportMessageAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  let staged: StagedSupportAttachment | null = null;
   try {
-    await postSupportMessage(user, id, {
+    staged = await stageSupportAttachment(formData.get("attachment"));
+    const posted = await postSupportMessage(user, id, {
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
+      attachment: staged,
     });
+    if (posted.duplicate) await staged?.discard();
+    staged = null;
     await audit("support.message_posted", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
+    await staged?.discard().catch(() => undefined);
     failure(`/dashboard/support/${id}`, error);
   }
   revalidatePath(`/dashboard/support/${id}`);

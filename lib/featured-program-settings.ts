@@ -1,5 +1,6 @@
 import {
   DEFAULT_FEATURED_PROGRAM_POLICY,
+  MAX_FEATURED_SHOWROOMS,
   validateFeaturedProgramDate,
   validateFeaturedProgramPolicy,
   type FeaturedProgramPolicy,
@@ -224,7 +225,10 @@ export async function saveFeaturedProgramDay(input: {
   const eligible = new Set(input.eligibleBusinessIds.filter((id) => Number.isSafeInteger(id) && id > 0));
   const businessIds = [...new Set(input.businessIds.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (input.mode === "manual" && !businessIds.length) throw new FeaturedProgramSettingsError("Choose at least one eligible business for a manual lineup.");
-  if (businessIds.length > 100 || businessIds.some((id) => !eligible.has(id))) throw new FeaturedProgramSettingsError("The manual lineup contains an ineligible business.");
+  if (input.mode === "manual" && businessIds.length > MAX_FEATURED_SHOWROOMS) {
+    throw new FeaturedProgramSettingsError(`Choose no more than ${MAX_FEATURED_SHOWROOMS} businesses for Daily Featured.`);
+  }
+  if (businessIds.some((id) => !eligible.has(id))) throw new FeaturedProgramSettingsError("The manual lineup contains an ineligible business.");
   const now = Date.now();
   const operation = async () => {
     if (input.mode === "automatic") {
@@ -243,5 +247,9 @@ export async function saveFeaturedProgramDay(input: {
     }
   };
   await port.transaction(operation);
-  return { dateIso: input.dateIso, mode: input.mode, participantCount: input.mode === "manual" ? businessIds.length : eligible.size };
+  return {
+    dateIso: input.dateIso,
+    mode: input.mode,
+    participantCount: input.mode === "manual" ? businessIds.length : Math.min(eligible.size, MAX_FEATURED_SHOWROOMS),
+  };
 }

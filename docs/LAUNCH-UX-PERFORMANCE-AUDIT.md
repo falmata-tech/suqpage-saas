@@ -1,5 +1,9 @@
 # Launch UX and performance audit
 
+> Historical baseline. The current map, route-splitting, PostgreSQL, PWA, and
+> low-end-phone findings are recorded in
+> `docs/PERFORMANCE-SCALABILITY-AUDIT-2026-08-15.md`.
+
 **Review date:** 2026-08-11
 **Controlling specs:** FE-025, FE-031, FE-035, BE-024, BE-028, DEP-023
 

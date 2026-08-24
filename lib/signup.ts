@@ -10,7 +10,7 @@ export class SignupError extends Error {
   }
 }
 
-type SignupInput = {
+export type SignupInput = {
   name: string;
   email: string;
   phone: string;
@@ -50,11 +50,11 @@ export function parseSignupInput(raw: Record<string, unknown>): SignupInput {
   return { name, email, phone, businessName, handle, password, requestText, idempotencyKey };
 }
 
-export async function createPublicClientWorkspace(raw: Record<string, unknown>) {
+export async function createPublicClientWorkspace(raw: Record<string, unknown>, options: { providerUserId?: string } = {}) {
   const { postgresRuntimeEnabled, postgresRuntimeServices } = await import("./postgres-runtime-services");
   if (postgresRuntimeEnabled()) {
     const { createPostgresPublicClientWorkspace } = await import("./signup-postgres");
-    return createPostgresPublicClientWorkspace(postgresRuntimeServices().runner, raw);
+    return createPostgresPublicClientWorkspace(postgresRuntimeServices().runner, raw, options);
   }
   const input = parseSignupInput(raw);
   const db = getDb();
@@ -84,6 +84,7 @@ export async function createPublicClientWorkspace(raw: Record<string, unknown>) 
       `).run(input.email, passwordHash, input.name, businessId);
       const userId = Number(userResult.lastInsertRowid);
       db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(userId);
+      if (options.providerUserId) db.prepare("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)").run(userId, options.providerUserId, input.email, Date.now());
       const publicRef = `REQ-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
       const requestResult = db.prepare(`
         INSERT INTO service_requests(

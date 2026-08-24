@@ -2,7 +2,7 @@
 id: DEP-020
 title: MirtPage marketplace rollout
 status: in_progress
-related: [FE-024, FE-025, FE-033, FE-034, BE-023, BE-029, DEP-017, DEP-019, DEP-021, DEP-024, DEP-025]
+related: [FE-024, FE-025, FE-033, FE-034, BE-023, BE-029, DEP-017, DEP-019, DEP-021, DEP-024, DEP-025, DEP-026]
 owners: [operations, engineering, design]
 last_updated: 2026-08-09
 change_level: L3
@@ -30,6 +30,12 @@ local pre-launch environment without changing stable showroom routes.
    taxonomy, retained-fixture cross-listing, and corrected production scale.
 8. Replace desktop/mobile evidence for the integrated sponsored rail, attached
    seven-day schedule, row-based Daily Featured, city marketplace, and centered showroom modal.
+9. Apply additive migration 35, verify retained showroom sponsorships, create
+   one external sponsor ad through the administrator workflow, and prove the
+   bounded merged public projection and rollback behavior.
+10. Prove viewport-bounded zoom under CPU throttling, a multi-thousand-row
+    nearby-group fixture, and separate Market/Featured client chunks before the
+    complete release gate.
 
 ## Rollback
 
@@ -50,6 +56,8 @@ reset; production rollout and domain/DNS changes are excluded.
 - Every industry has at least five disclosed sponsored placements in fixtures.
 - The fixed seven-day industry schedule remains independent from sponsorship;
   retained Sunday-program rows have no public or administrative effect.
+- Low-end-phone evidence records bounded map long tasks and mounted map-node
+  counts; the Featured route manifest contains no map-engine chunk.
 
 ## Scenarios
 
@@ -76,6 +84,7 @@ Scenario: Application rollback is required
 | Desktop/mobile public workflows | `scripts/capture-discovery-visuals.mjs`, `tests/acceptance/app.spec.ts` |
 | Complete repository regression | `npm run check`, `npm run test:acceptance`, `npm run release` |
 | Sponsorship and seven-day industry migrations | `scripts/test-discovery.ts`, `scripts/test-scale-fixtures.ts` |
+| Map and route performance | `npm run test:market-performance`, production route manifests |
 
 ## Readiness checklist
 

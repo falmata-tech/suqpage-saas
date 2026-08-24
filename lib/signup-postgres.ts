@@ -17,6 +17,7 @@ function signupFailure(error: unknown): never {
 export async function createPostgresPublicClientWorkspace(
   runner: PostgresTransactionRunner,
   raw: Record<string, unknown>,
+  options: { providerUserId?: string } = {},
 ) {
   const input = parseSignupInput(raw);
   const passwordHash = await bcrypt.hash(input.password, 12);
@@ -40,6 +41,7 @@ export async function createPostgresPublicClientWorkspace(
       const userId = user.rows[0]?.id;
       if (!userId) throw new Error("PostgreSQL did not return the created user identifier.");
       await runner.query("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')", [userId]);
+      if (options.providerUserId) await runner.query("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, options.providerUserId, input.email, Date.now()]);
       const publicRef = `REQ-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
       const request = await runner.query<{ id: number }>(
         "INSERT INTO service_requests(public_ref,business_id,represented_client_user_id,request_type,status,contact_name,contact_value,business_name,request_text,submitter_kind,submitted_by_user_id,idempotency_key,notification_state) VALUES(?,?,?,'onboarding','submitted',?,?,?,?, 'client',?,?,'not_required') RETURNING id",

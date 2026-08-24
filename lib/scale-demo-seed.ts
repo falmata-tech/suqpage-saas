@@ -231,6 +231,19 @@ function foundationReason(style: StyleKey) {
   return `${profile.tokenPack} supplies the typography, spacing, geometry, and media behavior because the brief fits ${style.replace("_", " ")} content anatomy; the palette is independently authored from the brand direction.`;
 }
 
+function spreadDemoCoordinate(location: SeededMarketplaceProfile, groupIndex: number, index: number) {
+  const slot = groupIndex * 11 + index * 5 + 1;
+  const ring = slot % 5;
+  const radius = location.city === "Addis Ababa"
+    ? 0.018 + ring * 0.008
+    : 0.006 + ring * 0.004;
+  const angle = slot * 2.399963229728653;
+  return {
+    latitude: Number((location.latitude + Math.sin(angle) * radius).toFixed(6)),
+    longitude: Number((location.longitude + Math.cos(angle) * radius).toFixed(6)),
+  };
+}
+
 export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGroups, ...growingFactoryGroups].flatMap(
   ({ industryKey, clients }, groupIndex) => clients.map((raw, index) => {
     const handle = `demo-${slug(raw.name)}`;
@@ -238,6 +251,10 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
       ? "agriculture-growers"
       : industryKey;
     const location = locations[locationPlans[industryKey][index]];
+    const sharedWorkshopAddress = groupIndex === 0 && index < 2;
+    const coordinates = sharedWorkshopAddress
+      ? { latitude: location.latitude, longitude: location.longitude }
+      : spreadDemoCoordinate(location, groupIndex, index);
     const customPalette = palette(raw);
     const profile: SeedShowroomBrief["profile"] = {
       ...styleProfiles[raw.style],
@@ -259,8 +276,7 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
       profile: {
         ...location,
         industryKeys: [assignedIndustryKey],
-        latitude: location.latitude + groupIndex * 0.0004 + index * 0.0001,
-        longitude: location.longitude + groupIndex * 0.0004 + index * 0.0001,
+        ...coordinates,
       },
       brief: {
         objective: raw.customerRequest,

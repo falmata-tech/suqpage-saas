@@ -1,14 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  isApprovedProviderUrl,
   mediaRequestTimeoutMs,
   mediaRoot,
   mediaStorageDriver,
   requestAttachmentRoot,
+  supportAttachmentRoot,
   supabaseMediaStorageConfig,
 } from "./config";
 
-export type MediaNamespace = "public" | "requests";
+export type MediaNamespace = "public" | "requests" | "support";
 export type StoredMediaObject = {
   bytes: Buffer;
   contentType: string;
@@ -46,7 +48,7 @@ export class MediaStorageError extends Error {
   }
 }
 
-const MEDIA_KEY = /^(?:[a-z0-9-]+-)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png|webp)$/i;
+const MEDIA_KEY = /^(?:[a-z0-9-]+-)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png|webp|pdf)$/i;
 
 export function assertMediaObjectKey(key: string) {
   if (!MEDIA_KEY.test(key)) {
@@ -57,7 +59,11 @@ export function assertMediaObjectKey(key: string) {
 
 function localObjectPath(namespace: MediaNamespace, key: string) {
   assertMediaObjectKey(key);
-  const root = namespace === "public" ? mediaRoot() : requestAttachmentRoot();
+  const root = namespace === "public"
+    ? mediaRoot()
+    : namespace === "requests"
+      ? requestAttachmentRoot()
+      : supportAttachmentRoot();
   const full = path.resolve(/* turbopackIgnore: true */ root, key);
   if (!full.startsWith(`${root}${path.sep}`)) {
     throw new MediaStorageError("The media reference is invalid.", "invalid_key");
@@ -157,11 +163,7 @@ function normalizedSupabaseConfig(
   }
   const requestTimeoutMs = input.requestTimeoutMs ?? mediaRequestTimeoutMs();
   if (
-    url.protocol !== "https:" ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash ||
+    !isApprovedProviderUrl(url) ||
     !/^[a-z0-9][a-z0-9_-]{1,62}$/i.test(input.bucket) ||
     input.serviceRoleKey.length < 20 ||
     !Number.isSafeInteger(requestTimeoutMs) ||
@@ -183,6 +185,20 @@ function normalizedSupabaseConfig(
 
 function encodedObjectPath(namespace: MediaNamespace, key: string) {
   return `${encodeURIComponent(namespace)}/${encodeURIComponent(assertMediaObjectKey(key))}`;
+}
+
+async function isMissingStorageObject(response: Response) {
+  if (response.status === 404) return true;
+  if (response.status !== 400) return false;
+  try {
+    const payload = JSON.parse((await readBoundedResponse(response)).toString("utf8")) as {
+      statusCode?: string | number;
+      code?: string;
+    };
+    return String(payload.statusCode) === "404" && payload.code === "NoSuchKey";
+  } catch {
+    return false;
+  }
 }
 
 export class SupabaseMediaObjectStore implements MediaObjectStore {
@@ -257,7 +273,7 @@ export class SupabaseMediaObjectStore implements MediaObjectStore {
         `${this.config.url}/storage/v1/object/authenticated/${this.bucketPath()}/${encodedObjectPath(namespace, key)}`,
         { method: "GET", headers: this.headers(), signal },
       );
-      if (response.status === 404) return { kind: "missing" as const };
+      if (await isMissingStorageObject(response)) return { kind: "missing" as const };
       if (!response.ok) {
         throw new MediaStorageError(
           "Media storage is temporarily unavailable.",

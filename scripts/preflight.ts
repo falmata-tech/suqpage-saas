@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import {
   assertProductionConfiguration,
+  authDriver,
   databaseDriver,
   databasePath,
   mediaRoot,
@@ -28,6 +29,21 @@ export async function preflight() {
     );
     if (!currentProjectMigration) {
       throw new Error("PostgreSQL migration 32 is required before this release can serve traffic.");
+    }
+  }
+
+  if (authDriver() === "supabase") {
+    const identityMigration = await runtimeGet<{ version: number }>(
+      "SELECT version FROM schema_migrations WHERE version=37",
+    );
+    if (!identityMigration) throw new Error("Database migration 37 is required before Supabase Auth can serve traffic.");
+    const unlinked = await runtimeGet<{ total: number }>(`
+      SELECT COUNT(*) total FROM users u
+      LEFT JOIN auth_identity_links link ON link.user_id=u.id AND link.provider='supabase'
+      WHERE link.user_id IS NULL
+    `);
+    if (Number(unlinked?.total || 0) > 0) {
+      throw new Error("Every retained MirtPage user must have one reconciled Supabase identity before Auth cutover.");
     }
   }
 

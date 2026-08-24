@@ -33,6 +33,8 @@ for (const [file, size] of [
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
 assert.match(worker, /const CACHE_PREFIX = "mirtpage-pwa-"/);
+assert.match(worker, /const VERSION = "v2"/);
+assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
 assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);
 assert.match(worker, /if \(request\.method !== "GET"\) return/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
@@ -56,7 +58,9 @@ assert.match(registration, /name\.startsWith\(CACHE_PREFIX\)/);
 
 const publicNavigation = read("components/PublicMobileNavigation.tsx");
 for (const label of ["Market", "Featured", "About"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
-for (const label of ["Sign up", "Sign in"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
+for (const label of ["Sign in", "Dashboard"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
+assert.doesNotMatch(publicNavigation, /label: "Sign up"/);
+assert.match(publicNavigation, /signedIn\s*\? \{ href: "\/dashboard"/);
 assert.match(publicNavigation, /<span>More<\/span>/);
 assert.match(publicNavigation, /aria-haspopup="dialog"/);
 assert.match(publicNavigation, /aria-current=\{active \? "page" : undefined\}/);
@@ -64,7 +68,8 @@ assert.match(publicNavigation, /aria-current=\{active \? "page" : undefined\}/);
 for (const file of ["app/page.tsx", "app/featured/page.tsx", "app/about/page.tsx"]) {
   assert.match(read(file), /<PublicAppShell>/, `${file} renders the shared public application shell`);
 }
-assert.match(read("components/PublicAppShell.tsx"), /<PublicMobileNavigation \/>/);
+assert.match(read("components/PublicAppShell.tsx"), /currentUser\(\)/);
+assert.match(read("components/PublicAppFrame.tsx"), /<PublicMobileNavigation signedIn=\{signedIn\} \/>/);
 for (const file of ["app/login/page.tsx", "app/request/page.tsx", "app/privacy/page.tsx", "app/terms/page.tsx", "app/contact-success/page.tsx", "app/invite/[token]/page.tsx"]) {
   assert.match(read(file), /<PublicMobileNavigation \/>/, `${file} renders shared phone navigation`);
 }

@@ -1,11 +1,13 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { authDriver } from "./config";
 import { getDb, getUserById } from "./db";
 import { runtimeUserById } from "./catalog-runtime";
 import { postgresRuntimeEnabled, postgresRuntimeServices } from "./postgres-runtime-services";
 import { currentRequestIdentity } from "./security";
 import type { SessionUser } from "./types";
+import { currentSupabaseIdentity, signOutSupabaseSession } from "./supabase-auth";
 
 const COOKIE = "mirtpage_session";
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -18,6 +20,11 @@ type SessionRow = {
 };
 
 export async function currentUser(): Promise<SessionUser | null> {
+  if (authDriver() === "supabase") {
+    const identity = await currentSupabaseIdentity();
+    if (!identity) return null;
+    return (await runtimeUserById(identity.userId)) || null;
+  }
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token || token.length < 40) return null;
@@ -53,6 +60,9 @@ export async function apiUser() {
 }
 
 export async function setSession(userId: number) {
+  if (authDriver() === "supabase") {
+    throw new Error("Supabase Auth sessions must be created by an authenticated provider flow.");
+  }
   const token = crypto.randomBytes(32).toString("base64url");
   const now = Date.now();
   const identity = await currentRequestIdentity();
@@ -74,6 +84,10 @@ export async function setSession(userId: number) {
 }
 
 export async function clearSession() {
+  if (authDriver() === "supabase") {
+    await signOutSupabaseSession();
+    return;
+  }
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (token) {

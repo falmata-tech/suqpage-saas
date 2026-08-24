@@ -7,6 +7,16 @@ const placesPath = "public/geo/ethiopia-places-osm.geojson";
 const attribution = fs.readFileSync("public/geo/ATTRIBUTION.md", "utf8");
 const roads = read(roadsPath);
 const places = read(placesPath);
+const roadTiers = [
+  read("public/geo/ethiopia-roads-major-osm.geojson"),
+  read("public/geo/ethiopia-roads-primary-osm.geojson"),
+  read("public/geo/ethiopia-roads-secondary-osm.geojson"),
+];
+const placeTiers = [
+  read("public/geo/ethiopia-places-cities-osm.geojson"),
+  read("public/geo/ethiopia-places-towns-osm.geojson"),
+  read("public/geo/ethiopia-places-villages-osm.geojson"),
+];
 
 assert.equal(roads.source, "OpenStreetMap via Geofabrik");
 assert.deepEqual(roads.features.map((feature) => feature.properties.highway), ["motorway", "trunk", "primary", "secondary"]);
@@ -16,5 +26,8 @@ assert(places.features.filter((feature) => feature.properties.place === "town").
 assert(places.features.every((feature) => feature.geometry.type === "Point" && feature.properties.name.length <= 100));
 assert(fs.statSync(roadsPath).size < 1_500_000, "simplified roads must stay below 1.5 MB");
 assert(fs.statSync(placesPath).size < 1_000_000, "places must stay below 1 MB");
+assert.deepEqual(roadTiers.flatMap((tier) => tier.features), roads.features, "zoom-tiered roads reconstruct the authoritative road collection");
+assert.deepEqual(placeTiers.flatMap((tier) => tier.features), places.features, "zoom-tiered places reconstruct the authoritative place collection");
+assert(fs.statSync("public/geo/ethiopia-places-cities-osm.geojson").size < 20_000, "initial city context remains inexpensive on low-end phones");
 assert(attribution.includes("Geofabrik") && attribution.includes("Open Database License"));
 console.log(`Local geography passed: ${roads.features.length} road layers, ${places.features.length} places, ${fs.statSync(roadsPath).size + fs.statSync(placesPath).size} bytes.`);

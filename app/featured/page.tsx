@@ -1,6 +1,6 @@
-import { FeaturedShowroomsWorkspace } from "@/components/DiscoveryWorkspace";
+import FeaturedShowroomsWorkspace from "@/components/FeaturedShowroomsWorkspace";
 import PublicAppShell from "@/components/PublicAppShell";
-import { getFeaturedShowroomsView, getSponsoredShowrooms } from "@/lib/discovery";
+import { getPublicFeaturedView, getPublicSponsors } from "@/lib/public-discovery-cache";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -13,8 +13,8 @@ export default async function FeaturedPage({ searchParams }: {
 }) {
   const query = await searchParams;
   const [discovery, sponsoredShowrooms] = await Promise.all([
-    getFeaturedShowroomsView({ featuredDay: query.featuredDay }),
-    getSponsoredShowrooms(),
+    getPublicFeaturedView(query.featuredDay),
+    getPublicSponsors(),
   ]);
 
   return <PublicAppShell>

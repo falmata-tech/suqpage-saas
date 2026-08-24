@@ -53,8 +53,9 @@ export class PostgresCatalogRepository {
   async getCatalogByBusinessId(
     businessId: number,
     includeDrafts = false,
+    knownBusiness?: Business,
   ): Promise<Catalog | undefined> {
-    const business = await this.getBusinessById(businessId);
+    const business = knownBusiness || await this.getBusinessById(businessId);
     if (!business) return undefined;
 
     const activeClause = includeDrafts ? "" : "AND is_active=1";
@@ -78,22 +79,39 @@ export class PostgresCatalogRepository {
       `, [businessId]),
     ]);
 
-    const hydratedProducts = await Promise.all(products.rows.map(async (product) => {
-      const groups = await this.runner.query<OptionGroup>(
-        "SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id",
-        [product.id],
-      );
+    const productIds = products.rows.map((product) => product.id);
+    const groups = productIds.length
+      ? (await this.runner.query<OptionGroup>(
+        `SELECT * FROM option_groups WHERE product_id IN (${productIds.map(() => "?").join(",")}) ORDER BY product_id,position,id`,
+        productIds,
+      )).rows
+      : [];
+    const groupIds = groups.map((group) => group.id);
+    const values = groupIds.length
+      ? (await this.runner.query<OptionValue>(
+        `SELECT * FROM option_values WHERE option_group_id IN (${groupIds.map(() => "?").join(",")}) ORDER BY option_group_id,id`,
+        groupIds,
+      )).rows
+      : [];
+    const valuesByGroup = new Map<number, OptionValue[]>();
+    for (const value of values) {
+      const existing = valuesByGroup.get(value.option_group_id);
+      if (existing) existing.push(value);
+      else valuesByGroup.set(value.option_group_id, [value]);
+    }
+    const groupsByProduct = new Map<number, OptionGroup[]>();
+    for (const group of groups) {
+      const hydratedGroup = { ...group, values: valuesByGroup.get(group.id) || [] };
+      const existing = groupsByProduct.get(group.product_id);
+      if (existing) existing.push(hydratedGroup);
+      else groupsByProduct.set(group.product_id, [hydratedGroup]);
+    }
+    const hydratedProducts = products.rows.map((product) => {
       product.quantity_mode = normalizeQuantityMode(product.quantity_mode);
       product.highlights = parseOfferingHighlightsJson(product.highlights_json);
-      product.option_groups = await Promise.all(groups.rows.map(async (group) => ({
-        ...group,
-        values: (await this.runner.query<OptionValue>(
-          "SELECT * FROM option_values WHERE option_group_id=? ORDER BY id",
-          [group.id],
-        )).rows,
-      })));
+      product.option_groups = groupsByProduct.get(product.id) || [];
       return product;
-    }));
+    });
     return {
       business,
       collections: collections.rows,
@@ -104,7 +122,7 @@ export class PostgresCatalogRepository {
 
   async getCatalogByHandle(handle: string): Promise<Catalog | undefined> {
     const business = await this.getBusinessByHandle(handle);
-    return business ? this.getCatalogByBusinessId(business.id, false) : undefined;
+    return business ? this.getCatalogByBusinessId(business.id, false, business) : undefined;
   }
 
   async getUserByEmail(

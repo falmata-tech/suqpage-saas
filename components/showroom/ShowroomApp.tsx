@@ -40,8 +40,20 @@ import { showroomTokenVariables } from "./bank/tokens";
 import "./showrooms.css";
 
 type CartLine = { product: Product; quantity: string; options: Record<string, string> };
+const PUBLIC_WORKSPACE_RETURN_KEY = "mirtpage:last-marketplace-url:v1";
 const focusableSelector =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+function validPublicWorkspaceReturn(raw: string | null, origin: string) {
+  if (!raw) return null;
+  try {
+    const destination = new URL(raw, origin);
+    if (destination.origin !== origin || !["/", "/featured"].includes(destination.pathname)) return null;
+    return `${destination.pathname}${destination.search}${destination.hash}`;
+  } catch {
+    return null;
+  }
+}
 
 function legacyCopy(value: string) {
   try {
@@ -364,13 +376,21 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
         <button type="button" className="showroom-host-back" aria-label="Back to MirtPage marketplace" onClick={() => {
+          let remembered: string | null = null;
+          try {
+            remembered = window.sessionStorage.getItem(PUBLIC_WORKSPACE_RETURN_KEY);
+          } catch {}
+          const destination = validPublicWorkspaceReturn(remembered, window.location.origin);
+          if (destination) {
+            router.push(destination);
+            return;
+          }
           const referrer = document.referrer ? new URL(document.referrer) : null;
           if (referrer?.origin === window.location.origin && (referrer.pathname === "/" || referrer.pathname === "/discover")) {
             router.back();
             return;
           }
-          const remembered = window.sessionStorage.getItem("mirtpage:last-marketplace-url:v1") || "/";
-          router.push(remembered.startsWith("/") && !remembered.startsWith("//") ? remembered : "/");
+          router.push("/");
         }}>
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
           <span>Back</span>

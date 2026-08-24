@@ -127,6 +127,7 @@ export async function readPublishedMedia(filename: string) {
 }
 
 export function mediaMime(filename: string) {
+  if (filename.endsWith(".pdf")) return "application/pdf";
   if (filename.endsWith(".png")) return "image/png";
   if (filename.endsWith(".webp")) return "image/webp";
   return "image/jpeg";

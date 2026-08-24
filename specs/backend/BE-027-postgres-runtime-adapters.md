@@ -2,7 +2,7 @@
 id: BE-027
 title: PostgreSQL runtime adapters and persistence parity
 status: in_progress
-related: [BE-028, BE-029, FE-033, DEP-023, DEP-024, ADR-0013]
+related: [BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
 last_updated: 2026-08-05
 change_level: L4
@@ -131,3 +131,7 @@ BE-027 remains `in_progress` until DEP-023 records PostgreSQL-backed production
 acceptance/security evidence and the monitored authority switch. SQLite adapters
 remain explicit local-development and rollback implementations; they are not
 dual-written.
+
+ADR-0015 and DEP-027 make local Supabase PostgreSQL the normal development
+runtime. SQLite adapters remain only for isolated compatibility tests,
+read-only migration evidence, and the bounded rollback window.

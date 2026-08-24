@@ -18,8 +18,8 @@ NEXT_TELEMETRY_DISABLED=1 node node_modules/next/dist/bin/next build
 printf '\n=== Output-file trace privacy validation ===\n'
 node scripts/test-build-trace.mjs
 
-printf '\n=== Production HTTP smoke tests ===\n'
-node scripts/http-smoke.mjs
+printf '\n=== Provider-backed production HTTP smoke tests ===\n'
+node scripts/acceptance-runner.mjs --grep "API authorization, validation, health, and security headers"
 
 printf '\n=== Server pagination and scale fixture validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts

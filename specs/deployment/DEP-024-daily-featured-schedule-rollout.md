@@ -4,7 +4,7 @@ title: Daily Featured schedule migration and rollout
 status: in_progress
 related: [FE-021, FE-033, BE-023, BE-027, BE-029, DEP-020, DEP-023]
 owners: [operations, engineering]
-last_updated: 2026-08-10
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -35,6 +35,9 @@ SQLite and production PostgreSQL.
 - Migration 32 is additive and idempotent.
 - Automatic remains the default when no day row exists.
 - Rollback never requires deleting migration-32 tables.
+- The ten-showroom capacity is an application/domain invariant over the existing
+  migration-32 tables. No destructive migration or retained lineup rewrite is
+  required; oversized retained rows fail closed to the first ten on projection.
 
 ## Contracts
 
@@ -42,8 +45,10 @@ SQLite and production PostgreSQL.
 2. Verify the 08:00–13:00 and 17:00–22:00 capacity windows, participant-based
    contraction toward 13:00 and 22:00, and at least four inactive midday hours.
 3. Verify an authorized manual future-date lineup and Automatic restoration.
-4. Capture public and admin desktop/phone states and obtain visual approval.
-5. After approval run `npm run check`, acceptance, release, PostgreSQL rehearsal,
+4. Verify Automatic projection caps at ten and Manual replacement rejects an
+   eleventh participant without changing the previous lineup.
+5. Capture public and admin desktop/phone states and obtain visual approval.
+6. After approval run `npm run check`, acceptance, release, PostgreSQL rehearsal,
    and remote CI as separately authorized.
 
 ## Scenarios

@@ -4,6 +4,18 @@ import os from "node:os";
 import path from "node:path";
 import type { SessionUser } from "../lib/types";
 
+const publicSupportRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/public-support/route.ts"), "utf8");
+const publicAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/public-support/attachments/[attachmentId]/route.ts"), "utf8");
+const authenticatedAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/support/[conversationId]/attachments/[attachmentId]/route.ts"), "utf8");
+const publicSupportUiSource = fs.readFileSync(path.join(process.cwd(), "components/PublicSupportChat.tsx"), "utf8");
+const supportRefreshSource = fs.readFileSync(path.join(process.cwd(), "components/SupportThreadRefresh.tsx"), "utf8");
+assert.match(publicSupportRouteSource, /await staged\?\.discard\(\)\.catch/, "failed public writes clean staged support objects");
+assert.match(publicSupportRouteSource, /if \(result\.duplicate\) await staged\?\.discard\(\)/, "idempotent public retries clean duplicate staged objects");
+assert.ok(publicAttachmentRouteSource.indexOf("await getPublicSupportAttachment") < publicAttachmentRouteSource.indexOf("await readSupportAttachment"), "public token authorization precedes private storage reads");
+assert.ok(authenticatedAttachmentRouteSource.indexOf("await getSupportAttachment") < authenticatedAttachmentRouteSource.indexOf("await readSupportAttachment"), "tenant/staff authorization precedes private storage reads");
+assert.match(publicSupportUiSource, /if \(!document\.hidden\) void loadConversation\(\)/, "public support pauses polling while its browser document is hidden");
+assert.match(supportRefreshSource, /if \(!document\.hidden\) router\.refresh\(\)/, "staff support pauses route refresh while its browser document is hidden");
+
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-support-"));
   process.env.MIRTPAGE_DB_PATH = path.join(root, "test.db");
@@ -13,19 +25,34 @@ async function main() {
   const { closeDbForTests, getDb } = await import("../lib/db");
   const {
     claimSupportConversation,
+    closePublicSupportConversation,
     closeSupportConversation,
+    createPublicSupportConversation,
     createSupportConversation,
+    getPublicSupportConversation,
+    getPublicSupportAttachment,
     getSupportConversation,
+    getSupportAttachment,
     getSupportAgentSummary,
     listSupportAgentWorkloads,
     listSupportAgentWorkloadsPage,
     postSupportMessage,
+    postPublicSupportMessage,
     reassignSupportConversation,
     reopenSupportConversation,
     SupportError,
     updateSupportAgentSetting,
   } = await import("../lib/support");
+  const { readSupportAttachment, stageSupportAttachment } = await import("../lib/support-media");
   const db = getDb();
+  assert.ok(db.prepare("SELECT 1 FROM schema_migrations WHERE version=36").get(), "migration 36 installs private support attachments");
+  const stagedImage = await stageSupportAttachment(new File(
+    [fs.readFileSync(path.join(process.cwd(), "public/pwa/favicon-32.png"))],
+    "sample.png",
+    { type: "image/png" },
+  ));
+  assert.equal(stagedImage?.mimeType, "image/png", "support images are decoded and sanitized before private storage");
+  await stagedImage?.discard();
   const businessA = Number(db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('support-a','Support A','composition','active')").run().lastInsertRowid);
   const businessB = Number(db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('support-b','Support B','composition','active')").run().lastInsertRowid);
   const addUser = db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,?,?,?,?,0)");
@@ -129,10 +156,101 @@ async function main() {
   });
   assert.equal((db.prepare("SELECT COUNT(*) total FROM support_assignments").get() as { total: number }).total, 6);
   assert.ok((db.prepare("SELECT COUNT(*) total FROM support_events").get() as { total: number }).total >= 16);
+  const visitorNow = Date.now() + 20_000;
+  const visitorCountBeforeInvalid = Number((db.prepare("SELECT COUNT(*) total FROM support_conversations WHERE participant_kind='visitor'").get() as { total: number }).total);
+  await assert.rejects(() => createPublicSupportConversation({
+    category: "sourcing",
+    email: "invalid",
+    phone: "+251911223344",
+    message: "This invalid request must not be stored.",
+    idempotencyKey: "public-support-invalid-0001",
+  }, "visitor-ip-invalid", visitorNow), (error: unknown) => error instanceof SupportError && error.code === "email_required");
+  await assert.rejects(() => createPublicSupportConversation({
+    category: "sourcing",
+    email: "visitor@example.test",
+    phone: "12",
+    message: "This invalid request must not be stored.",
+    idempotencyKey: "public-support-invalid-0002",
+  }, "visitor-ip-invalid", visitorNow), (error: unknown) => error instanceof SupportError && error.code === "phone_required");
+  assert.equal(Number((db.prepare("SELECT COUNT(*) total FROM support_conversations WHERE participant_kind='visitor'").get() as { total: number }).total), visitorCountBeforeInvalid, "invalid visitor contacts create no support row");
+  const visitor = await createPublicSupportConversation({
+    category: "sourcing",
+    email: "Visitor@Example.Test",
+    phone: "+251 (911) 223-344",
+    message: "Help me identify a suitable local workshop.",
+    idempotencyKey: "public-support-create-0001",
+  }, "visitor-ip-one", visitorNow);
+  const visitorThread = await getPublicSupportConversation(visitor.token, visitorNow + 1);
+  assert.equal(visitorThread.category, "sourcing");
+  assert.equal(visitorThread.messages[0]?.sender, "visitor");
+  assert.equal("visitorEmail" in visitorThread, false, "the public thread projection does not echo private reconnect details");
+  const storedVisitorContact = db.prepare("SELECT visitor_email,visitor_phone FROM support_conversations WHERE id=?").get(visitor.id) as { visitor_email: string; visitor_phone: string };
+  assert.equal(storedVisitorContact.visitor_email, "visitor@example.test", "visitor email is normalized before persistence");
+  assert.equal(storedVisitorContact.visitor_phone, "+251911223344", "visitor phone is normalized before persistence");
+  await assert.rejects(() => getPublicSupportConversation(`${visitor.token}x`, visitorNow + 1), SupportError);
+  await assert.rejects(() => getSupportConversation(clientA, visitor.id), SupportError);
+  const staffVisitorView = await getSupportConversation(operations, visitor.id);
+  assert.equal(staffVisitorView.conversation.participantKind, "visitor");
+  assert.equal(staffVisitorView.conversation.businessId, null);
+  assert.equal(staffVisitorView.conversation.visitorEmail, "visitor@example.test");
+  assert.equal(staffVisitorView.conversation.visitorPhone, "+251911223344");
+  const stagedPdf = await stageSupportAttachment(new File(
+    ["%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF"],
+    "production requirements.pdf",
+    { type: "application/pdf" },
+  ));
+  assert.ok(stagedPdf, "a valid PDF stages in private support storage");
+  const visitorReply = await postPublicSupportMessage(visitor.token, {
+    message: "The requirement is for a short production run.",
+    idempotencyKey: "public-support-reply-0001",
+    attachment: stagedPdf,
+  }, "visitor-ip-one", visitorNow + 2);
+  const attachmentRow = db.prepare("SELECT id FROM support_attachments WHERE message_id=?").get(visitorReply.id) as { id: number };
+  assert.ok(attachmentRow.id, "the support attachment is linked to its message");
+  const publicAttachment = await getPublicSupportAttachment(visitor.token, attachmentRow.id, visitorNow + 2);
+  assert.equal(publicAttachment.original_name, "production requirements.pdf");
+  assert.equal((await readSupportAttachment(publicAttachment.storage_key, publicAttachment.mime_type))?.contentType, "application/pdf");
+  assert.equal((await getSupportAttachment(operations, visitor.id, attachmentRow.id)).original_name, "production requirements.pdf");
+  await assert.rejects(() => getSupportAttachment(clientA, visitor.id, attachmentRow.id), SupportError);
+  await assert.rejects(() => getPublicSupportAttachment(`${visitor.token}x`, attachmentRow.id, visitorNow + 2), SupportError);
+  assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 2)).messages.at(-1)?.attachment?.id, attachmentRow.id);
+  const duplicateStage = await stageSupportAttachment(new File(
+    ["%PDF-1.7\nduplicate\n%%EOF"],
+    "duplicate.pdf",
+    { type: "application/pdf" },
+  ));
+  const duplicateVisitorReply = await postPublicSupportMessage(visitor.token, {
+    message: "The requirement is for a short production run.",
+    idempotencyKey: "public-support-reply-0001",
+    attachment: duplicateStage,
+  }, "visitor-ip-one", visitorNow + 3);
+  assert.equal(visitorReply.duplicate, false);
+  assert.equal(duplicateVisitorReply.duplicate, true);
+  await duplicateStage?.discard();
+  assert.equal(Number((db.prepare("SELECT COUNT(*) total FROM support_attachments WHERE message_id=?").get(visitorReply.id) as { total: number }).total), 1, "an idempotent retry does not create a second attachment row");
+  await assert.rejects(
+    () => stageSupportAttachment(new File(["not a real file"], "deceptive.pdf", { type: "application/pdf" })),
+    /Only valid JPEG, PNG, WebP, and PDF/,
+  );
+  await postSupportMessage(operations, visitor.id, {
+    message: "A team member will review the request.",
+    idempotencyKey: "public-support-staff-0001",
+  }, visitorNow + 4);
+  assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 5)).messages.at(-1)?.sender, "staff");
+  await assert.rejects(() => closePublicSupportConversation(`${visitor.token}x`, visitorNow + 6), SupportError);
+  assert.equal((await closePublicSupportConversation(visitor.token, visitorNow + 6)).duplicate, false, "visitor can end the owned active chat");
+  assert.equal((await closePublicSupportConversation(visitor.token, visitorNow + 7)).duplicate, true, "visitor close is idempotent");
+  assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 8)).status, "closed");
+  assert.equal(Number((db.prepare("SELECT COUNT(*) total FROM support_assignments WHERE conversation_id=? AND released_at IS NULL").get(visitor.id) as { total: number }).total), 0, "visitor close releases active staff assignment");
+  await assert.rejects(() => postPublicSupportMessage(visitor.token, {
+    message: "This reply must not reopen a closed conversation.",
+    idempotencyKey: "public-support-closed-0001",
+  }, "visitor-ip-one", visitorNow + 9), (error: unknown) => error instanceof SupportError && error.code === "closed");
+  await assert.rejects(() => getPublicSupportConversation(visitor.token, visitor.expiresAt + 1), SupportError);
   assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
   closeDbForTests();
   fs.rmSync(root, { recursive: true, force: true });
-  console.log("Support tenant scope, least-loaded assignment, paginated agent management, capacity, queue, messaging, claim, close, reopen, and reassignment passed.");
+  console.log("Support tenant scope, visitor contact validation, anonymous token isolation, least-loaded assignment, capacity, messaging, expiry, close, reopen, and reassignment passed.");
 }
 
 main().catch((error) => {

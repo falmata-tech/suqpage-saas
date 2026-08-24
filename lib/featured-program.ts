@@ -24,6 +24,7 @@ export const DEFAULT_FEATURED_PROGRAM_POLICY: FeaturedProgramPolicy = {
 
 export const FEATURED_PROGRAM_TARGET_PRESENTATION_MINUTES = 30;
 export const FEATURED_PROGRAM_MIN_SESSION_MINUTES = 60;
+export const MAX_FEATURED_SHOWROOMS = 40;
 
 export type FeaturedBroadcastPhase = "scheduled" | "live" | "intermission" | "ended";
 export type FeaturedProgramSession = "morning" | "afternoon";
@@ -51,9 +52,24 @@ export type FeaturedProgramBreak = {
   label: string;
   timeLabel: string;
   current: boolean;
+  sponsorSlot?: number;
 };
 
 export type FeaturedProgramAgendaEntry = FeaturedBoothWalkthrough | FeaturedProgramBreak;
+
+export function featuredProgramDisplayOrder(
+  walkthroughs: readonly FeaturedBoothWalkthrough[],
+  now: number | Date,
+) {
+  if (!walkthroughs.length) return [];
+  const value = now instanceof Date ? now.getTime() : Number(now);
+  if (!Number.isFinite(value)) throw new Error("Featured program display time is invalid.");
+  const current = walkthroughs.find((entry) => value >= entry.start && value < entry.end);
+  const completed = walkthroughs.filter((entry) => entry.end <= value).at(-1);
+  const anchor = current || completed || walkthroughs[0];
+  const anchorIndex = walkthroughs.indexOf(anchor);
+  return [...walkthroughs.slice(anchorIndex), ...walkthroughs.slice(0, anchorIndex)].map((entry) => entry.slot);
+}
 
 function validLabel(value: string, field: string) {
   const cleaned = String(value || "").trim();
@@ -139,7 +155,9 @@ export function resolveFeaturedProgramSessions(
   boothCount: number,
   rawPolicy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
 ): ResolvedFeaturedProgramSessions {
-  if (!Number.isSafeInteger(boothCount) || boothCount < 0) throw new Error("Featured program booth count must be a non-negative integer.");
+  if (!Number.isSafeInteger(boothCount) || boothCount < 0 || boothCount > MAX_FEATURED_SHOWROOMS) {
+    throw new Error(`Featured program booth count must be between 0 and ${MAX_FEATURED_SHOWROOMS}.`);
+  }
   const policy = validateFeaturedProgramPolicy(rawPolicy);
   const { morningCount, afternoonCount } = splitBoothCount(boothCount, policy);
   return {
@@ -225,7 +243,9 @@ export function buildFeaturedProgramAgenda(
   rawPolicy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
 ): FeaturedProgramAgendaEntry[] {
   validateFeaturedProgramDate(dateIso);
-  if (!Number.isSafeInteger(boothCount) || boothCount < 0) throw new Error("Featured program booth count must be a non-negative integer.");
+  if (!Number.isSafeInteger(boothCount) || boothCount < 0 || boothCount > MAX_FEATURED_SHOWROOMS) {
+    throw new Error(`Featured program booth count must be between 0 and ${MAX_FEATURED_SHOWROOMS}.`);
+  }
   const policy = validateFeaturedProgramPolicy(rawPolicy);
   const value = now instanceof Date ? now.getTime() : now;
   if (!Number.isFinite(value)) throw new Error("Featured program current time is invalid.");
@@ -244,7 +264,10 @@ export function buildFeaturedProgramAgenda(
     current: value >= intermissionStart && value < intermissionEnd,
   };
   const afternoon = sessionAgenda({ dateIso, session: "afternoon", startMinute: sessions.afternoon.startMinute, endMinute: sessions.afternoon.endMinute, count: sessions.afternoon.boothCount, slotOffset: sessions.morning.boothCount, policy, now: value });
-  return [...morning, intermission, ...afternoon];
+  let sponsorSlot = 0;
+  return [...morning, intermission, ...afternoon].map((entry) => entry.kind === "sponsor_break"
+    ? { ...entry, sponsorSlot: ++sponsorSlot }
+    : entry);
 }
 
 export function featuredBroadcastPhase(

@@ -1,4 +1,4 @@
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE_PREFIX = "mirtpage-pwa-";
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${VERSION}`;
 const PAGE_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
@@ -14,7 +14,7 @@ const APP_SHELL = [
 ];
 
 const PRIVATE_PATHS = ["/api", "/dashboard", "/preview", "/login", "/request"];
-const PUBLIC_PATHS = new Set(["/", "/about", "/discover", OFFLINE_URL, "/privacy", "/terms"]);
+const PUBLIC_PATHS = new Set(["/", "/about", "/featured", "/discover", OFFLINE_URL, "/privacy", "/terms"]);
 
 function isPrivatePath(pathname) {
   return PRIVATE_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

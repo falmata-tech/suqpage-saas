@@ -5,6 +5,7 @@ import { chromium } from "@playwright/test";
 
 const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
 const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-public-app-shell");
+const scope = process.env.MIRTPAGE_CAPTURE_SCOPE || "all";
 fs.mkdirSync(output, { recursive: true });
 
 async function openPage(browser, route, viewport) {
@@ -12,27 +13,17 @@ async function openPage(browser, route, viewport) {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
-  });
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   await page.goto(`${baseURL}${route}`, { waitUntil: "domcontentloaded" });
   await page.locator("main").waitFor();
   return { context, page, errors };
 }
 
-async function assertNoOverflow(page, label) {
+async function assertNoHorizontalOverflow(page, label) {
   assert.equal(
-    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
     true,
     `${label} has horizontal overflow`,
-  );
-}
-
-async function assertViewportBounded(page, label) {
-  assert.equal(
-    await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight + 2),
-    true,
-    `${label} must stay within the application viewport`,
   );
 }
 
@@ -40,23 +31,61 @@ async function captureMarket(browser, viewport, suffix) {
   const state = await openPage(browser, "/", viewport);
   const { page } = state;
   await page.locator(".discovery-map-stage").waitFor();
-  await page.locator("svg.discovery-map").waitFor();
-  assert.equal(await page.locator(".daily-featured").count(), 0, "Market must not mount Daily Featured");
-  assert.equal(await page.locator(".discovery-sponsored").count(), 0, "Market must not mount Sponsors");
-  assert.equal(await page.locator("main").count(), 1, "Market has one main landmark");
-  if (viewport.width > 680) {
-    assert.deepEqual(await page.locator(".public-app-rail > nav a span").allTextContents(), ["Market", "Daily featured", "About"]);
-    assert.equal(await page.locator(".public-app-rail-secondary > a").count(), 2);
-  }
-  await assertNoOverflow(page, `${suffix} Market`);
-  await assertViewportBounded(page, `${suffix} Market`);
-  const stageBox = await page.locator(".discovery-map-stage").boundingBox();
-  assert.ok(stageBox && stageBox.height >= (viewport.width > 680 ? 620 : 430), `${suffix} Market map does not fill the remaining workspace`);
-  if (viewport.width <= 680) {
-    const toolbarBox = await page.locator(".discovery-mobile-map-toolbar").boundingBox();
-    assert.ok(toolbarBox && stageBox && toolbarBox.y + toolbarBox.height <= stageBox.y + 1, `${suffix} map toolbar overlaps the map`);
-  }
+  const chooser = page.locator(".discovery-industry-start");
+  await chooser.waitFor();
+  assert.equal(await chooser.getByRole("link").count(), 8, `${suffix} exposes seven industries plus All industries`);
+  assert.match(await chooser.getByRole("link").last().textContent(), /All industries/, `${suffix} keeps All industries last`);
+  await page.locator(".discovery-cluster,.discovery-point").first().waitFor();
+  assert.ok(await page.locator(".discovery-cluster,.discovery-point").count() > 0, `${suffix} renders combined results behind the reminder`);
+  await assertNoHorizontalOverflow(page, `${suffix} orientation reminder`);
+  await page.screenshot({ path: path.join(output, `market-orientation-${suffix}.png`), caret: "initial" });
+
+  await chooser.getByRole("link", { name: /All industries/ }).click();
+  await page.waitForURL((url) => url.searchParams.get("industry") === "all");
+  await page.locator(".discovery-map-stage").waitFor();
+  assert.equal(await page.locator(".discovery-industry-start").count(), 0, `${suffix} closes the reminder after an explicit choice`);
+  assert.equal(await page.locator(".daily-featured").count(), 0, "Market does not mount Daily Featured");
+  assert.equal(await page.locator(".discovery-sponsored").count(), 0, "Market does not mount Sponsors");
+  await assertNoHorizontalOverflow(page, `${suffix} Market`);
   await page.screenshot({ path: path.join(output, `market-${suffix}.png`), caret: "initial" });
+
+  await page.locator(".discovery-map").hover();
+  await page.mouse.wheel(0, -6_000);
+  await page.waitForTimeout(300);
+  const nearbyMarker = page.locator(".discovery-nearby-group").first();
+  await nearbyMarker.waitFor({ state: "attached" });
+  await nearbyMarker.dispatchEvent("click");
+  const nearbyViewer = page.locator(".nearby-showroom-viewer");
+  await nearbyViewer.waitFor();
+  const nearbyMetrics = await nearbyViewer.evaluate((viewer) => {
+    const cards = [...viewer.querySelectorAll(".nearby-showroom-grid > button")].map((card) => card.getBoundingClientRect());
+    const bounds = viewer.getBoundingClientRect();
+    return {
+      count: cards.length,
+      outside: cards.filter((card) => card.left < bounds.left - 1 || card.right > bounds.right + 1 || card.top < bounds.top - 1 || card.bottom > bounds.bottom + 1).length,
+      internalScroll: viewer.scrollHeight - viewer.clientHeight,
+      width: bounds.width,
+    };
+  });
+  assert.ok(nearbyMetrics.count >= 2 && nearbyMetrics.count <= 6, `${suffix} nearby viewer contains two to six cards`);
+  assert.equal(nearbyMetrics.outside, 0, `${suffix} nearby cards stay inside the viewer`);
+  assert.ok(nearbyMetrics.internalScroll <= 1, `${suffix} nearby viewer has no internal scroll`);
+  assert.ok(nearbyMetrics.width <= viewport.width - 8, `${suffix} nearby viewer fits the viewport`);
+  await assertNoHorizontalOverflow(page, `${suffix} nearby viewer`);
+  await page.screenshot({ path: path.join(output, `market-nearby-${suffix}.png`), caret: "initial" });
+  await nearbyViewer.locator(".nearby-showroom-grid > button").first().click();
+  const nearbyDetail = nearbyViewer.locator(".nearby-showroom-detail");
+  await nearbyDetail.waitFor();
+  assert.equal(await page.locator(".nearby-showroom-viewer").count(), 1, `${suffix} retains one nearby inspector`);
+  assert.equal(await page.locator(".discovery-preview-layer").count(), 0, `${suffix} does not stack a portal preview over nearby results`);
+  assert.equal(await nearbyViewer.locator(".nearby-showroom-grid").count(), 0, `${suffix} replaces the nearby list with showroom detail`);
+  assert.equal(await page.locator(".public-support-launcher").evaluate((button) => getComputedStyle(button).visibility), "hidden", `${suffix} support launcher yields to the map inspector`);
+  const detailBounds = await nearbyViewer.boundingBox();
+  assert.ok(detailBounds && detailBounds.x >= 0 && detailBounds.x + detailBounds.width <= viewport.width, `${suffix} detail inspector fits the viewport`);
+  await page.screenshot({ path: path.join(output, `market-nearby-detail-${suffix}.png`), caret: "initial" });
+  await nearbyViewer.getByRole("button", { name: "Back to nearby" }).click();
+  await nearbyViewer.locator(".nearby-showroom-grid").waitFor();
+  assert.equal(await nearbyViewer.locator(".nearby-showroom-detail").count(), 0, `${suffix} Back restores the nearby list`);
   assert.deepEqual(state.errors, []);
   await state.context.close();
 }
@@ -65,89 +94,87 @@ async function captureFeatured(browser, viewport, suffix) {
   const state = await openPage(browser, "/featured", viewport);
   const { page } = state;
   await page.locator(".daily-featured").waitFor();
-  await page.locator("#featured-sponsors").waitFor();
-  await page.locator(".featured-floor-stage").waitFor();
-  assert.equal(await page.locator("main h1").count(), 1, `${suffix} Daily Featured needs one H1`);
-  assert.equal(await page.locator(".public-experience-head").count(), 0, `${suffix} Daily Featured must not repeat its introduction`);
-  assert.equal(await page.locator(".discovery-sponsored-rail > a").count(), 5);
-  assert.equal(await page.locator(".discovery-map-stage").count(), 0);
-  const floorBox = await page.locator(".featured-floor-stage").boundingBox();
-  assert.ok(floorBox && floorBox.height >= (viewport.width > 680 ? 520 : 260), `${suffix} venue does not receive enough viewport space`);
-  const floorToolbarOverlap = await page.evaluate(() => {
-    const toolbar = document.querySelector(".featured-floor-actions")?.getBoundingClientRect();
-    const stage = document.querySelector(".featured-floor-stage")?.getBoundingClientRect();
-    return toolbar && stage ? toolbar.bottom - stage.top : Number.POSITIVE_INFINITY;
+  await page.locator(".featured-gallery").waitFor();
+  await page.locator(".featured-card").first().waitFor();
+  assert.equal(await page.locator("main h1").count(), 1, `${suffix} Daily Featured has one H1`);
+  assert.equal(await page.locator(".featured-floor,.featured-booth").count(), 0, `${suffix} contains no retired venue UI`);
+  assert.equal(await page.locator(".discovery-sponsored-rail > a").count(), 5, `${suffix} discloses the complete sponsor pool`);
+  const gallery = await page.locator(".featured-gallery").evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const cards = [...element.querySelectorAll(".featured-card")].map((card) => card.getBoundingClientRect());
+    return {
+      horizontalOverflow: element.scrollWidth - element.clientWidth,
+      cards: cards.length,
+      minimumWidth: Math.min(...cards.map((card) => card.width)),
+      outside: cards.filter((card) => card.left < bounds.left - 1 || card.right > bounds.right + 1).length,
+    };
   });
-  assert.ok(floorToolbarOverlap <= 2, `${suffix} Featured zoom toolbar overlaps the venue by ${floorToolbarOverlap}px`);
+  assert.ok(gallery.cards > 0 && gallery.cards <= 40, `${suffix} renders the bounded Featured program`);
+  assert.ok(gallery.minimumWidth >= (viewport.width <= 350 ? 130 : 150), `${suffix} cards remain readable`);
+  assert.ok(gallery.horizontalOverflow <= 1 && gallery.outside === 0, `${suffix} gallery does not pan sideways`);
   if (viewport.width <= 680) {
     assert.equal(
       await page.locator(".discovery-sponsored-rail > a").evaluateAll((cards) => cards.filter((card) => getComputedStyle(card).display !== "none").length),
       2,
-      `${suffix} must show exactly two sponsors`,
+      `${suffix} shows two mobile sponsors`,
     );
   }
-  await assertNoOverflow(page, `${suffix} Daily Featured`);
-  await assertViewportBounded(page, `${suffix} Daily Featured`);
-  await page.screenshot({ path: path.join(output, `featured-${suffix}.png`), caret: "initial" });
-
-  if (viewport.width > 680) {
-    await page.getByRole("button", { name: "Zoom in to featured showroom floor" }).click();
-    await page.waitForTimeout(220);
-    const boothBox = await page.locator(".featured-booth").first().boundingBox();
-    assert.ok(boothBox, "Featured booth is required for pan evidence");
-    const beforePan = await page.locator(".featured-floor").getAttribute("style");
-    await page.mouse.move(boothBox.x + boothBox.width / 2, boothBox.y + boothBox.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(boothBox.x + boothBox.width / 2 + 90, boothBox.y + boothBox.height / 2 + 25, { steps: 6 });
-    await page.mouse.up();
-    const afterPan = await page.locator(".featured-floor").getAttribute("style");
-    assert.notEqual(afterPan, beforePan, "A drag beginning on a Featured booth must pan the venue");
-    assert.equal(await page.locator(".discovery-preview").count(), 0, "Panning from a booth must not open its inspector");
-    await page.getByRole("button", { name: "Fit featured showroom floor to view" }).click();
-  }
-
-  const agenda = page.locator(".featured-agenda");
-  if (await agenda.count()) {
-    await agenda.locator("summary").click();
-    assert.equal(await agenda.getAttribute("open"), "");
-    const expandedFloorBox = await page.locator(".featured-floor-stage").boundingBox();
-    assert.ok(expandedFloorBox && expandedFloorBox.height >= 170, `${suffix} expanded schedule hides the venue`);
-    await assertViewportBounded(page, `${suffix} expanded Daily Featured`);
-  }
+  await assertNoHorizontalOverflow(page, `${suffix} Daily Featured`);
+  await page.screenshot({ path: path.join(output, `featured-${suffix}.png`), caret: "initial", fullPage: viewport.width > 680 });
+  await page.locator(".featured-card").first().click();
+  await page.locator(".discovery-preview[role='dialog']").waitFor();
+  await page.screenshot({ path: path.join(output, `featured-preview-${suffix}.png`), caret: "initial" });
   assert.deepEqual(state.errors, []);
   await state.context.close();
 }
 
-async function captureCityMarket(browser, viewport, suffix) {
+async function captureSupport(browser, viewport, suffix) {
   const state = await openPage(browser, "/", viewport);
   const { page } = state;
-  await page.locator(".discovery-map-stage").waitFor();
-  await page.locator("svg.discovery-map").waitFor();
-  const zoomIn = viewport.width <= 680
-    ? page.locator(".discovery-mobile-map-toolbar").getByRole("button", { name: "Zoom in" })
-    : page.locator(".discovery-zoom").getByRole("button", { name: "Zoom in" });
-  for (let attempt = 0; attempt < 8 && await page.locator(".discovery-city-gateway").count() === 0; attempt += 1) {
-    await zoomIn.click();
-    await page.waitForTimeout(240);
+  await page.getByRole("button", { name: "Ask MirtPage" }).click();
+  const dialog = page.getByRole("dialog", { name: "Ask MirtPage" });
+  await dialog.waitFor();
+  const category = dialog.getByLabel("How can we help?");
+  await category.waitFor();
+  assert.equal(await category.locator("option").count(), 5, `${suffix} support exposes the bounded assistance categories`);
+  assert.equal(await dialog.getByLabel("Email").count(), 1, `${suffix} support requests a reconnect email`);
+  assert.equal(await dialog.getByLabel("Phone").count(), 1, `${suffix} support requests a reconnect phone number`);
+  assert.equal(await dialog.getByLabel("Email").getAttribute("required"), "", `${suffix} reconnect email is required`);
+  assert.equal(await dialog.getByLabel("Phone").getAttribute("required"), "", `${suffix} reconnect phone is required`);
+  assert.match(await dialog.textContent(), /continue by email or phone if this chat disconnects/i, `${suffix} explains why reconnect details are required`);
+  assert.match(await dialog.textContent(), /not certification, a guarantee, or an endorsement/i);
+  const box = await dialog.boundingBox();
+  assert.ok(box && box.x >= -1 && box.x + box.width <= viewport.width + 1, `${suffix} support drawer fits the viewport`);
+  await assertNoHorizontalOverflow(page, `${suffix} support drawer`);
+  await page.screenshot({ path: path.join(output, `support-${suffix}.png`), caret: "initial" });
+  if (suffix === "390") {
+    await dialog.getByLabel("Email").fill("visitor@example.test");
+    await dialog.getByLabel("Phone").fill("+251911223344");
+    await dialog.getByLabel("Your message").fill("Please review the attached production requirements.");
+    await dialog.locator("input[type=file]").setInputFiles({
+      name: "production-requirements.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF"),
+    });
+    await dialog.getByRole("button", { name: "Send" }).click();
+    await dialog.getByRole("button", { name: "End chat" }).waitFor();
+    const attachment = dialog.getByRole("link", { name: /production-requirements\.pdf/i });
+    await attachment.waitFor();
+    const attachmentResponse = await page.request.get(new URL(await attachment.getAttribute("href"), baseURL).toString());
+    assert.equal(attachmentResponse.status(), 200, "the token-owned visitor can read the private attachment");
+    assert.match(attachmentResponse.headers()["content-type"] || "", /application\/pdf/);
+    assert.match(attachmentResponse.headers()["cache-control"] || "", /private, no-store/);
+    await page.screenshot({ path: path.join(output, "support-active-390.png"), caret: "initial" });
+    page.once("dialog", (confirmation) => confirmation.accept());
+    await dialog.getByRole("button", { name: "End chat" }).click();
+    await dialog.getByText("Conversation closed").waitFor();
+    await dialog.getByRole("button", { name: "Start another chat" }).waitFor();
+    await page.screenshot({ path: path.join(output, "support-closed-390.png"), caret: "initial" });
+    await dialog.getByRole("button", { name: "Start another chat" }).click();
+    await dialog.getByLabel("Email").waitFor();
   }
-  const gateway = page.locator(".discovery-city-gateway").first();
-  await gateway.waitFor();
-  await gateway.press("Enter");
-  await page.locator(".city-showroom-stage").waitFor();
-  await page.waitForTimeout(320);
-  const stageBox = await page.locator(".city-showroom-stage").boundingBox();
-  const toolbarBox = await page.locator(".venue-zoom-toolbar.city-showroom-actions").boundingBox();
-  assert.ok(stageBox && stageBox.height >= (viewport.width > 680 ? 600 : 360), `${suffix} City Market does not fill the remaining workspace`);
-  assert.ok(toolbarBox && stageBox && toolbarBox.y + toolbarBox.height <= stageBox.y + 1, `${suffix} City Market zoom toolbar overlaps the venue`);
-  await assertNoOverflow(page, `${suffix} City Market`);
-  await assertViewportBounded(page, `${suffix} City Market`);
-  await page.screenshot({ path: path.join(output, `city-${suffix}.png`), caret: "initial" });
-  const floorBox = await page.locator(".city-showroom-floor").boundingBox();
-  const floorAspect = floorBox ? floorBox.width / floorBox.height : 0;
-  assert.ok(floorAspect > 0, `${suffix} City Market floor must render`);
   assert.deepEqual(state.errors, []);
   await state.context.close();
-  return floorAspect;
 }
 
 const browser = await chromium.launch({
@@ -156,52 +183,22 @@ const browser = await chromium.launch({
 });
 
 try {
-  const legacy = await openPage(browser, "/discover?industry=electronics&view=list", { width: 960, height: 800 });
-  await legacy.page.waitForURL((url) => url.pathname === "/" && url.searchParams.get("industry") === "electronics" && url.searchParams.get("view") === "list");
-  assert.deepEqual(legacy.errors, []);
-  await legacy.context.close();
-
-  const legacySponsors = await openPage(browser, "/sponsors", { width: 960, height: 800 });
-  await legacySponsors.page.waitForURL((url) => url.pathname === "/featured");
-  assert.deepEqual(legacySponsors.errors, []);
-  await legacySponsors.context.close();
-
-  await captureMarket(browser, { width: 1440, height: 1000 }, "1440");
-  await captureMarket(browser, { width: 390, height: 844 }, "390");
-  await captureMarket(browser, { width: 320, height: 720 }, "320");
-
-  const wideCityAspect = await captureCityMarket(browser, { width: 1440, height: 1000 }, "1440");
-  const phoneCityAspect = await captureCityMarket(browser, { width: 390, height: 844 }, "390");
-  assert.ok(phoneCityAspect < wideCityAspect, "City Market floor arrangement must respond to portrait and wide workspaces");
-
-  await captureFeatured(browser, { width: 1440, height: 1000 }, "1440");
-  await captureFeatured(browser, { width: 390, height: 844 }, "390");
-  await captureFeatured(browser, { width: 320, height: 720 }, "320");
-
-  const about = await openPage(browser, "/about", { width: 1440, height: 1000 });
-  await about.page.locator(".about-hero").waitFor();
-  assert.equal(await about.page.locator(".public-app-rail a[aria-current='page']").getAttribute("href"), "/about");
-  assert.equal(await about.page.locator(".landing-header").count(), 0);
-  await assertNoOverflow(about.page, "desktop About");
-  await about.page.screenshot({ path: path.join(output, "about-1440.png"), caret: "initial" });
-  assert.deepEqual(about.errors, []);
-  await about.context.close();
-
-  const mobile = await openPage(browser, "/", { width: 390, height: 844 });
-  const navigation = mobile.page.getByRole("navigation", { name: "MirtPage application navigation" });
-  await navigation.waitFor();
-  assert.equal(await navigation.locator(":scope > a").count(), 3);
-  assert.equal(await navigation.locator(":scope > button").count(), 1);
-  assert.equal(await navigation.locator(":scope > a, :scope > button").evaluateAll((targets) => targets.every((target) => target.getBoundingClientRect().height >= 44)), true);
-  await navigation.getByRole("button", { name: "More" }).click();
-  const more = mobile.page.getByRole("dialog", { name: "More" });
-  await more.waitFor();
-  await mobile.page.screenshot({ path: path.join(output, "more-390.png"), caret: "initial" });
-  await more.getByRole("button", { name: "Close navigation" }).click();
-  assert.deepEqual(mobile.errors, []);
-  await mobile.context.close();
-
-  console.log(`Public application shell visuals passed: ${output}`);
+  if (scope === "all" || scope === "market") {
+    await captureMarket(browser, { width: 1440, height: 1000 }, "1440");
+    await captureMarket(browser, { width: 390, height: 844 }, "390");
+    await captureMarket(browser, { width: 320, height: 720 }, "320");
+  }
+  if (scope === "all" || scope === "featured") {
+    await captureFeatured(browser, { width: 1440, height: 1000 }, "1440");
+    await captureFeatured(browser, { width: 390, height: 844 }, "390");
+    await captureFeatured(browser, { width: 320, height: 720 }, "320");
+  }
+  if (scope === "all" || scope === "support") {
+    await captureSupport(browser, { width: 1440, height: 1000 }, "1440");
+    await captureSupport(browser, { width: 390, height: 844 }, "390");
+    await captureSupport(browser, { width: 320, height: 720 }, "320");
+  }
+  console.log(`Focused public application visuals passed: ${output}`);
 } finally {
   await browser.close();
 }

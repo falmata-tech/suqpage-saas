@@ -105,22 +105,25 @@ disposable PostgreSQL 17 target without enabling database cutover:
 npm run test:postgres-readiness
 ```
 
-Deployment, Supabase Storage, GitHub protection, and rollback procedures are in
-`docs/DEVOPS-RUNBOOK.md`. PostgreSQL is not yet an application runtime; SQLite
-remains authoritative and one application instance is required.
+Deployment, local/hosted Supabase, Netlify/Vercel candidates, GitHub protection,
+and rollback procedures are in `docs/DEVOPS-RUNBOOK.md`. Normal development and
+production use PostgreSQL; SQLite remains isolated compatibility and migration
+infrastructure during the rollback window.
 
 ## Production environment
 
-Create a production `.env` with absolute persistent paths:
+Create production secrets in the selected host's encrypted environment UI:
 
 ```bash
 NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://mirtpage.com
-MIRTPAGE_DB_PATH=/srv/mirtpage/data/mirtpage.db
-MIRTPAGE_DATABASE_DRIVER=sqlite
-MIRTPAGE_MEDIA_DRIVER=filesystem
-MIRTPAGE_MEDIA_ROOT=/srv/mirtpage/data/media
-MIRTPAGE_BACKUP_ROOT=/srv/mirtpage/backups
+MIRTPAGE_DATABASE_DRIVER=postgres
+MIRTPAGE_POSTGRES_URL=<supabase-transaction-pooler-url>
+MIRTPAGE_MEDIA_DRIVER=supabase
+MIRTPAGE_SUPABASE_URL=https://<project-ref>.supabase.co
+MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY=<server-only>
+MIRTPAGE_SUPABASE_STORAGE_BUCKET=mirtpage-media
+MIRTPAGE_AUTH_DRIVER=local
 PRIVACY_SALT=<at-least-24-random-characters>
 ```
 
@@ -158,10 +161,9 @@ a renewal was received and advance the monthly period. No amount or price is
 collected in the current UI, and no checkout, payment gateway, or automatic
 debit is configured.
 
-Production startup refuses non-HTTPS app URLs and a non-persistent database.
-Filesystem media mode also requires a persistent media path. Supabase media mode
-requires a valid HTTPS project URL, server-only service-role key, and private
-bucket name.
+Production startup refuses non-HTTPS app URLs and an incomplete database.
+Supabase media mode requires a valid HTTPS project URL, server-only service-role
+key, and private bucket name.
 Set `MIRTPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
 basic product writes while leaving requests and showrooms available.
 Set `MIRTPAGE_RECIPE_STUDIO_ENABLED=0` to deny recipe export/import and route
@@ -170,18 +172,20 @@ Controlled YouTube admission is disabled by default. Set
 `MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=1` only after the DEP-009 provider gate is
 approved; this enables private normalized-ID admission, not public rendering.
 
-## New production installation
+## Local development
 
 ```bash
 npm ci
-npm run reset
-npm run release
-NODE_ENV=production npm start
+npm run local:supabase:start
+npm run local:supabase:configure
+npm run local:supabase:bootstrap
+npm run dev:local
 ```
 
-`npm run reset` is only for a new empty installation. Never run it against the
-populated demonstration or production database. Existing installations use
-`npm run migrate` after a verified backup.
+`npm run reset` is only for isolated SQLite compatibility fixtures. Never run
+it against a retained database. Local PostgreSQL uses
+`npm run local:supabase:reset`; retained PostgreSQL uses
+`npm run migrate:postgres` after a verified backup.
 
 Before opening the site publicly:
 

@@ -23,6 +23,10 @@ function dateTime(value: number) {
   }).format(new Date(value));
 }
 
+function fileSize(value: number) {
+  return value >= 1024 * 1024 ? `${(value / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(value / 1024))} KB`;
+}
+
 export default async function SupportThread({
   params,
   searchParams,
@@ -49,7 +53,7 @@ export default async function SupportThread({
           <Link href="/dashboard/support">Back to support inbox</Link>
           <span className="eyebrow">{data.conversation.publicRef}</span>
           <h1>{data.conversation.subject}</h1>
-          <p>{data.conversation.businessName} · <span className={`badge ${data.conversation.status}`}>{data.conversation.status}</span></p>
+          <p>{data.conversation.businessName}{data.conversation.participantKind === "visitor" ? ` · ${data.conversation.assistanceCategory.replaceAll("_", " ")}` : ""} · <span className={`badge ${data.conversation.status}`}>{data.conversation.status}</span></p>
         </div>
         <div className="support-thread-actions">
           {!client && data.conversation.status === "waiting" ? (
@@ -72,22 +76,38 @@ export default async function SupportThread({
           ) : null}
         </div>
       </div>
+      {!client && data.conversation.participantKind === "visitor" ? (
+        <section className="panel support-visitor-contact" aria-labelledby="visitor-contact-title">
+          <div><span className="eyebrow">Reconnect details</span><h2 id="visitor-contact-title">Visitor contact</h2><p>Use these details only to continue this support conversation.</p></div>
+          <div>
+            {data.conversation.visitorEmail ? <a href={`mailto:${data.conversation.visitorEmail}`}>{data.conversation.visitorEmail}</a> : <span>Email unavailable for this older conversation</span>}
+            {data.conversation.visitorPhone ? <a href={`tel:${data.conversation.visitorPhone}`}>{data.conversation.visitorPhone}</a> : <span>Phone unavailable for this older conversation</span>}
+          </div>
+        </section>
+      ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       {query.sent ? <p className="notice">Reply sent.</p> : null}
       <section className="support-thread" aria-label="Support message history" tabIndex={0}>
         {data.messages.map((message) => (
-          <article className={`support-message ${message.senderRole === "client" ? "client" : "staff"}`} key={message.id}>
+          <article className={`support-message ${message.senderRole === "client" || message.senderRole === "visitor" ? "client" : "staff"}`} key={message.id}>
             <header><strong>{message.senderName}</strong><time dateTime={new Date(message.createdAt).toISOString()}>{dateTime(message.createdAt)}</time></header>
             <p>{message.body}</p>
+            {message.attachment ? message.attachment.mimeType.startsWith("image/")
+              ? <a className="support-message-attachment image" href={`/api/support/${id}/attachments/${message.attachment.id}`} target="_blank" rel="noreferrer"><img src={`/api/support/${id}/attachments/${message.attachment.id}`} alt={message.attachment.originalName} loading="lazy" /><span>{message.attachment.originalName} · {fileSize(message.attachment.byteSize)}</span></a>
+              : <a className="support-message-attachment file" href={`/api/support/${id}/attachments/${message.attachment.id}`}><strong>{message.attachment.originalName}</strong><small>PDF · {fileSize(message.attachment.byteSize)}</small></a>
+              : null}
           </article>
         ))}
       </section>
       {canReply ? (
-        <form className="panel support-reply" action={postSupportMessageAction}>
+        <form className="panel support-reply" action={postSupportMessageAction} encType="multipart/form-data">
           <input type="hidden" name="conversationId" value={id} />
           <input type="hidden" name="idempotencyKey" value={crypto.randomBytes(16).toString("hex")} />
           <label htmlFor="support-reply">Reply</label>
           <textarea id="support-reply" name="message" maxLength={4000} required rows={4} />
+          <label htmlFor="support-reply-attachment">Attachment <span className="muted">(optional)</span></label>
+          <input id="support-reply-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
+          <small>One JPEG, PNG, WebP, or PDF up to 5 MB.</small>
           <button className="btn brand">Send reply</button>
         </form>
       ) : data.conversation.status === "waiting" && !client ? (

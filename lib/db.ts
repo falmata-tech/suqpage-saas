@@ -72,8 +72,8 @@ export function getAllBusinesses(): Business[] {
   return rows<Business>(getDb().prepare("SELECT * FROM businesses ORDER BY name").all());
 }
 
-export function getCatalogByBusinessId(businessId: number, includeDrafts = false): Catalog | undefined {
-  const business = getBusinessById(businessId);
+export function getCatalogByBusinessId(businessId: number, includeDrafts = false, knownBusiness?: Business): Catalog | undefined {
+  const business = knownBusiness || getBusinessById(businessId);
   if (!business) return undefined;
   const activeClause = includeDrafts ? "" : "AND is_active=1";
   const collections = rows<Collection>(getDb().prepare(`SELECT * FROM collections WHERE business_id=? ${activeClause} ORDER BY sort_order,name`).all(businessId));
@@ -87,22 +87,38 @@ export function getCatalogByBusinessId(businessId: number, includeDrafts = false
     WHERE p.business_id=? ${publishedClause}
     ORDER BY p.sort_order,p.name
   `).all(businessId));
-  const groupStmt = getDb().prepare("SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id");
-  const valueStmt = getDb().prepare("SELECT * FROM option_values WHERE option_group_id=? ORDER BY id");
+  const productIds = products.map((product) => product.id);
+  const groups = productIds.length
+    ? rows<OptionGroup>(getDb().prepare(`SELECT * FROM option_groups WHERE product_id IN (${productIds.map(() => "?").join(",")}) ORDER BY product_id,position,id`).all(...productIds))
+    : [];
+  const groupIds = groups.map((group) => group.id);
+  const values = groupIds.length
+    ? rows<OptionValue>(getDb().prepare(`SELECT * FROM option_values WHERE option_group_id IN (${groupIds.map(() => "?").join(",")}) ORDER BY option_group_id,id`).all(...groupIds))
+    : [];
+  const valuesByGroup = new Map<number, OptionValue[]>();
+  for (const value of values) {
+    const existing = valuesByGroup.get(value.option_group_id);
+    if (existing) existing.push(value);
+    else valuesByGroup.set(value.option_group_id, [value]);
+  }
+  const groupsByProduct = new Map<number, OptionGroup[]>();
+  for (const group of groups) {
+    const hydratedGroup = { ...group, values: valuesByGroup.get(group.id) || [] };
+    const existing = groupsByProduct.get(group.product_id);
+    if (existing) existing.push(hydratedGroup);
+    else groupsByProduct.set(group.product_id, [hydratedGroup]);
+  }
   for (const product of products) {
     product.quantity_mode = normalizeQuantityMode(product.quantity_mode);
     product.highlights = parseOfferingHighlightsJson(product.highlights_json);
-    product.option_groups = rows<OptionGroup>(groupStmt.all(product.id)).map((group) => ({
-      ...group,
-      values: rows<OptionValue>(valueStmt.all(group.id)),
-    }));
+    product.option_groups = groupsByProduct.get(product.id) || [];
   }
   return { business, collections, categories, products };
 }
 
 export function getCatalogByHandle(handle: string): Catalog | undefined {
   const business = getBusinessByHandle(handle);
-  return business ? getCatalogByBusinessId(business.id, false) : undefined;
+  return business ? getCatalogByBusinessId(business.id, false, business) : undefined;
 }
 
 export function getUserByEmail(email: string): (SessionUser & { password_hash: string }) | undefined {
