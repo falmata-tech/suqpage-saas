@@ -159,8 +159,8 @@ test("geographic discovery, Daily Featured Showrooms, benchmark Showrooms, and c
   await expect(page.locator(".discovery-summary strong")).toHaveText(unfilteredSummary || "");
   await expect(page.getByRole("navigation", { name: "Production scale" })).toHaveCount(0);
   await expect(page.locator(".discovery-regions path")).toHaveCount(14);
-  expect(await page.locator(".discovery-roads path").count()).toBeGreaterThan(0);
-  expect(await page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.locator(".discovery-roads path").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.locator(".discovery-cluster, .discovery-point").count()).toBeGreaterThan(0);
   await expect(page.getByRole("heading", { name: "How MirtPage works" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
   await expect(page.locator(".landing-hero-image")).toHaveCount(0);
@@ -727,9 +727,11 @@ test("mobile clustered map, nearby showroom inspector, and Daily Featured galler
   await sundayLink.click();
   await expect(page.getByRole("heading", { name: "Daily Featured Showrooms" })).toBeVisible();
   await expect(page.locator(".featured-gallery")).toHaveCount(1);
-  if (sundayIsToday) expect(await page.locator(".featured-card[data-business-id]").count()).toBeGreaterThan(0);
+  if (sundayIsToday) {
+    await expect.poll(() => page.locator(".featured-card[data-business-id]").count()).toBeGreaterThan(0);
+  }
   else {
-    expect(await page.locator(".featured-card-preview").count()).toBeGreaterThan(0);
+    await expect.poll(() => page.locator(".featured-card-preview").count()).toBeGreaterThan(0);
     await expect(page.locator(".featured-card[data-business-id]")).toHaveCount(0);
     const todayHref = await page.locator(".featured-week a.today").getAttribute("href") || "";
     const todayDay = todayHref.match(/featuredDay=(\d)/)?.[1] || "";
