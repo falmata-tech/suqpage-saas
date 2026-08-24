@@ -1,24 +1,63 @@
 # MirtPage delivery and managed-service runbook
 
-This runbook is the operator path for repository checks, Supabase Storage,
-PostgreSQL rehearsal, deployment, and rollback. It does not authorize a
-production launch or database cutover.
+This runbook is the operator path for local Supabase, repository checks,
+managed Auth and Storage, PostgreSQL, Netlify deployment, and rollback.
+It does not authorize a production launch, DNS change, or destructive cutover.
 
 ## Current authority
 
 - Node.js `24.18.1` is the repository, nvm, Docker, and CI baseline.
-- Runtime persistence is driver-selectable. Local development defaults to
-  SQLite; production is prepared for Supabase PostgreSQL through the bounded
-  transaction pooler and the dedicated least-privilege runtime role.
-- Mutable media is driver-selectable. Local development defaults to the
-  filesystem; production uses the private Supabase Storage adapter. The local
-  source remains the rollback authority through the recorded rollback window.
-- MirtPage owns password hashes, opaque sessions, role profiles, revocation,
-  and tenant bindings. Supabase Auth is not enabled.
+- Normal development uses the isolated local Supabase stack: PostgreSQL 17,
+  local Auth, private Storage, API, and captured email. Realtime and other
+  services the app does not yet use locally are disabled. SQLite is
+  compatibility and read-only migration infrastructure, not an app runtime.
+- Production and Deploy Previews use separate hosted Supabase projects. Each
+  selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
+  own private Storage bucket through MirtPage's server-side media port. MirtPage
+  remains the only role, capability, tenant, and suspension authority.
 - PostgreSQL tooling supports disposable rehearsal and a separately guarded,
   copy-only production cutover. The linked Supabase target has reconciled data,
-  and the generated Vercel candidate has passed PostgreSQL-backed smoke checks;
-  the exact current release must repeat its gates before custom-domain rollout.
+  and the generated Vercel candidate has passed historical PostgreSQL-backed
+  smoke checks. Netlify is the current reversible candidate and receives no DNS
+  change until the exact current release repeats all gates.
+
+## Local Supabase development
+
+Docker Desktop must be running. The first start downloads the official local
+Supabase images and may take several minutes:
+
+```bash
+npm run local:supabase:start
+npm run local:supabase:configure
+npm run local:postgres:copy
+npm run local:auth:migrate
+npm run local:media:migrate
+npm run dev:local
+```
+
+`local:supabase:configure` captures only local CLI values into ignored
+`.local/supabase-runtime.env` with mode `0600` and never prints credentials.
+`local:postgres:copy` opens the retained SQLite demo database read-only and
+accepts only loopback PostgreSQL port `54322`. The Auth migration prints
+aggregate counts only. Normal app writes then go exclusively to PostgreSQL.
+
+To replace an explicitly disposable local stack, stop the app and run:
+
+```bash
+npm run local:supabase:reset
+```
+
+The reset uses `supabase db reset --local`; the following bootstrap still
+rejects remote database destinations. Never run hosted reset or production-copy
+commands for local development. Stop local services with
+`npm run local:supabase:stop`.
+
+The normal MirtPage local project uses API/DB ports `54321`/`54322`. Browser
+acceptance starts a separate disposable `mirtpage-browser-*` project on
+`56321`/`56322`, applies the same schema, copies only an isolated compatibility
+fixture, and runs the production Next.js server with PostgreSQL, Supabase Auth,
+and private Storage. Its cleanup stops only that disposable project. Never reuse
+another repository's Supabase project ID, workdir, volumes, or port family.
 
 ## Connect Codex and GitHub safely
 
@@ -67,10 +106,32 @@ npm run release
 npm run test:container
 ```
 
-`npm run reset` destroys and reseeds the configured database. Stop every app,
-worker, and test process using the SQLite file before running it, then restart
-those processes so they open the replacement file. Reset is for an explicitly
-disposable local installation only. Existing data uses `npm run migrate`.
+`npm run reset` is retained only for isolated SQLite compatibility fixtures.
+It is not the normal development reset. Existing PostgreSQL data uses
+`npm run migrate:postgres`; disposable local data uses the local command above.
+
+## Supabase Auth rollout
+
+1. Apply PostgreSQL migration 37 before selecting the managed Auth driver.
+2. Keep the hosted application stopped or on the retained rollback release
+   during the one-time retained-user migration.
+3. Run `npm run migrate:auth:supabase` without `--apply`. Review only aggregate
+   retained, existing, create, linked, and conflict counts.
+4. Resolve every conflict. Then run the same exact release with
+   `MIRTPAGE_APPROVE_AUTH_MIGRATION=1 npm run migrate:auth:supabase -- --apply`.
+5. Configure the exact production site URL and redirect allowlist in Supabase.
+   Add the local callback and the selected host's deploy-preview wildcard only
+   where needed; do not use a broad production wildcard.
+6. For Google sign-in, create a Google Web OAuth client and place its client ID
+   and secret in the Supabase provider dashboard. The callback URI must be the
+   exact Supabase callback shown there. Provider secrets never enter Netlify,
+   Git, or chat.
+7. Enable `MIRTPAGE_AUTH_DRIVER=supabase` on one candidate, prove password and
+   Google login, logout, reset/change, unlinked denial, suspended-user denial,
+   and cross-tenant denial, then monitor before retiring local sessions.
+
+Supabase proves identity only. `auth_identity_links` maps its immutable UUID to
+one MirtPage user; roles and business access never come from OAuth metadata.
 
 ## Supabase Storage
 
@@ -173,7 +234,7 @@ Keep these outside GitHub artifacts and the repository:
 - `MIRTPAGE_CANONICAL_URL`
 - `MIRTPAGE_SERVER_ACTION_ORIGINS`
 - `MIRTPAGE_DATABASE_DRIVER`
-- `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler in Vercel)
+- `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler on the selected host)
 - `MIRTPAGE_POSTGRES_DIRECT_URL` (operator environment only)
 - `MIRTPAGE_POSTGRES_MIGRATION_ROLE` (operator command only, when required)
 - `MIRTPAGE_DB_PATH` (SQLite only)
@@ -181,6 +242,10 @@ Keep these outside GitHub artifacts and the repository:
 - `MIRTPAGE_SUPABASE_URL`
 - `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY`
 - `MIRTPAGE_SUPABASE_STORAGE_BUCKET`
+- `MIRTPAGE_AUTH_DRIVER`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `MIRTPAGE_GOOGLE_AUTH_ENABLED`
 - `PRIVACY_SALT`
 - notification provider credentials
 
@@ -192,6 +257,51 @@ missing framework runtime file fails smoke checks and must not receive the custo
 domain. Do not add a broad `./lib/**/*` output-tracing exclusion: Vercel applies
 it to Next.js's own server library. The release trace test enforces privacy for
 the project's source paths without deleting framework runtime files.
+
+## Netlify candidate
+
+Netlify's maintained Next.js runtime supports App Router, SSR, route handlers,
+Server Actions, image optimization, and ISR through OpenNext. The repository
+intentionally does not pin a legacy Next.js plugin.
+
+1. Authenticate the CLI with an isolated local home so an unrelated Netlify
+   account or project cannot be selected: `HOME="$PWD/.local/netlify-home" npx
+   --yes netlify-cli@latest login`. Link only the MirtPage GitHub repository and
+   verify the team and site before every deploy. `netlify.toml` supplies
+   `npm run build` and Node `24.18.1`.
+2. Add separate Preview- and Production-scoped environment variables in the
+   Netlify UI. Preview values must belong only to the Preview Supabase project;
+   Production values must belong only to Production. Both require their own
+   PostgreSQL pooler, publishable key, service-role key, private bucket, and
+   privacy salt. Never place a direct PostgreSQL migration URL in Netlify or
+   reuse a secret across scopes.
+3. Keep `mirtpage.com` on its current target. Test the generated Netlify domain
+   for health, public routes, Auth, upload/read, support, PWA, and tenant denial.
+4. Run the exact release and remote checks. Only then add the custom domain and
+   update DNS. Retain the prior Vercel target for the monitored rollback window.
+5. Monitor Netlify credits. The free plan has a hard monthly credit limit and
+   can pause service when exhausted; it is suitable for a free commercial
+   start, not unmetered production.
+
+The user action required for this stage is Netlify browser/CLI authentication,
+choosing the Netlify team/site name, adding secrets in its encrypted UI, and
+later controlling DNS at the registrar. Do not paste any secret into chat.
+
+## Realtime, PostGIS, and map geography
+
+- Support messages always commit to PostgreSQL. Realtime may notify only an
+  open visible thread or staff inbox, then unsubscribe on close/background. A
+  disconnect or quota limit falls back to bounded 4-5 second polling. Queue
+  capacity, not Realtime quota, determines whether the UI says agents are busy.
+  Local Realtime remains disabled until that optional notification adapter is
+  implemented and covered by provider-backed tests.
+- Do not enable PostGIS merely to draw the map. The current first-party roads,
+  places, and boundaries are static browser geography. At tens of thousands of
+  showrooms, add PostGIS points and spatial indexes behind a viewport/nearby
+  query port so the browser receives bounded markers.
+- Detailed roads and town labels may hide while a pan/zoom gesture is active
+  and return when it settles. This deliberate level-of-detail behavior protects
+  low-end phone input responsiveness. PostGIS cannot change that paint cost.
 
 ## PWA verification and rollback
 

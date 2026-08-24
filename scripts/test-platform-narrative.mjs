@@ -7,12 +7,13 @@ function read(file) {
 
 const home = read("app/page.tsx");
 const publicShell = read("components/PublicAppShell.tsx");
+const publicFrame = read("components/PublicAppFrame.tsx");
 const discovery = read("components/DiscoveryWorkspace.tsx");
 const about = read("app/about/page.tsx");
 const signup = read("app/request/page.tsx");
 const login = read("app/login/page.tsx");
 const metadata = read("app/layout.tsx");
-const publicNarrative = [home, publicShell, discovery, about, signup, login, metadata].join("\n");
+const publicNarrative = [home, publicShell, publicFrame, discovery, about, signup, login, metadata].join("\n");
 const activeApplicationFiles = ["app", "components"]
   .flatMap((directory) => fs.readdirSync(directory, { recursive: true })
     .filter((file) => typeof file === "string" && /\.(?:tsx?|css)$/.test(file))
@@ -31,7 +32,7 @@ for (const file of ["components/DiscoveryWorkspace.tsx", "lib/discovery.ts", "li
 }
 assert.doesNotMatch(discovery, retiredGeneratedUrl);
 
-assert.match(publicShell, /Online showrooms for Ethiopian production/);
+assert.match(publicFrame, /Online showrooms for Ethiopian production/);
 assert.match(home, /Find Ethiopian makers and producers/);
 assert.match(home, /online showrooms for custom work, ready products, and wholesale supply across Ethiopia/i);
 assert.match(home, /<DiscoveryWorkspace discovery=\{discovery\} hideIntro \/>/);

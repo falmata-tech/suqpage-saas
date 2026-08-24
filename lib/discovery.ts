@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
-import { featuredBoothWalkthroughs, type FeaturedProgramPolicy } from "./featured-program";
+import { featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
 import { getFeaturedProgramDaySelection, getFeaturedProgramPolicy, type FeaturedProgramDayMode } from "./featured-program-settings";
 import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
@@ -19,8 +19,10 @@ export const DISCOVERY_INDUSTRIES = [
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
 export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All industries", shortLabel: "All industries", icon: "grid", code: "ALL" } as const;
-export type DiscoveryIndustryFilter = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES;
-const DISCOVERY_INDUSTRY_FILTERS: readonly DiscoveryIndustryFilter[] = [ALL_DISCOVERY_INDUSTRIES, ...DISCOVERY_INDUSTRIES];
+export const UNSELECTED_DISCOVERY_INDUSTRY = { key: "", label: "Choose an industry", shortLabel: "Choose an industry", icon: "grid", code: "" } as const;
+export const DISCOVERY_INDUSTRY_OPTIONS = [...DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES] as const;
+export type DiscoveryIndustryOption = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES;
+export type DiscoveryIndustrySelection = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES | typeof UNSELECTED_DISCOVERY_INDUSTRY;
 export const FEATURED_WEEK = [
   { weekday: 1, dayLabel: "Monday", industryKey: "electronics" },
   { weekday: 2, dayLabel: "Tuesday", industryKey: "beauty-wellness" },
@@ -41,7 +43,6 @@ export function featuredProgramAssignment(dateIso: string) {
   return industry ? { ...assignment, industry } : null;
 }
 
-const LIST_PAGE_SIZE = 5;
 const ETHIOPIA_TIME_ZONE = "Africa/Addis_Ababa";
 
 type DiscoveryRow = {
@@ -50,6 +51,7 @@ type DiscoveryRow = {
   name: string;
   tagline: string;
   description: string;
+  logo_path: string;
   hero_image_path: string;
   booth_image_path: string;
   city: string;
@@ -67,12 +69,25 @@ type DiscoveryRow = {
   primary_industry_key: string;
 };
 
+type SponsorPlacementRow = {
+  kind: "showroom" | "external";
+  source_id: number;
+  handle: string;
+  name: string;
+  details: string;
+  image_path: string;
+  website_url: string | null;
+  phone: string | null;
+  sponsor_position: number;
+};
+
 export type DiscoveryShowroom = {
   id: number;
   handle: string;
   name: string;
   tagline: string;
   description: string;
+  logoPath: string;
   imagePath: string;
   city: string;
   zone: string;
@@ -90,6 +105,18 @@ export type DiscoveryShowroom = {
   primaryIndustryShortLabel: string;
 };
 
+export type SponsorPlacement = {
+  id: string;
+  kind: "showroom" | "external";
+  handle: string;
+  name: string;
+  details: string;
+  imagePath: string;
+  href: string;
+  actionLabel: string;
+  position: number;
+};
+
 export type FeaturedBooth = {
   slot: number;
   reference: string;
@@ -101,14 +128,14 @@ export type FeaturedBooth = {
   showroom: null;
 });
 
-export type DiscoveryCityGroup = {
+export type DiscoveryNearbyGroup = {
   key: string;
   city: string;
   region: string;
   latitude: number;
   longitude: number;
   count: number;
-  showrooms: DiscoveryShowroom[];
+  showroomIds: number[];
 };
 
 export type DiscoveryPlaceOption = {
@@ -157,28 +184,20 @@ export type WeeklyFeaturedProgram = {
 };
 
 export type DiscoveryView = {
-  industry: DiscoveryIndustryFilter;
-  industries: readonly DiscoveryIndustryFilter[];
+  industry: DiscoveryIndustrySelection;
+  industries: readonly DiscoveryIndustryOption[];
   query: string;
   suggestions: DiscoverySearchSuggestion[];
   place: string;
   places: DiscoveryPlaceOption[];
   productionScale: ProductionScale | "";
-  view: "map" | "list";
   total: number;
   sponsoredCount: number;
   locationCount: number;
   showrooms: DiscoveryShowroom[];
-  sponsoredShowrooms: DiscoveryShowroom[];
+  sponsoredShowrooms: SponsorPlacement[];
   featuredNowBusinessId: number | null;
-  cityGroups: DiscoveryCityGroup[];
-  list: {
-    items: DiscoveryShowroom[];
-    page: number;
-    pageCount: number;
-    pageSize: number;
-    total: number;
-  };
+  nearbyGroups: DiscoveryNearbyGroup[];
   featured: WeeklyFeaturedProgram;
 };
 
@@ -189,18 +208,13 @@ function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
 }
 
-function normalizeIndustryFilter(key: string | undefined): DiscoveryIndustryFilter {
-  if (!key || key === ALL_DISCOVERY_INDUSTRIES.key) return ALL_DISCOVERY_INDUSTRIES;
-  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || ALL_DISCOVERY_INDUSTRIES;
+function normalizeIndustrySelection(key: string | undefined): DiscoveryIndustrySelection {
+  if (key === ALL_DISCOVERY_INDUSTRIES.key) return ALL_DISCOVERY_INDUSTRIES;
+  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || UNSELECTED_DISCOVERY_INDUSTRY;
 }
 
 function normalizeProductionScale(value: string | undefined): ProductionScale | "" {
   return PRODUCTION_SCALES.some((scale) => scale.key === value) ? value as ProductionScale : "";
-}
-
-function normalizePositiveInteger(value: string | number | undefined, fallback: number) {
-  const parsed = typeof value === "number" ? value : Number.parseInt(value || "", 10);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function normalizeWeekday(value: string | number | undefined, fallback: number) {
@@ -218,13 +232,14 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     }
   }
   const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
-    || ALL_DISCOVERY_INDUSTRIES;
+    || DISCOVERY_INDUSTRIES[0];
   return {
     id: row.id,
     handle: row.handle,
     name: row.name,
     tagline: row.tagline,
     description: row.description,
+    logoPath: row.logo_path,
     imagePath: row.booth_image_path || row.hero_image_path,
     city: row.city,
     zone: row.zone,
@@ -240,6 +255,24 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     primaryIndustryKey: primaryIndustry.key,
     primaryIndustryLabel: primaryIndustry.label,
     primaryIndustryShortLabel: primaryIndustry.shortLabel,
+  };
+}
+
+function toSponsorPlacement(row: SponsorPlacementRow): SponsorPlacement {
+  const externalWebsite = row.website_url || "";
+  const href = row.kind === "showroom"
+    ? `/@${row.handle}?ref=sponsor`
+    : externalWebsite || `tel:${row.phone}`;
+  return {
+    id: `${row.kind}-${row.source_id}`,
+    kind: row.kind,
+    handle: row.handle,
+    name: row.name,
+    details: row.details,
+    imagePath: row.image_path,
+    href,
+    actionLabel: row.kind === "showroom" ? "Open showroom" : externalWebsite ? "Visit website" : "Call sponsor",
+    position: Number(row.sponsor_position),
   };
 }
 
@@ -263,7 +296,7 @@ const PRIMARY_INDUSTRY_SQL = `COALESCE((
 function selectSql(extraWhere: string, suffix = "") {
   return `
     SELECT
-      b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
+      b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
       p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
       p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
       COALESCE(s.position,999) AS sponsor_position,p.production_scale,
@@ -288,12 +321,12 @@ function selectSql(extraWhere: string, suffix = "") {
 
 function selectSponsoredSql() {
   return `
+    SELECT * FROM (
     SELECT
-      b.id,b.handle,b.name,b.tagline,b.description,b.hero_image_path,
-      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
-      p.fallback_style,1 AS is_sponsored,s.position AS sponsor_position,
-      p.production_scale,b.is_live,b.live_platform,b.live_url,
-      ${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
+      'showroom' AS kind,b.id AS source_id,b.handle,b.name,
+      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'MirtPage showroom') AS details,
+      COALESCE(NULLIF(p.booth_image_path,''),NULLIF(b.hero_image_path,''),NULLIF(b.logo_path,''),'') AS image_path,
+      NULL AS website_url,NULL AS phone,s.position AS sponsor_position
     FROM discovery_sponsorships s
     JOIN businesses b ON b.id=s.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
@@ -302,7 +335,15 @@ function selectSponsoredSql() {
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-    ORDER BY s.position,lower(b.name),b.id
+    UNION ALL
+    SELECT
+      'external' AS kind,a.id AS source_id,'' AS handle,a.name,a.description AS details,
+      a.image_path,NULLIF(a.website_url,'') AS website_url,NULLIF(a.phone,'') AS phone,
+      a.position AS sponsor_position
+    FROM external_sponsor_ads a
+    WHERE a.active=1
+    ) sponsor_placements
+    ORDER BY sponsor_position,lower(name),kind,source_id
     LIMIT 5
   `;
 }
@@ -461,50 +502,109 @@ function weeklySchedule(now: Date): { todayWeekday: number; days: WeeklyFeatured
 
 const INDUSTRY_POSITION = new Map<string, number>(DISCOVERY_INDUSTRIES.map((industry, index) => [industry.key, index]));
 
-function groupCities(showrooms: DiscoveryShowroom[], groupByIndustry: boolean): DiscoveryCityGroup[] {
-  const groups = new Map<string, DiscoveryCityGroup>();
-  for (const showroom of showrooms) {
-    const key = `${showroom.city.trim().toLocaleLowerCase()}\u0000${showroom.region.trim().toLocaleLowerCase()}`;
-    const group = groups.get(key) || {
-      key,
-      city: showroom.city,
-      region: showroom.region,
-      latitude: 0,
-      longitude: 0,
-      count: 0,
-      showrooms: [],
-    };
-    group.latitude += showroom.latitude;
-    group.longitude += showroom.longitude;
-    group.count += 1;
-    group.showrooms.push(showroom);
-    groups.set(key, group);
+const NEARBY_GROUP_RADIUS_KM = 0.8;
+const NEARBY_GROUP_MAX = 6;
+
+function distanceKm(left: DiscoveryShowroom, right: DiscoveryShowroom) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const latitudeDelta = radians(right.latitude - left.latitude);
+  const longitudeDelta = radians(right.longitude - left.longitude);
+  const latitudeA = radians(left.latitude);
+  const latitudeB = radians(right.latitude);
+  const haversine = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(latitudeA) * Math.cos(latitudeB) * Math.sin(longitudeDelta / 2) ** 2;
+  return 6_371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryNearbyGroup[] {
+  const ordered = [...showrooms].sort((left, right) =>
+    left.city.localeCompare(right.city)
+    || left.latitude - right.latitude
+    || left.longitude - right.longitude
+    || left.id - right.id);
+  const remaining = new Set(ordered.map((showroom) => showroom.id));
+  const groups: DiscoveryNearbyGroup[] = [];
+  const locationBuckets = new Map<string, DiscoveryShowroom[]>();
+
+  for (const showroom of ordered) {
+    const key = `${showroom.region.toLowerCase()}\u0000${showroom.city.toLowerCase()}`;
+    const bucket = locationBuckets.get(key);
+    if (bucket) bucket.push(showroom);
+    else locationBuckets.set(key, [showroom]);
   }
-  return [...groups.values()]
-    .filter((group) => group.count > 1)
-    .map((group) => {
-      const groupedShowrooms = groupByIndustry
-        ? [...group.showrooms].sort((left, right) =>
-          (INDUSTRY_POSITION.get(left.primaryIndustryKey) ?? 999) - (INDUSTRY_POSITION.get(right.primaryIndustryKey) ?? 999)
-          || left.name.localeCompare(right.name)
-          || left.id - right.id)
-        : group.showrooms;
-      return {
-        ...group,
-        latitude: group.latitude / group.count,
-        longitude: group.longitude / group.count,
-        showrooms: groupedShowrooms,
-      };
-    })
-    .sort((left, right) => right.count - left.count || left.city.localeCompare(right.city));
+
+  const spatialIndexes = new Map<string, { cells: Map<string, DiscoveryShowroom[]>; referenceLatitude: number }>();
+  for (const [locationKey, bucket] of locationBuckets) {
+    const referenceLatitude = bucket.reduce((sum, showroom) => sum + showroom.latitude, 0) / bucket.length;
+    const longitudeKm = 111.32 * Math.cos(referenceLatitude * Math.PI / 180);
+    const cells = new Map<string, DiscoveryShowroom[]>();
+    for (const showroom of bucket) {
+      const x = Math.floor((showroom.longitude * longitudeKm) / NEARBY_GROUP_RADIUS_KM);
+      const y = Math.floor((showroom.latitude * 110.574) / NEARBY_GROUP_RADIUS_KM);
+      const cellKey = `${x}:${y}`;
+      const cell = cells.get(cellKey);
+      if (cell) cell.push(showroom);
+      else cells.set(cellKey, [showroom]);
+    }
+    spatialIndexes.set(locationKey, { cells, referenceLatitude });
+  }
+
+  for (const anchor of ordered) {
+    if (!remaining.has(anchor.id)) continue;
+    const locationKey = `${anchor.region.toLowerCase()}\u0000${anchor.city.toLowerCase()}`;
+    const spatialIndex = spatialIndexes.get(locationKey);
+    if (!spatialIndex) {
+      remaining.delete(anchor.id);
+      continue;
+    }
+    const longitudeKm = 111.32 * Math.cos(spatialIndex.referenceLatitude * Math.PI / 180);
+    const anchorX = Math.floor((anchor.longitude * longitudeKm) / NEARBY_GROUP_RADIUS_KM);
+    const anchorY = Math.floor((anchor.latitude * 110.574) / NEARBY_GROUP_RADIUS_KM);
+    const candidates: DiscoveryShowroom[] = [];
+    for (let xOffset = -1; xOffset <= 1; xOffset += 1) {
+      for (let yOffset = -1; yOffset <= 1; yOffset += 1) {
+        candidates.push(...(spatialIndex.cells.get(`${anchorX + xOffset}:${anchorY + yOffset}`) || []));
+      }
+    }
+    const cohort = candidates
+      .filter((candidate) => remaining.has(candidate.id) && distanceKm(anchor, candidate) <= NEARBY_GROUP_RADIUS_KM)
+      .sort((left, right) => distanceKm(anchor, left) - distanceKm(anchor, right) || left.id - right.id);
+    if (cohort.length < 2) {
+      remaining.delete(anchor.id);
+      continue;
+    }
+    cohort.forEach((showroom) => remaining.delete(showroom.id));
+    const groupCount = Math.ceil(cohort.length / NEARBY_GROUP_MAX);
+    const baseSize = Math.floor(cohort.length / groupCount);
+    let remainder = cohort.length % groupCount;
+    let offset = 0;
+    for (let groupIndex = 0; groupIndex < groupCount; groupIndex += 1) {
+      const size = baseSize + (remainder-- > 0 ? 1 : 0);
+      const members = cohort.slice(offset, offset + size).sort((left, right) =>
+        (INDUSTRY_POSITION.get(left.primaryIndustryKey) ?? 999) - (INDUSTRY_POSITION.get(right.primaryIndustryKey) ?? 999)
+        || left.name.localeCompare(right.name)
+        || left.id - right.id);
+      offset += size;
+      const markerOffset = groupCount > 1 ? 0.0012 : 0;
+      const markerAngle = groupIndex * (Math.PI * 2 / groupCount);
+      groups.push({
+        key: `nearby:${anchor.city}:${members.map((showroom) => showroom.id).join("-")}`,
+        city: anchor.city,
+        region: anchor.region,
+        latitude: members.reduce((sum, showroom) => sum + showroom.latitude, 0) / members.length + Math.sin(markerAngle) * markerOffset,
+        longitude: members.reduce((sum, showroom) => sum + showroom.longitude, 0) / members.length + Math.cos(markerAngle) * markerOffset,
+        count: members.length,
+        showroomIds: members.map((showroom) => showroom.id),
+      });
+    }
+  }
+  return groups.sort((left, right) => left.city.localeCompare(right.city) || left.key.localeCompare(right.key));
 }
 
 type DiscoveryOptions = {
   industry?: string;
   q?: string;
   place?: string;
-  page?: string | number;
-  view?: string;
   featuredDay?: string | number;
   scale?: string;
   now?: Date;
@@ -530,12 +630,13 @@ function discoveryReadPort(db?: DatabaseSync): DiscoveryReadPort {
 type MarketplaceBase = Omit<MarketplaceDiscoveryView, "featuredNowBusinessId">;
 
 async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryReadPort): Promise<MarketplaceBase> {
-  const { get, all } = port;
-  const industry = normalizeIndustryFilter(options.industry);
+  const { all } = port;
+  const industry = normalizeIndustrySelection(options.industry);
   const query = (options.q || "").trim().slice(0, 80);
   const productionScale = normalizeProductionScale(options.scale);
+  const projectionIndustryKey = industry.key || ALL_DISCOVERY_INDUSTRIES.key;
   const where = discoveryWhere(productionScale);
-  const params = discoveryParameters(industry.key, query, productionScale);
+  const params = discoveryParameters(projectionIndustryKey, query, productionScale);
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
   const places = placeOptions(locationRows);
   const requestedPlace = (options.place || "").trim().slice(0, 180);
@@ -552,31 +653,14 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
       : [];
   const filteredWhere = `${where}${placeWhere}`;
   const filteredParams = [...params, ...placeParams];
-  const countRow = (await get<{ total: number }>(`
-    SELECT COUNT(DISTINCT b.id) AS total
-    FROM businesses b
-    JOIN business_discovery_profiles p ON p.business_id=b.id
-    WHERE (?='all' OR EXISTS(
-        SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
-      ))
-      AND b.status='active'
-      AND p.is_excluded=0
-      AND p.approved_at > 0
-      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
-      ${filteredWhere}
-  `, filteredParams))!;
-  const total = Number(countRow.total);
-  const pageCount = Math.max(1, Math.ceil(total / LIST_PAGE_SIZE));
-  const page = Math.min(normalizePositiveInteger(options.page, 1), pageCount);
-  const rows = await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams);
-  const listRows = await all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?"),
-    [...filteredParams, LIST_PAGE_SIZE, (page - 1) * LIST_PAGE_SIZE]);
+  const rows = selectedPlace
+    ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
+    : locationRows;
   const escapedQuery = escapeSearchPattern(query);
   const productSuggestionRows = query.length >= 2
     ? await all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
-      industry.key,
-      industry.key,
+      projectionIndustryKey,
+      projectionIndustryKey,
       `%${escapedQuery}%`,
       `%${escapedQuery}%`,
       ...placeParams,
@@ -585,30 +669,22 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     ])
     : [];
   const showrooms = rows.map(toShowroom);
-  const cityGroups = groupCities(showrooms, industry.key === ALL_DISCOVERY_INDUSTRIES.key);
+  const nearbyGroups = groupNearbyShowrooms(showrooms);
   const suggestions = buildSearchSuggestions(query, rows, places, productSuggestionRows);
 
   return {
     industry,
-    industries: DISCOVERY_INDUSTRY_FILTERS,
+    industries: DISCOVERY_INDUSTRY_OPTIONS,
     query,
     suggestions,
     place: selectedPlace?.key || "",
     places,
     productionScale,
-    view: options.view === "list" ? "list" : "map",
-    total,
+    total: showrooms.length,
     sponsoredCount: showrooms.filter((showroom) => showroom.sponsored).length,
     locationCount: new Set(showrooms.map((showroom) => `${showroom.city}\u0000${showroom.region}`)).size,
     showrooms,
-    cityGroups,
-    list: {
-      items: listRows.map(toShowroom),
-      page,
-      pageCount,
-      pageSize: LIST_PAGE_SIZE,
-      total,
-    },
+    nearbyGroups,
   };
 }
 
@@ -624,12 +700,12 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
     const eligibleRows = await all<DiscoveryRow>(selectSql("AND p.booth_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
-    if (selection.mode !== "manual") return { rows: eligibleRows, mode: "automatic" as const };
+    if (selection.mode !== "manual") return { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
     const byId = new Map(eligibleRows.map((row) => [row.id, row]));
-    const manualRows = selection.businessIds.map((businessId) => byId.get(businessId)).filter((row): row is DiscoveryRow => Boolean(row));
+    const manualRows = selection.businessIds.map((businessId) => byId.get(businessId)).filter((row): row is DiscoveryRow => Boolean(row)).slice(0, MAX_FEATURED_SHOWROOMS);
     return manualRows.length
       ? { rows: manualRows, mode: "manual" as const }
-      : { rows: eligibleRows, mode: "automatic" as const };
+      : { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
   };
   const selectedProgram = await featuredRowsForDay(selectedDay);
   const revealFeatured = selectedDay.isToday;
@@ -690,8 +766,8 @@ export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "
   return buildFeaturedProjection(options, discoveryReadPort(options.db));
 }
 
-export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "db"> = {}): Promise<DiscoveryShowroom[]> {
-  return (await discoveryReadPort(options.db).all<DiscoveryRow>(selectSponsoredSql())).map(toShowroom);
+export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "db"> = {}): Promise<SponsorPlacement[]> {
+  return (await discoveryReadPort(options.db).all<SponsorPlacementRow>(selectSponsoredSql())).map(toSponsorPlacement);
 }
 
 export async function getDiscoveryView(options: DiscoveryOptions = {}): Promise<DiscoveryView> {
@@ -699,7 +775,7 @@ export async function getDiscoveryView(options: DiscoveryOptions = {}): Promise<
   const [marketplace, featured, sponsoredShowrooms] = await Promise.all([
     buildMarketplaceBase(options, port),
     buildFeaturedProjection(options, port),
-    port.all<DiscoveryRow>(selectSponsoredSql()).then((rows) => rows.map(toShowroom)),
+    port.all<SponsorPlacementRow>(selectSponsoredSql()).then((rows) => rows.map(toSponsorPlacement)),
   ]);
   return { ...marketplace, ...featured, sponsoredShowrooms };
 }

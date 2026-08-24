@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
@@ -24,8 +23,6 @@ export async function updateServiceRequestStatusAction(formData: FormData) {
     if (error instanceof RequestError) redirect(`/dashboard/requests/${requestId}?error=transition`);
     throw error;
   }
-  revalidatePath("/dashboard/requests");
-  revalidatePath(`/dashboard/requests/${requestId}`);
   redirect(`/dashboard/requests/${requestId}?saved=1`);
 }
 
@@ -39,7 +36,5 @@ export async function addRequestClarificationAction(formData: FormData) {
   } catch (error) {
     redirect(`/dashboard/requests/${requestId}?error=${error instanceof RequestError ? "clarification" : "unknown"}`);
   }
-  revalidatePath("/dashboard/requests");
-  revalidatePath(`/dashboard/requests/${requestId}`);
   redirect(`/dashboard/requests/${requestId}?clarified=1`);
 }

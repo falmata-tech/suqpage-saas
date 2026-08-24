@@ -3,6 +3,18 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+const sqliteCatalogSource = fs.readFileSync(path.join(process.cwd(), "lib/db.ts"), "utf8");
+const postgresCatalogSource = fs.readFileSync(path.join(process.cwd(), "lib/postgres-catalog-repository.ts"), "utf8");
+const showroomPageSource = fs.readFileSync(path.join(process.cwd(), "app/[handle]/page.tsx"), "utf8");
+assert.match(sqliteCatalogSource, /option_groups WHERE product_id IN/);
+assert.match(sqliteCatalogSource, /option_values WHERE option_group_id IN/);
+assert.match(postgresCatalogSource, /option_groups WHERE product_id IN/);
+assert.match(postgresCatalogSource, /option_values WHERE option_group_id IN/);
+assert.doesNotMatch(postgresCatalogSource, /products\.rows\.map\(async/);
+assert.match(sqliteCatalogSource, /getCatalogByBusinessId\(business\.id, false, business\)/);
+assert.match(postgresCatalogSource, /getCatalogByBusinessId\(business\.id, false, business\)/);
+assert.match(showroomPageSource, /const catalog=await runtimeCatalogByHandle\(handle\);if\(!catalog\)\{const existing=await runtimeBusinessByHandleAny\(handle\)/);
+
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-scale-queries-"));
   process.env.MIRTPAGE_DB_PATH = path.join(root, "queries.db");
@@ -83,6 +95,11 @@ async function main() {
         index,
       );
     }
+    const secondCatalogProductId = Number((db.prepare("SELECT id FROM products WHERE business_id=? ORDER BY sort_order,id LIMIT 1 OFFSET 1").get(businessIds[0]) as { id: number }).id);
+    const firstGroupId = Number(db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,'Finish',0)").run(productIds[0]).lastInsertRowid);
+    const secondGroupId = Number(db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,'Size',0)").run(secondCatalogProductId).lastInsertRowid);
+    db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)").run(firstGroupId, "Matte");
+    db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)").run(secondGroupId, "Large");
 
     const clientIds: number[] = [];
     for (let index = 0; index < 25; index += 1) {
@@ -174,6 +191,12 @@ async function main() {
     assert.equal((await listStaffPage({ page: 2 })).items.length, 6);
     assert.equal((await listProductsPage(businessIds[0], { page: 1 })).items.length, 10);
     assert.equal((await listProductsPage(businessIds[0], { page: 2 })).items.length, 10);
+    const { getCatalogByBusinessId } = await import("../lib/db");
+    const catalog = getCatalogByBusinessId(businessIds[0]);
+    const firstCatalogProduct = catalog?.products.find((product) => product.id === productIds[0]);
+    const secondCatalogProduct = catalog?.products.find((product) => product.id === secondCatalogProductId);
+    assert.equal(firstCatalogProduct?.option_groups?.at(0)?.values.at(0)?.value, "Matte");
+    assert.equal(secondCatalogProduct?.option_groups?.at(0)?.values.at(0)?.value, "Large");
 
     const inquiries = await listInquiriesPage(businessIds[0], { page: 1, q: "widget" });
     assert.equal(inquiries.items.length, 10);

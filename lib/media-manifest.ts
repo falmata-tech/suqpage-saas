@@ -178,6 +178,27 @@ export function buildMediaReferenceManifest(db: DatabaseSync): MediaReferenceMan
     }
   }
 
+  const supportAttachmentColumns = tableColumns(db, "support_attachments");
+  if (supportAttachmentColumns.has("storage_key") && supportAttachmentColumns.has("mime_type")) {
+    const rows = db
+      .prepare("SELECT storage_key,mime_type FROM support_attachments")
+      .all() as Array<{ storage_key: string; mime_type: string }>;
+    for (const row of rows) {
+      try {
+        assertMediaObjectKey(row.storage_key);
+        addReference(
+          references,
+          "support",
+          row.storage_key,
+          row.mime_type,
+          "support_attachments.storage_key",
+        );
+      } catch {
+        invalidReferenceCount += 1;
+      }
+    }
+  }
+
   return {
     references: [...references.values()]
       .map((reference) => ({
@@ -197,10 +218,12 @@ export function buildMediaReferenceManifest(db: DatabaseSync): MediaReferenceMan
 export function listLocalMediaObjects(
   publicRoot: string,
   requestRoot: string,
+  supportRoot: string,
 ): LocalMediaObject[] {
   const roots: Array<{ namespace: MediaNamespace; root: string }> = [
     { namespace: "public", root: publicRoot },
     { namespace: "requests", root: requestRoot },
+    { namespace: "support", root: supportRoot },
   ];
   const objects: LocalMediaObject[] = [];
   for (const { namespace, root } of roots) {

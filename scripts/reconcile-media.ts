@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { databasePath, mediaRoot, requestAttachmentRoot } from "../lib/config";
+import { databasePath, mediaRoot, requestAttachmentRoot, supportAttachmentRoot } from "../lib/config";
 import {
   buildMediaReferenceManifest,
   listLocalMediaObjects,
@@ -12,7 +12,7 @@ function main() {
     const manifest = buildMediaReferenceManifest(db);
     const result = reconcileLocalMedia(
       manifest,
-      listLocalMediaObjects(mediaRoot(), requestAttachmentRoot()),
+      listLocalMediaObjects(mediaRoot(), requestAttachmentRoot(), supportAttachmentRoot()),
     );
     console.log(JSON.stringify({
       provider: "filesystem",

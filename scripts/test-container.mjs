@@ -104,55 +104,22 @@ try {
   run(["run", "--rm", image, "node", "-e", originProbe]);
   run(["run", "--rm", image, "npm", "run", "test:trace"]);
 
-  run(["volume", "create", volume], { capture: true });
   const environment = [
     "-e", `NEXT_PUBLIC_APP_URL=${canonicalUrl}`,
-    "-e", "MIRTPAGE_DB_PATH=/data/mirtpage.db",
-    "-e", "MIRTPAGE_MEDIA_ROOT=/data/media",
-    "-e", "MIRTPAGE_BACKUP_ROOT=/data/backups",
-    "-e", "MIRTPAGE_CREDENTIAL_PATH=/data/credentials.txt",
     "-e", "PRIVACY_SALT=container-test-privacy-salt-long-enough",
     "-e", "MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT=1",
   ];
-  const setup = run([
-    "run", "--rm", "--name", setupContainer,
+  const unconfigured = run([
+    "run", "--name", app,
     ...environment,
-    "-v", `${volume}:/data`,
     image,
-    "npm", "run", "setup", "--", "--reset",
-  ], { capture: true });
-  assert(!/^(ADMIN|CLIENT) \|/m.test(setup.stdout), "Container setup exposed generated credential values");
-
-  run([
-    "run", "-d", "--name", app,
-    "-p", "127.0.0.1::3000",
-    ...environment,
-    "-v", `${volume}:/data`,
-    image,
-  ], { capture: true });
-
-  const mapping = run(["port", app, "3000/tcp"], { capture: true }).stdout.trim();
-  const port = Number(mapping.match(/:(\d+)$/)?.[1]);
-  assert(Number.isInteger(port) && port > 0, `Could not resolve the temporary container port: ${mapping}`);
-
-  let healthy = false;
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/api/health`);
-      if (response.ok && (await response.json()).status === "ok") {
-        healthy = true;
-        break;
-      }
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  const logs = run(["logs", app], { capture: true, allowFailure: true });
-  const combinedLogs = `${logs.stdout || ""}\n${logs.stderr || ""}`;
+  ], { capture: true, allowFailure: true });
+  const combinedLogs = `${unconfigured.stdout || ""}\n${unconfigured.stderr || ""}`;
   assert(!/^(ADMIN|CLIENT) \|/m.test(combinedLogs), "Container logs exposed generated credential values");
-  assert.match(combinedLogs, /Preflight passed\./, "Production preflight did not complete in the container");
-  assert(healthy, `Container health did not become ready\n${safeOutput(combinedLogs)}`);
+  assert.notEqual(unconfigured.status, 0, "An unconfigured production container must fail closed");
+  assert.match(combinedLogs, /MIRTPAGE_DATABASE_DRIVER is required/, "Production preflight did not reject the unconfigured container");
 
-  console.log("Docker context, build-time origins, non-root preflight, and health tests passed.");
+  console.log("Docker context, build-time origins, non-root image, trace privacy, and fail-closed startup tests passed.");
 } finally {
   cleanup();
 }

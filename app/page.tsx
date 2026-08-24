@@ -1,6 +1,6 @@
 import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
 import PublicAppShell from "@/components/PublicAppShell";
-import { getMarketplaceDiscoveryView } from "@/lib/discovery";
+import { getPublicMarketplaceView } from "@/lib/public-discovery-cache";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -9,15 +9,13 @@ export const metadata = {
 };
 
 export default async function MarketPage({ searchParams }: {
-  searchParams: Promise<{ industry?: string; q?: string; place?: string; page?: string; view?: string; showroom?: string }>;
+  searchParams: Promise<{ industry?: string; q?: string; place?: string; showroom?: string }>;
 }) {
   const query = await searchParams;
-  const discovery = await getMarketplaceDiscoveryView({
+  const discovery = await getPublicMarketplaceView({
     industry: query.industry,
     q: query.q,
     place: query.place,
-    page: query.page,
-    view: query.view,
   });
 
   return <PublicAppShell>

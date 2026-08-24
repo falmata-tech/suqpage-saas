@@ -2,7 +2,7 @@
 id: BE-024
 title: Provider-neutral media storage
 status: done
-related: [BE-010, BE-026, BE-028, FE-009, FE-025, FE-031, DEP-015, DEP-021, DEP-022, ADR-0012, ADR-0013]
+related: [BE-010, BE-018, BE-026, BE-028, FE-009, FE-019, FE-025, FE-031, DEP-015, DEP-021, DEP-022, DEP-026, DEP-027, ADR-0012, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
 last_updated: 2026-08-02
 change_level: L3
@@ -23,11 +23,12 @@ Storage adapters while retaining every existing database reference.
 ### In scope
 
 - One narrow asynchronous object-store contract for put, get, and remove in
-  public-showroom and private-request namespaces.
+  public-showroom, private-request, and private-support namespaces.
 - A filesystem adapter preserving current paths and a server-only Supabase
   Storage REST adapter for a private bucket.
 - Existing image verification, decoding, metadata removal, dimension/byte limits,
-  random immutable names, and MIME handling.
+  random immutable names, and MIME handling, plus bounded PDF signature
+  admission for private support documents.
 - Public `/media/:filename` and authorized request-attachment routes reading
   through the port.
 - Revision publication materializing selected private images through the port.
@@ -55,7 +56,8 @@ Storage adapters while retaining every existing database reference.
 ## Contracts
 
 - `MediaObjectStore` exposes asynchronous `put`, `read`, and `remove` operations
-  over `public` and `requests` namespaces and returns bounded typed failures.
+  over `public`, `requests`, and `support` namespaces and returns bounded typed
+  failures.
 - Both adapters reject traversal, slashes in object names, unsupported
   extensions, and unknown namespaces before I/O.
 - Supabase requests use HTTPS, a configured private bucket, `apikey` plus bearer
@@ -100,6 +102,12 @@ Scenario: Object provider fails during upload
   WHEN a user uploads an image
   THEN no database reference is committed
   AND the user receives a bounded retryable error with no provider body or secret
+
+Scenario: Authorized support participant reads an attachment
+  GIVEN a support message references an immutable object in the support namespace
+  WHEN the parent conversation authorizes the participant or anonymous token
+  THEN the adapter returns the exact admitted MIME type through a private no-store route
+  AND the object key and provider credential remain server-only
 ```
 
 ## Quality impact

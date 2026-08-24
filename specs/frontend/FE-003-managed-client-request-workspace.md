@@ -4,7 +4,7 @@ title: Managed showroom project and review workspace
 status: in_progress
 related: [BE-003, BE-007, BE-025, DEP-003, FE-006, FE-007, FE-008, FE-013, FE-017, FE-021, FE-025, FE-031, FE-032, ADR-0004, ADR-0006]
 owners: [product, frontend]
-last_updated: 2026-08-10
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -146,6 +146,11 @@ publication authority.
   appears in a preview.
 - Saving changes affects only a mutable draft. Sending for review freezes that
   numbered revision; further work creates a new numbered revision.
+- The revision editor saves or previews a mutable draft but does not submit it
+  directly for client review. Review submission is available only from the
+  exact saved-preview screen, which identifies the revision and makes clear that
+  submission freezes it. Unsaved editor changes can never be omitted by a
+  neighboring submit action.
 - Client rejection requires a comment. Approval and rejection identify the
   exact revision, remain visible in request history, and cannot be repeated.
 - Only manager/admin interfaces expose prospect acceptance, on-behalf intake,
@@ -219,6 +224,13 @@ Scenario: Staff chooses an update tool
   THEN both paths create or resume the same private draft revision
   AND neither path bypasses preview, owner approval, or manager publication
   AND it contains no generic pre-design image attachments
+
+Scenario: Staff saves and refines a draft before review
+  GIVEN assigned staff are editing a mutable showroom revision
+  WHEN they save the draft and continue editing before review submission
+  THEN the same numbered draft remains editable and private
+  AND the editor offers a preview of the exact saved revision
+  AND only that saved preview can be sent for client review
 
 Scenario: Business cannot start overlapping showroom work
   GIVEN a business already has a current showroom setup or update

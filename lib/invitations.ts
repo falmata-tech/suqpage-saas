@@ -7,6 +7,8 @@ import {
   isLegacyShowroomDesignKey,
 } from "./showroom-manifests";
 import type { ClientInvitation } from "./types";
+import { authDriver } from "./config";
+import { finalizeSupabaseIdentity, provisionSupabasePasswordIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
 
 export const INVITATION_LIFETIME_MS = 72 * 60 * 60 * 1000;
 
@@ -97,11 +99,18 @@ export async function redeemClientInvitation(raw: { token:string; name:string; p
   if (!name) throw new InvitationError("Enter your name.");
   if (!isStrongPassword(raw.password)) throw new InvitationError("Use at least 12 characters with upper-case, lower-case, and a number.");
   const tokenHash = hashInvitationToken(token);
-  if (!(await getActiveInvitation(token, now))) {
+  const activeInvitation = await getActiveInvitation(token, now);
+  if (!activeInvitation) {
     throw new InvitationError("This invitation is invalid, expired, or already used.");
   }
   const passwordHash = await bcrypt.hash(raw.password, 12);
-  return runtimeTransaction(async () => {
+  let providerUserId = "";
+  if (authDriver() === "supabase") {
+    try { providerUserId = await provisionSupabasePasswordIdentity({ email:activeInvitation.email, password:raw.password, name }); }
+    catch { throw new InvitationError("Account access is temporarily unavailable. Try again."); }
+  }
+  try {
+    const result = await runtimeTransaction(async () => {
     const invitation = await runtimeGet<ClientInvitation>(`
       SELECT * FROM client_invitations WHERE token_hash=?
     `, [tokenHash]);
@@ -116,12 +125,19 @@ export async function redeemClientInvitation(raw: { token:string; name:string; p
     `, [invitation.email, passwordHash, name, invitation.business_id]);
     const userId = Number(inserted!.id);
     await runtimeRun("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')", [userId]);
+    if (providerUserId) await runtimeRun("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, providerUserId, invitation.email, now]);
     const accepted = await runtimeRun("UPDATE client_invitations SET accepted_at=?,accepted_user_id=? WHERE id=? AND accepted_at IS NULL AND revoked_at IS NULL", [now, userId, invitation.id]);
     if (accepted.changes !== 1) throw new InvitationError("This invitation is no longer available.", "replayed");
     if (invitation.request_id !== null) {
       await runtimeRun("UPDATE service_requests SET represented_client_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE id=?", [userId, invitation.request_id]);
       await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'client account established')", [invitation.request_id, userId, "invitation_accepted"]);
     }
-    return { userId, businessId: invitation.business_id, requestId: invitation.request_id };
+    return { userId, businessId: invitation.business_id, requestId: invitation.request_id, email: invitation.email };
   });
+    if (providerUserId) await finalizeSupabaseIdentity(providerUserId, result.userId).catch(() => undefined);
+    return result;
+  } catch (error) {
+    if (providerUserId) await removePendingSupabaseIdentity(providerUserId).catch(() => false);
+    throw error;
+  }
 }

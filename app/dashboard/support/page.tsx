@@ -36,7 +36,7 @@ export default async function SupportInbox({
       {query.error ? <p className="error">{query.error}</p> : null}
       {query.saved ? <p className="notice">Support conversation updated.</p> : null}
       {client ? (
-        <form className="panel form-grid support-new" action={createSupportConversationAction}>
+        <form className="panel form-grid support-new" action={createSupportConversationAction} encType="multipart/form-data">
           <h2 className="full">Start a conversation</h2>
           <input type="hidden" name="idempotencyKey" value={crypto.randomBytes(16).toString("hex")} />
           <div className="field full">
@@ -46,6 +46,11 @@ export default async function SupportInbox({
           <div className="field full">
             <label htmlFor="support-message">Message</label>
             <textarea id="support-message" name="message" maxLength={4000} required rows={5} />
+          </div>
+          <div className="field full">
+            <label htmlFor="support-attachment">Attachment <span className="muted">(optional)</span></label>
+            <input id="support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
+            <small>One JPEG, PNG, WebP, or PDF up to 5 MB.</small>
           </div>
           <div className="field full"><button className="btn brand">Send to MirtPage support</button></div>
         </form>
@@ -58,7 +63,7 @@ export default async function SupportInbox({
         {result.items.map((conversation) => (
           <Link className="support-row" href={`/dashboard/support/${conversation.id}`} key={conversation.id}>
             <span>
-              <small>{conversation.publicRef} · {conversation.businessName}</small>
+              <small>{conversation.publicRef} · {conversation.businessName}{conversation.participantKind === "visitor" ? ` · ${conversation.assistanceCategory.replaceAll("_", " ")}` : ""}</small>
               <strong>{conversation.subject}</strong>
               <small>{conversation.assignedUserName ? `Assigned to ${conversation.assignedUserName}` : "Waiting for a team member"}</small>
             </span>

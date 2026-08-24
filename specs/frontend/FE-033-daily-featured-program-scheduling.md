@@ -4,7 +4,7 @@ title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
 related: [FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-08-11
+last_updated: 2026-08-14
 change_level: L3
 ---
 
@@ -12,14 +12,14 @@ change_level: L3
 
 ## Problem and outcome
 
-Daily Featured Showrooms currently compresses every booth into one four-hour
+Daily Featured Showrooms currently schedules every participant inside one
 window and has no staff-owned schedule. MirtPage needs an all-day program with
 usable presentation time, deliberate changeovers, sponsor moments, a long
 midday break, and a safe way for staff to adjust a particular day's lineup.
 
 The default schedule is generated automatically from that day's eligible
 showrooms. Platform administrators can edit the global timing policy or replace
-one date's participant order, while the public floor continues to derive every
+one date's participant order, while the public gallery continues to derive every
 time and active highlight from one authoritative agenda.
 
 ## Scope
@@ -38,6 +38,9 @@ time and active highlight from one authoritative agenda.
 - A platform-admin schedule workspace for global rules and per-date
   Automatic/Manual lineup mode.
 - Manual inclusion and ordering of currently eligible businesses for one date.
+- A hard maximum of forty participating showrooms per date in Automatic and
+  Manual modes. Responsive image-led cards preserve readable identity without
+  ranking, a simulated venue, or pagination.
 
 ### Non-goals
 
@@ -51,12 +54,18 @@ time and active highlight from one authoritative agenda.
 
 - **Program policy** is the global pair of sessions, intermission, changeover,
   and sponsor-break rules.
-- **Automatic lineup** is the default deterministic order of every currently
-  eligible showroom for the selected weekday industry.
+- **Automatic lineup** is the first forty currently eligible showrooms in the
+  deterministic selected-weekday industry order.
 - **Manual lineup** is an administrator-selected ordered subset for one ISO
   date. Timing is still generated from the program policy.
 - A sponsor break is program inventory, not evidence that an adjacent showroom
   is sponsored or endorsed.
+- Generated sponsor breaks receive chronological sponsor slots. Each slot
+  resolves against the current ordered sponsor-placement pool, repeating only
+  when a day contains more sponsor breaks than active placements. The admin
+  agenda names the assigned sponsor and exact time. During that live segment,
+  the public status and sponsor rail bring the assigned placement forward and
+  label it **Sponsor spotlight** without changing showroom order or airtime.
 - Every participating booth receives one non-overlapping presentation window.
   A transition or sponsor break separates consecutive booths.
 - Each non-empty session is at least 60 minutes and targets no more than 30
@@ -65,6 +74,12 @@ time and active highlight from one authoritative agenda.
 - When at least two businesses participate, both sessions receive a lineup.
 - No booth is **Featured now** during transition, sponsor-break, or intermission
   time.
+- A selected date has at most forty participating showrooms. Eligible businesses
+  outside an Automatic top forty remain in the geographic marketplace and may be
+  selected by an administrator on another appropriate date.
+- Forty responsive cards are the visual capacity of one Daily Featured gallery.
+  The grid keeps a minimum readable width and adds vertical rows instead of
+  shrinking the complete lineup or creating a hall.
 
 ## Contracts
 
@@ -79,16 +94,26 @@ time and active highlight from one authoritative agenda.
   changeovers are summarized rather than expanded into repetitive rows.
 - Booth cards expose their generated EAT range. Current status names the active
   booth, sponsor break, booth changeover, intermission, or ended state.
+- Today's gallery is a circular schedule queue. Before the first presentation,
+  slot one leads. During a presentation, its card leads. During a break, the
+  most recently completed presentation remains first. When the next
+  presentation begins, that card moves first and prior cards rotate behind the
+  remaining lineup. After the program ends, the final presentation remains
+  first. Stable booth references, airtime, and the administrator lineup never
+  change; non-today previews retain stored lineup order.
 - The public composition remains compact on phones: session context belongs in
   the existing status and schedule controls, and the schedule remains collapsed
   by default rather than adding another stacked calendar or agenda wall above
-  the floor. When intentionally opened, morning and evening entries use one
+  the gallery. When intentionally opened, morning and evening entries use one
   readable phone column without horizontal scrolling.
 - `/dashboard/admin/featured-schedule` is available only to platform admins.
   It exposes global time inputs, break controls, a date chooser, the date's
   assigned industry, current mode, eligible participants, and numeric order.
 - Saving Manual mode requires at least one eligible participant. Reverting to
   Automatic removes the retained manual lineup for that date.
+- Saving Manual mode rejects more than forty selected participants atomically.
+  The admin workspace states the limit and prevents additional selection after
+  forty are checked without relying on browser enforcement for authority.
 - The admin form explains that participant eligibility is rechecked when the
   public schedule is read and shows a generated preview before publication.
 
@@ -98,7 +123,7 @@ time and active highlight from one authoritative agenda.
 Scenario: Today's agenda is generated automatically
   GIVEN no manual override exists for today's date
   WHEN Daily Featured Showrooms is projected
-  THEN every eligible showroom in today's assigned industry receives one presentation window
+  THEN at most the first forty eligible showrooms in today's assigned industry receive one presentation window
   AND the windows are divided between morning and afternoon sessions
   AND changeover or sponsor breaks separate consecutive booths
 
@@ -107,7 +132,22 @@ Scenario: Visitor checks today's generated schedule
   WHEN a visitor opens Today's schedule
   THEN every participating showroom is named beside its generated EAT range
   AND morning, evening, sponsor-break, and intermission timing match the authoritative agenda
-  AND closing the schedule restores the compact venue composition
+  AND closing the schedule restores the compact gallery composition
+
+Scenario: Today's gallery follows the live program
+  GIVEN today's ordered lineup has generated walkthrough windows
+  WHEN time advances from one presentation through a break into the next
+  THEN the active presentation leads while it is live
+  AND the just-completed presentation leads during the break
+  AND the next presentation moves first only when its own window begins
+  AND all cards retain their original booth reference and EAT range
+
+Scenario: Sponsor segment reaches the live screen
+  GIVEN today's agenda contains sponsor breaks and active sponsor placements
+  WHEN the agenda and public Daily Featured workspace render
+  THEN each sponsor break names its assigned placement and exact time
+  AND the currently active sponsor segment moves that placement to the front of the sponsor rail
+  AND the live status identifies it as a paid sponsor spotlight
 
 Scenario: Administrator adjusts one day's lineup
   GIVEN a platform administrator opens a future date
@@ -115,6 +155,12 @@ Scenario: Administrator adjusts one day's lineup
   THEN that date uses the saved eligible order
   AND presentation times are recalculated from the current program policy
   AND public future-day identities remain redacted
+
+Scenario: Administrator exceeds the Daily Featured capacity
+  GIVEN forty eligible businesses are selected for a Manual lineup
+  WHEN an administrator attempts to add a forty-first business and save
+  THEN the mutation is rejected atomically with a clear capacity message
+  AND the prior lineup remains unchanged
 
 Scenario: Administrator restores automatic scheduling
   GIVEN a date has a manual lineup

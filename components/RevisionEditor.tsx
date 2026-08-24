@@ -1,11 +1,9 @@
 "use client";
 
 import { Eye, Monitor, Smartphone } from "lucide-react";
+import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import {
-  saveRevisionDraftAction,
-  submitRevisionAction,
-} from "@/app/revision-actions";
+import { saveRevisionDraftAction } from "@/app/revision-actions";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "@/lib/showroom-bank-release";
 import type { ShowroomContentBlock } from "@/lib/showroom-content-blocks";
 import type { ShowroomPrimitive } from "@/lib/showroom-composition";
@@ -788,7 +786,7 @@ export default function RevisionEditor({
         </section>
 
         <div className="sticky-actions editor-save-actions">
-          <button className="btn brand" disabled={!previewValidation.snapshot}>Save private draft</button>
+          <button className="btn brand" disabled={!previewValidation.snapshot}>Save draft</button>
           <button className="btn secondary" type="button" onClick={() => document.getElementById("revision-live-preview")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Eye aria-hidden="true"/> Preview changes</button>
         </div>
       </form>
@@ -811,15 +809,13 @@ export default function RevisionEditor({
         </div>
       </section>
 
-      <form action={submitRevisionAction} className="panel review-submit">
-        <input type="hidden" name="requestId" value={requestId} />
-        <input type="hidden" name="revisionId" value={revisionId} />
+      <section className="panel review-submit">
         <div>
-          <h2>Ready for the client?</h2>
-          <p>Save first. Sending freezes this numbered revision and makes its private preview actionable.</p>
+          <h2>Review the saved draft</h2>
+          <p>Open the exact saved version before sending it to the client. This editor remains private and editable until then.</p>
         </div>
-        <button className="btn">Send revision for client review</button>
-      </form>
+        <Link className="btn" href={`/dashboard/requests/${requestId}/revisions/${revisionId}/preview`}>Review saved draft</Link>
+      </section>
     </div>
   );
 }

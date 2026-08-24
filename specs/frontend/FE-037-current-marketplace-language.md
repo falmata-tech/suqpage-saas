@@ -47,7 +47,7 @@ may remain inert when renaming them would weaken rollback or data integrity.
 
 - Current navigation and generated links never use Bazaar, Expo, `/bazaar`,
   `/expo`, `expoDay`, or `ref=expo`.
-- Public and authenticated copy never presents Bazaar, Expo, or SuqPage as a
+- Public and authenticated copy never presents Bazaar, Expo, or the former platform brand as a
   current MirtPage concept.
 - Retired public and administrator addresses receive the ordinary not-found
   response and are absent from generated links.

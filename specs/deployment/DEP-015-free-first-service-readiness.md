@@ -2,9 +2,9 @@
 id: DEP-015
 title: Free-first service and managed database readiness
 status: in_progress
-related: [FE-010, FE-018, FE-019, FE-025, BE-016, BE-017, BE-018, BE-019, BE-024, DEP-010, DEP-016, DEP-017, DEP-021, DEP-022, DEP_BASE, ADR-0002, ADR-0009, ADR-0010, ADR-0012]
+related: [FE-010, FE-018, FE-019, FE-025, BE-016, BE-017, BE-018, BE-019, BE-024, BE-030, DEP-010, DEP-016, DEP-017, DEP-021, DEP-022, DEP-026, DEP_BASE, ADR-0002, ADR-0009, ADR-0010, ADR-0012, ADR-0014]
 owners: [deployment, operations, security]
-last_updated: 2026-07-30
+last_updated: 2026-08-15
 change_level: L3
 ---
 
@@ -21,6 +21,10 @@ runtime is already horizontally scalable.
 ### In scope
 
 - Native support operation in the existing application and database.
+- Token-scoped anonymous visitor support in that same queue, using bounded
+  polling, required reconnect email and phone values, and no paid chat provider.
+- Provider-neutral private support image/PDF attachments using the same local or
+  Supabase media adapter and no additional paid service.
 - Optional metadata-only Telegram alerts with bounded failure.
 - Manual renewal records with no required price or payment integration.
 - Indexed, paginated tables and a documented Supabase/PostgreSQL migration
@@ -68,7 +72,7 @@ Scenario: Operator considers horizontal scaling
 
 ## Rollout and rollback
 
-Run backup, migration 21/22, account backfill verification, and support negative
+Run backup, migrations 21/22/33/34/36, account backfill verification, and support negative
 tests before deployment. Roll back application code while retaining additive
 tables. Do not activate Telegram without credentials and a monitored operator
 test. Payment integration requires a separate future decision and feature.

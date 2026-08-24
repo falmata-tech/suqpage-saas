@@ -16,6 +16,7 @@ import {
 import { assignRequestToTeamMember, createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
 import { audit, cleanText } from "@/lib/security";
 import { stageUploadedImage, type StagedImage } from "@/lib/media";
+import { createExternalSponsorAd, getExternalSponsorAd, setBusinessSponsorship, SponsorAdminError, updateExternalSponsorAd } from "@/lib/sponsor-admin";
 
 export async function createStaffAccountAction(formData: FormData) {
   const user = await requireUser();
@@ -44,8 +45,6 @@ export async function assignRequestAction(formData: FormData) {
   } catch (error) {
     redirect(`/dashboard/requests/${requestId}?error=assignment`);
   }
-  revalidatePath("/dashboard/requests");
-  revalidatePath(`/dashboard/requests/${requestId}`);
   redirect(`/dashboard/requests/${requestId}?assigned=1`);
 }
 
@@ -78,6 +77,72 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/discover");
   redirect(`/dashboard/admin/discovery/${businessId}?saved=profile`);
+}
+
+function sponsorAdminError(error: unknown) {
+  return error instanceof SponsorAdminError ? error.message : "The sponsor placement could not be saved.";
+}
+
+export async function createExternalSponsorAdAction(formData: FormData) {
+  const user = await requireUser();
+  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
+  let staged: StagedImage | null = null;
+  try {
+    staged = await stageUploadedImage(formData.get("image"), "sponsor");
+    if (!staged) throw new SponsorAdminError("Upload a sponsor image.");
+    const created = await createExternalSponsorAd({
+      name: formData.get("name"), description: formData.get("description"), imagePath: staged.imageRef,
+      websiteUrl: formData.get("websiteUrl"), phone: formData.get("phone"), position: formData.get("position"),
+      active: formData.get("active") === "on",
+    });
+    await audit("sponsor.external_created", { userId: user.id, detail: { sponsorAdId: created.id } });
+  } catch (error) {
+    await staged?.discard();
+    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+  }
+  revalidatePath("/featured");
+  revalidatePath("/dashboard/admin/sponsors");
+  redirect("/dashboard/admin/sponsors?saved=external");
+}
+
+export async function updateExternalSponsorAdAction(formData: FormData) {
+  const user = await requireUser();
+  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
+  const id = Number.parseInt(String(formData.get("id") || ""), 10);
+  let staged: StagedImage | null = null;
+  try {
+    const current = Number.isInteger(id) ? await getExternalSponsorAd(id) : undefined;
+    if (!current) throw new SponsorAdminError("Sponsor ad not found.");
+    staged = await stageUploadedImage(formData.get("image"), "sponsor");
+    await updateExternalSponsorAd({
+      id, name: formData.get("name"), description: formData.get("description"), imagePath: staged?.imageRef || current.imagePath,
+      websiteUrl: formData.get("websiteUrl"), phone: formData.get("phone"), position: formData.get("position"),
+      active: formData.get("active") === "on",
+    });
+    await audit("sponsor.external_updated", { userId: user.id, detail: { sponsorAdId: id } });
+  } catch (error) {
+    await staged?.discard();
+    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+  }
+  revalidatePath("/featured");
+  revalidatePath("/dashboard/admin/sponsors");
+  redirect("/dashboard/admin/sponsors?saved=external");
+}
+
+export async function setBusinessSponsorshipAction(formData: FormData) {
+  const user = await requireUser();
+  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
+  try {
+    const result = await setBusinessSponsorship({
+      businessId: formData.get("businessId"), position: formData.get("position"), active: formData.get("active") === "on",
+    });
+    await audit("sponsor.showroom_updated", { userId: user.id, businessId: result.businessId, detail: { active: formData.get("active") === "on" } });
+  } catch (error) {
+    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+  }
+  revalidatePath("/featured");
+  revalidatePath("/dashboard/admin/sponsors");
+  redirect("/dashboard/admin/sponsors?saved=showroom");
 }
 
 export async function updateFeaturedProgramPolicyAction(formData: FormData) {

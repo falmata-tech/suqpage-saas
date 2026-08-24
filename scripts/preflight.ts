@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import {
   assertProductionConfiguration,
+  authDriver,
   databaseDriver,
   databasePath,
   mediaRoot,
   mediaStorageDriver,
 } from "../lib/config";
+import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import { runtimeGet } from "../lib/runtime-sql";
 
 export async function preflight() {
@@ -31,6 +33,21 @@ export async function preflight() {
     }
   }
 
+  if (authDriver() === "supabase") {
+    const identityMigration = await runtimeGet<{ version: number }>(
+      "SELECT version FROM schema_migrations WHERE version=37",
+    );
+    if (!identityMigration) throw new Error("Database migration 37 is required before Supabase Auth can serve traffic.");
+    const unlinked = await runtimeGet<{ total: number }>(`
+      SELECT COUNT(*) total FROM users u
+      LEFT JOIN auth_identity_links link ON link.user_id=u.id AND link.provider='supabase'
+      WHERE link.user_id IS NULL
+    `);
+    if (Number(unlinked?.total || 0) > 0) {
+      throw new Error("Every retained MirtPage user must have one reconciled Supabase identity before Auth cutover.");
+    }
+  }
+
   const admins = await runtimeGet<{ total: number }>(
     "SELECT COUNT(*) total FROM users WHERE role='admin'",
   );
@@ -53,8 +70,14 @@ export async function preflight() {
 }
 
 if (process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY !== "1") {
-  preflight().catch((error) => {
-    console.error(error instanceof Error ? error.message : "Preflight failed.");
-    process.exitCode = 1;
-  });
+  void (async () => {
+    try {
+      await preflight();
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : "Preflight failed.");
+      process.exitCode = 1;
+    } finally {
+      await closePostgresRuntimeForTests();
+    }
+  })();
 }

@@ -43,6 +43,7 @@ export default async function DashboardShell({ user, business, children }: { use
     ]),
     group("Showroom system", [
       { href: "/dashboard/admin/featured-schedule", label: "Featured schedule", icon: "schedule" },
+      { href: "/dashboard/admin/sponsors", label: "Sponsor placements", icon: "discovery" },
       { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;

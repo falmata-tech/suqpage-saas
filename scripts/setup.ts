@@ -678,14 +678,15 @@ teamStaff.forEach((userId, index) => {
 
 const addSupportConversation = db.prepare(`
   INSERT INTO support_conversations(
-    public_ref,business_id,opened_by_user_id,subject,status,assigned_user_id,
+    public_ref,participant_kind,business_id,opened_by_user_id,
+    assistance_category,requester_label,subject,status,assigned_user_id,
     created_at,updated_at,last_message_at,closed_at
-  ) VALUES(?,?,?,?,?,?,?,?,?,?)
+  ) VALUES(?,'client',?,?,'general','MirtPage client',?,?,?,?,?,?,?)
 `);
 const addSupportMessage = db.prepare(`
   INSERT INTO support_messages(
-    conversation_id,sender_user_id,body,idempotency_key,created_at
-  ) VALUES(?,?,?,?,?)
+    conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
+  ) VALUES(?,?,'user',?,?,?,?)
 `);
 const addSupportAssignment = db.prepare(`
   INSERT INTO support_assignments(
@@ -724,6 +725,7 @@ supportHandles.forEach((handle, index) => {
   const firstMessage = addSupportMessage.run(
     conversationId,
     clientUsersByHandle.get(handle)!,
+    `user:${clientUsersByHandle.get(handle)!}`,
     `Fictional support message from ${handle} used to exercise the customer support queue.`,
     `demo-support-client-${index + 1}`,
     createdAt,
@@ -734,6 +736,7 @@ supportHandles.forEach((handle, index) => {
     const reply = addSupportMessage.run(
       conversationId,
       assigned,
+      `user:${assigned}`,
       "Thanks. The MirtPage team has reviewed this fictional demo request and will follow up here.",
       `demo-support-staff-${index + 1}`,
       replyAt,

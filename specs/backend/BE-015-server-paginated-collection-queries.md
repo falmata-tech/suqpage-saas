@@ -1,10 +1,10 @@
 ---
 id: BE-015
 title: Server-paginated collection queries
-status: done
+status: in_progress
 related: [FE-017, FE-018, FE-032, BE-003, BE-009, BE-012, BE-014, BE-017, BE-018, BE-019, BE-020, BE-023, DEP-014]
 owners: [backend, security, operations]
-last_updated: 2026-07-30
+last_updated: 2026-08-15
 change_level: L2
 ---
 
@@ -54,6 +54,13 @@ scoped SQL queries that remain predictable with hundreds or thousands of rows.
   complete catalogs.
 - Inquiry rows include their item snapshots through one page query/aggregate,
   not per-inquiry database reads.
+- A public or private showroom catalog hydrates option groups and values through
+  bounded relation queries for the complete selected catalog, not one query per
+  product and one additional query per option group. SQLite and PostgreSQL
+  adapters return the same nested catalog contract.
+- The ordinary active `/@handle` path resolves its canonical business while
+  loading the catalog. A second status lookup is reserved for the missing-catalog
+  branch that must distinguish a suspended showroom from an unknown handle.
 - Schema migration 20 adds only indexes and is repeatable. It does not rewrite
   tenant content or request state.
 
@@ -77,6 +84,13 @@ Scenario: Homepage search avoids catalog fan-out
   WHEN the public showroom page is queried
   THEN one count and one row query return the requested page
   AND no per-business catalog query executes
+
+Scenario: Showroom catalog avoids option fan-out
+  GIVEN a showroom has many products and option groups
+  WHEN its catalog is assembled
+  THEN option groups are read in one bounded catalog query
+  AND option values are read in one bounded catalog query
+  AND each value remains attached only to its owning group and product
 ```
 
 ## Quality impact
@@ -89,7 +103,7 @@ Scenario: Homepage search avoids catalog fan-out
 - Localization and merchant-entered values: matching uses SQLite case-insensitive
   behavior available to the current runtime; exact stored copy is returned.
 - Performance and limits: bounded limit/offset, deterministic indexes, two-query
-  pages, and no known list N+1 reads.
+  pages, and no known list or catalog-hydration N+1 reads.
 - Failure recovery and idempotency: read adapters do not mutate; index migration
   is additive and safe to rerun.
 
@@ -107,6 +121,7 @@ contacts, request text, or tenant-private content.
 | Query counts, filters, stable order, totals | integration | `scripts/test-scalable-queries.ts` |
 | Tenant and assignment negative paths | security | `scripts/test-scalable-queries.ts`, `scripts/test-security.ts` |
 | Additive index migration | migration | `scripts/test-scalable-queries.ts` |
+| Batched catalog relationships | adapter/integration | `scripts/test-scalable-queries.ts`, `scripts/test-adapters.ts` |
 
 ## Rollout and rollback
 

@@ -2,9 +2,9 @@
 id: BE-023
 title: Discovery scale and attention projection
 status: in_progress
-related: [BE-015, BE-018, BE-020, BE-021, BE-022, BE-029, FE-021, FE-024, FE-030, FE-032, FE-033, FE-036, DEP-017, DEP-019, DEP-020, DEP-024]
+related: [BE-015, BE-018, BE-020, BE-021, BE-022, BE-029, FE-021, FE-024, FE-030, FE-032, FE-033, FE-036, DEP-017, DEP-019, DEP-020, DEP-024, DEP-026]
 owners: [backend, security, operations]
-last_updated: 2026-08-10
+last_updated: 2026-08-15
 change_level: L3
 ---
 
@@ -25,7 +25,7 @@ preserve tenant isolation and predictable query cost.
   value for controlled internal use. Unknown values behave as no scale filter
   and never become SQL fragments.
 - Public homepage and discovery route adapters do not forward scale query state;
-  public rows, total counts, city groups, featured rows, and map points share
+  public rows, total counts, nearby groups, featured rows, and map points share
   the same industry/search eligibility predicate.
 - Platform attention includes: draft businesses with client accounts, submitted
   or needs-information requests, waiting or staff-unread support conversations,
@@ -35,15 +35,22 @@ preserve tenant isolation and predictable query cost.
 - Sponsored placement is a separate persisted concept and never grants Daily Featured
   eligibility, publication, or endorsement. Retained Sunday-selection rows are
   legacy data and have no public or administrative projection.
+- Internal sponsor placements reference an eligible MirtPage business. Additive
+  migration 35 introduces separately identified external sponsor ads with a
+  bounded name, description, approved local image, active flag, position, and
+  at least one validated destination: public HTTPS website or normalized phone.
+  External ads never create a tenant, showroom, product, or map record.
 - Region and city values are selected only from place keys derived from the
   current marketplace result set. Unknown keys are ignored and never become SQL.
-- An absent or explicit `all` industry filter is the allowlisted unfiltered
-  marketplace state. It never becomes a persisted business industry and never
-  changes the selected weekday's Daily Featured Showrooms industry.
+- An absent or invalid public industry filter returns the de-duplicated combined
+  marketplace projection for the required orientation chooser. Explicit `all`
+  returns the same combined result and closes the chooser. Neither value is a
+  persisted business industry, and neither changes the selected weekday's Daily
+  Featured Showrooms industry.
 - A public showroom's primary visual industry is the first of its memberships
   in the canonical `DISCOVERY_INDUSTRIES` order. It is deterministic display
   metadata only: cross-listed businesses remain eligible through every assigned
-  membership and remain de-duplicated in an all-industry result.
+  membership.
 - A public showroom row exposes live state only after the retained provider and
   destination pass `BE-021`. The selected day's floor and the current
   Ethiopia-time agenda are separate: `featuredNowBusinessId` identifies today's
@@ -70,17 +77,35 @@ preserve tenant isolation and predictable query cost.
   corrects the reviewed scale of Laga Grain Mill; migration 30 normalizes legacy
   per-industry sponsor flags to the five globally ordered active sponsors without
   deleting or rewriting showroom content.
-- Available-place filtering is applied before total, map rows, city groups, and
-  five-row List pagination. The Daily Featured and sponsored projections remain independent
+- Public sponsorship projection merges eligible active internal placements and
+  active external ads, sorts by position and deterministic identity, and returns
+  at most five typed placements. Visitor industry, search, place, and selected
+  program day never change this pool.
+- Available-place filtering is applied before total, map rows, and nearby
+  groups. The Daily Featured and sponsored projections remain independent
   from the visitor's search and place filters.
-- The unfiltered marketplace projection de-duplicates businesses that have more
-  than one industry membership. Its total, map rows, city groups, place options,
-  and five-row List pagination use one parameterized eligibility predicate.
-- Public map, List, sponsor, Daily Featured, and City Showroom rows project the
-  allowlisted primary visual industry key and label. In all-industry City
-  groups, rows are ordered by canonical primary-industry position and then
-  normalized business name and id; selected-industry groups preserve the
-  ordinary result ordering.
+- The selected-industry marketplace total, map rows, nearby groups, and place
+  options use one parameterized eligibility predicate. A cross-listed business
+  appears once in the selected result.
+- Public map, sponsor, Daily Featured, and nearby-group rows project the
+  allowlisted primary visual industry key and label. Nearby grouping considers
+  only eligible rows in the same reviewed city within 800 meters. It preserves
+  every authoritative business coordinate, forms deterministic balanced groups
+  of no more than six, and emits no one-business group. A nearby group carries
+  only stable showroom IDs; the complete public showroom records remain in the
+  single canonical showroom array and are not duplicated inside group payloads.
+- The marketplace base executes its unfiltered eligibility projection once.
+  When no valid place filter is selected, the place-option source and visible
+  showroom source reuse that result rather than issuing an identical second
+  database query.
+- Nearby grouping partitions eligible rows by normalized city and region, then
+  uses bounded geographic grid buckets to compare only neighboring candidates.
+  It preserves the exact 800-meter distance check and deterministic output but
+  must not scan the complete marketplace once per showroom.
+- Public non-search Market projections, Daily Featured projections, and the
+  bounded sponsor pool use a twenty-second server cache to absorb identical
+  anonymous traffic. Free-form search projections remain uncached so arbitrary
+  visitor input cannot create an unbounded application cache key space.
 - Search input shorter than two trimmed characters returns no suggestions.
   Longer input returns at most six de-duplicated suggestions from eligible
   public showroom names, published offering names, and reviewed city/region
@@ -89,6 +114,9 @@ preserve tenant isolation and predictable query cost.
 - Live fields use the existing bounded business row projection; current Daily Featured
   spotlight calculation reuses the deterministic eligible booth order and adds
   at most one current-day Daily Featured query when a visitor previews another date.
+- Daily Featured projection exposes at most forty rows in deterministic order in
+  both Automatic and Manual modes. Oversized retained Manual data is truncated
+  defensively without changing geographic marketplace eligibility.
 
 ## Scenarios
 
@@ -97,7 +125,7 @@ Scenario: Controlled scale projection remains bounded
   GIVEN eligible workshops and growing factories in one industry
   WHEN an internal caller selects growing_factory with a search term
   THEN projected totals and rows include only matching growing factories
-  AND pagination and city groups use the identical predicate
+  AND map rows and nearby groups use the identical predicate
 
 Scenario: Invalid scale reaches the adapter
   GIVEN an arbitrary scale query value
@@ -109,6 +137,15 @@ Scenario: Public route receives legacy scale state
   GIVEN a visitor opens the homepage or discovery route with a scale query
   WHEN the public adapter builds discovery
   THEN the scale query is ignored
+
+Scenario: Large discovery projection avoids quadratic grouping
+  GIVEN thousands of eligible showrooms are spread across reviewed locations
+  WHEN the marketplace projection builds nearby groups
+  THEN candidates are partitioned by city and geographic bucket
+  AND only neighboring buckets receive exact distance checks
+  AND the result preserves bounded groups and authoritative coordinates
+  AND each nearby group references canonical showroom rows by ID without duplicating their content
+  AND an unfiltered request executes one eligible-showroom projection rather than two identical queries
   AND no hidden filter narrows the marketplace results
 
 Scenario: Attention projection enforces scope
@@ -118,30 +155,43 @@ Scenario: Attention projection enforces scope
   AND platform-only account and unassigned-request counts are absent
 
 Scenario: Sponsored placement remains independent
-  GIVEN a business has paid sponsorship and an eligible showroom
+  GIVEN an eligible showroom placement and a validated external sponsor ad are active
   WHEN public discovery and Daily Featured are projected
-  THEN it appears in the globally ordered five-business sponsored section
+  THEN both compete by staff position in the globally ordered five-placement sponsored section
   AND the same sponsor pool remains visible across industry, date, search, and place changes
   AND sponsorship does not alter Daily Featured order or eligibility
 
 Scenario: Visitor selects an available place
   GIVEN an industry has eligible showrooms in multiple regions and cities
   WHEN a visitor selects one projected region or city key
-  THEN total, map rows, city groups, and List pagination use the same place predicate
+  THEN total, map rows, and nearby groups use the same place predicate
   AND an unknown place key restores the national result instead of changing SQL
 
-Scenario: Public discovery begins across every industry
+Scenario: Public discovery requires an explicit orientation choice
   GIVEN eligible published businesses span multiple industries
-  WHEN discovery receives no industry or the explicit all value
-  THEN each eligible business appears at most once in the combined projection
-  AND total, places, map rows, city groups, and List pagination share that scope
+  WHEN public discovery receives no industry or an invalid industry
+  THEN it returns the de-duplicated combined result with eight allowlisted choices
+  AND the UI retains an unset selection so the orientation chooser remains open
+  AND no arbitrary value reaches SQL
   AND the Daily Featured Showrooms projection remains scoped to its weekday industry
+
+Scenario: Visitor explicitly keeps all industries
+  GIVEN the combined marketplace projection is visible behind the chooser
+  WHEN public discovery receives the allowlisted all value
+  THEN it returns the same de-duplicated combined rows with All industries selected
+  AND no business acquires all as a persisted industry membership
+
+Scenario: Nearby coordinates create bounded map groups
+  GIVEN two or more eligible businesses in one reviewed city are within 800 meters
+  WHEN the marketplace projection is built
+  THEN deterministic balanced nearby groups contain no more than six businesses each
+  AND the source coordinates remain unchanged
+  AND a business outside the proximity threshold remains an individual map row
 
 Scenario: Cross-listed showroom receives stable visual metadata
   GIVEN one eligible showroom belongs to multiple allowlisted industries
   WHEN public discovery projects that showroom
   THEN its primary visual industry is the earliest canonical membership
-  AND it still appears once under All industries
   AND every assigned industry can still include it when selected
 
 Scenario: Search suggestions preserve public eligibility
@@ -170,14 +220,14 @@ Scenario: Current Daily Featured spotlight remains date-correct
 - Queries return counts only and log no customer content.
 - Additive migration and default preserve retained data.
 - Public query plans use the existing eligibility indexes plus the new scale
-  index; list results remain at five.
+  index and do not execute a duplicate public List query.
 
 ## Test plan
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Migration default/check/index | migration | `scripts/test-migrations.ts`, `scripts/test-discovery.ts` |
-| All-industry and selected-industry filter scope and paging | integration | `scripts/test-discovery.ts`, `scripts/test-scalable-queries.ts` |
+| Required-industry and selected-industry map scope | integration | `scripts/test-discovery.ts`, `scripts/test-scalable-queries.ts` |
 | Attention tenant/role scope | security/integration | `scripts/test-support.ts`, `scripts/test-security.ts` |
 | Sponsorship persistence, place filtering, and Daily Featured separation | integration | `scripts/test-discovery.ts` |
 

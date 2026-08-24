@@ -1,10 +1,10 @@
 ---
 id: FE-036
 title: Routed public marketplace application
-status: done
-related: [FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, BE-023, DEP-025]
+status: in_progress
+related: [FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, BE-023, DEP-025]
 owners: [product, frontend, design]
-last_updated: 2026-08-14
+last_updated: 2026-08-15
 change_level: L2
 ---
 
@@ -29,22 +29,27 @@ client-side and preserve URL-backed market state.
 
 ## Scope
 
-- `/` as the complete geographic Map/List marketplace and primary public entry.
+- `/` as the complete geographic map marketplace and primary public entry.
 - A query-preserving `/discover` compatibility redirect to `/` for existing
   links, history entries, and service-worker navigation.
-- `/featured` as the complete Daily Featured Showrooms schedule and venue.
+- `/featured` as the complete Daily Featured Showrooms schedule and image-led gallery.
 - `featuredDay` as the only current selected-day query key and
   `ref=featured` as the only current Daily Featured referral value.
 - The complete disclosed five-business paid-placement pool beside the Daily
-  Featured floor on desktop and as a compact two-card rotating strip on phones.
+  Featured gallery on desktop and as a compact two-card rotating strip on phones.
 - One desktop application shell and one phone application navigation shared by
-  those routes and About. Signup and sign-in remain explicit rail actions;
-  contact, privacy, and terms are available from a bounded More control.
+  those routes and About. Navigation is grouped into Explore, Account, and
+  Information. The Account group exposes Sign in only to anonymous visitors
+  and Dashboard only to authenticated users; showroom signup remains available
+  from the sign-in route. Contact, privacy, and terms remain in bounded
+  supporting navigation.
 - Route-local loading feedback and focused desktop, 390px, and 320px evidence.
+- A lazy public support launcher shared by Market, Daily Featured, and About;
+  FE-019 owns its drawer and conversation behavior.
 
 ## Non-goals
 
-- Buyer accounts, saved showrooms, public messages, notifications, fake event
+- Buyer accounts, saved showrooms, buyer-to-business messaging, notifications, fake event
   counts, checkout, ratings, verification, or any destination not already
   implemented.
 - Changing discovery eligibility, sponsorship authority, featured scheduling,
@@ -59,51 +64,61 @@ client-side and preserve URL-backed market state.
 - The public shell uses MirtPage's white, cool-gray, navy, teal, cobalt, and
   restrained berry roles. It may borrow an adaptive app scaffold from the
   reference, but it remains visibly MirtPage and does not imitate a tenant site.
-- Desktop exposes one top identity/action bar and one leading experience rail.
-  Experience destinations do not repeat in both surfaces. Create showroom and
-  sign-in actions remain explicit and visually secondary to marketplace use;
-  More contains contact and legal destinations without lengthening the primary
-  navigation.
+- Desktop exposes one top identity bar and one leading experience rail.
+  Experience destinations do not repeat in both surfaces. Short labeled groups
+  distinguish Explore, Account, and Information without placing More alone at
+  the bottom of the rail. Anonymous visitors see Sign in but not Dashboard;
+  authenticated visitors see Dashboard but not Sign in or signup. More sits
+  with the Information group and contains contact and legal destinations.
 - Phones expose four primary touch targets: Market, Featured, About, and More.
-  More opens an accessible bottom sheet containing supporting destinations and
-  a reachable close path. The current route is identified without color alone.
+  More opens an accessible bottom sheet with Account and Information sections,
+  the same session-aware Sign in or Dashboard choice, and a reachable close
+  path. The current route is identified without color alone.
 - Market is the public root experience. One concise heading and the complete
   workbench sit on a shared architectural canvas; there is no intermediate Home
   lobby or duplicate search surface. Long mission copy remains on `/about`.
 - Market uses the remaining public application viewport rather than a fixed
   map height followed by empty document space. Its route heading contracts on
-  phones, and both the Ethiopia map and an opened City Showroom expand to the
+  phones, and both the Ethiopia map and an opened nearby-showroom viewer expand to the
   measured workspace while retaining the fixed app navigation.
-- Market retains all existing search, industry, place, Map/List, geolocation,
-  cluster, City Showroom, preview, pagination, URL-state, and return-history
+- Market retains search, industry, place, geolocation, cluster, nearby-area
+  nearby-group viewer, preview, URL-state, and return-history
   behavior. It does not render Sponsors or Daily Featured below the map.
 - Daily featured retains the fixed weekday selector, authoritative schedule,
-  broadcast state, numbered venue, future-day redaction, fit/zoom controls, and
-  showroom inspector. Its disclosed sponsor panel sits beside the floor on
+  broadcast state, future-day redaction, responsive image-led cards, and
+  showroom inspector. Its disclosed sponsor panel sits beside the gallery on
   desktop; phones show two cards at a time and rotate through the complete pool
   without scroll, pause, or manual carousel controls. Sponsorship does not imply
   verification or editorial endorsement.
 - Daily featured is a bounded application workspace, not a document assembled
   from stacked promotional sections. One compact program header owns the H1,
   current broadcast state, and collapsed schedule summary; it does not repeat a
-  second route-level introduction above the venue. The weekday ribbon remains
-  visible and the floor consumes the remaining viewport height.
-- Expanding today’s schedule scrolls within a bounded panel and reduces the
-  visible floor area without increasing the root document height. On phones,
-  the compact two-sponsor strip, weekday ribbon, venue controls, and a usable
-  portion of the floor remain reachable without an introductory page scroll.
+  second route-level introduction above the gallery. The weekday ribbon remains
+  visible and the cards use ordinary vertical page scrolling.
+- Expanding today’s schedule uses a bounded disclosure. On phones, the compact
+  two-sponsor strip, weekday ribbon, and first image-led cards remain reachable
+  without a long promotional introduction.
 - The weekday selector is a compact segmented ribbon with icon, weekday, and
   date only; its accessible name retains the complete industry and today state.
-  Daily Featured and City Showroom zoom controls sit in a dedicated toolbar
-  outside the venue canvas, and the venue accepts two-dimensional panning after
-  zoom even when a gesture begins over a booth or storefront.
+  Geographic Map retains zoom and pan. Daily Featured uses fixed-readable
+  responsive columns and ordinary vertical scrolling. The nearby viewer uses at
+  most six fixed-readable cards over the map with no internal scroll, venue
+  zoom, pagination, or sideways panning.
 - Route navigation uses Next.js links and shareable URLs. Browser back/forward
   restores route and URL-backed market state. No section anchor is the primary
   navigation authority.
 - Route separation must prevent Featured and Sponsors client work and data
   projections from loading on the Market route. Featured receives only its
-  schedule/floor projection and bounded paid pool. The split must not merely
+  schedule/gallery projection and bounded paid pool. The split must not merely
   hide combined content with CSS.
+- Route separation also applies to client code: Daily Featured must not download
+  or evaluate D3, Supercluster, geographic assets, or map interaction code. Map
+  and Featured may share small presentation helpers, but each owns a distinct
+  client entry module and route chunk.
+- The installed public application treats `/featured` as a current bounded
+  public navigation destination. A successful response may be used as the
+  route's network-first offline fallback, while API and authenticated routes
+  remain network-authoritative.
 - Every route has one main landmark and clear H1, no horizontal overflow, 44px
   phone targets, visible focus, reduced-motion compliance, and no content hidden
   behind fixed navigation.
@@ -128,8 +143,8 @@ Scenario: Visitor changes public experiences
 Scenario: Phone visitor opens supporting navigation
   GIVEN the viewport is 320 or 390 CSS pixels
   WHEN the visitor activates More
-  THEN an accessible bottom sheet exposes About, signup, workspace, contact,
-  privacy, and terms
+  THEN an accessible bottom sheet exposes grouped Account and Information destinations
+  AND it shows Sign in for an anonymous visitor or Dashboard for an authenticated visitor, never both
   AND closing it restores a reachable navigation target
 
 Scenario: Account owner signs in
@@ -137,28 +152,29 @@ Scenario: Account owner signs in
   WHEN the owner signs in successfully
   THEN the existing role-authorized workspace shell opens
   AND public navigation does not replace or duplicate workspace navigation
+  AND returning to a public route exposes Dashboard instead of sign-in or signup actions
 
 Scenario: Visitor explores Daily Featured in one workspace
   GIVEN Daily Featured is open on desktop or phone
   WHEN the route finishes rendering
   THEN one compact program heading and the weekday ribbon are visible
-  AND Sponsors remain attached to the featured venue
-  AND the venue uses the remaining application viewport without root-page scroll
+  AND Sponsors remain attached to the featured gallery
+  AND image-led showroom cards remain readable without venue zoom
 
 Scenario: Visitor expands today's schedule
   GIVEN today's Daily Featured program is selected
   WHEN the visitor expands the schedule summary
   THEN the agenda becomes scrollable within the Daily Featured workspace
-  AND the venue remains visible and interactive below it
+  AND the featured gallery remains visible and interactive below it
   AND the public application navigation remains reachable
 
-Scenario: Visitor opens a responsive venue
-  GIVEN Market, City Showroom, or Daily Featured is open
+Scenario: Visitor opens a responsive marketplace experience
+  GIVEN Market, a nearby-showroom viewer, or Daily Featured is open
   WHEN the available viewport changes between portrait, balanced, and wide
   THEN the interactive canvas consumes the remaining workspace
-  AND City or Featured booth geometry reflows for the measured aspect
-  AND Fit reveals the complete venue without cropping
-  AND zoom controls do not cover interactive venue content
+  AND nearby or Featured card geometry reflows for the measured aspect
+  AND Featured uses ordinary vertical scrolling when its complete program exceeds the viewport
+  AND phone Featured galleries keep readable cards without horizontal overflow
 ```
 
 ## Test plan
@@ -169,7 +185,8 @@ Scenario: Visitor opens a responsive venue
 | Desktop rail and phone Market/Featured/About/More navigation | browser/accessibility | `scripts/capture-pwa-shell.mjs`, `scripts/test-accessibility-audit.mjs` |
 | Market, featured, and sponsor behavior plus route-specific projections retained | integration/browser | `scripts/test-discovery.ts`, `tests/acceptance/app.spec.ts` |
 | Route-level loading, overflow, and target sizing | browser | focused 1440px, 390px, and 320px captures |
-| Bounded Daily Featured workspace, compact header, schedule expansion, and adjacent Sponsors | browser | `scripts/capture-public-app-shell.mjs` desktop and phone assertions |
+| Daily Featured gallery, compact header, schedule expansion, and adjacent Sponsors | browser | `scripts/capture-public-app-shell.mjs` desktop and phone assertions |
+| Lazy public support launcher does not obscure route navigation | browser/accessibility | FE-019 focused desktop and phone assertions |
 
 ## Rollout and rollback
 

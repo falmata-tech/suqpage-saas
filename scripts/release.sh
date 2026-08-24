@@ -18,8 +18,15 @@ NEXT_TELEMETRY_DISABLED=1 node node_modules/next/dist/bin/next build
 printf '\n=== Output-file trace privacy validation ===\n'
 node scripts/test-build-trace.mjs
 
-printf '\n=== Production HTTP smoke tests ===\n'
-node scripts/http-smoke.mjs
+printf '\n=== Provider-backed production HTTP smoke tests ===\n'
+if [[ "${MIRTPAGE_DELEGATE_PROVIDER_SMOKE:-0}" == "1" ]]; then
+  printf 'Delegated to the required provider-backed browser CI job.\n'
+elif command -v supabase >/dev/null 2>&1; then
+  node scripts/acceptance-runner.mjs --grep "API authorization, validation, health, and security headers"
+else
+  printf 'Supabase CLI is required for the provider-backed release smoke.\n' >&2
+  exit 1
+fi
 
 printf '\n=== Server pagination and scale fixture validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts

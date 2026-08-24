@@ -3,13 +3,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { ALL_DISCOVERY_INDUSTRIES, DISCOVERY_INDUSTRIES, getDiscoveryView, getFeaturedShowroomsView, getMarketplaceDiscoveryView, getSponsoredShowrooms } from "../lib/discovery";
+import { ALL_DISCOVERY_INDUSTRIES, DISCOVERY_INDUSTRIES, getDiscoveryView, getFeaturedShowroomsView, getMarketplaceDiscoveryView, getSponsoredShowrooms, groupNearbyShowrooms, type DiscoveryShowroom } from "../lib/discovery";
 import { updateDiscoveryProfile } from "../lib/discovery-admin";
-import { buildDistrictVenueLayout, buildExhibitionGridVenueLayout, buildPerimeterVenueLayout } from "../lib/discovery-venue-layout";
 import { buildFeaturedProgramAgenda, featuredBoothWalkthroughs, featuredBroadcastPhase } from "../lib/featured-program";
 import { migrateDatabase } from "../lib/schema";
+import { createExternalSponsorAd, SponsorAdminError } from "../lib/sponsor-admin";
 
-const discoveryUiSource = fs.readFileSync(
+const discoveryMapSource = fs.readFileSync(
   path.join(process.cwd(), "components/DiscoveryWorkspace.tsx"),
   "utf8",
 );
@@ -17,10 +17,20 @@ const discoveryCssSource = fs.readFileSync(
   path.join(process.cwd(), "app/discovery.css"),
   "utf8",
 );
-const cityMarketplaceSource = discoveryUiSource.slice(
-  discoveryUiSource.indexOf("function CityMarketplacePanel"),
-  discoveryUiSource.indexOf("function DiscoveryList"),
+const featuredUiSource = fs.readFileSync(
+  path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"),
+  "utf8",
 );
+const discoveryUiSource = `${discoveryMapSource}\n${featuredUiSource}`;
+const featuredPageSource = fs.readFileSync(
+  path.join(process.cwd(), "app/featured/page.tsx"),
+  "utf8",
+);
+const publicDiscoveryCacheSource = fs.readFileSync(
+  path.join(process.cwd(), "lib/public-discovery-cache.ts"),
+  "utf8",
+);
+const nearbyViewerSource = discoveryMapSource.slice(discoveryMapSource.indexOf("function NearbyShowroomsViewer"));
 assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
 assert.match(discoveryUiSource, /router\.replace/);
 assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
@@ -29,144 +39,102 @@ assert.match(discoveryUiSource, /Filter by region or city/);
 assert.match(discoveryUiSource, /discovery-industry-menu/);
 assert.match(discoveryUiSource, /industry-accent-swatch/);
 assert.match(discoveryUiSource, /data-industry=\{showroom\.primaryIndustryKey\}/);
-assert.match(discoveryUiSource, /CityMarketplacePanel group=\{activeCity\} industryKey=\{discovery\.industry\.key\}/);
-assert.match(discoveryUiSource, /city-showroom-panel\$\{industryKey === "all" \? "" : " industry-themed"\}/);
-assert.match(discoveryUiSource, /className="discovery-list-wrap" data-industry=\{discovery\.industry\.key\}/);
-assert.match(discoveryUiSource, /className="discovery-list-industry"/);
+assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
 assert.match(discoveryUiSource, /showroom\.primaryIndustryShortLabel/);
-assert.match(discoveryUiSource, /className="city-industry-district"/);
-assert.match(discoveryUiSource, /layout\.districts\.map/);
-assert.match(discoveryUiSource, /presence\.shortLabel \|\| "Open"/);
-assert.doesNotMatch(discoveryUiSource, /className="city-industry-run"/);
-assert.doesNotMatch(cityMarketplaceSource, /Row \{row\}|padStart/, "City Market storefronts do not expose scheduled booth references");
-assert.match(discoveryUiSource, /R\{row\} · \{booth\.reference\}/, "Daily Featured Showrooms retains scheduled row and booth references");
+assert.match(discoveryUiSource, /NEARBY_GROUP_ZOOM = 14/);
+assert.match(discoveryUiSource, /function NearbyShowroomsViewer/);
+assert.match(discoveryUiSource, /className=\{`nearby-showroom-viewer/);
+assert.match(discoveryUiSource, /className="nearby-showroom-grid"/);
+assert.doesNotMatch(discoveryUiSource, /SharedLocationPanel|shared-location-floor|shared-location-more|buildScrollableSharedLocationVenueLayout/);
+assert.doesNotMatch(nearbyViewerSource, /Row \{row\}|padStart|pagination|Show more/, "nearby cards expose no scheduled references, pagination, or incremental loading");
+assert.match(discoveryUiSource, /<b>\{booth\.reference\}<\/b>/, "Daily Featured Showrooms retains scheduled booth references");
 assert.doesNotMatch(discoveryUiSource, /discovery-industries-static/);
-assert.match(discoveryUiSource, /featured-booth-platform/);
+assert.match(discoveryUiSource, /function IndustryStartChooser/);
+assert.match(discoveryUiSource, /className="featured-gallery"/);
+assert.match(discoveryUiSource, /className={`featured-card/);
+assert.doesNotMatch(discoveryUiSource, /featured-floor|featured-booth-platform|buildScrollableFeaturedVenueLayout/);
 assert.match(discoveryUiSource, /featured-experience/);
 assert.match(discoveryUiSource, /TikTok Live/);
 assert.match(discoveryUiSource, /Livestream ended/);
 assert.match(discoveryUiSource, /point-showroom-store/);
+assert.match(discoveryUiSource, /point-hit-target/);
+assert.doesNotMatch(discoveryUiSource, /className="point-halo"/);
 assert.match(discoveryUiSource, /SHOWROOM_DETAIL_SCALE/);
+assert.match(discoveryMapSource, /getClusters\(viewportGeoBounds, clusterZoom\)/, "cluster projection is bounded to the committed map viewport");
+assert.match(discoveryMapSource, /requestIdleCallback\(loadDetails, \{ timeout: 3_000 \}\)/, "secondary geography waits for browser idle time");
+assert.match(discoveryMapSource, /setTimeout\(loadDetails, 1_500\)/, "browsers without idle callbacks defer secondary geography");
+assert.match(discoveryMapSource, /const MapGeographyLayers = memo/, "static geography is isolated from marker viewport commits");
+assert.match(discoveryMapSource, /showPrimaryRoads=\{zoomLevel >= 1\.45\}/, "primary road detail is progressive by zoom level");
+assert.match(discoveryMapSource, /showSecondaryRoads=\{zoomLevel >= 2\.4\}/, "secondary road detail is progressive by zoom level");
+assert.match(discoveryMapSource, /ethiopia-places-cities-osm\.geojson/, "country context loads the bounded city place tier");
+assert.match(discoveryMapSource, /if \(loadTowns && !townPlaces\)/, "town places load only at their visible zoom tier");
+assert.match(discoveryMapSource, /if \(loadVillages && !villagePlaces\)/, "village places load only at their visible zoom tier");
+assert.match(discoveryMapSource, /Promise\.all\(requests\)/, "detail tiers commit from one batched request group");
+assert.match(discoveryMapSource, /startTransition\(\(\) => setMapViewport/, "viewport projection work is a non-urgent React update");
+assert.match(discoveryMapSource, /const MAX_PLACE_LABELS = 180/, "mounted map place labels retain an explicit upper bound");
+assert.match(discoveryMapSource, /MAX_PLACE_LABELS - visibleCityPlaces\.length/, "detailed labels cannot exceed the remaining mounted-label budget");
+assert.match(discoveryMapSource, /visibleCityCandidates\.slice\(0, 8\)/, "only eight population-prioritized city labels remain in the gesture hot path");
+assert.match(discoveryMapSource, /className="discovery-place-cities"/, "major-city labels use a stable gesture layer");
+assert.match(discoveryCssSource, /\.map-navigating \.discovery-place-details \{ visibility: hidden; \}/, "only detailed place labels pause during active navigation");
+assert.match(discoveryMapSource, /visibleNearbyGroups\.map/, "terminal nearby markers remain viewport bounded");
+assert.match(discoveryMapSource, /visibleUngroupedShowrooms\.map/, "terminal showroom markers remain viewport bounded");
+assert.doesNotMatch(discoveryMapSource, /discovery\.showrooms\.find\(\(candidate\) => candidate\.id === properties\.showroomId\)/, "marker resolution does not scan every showroom");
 assert.match(discoveryUiSource, /walkthrough-current/);
 assert.doesNotMatch(discoveryUiSource, /randomSponsorPair/);
 assert.doesNotMatch(discoveryUiSource, /rail\.scrollTo/);
 assert.match(discoveryUiSource, /mirtpage:discovery-navigation:v1/);
 assert.match(discoveryUiSource, /mirtpage:last-marketplace-url:v1/);
+assert.match(discoveryUiSource, /rememberCurrentPublicWorkspace/);
+assert.match(nearbyViewerSource, /onClick=\{\(\) => onSelect\(showroom\.id\)\}/);
 assert.match(discoveryUiSource, /mapPersistenceEnabledRef\.current = false/);
 assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
-assert.match(discoveryCssSource, /venue-hall-shell-v2\.webp/);
 assert.match(discoveryCssSource, /\[data-industry="electronics"\]/);
 assert.match(discoveryCssSource, /var\(--industry-accent/);
-assert.match(discoveryCssSource, /city-shop-fascia[^\n]+background:\s*var\(--industry-accent-strong/);
-assert.match(discoveryCssSource, /city-showroom-panel\.industry-themed \.city-showroom-floor/);
-assert.match(discoveryCssSource, /discovery-list article[^\n]+border-left-width:\s*6px/);
-assert.match(discoveryCssSource, /discovery-list-wrap\[data-industry\]:not\(\[data-industry="all"\]\)/);
-assert.match(discoveryCssSource, /\.city-industry-district/);
-assert.match(discoveryCssSource, /\.city-shop-fascia \.city-shop-open/);
-assert.equal(featuredBroadcastPhase("2026-08-09", 20, new Date("2026-08-09T07:59:59+03:00")), "scheduled");
-assert.equal(featuredBroadcastPhase("2026-08-09", 20, new Date("2026-08-09T08:00:00+03:00")), "live");
-assert.equal(featuredBroadcastPhase("2026-08-09", 20, new Date("2026-08-09T13:00:00+03:00")), "intermission");
-assert.equal(featuredBroadcastPhase("2026-08-09", 20, new Date("2026-08-09T17:00:00+03:00")), "live");
-assert.equal(featuredBroadcastPhase("2026-08-09", 20, new Date("2026-08-09T22:00:00+03:00")), "ended");
-const agendaAtStart = buildFeaturedProgramAgenda("2026-08-09", 20, new Date("2026-08-09T08:00:00+03:00"));
-const walkthroughsAtStart = featuredBoothWalkthroughs("2026-08-09", 20, new Date("2026-08-09T08:00:00+03:00"));
-assert.equal(walkthroughsAtStart.length, 20);
-assert.equal(walkthroughsAtStart[0].label, "08:00–08:24");
+assert.doesNotMatch(discoveryCssSource, /\.discovery-list|\.discovery-pages|\.discovery-tabs/);
+assert.match(discoveryCssSource, /\.nearby-showroom-grid\s*\{[^}]*repeat\(3/);
+assert.match(discoveryCssSource, /\.nearby-showroom-grid\s*\{[^}]*repeat\(2/);
+assert.doesNotMatch(nearbyViewerSource, /overflow-y|scrollTo|IntersectionObserver/);
+assert.match(discoveryCssSource, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
+assert.match(discoveryCssSource, /\.featured-card-media > img/);
+assert.doesNotMatch(discoveryCssSource, /\.featured-floor|\.featured-booth/);
+assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T10:04:59+03:00")), "scheduled");
+assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00")), "live");
+assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T13:00:00+03:00")), "intermission");
+assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T19:05:00+03:00")), "live");
+assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T22:00:00+03:00")), "ended");
+const agendaAtStart = buildFeaturedProgramAgenda("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
+const walkthroughsAtStart = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
+assert.equal(walkthroughsAtStart.length, 10);
+assert.equal(walkthroughsAtStart[0].label, "10:05–10:35");
 assert.equal(walkthroughsAtStart.filter((walkthrough) => walkthrough.current).length, 1);
 assert.equal(walkthroughsAtStart[0].current, true);
-assert.equal(agendaAtStart.filter((entry) => entry.kind === "sponsor_break").length, 6);
+assert.equal(agendaAtStart.filter((entry) => entry.kind === "sponsor_break").length, 2);
 const intermissionAtStart = agendaAtStart.find((entry) => entry.kind === "intermission");
-assert.equal(intermissionAtStart?.kind === "intermission" ? intermissionAtStart.timeLabel : "", "13:00–17:00");
-const walkthroughsAtSecond = featuredBoothWalkthroughs("2026-08-09", 20, new Date("2026-08-09T08:29:00+03:00"));
+assert.equal(intermissionAtStart?.kind === "intermission" ? intermissionAtStart.timeLabel : "", "13:00–19:05");
+const walkthroughsAtSecond = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:40:00+03:00"));
 assert.equal(walkthroughsAtSecond[1].current, true);
 assert.equal(walkthroughsAtSecond[0].current, false);
-assert.equal(featuredBoothWalkthroughs("2026-08-09", 20, new Date("2026-08-09T14:00:00+03:00")).some((walkthrough) => walkthrough.current), false);
+assert.equal(featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T14:00:00+03:00")).some((walkthrough) => walkthrough.current), false);
 assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
-const venueShell = path.join(process.cwd(), "public/landing/venue-hall-shell-v2.webp");
-assert.ok(fs.existsSync(venueShell), "the local architectural venue shell exists");
-assert.ok(fs.statSync(venueShell).size <= 300_000, "the architectural venue shell stays under 300 KB");
-
-for (const count of [1, 5, 10, 11, 20, 37]) {
-  const layout = buildPerimeterVenueLayout(count, 224, 164);
-  assert.equal(layout.positions.length, count, `${count} businesses receive exactly one perimeter position`);
-  assert.equal(new Set(layout.positions.map((position) => `${position.left}:${position.top}`)).size, count, `${count} perimeter positions remain unique`);
-  assert.ok(layout.clearWidth > 0 && layout.clearHeight > 0, `${count} businesses retain an empty central court`);
-  const clearLeft = layout.centerX - layout.clearWidth / 2;
-  const clearRight = layout.centerX + layout.clearWidth / 2;
-  const clearTop = layout.centerY - layout.clearHeight / 2;
-  const clearBottom = layout.centerY + layout.clearHeight / 2;
-  layout.positions.forEach((position, index) => {
-    assert.ok(position.left >= 0 && position.top >= 0 && position.left + layout.cardWidth <= layout.width && position.top + layout.cardHeight <= layout.height, `${count}:${index} stays inside the hall`);
-    const outsideCenter = position.left + layout.cardWidth <= clearLeft || position.left >= clearRight || position.top + layout.cardHeight <= clearTop || position.top >= clearBottom;
-    assert.ok(outsideCenter, `${count}:${index} stays outside the central court`);
-    layout.positions.slice(index + 1).forEach((other, otherIndex) => {
-      const separated = position.left + layout.cardWidth <= other.left || other.left + layout.cardWidth <= position.left || position.top + layout.cardHeight <= other.top || other.top + layout.cardHeight <= position.top;
-      assert.ok(separated, `${count}:${index} does not overlap ${index + otherIndex + 1}`);
-    });
-  });
-}
-
-for (const count of [1, 5, 10, 11, 20, 37, 64]) {
-  const layout = buildExhibitionGridVenueLayout(count, 224, 190);
-  assert.equal(layout.positions.length, count, `${count} Daily Featured booths receive exactly one exhibition bay`);
-  assert.equal(new Set(layout.positions.map((position) => `${position.left}:${position.top}`)).size, count, `${count} exhibition bays remain unique`);
-  assert.equal(layout.rows, Math.ceil(count / layout.columns), `${count} Daily Featured booths grow by complete deterministic rows`);
-  layout.positions.forEach((position, index) => {
-    assert.ok(position.left >= layout.safeInset && position.top >= layout.safeInset, `${count}:${index} clears the top and left venue walls`);
-    assert.ok(position.left + layout.cardWidth <= layout.width - layout.safeInset && position.top + layout.cardHeight <= layout.height - layout.safeInset, `${count}:${index} clears the bottom and right venue walls`);
-    if (index > 0 && index % layout.columns !== 0) assert.ok(position.left > layout.positions[index - 1].left, `${count}:${index} advances left-to-right within its numbered row`);
-    if (index >= layout.columns) assert.ok(position.top > layout.positions[index - layout.columns].top, `${count}:${index} advances top-to-bottom across numbered rows`);
-    layout.positions.slice(index + 1).forEach((other, otherIndex) => {
-      const separated = position.left + layout.cardWidth <= other.left || other.left + layout.cardWidth <= position.left || position.top + layout.cardHeight <= other.top || other.top + layout.cardHeight <= position.top;
-      assert.ok(separated, `${count}:${index} does not overlap ${index + otherIndex + 1} across Daily Featured rows`);
-    });
-  });
-}
-
-const portraitFeaturedLayout = buildExhibitionGridVenueLayout(20, 224, 190, .7);
-const wideFeaturedLayout = buildExhibitionGridVenueLayout(20, 224, 190, 2);
-assert.ok(portraitFeaturedLayout.columns < wideFeaturedLayout.columns, "portrait Featured floors use fewer columns than wide floors");
-assert.ok(portraitFeaturedLayout.rows > wideFeaturedLayout.rows, "portrait Featured floors gain rows while wide floors gain columns");
-assert.ok(portraitFeaturedLayout.width / portraitFeaturedLayout.height < wideFeaturedLayout.width / wideFeaturedLayout.height, "Featured floor geometry follows the measured stage aspect");
-assert.deepEqual(buildExhibitionGridVenueLayout(20, 224, 190, .7), portraitFeaturedLayout, "responsive Featured geometry remains deterministic within an aspect band");
-
-const districtFixture = [
-  { key: "electronics", label: "Electronics" },
-  ...Array.from({ length: 2 }, () => ({ key: "beauty-wellness", label: "Beauty & home care" })),
-  ...Array.from({ length: 4 }, () => ({ key: "agriculture-growers", label: "Agriculture" })),
-  ...Array.from({ length: 20 }, () => ({ key: "food-farming", label: "Food & beverage" })),
-];
-const districtLayout = buildDistrictVenueLayout(districtFixture, 218, 186);
-assert.equal(districtLayout.districts.length, 4, "one City Market district is created for each industry");
-assert.deepEqual(districtLayout.districts.map((district) => district.count), [1, 2, 4, 20], "district size follows uneven industry participation");
-assert.deepEqual(buildDistrictVenueLayout(districtFixture, 218, 186), districtLayout, "the same City Market participants always receive the same geometry");
-districtLayout.districts.forEach((district, districtIndex) => {
-  assert.ok(district.left >= districtLayout.safeInset && district.top >= 0, `${district.key} clears the venue's top and left architecture`);
-  assert.ok(district.left + district.width <= districtLayout.width - districtLayout.safeInset && district.top + district.height < districtLayout.height, `${district.key} clears the venue's bottom and right architecture`);
-  assert.equal(district.itemIndices.length, district.count, `${district.key} contains every member exactly once`);
-  district.itemIndices.forEach((itemIndex) => {
-    const position = districtLayout.positions[itemIndex];
-    assert.ok(position.left >= district.left && position.top >= district.top, `${district.key}:${itemIndex} begins inside its district`);
-    assert.ok(position.left + districtLayout.cardWidth <= district.left + district.width && position.top + districtLayout.cardHeight <= district.top + district.height, `${district.key}:${itemIndex} remains inside its district`);
-  });
-  districtLayout.districts.slice(districtIndex + 1).forEach((other) => {
-    const separated = district.left + district.width <= other.left || other.left + other.width <= district.left || district.top + district.height <= other.top || other.top + other.height <= district.top;
-    assert.ok(separated, `${district.key} does not overlap ${other.key}`);
-  });
-});
-districtLayout.positions.forEach((position, index) => {
-  districtLayout.positions.slice(index + 1).forEach((other, otherIndex) => {
-    const separated = position.left + districtLayout.cardWidth <= other.left || other.left + districtLayout.cardWidth <= position.left || position.top + districtLayout.cardHeight <= other.top || other.top + districtLayout.cardHeight <= position.top;
-    assert.ok(separated, `City Market booth ${index} does not overlap booth ${index + otherIndex + 1}`);
-  });
-});
-const portraitDistrictLayout = buildDistrictVenueLayout(districtFixture, 218, 186, .7);
-const wideDistrictLayout = buildDistrictVenueLayout(districtFixture, 218, 186, 2);
-assert.ok(portraitDistrictLayout.width / portraitDistrictLayout.height < wideDistrictLayout.width / wideDistrictLayout.height, "City Market districts repack for portrait and wide stages");
-assert.deepEqual(buildDistrictVenueLayout(districtFixture, 218, 186, .7), portraitDistrictLayout, "responsive City Market district geometry remains deterministic within an aspect band");
+assert.match(featuredPageSource, /components\/FeaturedShowroomsWorkspace/);
+assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
+assert.match(publicDiscoveryCacheSource, /if \(query\) return getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
+assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
+assert.match(publicDiscoveryCacheSource, /public-marketplace-v2-nearby-groups/, "the marketplace cache identity tracks the nearby-group projection contract");
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
 const db = new DatabaseSync(path.join(root, "discovery.db"));
+
+function distanceKm(left: { latitude: number; longitude: number }, right: { latitude: number; longitude: number }) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const latitudeDelta = radians(right.latitude - left.latitude);
+  const longitudeDelta = radians(right.longitude - left.longitude);
+  const latitudeA = radians(left.latitude);
+  const latitudeB = radians(right.latitude);
+  const haversine = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(latitudeA) * Math.cos(latitudeB) * Math.sin(longitudeDelta / 2) ** 2;
+  return 6_371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
 
 async function main() {
 try {
@@ -244,14 +212,15 @@ try {
   }
 
   let firstAddisBusinessId = 0;
-  for (let index = 0; index < 14; index += 1) {
+  for (let index = 0; index < 45; index += 1) {
+    const sharesAddisWorkshop = index < 2;
     const businessId = seed({
       handle: `addis-device-${index + 1}`,
       city: "Addis Ababa",
       zone: "Addis Ababa",
       region: "Addis Ababa",
-      latitude: 9.018 + index * .0001,
-      longitude: 38.748 + index * .0001,
+      latitude: sharesAddisWorkshop ? 9.018 : 9.018 + index * .0001,
+      longitude: sharesAddisWorkshop ? 38.748 : 38.748 + index * .0001,
       product: index === 0 ? "Needle signal tester" : undefined,
       sponsored: index < 2,
       live: index === 0 ? { platform: "tiktok", url: "https://www.tiktok.com/@addisdevice/live" } : undefined,
@@ -265,8 +234,8 @@ try {
       city: "Adama",
       zone: "East Shewa",
       region: "Oromia",
-      latitude: 8.545 + index * .0001,
-      longitude: 39.272 + index * .0001,
+      latitude: index < 2 ? 8.545 : 8.545 + index * .0001,
+      longitude: index < 2 ? 39.272 : 39.272 + index * .0001,
     });
   }
   seed({ handle: "bishoftu-repair", city: "Bishoftu", zone: "East Shewa", region: "Oromia", latitude: 8.748, longitude: 38.982 });
@@ -274,12 +243,24 @@ try {
   seed({ handle: "expired-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, expired: true });
   seed({ handle: "draft-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, status: "draft" });
   seed({ handle: "empty-device", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.01, longitude: 38.75, product: "" });
-  seed({ handle: "sheger-soap", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.025, longitude: 38.755, industryKey: "beauty-wellness", sponsored: true });
+  seed({ handle: "sheger-soap", city: "Addis Ababa", zone: "Addis Ababa", region: "Addis Ababa", latitude: 9.018, longitude: 38.748, industryKey: "beauty-wellness", sponsored: true });
   for (let index = 0; index < 3; index += 1) {
     seed({ handle: `sunday-grower-${index + 1}`, city: "Jimma", zone: "Jimma", region: "Oromia", latitude: 7.67 + index * .0001, longitude: 36.83 + index * .0001, industryKey: "agriculture-growers" });
   }
   addMembership.run(firstAddisBusinessId, "machinery-tools");
   addProduct.run(firstAddisBusinessId, "Unpublished turbine", "unpublished-turbine", "Internal draft only", 0);
+  assert.ok(db.prepare("SELECT 1 FROM schema_migrations WHERE version=35").get(), "external sponsor migration is recorded");
+  await assert.rejects(() => createExternalSponsorAd({ name: "Unsafe advertiser", description: "Rejected destination", imagePath: "/media/sponsor-test.webp", websiteUrl: "http://unsafe.example", phone: "", position: 1, active: true }, db), SponsorAdminError);
+  await createExternalSponsorAd({
+    name: "Addis Trade Services",
+    description: "Business services for Ethiopian producers.",
+    imagePath: "/media/sponsor-test.webp",
+    websiteUrl: "https://sponsor.example/partners",
+    phone: "+251 (911) 000-111",
+    position: 50,
+    active: true,
+  }, db);
+  assert.equal((db.prepare("SELECT phone FROM external_sponsor_ads WHERE name=?").get("Addis Trade Services") as { phone: string }).phone, "+251911000111", "external sponsor phone is normalized before persistence");
 
   const monday = new Date("2026-07-27T07:00:00+03:00");
   const allIndustries = await getDiscoveryView({ db, featuredDay: 1, now: monday });
@@ -290,47 +271,65 @@ try {
   assert.equal("showrooms" in featuredOnly, false, "the featured projection excludes geographic Market rows");
   assert.equal(featuredOnly.featured.selectedWeekday, 1);
   const sponsorsOnly = await getSponsoredShowrooms({ db });
-  assert.equal(sponsorsOnly.length, 3, "the sponsor route receives only the bounded global paid pool");
-  assert.equal(allIndustries.industry.key, ALL_DISCOVERY_INDUSTRIES.key, "public discovery begins with All industries selected");
-  assert.equal(allIndustries.industries[0].key, ALL_DISCOVERY_INDUSTRIES.key, "All industries is the first public filter option");
-  assert.equal(allIndustries.total, 23, "the initial projection includes every eligible industry");
-  assert.equal(allIndustries.showrooms.length, 23, "the all-industry map projection matches its total");
-  assert.equal(new Set(allIndustries.showrooms.map((showroom) => showroom.id)).size, 23, "a cross-listed showroom appears once in the combined projection");
+  assert.equal(sponsorsOnly.length, 4, "the sponsor route merges showroom and external placements into the bounded global paid pool");
+  assert.deepEqual(sponsorsOnly[0] && { kind: sponsorsOnly[0].kind, name: sponsorsOnly[0].name, href: sponsorsOnly[0].href }, { kind: "external", name: "Addis Trade Services", href: "https://sponsor.example/partners" }, "external sponsor details project without creating a showroom route");
+  assert.equal(allIndustries.industry.key, "", "public discovery retains an unset orientation state until the visitor chooses");
+  assert.equal(allIndustries.industries.at(-1)?.key, ALL_DISCOVERY_INDUSTRIES.key, "All industries is the eighth and final public choice");
+  assert.equal(allIndustries.industries.length, 8, "the orientation chooser contains seven industries plus All industries");
+  assert.equal(allIndustries.total, 54, "the initial map loads every eligible industry behind the chooser");
+  assert.equal(allIndustries.showrooms.length, 54, "the all-industry map projection matches its total");
+  assert.doesNotMatch(JSON.stringify(allIndustries.nearbyGroups), /"tagline"|"description"|"imagePath"/, "nearby groups reference canonical showroom rows without duplicating their content payload");
+  assert.equal(new Set(allIndustries.showrooms.map((showroom) => showroom.id)).size, 54, "a cross-listed showroom appears once in the combined projection");
   const crossListedShowroom = allIndustries.showrooms.find((showroom) => showroom.id === firstAddisBusinessId);
   assert.deepEqual(crossListedShowroom && {
     key: crossListedShowroom.primaryIndustryKey,
     label: crossListedShowroom.primaryIndustryShortLabel,
   }, { key: "electronics", label: "Electronics" }, "a cross-listed showroom receives its earliest canonical industry as stable visual metadata");
-  const allIndustryAddis = allIndustries.cityGroups.find((group) => group.city === "Addis Ababa");
-  assert.ok(allIndustryAddis, "the combined projection retains the Addis Ababa City Showroom");
+  const allShowroomById = new Map(allIndustries.showrooms.map((showroom) => [showroom.id, showroom]));
+  const allGroupMembers = (group: (typeof allIndustries.nearbyGroups)[number]) => group.showroomIds.map((id) => allShowroomById.get(id)).filter((showroom): showroom is DiscoveryShowroom => Boolean(showroom));
+  const allIndustryAddis = allIndustries.nearbyGroups.filter((group) => group.city === "Addis Ababa");
+  assert.ok(allIndustryAddis.length > 1, "the dense combined Addis projection is split into multiple readable nearby groups");
+  assert.ok(allIndustryAddis.every((group) => group.count >= 2 && group.count <= 6), "every nearby group contains two to six readable cards");
   const industryPosition = new Map<string, number>(DISCOVERY_INDUSTRIES.map((industry, index) => [industry.key, index]));
+  const mixedAddisGroup = allIndustryAddis.find((group) => allGroupMembers(group).some((showroom) => showroom.primaryIndustryKey === "beauty-wellness"));
+  assert.ok(mixedAddisGroup, "the combined nearby projection retains a visibly distinct second industry");
+  const mixedAddisMembers = mixedAddisGroup ? allGroupMembers(mixedAddisGroup) : [];
   assert.deepEqual(
-    allIndustryAddis.showrooms.map((showroom) => showroom.primaryIndustryKey),
-    [...allIndustryAddis.showrooms]
+    mixedAddisMembers.map((showroom) => showroom.primaryIndustryKey),
+    [...mixedAddisMembers]
       .sort((left, right) =>
         (industryPosition.get(left.primaryIndustryKey) ?? 999) - (industryPosition.get(right.primaryIndustryKey) ?? 999)
         || left.name.localeCompare(right.name)
         || left.id - right.id)
       .map((showroom) => showroom.primaryIndustryKey),
-    "the all-industry City Showroom places canonical industry groups next to each other",
+    "each all-industry nearby viewer keeps canonical industries adjacent",
   );
-  assert.ok(allIndustryAddis.showrooms.some((showroom) => showroom.primaryIndustryKey === "beauty-wellness"), "the grouped floor includes a visibly distinct second industry");
-  assert.equal(allIndustries.list.items.length, 5, "the combined List remains server-paginated at five rows");
-  assert.equal(allIndustries.list.pageCount, 5, "combined pagination is calculated from the all-industry total");
+  const combinedGroupedIds = allIndustries.nearbyGroups.flatMap((group) => group.showroomIds);
+  assert.equal(new Set(combinedGroupedIds).size, combinedGroupedIds.length, "a showroom appears in at most one nearby group");
+  assert.ok(allIndustryAddis.every((group) => allGroupMembers(group).every((showroom) => showroom.city === group.city && showroom.region === group.region)), "nearby groups never cross reviewed city or region boundaries");
   assert.ok(allIndustries.places.some((place) => place.kind === "city" && place.city === "Jimma"), "place options cover locations from every industry");
   assert.equal(allIndustries.featured.industryCode, "ELC", "the all-industry map state does not change Monday's featured industry");
   const explicitAll = await getDiscoveryView({ db, industry: "all", featuredDay: 1, now: monday });
   assert.deepEqual(explicitAll.showrooms.map((showroom) => showroom.id), allIndustries.showrooms.map((showroom) => showroom.id), "the explicit all value matches the omitted-filter projection");
+  assert.equal(explicitAll.industry.key, ALL_DISCOVERY_INDUSTRIES.key, "the explicit all value closes orientation with All industries selected");
 
   const view = await getDiscoveryView({ db, industry: "electronics", featuredDay: 1, now: monday });
-  assert.equal(view.total, 19, "active approved businesses with a published offering appear regardless of manual renewal date");
+  assert.equal(view.total, 50, "active approved businesses with a published offering appear regardless of manual renewal date");
   assert.equal(view.sponsoredCount, 2);
-  assert.equal(view.sponsoredShowrooms.length, 3, "the bounded global sponsor projection includes eligible staff selections from every industry");
+  assert.equal(view.sponsoredShowrooms.length, 4, "the bounded global sponsor projection includes eligible showroom and external selections");
   assert.equal(view.locationCount, 3, "real reviewed city locations remain distinct");
-  assert.deepEqual(view.cityGroups.map((group) => [group.city, group.count]), [["Addis Ababa", 15], ["Adama", 3]], "multi-business reviewed cities form deterministic counted gateways");
-  assert.equal(new Set(view.cityGroups.flatMap((group) => group.showrooms.map((showroom) => showroom.id))).size, 18, "a grouped business appears once in one city gateway");
-  assert.equal(view.cityGroups[0].latitude, view.cityGroups[0].showrooms.reduce((total, showroom) => total + showroom.latitude, 0) / view.cityGroups[0].count, "gateway latitude is the exact member centroid");
-  assert.equal(view.cityGroups[0].longitude, view.cityGroups[0].showrooms.reduce((total, showroom) => total + showroom.longitude, 0) / view.cityGroups[0].count, "gateway longitude is the exact member centroid");
+  assert.equal(view.nearbyGroups.filter((group) => group.city === "Adama").length, 1, "three close Adama businesses form one readable nearby group");
+  assert.equal(view.nearbyGroups.filter((group) => group.city === "Addis Ababa").length, 8, "forty-five close Addis showrooms split into balanced six-card-or-smaller groups");
+  const viewShowroomById = new Map(view.showrooms.map((showroom) => [showroom.id, showroom]));
+  const viewGroupMembers = (group: (typeof view.nearbyGroups)[number]) => group.showroomIds.map((id) => viewShowroomById.get(id)).filter((showroom): showroom is DiscoveryShowroom => Boolean(showroom));
+  const groupedIds = view.nearbyGroups.flatMap((group) => group.showroomIds);
+  assert.equal(new Set(groupedIds).size, groupedIds.length, "a nearby business appears once in one viewer");
+  assert.ok(view.nearbyGroups.every((group) => group.count === group.showroomIds.length && group.count >= 2 && group.count <= 6), "nearby group counts remain exact and bounded");
+  assert.ok(view.nearbyGroups.every((group) => viewGroupMembers(group).some((anchor) =>
+    viewGroupMembers(group).every((showroom) => distanceKm(anchor, showroom) <= .8),
+  )), "each group remains within one member's configured eight-hundred-meter neighborhood");
+  const addisFirst = view.showrooms.find((showroom) => showroom.handle === "addis-device-1");
+  assert.deepEqual(addisFirst && [addisFirst.latitude, addisFirst.longitude], [9.018, 38.748], "nearby grouping does not rewrite reviewed showroom coordinates");
   assert.deepEqual(
     view.showrooms.filter((showroom) => showroom.handle === "bishoftu-repair").map((showroom) => [showroom.latitude, showroom.longitude]),
     [[8.748, 38.982]],
@@ -345,7 +344,7 @@ try {
   const machineryView = await getDiscoveryView({ db, industry: "machinery-tools", featuredDay: 4, now: monday });
   assert.equal(machineryView.total, 1, "a cross-listed showroom remains eligible through its non-primary industry membership");
   assert.equal(machineryView.showrooms[0].primaryIndustryKey, "electronics", "filter membership does not rewrite stable primary visual metadata");
-  assert.equal(view.featured.boothCount, 19);
+  assert.equal(view.featured.boothCount, 40, "automatic Daily Featured projection is capped at forty");
   assert.equal(view.featured.mode, "featured");
   assert.equal(view.featured.isToday, true);
   assert.equal(view.featured.selectedWeekday, 1);
@@ -353,11 +352,11 @@ try {
   assert.deepEqual(view.featured.schedule.map((day) => day.dayLabel), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "schedule positions remain fixed from Monday through Sunday");
   assert.equal(view.featured.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
   assert.ok(view.featured.booths.every((booth) => booth.revealed && booth.showroom.imagePath === `/booths/${booth.showroom.handle}.webp`), "today's Daily Featured uses each business's approved booth profile image");
-  assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 19 }, (_, index) => index + 1), "every Daily Featured business receives one continuous floor slot");
+  assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 40 }, (_, index) => index + 1), "the bounded Daily Featured lineup receives one continuous floor slot per business");
   assert.equal(new Set(view.featured.booths.map((booth) => booth.reference)).size, view.featured.booths.length, "Daily Featured booth references are unique");
   assert.match(view.featured.booths[0].reference, /^ELC-B\d{2}$/);
 
-  const activeFeaturedTime = new Date("2026-07-27T11:10:00+03:00");
+  const activeFeaturedTime = new Date("2026-07-27T08:02:00+03:00");
   const activeFeatured = await getDiscoveryView({ db, industry: "electronics", featuredDay: 1, now: activeFeaturedTime });
   assert.ok(activeFeatured.featuredNowBusinessId, "the live Daily Featured session identifies one current deterministic booth");
   const activeFeaturedBooth = activeFeatured.featured.booths.find((booth) => booth.revealed && booth.showroom.id === activeFeatured.featuredNowBusinessId);
@@ -370,21 +369,12 @@ try {
   const duringIntermission = await getDiscoveryView({ db, industry: "electronics", featuredDay: 1, now: new Date("2026-07-27T14:01:00+03:00") });
   assert.equal(duringIntermission.featuredNowBusinessId, null, "the Daily Featured spotlight clears during the four-hour intermission");
 
-  assert.equal(view.list.items.length, 5, "the database-backed List response is capped at five rows");
-  assert.equal(view.list.pageCount, 4);
-  const secondPage = await getDiscoveryView({ db, industry: "electronics", page: 2, view: "list", featuredDay: 1, now: monday });
-  assert.equal(secondPage.list.page, 2);
-  assert.equal(secondPage.list.items.length, 5);
-  assert.equal(secondPage.view, "list");
-  assert.equal(secondPage.list.items.some((item) => view.list.items.some((first) => first.id === item.id)), false, "List pages do not repeat rows");
-  const clampedPage = await getDiscoveryView({ db, industry: "electronics", page: 99, view: "list", featuredDay: 1, now: monday });
-  assert.equal(clampedPage.list.page, 4, "an out-of-range page is clamped to the final page");
-  assert.equal(clampedPage.list.items.length, 4);
+  assert.equal("list" in view, false, "the map-only Market projection does not serialize a duplicate ranked List surface");
+  assert.equal("view" in view, false, "the map-only Market projection does not serialize a view-mode contract");
 
-  const oromia = await getDiscoveryView({ db, industry: "electronics", place: "region:Oromia", view: "list", featuredDay: 1, now: monday });
+  const oromia = await getDiscoveryView({ db, industry: "electronics", place: "region:Oromia", featuredDay: 1, now: monday });
   assert.equal(oromia.place, "region:Oromia");
-  assert.equal(oromia.total, 4, "region filtering is applied before count and pagination");
-  assert.equal(oromia.list.items.length, 4);
+  assert.equal(oromia.total, 4, "region filtering is applied before the geographic projection");
   assert.ok(oromia.showrooms.every((showroom) => showroom.region === "Oromia"));
   const adamaPlace = view.places.find((place) => place.kind === "city" && place.city === "Adama");
   assert.ok(adamaPlace, "an available city is projected as an allowlisted place option");
@@ -398,8 +388,8 @@ try {
   const search = await getDiscoveryView({ db, industry: "electronics", q: "Needle signal", featuredDay: 1, now: monday });
   assert.equal(search.total, 1, "published offering text is searchable");
   assert.equal(search.showrooms[0].city, "Addis Ababa");
-  assert.equal(search.cityGroups.length, 0, "a single searched result remains an isolated exact-coordinate storefront badge");
-  assert.equal(search.featured.booths.length, 19, "map search does not narrow the independently scheduled Daily Featured");
+  assert.equal(search.nearbyGroups.length, 0, "a single searched result remains an isolated storefront marker");
+  assert.equal(search.featured.booths.length, 40, "map search does not narrow the independently scheduled bounded Daily Featured");
   assert.deepEqual(search.sponsoredShowrooms.map((showroom) => showroom.handle), view.sponsoredShowrooms.map((showroom) => showroom.handle), "map search does not alter the global sponsor pool");
   assert.deepEqual(search.suggestions[0], {
     kind: "offering",
@@ -448,7 +438,8 @@ try {
   assert.ok(sundayToday.featured.booths.every((booth) => booth.revealed), "today's Sunday agriculture floor reveals eligible showrooms");
 
   const invalidIndustry = await getDiscoveryView({ db, industry: "not-real" });
-  assert.equal(invalidIndustry.industry.key, ALL_DISCOVERY_INDUSTRIES.key, "an unknown industry fails open to the allowlisted all-industry projection");
+  assert.equal(invalidIndustry.industry.key, "", "an unknown industry keeps the required chooser open");
+  assert.equal(invalidIndustry.total, allIndustries.total, "an unknown industry still projects the safe de-duplicated combined map behind the chooser");
 
   const plan = db.prepare("EXPLAIN QUERY PLAN SELECT business_id FROM business_industries WHERE industry_key=?").all("electronics") as Array<{ detail: string }>;
   assert.ok(plan.some((row) => /business_industry_lookup_idx|sqlite_autoindex_business_industries/i.test(row.detail)), "industry membership uses an index");
@@ -457,6 +448,40 @@ try {
     7,
     "the controlled industry vocabulary has seven entries",
   );
+
+  const scaleShowrooms: DiscoveryShowroom[] = Array.from({ length: 10_000 }, (_, index) => {
+    const location = index % 100;
+    const locationIndex = Math.floor(index / 100);
+    return {
+      id: 100_000 + index,
+      handle: `scale-showroom-${index}`,
+      name: `Scale Showroom ${index}`,
+      tagline: "Scale fixture",
+      description: "Synthetic non-customer performance fixture.",
+      logoPath: "",
+      imagePath: "",
+      city: `Scale City ${location}`,
+      zone: `Scale Zone ${location}`,
+      region: `Scale Region ${location % 10}`,
+      latitude: 6 + location * 0.02 + Math.floor(locationIndex / 2) * 0.02 + (locationIndex % 2) * 0.0001,
+      longitude: 35 + location * 0.02 + Math.floor(locationIndex / 2) * 0.02 + (locationIndex % 2) * 0.0001,
+      fallbackStyle: "technical",
+      sponsored: false,
+      productionScale: "workshop",
+      isLive: false,
+      livePlatform: "",
+      liveUrl: "",
+      primaryIndustryKey: "electronics",
+      primaryIndustryLabel: "Electronics",
+      primaryIndustryShortLabel: "Electronics",
+    };
+  });
+  const groupingStartedAt = performance.now();
+  const scaleGroups = groupNearbyShowrooms(scaleShowrooms);
+  const groupingDurationMs = performance.now() - groupingStartedAt;
+  assert.ok(groupingDurationMs < 2_500, `10,000-showroom grouping stays below 2.5 seconds (measured ${groupingDurationMs.toFixed(1)}ms)`);
+  assert.equal(scaleGroups.reduce((total, group) => total + group.count, 0), scaleShowrooms.length, "scale grouping retains every nearby showroom exactly once");
+  assert.ok(scaleGroups.every((group) => group.count >= 2 && group.count <= 6), "scale grouping preserves the two-to-six-card viewer contract");
 
   await updateDiscoveryProfile({
     businessId: firstAddisBusinessId,
@@ -512,10 +537,11 @@ try {
   }, db), /Choose at least one industry/, "admin discovery updates reject industries outside the controlled vocabulary");
   db.prepare("UPDATE business_discovery_profiles SET booth_image_path='' WHERE business_id=(SELECT id FROM businesses WHERE handle='bishoftu-repair')").run();
   const missingBoothMedia = await getDiscoveryView({ db, industry: "electronics", featuredDay: 1, now: monday });
-  assert.equal(missingBoothMedia.total, 19, "missing booth setup does not erase an otherwise eligible geographic Showroom");
-  assert.equal(missingBoothMedia.featured.boothCount, 18, "a business without its own approved booth image does not receive an Daily Featured slot");
+  assert.equal(missingBoothMedia.total, 50, "missing booth setup does not erase an otherwise eligible geographic Showroom");
+  assert.equal(missingBoothMedia.featured.boothCount, 40, "a business without its own approved booth image does not receive a Daily Featured slot and the projection remains capped");
+  assert.equal(missingBoothMedia.featured.booths.some((booth) => booth.revealed && booth.showroom.handle === "bishoftu-repair"), false, "the showroom missing approved Featured media is excluded even when enough replacements preserve capacity");
 
-  console.log("Geographic Showroom discovery and weekly industry Daily Featured tests passed.");
+  console.log(`Geographic Showroom discovery and weekly industry Daily Featured tests passed; 10,000-showroom grouping completed in ${groupingDurationMs.toFixed(1)}ms.`);
 } finally {
   db.close();
   fs.rmSync(root, { recursive: true, force: true });

@@ -87,14 +87,24 @@ for (const industry of DISCOVERY_INDUSTRIES) {
   if (globalSponsorHandles) assert.deepEqual(sponsorHandles, globalSponsorHandles, `${industry.label} does not alter the global sponsor pool`);
   else globalSponsorHandles = sponsorHandles;
   assert.ok(discovery.locationCount >= 1, `${industry.label} has a reviewed geographic location`);
-  const groupedIds = discovery.cityGroups.flatMap((group) => group.showrooms.map((showroom) => showroom.id));
-  assert.equal(new Set(groupedIds).size, groupedIds.length, `${industry.label} city gateways contain no duplicate businesses`);
-  assert.ok(discovery.cityGroups.every((group) => group.count === group.showrooms.length && group.count > 1), `${industry.label} city gateway counts remain exact`);
-  assert.equal(discovery.featured.booths.length, discovery.showrooms.length, `${industry.label} Daily Featured includes the complete result set`);
+  const showroomById = new Map(discovery.showrooms.map((showroom) => [showroom.id, showroom]));
+  const groupedIds = discovery.nearbyGroups.flatMap((group) => group.showroomIds);
+  assert.equal(new Set(groupedIds).size, groupedIds.length, `${industry.label} nearby viewers contain no duplicate businesses`);
+  assert.ok(discovery.nearbyGroups.every((group) => group.count === group.showroomIds.length && group.count >= 2 && group.count <= 6), `${industry.label} nearby viewer counts remain exact and readable`);
+  assert.ok(discovery.nearbyGroups.every((group) => group.showroomIds.every((showroomId) => {
+    const showroom = showroomById.get(showroomId);
+    return showroom?.city === group.city && showroom.region === group.region;
+  })), `${industry.label} nearby viewers never cross reviewed city or region boundaries`);
+  assert.equal(discovery.featured.booths.length, Math.min(discovery.showrooms.length, 40), `${industry.label} Daily Featured includes the complete result set up to its forty-showroom capacity`);
   assert.deepEqual(discovery.featured.booths.map((booth) => booth.slot), Array.from({ length: discovery.featured.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
   assert.equal(new Set(discovery.featured.booths.map((booth) => booth.reference)).size, discovery.featured.boothCount, `${industry.label} floor references remain unique`);
   assert.ok((await getDiscoveryView({ db, industry: industry.key, scale: "growing_factory" })).total >= 1, `${industry.label} has a growing-factory fixture`);
 }
+const seededElectronics = SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "electronics");
+assert.equal(seededElectronics[0]?.profile.latitude, seededElectronics[1]?.profile.latitude, "the scale demo retains one deliberate same-address workshop latitude");
+assert.equal(seededElectronics[0]?.profile.longitude, seededElectronics[1]?.profile.longitude, "the scale demo retains one deliberate same-address workshop longitude");
+assert.notEqual(seededElectronics[2]?.profile.latitude, seededElectronics[0]?.profile.latitude, "other Addis showrooms receive distinct reviewed coordinates");
+assert.notEqual(seededElectronics[2]?.profile.longitude, seededElectronics[0]?.profile.longitude, "other Addis showrooms do not collapse into the shared-address marker");
 const searchedMonday = await getDiscoveryView({ db, industry: "electronics", q: "Nova Assembly", featuredDay: 1 });
 assert.equal(searchedMonday.total, 1, "map search narrows geographic results");
 assert.equal(searchedMonday.featured.booths.length, industryCounts[0], "map search does not shrink the selected Daily Featured program");

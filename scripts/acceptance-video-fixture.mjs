@@ -1,21 +1,18 @@
-import { DatabaseSync } from "node:sqlite";
+import pg from "pg";
 
-const [, , databasePath, handle = "selam-weave"] = process.argv;
-if (!databasePath) {
-  console.error("Usage: acceptance-video-fixture.mjs <database> [handle]");
+const [, , handle = "selam-weave"] = process.argv;
+if (!process.env.MIRTPAGE_POSTGRES_URL) {
+  console.error("MIRTPAGE_POSTGRES_URL is required for the acceptance video fixture.");
   process.exit(2);
 }
 
-const database = new DatabaseSync(databasePath);
+const database = new pg.Client({ connectionString: process.env.MIRTPAGE_POSTGRES_URL });
 try {
-  const row = database
-    .prepare("SELECT id FROM businesses WHERE handle=?")
-    .get(handle);
+  await database.connect();
+  const row = (await database.query("SELECT id FROM businesses WHERE handle=$1", [handle])).rows[0];
   if (!row) throw new Error(`Business ${handle} not found.`);
-  database
-    .prepare("UPDATE businesses SET process_video_ref=? WHERE id=?")
-    .run("youtube:wJV9EDe_sFc", row.id);
+  await database.query("UPDATE businesses SET process_video_ref=$1 WHERE id=$2", ["youtube:wJV9EDe_sFc", row.id]);
   process.stdout.write(JSON.stringify({ handle, updated: true }));
 } finally {
-  database.close();
+  await database.end();
 }

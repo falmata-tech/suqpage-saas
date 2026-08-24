@@ -1,19 +1,20 @@
 ---
 id: FE-019
 title: Responsive client and staff support inbox
-status: done
-related: [FE-024, FE-026, BE-018, DEP-015, ADR-0009]
+status: in_progress
+related: [FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012]
 owners: [frontend, customer-support]
-last_updated: 2026-07-30
-change_level: L2
+last_updated: 2026-08-15
+change_level: L3
 ---
 
 # FE-019 - Responsive client and staff support inbox
 
 ## Problem and outcome
 
-Clients need a simple place to ask MirtPage for help, and team members need a
-stupid-proof queue that remains usable on phones and with many conversations.
+Clients and public visitors need a simple place to ask MirtPage for help, and
+team members need one clear queue that remains usable on phones and with many
+conversations.
 
 ## Scope
 
@@ -26,11 +27,32 @@ stupid-proof queue that remains usable on phones and with many conversations.
 - Clear assignment, unread, queue, and capacity states.
 - Responsive single-column thread on phones and compact queue/thread workspace
   on wider screens.
+- A public live-chat launcher that creates a privacy-preserving anonymous visitor
+  session without creating a MirtPage account.
+- Required email and phone fields on the first anonymous message so authorized
+  support staff can continue the conversation if the browser session disconnects.
+- A visitor-visible **End chat** action that closes the authoritative support
+  conversation, releases any active assignment, stops polling, and preserves
+  the closed transcript without confusing it with the drawer's hide control.
+- A closed transcript remains readable until the visitor chooses **Start another
+  chat**. That action removes only the browser's opaque conversation token; it
+  does not reopen, delete, or rewrite the retained staff conversation.
+- A bounded visitor choice between general help, sourcing assistance, business
+  document review, facility or quality visit coordination, and shipment/loading
+  observation.
+- Clear copy that direct showroom contact remains available and that optional
+  MirtPage assistance is a separately requested service, not certification or a
+  guarantee of a business, product, shipment, price, or outcome.
+- One optional private attachment per message for visitors, clients, and staff:
+  sanitized JPEG, PNG, or WebP images, or a verified PDF document up to 5 MB.
+  Image messages show a bounded preview; PDFs show a filename, type, and size
+  with an authorized download action.
 
 ### Non-goals
 
-- Public anonymous widget, attachments, typing indicators, presence, or chatbot
-  UI.
+- Multiple attachments in one message, SVG/Office/archive/executable uploads,
+  typing indicators, bot-generated advice, provider-hosted chat, or claims that
+  MirtPage has completed an inspection before staff record it.
 
 ## Scenarios
 
@@ -46,17 +68,63 @@ Scenario: Staff claims and closes a conversation
   WHEN a team member claims, replies, and closes it
   THEN the client sees the reply and closed state
   AND the team member regains one assignment slot
+
+Scenario: Anonymous visitor asks MirtPage for assistance
+  GIVEN a public visitor has not signed in
+  WHEN they open chat, provide a valid email and phone number, choose an assistance category, and send a bounded message
+  THEN the conversation enters the same staff waiting or assignment queue
+  AND a secure anonymous browser session can poll and reply only to that conversation
+  AND the authorized staff thread exposes the saved contact values for follow-up
+  AND no MirtPage account or public business record is created
+
+Scenario: Anonymous visitor omits reconnect details
+  GIVEN a public visitor starts a new support conversation
+  WHEN email or phone is missing or invalid
+  THEN the form and server reject creation with a field-relevant error
+  AND no support conversation or message is created
+
+Scenario: Visitor continues browsing independently
+  GIVEN the public chat explains optional MirtPage assistance and has an active conversation
+  WHEN the visitor chooses End chat and confirms the action
+  THEN the token-owned conversation closes idempotently
+  AND its active staff assignment is released
+  AND the closed transcript remains readable while replies and polling stop
+  AND marketplace browsing and direct showroom inquiry remain available
+  AND no inspection, trust, negotiation, or certification claim is implied
+
+Scenario: Visitor starts a separate conversation after closing one
+  GIVEN a visitor has ended a support conversation and can still read its transcript
+  WHEN the visitor chooses Start another chat
+  THEN the browser token for the closed conversation is removed
+  AND the new-conversation contact form is shown
+  AND the retained staff conversation and transcript are not deleted or reopened
+
+Scenario: Participant shares an image or document
+  GIVEN a visitor, client, or authorized staff participant can reply to an open conversation
+  WHEN they send bounded message text with one valid image or PDF attachment
+  THEN the message and attachment appear together in the thread
+  AND images use a bounded responsive preview
+  AND PDFs expose an authorized download without embedding private bytes in public markup
+
+Scenario: Attachment cannot be admitted
+  GIVEN a participant selects an unsupported, deceptive, or oversized file
+  WHEN they send the message
+  THEN no message or attachment row is committed
+  AND any staged private object is removed
+  AND the composer retains a clear retryable error
 ```
 
 ## Quality impact
 
 - Security and tenant isolation: UI projections contain only authorized data.
-- Privacy and data retention: no support body appears in browser notifications
-  or public markup.
+- Privacy and data retention: contact values, support bodies, and attachments
+  remain private support data and never appear in browser notifications or
+  unauthenticated public markup.
 - Accessibility and responsive behavior: labeled forms, status text, 44px mobile
   controls, focus-safe errors, and bounded message regions.
 - Performance and limits: paginated lists and incremental five-second polling
-  only while a thread is open.
+  only while a thread is open and the browser document is visible; anonymous
+  creation and replies are rate limited.
 
 ## Test plan
 
@@ -64,12 +132,16 @@ Scenario: Staff claims and closes a conversation
 |---|---|---|
 | Client create/read/reply | browser | `tests/acceptance/app.spec.ts` |
 | Staff queue/claim/reply/close | integration/browser | `scripts/test-support.ts`, `tests/acceptance/app.spec.ts` |
+| Anonymous start with contact validation, poll/reply/end, and truthful assistance copy | security/browser | `scripts/test-support.ts`, focused public-shell browser evidence |
+| Image/PDF admission, cleanup, participant-scoped reads, and responsive rendering | security/integration/browser | `scripts/test-support.ts`, `scripts/test-media-storage.ts`, focused support browser evidence |
 | Phone fit and labels | browser | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback
 
-Navigation appears only for authenticated supported roles. The inbox does not
-depend on Telegram configuration and can be disabled without losing messages.
+The authenticated inbox remains role-aware. The public drawer loads only when
+opened, polls only while its active thread is visible, and can be hidden during
+rollback without deleting conversations. Neither workflow depends on Telegram
+configuration.
 
 ## Readiness checklist
 

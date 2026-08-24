@@ -7,8 +7,15 @@ export default function SupportThreadRefresh({ active }: { active: boolean }) {
   const router = useRouter();
   useEffect(() => {
     if (!active) return;
-    const timer = window.setInterval(() => router.refresh(), 5000);
-    return () => window.clearInterval(timer);
+    const refreshVisibleThread = () => {
+      if (!document.hidden) router.refresh();
+    };
+    const timer = window.setInterval(refreshVisibleThread, 5000);
+    document.addEventListener("visibilitychange", refreshVisibleThread);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshVisibleThread);
+    };
   }, [active, router]);
   return null;
 }

@@ -137,6 +137,16 @@ try {
 
   fs.writeFileSync(path.join(root, "public/geo/ethiopia-major-roads-osm.geojson"), JSON.stringify(roads));
   fs.writeFileSync(path.join(root, "public/geo/ethiopia-places-osm.geojson"), JSON.stringify(places));
+  const writeFeatureSubset = (filename, collection, predicate) => fs.writeFileSync(
+    path.join(root, "public/geo", filename),
+    JSON.stringify({ ...collection, features: collection.features.filter(predicate) }),
+  );
+  writeFeatureSubset("ethiopia-roads-major-osm.geojson", roads, (feature) => ["motorway", "trunk"].includes(feature.properties.highway));
+  writeFeatureSubset("ethiopia-roads-primary-osm.geojson", roads, (feature) => feature.properties.highway === "primary");
+  writeFeatureSubset("ethiopia-roads-secondary-osm.geojson", roads, (feature) => feature.properties.highway === "secondary");
+  writeFeatureSubset("ethiopia-places-cities-osm.geojson", places, (feature) => feature.properties.place === "city");
+  writeFeatureSubset("ethiopia-places-towns-osm.geojson", places, (feature) => feature.properties.place === "town");
+  writeFeatureSubset("ethiopia-places-villages-osm.geojson", places, (feature) => feature.properties.place === "village");
   console.log(`Wrote ${roads.features.length} road layers and ${places.features.length} places.`);
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });

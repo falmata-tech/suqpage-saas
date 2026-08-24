@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { loginAction } from "@/app/actions";
+import { googleLoginAction, loginAction } from "@/app/actions";
 import MirtPageBrand from "@/components/MirtPageBrand";
 import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import { currentUser } from "@/lib/auth";
+import { supabaseAuthConfig, supabaseAuthEnabled } from "@/lib/config";
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
   const user = await currentUser();
   if (user) redirect(user.must_change_password ? "/dashboard/account?required=1" : "/dashboard");
   const p=await searchParams;
+  const googleEnabled=supabaseAuthEnabled()&&supabaseAuthConfig().googleEnabled;
   return <div className="landing-home platform-task-page">
     <header className="landing-header"><div className="landing-container landing-nav"><MirtPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Showrooms</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Showrooms</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav></details></div></header>
     <main className="platform-task-main">
@@ -28,6 +30,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
             <button type="submit">Sign in</button>
             <p className="platform-form-note">Staff-created temporary passwords must be changed after the first sign-in.</p>
           </form>
+          {googleEnabled?<form className="platform-login-provider" action={googleLoginAction}><button type="submit">Continue with Google</button></form>:null}
           <div className="platform-form-footer"><span>Need a showroom?</span><Link href="/request">Create your account</Link></div>
           <Link className="platform-return-link" href="/">Return to marketplace</Link>
         </div>

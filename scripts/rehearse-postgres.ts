@@ -44,13 +44,19 @@ type SqliteIndexColumn = {
 
 const TARGET_SCHEMA_PATTERN = /^mirtpage_rehearsal(?:_[a-z0-9_]+)?$/;
 const PRODUCTION_COPY = process.argv.includes("--production-copy");
+const LOCAL_COPY = process.argv.includes("--local-copy");
+if (PRODUCTION_COPY && LOCAL_COPY) throw new Error("Choose either production copy or local copy.");
 const POSTGRES_URL = PRODUCTION_COPY
   ? process.env.MIRTPAGE_POSTGRES_DIRECT_URL || ""
+  : LOCAL_COPY
+    ? process.env.MIRTPAGE_LOCAL_POSTGRES_URL || "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
   : process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL || "";
-const TARGET_SCHEMA = PRODUCTION_COPY
+const TARGET_SCHEMA = PRODUCTION_COPY || LOCAL_COPY
   ? "public"
   : process.env.MIRTPAGE_POSTGRES_REHEARSAL_SCHEMA || "mirtpage_rehearsal";
 const RESET_TARGET = process.argv.includes("--reset-target");
+const LOCAL_SUPABASE_PROFILE = (process.env.MIRTPAGE_LOCAL_SUPABASE_PROFILE || "development").trim();
+const LOCAL_SUPABASE_DB_PORT = LOCAL_SUPABASE_PROFILE === "browser-test" ? "56322" : "54322";
 const INSERT_BATCH_SIZE = 200;
 const MIGRATION_ROLE = (process.env.MIRTPAGE_POSTGRES_MIGRATION_ROLE || "").trim();
 
@@ -65,8 +71,9 @@ function qualified(schema: string, table: string) {
   return `${q(schema)}.${q(table)}`;
 }
 
-function reportProductionStage(stage: string) {
+function reportCopyStage(stage: string) {
   if (PRODUCTION_COPY) console.log(`Production copy stage: ${stage}`);
+  else if (LOCAL_COPY) console.log(`Local copy stage: ${stage}`);
 }
 
 function sqliteColumns(db: DatabaseSync, table: string) {
@@ -312,6 +319,8 @@ async function main() {
     throw new Error(
       PRODUCTION_COPY
         ? "MIRTPAGE_POSTGRES_DIRECT_URL is required."
+        : LOCAL_COPY
+          ? "MIRTPAGE_LOCAL_POSTGRES_URL is required."
         : "MIRTPAGE_POSTGRES_REHEARSAL_URL is required.",
     );
   }
@@ -331,6 +340,17 @@ async function main() {
     if (MIGRATION_ROLE && !/^[a-z_][a-z0-9_]*$/i.test(MIGRATION_ROLE)) {
       throw new Error("MIRTPAGE_POSTGRES_MIGRATION_ROLE must be a PostgreSQL identifier.");
     }
+  } else if (LOCAL_COPY) {
+    if (!["development", "browser-test"].includes(LOCAL_SUPABASE_PROFILE)) {
+      throw new Error("MIRTPAGE_LOCAL_SUPABASE_PROFILE must be development or browser-test.");
+    }
+    if (!["127.0.0.1", "localhost", "[::1]"].includes(parsed.hostname) || parsed.port !== LOCAL_SUPABASE_DB_PORT) {
+      throw new Error(`Local copy accepts only the ${LOCAL_SUPABASE_PROFILE} loopback Supabase PostgreSQL port ${LOCAL_SUPABASE_DB_PORT}.`);
+    }
+    if (process.env.MIRTPAGE_APPROVE_LOCAL_COPY !== "COPY_TO_LOCAL_SUPABASE") {
+      throw new Error("Set MIRTPAGE_APPROVE_LOCAL_COPY=COPY_TO_LOCAL_SUPABASE for this local-only command.");
+    }
+    if (RESET_TARGET) throw new Error("Reset the local stack with Supabase CLI before copying; --reset-target is not accepted for public.");
   } else if (!TARGET_SCHEMA_PATTERN.test(TARGET_SCHEMA)) {
     throw new Error("The rehearsal schema must begin with mirtpage_rehearsal.");
   }
@@ -343,27 +363,37 @@ async function main() {
     keepAlive: true,
     keepAliveInitialDelayMillis: 10_000,
   });
+  let targetConnected = false;
+  let transactionStarted = false;
   try {
+    reportCopyStage("source opened read-only");
     const integrity = source.prepare("PRAGMA integrity_check").get() as { integrity_check: string };
     if (integrity.integrity_check !== "ok") throw new Error("SQLite source integrity check failed.");
+    reportCopyStage("source integrity verified");
     const tables = source.prepare(`
       SELECT name,sql FROM sqlite_master
       WHERE type='table' AND name NOT LIKE 'sqlite_%'
       ORDER BY name
     `).all() as SqliteTable[];
+    reportCopyStage("source tables inventoried");
     const sourceTriggers = (source.prepare(`
       SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name
     `).all() as Array<{ name: string }>).map((row) => row.name);
+    reportCopyStage("source triggers inventoried");
     if (sourceTriggers.join("\n") !== [...POSTGRES_TRIGGER_NAMES].sort().join("\n")) {
       throw new Error("The PostgreSQL trigger translation is not synchronized with SQLite.");
     }
 
+    reportCopyStage("source schema verified");
     await target.connect();
+    targetConnected = true;
+    reportCopyStage("target connected");
     await target.query("BEGIN");
+    transactionStarted = true;
     if (MIGRATION_ROLE) {
       await target.query(`SET LOCAL ROLE ${q(MIGRATION_ROLE)}`);
     }
-    if (PRODUCTION_COPY) {
+    if (PRODUCTION_COPY || LOCAL_COPY) {
       await target.query("SET LOCAL statement_timeout = 0");
     }
     const existing = await target.query<{ count: string }>(
@@ -376,12 +406,14 @@ async function main() {
       throw new Error(
         PRODUCTION_COPY
           ? "The production target already contains MirtPage tables; no copy was attempted."
+          : LOCAL_COPY
+            ? "The local target already contains MirtPage tables. Run the guarded local reset before copying."
           : "The rehearsal target schema is not empty. Use --reset-target for a disposable target.",
       );
     }
     if (RESET_TARGET) await target.query(`DROP SCHEMA IF EXISTS ${q(TARGET_SCHEMA)} CASCADE`);
-    if (!PRODUCTION_COPY) await target.query(`CREATE SCHEMA ${q(TARGET_SCHEMA)}`);
-    reportProductionStage("target verified empty");
+    if (!PRODUCTION_COPY && !LOCAL_COPY) await target.query(`CREATE SCHEMA ${q(TARGET_SCHEMA)}`);
+    reportCopyStage("target verified empty");
 
     let expectedChecks = 0;
     let expectedForeignKeys = 0;
@@ -412,14 +444,14 @@ async function main() {
       totalRows += rows.length;
       await insertRows(target, table.name, names, rows, TARGET_SCHEMA);
     }
-    reportProductionStage("tables and rows copied");
+    reportCopyStage("tables and rows copied");
 
     for (const table of tables) {
       const indexes = postgresIndexes(source, table.name, TARGET_SCHEMA);
       expectedIndexes += indexes.length;
       for (const sql of indexes) await target.query(sql);
     }
-    reportProductionStage("indexes installed");
+    reportCopyStage("indexes installed");
     for (const table of tables) {
       const foreignKeys = groupedForeignKeys(sqliteForeignKeys(source, table.name));
       expectedForeignKeys += foreignKeys.length;
@@ -427,7 +459,7 @@ async function main() {
         await target.query(foreignKeySql(table.name, foreignKey, TARGET_SCHEMA));
       }
     }
-    reportProductionStage("foreign keys installed");
+    reportCopyStage("foreign keys installed");
 
     for (const table of tables) {
       const columns = sqliteColumns(source, table.name);
@@ -439,10 +471,10 @@ async function main() {
         [`${TARGET_SCHEMA}.${table.name}`, column],
       );
     }
-    reportProductionStage("sequences reconciled");
+    reportCopyStage("sequences reconciled");
 
     await target.query(postgresTriggerDefinitions(TARGET_SCHEMA));
-    reportProductionStage("triggers installed");
+    reportCopyStage("triggers installed");
 
     for (const table of tables) {
       const columns = tableColumns.get(table.name)!;
@@ -468,7 +500,7 @@ async function main() {
         );
       }
     }
-    reportProductionStage("row fingerprints reconciled");
+    reportCopyStage("row fingerprints reconciled");
 
     const targetCounts = await target.query<{
       tables: string;
@@ -507,7 +539,7 @@ async function main() {
       `UPDATE ${qualified(TARGET_SCHEMA, "businesses")} SET status='invalid' WHERE id=(SELECT min(id) FROM ${qualified(TARGET_SCHEMA, "businesses")})`,
       "23514",
     );
-    reportProductionStage("schema counts and invariants verified");
+    reportCopyStage("schema counts and invariants verified");
     await expectPostgresRejection(
       target,
       `UPDATE ${qualified(TARGET_SCHEMA, "users")} SET business_id=-1 WHERE id=(SELECT min(id) FROM ${qualified(TARGET_SCHEMA, "users")})`,
@@ -525,11 +557,12 @@ async function main() {
     );
 
     await target.query("COMMIT");
+    transactionStarted = false;
     const sourceAfter = crypto.createHash("sha256").update(fs.readFileSync(sourcePath)).digest("hex");
     if (sourceBefore !== sourceAfter) throw new Error("The SQLite source changed during rehearsal.");
     console.log(JSON.stringify({
       source: "sqlite-read-only",
-      target: PRODUCTION_COPY ? "supabase-postgresql-production" : "postgresql-rehearsal-schema",
+      target: PRODUCTION_COPY ? "supabase-postgresql-production" : LOCAL_COPY ? "supabase-postgresql-local" : "postgresql-rehearsal-schema",
       schema: TARGET_SCHEMA,
       tables: tables.length,
       rows: totalRows,
@@ -541,18 +574,27 @@ async function main() {
       fingerprintsReconciled: tables.length,
       invariantsProbed: 4,
       sourceBytePreserved: true,
-      runtimeCutoverEnabled: PRODUCTION_COPY,
+      runtimeCutoverEnabled: PRODUCTION_COPY || LOCAL_COPY,
     }));
   } catch (error) {
-    await target.query("ROLLBACK").catch(() => undefined);
+    if (targetConnected && transactionStarted) {
+      await target.query("ROLLBACK").catch(() => undefined);
+      transactionStarted = false;
+    }
     throw error;
   } finally {
     source.close();
-    await target.end().catch(() => undefined);
+    if (targetConnected) await target.end().catch(() => undefined);
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : "PostgreSQL rehearsal failed.");
-  process.exit(1);
-});
+// Node 24 does not keep this CommonJS-transpiled command alive for the first
+// pending pg connection promise. Retain one timer until the command settles so
+// a successful process exit can never mean that the copy silently did nothing.
+const commandKeepAlive = setInterval(() => undefined, 1_000);
+main()
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : "PostgreSQL rehearsal failed.");
+    process.exitCode = 1;
+  })
+  .finally(() => clearInterval(commandKeepAlive));
