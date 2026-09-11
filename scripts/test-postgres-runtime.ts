@@ -154,6 +154,18 @@ async function main() {
     });
     assert.ok(signupProject);
     const activeSignupProject = signupProject;
+    await runner.transaction(async () => {
+      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
+      await runner.query(`
+        INSERT INTO service_requests(
+          public_ref,business_id,represented_client_user_id,request_type,status,
+          contact_name,contact_value,business_name,request_text,submitter_kind,
+          submitted_by_user_id,notification_state
+        ) VALUES(? ,?,?,'onboarding','submitted','Initial','initial@example.test',
+          'PostgreSQL initial','This is the one allowed active project.',
+          'client',?,'not_required')
+      `, [`REQ-PG-INITIAL-${Date.now()}`,activeSignupProject.businessId,activeSignupProject.userId,activeSignupProject.userId]);
+    });
     await assert.rejects(
       () => runner.transaction(async () => {
         await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
