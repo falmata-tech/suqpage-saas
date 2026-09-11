@@ -104,7 +104,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
 
       <section className="panel featured-lineup-panel">
         <div className="featured-lineup-heading">
-          <div><span className="eyebrow">{requestedDate}</span><h2>{assignment.industry.label}</h2><p>Automatic schedules the first {MAX_FEATURED_SHOWROOMS} eligible showrooms in name order. Manual lets you choose and reorder up to {MAX_FEATURED_SHOWROOMS} for this date.</p></div>
+          <div><span className="eyebrow">{requestedDate}</span><h2>{assignment.industry.label}</h2><p>Automatic schedules the first {MAX_FEATURED_SHOWROOMS} eligible pages in name order. Manual lets you choose and reorder up to {MAX_FEATURED_SHOWROOMS} for this date.</p></div>
           <span className="badge active">{effectiveIds.length} scheduled</span>
         </div>
         <form action={saveFeaturedProgramDayAction}>
@@ -121,14 +121,14 @@ export default async function FeaturedSchedulePage({ searchParams }: {
               selected: effectiveOrder.has(business.id),
               position: effectiveOrder.get(business.id) || Math.min(index + 1, MAX_FEATURED_SHOWROOMS),
             }))}
-          /> : <div className="empty-state">No eligible showroom has approved discovery details, a booth image, and a published offering for this industry.</div>}
+          /> : <div className="empty-state">No eligible page has approved discovery details, an image, and a published offering for this industry.</div>}
           <div className="featured-lineup-actions"><p>Eligibility is checked again when you save and whenever the public schedule is read.</p><button className="btn" type="submit" disabled={!eligible.length}>Save lineup</button></div>
         </form>
       </section>
 
       <section className="panel featured-agenda-preview">
         <div className="featured-lineup-heading"><div><span className="eyebrow">Generated preview</span><h2>Broadcast agenda</h2><p>Smaller lineups contract toward midday and late evening. Times expand toward full capacity as participation grows.</p></div></div>
-        <ol tabIndex={0} aria-label="Generated featured showroom broadcast agenda">
+        <ol tabIndex={0} aria-label="Generated Daily Featured broadcast agenda">
           {agenda.map((entry, index) => <li className={`agenda-${entry.kind}`} key={`${entry.kind}-${entry.start}-${index}`}>
             <time>{entry.kind === "booth" ? entry.label : entry.timeLabel}</time>
             <span>{entry.kind === "booth" ? `Booth ${String(entry.slot).padStart(2, "0")}` : entry.kind === "sponsor_break" ? sponsorForSlot(entry.sponsorSlot)?.name || entry.label : entry.label}</span>

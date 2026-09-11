@@ -150,7 +150,7 @@ function MediaChoice({
   const choices = options.filter((item) => item.kind === kind);
   const visible =
     value && !choices.some((item) => item.value === value)
-      ? [{ value, label: kind === "video" ? "Current approved video" : "Current showroom image", kind }, ...choices]
+      ? [{ value, label: kind === "video" ? "Current approved video" : "Current page image", kind }, ...choices]
       : choices;
   const previewUrl = value.startsWith("request-attachment:")
     ? `/api/requests/${requestId}/attachments/${value.split(":")[1]}`
@@ -447,7 +447,7 @@ export default function RevisionEditor({
         <input type="hidden" name="revisionId" value={revisionId} />
         <input type="hidden" name="snapshot" value={JSON.stringify(snapshot)} />
 
-        <nav className="editor-area-tabs" aria-label="Showroom editing areas">
+        <nav className="editor-area-tabs" aria-label="Page editing areas">
           {EDITOR_AREAS.map((area) => (
             <button
               type="button"
@@ -523,7 +523,7 @@ export default function RevisionEditor({
                   )
                 }
               />
-              Use a custom showroom palette
+              Use a custom page palette
             </label>
             {snapshot.designManifest.customPalette ? (
               <div className="form-grid">
@@ -717,7 +717,7 @@ export default function RevisionEditor({
 
         <section className="panel" hidden={activeArea !== "offerings"}>
           <div className="dashboard-head">
-            <div><h2>Categories</h2><p>Categories drive showroom filters.</p></div>
+            <div><h2>Categories</h2><p>Categories drive page filters.</p></div>
             <button type="button" className="small-btn" onClick={() => { setSnapshot((current) => ({ ...current, categories: [...current.categories, { key: uid("category"), collectionKey: null, name: "New category", slug: "", sortOrder: current.categories.length, active: true }] })); setCategoryPage(Math.ceil((snapshot.categories.length + 1) / EDITOR_PAGE_SIZE)); }}>Add category</button>
           </div>
           {snapshot.categories
@@ -762,7 +762,7 @@ export default function RevisionEditor({
               <MediaChoice label={`Product ${index + 1} video`} value={item.videoRef} options={mediaOptions} kind="video" requestId={requestId} revisionId={revisionId} onAdmitted={addMediaOption} onChange={(value) => updateProduct(index, { videoRef: value })} />
               <div className="field"><label>Price in ETB</label><input aria-label={`Product ${index + 1} price in ETB`} type="number" min="0" step="0.01" value={item.priceMinor === null ? "" : item.priceMinor / 100} onChange={(event) => updateProduct(index, { priceMinor: event.target.value === "" ? null : Math.round(Number(event.target.value) * 100), currency: "ETB" })} /></div>
               <Field value={item.quantityUnit} onChange={(value) => updateProduct(index, { quantityUnit: value })} label={`Product ${index + 1} offered by`} max={40} />
-              <label className="check-field"><input type="checkbox" checked={item.published} onChange={(event) => updateProduct(index, { published: event.target.checked })} /> Show in showroom</label>
+              <label className="check-field"><input type="checkbox" checked={item.published} onChange={(event) => updateProduct(index, { published: event.target.checked })} /> Show on page</label>
               <div className="field full"><label>Description</label><textarea aria-label={`Product ${index + 1} description`} value={item.description} maxLength={3000} onChange={(event) => updateProduct(index, { description: event.target.value })} /></div>
               <Field value={item.capacitySummary} onChange={(value) => updateProduct(index, { capacitySummary: value })} label={`Product ${index + 1} capacity`} max={180} />
               <Field value={item.minimumOrderSummary} onChange={(value) => updateProduct(index, { minimumOrderSummary: value })} label={`Product ${index + 1} minimum order`} max={140} />

@@ -1,12 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { cache } from "react";
-import { appUrl } from "./app-url";
+import { googleAuthCallbackOrigin } from "./auth-callback-origin";
 import { assertSupabaseAuthConfiguration, supabaseAuthConfig } from "./config";
 import { runtimeGet } from "./runtime-sql";
 
 type LinkedIdentity = { user_id: number };
+export type SupabaseProviderIdentity = {
+  providerUserId: string;
+  email: string;
+  displayName: string;
+  userId: number | null;
+};
 
 export class ManagedIdentityError extends Error {
   constructor(message: string, readonly code: "conflict" | "provider_unavailable" | "unlinked" = "provider_unavailable") {
@@ -93,15 +99,57 @@ export async function linkedMirtPageUserId(providerUserId: string) {
   return link?.user_id || null;
 }
 
-async function resolveCurrentSupabaseIdentity() {
-  const client = await createMirtPageSupabaseServerClient();
-  const { data, error } = await client.auth.getUser();
-  if (error || !data.user) return null;
-  const userId = await linkedMirtPageUserId(data.user.id);
-  return userId ? { providerUserId: data.user.id, userId, email: data.user.email || "" } : null;
+export function providerDisplayName(metadata: unknown) {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return "";
+  const record = metadata as Record<string, unknown>;
+  for (const value of [record.full_name, record.display_name, record.name]) {
+    const name = String(value ?? "").trim().replace(/[\u0000-\u001F\u007F]/g, "");
+    if (name.length >= 2 && name.length <= 100) return name;
+  }
+  return "";
 }
 
-export const currentSupabaseIdentity = cache(resolveCurrentSupabaseIdentity);
+async function resolveCurrentSupabaseProviderIdentity(): Promise<SupabaseProviderIdentity | null> {
+  const client = await createMirtPageSupabaseServerClient();
+  const { data, error } = await client.auth.getUser();
+  const email = data.user?.email?.trim().toLowerCase() || "";
+  if (error || !data.user || !email) return null;
+  const userId = await linkedMirtPageUserId(data.user.id);
+  return { providerUserId: data.user.id, userId, email, displayName: providerDisplayName(data.user.user_metadata) };
+}
+
+export const currentSupabaseProviderIdentity = cache(resolveCurrentSupabaseProviderIdentity);
+
+export const currentSupabaseIdentity = cache(async () => {
+  const identity = await currentSupabaseProviderIdentity();
+  return identity?.userId ? { ...identity, userId: identity.userId } : null;
+});
+
+export async function requestSupabaseEmailOtp(email: string) {
+  const client = await createMirtPageSupabaseServerClient();
+  const { error } = await client.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true },
+  });
+  if (error) throw new ManagedIdentityError("Email sign-in is temporarily unavailable.");
+}
+
+export async function verifySupabaseEmailOtp(email: string, token: string) {
+  const client = await createMirtPageSupabaseServerClient();
+  const { data, error } = await client.auth.verifyOtp({ email, token, type: "email" });
+  if (error || !data.user) return null;
+  const verifiedEmail = data.user.email?.trim().toLowerCase() || "";
+  if (!verifiedEmail || verifiedEmail !== email) {
+    await client.auth.signOut({ scope: "local" });
+    return null;
+  }
+  return {
+    providerUserId: data.user.id,
+    email: verifiedEmail,
+    displayName: providerDisplayName(data.user.user_metadata),
+    userId: await linkedMirtPageUserId(data.user.id),
+  } satisfies SupabaseProviderIdentity;
+}
 
 export async function signInWithSupabasePassword(email: string, password: string) {
   const client = await createMirtPageSupabaseServerClient();
@@ -124,9 +172,11 @@ export async function beginGoogleSignIn() {
   const config = assertSupabaseAuthConfiguration();
   if (!config.googleEnabled) return null;
   const client = await createMirtPageSupabaseServerClient();
+  const requestHeaders = await headers();
+  const callbackOrigin = googleAuthCallbackOrigin(requestHeaders.get("host"));
   const { data, error } = await client.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${appUrl()}/auth/callback`, skipBrowserRedirect: true },
+    options: { redirectTo: `${callbackOrigin}/auth/callback`, skipBrowserRedirect: true },
   });
   return error ? null : data.url;
 }
@@ -135,12 +185,17 @@ export async function completeSupabaseCodeExchange(code: string) {
   const client = await createMirtPageSupabaseServerClient();
   const { data, error } = await client.auth.exchangeCodeForSession(code);
   if (error || !data.user) return null;
-  const userId = await linkedMirtPageUserId(data.user.id);
-  if (!userId) {
+  const email = data.user.email?.trim().toLowerCase() || "";
+  if (!email) {
     await client.auth.signOut({ scope: "local" });
     return null;
   }
-  return { providerUserId: data.user.id, userId };
+  return {
+    providerUserId: data.user.id,
+    email,
+    displayName: providerDisplayName(data.user.user_metadata),
+    userId: await linkedMirtPageUserId(data.user.id),
+  } satisfies SupabaseProviderIdentity;
 }
 
 export async function updateCurrentSupabasePassword(email: string, currentPassword: string, nextPassword: string) {

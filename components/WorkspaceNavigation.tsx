@@ -32,7 +32,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions";
-import MirtPageBrand from "@/components/MirtPageBrand";
+import AfricMadeBrand from "@/components/AfricMadeBrand";
+import NavigationPendingIndicator from "@/components/NavigationPendingIndicator";
 
 export type WorkspaceNavItem = {
   href: string;
@@ -100,8 +101,8 @@ const mobileLabels: Record<string, string> = {
   "Customer inquiries": "Inquiries",
   "My offerings": "Offerings",
   "Platform overview": "Overview",
-  "Showroom project": "Showroom",
-  "Showroom requests": "Requests",
+  "Page project": "Page",
+  "Page requests": "Requests",
   "Support inbox": "Support",
 };
 
@@ -147,6 +148,7 @@ function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[];
                 <NavIcon name={item.icon} />
                 <span>{item.label}</span>
                 {item.external ? <ExternalLink className="workspace-nav-external" aria-hidden="true" size={14} /> : null}
+                {item.external ? null : <NavigationPendingIndicator label={item.label} />}
               </Link>
             );
           })}
@@ -154,7 +156,7 @@ function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[];
       ))}
       <div className="workspace-nav-group workspace-nav-utility">
         <span className="workspace-nav-label">Account</span>
-        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>Account security</span></Link>
+        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>Account security</span><NavigationPendingIndicator label="Account security" /></Link>
         <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>Public site</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
         <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>Sign out</span></button></form>
       </div>
@@ -236,7 +238,7 @@ export default function WorkspaceNavigation({
   return (
     <>
       <aside className="sidebar">
-        <MirtPageBrand href={dashboardHref} className="workspace-brand" />
+        <AfricMadeBrand href={dashboardHref} className="workspace-brand" />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>
@@ -246,6 +248,7 @@ export default function WorkspaceNavigation({
           return <Link key={`mobile-${item.href}-${item.label}`} href={item.href} aria-current={active ? "page" : undefined} aria-label={item.label}>
             <NavIcon name={item.icon} />
             <span>{mobileLabels[item.label] || item.label}</span>
+            <NavigationPendingIndicator label={item.label} />
           </Link>;
         })}
         <button

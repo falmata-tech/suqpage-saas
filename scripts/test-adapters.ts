@@ -31,6 +31,8 @@ async function main() {
   process.env.MIRTPAGE_SUPABASE_URL = "https://project.supabase.co";
   process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY = "service-role-key-long-enough";
   process.env.MIRTPAGE_AUTH_DRIVER = "supabase";
+  process.env.MIRTPAGE_EMAIL_OTP_ENABLED = "1";
+  process.env.MIRTPAGE_GOOGLE_AUTH_ENABLED = "1";
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project.supabase.co";
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-key-long-enough";
   assert.doesNotThrow(() => assertProductionConfiguration());
@@ -45,6 +47,8 @@ async function main() {
   delete process.env.MIRTPAGE_POSTGRES_URL;
   delete process.env.MIRTPAGE_MEDIA_DRIVER;
   delete process.env.MIRTPAGE_AUTH_DRIVER;
+  delete process.env.MIRTPAGE_EMAIL_OTP_ENABLED;
+  delete process.env.MIRTPAGE_GOOGLE_AUTH_ENABLED;
 
   const { postgresRuntimeConfig, sqliteParametersToPostgres } = await import("../lib/postgres-runtime");
   assert.equal(postgresRuntimeConfig(), null);

@@ -1,4 +1,4 @@
-# Netsa Hygiene Products review
+# Netsa Care Goods Workshop review
 
 - [x] 1440px full-page capture inspected
 - [x] 390px full-page capture inspected

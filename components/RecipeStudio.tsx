@@ -37,7 +37,7 @@ export default function RecipeStudio({
 
   return (
     <div className="recipe-studio">
-      <nav className="studio-progress" aria-label="Showroom production stages">
+      <nav className="studio-progress" aria-label="Page production stages">
         {[
           ["Brief", "#studio-1"],
           ["Import", "#studio-2"],
@@ -82,12 +82,12 @@ export default function RecipeStudio({
             </button>
           </div>
           <div className="studio-current-export">
-            <p className="eyebrow">Current showroom</p>
+            <p className="eyebrow">Current page</p>
             <h3>Continue from the latest design</h3>
             <p>
               This complete design file includes the latest staff, client,
               offering, content, and media changes. Give it to the AI
-              with the change brief when revising an existing showroom.
+              with the change brief when revising an existing page.
             </p>
             <div className="inline-actions">
               <button
@@ -103,7 +103,7 @@ export default function RecipeStudio({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() => download(currentRecipe, `mirtpage-current-showroom-${requestId}.json`)}
+                onClick={() => download(currentRecipe, `africmade-current-page-${requestId}.json`)}
               >
                 Download current design
               </button>
@@ -122,14 +122,14 @@ export default function RecipeStudio({
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="revisionId" value={revisionId} />
           <div className="field full">
-            <p className="eyebrow">Showroom design</p>
+            <p className="eyebrow">Page design</p>
             <h2>Import the AI&apos;s complete design</h2>
             <p>
               The AI can choose dynamic products, sections, and labeled image
               spaces. Images that do not exist yet remain on the image checklist,
               so the layout can be reviewed before photography is ready.
             </p>
-            <label htmlFor="recipe-file">Choose showroom design file</label>
+            <label htmlFor="recipe-file">Choose page design file</label>
             <input
               ref={fileInput}
               id="recipe-file"
@@ -142,7 +142,7 @@ export default function RecipeStudio({
             />
           </div>
           <div className="field full">
-            <label htmlFor="showroom-recipe">Showroom design JSON</label>
+            <label htmlFor="showroom-recipe">Page design JSON</label>
             <textarea
               id="showroom-recipe"
               name="recipe"
@@ -164,8 +164,8 @@ export default function RecipeStudio({
         <summary>Connect a business video</summary>
         <p>
           Use this after import when the design includes a process or offering
-          video. MirtPage validates the YouTube link; select it later from the
-          relevant showroom or offering field.
+          video. AfricMade validates the YouTube link; select it later from the
+          relevant page or offering field.
         </p>
         <form action={admitRecipeYouTubeAction} className="form-grid">
             <input type="hidden" name="requestId" value={requestId} />
@@ -180,7 +180,7 @@ export default function RecipeStudio({
             </div>
             <label className="check-field full">
               <input type="checkbox" name="youtubeRights" required />
-              Authorized for this showroom
+              Authorized for this page
             </label>
             <div className="field full"><button className="btn secondary">Validate video</button></div>
         </form>

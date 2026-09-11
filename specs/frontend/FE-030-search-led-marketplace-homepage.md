@@ -1,10 +1,10 @@
 ---
 id: FE-030
 title: Search-led marketplace homepage
-status: in_progress
+status: done
 related: [FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023]
 owners: [product, frontend, design]
-last_updated: 2026-08-15
+last_updated: 2026-09-12
 change_level: L2
 ---
 
@@ -16,9 +16,9 @@ The homepage exposes the right marketplace capabilities, but its stacked dark
 banner, command strip, map, sponsored rail, and scheduled featured program read like one long
 operational panel. New visitors receive little visual context for the range of
 production behind the listings, and section transitions do not make the discovery journey
-easy to scan. The homepage should feel like a polished marketplace application:
-search and industry entry first, geographic discovery second, paid placement and
-Daily Featured Showrooms next, and producer conversion last.
+easy to scan. The homepage should feel like a polished marketplace application.
+Visitors can browse geographically on the map or make an intentional product or
+business search without being forced through one undifferentiated ranked directory.
 
 ## Scope
 
@@ -26,7 +26,7 @@ Daily Featured Showrooms next, and producer conversion last.
 
 - A compact product-led marketplace hero with truthful buyer and producer
   benefits that leads directly into the map command surface.
-- A coordinated, local MirtPage image set for the homepage, About story, and
+- A coordinated, local AfricMade image set for the homepage, About story, and
   signup/login context, with production-centered compositions tailored to each
   responsive surface.
 - A desktop and mobile hierarchy inspired by the supplied marketplace mockup
@@ -37,6 +37,10 @@ Daily Featured Showrooms next, and producer conversion last.
 - A clearer geographic-discovery composition that pairs one command surface
   with the local Ethiopia map and a required centered eight-option orientation
   choice, including **All industries** last.
+- A query-driven Search workspace that replaces the map canvas only after a
+  visitor submits or types a meaningful query. It keeps the same category and
+  place scope, separates matching products from matching businesses, and
+  provides an explicit return to the preserved map.
 - A Daily Featured companion panel with legible paid-placement cards and stable
   access to the complete manually selected five-business pool.
 - The two-session TikTok program is presented as a card-gallery agenda: every showroom
@@ -63,14 +67,15 @@ Daily Featured Showrooms next, and producer conversion last.
   business totals, category totals, ratings, sales, savings, or coverage that
   authoritative data does not establish.
 - Adding checkout, buyer accounts, newsletter collection, runtime image
-  providers, autoplay media, decorative animation, or another directory.
+  providers, autoplay media, decorative animation, an unfiltered public list,
+  paid ranking, or infinite result scrolling.
 - Changing tenant showroom presentation or identity.
 
 ## Domain language and invariants
 
-- The homepage is the MirtPage marketplace application, not a marketing landing
+- The homepage is the AfricMade marketplace application, not a marketing landing
   page and not a tenant showroom.
-- A **reviewed location** is the location MirtPage uses for discovery. It does
+- A **reviewed location** is the location AfricMade uses for discovery. It does
   not imply business certification, quality verification, or precise distance.
 - Sponsored showrooms remain explicitly labeled **Sponsors** and never imply
   endorsement.
@@ -128,7 +133,7 @@ Daily Featured Showrooms next, and producer conversion last.
 - The seven industries use one restrained, accessible accent system across the
   desktop industry menu, phone Filters sheet, and Shared Location booth borders
   and fascia. Numbered clusters and individual map markers remain one accessible
-  MirtPage teal. White and cool-gray remain the dominant
+  AfricMade orange. White and cool-gray remain the dominant
   booth content surfaces; color is a clearly visible identifier rather than a full-card wash, and an
   industry name or icon always accompanies it so meaning never depends on color
   alone.
@@ -149,9 +154,26 @@ Daily Featured Showrooms next, and producer conversion last.
   concise route heading, command row, unobstructed map or Shared Location canvas,
   and fixed application navigation fit without a document-length empty tail.
 - Map mode presents one cohesive command-and-map composition. Its styled
-  industry dropdown and live search are the sole homepage result controls;
-  location jump, zoom, and reset keep their existing behavior and
-  accessible names.
+  industry dropdown and live search are the sole homepage entry controls;
+  location jump, zoom, and reset keep their existing behavior and accessible
+  names. Search does not create a second route or duplicate global header.
+- A trimmed query of at least two characters opens Search in the map canvas.
+  Suggestions remain a short completion aid above the controls; substantive
+  results render in a separate scrollable workspace below a compact search
+  heading. The workspace never places result cards inside the suggestion menu.
+- Search offers **All**, **Products**, and **Businesses** as one segmented
+  result control. Product matches identify the product, source business,
+  category, and reviewed place. Business matches identify the business,
+  category, reviewed place, and concise description. Activating either kind
+  opens the existing page inspector before route navigation.
+- Search results are bounded and deterministic. Products and businesses are
+  ordered by textual relevance followed by stable names and IDs; sponsorship
+  does not affect search order. A no-results state keeps the query and filters
+  editable and offers a return to the map.
+- Returning to Map preserves the active query, category, place, and remembered
+  map viewport. Clearing the query returns to geographic browsing. Search mode
+  and its result type are represented in URL state so Back/Forward navigation
+  restores the same workspace.
 - After two non-whitespace characters, live search presents at most six
   server-authoritative suggestions drawn from eligible showroom names,
   published offerings, and reviewed places within the active industry and
@@ -194,7 +216,7 @@ Daily Featured Showrooms next, and producer conversion last.
   inspector becomes a bounded bottom sheet above app navigation rather than a
   full-screen takeover.
 - Valid merchant live state is visible on map aggregates, individual showroom
-  pins, Shared Location booths, and today's Daily Featured gallery. The current MirtPage Daily Featured
+  pins, Shared Location booths, and today's Daily Featured gallery. The current AfricMade Daily Featured
   walkthrough uses **Featured now** and overrides only that business's merchant
   live presentation for the duration of its slot.
 - Daily Featured retains the fixed weekly selector, truthful selected-day description,
@@ -226,7 +248,16 @@ Scenario: Visitor begins with a product, business, or industry search
   GIVEN the public homepage is open
   WHEN the visitor chooses an industry or enters a product, capability, business, or place in the map command surface
   THEN the existing discovery query receives the bounded search term
-  AND the matching map remains the authoritative result surface
+  AND a meaningful query opens Search in place of the map canvas
+  AND the map remains available without losing the query or filters
+
+Scenario: Visitor filters intentional search results
+  GIVEN a meaningful query has matching published products and eligible businesses
+  WHEN the visitor chooses All, Products, or Businesses
+  THEN the Search workspace displays only the requested result kinds
+  AND each result identifies its source and reviewed place
+  AND activating a result opens the existing page inspector before navigation
+  AND sponsorship does not change result order
 
 Scenario: Visitor chooses a search suggestion
   GIVEN the visitor has entered at least two characters
@@ -234,6 +265,7 @@ Scenario: Visitor chooses a search suggestion
   THEN at most six labeled suggestions appear without moving the map
   AND pointer, touch, and keyboard visitors can select one
   AND the selected value immediately becomes the authoritative search query
+  AND full results appear outside the suggestion list
 
 Scenario: Visitor opens geographic discovery without an industry filter
   GIVEN eligible published showrooms exist in multiple industries
@@ -249,7 +281,7 @@ Scenario: Visitor changes the selected marketplace industry
   WHEN the visitor opens the industry menu, scans individual map markers, or enters a Shared Location
   THEN the menu and Shared Location storefronts identify the selected industry
   AND the industry remains named or icon-labeled without relying on color alone
-  AND individual markers and numbered clusters retain the same MirtPage teal
+  AND individual markers and numbered clusters retain the same AfricMade orange
   AND additional Shared Location storefronts append vertically in stable bounded batches
   AND the separate Daily Featured Showrooms gallery is unchanged
 
@@ -271,6 +303,8 @@ Scenario: Visitor scans the marketplace on a phone
   AND one Filters action opens touch-sized industry and location controls in a bottom sheet
   AND locate and zoom controls remain available on the map without another toolbar row
   AND the geographic marketplace is visibly introduced without horizontal overflow
+  AND Search replaces the map canvas within the same remaining viewport
+  AND its result filters and cards remain touch-sized and vertically scrollable
 
 Scenario: Phone visitor reaches the Daily Featured gallery without control stacking
   GIVEN the homepage is open at a phone width
@@ -289,7 +323,7 @@ Scenario: Forty featured showrooms remain readable
 
 Scenario: Marketplace data does not support a promotional claim
   GIVEN the visual reference contains ratings, verification, transaction, or scale claims
-  WHEN MirtPage renders its version of that composition
+  WHEN AfricMade renders its version of that composition
   THEN those claims are omitted
   AND only implemented platform benefits and authoritative discovery totals are shown
 
@@ -422,3 +456,13 @@ stays above fixed navigation. Evidence is at
 `/tmp/mirtpage-search-suggestions-desktop.png` and
 `/tmp/mirtpage-search-suggestions-phone.png`; full release gates remain pending
 visual approval.
+
+The 2026-09-12 Search workspace revision passes `npm run check`, `npm run
+release`, and all 10 ordered production-browser acceptance workflows.
+Integration coverage proves bounded product projection, eligibility and scope
+rules, deterministic ordering, URL-backed result-type controls, and preserved
+map state. Chromium evidence at 1440, 390, and 320 CSS pixels proves that Search
+replaces only the map canvas, All/Products/Businesses filters work, result cards
+open the existing inspector before navigation, and no viewport has horizontal
+overflow. Evidence is under `/tmp/africmade-search-review`; the user approved
+the focused visual result on 2026-09-09.

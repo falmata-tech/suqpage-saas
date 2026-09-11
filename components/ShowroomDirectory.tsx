@@ -117,7 +117,7 @@ export default function ShowroomDirectory({
                   <strong>/@{entry.handle}</strong>
                   <p>{entry.tagline}</p>
                   <span className="market-card-link">
-                    Open showroom <span aria-hidden="true">→</span>
+                    Open page <span aria-hidden="true">→</span>
                   </span>
                 </div>
               </Link>

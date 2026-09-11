@@ -1,5 +1,5 @@
 {
-  "name": "mirtpage-saas-mvp",
+  "name": "africmade-saas-mvp",
   "version": "1.0.0-mvp-launch",
   "private": true,
   "scripts": {
@@ -65,6 +65,7 @@
     "test:market-performance": "node scripts/test-market-performance.mjs",
     "test:netlify-readiness": "node scripts/test-netlify-readiness.mjs",
     "test:local-supabase-readiness": "node scripts/test-local-supabase-readiness.mjs",
+    "test:auth-callback-origin": "node --import tsx scripts/test-auth-callback-origin.ts",
     "test:local-provider-smoke": "node scripts/test-local-provider-smoke.mjs",
     "test:featured-schedule": "tsx scripts/test-featured-schedule.ts",
     "test:identity": "node scripts/test-platform-identity.mjs",
@@ -91,6 +92,7 @@
     "capture:demo-videos": "node scripts/capture-demo-videos.mjs",
     "test:discovery-visual": "node scripts/capture-discovery-visuals.mjs",
     "test:platform-forms-visual": "node scripts/capture-platform-form-visuals.mjs",
+    "test:loading-states": "node scripts/test-localized-loading-states.mjs",
     "test:workspace-visual": "node scripts/capture-workspace-navigation.mjs",
     "test:focused-release-visual": "node scripts/capture-focused-release-visuals.mjs",
     "test:workflow": "node scripts/test-workflow.mjs",
@@ -98,7 +100,7 @@
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
     "precheck": "npm run test:homepage",
-    "check": "npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:auth-runtime && npm run test:netlify-readiness && npm run test:local-supabase-readiness && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:requests && npm run test:signup && npm run test:revisions",
+    "check": "npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:auth-runtime && npm run test:netlify-readiness && npm run test:local-supabase-readiness && npm run test:auth-callback-origin && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:showroom-migration && npm run test:stockless && npm run test:offerings && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:requests && npm run test:signup && npm run test:revisions",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {
@@ -107,11 +109,11 @@
     "bcryptjs": "^3.0.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.28.0",
-    "next": "^16.2.12",
+    "next": "^16.3.4",
     "pg": "^8.22.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "sharp": "0.35.3",
+    "sharp": "0.35.4",
     "supercluster": "^8.0.1"
   },
   "devDependencies": {
@@ -133,7 +135,7 @@
     "nanoid": "3.3.18",
     "next": {
       "postcss": "8.5.25",
-      "sharp": "0.35.3"
+      "sharp": "0.35.4"
     }
   }
 }

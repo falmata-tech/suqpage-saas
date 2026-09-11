@@ -19,9 +19,9 @@ try {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${baseURL}/@addis-metalworks`, { waitUntil: "domcontentloaded" });
-    const host = page.getByRole("navigation", { name: "MirtPage showroom host navigation" });
+    const host = page.getByRole("navigation", { name: "Page return navigation" });
     await host.waitFor();
-    await host.getByRole("button", { name: "Back to MirtPage marketplace" }).waitFor();
+    await host.getByRole("button", { name: "Back to Market" }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
     await page.screenshot({ path: path.join(output, `${name}-entry.png`), fullPage: false });
 

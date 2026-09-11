@@ -37,7 +37,7 @@ export default async function NewProduct({
           <p className="eyebrow">Basic upkeep</p>
           <h1>Add a product or capability</h1>
           <p>
-            Add what the business sells, makes, grows, supplies, or can manufacture. The showroom design
+            Add what the account owner manufactures, grows, or supplies. The page design
             handles presentation automatically.
           </p>
         </div>

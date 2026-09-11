@@ -157,7 +157,7 @@ function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"]
   return (
     <ControlledVideoFrame
       asset={mediaAsset(block, "video")}
-      title={block?.title || "Showroom video"}
+      title={block?.title || "Page video"}
     />
   );
 }
@@ -193,7 +193,7 @@ function ShowroomSectionNavigation({
     ["Contact", context.sectionAnchorIds.contact],
   ] as const;
   return (
-    <nav className={styles.showroomSectionNav} aria-label="Showroom sections">
+    <nav className={styles.showroomSectionNav} aria-label="Page sections">
       {links.map(([label, anchorId]) => (
         <a key={anchorId} href={`#${anchorId}`}>
           {label}
@@ -726,7 +726,7 @@ export function BankFooterSection({
         ) : null}
       </div>
       <div className={styles.footerShowroom}>
-        <span>Permanent showroom</span>
+        <span>Permanent AfricMade page</span>
         <strong>@{context.business.handle}</strong>
       </div>
       <div className={styles.footerContact}>

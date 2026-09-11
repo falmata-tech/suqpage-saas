@@ -29,7 +29,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
     <NavigationTrail items={[{ label: "Businesses", href: "/dashboard/admin/businesses" }, { label: profile.businessName }, { label: "Marketplace" }]} fallback={`/dashboard?business=${businessId}`} />
     <div className="dashboard-head">
       <div><span className="eyebrow">Business workspace</span><h1>Marketplace</h1><p>Control how {profile.businessName} appears in discovery, maps, and sponsored placement.</p></div>
-      <Link className="btn secondary" href={`/preview/@${profile.handle}`} target="_blank">Open showroom</Link>
+      <Link className="btn secondary" href={`/preview/@${profile.handle}`} target="_blank">Open page</Link>
     </div>
     {query.error ? <p className="error">{query.error}</p> : null}
     {query.saved ? <p className="notice">Discovery profile saved.</p> : null}
@@ -68,7 +68,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
               <fieldset className="field full">
                 <legend>Homepage sponsor</legend>
                 <div className="recipe-checks"><label className="check-field"><input type="checkbox" name="sponsored" defaultChecked={profile.sponsored} />Include this business in the global Sponsors pool</label></div>
-                <div className="field"><label htmlFor="sponsor-position">Sponsor order</label><input id="sponsor-position" name="sponsorPosition" type="number" min="1" max="999" defaultValue={profile.sponsorPosition} required /><small>The five active businesses with the lowest positions appear. This selection is independent of industries and daily featured showrooms.</small></div>
+                <div className="field"><label htmlFor="sponsor-position">Sponsor order</label><input id="sponsor-position" name="sponsorPosition" type="number" min="1" max="999" defaultValue={profile.sponsorPosition} required /><small>The five active placements with the lowest positions appear. This selection is independent of industries and Daily Featured.</small></div>
               </fieldset>
             </div>
           </details>

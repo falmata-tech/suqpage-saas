@@ -8,18 +8,18 @@ import { runtimeAll, runtimeGet } from "./runtime-sql";
 export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
 export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics, electrical & appliances", shortLabel: "Electronics", icon: "circuit", code: "ELC" },
-  { key: "beauty-wellness", label: "Beauty, hygiene & household care", shortLabel: "Beauty & home care", icon: "leaf", code: "BEA" },
-  { key: "agriculture-growers", label: "Agriculture, livestock & primary produce", shortLabel: "Agriculture & growers", icon: "sprout", code: "AGR" },
-  { key: "food-farming", label: "Food & beverage production", shortLabel: "Food & beverages", icon: "bowl", code: "FOD" },
-  { key: "machinery-tools", label: "Machinery, metalwork & industrial inputs", shortLabel: "Machinery & industrial", icon: "tool", code: "MCH" },
-  { key: "home-living", label: "Furniture, home goods & building materials", shortLabel: "Furniture & home", icon: "home", code: "HOM" },
-  { key: "fashion-textiles", label: "Textiles, garments, leather & paper", shortLabel: "Textiles & apparel", icon: "thread", code: "FSH" },
+  { key: "electronics", label: "Electronics & electrical", shortLabel: "Electronics & electrical", icon: "circuit", code: "ELC" },
+  { key: "beauty-wellness", label: "Personal care & household", shortLabel: "Personal & home care", icon: "leaf", code: "BEA" },
+  { key: "agriculture-growers", label: "Farms, livestock & feed", shortLabel: "Farms, livestock & feed", icon: "sprout", code: "AGR" },
+  { key: "food-farming", label: "Food & drink", shortLabel: "Food & drink", icon: "bowl", code: "FOD" },
+  { key: "machinery-tools", label: "Tools, machinery & metalwork", shortLabel: "Tools & metalwork", icon: "tool", code: "MCH" },
+  { key: "home-living", label: "Furniture, art & building", shortLabel: "Furniture, art & building", icon: "frame", code: "HOM" },
+  { key: "fashion-textiles", label: "Clothing, textiles & leather", shortLabel: "Clothing & textiles", icon: "thread", code: "FSH" },
 ] as const;
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
-export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All industries", shortLabel: "All industries", icon: "grid", code: "ALL" } as const;
-export const UNSELECTED_DISCOVERY_INDUSTRY = { key: "", label: "Choose an industry", shortLabel: "Choose an industry", icon: "grid", code: "" } as const;
+export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All categories", shortLabel: "All categories", icon: "grid", code: "ALL" } as const;
+export const UNSELECTED_DISCOVERY_INDUSTRY = { key: "", label: "Choose a category", shortLabel: "Choose a category", icon: "grid", code: "" } as const;
 export const DISCOVERY_INDUSTRY_OPTIONS = [...DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES] as const;
 export type DiscoveryIndustryOption = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES;
 export type DiscoveryIndustrySelection = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES | typeof UNSELECTED_DISCOVERY_INDUSTRY;
@@ -69,6 +69,20 @@ type DiscoveryRow = {
   primary_industry_key: string;
 };
 
+type DiscoveryProductResultRow = {
+  id: number;
+  name: string;
+  description: string;
+  image_path: string;
+  category_name: string;
+  business_id: number;
+  business_handle: string;
+  business_name: string;
+  city: string;
+  region: string;
+  primary_industry_key: string;
+};
+
 type SponsorPlacementRow = {
   kind: "showroom" | "external";
   source_id: number;
@@ -88,7 +102,7 @@ export type DiscoveryShowroom = {
   tagline: string;
   description: string;
   logoPath: string;
-  imagePath: string;
+  heroImagePath: string;
   city: string;
   zone: string;
   region: string;
@@ -154,6 +168,21 @@ export type DiscoverySearchSuggestion = {
   query: string;
 };
 
+export type DiscoveryProductResult = {
+  id: number;
+  name: string;
+  description: string;
+  imagePath: string;
+  categoryName: string;
+  businessId: number;
+  businessHandle: string;
+  businessName: string;
+  city: string;
+  region: string;
+  primaryIndustryKey: string;
+  primaryIndustryLabel: string;
+};
+
 export type WeeklyFeaturedDay = {
   weekday: number;
   dayLabel: string;
@@ -188,6 +217,7 @@ export type DiscoveryView = {
   industries: readonly DiscoveryIndustryOption[];
   query: string;
   suggestions: DiscoverySearchSuggestion[];
+  searchProducts: DiscoveryProductResult[];
   place: string;
   places: DiscoveryPlaceOption[];
   productionScale: ProductionScale | "";
@@ -240,7 +270,7 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     tagline: row.tagline,
     description: row.description,
     logoPath: row.logo_path,
-    imagePath: row.booth_image_path || row.hero_image_path,
+    heroImagePath: row.hero_image_path,
     city: row.city,
     zone: row.zone,
     region: row.region,
@@ -271,8 +301,27 @@ function toSponsorPlacement(row: SponsorPlacementRow): SponsorPlacement {
     details: row.details,
     imagePath: row.image_path,
     href,
-    actionLabel: row.kind === "showroom" ? "Open showroom" : externalWebsite ? "Visit website" : "Call sponsor",
+    actionLabel: row.kind === "showroom" ? "Open page" : externalWebsite ? "Visit website" : "Call sponsor",
     position: Number(row.sponsor_position),
+  };
+}
+
+function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult {
+  const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
+    || DISCOVERY_INDUSTRIES[0];
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    imagePath: row.image_path,
+    categoryName: row.category_name,
+    businessId: row.business_id,
+    businessHandle: row.business_handle,
+    businessName: row.business_name,
+    city: row.city,
+    region: row.region,
+    primaryIndustryKey: primaryIndustry.key,
+    primaryIndustryLabel: primaryIndustry.shortLabel,
   };
 }
 
@@ -324,7 +373,7 @@ function selectSponsoredSql() {
     SELECT * FROM (
     SELECT
       'showroom' AS kind,b.id AS source_id,b.handle,b.name,
-      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'MirtPage showroom') AS details,
+      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'AfricMade page') AS details,
       COALESCE(NULLIF(p.booth_image_path,''),NULLIF(b.hero_image_path,''),NULLIF(b.logo_path,''),'') AS image_path,
       NULL AS website_url,NULL AS phone,s.position AS sponsor_position
     FROM discovery_sponsorships s
@@ -396,6 +445,44 @@ function productSuggestionSql(placeWhere: string) {
   `;
 }
 
+function productSearchResultSql(placeWhere: string) {
+  return `
+    SELECT
+      product.id,product.name,product.description,product.image_path,
+      COALESCE(category.name,'Product') AS category_name,
+      b.id AS business_id,b.handle AS business_handle,b.name AS business_name,
+      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
+    FROM products product
+    JOIN businesses b ON b.id=product.business_id
+    JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN categories category ON category.id=product.category_id AND category.business_id=b.id
+    WHERE (?='all' OR EXISTS(
+        SELECT 1 FROM business_industries i
+        WHERE i.business_id=b.id AND i.industry_key=?
+      ))
+      AND b.status='active'
+      AND p.is_excluded=0
+      AND p.approved_at > 0
+      AND product.is_published=1
+      AND (
+        product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\'
+        OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
+        OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
+        OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
+      )
+      ${placeWhere}
+    ORDER BY
+      CASE
+        WHEN lower(product.name)=lower(?) THEN 0
+        WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
+        WHEN lower(b.name)=lower(?) THEN 2
+        ELSE 3
+      END,
+      lower(product.name),lower(b.name),product.id
+    LIMIT 40
+  `;
+}
+
 function buildSearchSuggestions(
   query: string,
   rows: DiscoveryRow[],
@@ -415,7 +502,7 @@ function buildSearchSuggestions(
     candidates.push({ kind: "offering", label: product.label, detail: `Offering from ${product.detail}`, query: product.label, score: score(product.label) });
   }
   for (const row of rows) {
-    candidates.push({ kind: "showroom", label: row.name, detail: `Showroom in ${row.city}`, query: row.name, score: score(row.name) });
+    candidates.push({ kind: "showroom", label: row.name, detail: `Page in ${row.city}`, query: row.name, score: score(row.name) });
   }
   for (const place of places) {
     if (!place.label.toLocaleLowerCase().includes(normalizedQuery)) continue;
@@ -657,17 +744,28 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
-  const productSuggestionRows = query.length >= 2
-    ? await all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
-      projectionIndustryKey,
-      projectionIndustryKey,
-      `%${escapedQuery}%`,
-      `%${escapedQuery}%`,
-      ...placeParams,
-      query,
-      `${escapedQuery}%`,
+  const [productSuggestionRows, productResultRows] = query.length >= 2
+    ? await Promise.all([
+      all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
+        projectionIndustryKey,
+        projectionIndustryKey,
+        `%${escapedQuery}%`,
+        `%${escapedQuery}%`,
+        ...placeParams,
+        query,
+        `${escapedQuery}%`,
+      ]),
+      all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere), [
+        projectionIndustryKey,
+        projectionIndustryKey,
+        ...Array.from({ length: 8 }, () => `%${escapedQuery}%`),
+        ...placeParams,
+        query,
+        `${escapedQuery}%`,
+        query,
+      ]),
     ])
-    : [];
+    : [[], []] as [Array<{ label: string; detail: string }>, DiscoveryProductResultRow[]];
   const showrooms = rows.map(toShowroom);
   const nearbyGroups = groupNearbyShowrooms(showrooms);
   const suggestions = buildSearchSuggestions(query, rows, places, productSuggestionRows);
@@ -677,6 +775,7 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     industries: DISCOVERY_INDUSTRY_OPTIONS,
     query,
     suggestions,
+    searchProducts: productResultRows.map(toProductResult),
     place: selectedPlace?.key || "",
     places,
     productionScale,
@@ -697,7 +796,7 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const featuredIndustry = normalizeIndustry(selectedDay.industryKey);
   const programPolicy = await getFeaturedProgramPolicy(port);
   const featuredRowsForDay = async (day: WeeklyFeaturedDay) => {
-    const eligibleRows = await all<DiscoveryRow>(selectSql("AND p.booth_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
+    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
     if (selection.mode !== "manual") return { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
@@ -710,7 +809,7 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const selectedProgram = await featuredRowsForDay(selectedDay);
   const revealFeatured = selectedDay.isToday;
   const featuredRows = selectedProgram.rows;
-  const featuredShowrooms = featuredRows.map((row) => ({ ...toShowroom(row), imagePath: row.booth_image_path }));
+  const featuredShowrooms = featuredRows.map(toShowroom);
   const boothCount = featuredShowrooms.length;
   const booths = Array.from({ length: boothCount }, (_, index): FeaturedBooth => {
     const slot = index + 1;
@@ -736,7 +835,7 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
     featuredNowBusinessId,
     featured: {
       mode: selectedDay.mode,
-      title: "Daily Featured Showrooms",
+      title: "Daily Featured",
       industryCode: featuredIndustry.code,
       industryLabel: featuredIndustry.label,
       industryIcon: selectedDay.industryIcon,

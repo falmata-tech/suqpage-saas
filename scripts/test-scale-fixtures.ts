@@ -98,7 +98,7 @@ for (const industry of DISCOVERY_INDUSTRIES) {
   assert.equal(discovery.featured.booths.length, Math.min(discovery.showrooms.length, 40), `${industry.label} Daily Featured includes the complete result set up to its forty-showroom capacity`);
   assert.deepEqual(discovery.featured.booths.map((booth) => booth.slot), Array.from({ length: discovery.featured.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
   assert.equal(new Set(discovery.featured.booths.map((booth) => booth.reference)).size, discovery.featured.boothCount, `${industry.label} floor references remain unique`);
-  assert.ok((await getDiscoveryView({ db, industry: industry.key, scale: "growing_factory" })).total >= 1, `${industry.label} has a growing-factory fixture`);
+  assert.equal((await getDiscoveryView({ db, industry: industry.key, scale: "growing_factory" })).total, 0, `${industry.label} demo data stays within the small-scale launch scope`);
 }
 const seededElectronics = SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "electronics");
 assert.equal(seededElectronics[0]?.profile.latitude, seededElectronics[1]?.profile.latitude, "the scale demo retains one deliberate same-address workshop latitude");
@@ -123,7 +123,7 @@ assert.ok(
 );
 assert.equal((db.prepare("PRAGMA foreign_key_check").all() as unknown[]).length, 0);
 
-console.log("Scale fixtures passed: 66 showrooms, five global sponsors, both production scales, all lifecycle states, and seven discovery industries.");
+console.log("Scale fixtures passed: 66 small-scale pages, five global sponsors, all lifecycle states, and seven discovery industries.");
 }
 
 main().catch((error) => {

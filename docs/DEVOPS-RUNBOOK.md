@@ -1,4 +1,4 @@
-# MirtPage delivery and managed-service runbook
+# AfricMade delivery and managed-service runbook
 
 This runbook is the operator path for local Supabase, repository checks,
 managed Auth and Storage, PostgreSQL, Netlify deployment, and rollback.
@@ -13,7 +13,7 @@ It does not authorize a production launch, DNS change, or destructive cutover.
   compatibility and read-only migration infrastructure, not an app runtime.
 - Production and Deploy Previews use separate hosted Supabase projects. Each
   selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
-  own private Storage bucket through MirtPage's server-side media port. MirtPage
+  own private Storage bucket through AfricMade's server-side media port. AfricMade
   remains the only role, capability, tenant, and suspension authority.
 - PostgreSQL tooling supports disposable rehearsal and a separately guarded,
   copy-only production cutover. The linked Supabase target has reconciled data,
@@ -52,7 +52,7 @@ rejects remote database destinations. Never run hosted reset or production-copy
 commands for local development. Stop local services with
 `npm run local:supabase:stop`.
 
-The normal MirtPage local project uses API/DB ports `54321`/`54322`. Browser
+The normal AfricMade local project uses API/DB ports `54321`/`54322`. Browser
 acceptance starts a separate disposable `mirtpage-browser-*` project on
 `56321`/`56322`, applies the same schema, copies only an isolated compatibility
 fixture, and runs the production Next.js server with PostgreSQL, Supabase Auth,
@@ -65,7 +65,7 @@ Use either the Codex GitHub connector or GitHub CLI. Never paste a personal
 access token into chat, a terminal command, `.env`, or repository files.
 
 1. In Codex, open connectors, connect GitHub, and grant access only to the
-   MirtPage repository. Repository read and Actions read are enough for CI
+   AfricMade repository. Repository read and Actions read are enough for CI
    review; write access is needed only when you explicitly ask Codex to push or
    open a pull request.
 2. For local CLI access, run `gh auth login --web --git-protocol https`, finish
@@ -122,13 +122,25 @@ It is not the normal development reset. Existing PostgreSQL data uses
 5. Configure the exact production site URL and redirect allowlist in Supabase.
    Add the local callback and the selected host's deploy-preview wildcard only
    where needed; do not use a broad production wildcard.
-6. For Google sign-in, create a Google Web OAuth client and place its client ID
+6. Before enabling public email-code entry, configure hosted Supabase custom
+   SMTP and send one code to a non-team address. For the bounded tester launch,
+   a dedicated Gmail account may use `smtp.gmail.com`, port `587`, its complete
+   email address as both sender and username, and a Google app password. Enter
+   the app password directly in Supabase; never put it in Netlify, Git, logs, or
+   chat. Keep local and browser-test email in the isolated Mailpit instances.
+7. Apply the concise AfricMade magic-link template from
+   `supabase/templates/magic-link.html`, which renders `{{ .Token }}` as the
+   six-digit sign-in code. Prove delivery, expiry, resend throttling, and one-time
+   use. Treat personal Gmail as a bounded launch bridge and move to a
+   verified-domain transactional sender before broad public promotion.
+8. For Google sign-in, create a Google Web OAuth client and place its client ID
    and secret in the Supabase provider dashboard. The callback URI must be the
    exact Supabase callback shown there. Provider secrets never enter Netlify,
    Git, or chat.
-7. Enable `MIRTPAGE_AUTH_DRIVER=supabase` on one candidate, prove password and
-   Google login, logout, reset/change, unlinked denial, suspended-user denial,
-   and cross-tenant denial, then monitor before retiring local sessions.
+9. Enable `MIRTPAGE_AUTH_DRIVER=supabase` on one candidate, prove email OTP and
+   Google login, logout, linked/new-user routing, unlinked denial,
+   suspended-user denial, and cross-tenant denial, then monitor before retiring
+   local sessions.
 
 Supabase proves identity only. `auth_identity_links` maps its immutable UUID to
 one MirtPage user; roles and business access never come from OAuth metadata.

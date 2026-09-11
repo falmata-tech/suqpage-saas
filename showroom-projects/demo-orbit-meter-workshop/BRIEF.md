@@ -1,18 +1,18 @@
-# Orbit Meter Workshop showroom brief
+# Orbit Meter Assembly showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Orbit Meter Workshop
+- Business name: Orbit Meter Assembly
 - Permanent handle: `demo-orbit-meter-workshop`
 - Location: Adama, Oromia
 - Existing logo/mark: generated geometric mark based on a meter needle orbiting a small O
-- Short description: The page should feel accurate and calm, with enough detail for a technician to decide whether to inquire.
+- Short description: Show repeatable meter and display assemblies with enough detail for a buyer to define range, signal, enclosure, and quantity.
 
 ## Customer And Goal
 
-- Primary customer: workshops, landlords, and equipment technicians
+- Primary customer: growers, workshops, landlords, and equipment builders
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Analog Meter Calibration (Calibration); Digital Panel Meter Repair (Repair); Pump Hour Counter (Instruments); Sensor Display Assembly (Assemblies)
+- Products or capabilities: Pump Hour Counter (Instruments); Water Level Display (Instruments); Temperature Panel (Instruments); Sensor Display Assembly (Assemblies)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,9 +55,9 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-orbit-meter-workshop/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-1.webp` | Analog Meter Calibration | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-2.webp` | Digital Panel Meter Repair | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-3.webp` | Pump Hour Counter | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-1.webp` | Pump Hour Counter | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-2.webp` | Water Level Display | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-3.webp` | Temperature Panel | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-4.webp` | Sensor Display Assembly | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-orbit-meter-workshop.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 

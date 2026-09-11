@@ -2,7 +2,7 @@
 id: FE-035
 title: Cross-role accessibility and interface clarity
 status: done
-related: [FE-005, FE-013, FE-017, FE-025, FE-026, FE-031, FE-032, FE-034, FE-036, FE_BASE, DEP-002]
+related: [FE-005, FE-013, FE-017, FE-025, FE-026, FE-031, FE-032, FE-034, FE-036, FE-038, FE_BASE, DEP-002]
 owners: [product, frontend, design, operations]
 last_updated: 2026-08-11
 change_level: L2

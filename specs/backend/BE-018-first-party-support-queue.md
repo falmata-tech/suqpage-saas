@@ -29,9 +29,9 @@ platform.
 - Paginated inboxes, bounded message history, unread state, and lightweight
   polling.
 - Optional Telegram queue notifications containing no message body.
-- Anonymous visitor categories for general help, sourcing assistance, business
-  document review, facility/quality visit coordination, and shipment/loading
-  observation.
+- Two active anonymous visitor categories: using or reporting something on
+  AfricMade, and help arranging transport. Older assistance values remain
+  readable only for retained historical conversations.
 - Validated visitor email and phone contact values for reconnecting outside the
   browser session when needed.
 - One optional provider-neutral private image or PDF attachment on a support
@@ -65,6 +65,8 @@ platform.
   staff conversation projection and are never sent in Telegram notifications.
 - An assistance category records requested work only. It never records that
   verification, inspection, negotiation, or monitoring was completed.
+- Public support does not promise sourcing, inspection, production checks,
+  certification, negotiation, shipment monitoring, or delivery operation.
 
 ## Contracts
 

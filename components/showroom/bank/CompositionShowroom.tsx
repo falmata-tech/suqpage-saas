@@ -189,11 +189,11 @@ export function InvalidComposition() {
   return (
     <main className={styles.invalidComposition} role="alert">
       <div>
-        <p>Showroom temporarily unavailable</p>
+        <p>Page temporarily unavailable</p>
         <h1>This design could not be verified.</h1>
         <p>
           No substitute design was loaded. Please try again later or contact
-          MirtPage support.
+          AfricMade support.
         </p>
       </div>
     </main>

@@ -1,18 +1,18 @@
-# Sheger Rebar Works showroom brief
+# Sheger Metalwork Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Sheger Rebar Works
+- Business name: Sheger Metalwork Workshop
 - Permanent handle: `demo-sheger-rebar-works`
 - Location: Adama, Oromia
-- Existing logo/mark: generated geometric mark based on an S bent from one ribbed steel bar
-- Short description: Show that we add local fabrication value through cut, bend, mesh, and scheduled bundles rather than acting as an importer.
+- Existing logo/mark: generated geometric mark based on an S bent from one measured steel line
+- Short description: Show a practical fabrication workshop focused on custom household and building metalwork, not bulk steel supply.
 
 ## Customer And Goal
 
-- Primary customer: contractors, block producers, developers, and construction suppliers
+- Primary customer: households, builders, shops, and neighborhood contractors
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -22,8 +22,8 @@
 
 - Customer color request: industrial red, steel gray, and black
 - Designer advice: Steel neutrals handle specifications while a controlled red marks actions and safety-critical production details.
-- Logo concept: an S bent from one ribbed steel bar
-- Visual thesis: Structural geometry, clear schedules, and project-ready batch evidence.
+- Logo concept: an S bent from one measured steel line
+- Visual thesis: Finished metalwork, measured details, and clear custom-order steps in a disciplined workshop presentation.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Cut-and-Bent Rebar (Rebar Fabrication); Welded Mesh Panels (Reinforcement); Stirrup Production Runs (Rebar Fabrication); Tagged Project Bundles (Project Supply)
+- Products or capabilities: Steel Entrance Gate (Gates); Window Guard Set (Window metalwork); Stair and Balcony Railing (Railings); Workshop Bracket Run (Metal fittings)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,10 +55,10 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-sheger-rebar-works/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-1.webp` | Cut-and-Bent Rebar | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-2.webp` | Welded Mesh Panels | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-3.webp` | Stirrup Production Runs | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-4.webp` | Tagged Project Bundles | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-1.webp` | Steel Entrance Gate | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-2.webp` | Window Guard Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-3.webp` | Stair and Balcony Railing | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-4.webp` | Workshop Bracket Run | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-sheger-rebar-works.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction
@@ -75,7 +75,7 @@
 
 - Approved logo/name treatment: generated mark plus exact business name
 - Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
-- Product/craft cue: an S bent from one ribbed steel bar
+- Product/craft cue: an S bent from one measured steel line
 - Generated image authorized: yes, for disposable demonstration use
 
 ## Acceptance Notes

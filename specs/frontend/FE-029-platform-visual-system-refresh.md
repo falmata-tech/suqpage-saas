@@ -2,7 +2,7 @@
 id: FE-029
 title: MirtPage platform visual system refresh
 status: done
-related: [FE-009, FE-013, FE-024, FE-026, FE-028, FE-030]
+related: [FE-009, FE-013, FE-024, FE-026, FE-028, FE-030, FE-038]
 owners: [product, frontend, design]
 last_updated: 2026-08-04
 change_level: L1

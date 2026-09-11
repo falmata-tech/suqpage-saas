@@ -2,9 +2,9 @@
 id: DEP-026
 title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
-related: [FE-019, FE-021, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-020, DEP-023, DEP-027, ADR-0014, ADR-0015, ADR-0016]
+related: [FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 owners: [deployment, operations, security]
-last_updated: 2026-08-24
+last_updated: 2026-08-27
 change_level: L4
 ---
 
@@ -12,7 +12,7 @@ change_level: L4
 
 ## Problem and outcome
 
-MirtPage needs a reversible Netlify production option and a disciplined way to
+AfricMade needs a reversible Netlify production option and a disciplined way to
 use Supabase Auth, Storage, Realtime, PostGIS, and search extensions without
 turning every free service into an unconditional runtime dependency.
 
@@ -22,8 +22,9 @@ turning every free service into an unconditional runtime dependency.
 - Canonical data: existing Supabase PostgreSQL transaction pooler.
 - Media: existing private Supabase Storage bucket through BE-024.
 - Identity candidate: Supabase Auth through BE-030.
-- Domain: `mirtpage.com`; the current Vercel deployment remains rollback until
-  Netlify DNS and workflow monitoring complete.
+- Generated production origin: `https://africmade.netlify.app`. No custom
+  domain is owned or configured; the current Vercel deployment remains rollback
+  until Netlify workflow monitoring completes.
 
 ## Contracts
 
@@ -134,8 +135,11 @@ than dual writing.
   PWA, and `osm-standard` settings. Netlify Free cannot apply paid hidden/scoped
   secret controls, so the owner explicitly approved ordinary site environment
   variables across Netlify's standard scopes; values remain outside Git and
-  application logs. Candidate deployment, generated-domain smoke, DNS cutover,
-  and monitored rollback evidence remain pending.
+  application logs. On 2026-08-27 that same site ID was renamed in place to
+  `africmade`; `https://africmade.netlify.app` returns HTTP 200 for `/` and
+  `/login`, and the production canonical/trusted-origin variables were updated
+  for the next deploy. Updated candidate deployment, authenticated provider
+  smoke, and monitored rollback evidence remain pending.
 
 ## Readiness checklist
 

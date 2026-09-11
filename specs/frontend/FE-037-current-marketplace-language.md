@@ -1,10 +1,10 @@
 ---
 id: FE-037
 title: Current marketplace and Daily Featured language
-status: done
-related: [FE-021, FE-030, FE-033, FE-036, BE-017, BE-029, DEP-023, DEP-025]
+status: deprecated
+related: [FE-021, FE-030, FE-033, FE-036, FE-039, BE-017, BE-029, DEP-023, DEP-025]
 owners: [product, frontend, operations]
-last_updated: 2026-08-14
+last_updated: 2026-08-29
 change_level: L2
 ---
 
@@ -22,6 +22,10 @@ MirtPage uses **Marketplace**, **City Showroom**, **Daily Featured**, and
 **showroom** consistently in every current visitor, client, staff, URL-state,
 and application contract. Historical database and immutable media identifiers
 may remain inert when renaming them would weaken rollback or data integrity.
+
+This visible-language contract is superseded by `FE-039`. Its completed
+retirement of Bazaar and Expo remains valid; its requirement to expose
+**showroom** as the public object does not.
 
 ## Scope
 

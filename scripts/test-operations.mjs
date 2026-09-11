@@ -12,6 +12,7 @@ const env = {
   MIRTPAGE_MEDIA_ROOT: path.join(root, "data", "media"),
   MIRTPAGE_BACKUP_ROOT: path.join(root, "backups"),
   MIRTPAGE_CREDENTIAL_PATH: path.join(root, "credentials.txt"),
+  MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
   PRIVACY_SALT: "operations-test-privacy-salt-long-enough",
 };
 const tsx = ["node_modules/tsx/dist/cli.mjs"];

@@ -141,7 +141,7 @@ export async function migratePostgresDatabase(
           ADD COLUMN visitor_token_hash TEXT,
           ADD COLUMN visitor_session_expires_at BIGINT,
           ADD COLUMN assistance_category TEXT NOT NULL DEFAULT 'general',
-          ADD COLUMN requester_label TEXT NOT NULL DEFAULT 'MirtPage client',
+          ADD COLUMN requester_label TEXT NOT NULL DEFAULT 'AfricMade client',
           ADD COLUMN visitor_last_read_message_id INTEGER NOT NULL DEFAULT 0;
         ALTER TABLE support_conversations
           ALTER COLUMN business_id DROP NOT NULL,
@@ -280,6 +280,27 @@ export async function migratePostgresDatabase(
       `);
       await runner.query("INSERT INTO schema_migrations(version) VALUES(37)");
       applied.push(37);
+    }
+    const migration38 = await runner.query<{ version: number }>(
+      "SELECT version FROM schema_migrations WHERE version=38",
+    );
+    if (!migration38.rows.length) {
+      await runner.query(`
+        CREATE TABLE business_onboarding_profiles (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          declared_category_key TEXT NOT NULL CHECK(declared_category_key IN (
+            'electronics','beauty-wellness','agriculture-growers','food-farming',
+            'machinery-tools','home-living','fashion-textiles','other-manufacturing'
+          )),
+          idempotency_key TEXT NOT NULL UNIQUE CHECK(length(idempotency_key) BETWEEN 16 AND 100),
+          created_at BIGINT NOT NULL,
+          updated_at BIGINT NOT NULL
+        );
+        CREATE INDEX business_onboarding_category_idx
+          ON business_onboarding_profiles(declared_category_key,business_id);
+      `);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(38)");
+      applied.push(38);
     }
     return { applied };
   });

@@ -16,7 +16,7 @@ export async function createOnBehalfRequest(user: SessionUser, formData: FormDat
   if (requestText.length < 10 || requestText.length > MAX_REQUEST_TEXT) throw new RequestError(`Describe the request in 10–${MAX_REQUEST_TEXT.toLocaleString("en-US")} characters.`);
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new RequestError("The request session is invalid. Refresh and try again.");
   const files = formData.getAll("images").filter((value): value is File => value instanceof File && value.size > 0);
-  if (files.length) throw new RequestError("Add images from the labeled checklist after the showroom design is imported.");
+  if (files.length) throw new RequestError("Add images from the labeled checklist after the page design is imported.");
   const duplicate = await runtimeGet<{id:number;public_ref:string}>("SELECT id,public_ref FROM service_requests WHERE submitted_by_user_id=? AND submitter_kind='manager' AND idempotency_key=?", [user.id,idempotencyKey]);
   if (duplicate) return { id:duplicate.id, publicRef:duplicate.public_ref, duplicate:true, existingProject:false };
 
@@ -72,7 +72,7 @@ export async function createOnBehalfRequest(user: SessionUser, formData: FormDat
         VALUES(?,?,?,?,'submitted',?,?,?,?, 'manager',?,?,'not_required') RETURNING id
       `, [publicRef,businessId,representedClientUserId,requestType,contactName,contactValue,businessName,requestText,user.id,idempotencyKey]);
       const requestId = Number(inserted!.id);
-      await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'MirtPage submitted on behalf')", [requestId,user.id,"submitted"]);
+      await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'AfricMade submitted on behalf')", [requestId,user.id,"submitted"]);
       return { id:requestId, publicRef, duplicate:false, existingProject:false };
     });
   } catch (error) {

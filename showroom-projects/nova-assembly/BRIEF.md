@@ -8,7 +8,7 @@
 - Permanent handle: `nova-assembly`
 - Location: Addis Ababa
 - Existing logo/mark: generated geometric mark based on a circuit node orbiting a compact N
-- Short description: Make electronics assembly and repair understandable without hiding specification requirements.
+- Short description: Make small-run electronics assembly understandable without hiding specification requirements.
 
 ## Customer And Goal
 
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Rugged Solar Charge Controller (Power); Compact Backup Power Box (Power); Audio Amplifier Rebuild (Repair); Custom Cable Harness Kit (Harnesses)
+- Products or capabilities: Rugged Solar Charge Controller (Power); Compact Backup Power Box (Power); Compact Audio Amplifier Module (Audio); Custom Cable Harness Kit (Harnesses)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -57,7 +57,7 @@
 | `/uploads/seed/benchmarks/nova-assembly/hero.jpg` | business-specific working scene | illustrative demo artwork | yes | hero |
 | `/uploads/seed/benchmarks/nova-assembly/product-1.jpg` | Rugged Solar Charge Controller | illustrative demo artwork | yes | offering |
 | `/uploads/seed/benchmarks/nova-assembly/product-2.jpg` | Compact Backup Power Box | illustrative demo artwork | yes | offering |
-| `/uploads/seed/benchmarks/nova-assembly/product-3.jpg` | Audio Amplifier Rebuild | illustrative demo artwork | yes | offering |
+| `/uploads/seed/benchmarks/nova-assembly/product-3.jpg` | Compact Audio Amplifier Module | illustrative demo artwork | yes | offering |
 | `/uploads/seed/benchmarks/nova-assembly/product-4.jpg` | Custom Cable Harness Kit | illustrative demo artwork | yes | offering |
 | `/landing/expo-booths/nova-assembly.webp` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 

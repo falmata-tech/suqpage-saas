@@ -6,6 +6,7 @@ export type DemoProcessVideo = {
 
 const PROCESS_VIDEOS = {
   apparel: { ref: "youtube:vsO8bQ8e7x4", label: "Garment production process", family: "apparel" },
+  art: { ref: "youtube:zDYlSLWAjQs", label: "Studio-art process", family: "art" },
   ceramics: { ref: "youtube:NJMPGgcDylY", label: "Ceramics production process", family: "ceramics" },
   concrete: { ref: "youtube:CPtmpcNJ6ec", label: "Concrete-product manufacturing", family: "concrete" },
   electronics: { ref: "youtube:rRbIS71ZVpU", label: "Electronics assembly process", family: "electronics" },
@@ -26,9 +27,10 @@ const PROCESS_VIDEOS = {
 
 const rules: Array<[RegExp, DemoProcessVideo]> = [
   [/\b(pasta)\b/i, PROCESS_VIDEOS.pasta],
-  [/\b(bottled water|water cases?|dispenser jars?|hospitality bottles?)\b/i, PROCESS_VIDEOS.water],
+  [/\b(bottled water|water bottling|water cases?|dispenser jars?|hospitality bottles?)\b/i, PROCESS_VIDEOS.water],
   [/\b(coffee)\b/i, PROCESS_VIDEOS.coffee],
   [/\b(honey|apiary|beeswax)\b/i, PROCESS_VIDEOS.honey],
+  [/\b(art(?:ist|work)?|painting|canvas|sculpture|sculpted|carv(?:e|ed|ing)|wall piece|wall panel)\b/i, PROCESS_VIDEOS.art],
   [/\b(concrete|pavers?|masonry blocks?|kerbs?|precast)\b/i, PROCESS_VIDEOS.concrete],
   [/\b(leather|wallet|satchel)\b/i, PROCESS_VIDEOS.leather],
   [/\b(flour|grain|mill|spice)\b/i, PROCESS_VIDEOS.grain],

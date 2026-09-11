@@ -26,13 +26,13 @@ export default async function SponsorPlacementsPage({ searchParams }: {
 
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Sponsor placements</strong></nav>
-    <div className="dashboard-head"><div><span className="eyebrow">Paid placement</span><h1>Sponsor placements</h1><p>Order up to five public sponsors from MirtPage showrooms and external advertisers. Sponsorship never changes marketplace or Daily Featured eligibility.</p></div><Link className="btn secondary" href="/featured" target="_blank">View Daily Featured</Link></div>
+    <div className="dashboard-head"><div><span className="eyebrow">Paid placement</span><h1>Sponsor placements</h1><p>Order up to five public sponsors from AfricMade pages and external advertisers. Sponsorship never changes marketplace or Daily Featured eligibility.</p></div><Link className="btn secondary" href="/featured" target="_blank">View Daily Featured</Link></div>
     {query.error ? <p className="error">{query.error}</p> : null}
     {query.saved ? <p className="notice">Sponsor placements updated.</p> : null}
 
     <section className="panel sponsor-public-preview">
       <div><span className="eyebrow">Currently public</span><h2>Five-placement rail</h2><p>The lowest active positions appear in this exact order across every Daily Featured day.</p></div>
-      {publicPlacements.length ? <ol>{publicPlacements.map((placement) => <li key={placement.id}><img src={placement.imagePath} alt=""/><span><small>{placement.kind === "showroom" ? "MirtPage showroom" : "External advertiser"}</small><strong>{placement.name}</strong><em>Position {placement.position}</em></span></li>)}</ol> : <div className="empty-state">No active sponsor placement is currently eligible.</div>}
+      {publicPlacements.length ? <ol>{publicPlacements.map((placement) => <li key={placement.id}><img src={placement.imagePath} alt=""/><span><small>{placement.kind === "showroom" ? "AfricMade page" : "External advertiser"}</small><strong>{placement.name}</strong><em>Position {placement.position}</em></span></li>)}</ol> : <div className="empty-state">No active sponsor placement is currently eligible.</div>}
     </section>
 
     <section className="panel">
@@ -50,7 +50,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     </section>
 
     <section className="panel">
-      <div className="dashboard-section-head"><div><span className="eyebrow">External ads</span><h2>Manage advertiser cards</h2><p>Changes update the public rail without creating a MirtPage business account.</p></div></div>
+      <div className="dashboard-section-head"><div><span className="eyebrow">External ads</span><h2>Manage advertiser cards</h2><p>Changes update the public rail without creating a AfricMade business account.</p></div></div>
       {externalAds.items.length ? <div className="sponsor-admin-list">{externalAds.items.map((ad) => <details key={ad.id} className="admin-form-disclosure">
         <summary><span><strong>{ad.name}</strong><small>{ad.active ? `Active · position ${ad.position}` : "Inactive"}</small></span><img src={ad.imagePath} alt=""/></summary>
         <form action={updateExternalSponsorAdAction} className="admin-form-disclosure-body form-grid">
@@ -69,7 +69,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     </section>
 
     <section className="panel">
-      <div className="dashboard-section-head"><div><span className="eyebrow">MirtPage businesses</span><h2>Sponsor a showroom</h2><p>Search the bounded business list and set paid placement independently from its marketplace profile.</p></div></div>
+      <div className="dashboard-section-head"><div><span className="eyebrow">AfricMade accounts</span><h2>Sponsor an AfricMade page</h2><p>Search the bounded account list and set paid placement independently from marketplace eligibility.</p></div></div>
       <CollectionToolbar action="/dashboard/admin/sponsors" search={query.q || ""} placeholder="Business, handle, or location" activeFilters={Boolean(query.q)}/>
       {businesses.items.length ? <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>Business</th><th>Marketplace</th><th>Paid placement</th></tr></thead><tbody>{businesses.items.map((business) => <tr key={business.businessId}>
         <td data-label="Business"><strong>{business.businessName}</strong><br/><small>@{business.handle}</small></td>

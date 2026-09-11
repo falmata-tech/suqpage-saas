@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { clearSession, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
+import { clearSession, currentUser, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { authDriver } from "@/lib/config";
 import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById, runtimeUserByEmail } from "@/lib/catalog-runtime";
@@ -72,7 +72,7 @@ export async function googleLoginAction(){
   redirect(destination);
 }
 
-export async function logoutAction(){const user=await requireUser({allowTemporaryPassword:true});await audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
+export async function logoutAction(){const user=await currentUser();if(user)await audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
 
 export async function changePasswordAction(formData:FormData){
   const user=await requireUser({allowTemporaryPassword:true});

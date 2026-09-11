@@ -4,7 +4,7 @@ title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
 related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016]
 owners: [product, frontend, design]
-last_updated: 2026-08-24
+last_updated: 2026-09-12
 change_level: L3
 ---
 
@@ -49,7 +49,7 @@ day of the week in a calm, bounded media-card gallery.
 - One dynamically sized Daily Featured gallery with up to forty responsive
   image-led showroom cards, stable numbered references, and ordinary vertical
   page scrolling without a simulated venue, hall, pagination, or zoom controls.
-- Full business identity, approved booth imagery, preview, and showroom links
+- Full business identity, the published business-page hero image, preview, and page links
   only for today's selected Daily Featured; every other date exposes anonymous booth
   outlines and schedule information without business identity or media.
 - One Daily Featured program from 08:00 to 22:00 Ethiopia time, split into
@@ -124,9 +124,11 @@ day of the week in a calm, bounded media-card gallery.
   schedule, and status while responsive columns grow downward without pagination.
 - Daily Featured booth references are `{industry-code}-B{booth}` and deterministic for an
   unchanged selected result set.
-- An approved booth image belongs to the business discovery profile and is the
-  only factual Daily Featured-booth visual. A named fallback handles file failure without
-  creating eligibility. Non-today previews receive neither identity nor media.
+- The published business-page hero image is the single image authority for map
+  detail inspectors, nearby-result cards, and today's Daily Featured cards.
+  Discovery does not maintain or prefer a separate booth illustration. A named
+  fallback handles file failure without creating eligibility. Non-today
+  previews receive neither identity nor media.
 
 ## Contracts
 
@@ -147,17 +149,19 @@ day of the week in a calm, bounded media-card gallery.
   eligibility. Geographic clusters and individual markers remain uniform teal.
 - Region/city filtering is URL-addressable and server-authoritative for the Map.
   Available options derive only from eligible reviewed business
-  profiles and never imply an authoritative administrative boundary.
+  profiles and never imply an authoritative administrative boundary. A fresh
+  place-scoped view starts around its filtered reviewed coordinates; a valid
+  same-tab saved transform still wins when the visitor is returning.
 - **Near me** requests browser geolocation only after an explicit visitor
   action. A granted coordinate is used in memory to center the local map and is
   not persisted, logged, added to the URL, or sent to the application server.
   Denial or browser failure leaves all region/city and national controls usable.
 - Public filters and selected program date are durable URL state. Opening
   a permanent showroom records the current public workspace as its same-tab
-  return destination. The last non-geolocation map transform and open nearby
-  group may be retained in same-tab session storage for two hours so the
-  MirtPage Back control restores the viewer that launched the showroom; they do
-  not alter eligibility.
+  return destination. The last non-geolocation map transform, open nearby
+  group, and selected business preview may be retained in same-tab session
+  storage for two hours so the AfricMade Back to Market control restores the
+  exact viewer that launched the page; they do not alter eligibility.
   A **Near me** coordinate or transform derived from it is never persisted.
 - The stable weekly assignment is Monday Electronics, Tuesday Beauty & Care,
   Wednesday Food & Beverage Production, Thursday Machinery & Industrial,
@@ -239,12 +243,14 @@ day of the week in a calm, bounded media-card gallery.
 - At terminal neighborhood zoom, a bounded nearby-group marker opens its
   six-card viewer instead of demanding building-level zoom. Leaflet's basemap
   supplies road and place labels; MirtPage does not mount duplicate local labels.
-- Selecting an individual showroom or booth opens a non-modal floating inspector
-  above the existing map or venue. It never dims, blurs, or makes the background
-  inert. Desktop centers it over a restrained low-opacity dismissible scrim so
-  selection is unmistakable while the marketplace remains visible; phones use a
-  compact bottom sheet above persistent app navigation. Close, scrim click, and Escape return
-  focus without losing the visitor's map, filter, or venue state.
+- Selecting an individual map page opens a non-modal floating inspector centered
+  and bounded inside the map canvas. It never crosses into the desktop command
+  rail, dims or blurs the wider application, or makes the background inert. A
+  restrained low-opacity dismissible scrim is limited to the map so selection is
+  unmistakable while its geographic context remains visible. Phones keep the
+  inspector compact and centered within the available map. Daily Featured may
+  use its own workspace-bounded preview. Close, scrim click, and Escape return
+  focus without losing the visitor's map, filter, or program state.
 - The desktop industry menu is no wider than its trigger. Labels wrap within
   that width, and the menu remains inside the map command surface at narrower
   desktop/tablet widths. Phone industry selection continues through the bounded
@@ -308,6 +314,13 @@ Scenario: Visitor changes map industry
   THEN map clusters and markers use the newly selected eligible result set
   AND the date-selected Daily Featured remains unchanged
 
+Scenario: Visitor opens a fresh place-scoped map
+  GIVEN the visitor selects a reviewed region or city without a saved transform for that scope
+  WHEN the filtered map opens
+  THEN its initial view is centered around the filtered reviewed coordinates
+  AND nearby results remain reachable through ordinary zoom controls
+  AND a valid saved transform is preserved on a later same-tab return
+
 Scenario: Visitor receives an industry orientation choice over the loaded map
   GIVEN eligible published showrooms exist across multiple industries
   WHEN geographic discovery opens without an industry query
@@ -351,17 +364,17 @@ Scenario: Visitor chooses Near me
 Scenario: Visitor returns from a showroom
   GIVEN the visitor chose filters, a map transform, or a nearby-group marker
   before opening a permanent showroom
-  WHEN the visitor activates the MirtPage Back control in the same tab
+  WHEN the visitor activates the persistent Back to Market control in the same tab
   THEN the explicit public workspace that launched the showroom is restored before any older browser-history destination
   AND its authoritative URL filters are restored
-  AND the prior non-geolocation map transform and nearby-group viewer are restored when still valid
+  AND the prior non-geolocation map transform, nearby-group viewer, and selected business preview are restored when still valid
   AND no visitor coordinate is read from storage
 
 Scenario: Today's featured program preserves a readable bounded floor
   GIVEN today's assigned industry has more than forty eligible businesses
   WHEN today's Daily Featured renders
   THEN exactly the first forty eligible businesses in authoritative order have booths
-  AND every booth retains a readable logo or fallback mark, business name, reference, schedule, and status
+  AND every card retains the business-page hero or fallback mark, business name, reference, schedule, and status
   AND large and phone screens use readable columns and ordinary vertical floor scrolling when needed
   AND no hall, page selector, or hidden overflow record exists
 
@@ -487,7 +500,7 @@ through the monitored rollback window.
 
 Evidence: completed locally on 2026-08-01. Focused discovery tests prove the
 fixed Ethiopia-local Monday-through-Sunday schedule and sequential references,
-business-owned booth media, media-gated Daily Featured eligibility, and identity/media
+business-owned presentation media, media-gated Daily Featured eligibility, and identity/media
 redaction for every non-today date. Browser acceptance passed all 10 workflows,
 including the six-second return to persistently highlighted today and the reduced
 nearby-group transition. Desktop, 390px, and
@@ -505,6 +518,14 @@ trigger, the desktop inspector is centered over a 14% scrim without making the
 map inert, the phone sheet clears navigation by 72px with zero overflow, and
 the established showroom/city-market markers expose live and featured presence.
 User visual approval remains pending before the complete release suite.
+
+Reopened on 2026-09-01 so map detail inspectors, nearby-result cards, and
+Daily Featured cards use the published business-page hero instead of separate
+booth artwork. `scripts/test-discovery.ts`, `scripts/test-featured-schedule.ts`,
+and typecheck pass. Focused Chromium captures at 1440px, 390px, and 320px prove
+decoded hero pixels and exact hero-path identity in the centered map inspector,
+revealed Featured cards, and their preview. User visual approval remains pending
+before the complete release suite.
 
 The 2026-08-09 terminology follow-up retains internal `expo` compatibility
 identifiers while focused browser evidence proves every visitor-visible and

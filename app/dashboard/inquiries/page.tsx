@@ -19,7 +19,7 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   const client = isClient(user);
   const inquiries = await listInquiriesPage(business.id, query);
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>Customer inquiries</h1><p>{client ? "See explicit contact-bearing inquiries sent to your showroom." : "Review explicit contact-bearing inquiries and their requested offerings."}</p></div></div>
+    <div className="dashboard-head"><div><h1>Customer inquiries</h1><p>{client ? "Review inquiries sent from your AfricMade page." : "Review customer contacts and requested offerings."}</p></div></div>
     {query.saved ? <p className="notice">Inquiry status updated.</p> : null}
     <CollectionToolbar
       action="/dashboard/inquiries"

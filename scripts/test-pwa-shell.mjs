@@ -7,11 +7,12 @@ const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const manifest = JSON.parse(read("public/manifest.webmanifest"));
 
-assert.equal(manifest.name, "MirtPage");
+assert.equal(manifest.name, "AfricMade");
+assert.equal(manifest.short_name, "AfricMade");
 assert.equal(manifest.start_url, "/");
 assert.equal(manifest.scope, "/");
 assert.equal(manifest.display, "standalone");
-assert.equal(manifest.theme_color, "#0B1D3A");
+assert.equal(manifest.theme_color, "#202428");
 assert.ok(manifest.icons.some((icon) => icon.sizes === "192x192" && icon.purpose === "any"));
 assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "any"));
 assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "maskable"));
@@ -32,8 +33,9 @@ for (const [file, size] of [
 
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
-assert.match(worker, /const CACHE_PREFIX = "mirtpage-pwa-"/);
-assert.match(worker, /const VERSION = "v2"/);
+assert.match(worker, /const CACHE_PREFIX = "africmade-pwa-"/);
+assert.match(worker, /const VERSION = "v3"/);
+assert.match(worker, /name\.startsWith\("mirtpage-pwa-"\)/);
 assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
 assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);
 assert.match(worker, /if \(request\.method !== "GET"\) return/);
@@ -54,24 +56,32 @@ assert.match(registration, /process\.env\.NODE_ENV !== "production"/);
 assert.match(registration, /NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED === "false"/);
 assert.match(registration, /navigator\.serviceWorker\.register\("\/sw\.js"/);
 assert.match(registration, /updateViaCache: "none"/);
-assert.match(registration, /name\.startsWith\(CACHE_PREFIX\)/);
+assert.match(registration, /CACHE_PREFIXES\.some\(\(prefix\) => name\.startsWith\(prefix\)\)/);
 
 const publicNavigation = read("components/PublicMobileNavigation.tsx");
 for (const label of ["Market", "Featured", "About"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
 for (const label of ["Sign in", "Dashboard"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
 assert.doesNotMatch(publicNavigation, /label: "Sign up"/);
 assert.match(publicNavigation, /signedIn\s*\? \{ href: "\/dashboard"/);
+assert.match(read("components/PublicAppFrame.tsx"), /signedIn\s*\? <Link href="\/dashboard"/);
+assert.match(read("components/PublicAppFrame.tsx"), /: <Link href="\/login"/);
 assert.match(publicNavigation, /<span>More<\/span>/);
 assert.match(publicNavigation, /aria-haspopup="dialog"/);
 assert.match(publicNavigation, /aria-current=\{active \? "page" : undefined\}/);
 
-for (const file of ["app/page.tsx", "app/featured/page.tsx", "app/about/page.tsx"]) {
-  assert.match(read(file), /<PublicAppShell>/, `${file} renders the shared public application shell`);
+assert.match(read("app/(public)/layout.tsx"), /<PublicAppShell>/, "the public route group renders the shared application shell once");
+for (const file of ["app/(public)/page.tsx", "app/(public)/featured/page.tsx", "app/(public)/about/page.tsx"]) {
+  assert.ok(fs.existsSync(path.join(root, file)), `${file} remains inside the shared public route group`);
 }
+assert.match(read("app/(public)/[handle]/page.tsx"), /withinPublicApp/);
 assert.match(read("components/PublicAppShell.tsx"), /currentUser\(\)/);
-assert.match(read("components/PublicAppFrame.tsx"), /<PublicMobileNavigation signedIn=\{signedIn\} \/>/);
-for (const file of ["app/login/page.tsx", "app/request/page.tsx", "app/privacy/page.tsx", "app/terms/page.tsx", "app/contact-success/page.tsx", "app/invite/[token]/page.tsx"]) {
+assert.match(read("components/PublicAppFrame.tsx"), /showroomOpen \? null : <PublicMobileNavigation signedIn=\{signedIn\} \/>/);
+for (const file of ["app/privacy/page.tsx", "app/terms/page.tsx", "app/contact-success/page.tsx", "app/invite/[token]/page.tsx"]) {
   assert.match(read(file), /<PublicMobileNavigation \/>/, `${file} renders shared phone navigation`);
+}
+for (const file of ["app/login/page.tsx", "app/request/page.tsx"]) {
+  assert.match(read(file), /className="landing-mobile-menu"/, `${file} provides bounded public navigation without stacking the application tabs on its focused form`);
+  assert.doesNotMatch(read(file), /<PublicMobileNavigation/, `${file} keeps one phone navigation model`);
 }
 assert.match(read("app/discover/page.tsx"), /redirect\(/);
 
@@ -93,7 +103,7 @@ assert.match(globals, /grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
 assert.match(globals, /\.workspace-drawer\{width:100%;height:auto;max-height:min\(84dvh,760px\)/);
 
 assert.match(read("components/showroom/bank/bank.module.css"), /@media \(max-width: 760px\) \{\s+\.footer \{\s+display: none;/);
-assert.match(read("components/showroom/showrooms.css"), /@media \(max-width: 620px\) \{\s+\.showroom-host-bar[\s\S]+?\.sr-footer \{\s+display: none;/);
+assert.match(read("components/showroom/showrooms.css"), /@media \(max-width: 680px\) \{\s+\.showroom-host-bar[\s\S]+?\.sr-footer \{\s+display: none;/);
 
 const nextConfig = read("next.config.ts");
 assert.match(nextConfig, /source: "\/sw\.js"/);

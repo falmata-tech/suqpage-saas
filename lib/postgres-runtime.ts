@@ -126,7 +126,7 @@ export function sqliteParametersToPostgres(sql: string) {
 }
 
 export function createPostgresPool(config: PostgresRuntimeConfig) {
-  // PostgreSQL returns BIGINT/Numeric values as strings by default. MirtPage IDs
+  // PostgreSQL returns BIGINT/Numeric values as strings by default. AfricMade IDs
   // and timestamps are bounded safe integers, so normalize them at this adapter.
   types.setTypeParser(20, Number);
   types.setTypeParser(1700, Number);

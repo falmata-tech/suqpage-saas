@@ -4,7 +4,7 @@ title: Reproducible delivery and repository hygiene
 status: in_progress
 related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
 owners: [operations, security]
-last_updated: 2026-08-11
+last_updated: 2026-09-12
 change_level: L3
 ---
 
@@ -349,3 +349,15 @@ Source-map advisory checkpoint on 2026-08-04:
 - `npm ls postcss next` resolves one overridden `postcss@8.5.25` beneath
   unchanged `next@16.2.12`; `npm run release` passes the production build,
   HTTP smoke, scale fixtures, security suites, and zero-vulnerability audit.
+
+Current dependency and release checkpoint on 2026-09-12:
+
+- The lockfile resolves `next@16.3.4`, one overridden `sharp@0.35.4`, and
+  `postcss@8.5.25`; `npm audit --omit=dev` reports zero vulnerabilities.
+- `npm run check`, `npm run release`, and all 10 ordered production-browser
+  workflows pass. The release rehearses the current 51-table, 2,746-row
+  SQLite-to-Supabase PostgreSQL copy with source-byte preservation and verifies
+  isolated Supabase Auth, private Storage, production HTTP security, and bounded
+  66-page scale fixtures.
+- Replacement remote checks remain required for the exact release commit, so
+  the deployment spec remains in progress.

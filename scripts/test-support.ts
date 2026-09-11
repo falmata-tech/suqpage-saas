@@ -159,14 +159,14 @@ async function main() {
   const visitorNow = Date.now() + 20_000;
   const visitorCountBeforeInvalid = Number((db.prepare("SELECT COUNT(*) total FROM support_conversations WHERE participant_kind='visitor'").get() as { total: number }).total);
   await assert.rejects(() => createPublicSupportConversation({
-    category: "sourcing",
+    category: "general",
     email: "invalid",
     phone: "+251911223344",
     message: "This invalid request must not be stored.",
     idempotencyKey: "public-support-invalid-0001",
   }, "visitor-ip-invalid", visitorNow), (error: unknown) => error instanceof SupportError && error.code === "email_required");
   await assert.rejects(() => createPublicSupportConversation({
-    category: "sourcing",
+    category: "general",
     email: "visitor@example.test",
     phone: "12",
     message: "This invalid request must not be stored.",
@@ -174,14 +174,14 @@ async function main() {
   }, "visitor-ip-invalid", visitorNow), (error: unknown) => error instanceof SupportError && error.code === "phone_required");
   assert.equal(Number((db.prepare("SELECT COUNT(*) total FROM support_conversations WHERE participant_kind='visitor'").get() as { total: number }).total), visitorCountBeforeInvalid, "invalid visitor contacts create no support row");
   const visitor = await createPublicSupportConversation({
-    category: "sourcing",
+    category: "shipment_observation",
     email: "Visitor@Example.Test",
     phone: "+251 (911) 223-344",
-    message: "Help me identify a suitable local workshop.",
+    message: "Please help me find a transport option for this purchase.",
     idempotencyKey: "public-support-create-0001",
   }, "visitor-ip-one", visitorNow);
   const visitorThread = await getPublicSupportConversation(visitor.token, visitorNow + 1);
-  assert.equal(visitorThread.category, "sourcing");
+  assert.equal(visitorThread.category, "shipment_observation");
   assert.equal(visitorThread.messages[0]?.sender, "visitor");
   assert.equal("visitorEmail" in visitorThread, false, "the public thread projection does not echo private reconnect details");
   const storedVisitorContact = db.prepare("SELECT visitor_email,visitor_phone FROM support_conversations WHERE id=?").get(visitor.id) as { visitor_email: string; visitor_phone: string };

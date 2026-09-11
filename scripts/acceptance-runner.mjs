@@ -40,8 +40,9 @@ const env = {
   MIRTPAGE_CREDENTIAL_PATH: credentialsPath,
   PRIVACY_SALT: "acceptance-test-privacy-salt-long-enough",
   PORT: String(port),
-  MIRTPAGE_TEST_BASE_URL: baseURL,
-  MIRTPAGE_TEST_CREDENTIALS: credentialsPath,
+    MIRTPAGE_TEST_BASE_URL: baseURL,
+    MIRTPAGE_TEST_CREDENTIALS: credentialsPath,
+    MIRTPAGE_TEST_MAILPIT_URL: `http://127.0.0.1:${browserSupabasePorts.smtp}`,
   MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
   MIRTPAGE_SERVER_ACTION_ORIGINS: baseURL,
   MIRTPAGE_NEXT_DIST_DIR: distDir,
@@ -81,6 +82,11 @@ function prepareBrowserSupabaseProject() {
     .replace(/^additional_redirect_urls = .*$/m, `additional_redirect_urls = ["${baseURL}", "${baseURL}/auth/callback"]`);
   fs.writeFileSync(path.join(supabaseConfigRoot, "config.toml"), config, { flag: "wx" });
   fs.copyFileSync(path.join(process.cwd(), "supabase/seed.sql"), path.join(supabaseConfigRoot, "seed.sql"));
+  fs.cpSync(
+    path.join(process.cwd(), "supabase/templates"),
+    path.join(supabaseConfigRoot, "templates"),
+    { recursive: true },
+  );
 }
 
 function run(command, args, { capture = false, allowFailure = false } = {}) {
@@ -150,7 +156,8 @@ try {
     MIRTPAGE_AUTH_DRIVER: "supabase",
     NEXT_PUBLIC_SUPABASE_URL: apiUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: required(provider, "ANON_KEY"),
-    MIRTPAGE_GOOGLE_AUTH_ENABLED: "0",
+    MIRTPAGE_EMAIL_OTP_ENABLED: "1",
+    MIRTPAGE_GOOGLE_AUTH_ENABLED: "1",
     MIRTPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS: "8000",
     MIRTPAGE_APPROVE_LOCAL_COPY: "COPY_TO_LOCAL_SUPABASE",
     MIRTPAGE_APPROVE_AUTH_MIGRATION: "1",

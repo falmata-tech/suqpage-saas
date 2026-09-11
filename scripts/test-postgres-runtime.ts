@@ -135,22 +135,21 @@ async function main() {
       const unique = `${Date.now()}${Math.floor(Math.random() * 10_000)}`;
       const input = {
         name: "PostgreSQL Signup",
-        email: `postgres-${unique}@example.test`,
         phone: "+251911123456",
         businessName: `PostgreSQL Works ${unique}`,
-        handle: `postgres-works-${unique}`,
-        password: "PostgresSignup123",
-        confirmPassword: "PostgresSignup123",
-        requestText: "We make durable goods and need a clear public showroom for local buyers.",
+        businessCategory: "machinery-tools",
         idempotencyKey: `postgres-signup-${unique}`,
         consent: true,
       };
-      const signup = await createPostgresPublicClientWorkspace(runner, input);
-      assert.ok(signup.userId && signup.businessId && signup.requestId);
+      const identity = { providerUserId: crypto.randomUUID(), email: `postgres-${unique}@example.test` };
+      const signup = await createPostgresPublicClientWorkspace(runner, input, identity);
+      assert.ok(signup.userId && signup.businessId);
+      assert.equal((await runner.query<{ declared_category_key: string }>("SELECT declared_category_key FROM business_onboarding_profiles WHERE business_id=$1", [signup.businessId])).rows[0]?.declared_category_key, "machinery-tools");
+      assert.equal(Number((await runner.query<{ count: string }>("SELECT COUNT(*)::text count FROM service_requests WHERE business_id=$1", [signup.businessId])).rows[0]?.count), 0);
       signupProject = { businessId: signup.businessId, userId: signup.userId };
       await assert.rejects(
-        () => createPostgresPublicClientWorkspace(runner, { ...input, handle: `other-${unique}`, idempotencyKey: `again-${unique}` }),
-        /already uses this email/,
+        () => createPostgresPublicClientWorkspace(runner, { ...input, idempotencyKey: `again-${unique}` }, identity),
+        /already has an AfricMade workspace/,
       );
     });
     assert.ok(signupProject);

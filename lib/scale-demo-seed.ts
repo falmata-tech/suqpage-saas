@@ -185,7 +185,7 @@ const clientGroups: Array<{ industryKey: string; clients: readonly RawClient[] }
     { name: "Aster Lighting Works", tagline: "Light fixtures designed as part of the room.", customer: "homeowners, cafes, and interior designers", customerRequest: "Show the glow and the fixture together, with enough technical information to ask for a project.", paletteRequest: "gold and black", paletteAdvice: "The luxury pairing was too theatrical; amber remains the light cue while midnight blue and white make specifications easier to read.", colors: ["#b77900", "#f3e3b9", "#233f70", "#dce4f2"], neutral: "cool", style: "room", logoConcept: "an A suspended like a pendant shade", visualThesis: "Warm pools of light framed by cool architectural surfaces.", heroTitle: "A room changes when the light belongs there.", heroSubtitle: "Browse pendants, wall lights, task lighting, and coordinated project sets.", process: ["Define place and effect", "Build fixture and wiring", "Test light and finish"], offerings: [["Woven Pendant Light", "Pendants", "standard_product", "A warm pendant with a structured woven shade."], ["Directional Wall Light", "Wall Lights", "standard_product", "A compact adjustable fixture for focused light."], ["Workshop Task Lamp", "Task Lights", "standard_product", "A sturdy articulated lamp for bench work."], ["Cafe Lighting Set", "Project Lighting", "made_to_order", "A coordinated quantity inquiry by layout and finish."]] },
     { name: "Wabi Joinery Studio", tagline: "Fitted storage drawn around the wall it serves.", customer: "homeowners and small offices", customerRequest: "Lead with fitted project thinking and make the inquiry feel approachable.", paletteRequest: "sage and oak", paletteAdvice: "Sage and oak were too soft together; deep green grounds the brand and brick red creates a precise project accent.", colors: ["#b34732", "#f1d9d3", "#24583e", "#d8e8de"], neutral: "fresh", style: "room", logoConcept: "a W made from interlocking joinery shoulders", visualThesis: "Measured wall compositions with warm wood and confident architectural color.", heroTitle: "Storage that begins with the wall, not the catalog.", heroSubtitle: "Review fitted shelves, cabinets, work surfaces, and compact interior packages.", process: ["Measure the room", "Approve layout and material", "Build and fit"], offerings: [["Fitted Wall Shelving", "Storage", "made_to_order", "A measured open-shelf composition for a defined wall."], ["Compact Entry Cabinet", "Cabinetry", "made_to_order", "Closed storage configured around an entry space."], ["Window Work Desk", "Workspaces", "made_to_order", "A fitted desk sized to an available window wall."], ["Small Office Joinery Pack", "Project Joinery", "manufacturing_capability", "Repeat cabinets and work surfaces for a defined small office."]] },
     { name: "Sena Home Textiles", tagline: "Soft furnishings composed as a useful room layer.", customer: "households and small guest spaces", customerRequest: "Make it feel colorful and modern, and show how pieces coordinate without using a busy pattern background.", paletteRequest: "purple, peach, and beige", paletteAdvice: "The three soft hues felt like one fabric; saturated plum and deep teal now frame bright neutral surfaces while peach stays in product styling.", colors: ["#8d3f78", "#eedbea", "#17616a", "#d5e9eb"], neutral: "cool", style: "atelier", logoConcept: "an S folded from a ribbon-like textile", visualThesis: "Large swatches and room details on clean bands with no decorative plaid.", heroTitle: "A room palette built one useful textile at a time.", heroSubtitle: "Coordinate throws, cushions, table linen, and compact guest-room sets.", process: ["Set palette and use", "Cut, sew, and finish", "Coordinate and inspect"], offerings: [["Structured Woven Throw", "Throws", "standard_product", "A substantial throw with a controlled two-color weave."], ["Textured Cushion Pair", "Cushions", "standard_product", "Two removable covers designed to coordinate."], ["Everyday Table Runner", "Table Linen", "standard_product", "A durable runner with a clean hand-finished edge."], ["Guest Room Textile Set", "Hospitality", "made_to_order", "A coordinated textile set discussed by room count and palette."]] },
-    { name: "Dara Clay Works", tagline: "Clay objects shaped for plants, tables, and daily use.", customer: "plant lovers, homes, and cafes", customerRequest: "Use the earthy material without making the whole site brown or rustic.", paletteRequest: "clay brown and sand", paletteAdvice: "Clay supplies the warmth in the images; cobalt and dark green create fresh digital contrast on white and mineral gray.", colors: ["#b44d2f", "#f0d8cf", "#245744", "#d8e8df"], neutral: "cool", style: "material", logoConcept: "a D formed by a pot profile and one handle", visualThesis: "Strong clay silhouettes presented like contemporary design objects.", heroTitle: "Clay forms made to hold, serve, and grow.", heroSubtitle: "Browse planters, table pieces, and small coordinated runs with visible variation.", process: ["Prepare and wedge clay", "Shape and refine", "Fire, finish, and sort"], offerings: [["Indoor Planter Pair", "Planters", "standard_product", "Two complementary planters with drainage."], ["Handled Water Carafe", "Tableware", "standard_product", "A hand-finished carafe with a comfortable pulled handle."], ["Low Serving Dish", "Serveware", "standard_product", "A broad dish with a durable glazed surface."], ["Cafe Tableware Run", "Hospitality", "made_to_order", "A repeat tableware form in an agreed finish and quantity."]] },
+    { name: "Dara Art Studio", tagline: "Original artwork made for walls, rooms, and the people who live with it.", customer: "homes, cafes, hotels, interior designers, and gift buyers", customerRequest: "Present original physical artwork and commissions clearly by size, material, availability, and lead time.", paletteRequest: "coral red, teal, and gallery white", paletteAdvice: "Coral gives the studio a confident signature while deep teal and bright neutral surfaces keep varied artwork readable without turning the page into one decorative theme.", colors: ["#c9432c", "#f3d7d1", "#17616a", "#d8e9eb"], neutral: "paper", style: "material", logoConcept: "a D formed by a picture frame and one sculpted curve", visualThesis: "Finished paintings, carved panels, and sculpture presented as collectible physical objects.", heroTitle: "Artwork made for the wall, the room, and daily life.", heroSubtitle: "Browse available pieces or discuss an original work by size, material, setting, and lead time.", process: ["Set the idea, scale, and material", "Paint, carve, or model", "Finish and prepare the work"], offerings: [["Original Canvas Painting", "Paintings", "standard_product", "An original framed or unframed canvas listed with its dimensions and availability."], ["Carved Wood Wall Panel", "Wall art", "made_to_order", "A carved decorative panel discussed by size, wood, pattern direction, and finish."], ["Hand-Built Clay Sculpture", "Sculpture", "standard_product", "A one-of-a-kind small sculpture for a shelf, table, or interior display."], ["Interior Artwork Commission", "Commissions", "made_to_order", "An original artwork planned around a defined room, dimensions, material, and completion date."]] },
   ] },
   { industryKey: "fashion-textiles", clients: [
     { name: "Sora Workwear Studio", tagline: "Workwear cut for movement and repeat orders.", customer: "small production and service teams", customerRequest: "Show garments clearly and make team sizing and repeat orders feel organized.", paletteRequest: "navy and khaki", paletteAdvice: "Khaki is kept in garment photography, while crisp white, navy, and safety red make the interface more decisive.", colors: ["#bd4038", "#f0d8d5", "#244d78", "#dbe5f0"], neutral: "cool", style: "precision", logoConcept: "an S built from two reinforced seam lines", visualThesis: "Uniform silhouettes and construction details arranged with production discipline.", heroTitle: "A uniform should be easy to move in and easy to reorder.", heroSubtitle: "Compare core garments, pocket layouts, branding, and team production options.", process: ["Choose garment and sizing", "Cut and assemble", "Fit-check and record"], offerings: [["Production Work Shirt", "Work Shirts", "standard_product", "A durable shirt with practical reinforced pockets."], ["Cross-Back Workshop Apron", "Aprons", "standard_product", "An adjustable apron designed to distribute weight."], ["Service Team Trouser", "Trousers", "standard_product", "A repeat trouser with functional pocket placement."], ["Branded Team Uniform Run", "Team Orders", "manufacturing_capability", "A sized repeat garment program with approved branding."]] },
@@ -199,7 +199,7 @@ const clientGroups: Array<{ industryKey: string; clients: readonly RawClient[] }
   ] },
 ];
 
-const growingFactoryGroups: Array<{ industryKey: string; clients: readonly RawClient[] }> = [
+const smallManufacturerGroups: Array<{ industryKey: string; clients: readonly RawClient[] }> = [
   { industryKey: "electronics", clients: [
     { productionScale: "growing_factory", name: "Abay Electrical Assembly", tagline: "Repeatable electrical builds for growing projects.", customer: "contractors, workshops, and commercial facilities", customerRequest: "Present us as a capable Ethiopian assembly floor for repeat B2B orders, with technical clarity and no giant-corporation tone.", paletteRequest: "cobalt, safety yellow, and white", paletteAdvice: "Safety yellow is reserved for production cues while cobalt, white, and charcoal carry the interface with dependable contrast.", colors: ["#1d4ed8", "#dbeafe", "#b45309", "#fef3c7"], neutral: "cool", style: "precision", logoConcept: "an A formed from a switch path and terminal", visualThesis: "Measured assembly lines, labeled specifications, and bold blue wayfinding.", heroTitle: "Electrical assemblies built to repeat cleanly.", heroSubtitle: "Review panel, harness, and enclosure capabilities for project quantities and recurring supply.", process: ["Confirm drawings and duty", "Assemble and inspect", "Test, label, and batch"], offerings: [["Distribution Board Runs", "Power Distribution", "manufacturing_capability", "Configured low-voltage boards assembled in reviewed repeat quantities."], ["Motor Control Panels", "Industrial Controls", "made_to_order", "Motor control panels built around an approved duty and protection schedule."], ["Labeled Cable Harnesses", "Electrical Assemblies", "manufacturing_capability", "Cut, terminated, tested, and labeled harness batches."], ["Sheet-Metal Enclosure Runs", "Enclosures", "production_supply", "Prepared electrical enclosures with repeat cutout and finish requirements."]] },
   ] },
@@ -208,7 +208,7 @@ const growingFactoryGroups: Array<{ industryKey: string; clients: readonly RawCl
   ] },
   { industryKey: "food-farming", clients: [
     { productionScale: "growing_factory", name: "Tena Pasta Works", tagline: "Ethiopian grain shaped for everyday tables.", customer: "distributors, groceries, hotels, schools, and food-service buyers", customerRequest: "Make our pasta line feel modern, reliable, and ready for wholesale conversations while keeping the origin of the grain visible.", paletteRequest: "tomato red, wheat gold, and navy", paletteAdvice: "Wheat gold supports provenance, tomato red creates appetite, and navy gives B2B information a disciplined anchor.", colors: ["#c2412d", "#f5ddd7", "#9a6700", "#f6e8bd"], neutral: "paper", style: "pantry", logoConcept: "a T drawn from one folded ribbon of pasta", visualThesis: "Bright food photography paired with disciplined pack and production information.", heroTitle: "Pasta made here, packed for markets near and far.", heroSubtitle: "Compare shapes, pack formats, and private-label production for retail and institutional supply.", process: ["Select and test grain", "Mix, shape, and dry", "Pack and batch-code"], offerings: [["Spaghetti Production", "Dry Pasta", "production_supply", "Retail and food-service spaghetti supplied in agreed pack formats."], ["Macaroni Production", "Dry Pasta", "production_supply", "Short-cut macaroni for grocery, hospitality, and institutional buyers."], ["Fortified School Pasta", "Institutional Supply", "manufacturing_capability", "A buyer-specified fortified pasta run subject to approved formulation and review."], ["Private-Label Pasta Run", "Private Label", "made_to_order", "Eligible pasta shapes packed to an approved buyer brand and case plan."]] },
-    { productionScale: "growing_factory", name: "Wabi Bottled Water", tagline: "Reliable drinking water for shops, teams, and events.", customer: "retailers, offices, hospitality buyers, schools, and event organizers", customerRequest: "Build confidence around dependable local water supply and multiple pack formats without inventing certifications.", paletteRequest: "clear blue, deep blue, and mint", paletteAdvice: "Clear blue leads product recognition while dark navy grounds logistics and mint is used sparingly for freshness.", colors: ["#0284c7", "#d7eef9", "#173b6c", "#dbe4f1"], neutral: "cool", style: "utility", logoConcept: "a W formed by two meeting water lines", visualThesis: "Crisp pack photography, generous white space, and direct delivery-format comparison.", heroTitle: "Water packed for the way your business serves it.", heroSubtitle: "Review bottle, case, dispenser, and event-label options for recurring local supply.", process: ["Treat and verify the batch", "Fill, seal, and code", "Case and prepare dispatch"], offerings: [["Retail Water Cases", "Bottled Water", "production_supply", "Sealed bottled-water cases in buyer-selected available sizes."], ["Dispenser Jar Supply", "Bulk Water", "production_supply", "Returnable dispenser-jar supply for eligible recurring routes."], ["Hospitality Bottle Packs", "Hospitality Supply", "made_to_order", "Compact bottle formats prepared for hotels, cafes, and meetings."], ["Event Label Water Run", "Custom Packaging", "made_to_order", "Short event runs using an approved label and delivery schedule."]] },
+    { name: "Wabi Feed Mill", tagline: "Small-batch animal feed milled for nearby farms.", customer: "poultry keepers, dairy farmers, livestock cooperatives, and neighborhood farm suppliers", customerRequest: "Present a practical local feed mill with clear animal, growth-stage, ingredient, and bag-size information without inventing nutrition or certification claims.", paletteRequest: "grain gold, field green, and charcoal", paletteAdvice: "Warm grain color identifies the product while deep field green and clean neutral surfaces keep feed types and order details readable.", colors: ["#a96808", "#f3e2bd", "#275b43", "#dce9e1"], neutral: "fresh", style: "provenance", logoConcept: "a W formed by two grain heads above a feed bowl", visualThesis: "Milled grain, pellets, and labeled sacks shown at the scale of a working local feed shop.", heroTitle: "Feed milled for the animals and stage you manage.", heroSubtitle: "Compare poultry, dairy, and small-ruminant blends, then ask about ingredients, bag size, and the next milling day.", process: ["Confirm animal and growth stage", "Measure, mill, and blend", "Bag, label, and record the batch"], offerings: [["Poultry Grower Feed", "Poultry feed", "production_supply", "A small-batch feed blend prepared for an agreed poultry growth stage."], ["Layer Feed Blend", "Poultry feed", "production_supply", "A milled layer blend supplied in currently available local bag sizes."], ["Dairy Concentrate Mix", "Cattle feed", "made_to_order", "A dairy concentrate batch discussed around the buyer's animals and available ingredients."], ["Sheep and Goat Feed Mix", "Livestock feed", "made_to_order", "A small-ruminant feed mix prepared for an agreed use and collection date."]] },
   ] },
   { industryKey: "machinery-tools", clients: [
     { productionScale: "growing_factory", name: "Sheger Rebar Works", tagline: "Project steel prepared to arrive ready for placement.", customer: "contractors, block producers, developers, and construction suppliers", customerRequest: "Show that we add local fabrication value through cut, bend, mesh, and scheduled bundles rather than acting as an importer.", paletteRequest: "industrial red, steel gray, and black", paletteAdvice: "Steel neutrals handle specifications while a controlled red marks actions and safety-critical production details.", colors: ["#b4232d", "#f3d8dc", "#334155", "#e2e8f0"], neutral: "cool", style: "workshop", logoConcept: "an S bent from one ribbed steel bar", visualThesis: "Structural geometry, clear schedules, and project-ready batch evidence.", heroTitle: "Rebar cut, bent, and bundled to the schedule.", heroSubtitle: "Send bar sizes, bending details, project stages, and optional quantities for a fabrication discussion.", process: ["Review the bar schedule", "Cut, bend, and weld", "Tag and bundle by stage"], offerings: [["Cut-and-Bent Rebar", "Rebar Fabrication", "manufacturing_capability", "Rebar prepared to an approved cutting and bending schedule."], ["Welded Mesh Panels", "Reinforcement", "manufacturing_capability", "Repeated welded mesh panels made to reviewed dimensions."], ["Stirrup Production Runs", "Rebar Fabrication", "production_supply", "Batch stirrup production in agreed bar size and dimensions."], ["Tagged Project Bundles", "Project Supply", "made_to_order", "Fabricated reinforcement grouped and tagged by approved project stage."]] },
@@ -221,6 +221,173 @@ const growingFactoryGroups: Array<{ industryKey: string; clients: readonly RawCl
     { productionScale: "growing_factory", name: "Awash Garment Factory", tagline: "Contract garments with fit, finish, and repeatability.", customer: "schools, hospitality teams, brands, clinics, and growing employers", customerRequest: "Show a real contract sewing floor for medium runs, with sample approval and repeat ordering clear to B2B buyers.", paletteRequest: "royal blue, orange, and white", paletteAdvice: "Royal blue carries trust and sizing information while a deeper orange marks sampling milestones and high-value actions with accessible contrast.", colors: ["#2447a8", "#dce3f7", "#a83e12", "#f6dfd3"], neutral: "cool", style: "atelier", logoConcept: "an A formed from a folded pattern piece and stitch line", visualThesis: "Editorial garment detail balanced by production-floor order and measurable run information.", heroTitle: "Garment runs built from one approved standard.", heroSubtitle: "Explore uniform, workwear, private-label, and contract sewing capabilities for repeat organizational orders.", process: ["Develop and approve sample", "Grade, cut, and sew", "Inspect, pack, and record"], offerings: [["School Uniform Programs", "Uniforms", "manufacturing_capability", "Repeat school uniform runs based on approved styles and sizing."], ["Hospitality and Clinic Wear", "Professional Uniforms", "manufacturing_capability", "Coordinated garments for eligible service and care teams."], ["Branded Workwear Runs", "Workwear", "made_to_order", "Durable workwear prepared to an approved garment and branding brief."], ["Private-Label Contract Sewing", "Contract Manufacturing", "manufacturing_capability", "Cut-and-sew production from buyer-approved samples and specifications."]] },
   ] },
 ];
+
+type SmallScaleOverride = Pick<
+  RawClient,
+  "name" | "tagline" | "customer" | "customerRequest" | "logoConcept" |
+  "visualThesis" | "heroTitle" | "heroSubtitle" | "process" | "offerings"
+>;
+
+const smallScaleOverrides: Record<string, SmallScaleOverride> = {
+  "Netsa Hygiene Products": {
+    name: "Netsa Care Goods Workshop",
+    tagline: "Washable care goods cut and sewn for everyday use.",
+    customer: "families, pharmacies, neighborhood shops, and community groups",
+    customerRequest: "Present a careful sewing workshop making reusable personal and household care goods without medical or certification claims.",
+    logoConcept: "an N formed by two folded cotton layers",
+    visualThesis: "Clean material close-ups and clear product-use information in a calm workshop setting.",
+    heroTitle: "Reusable care goods made for everyday routines.",
+    heroSubtitle: "Browse washable pads, baby cloths, care pouches, and small repeat orders made in a local sewing workshop.",
+    process: ["Choose material and size", "Cut, layer, and sew", "Wash-check, finish, and pack"],
+    offerings: [
+      ["Washable Baby Cloth Set", "Baby care", "standard_product", "A soft reusable cloth set cut and sewn for daily baby care."],
+      ["Reusable Menstrual Pad Set", "Personal care", "standard_product", "A washable layered pad set made in reviewed sizes and fabrics."],
+      ["Household Cleaning Cloth Pack", "Home care", "production_supply", "Durable washable cloths prepared in small repeat packs."],
+      ["Custom Care Pouch Run", "Small orders", "made_to_order", "A short run of washable pouches made to an approved size and fabric."],
+    ],
+  },
+  "Sheger Rebar Works": {
+    name: "Sheger Metalwork Workshop",
+    tagline: "Gates, window guards, railings, and fittings made to measure.",
+    customer: "households, builders, shops, and neighborhood contractors",
+    customerRequest: "Show a practical fabrication workshop focused on custom household and building metalwork, not bulk steel supply.",
+    logoConcept: "an S bent from one measured steel line",
+    visualThesis: "Finished metalwork, measured details, and clear custom-order steps in a disciplined workshop presentation.",
+    heroTitle: "Metalwork measured for the place it must fit.",
+    heroSubtitle: "See gates, window guards, railings, and brackets made by a local fabrication workshop.",
+    process: ["Measure the opening or use", "Cut, form, and weld", "Fit, finish, and inspect"],
+    offerings: [
+      ["Steel Entrance Gate", "Gates", "made_to_order", "A welded entrance gate made from approved measurements and finish choices."],
+      ["Window Guard Set", "Window metalwork", "made_to_order", "A coordinated guard set made for reviewed window dimensions."],
+      ["Stair and Balcony Railing", "Railings", "manufacturing_capability", "Measured railing sections fabricated for an approved site layout."],
+      ["Workshop Bracket Run", "Metal fittings", "production_supply", "A repeat set of cut, drilled, and welded brackets from one approved sample."],
+    ],
+  },
+  "Lume Solar Repair": {
+    name: "Lume Solar Light Workshop",
+    tagline: "Practical solar lights assembled for homes, kiosks, and field work.",
+    customer: "households, kiosks, and field operators",
+    customerRequest: "Show our compact solar lighting work clearly and keep the workshop approachable rather than making it look like a utility company.",
+    logoConcept: "a half-sun rising through an L-shaped lamp",
+    visualThesis: "Daylight utility with clear product assemblies and simple runtime information.",
+    heroTitle: "Solar lights built around the place they need to serve.",
+    heroSubtitle: "Compare compact lighting kits, work lamps, and made-to-length connections from a local assembly workshop.",
+    process: ["Match light to the use", "Assemble and connect", "Charge and runtime-test"],
+    offerings: [
+      ["Courtyard Solar Lamp", "Outdoor lights", "standard_product", "A freestanding light assembled for gates, paths, and courtyards."],
+      ["Market Stall Light Kit", "Work lights", "standard_product", "A panel, battery, and two-light kit for evening market work."],
+      ["Two-Room Solar Kit", "Home lights", "made_to_order", "A compact lighting package configured around two rooms and charging needs."],
+      ["Weatherproof DC Cable Set", "Connections", "manufacturing_capability", "Cut, terminated, and tested cable sets for small solar installations."],
+    ],
+  },
+  "Tana Radio Works": {
+    name: "Tana Speaker Workshop",
+    tagline: "Speaker cabinets and audio connections built for local venues.",
+    customer: "worship spaces, schools, cafes, and neighborhood venues",
+    customerRequest: "Show the speaker and cable work as local production, with enough detail to compare size, use, and connection options.",
+    logoConcept: "a sound wave forming a compact T",
+    visualThesis: "A precise listening-room mood with clear cabinet and connection details.",
+    heroTitle: "Sound equipment built around the room it must fill.",
+    heroSubtitle: "Browse speaker cabinets, stands, connection panels, and made-to-length audio cable sets.",
+    process: ["Define room and use", "Build cabinet and connections", "Test level and clarity"],
+    offerings: [
+      ["Compact PA Speaker", "Speakers", "made_to_order", "A durable speaker cabinet configured for a small venue."],
+      ["Floor Monitor Cabinet", "Speakers", "made_to_order", "A low-profile monitor cabinet built around an approved driver size."],
+      ["Speaker Stand Pair", "Stands", "standard_product", "A balanced metal stand pair for compatible compact speakers."],
+      ["Custom Audio Cable Loom", "Connections", "manufacturing_capability", "Labeled audio looms built to connector, length, and routing needs."],
+    ],
+  },
+  "Desta Appliance Repair": {
+    name: "Desta Injera Stove Works",
+    tagline: "Electric injera stoves and kitchen equipment made for daily use.",
+    customer: "households, cafes, and small food businesses",
+    customerRequest: "Make our locally built cooking equipment easy to compare by size, power, controls, and intended kitchen use.",
+    logoConcept: "a D shaped around a round cooking plate",
+    visualThesis: "Practical kitchen equipment shown at working scale with clear controls and dimensions.",
+    heroTitle: "Cooking equipment made around the work of the kitchen.",
+    heroSubtitle: "Compare injera stoves, hotplates, warming cabinets, and made-to-length wiring assemblies.",
+    process: ["Confirm size and power", "Build plate and enclosure", "Heat-test and finish"],
+    offerings: [
+      ["Household Injera Stove", "Cooking equipment", "standard_product", "A compact electric stove prepared for household injera making."],
+      ["Cafe Injera Stove", "Cooking equipment", "made_to_order", "A larger stove configured around an agreed plate and electrical supply."],
+      ["Countertop Hotplate", "Kitchen equipment", "standard_product", "A serviceable single-zone hotplate for everyday cooking."],
+      ["Labeled Stove Wiring Loom", "Electrical parts", "manufacturing_capability", "A measured and labeled loom for an approved stove design."],
+    ],
+  },
+  "Orbit Meter Workshop": {
+    name: "Orbit Meter Assembly",
+    tagline: "Compact meters and sensor displays assembled for everyday equipment.",
+    customer: "growers, workshops, landlords, and equipment builders",
+    customerRequest: "Show repeatable meter and display assemblies with enough detail for a buyer to define range, signal, enclosure, and quantity.",
+    logoConcept: "a meter needle orbiting a small O",
+    visualThesis: "Instrument-panel precision without dashboard clutter.",
+    heroTitle: "A clear reading starts with the right small assembly.",
+    heroSubtitle: "Review hour counters, level displays, temperature panels, and short-run sensor interfaces.",
+    process: ["Define signal and range", "Assemble display and enclosure", "Test, label, and record"],
+    offerings: [
+      ["Pump Hour Counter", "Instruments", "standard_product", "A compact counter assembly for maintenance tracking."],
+      ["Water Level Display", "Instruments", "standard_product", "A simple panel display for an approved tank-level input."],
+      ["Temperature Panel", "Instruments", "made_to_order", "A protected display configured for a compatible temperature sensor."],
+      ["Sensor Display Assembly", "Assemblies", "manufacturing_capability", "A short-run display enclosure for an approved low-voltage sensor."],
+    ],
+  },
+  "Bale Equipment Repair": {
+    name: "Bale Farm Tool Works",
+    tagline: "Small farm tools and mill parts made close to the work.",
+    customer: "growers, small mills, and agricultural cooperatives",
+    customerRequest: "Show the locally fabricated tools and parts clearly by use, dimensions, material, and repeat quantity.",
+    logoConcept: "a field blade and grain line forming a B",
+    visualThesis: "Human-scale agricultural tools grounded in clear material and dimension details.",
+    heroTitle: "Useful farm tools shaped around the work at hand.",
+    heroSubtitle: "Browse hoes, guards, hoppers, and made-to-measure mill parts from a regional metal workshop.",
+    process: ["Measure the use", "Cut, forge, or fabricate", "Fit, finish, and working-test"],
+    offerings: [
+      ["Field Hoe Head", "Hand tools", "standard_product", "A forged hoe head prepared for a locally fitted handle."],
+      ["Compact Grain Hopper", "Mill parts", "made_to_order", "A measured hopper built for an approved small-mill inlet."],
+      ["Pulley Guard Set", "Safety parts", "manufacturing_capability", "A configured guard assembly for an approved belt drive."],
+      ["Replacement Thresher Guard", "Farm equipment parts", "manufacturing_capability", "A new equipment guard built from approved measurements."],
+    ],
+  },
+  "Omo Packaging Factory": {
+    name: "Omo Box Workshop",
+    tagline: "Boxes and dividers made around the product and route.",
+    customer: "farms, food kitchens, studios, and neighborhood retailers",
+    customerRequest: "Present a small box-making workshop with dimensions, print, strength, and repeat orders easy to discuss.",
+    logoConcept: "an O unfolding into a corrugated carton",
+    visualThesis: "Material detail and simple dielines organized as a practical packaging workshop.",
+    heroTitle: "Packaging made for what happens after it leaves you.",
+    heroSubtitle: "Compare small carton runs, dividers, sleeves, and produce boxes for local products.",
+    process: ["Measure product and route", "Sample structure and print", "Cut, fold, inspect, and bundle"],
+    offerings: [
+      ["Small Shipping Box Run", "Transport packaging", "manufacturing_capability", "Repeated cartons configured around reviewed dimensions and load needs."],
+      ["Food Product Sleeve", "Retail packaging", "made_to_order", "Printed sleeves for eligible packaged food products."],
+      ["Protective Box Dividers", "Protective packaging", "production_supply", "Cut or slotted dividers prepared for product separation."],
+      ["Produce Carry Cartons", "Farm packaging", "manufacturing_capability", "Ventilated cartons designed around an approved produce and route brief."],
+    ],
+  },
+  "Awash Garment Factory": {
+    name: "Awash Sewing Workshop",
+    tagline: "Uniforms and small garment runs built from one approved sample.",
+    customer: "schools, cafes, clinics, shops, and small organizations",
+    customerRequest: "Show a capable sewing workshop for small and repeat runs, with sample approval and sizing easy to understand.",
+    logoConcept: "an A formed from a folded pattern piece and stitch line",
+    visualThesis: "Editorial garment detail balanced by orderly cutting, sewing, and sizing information.",
+    heroTitle: "A repeat garment begins with one approved sample.",
+    heroSubtitle: "Explore uniforms, aprons, workwear, and short garment runs for local teams.",
+    process: ["Develop and approve sample", "Grade, cut, and sew", "Inspect, sort, and pack"],
+    offerings: [
+      ["School Uniform Run", "Uniforms", "manufacturing_capability", "Repeat school uniforms based on approved styles and sizing."],
+      ["Cafe Apron Set", "Service wear", "made_to_order", "Coordinated aprons prepared for a small hospitality team."],
+      ["Branded Work Shirt Run", "Workwear", "made_to_order", "Work shirts prepared to an approved garment and marking brief."],
+      ["Small-Label Sewing Run", "Contract sewing", "manufacturing_capability", "Cut-and-sew production from a buyer-approved sample and specification."],
+    ],
+  },
+};
+
+function smallScaleClient(raw: RawClient): RawClient {
+  const override = smallScaleOverrides[raw.name];
+  return override ? { ...raw, ...override, productionScale: "workshop" } : { ...raw, productionScale: "workshop" };
+}
 
 function slug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -244,10 +411,11 @@ function spreadDemoCoordinate(location: SeededMarketplaceProfile, groupIndex: nu
   };
 }
 
-export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGroups, ...growingFactoryGroups].flatMap(
-  ({ industryKey, clients }, groupIndex) => clients.map((raw, index) => {
-    const handle = `demo-${slug(raw.name)}`;
-    const assignedIndustryKey = industryKey === "food-farming" && /(farm|orchard|seed-grower)/.test(handle)
+export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGroups, ...smallManufacturerGroups].flatMap(
+  ({ industryKey, clients }, groupIndex) => clients.map((source, index) => {
+    const raw = smallScaleClient(source);
+    const handle = `demo-${slug(source.name)}`;
+    const assignedIndustryKey = industryKey === "food-farming" && /(farm|orchard|seed-grower|feed-mill)/.test(handle)
       ? "agriculture-growers"
       : industryKey;
     const location = locations[locationPlans[industryKey][index]];
@@ -263,7 +431,7 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
     const description = `${raw.tagline} Browse the work by product, production approach, and the questions that matter to ${raw.customer}.`;
     return {
       handle,
-      productionScale: raw.productionScale ?? (handle === "demo-laga-grain-mill" ? "growing_factory" : "workshop"),
+      productionScale: "workshop",
       name: raw.name,
       tagline: raw.tagline,
       description,

@@ -2,7 +2,7 @@
 id: FE-034
 title: Installable PWA and mobile application shell
 status: done
-related: [FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE_BASE, DEP-020, DEP-023, DEP-025]
+related: [FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE-038, FE_BASE, DEP-020, DEP-023, DEP-025]
 owners: [product, frontend, design]
 last_updated: 2026-08-14
 change_level: L2

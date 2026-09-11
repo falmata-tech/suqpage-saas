@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const CACHE_PREFIX = "mirtpage-pwa-";
+const CACHE_PREFIXES = ["africmade-pwa-", "mirtpage-pwa-"];
 
 async function removeDevelopmentWorkers() {
   const registrations = await navigator.serviceWorker.getRegistrations();
@@ -11,7 +11,7 @@ async function removeDevelopmentWorkers() {
     .map((registration) => registration.unregister()));
   if (!("caches" in window)) return;
   const names = await caches.keys();
-  await Promise.all(names.filter((name) => name.startsWith(CACHE_PREFIX)).map((name) => caches.delete(name)));
+  await Promise.all(names.filter((name) => CACHE_PREFIXES.some((prefix) => name.startsWith(prefix))).map((name) => caches.delete(name)));
 }
 
 export default function PwaRegistration() {

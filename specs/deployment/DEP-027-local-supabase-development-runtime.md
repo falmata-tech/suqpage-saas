@@ -2,9 +2,9 @@
 id: DEP-027
 title: Local Supabase development runtime
 status: in_progress
-related: [BE-024, BE-027, BE-030, DEP-023, DEP-026, ADR-0013, ADR-0014, ADR-0015]
+related: [FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
 owners: [development, backend, operations]
-last_updated: 2026-08-24
+last_updated: 2026-08-27
 change_level: L3
 ---
 
@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage needs one PostgreSQL application model in development and production
+AfricMade needs one PostgreSQL application model in development and production
 without allowing local reset, seed, Auth, Storage, or Realtime work to touch the
 hosted Supabase project.
 
@@ -26,9 +26,18 @@ hosted Supabase project.
   stack; it never resets the developer stack or another repository's stack.
 - Local application URLs and database hosts are loopback-only. Guarded setup
   rejects any remote destination before a destructive operation.
+- Local Google sign-in preserves the approved loopback hostname that began the
+  flow. The callback returns to that same hostname and port so the PKCE verifier
+  and resulting Supabase session use one cookie scope. Production ignores the
+  request host and always uses the configured AfricMade origin.
 - Local Auth, private Storage, and captured email use local provider endpoints;
   production credentials are absent from local setup scripts. Realtime remains
   disabled until the optional visibility-scoped support adapter is implemented.
+- Local Google OAuth uses a separate Google Web client with the exact local
+  application origin and local Supabase callback. Its client ID and secret live
+  only in the ignored root `.env`; the local runtime exposes the Google entry
+  control only when both values are present. Hosted Google credentials are not
+  copied into local configuration.
 - Analytics, Vector buckets, Edge Runtime, Studio, and the local transaction
   pooler remain disabled because MirtPage does not depend on them in local
   development; the direct loopback PostgreSQL port is authoritative.
@@ -58,6 +67,18 @@ Scenario: Developer starts the application
   THEN it uses loopback PostgreSQL and local provider endpoints
   AND no hosted Supabase credential is required
 
+Scenario: Developer enables local Google entry
+  GIVEN a separate local Google Web client is configured in the ignored `.env`
+  WHEN the local Supabase stack and AfricMade development server restart
+  THEN the local provider uses `http://127.0.0.1:54321/auth/v1/callback`
+  AND the login page offers Google without exposing either provider secret
+
+Scenario: Browser starts Google sign-in on an approved alternate loopback host
+  GIVEN the configured application origin is `http://127.0.0.1:3000`
+  WHEN the browser starts Google sign-in through `http://localhost:3000`
+  THEN the application callback uses `http://localhost:3000/auth/callback`
+  AND the PKCE verifier and resulting session remain on the initiating host
+
 Scenario: Local setup receives a hosted database URL
   GIVEN a reset or seed command intended for local development
   WHEN its destination is not an approved loopback Supabase endpoint
@@ -77,8 +98,9 @@ Scenario: Browser acceptance runs beside another Supabase project
 | Gate | Evidence |
 |---|---|
 | Local configuration isolation | static local-runtime contract test |
+| Loopback Auth callback scope | focused callback-origin unit and browser OAuth smoke |
 | PostgreSQL schema and adapters | migrations plus PostgreSQL runtime suite |
-| Local Auth and Storage | focused signup/login/upload browser smoke |
+| Local Auth and Storage | focused email/Google signup, login, callback, and upload browser smoke |
 | Browser runtime parity and stack isolation | production browser acceptance against disposable Supabase plus Docker project/port assertions |
 | No hosted reset | negative destination-guard test |
 
@@ -108,6 +130,13 @@ read-only migration comparison until the explicit retirement cleanup.
   project rather than starting a production server on SQLite/local Auth.
 - No hosted project was reset and no production credential was emitted or
   copied into the local runtime.
+- On 2026-08-27 a separate local Google Web client was admitted through the
+  ignored mode-`0600` `.env`. The isolated Supabase stack restarted on the
+  existing 54321/54322 port family, generated a Google-enabled application
+  runtime, and focused 390px Chromium proved the visible Google control routes
+  to `accounts.google.com` with
+  `http://127.0.0.1:54321/auth/v1/callback`. Real consent and code exchange with
+  an allowlisted test user remain pending.
 - On 2026-08-24 the disposable browser project again copied 50 tables and 2,738
   rows, linked all 47 retained identities, and passed production API/security
   smoke on its isolated 563xx port family. Release no longer starts an

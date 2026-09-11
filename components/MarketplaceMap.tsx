@@ -228,6 +228,12 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
           const element = marker.getElement();
           element?.setAttribute("role", "button");
           element?.setAttribute("aria-label", accessibleName);
+          element?.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            event.stopPropagation();
+            marker.fire("click");
+          });
           markerRefs.current.push(marker);
           mountedMarkerCount += 1;
         };
@@ -248,11 +254,11 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             const marker = L.marker([group.latitude, group.longitude], {
               icon,
               keyboard: true,
-              title: `${group.count} nearby showrooms in ${group.city}`,
-              alt: `${group.count} nearby showrooms in ${group.city}`,
+              title: `${group.count} nearby pages in ${group.city}`,
+              alt: `${group.count} nearby pages in ${group.city}`,
               riseOnHover: true,
             }).on("click", () => callbackRef.current.onOpenNearbyGroup(group));
-            addMarker(marker, `${group.count} nearby showrooms in ${group.city}. Open nearby showrooms.`);
+            addMarker(marker, `${group.count} nearby pages in ${group.city}. Open nearby pages.`);
           }
           for (const showroom of data.showrooms) {
             if (groupedShowroomIds.has(showroom.id) || !bounds.contains([showroom.latitude, showroom.longitude])) continue;
@@ -262,8 +268,8 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             const icon = L.divIcon({
               className: "mp-map-div-icon",
               html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}><i class="mp-map-storefront" aria-hidden="true"><i></i></i><b>${lines}</b>${status}</span>`,
-              iconSize: [96, 74],
-              iconAnchor: [48, 31],
+              iconSize: [44, 44],
+              iconAnchor: [22, 25],
             });
             const marker = L.marker([showroom.latitude, showroom.longitude], {
               icon,
@@ -272,7 +278,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
               alt: `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}`,
               riseOnHover: true,
             }).on("click", () => callbackRef.current.onSelectShowroom(showroom));
-            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. Open business preview.`);
+            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. Open page preview.`);
           }
         } else {
           const markers = clusterIndexRef.current.getClusters(viewport, zoom);
@@ -292,13 +298,13 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
               const marker = L.marker([latitude, longitude], {
                 icon,
                 keyboard: true,
-                title: `${feature.properties.point_count} nearby showrooms`,
-                alt: `${feature.properties.point_count} nearby showrooms. Zoom to reveal.`,
+                title: `${feature.properties.point_count} nearby pages`,
+                alt: `${feature.properties.point_count} nearby pages. Zoom to reveal.`,
               }).on("click", () => {
                 const expansionZoom = clusterIndexRef.current.getClusterExpansionZoom(clusterId);
                 map?.setView([latitude, longitude], Math.min(expansionZoom, NEARBY_GROUP_ZOOM), { animate: true });
               });
-              addMarker(marker, `${feature.properties.point_count} nearby showrooms. Zoom to reveal.`);
+              addMarker(marker, `${feature.properties.point_count} nearby pages. Zoom to reveal.`);
               continue;
             }
             const showroom = showroomById.get(feature.properties.showroomId);
@@ -309,8 +315,8 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             const icon = L.divIcon({
               className: "mp-map-div-icon",
               html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}><i class="mp-map-storefront" aria-hidden="true"><i></i></i><b>${lines}</b>${status}</span>`,
-              iconSize: [96, 74],
-              iconAnchor: [48, 31],
+              iconSize: [44, 44],
+              iconAnchor: [22, 25],
             });
             const marker = L.marker([latitude, longitude], {
               icon,
@@ -325,7 +331,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
                 callbackRef.current.onSelectShowroom(showroom);
               }
             });
-            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. ${zoom < SHOWROOM_DETAIL_ZOOM ? "Zoom to business." : "Open business preview."}`);
+            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. ${zoom < SHOWROOM_DETAIL_ZOOM ? "Zoom to location." : "Open page preview."}`);
           }
         }
 
@@ -347,7 +353,9 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
         if (containerRef.current) containerRef.current.dataset.tileStatus = "degraded";
       });
       tileLayerRef.current.on("load", () => {
-        if (containerRef.current) containerRef.current.dataset.tileStatus = "ready";
+        if (containerRef.current && containerRef.current.dataset.tileStatus !== "degraded") {
+          containerRef.current.dataset.tileStatus = "ready";
+        }
       });
       renderMarkers();
       resizeObserver = new ResizeObserver(() => {
@@ -383,7 +391,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     data-map-marker-count="0"
     data-map-zoom={DEFAULT_ZOOM}
     role="region"
-    aria-label="Interactive OpenStreetMap map with clustered showroom locations"
+    aria-label="Interactive OpenStreetMap map with clustered AfricMade page locations"
   />;
 });
 

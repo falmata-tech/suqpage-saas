@@ -39,7 +39,24 @@ assert.equal(active.length, 66, "portfolio contains 66 active fictional clients"
 assert.equal(SCALE_DEMO_BUSINESSES.length, 56, "56 clients use complete explicit creative records");
 assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.creative.customerRequest)).size, 56, "scale clients have independent customer requests");
 assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.heroTitle)).size, 56, "scale clients have independent hero direction");
-assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "growing_factory").length, 9, "nine growing factories broaden the portfolio");
+assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "workshop").length, 56, "every expanded demo represents a small-scale operation");
+assert.equal(SCALE_DEMO_BUSINESSES.filter((business) => business.productionScale === "growing_factory").length, 0, "the public demo portfolio does not present large factories");
+assert.ok(SCALE_DEMO_BUSINESSES.every((business) => !/\b(?:factory|repair)\b/i.test(business.name)), "demo identities contain no factory or repair-only labels");
+assert.ok(SCALE_DEMO_BUSINESSES.every((business) => !/\b(?:bottled water|water bottling|diaper production)\b/i.test([business.name, business.tagline, business.description, ...business.offerings.map((offering) => `${offering.name} ${offering.description}`)].join(" "))), "demo identities avoid capital-intensive bottled-water and diaper production");
+assert.ok(SCALE_DEMO_BUSINESSES.some((business) => business.name === "Wabi Feed Mill"), "the portfolio includes a local small-batch animal-feed maker");
+const artStudio = SCALE_DEMO_BUSINESSES.find((business) => business.name === "Dara Art Studio");
+assert.ok(artStudio, "the portfolio includes a physical-art studio");
+assert.equal(artStudio.industryKey, "home-living", "the art studio appears under Furniture, art & building");
+assert.deepEqual(
+  artStudio.offerings.map((offering) => offering.name),
+  ["Original Canvas Painting", "Carved Wood Wall Panel", "Hand-Built Clay Sculpture", "Interior Artwork Commission"],
+  "the art studio represents paintings, carving, sculpture, and commissioned interior work",
+);
+assert.equal(
+  SCALE_DEMO_BUSINESSES.find((business) => business.name === "Wabi Feed Mill")?.industryKey,
+  "agriculture-growers",
+  "the animal-feed mill appears under Farms, livestock & feed",
+);
 
 for (const business of active) {
   const catalog = getCatalogByBusinessId(business.id);

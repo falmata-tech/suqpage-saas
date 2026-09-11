@@ -1,18 +1,18 @@
-# Awash Garment Factory showroom brief
+# Awash Sewing Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Awash Garment Factory
+- Business name: Awash Sewing Workshop
 - Permanent handle: `demo-awash-garment-factory`
 - Location: Addis Ababa, Addis Ababa
 - Existing logo/mark: generated geometric mark based on an A formed from a folded pattern piece and stitch line
-- Short description: Show a real contract sewing floor for medium runs, with sample approval and repeat ordering clear to B2B buyers.
+- Short description: Show a capable sewing workshop for small and repeat runs, with sample approval and sizing easy to understand.
 
 ## Customer And Goal
 
-- Primary customer: schools, hospitality teams, brands, clinics, and growing employers
+- Primary customer: schools, cafes, clinics, shops, and small organizations
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -23,7 +23,7 @@
 - Customer color request: royal blue, orange, and white
 - Designer advice: Royal blue carries trust and sizing information while a deeper orange marks sampling milestones and high-value actions with accessible contrast.
 - Logo concept: an A formed from a folded pattern piece and stitch line
-- Visual thesis: Editorial garment detail balanced by production-floor order and measurable run information.
+- Visual thesis: Editorial garment detail balanced by orderly cutting, sewing, and sizing information.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: School Uniform Programs (Uniforms); Hospitality and Clinic Wear (Professional Uniforms); Branded Workwear Runs (Workwear); Private-Label Contract Sewing (Contract Manufacturing)
+- Products or capabilities: School Uniform Run (Uniforms); Cafe Apron Set (Service wear); Branded Work Shirt Run (Workwear); Small-Label Sewing Run (Contract sewing)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,10 +55,10 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-awash-garment-factory/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-awash-garment-factory/product-1.webp` | School Uniform Programs | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-awash-garment-factory/product-2.webp` | Hospitality and Clinic Wear | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-awash-garment-factory/product-3.webp` | Branded Workwear Runs | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-awash-garment-factory/product-4.webp` | Private-Label Contract Sewing | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-awash-garment-factory/product-1.webp` | School Uniform Run | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-awash-garment-factory/product-2.webp` | Cafe Apron Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-awash-garment-factory/product-3.webp` | Branded Work Shirt Run | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-awash-garment-factory/product-4.webp` | Small-Label Sewing Run | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-awash-garment-factory.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction

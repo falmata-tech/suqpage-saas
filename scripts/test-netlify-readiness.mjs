@@ -20,6 +20,8 @@ for (const name of [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
   "MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY",
+  "MIRTPAGE_EMAIL_OTP_ENABLED",
+  "MIRTPAGE_GOOGLE_AUTH_ENABLED",
 ]) assert.match(environment, new RegExp(`^${name}=`, "m"));
 assert.match(environment, /^MIRTPAGE_DATABASE_DRIVER=postgres$/m);
 assert.match(environment, /^MIRTPAGE_MEDIA_DRIVER=supabase$/m);

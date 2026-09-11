@@ -84,7 +84,7 @@ export default function FeaturedShowrooms({ entries }: { entries: ShowroomDirect
         if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
       }}
     >
-      <div className="featured-rail" ref={railRef} aria-label="Featured showrooms">
+      <div className="featured-rail" ref={railRef} aria-label="Featured pages">
         {entries.map((entry) => <FeaturedCard entry={entry} key={entry.id} />)}
         {entries.length > 1 && entries.map((entry) => <FeaturedCard entry={entry} clone key={`clone-${entry.id}`} />)}
       </div>

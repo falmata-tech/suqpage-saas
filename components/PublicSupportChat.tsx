@@ -4,11 +4,8 @@ import { FileText, Headphones, Paperclip, Send, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 const categories = [
-  { key: "general", label: "General help" },
-  { key: "sourcing", label: "Find a supplier" },
-  { key: "document_review", label: "Review documents" },
-  { key: "site_visit", label: "Arrange a site visit" },
-  { key: "shipment_observation", label: "Observe a shipment" },
+  { key: "general", label: "AfricMade help or report" },
+  { key: "shipment_observation", label: "Transport arrangements" },
 ] as const;
 
 type Conversation = {
@@ -172,14 +169,14 @@ export default function PublicSupportChat() {
   }
 
   return <>
-    <button ref={launcherRef} className="public-support-launcher" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}>
+    <button ref={launcherRef} className="public-support-launcher" type="button" onClick={() => setOpen(true)} aria-label="Get help" aria-haspopup="dialog" aria-expanded={open}>
       <Headphones aria-hidden="true" />
-      <span>Ask MirtPage</span>
+      <span>Get help</span>
     </button>
     <dialog ref={dialogRef} className="public-support-dialog" aria-labelledby="public-support-title" onClose={() => setOpen(false)} onCancel={(event) => { event.preventDefault(); close(); }} onClick={(event) => { if (event.target === dialogRef.current) close(); }}>
       <section className={conversation ? "has-conversation" : "new-conversation"}>
         <header>
-          <div><span>Live support</span><h2 id="public-support-title">Ask MirtPage</h2></div>
+          <div><span>Live support</span><h2 id="public-support-title">AfricMade help</h2></div>
           <button type="button" onClick={close} aria-label="Close support"><X aria-hidden="true" /></button>
         </header>
         {!loaded ? <p className="public-support-loading" role="status">Opening support…</p> : conversation ? <>
@@ -195,9 +192,9 @@ export default function PublicSupportChat() {
             </article>)}
           </div>
         </> : <div className="public-support-intro">
-          <p>Browse and contact showrooms directly. Ask our team for sourcing support, a document review, an on-site observation, or shipment observation.</p>
-          <small>These services provide documented assistance, not certification, a guarantee, or an endorsement.</small>
-          <label className="public-support-category" htmlFor="public-support-category">How can we help?<select id="public-support-category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number]["key"])}>{categories.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select></label>
+          <p>Ask how AfricMade works, get help arranging transport, or report a concern about a listing.</p>
+          <small>Buying, payment, product details, and commercial terms stay between you and the listed operation.</small>
+          <label className="public-support-category" htmlFor="public-support-category">What do you need?<select id="public-support-category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number]["key"])}>{categories.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select></label>
         </div>}
         {conversation?.status === "closed" ? error ? <p className="public-support-error" role="alert">{error}</p> : null : loaded ? <form onSubmit={submit}>
           {!conversation ? <div className="public-support-contact-fields">

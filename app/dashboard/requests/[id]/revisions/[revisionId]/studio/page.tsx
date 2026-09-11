@@ -98,10 +98,10 @@ export default async function RecipeStudioPage({
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">AI-assisted design</p>
-          <h1>Showroom design workspace</h1>
+          <h1>Page design workspace</h1>
           <p>
             Prepare one complete content and design plan for{" "}
-            {data.workspace.businessName}. The live showroom remains unchanged.
+            {data.workspace.businessName}. The live page remains unchanged.
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default async function RecipeStudioPage({
           <div>
             <p className="eyebrow">Edit the private draft</p>
             <h2>Choose the part you need to change</h2>
-            <p>Every change stays in this revision until the client approves it and MirtPage publishes it.</p>
+            <p>Every change stays in this revision until the client approves it and AfricMade publishes it.</p>
           </div>
         </div>
         <div className="showroom-editing-grid">
@@ -180,7 +180,7 @@ export default async function RecipeStudioPage({
       <section className="panel review-submit" id="showroom-preview-action">
         <div>
           <p className="eyebrow">Preview</p>
-          <h2>Review the complete showroom</h2>
+          <h2>Review the complete page</h2>
           <p>Check desktop and mobile presentation before sending this revision to the client.</p>
         </div>
         <Link

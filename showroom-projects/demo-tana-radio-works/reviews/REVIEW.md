@@ -1,4 +1,4 @@
-# Tana Radio Works review
+# Tana Speaker Workshop review
 
 - [x] 1440px full-page capture inspected
 - [x] 390px full-page capture inspected

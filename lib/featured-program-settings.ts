@@ -197,7 +197,7 @@ export async function listFeaturedProgramEligibleBusinesses(industryKey: string,
     WHERE b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
-      AND p.booth_image_path LIKE '/%'
+      AND b.hero_image_path LIKE '/%'
       AND EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=?

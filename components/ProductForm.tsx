@@ -109,7 +109,7 @@ export default function ProductForm({
           onChange={(event) => setPrice(event.target.value)}
           placeholder="Example: 1250"
         />
-        <small>Informational only. MirtPage does not collect payment.</small>
+        <small>Informational only. AfricMade does not collect payment.</small>
       </div>
 
       <div className="field">
@@ -351,7 +351,7 @@ export default function ProductForm({
         <strong>This publishes only this offering update.</strong>
         <span>
           Design, options, order, categories, and business settings
-          stay protected. A retained showroom version is created automatically.
+          stay protected. A retained page version is created automatically.
         </span>
       </div>
 

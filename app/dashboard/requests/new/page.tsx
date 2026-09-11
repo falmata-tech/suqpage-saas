@@ -14,5 +14,5 @@ export default async function NewClientRequestPage() {
   const current=await runtimeCurrentShowroomProject(business.id);
   if(current)redirect(`/dashboard/requests/${current.id}`);
   const requestType=await runtimeRequestTypeForBusiness(business.id);
-  return <DashboardShell user={user} business={business}><NavigationTrail items={[{label:"Showroom project",href:"/dashboard/requests"},{label:requestType==="onboarding"?"Create showroom":"Update showroom"}]} fallback="/dashboard/requests"/><div className="dashboard-head"><div><h1>{requestType==="onboarding"?"Create your showroom":"Update your showroom"}</h1><p>Describe the outcome in your own words. MirtPage will prepare a private revision for your approval.</p></div></div><ClientRequestForm requestType={requestType}/></DashboardShell>;
+  return <DashboardShell user={user} business={business}><NavigationTrail items={[{label:"Page project",href:"/dashboard/requests"},{label:requestType==="onboarding"?"Create page":"Update page"}]} fallback="/dashboard/requests"/><div className="dashboard-head"><div><h1>{requestType==="onboarding"?"Create your AfricMade page":"Update your page"}</h1><p>Describe the outcome in your own words. AfricMade will prepare a private revision for your approval.</p></div></div><ClientRequestForm requestType={requestType}/></DashboardShell>;
 }

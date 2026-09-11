@@ -1,14 +1,14 @@
-# Lume Solar Repair showroom brief
+# Lume Solar Light Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Lume Solar Repair
+- Business name: Lume Solar Light Workshop
 - Permanent handle: `demo-lume-solar-repair`
 - Location: Addis Ababa, Addis Ababa
-- Existing logo/mark: generated geometric mark based on a half-sun rising through a repair ring
-- Short description: Make repair feel trustworthy and show complete small solar kits without looking like a large utility company.
+- Existing logo/mark: generated geometric mark based on a half-sun rising through an L-shaped lamp
+- Short description: Show our compact solar lighting work clearly and keep the workshop approachable rather than making it look like a utility company.
 
 ## Customer And Goal
 
@@ -22,8 +22,8 @@
 
 - Customer color request: yellow everywhere with dark gray
 - Designer advice: A full yellow interface would reduce readability; warm yellow becomes the energy cue against white, with deep teal for dependable actions.
-- Logo concept: a half-sun rising through a repair ring
-- Visual thesis: Daylight utility with clear before-and-after product evidence.
+- Logo concept: a half-sun rising through an L-shaped lamp
+- Visual thesis: Daylight utility with clear product assemblies and simple runtime information.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Lantern Battery Rebuild (Repair); Charge Controller Repair (Repair); Two-Room Solar Kit (Solar Kits); Weatherproof DC Cable Set (Connections)
+- Products or capabilities: Courtyard Solar Lamp (Outdoor lights); Market Stall Light Kit (Work lights); Two-Room Solar Kit (Home lights); Weatherproof DC Cable Set (Connections)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,8 +55,8 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-lume-solar-repair/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-lume-solar-repair/product-1.webp` | Lantern Battery Rebuild | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-lume-solar-repair/product-2.webp` | Charge Controller Repair | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-lume-solar-repair/product-1.webp` | Courtyard Solar Lamp | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-lume-solar-repair/product-2.webp` | Market Stall Light Kit | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-lume-solar-repair/product-3.webp` | Two-Room Solar Kit | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-lume-solar-repair/product-4.webp` | Weatherproof DC Cable Set | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-lume-solar-repair.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
@@ -75,7 +75,7 @@
 
 - Approved logo/name treatment: generated mark plus exact business name
 - Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
-- Product/craft cue: a half-sun rising through a repair ring
+- Product/craft cue: a half-sun rising through an L-shaped lamp
 - Generated image authorized: yes, for disposable demonstration use
 
 ## Acceptance Notes

@@ -89,7 +89,7 @@ export async function ensureBusinessSubscription(
     INSERT INTO business_subscriptions(
       business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
       current_period_end,grace_ends_at,updated_at
-    ) VALUES(?,'MirtPage monthly',?,'ETB',?,?,?,?,?)
+    ) VALUES(?,'AfricMade monthly',?,'ETB',?,?,?,?,?)
     ON CONFLICT (business_id) DO NOTHING
   `, [
     businessId,

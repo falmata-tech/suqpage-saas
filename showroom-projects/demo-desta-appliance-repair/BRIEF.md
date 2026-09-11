@@ -1,18 +1,18 @@
-# Desta Appliance Repair showroom brief
+# Desta Injera Stove Works showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Desta Appliance Repair
+- Business name: Desta Injera Stove Works
 - Permanent handle: `demo-desta-appliance-repair`
 - Location: Adama, Oromia
-- Existing logo/mark: generated geometric mark based on a D shaped like an open tool case
-- Short description: Lead with repair confidence and make it easy to understand which appliances we accept.
+- Existing logo/mark: generated geometric mark based on a D shaped around a round cooking plate
+- Short description: Make our locally built cooking equipment easy to compare by size, power, controls, and intended kitchen use.
 
 ## Customer And Goal
 
-- Primary customer: households and small food businesses
+- Primary customer: households, cafes, and small food businesses
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -22,8 +22,8 @@
 
 - Customer color request: green because repair is sustainable
 - Designer advice: Green alone looked generic, so a deep repair-bay blue provides structure and a vivid green is reserved for successful service cues.
-- Logo concept: a D shaped like an open tool case
-- Visual thesis: Friendly service clarity with equipment shown at working scale.
+- Logo concept: a D shaped around a round cooking plate
+- Visual thesis: Practical kitchen equipment shown at working scale with clear controls and dimensions.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Refrigerator Control Diagnostic (Cooling); Blender Motor Rewind (Kitchen Equipment); Commercial Cooker Service (Kitchen Equipment); Replacement Wiring Loom (Parts)
+- Products or capabilities: Household Injera Stove (Cooking equipment); Cafe Injera Stove (Cooking equipment); Countertop Hotplate (Kitchen equipment); Labeled Stove Wiring Loom (Electrical parts)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,10 +55,10 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-desta-appliance-repair/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-1.webp` | Refrigerator Control Diagnostic | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-2.webp` | Blender Motor Rewind | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-3.webp` | Commercial Cooker Service | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-4.webp` | Replacement Wiring Loom | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-1.webp` | Household Injera Stove | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-2.webp` | Cafe Injera Stove | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-3.webp` | Countertop Hotplate | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-desta-appliance-repair/product-4.webp` | Labeled Stove Wiring Loom | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-desta-appliance-repair.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction
@@ -75,7 +75,7 @@
 
 - Approved logo/name treatment: generated mark plus exact business name
 - Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
-- Product/craft cue: a D shaped like an open tool case
+- Product/craft cue: a D shaped around a round cooking plate
 - Generated image authorized: yes, for disposable demonstration use
 
 ## Acceptance Notes
