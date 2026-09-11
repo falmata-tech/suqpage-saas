@@ -17,7 +17,7 @@ export async function notifySupportQueue(
         signal: AbortSignal.timeout(options.timeoutMs ?? 5_000),
         body: JSON.stringify({
           chat_id: chatId,
-          text: `New MirtPage support request ${conversation.publicRef} from ${conversation.businessName}.${conversation.assignedUserName ? ` Assigned to ${conversation.assignedUserName}.` : " Waiting for an available agent."}\n${appUrl}/dashboard/support/${conversation.id}`,
+          text: `New AfricMade support request ${conversation.publicRef} from ${conversation.businessName}.${conversation.assignedUserName ? ` Assigned to ${conversation.assignedUserName}.` : " Waiting for an available agent."}\n${appUrl}/dashboard/support/${conversation.id}`,
           disable_web_page_preview: true,
         }),
       },

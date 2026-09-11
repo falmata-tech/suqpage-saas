@@ -92,7 +92,7 @@ export default async function RevisionPreviewPage({
         <div>
           <span className={`badge ${revision.status}`}>{revision.status.replaceAll("_", " ")}</span>
           <h1>Revision {revision.revision_number} private preview</h1>
-          <p>Request {request.public_ref} · based on live showroom version {revision.base_content_version}</p>
+          <p>Request {request.public_ref} · based on live page version {revision.base_content_version}</p>
           {revision.summary ? <p><strong>What changed:</strong> {revision.summary}</p> : null}
         </div>
       </section>
@@ -107,7 +107,7 @@ export default async function RevisionPreviewPage({
               </div>
             ))}
           </div>
-          <p>The public showroom is unchanged. Review this private preview before sending it to the client.</p>
+          <p>The public page is unchanged. Review this private preview before sending it to the client.</p>
         </section>
       ) : null}
       {query.submitted ? <p className="notice">Revision sent for client review.</p> : null}
@@ -137,7 +137,7 @@ export default async function RevisionPreviewPage({
           <input type="hidden" name="revisionId" value={revisionId} />
           <div className="field full">
             <label htmlFor="decision-comment">Comments <span className="optional">required when rejecting</span></label>
-            <textarea id="decision-comment" name="comment" maxLength={1000} placeholder="Tell MirtPage what should change, or add an optional approval note." />
+            <textarea id="decision-comment" name="comment" maxLength={1000} placeholder="Tell AfricMade what should change, or add an optional approval note." />
           </div>
           <div className="inline-actions">
             <button className="btn brand" name="decision" value="approve">Approve this revision</button>
@@ -151,7 +151,7 @@ export default async function RevisionPreviewPage({
           <input type="hidden" name="revisionId" value={revisionId} />
           <div>
             <h2>Client approval recorded</h2>
-            <p>MirtPage checks this approved revision against the current live showroom before publication.</p>
+            <p>AfricMade checks this approved revision against the current live page before publication.</p>
           </div>
           <button className="btn brand">Publish approved revision</button>
         </form>
@@ -159,7 +159,7 @@ export default async function RevisionPreviewPage({
       {revision.decision_comment ? (
         <section className="panel"><h2>Client decision note</h2><p className="request-copy">{revision.decision_comment}</p></section>
       ) : null}
-      <section className="revision-showroom" aria-label={`Revision ${revision.revision_number} showroom preview`}>
+      <section className="revision-showroom" aria-label={`Revision ${revision.revision_number} page preview`}>
         <ShowroomApp catalog={catalog} previewMode embedded privateMediaRequestId={requestId} />
       </section>
     </DashboardShell>

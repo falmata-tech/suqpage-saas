@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { BUSINESS_CATEGORY_OPTIONS } from "@/lib/business-categories";
 
 type State = { kind: "idle" } | { kind: "sending" } | { kind: "error"; message: string };
 
-export default function SignupForm() {
+export default function SignupForm({ email, initialName }: { email: string; initialName?: string }) {
   const [state, setState] = useState<State>({ kind: "idle" });
   const idempotencyKey = useRef(crypto.randomUUID());
 
@@ -26,16 +27,13 @@ export default function SignupForm() {
   }
 
   return <form className="form-card platform-interest-form" onSubmit={submit}><div className="form-grid">
-    <div className="field"><label htmlFor="signup-name">Your name</label><input id="signup-name" name="name" autoComplete="name" required minLength={2} maxLength={100} /></div>
-    <div className="field"><label htmlFor="signup-email">Email</label><input id="signup-email" name="email" type="email" autoComplete="email" required maxLength={160} /></div>
+    <div className="field"><label htmlFor="signup-name">Your name</label><input id="signup-name" name="name" autoComplete="name" required minLength={2} maxLength={100} defaultValue={initialName} /></div>
+    <div className="field"><label>Verified email</label><div className="verified-identity">{email}</div></div>
+    <div className="field"><label htmlFor="signup-business">Name buyers will see</label><input id="signup-business" name="businessName" autoComplete="organization" required minLength={2} maxLength={120} /></div>
+    <div className="field"><label htmlFor="signup-category">Category</label><select id="signup-category" name="businessCategory" required defaultValue=""><option value="" disabled>Choose a category</option>{BUSINESS_CATEGORY_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select></div>
     <div className="field"><label htmlFor="signup-phone">Phone or WhatsApp</label><input id="signup-phone" name="phone" type="tel" autoComplete="tel" required minLength={5} maxLength={40} /></div>
-    <div className="field"><label htmlFor="signup-business">Business name</label><input id="signup-business" name="businessName" autoComplete="organization" required minLength={2} maxLength={120} /></div>
-    <div className="field full"><label htmlFor="signup-handle">Preferred showroom address</label><div className="signup-handle"><span>mirtpage.com/@</span><input id="signup-handle" name="handle" required minLength={3} maxLength={80} /></div><small>Use letters, numbers, spaces, or hyphens. We will turn it into a clean address.</small></div>
-    <div className="field"><label htmlFor="signup-password">Password</label><input id="signup-password" name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={128} /></div>
-    <div className="field"><label htmlFor="signup-confirm-password">Confirm password</label><input id="signup-confirm-password" name="confirmPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={128} /></div>
-    <div className="field full"><label htmlFor="signup-request">What can your business make or supply?</label><textarea id="signup-request" name="requestText" required minLength={20} maxLength={4000} rows={5} placeholder="Describe custom orders you accept, ready products you sell, wholesale supply you offer, and the buyers you want to reach." /><small>The design team will turn this brief into a private showroom and a labeled image checklist.</small></div>
-    <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> Create my private MirtPage workspace and use these details to prepare my showroom request.</label></div>
+    <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> I agree to the AfricMade Terms and Privacy Policy.</label></div>
     {state.kind === "error" ? <div className="field full error" role="alert">{state.message}</div> : null}
-    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending"}>{state.kind === "sending" ? "Creating workspace…" : "Create my workspace"}</button></div>
+    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending"}>{state.kind === "sending" ? "Finishing setup..." : "Finish setup"}</button></div>
   </div></form>;
 }

@@ -22,9 +22,14 @@ if (process.env.MIRTPAGE_MEDIA_DRIVER !== "supabase") {
 assertLoopback(process.env.MIRTPAGE_POSTGRES_URL, "54322", "Local database URL");
 assertLoopback(process.env.MIRTPAGE_SUPABASE_URL, "54321", "Local provider URL");
 
+const port = process.env.PORT || "3000";
+if (!/^\d{4,5}$/.test(port) || Number(port) < 1024 || Number(port) > 65535) {
+  throw new Error("PORT must be an available local TCP port from 1024 to 65535.");
+}
+
 const next = spawn(
   process.execPath,
-  ["node_modules/next/dist/bin/next", "dev", "--hostname", "127.0.0.1", "--port", "3000"],
+  ["node_modules/next/dist/bin/next", "dev", "--hostname", "127.0.0.1", "--port", port],
   { cwd: process.cwd(), env: process.env, stdio: "inherit" },
 );
 

@@ -1,18 +1,18 @@
-# Omo Packaging Factory showroom brief
+# Omo Box Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Omo Packaging Factory
+- Business name: Omo Box Workshop
 - Permanent handle: `demo-omo-packaging-factory`
 - Location: Adama, Oromia
 - Existing logo/mark: generated geometric mark based on an O unfolding into a corrugated carton
-- Short description: Make packaging feel like a practical manufacturing partnership, with dimensions, print, strength, and repeat orders easy to discuss.
+- Short description: Present a small box-making workshop with dimensions, print, strength, and repeat orders easy to discuss.
 
 ## Customer And Goal
 
-- Primary customer: food processors, farms, workshops, retailers, and exporters
+- Primary customer: farms, food kitchens, studios, and neighborhood retailers
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -23,7 +23,7 @@
 - Customer color request: forest green, kraft, and blue
 - Designer advice: Kraft appears in product media while forest and blue provide cleaner digital contrast and separate sustainability from action states.
 - Logo concept: an O unfolding into a corrugated carton
-- Visual thesis: Material detail and dieline precision organized as a modern packaging workshop.
+- Visual thesis: Material detail and simple dielines organized as a practical packaging workshop.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Corrugated Shipping Boxes (Transport Packaging); Food Product Cartons (Retail Packaging); Protective Box Dividers (Protective Packaging); Produce Carry Cartons (Farm Packaging)
+- Products or capabilities: Small Shipping Box Run (Transport packaging); Food Product Sleeve (Retail packaging); Protective Box Dividers (Protective packaging); Produce Carry Cartons (Farm packaging)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,8 +55,8 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-omo-packaging-factory/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-omo-packaging-factory/product-1.webp` | Corrugated Shipping Boxes | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-omo-packaging-factory/product-2.webp` | Food Product Cartons | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-omo-packaging-factory/product-1.webp` | Small Shipping Box Run | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-omo-packaging-factory/product-2.webp` | Food Product Sleeve | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-omo-packaging-factory/product-3.webp` | Protective Box Dividers | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-omo-packaging-factory/product-4.webp` | Produce Carry Cartons | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-omo-packaging-factory.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |

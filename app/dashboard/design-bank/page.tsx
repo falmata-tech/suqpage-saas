@@ -18,11 +18,11 @@ export default async function DesignBankPage() {
       <div className="dashboard-head">
         <div>
           <span className="eyebrow">Internal design system</span>
-          <h1>Showroom design library</h1>
+          <h1>Page design library</h1>
           <p>
             Review design release {SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE.release}.
             These previews use demonstration content and cannot change a
-            business workspace or publish a showroom.
+            business workspace or publish a page.
           </p>
         </div>
       </div>

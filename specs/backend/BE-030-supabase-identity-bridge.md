@@ -2,7 +2,7 @@
 id: BE-030
 title: Supabase identity bridge and session authority
 status: in_progress
-related: [BE-002, BE-018, BE-026, BE-027, DEP-015, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
+related: [BE-002, BE-018, BE-026, BE-027, BE-031, DEP-015, DEP-023, DEP-026, DEP-027, DEP-028, ADR-0013, ADR-0014, ADR-0015, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-08-24
 change_level: L3

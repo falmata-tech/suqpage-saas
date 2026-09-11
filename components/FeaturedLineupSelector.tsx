@@ -23,9 +23,9 @@ export default function FeaturedLineupSelector({
   return <>
     <div className="featured-lineup-capacity" aria-live="polite">
       <strong>{selectedIds.size} of {limit} selected</strong>
-      <span>Daily Featured accepts up to {limit} showrooms.</span>
+      <span>Daily Featured accepts up to {limit} pages.</span>
     </div>
-    <div className="featured-business-list" role="group" aria-label="Eligible featured showrooms">
+    <div className="featured-business-list" role="group" aria-label="Eligible featured pages">
       {businesses.map((business) => {
         const selected = selectedIds.has(business.id);
         return <label className={`featured-business-row${selected ? " selected" : ""}`} key={business.id}>

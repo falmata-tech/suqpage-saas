@@ -15,7 +15,7 @@ import type { OperationsRequest } from "@/lib/request-sqlite";
 export const dynamic = "force-dynamic";
 
 const projectKind = (request: Pick<OperationsRequest, "request_type">) =>
-  request.request_type === "onboarding" ? "Showroom setup" : "Showroom update";
+  request.request_type === "onboarding" ? "Page setup" : "Page update";
 
 const readableStatus = (status: string) => status.replaceAll("_", " ");
 
@@ -54,17 +54,17 @@ export default async function RequestsPage({
         : `/dashboard/requests/on-behalf?business=${business.id}`
       : client ? "/dashboard/requests/new" : null;
     const actionLabel = current
-      ? `Continue showroom ${current.request_type === "onboarding" ? "setup" : "update"}`
+      ? `Continue page ${current.request_type === "onboarding" ? "setup" : "update"}`
       : established
-        ? "Update showroom"
-        : "Create showroom";
+        ? "Update page"
+        : "Create AfricMade page";
     const actionHref = current ? `/dashboard/requests/${current.id}` : startHref;
 
     return <DashboardShell user={user} business={business}>
       <div className="dashboard-head">
         <div>
           <span className="eyebrow">{business.name}</span>
-          <h1>Showroom project</h1>
+          <h1>Page project</h1>
           <p>{current ? `Continue the current ${nextKind}, review progress, and prepare its next decision.` : `Start the next ${nextKind} when the business is ready.`}</p>
         </div>
         {actionHref ? <Link className="btn brand" href={actionHref}>{actionLabel}</Link> : null}
@@ -74,7 +74,7 @@ export default async function RequestsPage({
         <div className="collection-heading">
           <div>
             <span className="eyebrow">Current work</span>
-            <h2 id="current-showroom-project">{current ? projectKind(current) : `No active showroom ${nextKind}`}</h2>
+            <h2 id="current-showroom-project">{current ? projectKind(current) : `No active page ${nextKind}`}</h2>
           </div>
           {current ? <span className={`badge ${current.status}`}>{readableStatus(current.status)}</span> : null}
         </div>
@@ -86,17 +86,17 @@ export default async function RequestsPage({
             <span><b>Reference</b>{current.public_ref}</span>
           </div>
         </> : <div className="empty-state">
-          <h3>{established ? "Ready for the next update" : "Ready to create the first showroom"}</h3>
-          <p>{teamMember ? "No showroom project is currently assigned for this business." : established ? "Start one focused update. It stays private until the owner approves the exact revision." : "Start the setup with a clear business brief. MirtPage will prepare a private design for owner review."}</p>
+          <h3>{established ? "Ready for the next update" : "Ready to create the first page"}</h3>
+          <p>{teamMember ? "No page project is currently assigned for this business." : established ? "Start one focused update. It stays private until the owner approves the exact revision." : "Start with a clear brief. AfricMade will prepare a private design for owner review."}</p>
         </div>}
       </section>
 
       <section className="panel" aria-labelledby="showroom-history">
-        <div className="collection-heading"><div><span className="eyebrow">Previous work</span><h2 id="showroom-history">Showroom history</h2><p>Completed, cancelled, and closed projects remain available for reference.</p></div></div>
+        <div className="collection-heading"><div><span className="eyebrow">Previous work</span><h2 id="showroom-history">Page history</h2><p>Completed, cancelled, and closed projects remain available for reference.</p></div></div>
         {history.items.length || query.q ? <CollectionToolbar
           action="/dashboard/requests"
           search={query.q || ""}
-          placeholder="Search showroom history"
+          placeholder="Search page history"
           activeFilters={Boolean(query.q)}
           hidden={{ business: business.id }}
         /> : null}
@@ -108,14 +108,14 @@ export default async function RequestsPage({
             <td>{new Date(project.updated_at).toLocaleString()}</td>
           </tr>)}</tbody></table></div>
           <PaginationNav result={history} pathname="/dashboard/requests" params={{ q: query.q, business: business.id }}/>
-        </> : <div className="empty-state">{query.q ? "No showroom history matches this search." : "Completed showroom projects will appear here."}</div>}
+        </> : <div className="empty-state">{query.q ? "No page history matches this search." : "Completed page projects will appear here."}</div>}
       </section>
     </DashboardShell>;
   }
 
   const requests = await runtimeListRequestsPage(user, query);
-  const title = manager ? "Showroom requests" : "Assigned requests";
-  const description = manager ? "Review, record, and assign private onboarding and showroom-update work." : "Only work explicitly assigned to you appears here.";
+  const title = manager ? "Page requests" : "Assigned requests";
+  const description = manager ? "Review, record, and assign private page work." : "Only work explicitly assigned to you appears here.";
   return <DashboardShell user={user} business={business}>
     <div className="dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{manager ? <Link className="btn brand" href="/dashboard/requests/on-behalf">Record a request</Link> : null}</div>
     <section className="panel">

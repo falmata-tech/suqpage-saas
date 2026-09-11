@@ -83,7 +83,7 @@ export default async function EditRevisionPage({
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">Private draft</p>
-          <h1>Edit current showroom</h1>
+          <h1>Edit current page</h1>
           <p>Change only what needs attention, save the private draft, and review the complete result before it reaches the client.</p>
         </div>
       </div>

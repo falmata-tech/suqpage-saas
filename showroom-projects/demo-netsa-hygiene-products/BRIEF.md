@@ -1,18 +1,18 @@
-# Netsa Hygiene Products showroom brief
+# Netsa Care Goods Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Netsa Hygiene Products
+- Business name: Netsa Care Goods Workshop
 - Permanent handle: `demo-netsa-hygiene-products`
 - Location: Addis Ababa, Addis Ababa
-- Existing logo/mark: generated geometric mark based on an N built from two soft protective layers
-- Short description: Show production capability and buyer confidence for recurring hygiene orders without making medical claims.
+- Existing logo/mark: generated geometric mark based on an N formed by two folded cotton layers
+- Short description: Present a careful sewing workshop making reusable personal and household care goods without medical or certification claims.
 
 ## Customer And Goal
 
-- Primary customer: pharmacies, clinics, schools, wholesalers, and institutions
+- Primary customer: families, pharmacies, neighborhood shops, and community groups
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -22,8 +22,8 @@
 
 - Customer color request: aqua, white, and coral
 - Designer advice: Aqua and white keep the presentation clean; restrained coral distinguishes actions and product families without suggesting clinical certification.
-- Logo concept: an N built from two soft protective layers
-- Visual thesis: Clean material close-ups, calm quality signals, and highly legible case-order information.
+- Logo concept: an N formed by two folded cotton layers
+- Visual thesis: Clean material close-ups and clear product-use information in a calm workshop setting.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Baby Diaper Production (Absorbent Care); Sanitary Pad Runs (Personal Care); Protective Underpads (Institutional Hygiene); Private-Label Hygiene Packs (Private Label)
+- Products or capabilities: Washable Baby Cloth Set (Baby care); Reusable Menstrual Pad Set (Personal care); Household Cleaning Cloth Pack (Home care); Custom Care Pouch Run (Small orders)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,10 +55,10 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-netsa-hygiene-products/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-1.webp` | Baby Diaper Production | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-2.webp` | Sanitary Pad Runs | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-3.webp` | Protective Underpads | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-4.webp` | Private-Label Hygiene Packs | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-1.webp` | Washable Baby Cloth Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-2.webp` | Reusable Menstrual Pad Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-3.webp` | Household Cleaning Cloth Pack | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-netsa-hygiene-products/product-4.webp` | Custom Care Pouch Run | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-netsa-hygiene-products.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction
@@ -75,7 +75,7 @@
 
 - Approved logo/name treatment: generated mark plus exact business name
 - Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
-- Product/craft cue: an N built from two soft protective layers
+- Product/craft cue: an N formed by two folded cotton layers
 - Generated image authorized: yes, for disposable demonstration use
 
 ## Acceptance Notes

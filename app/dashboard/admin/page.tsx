@@ -45,7 +45,7 @@ export default async function AdminOverview({
     },
     {
       href: "/dashboard/requests",
-      label: "Showroom requests",
+      label: "Page requests",
       value: attention.showroomRequests,
       detail: `${counts.open_requests} open across the managed workflow`,
       icon: ClipboardList,
@@ -82,7 +82,7 @@ export default async function AdminOverview({
       href: "/dashboard/design-bank",
       label: "Design library",
       value: "67",
-      detail: "Approved showroom components and patterns",
+      detail: "Approved page components and patterns",
       icon: Palette,
     },
   ];

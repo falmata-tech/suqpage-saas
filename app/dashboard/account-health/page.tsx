@@ -78,7 +78,7 @@ export default async function AccountHealthPage({
       <section className={`account-status-panel ${subscription.state}`}>
         <div><span className="eyebrow">Manual renewal record</span><h2>{subscription.state === "active" ? "Current period" : subscription.state === "grace" ? "Renewal due" : "Renewal overdue"}</h2></div>
         <div className="account-dates"><span><small>Current period</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>Grace deadline</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
-        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact MirtPage to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: a published active showroom remains public unless an administrator explicitly suspends it.</p>
+        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact AfricMade to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: an active published page remains public unless an administrator suspends it.</p>
       </section>
       {operations ? (
         <form className="panel form-grid account-payment" action={recordManualPaymentAction}>
@@ -91,7 +91,7 @@ export default async function AccountHealthPage({
       ) : null}
       <section className="panel">
         <h2>Payment history</h2>
-        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>Renewal recorded by MirtPage</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">No renewal records have been added yet.</p>}
+        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>Renewal recorded by AfricMade</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">No renewal records have been added yet.</p>}
       </section>
     </DashboardShell>
   );

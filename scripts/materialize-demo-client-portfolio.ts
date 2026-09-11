@@ -79,7 +79,7 @@ const benchmarkOfferings: Record<string, Array<{ name: string; category: string 
   "nova-assembly": [
     { name: "Rugged Solar Charge Controller", category: "Power" },
     { name: "Compact Backup Power Box", category: "Power" },
-    { name: "Audio Amplifier Rebuild", category: "Repair" },
+    { name: "Compact Audio Amplifier Module", category: "Audio" },
     { name: "Custom Cable Harness Kit", category: "Harnesses" },
   ],
 };
@@ -134,7 +134,7 @@ function boothSvg(name: string, primary: string, secondary: string, concept: str
   <path d="M420 470h560l-38-55H458z" fill="${primary}"/>
   ${props[variant]}
   <text x="600" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#ffffff">${escapedName}</text>
-  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">MIRTPAGE SHOWROOM</text>
+  <text x="700" y="565" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#ffffff">AFRICMADE PAGE</text>
   <text x="700" y="602" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#ffffff" opacity=".82">${escapedConcept}</text>
 </svg>\n`;
 }

@@ -24,7 +24,7 @@ export default function BlueprintMediaBoard({
     <section className="panel blueprint-media" id="media-plan">
       <div className="blueprint-section-head">
         <div>
-          <p className="eyebrow">Showroom images</p>
+          <p className="eyebrow">Page images</p>
           <h2>Complete the image checklist</h2>
           <p>
             Upload each image where the design requires it. Required images
@@ -79,7 +79,7 @@ export default function BlueprintMediaBoard({
                 />
                 <label className="check-field">
                   <input type="checkbox" name="rights" required />
-                  Authorized for this showroom
+                  Authorized for this page
                 </label>
                 <button className="btn secondary">
                     {slot.complete ? "Replace" : "Add image"}
@@ -92,7 +92,7 @@ export default function BlueprintMediaBoard({
         <div className="media-plan-empty">
           <strong>The image checklist is not ready yet</strong>
           <p>
-            Import the showroom design first. MirtPage will then show every
+            Import the page design first. AfricMade will then show every
             labeled image needed for its products and sections.
           </p>
         </div>

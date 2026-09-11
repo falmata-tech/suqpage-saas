@@ -62,7 +62,7 @@ const benchmarkBusinesses = [
   { handle:"rift-valley-mill", name:"Rift Valley Mill", tagline:"Local grains milled for homes and small bakeries.", description:"A clean small-scale mill producing teff flours, roasted barley blends and practical mixed-grain packs.", logo_path:"", hero_title:"Know the grain behind every bag.", hero_subtitle:"Compare grain types, milling styles and available pack formats in one clear catalog.", hero_image_path:"/uploads/seed/benchmarks/rift-valley-mill/hero.jpg", contact_email:"orders@riftmill.local", whatsapp:"", telegram:"", tiktok:"" },
   { handle:"entoto-ceramics", name:"Entoto Ceramics", tagline:"Quiet tableware made in a working pottery studio.", description:"Wheel-thrown and hand-finished cups, bowls, vases and table pieces with natural glaze variation.", logo_path:"", hero_title:"Useful forms, shaped one at a time.", hero_subtitle:"Browse studio pieces and ask about sets, glaze variation or hospitality orders.", hero_image_path:"/uploads/seed/benchmarks/entoto-ceramics/hero.jpg", contact_email:"", whatsapp:"251911100108", telegram:"", tiktok:"" },
   { handle:"koba-leather", name:"Koba Leather Workshop", tagline:"Durable leather goods cut and stitched by hand.", description:"A practical range of work bags, wallets, rolls and satchels made in small production runs.", logo_path:"", hero_title:"Leather goods that show their construction.", hero_subtitle:"Inspect the forms, choose a finish and ask about personal or team orders.", hero_image_path:"/uploads/seed/benchmarks/koba-leather/hero.jpg", contact_email:"", whatsapp:"", telegram:"kobaleather", tiktok:"" },
-  { handle:"nova-assembly", name:"Nova Assembly Lab", tagline:"Electronics assembly, repair and custom power work.", description:"A small technical studio building power-control products, cable harnesses and repair solutions for local operators.", logo_path:"", hero_title:"Technical work explained before it is ordered.", hero_subtitle:"Review standard builds or describe the equipment, repair and connector requirements.", hero_image_path:"/uploads/seed/benchmarks/nova-assembly/hero.jpg", contact_email:"lab@novaassembly.local", whatsapp:"251911100110", telegram:"", tiktok:"" }
+  { handle:"nova-assembly", name:"Nova Assembly Lab", tagline:"Electronics assembly and custom power work.", description:"A small technical studio building power-control products, cable harnesses and test fixtures for local equipment operators.", logo_path:"", hero_title:"Technical work explained before it is ordered.", hero_subtitle:"Review standard builds or describe the equipment, power and connector requirements.", hero_image_path:"/uploads/seed/benchmarks/nova-assembly/hero.jpg", contact_email:"lab@novaassembly.local", whatsapp:"251911100110", telegram:"", tiktok:"" }
 ] satisfies Array<Record<string,string>>;
 
 const additionalBusinesses = [
@@ -311,12 +311,12 @@ benchmarkCatalog("koba-leather",["Bags","Small Goods","Tools"],[
   {name:"Leather Tool Roll",category:"Tools",eyebrow:"Organized carry",description:"A roll-up organizer for small tools, brushes or studio equipment.",image:3},
   {name:"Everyday Crossbody",category:"Bags",eyebrow:"Secure satchel",description:"A medium satchel with adjustable strap and covered closure.",image:4},
 ]);
-benchmarkCatalog("nova-assembly",["Power","Repair","Harnesses"],[
+benchmarkCatalog("nova-assembly",["Power","Audio","Harnesses"],[
   {name:"Rugged Solar Charge Controller",category:"Power",eyebrow:"Field power control",description:"A protected controller assembled for small off-grid systems.",image:1},
   {name:"Compact Backup Power Box",category:"Power",eyebrow:"Configured power",description:"A portable backup enclosure configured to the approved load plan.",image:2},
-  {name:"Audio Amplifier Rebuild",category:"Repair",eyebrow:"Bench repair",description:"A diagnostic and rebuild service for compatible amplifier hardware.",image:3},
+  {name:"Compact Audio Amplifier Module",category:"Audio",eyebrow:"Local audio assembly",description:"A compact amplifier module assembled and tested for an approved speaker load.",image:3},
   {name:"Custom Cable Harness Kit",category:"Harnesses",eyebrow:"Made to specification",description:"A labeled harness kit built to connector, length and routing requirements.",image:4},
-  {name:"Control Board Diagnostic",category:"Repair",eyebrow:"Technical service",description:"A documented diagnostic for an eligible control board or module."},
+  {name:"Control Relay Board",category:"Power",eyebrow:"Configured control",description:"A labeled relay board assembled around an approved low-voltage control need."},
 ]);
 
 const additionalCatalogs: Record<string, {
@@ -579,7 +579,7 @@ function seedUser(role:"admin"|"owner",accessRole:"platform_admin"|"client"|"tea
   generatedCredentials.push({role:accessRole === "platform_admin" ? "ADMIN" : accessRole === "client" ? "CLIENT" : "STAFF",business,email,password});
   return userId;
 }
-const adminUserId = seedUser("admin","platform_admin","MirtPage",process.env.SEED_ADMIN_EMAIL||"admin@mirtpage.local","MirtPage Admin",null);
+const adminUserId = seedUser("admin","platform_admin","AfricMade",process.env.SEED_ADMIN_EMAIL||"admin@mirtpage.local","AfricMade Admin",null);
 const clientUsersByHandle = new Map<string, number>();
 for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
   clientUsersByHandle.set(business.handle, seedUser(
@@ -593,9 +593,9 @@ for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0
 }
 
 const operationsStaff = ["Mekdes Operations", "Samuel Operations", "Rahel Operations", "Dawit Operations"]
-  .map((name, index) => seedUser("admin", "operations_manager", "MirtPage", `operations-${index + 1}@demo.mirtpage.local`, name, null));
+  .map((name, index) => seedUser("admin", "operations_manager", "AfricMade", `operations-${index + 1}@demo.mirtpage.local`, name, null));
 const teamStaff = ["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
-  .map((name, index) => seedUser("admin", "team_member", "MirtPage", `team-${index + 1}@demo.mirtpage.local`, name, null));
+  .map((name, index) => seedUser("admin", "team_member", "AfricMade", `team-${index + 1}@demo.mirtpage.local`, name, null));
 
 const subscriptionStateHandles = [
   SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "fashion-textiles"),
@@ -831,7 +831,7 @@ for (let index = 0; index < 66; index += 1) {
     `${handle} client`,
     `${handle}@mirtpage.local`,
     businesses.find((business) => business.handle === handle)!.name,
-    `Update the showroom with current product, capability, and business information for review.`,
+    `Update the AfricMade page with current product, capability, and business information for review.`,
     clientUserId,
     assignedUserId,
     `demo-lifecycle-${index + 1}`,
@@ -923,8 +923,11 @@ for (let index = 1; index <= 36; index += 1) {
 
 const credentialPath=path.resolve(process.env.MIRTPAGE_CREDENTIAL_PATH||path.join(process.cwd(),".local","seed-credentials.txt"));
 fs.mkdirSync(path.dirname(credentialPath),{recursive:true});
-const credentialText=["MirtPage temporary local credentials","Change every password on first login.","",...generatedCredentials.map(c=>`${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
+const credentialText=["AfricMade temporary local credentials","Change every password on first login.","",...generatedCredentials.map(c=>`${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
 fs.writeFileSync(credentialPath,credentialText,{mode:0o600});
-console.log(`MirtPage database created at ${dbPath}`);
+console.log(`AfricMade database created at ${dbPath}`);
 console.log(`Temporary credentials written to ${credentialPath}`);
-if (process.env.MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT !== "1") console.log(credentialText);
+const suppressCredentialOutput =
+  process.env.MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT === "1" ||
+  process.env.SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT === "1";
+if (!suppressCredentialOutput) console.log(credentialText);

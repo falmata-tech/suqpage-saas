@@ -47,7 +47,7 @@ export async function currentUser(): Promise<SessionUser | null> {
 export async function requireUser(options: { allowTemporaryPassword?: boolean } = {}) {
   const user = await currentUser();
   if (!user) redirect("/login");
-  if (user.must_change_password && !options.allowTemporaryPassword) {
+  if (authDriver() === "local" && user.must_change_password && !options.allowTemporaryPassword) {
     redirect("/dashboard/account?required=1");
   }
   return user;
@@ -55,7 +55,7 @@ export async function requireUser(options: { allowTemporaryPassword?: boolean } 
 
 export async function apiUser() {
   const user = await currentUser();
-  if (!user || user.must_change_password) return null;
+  if (!user || (authDriver() === "local" && user.must_change_password)) return null;
   return user;
 }
 

@@ -40,7 +40,7 @@ export default async function ProductsPage({
           <h1>Custom work, ready products &amp; wholesale supply</h1>
           <p>
             Keep every made-to-order capability, finished product, wholesale offer, and
-            production fact current without opening the showroom design system.
+            production fact current without opening the page design system.
           </p>
         </div>
         <Link
@@ -51,7 +51,7 @@ export default async function ProductsPage({
         </Link>
       </div>
       {query.saved ? (
-        <p className="notice">Offering published in a retained showroom version.</p>
+        <p className="notice">Offering published in a retained page version.</p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       <CollectionToolbar
@@ -72,7 +72,7 @@ export default async function ProductsPage({
       ) : (
         <section className="empty-state">
           <h2>{query.q ? "No matching offerings" : "No offerings yet"}</h2>
-          <p>{query.q ? "Try a broader search." : "Add the first product or capability to this established showroom."}</p>
+          <p>{query.q ? "Try a broader search." : "Add the first product or capability to this published page."}</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}

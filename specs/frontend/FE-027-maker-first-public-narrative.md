@@ -1,235 +1,204 @@
 ---
 id: FE-027
-title: Maker-first public narrative
-status: in_progress
-related: [FE-013, FE-021, FE-024, FE-025, FE-028, FE-030, FE-036]
+title: Small-scale local production public narrative
+status: done
+related: [FE-013, FE-021, FE-024, FE-025, FE-028, FE-030, FE-036, FE-038, FE-039]
 owners: [product, frontend, design]
-last_updated: 2026-08-09
+last_updated: 2026-09-12
 change_level: L1
 ---
 
-# FE-027 - Maker-first public narrative
+# FE-027 - Small-scale local production public narrative
 
 ## Problem and outcome
 
-MirtPage's public pages explain digital showrooms and discovery, but they do not
-yet give buyers one clear model for the different offers found across Ethiopian
-production. A workshop may make doors, windows, furniture, equipment, or other
-work to specification. A producer may sell finished goods that a household can
-buy or a retailer can stock. A manufacturer may need recurring wholesale and
-distribution relationships. MirtPage must unite these as three understandable
-buying paths—custom work, ready products, and wholesale supply—without implying
-that every business supports every path or claiming guaranteed outcomes.
+AfricMade must explain one useful connection without turning every screen into a
+manifesto. Small-scale local production is often difficult to discover even
+when the right product, craft, or workshop is nearby. Buyers need a practical
+way to find what is made or grown, understand the work and available capacity,
+and contact the source. The launch catalog starts in Ethiopia and is useful
+first within a locality, region, and country; wider African discovery follows.
+
+The Market states that outcome plainly. About carries the fuller story. Login,
+business setup, support, and workspace screens describe only the task at hand.
 
 ## Scope
 
 ### In scope
 
-- One consistent production-to-market narrative across the homepage, discovery
-  introduction, About page, business signup, login support copy, footer, and
-  platform metadata.
-- Primary audience language for small and growing Ethiopian makers, growers,
-  workshops, processors, and factories that still need practical market access.
-- Buyer language covering national and local sourcing, reviewed location,
-  professional showrooms, product and production-capability context, and direct
-  consumer, retail, distribution, or wholesale inquiry.
-- Customer-facing copy calls showrooms **online showrooms** and explains their
-  utility: discovering workshops, growers, producers, and manufacturers that a
-  visitor may not already know nearby or elsewhere in Ethiopia; understanding
-  what they make, their skills and capabilities, and available supply context;
-  and starting a direct inquiry. It does not assume every visitor understands
-  the platform from the word "showroom" alone.
-- One controlled three-offer vocabulary: **custom work**, **ready products**,
-  and **wholesale supply**. These terms clarify marketplace capabilities in
-  supporting copy and functional labels; they are not repeated as slogans or
-  used as a substitute for a clear customer outcome. Growers and processors fit
-  ready-product or wholesale-supply offers according to their approved content.
-- Concise homepage messaging with the fuller Ethiopian supply-chain story on
-  the About page and a producer-focused invitation on signup.
-- Automated assertions for the narrative's required claims and prohibited
-  overclaims.
+- One consistent production-to-market narrative across Market, About, account
+  entry, business setup, sourcing support, metadata, and platform navigation.
+- **Locally made and grown products** as the concise primary promise.
+- **Artisans, farms and growers, workshops, and small manufacturers** as the
+  participant set when the people or operations must be named. The interface
+  does not force one vague umbrella noun onto every participant.
+- Seven stable public categories with literal contents: **Electronics &
+  electrical**, **Personal care & household**, **Farms, livestock & feed**,
+  **Food & drink**, **Tools, machinery & metalwork**, **Furniture, art &
+  building**, and **Clothing, textiles & leather**. Internal keys may remain
+  stable for URL and database compatibility.
+- Buyers looking for finished products, made-to-order work, or repeat and bulk
+  supply without claiming every participant supports every need.
+- Household and individual buyers are the primary public audience. Traders and
+  retailers can also discover repeat supply where a listed operation offers it;
+  the interface does not recast every participant as a wholesale supplier.
+- Direct contact and optional AfricMade help with transport arrangements or a
+  report about a listed operation.
+- Exact, concise copy assertions and prohibited overclaims.
 
 ### Non-goals
 
-- Changing discovery, signup, inquiry, publication, payment, or showroom
+- Changing inquiry, publication, payment, location-review, or page-rendering
   behavior.
-- Claiming that every business has verified tax, employment, certification,
-  import-substitution, availability, or economic-impact outcomes.
-- Targeting importers, general resellers, giant enterprises, or businesses that
-  do not need managed discovery.
-- Adding MirtPage's platform narrative inside independently branded client
-  showrooms.
-- Presenting MirtPage as checkout, delivery, financing, certification, or an
-  endorsement of listed businesses.
+- Presenting AfricMade as checkout, delivery, financing, certification,
+  endorsement, quality guarantee, or commercial representative.
+- Listing import-only sellers, repair-only services, or large industrial
+  manufacturers in the launch/demo catalog.
+- Claiming every listed participant is tax-compliant, job-creating, export-ready,
+  available, or suitable for a particular order.
+- Injecting platform mission copy into independently branded participant pages.
 
 ## Domain language and invariants
 
-- **Local producer** means a business that makes, grows, processes, or adds
-  material value to a product in Ethiopia.
-- **Small and growing** describes the intended market-access audience; it is not
-  a legal, revenue, staffing, credit, or quality classification.
-- **Professional presence** means a permanent branded showroom with useful
-  product, capability, process, location, and inquiry information. It does not
-  imply certification or platform ownership of the customer relationship.
-- Public copy may state that connecting Ethiopian production to households,
-  retailers, distributors, and wholesale buyers can strengthen local supply,
-  widen buyer choice, and keep more trade activity within Ethiopian businesses.
-  It must not attribute a specific unverified impact to every listing.
-- MirtPage connects participants and forwards inquiries. It does not set,
-  compare, guarantee, or process prices, transactions, delivery, or quality.
-- **Custom work** means made-to-order work based on the buyer's measurements,
-  specification, configuration, or brief. **Ready products** are finished goods
-  presented for direct or retail inquiry. **Wholesale supply** covers repeat or
-  bulk supply for retailers, wholesalers, distributors, and organizations.
-- A showroom may support one, two, or all three paths. Platform copy describes
-  the marketplace as a whole and never assigns an unsupported mode to a listing.
-- The public homepage remains an application-first marketplace. Narrative copy
-  introduces and frames discovery without displacing it with a marketing hero.
-- Client showrooms retain their own identity and approved business claims.
+- **Artisan** means a skilled person or small studio producing physical goods
+  through a craft or trade. It is not a catch-all label for every participant.
+- **Workshop** means a small production operation making, assembling, processing,
+  or fabricating goods, including joinery, furniture, metalwork, garment,
+  equipment, and food-processing work.
+- **Small manufacturer** means a small operation producing repeatable physical
+  goods or components. Furniture and tables are furniture manufacturing;
+  wooden doors and windows are joinery manufacturing; metal or aluminum doors
+  and windows are fabrication. Public labels should still use the operation's
+  natural identity, such as **furniture workshop** or **aluminum workshop**.
+- **Farm or grower** covers agricultural production that sells a grown output.
+- **Artist** or **art studio** covers original physical work offered for sale or
+  commission, including painting, sculpture, carving, wall pieces, and interior
+  artwork. It does not turn unrelated trade workshops into artists.
+- **AfricMade page** is the public destination for approved identity, offerings,
+  process or story content, location context, and direct inquiry.
+- **Custom work**, **ready products**, and **wholesale supply** are optional
+  capability labels, not a slogan and not a mandatory onboarding questionnaire.
+- Consumer sales are the ordinary starting point. Retail or trader supply is an
+  opportunity shown only by relevant products or capabilities, not a platform
+  promise or a label applied to every business.
+- AfricMade connects buyers and listed participants. It does not set prices,
+  process transactions, operate delivery, or guarantee quality or output.
+- AfricMade does not inspect, certify, endorse, negotiate for, or guarantee a
+  listed participant. Public support may help arrange transport or receive a
+  report about a listing; commercial terms remain between buyer and seller.
+- Reviewed exact-location claims remain limited to the supported launch catalog.
+  Copy must not imply continent-wide listing coverage before it exists.
 
-## Contracts
+## Content design contracts
 
-- The homepage presents one Ethiopian production market and immediately directs
-  visitors into search, industry, map, list, sponsored, and Daily Featured
-  Showrooms discovery.
-- The homepage headline promises direct discovery of the people and businesses
-  that make what a visitor needs. Supporting copy immediately identifies the
-  destination as online showrooms, explains local and country-wide discovery,
-  and connects business skills, products, customization, supply, and direct
-  contact. Functional benefit labels retain custom, ready-product, and wholesale
-  distinctions where useful. Supporting copy makes clear that households can
-  find products or skilled custom work and that retailers, distributors,
-  organizations, and wholesale buyers can source for their own markets from
-  anywhere in Ethiopia.
-- The About page explains the broken connection between production and demand,
-  shows how a product can move from producer to household, retailer,
-  distributor, or wholesale buyer, and then connects that story to MirtPage's
-  actual showroom, map, search, and inquiry capabilities.
-- About-page steps describe observable buyer actions: search for the need,
-  compare what businesses can deliver, understand the producer, and start a
-  direct conversation. They do not frame internal offer taxonomy as a vague
-  instruction to "choose a path."
-- Signup copy asks whether the business takes custom orders, sells ready
-  products, supplies in bulk, or seeks distributors, and explains the value of
-  one professional showroom without implying automatic publication or sales.
-- Login support copy remains task-focused while identifying the workspace as the
-  place where producers manage their showroom, inquiries, requests, and support.
-- Footer and metadata use the same production-to-market audience and direct
-  connection purpose.
-- Copy uses **households, retailers, distributors, organizations, and wholesale
-  buyers** where the wider trade chain matters, **connect** or **inquiry** instead
-  of platform checkout, and **reviewed location** instead of unsupported
-  distance or proximity guarantees.
-- Public copy may describe avoiding unnecessary import and intermediary layers,
-  but it must not promise a lower price or a specific logistics saving.
-- Active platform-owned public surfaces do not use giant-enterprise targeting,
-  broad importer/reseller language, or unverified phrases such as "every
-  business pays taxes" or "guaranteed sales."
+- Every screen has one communication job. Eyebrow, heading, body, and button do
+  not repeat the same statement in different words.
+- Market uses one literal heading and one short sentence before discovery. It
+  does not use slogan fragments, unsupported rankings, audience piles, or a
+  second search explanation.
+- Search controls use literal task language such as **Products** and
+  **Businesses**. Result copy identifies what matched and where it comes from;
+  it does not repeat the platform mission or internal audience strategy.
+- About is the concise vision story, not a feature checklist or policy summary.
+  It explains that valuable local production already exists, discovery should
+  not depend on word of mouth, and stronger local demand can create a path from
+  Ethiopia toward wider African market connections. It may describe the map,
+  AfricMade pages, and direct relationships as one coherent idea, but it does
+  not enumerate support categories, commercial caveats, or internal workflows.
+- Account entry explains access. Business setup explains profile creation.
+  Neither recites the whole market strategy, offer taxonomy, design workflow, or
+  publication lifecycle.
+- Public support offers only help using AfricMade, transport-arrangement help, and
+  reporting a concern about a listed operation. It does not suggest inspection,
+  certification, negotiation, production monitoring, or delivery operation.
+- Copy uses short, translation-friendly sentences and concrete nouns. It leads
+  with the useful outcome and names the participant set only where needed.
+- **Business** remains valid where the subject is legally or operationally an
+  account, profile, or company. It is not the Market's value proposition.
 
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor understands the trade MirtPage enables
-  GIVEN the public marketplace is open
-  WHEN a visitor reads the welcome and discovery introduction
-  THEN the destination is identified as online showrooms for Ethiopian production
-  AND custom work, ready products, and wholesale supply are available as useful distinctions
-  AND Ethiopian producers and the buyers at the next step in their market are named
-  AND visiting a showroom and making direct contact are clear next steps
+Scenario: Visitor understands the Market
+  GIVEN the public Market is open
+  WHEN a visitor reads its introduction
+  THEN the visitor understands that AfricMade lists locally made and grown products
+  AND the visitor can search pages from artisans, farms, workshops, and small manufacturers
+  AND the visitor can contact them directly
+  AND no certification, guaranteed quality, or continent-wide coverage is implied
 
-Scenario: Platform language does not overstate one business's offer
-  GIVEN a listed business may support only one buying path
-  WHEN MirtPage describes the overall marketplace
-  THEN it presents the three paths as choices available across the platform
-  AND it does not claim that every listing accepts custom, retail, and wholesale orders
+Scenario: Participant understands that scale is not an exclusion
+  GIVEN a qualifying participant is an artisan, farm, workshop, or small manufacturer
+  WHEN they read About
+  THEN the language includes their production scale without infantilizing it
+  AND it uses the participant's natural trade or operation label
 
-Scenario: Producer understands how MirtPage connects the market
-  GIVEN a local maker, grower, processor, workshop, or growing factory opens About
-  WHEN they read the MirtPage story
-  THEN the page explains the path from production to households and trade buyers
-  AND MirtPage's contribution is limited to presentation, discovery, and inquiry
+Scenario: Task page remains focused
+  GIVEN a user is signing in or completing a private production profile
+  WHEN the task page renders
+  THEN it describes only the immediate action and next destination
+  AND it does not repeat the full platform narrative or offer taxonomy
 
-Scenario: Public copy does not guarantee transaction economics
-  GIVEN MirtPage does not set product prices or operate delivery
-  WHEN a visitor reads about buying closer to the source
-  THEN the copy does not promise a better price, savings amount, quality, or delivery outcome
-  AND it may explain the value of reducing unnecessary market layers as a platform purpose
+Scenario: Visitor asks for bounded platform help
+  GIVEN a buyer may contact a listed participant directly
+  WHEN the buyer opens public support
+  THEN the buyer can ask how to use AfricMade, request help arranging transport, or report a listing
+  AND AfricMade does not claim inspection, certification, negotiation, or delivery responsibility
 
-Scenario: Producer begins signup without a false promise
-  GIVEN a producer opens business signup
-  WHEN they read the signup context
-  THEN the page connects their existing work to a professional public presence
-  AND it still states that publication follows private design and review
+Scenario: Demo catalog reflects the target market
+  GIVEN fictional launch businesses are prepared for public demonstration
+  WHEN the demo catalog is reviewed
+  THEN every business makes, grows, processes, or fabricates physical goods at small scale
+  AND import-only sellers, repair-only services, and large industrial manufacturers are absent
 
-Scenario: Client showroom keeps its independent identity
-  GIVEN a visitor opens a published client showroom
-  WHEN the showroom renders
-  THEN MirtPage's platform mission copy is not injected into client-owned content
-  AND only the client's approved identity and claims are presented
+Scenario: Visitor can recognize physical art and local agricultural inputs
+  GIVEN the Market category chooser is open
+  WHEN a visitor reviews the available categories and icons
+  THEN artists and art studios have an obvious home under Furniture, art & building
+  AND small animal-feed makers have an obvious home under Farms, livestock & feed
+  AND each category uses a distinct icon and plain label
 ```
 
 ## Quality impact
 
-- Security and tenant isolation: no authorization or data access changes.
-- Privacy and data retention: no new data collection or tracking.
-- Accessibility and responsive behavior: revised text must fit existing 320,
-  390, and desktop layouts without clipping, overlap, or horizontal overflow.
-- Localization and merchant-entered values: English copy uses plain,
-  translation-friendly sentences; no merchant-entered content changes.
-- Performance and limits: static copy only; no dependency, asset, or runtime
-  request changes.
-- Failure recovery and idempotency: not applicable to static presentation.
-
-## Observability
-
-No new runtime events or logs. Existing page and inquiry analytics remain
-unchanged and must not capture private copy or contact information.
+- Security and tenant isolation: no authorization or query change.
+- Privacy and data retention: no new public data collection.
+- Accessibility and responsive behavior: copy must fit at 320, 390, and desktop
+  widths without clipping, overlap, or horizontal overflow.
+- Localization: literal language, short sentences, and stable terms reduce
+  ambiguity and translation cost.
+- Performance: static copy only.
 
 ## Test plan
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Required audience, mission, capability, and overclaim boundaries | contract | `scripts/test-platform-narrative.mjs` |
-| Homepage, discovery, About, signup, and login presentation | browser | `tests/acceptance/app.spec.ts` |
-| Narrow-screen fit and overflow | browser/manual | `scripts/capture-platform-form-visuals.mjs`, focused public capture |
-| Client identity remains independent | contract/browser | existing showroom identity and acceptance tests |
+| Required narrative and overclaim boundaries | contract | `scripts/test-platform-narrative.mjs` |
+| Market, About, auth, setup, and support presentation | browser | `tests/acceptance/app.spec.ts` |
+| Narrow-screen fit | browser/manual | `scripts/capture-platform-form-visuals.mjs`, focused public capture |
+| Participant page retains independent identity | integration/browser | existing renderer and identity tests |
 
 ## Rollout and rollback
 
-No data or deployment migration is required. Rollback restores the preceding
-copy and metadata files; all routes, stored data, and showroom content remain
-unchanged.
+No data migration is required for copy. Rollback restores prior platform copy;
+participant-authored content and internal renderer identifiers remain unchanged.
 
 ## Readiness checklist
 
-- [x] Scope and non-goals agreed
-- [x] Related specs linked reciprocally
-- [x] Contracts and invariants explicit
-- [x] Positive and negative scenarios present
-- [x] Quality impacts evaluated
-- [x] Test plan maps every acceptance criterion
-- [x] Rollout/rollback decided
+- [x] Audience, purpose, launch geography, and non-goals are explicit
+- [x] Screen-level content responsibilities are explicit
+- [x] Overclaim and sourcing-support boundaries are explicit
+- [x] Accessibility, localization, and rollback are evaluated
+- [x] Automated and visual evidence is planned
 
-## Completion evidence
+## Evidence
 
-Evidence: completed locally on 2026-08-04. `npm run test:narrative` proves the required
-producer audience, commitment language, real platform capabilities, overclaim
-boundaries, and absence of MirtPage mission slogans in client showroom source.
-`npm run check` passed all specification, identity, design-system, recipe,
-security, discovery, media, tenant-scope, and revision contracts. Ordered
-`npm run test:acceptance` passed 10/10 production-browser workflows, including
-the About story, business signup, marketplace, mobile behavior, and independent
-client showroom identity.
+Evidence:
 
-`npm run test:platform-forms-visual` passed desktop, 390-pixel, and 320-pixel
-login/signup captures with no horizontal overflow, visible forms, and touch-size
-controls. Focused Chromium captures of the homepage and About page at 1440 and
-390 CSS pixels were reviewed without clipped or overlapping narrative text.
-
-Reopened narrative evidence on 2026-08-09: `npm run test:narrative`,
-`npm run test:homepage`, `npm run typecheck`, and `npm run validate:specs`
-pass after identifying the customer-facing product as online showrooms and
-replacing vague buying-path slogans with direct discovery, capability, and
-contact outcomes. Focused Chromium captures at 1440, 390, and 320 CSS pixels
-show the complete homepage explanation and About buyer journey with zero
-horizontal overflow. Full release gates remain pending visual approval.
+The 2026-09-12 revision passes `npm run check`, `npm run release`, and all 10
+ordered production-browser acceptance workflows. Contract coverage proves
+the consumer-first locally made and grown promise, optional trader and retailer
+opportunities, bounded support language, and exclusion of repair-only and
+mass-industrial demo participants. The approved 1440, 390, and 320 CSS-pixel
+Search captures under `/tmp/africmade-search-review` show concise copy without
+clipping or horizontal overflow.

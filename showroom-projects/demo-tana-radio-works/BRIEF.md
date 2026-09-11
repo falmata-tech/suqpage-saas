@@ -1,18 +1,18 @@
-# Tana Radio Works showroom brief
+# Tana Speaker Workshop showroom brief
 
 > Fictional disposable client used to exercise the MirtPage design workflow. All copy and imagery are demonstration material, not verified business claims.
 
 ## Identity
 
-- Business name: Tana Radio Works
+- Business name: Tana Speaker Workshop
 - Permanent handle: `demo-tana-radio-works`
 - Location: Addis Ababa, Addis Ababa
-- Existing logo/mark: generated geometric mark based on concentric radio waves inside a T
-- Short description: Use some vintage character, but keep the product and repair information modern and easy to scan.
+- Existing logo/mark: generated geometric mark based on a sound wave forming a compact T
+- Short description: Show the speaker and cable work as local production, with enough detail to compare size, use, and connection options.
 
 ## Customer And Goal
 
-- Primary customer: homes, worship spaces, and neighborhood venues
+- Primary customer: worship spaces, schools, cafes, and neighborhood venues
 - Main visitor decision: identify the closest offering and decide what requirement to send
 - Inquiry outcome: one direct MirtPage inquiry with optional quantity and practical context
 - Product, production, or custom-work mode: mixed as recorded per offering
@@ -22,8 +22,8 @@
 
 - Customer color request: brown, orange, and cream
 - Designer advice: The requested colors felt nostalgic but muddy together; copper is retained as a detail while navy and clean gray sharpen the interface.
-- Logo concept: concentric radio waves inside a T
-- Visual thesis: A precise listening-room mood with restrained analog detail.
+- Logo concept: a sound wave forming a compact T
+- Visual thesis: A precise listening-room mood with clear cabinet and connection details.
 - Visual directions to avoid: one-color tinting, generic stock scale, framed hero boxes, decorative clutter, unsupported claims
 
 ## Final Palette
@@ -46,7 +46,7 @@
 
 ## Content Inventory
 
-- Products or capabilities: Table Radio Restoration (Restoration); PA Amplifier Repair (Repair); Outdoor FM Antenna Kit (Reception); Custom Audio Cable Loom (Connections)
+- Products or capabilities: Compact PA Speaker (Speakers); Floor Monitor Cabinet (Speakers); Speaker Stand Pair (Stands); Custom Audio Cable Loom (Connections)
 - Required inquiry details: intended use, format or specification, timing, and optional quantity
 - Unknowns: all operational facts remain provisional because this is a fictional client
 
@@ -55,9 +55,9 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-tana-radio-works/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-1.webp` | Table Radio Restoration | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-2.webp` | PA Amplifier Repair | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-3.webp` | Outdoor FM Antenna Kit | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-1.webp` | Compact PA Speaker | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-2.webp` | Floor Monitor Cabinet | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-3.webp` | Speaker Stand Pair | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-tana-radio-works/product-4.webp` | Custom Audio Cable Loom | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-tana-radio-works.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
@@ -75,7 +75,7 @@
 
 - Approved logo/name treatment: generated mark plus exact business name
 - Facade material and color: shared clean City Showroom architecture with the final primary and secondary roles
-- Product/craft cue: concentric radio waves inside a T
+- Product/craft cue: a sound wave forming a compact T
 - Generated image authorized: yes, for disposable demonstration use
 
 ## Acceptance Notes

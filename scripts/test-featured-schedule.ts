@@ -26,21 +26,21 @@ import {
 import { migrateDatabase } from "../lib/schema";
 import type { RuntimeSqlValue } from "../lib/runtime-sql";
 
-const discoveryUiSource = fs.readFileSync(path.join(process.cwd(), "components/DiscoveryWorkspace.tsx"), "utf8");
+const featuredUiSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"), "utf8");
 const discoveryCssSource = fs.readFileSync(path.join(process.cwd(), "app/discovery.css"), "utf8");
 const lineupSelectorSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedLineupSelector.tsx"), "utf8");
 const featuredAdminSource = fs.readFileSync(path.join(process.cwd(), "app/dashboard/admin/featured-schedule/page.tsx"), "utf8");
-assert.match(discoveryUiSource, /function TodayProgramSchedule/);
-assert.match(discoveryUiSource, /Today's schedule/);
-assert.match(discoveryUiSource, /if \(!featured\.isToday\) return null/);
-assert.match(discoveryUiSource, /featured\.booths\[slot - 1\]/, "public schedule names resolve from the same authoritative booth lineup");
-assert.match(discoveryUiSource, /entry\.kind === "booth" \|\| entry\.kind === "sponsor_break"/, "visitor schedule includes presentations and sponsor breaks without an expanded changeover wall");
+assert.match(featuredUiSource, /function TodayProgramSchedule/);
+assert.match(featuredUiSource, /Today&apos;s schedule/);
+assert.match(featuredUiSource, /if \(!featured\.isToday\) return null/);
+assert.match(featuredUiSource, /featured\.booths\[slot - 1\]/, "public schedule names resolve from the same authoritative booth lineup");
+assert.match(featuredUiSource, /entry\.kind === "booth" \|\| entry\.kind === "sponsor_break"/, "visitor schedule includes presentations and sponsor breaks without an expanded changeover wall");
 assert.match(discoveryCssSource, /\.featured-agenda-body/);
 assert.match(discoveryCssSource, /max-height:\s*min\(470px, 58dvh\)/, "the opened phone schedule remains bounded");
 assert.match(lineupSelectorSource, /disabled=\{!selected && capacityReached\}/, "the admin selector prevents a forty-first browser selection");
-assert.match(lineupSelectorSource, /Daily Featured accepts up to \{limit\} showrooms/, "the admin selector explains the capacity");
+assert.match(lineupSelectorSource, /Daily Featured accepts up to \{limit\} pages/, "the admin selector explains the capacity");
 assert.match(featuredAdminSource, /sponsorForSlot\(entry\.sponsorSlot\)\?\.name/, "the internal agenda names each scheduled sponsor placement");
-assert.match(discoveryUiSource, /Sponsor spotlight/, "the public schedule and live rail disclose the active sponsor segment");
+assert.match(featuredUiSource, /Sponsor spotlight/, "the public schedule and live rail disclose the active sponsor segment");
 
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-featured-schedule-"));
@@ -133,7 +133,7 @@ async function main() {
   ];
   const businessIds = scheduleBusinessNames.map((name, index) => {
     const handle = `schedule-business-${index + 1}`;
-    const businessId = Number(db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES(?,?,?,'active')").run(handle, name, "composition").lastInsertRowid);
+    const businessId = Number(db.prepare("INSERT INTO businesses(handle,name,design_key,hero_image_path,status) VALUES(?,?,?,?,'active')").run(handle, name, "composition", `/heroes/${handle}.webp`).lastInsertRowid);
     db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'electronics')").run(businessId);
     db.prepare(`
       INSERT INTO business_discovery_profiles(

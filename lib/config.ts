@@ -85,6 +85,7 @@ export function supabaseAuthConfig() {
     url: (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim().replace(/\/$/, ""),
     publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
     serviceRoleKey: process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY || "",
+    emailOtpEnabled: process.env.MIRTPAGE_EMAIL_OTP_ENABLED === "1",
     googleEnabled: process.env.MIRTPAGE_GOOGLE_AUTH_ENABLED === "1",
     requestTimeoutMs: timeout,
   };
@@ -215,5 +216,8 @@ export function assertProductionConfiguration() {
   if (!/^[a-z0-9][a-z0-9_-]{1,62}$/i.test(storage.bucket)) {
     throw new Error("MIRTPAGE_SUPABASE_STORAGE_BUCKET is invalid.");
   }
-  assertSupabaseAuthConfiguration();
+  const identityConfig = assertSupabaseAuthConfiguration();
+  if (!identityConfig.emailOtpEnabled || !identityConfig.googleEnabled) {
+    throw new Error("AfricMade production requires verified email-code and Google sign-in providers.");
+  }
 }

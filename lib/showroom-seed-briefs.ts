@@ -192,7 +192,7 @@ export const ADDITIONAL_SEED_SHOWROOM_BRIEFS: Record<string, SeedShowroomBrief> 
     cta: { title: "Choose a carry form or describe a small team run.", body: "Add a product and share finish, dimensions, quantity, marking, and delivery timing." },
   },
   "nova-assembly": {
-    objective: "Make electronics assembly and repair understandable without hiding specification requirements.",
+    objective: "Make small-run electronics assembly understandable without hiding specification requirements.",
     template: "Cinematic technical opening, structured process proof, and specification-led catalog.",
     profile: {
       tokenPack: "chrome-future", motion: "balanced", decoration: "clean",
@@ -203,9 +203,9 @@ export const ADDITIONAL_SEED_SHOWROOM_BRIEFS: Record<string, SeedShowroomBrief> 
       heroMediaIntegration: "surface_blend", storyMediaIntegration: "natural",
       productDetailPattern: "technical",
     },
-    story: { kicker: "Bench discipline", title: "Technical work documented before assembly or repair begins", quote: "The connector, load, fault, and operating environment all matter." },
-    process: { title: "Diagnose, define, assemble, and verify", body: "The lab records the requirement, confirms compatibility, completes the work, and verifies the result.", items: ["Document equipment and need", "Review circuit and interfaces", "Assemble, test, and label"] },
-    cta: { title: "Send the equipment, fault, load, connector, and quantity context.", body: "Add a related build or service and include photos, model details, interfaces, and expected operating conditions." },
+    story: { kicker: "Bench discipline", title: "Technical work documented before assembly begins", quote: "The connector, load, interfaces, and operating environment all matter." },
+    process: { title: "Define, assemble, test, and verify", body: "The lab records the requirement, confirms compatibility, completes the assembly, and verifies the result.", items: ["Document the equipment need", "Review circuit and interfaces", "Assemble, test, and label"] },
+    cta: { title: "Send the load, connector, interface, and quantity context.", body: "Add a related build and include drawings, photos, model details, interfaces, and expected operating conditions." },
   },
   "tekle-circuit-systems": {
     objective: "Make repeat electronics assembly legible to equipment buyers.",

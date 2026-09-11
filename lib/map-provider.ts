@@ -21,7 +21,7 @@ const OSM_STANDARD_PROVIDER: MapProviderConfig = {
 export function mapProviderConfig(): MapProviderConfig {
   const providerId = process.env.NEXT_PUBLIC_MIRTPAGE_MAP_PROVIDER || "osm-standard";
   if (providerId !== OSM_STANDARD_PROVIDER.id) {
-    throw new Error(`Unsupported MirtPage map provider: ${providerId}`);
+    throw new Error(`Unsupported AfricMade map provider: ${providerId}`);
   }
   return OSM_STANDARD_PROVIDER;
 }

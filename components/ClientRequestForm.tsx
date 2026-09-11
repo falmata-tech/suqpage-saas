@@ -62,12 +62,12 @@ export default function ClientRequestForm({
       <input type="hidden" name="idempotencyKey" value={key} />
       <div className="field full">
         <span className="eyebrow">
-          {requestType === "onboarding" ? "Showroom setup" : "Showroom update"}
+          {requestType === "onboarding" ? "Page setup" : "Page update"}
         </span>
         <h2>{isUpdate ? "What would you like changed?" : "Tell us what exists today"}</h2>
         <p>{isUpdate
-          ? "Describe the result you want. You do not need to repeat information already in your showroom."
-          : "MirtPage will choose a suitable page structure and the number of product, capability, and image slots. Images are added to the labeled checklist after the design is imported."}</p>
+          ? "Describe the result you want. You do not need to repeat information already on your page."
+          : "AfricMade will choose a suitable page structure and the number of product, capability, and image slots. Images are added to the labeled checklist after the design is imported."}</p>
       </div>
       {!isUpdate ? <><div className="field">
         <label htmlFor="client-archetype">Business type</label>
@@ -77,8 +77,8 @@ export default function ClientRequestForm({
       </div>
       <div className="field">
         <label htmlFor="client-catalog-stage">Products &amp; capabilities</label>
-        <select id="client-catalog-stage" name="catalogStage" defaultValue="Let MirtPage choose">
-          <option>Let MirtPage choose</option>
+        <select id="client-catalog-stage" name="catalogStage" defaultValue="Let AfricMade choose">
+          <option>Let AfricMade choose</option>
           <option>Small catalog (1-5)</option>
           <option>Growing catalog (6-15)</option>
           <option>Large catalog (16+)</option>
@@ -101,14 +101,14 @@ export default function ClientRequestForm({
           minLength={10}
           maxLength={9600}
           placeholder={isUpdate
-            ? "For example: replace the hero image, rewrite the process section, add two offerings, adjust the colors, or redesign the whole showroom."
+            ? "For example: replace the hero image, rewrite the process section, add two offerings, adjust the colors, or redesign the whole page."
             : "List what you sell, make, grow, supply, or can manufacture. Add known capacity, minimum order, lead time, categories, and common customer questions. A simple list is fine; leave unknown facts out."}
         />
       </div>
       {error ? <p className="error field full" role="alert">{error}</p> : null}
       <div className="field full">
         <button className="btn brand" disabled={pending}>
-          {pending ? "Starting project..." : requestType === "onboarding" ? "Start showroom setup" : "Start showroom update"}
+          {pending ? "Starting project..." : requestType === "onboarding" ? "Start page setup" : "Start page update"}
         </button>
       </div>
     </form>

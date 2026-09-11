@@ -1,41 +1,44 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { googleLoginAction, loginAction } from "@/app/actions";
-import MirtPageBrand from "@/components/MirtPageBrand";
-import PublicMobileNavigation from "@/components/PublicMobileNavigation";
-import { currentUser } from "@/lib/auth";
+import { googleLoginAction } from "@/app/actions";
+import AfricMadeBrand from "@/components/AfricMadeBrand";
+import PasswordlessLoginForm from "@/components/PasswordlessLoginForm";
 import { supabaseAuthConfig, supabaseAuthEnabled } from "@/lib/config";
+import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
-  const user = await currentUser();
-  if (user) redirect(user.must_change_password ? "/dashboard/account?required=1" : "/dashboard");
+  const managedAuth = supabaseAuthEnabled();
+  const identity = managedAuth ? await currentSupabaseProviderIdentity() : null;
+  if (identity) redirect(identity.userId ? "/dashboard" : "/request");
   const p=await searchParams;
-  const googleEnabled=supabaseAuthEnabled()&&supabaseAuthConfig().googleEnabled;
+  const config=supabaseAuthConfig();
+  const emailEnabled=managedAuth&&config.emailOtpEnabled;
+  const googleEnabled=managedAuth&&config.googleEnabled;
+  const accessMessage=emailEnabled&&googleEnabled
+    ? "Use a one-time email code or Google."
+    : emailEnabled
+      ? "Use a one-time email code."
+      : googleEnabled
+        ? "Use your Google account."
+        : "Account access is temporarily unavailable.";
   return <div className="landing-home platform-task-page">
-    <header className="landing-header"><div className="landing-container landing-nav"><MirtPageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Explore Showrooms</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Explore Showrooms</Link><Link href="/about">About</Link><Link href="/request">Sign up</Link></nav></details></div></header>
+    <header className="landing-header"><div className="landing-container landing-nav"><AfricMadeBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Market</Link><Link href="/about">About</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Market</Link><Link href="/about">About</Link></nav></details></div></header>
     <main className="platform-task-main">
       <section className="platform-task-shell login-task-shell" aria-labelledby="login-title">
         <div className="platform-task-context">
-          <span className="platform-task-eyebrow">Business workspace</span>
-          <h1 id="login-title">Welcome back to MirtPage.</h1>
-          <p>Manage your showroom, customer inquiries, design requests, private previews, and support conversations in one protected workspace.</p>
-          <div className="platform-context-note"><strong>Not on MirtPage yet?</strong><span>Create a private workspace and present your custom work, ready products, or wholesale supply in one showroom.</span></div>
+          <span className="platform-task-eyebrow">Account access</span>
+          <h1 id="login-title">Sign in to AfricMade.</h1>
+          <p>Manage your AfricMade page, inquiries, and support.</p>
+          <div className="platform-context-note"><strong>Creating an account?</strong><span>Verify your email or Google account, then add your work and contact details.</span></div>
         </div>
         <div className="platform-form-panel">
-          <div className="platform-form-heading"><span>Account access</span><h2>Sign in</h2><p>Use the email and password connected to your MirtPage account.</p></div>
-          <form className="platform-login-form" action={loginAction}>
-            {p.error&&<p className="error" role="alert">{p.error}</p>}
-            <div className="field"><label htmlFor="login-email">Email</label><input id="login-email" name="email" type="email" autoComplete="email" required/></div>
-            <div className="field"><label htmlFor="login-password">Password</label><input id="login-password" name="password" type="password" autoComplete="current-password" required/></div>
-            <button type="submit">Sign in</button>
-            <p className="platform-form-note">Staff-created temporary passwords must be changed after the first sign-in.</p>
-          </form>
-          {googleEnabled?<form className="platform-login-provider" action={googleLoginAction}><button type="submit">Continue with Google</button></form>:null}
-          <div className="platform-form-footer"><span>Need a showroom?</span><Link href="/request">Create your account</Link></div>
-          <Link className="platform-return-link" href="/">Return to marketplace</Link>
+          <div className="platform-form-heading"><span>Passwordless access</span><h2>Continue to your account</h2><p>{accessMessage}</p></div>
+          <PasswordlessLoginForm emailEnabled={emailEnabled} initialError={p.error || ""} />
+          {!emailEnabled&&!googleEnabled?<p className="platform-form-note" role="status">Please try again later or contact AfricMade support.</p>:null}
+          {googleEnabled?<><div className="platform-provider-divider"><span>or</span></div><form className="platform-login-provider" action={googleLoginAction}><button type="submit">Continue with Google</button></form></>:null}
+          <Link className="platform-return-link" href="/">Return to Market</Link>
         </div>
       </section>
     </main>
-    <PublicMobileNavigation />
   </div>;
 }

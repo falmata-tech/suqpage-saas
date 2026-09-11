@@ -1,10 +1,10 @@
 ---
 id: FE-023
 title: Complete demo showroom portfolio
-status: done
+status: in_progress
 related: [FE-014, FE-022, FE-024, BE-013, BE-022, DEP-011, DEP-019]
 owners: [product, frontend, design]
-last_updated: 2026-08-11
+last_updated: 2026-08-29
 change_level: L2
 ---
 
@@ -48,8 +48,12 @@ preferences.
 
 - The fixture portfolio contains exactly 66 active fictional showrooms and
   exactly four published offerings per showroom after reset.
-- The 56 expanded creative records include exactly nine growing-factory
-  profiles alongside workshop and producer profiles.
+- The 56 expanded creative records represent artisans, farms and growers,
+  workshops, and small manufacturers. Repair-only services, import-only sellers,
+  explicit large-factory identities, and `growing_factory` demo profiles are absent.
+- The portfolio includes a small-batch animal-feed mill and a physical-art
+  studio offering paintings, sculpture, carved wall pieces, and commissioned
+  interior artwork. It contains no bottled-water or diaper-production demo.
 - Every fixture references a non-empty logo, hero, booth, and four non-empty
   offering images that exist under managed public fixture paths.
 - Every showroom and offering resolves to a reviewed production-video family;
@@ -97,6 +101,13 @@ Scenario: Visitor reads a demonstration showroom
   THEN the customer-facing copy reads as a coherent showroom presentation
   AND fixture provenance remains available to staff without appearing as
   development or provisional-copy language on the public page
+
+Scenario: Demo portfolio represents small-scale production
+  GIVEN the disposable portfolio has been materialized
+  WHEN its identities, offerings, and production-scale values are reviewed
+  THEN every public fixture makes, grows, processes, assembles, or fabricates physical goods
+  AND no fixture is a repair-only service, import-only seller, or large industrial manufacturer
+  AND physical art and small-batch animal feed are represented by complete reviewed fixtures
 ```
 
 ## Quality impact
@@ -140,6 +151,6 @@ Evidence: `scripts/test-demo-client-portfolio.ts` passed on 2026-08-11 for the
 
 The original 58-showroom admission passed on 2026-08-02. The current expanded
 contract is 66 active fictional showrooms, 66 briefs/logos/heroes/booths, at
-least 40 palette signatures, nine growing factories, and 264 independent imaged
+least 40 palette signatures, 56 small-scale expanded demos, and 264 independent imaged
 offerings. Current browser and release evidence is recorded in traceability;
 production customer publication remains excluded.

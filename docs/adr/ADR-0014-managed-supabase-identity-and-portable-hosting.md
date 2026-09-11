@@ -4,7 +4,7 @@ title: Managed Supabase identity and portable application hosting
 status: accepted
 date: 2026-08-16
 deciders: [MirtPage]
-related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, DEP-015, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0015, ADR-0016]
+related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-023, DEP-026, DEP-027, DEP-028, ADR-0013, ADR-0015, ADR-0016, ADR-0017]
 ---
 
 # ADR-0014 - Managed Supabase identity and portable application hosting

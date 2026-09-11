@@ -55,7 +55,7 @@ export default async function SettingsPage({
         </div>
         <label className="check-field field full">
           <input type="checkbox" name="isLive" defaultChecked={Boolean(business.is_live)} />
-          Show this business as live now in its showroom and across the MirtPage marketplace
+          Show this business as live now on its page and across the AfricMade Market
         </label>
         <div className="field full settings-section-heading"><span className="eyebrow">Search</span><h2>Browser and sharing details</h2></div>
         <div className="field"><label>Page title</label><input aria-label="Page title" name="siteTitle" defaultValue={business.site_title || business.name} /></div>

@@ -2,7 +2,7 @@
 id: FE-013
 title: Unified platform identity and workspace shell
 status: done
-related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE-029, FE-034, FE-035, FE_BASE]
+related: [FE-003, FE-012, FE-015, FE-017, FE-020, FE-021, FE-024, FE-026, FE-027, FE-029, FE-034, FE-035, FE-038, FE_BASE]
 owners: [product, frontend]
 last_updated: 2026-08-11
 change_level: L1

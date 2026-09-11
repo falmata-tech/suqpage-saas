@@ -11,5 +11,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/login?error=Sign-in%20could%20not%20be%20completed.", url.origin));
   }
   const identity = await completeSupabaseCodeExchange(code);
-  return NextResponse.redirect(new URL(identity ? "/dashboard" : "/login?error=This%20Google%20account%20is%20not%20linked%20to%20MirtPage.", url.origin));
+  if (!identity) return NextResponse.redirect(new URL("/login?error=Sign-in%20could%20not%20be%20completed.", url.origin));
+  return NextResponse.redirect(new URL(identity.userId ? "/dashboard" : "/request", url.origin));
 }

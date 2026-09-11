@@ -113,8 +113,8 @@ function buildMessage(catalog: Catalog, cart: CartLine[]) {
     "",
     "Please confirm availability and the next steps.",
     "",
-    `Showroom reference: @${catalog.business.handle}`,
-    `https://mirtpage.com/@${catalog.business.handle}`,
+    `AfricMade page: @${catalog.business.handle}`,
+    `${typeof window === "undefined" ? "" : window.location.origin}/@${catalog.business.handle}`,
   ]
     .join("\n");
 }
@@ -150,7 +150,7 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
   }
 }
 
-export default function ShowroomApp({ catalog, previewMode = false, embedded = false, privateMediaRequestId }: { catalog: Catalog; previewMode?: boolean; embedded?: boolean; privateMediaRequestId?: number }) {
+export default function ShowroomApp({ catalog, previewMode = false, embedded = false, withinPublicApp = false, privateMediaRequestId }: { catalog: Catalog; previewMode?: boolean; embedded?: boolean; withinPublicApp?: boolean; privateMediaRequestId?: number }) {
   const router = useRouter();
   const storageKey = `mirtpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
@@ -259,7 +259,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
     setSelected(product);
   };
   const add = (product: Product, options: Record<string, string> = {}) => {
-    if(previewMode){setSelected(null);show("Private preview only — customer inquiries remain on the live showroom.");return;}
+    if(previewMode){setSelected(null);show("Private preview only — customer inquiries remain on the live page.");return;}
     if (!["available", "limited"].includes(product.availability)) {
       show("This product is not currently available.");
       return;
@@ -366,16 +366,15 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
       ? compositionManifest.productDetailPattern
       : undefined,
   );
-  const ShowroomRoot = embedded ? "div" : "main";
+  const ShowroomRoot = embedded || withinPublicApp ? "div" : "main";
 
   return (
     <>
       <nav
-        className="showroom-host-bar"
-        aria-label="MirtPage showroom host navigation"
-        style={runtimeTokenVariables as CSSProperties | undefined}
+        className={`showroom-host-bar${withinPublicApp ? " showroom-host-bar-shell" : ""}`}
+        aria-label="Page return navigation"
       >
-        <button type="button" className="showroom-host-back" aria-label="Back to MirtPage marketplace" onClick={() => {
+        <button type="button" className="showroom-host-back" aria-label="Back to Market" onClick={() => {
           let remembered: string | null = null;
           try {
             remembered = window.sessionStorage.getItem(PUBLIC_WORKSPACE_RETURN_KEY);
@@ -393,18 +392,14 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
           router.push("/");
         }}>
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
-          <span>Back</span>
+          <span>Back to Market</span>
         </button>
-        <span className="showroom-host-identity">
-          <img src="/brand/mirtpage-mark-v2.svg" alt="" width="24" height="24" />
-          <span>Powered by <strong>MirtPage</strong></span>
-        </span>
       </nav>
       <ShowroomRoot
-        className={`runtime-root theme-${catalog.business.design_key}${compositionManifest && !previewMode && !embedded ? " has-showroom-mobile-nav" : ""}`}
+        className={`runtime-root theme-${catalog.business.design_key}${withinPublicApp ? " is-public-shell" : ""}${compositionManifest && !previewMode && !embedded ? " has-showroom-mobile-nav" : ""}`}
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
-      {!embedded ? <h1 className="sr-only">{catalog.business.name} online showroom</h1> : null}
+      {!embedded ? <h1 className="sr-only">{catalog.business.name} on AfricMade</h1> : null}
       {compositionManifest ? (
         <CompositionShowroom
           {...designProps}
@@ -431,7 +426,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         ) : null}
       </button> : null}
       {compositionManifest && !previewMode && !embedded ? (
-        <nav className="showroom-mobile-nav" aria-label="Showroom sections">
+        <nav className="showroom-mobile-nav" aria-label="Page sections">
           <a href="#showroom-home"><Home aria-hidden="true" /><span>Home</span></a>
           <a href="#showroom-story"><BookOpen aria-hidden="true" /><span>Story</span></a>
           <a href="#showroom-catalog"><LayoutGrid aria-hidden="true" /><span>Offerings</span></a>
@@ -683,7 +678,7 @@ function InquiryDrawer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessId: catalog.business.id,
-          customerName: "Showroom visitor",
+          customerName: "Page visitor",
           contact: phone,
           contactMethod: "phone",
           idempotencyKey: idempotencyKey.current,
@@ -768,7 +763,7 @@ function InquiryDrawer({
           <div className="drawer-actions">
             <form className="platform-inquiry" onSubmit={sendInquiry}>
               <div className="drawer-action-heading">
-                <span className="eyebrow">Send through MirtPage</span>
+                <span className="eyebrow">Send through AfricMade</span>
                 <h3>Send to {catalog.business.name}</h3>
                 <p>Add a phone number so the business can reply to your inquiry.</p>
               </div>

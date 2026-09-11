@@ -57,7 +57,7 @@ const laboratoryFixtureBase = {
       "We bring together carefully prepared food goods, workshop-made objects, furnishing materials, and production-ready equipment. Every product entry preserves the supplied name, description, availability, and inquiry path.",
     heroTitle: "Useful products, clearly presented.",
     heroSubtitle:
-      "A flexible showroom can feel precise, warm, technical, editorial, or energetic while the underlying catalog and inquiry behavior remain dependable.",
+      "A flexible page can feel precise, warm, technical, editorial, or energetic while the underlying catalog and inquiry behavior remain dependable.",
     logoRef: "",
     heroImageRef: "",
     contactLabel: "Choose products to prepare one structured inquiry",

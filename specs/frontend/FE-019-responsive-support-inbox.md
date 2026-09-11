@@ -37,12 +37,11 @@ conversations.
 - A closed transcript remains readable until the visitor chooses **Start another
   chat**. That action removes only the browser's opaque conversation token; it
   does not reopen, delete, or rewrite the retained staff conversation.
-- A bounded visitor choice between general help, sourcing assistance, business
-  document review, facility or quality visit coordination, and shipment/loading
-  observation.
-- Clear copy that direct showroom contact remains available and that optional
-  MirtPage assistance is a separately requested service, not certification or a
-  guarantee of a business, product, shipment, price, or outcome.
+- A bounded visitor choice between **AfricMade help or report** and **Transport
+  arrangements**. Historical conversations retain their original labels.
+- Clear copy that buying, negotiation, payment, and product questions stay
+  between buyer and listed operation. AfricMade may help connect the buyer with
+  a transport option but does not book, operate, or guarantee delivery.
 - One optional private attachment per message for visitors, clients, and staff:
   sanitized JPEG, PNG, or WebP images, or a verified PDF document up to 5 MB.
   Image messages show a bounded preview; PDFs show a filename, type, and size
@@ -69,7 +68,7 @@ Scenario: Staff claims and closes a conversation
   THEN the client sees the reply and closed state
   AND the team member regains one assignment slot
 
-Scenario: Anonymous visitor asks MirtPage for assistance
+Scenario: Anonymous visitor asks AfricMade for assistance
   GIVEN a public visitor has not signed in
   WHEN they open chat, provide a valid email and phone number, choose an assistance category, and send a bounded message
   THEN the conversation enters the same staff waiting or assignment queue
@@ -89,8 +88,14 @@ Scenario: Visitor continues browsing independently
   THEN the token-owned conversation closes idempotently
   AND its active staff assignment is released
   AND the closed transcript remains readable while replies and polling stop
-  AND marketplace browsing and direct showroom inquiry remain available
-  AND no inspection, trust, negotiation, or certification claim is implied
+  AND marketplace browsing and direct page inquiry remain available
+  AND no inspection, sourcing, negotiation, certification, or delivery guarantee is implied
+
+Scenario: Visitor reports a listing
+  GIVEN a visitor sees a concern on an AfricMade page
+  WHEN they choose AfricMade help or report and send the details
+  THEN the report enters the support queue with reconnect contact details
+  AND the interface does not claim the report has already been verified or resolved
 
 Scenario: Visitor starts a separate conversation after closing one
   GIVEN a visitor has ended a support conversation and can still read its transcript
@@ -121,7 +126,11 @@ Scenario: Attachment cannot be admitted
   remain private support data and never appear in browser notifications or
   unauthenticated public markup.
 - Accessibility and responsive behavior: labeled forms, status text, 44px mobile
-  controls, focus-safe errors, and bounded message regions.
+  controls, focus-safe errors, and bounded message regions. On phones the
+  launcher is a compact icon action with an accessible **Get help** name. It
+  remains persistent in the Market and Featured workspaces; on the scrolling
+  About narrative it is anchored in the opening visual and scrolls away instead
+  of covering headings or body copy.
 - Performance and limits: paginated lists and incremental five-second polling
   only while a thread is open and the browser document is visible; anonymous
   creation and replies are rate limited.

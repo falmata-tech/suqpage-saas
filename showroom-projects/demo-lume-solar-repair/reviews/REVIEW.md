@@ -1,4 +1,4 @@
-# Lume Solar Repair review
+# Lume Solar Light Workshop review
 
 - [x] 1440px full-page capture inspected
 - [x] 390px full-page capture inspected

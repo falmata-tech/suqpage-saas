@@ -2,7 +2,7 @@
 id: BE-020
 title: Public client bootstrap and unified discovery projection
 status: in_progress
-related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, BE-029, FE-021, DEP-017, ADR-0011]
+related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, BE-029, BE-031, FE-021, DEP-017, ADR-0011, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-08-09
 change_level: L3
@@ -48,7 +48,7 @@ the weekly industry Daily Featured program.
 - Public staff registration, email verification claims, passwordless login, or
   an external identity provider.
 - Browser-authoritative business coordinates, visitor-coordinate persistence,
-  industry membership, booth media, featured
+  industry membership, page hero media, featured
   status, publication state, or tenant identifiers.
 
 ## Domain language and invariants
@@ -79,8 +79,10 @@ the weekly industry Daily Featured program.
 - Today's Daily Featured ordering is featured first, then normalized business name and ID.
   Every entry has one sequential stable floor reference for an unchanged
   projection; there is no hall partition.
-- Approved `booth_image_path` remains business-owned profile configuration and
-  is projected only with that business's revealed booth on today's Daily Featured.
+- `businesses.hero_image_path` is the published page-image authority projected
+  with eligible map records and revealed cards on today's Daily Featured.
+  Daily Featured eligibility requires that hero path; retained
+  `booth_image_path` configuration does not override the page hero.
 - Schedule dates are calculated in `Africa/Addis_Ababa` for the current
   Monday-through-Sunday calendar week. Entries remain in fixed weekday order
   and exactly one entry is identified as today.
@@ -229,10 +231,18 @@ production rollout requires abuse monitoring, backup, and reconciled migration.
 ## Evidence
 
 Evidence: completed on 2026-08-01. `scripts/test-discovery.ts` proves one stable
-sequential floor-slot projection, approved booth-image ownership, missing-media
+sequential floor-slot projection, approved presentation-media ownership, missing-media
 exclusion from Daily Featured without geographic exclusion, rolling schedule dates, and
 count-preserving non-today slots containing no business, handle, destination,
 or media projection. Scale fixtures prove complete unique slot sequences across
 all six industries. All 10 browser workflows, `npm run check`, and
 `npm run release` passed, including security, HTTP, scale, and production-build
 gates. No production rollout occurred.
+
+Reopened on 2026-09-01 to replace the retained booth-image projection with the
+published business-page hero for map detail and Daily Featured presentation.
+`scripts/test-discovery.ts` and `scripts/test-featured-schedule.ts` pass and prove
+that retained booth configuration cannot override the page hero. Focused
+Chromium captures prove decoded pixels resolve to the exact projected hero path
+at desktop and phone widths. User visual approval remains pending before the
+complete release gate.

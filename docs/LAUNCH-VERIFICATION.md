@@ -1,32 +1,30 @@
-# MirtPage SaaS MVP — Launch Verification
+# AfricMade Launch Verification
 
 **Release:** `1.0.0-mvp-launch`
-**Verification date:** 2026-08-03 local candidate verification
-**Reviewed input:** current MirtPage launch candidate and data-preserving rollout plan
+**Verification date:** 2026-09-12 local candidate verification
+**Reviewed input:** current AfricMade candidate and data-preserving rollout plan
 
 ## Verdict
 
-The current package is a **locally and remotely verified soft-launch candidate
-for one persistent application instance**. Final approval remains pending
-production configuration, optional Supabase media-copy verification when that
-adapter is selected, and publication. No production launch was performed during
-this verification.
+The current package is a **locally verified AfricMade launch candidate**.
+Production publication and generated-origin smoke remain pending under DEP-028.
 
 This approval has two explicit boundaries:
 
-1. The enabled runtime uses SQLite, so only one application instance should run.
-   Private Supabase Storage is supported but is not configured by repository
-   code alone.
-2. PostgreSQL portability is rehearsed, but PostgreSQL runtime mode is
-   deliberately rejected until every repository port and parity gate passes.
-3. MirtPage-owned authentication remains authoritative; Supabase Auth is not enabled.
+1. Local development, browser acceptance, preview, and production use isolated
+   Supabase PostgreSQL/Auth/private Storage environments with one authorization
+   model. SQLite remains read-only compatibility and migration input.
+2. AfricMade owns roles, capabilities, tenant scope, and suspension after
+   Supabase verifies an email code or Google identity.
+3. Hosted Google consent/code exchange and production delivery must be smoked
+   against the exact deployed commit before public admission.
 4. The former Delivery/Malikt demonstration is retired; dormant legacy tables
    are retained only for a non-destructive rollback window.
 
 ## Current local release evidence
 
-The final local candidate gates passed on 2026-08-03 with Node 24.18.1, npm
-11.16.0, and Next.js 16.2.12:
+The final local candidate gates passed on 2026-09-12 with Node 24.18.1,
+Next.js 16.3.4, Sharp 0.35.4, and PostCSS 8.5.25:
 
 - Next.js production build
 - output-file trace privacy validation
@@ -39,11 +37,11 @@ The final local candidate gates passed on 2026-08-03 with Node 24.18.1, npm
 - operations, migration, backup, and verified restore checks
 - clean production-container install, build, trace, non-root runtime,
   persistence preflight, and health checks
-- disposable PostgreSQL 17 rehearsal of 44 tables and 2,849 rows, including 83
-  checks, 79 foreign keys, 78 indexes, 14 triggers, 44 reconciled fingerprints,
+- disposable PostgreSQL 17 rehearsal of 51 tables and 2,746 rows, including 122
+  checks, 86 foreign keys, 91 indexes, 17 triggers, 51 reconciled fingerprints,
   four invariant probes, and byte preservation of the SQLite source
-- reviewed administrator/client workspace captures at 1440, 390, and 320 CSS
-  pixels with bounded collections and no horizontal overflow
+- approved Search and account-entry captures at 1440, 390, and 320 CSS pixels
+  with bounded collections and no horizontal overflow
 
 The current `npm run backup` rehearsal wrote a preserved snapshot under
 `backups/2026-08-02T20-49-30-395Z`; runtime backup contents remain excluded from
@@ -68,7 +66,7 @@ DEP-002 was completed from a clean tracked worktree on Node 22.16 or newer:
 - generated Next.js declarations remained ignored and development/type
   generation did not dirty tracked Git state.
 - after advisory `GHSA-f88m-g3jw-g9cj` was published, `sharp` was updated to
-  0.35.3 with libvips 8.18.3; the graph contains one patched Sharp version and
+  0.35.4; the graph contains one patched Sharp version and
   image sanitization regression tests pass.
 
 GitHub Actions run `29889083549` passed its `core`, `browser`, and `container`

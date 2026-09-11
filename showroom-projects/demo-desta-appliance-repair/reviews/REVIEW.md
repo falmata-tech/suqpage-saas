@@ -1,4 +1,4 @@
-# Desta Appliance Repair review
+# Desta Injera Stove Works review
 
 - [x] 1440px full-page capture inspected
 - [x] 390px full-page capture inspected

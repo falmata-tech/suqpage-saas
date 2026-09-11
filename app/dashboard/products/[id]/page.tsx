@@ -51,7 +51,7 @@ export default async function EditProduct({
           <h1>Edit {product.name}</h1>
           <p>
             Only the safe client-managed fields below will change. Existing
-            options and showroom design remain intact.
+            options and page design remain intact.
           </p>
         </div>
         <Link
@@ -65,7 +65,7 @@ export default async function EditProduct({
       {query.saved ? (
         <p className="notice">
           Offering published successfully
-          {query.version ? ` as showroom version ${query.version}` : ""}.
+          {query.version ? ` as page version ${query.version}` : ""}.
         </p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}

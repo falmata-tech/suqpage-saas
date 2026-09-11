@@ -1268,7 +1268,7 @@ export function migrateDatabase(
       db.exec(`
         CREATE TABLE IF NOT EXISTS business_subscriptions (
           business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
-          plan_name TEXT NOT NULL DEFAULT 'MirtPage monthly',
+          plan_name TEXT NOT NULL DEFAULT 'AfricMade monthly',
           amount_minor INTEGER CHECK(amount_minor IS NULL OR amount_minor >= 0),
           currency TEXT NOT NULL DEFAULT 'ETB' CHECK(length(currency)=3),
           starts_at INTEGER NOT NULL,
@@ -1318,7 +1318,7 @@ export function migrateDatabase(
             business_id,plan_name,amount_minor,currency,starts_at,
             current_period_start,current_period_end,grace_ends_at,updated_at
           ) VALUES(
-            NEW.id,'MirtPage monthly',NULL,'ETB',
+            NEW.id,'AfricMade monthly',NULL,'ETB',
             CAST(strftime('%s','now') AS INTEGER)*1000,
             CAST(strftime('%s','now') AS INTEGER)*1000,
             CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
@@ -1331,7 +1331,7 @@ export function migrateDatabase(
           current_period_start,current_period_end,grace_ends_at,updated_at
         )
         SELECT
-          id,'MirtPage monthly',NULL,'ETB',
+          id,'AfricMade monthly',NULL,'ETB',
           CAST(strftime('%s','now') AS INTEGER)*1000,
           CAST(strftime('%s','now') AS INTEGER)*1000,
           CAST(strftime('%s','now','+30 days') AS INTEGER)*1000,
@@ -1902,7 +1902,7 @@ export function migrateDatabase(
           client_last_read_message_id,visitor_last_read_message_id,staff_last_read_message_id,
           created_at,updated_at,last_message_at,closed_at
         )
-        SELECT id,public_ref,'client',business_id,opened_by_user_id,'general','MirtPage client',
+        SELECT id,public_ref,'client',business_id,opened_by_user_id,'general','AfricMade client',
           subject,status,assigned_user_id,client_last_read_message_id,0,staff_last_read_message_id,
           created_at,updated_at,last_message_at,closed_at
         FROM support_conversations_v22;
@@ -2056,6 +2056,34 @@ export function migrateDatabase(
         END;
       `);
       db.prepare("INSERT INTO schema_migrations(version) VALUES(37)").run();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  const businessOnboardingProfilesApplied = db
+    .prepare("SELECT 1 FROM schema_migrations WHERE version=38")
+    .get();
+  if (!businessOnboardingProfilesApplied) {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.exec(`
+        CREATE TABLE business_onboarding_profiles (
+          business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+          declared_category_key TEXT NOT NULL CHECK(declared_category_key IN (
+            'electronics','beauty-wellness','agriculture-growers','food-farming',
+            'machinery-tools','home-living','fashion-textiles','other-manufacturing'
+          )),
+          idempotency_key TEXT NOT NULL UNIQUE CHECK(length(idempotency_key) BETWEEN 16 AND 100),
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX business_onboarding_category_idx
+          ON business_onboarding_profiles(declared_category_key,business_id);
+      `);
+      db.prepare("INSERT INTO schema_migrations(version) VALUES(38)").run();
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

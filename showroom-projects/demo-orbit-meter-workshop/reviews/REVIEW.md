@@ -1,4 +1,4 @@
-# Orbit Meter Workshop review
+# Orbit Meter Assembly review
 
 - [x] 1440px full-page capture inspected
 - [x] 390px full-page capture inspected

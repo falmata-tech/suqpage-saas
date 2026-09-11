@@ -27,9 +27,9 @@ export default async function SupportInbox({
     <DashboardShell user={user} business={business}>
       <div className="dashboard-head">
         <div>
-          <span className="eyebrow">{client ? "MirtPage support" : "Customer support"}</span>
+          <span className="eyebrow">{client ? "AfricMade support" : "Customer support"}</span>
           <h1>{client ? "How can we help?" : "Support inbox"}</h1>
-          <p>{client ? "Keep questions and replies together with your MirtPage account." : "Claim waiting conversations, help the client, and close work when it is resolved."}</p>
+          <p>{client ? "Keep questions and replies together with your AfricMade account." : "Claim waiting conversations, help the client, and close work when it is resolved."}</p>
         </div>
         {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">Emergency WhatsApp</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">Manage support agents</Link> : null}
       </div>
@@ -52,7 +52,7 @@ export default async function SupportInbox({
             <input id="support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
             <small>One JPEG, PNG, WebP, or PDF up to 5 MB.</small>
           </div>
-          <div className="field full"><button className="btn brand">Send to MirtPage support</button></div>
+          <div className="field full"><button className="btn brand">Send to AfricMade support</button></div>
         </form>
       ) : (
         <CollectionToolbar action="/dashboard/support" search={query.q || ""} placeholder="Conversation, business, or reference">

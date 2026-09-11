@@ -19,14 +19,14 @@ export default function ClientWorkflowNav({
   const steps = canEdit ? [
     { key: "request" as const, label: "Project", href: `/dashboard/requests/${requestId}`, icon: ClipboardList, available: true },
     { key: "design" as const, label: "AI redesign", href: revisionId ? `/dashboard/requests/${requestId}/revisions/${revisionId}/studio` : "", icon: Palette, available: Boolean(revisionId) },
-    { key: "edit" as const, label: "Edit showroom", href: revisionId ? `/dashboard/requests/${requestId}/revisions/${revisionId}/edit` : "", icon: SlidersHorizontal, available: Boolean(revisionId) },
+    { key: "edit" as const, label: "Edit page", href: revisionId ? `/dashboard/requests/${requestId}/revisions/${revisionId}/edit` : "", icon: SlidersHorizontal, available: Boolean(revisionId) },
     { key: "preview" as const, label: "Preview", href: revisionId ? `/dashboard/requests/${requestId}/revisions/${revisionId}/preview` : "", icon: Eye, available: Boolean(revisionId && canPreview) },
   ] : [
     { key: "request" as const, label: "Project", href: `/dashboard/requests/${requestId}`, icon: ClipboardList, available: true },
     ...(revisionId && canPreview ? [{ key: "preview" as const, label: "Review preview", href: `/dashboard/requests/${requestId}/revisions/${revisionId}/preview`, icon: Eye, available: true }] : []),
   ];
   return (
-    <nav className={`client-workflow-nav ${canEdit ? "staff" : "client"}`} aria-label="Showroom project navigation">
+    <nav className={`client-workflow-nav ${canEdit ? "staff" : "client"}`} aria-label="Page project navigation">
       {steps.map((step) => {
         const Icon = step.icon;
         const contents = <><Icon aria-hidden="true" size={17}/><b>{step.label}</b></>;

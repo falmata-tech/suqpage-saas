@@ -156,11 +156,11 @@ async function main() {
     const managerForm = new FormData();
     managerForm.set("clientUserId",String(client.id));
     managerForm.set("requestType","change");
-    managerForm.set("requestText","The client asked MirtPage to prepare a new private hero and catalog arrangement.");
+    managerForm.set("requestText","The client asked AfricMade to prepare a new private hero and catalog arrangement.");
     managerForm.set("idempotencyKey","manager_request_key_123456");
     const blockedManagerImages = new FormData();
     blockedManagerImages.set("clientUserId",String(client.id));
-    blockedManagerImages.set("requestText", "The client asked MirtPage to prepare a complete private showroom.");
+    blockedManagerImages.set("requestText", "The client asked AfricMade to prepare a complete private showroom.");
     blockedManagerImages.set("idempotencyKey", "manager_images_blocked_123456");
     blockedManagerImages.append("images",new File([new Uint8Array(png)],"manager-reference.png",{type:"image/png"}));
     await assert.rejects(
@@ -221,7 +221,7 @@ async function main() {
     assert.match(assignmentEvent.detail,/^team_member:\d+$/);
     assert.deepEqual(presentRequestEvent(assignmentEvent,true),{
       label:"Team assigned",
-      detail:"A MirtPage team member was assigned to this request.",
+      detail:"An AfricMade team member was assigned to this request.",
     });
     assert.deepEqual(presentRequestEvent(assignmentEvent,false),{
       label:"Assigned",
@@ -236,7 +236,7 @@ async function main() {
       detail:"Revision 3 was sent for your review.",
     });
     const unknownClientEvent = presentRequestEvent({event_type:"internal_test",detail:"staff:42;storage:secret"},true);
-    assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"MirtPage recorded progress on this request."});
+    assert.deepEqual(unknownClientEvent,{label:"Request updated",detail:"AfricMade recorded progress on this request."});
     assert.doesNotMatch(`${unknownClientEvent.label} ${unknownClientEvent.detail}`,/42|secret|staff:/);
     await assignRequestToTeamMember(managerRequest.id,teamTwo.id,manager.id);
     const assignedToTwo = getRequestDetail(managerRequest.id)!;
@@ -286,7 +286,7 @@ async function main() {
     const migrations = getDb().prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>;
     assert.deepEqual(
       migrations.map((migration) => migration.version),
-      Array.from({ length: 37 }, (_, index) => index + 1),
+      Array.from({ length: 38 }, (_, index) => index + 1),
     );
     console.log("Managed request integration tests passed.");
   } finally {

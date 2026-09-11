@@ -1,4 +1,4 @@
-# MirtPage agent operating contract
+# AfricMade agent operating contract
 
 This file is mandatory for every human or AI change in this repository. Read it
 with `MIRTPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
@@ -109,6 +109,13 @@ or treat generated illustrative media as a factual product photograph.
 
 - Inspect before editing. Reuse existing contracts, scripts, fixtures, and
   adapters.
+- Classify operational work as recurring or one-time before adding code. For a
+  reviewed correction to disposable demo data, prefer the smallest direct
+  operation over a permanent sync utility unless CI, repeatability, or data
+  safety creates a concrete reuse requirement.
+- Timebox environment and test-harness diagnosis. After one controlled retry,
+  determine whether the failure is product behavior, stale test data, or test
+  infrastructure before expanding implementation scope.
 - Do not redesign unrelated code, add dependencies, invent integrations, or
   expand MVP scope while implementing a focused spec.
 - Do not repeat the master prompt inside feature specs; link it and record only
@@ -170,3 +177,13 @@ or treat generated illustrative media as a factual product photograph.
 - Destructive migrations without backup and rollback evidence.
 - `any` at a new domain/port boundary without a documented reason.
 - A broad architecture rewrite hidden inside a feature or defect change.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

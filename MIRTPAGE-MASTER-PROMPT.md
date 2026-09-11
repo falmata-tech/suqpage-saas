@@ -1,6 +1,6 @@
-# MirtPage Project Master Prompt
+# AfricMade Project Master Prompt
 
-> **Read this file before changing any MirtPage code, design, data model, copy, integration, or deployment configuration.**
+> **Read this file before changing any AfricMade code, design, data model, copy, integration, or deployment configuration.**
 >
 > This document is the permanent product and engineering brief for human contributors, AI coding agents, designers, and reviewers. It describes the intended product, the principles behind it, the current MVP boundary, and the rules that must not be broken.
 
@@ -8,15 +8,15 @@
 
 ## 1. Your role
 
-You are working on **MirtPage**, a multi-tenant SaaS platform for small and growing Ethiopian makers, growers, processors, workshops, home-based product businesses, and factories that still need practical market access and primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and B2B relationships.
+You are working on **AfricMade**, a multi-tenant SaaS platform that makes small-scale local production easier to discover. The launch catalog contains Ethiopian artisans, farms and growers, workshops, and small manufacturers that primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and direct trade relationships.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
-Do not treat MirtPage as a generic website builder or a conventional ecommerce platform.
+Do not treat AfricMade as a generic website builder or a conventional ecommerce platform.
 
 The central principle is:
 
-> **MirtPage controls the smart catalog, availability, inquiry, and customer-capture workflows. Each client showroom controls its own visual experience.**
+> **AfricMade controls discovery, catalog, availability, inquiry, and customer-capture workflows. Each client AfricMade page controls its own visual experience.**
 
 When a user gives an explicit instruction that conflicts with an older preference in this file, follow the newest explicit instruction, but preserve security, tenant isolation, and data integrity.
 
@@ -27,16 +27,19 @@ When a user gives an explicit instruction that conflicts with an older preferenc
 The official product name is:
 
 ```text
-MirtPage
+AfricMade
 ```
 
 Do not write `SuuqPage`, `Showroom Page`, or another variation unless quoting historical material.
 
-Primary domain:
+Launch origin:
 
 ```text
-mirtpage.com
+configured HTTPS Netlify origin
 ```
+
+No custom AfricMade domain is owned yet. Never publish or configure an assumed
+domain before the product owner purchases it.
 
 Primary support contact:
 
@@ -44,7 +47,7 @@ Primary support contact:
 falmata.dawano@gmail.com
 ```
 
-MirtPage gives each business a polished online showroom at a handle-based route such as:
+AfricMade gives each participating artisan, farm, workshop, or small manufacturer a polished public page at a handle-based route such as:
 
 ```text
 /@selam-weave
@@ -53,17 +56,18 @@ MirtPage gives each business a polished online showroom at a handle-based route 
 /@green-terrace-farm
 ```
 
-The showroom is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
+The AfricMade page is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
 
 ---
 
-## 3. The problem MirtPage solves
+## 3. The problem AfricMade solves
 
-MirtPage exists to connect Ethiopian production to its next market. Makers,
-growers, processors, workshops, and growing factories need practical routes to
-households, retailers, distributors, organizations, and wholesale buyers.
-Those buyers need a clear way to find and assess Ethiopian products directly,
-whether the right producer is nearby or elsewhere in the country.
+AfricMade makes locally made and grown products visible to their next market.
+It launches with reviewed Ethiopian artisans, farms and growers, workshops, and
+small manufacturers. AfricMade helps them reach buyers in their locality,
+region, and country, with wider African discovery as the next market. Buyers
+need a clear way to find the right product or production capability, understand
+its source, and contact that source directly.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -76,37 +80,34 @@ wholesale buyers struggle to understand:
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
 - how the business can retain the inquiry if a social-app handoff fails.
 
-MirtPage gives that production a professional online showroom and public
-presence. It organizes the
-business's products, capabilities, process, reviewed location, and story inside
-a permanent branded showroom; helps visitors discover skilled workshops,
-producers, and manufacturers they may not already know nearby or elsewhere in
-Ethiopia; helps households connect for personal purchases;
-helps retailers, distributors, organizations, and wholesale buyers source at
-the scale they need; and adds a structured direct inquiry workflow without
-forcing the business into full ecommerce operations. The producer keeps its
-identity, customer relationship, and control of the conversation. MirtPage does
-not set or guarantee prices, savings, quality, availability, delivery, or sales.
+AfricMade gives that production a professional public page. It organizes each
+participant's story, process, products, capabilities, reviewed location, and
+contact options; supports map, region, category, product, and capability search;
+and lets buyers contact the participant directly for small purchases, custom
+work, repeat orders, or larger trade inquiries. AfricMade public support may
+help with using the platform, transport arrangements, or reporting a concern
+about a listing. AfricMade does not inspect, certify, endorse, negotiate for,
+deliver for, or guarantee a listed participant.
 
 ---
 
-## 4. What MirtPage is—and is not
+## 4. What AfricMade is—and is not
 
-### MirtPage is
+### AfricMade is
 
-- a multi-tenant showroom SaaS;
+- a multi-tenant market-discovery and public-page SaaS;
 - a dynamic catalog and availability manager;
 - an inquiry-cart system;
 - a lightweight customer lead-capture system;
 - a copy-first inquiry-message builder with configured WhatsApp and Telegram
-  handoff, plus phone-required submission into the business's MirtPage inbox;
+  handoff, plus phone-required submission into the business's AfricMade inbox;
 - an inquiry management dashboard;
 - a first-party customer support workspace;
 - an anonymous, token-scoped public support drawer that enters the same staff
-  queue for general help, sourcing assistance, document review, site-visit
-  coordination, or shipment observation, requiring private reconnect email and
-  phone values on the first message without creating a buyer account or
-  implying certification, endorsement, or a guaranteed outcome; visitors may
+  queue for platform help or listing reports and transport-arrangement help,
+  requiring private reconnect email and phone values on the first message
+  without creating a buyer account or implying certification, endorsement,
+  delivery operation, or a guaranteed outcome; visitors may
   end an active chat, retain its readable transcript, and clear only their
   browser token to begin a separate conversation; visitors, clients, and
   authorized staff may attach one private sanitized image or verified PDF up to
@@ -115,15 +116,15 @@ not set or guarantee prices, savings, quality, availability, delivery, or sales.
 - a platform that supports manually designed, highly distinct client pages;
 - a permanent public discovery surface where visitors choose an industry,
   explore exact reviewed business locations or a daily country-wide virtual
-  Daily Featured Showrooms program, and enter each business's permanent
-  `/@handle` digital showroom;
-- a controlled SaaS pilot with 66 fictional local showrooms spanning makers,
-  growers, processors, workshops, natural-care producers, home brands, and
-  growing factories; ten are curated benchmark identities and all 66 have durable fictional briefs,
+  Daily Featured program, and enter each participant's permanent
+  `/@handle` AfricMade page;
+- a controlled SaaS pilot with fictional Ethiopian artisans, farms and growers,
+  workshops, and small manufacturers; import-only sellers, repair-only services,
+  and large industrial manufacturers are excluded. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
 
-### MirtPage is not
+### AfricMade is not
 
 - a generic theme marketplace;
 - a payment processor;
@@ -133,8 +134,8 @@ not set or guarantee prices, savings, quality, availability, delivery, or sales.
 - a tax engine;
 - an automatic order-fulfillment system;
 - a checkout marketplace or shared storefront that replaces each business's
-  permanent showroom identity;
-- an excuse to make every client page look like the MirtPage landing page;
+  permanent AfricMade page identity;
+- an excuse to make every client page look like the AfricMade landing page;
 - an AI product merely because AI may help generate custom designs.
 
 Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not casually rename inquiries as paid orders.
@@ -198,7 +199,7 @@ configured inquiry/contact destination; they do not repeat product-category
 navigation. The desktop floating Inquiry control owns persistent cart access.
 Phones replace it with a fixed, safe-area-aware showroom application bar that
 exposes Home, Story, Offerings, Contact, and the same tenant-scoped Inquiry
-drawer without covering content. The platform-owned **Powered by MirtPage** and
+drawer without covering content. The platform-owned **Powered by AfricMade** and
 **Back** host bar remains above every public tenant presentation.
 The combined story-and-process chapter is visually distinct from both the hero
 and catalog, returns to semantic heading-first reading order on phones, and may
@@ -211,7 +212,7 @@ Never turn the shared composition interpreter into a visually generic theme.
 `ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
 external AI may propose an exact combination of approved, versioned components,
 one reviewed non-color foundation, optional contrast-safe custom colors, and
-bounded properties as declarative JSON, while MirtPage validates and renders it.
+bounded properties as declarative JSON, while AfricMade validates and renders it.
 The current `showroom-bank@1.2.0` release contains 67 reviewed component
 variants across eight section families and 18 semantic token systems.
 Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
@@ -260,16 +261,25 @@ and interactions must be CSS-first, mobile-safe, static without support, and
 disabled by reduced-motion preference; arbitrary code, copied trade dress,
 autoplay, parallax, and scroll-jacking remain prohibited.
 
-### 5.2 MirtPage must have its own platform identity
+### 5.2 AfricMade must have its own platform identity
 
-The MirtPage public root must not look like any client showroom. It is a polished,
+The AfricMade public root must not look like any client page. It is a polished,
 mobile-first marketplace application designed to remain understandable inside
 TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
 `FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
 venue art direction, and platform visual system. `/` opens directly into the
 geographic Market; there is no intermediate landing lobby or duplicate search.
-A concise heading identifies the marketplace as online showrooms for Ethiopian
-makers and producers, while long platform education remains on `/about`. The
+A concise heading promises locally made and grown products. One short sentence
+explains that visitors can search AfricMade pages from artisans, farms and
+growers, workshops, and small manufacturers
+by product, capability, or location and contact the source directly. Individual
+and household buyers are the primary public audience; traders and retailers can
+also find repeat supply when a participant actually offers it. This audience
+strategy guides content but is not repeated as promotional taxonomy in every
+screen. The launch
+catalog begins in Ethiopia; nearby, national, East African, and wider African
+trade context belongs on About rather than in a slogan fragment. Long platform
+education remains on `/about`. The
 Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
@@ -282,28 +292,40 @@ zoom, and the exact-location Ethiopia map remain within the same bounded
 surface. On phones, Search and Filters share one command row; industry and place
 selection open in a modal bottom sheet, while a compact locate, zoom, and reset
 toolbar sits directly above the map without covering markers. Market and an
-opened nearby-showroom viewer consume the remaining application viewport above fixed
+opened nearby-page viewer consume the remaining application viewport above fixed
 phone navigation.
-Opening a permanent showroom records that exact same-tab public workspace, so
-the hosted showroom Back control restores its nearby-group or map state
-before consulting older browser history.
+Opening a permanent AfricMade page navigates in the same tab to its canonical tenant
+route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
+the AfricMade application rail around the tenant-owned page. Phones use an
+immersive page surface instead: the platform bottom navigation is removed,
+one compact platform-owned Back/Powered by AfricMade bar remains, and the
+tenant's single section/inquiry navigation may stay fixed at the bottom. The
+Back action restores the exact recorded map, filter, nearby-group, or Featured
+state before consulting older browser history. A direct AfricMade page URL renders
+the same responsive shell without requiring prior Market history.
 Desktop retains the complete side command panel. Its opened industry
 menu matches the trigger width and wraps long labels instead of spanning across
 the map. The menu and phone Filters sheet use one restrained accent for each of
 the seven industries and a neutral combined treatment for **All industries**.
-Industry accents may identify nearby-showroom cards, but individual geographic markers and numbered clusters use one
-consistent MirtPage teal. The isolated marker uses a compact storefront pin smaller than a cluster core,
+Industry accents may identify nearby-page cards, but individual geographic markers and numbered clusters use one
+consistent AfricMade orange action treatment. The isolated marker uses a compact storefront pin smaller than a cluster core,
 with no visible halo and an independent touch-sized transparent target;
 white and cool-gray remain the dominant content surfaces, and visible industry text or iconography means
 color is never the only identifier. After two typed characters, search exposes no more than six
-server-authoritative eligible showroom, published offering, and reviewed-place
+server-authoritative eligible page, published offering, and reviewed-place
 suggestions. The combobox supports pointer, touch, and keyboard selection and
-overlays rather than reflows the map. The public program name is always **Daily Featured Showrooms** across
+overlays rather than reflows the workspace. Suggestions complete queries; they
+do not contain the full result experience. A meaningful query opens a bounded
+Search workspace in place of the map canvas, with All, Products, and Businesses
+result controls, deterministic unpaid ordering, and the same category and place
+scope. Result activation opens the existing page inspector. Returning to Map
+preserves query, filters, and remembered viewport; clearing the query returns to
+geographic browsing. The public program name is always **Daily Featured** across
 visible copy and accessible names. Existing `expo` types, query keys, analytics
 values, styles, routes, and persistence fields remain internal compatibility
 identifiers and must never render as visitor language. A disclosed five-placement
 global paid-sponsorship pool is attached to Daily Featured. A placement may be
-an eligible MirtPage showroom or a validated external ad with approved local
+an eligible AfricMade showroom or a validated external ad with approved local
 media and an HTTPS website or telephone action; external ads never become fake
 showrooms or map records. Staff selection and
 ordering do not change with industry, search, place, or selected program day.
@@ -338,7 +360,7 @@ Sponsor breaks receive sequential placements from the active five-placement
 pool. Internal schedule previews name each assigned sponsor and exact time;
 during the live segment, public status names the paid sponsor and its rail card
 moves first with a **Sponsor spotlight** treatment.
-On phones, Daily Featured Showrooms avoids a vertical wall of controls: its long
+On phones, Daily Featured avoids a vertical wall of controls: its long
 description is omitted, broadcast status is compact, and all seven fixed weekdays
 fit in one compact segmented row above the gallery. Daily Featured uses an
 ordinary responsive image-card grid that grows downward without venue scaling,
@@ -354,47 +376,45 @@ hiding application navigation.
 The public application shell exposes Market, Daily featured, About, and More on
 phones. Desktop and More navigation separate Explore, Account, and
 Information. Anonymous visitors see Sign in only; authenticated visitors see
-Dashboard only; showroom signup remains available from the sign-in route. More
+Dashboard only; account creation remains available from the sign-in route. More
 contains direct contact, privacy, and terms rather than repeating the same
 destinations in two navigation surfaces.
-The welcome uses one short, confident market story across public and onboarding
-surfaces: MirtPage helps buyers find Ethiopian businesses for **custom work**,
-**ready products**, and **wholesale supply**. Custom work covers workshops
-making to measurement, specification, configuration, or brief. Ready products
-cover finished goods for consumers or retailers. Wholesale supply covers repeat
-or bulk relationships with retailers, wholesalers, distributors, and
-organizations. A business may support one, two, or all three paths; platform
-copy must never assign an unsupported mode to an individual listing. Visitors
-search by product, capability, or place, inspect a professional showroom, and
-begin a direct inquiry. It avoids motivational clichés, generic SaaS claims, and childish
-slogans while visually connecting directly to the workspace. The fuller story
-of Ethiopian production moving through households and trade buyers belongs on
-`/about`;
+Each screen has one communication job. Market helps visitors find locally made
+and grown products. About explains the local, regional, national, and wider
+African market story. Login explains passwordless account access. Setup
+collects private account details. Support offers platform help, transport help,
+and a way to report a listing.
+No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
+the complete platform narrative. **Custom work**, **ready products**, and
+**wholesale supply** remain optional capability labels, not a slogan or a
+mandatory signup questionnaire. Platform-owned copy does not use **maker**,
+**producer**, or **businesses that make** as its primary catch-all audience.
+Visitors search by product, capability, or place, inspect a professional
+AfricMade page, and begin a direct inquiry. Copy avoids motivational clichés,
+generic SaaS claims, and childish slogans. The fuller story of African
+production moving through households and trade buyers, beginning with Ethiopia
+and East Africa, belongs on `/about`;
 merchant education and conversion remain secondary content below the public
 discovery experience. Platform copy must not claim verified tax, employment,
 certification, import-substitution, sales, or other outcomes for every listed
-business, and MirtPage mission copy must not be injected into client-owned
-showrooms. Every public showroom and private preview is framed by one compact,
-platform-owned **Powered by MirtPage** band with a concise visible **Back**
-action whose accessible name identifies the MirtPage marketplace destination.
-This host chrome sits outside the tenant renderer and must not replace,
-obscure, or visually compete with the tenant's logo, header,
-navigation, or content. Its surface, border, text, and focus colors may derive
-from the approved tenant palette so the compact band belongs beside the site;
-the MirtPage mark, host wording, and Marketplace action remain controlled
-platform identity.
+participant, and AfricMade mission copy must not be injected into client-owned
+pages. A public AfricMade page on desktop or tablet is framed by the AfricMade
+application shell without a duplicate host band. Its mobile presentation uses
+one compact platform-owned **Powered by AfricMade** bar with a concise visible
+**Back** action whose accessible name identifies the marketplace destination.
+Private previews retain their authorized workspace framing. Platform chrome
+sits outside the tenant renderer and must not replace, obscure, recolor, or
+visually compete with the tenant's logo, header, navigation, or content.
 
-MirtPage-owned surfaces use one semantic identity system derived from midnight
-navy `#0B1D3A`, deep teal `#0D6B6E`, bright teal `#27A5A1`, cool cobalt
-`#356C9A`, restrained berry `#A44765`, saffron `#F2B01E`, white, and cool gray
-`#F3F5F7`. White and cool gray carry most public page area; navy carries identity
-and structural contrast; teal carries primary actions, selection, and map state;
-cobalt is limited to technical emphasis; berry is limited to sponsored or
-editorial emphasis; and saffron is reserved for bounded warning or exceptional
-attention states, never the current-day Daily Featured treatment. Sponsored placement uses bright-teal accents and
-an explicit paid label over a restrained midnight patterned field instead of a
-warning color. Public pages, task forms, discovery, and
-authenticated workspaces share the same vector mark and split-color wordmark.
+AfricMade-owned surfaces use one semantic identity system derived from safety
+orange `#FF4B00`, accessible action orange `#C93600`, charcoal `#202428`, middle
+gray, soft gray `#F4F4F2`, and white. White and soft gray carry most public page
+area; charcoal carries identity and structural contrast; orange carries brand,
+selection, and bounded emphasis. White text uses the darker action-orange state
+needed for accessible contrast. Sponsored placement uses an explicit paid label
+and restrained charcoal or soft-neutral structure rather than warning color.
+Public pages, task forms, discovery, and authenticated workspaces share the
+same Africa-pin vector mark and split-color lower-case `africmade` wordmark.
 Client showroom logos and approved or custom showroom palettes remain
 independent and are never replaced by the platform palette.
 
@@ -406,7 +426,7 @@ or hidden overflow.
 The discovery map uses Leaflet with the centralized `osm-standard` provider.
 The visitor's browser requests only visible basemap tiles from the exact
 OpenStreetMap Standard HTTPS endpoint and retains visible attribution plus the
-provider's normal cache behavior. MirtPage does not proxy, prefetch, scrape,
+provider's normal cache behavior. AfricMade does not proxy, prefetch, scrape,
 bulk-download, package, or service-worker-cache those tiles, and it sends no
 search, account, showroom, or private-location data in tile URLs. OpenStreetMap
 supplies visual road and place context only; Supabase remains authoritative for
@@ -422,7 +442,7 @@ unchanged map, with no pagination, internal scroll, simulated architecture, or
 deeper zoom requirement. Selecting a nearby card replaces that list inside the
 same bounded map inspector and provides **Back to nearby**; it never opens a
 second popup or scrim over the retained list, and persistent support controls do
-not overlap the inspector. Isolated businesses use a compact teal
+not overlap the inspector. Isolated businesses use a compact accessible action-orange
 map-pin containing a familiar upright storefront and the
 actual business name in a bounded multi-line label. A generic Showroom caption
 and horizontally unbounded names are prohibited.
@@ -430,15 +450,15 @@ Perspective platforms or device-like silhouettes are prohibited.
 Activating one below
 local-detail zoom centers and enlarges the map first; activating it at local
 detail opens the richer business preview. The map marker does not load booth
-photography. That preview is a non-modal floating inspector centered over a
+or hero photography. That preview is a non-modal floating inspector centered over a
 restrained low-opacity dismissible scrim: the map remains visible, and on
 phones it becomes a bounded bottom sheet above app navigation. A counted nearby-group
-group marker uses the same accessible teal cluster language and exact count so
+group marker uses the same accessible action-orange cluster language and exact count so
 it cannot be mistaken for one business marker.
 Activating a revealed Daily Featured booth opens this same inspector before any
 tenant route change; only its explicit **Open showroom** action navigates.
 Valid tenant-controlled live state appears on clusters, showroom markers,
-nearby-group cards, and today's featured cards. The business in MirtPage's current
+nearby-group cards, and today's featured cards. The business in AfricMade's current
 Daily Featured walkthrough slot is labeled **Featured now** everywhere it is visible; this
 temporarily overrides only its merchant-live presentation and never changes the
 tenant's saved live setting.
@@ -455,8 +475,8 @@ Daily Featured is a seven-day virtual presentation, not a physical location
 claim. It uses one responsive image-led card gallery with no physical hall,
 pan/zoom controls, pages, ranking, or hidden overflow records.
 The seven-date selector remains in fixed Monday-through-Sunday order for the
-current Ethiopia-local calendar week. Its midnight-and-teal **Today** indicator
-moves to the current weekday without reordering the cards or using saffron.
+current Ethiopia-local calendar week. Its charcoal-and-orange **Today** indicator
+moves to the current weekday without reordering the cards or using warning color.
 Selecting another date opens a six-second anonymous preview and then returns to
 today; selecting a different preview restarts that timer without changing map
 filters. The selected calendar date, not map filters, chooses its industry.
@@ -465,7 +485,7 @@ Wednesday Food & Beverage Production, Thursday Machinery, Metalwork & Industrial
 Inputs, Friday Furniture, Home Goods & Building Materials, Saturday Textiles,
 Garments, Leather & Paper, and Sunday Agriculture, Livestock & Primary Produce.
 Today's program reveals each business's
-identity, approved account-owned booth image, preview, and permanent Visit Showroom
+identity, published business-page hero image, preview, and permanent page
 link. Selecting any other date returns only count-preserving anonymous booth
 outlines; business identity, handle, media, and destination are not serialized.
 Sunday follows the same eligibility, privacy, gallery, and interaction rules as
@@ -484,31 +504,39 @@ global pool of five eligible showroom placements and/or validated external ads;
 it does not change with map industry, search, place, or selected
 program day. Sponsorship does not imply endorsement
 or Daily Featured eligibility. All other eligible showrooms remain discoverable. Map previews and
-Daily Featured cards link to the authoritative permanent showroom. Approved booth media
-belongs to its represented business; a generic named booth is only a failed-file
-display fallback and cannot make an incomplete profile eligible. The useful
+Daily Featured cards link to the authoritative permanent page. The published
+business-page hero is the single image used by map detail inspectors,
+nearby-result cards, and revealed Daily Featured cards; retained booth artwork
+does not override it. A named fallback is only a failed-file display state and
+cannot make an incomplete profile eligible. The useful
 product explanation lives on `/about` and in the compact merchant invitation,
 and a visually distinct merchant CTA closes the page. Public controls have at least
 44-pixel touch targets and the complete composition is verified without
 horizontal overflow at 320 and 390 CSS pixels.
 
-The homepage CTA links to review-gated client signup. Signup creates an
-authenticated private business workspace and onboarding request from bounded
-contact, handle, password, and showroom-description fields. It accepts no public
-file upload and creates no public marker, Daily Featured booth, catalog, or showroom.
+The merchant CTA links to passwordless account entry. Google or a six-digit
+email code verifies identity before any business details are requested. An
+authenticated unlinked identity then submits bounded owner name, business name,
+phone or WhatsApp, and a short description of what the business makes or
+supplies. The server derives identity from the Supabase session, generates a
+safe unique handle, and atomically creates the private draft business, owner,
+client access profile, identity link, and onboarding request. It accepts no
+public file upload and creates no public marker, Daily Featured card, catalog,
+or showroom.
 Existing administrator-created invitations and the attachment-free legacy lead
 endpoint remain supported parallel intake paths. The homepage and request flow
 use professional copy with no development-stage disclaimers. The public
 composition is verified without horizontal document overflow at 320 and 390
 CSS pixels.
 
-The public login and business-signup routes use the same MirtPage header,
-solid purple, white, charcoal, and cool-neutral platform language as the
-homepage and About page. Each is a focused task surface with one purple context
+The public account-entry and authenticated business-setup routes use the same
+AfricMade header, orange, charcoal, white, and cool-neutral platform language
+as Market and About. Each is a focused task surface with one concise context
 panel and one white form panel on wider screens, stacked in semantic order on
-phones. They do not return to the former promotional gradients or oversized
-rounded-card treatment, and their authentication and intake contracts remain
-unchanged.
+phones. Account entry asks only for an email code or configured Google identity;
+business setup follows only after provider verification. Password entry,
+password reset, public role selection, handle selection, and initial catalog
+collection are outside the launch flow.
 
 ### 5.3 Public copy must look finished
 
@@ -557,9 +585,9 @@ components, catalog modes, and mobile behaviors intentionally vary. Generated
 benchmark images are internally illustrative and are never evidence of a real
 merchant product. Public presentation uses normal finished business copy.
 
-The wider disposable seed contains 56 additional authored businesses, including
-nine growing factories, distributed across seven industries and reviewed
-Ethiopian locations. Reset creates 66 total businesses with 264 imaged
+The wider disposable seed contains additional small-scale authored operations
+distributed across seven industries and reviewed Ethiopian locations. Reset
+creates a dense demonstration catalog with imaged
 offerings, exactly five globally selected sponsored placements, exactly ten
 retained legacy benchmark flags,
 approved discovery media, reviewed
@@ -582,7 +610,7 @@ and present them but must not invent or silently translate them.
 
 ## 7. Dynamic catalog model
 
-MirtPage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products.
+AfricMade stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products.
 
 Core hierarchy:
 
@@ -618,7 +646,7 @@ Region
 Count
 ```
 
-MirtPage uses **Offering** as the internal umbrella for a standard product,
+AfricMade uses **Offering** as the internal umbrella for a standard product,
 made-to-order product, manufacturing capability, or production supply. Public
 showrooms label this catalog **Products & Capabilities**. The compatible
 `products` table and recipe array remain the current transport; they do not
@@ -675,7 +703,7 @@ recovery input and are discarded when upgraded to revision schema v3.
 
 ## 8. Inquiry-cart workflow
 
-The inquiry cart is MirtPage’s central conversion feature.
+The inquiry cart is AfricMade’s central conversion feature.
 
 Expected customer flow:
 
@@ -692,8 +720,8 @@ Expected customer flow:
 9. When the business configured them, the customer may instead open WhatsApp
    or Telegram with the prepared message.
 10. The customer may separately enter a phone number and activate **Send
-    inquiry** to save the structured cart in that business's MirtPage inbox.
-11. Direct MirtPage delivery requires a normalized phone number with 7–15 digits
+    inquiry** to save the structured cart in that business's AfricMade inbox.
+11. Direct AfricMade delivery requires a normalized phone number with 7–15 digits
     and shows an explicit success or failure state.
 12. Copy and social-app preparation do not fabricate a saved dashboard inquiry
     and do not claim that copying delivered the message.
@@ -797,25 +825,28 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ---
 
-## 10. Showroom directory behavior
+## 10. Market discovery behavior
 
-MirtPage’s directory must scale without dumping every tenant onto the page by default.
+AfricMade’s directory must scale without dumping every tenant onto the page by default.
 
 Default behavior:
 
 - load the combined geographic map behind a required first-use orientation
   chooser with seven industries plus **All industries** as the final option;
-- provide no ranked public List result state;
+- provide no unfiltered or paid-ranked public List result state;
 - de-duplicate businesses with more than one industry membership and keep the
-  Daily Featured Showrooms weekday industry independent from that map filter;
+  Daily Featured weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
+- replace the map canvas with a bounded query-driven Search workspace when a
+  visitor searches, separating Products and Businesses without adding a second
+  route or duplicating the map runtime;
 - after two characters, provide at most six de-duplicated, public-eligible
-  showroom, published-offering, and reviewed-place suggestions scoped to the
+  AfricMade page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place;
 - do not expose category filters or duplicate all-business/reset navigation;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
-- keep reviewed **Workshop / producer** and **Growing factory** scale metadata
+- keep reviewed production-scale metadata
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
   controls within one discovery workbench; progressively disclose industry and
@@ -825,42 +856,41 @@ Default behavior:
 
 ---
 
-## 11. Public client signup
+## 11. Passwordless account entry and business onboarding
 
-The MirtPage landing page leads businesses to a simple review-gated signup. It
-creates a private client account, draft business, explicit client access profile,
-and tenant-bound onboarding request atomically. It does not publish anything.
+AfricMade uses one identity-first entry surface for sign-in and account creation.
+The visitor enters an email and six-digit one-time code or continues with Google
+when that provider is configured. Passwords are not requested in the launch
+flow. Existing linked users continue to their permitted dashboard; verified but
+unlinked identities continue to protected business setup.
 
-Required inputs and limits are controlled by `FE-021`, `BE-020`, and `DEP-017`:
+Business setup collects only owner name, verified-email display, phone or
+WhatsApp, organization name, one bounded private production category,
+processing consent, and an idempotency token. A safe Google display name is
+prefilled when available and remains editable. The public-page handle is
+generated server-side and may be changed later by an authorized operator. There
+are no public file, image, design-brief, password, or free-form offer inputs.
 
-- name and email;
-- phone or WhatsApp;
-- business name and preferred Showroom handle;
-- strong password and confirmation;
-- one showroom description of 20–4,000 characters;
-- processing consent;
-- no public file or image inputs.
-
-Requirements:
+Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
 
 - use bounded JSON, exact-origin checks, privacy-preserving IP/email rate limits,
-  strong password hashing, safe conflicts, and an idempotency token;
-- commit the draft tenant, client identity, access profile, request, and event in
-  one transaction or roll back all of them;
-- authenticate the new client into the private request destination;
-- reject multipart/file submissions before storage;
-- ignore or reject browser-supplied publication, location, industry, featured,
-  and media authority;
-- keep the draft absent from public showroom, map, list, featured, and Daily Featured
+  generic OTP responses, and managed Supabase identity;
+- derive provider UUID and email only from the verified server-side session;
+- commit the draft tenant, owner, access profile, immutable identity link, and
+  private onboarding profile in one transaction or roll back all of them;
+- reject browser-supplied identity, role, tenant, publication, location,
+  industry, featured, media, password, or handle authority;
+- do not create a page project automatically during account setup;
+- keep the draft absent from public page, map, featured, and Daily Featured
   surfaces until exact authorized publication;
-- retain administrator-created invitations and the legacy attachment-free lead
-  endpoint as parallel operations paths.
+- retain old password records and invitation infrastructure only as bounded
+  rollback compatibility, never as the public launch entry experience.
 
 ---
 
 ## 12. Fulfillment boundary
 
-MirtPage does not book, quote, dispatch, or track delivery. Businesses and
+AfricMade does not book, quote, dispatch, or track delivery. Businesses and
 customers confirm payment, collection, shipping, returns, and fulfillment
 directly after an inquiry. No workspace may expose a logistics provider,
 delivery request, delivery status, or simulated fulfillment capability.
@@ -873,7 +903,7 @@ window, but application code must not read or mutate them.
 
 ## 13. User roles
 
-### MirtPage administrator
+### AfricMade administrator
 
 The administrator can:
 
@@ -881,7 +911,7 @@ The administrator can:
 - review self-created private client workspaces and onboarding requests;
 - create a draft client workspace and invitation without requiring a prior
   public interest or service request;
-- reset client passwords and revoke their sessions;
+- revoke provider sessions and repair explicit identity links;
 - provision individual operations-manager and team-member accounts;
 - manage showroom-project intake, request assignment, and customer operations;
 - publish only an exact client-approved revision;
@@ -905,10 +935,10 @@ invitation. The client can:
   capabilities and maintain their type, optional desired-quantity behavior, name,
   description, production facts, primary image, descriptive availability, and
   compatible existing product-category placement;
-- view their showroom and manage their account password.
+- view their showroom and managed identity details.
 - view advisory monthly renewal state, history, and aggregate direct, marketplace,
   and Daily Featured visits;
-- open, reply to, close, and reopen tenant-scoped MirtPage support conversations.
+- open, reply to, close, and reopen tenant-scoped AfricMade support conversations.
 
 Clients cannot directly edit business settings, design, categories,
 options, ordering, slugs, structural publication state, or complete showroom
@@ -916,7 +946,7 @@ revisions. They cannot delete/unpublish products structurally, update inquiry
 status, or operate fulfillment.
 
 Assigned team members receive that same narrow product-upkeep authority for
-assigned businesses so MirtPage can provide extra customer service. Operations
+assigned businesses so AfricMade can provide extra customer service. Operations
 managers and administrators can perform it within their explicit scope. Each
 basic update publishes a retained new content version with actor attribution
 and stale-version protection; full structural and visual work continues through
@@ -950,7 +980,7 @@ A public customer does not require an account. The customer can:
 - copy the prepared inquiry without personal-detail fields;
 - continue through configured WhatsApp or Telegram;
 - enter a required phone number and send the structured inquiry into the
-  business's MirtPage inbox.
+  business's AfricMade inbox.
 
 The access-profile layer distinguishes platform administrator, client, team
 member, and operations manager. Every account has an explicit profile.
@@ -959,8 +989,10 @@ member, and operations manager. Every account has an explicit profile.
 
 Current verified behavior:
 
-- Businesses can self-register into a draft private workspace and start a
-  first-showroom setup project. A separate attachment-free expression-of-interest
+- Artisans, farms and growers, workshops, and small manufacturers can
+  self-register into a draft private workspace.
+  Account setup does not start a page project; **Create AfricMade page** is a
+  separate deliberate action after setup. A separate attachment-free expression-of-interest
   path remains available for prospects who prefer staff follow-up.
 - Public interests use random references, idempotency, bounded JSON,
   privacy-preserving rate limits, events, and additive schema migrations.
@@ -976,35 +1008,37 @@ Current verified behavior:
   directly for a referred client without fabricating a public lead or request.
 - Invitation redemption atomically creates one business-bound client account
   with the restricted client access profile and cannot be replayed.
-- Invited clients have a minimal private workspace for one current showroom
-  project, showroom history, read-only
-  customer inquiries, offering upkeep, support, showroom preview, and
+- Invited clients have a minimal private workspace for one current page
+  project, page history, read-only
+  customer inquiries, offering upkeep, support, page preview, and
   account security. Before first publication, product upkeep is hidden and a
-  deep link returns to the first-showroom setup. After publication, only the
+  deep link returns to the first-page setup. After publication, only the
   bounded **My offerings** fields are available; structural catalog,
   business-setting, design, and inquiry-status mutations remain
   hidden and denied on the server.
 - Authenticated clients can submit a 10–10,000 character written instruction.
-  Request intake is attachment-free. First-showroom setup captures business
+  Request intake is attachment-free. First-page setup captures business
   archetype, products/capabilities stage, and photography stage while asking
   what the business sells, makes, grows, supplies, or can manufacture and any
-  known capacity, minimum-order, and lead-time facts. Established-showroom
+  known capacity, minimum-order, and lead-time facts. Established-page
   updates ask only what should change; owners do not repeat setup context already
-  present in the live showroom. Page structure and dynamic offering/media counts
+  present in the live page. Page structure and dynamic offering/media counts
   remain with the blueprint workflow. After import, missing photography becomes labeled
   recipe destinations that accept verified private uploads, not an unexplained
   “no images” state.
-  The server derives showroom setup versus showroom update from retained
+  The server derives page setup versus page update from retained
   publication state; the browser cannot choose or forge it. The business UI
-  presents **Create showroom**, **Update showroom**, or **Continue showroom
-  setup/update** and keeps terminal work in **Showroom history**. The backing
+  presents **Create AfricMade page**, **Update page**, or **Continue page
+  setup/update** and keeps terminal work in **Page history**. The backing
   service request is tenant-bound and idempotent. A partial unique database
-  index permits only one active showroom project per business across SQLite and
+  index permits only one active page project per business across SQLite and
   PostgreSQL; concurrent attempts return the current project rather than
   creating overlapping work.
 - Platform administrators can provision individual operations-manager and team-
-  member accounts with a temporary password that must be changed on first use.
-  Shared staff credentials and public staff registration are not supported.
+  member application access for a verified managed identity. Shared staff
+  credentials and public staff registration are not supported. Retained
+  temporary-password records are rollback compatibility only and are not shown
+  by the launch account-entry UI.
 - Operations managers can review all requests, create client workspaces, accept
   and invite prospects, submit a request on behalf of a prospect or client, and
   assign or reassign work. They can also update inquiry status. On-behalf
@@ -1043,7 +1077,7 @@ Current verified behavior:
 - Clients and authorized staff can exchange attributable clarification messages
   without rewriting the immutable original instruction. A staff question moves
   eligible work to needs-information; a client reply resumes review. Clients
-  see staff authors as the MirtPage team while internal views retain attribution.
+  see staff authors as the AfricMade team while internal views retain attribution.
 - The focused revision editor renders its current unsaved snapshot through the
   interaction-disabled showroom renderer below the forms. Staff can jump to
   that preview and switch between desktop and phone widths without saving,
@@ -1096,14 +1130,14 @@ Current verified behavior:
   salt and deduplicate per business, source, and day. Clients see aggregate
   direct, marketplace discovery, Daily Featured, and recent counts; raw IP addresses are not stored
   and traffic counts are not billing authority.
-- Authenticated client support is stored inside MirtPage. Enabled agents have
+- Authenticated client support is stored inside AfricMade. Enabled agents have
   configurable concurrent limits; new conversations transactionally select the
   least-loaded available agent or remain waiting. Assignment history and
   lifecycle events are retained, open threads refresh every five seconds, and
   Telegram may send metadata-only secure dashboard links. WhatsApp is an
   optional emergency handoff, never the support source of truth.
 - Platform-owned homepage, discovery, intake, login, legal, favicon, and workspace
-  surfaces use one MirtPage mark and wordmark without replacing any tenant's
+  surfaces use one AfricMade mark and wordmark without replacing any tenant's
   showroom identity. Public intake and login also share the solid platform
   palette and compact form geometry. At phone widths, public surfaces remove
   desktop header and full-footer chrome and expose one safe-area-aware four-tab
@@ -1112,7 +1146,7 @@ Current verified behavior:
   up to four authorized primary tasks sit in the bottom application bar and a
   focus-contained **More** sheet exposes every remaining permitted destination.
   Hosted showrooms omit their full tenant footer on phones while retaining the
-  tenant identity and compact MirtPage Back/provenance bar.
+  tenant identity and compact AfricMade Back/provenance bar.
 - Clients see a revision preview action only after that exact revision is sent
   for review. A staff-only draft is described as being prepared, and client
   request history replaces internal assignment IDs, raw status-transition
@@ -1131,7 +1165,7 @@ Accepted behavior still to implement:
 
 ## 14. Custom showroom integration contract
 
-Custom renderers may be manually written or AI-generated, but they must preserve the MirtPage smart-feature contract.
+Custom renderers may be manually written or AI-generated, but they must preserve the AfricMade smart-feature contract.
 
 The renderer owns:
 
@@ -1148,7 +1182,7 @@ The renderer owns:
 - section order;
 - visual inquiry-cart treatment.
 
-MirtPage owns:
+AfricMade owns:
 
 - business data;
 - categories;
@@ -1295,7 +1329,7 @@ remaining AI-assisted delivery sequence is recorded in
   block destinations with purpose, aspect, required state, alt text, and
   factual/illustrative classification. Staff then fulfill labeled slots with
   request-scoped verified images. The recipe and brief contain only stable
-  destination identifiers, opaque admitted keys, and safe descriptors; MirtPage
+  destination identifiers, opaque admitted keys, and safe descriptors; AfricMade
   does not transmit private files to an external AI.
 - Authorized staff can upload and admit a verified image directly from the
   detailed revision editor. The same private draft then exposes it to compatible
@@ -1372,7 +1406,7 @@ remaining AI-assisted delivery sequence is recorded in
   parameters, provider scripts, remote-image hotlinks, or unapproved URLs.
 - A business may mark its showroom live on TikTok, Facebook, YouTube, or Google
   Meet. Active state requires a matching allowlisted HTTPS destination and is
-  rendered as one concise `Live on: {platform}` action. MirtPage does not host,
+  rendered as one concise `Live on: {platform}` action. AfricMade does not host,
   proxy, record, or autoplay the session.
 - A direct AI-provider adapter still requires a later accepted provider,
   privacy, failure, cost, and deployment contract.
@@ -1449,18 +1483,19 @@ Security requirements are product requirements, not optional cleanup.
 ### Authentication and sessions
 
 - Never expose seeded credentials in public UI.
-- Never ship a shared known password.
-- Generate unique temporary passwords.
-- Force password change for temporary or reset credentials.
-- Supabase Auth owns managed password/OAuth session validity in normal local,
+- Never expose, collect, or transmit a password in the launch account-entry or
+  business-onboarding flow.
+- Supabase Auth owns managed email-OTP/OAuth session validity in normal local,
   browser-acceptance, Preview, and Production runtimes; application-owned opaque
   sessions remain compatibility and bounded rollback infrastructure only.
 - A provider session grants no access until its immutable UUID maps to one
-  MirtPage user. Roles, tenant bindings, capabilities, and suspension always
-  come from MirtPage tables, never provider metadata.
+  AfricMade user. Roles, tenant bindings, capabilities, and suspension always
+  come from AfricMade tables, never provider metadata.
 - Do not use a hard-coded fallback session secret.
-- Revoke sessions after password reset or suspected compromise.
-- Rate-limit login attempts.
+- Revoke provider sessions after suspected compromise, suspension, or explicit
+  administrative recovery.
+- Rate-limit OTP request, OTP verification, OAuth callback, and onboarding
+  attempts without storing raw identity values in rate-limit keys or logs.
 
 ### Tenant isolation
 
@@ -1503,7 +1538,7 @@ Security requirements are product requirements, not optional cleanup.
   Preview and Production projects use private Supabase Storage buckets through
   the provider-neutral media port. Filesystem storage is retained only for
   compatibility fixtures and bounded rollback. Service credentials are
-  server-only and all public/private reads remain behind MirtPage routes.
+  server-only and all public/private reads remain behind AfricMade routes.
 - Remote object-storage operations use a bounded configurable deadline and
   bounded response reads. A database-derived manifest reconciles every retained
   public and private reference without printing object keys or provider data.
@@ -1681,7 +1716,7 @@ When adding or updating recognizable branded products, especially current techno
 - preserve merchant-provided names exactly when importing their catalog;
 - keep product imagery legally and operationally appropriate for the business.
 
-Prices are optional ETB display context and are not required for every MirtPage
+Prices are optional ETB display context and are not required for every AfricMade
 catalog. They are merchant- or reviewer-controlled presentation data, not a
 charge, quote guarantee, or checkout amount. The platform’s main goal is
 structured inquiry, not online checkout.
@@ -1697,10 +1732,10 @@ When adding a new client:
 1. Accept a public expression of interest or create a client workspace directly
    for a referred client.
 2. Reserve a unique handle and choose a starting reviewed composition style.
-3. Deliver the displayed-once invitation securely; do not create a public
-   request merely to provision access.
-4. Let the client set a strong password and start their first showroom setup
-   with a detailed written brief.
+3. Link or invite the client's verified Supabase identity securely; do not
+   create a public request merely to provision access.
+4. Let the client enter with an email code or Google and start the first
+   showroom setup with a detailed written brief.
 5. Assign an individual team member and resolve clarifications in the project
    thread.
 6. Prepare settings, contacts, catalog, options, descriptive availability,
@@ -1781,7 +1816,7 @@ and persisted business content-block storage used by bank-1.2 rendering.
 Current development exception: on 2026-07-25 and again for the 2026-07-27
 benchmark replacement, the product owner confirmed that the local database and
 seeded tenant data are not real customer data
-and do not need preservation. For this repository state, MirtPage may finish the
+and do not need preservation. For this repository state, AfricMade may finish the
 v4/bank-1.2 feature through a reset-only cutover: reset-created showrooms,
 drafts, recipe imports, previews, and publications can move directly to
 revision v4, content-schema v2, design-schema v2, and `showroom-bank@1.2.0`.
@@ -1820,7 +1855,7 @@ Required verification areas:
 - clean dependency installation;
 - migrations and seed/reset;
 - authentication;
-- forced password change;
+- email-code and Google linked/unlinked identity routing;
 - session revocation;
 - administrator, client, operations-manager, and assigned-team permissions;
 - cross-tenant denial;
@@ -1888,7 +1923,7 @@ Always test ZIP integrity after packaging.
 
 ## 24. How to approach future work
 
-When given a new MirtPage task:
+When given a new AfricMade task:
 
 1. Read this file.
 2. Read `README.md`, `SECURITY.md`, and the relevant code.
@@ -1905,7 +1940,7 @@ When given a new MirtPage task:
 
 ### 24.1 Keep this product contract synchronized
 
-This file is a living statement of MirtPage's current product reality. Every
+This file is a living statement of AfricMade's current product reality. Every
 completed feature or change to roles, capabilities, workflow, terminology,
 security, data, or deployment boundaries must update all affected sections in
 the same task that records passing evidence.
@@ -1925,15 +1960,15 @@ and rollout gates.
 
 ## 25. Product north star
 
-Every MirtPage change should move the product toward this experience:
+Every AfricMade change should move the product toward this experience:
 
 > A social seller receives a beautiful, unmistakably custom digital showroom
 > without learning a complex site builder. The client describes the business
-> and requested changes in their own words; MirtPage staff turn those instructions
+> and requested changes in their own words; AfricMade staff turn those instructions
 > into a private, validated proposal, obtain approval for the exact preview, and
 > publish it safely. A customer can quickly discover products, select exact
 > options, create one complete inquiry, and reach the seller through the
-> customer’s preferred messaging app. MirtPage operations retains the inquiry,
+> customer’s preferred messaging app. AfricMade operations retains the inquiry,
 > follows up, while payment and fulfillment remain a direct agreement between
 > customer and business without forcing either party into ecommerce checkout.
 

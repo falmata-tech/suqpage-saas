@@ -5,7 +5,7 @@ import path from "node:path";
 
 const sqliteCatalogSource = fs.readFileSync(path.join(process.cwd(), "lib/db.ts"), "utf8");
 const postgresCatalogSource = fs.readFileSync(path.join(process.cwd(), "lib/postgres-catalog-repository.ts"), "utf8");
-const showroomPageSource = fs.readFileSync(path.join(process.cwd(), "app/[handle]/page.tsx"), "utf8");
+const showroomPageSource = fs.readFileSync(path.join(process.cwd(), "app/(public)/[handle]/page.tsx"), "utf8");
 assert.match(sqliteCatalogSource, /option_groups WHERE product_id IN/);
 assert.match(sqliteCatalogSource, /option_values WHERE option_group_id IN/);
 assert.match(postgresCatalogSource, /option_groups WHERE product_id IN/);

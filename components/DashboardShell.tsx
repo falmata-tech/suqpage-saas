@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
 import { hasCapability, isClient } from "@/lib/capabilities";
 import { runtimeHasRetainedPublication } from "@/lib/catalog-runtime";
 import { hasClientReviewableRevision } from "@/lib/dashboard";
+import { authDriver } from "@/lib/config";
 import type { Business, SessionUser } from "@/lib/types";
 
 const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
@@ -37,11 +39,11 @@ export default async function DashboardShell({ user, business, children }: { use
       { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
     ]),
     group("Operations", [
-      { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" },
+      { href: "/dashboard/requests", label: "Page requests", icon: "requests" },
       { href: "/dashboard/support", label: "Support inbox", icon: "support" },
       { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" },
     ]),
-    group("Showroom system", [
+    group("Page system", [
       { href: "/dashboard/admin/featured-schedule", label: "Featured schedule", icon: "schedule" },
       { href: "/dashboard/admin/sponsors", label: "Sponsor placements", icon: "discovery" },
       { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
@@ -51,9 +53,9 @@ export default async function DashboardShell({ user, business, children }: { use
     group("Business workspace", [
       { href: dashboardHref, label: "Overview", icon: "overview" },
       platformAdmin ? { href: `/dashboard/settings${query}`, label: "Business details", icon: "settings" } : null,
-      { href: `/dashboard/requests${query}`, label: "Showroom project", icon: "requests" },
+      { href: `/dashboard/requests${query}`, label: "Page project", icon: "requests" },
       canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Offerings", icon: "offerings" } : null,
-      { href: `/preview/@${business.handle}`, label: "View showroom", icon: "public", external: true },
+      { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true },
     ]),
     group("Customers & discovery", [
       platformAdmin ? { href: `/dashboard/admin/discovery/${business.id}`, label: "Marketplace", icon: "discovery" } : null,
@@ -73,14 +75,14 @@ export default async function DashboardShell({ user, business, children }: { use
       { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
       operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
       canMaintainProducts ? { href: `/dashboard/products${query}`, label: client ? "My offerings" : "Offerings", icon: "offerings" } : null,
-      client ? { href: "/dashboard/requests", label: "Showroom project", icon: "requests" } : null,
+      client ? { href: "/dashboard/requests", label: "Page project", icon: "requests" } : null,
       teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
-      operations && !business ? { href: "/dashboard/requests", label: "Showroom requests", icon: "requests" } : null,
+      operations && !business ? { href: "/dashboard/requests", label: "Page requests", icon: "requests" } : null,
       (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
       (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
-      reviewable ? { href: `/preview/@${business!.handle}`, label: "Review showroom", icon: "workspace" } : null,
-      (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View showroom", icon: "public", external: true } : null,
-      { href: "/dashboard/support", label: client ? "MirtPage support" : "Support inbox", icon: "support" },
+      reviewable ? { href: `/preview/@${business!.handle}`, label: "Review page", icon: "workspace" } : null,
+      (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true } : null,
+      { href: "/dashboard/support", label: client ? "AfricMade support" : "Support inbox", icon: "support" },
     ]),
     group("Customer operations", [
       operations ? { href: "/dashboard/clients/new", label: "Add business", icon: "businesses" } : null,
@@ -97,8 +99,8 @@ export default async function DashboardShell({ user, business, children }: { use
   ].filter((item): item is WorkspaceNavGroup => Boolean(item));
   const groups = globalGroups || focusedStaffGroups || standardGroups;
 
-  return <div className="dashboard">
+  return <NavigationPendingProvider><div className="dashboard">
     <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={identityContext} groups={groups} />
-    <main className="main">{user.must_change_password ? <div className="error temporary-password">Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div> : null}{children}</main>
-  </div>;
+    <NavigationPendingMain className="main">{authDriver() === "local" && user.must_change_password ? <div className="error temporary-password">Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div> : null}{children}</NavigationPendingMain>
+  </div></NavigationPendingProvider>;
 }
