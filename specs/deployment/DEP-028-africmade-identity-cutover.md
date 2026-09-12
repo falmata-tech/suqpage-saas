@@ -135,3 +135,14 @@ authorization request to `accounts.google.com` with the exact hosted Supabase
 callback. The Netlify production Google feature flag is enabled for the next
 deploy; real consent, code exchange, identity linking/onboarding, and logout
 with an allowlisted Google test user remain required before public admission.
+
+The 2026-09-12 recovery resumed the paused production Supabase project, retained
+private schema/data backups, applied migration 38, and passed hosted runtime
+preflight. The restored prior Netlify deployment returns HTTP 200 for health and
+login. The exact application commit and merged-main remote gates passed, but
+the cutover remains incomplete. An operator configuration push changed hosted
+Google credentials; secure production Auth settings were corrected and Google
+was disabled pending owner restoration of its production credentials. See
+`docs/LAUNCH-VERIFICATION.md` for deployment IDs, evidence, and the remaining
+provider admission checks, and `docs/DEVOPS-RUNBOOK.md` for safeguards against
+repeating the incident.

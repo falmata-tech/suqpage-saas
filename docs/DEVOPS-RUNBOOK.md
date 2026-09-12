@@ -112,6 +112,29 @@ It is not the normal development reset. Existing PostgreSQL data uses
 
 ## Supabase Auth rollout
 
+### Recovery safeguards
+
+- Before changing hosted Auth, retain a protected provider-configuration backup
+  and review the exact requested fields. Prefer a narrowly scoped Management
+  API patch; never push the development configuration to Production.
+- Do not rely on the CLI `--workdir` option for isolation: during the
+  2026-09-12 recovery it selected the repository configuration instead of the
+  supplied directory. Use an explicit process working directory and verify the
+  resolved configuration before a write. The installed CLI can apply changes
+  without an interactive confirmation, including defaulted fields. Do not use
+  an actual push as a dry run.
+- Keep managed CLI database operations sequential. Each linked command can
+  rotate the same temporary login role; concurrent dumps caused one backup to
+  fail authentication during this recovery.
+- A Netlify draft has Preview runtime context even when built with
+  `--context production`. Keep secrets isolated; do not copy Production keys to
+  Preview to make that draft work. Test a correctly scoped production candidate
+  under a reviewed publication/rollback procedure.
+- Check provider health, required Auth flags, schema versions, and Linux native
+  dependencies before publication. A Netlify `ready` state alone is not an
+  application-health check. A paused Supabase project must be resumed, not
+  recreated or treated as evidence that its database password is incorrect.
+
 1. Apply PostgreSQL migration 37 before selecting the managed Auth driver.
 2. Keep the hosted application stopped or on the retained rollback release
    during the one-time retained-user migration.
