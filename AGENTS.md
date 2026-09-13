@@ -133,6 +133,37 @@ or treat generated illustrative media as a factual product photograph.
 - Never expose `.env`, databases, generated credentials, customer data, uploads,
   backups, tokens, or provider secrets.
 
+## Hosted configuration safety (DEP-029)
+
+- Never run `supabase config push` against a hosted project, including from a
+  temporary directory, ignored one-time script, or during recovery. A push is a
+  mutation, not a preview. Do not substitute a broad REST configuration write.
+- Routine production Auth changes must use `npm run ops:auth-config -- plan`
+  followed by the guarded apply command after the owner reviews its exact target,
+  fields, and digest. Producing a digest does not grant approval to apply it.
+  No raw-command fallback is permitted when the guard refuses an operation.
+- Google client IDs/secrets, provider enablement, SMTP credentials, signing keys,
+  and other secret changes require separate explicit owner authorization and a
+  recoverable source. Make those changes in the provider dashboard; never copy
+  local provider credentials to Production or "repair" them by disabling or
+  replacing providers without that authorization.
+- Before any hosted configuration write, verify the account/project/environment
+  independently of the current directory, identify the exact fields being
+  changed, and retain a protected backup. Missing or masked credentials are not
+  a recoverable credential backup. Stop if backup/access/target verification is
+  blocked; do not try a more powerful or broader command.
+- After an unexpected remote mutation or ambiguous timeout, stop further writes,
+  report the incident, and obtain direction on an exact recovery plan. A backup
+  restore is another mutation, not an automatic safe fallback. Never use bulk
+  configuration sync to reverse an incident.
+- Keep linked Supabase database commands sequential: they may rotate the same
+  temporary login role. Keep production management tokens out of application
+  runtimes, builds, and routine CI; grant access only for the approved operation.
+- These repository controls do not sandbox a full-access shell or provider
+  administrator. Do not promise that direct commands are technically impossible.
+  Preserve the separation of credentials and use provider permissions as the
+  outer enforcement boundary.
+
 ## Git task isolation and commit discipline
 
 - Record `git status --short` before editing. Treat every existing modification

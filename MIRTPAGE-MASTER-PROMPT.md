@@ -1577,6 +1577,19 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
+DEP-029 governs production Auth configuration maintenance. The repository's
+guarded command pins the production project and HTTPS origin, rejects local and
+unknown settings or credential changes, and creates a read-only review plan with
+a private provider-returned backup. Apply requires the owner's reviewed digest,
+a fresh unchanged remote state, and one narrow write followed by readback.
+Hosted configuration pushes and raw-command workarounds are prohibited, including
+during incident recovery. Google/SMTP credential changes are separate authorized
+owner operations; masked provider secrets are not claimed recoverable from a
+configuration snapshot. These controls govern the repository workflow, not an
+administrator's full-access shell; management credentials remain outside app
+runtimes, builds, and routine CI. No hosted change or cutover is implied by
+passing the guard's offline tests.
+
 The controlled MVP uses separate Supabase projects for every executable lane:
 an isolated local project for normal development, a disposable local project on
 dedicated ports for production-mode browser acceptance, and separate managed

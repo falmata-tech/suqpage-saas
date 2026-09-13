@@ -115,14 +115,13 @@ It is not the normal development reset. Existing PostgreSQL data uses
 ### Recovery safeguards
 
 - Before changing hosted Auth, retain a protected provider-configuration backup
-  and review the exact requested fields. Prefer a narrowly scoped Management
-  API patch; never push the development configuration to Production.
-- Do not rely on the CLI `--workdir` option for isolation: during the
-  2026-09-12 recovery it selected the repository configuration instead of the
-  supplied directory. Use an explicit process working directory and verify the
-  resolved configuration before a write. The installed CLI can apply changes
-  without an interactive confirmation, including defaulted fields. Do not use
-  an actual push as a dry run.
+  and review the exact requested fields. Use the guarded plan/apply command
+  below; never push the development configuration to Production.
+- Hosted `supabase config push` is prohibited, including from isolated working
+  directories. The 2026-09-12 incident showed both directory-selection mistakes
+  and writes of defaulted fields without an interactive confirmation. A push is
+  never a dry run. DEP-029 replaces routine Auth maintenance with the guarded
+  plan/apply command below; credential maintenance remains an owner action.
 - Keep managed CLI database operations sequential. Each linked command can
   rotate the same temporary login role; concurrent dumps caused one backup to
   fail authentication during this recovery.
@@ -134,6 +133,40 @@ It is not the normal development reset. Existing PostgreSQL data uses
   dependencies before publication. A Netlify `ready` state alone is not an
   application-health check. A paused Supabase project must be resumed, not
   recreated or treated as evidence that its database password is incorrect.
+
+### Guarded production Auth maintenance
+
+`npm run ops:auth-config -- plan --project sjeiiqxgscuqajpgddcc --patch /absolute/path/to/patch.json`
+is read-only remotely. The patch must be JSON containing only the intended
+fields, for example `{"mailer_otp_length":6,"mailer_otp_exp":600}`. The tool uses
+no local Supabase config, linked project, dotenv file, or Keychain fallback.
+Supply a management token privately as `SUPABASE_ACCESS_TOKEN` for the approved
+operation only; never include it in a command argument or commit it.
+
+The output names the pinned project, production origin, proposed safe values,
+plan ID, expiry, and review digest. It never prints current provider settings or
+credentials. The provider-returned before-state and patch are retained together
+under `.local/production-auth-plans` with private permissions. A provider-masked
+secret is not recoverable merely because it appears in that backup.
+
+After the owner reviews that exact plan, use:
+
+`npm run ops:auth-config -- apply --project sjeiiqxgscuqajpgddcc --plan PLAN_ID --approve REVIEWED_DIGEST`
+
+Plans expire after ten minutes. Apply revalidates the backup, digest, scope,
+project health, and unchanged remote state before one narrow PATCH and complete
+readback. Coordinate a single writer during this maintenance window: Supabase's
+API does not provide an atomic compare-and-swap for the configuration snapshot.
+Verification detects unexpected readback changes but cannot prevent another
+administrator writing between the precheck and PATCH. An attempt is never
+automatically retried, including after timeout, and there is no blanket rollback.
+Inspect the provider state and obtain direction before preparing another plan.
+
+Google credentials/enablement, SMTP credentials, arbitrary templates, and unknown
+fields cannot be changed through this tool. Use the owner-authorized provider
+dashboard process for those operations. A blocked plan must not be worked around
+with raw shell, REST, `--workdir`, or an ignored script. This is a guarded
+repository path, not an OS sandbox; restrict management credentials accordingly.
 
 1. Apply PostgreSQL migration 37 before selecting the managed Auth driver.
 2. Keep the hosted application stopped or on the retained rollback release

@@ -2,9 +2,9 @@
 id: DEP-028
 title: AfricMade identity and passwordless production cutover
 status: in_progress
-related: [FE-038, FE-039, BE-030, BE-031, DEP-026, DEP-027, ADR-0017]
+related: [FE-038, FE-039, BE-030, BE-031, DEP-026, DEP-027, DEP-029, ADR-0017]
 owners: [deployment, operations, security, product]
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 change_level: L4
 ---
 
