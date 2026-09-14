@@ -64,3 +64,18 @@ the reviewed candidate, with no production credential or private runtime path in
 the function archive. Container context/non-root/origin/trace/fail-closed checks also pass. Hosted
 rollout remains the next gate in the active checklist. Retained names are enumerated in
 `docs/SUQPAGE-NAMING-COMPATIBILITY.md`.
+
+## Hosted static routing correction
+
+Live verification of the first candidate found that Netlify's static assets are
+served separately from the Next.js function, so the local Next rewrite alone
+returned 404 for an old asset URL. Exact CDN rules in `public/_redirects` must match
+`lib/platform-assets.ts` and ship at the static publish root. The same mapping is
+retained in Next for local/other-provider continuity. No catch-all or external
+redirect is added. Test mapping equality and all legacy live URLs before closure.
+Reference: https://docs.netlify.com/manage/routing/redirects/overview/ .
+
+Evidence: focused naming/CDN mapping regression passes. The static correction
+reuses the unchanged verified server function hash and adds only the exact
+`_redirects` file to the static publish root; artifact privacy and mapping checks
+pass. No database or application rebuild is needed for this static routing file.

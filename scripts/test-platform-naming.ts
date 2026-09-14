@@ -55,6 +55,8 @@ function auditDirectory(directory: string) {
 for (const directory of ['app', 'components', 'lib']) auditDirectory(directory);
 assert.ok(fs.existsSync('SUQPAGE-MASTER-PROMPT.md'));
 assert.ok(!fs.existsSync('MIRTPAGE-MASTER-PROMPT.md'));
+const cdnRules = fs.readFileSync('public/_redirects', 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#'));
+assert.deepEqual(cdnRules, platformAssetRewrites.map(route => `${route.source} ${route.destination} 200`), 'Netlify static aliases must match the bounded Next mappings exactly');
 const auth=fs.readFileSync("lib/auth.ts","utf8");assert.match(auth,/new Set\(\[jar\.get\(COOKIE\)\?\.value, jar\.get\(platformCookies\.session\.legacy\)\?\.value\]\)/);assert.match(auth,/for \(const token of tokens\)[\s\S]*revokeByToken/);
 const db=await getDb();
 try {

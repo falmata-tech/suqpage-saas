@@ -51,13 +51,17 @@ Deployment sequence (operations, L3/L4; DEP-030/031):
   Evidence: namespace regression, typecheck, eight browser scenarios and clean
   release pass; custom subscription labels/prices preserved. Core final invitation
   query timed out under build load and passed unchanged on focused retry and release.
-- [ ] N5. All verification passed; review
+- [x] N5. Verification and reviewed source commit `51109d8` complete; review
   and commit only task files, preserving deno.lock and ignored operator data.
   Container context/non-root/origins/trace/fail-closed checks pass. Netlify offline
   artifact privacy and exact runtime-source comparison pass; production audit has
-  zero vulnerabilities. Commit is the remaining N5 action.
+  zero vulnerabilities. The pre-existing deno.lock remains untouched.
 - [ ] N6. Package clean source, perform approved monitored rollout and record exact
   compatibility exceptions and hosted configuration gates that remain separate.
+  - [ ] N6a. Live candidate 6aa80d74354566ace7fd51e8 exposed missing CDN aliases
+    for old static asset URLs. Add exact Netlify rules matching the tested Next map,
+    verify mapping equality, publish static correction and check every legacy URL.
+    Main pages/health and schema 45 remain verified; no database retry or downgrade.
 
 ## Decisions
 

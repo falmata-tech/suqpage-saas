@@ -945,7 +945,8 @@ operational disable switch, not a route back to the retired workflow.
 Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
 platform environment adapter accepts the earlier namespace only as a read fallback;
 explicit canonical settings, including empty or disabled values, win. New public
-assets and persisted browser state use Suqpage names. Exact asset rewrites and
+assets and persisted browser state use Suqpage names. Exact asset rewrites (with
+matching Netlify CDN rules at the static publish root) and
 tenant-scoped cart/navigation migration preserve existing links and saved inquiries.
 
 Current controlled-launch stack:

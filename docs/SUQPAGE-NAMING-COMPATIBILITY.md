@@ -12,7 +12,7 @@ asset paths, developer documents and the master brief use that name.
 | `mirtpage_session`, `mirtpage_visitor`, `mirtpage_public_support` | Read compatibility only. New cookies use Suqpage; logout revokes both supplied local session tokens and clears both names. |
 | `mirtpage-cart:<handle>` and two discovery navigation keys | Migrate on read to the same business's Suqpage key. Existing canonical state wins; private previews are excluded; blocked storage preserves the old value. |
 | `africmade-pwa-*`, `mirtpage-pwa-*` | Obsolete cache cleanup, never new cache creation. |
-| Old `/brand`, `/landing`, `/uploads/seed/mirtpage` asset URLs | Exact rewrites in `lib/platform-assets.ts` keep bookmarks and stored references working. New assets use Suqpage paths. |
+| Old `/brand`, `/landing`, `/uploads/seed/mirtpage` asset URLs | Exact rewrites in `lib/platform-assets.ts` and matching Netlify CDN rules in `public/_redirects` keep bookmarks and stored references working. New assets use Suqpage paths. |
 | `https://africmade.netlify.app` | Actual deployed origin, pinned in guarded Auth operations. A new hostname needs an owned alias and coordinated redirect review under DEP-029. No invented domain is substituted. |
 | `mirtpage-media` | Existing private Supabase Storage bucket. Replacing its name without copying objects and updating stored references would break media. |
 | Local Supabase `project_id = "mirtpage"` | Identifies the existing local containers/volumes. Keep it to retain local accounts and data. Disposable test projects use Suqpage. |

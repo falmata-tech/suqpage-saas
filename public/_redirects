@@ -1,0 +1,18 @@
+# Exact legacy asset aliases; keep in sync with lib/platform-assets.ts.
+/brand/africmade-mark.svg /brand/suqpage-mark.svg 200
+/brand/mirtpage-mark-v2.svg /brand/suqpage-mark.svg 200
+/brand/mirtpage-mark.svg /brand/suqpage-mark.svg 200
+/landing/africmade-about-production-v1.webp /landing/suqpage-about-production-v1.webp 200
+/landing/africmade-public-app-canvas-v1.webp /landing/suqpage-public-app-canvas-v1.webp 200
+/landing/africmade-workspace-context-v1.webp /landing/suqpage-workspace-context-v1.webp 200
+/landing/mirtpage-about-production-v2.webp /landing/suqpage-about-production-v2.webp 200
+/landing/mirtpage-marketplace-hero-v5.webp /landing/suqpage-marketplace-hero-v5.webp 200
+/landing/mirtpage-marketplace-hero-v6.webp /landing/suqpage-marketplace-hero-v6.webp 200
+/landing/mirtpage-public-app-canvas-v1.webp /landing/suqpage-original-public-app-canvas-v1.webp 200
+/landing/mirtpage-workspace-context-v2.webp /landing/suqpage-workspace-context-v2.webp 200
+/uploads/seed/mirtpage/alhaya-mockup.jpg /uploads/seed/suqpage/alhaya-mockup.jpg 200
+/uploads/seed/mirtpage/homevibe-mockup.jpg /uploads/seed/suqpage/homevibe-mockup.jpg 200
+/uploads/seed/mirtpage/icon.png /uploads/seed/suqpage/icon.png 200
+/uploads/seed/mirtpage/logo.png /uploads/seed/suqpage/logo.png 200
+/uploads/seed/mirtpage/novatech-mockup.jpg /uploads/seed/suqpage/novatech-mockup.jpg 200
+/uploads/seed/mirtpage/usashopet-mockup.jpg /uploads/seed/suqpage/usashopet-mockup.jpg 200
