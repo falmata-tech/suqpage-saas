@@ -14,6 +14,7 @@ import {
   House,
   Inbox,
   LayoutDashboard,
+  LayoutTemplate,
   LockKeyhole,
   LogOut,
   MapPinned,
@@ -32,7 +33,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions";
-import AfricMadeBrand from "@/components/AfricMadeBrand";
+import SuqpageBrand from "@/components/SuqpageBrand";
 import NavigationPendingIndicator from "@/components/NavigationPendingIndicator";
 
 export type WorkspaceNavItem = {
@@ -54,6 +55,7 @@ export type WorkspaceNavIcon =
   | "library"
   | "offerings"
   | "overview"
+  | "pageEditor"
   | "public"
   | "requests"
   | "security"
@@ -78,6 +80,7 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   library: BookOpen,
   offerings: Package,
   overview: LayoutDashboard,
+  pageEditor: LayoutTemplate,
   public: ExternalLink,
   requests: ClipboardList,
   security: LockKeyhole,
@@ -102,6 +105,8 @@ const mobileLabels: Record<string, string> = {
   "My offerings": "Offerings",
   "Platform overview": "Overview",
   "Page project": "Page",
+  "Your page": "Page",
+  "Page draft": "Draft",
   "Page requests": "Requests",
   "Support inbox": "Support",
 };
@@ -184,7 +189,8 @@ export default function WorkspaceNavigation({
   const previousRoute = useRef(routeKey);
   const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
   const allItems = groups.flatMap((group) => group.items);
-  const priority: WorkspaceNavIcon[] = ["overview", "businesses", "offerings", "requests", "inquiries", "support"];
+  const hasPageEditor = groups.some((entry) => entry.items.some((item) => item.icon === "pageEditor"));
+  const priority: WorkspaceNavIcon[] = ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
   const primaryItems = priority
     .map((icon) => allItems.find((item) => item.icon === icon && !item.external))
     .filter((item): item is WorkspaceNavItem => Boolean(item))
@@ -238,7 +244,7 @@ export default function WorkspaceNavigation({
   return (
     <>
       <aside className="sidebar">
-        <AfricMadeBrand href={dashboardHref} className="workspace-brand" />
+        <SuqpageBrand href={dashboardHref} className="workspace-brand" />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>

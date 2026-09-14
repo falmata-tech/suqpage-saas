@@ -278,7 +278,7 @@ async function captureSupport(browser, viewport, suffix) {
   const launcher = page.getByRole("button", { name: "Get help" });
   await waitForHydration(launcher);
   await launcher.click();
-  const dialog = page.getByRole("dialog", { name: "AfricMade help" });
+  const dialog = page.getByRole("dialog", { name: "Suqpage help" });
   await dialog.waitFor();
   const category = dialog.getByLabel("What do you need?");
   await category.waitFor();

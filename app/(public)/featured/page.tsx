@@ -5,8 +5,8 @@ import { getPublicFeaturedView, getPublicSponsors } from "@/lib/public-discovery
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Daily Featured | AfricMade",
-  description: "Meet selected Ethiopian artisans, farms, workshops, and small manufacturers in AfricMade's daily live program.",
+  title: "Daily Featured | Suqpage",
+  description: "Discover today's featured shops and products on Suqpage.",
 };
 
 type FeaturedSearchParams = Promise<{ featuredDay?: string }>;

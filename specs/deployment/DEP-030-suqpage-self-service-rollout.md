@@ -1,0 +1,137 @@
+---
+id: DEP-030
+title: Data-preserving Suqpage self-service rollout
+status: in_progress
+related: [DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034]
+owners: [operations, security, product]
+last_updated: 2026-09-14
+change_level: L3
+---
+
+# DEP-030 - Data-preserving Suqpage self-service rollout
+
+## Problem and outcome
+
+Introduce customer-controlled pages without overwriting existing business content,
+mixing local/hosted providers, or treating a public rename as an Auth migration.
+
+## Scope
+
+The owner approved deployment, the exact private production-data backup destination
+and an email-only launch on 2026-09-14. Production requires email-code sign-in;
+Google UI stays disabled until its provider credentials are separately restored
+and verified. This does not authorize Google/SMTP secret replacement or bypass
+DEP-029's exact-plan requirement for hosted Auth configuration changes.
+
+`docs/SUQPAGE-TRANSITION-CHECKLIST.md` is the active sequence. FE-042/BE-033 enable the standard
+editor by default, with an explicit emergency-disable environment switch. Its additive
+schema is rehearsed locally before any remote application. Public and ordinary
+preview rendering uses the shared profile for all businesses; retained design
+records and managed project history are unchanged. No reset or hosted config push.
+
+`SUQPAGE_OWNER_EDITOR_ENABLED=0` disables the editor and API; unset or `1`
+enables them. Migration 39 was verified on local Supabase PostgreSQL on 2026-09-13.
+No hosted application, provider setting or database has been changed by this step.
+
+S3a adds migration 40 for owner publication history, denied to Supabase
+public roles. The same gate controls draft publication and public snapshot reads.
+Gate-off returns existing handles to canonical content in the shared profile; saved
+drafts, products and publication history remain retained. Local rehearsal and
+focused tests precede any hosted migration. Public rollout remains blocked on
+visual approval, full gates and broader asset retention in S3b. FE-042/BE-033
+verify local first-listing review and category discovery pagination.
+Migration 40 and owner-publication/restore flows were verified only on this
+project's local Supabase (54322/54321) and app port 3101 on 2026-09-13. No remote
+migration, config change, deployment, commit or full release gate was performed.
+
+## Scenarios
+
+```gherkin
+Scenario: Gate is off
+  GIVEN the new editor is not enabled
+  WHEN someone opens its route or API
+  THEN no draft feature is exposed and public pages use canonical content in the shared profile
+
+Scenario: Rollback after draft use
+  GIVEN private drafts exist
+  WHEN the editor gate is disabled
+  THEN the drafts remain retained but inaccessible through the new surface
+  AND the existing public catalog and pages remain intact
+```
+
+## Test plan
+
+Focused unit/security and local PostgreSQL evidence first; desktop/phone review
+and explicit visual approval before full check/release/acceptance gates. Hosted
+approval, backups, migration rehearsal and monitoring are pending rollout work.
+
+## Rollout and rollback
+
+Sequence: approve UI; complete owner publish and moderation; local migration and
+regressions; reviewed scoped commits; explicit remote approval/backup; deploy
+and monitor. Gate off is the first rollback. Keep data and provider identifiers.
+Suqpage logo and email/PWA metadata are a separate visual checkpoint. Google
+credential restoration under DEP-028 remains pending and is not part of rename.
+
+## S2g local contact migration
+
+Migration 41 is additive and introduces no Auth changes. Before applying locally,
+verify loopback port 54322 and retain a protected public-schema backup outside Git.
+Verify a second apply is a no-op and preserve existing account emails, notification
+contacts and provider links. Demo contact filling is a one-time reviewed operation,
+not production migration logic; only allowlisted demos may receive approved fictional
+values. Missing real-user details require owner input. Rollback application code can
+leave the empty-compatible columns retained; restore demo values transactionally from
+the protected backup if needed. Hosted migration/build/release remains unperformed.
+
+S2g local verification (2026-09-14): migration 41 and repeat apply passed after
+protected loopback backup. Account/signup/domain and PostgreSQL privacy tests pass;
+66 anonymous page responses exclude private contacts. Three account browser
+workflows/accessibility scans and the 24-state/12-profile-scan public matrix pass.
+Approved fictional contacts populated for 66 demo pages and 47 demo users, retaining
+account emails. Two non-demo account phones require owner input. Evidence and
+screenshots: docs/SUQPAGE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
+commit and hosted rollout remain pending.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+
+## S2i/S2j local standard-page lifecycle
+
+Migration 42 adds owner_page_reviews with direct PUBLIC/anon/authenticated access
+denied. Applied only to local PostgreSQL after a mode-0600 PGDMP backup at
+`.local/backups/before-page-review-20260914.dump`; the path is gitignored.
+Rollback keeps additive schema and retained history. No destructive reverse
+migration is needed. Local real-provider rollback tests and browser fixtures
+verify draft catalog/privacy, first submission, feedback, stale-version denial,
+first publication, direct assignment/revocation and retired endpoints. See
+`docs/SUQPAGE-APP-WIRING-AUDIT.md` for mapped evidence and test boundaries.
+No hosted migration, full release gate, deployment or remote Git operation is claimed.
+
+## S2k/S2l local candidate
+
+Local additive migration 43 followed protected backup
+`.local/backups/before-launch-wiring-20260914.dump`. FE-043/BE-034 now connect owner
+identity/location, product options/visibility and media reconciliation. BE-035 and
+DEP-031 replace every executable embedded-database path with native PostgreSQL.
+Fresh install, adapter and current browser workflows pass locally. Explicit visual
+approval, full gates, commit and hosted candidate verification remain separate.
+See `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` and the PostgreSQL-only runbook.
+
+## Current rollout evidence
+
+The owner approved visuals, deployment, the private data backup and email-only
+entry on 2026-09-14. Core/release, seven acceptance scenarios, 72 accessibility
+states, PostgreSQL, operations and container gates pass. Restoring the production
+backup preserved 50 original table fingerprints through additive migrations
+39–43. Netlify email/Google application flags are verified; hosted migration,
+publication and delivery monitoring remain pending. See
+`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` for the current admission record; earlier
+local-only evidence above does not impose another visual approval gate.

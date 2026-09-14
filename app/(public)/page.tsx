@@ -5,11 +5,11 @@ import { getPublicMarketplaceView } from "@/lib/public-discovery-cache";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Market | AfricMade",
-  description: "Find locally made and grown products from Ethiopian artisans, farms, workshops, and small manufacturers.",
+  title: "Market",
+  description: "Discover shops and products near you. Explore their pages and contact sellers directly on Suqpage.",
 };
 
-type MarketSearchParams = Promise<{ industry?: string; q?: string; place?: string; showroom?: string; view?: string; type?: string }>;
+type MarketSearchParams = Promise<{ industry?: string; q?: string; place?: string; showroom?: string; view?: string; type?: string; page?: string }>;
 
 async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchParams }) {
   const query = await searchParams;
@@ -17,6 +17,8 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
     industry: query.industry,
     q: query.q,
     place: query.place,
+    page: query.page,
+    type: query.type,
   });
 
   return <>
@@ -35,9 +37,9 @@ export default function MarketPage({ searchParams }: {
 }) {
   return <div className="public-experience public-market-experience">
       <header className="public-experience-head">
-        <span>AfricMade Market</span>
-        <h1>Find locally made and grown products.</h1>
-        <p>Explore pages from Ethiopian artisans, farms, workshops, and small manufacturers. See their work and contact them directly.</p>
+        <span>Suqpage Market</span>
+        <h1>Shops and products near you.</h1>
+        <p>Find a shop, explore its products, and contact the seller directly.</p>
       </header>
       <Suspense fallback={<MarketWorkspaceLoading />}><MarketWorkspace searchParams={searchParams} /></Suspense>
     </div>;

@@ -638,7 +638,7 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
   .discovery-map, .shared-location-stage { scroll-behavior: auto; }
 }
 
-/* FE-029 AfricMade discovery and venue identity */
+/* FE-029 Suqpage discovery and venue identity */
 .discovery-switcher { border-color: var(--mp-line); }
 .discovery-kicker { color: var(--mp-teal); }
 .discovery-industries a { border-color: var(--mp-line); background: #f8fafb; color: #41545d; }
@@ -883,7 +883,7 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .featured-experience .discovery-sponsored-heading { display: grid; align-items: start; gap: 7px; margin-bottom: 14px; }
 .featured-experience .discovery-sponsored-heading h2 { margin: 2px 0 4px; color: #fff; font-family: Georgia, "Times New Roman", serif; font-size: 1.22rem; }
 .featured-experience .discovery-sponsored-heading p { color: #ffe4d7; }
-.featured-experience .discovery-sponsored-heading > small { width: fit-content; padding: 4px 6px; border: 1px solid rgb(255 255 255 / 30%); border-radius: 4px; color: #ffe4d7; font-size: .54rem; font-weight: 800; }
+.featured-experience .discovery-sponsored-heading > small { width: fit-content; padding: 4px 6px; border: 1px solid rgb(255 255 255 / 30%); border-radius: 4px; color: #fff; font-size: .54rem; font-weight: 800; }
 .featured-experience .discovery-sponsored-rail { display: grid; gap: 8px; overflow: visible; padding: 0; }
 .featured-experience .discovery-sponsored-rail > a { display: grid; grid-template-columns: 66px minmax(0, 1fr); grid-template-rows: 76px; min-height: 76px; overflow: hidden; border: 1px solid rgb(255 255 255 / 36%); border-radius: 5px; background: #fff; box-shadow: 0 5px 12px rgb(11 29 58 / 13%); }
 .featured-experience .discovery-sponsored-rail > a:hover,.featured-experience .discovery-sponsored-rail > a:focus-visible { border-color: #fff; outline: 2px solid rgb(255 255 255 / 42%); transform: none; }
@@ -918,6 +918,9 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .public-featured-experience .featured-experience .discovery-sponsored-rail > a { grid-template-rows: 68px; min-height: 68px; }
 .public-featured-experience .featured-experience .discovery-sponsored-rail img,
 .public-featured-experience .featured-experience .discovery-sponsored-rail .discovery-image-fallback { height: 68px; }
+.public-featured-experience .discovery-sponsored-rail > a > span { justify-content: center; gap: 3px; }
+.public-featured-experience .discovery-sponsored-rail b { flex: none; display: -webkit-box; margin: 0; overflow: hidden; white-space: normal; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.public-featured-experience .discovery-sponsored-rail :is(.sponsor-placement-details, em) { display: none; }
 
 /* FE-030/FE-036: remaining-viewport market and unobstructed venue controls. */
 .public-market-experience .discovery-marketplace,
@@ -1172,3 +1175,78 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
   .public-featured-experience .featured-broadcast > span { grid-row: 1 / 3; }
   .public-featured-experience .featured-broadcast strong,.public-featured-experience .featured-broadcast small { min-width: 0; }
 }
+
+/* FE-041: search alongside a persistent map, with controls on the map. */
+.public-market-experience .discovery-workbench { grid-template-columns: minmax(300px,370px) minmax(0,1fr); grid-template-rows: minmax(0,1fr); background: #fff; }
+.public-market-experience .discovery-workbench-unselected { grid-template-columns: minmax(0,1fr); }
+.public-market-experience .discovery-summary { display: flex; flex-direction: column; gap: 0; padding: 0; background: #fff; color: #252a2d; border: 0; border-right: 1px solid #e1e5e4; overflow: hidden; border-radius: 0; }
+.discovery-command-search { position: relative; flex: none; z-index: 20; padding: 16px; border-bottom: 1px solid #edf0ef; }
+.discovery-command-search .discovery-search { width: 100%; min-width: 0; }
+.discovery-search-welcome { display: grid; justify-items: start; align-content: start; gap: 14px; padding: 32px 24px; }
+.discovery-search-welcome > svg { width: 28px; height: 28px; color: #c23806; }
+.discovery-search-welcome h2 { max-width: 250px; margin: 0; font-size: 26px; line-height: 1.2; }
+.discovery-search-welcome p { margin: 0; color: #667178; font-size: 14px; line-height: 1.6; }
+.discovery-search-welcome > span { margin-top: 8px; color: #667178; font-size: 12px; }
+.discovery-summary .discovery-search-workspace { flex: 1; min-height: 0; height: auto; overflow-y: auto; padding: 18px 16px; background: #fff; }
+.discovery-summary .discovery-search-workspace-head { gap: 8px; align-items: flex-start; }
+.discovery-summary .discovery-search-workspace-head h2 { font-size: 18px; line-height: 1.35; overflow-wrap: anywhere; }
+.discovery-summary .discovery-search-workspace-head p { font-size: 12px; }
+.discovery-summary .discovery-search-map-action { min-width: 44px; min-height: 44px; padding: 10px; flex: none; }
+.discovery-summary .discovery-search-result-types { display: flex; gap: 5px; margin: 16px 0; }
+.discovery-summary .discovery-search-result-types a { flex: 1; min-width: 0; min-height: 44px; gap: 4px; padding: 7px 5px; font-size: 11px; }
+.discovery-summary .discovery-search-result-types svg { display: none; }
+.discovery-summary .discovery-product-results, .discovery-summary .discovery-business-results { grid-template-columns: minmax(0,1fr); gap: 10px; }
+.discovery-summary .discovery-product-results > a, .discovery-summary .discovery-business-results > button { display: grid; grid-template-columns: 86px minmax(0,1fr); min-height: 108px; min-width: 0; overflow: hidden; border: 1px solid #e1e5e4; border-radius: 8px; background: #fff; color: #252a2d; text-decoration: none; text-align: left; box-shadow: none; }
+.discovery-summary .discovery-product-results > a:hover, .discovery-summary .discovery-business-results > button:hover { background: #f7f8f7; border-color: #9cacaa; }
+.discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) { padding: 11px; gap: 5px; }
+.discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) strong { font-family: inherit; font-size: 13px; line-height: 1.4; }
+.discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) p { display: none; }
+.discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) em { font-size: 10px; }
+.public-market-experience .discovery-map-shell { position: relative; display: block; grid-template-rows: none; border-radius: 0; }
+.discovery-floating-tools { position: absolute; z-index: 600; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; pointer-events: none; }
+.discovery-floating-filters { display: flex; align-items: flex-end; gap: 8px; min-width: 0; pointer-events: auto; }
+.discovery-floating-filters .discovery-industry-picker { width: min(220px,22vw); gap: 0; }
+.discovery-floating-filters .discovery-industry-picker > span { display: none; }
+.discovery-floating-filters .discovery-location-picker { width: min(175px,18vw); }
+.discovery-floating-filters select { min-height: 44px; border: 1px solid #d4dcd9; border-radius: 7px; background-color: #fff; color: #344248; box-shadow: 0 3px 12px #0001; font-size: 12px; }
+.discovery-floating-buttons { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; pointer-events: auto; }
+.discovery-floating-buttons button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; height: 44px; padding: 8px; border: 1px solid #d4dcd9; border-radius: 7px; background: #fff; color: #344248; box-shadow: 0 3px 12px #0001; }
+.discovery-floating-buttons svg { width: 18px; height: 18px; }
+.discovery-floating-buttons .discovery-floating-filter-button { display: none; }
+@media (min-width: 761px) and (max-width: 1100px) { .public-market-experience .discovery-workbench { grid-template-columns: 310px minmax(0,1fr); } .discovery-floating-tools { flex-wrap: wrap; } .discovery-floating-filters { width: 100%; } .discovery-floating-filters .discovery-industry-picker,.discovery-floating-filters .discovery-location-picker { width: 50%; } .discovery-floating-buttons { margin-left: auto; } }
+@media (max-width: 760px) {
+  .public-market-experience .discovery-workbench { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr); position: relative; overflow-y: auto; }
+  .public-market-experience .discovery-workbench:not(.discovery-workbench-unselected) { display: flex; flex-direction: column; }
+  .public-market-experience .discovery-summary { display: contents; }
+  .discovery-command-search { order: 0; padding: 10px; background: #fff; }
+  .public-market-experience .discovery-map-shell { order: 1; flex: 1; min-height: 240px; width: 100%; }
+  .public-market-experience .discovery-workbench-search .discovery-map-shell { flex: none; height: 240px; }
+  .discovery-summary .discovery-search-workspace { order: 2; flex: 1 0 auto; min-height: 240px; overflow: visible; padding: 18px 14px 28px; }
+  .discovery-search-welcome { display: none; }
+  .discovery-floating-tools { top: 10px; left: 10px; right: 10px; justify-content: flex-end; }
+  .discovery-floating-filters { display: none; }
+  .discovery-floating-buttons { flex-wrap: nowrap; gap: 5px; }
+  .discovery-floating-buttons .discovery-floating-filter-button { display: flex; font-size: 12px; }
+  .public-market-experience .discovery-map-stage { border-radius: 0; }
+  .public-market-experience .discovery-workbench-unselected > .discovery-map-shell { min-height: 100%; height: 100%; }
+}
+
+.discovery-summary .discovery-search-workspace-head { padding: 0; background: #fff; color: #252a2d; }
+.discovery-summary .discovery-search-workspace-head h2 { white-space: normal; }
+.discovery-summary .discovery-search-workspace-head p { color: #667178; font-weight: 400; }
+.discovery-summary .discovery-search-result-types a { display: flex; justify-content: center; }
+.discovery-summary .discovery-search-result-types a b { flex: none; }
+
+.discovery-command-search { z-index: 700; }
+.discovery-summary .discovery-search-suggestions small { color: #667178; }
+
+/* FE-042: database-backed result pages, with controls outside the list scroll. */
+.discovery-search-workspace { min-height: 0; }
+.discovery-search-workspace:has(> .discovery-pagination) { grid-template-rows: auto auto auto minmax(0, 1fr); }
+.discovery-pagination { flex: 0 0 auto; padding: 10px 0 14px; margin-bottom: 10px; border-bottom: 1px solid #dde2e5; background: #fff; }
+.discovery-pagination p { margin: 0 0 8px; font-size: 12px; color: #52636b; }
+.discovery-pagination > div { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12px; }
+.discovery-pagination a, .discovery-pagination [aria-disabled] { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 10px; border-radius: 8px; border: 1px solid #d6dde0; font-weight: 700; color: #26353c; }
+.discovery-pagination [aria-disabled] { color: #75828a; background: #f5f7f8; }
+.discovery-pagination a:hover { background: #fff0e8; border-color: #c93600; }
+.discovery-pagination a:focus-visible { outline: 3px solid #c93600; outline-offset: 2px; }

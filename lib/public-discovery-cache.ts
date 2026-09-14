@@ -1,4 +1,6 @@
 import { unstable_cache } from "next/cache";
+import { ownerPageEditorEnabled } from "./owner-page-runtime";
+import { runtimeCurrentPageCovers } from "./owner-page-publication-runtime";
 import {
   getFeaturedShowroomsView,
   getMarketplaceDiscoveryView,
@@ -11,14 +13,14 @@ import {
 const PUBLIC_DISCOVERY_REVALIDATE_SECONDS = 20;
 
 const cachedMarketplace = unstable_cache(
-  async (industry: string, place: string): Promise<MarketplaceDiscoveryView> => getMarketplaceDiscoveryView({ industry, place }),
-  ["public-marketplace-v2-nearby-groups"],
+  async (industry: string, place: string, page: string, type: string): Promise<MarketplaceDiscoveryView> => getMarketplaceDiscoveryView({ industry, place, page, type }),
+  ["public-marketplace-v4-paginated-results", String(ownerPageEditorEnabled())],
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-marketplace"] },
 );
 
 const cachedFeatured = unstable_cache(
   async (featuredDay: string): Promise<FeaturedShowroomsView> => getFeaturedShowroomsView({ featuredDay }),
-  ["public-featured-v1"],
+  ["public-featured-v2-profile-covers", String(ownerPageEditorEnabled())],
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-featured"] },
 );
 
@@ -28,14 +30,20 @@ const cachedSponsors = unstable_cache(
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-sponsors"] },
 );
 
-export function getPublicMarketplaceView(input: { industry?: string; q?: string; place?: string }) {
+export async function getPublicMarketplaceView(input: { industry?: string; q?: string; place?: string; page?: string; type?: string }) {
   const query = (input.q || "").trim();
-  if (query) return getMarketplaceDiscoveryView(input);
-  return cachedMarketplace(input.industry || "", input.place || "");
+  const view = await (query ? getMarketplaceDiscoveryView(input) : cachedMarketplace(input.industry || "", input.place || "", input.page || "1", input.type || "all"));
+  if (!ownerPageEditorEnabled()) return view;
+  const covers = await runtimeCurrentPageCovers(view.showrooms.map((showroom) => showroom.id));
+  return { ...view, showrooms: view.showrooms.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })), searchBusinesses: view.searchBusinesses.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })) };
 }
 
-export function getPublicFeaturedView(featuredDay?: string) {
-  return cachedFeatured(featuredDay || "");
+export async function getPublicFeaturedView(featuredDay?: string) {
+  const view = await cachedFeatured(featuredDay || "");
+  if (!ownerPageEditorEnabled()) return view;
+  const covers = await runtimeCurrentPageCovers(view.featured.booths.flatMap((booth) => booth.revealed ? [booth.showroom.id] : []));
+  return { ...view, featured: { ...view.featured, booths: view.featured.booths.map((booth) => booth.revealed
+    ? { ...booth, showroom: { ...booth.showroom, heroImagePath: covers.get(booth.showroom.id) || "" } } : booth) } };
 }
 
 export function getPublicSponsors() {

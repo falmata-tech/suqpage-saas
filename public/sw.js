@@ -1,5 +1,5 @@
-const VERSION = "v3";
-const CACHE_PREFIX = "africmade-pwa-";
+const VERSION = "v1";
+const CACHE_PREFIX = "suqpage-pwa-";
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${VERSION}`;
 const PAGE_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
 const ASSET_CACHE = `${CACHE_PREFIX}assets-${VERSION}`;
@@ -7,10 +7,10 @@ const OFFLINE_URL = "/offline";
 const APP_SHELL = [
   OFFLINE_URL,
   "/manifest.webmanifest",
-  "/brand/africmade-mark.svg",
-  "/pwa/icon-192.png",
-  "/pwa/icon-512.png",
-  "/pwa/icon-maskable-512.png"
+  "/brand/suqpage-mark.svg",
+  "/pwa/suqpage-icon-192.png",
+  "/pwa/suqpage-icon-512.png",
+  "/pwa/suqpage-icon-maskable-512.png"
 ];
 
 const PRIVATE_PATHS = ["/api", "/dashboard", "/preview", "/login", "/request"];
@@ -37,7 +37,7 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(caches.keys()
-    .then((names) => Promise.all(names.filter((name) => (name.startsWith(CACHE_PREFIX) || name.startsWith("mirtpage-pwa-")) && ![SHELL_CACHE, PAGE_CACHE, ASSET_CACHE].includes(name)).map((name) => caches.delete(name))))
+    .then((names) => Promise.all(names.filter((name) => [CACHE_PREFIX, "africmade-pwa-", "mirtpage-pwa-"].some((prefix) => name.startsWith(prefix)) && ![SHELL_CACHE, PAGE_CACHE, ASSET_CACHE].includes(name)).map((name) => caches.delete(name))))
     .then(() => self.clients.claim()));
 });
 

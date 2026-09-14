@@ -91,7 +91,7 @@ export function postgresRuntimeConfig(
   };
 }
 
-export function sqliteParametersToPostgres(sql: string) {
+export function postgresParameters(sql: string) {
   let index = 0;
   let quote: "'" | '"' | null = null;
   let result = "";
@@ -126,7 +126,7 @@ export function sqliteParametersToPostgres(sql: string) {
 }
 
 export function createPostgresPool(config: PostgresRuntimeConfig) {
-  // PostgreSQL returns BIGINT/Numeric values as strings by default. AfricMade IDs
+  // PostgreSQL returns BIGINT/Numeric values as strings by default. Suqpage IDs
   // and timestamps are bounded safe integers, so normalize them at this adapter.
   types.setTypeParser(20, Number);
   types.setTypeParser(1700, Number);
@@ -151,7 +151,7 @@ export class PostgresTransactionRunner {
   ): Promise<PostgresQueryResult<T>> {
     const transaction = this.currentTransaction.getStore();
     const execute = async (executor: Queryable) =>
-      executor.query<T>(sqliteParametersToPostgres(sql), [...values]);
+      executor.query<T>(postgresParameters(sql), [...values]);
     if (!transaction) {
       const result = await execute(this.pool);
       return { rows: result.rows, rowCount: result.rowCount || 0 };

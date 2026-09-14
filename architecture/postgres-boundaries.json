@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 2,
+  "decision": "ADR-0020",
+  "runtimeStatus": "postgres-only",
+  "runtimePort": "lib/runtime-sql.ts",
+  "catalogPort": "lib/catalog-runtime.ts",
+  "schema": "lib/postgres-baseline.json",
+  "migrations": "lib/postgres-migrations.ts",
+  "testIsolation": "scripts/testing/postgres-fixture.ts",
+  "check": "scripts/check-database-boundaries.mjs"
+}

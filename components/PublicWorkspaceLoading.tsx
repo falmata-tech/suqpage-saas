@@ -28,7 +28,7 @@ export default function PublicWorkspaceLoading({ variant }: { variant: LoadingVa
     ? "Loading Market results"
     : variant === "featured"
       ? "Loading Daily Featured"
-      : "Loading AfricMade page";
+      : "Loading Suqpage page";
 
   if (variant === "page") {
     return <section className="public-workspace-loading public-page-loading" aria-busy="true" aria-live="polite">

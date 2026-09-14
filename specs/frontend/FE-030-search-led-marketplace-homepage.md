@@ -2,7 +2,7 @@
 id: FE-030
 title: Search-led marketplace homepage
 status: done
-related: [FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023]
+related: [FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
 owners: [product, frontend, design]
 last_updated: 2026-09-12
 change_level: L2
@@ -466,3 +466,12 @@ replaces only the map canvas, All/Products/Businesses filters work, result cards
 open the existing inspector before navigation, and no viewport has horizontal
 overflow. Evidence is under `/tmp/africmade-search-review`; the user approved
 the focused visual result on 2026-09-09.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.

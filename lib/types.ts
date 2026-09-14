@@ -1,6 +1,7 @@
 export type Business = {
   id: number; handle: string; name: string; design_key: string; design_manifest_json:string; content_blocks_json:string; tagline: string; description: string;
   logo_path: string; hero_title: string; hero_subtitle: string; hero_image_path: string;
+  public_email?: string; public_phone?: string;
   contact_email: string; whatsapp: string; telegram: string; tiktok: string;
   process_video_ref:string; is_live:number; live_platform:""|"tiktok"|"facebook"|"youtube"|"google_meet"; live_url:string;
   status: "active" | "draft" | "suspended"; site_title: string; site_description: string; favicon_path: string; content_version:number;

@@ -2,13 +2,19 @@
 id: DEP-027
 title: Local Supabase development runtime
 status: in_progress
-related: [FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
+related: [DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
 owners: [development, backend, operations]
 last_updated: 2026-08-27
 change_level: L3
 ---
 
 # DEP-027 - Local Supabase development runtime
+
+
+Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retained
+SQLite fixture, fallback and copy-tool exception in this specification. Only native
+PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
+below is historical; current acceptance uses PostgreSQL-only fixtures.
 
 ## Problem and outcome
 

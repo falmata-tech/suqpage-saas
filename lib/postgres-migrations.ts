@@ -1,4 +1,10 @@
+import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
+import baseline from "./postgres-baseline.json";
+import { OWNER_BUSINESS_SCHEMA_SQL } from "./owner-business-schema";
+import { PAGE_REVIEW_SCHEMA_SQL } from "./page-review-schema";
+import { CONTACT_SCHEMA_SQL } from "./contact-schema";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
+import { OWNER_PAGE_SCHEMA_SQL, OWNER_PAGE_PUBLICATION_SCHEMA_SQL } from "./owner-page-schema";
 
 const SCHEMA_NAME = /^[a-z_][a-z0-9_]*$/i;
 
@@ -21,6 +27,29 @@ export async function migratePostgresDatabase(
     if (migrationRole) await runner.query(`SET LOCAL ROLE ${quotedRole(migrationRole)}`);
     await runner.query(`SET LOCAL search_path TO ${quotedSchema(schema)}`);
     await runner.query("SELECT pg_advisory_xact_lock(6870619271341)");
+    const installed = await runner.query<{ name: string | null }>("SELECT to_regclass('schema_migrations')::text name");
+    if (!installed.rows[0]?.name) {
+      const existing = await runner.query<{ total: number }>("SELECT COUNT(*) total FROM information_schema.tables WHERE table_schema=current_schema() AND table_type='BASE TABLE'");
+      if (Number(existing.rows[0]?.total)) throw new Error("Refusing to install into an unversioned populated schema.");
+      const ddl = baseline.sql.join("\n").replaceAll('"public".', `${quotedSchema(schema)}.`).replaceAll("public.", `${quotedSchema(schema)}.`);
+      await runner.query(ddl);
+      await runner.query("INSERT INTO schema_migrations(version) SELECT generate_series(1, ?)", [baseline.version]);
+      for (const [position, industry] of DISCOVERY_INDUSTRIES.entries()) {
+        await runner.query("INSERT INTO discovery_industries(key,label,icon,position,active) VALUES(?,?,?,?,1)", [industry.key,industry.label,industry.icon,position]);
+      }
+      await runner.query(`INSERT INTO featured_program_policy(id,morning_start_minute,morning_end_minute,afternoon_start_minute,afternoon_end_minute,changeover_minutes,sponsor_break_every,sponsor_break_minutes,sponsor_break_label,intermission_label,updated_at) VALUES(1,480,780,1020,1320,5,3,10,'Sponsor break','Lunch and program break',0)`);
+
+      await runner.query(`REVOKE ALL ON ALL TABLES IN SCHEMA ${quotedSchema(schema)} FROM PUBLIC`);
+      await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM PUBLIC`);
+      for (const role of ["anon", "authenticated"]) {
+        const exists = await runner.query("SELECT 1 FROM pg_roles WHERE rolname=?", [role]);
+        if (exists.rows.length) {
+          await runner.query(`REVOKE ALL ON ALL TABLES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
+          await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
+        }
+      }
+      return { applied: Array.from({ length: baseline.version }, (_, index) => index + 1) };
+    }
     const migration31 = await runner.query<{ version: number }>(
       "SELECT version FROM schema_migrations WHERE version=31",
     );
@@ -141,7 +170,7 @@ export async function migratePostgresDatabase(
           ADD COLUMN visitor_token_hash TEXT,
           ADD COLUMN visitor_session_expires_at BIGINT,
           ADD COLUMN assistance_category TEXT NOT NULL DEFAULT 'general',
-          ADD COLUMN requester_label TEXT NOT NULL DEFAULT 'AfricMade client',
+          ADD COLUMN requester_label TEXT NOT NULL DEFAULT 'Suqpage client',
           ADD COLUMN visitor_last_read_message_id INTEGER NOT NULL DEFAULT 0;
         ALTER TABLE support_conversations
           ALTER COLUMN business_id DROP NOT NULL,
@@ -301,6 +330,65 @@ export async function migratePostgresDatabase(
       `);
       await runner.query("INSERT INTO schema_migrations(version) VALUES(38)");
       applied.push(38);
+    }
+    const migration39 = await runner.query<{ version: number }>("SELECT version FROM schema_migrations WHERE version=39");
+    if (!migration39.rows.length) {
+      await runner.query(OWNER_PAGE_SCHEMA_SQL);
+      // These drafts are accessible only through the tenant-authorized server adapter.
+      await runner.query(`REVOKE ALL ON owner_page_drafts, owner_page_events FROM PUBLIC;
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+            REVOKE ALL ON owner_page_drafts, owner_page_events FROM anon;
+          END IF;
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+            REVOKE ALL ON owner_page_drafts, owner_page_events FROM authenticated;
+          END IF;
+        END $$;`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(39)");
+      applied.push(39);
+    }
+    const migration40 = await runner.query<{ version: number }>("SELECT version FROM schema_migrations WHERE version=40");
+    if (!migration40.rows.length) {
+      await runner.query(OWNER_PAGE_PUBLICATION_SCHEMA_SQL);
+      await runner.query(`REVOKE ALL ON owner_page_publications FROM PUBLIC;
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+            REVOKE ALL ON owner_page_publications FROM anon;
+          END IF;
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+            REVOKE ALL ON owner_page_publications FROM authenticated;
+          END IF;
+        END $$;`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(40)");
+      applied.push(40);
+    }
+    const migration41 = await runner.query<{ version: number }>("SELECT version FROM schema_migrations WHERE version=41");
+    if (!migration41.rows.length) {
+      await runner.query(CONTACT_SCHEMA_SQL);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(41)");
+      applied.push(41);
+    }
+    const migration42 = await runner.query<{ version: number }>("SELECT version FROM schema_migrations WHERE version=42");
+    if (!migration42.rows.length) {
+      await runner.query(PAGE_REVIEW_SCHEMA_SQL);
+      await runner.query(`REVOKE ALL ON owner_page_reviews FROM PUBLIC;
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN REVOKE ALL ON owner_page_reviews FROM anon; END IF;
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN REVOKE ALL ON owner_page_reviews FROM authenticated; END IF;
+        END $$;`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(42)");
+      applied.push(42);
+    }
+    const migration43 = await runner.query("SELECT version FROM schema_migrations WHERE version=43");
+    if (!migration43.rows.length) {
+      await runner.query(OWNER_BUSINESS_SCHEMA_SQL);
+      await runner.query(`REVOKE ALL ON owner_location_proposals FROM PUBLIC;
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN REVOKE ALL ON owner_location_proposals FROM anon; END IF;
+          IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN REVOKE ALL ON owner_location_proposals FROM authenticated; END IF;
+        END $$;`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(43)");
+      applied.push(43);
     }
     return { applied };
   });

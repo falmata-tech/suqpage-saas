@@ -39,19 +39,18 @@ export default async function EditProduct({
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            My offerings
+            Products
           </Link>
           <span aria-hidden="true">/</span>
           <span>{product.name}</span>
         </nav>
       </div>
-      <div className="dashboard-head">
+      <div className="dashboard-head standard-page-heading">
         <div>
-          <p className="eyebrow">Basic upkeep</p>
+          <p className="eyebrow">Product details</p>
           <h1>Edit {product.name}</h1>
           <p>
-            Only the safe client-managed fields below will change. Existing
-            options and page design remain intact.
+            Update the details buyers see on your page.
           </p>
         </div>
         <Link
@@ -64,8 +63,7 @@ export default async function EditProduct({
       </div>
       {query.saved ? (
         <p className="notice">
-          Offering published successfully
-          {query.version ? ` as page version ${query.version}` : ""}.
+          Product saved.
         </p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}

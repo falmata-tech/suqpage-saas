@@ -2,13 +2,24 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006]
+related: [BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034]
 owners: [product, backend, security]
 last_updated: 2026-07-28
 change_level: L3
 ---
 
 # BE-009 — Tenant-scoped versioned product upkeep
+
+## Standard-page supersession — 2026-09-14
+
+FE-042/BE-033 supersede the initial-publication prerequisite and custom revision
+entrypoints below. Authorized owners maintain products/categories while their
+business is private; assigned staff retain tenant scope. Product and category
+commands advance the canonical content version. New product images use private
+storage and authorized reads until active publication; suspension removes public
+access. Existing idempotency, validation and retained catalog snapshots remain.
+Focused product-upkeep and local PostgreSQL evidence is mapped in BE-033 and the
+application wiring audit. This note does not claim a completed hosted rollout.
 
 ## Problem and outcome
 

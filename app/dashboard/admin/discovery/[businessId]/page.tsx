@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { readLocationProposal } from "@/lib/owner-business-runtime";
 import { notFound, redirect } from "next/navigation";
 import { updateDiscoveryProfileAction } from "@/app/staff-actions";
 import DashboardShell from "@/components/DashboardShell";
@@ -22,12 +23,14 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
   const profile = await getDiscoveryProfileAdminView(businessId);
   if (!profile) notFound();
   const business = (await runtimeBusinessById(businessId)) || null;
+  const proposal = await readLocationProposal(businessId);
+  const pending = proposal && proposal.version !== proposal.reviewed_version;
   const query = await searchParams;
   const industryLabels = new Map<string, string>(DISCOVERY_INDUSTRIES.map((industry) => [industry.key, industry.label]));
 
   return <DashboardShell user={user} business={business}>
     <NavigationTrail items={[{ label: "Businesses", href: "/dashboard/admin/businesses" }, { label: profile.businessName }, { label: "Marketplace" }]} fallback={`/dashboard?business=${businessId}`} />
-    <div className="dashboard-head">
+    <div className="dashboard-head standard-page-heading">
       <div><span className="eyebrow">Business workspace</span><h1>Marketplace</h1><p>Control how {profile.businessName} appears in discovery, maps, and sponsored placement.</p></div>
       <Link className="btn secondary" href={`/preview/@${profile.handle}`} target="_blank">Open page</Link>
     </div>
@@ -41,11 +44,12 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
       </section>
       <section className="panel">
         <h2>Edit discovery profile</h2>
+        {proposal?<p className="notice">Owner location: {proposal.city}, {proposal.region}. {proposal.location_mode === "area"?"General area only: approval rounds the marker to an approximate area. Do not use a home address.":"Public storefront coordinates supplied by the owner."} {pending?"Awaiting review.":"Reviewed."}</p>:<p className="hint">The owner has not submitted a location yet.</p>}
         <form action={updateDiscoveryProfileAction} className="form-grid">
-          <input type="hidden" name="businessId" value={profile.businessId} />
+          <input type="hidden" name="businessId" value={profile.businessId} /><input type="hidden" name="proposalVersion" value={proposal?.version||0}/>
           <fieldset className="field full">
             <legend>Industries</legend>
-            <div className="recipe-checks">{DISCOVERY_INDUSTRIES.map((industry) => <label key={industry.key} className="check-field"><input type="checkbox" name="industryKeys" value={industry.key} defaultChecked={profile.industryKeys.includes(industry.key)} />{industry.label}</label>)}</div>
+            <div className="recipe-checks">{DISCOVERY_INDUSTRIES.map((industry) => <label key={industry.key} className="check-field"><input type="checkbox" name="industryKeys" value={industry.key} defaultChecked={pending?proposal.category_key===industry.key:profile.industryKeys.includes(industry.key)} />{industry.label}</label>)}</div>
           </fieldset>
           <div className="field full"><label htmlFor="profile-scale">Production scale</label><select id="profile-scale" name="productionScale" defaultValue={profile.productionScale}><option value="workshop">Workshop / producer</option><option value="growing_factory">Growing factory</option></select></div>
           <input type="hidden" name="existingBoothImagePath" value={profile.boothImagePath} />
@@ -53,17 +57,17 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
             <label htmlFor="profile-image">Marketplace booth image</label>
             {profile.boothImagePath ? <img src={profile.boothImagePath} alt={`${profile.businessName} booth`} /> : null}
             <input id="profile-image" name="boothImage" type="file" accept="image/jpeg,image/png,image/webp" />
-            <small>Upload a JPG, PNG, or WebP image up to 5 MB. Leave empty to keep the current booth.</small>
+            <small>Upload a JPG, PNG, or WebP image up to 5 MB. Leave empty to keep the current image or use the page cover/fallback.</small>
           </div>
-          <div className="field"><label htmlFor="profile-city">City</label><input id="profile-city" name="city" defaultValue={profile.city} required /></div>
-          <div className="field"><label htmlFor="profile-zone">Zone / administrative area</label><input id="profile-zone" name="zone" defaultValue={profile.zone} required /></div>
-          <div className="field full"><label htmlFor="profile-region">Region</label><input id="profile-region" name="region" defaultValue={profile.region} required /></div>
+          <div className="field"><label htmlFor="profile-city">City</label><input id="profile-city" name="city" defaultValue={pending?proposal.city:profile.city} required /></div>
+          <div className="field"><label htmlFor="profile-zone">Zone / administrative area</label><input id="profile-zone" name="zone" defaultValue={profile.zone || (pending?proposal.city:profile.city)} required /></div>
+          <div className="field full"><label htmlFor="profile-region">Region</label><input id="profile-region" name="region" defaultValue={pending?proposal.region:profile.region} required /></div>
           <label className="check-field"><input type="checkbox" name="excluded" defaultChecked={profile.excluded} />Exclude from discovery</label>
           <details className="field full admin-form-disclosure">
             <summary>Advanced visibility <span>Map placement, fallback, and sponsorship</span></summary>
             <div className="admin-form-disclosure-body form-grid">
-              <div className="field"><label htmlFor="profile-latitude">Latitude</label><input id="profile-latitude" name="latitude" type="number" min="3" max="15" step="any" defaultValue={profile.latitude ?? ""} required /></div>
-              <div className="field"><label htmlFor="profile-longitude">Longitude</label><input id="profile-longitude" name="longitude" type="number" min="32" max="49" step="any" defaultValue={profile.longitude ?? ""} required /></div>
+              <div className="field"><label htmlFor="profile-latitude">Latitude</label><input id="profile-latitude" name="latitude" type="number" min="3" max="15" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.latitude??"":""):profile.latitude??""} required /></div>
+              <div className="field"><label htmlFor="profile-longitude">Longitude</label><input id="profile-longitude" name="longitude" type="number" min="32" max="49" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.longitude??"":""):profile.longitude??""} required /></div>
               <div className="field full"><label htmlFor="profile-fallback">Booth fallback style</label><select id="profile-fallback" name="fallbackStyle" defaultValue={profile.fallbackStyle}>{["workshop", "botanical", "textile", "food", "home", "technical"].map((style) => <option key={style}>{style}</option>)}</select></div>
               <fieldset className="field full">
                 <legend>Homepage sponsor</legend>

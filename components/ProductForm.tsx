@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
 import {
   availabilityLabel,
@@ -41,15 +42,6 @@ export default function ProductForm({
   const [offeringKind, setOfferingKind] = useState<OfferingKind>(
     product?.offering_kind || "standard_product",
   );
-  const [capacitySummary, setCapacitySummary] = useState(
-    product?.capacity_summary || "",
-  );
-  const [minimumOrderSummary, setMinimumOrderSummary] = useState(
-    product?.minimum_order_summary || "",
-  );
-  const [leadTimeSummary, setLeadTimeSummary] = useState(
-    product?.lead_time_summary || "",
-  );
   const [price, setPrice] = useState(
     product?.price_minor == null ? "" : (product.price_minor / 100).toFixed(product.price_minor % 100 ? 2 : 0),
   );
@@ -82,7 +74,7 @@ export default function ProductForm({
       ) : null}
 
       <div className="field full">
-        <label htmlFor="product-name">Offering name</label>
+        <label htmlFor="product-name">Product name</label>
         <input
           id="product-name"
           name="name"
@@ -109,7 +101,7 @@ export default function ProductForm({
           onChange={(event) => setPrice(event.target.value)}
           placeholder="Example: 1250"
         />
-        <small>Informational only. AfricMade does not collect payment.</small>
+        <small>Informational only. Suqpage does not collect payment.</small>
       </div>
 
       <div className="field">
@@ -183,41 +175,8 @@ export default function ProductForm({
         />
       </div>
 
-      <div className="field">
-        <label htmlFor="product-capacity">Production or supply capacity <span className="optional">(optional)</span></label>
-        <input
-          id="product-capacity"
-          name="capacitySummary"
-          maxLength={180}
-          value={capacitySummary}
-          onChange={(event) => setCapacitySummary(event.target.value)}
-          placeholder="Example: Up to 5,000 units per month"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="product-minimum-order">Minimum order <span className="optional">(optional)</span></label>
-        <input
-          id="product-minimum-order"
-          name="minimumOrderSummary"
-          maxLength={140}
-          value={minimumOrderSummary}
-          onChange={(event) => setMinimumOrderSummary(event.target.value)}
-          placeholder="Example: MOQ 100 units"
-        />
-      </div>
-
-      <div className="field full">
-        <label htmlFor="product-lead-time">Lead time or production window <span className="optional">(optional)</span></label>
-        <input
-          id="product-lead-time"
-          name="leadTimeSummary"
-          maxLength={140}
-          value={leadTimeSummary}
-          onChange={(event) => setLeadTimeSummary(event.target.value)}
-          placeholder="Example: Samples in 7 days; production in 3-4 weeks"
-        />
-      </div>
+      <div className="field"><label htmlFor="product-visibility">Visibility</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">Listed on my page</option><option value="0">Hidden from buyers</option></select><small>Your business must be published before buyers can see listed products.</small></div>
+      <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
 
       <div className="field">
         <label htmlFor="product-availability">Availability</label>
@@ -332,32 +291,25 @@ export default function ProductForm({
             {availabilityLabel(offeringKind, availability)}
           </span>
           <small>{offeringKindLabels[offeringKind]}</small>
-          <strong>{name || "Offering name preview"}</strong>
-          <p>{description || "The offering description will appear here."}</p>
+          <strong>{name || "Product name preview"}</strong>
+          <p>{description || "The product description will appear here."}</p>
           {price ? <strong>ETB {price}</strong> : null}
           {quantityUnit ? <p>Offered by {quantityUnit}</p> : null}
           {highlights.trim() ? <ul className="product-upkeep-facts">{highlights.split(/\r?\n/).filter(Boolean).slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul> : null}
-          {[capacitySummary, minimumOrderSummary, leadTimeSummary].filter(Boolean).length ? (
-            <ul className="product-upkeep-facts">
-              {capacitySummary ? <li>Capacity: {capacitySummary}</li> : null}
-              {minimumOrderSummary ? <li>Minimum order: {minimumOrderSummary}</li> : null}
-              {leadTimeSummary ? <li>Lead time: {leadTimeSummary}</li> : null}
-            </ul>
-          ) : null}
         </div>
       </aside>
 
       <div className="field full product-upkeep-explainer">
-        <strong>This publishes only this offering update.</strong>
+        <strong>Save your product details.</strong>
         <span>
-          Design, options, order, categories, and business settings
-          stay protected. A retained page version is created automatically.
+          Listed products update on your published page. Hidden products stay private;
+          your earlier catalog versions are retained.
         </span>
       </div>
 
       <div className="field full">
         <button className="btn brand" type="submit">
-          {product ? "Save and publish offering" : "Add and publish offering"}
+          {product ? "Save product" : "Add product"}
         </button>
       </div>
     </form>

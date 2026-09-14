@@ -2,7 +2,7 @@
 id: FE-016
 title: Unified products and capabilities experience
 status: done
-related: [FE-001, FE-007, FE-008, FE-014, BE-014, DEP-011, DEP-012]
+related: [FE-041, FE-001, FE-007, FE-008, FE-014, BE-014, DEP-011, DEP-012]
 owners: [product, frontend]
 last_updated: 2026-07-29
 change_level: L3
@@ -166,3 +166,12 @@ Evidence: verified locally on 2026-07-29.
   Addis Metalworks catalog, capability detail, and inquiry drawer.
 - `npm run check` and `npm run release` passed; the release dependency audit
   reported zero vulnerabilities.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.

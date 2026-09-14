@@ -1,5 +1,11 @@
 # AfricMade Launch Verification
 
+Current checkpoint: BE-035/DEP-031 retire all executable file-database tooling.
+Use `docs/POSTGRES-ONLY-RUNBOOK.md` and `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for
+current commands and evidence. Earlier dated results below are historical and do
+not authorize retired commands or establish readiness of this candidate.
+
+
 **Release:** `1.0.0-mvp-launch`
 **Verification date:** 2026-09-12 local candidate verification
 **Reviewed input:** current AfricMade candidate and data-preserving rollout plan

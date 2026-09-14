@@ -46,6 +46,8 @@ const forbidden: unknown[] = [
   { external_google_client_id: "local-client" }, { external_google_secret: "new-secret" },
   { smtp_pass: "new-secret" }, { smtp_host: "localhost" }, { smtp_user: "other-sender" },
   { mailer_templates_confirmation_content: "<a href='https://evil.test'>Sign in</a>" },
+  { mailer_subjects_confirmation: "Your AfricMade sign-in code" },
+  { mailer_subjects_magic_link: "Arbitrary subject" },
   { unknown: true }, { mailer_otp_length: 6, smtp_pass: "smuggled-secret" },
   JSON.parse('{"__proto__":{"mailer_otp_length":6}}'),
 ];
@@ -64,6 +66,7 @@ test("explicit target and safe exact patch are required", async () => {
   assert.throws(() => validatePatch("another-project", { mailer_otp_length: 6 }, template), /project/);
   validatePatch(project, { site_url: PRODUCTION_AUTH.origin, uri_allow_list: `${PRODUCTION_AUTH.origin}/auth/callback`,
     mailer_otp_length: 6, mailer_otp_exp: 600, smtp_max_frequency: 60, mailer_autoconfirm: false,
+    mailer_subjects_confirmation: "Your Suqpage sign-in code", mailer_subjects_magic_link: "Your Suqpage sign-in code",
     mailer_templates_confirmation_content: template, mailer_templates_magic_link_content: template }, template);
   const f = fixture();
   try {

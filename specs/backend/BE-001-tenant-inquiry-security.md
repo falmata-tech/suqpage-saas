@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017]
+related: [FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L2
@@ -84,3 +84,12 @@ compatibility or verified database/media restore.
 `BE-009` and `DEP-008` now define the implemented eligibility rule:
 availability is canonical, requested quantity is optional bounded text intent
 under BE-014, and no active inventory count is stored or consulted.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.

@@ -1,22 +1,35 @@
-# AfricMade Project Master Prompt
+# Suqpage Project Master Prompt
 
-> **Read this file before changing any AfricMade code, design, data model, copy, integration, or deployment configuration.**
+> **Read this file before changing any Suqpage code, design, data model, copy, integration, or deployment configuration.**
 >
 > This document is the permanent product and engineering brief for human contributors, AI coding agents, designers, and reviewers. It describes the intended product, the principles behind it, the current MVP boundary, and the rules that must not be broken.
 
 ---
 
+
+Transition in progress (FE-042/BE-033, ADR-0019): the owner has retired custom-page
+requests and their design/revision workflow. Standard owner pages, direct business
+staff assignments and admin first-page review replace those live features. Category
+results gain five-row backend pagination. Implementation and verification are tracked
+in S2i/S2j; historical managed-workflow descriptions below are superseded, not approval
+to expose or extend those features. Historical data remains preserved.
+
 ## 1. Your role
 
-You are working on **AfricMade**, a multi-tenant SaaS platform that makes small-scale local production easier to discover. The launch catalog contains Ethiopian artisans, farms and growers, workshops, and small manufacturers that primarily sell through WhatsApp, Telegram, TikTok, phone calls, direct messages, and direct trade relationships.
+You are working on **Suqpage**, a multi-tenant platform for discovering shops and
+products and contacting sellers directly. It serves consumer-facing retailers,
+home sellers, growers, workshops and other product businesses. Sellers may make,
+grow or resell their inventory. The initial market is Ethiopia.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
-Do not treat AfricMade as a generic website builder or a conventional ecommerce platform.
+Do not treat Suqpage as a generic website builder or a conventional ecommerce platform.
 
 The central principle is:
 
-> **AfricMade controls discovery, catalog, availability, inquiry, and customer-capture workflows. Each client AfricMade page controls its own visual experience.**
+> **Suqpage provides one consistent business profile and discovery experience.
+> Each seller owns its content, products and identity; private staff assistance
+> requires revocable consent. Inquiries are not checkout or paid orders.**
 
 When a user gives an explicit instruction that conflicts with an older preference in this file, follow the newest explicit instruction, but preserve security, tenant isolation, and data integrity.
 
@@ -24,10 +37,34 @@ When a user gives an explicit instruction that conflicts with an older preferenc
 
 ## 2. Product identity
 
+### Current local candidate (FE-040–FE-042, BE-032/BE-033, DEP-030)
+
+One shared business profile uses each business's canonical catalog or current
+published owner profile. It serves product sellers, retailers, growers and workshops
+with a hero/video poster, one About, linked products and a separate contact section.
+Public and private account contacts remain separate. The current editor is enabled
+by default and supports saved drafts, private image uploads, consented staff help,
+first-page admin review and subsequent owner publish/restore. The interactive preview
+cannot send inquiries or persist a visitor cart.
+
+Category/search results use five-row database pages alongside a persistent map.
+Custom request/design/revision features are retired under ADR-0019. Historical
+records/assets and compatible catalog readers remain preserved. Historical asset
+briefs and visual evidence remain under showroom-projects/WORKFLOW.md; those files
+do not enable a custom-request application feature.
+
+Focused local SQL, security and owner/admin browser evidence is recorded in the
+active transition checklist. Visual and deployment approval was received on 2026-09-14;
+core, release, operations, PostgreSQL, seven production browser scenarios and 72
+accessibility states pass. The remaining container gate, reviewed commits and deployment are tracked separately in
+`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md`. No hosted provider setting or
+production deployment is changed by this local implementation. Remaining operational
+asset retention and rollout work stays in DEP-030 and the transition checklist.
+
 The official product name is:
 
 ```text
-AfricMade
+Suqpage
 ```
 
 Do not write `SuuqPage`, `Showroom Page`, or another variation unless quoting historical material.
@@ -38,7 +75,7 @@ Launch origin:
 configured HTTPS Netlify origin
 ```
 
-No custom AfricMade domain is owned yet. Never publish or configure an assumed
+No custom Suqpage domain is owned yet. Never publish or configure an assumed
 domain before the product owner purchases it.
 
 Primary support contact:
@@ -47,7 +84,7 @@ Primary support contact:
 falmata.dawano@gmail.com
 ```
 
-AfricMade gives each participating artisan, farm, workshop, or small manufacturer a polished public page at a handle-based route such as:
+Suqpage gives each participating artisan, farm, workshop, or small manufacturer a polished public page at a handle-based route such as:
 
 ```text
 /@selam-weave
@@ -56,18 +93,16 @@ AfricMade gives each participating artisan, farm, workshop, or small manufacture
 /@green-terrace-farm
 ```
 
-The AfricMade page is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
+The Suqpage page is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
 
 ---
 
-## 3. The problem AfricMade solves
+## 3. The problem Suqpage solves
 
-AfricMade makes locally made and grown products visible to their next market.
-It launches with reviewed Ethiopian artisans, farms and growers, workshops, and
-small manufacturers. AfricMade helps them reach buyers in their locality,
-region, and country, with wider African discovery as the next market. Buyers
-need a clear way to find the right product or production capability, understand
-its source, and contact that source directly.
+Suqpage helps buyers discover shops and products beyond the streets and social
+accounts they already know. Shops need a clear presence for their products;
+buyers need to find what is available and reach the seller. The initial market
+is Ethiopia, with wider African discovery as a future direction.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -80,27 +115,27 @@ wholesale buyers struggle to understand:
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
 - how the business can retain the inquiry if a social-app handoff fails.
 
-AfricMade gives that production a professional public page. It organizes each
+Suqpage gives each shop a consistent public page. It organizes each
 participant's story, process, products, capabilities, reviewed location, and
 contact options; supports map, region, category, product, and capability search;
 and lets buyers contact the participant directly for small purchases, custom
-work, repeat orders, or larger trade inquiries. AfricMade public support may
+work, repeat orders, or larger trade inquiries. Suqpage public support may
 help with using the platform, transport arrangements, or reporting a concern
-about a listing. AfricMade does not inspect, certify, endorse, negotiate for,
+about a listing. Suqpage does not inspect, certify, endorse, negotiate for,
 deliver for, or guarantee a listed participant.
 
 ---
 
-## 4. What AfricMade is—and is not
+## 4. What Suqpage is—and is not
 
-### AfricMade is
+### Suqpage is
 
 - a multi-tenant market-discovery and public-page SaaS;
 - a dynamic catalog and availability manager;
 - an inquiry-cart system;
 - a lightweight customer lead-capture system;
-- a copy-first inquiry-message builder with configured WhatsApp and Telegram
-  handoff, plus phone-required submission into the business's AfricMade inbox;
+- a single-product or grouped inquiry builder with configured WhatsApp, Telegram
+  and SMS handoffs, copy, and phone-required submission into the business’s inbox;
 - an inquiry management dashboard;
 - a first-party customer support workspace;
 - an anonymous, token-scoped public support drawer that enters the same staff
@@ -113,18 +148,20 @@ deliver for, or guarantee a listed participant.
   authorized staff may attach one private sanitized image or verified PDF up to
   5 MB to a message, with conversation-scoped reads through the configured media
   adapter;
-- a platform that supports manually designed, highly distinct client pages;
+- one shared business profile with each seller's own identity, introduction,
+  images, products and optional About video;
 - a permanent public discovery surface where visitors choose an industry,
   explore exact reviewed business locations or a daily country-wide virtual
   Daily Featured program, and enter each participant's permanent
-  `/@handle` AfricMade page;
-- a controlled SaaS pilot with fictional Ethiopian artisans, farms and growers,
-  workshops, and small manufacturers; import-only sellers, repair-only services,
-  and large industrial manufacturers are excluded. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
+  `/@handle` Suqpage page;
+- a controlled SaaS pilot whose existing fictional Ethiopian catalog includes
+  artisans, farms, workshops and small manufacturers. Product retailers and
+  home sellers are eligible; additional retailer examples remain checklist S6.
+  Repair-only services are not product sellers. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
 
-### AfricMade is not
+### Suqpage is not
 
 - a generic theme marketplace;
 - a payment processor;
@@ -134,8 +171,8 @@ deliver for, or guarantee a listed participant.
 - a tax engine;
 - an automatic order-fulfillment system;
 - a checkout marketplace or shared storefront that replaces each business's
-  permanent AfricMade page identity;
-- an excuse to make every client page look like the AfricMade landing page;
+  permanent Suqpage page identity;
+- an excuse to make every client page look like the Suqpage landing page;
 - an AI product merely because AI may help generate custom designs.
 
 Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not casually rename inquiries as paid orders.
@@ -144,135 +181,29 @@ Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not ca
 
 ## 5. Non-negotiable design philosophy
 
-### 5.1 Every client showroom is deliberately designed
+### 5.1 One profile, each seller's content
 
-Client pages are not one generic layout with different colors. The current
-default is a deterministic composition assembled from independently reviewed
-components, an exact token system, bounded motion and decoration, declared
-content bindings, and client-specific section choices. Component reuse must not
-collapse distinct brand identity into one theme.
+Every public page and ordinary preview uses BusinessProfile (FE-040/FE-041).
+The structure is image/video poster, name/logo, one About description, Products
+navigation with either a catalog or shareable inline product detail, then a separate
+public contact section. The hero image is the video poster; one intentional play
+control loads the privacy-enhanced player. Only configured public links appear.
+Saved selections expose inquiry access; an empty selection offers Explore products.
+There is no separate Introduction field or custom layout selector. Account contacts
+are edited separately from the public contact values. Owners and consented staff
+use the same standard page editor; admin first-review uses the submitted page.
 
-Each client composition can have its own:
+### 5.2 Suqpage must have its own platform identity
 
-- logo;
-- typography;
-- visual hierarchy;
-- navigation;
-- hero composition;
-- product-card structure;
-- product-detail presentation;
-- backgrounds;
-- animations;
-- buttons;
-- inquiry-cart treatment;
-- section anatomy within the canonical journey;
-- mobile behavior;
-- favicon;
-- social-sharing image;
-- brand voice.
-
-Shared behavior is acceptable. Shared visual identity is not.
-
-Every direct client-showroom design command uses the repository workflow in
-`showroom-projects/WORKFLOW.md`. The client folder is the working source for the
-brief, approved assets, visual references, booth direction, and review evidence.
-Design begins from that evidence and the machine-readable component bank, not
-from industry stereotypes. A candidate is not complete until its 1440-pixel and
-390-pixel screenshots are inspected, defects are recorded and corrected, and
-the final recipe remains inside the normal private review/publication boundary.
-
-Normal generated showrooms share one purposeful information architecture:
-header, hero, one combined story-and-process chapter, products, inquiry
-call-to-action, and footer. The AI varies the visual anatomy, media treatment, typography, density,
-and component choice inside those roles; it does not add trust ledgers,
-information summaries, standalone navigation, or other filler chapters, and it
-does not reorder the four content sections.
-
-All seven admitted headers and all six admitted footers expose distinct,
-industry-neutral machine-readable anatomy and materially different responsive
-layouts. Header and footer are selected independently by identity scale,
-available content, visual weight, and mobile behavior. Headers carry tenant
-identity and the renderer-owned Home, Story, Offerings, and Contact section
-navigation; they do not repeat a promotional descriptor or product-category
-commands. Footers close with identity, the permanent showroom handle, and the
-configured inquiry/contact destination; they do not repeat product-category
-navigation. The desktop floating Inquiry control owns persistent cart access.
-Phones replace it with a fixed, safe-area-aware showroom application bar that
-exposes Home, Story, Offerings, Contact, and the same tenant-scoped Inquiry
-drawer without covering content. The platform-owned **Powered by AfricMade** and
-**Back** host bar remains above every public tenant presentation.
-The combined story-and-process chapter is visually distinct from both the hero
-and catalog, returns to semantic heading-first reading order on phones, and may
-use any reviewed semantic surface that supports its content. Normal showrooms do not use
-repeating plaid, pinstripe, graph-paper, center-divider, or repeated-rule
-background motifs; one bounded accent plane may provide direction without
-turning the page into a grid.
-
-Never turn the shared composition interpreter into a visually generic theme.
-`ADR-0005` and `BE-004` define the accepted constrained-composition foundation:
-external AI may propose an exact combination of approved, versioned components,
-one reviewed non-color foundation, optional contrast-safe custom colors, and
-bounded properties as declarative JSON, while AfricMade validates and renders it.
-The current `showroom-bank@1.2.0` release contains 67 reviewed component
-variants across eight section families and 18 semantic token systems.
-Every component exposes bounded `quiet`, `balanced`, or `expressive` motion and
-`clean`, `subtle`, or `signature` decorative depth. Those settings are CSS-only,
-scoped, reduced-motion safe, and cannot carry arbitrary code or style values.
-Authorized staff can inspect every component in a synthetic, read-only visual
-laboratory, including a true container-based 390-pixel phone preview. `FE-006`,
-`BE-007`, and `DEP-006` establish the current public/private composition
-renderer, revision-schema-v2 persistence, exact client-content mapping,
-publication, rollback, and four-example-client cutover. The implementation
-checkpoint under `FE-007`, `BE-008`, and `DEP-007` adds a permission-scoped
-staff design studio: staff import a strict complete design, fulfill its labeled
-post-import image checklist with verified assets, export a sanitized brief and
-exact current design with portable schemas/current content/component-bank rules,
-import a strict
-combined content/design recipe, inspect safe validation failures and count
-differences, and open the resulting private revision preview. Imports are
-idempotent, remain private, and preserve the existing client-approval and
-manager-publication path. Components now declare image media-slot requirements,
-and recipes may use only request-scoped opaque asset keys. Remote image URLs,
-embed markup, arbitrary providers, inventory, and cross-tenant assets are
-rejected. A strict six-type content-block parser, additive design-v2 validator,
-and portable v2 schemas now exist. Controlled YouTube watch/share URL
-normalization and privacy-enhanced embed derivation are implemented as a
-network-free contract. Authorized staff may enable a separate, default-off
-admission capability that stores only normalized provider IDs and exports
-request-scoped opaque keys; raw URLs are never stored or exported. CSP-gated
-rendering, revision-v4 persistence, typed content blocks, and focused
-post-import controls are implemented locally under the promoted v4/bank-1.2
-work. The current local checkpoint passes the standard check, release,
-container, and ten production-browser acceptance scenarios, including
-CSP/provider-video proof, the focused design workspace, current-design export,
-staff offering creation, client approval, and publication. `FE-014`, `BE-013`,
-`FE-015`, and `DEP-011` record the completed local blueprint, composition-
-fitness, marketplace, and showroom visual-benchmark scope. Remote checks
-and any production/data-preserving rollout remain separate future evidence.
-The product owner has promoted that completion work and a creative expansion to
-the active roadmap under `FE-009`, `BE-010`, `DEP-009`, and `ADR-0007`. The
-implementation is additive: revision v4/content-schema v2/design-schema v2 and
-`showroom-bank@1.2.0` coexists with retained v1-v3 revisions and the immutable
-bank 1.1 release. The admitted synthetic laboratory
-contains 67 reviewed components, 18 token systems, and 98,280 required-slot
-combinations with stronger editorial, tactile, product-led, source-led,
-spatial, precise, high-contrast, and information-dense art direction. Bounded reveals
-and interactions must be CSS-first, mobile-safe, static without support, and
-disabled by reduced-motion preference; arbitrary code, copied trade dress,
-autoplay, parallax, and scroll-jacking remain prohibited.
-
-### 5.2 AfricMade must have its own platform identity
-
-The AfricMade public root must not look like any client page. It is a polished,
+The Suqpage public root must not look like any client page. It is a polished,
 mobile-first marketplace application designed to remain understandable inside
 TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
 `FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
 venue art direction, and platform visual system. `/` opens directly into the
 geographic Market; there is no intermediate landing lobby or duplicate search.
-A concise heading promises locally made and grown products. One short sentence
-explains that visitors can search AfricMade pages from artisans, farms and
-growers, workshops, and small manufacturers
-by product, capability, or location and contact the source directly. Individual
+A concise heading identifies shops and products near the visitor. One short
+sentence explains finding a shop, exploring its products and contacting the
+seller directly. Visitors can search by product, category or location. Individual
 and household buyers are the primary public audience; traders and retailers can
 also find repeat supply when a participant actually offers it. This audience
 strategy guides content but is not repeated as promotional taxonomy in every
@@ -289,43 +220,45 @@ continues: one of seven production industries or **All industries** as the
 eighth and final option. After that choice, live search, the current industry control, the available
 region/city selector, the privacy-preserving **Near me** map framing action,
 zoom, and the exact-location Ethiopia map remain within the same bounded
-surface. On phones, Search and Filters share one command row; industry and place
-selection open in a modal bottom sheet, while a compact locate, zoom, and reset
-toolbar sits directly above the map without covering markers. Market and an
+surface. Desktop search results occupy the panel beside the still-mounted map.
+Filters and map actions float on the map; on phones a Filters button opens
+category/place choices in a bottom sheet. Search, a bounded map, and results
+below it share the remaining workspace. Map attribution stays clear. Market and an
 opened nearby-page viewer consume the remaining application viewport above fixed
 phone navigation.
-Opening a permanent AfricMade page navigates in the same tab to its canonical tenant
+Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
-the AfricMade application rail around the tenant-owned page. Phones use an
+the Suqpage application rail around the tenant-owned page. Phones use an
 immersive page surface instead: the platform bottom navigation is removed,
-one compact platform-owned Back/Powered by AfricMade bar remains, and the
+one compact platform-owned Back/Powered by Suqpage bar remains, and the
 tenant's single section/inquiry navigation may stay fixed at the bottom. The
 Back action restores the exact recorded map, filter, nearby-group, or Featured
-state before consulting older browser history. A direct AfricMade page URL renders
+state before consulting older browser history. A direct Suqpage page URL renders
 the same responsive shell without requiring prior Market history.
 Desktop retains the complete side command panel. Its opened industry
 menu matches the trigger width and wraps long labels instead of spanning across
 the map. The menu and phone Filters sheet use one restrained accent for each of
 the seven industries and a neutral combined treatment for **All industries**.
 Industry accents may identify nearby-page cards, but individual geographic markers and numbered clusters use one
-consistent AfricMade orange action treatment. The isolated marker uses a compact storefront pin smaller than a cluster core,
+consistent Suqpage orange action treatment. The isolated marker uses a compact storefront pin smaller than a cluster core,
 with no visible halo and an independent touch-sized transparent target;
 white and cool-gray remain the dominant content surfaces, and visible industry text or iconography means
 color is never the only identifier. After two typed characters, search exposes no more than six
 server-authoritative eligible page, published offering, and reviewed-place
-suggestions. The combobox supports pointer, touch, and keyboard selection and
-overlays rather than reflows the workspace. Suggestions complete queries; they
-do not contain the full result experience. A meaningful query opens a bounded
-Search workspace in place of the map canvas, with All, Products, and Businesses
-result controls, deterministic unpaid ordering, and the same category and place
-scope. Result activation opens the existing page inspector. Returning to Map
-preserves query, filters, and remembered viewport; clearing the query returns to
-geographic browsing. The public program name is always **Daily Featured** across
+suggestions. The combobox supports pointer, touch and keyboard interaction.
+Selecting a category already opens the bounded result panel; a meaningful query
+refines it. The panel stays beside the map on desktop and below its bounded canvas
+on phones. All, Products and Businesses show accurate scoped totals. Five results
+are selected by SQL COUNT/LIMIT/OFFSET with deterministic unpaid ordering and
+Previous/Next controls. All traverses products then businesses; category, query,
+place or type changes reset the result page. Direct product links and business
+inspectors remain distinct actions. The map stays mounted across result pages and
+query/type changes, preserving its center and zoom. The public program name is always **Daily Featured** across
 visible copy and accessible names. Existing `expo` types, query keys, analytics
 values, styles, routes, and persistence fields remain internal compatibility
 identifiers and must never render as visitor language. A disclosed five-placement
 global paid-sponsorship pool is attached to Daily Featured. A placement may be
-an eligible AfricMade showroom or a validated external ad with approved local
+an eligible Suqpage showroom or a validated external ad with approved local
 media and an HTTPS website or telephone action; external ads never become fake
 showrooms or map records. Staff selection and
 ordering do not change with industry, search, place, or selected program day.
@@ -390,23 +323,22 @@ the complete platform narrative. **Custom work**, **ready products**, and
 mandatory signup questionnaire. Platform-owned copy does not use **maker**,
 **producer**, or **businesses that make** as its primary catch-all audience.
 Visitors search by product, capability, or place, inspect a professional
-AfricMade page, and begin a direct inquiry. Copy avoids motivational clichés,
-generic SaaS claims, and childish slogans. The fuller story of African
-production moving through households and trade buyers, beginning with Ethiopia
-and East Africa, belongs on `/about`;
+Suqpage page, and begin a direct inquiry. Copy avoids motivational clichés,
+generic SaaS claims, and childish slogans. The fuller story of helping shops be
+discovered and connecting nearby buyers and sellers, beginning in Ethiopia,
+belongs on `/about`;
 merchant education and conversion remain secondary content below the public
 discovery experience. Platform copy must not claim verified tax, employment,
 certification, import-substitution, sales, or other outcomes for every listed
-participant, and AfricMade mission copy must not be injected into client-owned
-pages. A public AfricMade page on desktop or tablet is framed by the AfricMade
+participant, and Suqpage mission copy must not be injected into client-owned
+pages. A public Suqpage page on desktop or tablet is framed by the Suqpage
 application shell without a duplicate host band. Its mobile presentation uses
-one compact platform-owned **Powered by AfricMade** bar with a concise visible
-**Back** action whose accessible name identifies the marketplace destination.
+one compact **Back to Market** bar with no redundant platform credit.
 Private previews retain their authorized workspace framing. Platform chrome
 sits outside the tenant renderer and must not replace, obscure, recolor, or
 visually compete with the tenant's logo, header, navigation, or content.
 
-AfricMade-owned surfaces use one semantic identity system derived from safety
+Suqpage-owned surfaces use one semantic identity system derived from safety
 orange `#FF4B00`, accessible action orange `#C93600`, charcoal `#202428`, middle
 gray, soft gray `#F4F4F2`, and white. White and soft gray carry most public page
 area; charcoal carries identity and structural contrast; orange carries brand,
@@ -414,9 +346,9 @@ selection, and bounded emphasis. White text uses the darker action-orange state
 needed for accessible contrast. Sponsored placement uses an explicit paid label
 and restrained charcoal or soft-neutral structure rather than warning color.
 Public pages, task forms, discovery, and authenticated workspaces share the
-same Africa-pin vector mark and split-color lower-case `africmade` wordmark.
-Client showroom logos and approved or custom showroom palettes remain
-independent and are never replaced by the platform palette.
+same shop/map vector mark and split-color lower-case `suqpage` wordmark.
+Business logos and media remain independent. The shared business-profile layout
+uses the platform's restrained palette rather than legacy custom design tokens.
 
 Nearby-group viewers use no architectural shell, venue, floor, hall, or
 decorative environment. Daily Featured likewise presents up to forty image-led cards in responsive columns with
@@ -426,7 +358,7 @@ or hidden overflow.
 The discovery map uses Leaflet with the centralized `osm-standard` provider.
 The visitor's browser requests only visible basemap tiles from the exact
 OpenStreetMap Standard HTTPS endpoint and retains visible attribution plus the
-provider's normal cache behavior. AfricMade does not proxy, prefetch, scrape,
+provider's normal cache behavior. Suqpage does not proxy, prefetch, scrape,
 bulk-download, package, or service-worker-cache those tiles, and it sends no
 search, account, showroom, or private-location data in tile URLs. OpenStreetMap
 supplies visual road and place context only; Supabase remains authoritative for
@@ -458,7 +390,7 @@ it cannot be mistaken for one business marker.
 Activating a revealed Daily Featured booth opens this same inspector before any
 tenant route change; only its explicit **Open showroom** action navigates.
 Valid tenant-controlled live state appears on clusters, showroom markers,
-nearby-group cards, and today's featured cards. The business in AfricMade's current
+nearby-group cards, and today's featured cards. The business in Suqpage's current
 Daily Featured walkthrough slot is labeled **Featured now** everywhere it is visible; this
 temporarily overrides only its merchant-live presentation and never changes the
 tenant's saved live setting.
@@ -520,17 +452,17 @@ authenticated unlinked identity then submits bounded owner name, business name,
 phone or WhatsApp, and a short description of what the business makes or
 supplies. The server derives identity from the Supabase session, generates a
 safe unique handle, and atomically creates the private draft business, owner,
-client access profile, identity link, and onboarding request. It accepts no
+client access profile, identity link, and business onboarding record. It accepts no
 public file upload and creates no public marker, Daily Featured card, catalog,
 or showroom.
-Existing administrator-created invitations and the attachment-free legacy lead
-endpoint remain supported parallel intake paths. The homepage and request flow
+Standalone administrator-created account invitations remain supported. The legacy
+custom-page lead endpoint is retired. The homepage and request flow
 use professional copy with no development-stage disclaimers. The public
 composition is verified without horizontal document overflow at 320 and 390
 CSS pixels.
 
 The public account-entry and authenticated business-setup routes use the same
-AfricMade header, orange, charcoal, white, and cool-neutral platform language
+Suqpage header, orange, charcoal, white, and cool-neutral platform language
 as Market and About. Each is a focused task surface with one concise context
 panel and one white form panel on wider screens, stacked in semantic order on
 phones. Account entry asks only for an email code or configured Google identity;
@@ -610,7 +542,7 @@ and present them but must not invent or silently translate them.
 
 ## 7. Dynamic catalog model
 
-AfricMade stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products.
+Suqpage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products.
 
 Core hierarchy:
 
@@ -646,7 +578,7 @@ Region
 Count
 ```
 
-AfricMade uses **Offering** as the internal umbrella for a standard product,
+Suqpage uses **Offering** as the internal umbrella for a standard product,
 made-to-order product, manufacturing capability, or production supply. Public
 showrooms label this catalog **Products & Capabilities**. The compatible
 `products` table and recipe array remain the current transport; they do not
@@ -673,7 +605,7 @@ Rules:
     `made_to_order`, `manufacturing_capability`, or `production_supply`.
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
     merchant facts. The platform and AI must not calculate, verify, or invent
-    them.
+    them. The shared public product view omits these production facts.
 12. An offering may display one optional non-negative ETB price, one normalized
     merchant-defined offered-by unit, and up to six concise highlights. These
     fields support inquiry context only and never create checkout, payment, tax,
@@ -701,42 +633,45 @@ recovery input and are discarded when upgraded to revision schema v3.
 
 ---
 
-## 8. Inquiry-cart workflow
+## 8. Product and inquiry workflow
 
-The inquiry cart is AfricMade’s central conversion feature.
+Product cards open a shareable `/@handle?product=<id>` view inside the business’s
+product section (FE-041). The route reloads directly, supports browser back/forward,
+and provides Back to products. Unknown, foreign or unpublished product references
+show a safe unavailable state. Cards have no Video badge; details show the photo,
+an intentional Watch video action when available, name, description, optional
+price, canonical selling unit and feature chips. Capacity, minimum order, lead time
+and internal offering-kind labels stay out of this public view. Single-value option
+groups need no selector; their canonical defaults remain part of the inquiry.
 
 Expected customer flow:
 
-1. A customer browses a client showroom.
-2. The customer selects a product or capability.
-3. The customer selects required option values.
-4. The customer adds the item to the inquiry cart.
-5. The customer can add multiple offerings.
-6. The customer may state a concise desired quantity with units or packaging
-   for any offering, leave it open, and remove items.
-7. The customer activates the primary **Copy inquiry** action without providing
-   a name, contact value, or note.
-8. The exact copied text remains visible and selectable as a reference.
-9. When the business configured them, the customer may instead open WhatsApp
-   or Telegram with the prepared message.
-10. The customer may separately enter a phone number and activate **Send
-    inquiry** to save the structured cart in that business's AfricMade inbox.
-11. Direct AfricMade delivery requires a normalized phone number with 7–15 digits
-    and shows an explicit success or failure state.
-12. Copy and social-app preparation do not fabricate a saved dashboard inquiry
-    and do not claim that copying delivered the message.
+1. Open a product, review photo/video/features, and choose any available options.
+2. Choose **Inquire about this product** for that selection alone, or **Add to
+   inquiry** to save it while continuing to browse. A direct inquiry never merges
+   with, clears or submits the visitor’s saved group.
+3. A single selection uses a compact product summary. Multiple selections show an
+   editable inquiry list; zero selections show no persistent cart button. Saved
+   references are revalidated against current tenant products/options and capped
+   at 20, matching server limits. Desired quantity remains optional bounded text.
+4. Choose configured WhatsApp, Telegram or SMS, **Copy inquiry**, or **Send on
+   Suqpage**. Only validated effective public contacts supply handoff destinations;
+   SMS uses public phone and never implies WhatsApp availability.
+5. App actions prepare a message for the visitor to review and send. Copy retains
+   visible/selectable text, including a clipboard-failure fallback. None of these
+   actions creates an inbox inquiry or claims external delivery.
+6. Only choosing **Send on Suqpage** reveals the reply-phone field and explicit
+   **Send inquiry** confirmation. Back to sending options hides the phone again.
+   Sending disables edits; bounded failure, retry-safe idempotency and explicit
+   success remain. An obsolete response cannot mark a different selection sent.
+7. Platform delivery retains canonical tenant validation and requires a normalized
+   phone with 7–15 digits. Phone is never stored in the browser’s saved cart.
 
-The current inquiry cart opens as a bounded floating task panel with visible
-outer margins on desktop. At 320 and 390 CSS pixels it becomes a safe-area-aware,
-bottom-anchored near-full-height sheet with one internal scroll region. Opening
-locks background scrolling; closing restores it and returns focus to the
-opener. Close, optional quantity, remove, clear, copy, and configured handoff
-controls provide at least a 44-pixel mobile touch block. The panel inherits the
-active showroom's semantic type and color roles while preserving contrast. One shared persistent
-inquiry trigger remains fixed inside the viewport across every showroom anatomy,
-shows the current selected-item count, and opens the same cart without requiring
-the visitor to return to the header. At phone widths it becomes a compact
-icon-sized control, and its visible badge is omitted while the cart is empty.
+The inquiry composer is a bounded floating panel with outer margins on desktop
+and a safe-area-aware bottom sheet on phones. It has an anchored header, one
+scroll region, keyboard focus containment, Escape/close and opener restoration.
+All actions have at least a 44px touch target. It is rendered outside clipping
+ancestors; the product detail itself is an ordinary navigable section, not a modal.
 
 A canonical inquiry record created by the public **Send inquiry** action
 contains:
@@ -827,23 +762,25 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ## 10. Market discovery behavior
 
-AfricMade’s directory must scale without dumping every tenant onto the page by default.
+Suqpage’s directory must scale without dumping every tenant onto the page by default.
 
 Default behavior:
 
 - load the combined geographic map behind a required first-use orientation
   chooser with seven industries plus **All industries** as the final option;
-- provide no unfiltered or paid-ranked public List result state;
+- selecting a category, including All categories, opens its paginated results;
+  list ranking remains independent of sponsorship;
 - de-duplicate businesses with more than one industry membership and keep the
   Daily Featured weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
-- replace the map canvas with a bounded query-driven Search workspace when a
-  visitor searches, separating Products and Businesses without adding a second
-  route or duplicating the map runtime;
+- show five-row category- or query-driven Products/Businesses result pages beside the persistent
+  map on desktop, or below its bounded canvas on phones. Product results link
+  directly to the selected product; query/type changes retain map center/zoom;
 - after two characters, provide at most six de-duplicated, public-eligible
-  AfricMade page, published-offering, and reviewed-place suggestions scoped to the
-  active industry and place;
-- do not expose category filters or duplicate all-business/reset navigation;
+  Suqpage page, published-offering, and reviewed-place suggestions scoped to the
+  active industry and place. Hide duplicate autocomplete once full results appear;
+- provide one category control and location filter on the map; do not duplicate
+  these controls inside the result list;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
 - keep reviewed production-scale metadata
@@ -858,11 +795,15 @@ Default behavior:
 
 ## 11. Passwordless account entry and business onboarding
 
-AfricMade uses one identity-first entry surface for sign-in and account creation.
+Suqpage uses one identity-first entry surface for sign-in and account creation.
 The visitor enters an email and six-digit one-time code or continues with Google
 when that provider is configured. Passwords are not requested in the launch
 flow. Existing linked users continue to their permitted dashboard; verified but
 unlinked identities continue to protected business setup.
+
+The owner approved an email-only production launch on 2026-09-14. Email-code
+entry is required; Google remains hidden until separately restored and verified.
+No local OAuth or SMTP credentials are copied to Production for this release.
 
 Business setup collects only owner name, verified-email display, phone or
 WhatsApp, organization name, one bounded private production category,
@@ -890,7 +831,7 @@ Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
 
 ## 12. Fulfillment boundary
 
-AfricMade does not book, quote, dispatch, or track delivery. Businesses and
+Suqpage does not book, quote, dispatch, or track delivery. Businesses and
 customers confirm payment, collection, shipping, returns, and fulfillment
 directly after an inquiry. No workspace may expose a logistics provider,
 delivery request, delivery status, or simulated fulfillment capability.
@@ -901,520 +842,95 @@ window, but application code must not read or mutate them.
 
 ---
 
-## 13. User roles
+## 13. User roles and standard page workspaces
 
-### AfricMade administrator
+The access-profile layer distinguishes platform administrator, operations manager,
+team member and client. Session identity and tenant scope remain server-authoritative.
 
-The administrator can:
+### Administrator
 
-- accept legacy public leads and invite clients;
-- review self-created private client workspaces and onboarding requests;
-- create a draft client workspace and invitation without requiring a prior
-  public interest or service request;
-- revoke provider sessions and repair explicit identity links;
-- provision individual operations-manager and team-member accounts;
-- manage showroom-project intake, request assignment, and customer operations;
-- publish only an exact client-approved revision;
-- suspend or restore an established showroom without editing its content;
-- preview draft showrooms securely;
-- inspect operational status;
-- roll back to a retained publication as a new content version.
+Administrators manage business accounts, individual staff access, standard page
+first-review decisions, marketplace geography/category approval, sponsorship,
+Daily Featured schedules, customer operations, support and renewals. They can create
+a private business invitation independently of any service request. The dashboard
+shows a paginated Page reviews queue and per-business review/publication status.
+Direct staff assignments belong to the business and can be revoked. First approval
+publishes the owner's exact submitted saved page and catalog versions and activates
+its private business atomically. Stale, already-decided and non-draft submissions
+cannot publish. Requested changes include feedback visible to the owner.
 
-### Client
+An administrator can suspend or restore an established page's visibility. They
+cannot use assistance to impersonate owner publication or bypass consent. Reviewing
+an exact pending submission grants read-only access to its preview/cover; editing
+its private draft still requires the owner's assistance permission.
 
-A client has a minimal workspace bound to one business. The client can create
-that private workspace through public signup or receive an administrator-issued
-invitation. The client can:
+### Owner (client)
 
-- start one unstructured showroom setup or update project;
-- read and reply to attributable clarification messages;
-- continue their one current showroom project and see showroom history;
-- review an exact private showroom revision and approve or reject it;
-- view customer inquiries without mutating them;
-- after first publication, use **My offerings** to create products or
-  capabilities and maintain their type, optional desired-quantity behavior, name,
-  description, production facts, primary image, descriptive availability, and
-  compatible existing product-category placement;
-- view their showroom and managed identity details.
-- view advisory monthly renewal state, history, and aggregate direct, marketplace,
-  and Daily Featured visits;
-- open, reply to, close, and reopen tenant-scoped AfricMade support conversations.
+Owners create a private workspace through verified signup or accept an invitation.
+They can add/update products, maintain categories, save and preview their standard
+page, manage public contacts separately from private account contacts, and submit
+its first saved version for review. Product creation no longer requires a prior
+custom-page publication. Categories and product updates advance the catalog version
+so a pending review cannot silently approve changed content.
 
-Clients cannot directly edit business settings, design, categories,
-options, ordering, slugs, structural publication state, or complete showroom
-revisions. They cannot delete/unpublish products structurally, update inquiry
-status, or operate fulfillment.
+After first approval, owners can publish saved page edits or restore the prior
+page publication. They can enable/revoke staff page assistance, read buyer inquiries,
+use tenant-scoped support, see renewal status and view aggregate visit statistics.
+They do not assign staff, approve their own first listing, edit other tenants,
+change inquiry status, or operate payment/delivery. Existing canonical product
+option structures and retained catalog snapshots remain compatible.
 
-Assigned team members receive that same narrow product-upkeep authority for
-assigned businesses so AfricMade can provide extra customer service. Operations
-managers and administrators can perform it within their explicit scope. Each
-basic update publishes a retained new content version with actor attribution
-and stale-version protection; full structural and visual work continues through
-private revision, exact client approval, and manager publication.
+### Operations managers and team members
 
-### Operations manager and team member
+Operations managers can open business workspaces, create business invitations,
+maintain products with a service note, assist with pages when consented, operate
+inquiries, manage support capacity/assignments and record manual renewals. First
+page approval and business staff assignment are administrator actions.
 
-Operations managers can create or invite clients, start showroom projects on
-their behalf, review and assign the backing requests, ask clarifying questions, manage inquiry
-activity, publish approved revisions, and perform retained-version
-rollback. They can also record a manual monthly renewal without a configured
-price, review account health, configure support-agent limits, inspect workload, and
-reassign support conversations. Team members see only assigned requests and their associated
-read-only business context; they can ask clarifying questions and prepare
-private revisions but cannot invite, assign, publish, or perform customer
-operations. Enabled support team members additionally receive least-loaded
-support assignments up to their configured limit and can reply, close, and
-reopen assigned conversations. Platform administrators, operations managers,
-and team members can view the internal showroom component laboratory; clients
-cannot.
+Team members see only actively assigned businesses and their permitted product
+workspace. Page editing also requires current owner assistance consent. Revocation
+removes that access. Existing support-agent permissions govern support conversations
+independently. No role uses service-request assignments, custom design studios or
+revision-approval projects in the live application.
 
 ### Public customer
 
-A public customer does not require an account. The customer can:
-
-- browse an active showroom;
-- filter products and capabilities;
-- select options;
-- build an inquiry cart;
-- optionally add desired quantities;
-- copy the prepared inquiry without personal-detail fields;
-- continue through configured WhatsApp or Telegram;
-- enter a required phone number and send the structured inquiry into the
-  business's AfricMade inbox.
-
-The access-profile layer distinguishes platform administrator, client, team
-member, and operations manager. Every account has an explicit profile.
-
-### Managed service — versioned client-approved publication
-
-Current verified behavior:
-
-- Artisans, farms and growers, workshops, and small manufacturers can
-  self-register into a draft private workspace.
-  Account setup does not start a page project; **Create AfricMade page** is a
-  separate deliberate action after setup. A separate attachment-free expression-of-interest
-  path remains available for prospects who prefer staff follow-up.
-- Public interests use random references, idempotency, bounded JSON,
-  privacy-preserving rate limits, events, and additive schema migrations.
-  HTTP and database boundaries both prohibit attachments on public leads.
-- Platform administrators have a private operations queue for reviewing the
-  immutable original interest message and moving it through early review
-  statuses. They cannot mark it client-approved or published from this queue.
-- Authorized operators can accept a public onboarding lead, create or link its
-  draft business, and generate a random single-use invitation that expires
-  after 72 hours. Only the token hash persists; the raw manual-delivery link is
-  shown once, and replacing it revokes older unused invitations.
-- Authorized operators can also create a private draft business and invitation
-  directly for a referred client without fabricating a public lead or request.
-- Invitation redemption atomically creates one business-bound client account
-  with the restricted client access profile and cannot be replayed.
-- Invited clients have a minimal private workspace for one current page
-  project, page history, read-only
-  customer inquiries, offering upkeep, support, page preview, and
-  account security. Before first publication, product upkeep is hidden and a
-  deep link returns to the first-page setup. After publication, only the
-  bounded **My offerings** fields are available; structural catalog,
-  business-setting, design, and inquiry-status mutations remain
-  hidden and denied on the server.
-- Authenticated clients can submit a 10–10,000 character written instruction.
-  Request intake is attachment-free. First-page setup captures business
-  archetype, products/capabilities stage, and photography stage while asking
-  what the business sells, makes, grows, supplies, or can manufacture and any
-  known capacity, minimum-order, and lead-time facts. Established-page
-  updates ask only what should change; owners do not repeat setup context already
-  present in the live page. Page structure and dynamic offering/media counts
-  remain with the blueprint workflow. After import, missing photography becomes labeled
-  recipe destinations that accept verified private uploads, not an unexplained
-  “no images” state.
-  The server derives page setup versus page update from retained
-  publication state; the browser cannot choose or forge it. The business UI
-  presents **Create AfricMade page**, **Update page**, or **Continue page
-  setup/update** and keeps terminal work in **Page history**. The backing
-  service request is tenant-bound and idempotent. A partial unique database
-  index permits only one active page project per business across SQLite and
-  PostgreSQL; concurrent attempts return the current project rather than
-  creating overlapping work.
-- Platform administrators can provision individual operations-manager and team-
-  member application access for a verified managed identity. Shared staff
-  credentials and public staff registration are not supported. Retained
-  temporary-password records are rollback compatibility only and are not shown
-  by the launch account-entry UI.
-- Operations managers can review all requests, create client workspaces, accept
-  and invite prospects, submit a request on behalf of a prospect or client, and
-  assign or reassign work. They can also update inquiry status. On-behalf
-  request type is server-derived for existing
-  clients. On-behalf intake is attachment-free and follows the same setup-versus-
-  update distinction as client intake; images are added only inside the private
-  draft.
-- Team members see only assigned requests and associated business/showroom
-  context. Assignment changes add or remove that scope atomically. For an
-  established assigned showroom they may perform the same bounded product
-  upkeep with a required customer-service note. They cannot invite clients,
-  submit on behalf, assign work, restructure the catalog, or use settings,
-  design, or inquiry-status forms.
-- Platform administrators, operations managers, and team members can open the
-  staff-only component laboratory. It uses synthetic fixture content, exposes no
-  tenant/customer data, and has no revision, AI-provider, or publication action.
-  Clients and anonymous visitors cannot access it.
-- Assigned staff can prepare a private draft through **Edit current showroom**
-  for bounded changes or **AI-assisted redesign** for a complete recipe. Initial
-  builds may lead with the staged recipe blueprint studio. Both tools expose the
-  same focused settings, layout/style, page-content, offering, media, fitness,
-  and preview controls. The editor saves and previews the mutable draft; only
-  the exact saved-preview screen can submit it for client review. Drafts do not
-  mutate live rows; submitted
-  numbered revisions are immutable and later changes create a newer revision.
-- Invited clients can open the exact private showroom preview for their request
-  and approve it or reject it with comments. Superseded previews cannot receive
-  a decision, and preview inquiry/cart actions are disabled.
-- Operations managers can publish only the latest client-approved revision when
-  its base content version still matches live state. Publication revalidates the
-  snapshot, promotes selected private references, atomically replaces canonical
-  catalog data, activates the showroom, and increments its content version.
-- Prior published snapshots are retained. Authorized operational rollback
-  republishes a retained snapshot as a new monotonic content version rather than
-  erasing publication history.
-- Clients and authorized staff can exchange attributable clarification messages
-  without rewriting the immutable original instruction. A staff question moves
-  eligible work to needs-information; a client reply resumes review. Clients
-  see staff authors as the AfricMade team while internal views retain attribution.
-- The focused revision editor renders its current unsaved snapshot through the
-  interaction-disabled showroom renderer below the forms. Staff can jump to
-  that preview and switch between desktop and phone widths without saving,
-  publishing, or changing the live showroom.
-- Each editable logo, hero, browser-icon, combined story/process, and offering
-  image field accepts an in-place replacement upload. The combined
-  story/process chapter and every offering also accept a controlled YouTube
-  watch or share URL. New media is selected into the unsaved preview
-  immediately; images remain private request media until approved publication
-  promotes selected references through the configured storage adapter, while
-  video fields retain normalized `youtube:<provider-id>` references.
-- Request, invitation, and new-request screens provide breadcrumbs and a Back
-  action with a deterministic parent fallback.
-- Authenticated workspace navigation keeps each actor in a role-oriented,
-  icon-supported workspace. Administrators use one server-paginated Businesses
-  directory rather than separate client-account and discovery-profile lists.
-  Selecting a business opens one task-oriented Business workspace grouped into
-  showroom work, customer activity, and business administration. Client access
-  remains a separate authorized record but appears as an Owner sign-in recovery
-  disclosure inside administrator-only Business details. Marketplace
-  configuration remains a business-scoped Marketplace task, privacy-conscious
-  visit aggregates appear on Business Overview, and Renewal remains a distinct
-  administrative destination. Cross-business requests, support, renewals,
-  staff, and design-library work remain global queues. The public site is a
-  separate, explicit link, and an authenticated visit to the login route returns
-  to the dashboard instead of showing a second sign-in form.
-- High-volume dashboard collections use bounded server queries: five public
-  showroom cards, six unified business-directory rows, or 10 authorized
-  workspace rows per page. Businesses, staff, requests, products, inquiries,
-  support conversations, and renewals have linkable search/filter state,
-  accurate counts, and focused record actions. Business and staff selection
-  never loads the complete account into a dropdown; owner recovery and
-  Marketplace edit records for one selected business, and inquiry rows include
-  item summaries without per-row follow-up queries.
-- Platform administrators manage internal showroom sponsorship from each
-  focused discovery profile and external sponsor ads from one bounded Sponsor
-  placements workspace. Sponsorship does not change
-  showroom publication authority, industry membership, or Daily Featured eligibility.
-- Role-scoped dashboard attention cards summarize new accounts, actionable
-  showroom requests, tenant-safe new inquiries, and support conversations that
-  need a reply. Counts are live aggregates and link to bounded working queues;
-  they never expose another tenant's content.
-- Every business has a manually operated monthly renewal ledger. Its dates are
-  advisory operations records and never automatically hide, redirect, or remove
-  an active published showroom. Operations may record renewal without collecting
-  an amount or requiring a configured price. Only explicit administrator
-  suspension removes a published Showroom from public access and discovery. There is
-  no checkout, payment gateway, automatic debit, or public pricing claim.
-- Showroom visits use an opaque first-party visitor token hashed with the privacy
-  salt and deduplicate per business, source, and day. Clients see aggregate
-  direct, marketplace discovery, Daily Featured, and recent counts; raw IP addresses are not stored
-  and traffic counts are not billing authority.
-- Authenticated client support is stored inside AfricMade. Enabled agents have
-  configurable concurrent limits; new conversations transactionally select the
-  least-loaded available agent or remain waiting. Assignment history and
-  lifecycle events are retained, open threads refresh every five seconds, and
-  Telegram may send metadata-only secure dashboard links. WhatsApp is an
-  optional emergency handoff, never the support source of truth.
-- Platform-owned homepage, discovery, intake, login, legal, favicon, and workspace
-  surfaces use one AfricMade mark and wordmark without replacing any tenant's
-  showroom identity. Public intake and login also share the solid platform
-  palette and compact form geometry. At phone widths, public surfaces remove
-  desktop header and full-footer chrome and expose one safe-area-aware four-tab
-  application bar for Market, Featured, About, and More. Authenticated
-  navigation groups role-permitted work in a neutral desktop sidebar; on phones,
-  up to four authorized primary tasks sit in the bottom application bar and a
-  focus-contained **More** sheet exposes every remaining permitted destination.
-  Hosted showrooms omit their full tenant footer on phones while retaining the
-  tenant identity and compact AfricMade Back/provenance bar.
-- Clients see a revision preview action only after that exact revision is sent
-  for review. A staff-only draft is described as being prepared, and client
-  request history replaces internal assignment IDs, raw status-transition
-  syntax, revision metadata, and unknown workflow detail with customer-safe
-  progress descriptions. Authorized staff retain complete operational detail.
-- The ten benchmark business accounts and every former compatibility owner are
-  restricted clients. No legacy-owner role or direct live-content workflow
-  remains.
-
-Accepted behavior still to implement:
-
-- Automated invitation delivery by email or WhatsApp remains planned, not
-  claimed; the controlled pilot uses manual secure delivery.
+Visitors browse category/search results in five-row backend pages beside the map,
+open shareable products, choose relevant options and inquire about one product or
+an independently saved group. Configured app handoffs and copy need no reply-phone
+form; Send on Suqpage reveals that field and confirms canonical inbox persistence.
+Only active businesses, published products and approved discovery geography enter
+public projections. Account phone/email never supply public contacts implicitly.
 
 ---
 
-## 14. Custom showroom integration contract
+Owner business setup at `/dashboard/business` saves the canonical name/logo and a
+private general-area or storefront location proposal. Public contact fields remain
+in the page editor; private account contacts remain in account settings. Location
+changes immediately withdraw the old map approval. Admins find pending locations
+through the dashboard count and business-directory filter and approve the exact
+proposal version. General-area approval uses coarse coordinates; storefront mode
+requires the owner's explicit choice and valid coordinates (FE-043/BE-034).
 
-Custom renderers may be manually written or AI-generated, but they must preserve the AfricMade smart-feature contract.
+## 14. Retired custom-page workflow and compatibility
 
-The renderer owns:
+FE-042/BE-033 and ADR-0019 retire custom-page request intake, clarification,
+request assignment, revision import/edit/review/publish, recipe/blueprint studios,
+and dashboard design-library/SDK features. Their pages, APIs and server actions
+are removed; retired route prefixes return 404 for reads and mutations. Navigation,
+attention counts and workspace actions use the standard page lifecycle.
 
-- layout;
-- typography;
-- color system;
-- logo presentation;
-- navigation appearance;
-- hero design;
-- animations;
-- product card design;
-- product detail design;
-- responsive layout;
-- section order;
-- visual inquiry-cart treatment.
+Historical service requests, revisions, events, media and catalog versions remain
+preserved. Compatible catalog snapshot validators/readers are retained where current
+product audit/recovery needs them. They do not expose a live custom-design workflow.
+Account signup and standalone invitations remain supported and create no service
+request. Redeeming an older valid account invitation does not mutate its historical
+request record. A destructive historical-data purge is outside this transition.
 
-AfricMade owns:
-
-- business data;
-- categories;
-- products;
-- option groups;
-- availability;
-- inquiry state;
-- inquiry persistence;
-- social routing;
-- authentication;
-- tenant isolation;
-- media validation;
-- database writes.
-
-Custom renderers must not:
-
-- query SQLite directly;
-- hard-code tenant products;
-- hard-code availability or stock;
-- hard-code business contacts;
-- bypass shared inquiry validation;
-- write directly to protected APIs without the approved shared client logic;
-- remove required add-to-inquiry behavior;
-- remove the inquiry-cart trigger;
-- silently translate merchant-entered values;
-- weaken accessibility or mobile behavior;
-- introduce another tenant’s assets.
-
-Use the files under:
-
-```text
-showroom-sdk/
-```
-
-A custom design must include or satisfy a manifest that identifies:
-
-- design key;
-- design name;
-- supported features;
-- required smart-component integration;
-- expected responsive behavior.
-
-AI design workflow:
-
-1. Copy the showroom SDK template into a separate workspace.
-2. Provide the AI with sample catalog data and the integration rules.
-3. Allow the AI to redesign every visual section.
-4. Preserve props, callbacks, data types, and required smart-feature hooks.
-5. Return the renderer and assets without a database copy or secrets.
-6. Register the renderer under a unique design key.
-7. Preview with the tenant’s real dynamic data.
-8. Run design validation, type checking, build, and release tests.
-9. Publish only after visual and functional review.
-10. Keep the previous design version available for rollback when practical.
-
-### Constrained component-bank production system and planned AI workflow
-
-The current default is a deterministic showroom composition system, not runtime
-execution of tenant-specific AI code. `BE-004` through `BE-007`, `FE-004`
-through `FE-006`, and `DEP-004` through `DEP-006` establish the bank,
-laboratory, schema-v2 persistence, renderer, and controlled cutover. The
-remaining AI-assisted delivery sequence is recorded in
-`docs/SHOWROOM-COMPOSITION-ROADMAP.md`.
-
-- Approved component implementations, schemas, fixtures, examples,
-  compatibility metadata, and tests enter immutable bank releases through the
-  repository review and CI workflow.
-- `showroom-bank@1.2.0` retains 67 compatible variants across eight section
-  families; the current authoring brief exposes 66 and omits the legacy
-  standalone-film component. Eighteen token systems cover quiet editorial, organic, tactile,
-  spatial, precise, high-contrast, utilitarian, and expressive visual
-  directions. Their legacy stable IDs are not industry suitability signals.
-  Bank 1.1 remains immutable and readable for retained revisions.
-- Those 18 systems are machine-readable semantic foundations, not color names
-  alone. Each declares canvas/surface/text, primary and distinct secondary
-  roles, neutral layer hierarchy, exact strong/onStrong and inverse/onInverse
-  contrast pairs, border, typography, spacing, shape, layout rhythm,
-  product-media bounds, and preferred/allowed hero-media integration. A recipe
-  may retain any one of these non-color foundations while replacing the complete
-  color-role set with reviewed six-digit hex values. Custom colors remain data,
-  never CSS, and required text/surface pairs must remain readable.
-- Required-slot choices and tokens provide 98,280 validated base combinations
-  before optional navigation, content, trust, call-to-action, and bounded
-  component properties are counted. Combination volume never replaces visual,
-  accessibility, compatibility, factual, or client review.
-- The authenticated `/dashboard/design-bank` laboratory renders every admitted
-  component from local synthetic fixture data. It is a review/contact-sheet
-  surface, not a tenant preview, page builder, or publication path.
-- Every admitted component has required bounded motion-intensity and decorative-
-  depth properties. The laboratory can compare those settings and force a
-  container-based 390-pixel phone layout. Phone layouts use touch-sized
-  controls, native swipe rails where appropriate, safe-area-aware spacing, and
-  no hover dependency; the user agent's reduced-motion preference always
-  disables nonessential movement.
-- Customer content remains separate from component code. Revision schema v2
-  binds canonical content to an exact validated design manifest and bank
-  release for reproducible preview, publication, and rollback.
-- The currently implemented external-tool contract validates bounded design JSON
-  containing approved component references, an admitted non-color foundation,
-  optional custom palette, semantic section surfaces, properties, bindings,
-  questions, warnings, and rationale. It receives no credentials, database
-  access, publication authority, or ability to register component code.
-- Portable JSON schemas guide external tools but never replace authoritative
-  server-side schema, compatibility, provenance, tenant, revision, client-
-  approval, and publication checks.
-- AI may write provisional business, product, capability, and section copy even
-  when intake is incomplete. Provenance is optional review metadata and
-  questions/warnings are advisory. This freedom creates only a private
-  candidate; staff review, client approval, and authorized publication remain
-  the authority boundary for public claims and contact information.
-- The current implementation uses a full showroom recipe with a separate
-  content proposal and design proposal inside a versioned envelope. Content
-  currently covers dynamic product categories, products/capabilities, offering
-  kind, optional desired-quantity behavior, bounded production facts, options,
-  business/meta/contact values, and allowed image keys. Product availability is
-  descriptive; numeric product/option inventory is prohibited. The `products`
-  key is the single documented compatibility transport for offerings. Compatibility
-  collection arrays/removals are fixed empty and all recipe collection
-  relationships are null; the server alone may preserve hidden legacy
-  relationships for matching stable entities. Dynamic catalog counts remain
-  bounded, not fixed by examples. Current authoring uses typed hero, one
-  highlights story-and-process chapter, and call-to-action blocks. Story,
-  information, trust, and standalone-video shapes remain managed compatibility
-  input only for retained revision-v4/bank-1.2 content.
-- The studio exports a sanitized request/current-snapshot brief with a named
-  contract manifest, current schemas, bank contract, source facts, allowed
-  opaque asset keys, expected counts, and one fixed client-independent synthetic
-  structural example. The example demonstrates nested relationships, options,
-  typed blocks, exact assignments, optional empty provenance, and unresolved media planning,
-  but its reserved example keys are not import authority and its content,
-  counts, component choices, and token choices must not be copied. Contract
-  versions are independent and named: recipe/content/content-blocks remain
-  version 1 while current design and component-bank schemas are version 2 and
-  the component-bank release is separately `showroom-bank@1.2.0`. The brief
-  explicitly tells external AI not to normalize those numbers. Staff manually
-  import returned JSON and inspect the exact private preview. Re-import
-  remains available through the staged Brief, Blueprint, Media, Preview, and
-  Review workflow. Authorized staff can use focused v4 controls for foundations,
-  custom palette colors, section surfaces, compatible section swaps, bounded
-  section properties, content blocks, media assignments, and catalog details on
-  editable private drafts.
-- Media remains a separately admitted source, not AI authority. A recipe may
-  first declare a bounded `mediaPlan` of exact business, product, or content-
-  block destinations with purpose, aspect, required state, alt text, and
-  factual/illustrative classification. Staff then fulfill labeled slots with
-  request-scoped verified images. The recipe and brief contain only stable
-  destination identifiers, opaque admitted keys, and safe descriptors; AfricMade
-  does not transmit private files to an external AI.
-- Authorized staff can upload and admit a verified image directly from the
-  detailed revision editor. The same private draft then exposes it to compatible
-  logo, hero, combined chapter, process-video, icon, and offering selectors without publishing it.
-- The recipe brief enumerates currently valid media destinations with exact
-  owner type, opaque owner key, and slot key. Product photography destinations
-  use `product_image`; import normalizes that owner key together with the
-  corresponding product key. The synthetic example includes an optional labeled
-  unresolved product destination to demonstrate the media-plan shape without
-  implying that a client media plan must be empty or that example keys are valid.
-- Every typed content block must bind to exactly one compatible design section.
-  The brief includes a block-assignment checklist, and validation identifies the
-  exact unassigned, duplicated, or unknown block key with a corrective action.
-- Each component declares named required/optional media slots, permitted kinds,
-  bounded counts, and aspect guidance. Content blocks assign admitted keys to
-  those slots. Missing or incompatible required media blocks candidate/client
-  review. Optional omissions use reviewed no-media treatments rather than
-  broken images, unexplained initials, or false photography claims.
-- Eight reviewed abstract composition templates describe section roles, pacing,
-  surface rhythm, and signature budget before individual variants are chosen;
-  they do not prescribe an industry, token pack, or exact component sequence.
-  Every normal template preserves the same semantic order: header, hero,
-  combined story and process, catalog, inquiry CTA, footer. Templates differ in
-  anatomy and art direction, not information architecture.
-  All seven header and all six footer variants have unique layout families and
-  honest rendered-region descriptions. Header and footer are selected
-  independently from objective content and interaction needs; neither profile
-  contains an industry or tenant recommendation. Headers expose identity and an
-  optional descriptor without catalog or inquiry commands. Footers expose
-  identity, permanent handle, and contact destination without category
-  navigation. The ten local benchmarks exercise every admitted header and
-  footer anatomy.
-  Machine-readable guidance declares rendered anatomy, true media-plane count,
-  no-media support, fallback treatments, commerce modes, content needs, visual
-  tones, recommended product/category counts, long-title and RTL support,
-  responsive behavior, unsuitable conditions, fallback components, and
-  compatible section-media integration. Selection metadata is
-  industry-neutral: legacy identifiers remain stable but do not act as
-  suitability signals, and guidance is never inferred from words in IDs.
-  Design-v2 recipes let AI choose neutral `natural`, full-section
-  `surface_blend`, `edge_fade`, `split_bleed`, `editorial_overlap`,
-  `product_stage`, or `hidden`; `ambient_overlay` is retained only for existing
-  designs. Every section also selects a semantic `surfaceRole` from `canvas`,
-  `surface`, `soft`, `accent-soft`, `secondary-soft`, `strong`, or `inverse`.
-  The semantic content order remains fixed, but no one surface-role sequence is
-  mandatory; monotony and weak pacing are review feedback. Hero and chapter imagery is
-  borderless and connects to its section only when the recipe explicitly
-  selects a blend, fade, overlap, or stage; omitted treatments receive a neutral
-  readable default. Product imagery remains proportionally bounded and flush
-  with its catalog card rather than becoming an arbitrary loose image block.
-  Catalog-owned category browsing uses compact, touch-sized, horizontally
-  scrollable tabs with modest corners; it is one shared catalog control and
-  does not change shape merely because the AI selects another catalog variant.
-  The combined story-and-process chapter uses a distinct desktop composition
-  and semantic single-column phone order. Its selected surface, media, density,
-  and typography separate it from the hero and catalog without repeated rules. Repeating
-  plaid, pinstripe, graph-paper,
-  and center-divider motifs are rejected by bank and browser admission.
-  Product detail presentation is also a design-v2 choice. Recipes select one of
-  the reviewed `editorial`, `technical`, `product_stage`, or `compact` patterns;
-  each inherits the showroom token system, preserves bounded image/video media,
-  presents optional price, highlights, unit and capability facts, and becomes a
-  mobile bottom sheet without horizontal overflow. Unknown detail patterns fail
-  recipe and publication validation.
-  Deterministic composition fitness blocks duplicate navigation, standalone
-  navigation combined with catalog filters, incompatible sparse catalogs, and
-  missing media-treatment prerequisites. It provides review guidance for
-  signature-treatment density, surface monotony, adjacent anatomy repetition,
-  unnecessary controls, repeated factual media, and intentional product-media
-  fallbacks without imposing one universal visual rhythm.
-- Initial linked-video support is a manually entered YouTube link normalized
-  into a canonical provider asset and rendered by a reviewed, privacy-conscious
-  component. Recipes cannot supply raw iframe/embed markup, arbitrary query
-  parameters, provider scripts, remote-image hotlinks, or unapproved URLs.
-- A business may mark its showroom live on TikTok, Facebook, YouTube, or Google
-  Meet. Active state requires a matching allowlisted HTTPS destination and is
-  rendered as one concise `Live on: {platform}` action. AfricMade does not host,
-  proxy, record, or autoplay the session.
-- A direct AI-provider adapter still requires a later accepted provider,
-  privacy, failure, cost, and deployment contract.
-- All ten local benchmark clients use distinct validated revision-v4/bank-1.2
-  compositions. The four
-  former renderer keys and schema-v1 parser remain read-only recovery bridges
-  for pre-cutover backups; no current seed, invitation, draft, publication, or
-  rollback writer creates v1 or selects a former renderer.
+The shared BusinessProfile renderer consumes canonical products and an optional
+published owner profile. Customer industry never chooses a custom page layout.
+The editor is enabled by default; an explicit SUQPAGE_OWNER_EDITOR_ENABLED=0 is an
+operational disable switch, not a route back to the retired workflow.
 
 ---
 
@@ -1441,17 +957,18 @@ app/                  Next.js routes, pages, APIs, and dashboard
 components/           Shared UI and showroom application logic
 components/showroom/bank/  Reviewed component bank, registry, tokens, and laboratory
 lib/                  Authentication, database, security, media, inquiries, support
-showroom-sdk/         AI/manual custom-showroom integration package
+showroom-sdk/         retained catalog/design compatibility tools; no live request UI
 scripts/              Setup, migration, backup, restore, preflight, release tests
-data/                 Compatibility fixtures and retained migration sources only
+data/                 Ignored local media; no application database files
 ```
 
 Important commands:
 
 ```bash
 npm ci
-npm run reset
-npm run dev
+npm run local:supabase:start
+npm run local:supabase:bootstrap
+npm run dev:local
 npm run typecheck
 npm run validate:designs
 npm run test:bank
@@ -1489,8 +1006,14 @@ Security requirements are product requirements, not optional cleanup.
   browser-acceptance, Preview, and Production runtimes; application-owned opaque
   sessions remain compatibility and bounded rollback infrastructure only.
 - A provider session grants no access until its immutable UUID maps to one
-  AfricMade user. Roles, tenant bindings, capabilities, and suspension always
-  come from AfricMade tables, never provider metadata.
+  Suqpage user. Roles, tenant bindings, capabilities, and suspension always
+  come from Suqpage tables, never provider metadata.
+- The account page shows the existing verified sign-in email and a separate private,
+  unverified account phone. All roles can update or clear only their own phone;
+  posted user IDs/email cannot change identity or another account. Signup records
+  the required account phone privately and leaves public phone/email/WhatsApp
+  empty until explicitly provided. Account phone is not a sign-in factor and is
+  excluded from session-user and public catalog data (FE-040/BE-032, migration 41).
 - Do not use a hard-coded fallback session secret.
 - Revoke provider sessions after suspected compromise, suspension, or explicit
   administrative recovery.
@@ -1499,8 +1022,9 @@ Security requirements are product requirements, not optional cleanup.
 
 ### Tenant isolation
 
-- Every request, revision, customer-operation read, and mutation must be scoped
-  by the actor’s explicit role and authorized business/request relationship.
+- Every page, review and customer-operation read or mutation must be scoped
+  by the actor’s explicit role and authorized business relationship. Retained
+  historical request/revision readers preserve their original tenant boundary.
 - Validate every referenced collection, category, product, inquiry, request, and support record belongs to the same tenant.
 - Keep database constraints or triggers as defense in depth.
 - Add tests for cross-tenant reads and writes.
@@ -1538,12 +1062,13 @@ Security requirements are product requirements, not optional cleanup.
   Preview and Production projects use private Supabase Storage buckets through
   the provider-neutral media port. Filesystem storage is retained only for
   compatibility fixtures and bounded rollback. Service credentials are
-  server-only and all public/private reads remain behind AfricMade routes.
+  server-only and all public/private reads remain behind Suqpage routes.
 - Remote object-storage operations use a bounded configurable deadline and
   bounded response reads. A database-derived manifest reconciles every retained
   public and private reference without printing object keys or provider data.
-- Preserve stable `/media/<opaque-key>` and private request-attachment
-  references across providers. Object-storage migration is copy-only,
+- Preserve stable `/media/<opaque-key>` references across providers. Historical
+  request attachments remain retained for recovery; their retired download APIs
+  are unavailable. Object-storage migration is copy-only,
   hash-verified, repeatable, and never deletes local sources or rewrites the
   database.
 - Set `nosniff` and safe content types.
@@ -1556,6 +1081,15 @@ Security requirements are product requirements, not optional cleanup.
 - Suspended businesses must not render publicly.
 
 ### Privacy and operations
+
+- Business-profile contact fields are explicitly public, owner-published values.
+  Never infer them from notification email, account identity or private onboarding
+  phone/email. Canonical public email/phone and existing public
+  WhatsApp/Telegram/TikTok handles supply fallback only when no published contact
+  object exists; an explicitly empty published object stays empty. Profile contact editing
+  does not rewrite notification or structured-inquiry destinations. Public catalog
+  serialization blanks the private notification email; inquiry delivery resolves
+  its destination on the server.
 
 - Next.js Server Actions and custom browser mutation APIs derive trusted origins
   from one exact-origin policy. Development admits only the request/canonical
@@ -1595,33 +1129,22 @@ an isolated local project for normal development, a disposable local project on
 dedicated ports for production-mode browser acceptance, and separate managed
 projects for Netlify Preview and Production. Every lane applies the same
 reviewed PostgreSQL schema and application-owned authorization model and selects
-Supabase PostgreSQL, Auth, and private Storage. SQLite remains only for
-compatibility fixtures, read-only migration evidence, and the bounded rollback
-window under ADR-0015.
+Supabase PostgreSQL, Auth, and private Storage. PostgreSQL is the only executable
+database engine in application code, local development, fixtures, CI and deployments
+(BE-035, DEP-031, ADR-0020). There is no file-database fallback or copy-through-fixture
+bootstrap. Unsupported database settings fail closed.
 
-Retained SQLite compatibility requirements:
+Native schema 43 installs directly into empty PostgreSQL schemas, including taxonomy,
+schedule defaults, constraints, sequences and tenant triggers. Existing versioned
+schemas use additive/idempotent migrations. Unversioned populated schemas are refused.
+Each persistence fixture uses a disposable local PostgreSQL schema; trigger definitions
+must remain inside that schema. Demo setup seeds an empty local database and preserves
+populated targets. Existing data and protected historical backups are not deleted.
 
-- never serve an application runtime from the fixture;
-- create fixtures in isolated temporary paths;
-- WAL mode;
-- busy timeout;
-- foreign keys enabled;
-- migrations before use when needed;
-- database integrity checks;
-- appropriate file permissions;
-- copy or inspect retained sources read-only and preserve their bytes.
-
-Do not run the application or horizontally scale a deployment on SQLite.
-`docs/MANAGED-POSTGRES-READINESS.md`, `docs/DEVOPS-RUNBOOK.md`, and ADR-0013
-record the required SQL-adapter, migration, job, realtime, backup, and
-monitored-cutover work. The disposable PostgreSQL gate translates the complete
-schema, copies rows, installs reviewed constraints, indexes, and triggers,
-reconciles counts and fingerprints while leaving SQLite byte-identical, and runs
-every authoritative workflow through PostgreSQL adapters. A boundary manifest
-prevents new direct SQLite coupling and records the retained local/rollback
-adapters. The guarded production copy can transaction-locally assume an
-explicit, identifier-safe provider migration role when a temporary Supabase CLI
-login requires it. Supabase Storage and PostgreSQL are implemented runtime modes.
+`docs/POSTGRES-ONLY-RUNBOOK.md` controls current setup and recovery. Database backup
+uses protected PostgreSQL custom archives with hashes; restore requires a reviewed
+target digest and an empty recovery database. Auth and private Storage have separate
+provider backup requirements. Neither a local test nor a digest grants hosted approval.
 
 Hosted Supabase PostgreSQL and the Netlify candidate rollout are
 controlled by BE-027, DEP-023, and DEP-026. Runtime parity, the reconciled
@@ -1639,7 +1162,7 @@ Before broad external rollout or multi-instance production scale, complete:
 - spatial viewport queries when measured point volume requires them;
 
 PostgreSQL production requires the managed connection URL and private Supabase
-Storage. SQLite is not an authorized production runtime. All production
+Storage. All production
 environments require HTTPS. Follow `.env.example`, `README.md`, Docker
 configuration, and preflight checks.
 
@@ -1729,119 +1252,46 @@ When adding or updating recognizable branded products, especially current techno
 - preserve merchant-provided names exactly when importing their catalog;
 - keep product imagery legally and operationally appropriate for the business.
 
-Prices are optional ETB display context and are not required for every AfricMade
+Prices are optional ETB display context and are not required for every Suqpage
 catalog. They are merchant- or reviewer-controlled presentation data, not a
 charge, quote guarantee, or checkout amount. The platform’s main goal is
 structured inquiry, not online checkout.
 
 ---
 
-## 21. Managed client workflow expectations
+## 21. Standard page operating workflow
 
-### Administrator onboarding checklist
-
-When adding a new client:
-
-1. Accept a public expression of interest or create a client workspace directly
-   for a referred client.
-2. Reserve a unique handle and choose a starting reviewed composition style.
-3. Link or invite the client's verified Supabase identity securely; do not
-   create a public request merely to provision access.
-4. Let the client enter with an email code or Google and start the first
-   showroom setup with a detailed written brief.
-5. Assign an individual team member and resolve clarifications in the project
-   thread.
-6. Prepare settings, contacts, catalog, options, descriptive availability,
-   images, and design
-   choices inside a bounded private revision.
-7. Test the exact private preview, inquiry behavior, social routing, tenant
-   isolation, and mobile layout.
-8. Obtain the client’s approval for that exact revision.
-9. Publish through the operations-manager action only; never copy draft data
-   into live rows manually.
-10. Retain the prior version for auditable rollback and use operations tools for
-    later inquiry and support activity.
-
-### Client workflow
-
-The client uses one current showroom project for first-showroom, structural,
-option, setting, and visual-design work. The client can follow the current
-project, showroom history, clarification, inquiries, private previews,
-approvals, support, and account security. A business with no retained
-publication starts a showroom setup; after publication it starts a showroom
-update. The server decides this classification. Submitted numbered revisions
-are immutable; a rejected revision continues inside the same project as a new
-draft revision rather than creating another project.
-
-After first publication, **My offerings** lets the client create a product or
-capability or maintain its offering type, optional desired-quantity behavior, name,
-description, bounded capacity/minimum-order/lead-time facts, primary managed
-image, availability, and assignment to an existing compatible product
-category. The same bounded workflow is
-available to assigned team members acting for the client with staff attribution.
-It publishes a retained new content version and makes older-base staff work
-stale. It does not expose structure creation, options, ordering, deletion,
-design, settings, page content, recipe tools, or complete-showroom publication.
-`FE-008`, `BE-009`, `DEP-008`, `FE-016`, `BE-014`, `DEP-012`, and `ADR-0006`
-control this verified exception and its expanded offering contract.
-
-### Current composition assembly and AI import
-
-The current workflow stores an exact validated composition in each schema-v2
-revision and renders it consistently in private preview and public publication.
-The structured revision editor is a first-class bounded update surface and shows
-the immutable composition identity instead of offering old renderer keys. The
-implemented workflow under `FE-007`, `FE-014`, `BE-008`, and `BE-013` uses one
-approval-gated private revision with two authoring paths. **Edit current
-showroom** starts from the authorized live snapshot for bounded content, media,
-offering, component, palette, and motion changes. **AI-assisted redesign** adds
-sanitized brief export, strict full-recipe blueprint import, grouped
-content/design/optional-provenance validation, and composition fitness when a
-complete new direction is warranted. A change recipe remains a complete desired
-snapshot, not an ambiguous patch, but an update does not require a recipe.
-Staff may admit available client images and supported media links before import,
-or fulfill exact labeled destinations after the blueprint chooses its dynamic
-composition. The recipe assigns opaque keys to typed component media slots; it
-cannot create URLs, embeds, or cross-tenant asset references. Missing required
-media and incompatible slot assignments remain visible blockers. Provisional
-written copy and unresolved questions remain visible review notes but do not
-prevent a private candidate. If the external AI needs image understanding, staff
-manually supplies only the approved files in that external conversation.
-Manual recipe import and its focused staff workspace are implemented as a
-private checkpoint under `ADR-0005`; `FE-007`, `BE-008`, and `DEP-007` remain
-open until remaining rollout evidence is complete. The component laboratory
-remains synthetic and cannot itself alter a tenant revision.
-`FE-009`, `BE-010`, `DEP-009`, and `ADR-0007` define the promoted additive
-revision-v4 and bank-1.2 release. The strict typed-block/design-v2 contracts,
-local reset default writers, focused controls, controlled provider rendering,
-and bank-1.2 runtime path are implemented. Old schema/bank readers remain
-exact; production rollout still requires remote checks and a data-preserving
-or explicitly reset-approved deployment plan.
-The separate revision-v4 domain parser is implemented: it enforces the existing
-1 MiB snapshot limit, strict catalog content, six typed content blocks, exact
-design-v2 compatibility, and an explicitly supplied reviewed bank. It remains
-additive to the v1-v3 reader while local reset-created seeds, drafts, imports,
-publication, rollback, product-upkeep baselines, and public/private rendering
-now use revision v4 and `showroom-bank@1.2.0`.
-Schema migrations 13 and 14 add the immutable revision snapshot-version marker
-and persisted business content-block storage used by bank-1.2 rendering.
-
-Current development exception: on 2026-07-25 and again for the 2026-07-27
-benchmark replacement, the product owner confirmed that the local database and
-seeded tenant data are not real customer data
-and do not need preservation. For this repository state, AfricMade may finish the
-v4/bank-1.2 feature through a reset-only cutover: reset-created showrooms,
-drafts, recipe imports, previews, and publications can move directly to
-revision v4, content-schema v2, design-schema v2, and `showroom-bank@1.2.0`.
-This exception preserves security, tenant isolation, media validation, inquiry
-safety, client approval, and operations publication. It does not apply to future
-production or data-important migrations; before any later major feature switch,
-ask whether the existing data must be preserved and use the careful staged
-migration/backup/rollback path when it does.
+1. A verified owner creates a private business account or accepts an individual
+   invitation. No custom-page request, public upload or fabricated project is created.
+2. The owner adds product categories/products, uploads images and saves the page's
+   About, cover/video and available public contact links in the standard editor.
+3. New product uploads are authorized before writing and stored in the private
+   media namespace. Their stable media route requires scoped access while the
+   business is private; a currently listed product or published cover becomes
+   anonymously readable only for an active business.
+4. The owner submits the exact saved draft and catalog versions. An administrator
+   reviews that candidate, requests explanatory changes or approves first publication.
+   Concurrent/stale edits require resubmission. Decisions and actor attribution are
+   retained, and approval/publication/business activation are one transaction.
+5. Marketplace placement separately requires administrator-reviewed category and
+   geography, listed products and a non-excluded active business. First publication
+   does not invent a location or bypass discovery approval.
+6. Established owners publish/restore saved page content themselves. Optional staff
+   help uses current business assignment and revocable owner editing consent.
+7. Buyer inquiries, support, account access, renewals and visit statistics remain
+   connected to the same business workspace. Full release checks and deployment
+   remain distinct from local implementation and visual review.
 
 ---
 
 ## 22. Testing and definition of done
+
+Persistence tests execute against isolated PostgreSQL schemas installed from the
+native baseline. Current browser acceptance installs PostgreSQL directly in its
+separate local Supabase project. Source-boundary checks reject retired database
+imports, file-based configuration and client-to-database coupling. Native archive
+operations and hosted readiness remain separate release gates (BE-035/DEP-031).
+
 
 A feature is not complete merely because the page renders.
 
@@ -1873,7 +1323,8 @@ Required verification areas:
 - administrator, client, operations-manager, and assigned-team permissions;
 - cross-tenant denial;
 - active/draft/suspended visibility;
-- revision-based settings, design, option, structure, and image changes;
+- saved standard-page edits, stale-version denial, first review, owner publication
+  and restoration; retired request/design endpoints must reject reads and writes;
 - versioned basic offering upkeep for every authorized role;
 - compatibility-collection and active product-category integrity;
 - option validation;
@@ -1936,7 +1387,7 @@ Always test ZIP integrity after packaging.
 
 ## 24. How to approach future work
 
-When given a new AfricMade task:
+When given a new Suqpage task:
 
 1. Read this file.
 2. Read `README.md`, `SECURITY.md`, and the relevant code.
@@ -1953,7 +1404,7 @@ When given a new AfricMade task:
 
 ### 24.1 Keep this product contract synchronized
 
-This file is a living statement of AfricMade's current product reality. Every
+This file is a living statement of Suqpage's current product reality. Every
 completed feature or change to roles, capabilities, workflow, terminology,
 security, data, or deployment boundaries must update all affected sections in
 the same task that records passing evidence.
@@ -1973,15 +1424,14 @@ and rollout gates.
 
 ## 25. Product north star
 
-Every AfricMade change should move the product toward this experience:
+Every Suqpage change should move the product toward this experience:
 
-> A social seller receives a beautiful, unmistakably custom digital showroom
-> without learning a complex site builder. The client describes the business
-> and requested changes in their own words; AfricMade staff turn those instructions
-> into a private, validated proposal, obtain approval for the exact preview, and
-> publish it safely. A customer can quickly discover products, select exact
+> A seller has a clear page for their shop and products without learning a site
+> builder. The owner can save private changes, preview them, and publish them
+> safely; optional scoped staff help requires their consent. A customer can
+> quickly discover shops and products, select exact
 > options, create one complete inquiry, and reach the seller through the
-> customer’s preferred messaging app. AfricMade operations retains the inquiry,
+> customer’s preferred messaging app. Suqpage operations retains the inquiry,
 > follows up, while payment and fulfillment remain a direct agreement between
 > customer and business without forcing either party into ecommerce checkout.
 

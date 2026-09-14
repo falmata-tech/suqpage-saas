@@ -54,8 +54,8 @@ export function validatePatch(project: string, patch: unknown, template: string)
     mailer_allow_unverified_email_sign_ins: false,
     external_google_skip_nonce_check: false,
     external_google_email_optional: false,
-    mailer_subjects_confirmation: "Your AfricMade sign-in code",
-    mailer_subjects_magic_link: "Your AfricMade sign-in code",
+    mailer_subjects_confirmation: "Your Suqpage sign-in code",
+    mailer_subjects_magic_link: "Your Suqpage sign-in code",
     mailer_templates_confirmation_content: template,
     mailer_templates_magic_link_content: template,
   };

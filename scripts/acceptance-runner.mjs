@@ -31,10 +31,9 @@ const env = {
   NEXT_PUBLIC_APP_URL: baseURL,
   MIRTPAGE_CANONICAL_URL: baseURL,
   MIRTPAGE_RUNTIME_PROFILE: "browser-test",
-  MIRTPAGE_DATABASE_DRIVER: "sqlite",
-  MIRTPAGE_AUTH_DRIVER: "local",
-  MIRTPAGE_MEDIA_DRIVER: "filesystem",
-  MIRTPAGE_DB_PATH: path.join(root, "acceptance.db"),
+  MIRTPAGE_DATABASE_DRIVER: "postgres",
+  MIRTPAGE_AUTH_DRIVER: "supabase",
+  MIRTPAGE_MEDIA_DRIVER: "supabase",
   MIRTPAGE_MEDIA_ROOT: path.join(root, "media"),
   MIRTPAGE_BACKUP_ROOT: path.join(root, "backups"),
   MIRTPAGE_CREDENTIAL_PATH: credentialsPath,
@@ -136,9 +135,6 @@ try {
     ],
     exclude: ["node_modules", ".next", ".next-*"],
   }, null, 2)}\n`, { flag: "wx" });
-  const setupOutput = run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/setup.ts", "--reset"], { capture: true });
-  if (/^(?:ADMIN|CLIENT) \|/m.test(setupOutput)) throw new Error("Acceptance setup exposed credential values.");
-  for (const line of setupOutput.split("\n").filter((value) => value.startsWith("MirtPage database") || value.startsWith("Temporary credentials"))) console.log(line);
   Object.assign(env, {
     MIRTPAGE_DATABASE_DRIVER: "postgres",
     MIRTPAGE_POSTGRES_URL: databaseUrl,
@@ -159,10 +155,9 @@ try {
     MIRTPAGE_EMAIL_OTP_ENABLED: "1",
     MIRTPAGE_GOOGLE_AUTH_ENABLED: "1",
     MIRTPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS: "8000",
-    MIRTPAGE_APPROVE_LOCAL_COPY: "COPY_TO_LOCAL_SUPABASE",
     MIRTPAGE_APPROVE_AUTH_MIGRATION: "1",
   });
-  run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/rehearse-postgres.ts", "--local-copy"]);
+  run(process.execPath, ["--import", "tsx", "scripts/setup.ts"]);
   run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate-supabase-auth.ts", "--apply"]);
   run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate-media-to-object-storage.ts", "--execute"]);
   run(process.execPath, ["node_modules/next/dist/bin/next", "build"]);

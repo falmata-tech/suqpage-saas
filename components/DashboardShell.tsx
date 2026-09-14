@@ -2,10 +2,11 @@ import Link from "next/link";
 import { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
 import { hasCapability, isClient } from "@/lib/capabilities";
-import { runtimeHasRetainedPublication } from "@/lib/catalog-runtime";
-import { hasClientReviewableRevision } from "@/lib/dashboard";
 import { authDriver } from "@/lib/config";
 import type { Business, SessionUser } from "@/lib/types";
+import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
+import { readOwnerPage } from "@/lib/owner-page-service";
+import { OwnerPageError } from "@/lib/owner-page-domain";
 
 const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
   const visible = items.filter((item): item is WorkspaceNavItem => Boolean(item));
@@ -18,9 +19,13 @@ export default async function DashboardShell({ user, business, children }: { use
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
-  const established = business ? await runtimeHasRetainedPublication(business.id) : false;
-  const canMaintainProducts = Boolean(business && established && hasCapability(user, "basic-product:maintain"));
-  const reviewable = Boolean(client && business && await hasClientReviewableRevision(user.id, business.id));
+  const canMaintainProducts = Boolean(business && hasCapability(user, "basic-product:maintain"));
+  const reviewable = Boolean(client && business);
+  let pageEditor = false;
+  if (business && ownerPageEditorEnabled()) {
+    try { await readOwnerPage(ownerPagePort, user, business.id); pageEditor = true; }
+    catch (error) { if (!(error instanceof OwnerPageError && error.status === 403)) throw error; }
+  }
   const dashboardHref = platformAdmin && !business ? "/dashboard/admin" : `/dashboard${query}`;
   const identityContext = business
     ? business.name
@@ -36,25 +41,30 @@ export default async function DashboardShell({ user, business, children }: { use
     group("Platform", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
       { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses" },
+      { href: "/dashboard/clients/new", label: "Add business", icon: "businesses" },
+      { href: "/dashboard/admin/discovery", label: "Marketplace", icon: "discovery" },
       { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
     ]),
     group("Operations", [
-      { href: "/dashboard/requests", label: "Page requests", icon: "requests" },
+      { href: "/dashboard/admin/page-reviews", label: "Page reviews", icon: "pageEditor" },
       { href: "/dashboard/support", label: "Support inbox", icon: "support" },
+      { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" },
       { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" },
     ]),
     group("Page system", [
       { href: "/dashboard/admin/featured-schedule", label: "Featured schedule", icon: "schedule" },
       { href: "/dashboard/admin/sponsors", label: "Sponsor placements", icon: "discovery" },
-      { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;
   const focusedStaffGroups = business && (operations || teamMember) ? [
     group("Business workspace", [
       { href: dashboardHref, label: "Overview", icon: "overview" },
       platformAdmin ? { href: `/dashboard/settings${query}`, label: "Business details", icon: "settings" } : null,
-      { href: `/dashboard/requests${query}`, label: "Page project", icon: "requests" },
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Offerings", icon: "offerings" } : null,
+      pageEditor ? { href: `/dashboard/page-editor${query}`, label: "Page draft", icon: "pageEditor" } : null,
+      client ? { href: "/dashboard/business", label: "Business details", icon: "settings" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products", icon: "offerings" } : null,
+      canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
+      platformAdmin ? { href: `/dashboard/admin/businesses/${business!.id}/team`, label: "Staff assistance", icon: "staff" } : null,
       { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true },
     ]),
     group("Customers & discovery", [
@@ -65,7 +75,6 @@ export default async function DashboardShell({ user, business, children }: { use
       operations ? { href: `/dashboard/account-health${query}`, label: "Renewal", icon: "renewal" } : null,
     ]),
     group("Leave business workspace", [
-      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
       { href: platformAdmin ? "/dashboard/admin/businesses" : "/dashboard", label: "Switch business", icon: "switch" },
       platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
     ]),
@@ -74,24 +83,22 @@ export default async function DashboardShell({ user, business, children }: { use
     group(business ? "Business workspace" : "Workspace", [
       { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
       operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: client ? "My offerings" : "Offerings", icon: "offerings" } : null,
-      client ? { href: "/dashboard/requests", label: "Page project", icon: "requests" } : null,
-      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
-      operations && !business ? { href: "/dashboard/requests", label: "Page requests", icon: "requests" } : null,
+      client ? { href: "/dashboard/business", label: "Business details", icon: "settings" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products", icon: "offerings" } : null,
+      pageEditor ? { href: `/dashboard/page-editor${query}`, label: "Your page", icon: "pageEditor" } : null,
+      canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
       (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
       (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
       reviewable ? { href: `/preview/@${business!.handle}`, label: "Review page", icon: "workspace" } : null,
       (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true } : null,
-      { href: "/dashboard/support", label: client ? "AfricMade support" : "Support inbox", icon: "support" },
+      { href: "/dashboard/support", label: client ? "Suqpage support" : "Support inbox", icon: "support" },
     ]),
     group("Customer operations", [
       operations ? { href: "/dashboard/clients/new", label: "Add business", icon: "businesses" } : null,
-      operations && !business ? { href: "/dashboard/requests/on-behalf", label: "Record a request", icon: "requests" } : null,
       operations ? { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" } : null,
       operations && !business ? { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" } : null,
     ]),
-    group("Design", [
-      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library", icon: "design" } : null,
+    group("Page", [
     ]),
     group("Platform", [
       platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,

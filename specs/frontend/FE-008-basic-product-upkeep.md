@@ -2,13 +2,24 @@
 id: FE-008
 title: Simple client and staff product upkeep
 status: done
-related: [FE-001, FE-003, FE-007, FE-016, FE-017, BE-009, DEP-008, ADR-0006]
+related: [FE-001, FE-003, FE-007, FE-016, FE-017, BE-009, DEP-008, ADR-0006, FE-042, FE-043]
 owners: [product, frontend]
 last_updated: 2026-07-28
 change_level: L3
 ---
 
 # FE-008 — Simple client and staff product upkeep
+
+## Standard-page supersession — 2026-09-14
+
+FE-042/BE-033 supersede the initial-publication prerequisite and custom revision
+entrypoints below. Authorized owners maintain products/categories while their
+business is private; assigned staff retain tenant scope. Product and category
+commands advance the canonical content version. New product images use private
+storage and authorized reads until active publication; suspension removes public
+access. Existing idempotency, validation and retained catalog snapshots remain.
+Focused product-upkeep and local PostgreSQL evidence is mapped in BE-033 and the
+application wiring audit. This note does not claim a completed hosted rollout.
 
 ## Problem and outcome
 

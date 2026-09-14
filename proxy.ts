@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { refreshSupabaseAuth } from "./lib/supabase-auth-proxy";
 
 export async function proxy(request: NextRequest) {
-  if (["/bazaar", "/expo"].includes(request.nextUrl.pathname)) {
+  if (["/bazaar", "/expo"].includes(request.nextUrl.pathname) || ["/dashboard/requests", "/dashboard/design-bank", "/dashboard/design-sdk", "/api/requests", "/api/client/requests", "/api/operations/requests"].some(path => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`))) {
     return new Response("Not found", {
       status: 404,
       headers: {

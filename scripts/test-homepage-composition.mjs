@@ -28,9 +28,9 @@ assert.match(market, /getPublicMarketplaceView/);
 assert.match(publicDiscoveryCache, /getMarketplaceDiscoveryView/);
 assert.match(publicLayout, /<PublicAppShell>/);
 assert.match(market, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
-assert.match(market, /Find locally made and grown products\./);
-assert.match(market, /Ethiopian artisans, farms, workshops, and small manufacturers/);
-assert.match(market, /contact them directly/);
+assert.match(market, /Shops and products near you\./);
+assert.match(market, /Find a shop, explore its products/);
+assert.match(market, /contact the seller directly/);
 assert.doesNotMatch(market, /public-lobby|landing-hero|FeaturedShowroomsWorkspace|SponsoredShowroomsWorkspace/);
 assert.doesNotMatch(market, /verified|rating|rated|buyers served|#1|newsletter|checkout/i);
 
@@ -50,7 +50,7 @@ assert.match(mobileNavigation, /href: "\/featured", label: "Featured", icon: Sta
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /CalendarClock/);
 assert.match(publicFrame, /href="\/about"/);
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
-assert.match(publicFrame, /aria-label="Explore AfricMade"/);
+assert.match(publicFrame, /aria-label="Explore Suqpage"/);
 assert.match(mobileNavigation, /href: "\/", label: "Market"/);
 assert.match(mobileNavigation, /href: "\/about", label: "About"/);
 assert.match(mobileNavigation, /aria-haspopup="dialog"/);
@@ -74,7 +74,7 @@ assert.match(discoveryRuntime, /export async function getFeaturedShowroomsView/)
 assert.match(discoveryRuntime, /export async function getSponsoredShowrooms/);
 assert.match(discoveryUi, /discovery-filter-sheet/);
 assert.match(discoveryUi, /Open category and location filters/);
-assert.match(discoveryUi, /discovery-mobile-map-toolbar/);
+assert.match(discoveryUi, /discovery-floating-tools/);
 assert.match(discoveryUi, /function IndustryStartChooser/);
 assert.match(discoveryUi, /Choose a category/);
 assert.doesNotMatch(discoveryUi, /discovery-mobile-view-tabs|aria-label="List view"/);
@@ -106,7 +106,10 @@ assert.match(discoveryUi, /label: "Businesses"/);
 assert.match(discoveryUi, /view: "search"/);
 assert.match(discoveryUi, /className="discovery-search-map-action"/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
-assert.match(discoveryRuntime, /LIMIT 40/);
+// FE-042 replaces the former fixed result cap with a bounded database page.
+assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);
+assert.match(discoveryUi, /Previous/);
+assert.match(discoveryUi, /Next/);
 assert.match(discoveryCss, /\.discovery-search-results\s*\{[^}]*overflow-y:\s*auto/);
 assert.match(discoveryUi, /className="featured-gallery"/);
 assert.match(discoveryCss, /\.discovery-workbench\s*\{[^}]*grid-template-columns:\s*320px minmax\(0, 1fr\)/);

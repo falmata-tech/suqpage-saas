@@ -12,6 +12,8 @@ const canonicalUrl = "https://mirtpage.test";
 const proxyOrigin = "proxy.mirtpage.test";
 const requiredIgnores = [
   ".git",
+  ".netlify",
+  ".vercel",
   "node_modules",
   ".next",
   ".next-acceptance",
@@ -84,6 +86,8 @@ try {
 
   const forbiddenPaths = [
     "/app/.git",
+    "/app/.netlify",
+    "/app/.vercel",
     "/app/.env",
     "/app/.local",
     "/app/data",
@@ -117,7 +121,7 @@ try {
   const combinedLogs = `${unconfigured.stdout || ""}\n${unconfigured.stderr || ""}`;
   assert(!/^(ADMIN|CLIENT) \|/m.test(combinedLogs), "Container logs exposed generated credential values");
   assert.notEqual(unconfigured.status, 0, "An unconfigured production container must fail closed");
-  assert.match(combinedLogs, /MIRTPAGE_DATABASE_DRIVER is required/, "Production preflight did not reject the unconfigured container");
+  assert.match(combinedLogs, /MIRTPAGE_DATABASE_DRIVER must be postgres/, "Production preflight did not reject the unconfigured container");
 
   console.log("Docker context, build-time origins, non-root image, trace privacy, and fail-closed startup tests passed.");
 } finally {

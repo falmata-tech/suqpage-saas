@@ -25,6 +25,13 @@ silently change product behavior to match convenient code.
    current product behavior will be affected.
 4. Confirm Definition of Ready in `specs/README.md`.
 5. Write a short implementation plan linked to spec IDs and acceptance criteria.
+   Before feature work, record ordered, checkable steps in the active task
+   checklist (currently `docs/SUQPAGE-TRANSITION-CHECKLIST.md`). Mark the current
+   step, dependencies, verification, and approval gates. Add new user requests
+   where they belong before acting; do not silently replace earlier work.
+   Check items only when their stated evidence exists. Distinguish implemented,
+   tested, visually approved, and deployed; resume from the first incomplete
+   dependency instead of restarting or relying on conversation memory.
 6. Make the smallest coherent change. Preserve tenant isolation and custom
    showroom identity.
 7. Add tests that prove every changed acceptance criterion. Security and data
@@ -67,7 +74,7 @@ or treat generated illustrative media as a factual product photograph.
 ## Architecture and design rules
 
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,
-  HTTP, cookies, SQLite, email vendors, or filesystem details.
+  HTTP, cookies, database drivers, email vendors, or filesystem details.
 - Treat routes, server actions, database modules, media storage, and Resend as
   adapters around explicit application/domain contracts.
 - Apply DDD where the domain has identity or invariants: Tenant, Product,
@@ -82,7 +89,7 @@ or treat generated illustrative media as a factual product photograph.
 - Define a TypeScript interface or function contract at every real port. Define
   class contracts only when runtime polymorphism or stateful lifecycle requires
   classes.
-- Keep SQLite access server-only. UI renderers consume typed catalog/application
+- Keep PostgreSQL access server-only. UI renderers consume typed catalog/application
   data and callbacks, never database handles.
 - New external providers require an adapter, bounded failure behavior,
   idempotency where applicable, observability, and an ADR if the dependency is

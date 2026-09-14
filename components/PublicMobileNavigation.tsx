@@ -13,7 +13,7 @@ const items = [
 ] as const;
 
 const informationItems = [
-  { href: "mailto:falmata.dawano@gmail.com", label: "Contact AfricMade", icon: Mail },
+  { href: "mailto:falmata.dawano@gmail.com", label: "Contact Suqpage", icon: Mail },
   { href: "/privacy", label: "Privacy", icon: Shield },
   { href: "/terms", label: "Terms", icon: FileText },
 ] as const;
@@ -43,7 +43,7 @@ export default function PublicMobileNavigation({ signedIn = false, onboarding = 
   const AccountIcon = accountItem.icon;
   const supportingCurrent = pathname === accountItem.href || informationItems.some((item) => item.href.startsWith("/") && pathname === item.href);
 
-  return <nav className="public-mobile-tabs" aria-label="AfricMade application navigation">
+  return <nav className="public-mobile-tabs" aria-label="Suqpage application navigation">
     {items.map((item) => {
       const active = item.active(pathname);
       const Icon = item.icon;
@@ -60,14 +60,14 @@ export default function PublicMobileNavigation({ signedIn = false, onboarding = 
     <dialog ref={dialogRef} className="public-more-sheet" aria-labelledby="public-more-title" onClose={() => { setMenuOpen(false); moreButtonRef.current?.focus(); }} onCancel={() => setMenuOpen(false)} onClick={(event) => { if (event.target === dialogRef.current) setMenuOpen(false); }}>
       <section>
         <header><h2 id="public-more-title">More</h2><button type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation"><X aria-hidden="true" /></button></header>
-        <div className="public-more-group"><span>Account</span><nav aria-label="AfricMade account">
+        <div className="public-more-group"><span>Account</span><nav aria-label="Suqpage account">
           <Link href={accountItem.href} aria-current={pathname === accountItem.href ? "page" : undefined}>
             <AccountIcon aria-hidden="true" />
             <span>{accountItem.label}</span>
             <NavigationPendingIndicator label={accountItem.label} />
           </Link>
         </nav></div>
-        <div className="public-more-group"><span>Information</span><nav aria-label="AfricMade information">
+        <div className="public-more-group"><span>Information</span><nav aria-label="Suqpage information">
           {informationItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={href.startsWith("/") && pathname === href ? "page" : undefined}>
             <Icon aria-hidden="true" />
             <span>{label}</span>

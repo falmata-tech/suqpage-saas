@@ -249,11 +249,11 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 [auth.email.template.magic_link]
-subject = "Your AfricMade sign-in code"
+subject = "Your Suqpage sign-in code"
 content_path = "./supabase/templates/magic-link.html"
 
 [auth.email.template.confirmation]
-subject = "Your AfricMade sign-in code"
+subject = "Your Suqpage sign-in code"
 content_path = "./supabase/templates/magic-link.html"
 
 # Uncomment to customize notification email template

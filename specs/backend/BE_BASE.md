@@ -29,13 +29,13 @@ classes are not required.
 
 ```text
 Next routes/actions ─┐
-SQLite adapter ──────┼─> application use cases -> domain rules
+PostgreSQL adapter ──────┼─> application use cases -> domain rules
 Media filesystem ───┤
 Resend ──────────────┘
 ```
 
 Domain/application rules must not import Next.js, cookies, HTTP response types,
-filesystem paths, SQLite primitives, or vendor SDKs. Existing code moves toward
+filesystem paths, database primitives, or vendor SDKs. Existing code moves toward
 this boundary incrementally when a touched workflow benefits; no wholesale
 rewrite is authorized by this base spec.
 
@@ -64,7 +64,7 @@ Create narrow TypeScript contracts for genuine substitution boundaries:
 
 ## Transaction and error policy
 
-Multi-record invariant changes use immediate transactions. Expected domain
+Multi-record invariant changes use PostgreSQL transactions with explicit row locks where required. Expected domain
 rejections return safe typed errors; unexpected failures are not exposed to
 public callers. Redirect control-flow must remain outside broad exception
 handlers.
@@ -72,7 +72,7 @@ handlers.
 ## Test baseline
 
 - Domain/unit tests for validation boundaries.
-- SQLite integration tests for transactions, constraints, migrations, isolation,
+- PostgreSQL integration tests for transactions, constraints, migrations, isolation,
   idempotency, and integrity.
 - HTTP tests for status, payload, auth, size, rate, and security headers.
 - Browser tests prove end-to-end persistence for role workflows.

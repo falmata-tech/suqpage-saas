@@ -391,7 +391,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     data-map-marker-count="0"
     data-map-zoom={DEFAULT_ZOOM}
     role="region"
-    aria-label="Interactive OpenStreetMap map with clustered AfricMade page locations"
+    aria-label="Interactive OpenStreetMap map with clustered Suqpage page locations"
   />;
 });
 

@@ -26,15 +26,15 @@ export default async function NewProduct({
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            My offerings
+            Products
           </Link>
           <span aria-hidden="true">/</span>
           <span>Add offering</span>
         </nav>
       </div>
-      <div className="dashboard-head">
+      <div className="dashboard-head standard-page-heading">
         <div>
-          <p className="eyebrow">Basic upkeep</p>
+          <p className="eyebrow">Product details</p>
           <h1>Add a product or capability</h1>
           <p>
             Add what the account owner manufactures, grows, or supplies. The page design

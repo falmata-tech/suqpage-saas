@@ -36,6 +36,7 @@ export default async function AdminOverview({
   const counts = await getPlatformCounts();
   const attention = await getDashboardAttention(user);
   const destinations = [
+    {href:"/dashboard/admin/businesses?location=pending",label:"Location reviews",value:attention.locationReviews||0,detail:"Owner locations awaiting marketplace approval",icon:Building2},
     {
       href: "/dashboard/admin/businesses",
       label: "Businesses",
@@ -44,10 +45,10 @@ export default async function AdminOverview({
       icon: Building2,
     },
     {
-      href: "/dashboard/requests",
-      label: "Page requests",
-      value: attention.showroomRequests,
-      detail: `${counts.open_requests} open across the managed workflow`,
+      href: "/dashboard/admin/page-reviews",
+      label: "Page reviews",
+      value: attention.pageReviews,
+      detail: "Owner submissions awaiting first publication",
       icon: ClipboardList,
     },
     {
@@ -78,13 +79,6 @@ export default async function AdminOverview({
       detail: "Manual service periods and renewal records",
       icon: CalendarClock,
     },
-    {
-      href: "/dashboard/design-bank",
-      label: "Design library",
-      value: "67",
-      detail: "Approved page components and patterns",
-      icon: Palette,
-    },
   ];
 
   return (
@@ -109,7 +103,7 @@ export default async function AdminOverview({
       <section className="admin-quick-actions" aria-labelledby="admin-quick-title">
         <div><span className="eyebrow">Common actions</span><h2 id="admin-quick-title">Keep work moving</h2></div>
         <div>
-          <Link className="small-btn" href="/dashboard/requests/on-behalf">Record a request</Link>
+          <Link className="small-btn" href="/dashboard/admin/page-reviews">Review new pages</Link>
           <Link className="small-btn" href="/dashboard/support/agents">Manage support capacity</Link>
           <Link className="small-btn" href="/dashboard/account-health">Review monthly accounts</Link>
         </div>

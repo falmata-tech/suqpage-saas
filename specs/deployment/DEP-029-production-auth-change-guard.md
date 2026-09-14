@@ -29,6 +29,9 @@ fail-closed plan/apply command, not the Supabase configuration-push command.
   repository email templates/subjects, and security-enforcing boolean values are
   permitted. Google enablement/credentials, SMTP credentials, arbitrary templates,
   other providers, paid capabilities, and unknown keys are denied, not stripped.
+  The current repository subject is exactly `Your Suqpage sign-in code`; the
+  earlier platform subject is rejected. Updating this allowlist does not authorize
+  a hosted write or remove the separate reviewed-plan requirement.
 - Apply requires the digest of the reviewed plan, no more than ten minutes old,
   and unchanged remote configuration. It revalidates target, patch, and private
   plan permissions before one narrow PATCH, then reads back changed and unchanged

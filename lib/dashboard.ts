@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { runtimeBusinessById, runtimeHasRetainedPublication } from "./catalog-runtime";
+import { runtimeBusinessById } from "./catalog-runtime";
 import {
   canMaintainBasicProducts,
   canManageBusiness,
@@ -37,31 +37,7 @@ export async function resolveProductBusiness(
   if (!canMaintainBasicProducts(user, business.id, assigned)) {
     redirect("/dashboard");
   }
-  if (!(await runtimeHasRetainedPublication(business.id))) {
-    redirect(
-      user.access_role === "client"
-        ? "/dashboard/requests/new"
-        : "/dashboard/requests",
-    );
-  }
   return business;
-}
-
-export async function hasClientReviewableRevision(userId: number, businessId: number) {
-  return Boolean(await runtimeGet(`
-    SELECT 1
-    FROM service_requests r
-    JOIN content_revisions revision ON revision.request_id=r.id
-    WHERE r.represented_client_user_id=?
-      AND r.business_id=?
-      AND revision.status='awaiting_review'
-      AND revision.id=(
-        SELECT latest.id FROM content_revisions latest
-        WHERE latest.request_id=r.id
-        ORDER BY latest.revision_number DESC LIMIT 1
-      )
-    LIMIT 1
-  `, [userId, businessId]));
 }
 
 async function getAssignedBusiness(userId: number, businessId: number) {

@@ -1,21 +1,15 @@
-import type { DatabaseSync } from "node:sqlite";
-import { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
+import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
+import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 import { featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
 import { getFeaturedProgramDaySelection, getFeaturedProgramPolicy, type FeaturedProgramDayMode } from "./featured-program-settings";
 import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
+import { parseShopPageContent } from "./owner-page-domain";
+import { publicPageContent } from "./business-profile";
 
 export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
-export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics & electrical", shortLabel: "Electronics & electrical", icon: "circuit", code: "ELC" },
-  { key: "beauty-wellness", label: "Personal care & household", shortLabel: "Personal & home care", icon: "leaf", code: "BEA" },
-  { key: "agriculture-growers", label: "Farms, livestock & feed", shortLabel: "Farms, livestock & feed", icon: "sprout", code: "AGR" },
-  { key: "food-farming", label: "Food & drink", shortLabel: "Food & drink", icon: "bowl", code: "FOD" },
-  { key: "machinery-tools", label: "Tools, machinery & metalwork", shortLabel: "Tools & metalwork", icon: "tool", code: "MCH" },
-  { key: "home-living", label: "Furniture, art & building", shortLabel: "Furniture, art & building", icon: "frame", code: "HOM" },
-  { key: "fashion-textiles", label: "Clothing, textiles & leather", shortLabel: "Clothing & textiles", icon: "thread", code: "FSH" },
-] as const;
+export { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
 export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All categories", shortLabel: "All categories", icon: "grid", code: "ALL" } as const;
@@ -53,6 +47,7 @@ type DiscoveryRow = {
   description: string;
   logo_path: string;
   hero_image_path: string;
+  published_profile_json?: string | null;
   booth_image_path: string;
   city: string;
   zone: string;
@@ -218,6 +213,9 @@ export type DiscoveryView = {
   query: string;
   suggestions: DiscoverySearchSuggestion[];
   searchProducts: DiscoveryProductResult[];
+  searchBusinesses: DiscoveryShowroom[];
+  resultCounts: { products: number; businesses: number };
+  resultPage: Omit<PageResult<never>, "items">;
   place: string;
   places: DiscoveryPlaceOption[];
   productionScale: ProductionScale | "";
@@ -270,7 +268,9 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     tagline: row.tagline,
     description: row.description,
     logoPath: row.logo_path,
-    heroImagePath: row.hero_image_path,
+    heroImagePath: row.published_profile_json
+      ? publicPageContent(row.id, parseShopPageContent(JSON.parse(row.published_profile_json))).heroImage
+      : row.hero_image_path,
     city: row.city,
     zone: row.zone,
     region: row.region,
@@ -342,10 +342,13 @@ const PRIMARY_INDUSTRY_SQL = `COALESCE((
   LIMIT 1
 ),'all')`;
 
-function selectSql(extraWhere: string, suffix = "") {
+function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,sponsor_position,lower(b.name),b.id") {
+  // Latest public snapshot only; no draft join or per-card database requests.
+  const profile = process.env.SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
   return `
     SELECT
       b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
+      ${profile ? "publication.content_json" : "NULL"} AS published_profile_json,
       p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
       p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
       COALESCE(s.position,999) AS sponsor_position,p.production_scale,
@@ -354,6 +357,8 @@ function selectSql(extraWhere: string, suffix = "") {
     FROM businesses b
     JOIN business_discovery_profiles p ON p.business_id=b.id
     LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
+    ${profile ? `LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)` : ""}
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=?
@@ -363,7 +368,7 @@ function selectSql(extraWhere: string, suffix = "") {
       AND p.approved_at > 0
       AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
       ${extraWhere}
-    ORDER BY is_sponsored DESC,sponsor_position,lower(b.name),b.id
+    ORDER BY ${order}
     ${suffix}
   `;
 }
@@ -373,7 +378,7 @@ function selectSponsoredSql() {
     SELECT * FROM (
     SELECT
       'showroom' AS kind,b.id AS source_id,b.handle,b.name,
-      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'AfricMade page') AS details,
+      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'Suqpage page') AS details,
       COALESCE(NULLIF(p.booth_image_path,''),NULLIF(b.hero_image_path,''),NULLIF(b.logo_path,''),'') AS image_path,
       NULL AS website_url,NULL AS phone,s.position AS sponsor_position
     FROM discovery_sponsorships s
@@ -445,7 +450,7 @@ function productSuggestionSql(placeWhere: string) {
   `;
 }
 
-function productSearchResultSql(placeWhere: string) {
+function productSearchResultSql(placeWhere: string, suffix = "") {
   return `
     SELECT
       product.id,product.name,product.description,product.image_path,
@@ -479,7 +484,7 @@ function productSearchResultSql(placeWhere: string) {
         ELSE 3
       END,
       lower(product.name),lower(b.name),product.id
-    LIMIT 40
+    ${suffix}
   `;
 }
 
@@ -689,13 +694,15 @@ export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryN
 }
 
 type DiscoveryOptions = {
+  page?: string | number;
+  type?: string;
   industry?: string;
   q?: string;
   place?: string;
   featuredDay?: string | number;
   scale?: string;
   now?: Date;
-  db?: DatabaseSync;
+  readPort?: DiscoveryReadPort;
 };
 
 type DiscoveryReadPort = {
@@ -703,23 +710,17 @@ type DiscoveryReadPort = {
   all: <T>(sql: string, values?: Array<string | number>) => Promise<T[]>;
 };
 
-function discoveryReadPort(db?: DatabaseSync): DiscoveryReadPort {
-  return {
-    get: async <T>(sql: string, values: Array<string | number> = []) => db
-      ? db.prepare(sql).get(...values) as T | undefined
-      : runtimeGet<T>(sql, values),
-    all: async <T>(sql: string, values: Array<string | number> = []) => db
-      ? db.prepare(sql).all(...values) as T[]
-      : runtimeAll<T>(sql, values),
-  };
+function discoveryReadPort(port?: DiscoveryReadPort): DiscoveryReadPort {
+  return port || { all: runtimeAll, get: runtimeGet };
 }
 
 type MarketplaceBase = Omit<MarketplaceDiscoveryView, "featuredNowBusinessId">;
 
 async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryReadPort): Promise<MarketplaceBase> {
-  const { all } = port;
+  const { all, get } = port;
   const industry = normalizeIndustrySelection(options.industry);
-  const query = (options.q || "").trim().slice(0, 80);
+  const rawQuery = (options.q || "").trim().slice(0, 80);
+  const query = rawQuery.length >= 2 ? rawQuery : "";
   const productionScale = normalizeProductionScale(options.scale);
   const projectionIndustryKey = industry.key || ALL_DISCOVERY_INDUSTRIES.key;
   const where = discoveryWhere(productionScale);
@@ -744,28 +745,37 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
-  const [productSuggestionRows, productResultRows] = query.length >= 2
-    ? await Promise.all([
-      all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
-        projectionIndustryKey,
-        projectionIndustryKey,
-        `%${escapedQuery}%`,
-        `%${escapedQuery}%`,
-        ...placeParams,
-        query,
-        `${escapedQuery}%`,
-      ]),
-      all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere), [
-        projectionIndustryKey,
-        projectionIndustryKey,
-        ...Array.from({ length: 8 }, () => `%${escapedQuery}%`),
-        ...placeParams,
-        query,
-        `${escapedQuery}%`,
-        query,
-      ]),
-    ])
-    : [[], []] as [Array<{ label: string; detail: string }>, DiscoveryProductResultRow[]];
+  const productParams = [projectionIndustryKey, projectionIndustryKey,
+    ...Array.from({ length: 8 }, () => `%${escapedQuery}%`), ...placeParams,
+    query, `${escapedQuery}%`, query];
+  const productSql = productSearchResultSql(placeWhere);
+  const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
+  const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
+  const businessSql = selectSql(filteredWhere, "", businessOrder);
+  const [productCountRow, businessCountRow] = await Promise.all([
+    get<{ total: number }>(`SELECT COUNT(*) AS total FROM (${productSql}) matched_products`, productParams),
+    get<{ total: number }>(`SELECT COUNT(*) AS total FROM (${businessSql}) matched_businesses`, businessResultParams),
+  ]);
+  const productCount = Number(productCountRow?.total || 0);
+  const businessCount = Number(businessCountRow?.total || 0);
+  const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
+  const total = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
+  const request = normalizePageRequest({ page: options.page }, PUBLIC_PAGE_SIZE);
+  const window = pageWindow(total, request);
+  const productLimit = type === "businesses" ? 0 : Math.max(0, Math.min(window.limit, productCount - window.offset));
+  const businessLimit = type === "products" ? 0 : window.limit - productLimit;
+  const businessOffset = type === "businesses" ? window.offset : Math.max(0, window.offset - productCount);
+  const [productSuggestionRows, productResultRows, businessResultRows] = await Promise.all([
+    query.length >= 2 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
+      projectionIndustryKey, projectionIndustryKey, `%${escapedQuery}%`, `%${escapedQuery}%`,
+      ...placeParams, query, `${escapedQuery}%`,
+    ]) : Promise.resolve([]),
+    productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere, "LIMIT ? OFFSET ?"),
+      [...productParams, productLimit, window.offset]) : Promise.resolve([]),
+    businessLimit ? all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?", businessOrder),
+      [...businessResultParams, businessLimit, businessOffset]) : Promise.resolve([]),
+  ]);
+  const { items: _items, ...resultPage } = pageResult(Array.from({ length: productResultRows.length + businessResultRows.length }), total, request);
   const showrooms = rows.map(toShowroom);
   const nearbyGroups = groupNearbyShowrooms(showrooms);
   const suggestions = buildSearchSuggestions(query, rows, places, productSuggestionRows);
@@ -776,6 +786,9 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     query,
     suggestions,
     searchProducts: productResultRows.map(toProductResult),
+    searchBusinesses: businessResultRows.map(toShowroom),
+    resultCounts: { products: productCount, businesses: businessCount },
+    resultPage,
     place: selectedPlace?.key || "",
     places,
     productionScale,
@@ -853,7 +866,7 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
 }
 
 export async function getMarketplaceDiscoveryView(options: DiscoveryOptions = {}): Promise<MarketplaceDiscoveryView> {
-  const port = discoveryReadPort(options.db);
+  const port = discoveryReadPort(options.readPort);
   const [marketplace, featured] = await Promise.all([
     buildMarketplaceBase(options, port),
     buildFeaturedProjection({ now: options.now }, port),
@@ -861,16 +874,16 @@ export async function getMarketplaceDiscoveryView(options: DiscoveryOptions = {}
   return { ...marketplace, featuredNowBusinessId: featured.featuredNowBusinessId };
 }
 
-export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "db"> = {}): Promise<FeaturedShowroomsView> {
-  return buildFeaturedProjection(options, discoveryReadPort(options.db));
+export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "readPort"> = {}): Promise<FeaturedShowroomsView> {
+  return buildFeaturedProjection(options, discoveryReadPort(options.readPort));
 }
 
-export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "db"> = {}): Promise<SponsorPlacement[]> {
-  return (await discoveryReadPort(options.db).all<SponsorPlacementRow>(selectSponsoredSql())).map(toSponsorPlacement);
+export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "readPort"> = {}): Promise<SponsorPlacement[]> {
+  return (await discoveryReadPort(options.readPort).all<SponsorPlacementRow>(selectSponsoredSql())).map(toSponsorPlacement);
 }
 
 export async function getDiscoveryView(options: DiscoveryOptions = {}): Promise<DiscoveryView> {
-  const port = discoveryReadPort(options.db);
+  const port = discoveryReadPort(options.readPort);
   const [marketplace, featured, sponsoredShowrooms] = await Promise.all([
     buildMarketplaceBase(options, port),
     buildFeaturedProjection(options, port),

@@ -194,7 +194,7 @@ function ShowroomSectionNavigation({
   ] as const;
   return (
     <nav className={styles.showroomSectionNav} aria-label="Page sections">
-      {links.map(([label, anchorId]) => (
+      {links.filter(([, anchorId]) => Boolean(anchorId)).map(([label, anchorId]) => (
         <a key={anchorId} href={`#${anchorId}`}>
           {label}
         </a>
@@ -726,7 +726,7 @@ export function BankFooterSection({
         ) : null}
       </div>
       <div className={styles.footerShowroom}>
-        <span>Permanent AfricMade page</span>
+        <span>Permanent Suqpage page</span>
         <strong>@{context.business.handle}</strong>
       </div>
       <div className={styles.footerContact}>

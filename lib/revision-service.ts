@@ -464,7 +464,7 @@ export async function decideRevision(
     .slice(0, 1000);
   if (decision === "reject" && comment.length < 5) {
     throw new RevisionError(
-      "Tell AfricMade what should change in at least 5 characters.",
+      "Tell Suqpage what should change in at least 5 characters.",
     );
   }
   return runtimeTransaction(async () => {

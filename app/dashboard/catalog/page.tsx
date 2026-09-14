@@ -5,7 +5,7 @@ import {
 } from "@/app/actions";
 import DashboardShell from "@/components/DashboardShell";
 import { requireUser } from "@/lib/auth";
-import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
+import { resolveProductBusiness as resolveBusiness } from "@/lib/dashboard";
 import { runtimeCatalogByBusinessId } from "@/lib/catalog-runtime";
 
 export const dynamic = "force-dynamic";

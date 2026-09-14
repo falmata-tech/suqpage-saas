@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "AfricMade",
-  "short_name": "AfricMade",
-  "description": "Find African makers, growers, processors, and manufacturers through professional online showrooms.",
+  "name": "Suqpage",
+  "short_name": "Suqpage",
+  "description": "Discover shops and products near you, and contact sellers directly.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,13 +12,13 @@
   "dir": "ltr",
   "categories": ["business", "shopping"],
   "icons": [
-    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/suqpage-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/suqpage-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Explore showrooms", "short_name": "Market", "url": "/#discover", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Daily featured showrooms", "short_name": "Featured", "url": "/featured#daily-featured-title", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Get a showroom", "short_name": "Join", "url": "/request", "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Explore shops", "short_name": "Market", "url": "/", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] },
+    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] }
   ]
 }

@@ -4,6 +4,8 @@
 .agents
 .codex
 .vscode
+.netlify
+.vercel
 
 # Dependencies and framework/test output are rebuilt inside the image
 node_modules

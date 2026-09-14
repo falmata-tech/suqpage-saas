@@ -37,21 +37,20 @@ export default async function ProductsPage({
       <div className="dashboard-head">
         <div>
           <p className="eyebrow">Your market offer</p>
-          <h1>Custom work, ready products &amp; wholesale supply</h1>
+          <h1>Products</h1>
           <p>
-            Keep every made-to-order capability, finished product, wholesale offer, and
-            production fact current without opening the page design system.
+            Add products, photos, videos and features to your page.
           </p>
         </div>
         <Link
           className="btn brand"
           href={`/dashboard/products/new?business=${business.id}`}
         >
-          Add offering
+          Add product
         </Link>
       </div>
       {query.saved ? (
-        <p className="notice">Offering published in a retained page version.</p>
+        <p className="notice">Product saved.</p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       <CollectionToolbar
@@ -72,12 +71,12 @@ export default async function ProductsPage({
       ) : (
         <section className="empty-state">
           <h2>{query.q ? "No matching offerings" : "No offerings yet"}</h2>
-          <p>{query.q ? "Try a broader search." : "Add the first product or capability to this published page."}</p>
+          <p>{query.q ? "Try a broader search." : "Add the first product to your page."}</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}
           >
-            Add first offering
+            Add first product
           </Link>
         </section>
       )}

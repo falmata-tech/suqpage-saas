@@ -5,7 +5,7 @@ import { ProductUpkeepError, type BasicProductCommand } from "./product-upkeep-d
 import type { BasicProductUpkeepPort, ProductUpkeepResult } from "./product-upkeep";
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
-import { runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
+import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import type { SessionUser } from "./types";
 
@@ -39,9 +39,6 @@ async function authorize(user: SessionUser, command: BasicProductCommand) {
   }
   const business = await runtimeBusinessById(command.businessId);
   if (!business) throw new ProductUpkeepError("Business not found.", 404, "not_found");
-  if (business.status === "draft" || !(await runtimeHasRetainedPublication(command.businessId))) {
-    throw new ProductUpkeepError("Products become editable after the first showroom publication.", 409, "showroom_not_established");
-  }
   if (user.access_role !== "client" && !command.serviceNote) {
     throw new ProductUpkeepError("Add a short customer-service note for this staff update.", 400, "service_note_required");
   }
@@ -83,14 +80,16 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       capacitySummary: command.capacitySummary,
       minimumOrderSummary: command.minimumOrderSummary,
       leadTimeSummary: command.leadTimeSummary,
-      published: true,
+      published: command.isPublished ?? true,
       sortOrder: snapshot.products.reduce((maximum, product) => Math.max(maximum, product.sortOrder), -1) + 1,
-      optionGroups: [],
+      optionGroups: command.optionGroups ?? [],
     });
   } else {
     const product = snapshot.products.find((entry) => entry.key === `product-${command.productId}`);
     if (!product) throw new ProductUpkeepError("Product not found.", 404, "not_found");
     Object.assign(product, {
+      ...(command.optionGroups !== undefined ? { optionGroups: command.optionGroups } : {}),
+      ...(command.isPublished !== undefined ? { published: command.isPublished } : {}),
       collectionKey: null,
       categoryKey,
       name: command.name,
@@ -118,6 +117,9 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
   },
   async publish(user, command, stagedImage, payloadHash): Promise<ProductUpkeepResult> {
     return runtimeTransaction(async () => {
+      await authorize(user, command);
+      const locked=await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=?",[command.businessId]);
+      if(!locked.changes)throw new ProductUpkeepError("Business not found.",404,"not_found");
       const duplicate = await runtimeGet<StoredCommand>(
         "SELECT payload_hash,result_product_id,result_content_version FROM product_upkeep_commands WHERE business_id=? AND idempotency_key=?",
         [command.businessId, command.idempotencyKey],
@@ -183,6 +185,21 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         );
         if (changed.changes !== 1) throw new ProductUpkeepError("The product changed while saving.", 409, "write_conflict");
       }
+
+      if (command.isPublished !== undefined) await runtimeRun("UPDATE products SET is_published=? WHERE id=? AND business_id=?", [Number(command.isPublished), productId, command.businessId]);
+      if (command.optionGroups !== undefined) {
+        const previous = await runtimeAll<{id:number;name:string}>("SELECT id,name FROM option_groups WHERE product_id=?", [productId]);
+        for (const group of previous) if (!command.optionGroups.some(next => next.name === group.name)) await runtimeRun("DELETE FROM option_groups WHERE id=? AND product_id=?", [group.id, productId]);
+        for (const [index, group] of command.optionGroups.entries()) {
+          let groupId = previous.find(old => old.name === group.name)?.id;
+          if (!groupId) groupId = (await runtimeGet<{id:number}>("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?) RETURNING id", [productId, group.name, index + 1]))!.id;
+          else await runtimeRun("UPDATE option_groups SET position=? WHERE id=? AND product_id=?", [index + 1, groupId, productId]);
+          const values = await runtimeAll<{id:number;value:string}>("SELECT id,value FROM option_values WHERE option_group_id=?", [groupId]);
+          for (const old of values) if (!group.values.includes(old.value)) await runtimeRun("DELETE FROM option_values WHERE id=? AND option_group_id=?", [old.id, groupId]);
+          for (const value of group.values) if (!values.some(old => old.value === value)) await runtimeRun("INSERT INTO option_values(option_group_id,value) VALUES(?,?)", [groupId, value]);
+        }
+      }
+
 
       const nextVersion = business.content_version + 1;
       const bumped = await runtimeRun(

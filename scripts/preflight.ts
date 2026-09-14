@@ -1,9 +1,7 @@
-import fs from "node:fs";
 import {
   assertProductionConfiguration,
   authDriver,
   databaseDriver,
-  databasePath,
   mediaRoot,
   mediaStorageDriver,
 } from "../lib/config";
@@ -14,24 +12,8 @@ export async function preflight() {
   assertProductionConfiguration();
 
   const driver = databaseDriver();
-  if (driver === "sqlite") {
-    const { getDb } = await import("../lib/db");
-    const database = getDb();
-    const integrity = database
-      .prepare("PRAGMA integrity_check")
-      .get() as Record<string, string>;
-    if (!Object.values(integrity).includes("ok")) {
-      throw new Error("Database integrity check failed.");
-    }
-    fs.accessSync(databasePath(), fs.constants.R_OK | fs.constants.W_OK);
-  } else {
-    const currentProjectMigration = await runtimeGet<{ version: number }>(
-      "SELECT version FROM schema_migrations WHERE version=32",
-    );
-    if (!currentProjectMigration) {
-      throw new Error("PostgreSQL migration 32 is required before this release can serve traffic.");
-    }
-  }
+  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=43");
+  if (!migration) throw new Error("PostgreSQL migration 43 is required before this release can serve traffic.");
 
   if (authDriver() === "supabase") {
     const identityMigration = await runtimeGet<{ version: number }>(

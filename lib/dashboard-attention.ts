@@ -4,7 +4,8 @@ import type { SessionUser } from "./types";
 
 export type DashboardAttention = {
   newAccounts?: number;
-  showroomRequests: number;
+  locationReviews?: number;
+  pageReviews: number;
   customerInquiries?: number;
   supportReplies: number;
 };
@@ -19,6 +20,7 @@ export async function getDashboardAttention(
 ): Promise<DashboardAttention> {
   if (hasCapability(user, "operations:manage") && !businessId) {
     return {
+      locationReviews: hasCapability(user,"platform:admin") ? await count("SELECT COUNT(*) total FROM owner_location_proposals WHERE version<>reviewed_version") : 0,
       newAccounts: await count(`
         SELECT COUNT(*) total FROM businesses b
         WHERE b.status='draft'
@@ -28,7 +30,7 @@ export async function getDashboardAttention(
             WHERE u.business_id=b.id AND p.access_role='client'
           )
       `),
-      showroomRequests: await count("SELECT COUNT(*) total FROM service_requests WHERE status='submitted'"),
+      pageReviews: await count("SELECT COUNT(*) total FROM owner_page_reviews WHERE status='pending'"),
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
@@ -46,11 +48,7 @@ export async function getDashboardAttention(
 
   if (user.access_role === "team_member") {
     return {
-      showroomRequests: await count(`
-        SELECT COUNT(*) total FROM service_requests
-        WHERE assigned_user_id=?
-          AND status IN ('submitted','under_review','approved_for_work','in_progress')
-      `, user.id),
+      pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
@@ -67,14 +65,10 @@ export async function getDashboardAttention(
   }
 
   const scopedBusinessId = businessId || user.business_id;
-  if (!scopedBusinessId) return { showroomRequests: 0, supportReplies: 0 };
+  if (!scopedBusinessId) return { pageReviews: 0, supportReplies: 0 };
   const client = user.access_role === "client";
   return {
-    showroomRequests: await count(
-      `SELECT COUNT(*) total FROM service_requests
-       WHERE business_id=? AND status IN (${client ? "'needs_information','client_review'" : "'submitted','client_approved'"})`,
-      scopedBusinessId,
-    ),
+    pageReviews: await count("SELECT COUNT(*) total FROM owner_page_reviews WHERE business_id=? AND status=?", scopedBusinessId, client ? 'changes_requested' : 'pending'),
     customerInquiries: await count(
       "SELECT COUNT(*) total FROM inquiries WHERE business_id=? AND status='new'",
       scopedBusinessId,

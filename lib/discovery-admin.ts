@@ -1,9 +1,7 @@
-import type { DatabaseSync } from "node:sqlite";
 import { DISCOVERY_INDUSTRIES } from "./discovery";
 import type { ProductionScale } from "./discovery";
 import { likePattern, normalizePageRequest, pageResult, pageWindow } from "./pagination";
 import { cleanText } from "./security";
-import { postgresRuntimeEnabled } from "./postgres-runtime-services";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 
 export class DiscoveryAdminError extends Error {}
@@ -71,7 +69,7 @@ function mapProfile(row: ProfileRow): DiscoveryProfileAdminView {
 }
 
 const selectProfile = () => {
-  const aggregate = postgresRuntimeEnabled() ? "string_agg" : "group_concat";
+  const aggregate = "string_agg";
   return `
   SELECT b.id business_id,b.name business_name,b.handle,b.status,
     p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
@@ -107,6 +105,7 @@ export async function getDiscoveryProfileAdminView(businessId: number) {
 
 export async function updateDiscoveryProfile(input: {
   businessId: unknown;
+  proposalVersion?: unknown;
   industryKeys: unknown[];
   boothImagePath: unknown;
   city: unknown;
@@ -119,7 +118,7 @@ export async function updateDiscoveryProfile(input: {
   sponsored: boolean;
   sponsorPosition: unknown;
   excluded: boolean;
-}, db?: DatabaseSync) {
+}) {
   const businessId = Number.parseInt(String(input.businessId), 10);
   const allowedIndustries = new Set(DISCOVERY_INDUSTRIES.map((industry) => industry.key));
   const industryKeys = [...new Set(input.industryKeys.map((value) => cleanText(value, 40)).filter((value) => allowedIndustries.has(value as never)))];
@@ -127,56 +126,27 @@ export async function updateDiscoveryProfile(input: {
   const city = cleanText(input.city, 100);
   const zone = cleanText(input.zone, 100);
   const region = cleanText(input.region, 100);
-  const latitude = Number(input.latitude);
-  const longitude = Number(input.longitude);
+  let latitude = Number(input.latitude);
+  let longitude = Number(input.longitude);
   const fallbackStyle = cleanText(input.fallbackStyle, 30);
   const productionScale = cleanText(input.productionScale, 30);
   const sponsorPosition = Number.parseInt(String(input.sponsorPosition), 10);
   const allowedFallbacks = new Set(["workshop", "botanical", "textile", "food", "home", "technical"]);
-  const businessExists = db
-    ? db.prepare("SELECT 1 FROM businesses WHERE id=?").get(businessId)
-    : await runtimeGet("SELECT 1 FROM businesses WHERE id=?", [businessId]);
+  const businessExists = await runtimeGet("SELECT 1 FROM businesses WHERE id=?", [businessId]);
   if (!Number.isInteger(businessId) || !businessExists) throw new DiscoveryAdminError("Business not found.");
   if (!industryKeys.length) throw new DiscoveryAdminError("Choose at least one industry.");
-  if (!boothImagePath.startsWith("/")) throw new DiscoveryAdminError("Use an approved local booth image path.");
+  if (boothImagePath && !boothImagePath.startsWith("/")) throw new DiscoveryAdminError("Use an approved local booth image path.");
   if (!city || !zone || !region) throw new DiscoveryAdminError("City, zone, and region are required.");
   if (!Number.isFinite(latitude) || latitude < 3 || latitude > 15 || !Number.isFinite(longitude) || longitude < 32 || longitude > 49) throw new DiscoveryAdminError("Coordinates must be inside the supported Ethiopia bounds.");
   if (!allowedFallbacks.has(fallbackStyle)) throw new DiscoveryAdminError("Choose an approved fallback style.");
   if (productionScale !== "workshop" && productionScale !== "growing_factory") throw new DiscoveryAdminError("Choose an approved production scale.");
   if (!Number.isInteger(sponsorPosition) || sponsorPosition < 1 || sponsorPosition > 999) throw new DiscoveryAdminError("Sponsored position must be between 1 and 999.");
   const now = Date.now();
-  if (db) {
-  db.exec("BEGIN IMMEDIATE");
-  try {
-    db.prepare(`
-      INSERT INTO business_discovery_profiles(
-        business_id,booth_image_path,city,zone,region,latitude,longitude,
-        fallback_style,production_scale,is_featured,is_excluded,approved_at,updated_at
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(business_id) DO UPDATE SET
-        booth_image_path=excluded.booth_image_path,city=excluded.city,zone=excluded.zone,
-        region=excluded.region,latitude=excluded.latitude,longitude=excluded.longitude,
-        fallback_style=excluded.fallback_style,production_scale=excluded.production_scale,is_featured=excluded.is_featured,
-        is_excluded=excluded.is_excluded,approved_at=excluded.approved_at,updated_at=excluded.updated_at
-    `).run(businessId, boothImagePath, city, zone, region, latitude, longitude, fallbackStyle, productionScale, input.sponsored ? 1 : 0, input.excluded ? 1 : 0, now, now);
-    db.prepare("DELETE FROM business_industries WHERE business_id=?").run(businessId);
-    const add = db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)");
-    industryKeys.forEach((key) => add.run(businessId, key));
-    db.prepare(`
-      INSERT INTO discovery_sponsorships(business_id,position,active,updated_at)
-      VALUES(?,?,?,?)
-      ON CONFLICT(business_id) DO UPDATE SET
-        position=excluded.position,active=excluded.active,updated_at=excluded.updated_at
-    `).run(businessId, sponsorPosition, input.sponsored ? 1 : 0, now);
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
-  return { businessId };
-  }
-
   await runtimeTransaction(async () => {
+    await runtimeRun('UPDATE businesses SET content_version=content_version WHERE id=?',[businessId]);
+    const proposal = await runtimeGet<{version:number;location_mode:string}>('SELECT version,location_mode FROM owner_location_proposals WHERE business_id=?',[businessId]);
+    if(proposal && Number(input.proposalVersion)!==proposal.version) throw new DiscoveryAdminError('The owner changed the location. Reload before approving.');
+    if(proposal?.location_mode==='area'){latitude=Math.round(latitude*10)/10;longitude=Math.round(longitude*10)/10;}
     await runtimeRun(`
       INSERT INTO business_discovery_profiles(
         business_id,booth_image_path,city,zone,region,latitude,longitude,
@@ -195,6 +165,7 @@ export async function updateDiscoveryProfile(input: {
       VALUES(?,?,?,?) ON CONFLICT(business_id) DO UPDATE SET
         position=excluded.position,active=excluded.active,updated_at=excluded.updated_at
     `, [businessId, sponsorPosition, input.sponsored ? 1 : 0, now]);
+    await runtimeRun('UPDATE owner_location_proposals SET reviewed_version=version WHERE business_id=?',[businessId]);
   });
   return { businessId };
 }

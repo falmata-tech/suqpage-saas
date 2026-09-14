@@ -9,14 +9,14 @@ It does not authorize a production launch, DNS change, or destructive cutover.
 - Node.js `24.18.1` is the repository, nvm, Docker, and CI baseline.
 - Normal development uses the isolated local Supabase stack: PostgreSQL 17,
   local Auth, private Storage, API, and captured email. Realtime and other
-  services the app does not yet use locally are disabled. SQLite is
-  compatibility and read-only migration infrastructure, not an app runtime.
+  services the app does not yet use locally are disabled. PostgreSQL is the sole
+  database engine, including fixtures and operations (BE-035/DEP-031).
 - Production and Deploy Previews use separate hosted Supabase projects. Each
   selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
   own private Storage bucket through AfricMade's server-side media port. AfricMade
   remains the only role, capability, tenant, and suspension authority.
-- PostgreSQL tooling supports disposable rehearsal and a separately guarded,
-  copy-only production cutover. The linked Supabase target has reconciled data,
+- PostgreSQL tooling supports native installation, isolated fixtures, and
+  explicitly approved archive recovery. The linked Supabase target has reconciled data,
   and the generated Vercel candidate has passed historical PostgreSQL-backed
   smoke checks. Netlify is the current reversible candidate and receives no DNS
   change until the exact current release repeats all gates.
@@ -29,7 +29,7 @@ Supabase images and may take several minutes:
 ```bash
 npm run local:supabase:start
 npm run local:supabase:configure
-npm run local:postgres:copy
+npm run local:postgres:seed
 npm run local:auth:migrate
 npm run local:media:migrate
 npm run dev:local
@@ -37,9 +37,9 @@ npm run dev:local
 
 `local:supabase:configure` captures only local CLI values into ignored
 `.local/supabase-runtime.env` with mode `0600` and never prints credentials.
-`local:postgres:copy` opens the retained SQLite demo database read-only and
-accepts only loopback PostgreSQL port `54322`. The Auth migration prints
-aggregate counts only. Normal app writes then go exclusively to PostgreSQL.
+`local:postgres:seed` installs the native PostgreSQL schema and seeds only an empty
+local database. Existing rows are preserved. Auth migration reports aggregate counts.
+See `docs/POSTGRES-ONLY-RUNBOOK.md` for current setup, fixtures and archive recovery.
 
 To replace an explicitly disposable local stack, stop the app and run:
 
@@ -106,9 +106,8 @@ npm run release
 npm run test:container
 ```
 
-`npm run reset` is retained only for isolated SQLite compatibility fixtures.
-It is not the normal development reset. Existing PostgreSQL data uses
-`npm run migrate:postgres`; disposable local data uses the local command above.
+Full gates follow explicit desktop/phone approval under AGENTS.md. Existing
+PostgreSQL data uses `npm run migrate:postgres`; native test fixtures are isolated.
 
 ## Supabase Auth rollout
 
@@ -214,85 +213,26 @@ one MirtPage user; roles and business access never come from OAuth metadata.
    missing or mismatched authoritative object as a failed migration.
 6. Verify a published image and an authorized private request attachment
    through MirtPage routes. Browser clients must not receive provider keys.
-7. Retain the filesystem source through the rollback window. Rollback changes
-   the driver to `filesystem`; it does not delete copied objects.
+7. Retain source objects through the rollback window. Production continues to
+   require private Supabase Storage; never switch its driver to local files.
 
-## PostgreSQL rehearsal and controlled copy
+## Native PostgreSQL installation and verification
 
-The automated gate starts a disposable PostgreSQL 17 container:
+`npm run test:postgres-readiness` verifies the native installer and application
+adapters against a disposable PostgreSQL 17 container. It uses no intermediate
+database engine. The baseline installs only into empty schemas; existing versioned
+schemas apply reviewed migrations. Preflight requires migration 43.
 
-```bash
-npm run test:postgres-readiness
-```
+For an explicitly authorized target, `npm run migrate:postgres` uses its direct
+migration connection and optional identifier-safe migration role. Keep direct
+credentials outside application runtimes. Hosted writes require independent target
+verification, backup, reviewed fields and owner approval under DEP-029.
 
-For an operator-owned target, use a dedicated empty schema whose name starts
-with `mirtpage_rehearsal` and supply the connection string through the process
-environment:
-
-```bash
-MIRTPAGE_POSTGRES_REHEARSAL_URL='postgresql://...' \
-  npm run rehearse:postgres -- --reset-target
-```
-
-The rehearsal command opens SQLite read-only, creates only the named rehearsal schema,
-copies rows transactionally, resets sequences, installs reviewed constraints,
-indexes, and triggers, and verifies counts plus fingerprints.
-
-After a verified backup and quiescence, the initial copy to an empty Supabase
-project uses the direct database URL for one command only:
-
-```bash
-MIRTPAGE_POSTGRES_DIRECT_URL='postgresql://...' \
-MIRTPAGE_POSTGRES_MIGRATION_ROLE='postgres' \
-MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
-  npm run cutover:postgres
-```
-
-For a project already linked with an authenticated Supabase CLI, prefer the
-temporary-credential wrapper. It keeps the issued password in process memory,
-assumes the Supabase owner role transaction-locally, and writes no secret file:
-
-```bash
-MIRTPAGE_APPROVE_PRODUCTION_COPY=COPY_TO_EMPTY_SUPABASE \
-  npm run cutover:supabase-linked
-```
-
-After a reconciled copy, provision and verify the least-privilege runtime login:
-
-For an existing PostgreSQL authority, apply reviewed additive migrations with
-the direct migration credential before deploying application code that requires
-them:
-
-```bash
-MIRTPAGE_POSTGRES_DIRECT_URL='postgresql://...' \
-  npm run migrate:postgres
-```
-
-The command uses a transaction-scoped advisory lock, reconciles legacy active
-showroom-project overlaps into retained cancelled history, installs the partial
-unique index, and records migration 31. Application preflight fails closed when
-migration 31 is absent.
-
-```bash
-MIRTPAGE_APPROVE_RUNTIME_ROLE=PROVISION_MIRTPAGE_RUNTIME \
-  npm run provision:supabase-runtime
-```
-
-The command rotates the fixed `mirtpage_runtime` login, grants only schema use,
-table DML, and sequence use, verifies the transaction-pooler login, and writes
-the runtime URL plus Storage secrets to ignored
-`.local/production-secrets.json` with mode `0600`. It never prints a credential.
-
-The command refuses `--reset-target`, refuses existing MirtPage tables, performs
-all writes in one transaction, reconciles every table fingerprint and sequence,
-and leaves SQLite byte-identical. `MIRTPAGE_POSTGRES_MIGRATION_ROLE` is optional;
-use it only when a provider-issued migration login must assume a named owner role.
-The command accepts a PostgreSQL identifier, applies it transaction-locally, and
-fails closed when role assumption is unavailable. It also disables the provider
-statement timeout only for that guarded copy transaction; runtime queries retain
-their bounded timeout. Never configure the direct URL or migration role in Vercel.
-Fingerprint reconciliation canonicalizes only SQLite REAL/PostgreSQL double
-precision values to 12 decimal places; every other column is compared exactly.
+Least-privilege hosted runtime provisioning remains a separately authorized
+operation (`npm run provision:supabase-runtime`). It rotates the fixed runtime
+login and writes protected credentials; do not run it as a routine setup check.
+Historical source-copy commands have been removed. Archive-based recovery is
+specified in `docs/POSTGRES-ONLY-RUNBOOK.md`.
 
 ## Deployment secrets and configuration
 
@@ -305,7 +245,6 @@ Keep these outside GitHub artifacts and the repository:
 - `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler on the selected host)
 - `MIRTPAGE_POSTGRES_DIRECT_URL` (operator environment only)
 - `MIRTPAGE_POSTGRES_MIGRATION_ROLE` (operator command only, when required)
-- `MIRTPAGE_DB_PATH` (SQLite only)
 - `MIRTPAGE_MEDIA_ROOT` when using filesystem media
 - `MIRTPAGE_SUPABASE_URL`
 - `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY`
@@ -396,8 +335,7 @@ worker route before this cleanup release has reached controlled browsers.
 
 1. Record the exact commit and image digest.
 2. Run `npm run backup` and a restore drill before applying migrations.
-3. Run `npm run migrate` for SQLite or `npm run migrate:postgres` for managed
-   PostgreSQL, then run `npm run release` and production preflight against the
+3. Run `npm run migrate:postgres` for the verified PostgreSQL target, then run `npm run release` and production preflight against the
    existing database. Never use reset for retained production data.
 4. Deploy one replica, check `/api/health`, sign-in, tenant isolation, media,
    inquiry, support, and one draft/public visibility path.

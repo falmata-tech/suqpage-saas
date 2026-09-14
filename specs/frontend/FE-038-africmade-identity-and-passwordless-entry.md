@@ -2,7 +2,7 @@
 id: FE-038
 title: AfricMade identity and passwordless account entry
 status: in_progress
-related: [FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
+related: [BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
 owners: [product, frontend, design, security]
 last_updated: 2026-09-12
 change_level: L3
@@ -62,7 +62,9 @@ flow and a separate authenticated business setup.
 - Account entry initially asks only for email and offers **Continue with
   Google** when the provider is configured.
 - Account entry never exposes rollout or launch-placeholder language. Production
-  configuration requires both approved methods; a misconfigured non-production
+  configuration requires verified email-code entry; Google is optional and is
+  hidden when disabled. The owner approved an email-only launch on 2026-09-14.
+  A misconfigured non-production
   environment shows one concise temporary-unavailability status instead of a
   control that cannot work.
 - Email continuation moves to a six-digit code state without navigating away.
@@ -73,7 +75,7 @@ flow and a separate authenticated business setup.
   follow an email link back to the application.
 - Successful verification routes a linked user to the dashboard and an
   authenticated but unlinked user to business setup.
-- Business setup asks for owner name, business name, phone/WhatsApp, and one
+- Business setup asks for owner name, business name, private account phone, and one
   bounded private business category. A safe Google display name is prefilled
   when available and remains editable. A safe unique public-page handle is
   generated server-side and can be changed later in business settings.
@@ -166,3 +168,6 @@ email-code exchange through isolated Mailpit, authenticated setup, dashboard
 routing, logout, and retained provider-aware account states. Exact hosted
 Google consent/code exchange and the new AfricMade Netlify deployment remain
 rollout gates under DEP-028.
+
+S2g contact separation (BE-032/FE-040): signup phone is private users.account_phone;
+public business contacts and WhatsApp begin empty. Verified account email is retained.

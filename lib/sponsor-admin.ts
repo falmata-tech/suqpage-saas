@@ -4,14 +4,6 @@ import { runtimeAll, runtimeGet, runtimeRun, type RuntimeSqlValue } from "./runt
 
 export class SponsorAdminError extends Error {}
 
-type SponsorTestDatabase = {
-  prepare(sql: string): {
-    all(...values: readonly RuntimeSqlValue[]): unknown[];
-    get(...values: readonly RuntimeSqlValue[]): unknown;
-    run(...values: readonly RuntimeSqlValue[]): { lastInsertRowid: number | bigint };
-  };
-};
-
 export type ExternalSponsorAd = {
   id: number;
   name: string;
@@ -102,15 +94,7 @@ function externalSponsorInput(input: {
   return { name, description, imagePath, websiteUrl: websiteUrl || null, phone: phone || null, position: positionValue(input.position), active: input.active ? 1 : 0 };
 }
 
-async function all<T>(db: SponsorTestDatabase | undefined, sql: string, values: readonly RuntimeSqlValue[] = []) {
-  return db ? db.prepare(sql).all(...values) as T[] : runtimeAll<T>(sql, values);
-}
-
-async function get<T>(db: SponsorTestDatabase | undefined, sql: string, values: readonly RuntimeSqlValue[] = []) {
-  return db ? db.prepare(sql).get(...values) as T | undefined : runtimeGet<T>(sql, values);
-}
-
-export async function listExternalSponsorAdsPage(input: { page?: unknown; q?: unknown }, db?: SponsorTestDatabase) {
+export async function listExternalSponsorAdsPage(input: { page?: unknown; q?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const params: RuntimeSqlValue[] = [];
   let where = "";
@@ -119,44 +103,40 @@ export async function listExternalSponsorAdsPage(input: { page?: unknown; q?: un
     const pattern = likePattern(request.search);
     params.push(pattern, pattern);
   }
-  const total = Number((await get<{ total: number }>(db, `SELECT COUNT(*) total FROM external_sponsor_ads${where}`, params))?.total || 0);
+  const total = Number((await runtimeGet<{ total: number }>(`SELECT COUNT(*) total FROM external_sponsor_ads${where}`, params))?.total || 0);
   const window = pageWindow(total, request);
-  const rows = await all<ExternalSponsorRow>(db, `SELECT * FROM external_sponsor_ads${where} ORDER BY active DESC,position,name,id LIMIT ? OFFSET ?`, [...params, window.limit, window.offset]);
+  const rows = await runtimeAll<ExternalSponsorRow>(`SELECT * FROM external_sponsor_ads${where} ORDER BY active DESC,position,name,id LIMIT ? OFFSET ?`, [...params, window.limit, window.offset]);
   return pageResult(rows.map(mapExternalSponsor), total, request);
 }
 
-export async function getExternalSponsorAd(id: number, db?: SponsorTestDatabase) {
-  const row = await get<ExternalSponsorRow>(db, "SELECT * FROM external_sponsor_ads WHERE id=?", [id]);
+export async function getExternalSponsorAd(id: number) {
+  const row = await runtimeGet<ExternalSponsorRow>("SELECT * FROM external_sponsor_ads WHERE id=?", [id]);
   return row ? mapExternalSponsor(row) : undefined;
 }
 
-export async function createExternalSponsorAd(input: Parameters<typeof externalSponsorInput>[0], db?: SponsorTestDatabase) {
+export async function createExternalSponsorAd(input: Parameters<typeof externalSponsorInput>[0]) {
   const value = externalSponsorInput(input);
   const now = Date.now();
   const params = [value.name, value.description, value.imagePath, value.websiteUrl, value.phone, value.position, value.active, now, now] as const;
-  const id = db
-    ? Number(db.prepare(`INSERT INTO external_sponsor_ads(name,description,image_path,website_url,phone,position,active,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)`).run(...params).lastInsertRowid)
-    : Number((await runtimeGet<{ id: number }>(`INSERT INTO external_sponsor_ads(name,description,image_path,website_url,phone,position,active,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING id`, params))!.id);
+  const id = Number((await runtimeGet<{ id: number }>(`INSERT INTO external_sponsor_ads(name,description,image_path,website_url,phone,position,active,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING id`, params))!.id);
   return { id };
 }
 
-export async function updateExternalSponsorAd(input: Parameters<typeof externalSponsorInput>[0] & { id: unknown }, db?: SponsorTestDatabase) {
+export async function updateExternalSponsorAd(input: Parameters<typeof externalSponsorInput>[0] & { id: unknown }) {
   const id = Number.parseInt(String(input.id), 10);
-  if (!Number.isInteger(id) || !(await get(db, "SELECT 1 FROM external_sponsor_ads WHERE id=?", [id]))) throw new SponsorAdminError("Sponsor ad not found.");
+  if (!Number.isInteger(id) || !(await runtimeGet("SELECT 1 FROM external_sponsor_ads WHERE id=?", [id]))) throw new SponsorAdminError("Sponsor ad not found.");
   const value = externalSponsorInput(input);
   const params = [value.name, value.description, value.imagePath, value.websiteUrl, value.phone, value.position, value.active, Date.now(), id] as const;
-  if (db) db.prepare(`UPDATE external_sponsor_ads SET name=?,description=?,image_path=?,website_url=?,phone=?,position=?,active=?,updated_at=? WHERE id=?`).run(...params);
-  else await runtimeRun(`UPDATE external_sponsor_ads SET name=?,description=?,image_path=?,website_url=?,phone=?,position=?,active=?,updated_at=? WHERE id=?`, params);
+  await runtimeRun(`UPDATE external_sponsor_ads SET name=?,description=?,image_path=?,website_url=?,phone=?,position=?,active=?,updated_at=? WHERE id=?`, params);
   return { id };
 }
 
-export async function setBusinessSponsorship(input: { businessId: unknown; position: unknown; active: boolean }, db?: SponsorTestDatabase) {
+export async function setBusinessSponsorship(input: { businessId: unknown; position: unknown; active: boolean }) {
   const businessId = Number.parseInt(String(input.businessId), 10);
-  if (!Number.isInteger(businessId) || !(await get(db, "SELECT 1 FROM businesses WHERE id=?", [businessId]))) throw new SponsorAdminError("Business not found.");
+  if (!Number.isInteger(businessId) || !(await runtimeGet("SELECT 1 FROM businesses WHERE id=?", [businessId]))) throw new SponsorAdminError("Business not found.");
   const position = positionValue(input.position);
   const values = [businessId, position, input.active ? 1 : 0, Date.now()] as const;
   const sql = `INSERT INTO discovery_sponsorships(business_id,position,active,updated_at) VALUES(?,?,?,?) ON CONFLICT(business_id) DO UPDATE SET position=excluded.position,active=excluded.active,updated_at=excluded.updated_at`;
-  if (db) db.prepare(sql).run(...values);
-  else await runtimeRun(sql, values);
+  await runtimeRun(sql, values);
   return { businessId };
 }

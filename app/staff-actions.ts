@@ -1,5 +1,6 @@
 "use server";
 
+import { getDiscoveryProfileAdminView } from "@/lib/discovery-admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
@@ -13,7 +14,7 @@ import {
   saveFeaturedProgramDay,
   updateFeaturedProgramPolicy,
 } from "@/lib/featured-program-settings";
-import { assignRequestToTeamMember, createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
+import { createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
 import { audit, cleanText } from "@/lib/security";
 import { stageUploadedImage, type StagedImage } from "@/lib/media";
 import { createExternalSponsorAd, getExternalSponsorAd, setBusinessSponsorship, SponsorAdminError, updateExternalSponsorAd } from "@/lib/sponsor-admin";
@@ -32,22 +33,6 @@ export async function createStaffAccountAction(formData: FormData) {
   redirect("/dashboard/admin/staff?saved=staff");
 }
 
-export async function assignRequestAction(formData: FormData) {
-  const user = await requireUser();
-  if (!hasCapability(user, "operations:manage")) throw new Error("Operations manager access required.");
-  const requestId = Number.parseInt(cleanText(formData.get("requestId"), 20), 10);
-  const rawTeamMember = cleanText(formData.get("teamMemberId"), 20);
-  const teamMemberId = rawTeamMember ? Number.parseInt(rawTeamMember, 10) : null;
-  if (!Number.isInteger(requestId) || teamMemberId !== null && !Number.isInteger(teamMemberId)) redirect("/dashboard/requests?error=assignment");
-  try {
-    const assigned = await assignRequestToTeamMember(requestId, teamMemberId, user.id);
-    await audit("service_request.assigned", { userId:user.id, businessId:assigned.businessId, detail:{ requestId, assignedUserId:assigned.assignedUserId, previousUserId:assigned.previousUserId } });
-  } catch (error) {
-    redirect(`/dashboard/requests/${requestId}?error=assignment`);
-  }
-  redirect(`/dashboard/requests/${requestId}?assigned=1`);
-}
-
 export async function updateDiscoveryProfileAction(formData: FormData) {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
@@ -55,10 +40,12 @@ export async function updateDiscoveryProfileAction(formData: FormData) {
   let staged: StagedImage | null = null;
   try {
     staged = await stageUploadedImage(formData.get("boothImage"), "booth");
+    const existing=await getDiscoveryProfileAdminView(businessId);
     const result = await updateDiscoveryProfile({
       businessId,
+      proposalVersion:formData.get("proposalVersion"),
       industryKeys: formData.getAll("industryKeys"),
-      boothImagePath: staged?.imageRef || formData.get("existingBoothImagePath"),
+      boothImagePath: staged?.imageRef || existing?.boothImagePath || "",
       city: formData.get("city"), zone: formData.get("zone"), region: formData.get("region"),
       latitude: formData.get("latitude"), longitude: formData.get("longitude"),
       fallbackStyle: formData.get("fallbackStyle"),

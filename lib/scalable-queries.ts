@@ -193,7 +193,8 @@ export type AdminBusinessRow = Business & {
   client_name: string | null;
   client_email: string | null;
   client_count: number;
-  request_count: number;
+  page_review_status: string | null;
+  location_pending: number;
   marketplace_city: string | null;
   marketplace_region: string | null;
   marketplace_approved_at: number | null;
@@ -201,7 +202,7 @@ export type AdminBusinessRow = Business & {
   marketplace_sponsored: number;
 };
 
-export async function listBusinessesPage(input: PageInput & { status?: unknown }) {
+export async function listBusinessesPage(input: PageInput & { status?: unknown; location?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["active", "draft", "suspended"].includes(String(input.status))
     ? String(input.status)
@@ -212,6 +213,7 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
     where += " AND b.status=?";
     params.push(status);
   }
+  if(input.location==='pending')where += " AND EXISTS(SELECT 1 FROM owner_location_proposals ol WHERE ol.business_id=b.id AND ol.version<>ol.reviewed_version)";
   where += searchClause(request.search, ["b.name", "b.handle"], params, [
     `EXISTS(
       SELECT 1 FROM users su
@@ -260,7 +262,8 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
         ORDER BY u.id LIMIT 1
       ) client_email,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles profile ON profile.user_id=u.id WHERE u.business_id=b.id AND profile.access_role='client') client_count,
-      (SELECT COUNT(*) FROM service_requests r WHERE r.business_id=b.id) request_count,
+      (SELECT status FROM owner_page_reviews r WHERE r.business_id=b.id) page_review_status,
+      (SELECT COUNT(*) FROM owner_location_proposals ol WHERE ol.business_id=b.id AND ol.version<>ol.reviewed_version) location_pending,
       (SELECT city FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_city,
       (SELECT region FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_region,
       (SELECT approved_at FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_approved_at,
@@ -358,7 +361,7 @@ export type StaffRow = {
   access_role: "team_member" | "operations_manager";
   must_change_password: number;
   active_assignments: number;
-  open_requests: number;
+  pending_pages: number;
 };
 
 export async function listStaffPage(input: PageInput & { role?: unknown }) {
@@ -382,10 +385,9 @@ export async function listStaffPage(input: PageInput & { role?: unknown }) {
         WHERE a.user_id=u.id AND a.active=1
       ) active_assignments,
       (
-        SELECT COUNT(*) FROM service_requests r
-        WHERE r.assigned_user_id=u.id
-          AND r.status NOT IN ('completed','rejected','cancelled')
-      ) open_requests
+        SELECT COUNT(*) FROM owner_page_reviews r JOIN staff_business_assignments a ON a.business_id=r.business_id
+        WHERE a.user_id=u.id AND a.active=1 AND r.status='pending'
+      ) pending_pages
      ${from}
      ORDER BY p.access_role,lower(u.name),u.id
      LIMIT ? OFFSET ?`,
@@ -560,20 +562,9 @@ export async function listInquiriesPage(
 }
 
 export async function getBusinessActivityCounts(businessId: number) {
-  return runtimeGet<{
-    inquiries: number;
-    offerings: number;
-    requests: number;
-  }>(`
-    SELECT
-      (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
-      (SELECT COUNT(*) FROM products WHERE business_id=?) offerings,
-      (SELECT COUNT(*) FROM service_requests WHERE business_id=?) requests
-  `, [businessId, businessId, businessId]) as Promise<{
-    inquiries: number;
-    offerings: number;
-    requests: number;
-  }>;
+  return runtimeGet<{inquiries:number;products:number}>(`SELECT
+    (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
+    (SELECT COUNT(*) FROM products WHERE business_id=?) products`,[businessId,businessId]) as Promise<{inquiries:number;products:number}>;
 }
 
 export async function getPlatformCounts() {
@@ -581,17 +572,17 @@ export async function getPlatformCounts() {
     businesses: number;
     clients: number;
     staff: number;
-    open_requests: number;
+    pending_pages: number;
   }>(`
     SELECT
       (SELECT COUNT(*) FROM businesses) businesses,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client') clients,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role IN ('team_member','operations_manager')) staff,
-      (SELECT COUNT(*) FROM service_requests WHERE status NOT IN ('completed','rejected','cancelled')) open_requests
+      (SELECT COUNT(*) FROM owner_page_reviews WHERE status='pending') pending_pages
   `) as Promise<{
     businesses: number;
     clients: number;
     staff: number;
-    open_requests: number;
+    pending_pages: number;
   }>;
 }

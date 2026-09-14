@@ -1,5 +1,11 @@
 # Controlled MVP launch checklist
 
+Current checkpoint: BE-035/DEP-031 retire all executable file-database tooling.
+Use `docs/POSTGRES-ONLY-RUNBOOK.md` and `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for
+current commands and evidence. Earlier dated results below are historical and do
+not authorize retired commands or establish readiness of this candidate.
+
+
 ## Required before launch
 
 - [ ] Confirm all release-affecting specs are `done` and `npm run validate:specs` passes.

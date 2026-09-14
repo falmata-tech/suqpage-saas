@@ -2,7 +2,7 @@
 id: FE-036
 title: Routed public marketplace application
 status: in_progress
-related: [FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025]
+related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025]
 owners: [product, frontend, design]
 last_updated: 2026-08-29
 change_level: L2
@@ -289,3 +289,12 @@ at the production Vercel origin.
 - [x] Unsupported mockup features are excluded
 - [x] Performance outcome and rollback are testable
 - [x] Production routes and exact remote release are verified
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.

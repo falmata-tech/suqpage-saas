@@ -22,23 +22,11 @@ export function isApprovedProviderUrl(url: URL) {
   );
 }
 
-export function databasePath() {
-  return path.resolve(
-    /* turbopackIgnore: true */ process.env.MIRTPAGE_DB_PATH ||
-      path.join(/* turbopackIgnore: true */ process.cwd(), "data", "mirtpage.db"),
-  );
-}
-
-export function databaseDriver() {
-  const configured = process.env.MIRTPAGE_DATABASE_DRIVER?.trim();
-  const value = configured || (process.env.NODE_ENV !== "production" && process.env.MIRTPAGE_DB_PATH ? "sqlite" : "");
-  if (!value) {
-    throw new Error("MIRTPAGE_DATABASE_DRIVER is required. Use postgres for the application runtime.");
+export function databaseDriver(): "postgres" {
+  if (process.env.MIRTPAGE_DATABASE_DRIVER?.trim() !== "postgres") {
+    throw new Error("MIRTPAGE_DATABASE_DRIVER must be postgres in every environment.");
   }
-  if (value !== "sqlite" && value !== "postgres") {
-    throw new Error("MIRTPAGE_DATABASE_DRIVER must be sqlite or postgres.");
-  }
-  return value as "sqlite" | "postgres";
+  return "postgres";
 }
 
 export function mediaRoot() {
@@ -154,7 +142,6 @@ export function supportWhatsAppUrl() {
 }
 
 export function ensureRuntimeDirectories() {
-  fs.mkdirSync(path.dirname(databasePath()), { recursive: true });
   fs.mkdirSync(mediaRoot(), { recursive: true });
   fs.mkdirSync(requestAttachmentRoot(), { recursive: true });
   fs.mkdirSync(supportAttachmentRoot(), { recursive: true });
@@ -217,7 +204,7 @@ export function assertProductionConfiguration() {
     throw new Error("MIRTPAGE_SUPABASE_STORAGE_BUCKET is invalid.");
   }
   const identityConfig = assertSupabaseAuthConfiguration();
-  if (!identityConfig.emailOtpEnabled || !identityConfig.googleEnabled) {
-    throw new Error("AfricMade production requires verified email-code and Google sign-in providers.");
+  if (!identityConfig.emailOtpEnabled) {
+    throw new Error("Suqpage production requires verified email-code sign-in.");
   }
 }

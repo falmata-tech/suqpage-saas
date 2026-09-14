@@ -2,7 +2,7 @@
 id: FE-001
 title: Public showroom discovery and inquiry experience
 status: done
-related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
+related: [FE-041, BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L2
@@ -146,3 +146,12 @@ and visibility in the correct client inquiry inbox.
 Renderer/application changes ship together after browser and release gates.
 Rollback deploys the previous compatible build. Additive migration 19 may
 remain in place because it preserves the legacy numeric quantity column.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.

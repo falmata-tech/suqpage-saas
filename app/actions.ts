@@ -1,14 +1,16 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { changeProductCategory } from "@/lib/product-categories";
+import { stageTenantProductImage } from "@/lib/tenant-product-media";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, currentUser, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { authDriver } from "@/lib/config";
-import { canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
+import { canMaintainBasicProducts, canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById, runtimeUserByEmail } from "@/lib/catalog-runtime";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "@/lib/runtime-sql";
-import { saveUploadedImage, stageUploadedImage } from "@/lib/media";
+import { saveUploadedImage, stageUploadedImage, type StagedImage } from "@/lib/media";
 import { isStrongPassword } from "@/lib/passwords";
 import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
 import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
@@ -102,7 +104,7 @@ export async function updateBusinessAction(formData:FormData){
     const logoPath=await saveUploadedImage(formData.get("logo"),existing.logo_path,"logo");
     const favicon=await saveUploadedImage(formData.get("favicon"),existing.favicon_path,"favicon");
     const live=validateLiveSettings({isLive:formData.get("isLive"),platform:text(formData,"livePlatform",30),url:text(formData,"liveUrl",500)});
-    await runtimeRun(`UPDATE businesses SET name=?,logo_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=? WHERE id=?`,[
+    await runtimeRun(`UPDATE businesses SET name=?,logo_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=?,content_version=content_version+1 WHERE id=?`,[
       text(formData,"name",100),logoPath,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
     ]);
     await audit("business.updated",{userId:user.id,businessId});
@@ -136,23 +138,19 @@ export async function adminResetClientPasswordAction(formData:FormData){
   revalidatePath("/dashboard/settings");go("/dashboard/settings",{business:businessId,saved:"password"});
 }
 
-export async function createCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const name=text(formData,"name",100);
-  try{await runtimeRun("INSERT INTO categories(business_id,collection_id,name,slug,sort_order,is_active) VALUES(?,NULL,?,?,?,1)",[businessId,name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder")]);await audit("category.created",{userId:user.id,businessId,detail:{name}});}catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not create category."});}
-  revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
+async function categoryAction(kind:"create"|"update"|"delete",formData:FormData){
+ const user=await requireUser();const businessId=int(formData,"businessId");const name=text(formData,"name",100);
+ try{await changeProductCategory(user,{kind,businessId,id:int(formData,"categoryId")||undefined,name,slug:slugify(text(formData,"slug",80)||name),sortOrder:int(formData,"sortOrder"),active:Boolean(formData.get("isActive"))});}
+ catch(error){go("/dashboard/catalog",{business:businessId,error:error instanceof Error?error.message:"Could not save category."});}
+ revalidatePath("/dashboard/catalog");revalidatePath("/dashboard/products");revalidatePath("/");go("/dashboard/catalog",{business:businessId,saved:"category"});
 }
-
-export async function updateCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId"),name=text(formData,"name",100);
-  if(!await runtimeGet("SELECT id FROM categories WHERE id=? AND business_id=?",[id,businessId]))throw new Error("Category not found.");
-  await runtimeRun("UPDATE categories SET collection_id=NULL,name=?,slug=?,sort_order=?,is_active=? WHERE id=? AND business_id=?",[name,slugify(text(formData,"slug",80)||name),int(formData,"sortOrder"),formData.get("isActive")?1:0,id,businessId]);await audit("category.updated",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"category"});
-}
-
-export async function deleteCategoryAction(formData:FormData){
-  const {businessId,user}=await authorizedBusinessId(int(formData,"businessId"));const id=int(formData,"categoryId");await runtimeTransaction(async()=>{await runtimeRun("UPDATE products SET category_id=NULL WHERE business_id=? AND category_id=?",[businessId,id]);await runtimeRun("DELETE FROM categories WHERE id=? AND business_id=?",[id,businessId]);});await audit("category.deleted",{userId:user.id,businessId,detail:{id}});revalidatePath("/dashboard/catalog");go("/dashboard/catalog",{business:businessId,saved:"deleted"});
-}
+export async function createCategoryAction(formData:FormData){return categoryAction("create",formData);}
+export async function updateCategoryAction(formData:FormData){return categoryAction("update",formData);}
+export async function deleteCategoryAction(formData:FormData){return categoryAction("delete",formData);}
 
 const productFormFields = new Set([
+  "optionGroups",
+  "isPublished",
   "businessId",
   "productId",
   "kind",
@@ -182,6 +180,7 @@ export async function basicProductUpkeepAction(formData:FormData){
   const productId=int(formData,"productId")||null;
   const returnPath=productId?`/dashboard/products/${productId}`:"/dashboard/products/new";
   let result:{productId:number;contentVersion:number};
+  let staged:StagedImage|null=null;
   try{
     const unsupported=[...formData.keys()].filter(key=>!productFormFields.has(key)&&!key.startsWith("$ACTION_"));
     if(unsupported.length)throw new ProductUpkeepError("The product form contains unsupported fields.");
@@ -189,12 +188,17 @@ export async function basicProductUpkeepAction(formData:FormData){
     const hasFile=file instanceof File&&file.size>0;
     const removeImage=Boolean(formData.get("removeImage"));
     if(hasFile&&removeImage)throw new ProductUpkeepError("Choose either a replacement image or remove the current image.");
-    const staged=await stageUploadedImage(file,"product");
+    staged=await stageTenantProductImage(user,businessId,file);
+    const previous=productId?await runtimeGet<{capacity_summary:string;minimum_order_summary:string;lead_time_summary:string}>("SELECT capacity_summary,minimum_order_summary,lead_time_summary FROM products WHERE id=? AND business_id=?",[productId,businessId]):undefined;
+    const optionText=String(formData.get("optionGroups")||"[]");
+    if(optionText.length>25000)throw new ProductUpkeepError("Product options are too long.");
     const priceInput=text(formData,"priceEtb",40);
     const priceValue=priceInput===""?null:Number(priceInput);
     if(priceValue!==null&&(!Number.isFinite(priceValue)||priceValue<0||priceValue>9999999.99))throw new ProductUpkeepError("Price must be a valid non-negative ETB amount.");
     const videoInput=text(formData,"videoUrl",500);
     result=await executeBasicProductUpkeep(runtimeProductUpkeepPort(),user,{
+      ...(formData.has("optionGroups")?{optionGroups:JSON.parse(optionText)}:{}),
+      ...(formData.has("isPublished")?{isPublished:formData.get("isPublished")==="1"}:{}),
       kind:text(formData,"kind",20),
       businessId,
       productId,
@@ -205,9 +209,9 @@ export async function basicProductUpkeepAction(formData:FormData){
       availability:text(formData,"availability",30),
       offeringKind:text(formData,"offeringKind",40),
       quantityMode:text(formData,"quantityMode",20),
-      capacitySummary:text(formData,"capacitySummary",180),
-      minimumOrderSummary:text(formData,"minimumOrderSummary",140),
-      leadTimeSummary:text(formData,"leadTimeSummary",140),
+      capacitySummary:formData.has("capacitySummary")?text(formData,"capacitySummary",180):previous?.capacity_summary||"",
+      minimumOrderSummary:formData.has("minimumOrderSummary")?text(formData,"minimumOrderSummary",140):previous?.minimum_order_summary||"",
+      leadTimeSummary:formData.has("leadTimeSummary")?text(formData,"leadTimeSummary",140):previous?.lead_time_summary||"",
       priceMinor:priceValue===null?null:Math.round(priceValue*100),
       quantityUnit:text(formData,"quantityUnit",40),
       highlights:text(formData,"highlights",485).split(/\r?\n/),
@@ -217,6 +221,7 @@ export async function basicProductUpkeepAction(formData:FormData){
       serviceNote:text(formData,"serviceNote",300),
     },staged);
   }catch(error){
+    await staged?.discard();
     go(returnPath,{
       business:businessId||undefined,
       error:error instanceof Error?error.message:"Could not save product.",
@@ -226,6 +231,7 @@ export async function basicProductUpkeepAction(formData:FormData){
   revalidatePath(`/@${business.handle}`);
   revalidatePath(`/preview/@${business.handle}`);
   revalidatePath("/dashboard/products");
+  revalidatePath("/");
   revalidatePath(`/dashboard/products/${result.productId}`);
   go(`/dashboard/products/${result.productId}`,{business:businessId,saved:1,version:result.contentVersion});
 }

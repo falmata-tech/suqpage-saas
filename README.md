@@ -1,358 +1,90 @@
-# MirtPage SaaS MVP — Controlled Launch Build
+# Suqpage
 
-MirtPage is a multi-tenant Next.js application for professionally designed client showrooms. Each client keeps a distinct renderer while MirtPage supplies managed onboarding requests, dynamic catalogs, product options, descriptive availability, saved inquiries, social handoff, and first-party support.
+Suqpage is a multi-tenant marketplace for locally made products. Sellers manage a
+standard public page, product photos/videos, choices, visibility and public
+contacts. Buyers discover businesses beside a map, open linked product pages,
+and send one-product or grouped inquiries through the platform or available
+contact channels. Owners and administrators have separate workspaces; the first
+page publication and marketplace location are reviewed by an administrator.
 
-## Engineering workflow
+The current implementation uses Next.js, Supabase PostgreSQL, Supabase Auth and
+private Supabase Storage. PostgreSQL is the only database engine in local
+development, tests, browser acceptance, CI and deployments. Custom-page requests
+and the design studio are retired; historical published content remains readable.
 
-This repository uses spec-driven development. Before changing behavior, read
-`AGENTS.md`, `MIRTPAGE-MASTER-PROMPT.md`, and `specs/README.md`, then locate the
-controlling FE/BE/DEP specs:
+## Start locally
 
-```bash
-npm run specs:list
-npm run validate:specs
-```
+Use Node 24.18.1, npm, Docker and Supabase CLI. Start from `.env.example` and retain
+all provider values in ignored local environment files.
 
-The full operating model is in `docs/engineering/SDD-PLAYBOOK.md`; architectural
-decisions are in `docs/adr/` and implementation/test evidence is mapped in
-`specs/TRACEABILITY.md`.
-
-## Included benchmark tenants
-
-- `@selam-weave` — textile atelier
-- `@afia-botanics` — small-batch botanical care
-- `@warka-furniture` — furniture workshop
-- `@addis-metalworks` — small-run fabrication and RFQ
-- `@green-terrace-farm` — seasonal farm
-- `@blue-nile-apiary` — honey and beeswax producer
-- `@rift-valley-mill` — grain mill
-- `@entoto-ceramics` — pottery studio
-- `@koba-leather` — leather workshop
-- `@nova-assembly` — electronics assembly and repair
-
-The visual pages remain separately designed. Products, categories, options, inquiries, requests, and support workflows are database-backed.
-
-## Requirements
-
-- Node.js 24.18.1 (use `nvm use`)
-- npm
-- A single persistent server or container for this SQLite pilot
-- HTTPS for production
-
-## Local setup
-
-```bash
-cp .env.example .env
-npm ci
-npm run reset
-npm run dev
-```
-
-`npm run reset` creates 66 fictional, disposable demo businesses, including ten
-visual benchmarks, and generates a different temporary password for every account. Credentials are
-printed once and written to:
-
-```text
-.local/seed-credentials.txt
-```
-
-The credentials file and database are excluded from the ZIP and Git. Every user is required to change the temporary password.
-
-## Release verification
-
-Run the complete repeatable release check:
-
-```bash
-npm run release
-```
-
-This performs:
-
-- TypeScript validation
-- showroom integration validation
-- security and tenant-isolation tests
-- stockless schema/recovery and versioned product-upkeep tests
-- production build
-- production HTTP smoke tests
-- dependency vulnerability audit
-- managed-request integration and production HTTP checks
-- blueprint-media, composition-fitness, and ten-showroom benchmark checks
-
-For real Chromium acceptance tests covering public, administrator, and owner
-workflows with an isolated temporary database, install the browser once and run:
-
-```bash
-npx playwright install --with-deps chromium
-npm run test:acceptance
-```
-
-To verify migration idempotence plus database/media backup and restore:
-
-```bash
-npm run test:operations
-```
-
-To build and exercise the production image with disposable Docker resources:
-
-```bash
-npm run test:container
-```
-
-To verify the complete current SQLite schema and retained rows against a
-disposable PostgreSQL 17 target without enabling database cutover:
-
-```bash
-npm run test:postgres-readiness
-```
-
-Deployment, local/hosted Supabase, Netlify/Vercel candidates, GitHub protection,
-and rollback procedures are in `docs/DEVOPS-RUNBOOK.md`. Normal development and
-production use PostgreSQL; SQLite remains isolated compatibility and migration
-infrastructure during the rollback window.
-
-## Production environment
-
-Create production secrets in the selected host's encrypted environment UI:
-
-```bash
-NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://mirtpage.com
-MIRTPAGE_DATABASE_DRIVER=postgres
-MIRTPAGE_POSTGRES_URL=<supabase-transaction-pooler-url>
-MIRTPAGE_MEDIA_DRIVER=supabase
-MIRTPAGE_SUPABASE_URL=https://<project-ref>.supabase.co
-MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY=<server-only>
-MIRTPAGE_SUPABASE_STORAGE_BUCKET=mirtpage-media
-MIRTPAGE_AUTH_DRIVER=local
-PRIVACY_SALT=<at-least-24-random-characters>
-```
-
-Generate a salt with:
-
-```bash
-openssl rand -hex 32
-```
-
-Optional inquiry email notifications use Resend:
-
-```bash
-RESEND_API_KEY=
-NOTIFICATION_FROM_EMAIL=MirtPage <notifications@mirtpage.com>
-```
-
-Customer support is first-party and works without an external provider.
-Operations can enable support agents, set each concurrent-conversation limit,
-and rely on transactional least-loaded assignment with a waiting queue.
-Optional Telegram alerts contain only the support reference, business name,
-assignment, and an authenticated dashboard link:
-
-```bash
-MIRTPAGE_TELEGRAM_BOT_TOKEN=
-MIRTPAGE_TELEGRAM_SUPPORT_CHAT_ID=
-MIRTPAGE_SUPPORT_WHATSAPP_URL=
-```
-
-The WhatsApp value is an optional official `https://wa.me/...` or
-`https://api.whatsapp.com/...` emergency handoff. Telegram and WhatsApp are not
-the support record and never receive the in-app message body.
-
-Monthly account access is also manual in this release. MirtPage staff record that
-a renewal was received and advance the monthly period. No amount or price is
-collected in the current UI, and no checkout, payment gateway, or automatic
-debit is configured.
-
-Production startup refuses non-HTTPS app URLs and an incomplete database.
-Supabase media mode requires a valid HTTPS project URL, server-only service-role
-key, and private bucket name.
-Set `MIRTPAGE_PRODUCT_UPKEEP_ENABLED=0` only as an emergency switch to disable
-basic product writes while leaving requests and showrooms available.
-Set `MIRTPAGE_RECIPE_STUDIO_ENABLED=0` to deny recipe export/import and route
-new or existing private drafts through the retained administrative editor.
-Controlled YouTube admission is disabled by default. Set
-`MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=1` only after the DEP-009 provider gate is
-approved; this enables private normalized-ID admission, not public rendering.
-
-## Local development
-
-```bash
+```sh
 npm ci
 npm run local:supabase:start
-npm run local:supabase:configure
 npm run local:supabase:bootstrap
 npm run dev:local
 ```
 
-`npm run reset` is only for isolated SQLite compatibility fixtures. Never run
-it against a retained database. Local PostgreSQL uses
-`npm run local:supabase:reset`; retained PostgreSQL uses
-`npm run migrate:postgres` after a verified backup.
+The native installer creates schema and 66 fictional demo businesses in an empty
+local database. It preserves a populated database. Sign in using the configured
+local Supabase email-code or Google flow. Local fixture passwords, when generated,
+are written only to `.local/seed-credentials.txt` with restricted permissions.
+Never copy them or local provider credentials to Preview or Production.
 
-Before opening the site publicly:
+The local review server currently uses `http://127.0.0.1:3101`. Useful routes:
 
-1. Sign in with each temporary account and change its password.
-2. Configure real business notification emails and social contacts.
-3. Submit a public expression of interest and confirm it appears in the administrator operations queue without attachments or account creation.
-4. Put the server behind an HTTPS reverse proxy.
-5. Create and verify an initial backup.
+- `/`: category/search results, backend pagination and retained map.
+- `/@demo-nile-sensor-studio?ref=discovery`: a public business page.
+- `/dashboard/page`, `/dashboard/products`, `/dashboard/business`: owner editing.
+- `/dashboard/account`: private account contacts.
+- `/dashboard/admin/page-reviews`: initial publication review.
+- `/dashboard/admin/businesses?location=pending`: pending location review.
 
-## Upgrade from the audited prototype
+Public contact details and private account identity are separate. Existing verified
+account emails are preserved. Optional public channels appear only when provided.
 
-Copy the previous database to the configured `MIRTPAGE_DB_PATH`. For an existing
-database whose product/history tables require a destructive rebuild, stop every
-application instance, create a verified checkpoint, and approve that one
-migration command:
+## Engineering and verification
 
-```bash
-npm run backup
-MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS=1 npm run migrate
+Read `AGENTS.md`, `MIRTPAGE-MASTER-PROMPT.md` and `specs/README.md` before changing
+behavior. The active ordered work is in `docs/SUQPAGE-TRANSITION-CHECKLIST.md`.
+Contracts FE-040–043, BE-032–035, DEP-030–031 and ADR-0018–0020 control the current
+transition. Evidence is mapped in `specs/TRACEABILITY.md`.
+
+```sh
+npm run validate:specs
+npm run check:database-boundaries
+npm run typecheck
+npm run test:native-postgres
+npm run test:launch-wiring
+```
+
+Persistence tests require an isolated local PostgreSQL service; they use disposable
+schemas and the real native installer. `MIRTPAGE_TEST_POSTGRES_URL` can select a
+local/CI test service. Browser acceptance starts a separate Supabase project and
+uses real local Auth/Storage with synthetic users. No external inquiry message is
+sent by the focused launch fixtures.
+
+Visual changes require desktop/phone review before expensive gates. After approval:
+
+```sh
+npm run check
 npm run release
+npm run test:acceptance
+npm run test:operations
+npm run test:container
 ```
 
-Do not leave `MIRTPAGE_APPROVE_DESTRUCTIVE_MIGRATIONS` in the persistent
-environment. Migration refuses a checkpoint older than 24 hours, a backup for a
-different database, an integrity/foreign-key failure, changed source bytes, or
-insufficient disk. The migration preserves businesses, products, availability,
-inquiries, relationships, and retained history while removing obsolete numeric
-inventory columns and adding product-upkeep history. An administrator should
-reset all old shared passwords before public launch.
+See `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for the wiring audit and current limits.
+A passing local workflow does not imply hosted provider readiness or deployment.
 
-Old uploads stored under `public/uploads/runtime` should be re-uploaded through
-the dashboard so they are validated and stored behind the stable `/media/`
-route.
+## Operations
 
-## Supabase media storage
+Follow [PostgreSQL operations](docs/POSTGRES-ONLY-RUNBOOK.md) for native installation,
+fixtures, migration, backup, restore and release checks. Database archives cover
+the application schema; Auth and private Storage require separate provider backups.
+Restore requires a reviewed target digest and an empty recovery database.
 
-MirtPage can keep SQLite on one persistent application instance while moving
-verified media to a private Supabase Storage bucket. This removes media-volume
-coupling only; it does not make SQLite safe for multiple application replicas.
-
-Create one private bucket, then configure server-only deployment secrets:
-
-```bash
-MIRTPAGE_MEDIA_DRIVER=supabase
-MIRTPAGE_SUPABASE_URL=https://<project-ref>.supabase.co
-MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY=<server-only-service-role-key>
-MIRTPAGE_SUPABASE_STORAGE_BUCKET=mirtpage-media
-```
-
-Never expose the service-role key through `NEXT_PUBLIC_*`, browser code, logs,
-screenshots, or support messages. The application proxies public showroom media
-and authorizes private request media before reading the private bucket.
-
-For an existing installation, copy media without changing database references
-or deleting local source files:
-
-```bash
-npm run backup
-npm run migrate:media -- --dry-run
-npm run migrate:media -- --execute
-npm run migrate:media -- --dry-run
-```
-
-The final dry run must report every object as already verified. Then switch the
-driver, run `npm run preflight` and `npm run release`, and test one published
-image, one authorized private attachment, one upload, and one approved revision
-publication. Retain the local media tree through the rollback window. Rollback
-sets `MIRTPAGE_MEDIA_DRIVER=filesystem`; stable `/media/<key>` and private
-attachment references do not change.
-
-## Docker deployment
-
-Set `NEXT_PUBLIC_APP_URL`, any exact `MIRTPAGE_SERVER_ACTION_ORIGINS`, and
-`PRIVACY_SALT` in a `.env` file. The URL and trusted origins are supplied to both
-the build and runtime because Next.js compiles Server Action origin policy into
-the production artifact. Then initialize the persistent volume:
-
-```bash
-docker compose build
-docker compose run --rm mirtpage npm run reset
-docker compose up -d
-```
-
-The application and uploaded media use the `mirtpage_data` volume. Run backups with:
-
-```bash
-docker compose exec mirtpage npm run backup
-```
-
-## Backups and restore
-
-```bash
-npm run backup
-npm run restore -- --from=/absolute/path/to/backups/<timestamp>
-```
-
-The backup command reads the database without invoking application migrations,
-checkpoints WAL, verifies integrity and foreign keys before and after copying,
-and records a source hash used by destructive-migration admission. Stop the
-application before backup for a destructive upgrade and before any restore.
-Test restoration before relying on a backup policy.
-
-## Social contact formats
-
-Enter these under **Dashboard → Business settings**:
-
-- WhatsApp: `251911234567`
-- Telegram: `AlHayaModest`
-- TikTok: `selamweave`
-
-WhatsApp and Telegram receive the structured inquiry in the destination link. TikTok opens the exact profile and uses copy/manual-message fallback because reliable public DM prefilling is unavailable.
-
-## Secure media uploads
-
-Dashboard uploads:
-
-- accept only verified JPEG, PNG and WebP content
-- reject mismatched MIME types and disguised HTML
-- enforce a 5 MB limit
-- reject excessive image dimensions
-- generate server-controlled filenames
-- store outside the Next.js static build through the configured filesystem or
-  private Supabase adapter
-- serve published media through `/media/<generated-file>` with `nosniff`
-
-Public, authenticated-client, and on-behalf request intake is attachment-free.
-After staff import the design, each labeled image destination accepts one
-verified upload. Those private images remain in the request-media namespace and
-are served only through an authorized route until approved publication.
-
-## AI showroom design workflow
-
-Authenticated clients and operations staff describe the business type, catalog
-stage, photography stage, products, and desired outcome. They do not choose a
-page layout or fixed image count. Authorized staff use the design workspace in
-five stages: **Brief**, **Import**, **Images**, **Edit**, and **Preview**.
-The AI design may choose bounded dynamic product and image counts and declare
-labeled unresolved image destinations. Staff fulfill those exact spaces with
-verified request-scoped images. Required slots and hard composition-fitness
-issues block client review; optional slots use reviewed no-media treatments.
-The revision editor groups complete staff control into settings, layout/style,
-page content, and offerings.
-
-## Basic product upkeep
-
-After the first showroom publication, clients see **My offerings**. They may add
-an offering or maintain its exact name, description, primary managed image,
-descriptive availability, and compatible existing category placement. Before
-publication, assigned team members, operations managers, and administrators can
-edit the complete imported offering set inside the private revision workflow.
-Every post-publication save creates a retained monotonic showroom version;
-stale forms fail instead of overwriting newer revisions. Category structure,
-ordering, slugs, structural removal, settings, design, and full publication
-remain in the request/revision workflow.
-
-## Custom showroom workflow
-
-See `showroom-sdk/README-AI-INTEGRATION.md`.
-
-The client renderer owns layout and styling. MirtPage owns catalog data, availability, inquiry state, persistence, and social routing. Custom designs must not query SQLite or hard-code tenant products.
-
-## MVP deployment boundary
-
-This build is suitable for a small controlled pilot on one persistent server.
-The 66 included businesses are disposable local fixtures, including ten visual
-benchmarks, not a production capacity claim. SQLite is configured with WAL,
-busy timeout, integrity checks,
-backups and migrations, but it is not a multi-instance database. Move to managed
-PostgreSQL and complete a verified object-storage cutover before broad external
-onboarding or horizontal scaling.
+Hosted changes follow DEP-029. Never run `supabase config push`; never replace or
+disable hosted Google/SMTP settings as a recovery shortcut. Preview and Production
+must use separate projects and credentials. Deployment requires verified migrations,
+private media, email/Google sign-in, host configuration, health and rollback evidence.
+No hosted write or deployment is implied by this README or the local launch audit.

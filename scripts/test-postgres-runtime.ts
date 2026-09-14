@@ -1,3 +1,4 @@
+import { getDb, seedFixture, closeDbForTests } from "./testing/postgres-fixture";
 import assert from "node:assert/strict";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "../lib/postgres-runtime";
 import { consumePostgresRateLimit, resetPostgresRateLimit } from "../lib/rate-limit-postgres";
@@ -8,17 +9,11 @@ import { createPostgresPublicClientWorkspace } from "../lib/signup-postgres";
 import { PostgresRequestRepository } from "../lib/postgres-request-repository";
 
 async function main() {
-  const config = postgresRuntimeConfig({
-    MIRTPAGE_POSTGRES_URL: process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL,
-    MIRTPAGE_POSTGRES_POOL_MAX: "2",
-  });
-  assert.ok(config, "A disposable PostgreSQL URL is required for runtime adapter tests.");
-
-  const pool = createPostgresPool(config);
-  const runner = new PostgresTransactionRunner(pool);
+  const db = await getDb();
+  await seedFixture();
+  const runner = db.runner;
   try {
     const evidence = await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       const businesses = await runner.query<{ count: number }>(
         "SELECT COUNT(*)::int AS count FROM businesses WHERE status=?",
         ["active"],
@@ -37,7 +32,6 @@ async function main() {
 
     let signupProject: { businessId: number; userId: number } | undefined;
     await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       const repository = new PostgresCatalogRepository(runner);
       const businesses = await repository.getAllBusinesses();
       const business = businesses[0];
@@ -110,7 +104,6 @@ async function main() {
     });
 
     await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       const requests = new PostgresRequestRepository(runner);
       const key = `postgres-request-${Date.now()}`;
       const input = { contactName: "PostgreSQL request", contactValue: "+251911123456", businessName: "PostgreSQL Works", requestText: "We need a professional showroom for the products made in our workshop.", idempotencyKey: key, consent: true };
@@ -131,7 +124,6 @@ async function main() {
     });
 
     await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       const unique = `${Date.now()}${Math.floor(Math.random() * 10_000)}`;
       const input = {
         name: "PostgreSQL Signup",
@@ -149,13 +141,12 @@ async function main() {
       signupProject = { businessId: signup.businessId, userId: signup.userId };
       await assert.rejects(
         () => createPostgresPublicClientWorkspace(runner, { ...input, idempotencyKey: `again-${unique}` }, identity),
-        /already has an AfricMade workspace/,
+        /already has a Suqpage workspace/,
       );
     });
     assert.ok(signupProject);
     const activeSignupProject = signupProject;
     await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       await runner.query(`
         INSERT INTO service_requests(
           public_ref,business_id,represented_client_user_id,request_type,status,
@@ -168,8 +159,7 @@ async function main() {
     });
     await assert.rejects(
       () => runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        await runner.query(`
+          await runner.query(`
           INSERT INTO service_requests(
             public_ref,business_id,represented_client_user_id,request_type,status,
             contact_name,contact_value,business_name,request_text,submitter_kind,
@@ -182,17 +172,15 @@ async function main() {
       (error: unknown) => error instanceof Error && "code" in error && error.code === "23505",
     );
     const projectIndex = await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       return (await runner.query<{ indexdef: string }>(`
         SELECT indexdef FROM pg_indexes
-        WHERE schemaname='mirtpage_rehearsal'
+        WHERE schemaname=current_schema()
           AND indexname='one_active_showroom_project_per_business_idx'
       `)).rows[0];
     });
     assert.match(projectIndex?.indexdef || "", /UNIQUE INDEX/);
 
     await runner.transaction(async () => {
-      await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
       await resetPostgresRateLimit(runner, "postgres-runtime-test");
       assert.equal((await consumePostgresRateLimit(runner, "postgres-runtime-test", 2, 60_000)).remaining, 1);
       assert.equal((await consumePostgresRateLimit(runner, "postgres-runtime-test", 2, 60_000)).remaining, 0);
@@ -202,10 +190,7 @@ async function main() {
       assert.ok(blocked.retryAfterSeconds > 0);
     });
 
-    const runtimeUrl = new URL(process.env.MIRTPAGE_POSTGRES_REHEARSAL_URL!);
-    runtimeUrl.searchParams.set("options", "-c search_path=mirtpage_rehearsal");
-    process.env.MIRTPAGE_DATABASE_DRIVER = "postgres";
-    process.env.MIRTPAGE_POSTGRES_URL = runtimeUrl.toString();
+
     process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY = "1";
     const { preflight } = await import("./preflight");
     await preflight();
@@ -260,8 +245,7 @@ async function main() {
         runtimeRequestTypeForBusiness,
       } = await import("../lib/request-runtime");
       const runtimeAdmin = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{
+          return (await runner.query<{
           id: number;
           email: string;
           name: string;
@@ -276,8 +260,7 @@ async function main() {
       const requestBusinessId = requestPage.items.find((item) => item.business_id)?.business_id;
       if (requestBusinessId) assert.ok(await runtimeRequestTypeForBusiness(requestBusinessId));
       const attachmentTarget = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{ id: number; request_id: number }>(
+          return (await runner.query<{ id: number; request_id: number }>(
           "SELECT id,request_id FROM request_attachments ORDER BY id LIMIT 1",
         )).rows[0];
       });
@@ -285,8 +268,7 @@ async function main() {
         assert.equal((await runtimeRequestAttachment(attachmentTarget.request_id, attachmentTarget.id))?.id, attachmentTarget.id);
       }
       const inquiryBusiness = (await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{ business_id: number }>(
+          return (await runner.query<{ business_id: number }>(
           "SELECT business_id FROM inquiries ORDER BY id DESC LIMIT 1",
         )).rows[0];
       }))?.business_id;
@@ -297,8 +279,7 @@ async function main() {
       }
 
       const upkeepTarget = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{
+          return (await runner.query<{
           business_id: number;
           content_version: number;
           category_id: number;
@@ -365,8 +346,7 @@ async function main() {
         recordShowroomVisit,
       } = await import("../lib/account-health");
       const accountTarget = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        const business = (await runner.query<{ id: number; handle: string }>(
+          const business = (await runner.query<{ id: number; handle: string }>(
           "SELECT id,handle FROM businesses WHERE status='active' ORDER BY id LIMIT 1",
         )).rows[0];
         const operations = (await runner.query<{
@@ -423,8 +403,7 @@ async function main() {
         accessRole: "team_member",
       });
       const assignableRequest = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{ id: number; business_id: number }>(
+          return (await runner.query<{ id: number; business_id: number }>(
           "SELECT id,business_id FROM service_requests WHERE business_id IS NOT NULL ORDER BY id LIMIT 1",
         )).rows[0];
       });
@@ -474,8 +453,7 @@ async function main() {
         maxOpenConversations: 2,
       });
       const supportClientRow = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{
+          return (await runner.query<{
           id: number;
           email: string;
           name: string;
@@ -566,8 +544,7 @@ async function main() {
         detail: { evidence: "runtime" },
       });
       const auditRow = await runner.transaction(async () => {
-        await runner.query("SET LOCAL search_path TO mirtpage_rehearsal");
-        return (await runner.query<{ action: string }>(
+          return (await runner.query<{ action: string }>(
           "SELECT action FROM audit_logs WHERE action=? ORDER BY id DESC LIMIT 1",
           [auditAction],
         )).rows[0];
@@ -578,7 +555,7 @@ async function main() {
     }
     console.log("PostgreSQL runtime pool, placeholder, and transaction tests passed.");
   } finally {
-    await pool.end();
+    await closeDbForTests();
   }
 }
 

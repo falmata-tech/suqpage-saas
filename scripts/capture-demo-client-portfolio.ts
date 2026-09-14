@@ -46,7 +46,7 @@ try {
       const page = await context.newPage();
       const browserErrors: string[] = [];
       page.on("console", (message) => {
-        if (message.type() === "error" && !message.text().includes("ExperimentalWarning: SQLite")) {
+        if (message.type() === "error") {
           browserErrors.push(message.text());
         }
       });

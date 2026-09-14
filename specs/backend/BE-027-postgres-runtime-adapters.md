@@ -2,13 +2,19 @@
 id: BE-027
 title: PostgreSQL runtime adapters and persistence parity
 status: in_progress
-related: [BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
+related: [BE-035, BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
 last_updated: 2026-08-05
 change_level: L4
 ---
 
 # BE-027 - PostgreSQL runtime adapters and persistence parity
+
+
+Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retained
+SQLite fixture, fallback and copy-tool exception in this specification. Only native
+PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
+below is historical; current acceptance uses PostgreSQL-only fixtures.
 
 ## Problem and outcome
 

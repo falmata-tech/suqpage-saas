@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const CACHE_PREFIXES = ["africmade-pwa-", "mirtpage-pwa-"];
+const CACHE_PREFIXES = ["suqpage-pwa-", "africmade-pwa-", "mirtpage-pwa-"];
 
 async function removeDevelopmentWorkers() {
   const registrations = await navigator.serviceWorker.getRegistrations();

@@ -14,7 +14,8 @@ type RuntimeServices = {
 let services: RuntimeServices | null = null;
 
 export function postgresRuntimeEnabled() {
-  return process.env.MIRTPAGE_DATABASE_DRIVER === "postgres";
+  if (process.env.MIRTPAGE_DATABASE_DRIVER !== "postgres") throw new Error("MIRTPAGE_DATABASE_DRIVER must be postgres in every environment.");
+  return true;
 }
 
 export function postgresRuntimeServices() {

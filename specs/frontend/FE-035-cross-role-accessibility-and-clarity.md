@@ -49,6 +49,8 @@ judge.
 - Every audited page has a useful title, one primary content landmark, a clear
   top-level heading, no duplicate element IDs, and no horizontal page overflow
   at 390 or 1440 CSS pixels.
+  Embedded business previews use a subordinate heading within the owner editor;
+  cover-image galleries remain keyboard-scrollable even before editing is enabled.
 - Controls expose programmatic names and states. Form fields have persistent
   labels or equivalent accessible names; errors are understandable without
   relying on color alone.

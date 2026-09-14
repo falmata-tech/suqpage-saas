@@ -28,7 +28,7 @@ export const PUBLIC_SUPPORT_CATEGORIES: ReadonlyArray<{
   label: string;
   description: string;
 }> = [
-  { key: "general", label: "AfricMade help or report", description: "Ask how AfricMade works or report a concern about a listing." },
+  { key: "general", label: "Suqpage help or report", description: "Ask how Suqpage works or report a concern about a listing." },
   { key: "shipment_observation", label: "Transport arrangements", description: "Ask for help connecting with a transport option for a purchase." },
 ] as const;
 
@@ -233,7 +233,7 @@ async function insertSupportAttachment(messageId: number, value: ReturnType<type
 function assistanceCategory(value: unknown): SupportAssistanceCategory {
   const category = cleanText(value, 40) as SupportAssistanceCategory;
   if (!PUBLIC_SUPPORT_CATEGORIES.some((option) => option.key === category)) {
-    throw new SupportError("Choose how AfricMade can help.", "category_required");
+    throw new SupportError("Choose how Suqpage can help.", "category_required");
   }
   return category;
 }
@@ -359,7 +359,7 @@ export async function createSupportConversation(
         public_ref,participant_kind,business_id,opened_by_user_id,
         assistance_category,requester_label,subject,status,
         created_at,updated_at,last_message_at
-      ) VALUES(?,'client',?,?, 'general','AfricMade client',?,'waiting',?,?,?) RETURNING id
+      ) VALUES(?,'client',?,?, 'general','Suqpage client',?,'waiting',?,?,?) RETURNING id
     `, [publicRef, user.business_id, user.id, subject, now, now, now]);
     const conversationId = Number(result!.id);
     const messageResult = await runtimeGet<{ id: number }>(`
@@ -412,7 +412,7 @@ export async function createPublicSupportConversation(
   const message = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
-  if (!message) throw new SupportError("Write a message for the AfricMade team.", "message_required");
+  if (!message) throw new SupportError("Write a message for the Suqpage team.", "message_required");
   const rate = await consumeRuntimeRateLimit(`public-support:create:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
   if (!rate.allowed) throw new SupportError("Too many conversations were started. Please try again later.", "rate_limited");
 
@@ -501,7 +501,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
     messages: messages.map((message) => ({
       id: message.id,
       sender: message.sender_kind === "visitor" ? "visitor" as const : "staff" as const,
-      senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "AfricMade support",
+      senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "Suqpage support",
       body: message.body,
       createdAt: message.created_at,
       attachment: attachmentView(message),
@@ -536,7 +536,7 @@ export async function postPublicSupportMessage(
   const body = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
-  if (!body) throw new SupportError("Write a message for the AfricMade team.", "message_required");
+  if (!body) throw new SupportError("Write a message for the Suqpage team.", "message_required");
   const { row, tokenHash } = await requirePublicConversation(token, now);
   if (row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
   const rate = await consumeRuntimeRateLimit(`public-support:message:${ipHash}:${tokenHash}`, 30, 10 * 60 * 1000, 30 * 60 * 1000);

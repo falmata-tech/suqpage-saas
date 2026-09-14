@@ -2,7 +2,7 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-09-12
 change_level: L3
@@ -162,3 +162,6 @@ verification, server-derived identity, atomic and retryable onboarding, private
 category storage, tenant denial, and dashboard routing. Hosted Google
 consent/code exchange and production delivery smoke remain rollout gates under
 DEP-028, so this spec remains in progress.
+
+S2g contact separation (BE-032/FE-040): signup phone is private users.account_phone;
+public business contacts and WhatsApp begin empty. Verified account email is retained.

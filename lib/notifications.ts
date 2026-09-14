@@ -25,8 +25,8 @@ export async function notifyNewInquiry(
       body: JSON.stringify({
         from,
         to: [business.contact_email],
-        subject: `New AfricMade inquiry #${inquiryId}`,
-        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to AfricMade to review it.`,
+        subject: `New Suqpage inquiry #${inquiryId}`,
+        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to Suqpage to review it.`,
       }),
     });
     if (!response.ok) throw new Error("provider_non_success");

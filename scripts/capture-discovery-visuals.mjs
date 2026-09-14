@@ -16,7 +16,7 @@ async function capture(name, viewport, action) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error" && !message.text().includes("ExperimentalWarning: SQLite")) errors.push(message.text());
+    if (message.type() === "error") errors.push(message.text());
   });
   await page.goto(featuredExperience ? `${baseURL}/featured?featuredDay=1` : `${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   if (featuredExperience) await page.locator(".featured-week a").first().waitFor();

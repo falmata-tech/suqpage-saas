@@ -27,6 +27,10 @@ four-tenant application behavior and single-instance pilot boundary.
 
 - Exclude secrets, credentials, databases, backups, uploads, Git metadata, local
   dependencies, framework output, and test artifacts from Docker build context.
+  Host-generated `.netlify` and `.vercel` state is excluded from both the context
+  and final image, including bundles left by a previous deployment.
+  Dependency builds may reuse a BuildKit npm download cache; `npm ci` still
+  verifies the lockfile and package integrity on each fresh dependency layer.
 - Make the release script the canonical CI core gate and retain independent
   operations, browser, and container evidence.
 - Build, seed, start, health-check, and clean up an isolated non-root container

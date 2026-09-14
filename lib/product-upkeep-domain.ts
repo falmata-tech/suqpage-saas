@@ -15,7 +15,11 @@ import {
 export type ProductUpkeepKind = "create" | "update";
 export type ProductImageAction = "keep" | "remove" | "replace";
 
+export type ProductOptionInput = { name: string; values: string[] };
+
 export type BasicProductCommand = {
+  optionGroups?: ProductOptionInput[];
+  isPublished?: boolean;
   kind: ProductUpkeepKind;
   businessId: number;
   productId: number | null;
@@ -49,6 +53,8 @@ export class ProductUpkeepError extends Error {
 }
 
 const commandKeys = new Set([
+  "optionGroups",
+  "isPublished",
   "kind",
   "businessId",
   "productId",
@@ -101,6 +107,26 @@ const optionalInteger = (value: unknown, label: string) => {
   if (value === null || value === undefined || value === "") return null;
   return positiveInteger(value, label);
 };
+
+export function parseProductOptions(raw: unknown): ProductOptionInput[] {
+  if (!Array.isArray(raw) || raw.length > 4) throw new ProductUpkeepError("Use up to four option groups.");
+  const names = new Set<string>();
+  return raw.map(entry => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry) || Object.keys(entry).some(key => !["name", "values"].includes(key))) throw new ProductUpkeepError("Invalid product options.");
+    const name = boundedText(entry.name, 80, "Option name");
+    if (!name || names.has(name.toLowerCase())) throw new ProductUpkeepError("Give each option group a different name.");
+    names.add(name.toLowerCase());
+    if (!Array.isArray(entry.values) || !entry.values.length || entry.values.length > 50) throw new ProductUpkeepError("Each option needs 1–50 choices.");
+    const values = entry.values.map((value: unknown) => {
+      if (typeof value !== "string") throw new ProductUpkeepError("Option choices must be text.");
+      const text = boundedText(value, 100, "Option choice");
+      if (!text) throw new ProductUpkeepError("Remove empty option choices.");
+      return text;
+    });
+    if (new Set(values.map((v: string) => v.toLowerCase())).size !== values.length) throw new ProductUpkeepError("Option choices must be different.");
+    return { name, values };
+  });
+}
 
 export function parseBasicProductCommand(
   raw: Record<string, unknown>,
@@ -163,7 +189,10 @@ export function parseBasicProductCommand(
       error instanceof Error ? error.message : "The offering details are invalid.",
     );
   }
+  if (raw.isPublished !== undefined && typeof raw.isPublished !== "boolean") throw new ProductUpkeepError("Choose listed or hidden visibility.");
   return {
+    ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
+    ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
     kind,
     businessId: positiveInteger(raw.businessId, "Business"),
     productId,

@@ -38,6 +38,12 @@ spec. Prefer stable IDs, file paths, and concise decisions.
 
 ## Feature workflow
 
+Maintain an ordered task checklist before implementation, linked to the controlling
+specs. Track implementation, verification, visual approval and deployment separately.
+Insert new requests at their dependency-appropriate step, and resume from the first
+unfinished dependency. Record mistakes as a brief cause and prevention rule, not raw
+logs or chat history. See `docs/SUQPAGE-TRANSITION-CHECKLIST.md` for the active example.
+
 1. Draft affected FE/BE/DEP specs from the template.
 2. Write success, denial/failure, retry/idempotency, and boundary scenarios.
 3. Define domain language and contracts. Avoid UI-driven database design.

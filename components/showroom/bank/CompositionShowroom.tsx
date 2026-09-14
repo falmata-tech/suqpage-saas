@@ -120,7 +120,7 @@ export function CompositionShowroom({
     cartCount: props.cartCount,
     sectionAnchorIds: {
       home: "showroom-home",
-      story: "showroom-story",
+      story: manifest.sections.some((section) => definitionById.get(section.component)?.slot === "content") ? "showroom-story" : undefined,
       offerings: "showroom-catalog",
       contact: "showroom-contact",
     },
@@ -193,7 +193,7 @@ export function InvalidComposition() {
         <h1>This design could not be verified.</h1>
         <p>
           No substitute design was loaded. Please try again later or contact
-          AfricMade support.
+          Suqpage support.
         </p>
       </div>
     </main>

@@ -7,8 +7,8 @@ const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const manifest = JSON.parse(read("public/manifest.webmanifest"));
 
-assert.equal(manifest.name, "AfricMade");
-assert.equal(manifest.short_name, "AfricMade");
+assert.equal(manifest.name, "Suqpage");
+assert.equal(manifest.short_name, "Suqpage");
 assert.equal(manifest.start_url, "/");
 assert.equal(manifest.scope, "/");
 assert.equal(manifest.display, "standalone");
@@ -18,11 +18,11 @@ assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose
 assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "maskable"));
 
 for (const [file, size] of [
-  ["public/pwa/favicon-32.png", 32],
-  ["public/pwa/apple-touch-icon.png", 180],
-  ["public/pwa/icon-192.png", 192],
-  ["public/pwa/icon-512.png", 512],
-  ["public/pwa/icon-maskable-512.png", 512],
+  ["public/pwa/suqpage-favicon-32.png", 32],
+  ["public/pwa/suqpage-apple-touch-icon.png", 180],
+  ["public/pwa/suqpage-icon-192.png", 192],
+  ["public/pwa/suqpage-icon-512.png", 512],
+  ["public/pwa/suqpage-icon-maskable-512.png", 512],
 ]) {
   assert.ok(fs.existsSync(path.join(root, file)), `${file} exists`);
   const metadata = await sharp(path.join(root, file)).metadata();
@@ -33,9 +33,9 @@ for (const [file, size] of [
 
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
-assert.match(worker, /const CACHE_PREFIX = "africmade-pwa-"/);
-assert.match(worker, /const VERSION = "v3"/);
-assert.match(worker, /name\.startsWith\("mirtpage-pwa-"\)/);
+assert.match(worker, /const CACHE_PREFIX = "suqpage-pwa-"/);
+assert.match(worker, /const VERSION = "v1"/);
+assert.match(worker, /\[CACHE_PREFIX, "africmade-pwa-", "mirtpage-pwa-"\]\.some/);
 assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
 assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);
 assert.match(worker, /if \(request\.method !== "GET"\) return/);
