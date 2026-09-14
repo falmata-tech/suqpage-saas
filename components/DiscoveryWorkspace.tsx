@@ -1,4 +1,5 @@
 "use client";
+import { readPlatformState } from "@/lib/platform-state";
 
 import Image from "next/image";
 import { productHref } from "@/lib/product-inquiry";
@@ -12,8 +13,8 @@ import type { DiscoveryNearbyGroup, DiscoveryProductResult, DiscoverySearchSugge
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
 const ETHIOPIA_BOUNDS: [number, number, number, number] = [32, 3, 49, 15];
-const DISCOVERY_SESSION_KEY = "mirtpage:discovery-navigation:v2";
-const DISCOVERY_RETURN_KEY = "mirtpage:last-marketplace-url:v1";
+const DISCOVERY_SESSION_KEY = "suqpage:discovery-navigation:v2";
+const DISCOVERY_RETURN_KEY = "suqpage:last-marketplace-url:v1";
 
 type MapView = {
   center: [number, number];
@@ -45,7 +46,7 @@ type DiscoverySessionState = {
 
 function readDiscoverySession(scope: string): DiscoverySessionState | null {
   try {
-    const parsed = JSON.parse(window.sessionStorage.getItem(DISCOVERY_SESSION_KEY) || "null") as DiscoverySessionState | null;
+    const parsed = JSON.parse(readPlatformState(window.sessionStorage, DISCOVERY_SESSION_KEY) || "null") as DiscoverySessionState | null;
     if (!parsed || parsed.scope !== scope || Date.now() - parsed.updatedAt > 2 * 60 * 60 * 1000) return null;
     if (![...parsed.mapView.center, parsed.mapView.zoom].every(Number.isFinite)) return null;
     return parsed;

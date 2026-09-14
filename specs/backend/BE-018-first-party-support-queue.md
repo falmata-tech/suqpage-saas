@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-Clients need free in-app support and MirtPage team members need a shared queue
+Clients need free in-app support and Suqpage team members need a shared queue
 without adopting a costly per-agent SaaS or operating a second large support
 platform.
 
@@ -21,7 +21,7 @@ platform.
 ### In scope
 
 - Tenant-safe conversations and messages between authenticated clients and
-  authorized MirtPage staff, plus token-scoped public visitor conversations in
+  authorized Suqpage staff, plus token-scoped public visitor conversations in
   the same staff queue.
 - Waiting, open, and closed states; claim, assignment, close, and reopen.
 - Configurable per-agent open-conversation limits, transactional least-loaded
@@ -30,7 +30,7 @@ platform.
   polling.
 - Optional Telegram queue notifications containing no message body.
 - Two active anonymous visitor categories: using or reporting something on
-  AfricMade, and help arranging transport. Older assistance values remain
+  Suqpage, and help arranging transport. Older assistance values remain
   readable only for retained historical conversations.
 - Validated visitor email and phone contact values for reconnecting outside the
   browser session when needed.

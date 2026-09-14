@@ -14,14 +14,14 @@ change_level: L1
 
 Public pages and authenticated workspaces currently use different marks,
 colors, and navigation structures. Staff and clients need one recognizable
-MirtPage identity and a calm role-aware shell that keeps complex operations
+Suqpage identity and a calm role-aware shell that keeps complex operations
 findable on desktop and mobile.
 
 ## Scope
 
 ### In scope
 
-- One project-owned MirtPage mark and wordmark component for platform-owned
+- One project-owned Suqpage mark and wordmark component for platform-owned
   public and authenticated surfaces.
 - A neutral platform palette shared by the public marketplace and workspace
   shell while preserving tenant showroom identity inside showroom renderers.
@@ -41,8 +41,8 @@ findable on desktop and mobile.
 
 ## Domain language and invariants
 
-- **Platform identity:** the MirtPage mark, wordmark, colors, and navigation
-  presentation on surfaces owned by MirtPage.
+- **Platform identity:** the Suqpage mark, wordmark, colors, and navigation
+  presentation on surfaces owned by Suqpage.
 - **Workspace context:** the authenticated actor role and optional selected
   business shown independently from platform identity.
 - Navigation visibility is a convenience layer only. Existing server-side
@@ -50,7 +50,7 @@ findable on desktop and mobile.
 - Tenant showroom logos and visual systems are never replaced by the platform
   mark inside the tenant's public showroom.
 - A compact platform-owned host band may frame the showroom above its tenant
-  renderer when its controlled MirtPage identity remains clear. Its neutral
+  renderer when its controlled Suqpage identity remains clear. Its neutral
   chrome may adapt to the approved tenant palette to avoid a pasted-on strip.
 
 ## Contracts
@@ -58,7 +58,7 @@ findable on desktop and mobile.
 - The same accessible brand component appears on the homepage, Marketplace, public
   intake, login, legal pages, and authenticated workspace shell.
 - Public showrooms and private previews include a compact **Powered by
-  MirtPage** band with a visible **Back** action whose accessible name identifies
+  Suqpage** band with a visible **Back** action whose accessible name identifies
   the marketplace destination. It remains in
   normal document flow and does not replace or cover tenant navigation.
 - Every public navigation link to `/request` is labeled **Sign up** on desktop,
@@ -89,16 +89,16 @@ findable on desktop and mobile.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor recognizes MirtPage across platform surfaces
+Scenario: Visitor recognizes Suqpage across platform surfaces
   GIVEN a visitor moves between the homepage, Marketplace, intake, login, and legal pages
   WHEN each platform header or identity area renders
-  THEN the same MirtPage mark and wordmark identify the service
+  THEN the same Suqpage mark and wordmark identify the service
   AND no tenant showroom identity is overwritten
 
 Scenario: Visitor returns from a tenant showroom
-  GIVEN a visitor opened a published showroom from MirtPage discovery
+  GIVEN a visitor opened a published showroom from Suqpage discovery
   WHEN the showroom renders with its tenant-owned identity
-  THEN a visually separate MirtPage host band links directly to the marketplace
+  THEN a visually separate Suqpage host band links directly to the marketplace
   AND the band does not cover tenant navigation or showroom content
 
 Scenario: Visitor finds business signup consistently
@@ -110,7 +110,7 @@ Scenario: Visitor finds business signup consistently
 Scenario: Visitor uses a public platform task on a phone
   GIVEN a visitor opens login or the expression-of-interest form at 320 or 390 CSS pixels
   WHEN the page and form controls render
-  THEN the MirtPage header and solid platform palette match the homepage and About page
+  THEN the Suqpage header and solid platform palette match the homepage and About page
   AND the task heading, fields, primary action, and recovery copy remain clear
   AND controls are at least 44 CSS pixels high with no horizontal overflow
 
@@ -187,7 +187,7 @@ production-browser identity test passed across all public surfaces, and
 scale, security, trace privacy, and zero-vulnerability gates. No route, signup
 behavior, schema, or tenant data changed.
 
-- `public/brand/mirtpage-mark-v2.svg` and `components/MirtPageBrand.tsx` provide one
+- `public/brand/suqpage-original-mark-v2.svg` and `components/SuqpageBrand.tsx` provide one
   project-owned platform identity on the homepage, Marketplace, intake, login, legal,
   favicon, and authenticated workspace surfaces. Tenant showroom marks remain
   unchanged.

@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Public input is untrusted. MirtPage must retain useful inquiries without allowing
+Public input is untrusted. Suqpage must retain useful inquiries without allowing
 forged products/options, cross-tenant references, excessive quantities, duplicate
 records, or uncontrolled spam.
 

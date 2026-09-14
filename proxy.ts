@@ -12,7 +12,7 @@ export async function proxy(request: NextRequest) {
       },
     });
   }
-  if (process.env.MIRTPAGE_AUTH_DRIVER !== "supabase") return NextResponse.next({ request });
+  if (process.env.SUQPAGE_AUTH_DRIVER !== "supabase") return NextResponse.next({ request });
   return refreshSupabaseAuth(request);
 }
 

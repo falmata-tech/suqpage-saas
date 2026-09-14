@@ -16,16 +16,16 @@ import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import type { Business, Catalog, Category, OptionGroup, OptionValue, Product, } from "../lib/types";
 async function runPostgresFixture() {
-    const url = process.env.MIRTPAGE_POSTGRES_DIRECT_URL || process.env.MIRTPAGE_POSTGRES_URL || "";
+    const url = process.env.SUQPAGE_POSTGRES_DIRECT_URL || process.env.SUQPAGE_POSTGRES_URL || "";
     const target = new URL(url);
     if (!["127.0.0.1", "localhost", "[::1]"].includes(target.hostname))
         throw new Error("Demo setup only permits a local PostgreSQL target.");
-    const config = postgresRuntimeConfig({ MIRTPAGE_POSTGRES_URL: url, MIRTPAGE_POSTGRES_POOL_MAX: "1" });
+    const config = postgresRuntimeConfig({ SUQPAGE_POSTGRES_URL: url, SUQPAGE_POSTGRES_POOL_MAX: "1" });
     if (!config)
         throw new Error("Local PostgreSQL configuration is required.");
     const pool = createPostgresPool(config);
     const runner = new PostgresTransactionRunner(pool);
-    const schema = process.env.MIRTPAGE_POSTGRES_MIGRATION_SCHEMA || "public";
+    const schema = process.env.SUQPAGE_POSTGRES_MIGRATION_SCHEMA || "public";
     await migratePostgresDatabase(runner, schema);
     await runner.query(`SET search_path TO "${schema}"`);
     const db = new FixtureDatabase(runner, () => pool.end());
@@ -410,7 +410,7 @@ async function runPostgresFixture() {
   INSERT INTO business_subscriptions(
     business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
     current_period_end,grace_ends_at,updated_at
-  ) VALUES(?,'MirtPage monthly',NULL,'ETB',?,?,?,?,?)
+  ) VALUES(?,'Suqpage monthly',NULL,'ETB',?,?,?,?,?)
   ON CONFLICT(business_id) DO UPDATE SET
     starts_at=excluded.starts_at,
     current_period_start=excluded.current_period_start,
@@ -505,15 +505,15 @@ async function runPostgresFixture() {
         generatedCredentials.push({ role: accessRole === "platform_admin" ? "ADMIN" : accessRole === "client" ? "CLIENT" : "STAFF", business, email, password });
         return userId;
     }
-    const adminUserId = await seedUser("admin", "platform_admin", "AfricMade", process.env.SEED_ADMIN_EMAIL || "admin@mirtpage.local", "AfricMade Admin", null);
+    const adminUserId = await seedUser("admin", "platform_admin", "Suqpage", process.env.SEED_ADMIN_EMAIL || "admin@mirtpage.local", "Suqpage Admin", null);
     const clientUsersByHandle = new Map<string, number>();
     for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
         clientUsersByHandle.set(business.handle, await seedUser("owner", "client", business.name, `${business.handle}@mirtpage.local`, `${business.name} Client`, seeded.get(business.handle)!));
     }
     const operationsStaff = await Promise.all(["Mekdes Operations", "Samuel Operations", "Rahel Operations", "Dawit Operations"]
-        .map(async (name, index) => await seedUser("admin", "operations_manager", "AfricMade", `operations-${index + 1}@demo.mirtpage.local`, name, null)));
+        .map(async (name, index) => await seedUser("admin", "operations_manager", "Suqpage", `operations-${index + 1}@demo.mirtpage.local`, name, null)));
     const teamStaff = await Promise.all(["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
-        .map(async (name, index) => await seedUser("admin", "team_member", "AfricMade", `team-${index + 1}@demo.mirtpage.local`, name, null)));
+        .map(async (name, index) => await seedUser("admin", "team_member", "Suqpage", `team-${index + 1}@demo.mirtpage.local`, name, null)));
     const subscriptionStateHandles = [
         SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "fashion-textiles"),
         SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "beauty-wellness"),
@@ -581,7 +581,7 @@ async function runPostgresFixture() {
     public_ref,participant_kind,business_id,opened_by_user_id,
     assistance_category,requester_label,subject,status,assigned_user_id,
     created_at,updated_at,last_message_at,closed_at
-  ) VALUES(?,'client',?,?,'general','MirtPage client',?,?,?,?,?,?,?)
+  ) VALUES(?,'client',?,?,'general','Suqpage client',?,?,?,?,?,?,?)
 `);
     const addSupportMessage = db.prepare(`
   INSERT INTO support_messages(
@@ -615,7 +615,7 @@ async function runPostgresFixture() {
         await addSupportEvent.run(conversationId, clientUsersByHandle.get(handle)!, "created", "fictional seeded conversation", createdAt);
         if (assigned) {
             const replyAt = createdAt + 15 * 60 * 1000;
-            const reply = await addSupportMessage.run(conversationId, assigned, `user:${assigned}`, "Thanks. The MirtPage team has reviewed this fictional demo request and will follow up here.", `demo-support-staff-${index + 1}`, replyAt);
+            const reply = await addSupportMessage.run(conversationId, assigned, `user:${assigned}`, "Thanks. The Suqpage team has reviewed this fictional demo request and will follow up here.", `demo-support-staff-${index + 1}`, replyAt);
             await db.prepare(`
       UPDATE support_conversations
       SET client_last_read_message_id=?,staff_last_read_message_id=?,
@@ -693,7 +693,7 @@ async function runPostgresFixture() {
         ].includes(status);
         const assignedUserId = current ? teamStaff[index % teamStaff.length] : null;
         const age = `-${66 - index} hours`;
-        const requestId = Number((await addServiceRequest.run(`DEMO-${String(index + 1).padStart(5, "0")}`, businessId, clientUserId, status, `${handle} client`, `${handle}@mirtpage.local`, businesses.find((business) => business.handle === handle)!.name, `Update the AfricMade page with current product, capability, and business information for review.`, clientUserId, assignedUserId, `demo-lifecycle-${index + 1}`, age, age)).insertedId);
+        const requestId = Number((await addServiceRequest.run(`DEMO-${String(index + 1).padStart(5, "0")}`, businessId, clientUserId, status, `${handle} client`, `${handle}@mirtpage.local`, businesses.find((business) => business.handle === handle)!.name, `Update the Suqpage page with current product, capability, and business information for review.`, clientUserId, assignedUserId, `demo-lifecycle-${index + 1}`, age, age)).insertedId);
         await addRequestEvent.run(requestId, clientUserId, "submitted", "fictional demo request", age);
         if (status !== "submitted") {
             await addRequestEvent.run(requestId, assignedUserId || operationsStaff[0], "status_changed", `submitted->${status}`, age);
@@ -744,14 +744,14 @@ async function runPostgresFixture() {
     // These rows were created by this empty-target demo seed, never imported accounts.
     await db.exec("UPDATE businesses SET public_email='hello+' || handle || '@example.test', public_phone='+447700900' || lpad(id::text,3,'0')");
     await db.exec("UPDATE users SET account_phone='+447700900' || lpad((id+100)::text,3,'0') WHERE email LIKE '%@mirtpage.local' OR email LIKE '%@demo.mirtpage.local'");
-    const credentialPath = path.resolve(process.env.MIRTPAGE_CREDENTIAL_PATH || path.join(process.cwd(), ".local", "seed-credentials.txt"));
+    const credentialPath = path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH || path.join(process.cwd(), ".local", "seed-credentials.txt"));
     fs.mkdirSync(path.dirname(credentialPath), { recursive: true });
-    const credentialText = ["AfricMade temporary local credentials", "Change every password on first login.", "", ...generatedCredentials.map(c => `${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
+    const credentialText = ["Suqpage temporary local credentials", "Change every password on first login.", "", ...generatedCredentials.map(c => `${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");
     fs.writeFileSync(credentialPath, credentialText, { mode: 0o600 });
     console.log("Suqpage demo fixtures installed in local PostgreSQL.");
     await db.close();
     console.log(`Temporary credentials written to ${credentialPath}`);
-    const suppressCredentialOutput = process.env.MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT === "1" ||
+    const suppressCredentialOutput = process.env.SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT === "1" ||
         process.env.SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT === "1";
     // Credentials remain only in the protected local fixture file.
     async function sequentialEach<T>(items: readonly T[], action: (item: T, index: number) => Promise<unknown>) {

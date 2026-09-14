@@ -15,7 +15,7 @@ change_level: L3
 Verified media is currently written and read directly from one local filesystem.
 That is appropriate for the single-instance pilot, but it couples application
 services and routes to local paths and prevents a data-preserving object-storage
-deployment. MirtPage needs one server-only media port with local and Supabase
+deployment. Suqpage needs one server-only media port with local and Supabase
 Storage adapters while retaining every existing database reference.
 
 ## Scope

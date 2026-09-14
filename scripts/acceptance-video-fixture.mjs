@@ -1,12 +1,12 @@
 import pg from "pg";
 
 const [, , handle = "selam-weave"] = process.argv;
-if (!process.env.MIRTPAGE_POSTGRES_URL) {
-  console.error("MIRTPAGE_POSTGRES_URL is required for the acceptance video fixture.");
+if (!process.env.SUQPAGE_POSTGRES_URL) {
+  console.error("SUQPAGE_POSTGRES_URL is required for the acceptance video fixture.");
   process.exit(2);
 }
 
-const database = new pg.Client({ connectionString: process.env.MIRTPAGE_POSTGRES_URL });
+const database = new pg.Client({ connectionString: process.env.SUQPAGE_POSTGRES_URL });
 try {
   await database.connect();
   const row = (await database.query("SELECT id FROM businesses WHERE handle=$1", [handle])).rows[0];

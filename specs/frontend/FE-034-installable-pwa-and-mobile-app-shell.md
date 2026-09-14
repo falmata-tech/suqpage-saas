@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-MirtPage is responsive but still presents desktop website chrome on phones and
+Suqpage is responsive but still presents desktop website chrome on phones and
 cannot be installed as a complete Progressive Web App. Visitors and workspace
 users need a coherent phone application shell, safe standalone behavior, and a
 useful offline failure state without caching private or mutable business data.
@@ -29,12 +29,12 @@ useful offline failure state without caching private or mutable business data.
   More exposes signup, workspace access, contact, privacy, and
   terms in a bounded sheet.
 - Removal of desktop-style public headers and full public footers at phone
-  widths while retaining MirtPage identity inside primary page content.
+  widths while retaining Suqpage identity inside primary page content.
 - A role-derived authenticated phone tab bar whose **More** action opens the
   existing complete authorized workspace menu.
 - Removal of the authenticated mobile top header once equivalent bottom
   navigation is available.
-- Removal of composed showroom footers on phones. The compact MirtPage host bar
+- Removal of composed showroom footers on phones. The compact Suqpage host bar
   and business identity remain because they provide Back, hosting provenance,
   live status, and tenant identity rather than duplicate platform navigation.
 
@@ -47,10 +47,10 @@ useful offline failure state without caching private or mutable business data.
 
 ## Contracts
 
-- The manifest uses `/` scope and start URL, `standalone` display, MirtPage
+- The manifest uses `/` scope and start URL, `standalone` display, Suqpage
   colors, and 192px, 512px, maskable, and Apple-compatible raster icons.
 - Registration occurs only in a service-worker-capable production browser.
-  Development unregisters stale MirtPage workers and caches so local debugging
+  Development unregisters stale Suqpage workers and caches so local debugging
   cannot silently use old application code. A build-time public operations flag
   can disable registration and remove controlled workers during rollback.
 - `GET` navigation to public pages is network-first and may fall back to a
@@ -58,12 +58,12 @@ useful offline failure state without caching private or mutable business data.
   workspace routes, preview routes, authentication, mutations, and cross-origin
   requests are never stored in the PWA cache.
 - Service-worker cache names are versioned; activation deletes only prior
-  MirtPage-managed caches and claims open clients.
+  Suqpage-managed caches and claims open clients.
 - At phone widths, public pages expose no desktop header, hamburger menu, or
   full footer. The fixed bottom bar respects the device safe area, contains four
   labeled icon targets of at least 44 CSS pixels, exposes active-page semantics,
   and does not cover page actions or dialogs.
-- The root Market retains compact MirtPage identity and context without adding
+- The root Market retains compact Suqpage identity and context without adding
   a replacement mobile top navigation bar.
 - Authenticated phone navigation is derived only from links already admitted by
   role and business context. Up to four primary tasks appear in the bottom bar;
@@ -75,8 +75,8 @@ useful offline failure state without caching private or mutable business data.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor installs MirtPage
-  GIVEN a supported production browser opens MirtPage over HTTPS
+Scenario: Visitor installs Suqpage
+  GIVEN a supported production browser opens Suqpage over HTTPS
   WHEN the browser evaluates installability
   THEN a valid manifest, service worker, application name, colors, and complete icon set are available
   AND standalone launch begins at the marketplace
@@ -105,7 +105,7 @@ Scenario: Visitor opens a hosted showroom on a phone
   GIVEN an active composed showroom
   WHEN it renders at phone width
   THEN its full footer is omitted
-  AND its compact tenant identity and MirtPage Back/provenance controls remain available
+  AND its compact tenant identity and Suqpage Back/provenance controls remain available
 ```
 
 ## Quality impact
@@ -145,7 +145,7 @@ On 2026-08-14, the approved desktop, 390px, and 320px shell evidence, complete
 release, and 10/10 browser acceptance workflows passed for the exact production
 release. The HTTPS production probe for deployment
 `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` proved worker control after reload, offline
-public navigation, bounded MirtPage caches, and exclusion of protected, API,
+public navigation, bounded Suqpage caches, and exclusion of protected, API,
 preview, login, request, and mutation authority. All five required remote jobs
 passed in GitHub Actions run `31750355870`.
 

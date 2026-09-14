@@ -3,7 +3,7 @@ id: ADR-0013
 title: Staged PostgreSQL and identity migration
 status: accepted
 date: 2026-08-03
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [FE-026, BE-002, BE-024, BE-026, BE-027, BE-030, DEP-021, DEP-022, DEP-023, DEP-026, DEP-027, ADR-0012, ADR-0014, ADR-0015]
 ---
 
@@ -11,7 +11,7 @@ related: [FE-026, BE-002, BE-024, BE-026, BE-027, BE-030, DEP-021, DEP-022, DEP-
 
 ## Context
 
-MirtPage currently owns authenticated identities, password hashes, opaque
+Suqpage currently owns authenticated identities, password hashes, opaque
 sessions, roles, business bindings, and tenant authorization in SQLite. Many
 application modules use the synchronous `node:sqlite` API directly. Supabase
 Storage is already optional behind a port, but moving the database and replacing
@@ -36,7 +36,7 @@ make rollback or authorization regressions harder to isolate.
    generated identifiers, JSON, collation, and concurrency differ.
 3. Stage the move: harden provider-neutral media; inventory and port database
    repositories; rehearse schema/data reconciliation; cut over PostgreSQL while
-   retaining MirtPage-owned auth; then evaluate Supabase Auth separately.
+   retaining Suqpage-owned auth; then evaluate Supabase Auth separately.
 
 ## Decision
 
@@ -46,7 +46,7 @@ the PostgreSQL adapters pass the same security, tenant, workflow, browser, and
 reconciliation gates. Supabase may host PostgreSQL and private Storage, but the
 provider is infrastructure rather than application authority.
 
-The first database cutover migrates MirtPage identity tables and preserves
+The first database cutover migrates Suqpage identity tables and preserves
 existing bcrypt hashes and opaque session semantics. Supabase Auth is neither
 required nor enabled. Adopting it later requires a separate ADR and migration
 for account linking, sessions, recovery, MFA, role claims, tenant bindings, and
@@ -66,7 +66,7 @@ rollback.
 
 ### Negative / debt
 
-- MirtPage temporarily maintains SQLite and PostgreSQL adapters during the
+- Suqpage temporarily maintains SQLite and PostgreSQL adapters during the
   transition.
 - Direct synchronous database calls must be converted in bounded vertical
   slices before multi-instance operation is possible.
@@ -85,9 +85,9 @@ rows, including translated constraints, indexes, triggers, sequences, stable
 fingerprints, invariant probes, and byte preservation of the SQLite source.
 On 2026-08-05, all authoritative runtime workflows passed the disposable
 PostgreSQL adapter suite and the guarded empty-target production-copy rehearsal.
-`MIRTPAGE_DATABASE_DRIVER=postgres` is now an accepted fail-closed runtime mode;
+`SUQPAGE_DATABASE_DRIVER=postgres` is now an accepted fail-closed runtime mode;
 SQLite remains the current local authority until DEP-023 completes the real
-Supabase copy and monitored switch. MirtPage authentication remains unchanged.
+Supabase copy and monitored switch. Suqpage authentication remains unchanged.
 
 ADR-0015 supersedes only the local-development-authority portion of this
 decision: normal development now targets an isolated local Supabase PostgreSQL

@@ -26,7 +26,7 @@ retailers and home sellers as well as businesses that make or grow products.
 
 Git HEAD at resumption is `5675a21` (production Auth configuration guard), preceded
 by `9e7c3f4` (recovery record), `7ace89c` (PostgreSQL regression), and `b2806c1`
-(AfricMade launch work). The Suqpage transition is a large pre-existing uncommitted
+(Suqpage launch work). The Suqpage transition is a large pre-existing uncommitted
 worktree. Its profile, owner draft/publication services, public renderer, cover
 projection, logo and platform branding must be preserved. `deno.lock` and
 `feature-request-docs-and-assets/` remain outside this task. No staging, commit,

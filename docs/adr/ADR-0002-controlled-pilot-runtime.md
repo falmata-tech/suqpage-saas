@@ -3,7 +3,7 @@ id: ADR-0002
 title: Single-instance SQLite controlled pilot
 status: accepted
 date: 2026-07-20
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [BE_BASE, DEP_BASE, DEP-002]
 ---
 

@@ -16,7 +16,7 @@ The public homepage currently mounts several marketplace experiences in one
 long document. The geographic Market is the product's primary public job and
 must open immediately, while Daily Featured needs its own viewport, URL,
 navigation state, and performance boundary with Sponsors visibly attached to
-that program. MirtPage should feel
+that program. Suqpage should feel
 like a public marketplace application before sign-in while retaining the
 existing role-specific workspace after sign-in.
 
@@ -33,7 +33,7 @@ client-side and preserve URL-backed market state.
 - A query-preserving `/discover` compatibility redirect to `/` for existing
   links, history entries, and service-worker navigation.
 - `/featured` as the complete Daily Featured schedule and image-led gallery.
-- `/@handle` as a tenant-owned AfricMade page rendered inside the same public
+- `/@handle` as a tenant-owned Suqpage page rendered inside the same public
   application shell, replacing the selected primary workspace without retaining
   a hidden map or opening a separate browser context.
 - `featuredDay` as the only current selected-day query key and
@@ -65,8 +65,8 @@ client-side and preserve URL-backed market state.
 
 ## Contracts
 
-- The public shell uses AfricMade's orange, charcoal, white, and cool-neutral
-  roles. It remains visibly AfricMade and does not replace or recolor the tenant
+- The public shell uses Suqpage's orange, charcoal, white, and cool-neutral
+  roles. It remains visibly Suqpage and does not replace or recolor the tenant
   showroom rendered inside its workspace.
 - Desktop exposes one top identity bar and one leading experience rail.
   Experience destinations do not repeat in both surfaces. Short labeled groups
@@ -114,7 +114,7 @@ client-side and preserve URL-backed market state.
 - Route navigation uses Next.js links and shareable URLs. Browser back/forward
   restores route and URL-backed market state. No section anchor is the primary
   navigation authority.
-- Public route transitions retain the shared AfricMade header, desktop rail,
+- Public route transitions retain the shared Suqpage header, desktop rail,
   phone navigation, and support launcher. Loading feedback replaces only the
   selected workspace inside the main content region; it never blanks the full
   application shell.
@@ -126,8 +126,8 @@ client-side and preserve URL-backed market state.
   identifies the selected pending destination inline. Mutation buttons retain
   their existing local disabled and progress labels; no global loading screen
   replaces unrelated navigation or context.
-- Opening an AfricMade page from Market or Daily Featured navigates client-side to its
-  canonical `/@handle` route inside the retained AfricMade shell. The map or
+- Opening an Suqpage page from Market or Daily Featured navigates client-side to its
+  canonical `/@handle` route inside the retained Suqpage shell. The map or
   Featured workspace is unmounted rather than visually hidden. Browser Back
   restores the exact prior route and URL-backed state; a direct page link
   renders the same shell without requiring a prior Market visit.
@@ -135,13 +135,13 @@ client-side and preserve URL-backed market state.
   action. It restores the recorded Market URL plus the same-tab map transform,
   nearby-result group, and selected business preview when that state remains
   valid. Without valid history it returns safely to the Market root.
-- An AfricMade page route has one main landmark owned by the AfricMade shell. The
+- An Suqpage page route has one main landmark owned by the Suqpage shell. The
   tenant renderer uses a nested neutral container, retains its own approved
   header, section navigation, palette, content, product details, and inquiry
-  workflow, and does not render duplicate AfricMade application menus. Desktop
-  and tablet retain the AfricMade rail plus one compact sticky Back to Market
+  workflow, and does not render duplicate Suqpage application menus. Desktop
+  and tablet retain the Suqpage rail plus one compact sticky Back to Market
   strip above the tenant workspace. On phones, the page becomes an immersive
-  full-width surface: AfricMade's fixed bottom navigation is absent, the same
+  full-width surface: Suqpage's fixed bottom navigation is absent, the same
   compact platform-owned Back to Market bar remains above the tenant surface,
   and the tenant may retain its single fixed section/inquiry
   navigation. Two fixed bottom navigations never render together.
@@ -167,7 +167,7 @@ client-side and preserve URL-backed market state.
 
 ```gherkin
 Scenario: Visitor enters the public application
-  GIVEN the visitor opens AfricMade without authentication
+  GIVEN the visitor opens Suqpage without authentication
   WHEN the root route renders
   THEN the geographic Market is immediately usable
   AND Daily featured remains a distinct route action with disclosed Sponsors
@@ -181,7 +181,7 @@ Scenario: Visitor changes public experiences
   AND only the selected primary experience renders
 
 Scenario: Public data takes time to load
-  GIVEN the AfricMade public application shell is visible
+  GIVEN the Suqpage public application shell is visible
   WHEN a Market or Daily Featured workspace is still resolving
   THEN the platform header and navigation remain available
   AND loading feedback appears only inside the selected workspace
@@ -194,19 +194,19 @@ Scenario: A workspace destination is resolving
   AND the selected link communicates its pending state
   AND unrelated navigation and account context do not disappear
 
-Scenario: Visitor opens a tenant page without leaving AfricMade
+Scenario: Visitor opens a tenant page without leaving Suqpage
   GIVEN a page preview is open from Market or Daily Featured
   WHEN the visitor chooses Open page
   THEN the canonical page route replaces the selected public workspace
-  AND the AfricMade desktop rail remains available on wider screens
-  AND a phone renders one AfricMade Back to Market bar and one tenant bottom navigation
+  AND the Suqpage desktop rail remains available on wider screens
+  AND a phone renders one Suqpage Back to Market bar and one tenant bottom navigation
   AND no hidden map or Featured client runtime remains mounted
   AND browser Back restores the prior public route and URL state
 
-Scenario: Visitor follows a direct AfricMade page link
-  GIVEN the visitor has no prior AfricMade navigation history
+Scenario: Visitor follows a direct Suqpage page link
+  GIVEN the visitor has no prior Suqpage navigation history
   WHEN the visitor opens a published /@handle URL
-  THEN the page renders inside the AfricMade public shell
+  THEN the page renders inside the Suqpage public shell
   AND the tenant's approved identity and section navigation remain distinct
   AND phone presentation does not render two fixed navigation bars
   AND Market remains one reachable application action

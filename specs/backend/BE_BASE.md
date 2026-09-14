@@ -12,7 +12,7 @@ last_updated: 2026-07-20
 ## Purpose
 
 Define domain boundaries, application contracts, adapters, persistence rules,
-and security invariants for the controlled MirtPage pilot.
+and security invariants for the controlled Suqpage pilot.
 
 ## Domain model
 

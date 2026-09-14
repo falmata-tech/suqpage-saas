@@ -70,7 +70,7 @@ to own canonical content and smart-showroom actions.
   Desktop headers carry those links beside tenant identity instead of repeating
   a promotional descriptor. Phone showrooms expose the same destinations in a
   fixed bottom application bar with Inquiry as a named action and item count.
-- The platform-owned **Powered by MirtPage** and **Back** host bar remains above
+- The platform-owned **Powered by Suqpage** and **Back** host bar remains above
   tenant-controlled presentation. Tenant manifests may vary header anatomy and
   colors but cannot remove, rename, or intercept platform navigation or the
   Inquiry action.
@@ -100,7 +100,7 @@ Scenario: Visitor navigates one showroom as an application
   THEN focus moves to the corresponding canonical rendered section
   AND the tenant header does not repeat the business tagline as navigation copy
   AND choosing Inquiry opens the existing tenant-scoped inquiry drawer
-  AND the MirtPage host bar remains the topmost navigation context
+  AND the Suqpage host bar remains the topmost navigation context
 
 Scenario: Client reviews the exact composed revision
   GIVEN the latest submitted schema-v2 revision for the client's business

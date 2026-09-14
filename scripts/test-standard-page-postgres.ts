@@ -23,7 +23,7 @@ import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import type { SessionUser } from '../lib/types';
 import type { StagedImage } from '../lib/media';
 async function main(){
- const target=new URL(process.env.MIRTPAGE_POSTGRES_URL||'');assert.ok(['localhost','127.0.0.1'].includes(target.hostname)&&target.port==='54322');assert.equal(process.env.MIRTPAGE_DATABASE_DRIVER,'postgres');
+ const target=new URL(process.env.SUQPAGE_POSTGRES_URL||'');assert.ok(['localhost','127.0.0.1'].includes(target.hostname)&&target.port==='54322');assert.equal(process.env.SUQPAGE_DATABASE_DRIVER,'postgres');
  process.env.SUQPAGE_OWNER_EDITOR_ENABLED='1';const {runner}=postgresRuntimeServices();const rollback=new Error('ROLLBACK_STANDARD_PAGE_TEST');let staged:StagedImage|null=null;
  try{await runner.transaction(async()=>{
   assert.deepEqual((await migratePostgresDatabase(runner)).applied,[]);

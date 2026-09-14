@@ -1,6 +1,6 @@
 ---
 id: DEP-028
-title: AfricMade identity and passwordless production cutover
+title: Suqpage identity and passwordless production cutover
 status: in_progress
 related: [FE-038, FE-039, BE-030, BE-031, DEP-026, DEP-027, DEP-029, ADR-0017]
 owners: [deployment, operations, security, product]
@@ -8,12 +8,12 @@ last_updated: 2026-09-13
 change_level: L4
 ---
 
-# DEP-028 - AfricMade identity and passwordless production cutover
+# DEP-028 - Suqpage identity and passwordless production cutover
 
 ## Problem and outcome
 
-The currently deployed Netlify rollback candidate uses the retired MirtPage
-identity and password-first entry. AfricMade must be released as an exact,
+The currently deployed Netlify rollback candidate uses the retired Suqpage
+identity and password-first entry. Suqpage must be released as an exact,
 reviewed commit with working managed identity delivery, while the unpurchased
 custom domain and private compatibility identifiers remain explicitly outside
 the visual cutover.
@@ -22,7 +22,7 @@ the visual cutover.
 
 ### In scope
 
-- AfricMade production build, generated Netlify URL, PWA cache/version, Auth
+- Suqpage production build, generated Netlify URL, PWA cache/version, Auth
   redirects, private Storage, PostgreSQL, and representative browser smoke.
 - Custom SMTP and Google OAuth provider readiness gates.
 - Existing Netlify deployment as rollback until the new generated-origin smoke
@@ -30,7 +30,7 @@ the visual cutover.
 
 ### Non-goals
 
-- Configuring or claiming `mirtpage.com`, an AfricMade custom domain, or DNS
+- Configuring or claiming `mirtpage.com`, an Suqpage custom domain, or DNS
   before the owner purchases a domain.
 - Destructive database, identity, media, or internal environment-key renames.
 
@@ -40,7 +40,7 @@ the visual cutover.
 - The generated production origin is `https://africmade.netlify.app`. Supabase
   Site URL, redirect allowlists, Google authorized origins, and application
   canonical/trusted-origin settings must use this exact HTTPS origin.
-- Hosted Supabase uses the AfricMade six-digit token template and subject for
+- Hosted Supabase uses the Suqpage six-digit token template and subject for
   both confirmation and magic-link messages, so new and existing email users
   complete the same in-app code flow without an email redirect.
 - Public email OTP is disabled or release-blocked until custom SMTP sends to a
@@ -58,7 +58,7 @@ the visual cutover.
 - The release records the exact commit, Netlify deploy ID, generated URL,
   health/auth/onboarding/page/PWA smoke, production logs, rollback URL, and
   remaining provider or custom-domain limits.
-- Private `MIRTPAGE_*` environment keys and historical database identifiers may
+- Private `SUQPAGE_*` environment keys and historical database identifiers may
   remain during rollback. They must not appear as product language in public or
   operator UI.
 
@@ -67,16 +67,16 @@ the visual cutover.
 ```gherkin
 Scenario: Email delivery is not production capable
   GIVEN custom SMTP is absent or a real-address OTP smoke fails
-  WHEN AfricMade release admission runs
+  WHEN Suqpage release admission runs
   THEN public email-code entry is not claimed ready
   AND the prior production deployment remains available
 
-Scenario: Exact AfricMade candidate passes
+Scenario: Exact Suqpage candidate passes
   GIVEN the reviewed commit and provider configuration are deployed
-  WHEN public, OTP, Google, onboarding, linked dashboard, AfricMade page, Storage, and
+  WHEN public, OTP, Google, onboarding, linked dashboard, Suqpage page, Storage, and
     PWA smokes pass
-  THEN the generated AfricMade Netlify URL may become the public launch URL
-  AND the prior MirtPage deployment remains rollback during monitoring
+  THEN the generated Suqpage Netlify URL may become the public launch URL
+  AND the prior Suqpage deployment remains rollback during monitoring
 ```
 
 ## Quality impact
@@ -123,10 +123,10 @@ L4 task.
 ## Completion evidence
 
 On 2026-08-27 Netlify site `26c795eb-5560-4a88-b38d-3cc922c2a5e6` was renamed
-in place from `mirtpage` to `africmade`; its existing deploy and environment
+in place from `suqpage` to `suqpage`; its existing deploy and environment
 configuration were retained. The production canonical URL and trusted action
 origin now target `https://africmade.netlify.app`, and unauthenticated `/` and
-`/login` requests return HTTP 200 on the renamed origin. The updated AfricMade
+`/login` requests return HTTP 200 on the renamed origin. The updated Suqpage
 application has approved responsive visual evidence and passes `npm run check`,
 `npm run release`, and all 10 ordered production-browser workflows locally. It
 still awaits exact deployment and complete production smoke. Hosted Supabase

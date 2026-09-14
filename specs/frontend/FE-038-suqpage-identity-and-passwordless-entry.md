@@ -1,25 +1,25 @@
 ---
 id: FE-038
-title: AfricMade identity and passwordless account entry
+title: Suqpage identity and passwordless account entry
 status: in_progress
-related: [BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
+related: [BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
 owners: [product, frontend, design, security]
 last_updated: 2026-09-12
 change_level: L3
 ---
 
-# FE-038 - AfricMade identity and passwordless account entry
+# FE-038 - Suqpage identity and passwordless account entry
 
 ## Problem and outcome
 
-The launch candidate still presents the retired MirtPage name, mark, teal/navy
-palette, and password-first signup. The supplied AfricMade direction establishes
+The launch candidate still presents the retired Suqpage name, mark, teal/navy
+palette, and password-first signup. The supplied Suqpage direction establishes
 an Africa-pin mark, a lower-case two-color wordmark, and a crisp orange,
 charcoal, gray, and white platform system. Account entry must ask only for an
 email code or Google identity; business details belong to a protected onboarding
 step after authentication.
 
-The outcome is one coherent AfricMade identity across public, showroom-host,
+The outcome is one coherent Suqpage identity across public, showroom-host,
 PWA, authentication, and workspace surfaces, with a short passwordless entry
 flow and a separate authenticated business setup.
 
@@ -27,7 +27,7 @@ flow and a separate authenticated business setup.
 
 ### In scope
 
-- Project-owned responsive AfricMade mark, wordmark, favicon, PWA icons, titles,
+- Project-owned responsive Suqpage mark, wordmark, favicon, PWA icons, titles,
   metadata, public copy, workspace chrome, and showroom host provenance.
 - One semantic platform palette based on safety orange, near-black charcoal,
   middle gray, soft gray, and white with derived accessible states.
@@ -42,15 +42,15 @@ flow and a separate authenticated business setup.
 - Recoloring or renaming tenant-owned showrooms, tenant logos, tenant palettes,
   products, or business content.
 - Renaming database tables, historical migrations, immutable media keys, or
-  private `MIRTPAGE_*` compatibility environment variables during this rollout.
+  private `SUQPAGE_*` compatibility environment variables during this rollout.
 - Password entry/reset, phone OTP, a custom OAuth provider, or collecting a
   full catalog during initial onboarding.
 
 ## Domain language and invariants
 
-- The product name is **AfricMade** in prose. The visual wordmark renders
-  lower-case **africmade**, with `afric` in charcoal and `made` in orange.
-- Platform-owned UI uses AfricMade tokens; tenant renderers continue to use
+- The product name is **Suqpage** in prose. The visual wordmark renders
+  lower-case **suqpage**, with `afric` in charcoal and `made` in orange.
+- Platform-owned UI uses Suqpage tokens; tenant renderers continue to use
   their approved independent palettes.
 - **Sign in** and **Create account** are one identity step. New-user business
   setup begins only after Supabase verifies an email OTP or Google identity.
@@ -70,7 +70,7 @@ flow and a separate authenticated business setup.
 - Email continuation moves to a six-digit code state without navigating away.
   The address remains visible and editable; resend is bounded and never exposes
   whether an application account already exists.
-- New and existing email identities receive the same concise AfricMade code
+- New and existing email identities receive the same concise Suqpage code
   experience. Neither path sends a confirmation button or asks the user to
   follow an email link back to the application.
 - Successful verification routes a linked user to the dashboard and an
@@ -79,8 +79,8 @@ flow and a separate authenticated business setup.
   bounded private business category. A safe Google display name is prefilled
   when available and remains editable. A safe unique public-page handle is
   generated server-side and can be changed later in business settings.
-- Public and workspace navigation use AfricMade labels and assets without
-  exposing retired MirtPage wording.
+- Public and workspace navigation use Suqpage labels and assets without
+  exposing retired Suqpage wording.
 - Public navigation resolves the linked application session on the server:
   anonymous visitors see **Sign in**, while authenticated linked clients see
   **Dashboard** and no competing sign-in action.
@@ -94,7 +94,7 @@ Scenario: Existing user enters with an email code
   GIVEN a linked active user enters a valid email address
   WHEN the user submits the delivered six-digit code
   THEN the user receives a managed Supabase session
-  AND the app opens the permitted AfricMade dashboard
+  AND the app opens the permitted Suqpage dashboard
 
 Scenario: New user enters before creating a business
   GIVEN an email address has no Supabase identity or application link
@@ -106,7 +106,7 @@ Scenario: New user enters before creating a business
 Scenario: Public identity is viewed on a phone
   GIVEN a visitor opens a public, auth, showroom-host, or PWA surface at 320px
   WHEN the surface renders
-  THEN the AfricMade mark and semantic palette remain legible
+  THEN the Suqpage mark and semantic palette remain legible
   AND navigation and forms fit without horizontal overflow
 ```
 
@@ -144,7 +144,7 @@ contact data, tokens, cookies, or onboarding request text.
 ## Rollout and rollback
 
 Ship behind managed Supabase Auth after SMTP and Google provider smoke evidence.
-The current MirtPage Netlify deployment remains rollback until AfricMade entry,
+The current Suqpage Netlify deployment remains rollback until Suqpage entry,
 onboarding, workspace, PWA, and representative showroom flows pass. Rollback
 restores the previous deployment; no tenant data is rewritten by the visual
 change.
@@ -166,7 +166,7 @@ On 2026-09-12 the approved desktop, 390px, and 320px identity and form states,
 workflows passed. Browser acceptance verifies a real six-digit Supabase Auth
 email-code exchange through isolated Mailpit, authenticated setup, dashboard
 routing, logout, and retained provider-aware account states. Exact hosted
-Google consent/code exchange and the new AfricMade Netlify deployment remain
+Google consent/code exchange and the new Suqpage Netlify deployment remain
 rollout gates under DEP-028.
 
 S2g contact separation (BE-032/FE-040): signup phone is private users.account_phone;

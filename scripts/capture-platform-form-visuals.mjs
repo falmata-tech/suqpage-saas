@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const mailpitURL = process.env.MIRTPAGE_TEST_MAILPIT_URL || "http://127.0.0.1:54324";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "africmade-platform-form-visuals");
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const mailpitURL = process.env.SUQPAGE_TEST_MAILPIT_URL || "http://127.0.0.1:54324";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-platform-form-visuals");
 fs.mkdirSync(output, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -32,8 +32,8 @@ async function capture(page, name, viewport) {
     };
   });
   assert.equal(metrics.documentWidth, metrics.viewportWidth, `${name} has no document overflow`);
-  assert.equal(metrics.contextColor, "rgb(244, 244, 242)", `${name} uses the AfricMade neutral context`);
-  assert.match(metrics.contextImage, /africmade-workspace-context-v1\.webp/, `${name} uses AfricMade artwork`);
+  assert.equal(metrics.contextColor, "rgb(244, 244, 242)", `${name} uses the Suqpage neutral context`);
+  assert.match(metrics.contextImage, /suqpage-workspace-context-v1\.webp/, `${name} uses Suqpage artwork`);
   assert.equal(metrics.formVisible, true, `${name} keeps its form visible`);
   assert.ok(metrics.controls.length > 0 && metrics.controls.every((height) => height >= 44), `${name} controls are touch sized (${metrics.controls.join(", ")})`);
   const screenshot = path.join(output, `${name}.png`);
@@ -52,7 +52,7 @@ async function latestCode(email) {
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error("Local AfricMade OTP did not reach Mailpit.");
+  throw new Error("Local Suqpage OTP did not reach Mailpit.");
 }
 
 try {
@@ -75,7 +75,7 @@ try {
   const onboardingErrors = [];
   onboardingPage.on("pageerror", (error) => onboardingErrors.push(error.message));
   onboardingPage.on("console", (message) => { if (message.type() === "error") onboardingErrors.push(message.text()); });
-  const email = `visual-${Date.now()}@africmade.local`;
+  const email = `visual-${Date.now()}@suqpage.local`;
   await onboardingPage.goto(`${baseURL}/login`, { waitUntil: "networkidle" });
   await onboardingPage.getByLabel("Email").fill(email);
   await onboardingPage.getByRole("button", { name: "Continue with email" }).click();

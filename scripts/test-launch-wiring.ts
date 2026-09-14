@@ -3,8 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'suqpage-launch-'));
-process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, 'media');
-process.env.MIRTPAGE_AUTH_DRIVER = 'local';
+process.env.SUQPAGE_MEDIA_ROOT = path.join(root, 'media');
+process.env.SUQPAGE_AUTH_DRIVER = 'local';
 async function main() {
     const { createPublicClientWorkspace } = await import('../lib/signup');
     const { getUserById, getDb, closeDbForTests } = await import('./testing/postgres-fixture');

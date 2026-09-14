@@ -2,7 +2,7 @@
 id: BE-035
 title: PostgreSQL-only persistence in every executable environment
 status: done
-related: [BE-027, BE-034, DEP-031, ADR-0020]
+related: [BE-036, BE-027, BE-034, DEP-031, ADR-0020]
 owners: [backend, security, operations]
 last_updated: 2026-09-14
 change_level: L3

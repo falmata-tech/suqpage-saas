@@ -26,7 +26,7 @@ business search without being forced through one undifferentiated ranked directo
 
 - A compact product-led marketplace hero with truthful buyer and producer
   benefits that leads directly into the map command surface.
-- A coordinated, local AfricMade image set for the homepage, About story, and
+- A coordinated, local Suqpage image set for the homepage, About story, and
   signup/login context, with production-centered compositions tailored to each
   responsive surface.
 - A desktop and mobile hierarchy inspired by the supplied marketplace mockup
@@ -73,9 +73,9 @@ business search without being forced through one undifferentiated ranked directo
 
 ## Domain language and invariants
 
-- The homepage is the AfricMade marketplace application, not a marketing landing
+- The homepage is the Suqpage marketplace application, not a marketing landing
   page and not a tenant showroom.
-- A **reviewed location** is the location AfricMade uses for discovery. It does
+- A **reviewed location** is the location Suqpage uses for discovery. It does
   not imply business certification, quality verification, or precise distance.
 - Sponsored showrooms remain explicitly labeled **Sponsors** and never imply
   endorsement.
@@ -133,7 +133,7 @@ business search without being forced through one undifferentiated ranked directo
 - The seven industries use one restrained, accessible accent system across the
   desktop industry menu, phone Filters sheet, and Shared Location booth borders
   and fascia. Numbered clusters and individual map markers remain one accessible
-  AfricMade orange. White and cool-gray remain the dominant
+  Suqpage orange. White and cool-gray remain the dominant
   booth content surfaces; color is a clearly visible identifier rather than a full-card wash, and an
   industry name or icon always accompanies it so meaning never depends on color
   alone.
@@ -216,7 +216,7 @@ business search without being forced through one undifferentiated ranked directo
   inspector becomes a bounded bottom sheet above app navigation rather than a
   full-screen takeover.
 - Valid merchant live state is visible on map aggregates, individual showroom
-  pins, Shared Location booths, and today's Daily Featured gallery. The current AfricMade Daily Featured
+  pins, Shared Location booths, and today's Daily Featured gallery. The current Suqpage Daily Featured
   walkthrough uses **Featured now** and overrides only that business's merchant
   live presentation for the duration of its slot.
 - Daily Featured retains the fixed weekly selector, truthful selected-day description,
@@ -281,7 +281,7 @@ Scenario: Visitor changes the selected marketplace industry
   WHEN the visitor opens the industry menu, scans individual map markers, or enters a Shared Location
   THEN the menu and Shared Location storefronts identify the selected industry
   AND the industry remains named or icon-labeled without relying on color alone
-  AND individual markers and numbered clusters retain the same AfricMade orange
+  AND individual markers and numbered clusters retain the same Suqpage orange
   AND additional Shared Location storefronts append vertically in stable bounded batches
   AND the separate Daily Featured Showrooms gallery is unchanged
 
@@ -323,7 +323,7 @@ Scenario: Forty featured showrooms remain readable
 
 Scenario: Marketplace data does not support a promotional claim
   GIVEN the visual reference contains ratings, verification, transaction, or scale claims
-  WHEN AfricMade renders its version of that composition
+  WHEN Suqpage renders its version of that composition
   THEN those claims are omitted
   AND only implemented platform benefits and authoritative discovery totals are shown
 
@@ -415,7 +415,7 @@ gates remain pending renewed visual approval.
 - `npm run test:discovery-visual` passed thirteen desktop/390px/320px homepage,
   map, City Showroom, List, Daily Featured, and preview-dialog states with no browser
   errors, document overflow, extra halls, hidden today booths, or exposed future
-  booth identities. Evidence is under `/tmp/mirtpage-home-redesign`.
+  booth identities. Evidence is under `/tmp/suqpage-home-redesign`.
 - Layered Daily Featured geometry passed deterministic uniqueness, no-overlap, safe-wall,
   and empty-center checks from 1 through 64 booths. Final browser evidence shows
   floor-contact shadows and one continuous venue.
@@ -442,8 +442,8 @@ test:discovery`, `npm run test:homepage`, and `npm run validate:specs`. The
 integration fixture proves omitted and explicit `all` filters return the same
 de-duplicated cross-industry projection while keeping five-row List pagination
 and the weekday program independent. Focused desktop and 390px captures are at
-`/tmp/mirtpage-all-industries-desktop.png` and
-`/tmp/mirtpage-all-industries-phone.png`; complete release gates remain pending
+`/tmp/suqpage-all-industries-desktop.png` and
+`/tmp/suqpage-all-industries-phone.png`; complete release gates remain pending
 visual approval.
 
 The 2026-08-10 autocomplete follow-up passes focused type, discovery,
@@ -453,8 +453,8 @@ exclusion of unpublished and excluded records. Focused Chromium interaction
 proves desktop and 390px pointer/touch rendering, zero phone overflow,
 keyboard Arrow/Enter selection, URL-backed application, and a phone list that
 stays above fixed navigation. Evidence is at
-`/tmp/mirtpage-search-suggestions-desktop.png` and
-`/tmp/mirtpage-search-suggestions-phone.png`; full release gates remain pending
+`/tmp/suqpage-search-suggestions-desktop.png` and
+`/tmp/suqpage-search-suggestions-phone.png`; full release gates remain pending
 visual approval.
 
 The 2026-09-12 Search workspace revision passes `npm run check`, `npm run
@@ -464,7 +464,7 @@ rules, deterministic ordering, URL-backed result-type controls, and preserved
 map state. Chromium evidence at 1440, 390, and 320 CSS pixels proves that Search
 replaces only the map canvas, All/Products/Businesses filters work, result cards
 open the existing inspector before navigation, and no viewport has horizontal
-overflow. Evidence is under `/tmp/africmade-search-review`; the user approved
+overflow. Evidence is under `/tmp/suqpage-search-review`; the user approved
 the focused visual result on 2026-09-09.
 
 ## S2h public experience revision

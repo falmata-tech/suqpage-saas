@@ -3,7 +3,7 @@ id: ADR-0015
 title: Local Supabase runtime and SQLite retirement
 status: accepted
 date: 2026-08-16
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [BE-024, BE-027, BE-030, DEP-023, DEP-026, DEP-027, ADR-0013, ADR-0014]
 ---
 
@@ -46,7 +46,7 @@ rejected by those commands.
 - Developers must start Docker and the local Supabase stack before running the
   application.
 - The complete local stack uses more memory than SQLite, so optional services
-  should stay disabled unless MirtPage exercises them.
+  should stay disabled unless Suqpage exercises them.
 - SQLite adapter deletion waits until remaining compatibility tests and the
   production rollback window are explicitly retired.
 

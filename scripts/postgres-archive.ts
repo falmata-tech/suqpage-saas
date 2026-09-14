@@ -1,17 +1,19 @@
+import { platformEnvironment } from "../lib/platform-environment.mjs";
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 export function archiveTarget() {
-  const raw = process.env.MIRTPAGE_POSTGRES_DIRECT_URL;
-  if (!raw) throw new Error('MIRTPAGE_POSTGRES_DIRECT_URL is required for database archives.');
+  const raw = platformEnvironment().SUQPAGE_POSTGRES_DIRECT_URL;
+  if (!raw) throw new Error('SUQPAGE_POSTGRES_DIRECT_URL is required for database archives.');
   const url = new URL(raw);
   if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || !url.username || !url.password) throw new Error('Invalid PostgreSQL archive target.');
   return url;
 }
 export function archiveCommand(command: 'pg_dump' | 'pg_restore', args: string[], target?: URL) {
-  const container = process.env.MIRTPAGE_LOCAL_PG_CONTAINER;
+  const container = platformEnvironment().SUQPAGE_LOCAL_PG_CONTAINER;
   const env = { ...process.env };
-  let binary = process.env.MIRTPAGE_PG_BIN_DIR ? path.join(process.env.MIRTPAGE_PG_BIN_DIR, command) : command;
+  const binaryDirectory = platformEnvironment().SUQPAGE_PG_BIN_DIR;
+  let binary = binaryDirectory ? path.join(binaryDirectory, command) : command;
   let commandArgs = args;
   if (container) {
     if (!/^supabase_db_[a-z0-9_-]+$/i.test(container)) throw new Error('Invalid local PostgreSQL container.');

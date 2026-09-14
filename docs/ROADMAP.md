@@ -1,4 +1,4 @@
-# MirtPage controlled-pilot roadmap
+# Suqpage controlled-pilot roadmap
 
 This roadmap controls sequencing; accepted specs control behavior. It prevents a
 valid-looking implementation from becoming the wrong next product investment.
@@ -35,7 +35,7 @@ the active checklist.
 ## Completed foundation — managed client request operations
 
 - Outcome: clients submit onboarding/change requests and approve private
-  previews while assigned MirtPage staff structure content and managers control
+  previews while assigned Suqpage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
 - Delivered: attachment-free legacy public interest, review-gated public client
@@ -73,7 +73,7 @@ the active checklist.
 
 ### Operate the mobile marketplace and Daily Featured program
 
-- Outcome: keep the Market as MirtPage's primary public application, with a
+- Outcome: keep the Market as Suqpage's primary public application, with a
   mobile-friendly geographic map, grouped City Markets, showroom inspectors,
   and a complete paginated List view that always leads visitors into permanent
   `/@handle` showrooms.

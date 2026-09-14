@@ -60,7 +60,7 @@ day of the week in a calm, bounded media-card gallery.
   **Visit Showroom** destination.
 - Truthful merchant-controlled live status on map aggregates, exact showroom
   markers, nearby-group cards, and today's Daily Featured cards, with the active
-  MirtPage Daily Featured walkthrough taking presentation precedence for its current booth.
+  Suqpage Daily Featured walkthrough taking presentation precedence for its current booth.
 - Mobile-first touch, close-proximity geographic zoom, map reset, and ordinary
   vertical scrolling.
 - Viewport-bounded map rendering that remains usable on low-end phones as the
@@ -91,7 +91,7 @@ day of the week in a calm, bounded media-card gallery.
   storefront and a short Showroom label. Its visible silhouette remains smaller
   than the numbered cluster core and has no decorative halo, while a transparent
   44px interaction target preserves phone usability. Every individual marker and
-  numbered cluster uses the same accessible MirtPage teal family; industry never
+  numbered cluster uses the same accessible Suqpage teal family; industry never
   recolors geographic markers. It distinguishes one showroom
   from an aggregate and does not load booth photography into the map renderer.
 - **Cluster:** a zoom-dependent aggregate of two or more nearby markers. Its
@@ -160,7 +160,7 @@ day of the week in a calm, bounded media-card gallery.
   a permanent showroom records the current public workspace as its same-tab
   return destination. The last non-geolocation map transform, open nearby
   group, and selected business preview may be retained in same-tab session
-  storage for two hours so the AfricMade Back to Market control restores the
+  storage for two hours so the Suqpage Back to Market control restores the
   exact viewer that launched the page; they do not alter eligibility.
   A **Near me** coordinate or transform derived from it is never persisted.
 - The stable weekly assignment is Monday Electronics, Tuesday Beauty & Care,
@@ -216,7 +216,7 @@ day of the week in a calm, bounded media-card gallery.
   references advance left-to-right and then top-to-bottom through its responsive
   card grid without changing schedule, sponsor placement, or walkthrough behavior.
 - Exactly five staff-selected paid sponsor placements compose into a right-side Daily Featured information
-  rail on desktop. A placement may link to an eligible MirtPage showroom or be
+  rail on desktop. A placement may link to an eligible Suqpage showroom or be
   a validated external ad with its own uploaded image, name, short details, and
   HTTPS website or normalized telephone action. External ads do not create
   showroom, business, product, or discovery records. The
@@ -235,14 +235,14 @@ day of the week in a calm, bounded media-card gallery.
 - Leaflet requests the exact policy-approved OpenStreetMap Standard URL only
   for the active viewport. It uses provider/browser caching, zero retained tile
   buffer, idle updates, no zoom-animation tile refresh, and no retina duplicate
-  requests. MirtPage never proxies or preloads those tiles.
+  requests. Suqpage never proxies or preloads those tiles.
 - Geographic zoom commits cluster, nearby-group, and individual-marker
   reconciliation only after movement settles. Supercluster receives the
   committed Leaflet bounds and a small viewport buffer; off-screen businesses
   remain searchable but do not create marker DOM nodes.
 - At terminal neighborhood zoom, a bounded nearby-group marker opens its
   six-card viewer instead of demanding building-level zoom. Leaflet's basemap
-  supplies road and place labels; MirtPage does not mount duplicate local labels.
+  supplies road and place labels; Suqpage does not mount duplicate local labels.
 - Selecting an individual map page opens a non-modal floating inspector centered
   and bounded inside the map canvas. It never crosses into the desktop command
   rail, dims or blurs the wider application, or makes the background inert. A
@@ -281,7 +281,7 @@ Scenario: Browser loads the detailed basemap within provider policy
   WHEN the visitor pans or zooms
   THEN the browser requests only visible tiles from https://tile.openstreetmap.org/{z}/{x}/{y}.png
   AND visible OpenStreetMap attribution remains available
-  AND MirtPage does not proxy, prefetch, bulk-download, or service-worker-cache those tiles
+  AND Suqpage does not proxy, prefetch, bulk-download, or service-worker-cache those tiles
   AND showroom search and place filtering continue to use the Supabase catalog
 
 Scenario: Visitor opens a nearby showroom group
@@ -422,7 +422,7 @@ Scenario: Live walkthrough identifies the current booth
 
 Scenario: Merchant live status yields to the active Daily Featured spotlight
   GIVEN a business enabled a valid merchant live session
-  AND that business is the current MirtPage Daily Featured walkthrough booth
+  AND that business is the current Suqpage Daily Featured walkthrough booth
   WHEN its map marker, nearby-group card, Daily Featured card, or preview is rendered
   THEN it is labeled Featured now instead of merchant Live
   AND other valid merchant live businesses remain labeled Live

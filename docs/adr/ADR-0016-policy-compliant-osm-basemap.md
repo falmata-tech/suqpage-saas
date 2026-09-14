@@ -3,7 +3,7 @@ id: ADR-0016
 title: Policy-compliant browser OpenStreetMap basemap
 status: accepted
 date: 2026-08-24
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [FE-021, BE-023, DEP-026, ADR-0014]
 ---
 
@@ -11,7 +11,7 @@ related: [FE-021, BE-023, DEP-026, ADR-0014]
 
 ## Context
 
-MirtPage's first-party simplified Ethiopia geography kept the marketplace
+Suqpage's first-party simplified Ethiopia geography kept the marketplace
 independent from a runtime map provider, but it did not provide the road, town,
 and neighborhood detail visitors expect from an interactive map. Hosting a tile
 stack on Netlify's free plan would consume deployment and bandwidth credits,
@@ -25,7 +25,7 @@ directly from the OpenStreetMap Standard endpoint:
 `https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
 
 One provider registry owns the provider ID, exact URL template, attribution,
-zoom limits, and conservative tile-loading options. MirtPage does not proxy,
+zoom limits, and conservative tile-loading options. Suqpage does not proxy,
 prefetch, scrape, package, or service-worker-cache map tiles. Browser requests
 retain the normal referrer and provider cache semantics, and visible
 OpenStreetMap attribution links remain inside the map at every supported
@@ -41,7 +41,7 @@ when measured point volume makes sending the eligible point set inefficient.
 
 ## Consequences
 
-- The map gains familiar road and place detail without a MirtPage tile server.
+- The map gains familiar road and place detail without a Suqpage tile server.
 - A visitor's browser discloses ordinary tile-request metadata to the provider.
 - Public OSM tiles are best-effort and may be unavailable or rate limited; the
   showroom controls and markers retain a bounded degraded state.

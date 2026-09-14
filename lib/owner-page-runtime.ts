@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 import { runtimeCatalogByBusinessId } from "./catalog-runtime";
 import { OwnerPageError, readSavedPageContent, type OwnerPageDraft } from "./owner-page-domain";
 import type { OwnerPagePort } from "./owner-page-service";
@@ -7,7 +8,7 @@ import { getMediaObjectStore } from "./media-storage";
 import { mediaMime } from "./media";
 
 export function ownerPageEditorEnabled(): boolean {
-  return process.env.SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
+  return platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
 }
 type DraftRow = { business_id: number; version: number; content_json: string; assistance_enabled: number; updated_by: number; updated_at: number };
 function draft(row: DraftRow): OwnerPageDraft {

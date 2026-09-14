@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 async function main() {
-    process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
-    process.env.MIRTPAGE_YOUTUBE_ADMISSION_ENABLED = "1";
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-recipe-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+    process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
+    process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "1";
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-recipe-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
     try {
         const { closeDbForTests, getDb, getUserById } = await import("./testing/postgres-fixture");
         const { createDraftRevision, getContentRevision, saveDraftRevision } = await import("../lib/revision-service");
@@ -83,14 +83,14 @@ async function main() {
         assert.equal(serializedBrief.includes("dQw4w9WgXcQ"), false);
         assert.deepEqual(exported.brief.contractManifest, SHOWROOM_RECIPE_BRIEF_CONTRACTS);
         assert.deepEqual(exported.brief.contractManifest, {
-            brief: "mirtpage.recipe-brief@1",
-            recipe: "mirtpage.showroom-recipe@1",
-            content: "mirtpage.showroom-content@1",
-            contentBlocks: "mirtpage.showroom-content-blocks@1",
-            design: "mirtpage.showroom-design@2",
-            componentBankSchema: "mirtpage.component-bank@2",
+            brief: "suqpage.recipe-brief@1",
+            recipe: "suqpage.showroom-recipe@1",
+            content: "suqpage.showroom-content@1",
+            contentBlocks: "suqpage.showroom-content-blocks@1",
+            design: "suqpage.showroom-design@2",
+            componentBankSchema: "suqpage.component-bank@2",
             componentBankRelease: "showroom-bank@1.2.0",
-            designSystems: "mirtpage.showroom-design-systems@2",
+            designSystems: "suqpage.showroom-design-systems@2",
         });
         assert.equal(exported.brief.requiredRecipeSchemaVersion, 1);
         assert.equal(exported.brief.requiredContentSchemaVersion, 1);
@@ -304,10 +304,10 @@ async function main() {
             error.issues[0]?.category === "design");
         await assert.rejects(() => buildShowroomRecipeBrief(client, draft.id), (error: unknown) => error instanceof ShowroomRecipeError && error.status === 404);
         await assert.rejects(() => importShowroomRecipe(outsider, draft.id, recipe), (error: unknown) => error instanceof ShowroomRecipeError && error.status === 404);
-        process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "0";
+        process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "0";
         await assert.rejects(() => buildShowroomRecipeBrief(manager, draft.id), (error: unknown) => error instanceof ShowroomRecipeError && error.status === 404);
-        process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
-        process.env.MIRTPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
+        process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
+        process.env.SUQPAGE_YOUTUBE_ADMISSION_ENABLED = "0";
         await assert.rejects(() => admitRecipeYouTube(team, draft.id, "https://youtu.be/dQw4w9WgXcQ", "Approved process film", true), (error: unknown) => error instanceof ShowroomRecipeError && error.status === 404);
         assert.equal((await db.prepare("SELECT COUNT(*) count FROM content_revisions").get())?.count, 1);
         assert.equal((await db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE version=11").get())?.count, 1);

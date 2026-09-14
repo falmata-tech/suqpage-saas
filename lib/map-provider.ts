@@ -19,7 +19,7 @@ const OSM_STANDARD_PROVIDER: MapProviderConfig = {
 };
 
 export function mapProviderConfig(): MapProviderConfig {
-  const providerId = process.env.NEXT_PUBLIC_MIRTPAGE_MAP_PROVIDER || "osm-standard";
+  const providerId = process.env.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER || "osm-standard";
   if (providerId !== OSM_STANDARD_PROVIDER.id) {
     throw new Error(`Unsupported Suqpage map provider: ${providerId}`);
   }

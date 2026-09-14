@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import type { SessionUser } from "../lib/types";
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-account-health-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-account-health-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
     process.env.PRIVACY_SALT = "account-health-test-salt-long-enough";
     const { closeDbForTests, getBusinessByHandle, getDb } = await import("./testing/postgres-fixture");
     const { getBusinessSubscription, getShowroomInsights, recordManualPayment, recordShowroomVisit, } = await import("../lib/account-health");

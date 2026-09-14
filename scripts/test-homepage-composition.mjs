@@ -57,7 +57,7 @@ assert.match(mobileNavigation, /aria-haspopup="dialog"/);
 assert.match(mobileNavigation, /<span>More<\/span>/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);
 
-assert.match(landingCss, /africmade-public-app-canvas-v1\.webp/);
+assert.match(landingCss, /suqpage-public-app-canvas-v1\.webp/);
 assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\(4/);
 assert.match(landingCss, /\.public-market-experience > \.discovery/);
 assert.doesNotMatch(landingCss, /\.public-lobby/);
@@ -127,7 +127,7 @@ assert.doesNotMatch(discoveryUi, /rail\.scrollTo/);
 assert.doesNotMatch(discoveryUi, /emphasizedFit|phoneMinimum/);
 
 assert.match(showroomUi, /router\.back\(\)/);
-assert.match(showroomUi, /mirtpage:last-marketplace-url:v1/);
+assert.match(showroomUi, /suqpage:last-marketplace-url:v1/);
 assert.match(showroomUi, /validPublicWorkspaceReturn/);
 assert.match(showroomUi, /Back to Market/);
 assert.match(showroomCss, /\.showroom-host-bar-shell\{position:sticky;top:0/);
@@ -136,9 +136,9 @@ assert.match(nextConfig, /geolocation=\(self\)/);
 assert.doesNotMatch(nextConfig, /geolocation=\(\)/);
 
 const images = [
-  ["public/landing/africmade-public-app-canvas-v1.webp", 160_000],
-  ["public/landing/africmade-about-production-v1.webp", 180_000],
-  ["public/landing/africmade-workspace-context-v1.webp", 140_000],
+  ["public/landing/suqpage-public-app-canvas-v1.webp", 160_000],
+  ["public/landing/suqpage-about-production-v1.webp", 180_000],
+  ["public/landing/suqpage-workspace-context-v1.webp", 140_000],
 ];
 for (const [file, maximum] of images) {
   const target = path.join(root, file);
@@ -146,8 +146,8 @@ for (const [file, maximum] of images) {
   assert.ok(fs.statSync(target).size <= maximum, `${file} remains within its image budget`);
 }
 
-assert.match(about, /africmade-about-production-v1\.webp/);
-assert.match(landingCss, /africmade-workspace-context-v1\.webp/);
+assert.match(about, /suqpage-about-production-v1\.webp/);
+assert.match(landingCss, /suqpage-workspace-context-v1\.webp/);
 assert.doesNotMatch(market + about + landingCss, /https?:\/\/[^"')]+\.(?:png|jpe?g|webp)/i);
 
 console.log("Public marketplace composition contract tests passed.");

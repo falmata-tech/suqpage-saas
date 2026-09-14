@@ -1,4 +1,4 @@
-# AfricMade Launch Verification
+# Suqpage Launch Verification
 
 Current checkpoint: BE-035/DEP-031 retire all executable file-database tooling.
 Use `docs/POSTGRES-ONLY-RUNBOOK.md` and `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for
@@ -8,11 +8,11 @@ not authorize retired commands or establish readiness of this candidate.
 
 **Release:** `1.0.0-mvp-launch`
 **Verification date:** 2026-09-12 local candidate verification
-**Reviewed input:** current AfricMade candidate and data-preserving rollout plan
+**Reviewed input:** current Suqpage candidate and data-preserving rollout plan
 
 ## Verdict
 
-The current package is a **locally verified AfricMade launch candidate**.
+The current package is a **locally verified Suqpage launch candidate**.
 Production publication and generated-origin smoke remain pending under DEP-028.
 
 ## Production recovery: 2026-09-12
@@ -22,7 +22,7 @@ Production publication and generated-origin smoke remain pending under DEP-028.
   passed Quality and specification gates in run `34655728038`.
 - Netlify site `26c795eb-5560-4a88-b38d-3cc922c2a5e6` remains on rollback
   deployment `6a8c791bbc9ad7b10122e4a6`. The newer production attempt failed
-  startup because `MIRTPAGE_EMAIL_OTP_ENABLED` was absent.
+  startup because `SUQPAGE_EMAIL_OTP_ENABLED` was absent.
 - Supabase project `sjeiiqxgscuqajpgddcc` was paused. It was resumed without
   recreating the project. Public-schema and data backups were retained outside
   Git before applying additive migration 38. Managed PostgreSQL/Auth-link
@@ -38,7 +38,7 @@ Production publication and generated-origin smoke remain pending under DEP-028.
   The actual isolated working directory was then used to correct the HTTPS
   production return URL, require email confirmation, restore TOTP settings,
   set six-digit codes with a ten-minute lifetime and one-minute resend interval,
-  and apply the AfricMade code templates. Storage S3 settings were restored;
+  and apply the Suqpage code templates. Storage S3 settings were restored;
   paid vector storage remains disabled. Google was disabled pending restoration
   of the production client ID and secret by the owner. Customer records were
   not changed by these provider-configuration operations.
@@ -52,7 +52,7 @@ This approval has two explicit boundaries:
 1. Local development, browser acceptance, preview, and production use isolated
    Supabase PostgreSQL/Auth/private Storage environments with one authorization
    model. SQLite remains read-only compatibility and migration input.
-2. AfricMade owns roles, capabilities, tenant scope, and suspension after
+2. Suqpage owns roles, capabilities, tenant scope, and suspension after
    Supabase verifies an email code or Google identity.
 3. Hosted Google consent/code exchange and production delivery must be smoked
    against the exact deployed commit before public admission.

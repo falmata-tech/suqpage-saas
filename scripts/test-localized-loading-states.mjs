@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "africmade-loading-states");
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-loading-states");
 fs.mkdirSync(output, { recursive: true });
 
 function deferred() {
@@ -83,7 +83,7 @@ for (const [viewport, suffix] of [
 ]) {
   const browser = await chromium.launch({
     headless: true,
-    executablePath: process.env.MIRTPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
+    executablePath: process.env.SUQPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
   });
   try {
     await captureTransition(browser, viewport, suffix);

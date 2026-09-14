@@ -12,7 +12,7 @@ change_level: L4
 
 ## Problem and outcome
 
-AfricMade needs a reversible Netlify production option and a disciplined way to
+Suqpage needs a reversible Netlify production option and a disciplined way to
 use Supabase Auth, Storage, Realtime, PostGIS, and search extensions without
 turning every free service into an unconditional runtime dependency.
 
@@ -35,7 +35,7 @@ turning every free service into an unconditional runtime dependency.
 2. Netlify configuration contains no secrets and does not pin the OpenNext
    adapter. Node version follows the repository baseline. Local Netlify account
    and site-link state stays ignored, and operator commands use the isolated
-   MirtPage CLI home rather than an ambient account profile.
+   Suqpage CLI home rather than an ambient account profile.
 3. The free-plan credit hard limit is monitored; unnecessary production deploys
    and globally open serverless polling are prohibited.
 4. Realtime subscribes only while a support thread or staff inbox is visible,
@@ -49,7 +49,7 @@ turning every free service into an unconditional runtime dependency.
    canonical point set.
 7. Local development, browser acceptance, deploy previews, and Production all
    select PostgreSQL, Supabase Auth, and private Supabase Storage. They apply the
-   same MirtPage schema and identity-link/tenant-authorization model; only
+   same Suqpage schema and identity-link/tenant-authorization model; only
    endpoints, credentials, data, and lifecycle differ.
 
 ## Scenarios
@@ -76,7 +76,7 @@ Scenario: Visitor zooms the map
   GIVEN the centralized osm-standard provider is selected
   WHEN the visitor pans or zooms
   THEN the browser requests only visible OpenStreetMap Standard tiles
-  AND MirtPage sends no catalog query, private location, or account data in a tile request
+  AND Suqpage sends no catalog query, private location, or account data in a tile request
   AND a tile-provider failure does not remove Supabase-backed showroom discovery
 ```
 
@@ -129,14 +129,14 @@ than dual writing.
   fallback. PostGIS remains deferred until measured public-map scale requires
   server-side viewport queries.
 - On 2026-08-24 the isolated Netlify CLI profile authenticated as the intended
-  account and created only site `mirtpage`
+  account and created only site `suqpage`
   (`26c795eb-5560-4a88-b38d-3cc922c2a5e6`). The production context contains
   the allowlisted PostgreSQL, Supabase Auth, private Storage, canonical-origin,
   PWA, and `osm-standard` settings. Netlify Free cannot apply paid hidden/scoped
   secret controls, so the owner explicitly approved ordinary site environment
   variables across Netlify's standard scopes; values remain outside Git and
   application logs. On 2026-08-27 that same site ID was renamed in place to
-  `africmade`; `https://africmade.netlify.app` returns HTTP 200 for `/` and
+  `suqpage`; `https://africmade.netlify.app` returns HTTP 200 for `/` and
   `/login`, and the production canonical/trusted-origin variables were updated
   for the next deploy. Updated candidate deployment, authenticated provider
   smoke, and monitored rollback evidence remain pending.

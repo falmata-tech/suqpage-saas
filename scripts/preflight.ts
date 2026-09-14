@@ -1,3 +1,4 @@
+import { platformEnvironment } from "../lib/platform-environment.mjs";
 import {
   assertProductionConfiguration,
   authDriver,
@@ -12,8 +13,8 @@ export async function preflight() {
   assertProductionConfiguration();
 
   const driver = databaseDriver();
-  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=43");
-  if (!migration) throw new Error("PostgreSQL migration 43 is required before this release can serve traffic.");
+  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=45");
+  if (!migration) throw new Error("PostgreSQL migration 45 is required before this release can serve traffic.");
 
   if (authDriver() === "supabase") {
     const identityMigration = await runtimeGet<{ version: number }>(
@@ -30,7 +31,7 @@ export async function preflight() {
       WHERE link.user_id IS NULL
     `);
     if (Number(unlinked?.total || 0) > 0) {
-      throw new Error("Every retained AfricMade user must have one reconciled Supabase identity before Auth cutover.");
+      throw new Error("Every retained Suqpage user must have one reconciled Supabase identity before Auth cutover.");
     }
   }
 
@@ -55,7 +56,7 @@ export async function preflight() {
   }
 }
 
-if (process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY !== "1") {
+if (platformEnvironment().SUQPAGE_PREFLIGHT_IMPORT_ONLY !== "1") {
   void (async () => {
     try {
       await preflight();

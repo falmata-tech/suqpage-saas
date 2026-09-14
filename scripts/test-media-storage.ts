@@ -15,7 +15,7 @@ const pageKey = "page-1-00000000-0000-4000-8000-000000000004.webp";
 
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-media-store-"));
-  process.env.MIRTPAGE_MEDIA_ROOT = root;
+  process.env.SUQPAGE_MEDIA_ROOT = root;
   try {
     const local = new FileMediaObjectStore();
     await local.put("public", key, Buffer.from("public-image"), "image/webp");

@@ -14,8 +14,8 @@ async function main() {
   const target = archiveTarget();
   const targetDigest = crypto.createHash('sha256').update(`${target.hostname}:${target.port || '5432'}${target.pathname}`).digest('hex');
   if (!process.argv.includes('--execute')) { console.log(`Restore plan: public schema, empty target required. Target digest: ${targetDigest}`); return; }
-  if (process.env.MIRTPAGE_APPROVE_POSTGRES_RESTORE !== targetDigest) throw new Error('Review the target digest and explicitly approve the restore before execution.');
-  const config = postgresRuntimeConfig({ MIRTPAGE_POSTGRES_URL: target.toString() });
+  if (process.env.SUQPAGE_APPROVE_POSTGRES_RESTORE !== targetDigest) throw new Error('Review the target digest and explicitly approve the restore before execution.');
+  const config = postgresRuntimeConfig({ SUQPAGE_POSTGRES_URL: target.toString() });
   if (!config) throw new Error('Invalid PostgreSQL restore target.');
   const pool = createPostgresPool(config);
   try {

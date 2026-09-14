@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Pool, type PoolClient, types } from "pg";
 
@@ -46,14 +47,15 @@ function boundedInteger(
 export function postgresRuntimeConfig(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): PostgresRuntimeConfig | null {
-  const connectionString = (environment.MIRTPAGE_POSTGRES_URL || "").trim();
+  environment = platformEnvironment(environment);
+  const connectionString = (environment.SUQPAGE_POSTGRES_URL || "").trim();
   if (!connectionString) return null;
 
   let parsed: URL;
   try {
     parsed = new URL(connectionString);
   } catch {
-    throw new Error("MIRTPAGE_POSTGRES_URL must be a valid PostgreSQL connection URL.");
+    throw new Error("SUQPAGE_POSTGRES_URL must be a valid PostgreSQL connection URL.");
   }
   if (
     (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") ||
@@ -62,29 +64,29 @@ export function postgresRuntimeConfig(
     !parsed.password ||
     parsed.hash
   ) {
-    throw new Error("MIRTPAGE_POSTGRES_URL must include a PostgreSQL host, user, and password.");
+    throw new Error("SUQPAGE_POSTGRES_URL must include a PostgreSQL host, user, and password.");
   }
 
   return {
     connectionString,
     poolMax: boundedInteger(
-      environment.MIRTPAGE_POSTGRES_POOL_MAX,
+      environment.SUQPAGE_POSTGRES_POOL_MAX,
       DEFAULT_POOL_MAX,
-      "MIRTPAGE_POSTGRES_POOL_MAX",
+      "SUQPAGE_POSTGRES_POOL_MAX",
       MIN_POOL_MAX,
       MAX_POOL_MAX,
     ),
     connectionTimeoutMs: boundedInteger(
-      environment.MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS,
+      environment.SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS,
       DEFAULT_CONNECTION_TIMEOUT_MS,
-      "MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS",
+      "SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS",
       MIN_TIMEOUT_MS,
       MAX_TIMEOUT_MS,
     ),
     statementTimeoutMs: boundedInteger(
-      environment.MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS,
+      environment.SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS,
       DEFAULT_STATEMENT_TIMEOUT_MS,
-      "MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS",
+      "SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS",
       MIN_TIMEOUT_MS,
       MAX_TIMEOUT_MS,
     ),

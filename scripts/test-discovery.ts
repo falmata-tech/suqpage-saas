@@ -56,8 +56,8 @@ async function runPostgresFixture() {
     assert.match(discoveryUiSource, /walkthrough-current/);
     assert.doesNotMatch(discoveryUiSource, /randomSponsorPair/);
     assert.doesNotMatch(discoveryUiSource, /rail\.scrollTo/);
-    assert.match(discoveryUiSource, /mirtpage:discovery-navigation:v2/);
-    assert.match(discoveryUiSource, /mirtpage:last-marketplace-url:v1/);
+    assert.match(discoveryUiSource, /suqpage:discovery-navigation:v2/);
+    assert.match(discoveryUiSource, /suqpage:last-marketplace-url:v1/);
     assert.match(discoveryUiSource, /selectedShowroomId: number \| null/);
     assert.match(discoveryUiSource, /setSelectedShowroomId\(savedSelection && selectionBelongsToGroup/);
     assert.match(discoveryUiSource, /rememberCurrentPublicWorkspace/);
@@ -100,7 +100,7 @@ async function runPostgresFixture() {
     assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
     assert.match(publicDiscoveryCacheSource, /public-marketplace-v4-paginated-results/, "the marketplace cache identity tracks the nearby-group projection contract");
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-discovery-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));
     const db = await getDb();
     function distanceKm(left: {
         latitude: number;

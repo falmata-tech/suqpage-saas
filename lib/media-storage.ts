@@ -328,7 +328,7 @@ export function configuredMediaDriver() {
     return mediaStorageDriver();
   } catch {
     throw new MediaStorageError(
-      "MIRTPAGE_MEDIA_DRIVER must be filesystem or supabase.",
+      "SUQPAGE_MEDIA_DRIVER must be filesystem or supabase.",
       "invalid_configuration",
     );
   }

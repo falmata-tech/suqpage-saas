@@ -1,3 +1,4 @@
+import { platformCookie, platformCookies } from "@/lib/platform-state";
 import { NextRequest, NextResponse } from "next/server";
 import { getPublicSupportAttachment, PUBLIC_SUPPORT_COOKIE } from "@/lib/support";
 import { readSupportAttachment } from "@/lib/support-media";
@@ -11,7 +12,7 @@ const hidden = () => NextResponse.json(
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ attachmentId: string }> }) {
   try {
-    const token = request.cookies.get(PUBLIC_SUPPORT_COOKIE)?.value;
+    const token = platformCookie(request.cookies, "support");
     const attachmentId = Number.parseInt((await params).attachmentId, 10);
     if (!token || !Number.isSafeInteger(attachmentId)) return hidden();
     const attachment = await getPublicSupportAttachment(token, attachmentId);

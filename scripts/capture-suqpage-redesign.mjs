@@ -88,7 +88,7 @@ try {
       await page.screenshot({ path: `${output}/${name}-${width}.png`, caret: "initial" });
       const metrics = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth > innerWidth,
-        retired: /AfricMade|MirtPage/.test(document.body.innerText),
+        retired: /Suqpage|Suqpage/.test(document.body.innerText),
         broken: [...document.images].filter((img) => img.getBoundingClientRect().top < innerHeight && img.complete && !img.naturalWidth).map((img) => img.getAttribute("src")),
       }));
       assert.equal(metrics.overflow, false, `${name} ${width}: no horizontal overflow`);

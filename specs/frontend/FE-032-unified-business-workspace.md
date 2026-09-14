@@ -18,9 +18,9 @@ Those names mirror persistence records instead of the work an administrator is
 trying to complete. A business, its authorized people, its marketplace
 projection, its renewal record, and its visit aggregates must remain separate
 authoritative records, but staff should not have to understand those boundaries
-to manage one MirtPage customer.
+to manage one Suqpage customer.
 
-MirtPage needs one scalable Businesses directory and one task-oriented Business
+Suqpage needs one scalable Businesses directory and one task-oriented Business
 workspace. Cross-business queues remain global; business-specific work remains
 inside the selected business context.
 
@@ -150,7 +150,7 @@ Scenario: Staff distinguishes performance from renewal
 Scenario: Legacy administration link is followed
   GIVEN a saved Clients or Discovery administration URL
   WHEN an authorized administrator opens it
-  THEN MirtPage redirects to the equivalent Businesses or Marketplace context
+  THEN Suqpage redirects to the equivalent Businesses or Marketplace context
   AND no customer, access, or marketplace data is changed
 ```
 

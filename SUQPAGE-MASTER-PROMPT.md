@@ -807,6 +807,10 @@ The owner approved an email-only production launch on 2026-09-14. Email-code
 entry is required; Google remains hidden until separately restored and verified.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
+The Suqpage namespace preserves existing account emails and Auth links. Legacy
+local session cookies remain readable through the same authorization checks; new
+cookies use Suqpage names and logout revokes both local token names (BE-036).
+
 Business setup collects only owner name, verified-email display, phone or
 WhatsApp, organization name, one bounded private production category,
 processing consent, and an idempotency token. A safe Google display name is
@@ -937,6 +941,12 @@ operational disable switch, not a route back to the retired workflow.
 ---
 
 ## 15. Current technical architecture
+
+Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
+platform environment adapter accepts the earlier namespace only as a read fallback;
+explicit canonical settings, including empty or disabled values, win. New public
+assets and persisted browser state use Suqpage names. Exact asset rewrites and
+tenant-scoped cart/navigation migration preserve existing links and saved inquiries.
 
 Current controlled-launch stack:
 
@@ -1137,12 +1147,19 @@ database engine in application code, local development, fixtures, CI and deploym
 (BE-035, DEP-031, ADR-0020). There is no file-database fallback or copy-through-fixture
 bootstrap. Unsupported database settings fail closed.
 
-Native schema 43 installs directly into empty PostgreSQL schemas, including taxonomy,
+Native schema 45 installs directly into empty PostgreSQL schemas, including taxonomy,
 schedule defaults, constraints, sequences and tenant triggers. Existing versioned
 schemas use additive/idempotent migrations. Unversioned populated schemas are refused.
 Each persistence fixture uses a disposable local PostgreSQL schema; trigger definitions
 must remain inside that schema. Demo setup seeds an empty local database and preserves
 populated targets. Existing data and protected historical backups are not deleted.
+
+Migration 44 changes the platform support-label default. Migration 45 changes the
+subscription creation trigger/default and exact standard plan labels to Suqpage.
+Custom plan names, prices, periods, tenant records and account identities remain
+intact. Provisioned provider identifiers and immutable backup members are retained
+for continuity; `docs/SUQPAGE-NAMING-COMPATIBILITY.md` enumerates every exception
+and the guarded hostname/resource changes required to retire them (BE-036/DEP-032).
 
 `docs/POSTGRES-ONLY-RUNBOOK.md` controls current setup and recovery. Database backup
 uses protected PostgreSQL custom archives with hashes; restore requires a reviewed
@@ -1295,6 +1312,12 @@ separate local Supabase project. Source-boundary checks reject retired database
 imports, file-based configuration and client-to-database coupling. Native archive
 operations and hosted readiness remain separate release gates (BE-035/DEP-031).
 
+
+`npm run test:platform-naming` checks canonical source naming, legacy configuration
+precedence, cookies, tenant-scoped saved state, asset targets and label-only database
+migrations. Browser acceptance verifies a real saved-cart upgrade and bookmarked
+asset requests. Backup rehearsal compares preserved rows and expected standard-label
+changes before any hosted migration (BE-036/DEP-032).
 
 A feature is not complete merely because the page renders.
 

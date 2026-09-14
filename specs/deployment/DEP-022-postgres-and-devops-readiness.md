@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage needs a credible path from one persistent SQLite instance to managed
+Suqpage needs a credible path from one persistent SQLite instance to managed
 PostgreSQL and Supabase-hosted services without risking its retained demo data.
 Its delivery workflow also needs current LTS tooling, explicit repository
 protection, repeatable CI, and an operator runbook that distinguishes local
@@ -28,7 +28,7 @@ evidence, migration rehearsal, and production cutover evidence.
   reconciliation rehearsal against a disposable local PostgreSQL service.
 - Translation or explicit inventory of SQLite-specific constraints, indexes,
   triggers, JSON operations, collations, and transaction semantics.
-- A phase gate that prevents `MIRTPAGE_DATABASE_DRIVER=postgres` from being
+- A phase gate that prevents `SUQPAGE_DATABASE_DRIVER=postgres` from being
   presented as available until every authoritative repository port, workflow,
   authorization test, and reconciliation gate passes.
 - Pinned least-privilege GitHub Actions, dependency/security checks, manual
@@ -163,5 +163,5 @@ was followed by exact-main run `30811139517`, which passed the same five jobs on
 commit `a134a12`. Main protection now requires all five checks on an up-to-date
 pull request, enforces administrators, resolves conversations, and requires
 linear history. Force pushes and branch deletion are disabled. The approval
-count is zero while MirtPage has one maintainer; it must increase when an
+count is zero while Suqpage has one maintainer; it must increase when an
 independent reviewer joins.

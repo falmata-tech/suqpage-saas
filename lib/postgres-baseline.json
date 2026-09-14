@@ -1,5 +1,5 @@
 {
-  "version": 43,
+  "version": 45,
   "sql": [
     "CREATE FUNCTION public.create_business_subscription() RETURNS trigger",
     "    LANGUAGE plpgsql",
@@ -11,7 +11,7 @@
     "    business_id, plan_name, amount_minor, currency, starts_at,",
     "    current_period_start, current_period_end, grace_ends_at, updated_at",
     "  ) VALUES (",
-    "    NEW.id, 'MirtPage monthly', NULL, 'ETB', now_ms, now_ms,",
+    "    NEW.id, 'Suqpage monthly', NULL, 'ETB', now_ms, now_ms,",
     "    now_ms + 2592000000, now_ms + 2937600000, now_ms",
     "  ) ON CONFLICT (business_id) DO NOTHING;",
     "  RETURN NEW;",
@@ -315,7 +315,7 @@
     "",
     "CREATE TABLE public.business_subscriptions (",
     "    business_id bigint NOT NULL,",
-    "    plan_name text DEFAULT 'MirtPage monthly'::text NOT NULL,",
+    "    plan_name text DEFAULT 'Suqpage monthly'::text NOT NULL,",
     "    amount_minor bigint,",
     "    currency text DEFAULT 'ETB'::text NOT NULL,",
     "    starts_at bigint NOT NULL,",

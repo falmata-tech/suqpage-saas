@@ -20,7 +20,7 @@ const fixtureConfig = (): AuthConfig => ({
   smtp_pass: "test-only-smtp-secret", mailer_autoconfirm: false, mailer_otp_length: 8,
 });
 function fixture() {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "africmade-auth-guard-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-auth-guard-"));
   fs.chmodSync(directory, 0o700);
   let config = fixtureConfig();
   const writes: AuthConfig[] = [];

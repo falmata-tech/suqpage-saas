@@ -14,7 +14,7 @@ change_level: L3
 
 The existing public bootstrap combines identity creation, password selection,
 contact details, handle choice, and showroom briefing in one unauthenticated
-transaction. AfricMade needs a lower-friction identity-first model without
+transaction. Suqpage needs a lower-friction identity-first model without
 allowing an unlinked Supabase account to invent a role or tenant.
 
 Supabase verifies email OTP or Google first. PostgreSQL then atomically creates
@@ -45,7 +45,7 @@ command. Creating a public business-page project is a later deliberate action.
 ## Domain language and invariants
 
 - A **provider identity** is a verified Supabase user UUID and email. It is not
-  an AfricMade user until one immutable `auth_identity_links` record exists.
+  an Suqpage user until one immutable `auth_identity_links` record exists.
 - An **unlinked session** may access only account entry, callback, logout, and
   business onboarding.
 - Application role, access profile, business ownership, suspension, and
@@ -62,7 +62,7 @@ command. Creating a public business-page project is a later deliberate action.
   `signInWithOtp` with managed user creation enabled. Its public response is
   generic for accepted provider outcomes.
 - Hosted and local Auth configure both the new-identity confirmation template
-  and existing-identity magic-link template as the same six-digit AfricMade OTP
+  and existing-identity magic-link template as the same six-digit Suqpage OTP
   message. Both render `{{ .Token }}` and neither renders a confirmation URL.
 - OTP verification accepts the same email and exactly six decimal digits, calls
   `verifyOtp` with type `email`, and returns only `dashboard` or `onboarding`
@@ -104,7 +104,7 @@ Scenario: Browser forges provider or tenant authority
 Scenario: Bootstrap transaction fails
   GIVEN a valid unlinked provider session
   WHEN any canonical PostgreSQL write fails
-  THEN no partial AfricMade tenant or identity link remains
+  THEN no partial Suqpage tenant or identity link remains
   AND the provider session may retry onboarding safely
 ```
 

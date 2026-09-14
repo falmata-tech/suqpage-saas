@@ -1,6 +1,6 @@
 ---
 id: FE-029
-title: MirtPage platform visual system refresh
+title: Suqpage platform visual system refresh
 status: done
 related: [FE-009, FE-013, FE-024, FE-026, FE-028, FE-030, FE-038]
 owners: [product, frontend, design]
@@ -8,14 +8,14 @@ last_updated: 2026-08-04
 change_level: L1
 ---
 
-# FE-029 - MirtPage platform visual system refresh
+# FE-029 - Suqpage platform visual system refresh
 
 ## Problem and outcome
 
-MirtPage-owned surfaces still mix the retired purple identity with several
+Suqpage-owned surfaces still mix the retired purple identity with several
 unrelated neutral, green, and slate systems. The marketplace, virtual venues,
 public forms, and authenticated workspaces should feel like one deliberate
-product. The supplied MirtPage identity establishes midnight navy, two teals,
+product. The supplied Suqpage identity establishes midnight navy, two teals,
 saffron, and cool gray as the platform palette and a rounded navy M mark with a
 teal point as the universal platform identity.
 
@@ -29,7 +29,7 @@ teal point as the universal platform identity.
 - Coordinated marketplace, map, City Showroom, Daily Featured, login, signup, admin,
   staff, support, and client-workspace colors and interaction states.
 - A compact platform-owned host band above every public showroom and private
-  preview, with a direct return to the MirtPage marketplace.
+  preview, with a direct return to the Suqpage marketplace.
 - An Daily Featured and City architectural shell recolored to the same visual system
   while keeping data-driven placement separate from decorative venue artwork.
 - Accessible focus, hover, selected, status, warning, error, and inverse states.
@@ -48,11 +48,11 @@ teal point as the universal platform identity.
 - **Platform palette:** midnight `#0B1D3A`, deep teal `#0D6B6E`, bright teal
   `#27A5A1`, saffron `#F2B01E`, and cool gray `#F3F5F7`, plus derived neutral
   and contrast-safe interaction states.
-- MirtPage platform identity must remain visually distinct from every tenant
+- Suqpage platform identity must remain visually distinct from every tenant
   showroom identity.
 - The host band is platform chrome outside the tenant renderer. Its semantic
   surface, border, text, and focus colors may derive from the showroom's
-  approved palette so the band blends with that site, while its MirtPage mark,
+  approved palette so the band blends with that site, while its Suqpage mark,
   host wording, and marketplace action remain platform-controlled. It must not
   replace or imply ownership of the tenant's logo, header, navigation, or content.
 - Saffron communicates bounded attention or warning; it is not a general
@@ -85,19 +85,19 @@ teal point as the universal platform identity.
   horizontal overflow.
 - Client showroom renderers continue to resolve their own approved or custom
   palette exactly as before.
-- Every showroom entry presents one compact, responsive MirtPage host band with
+- Every showroom entry presents one compact, responsive Suqpage host band with
   a concise visible **Back** action whose accessible name identifies the
-  MirtPage marketplace destination, plus a **Powered by MirtPage** label.
+  Suqpage marketplace destination, plus a **Powered by Suqpage** label.
   The band remains in normal document flow so it does not cover tenant
   navigation, showroom content, dialogs, or the floating inquiry control, and
-  it adapts to the approved tenant palette without losing the MirtPage identity.
+  it adapts to the approved tenant palette without losing the Suqpage identity.
 
 ## Scenarios
 
 ```gherkin
 Scenario: Visitor moves through the public platform
   GIVEN the homepage, discovery workspace, Daily Featured, login, signup, and About page
-  WHEN MirtPage-owned surfaces render
+  WHEN Suqpage-owned surfaces render
   THEN the same mark and semantic navy, teal, saffron, and cool-gray system is used
   AND no retired purple platform treatment remains
 
@@ -111,7 +111,7 @@ Scenario: Visitor opens a tenant showroom
   GIVEN a published showroom has an approved custom visual identity
   WHEN the showroom renders after the platform refresh
   THEN its tenant palette and logo are unchanged
-  AND a compact MirtPage host band provides a direct return to the marketplace
+  AND a compact Suqpage host band provides a direct return to the marketplace
   AND platform-owned chrome remains visibly separate from the tenant identity
 ```
 
@@ -150,11 +150,11 @@ Evidence:
 - `npm run check` passed on Node 24.18.1.
 - `npm run test:acceptance` passed all 10 production-build workflows, including
   the adaptive showroom host band and fixed inquiry overlay regression.
-- `/tmp/mirtpage-final-discovery-v6` records passing desktop, 390px, and 320px
+- `/tmp/suqpage-final-discovery-v6` records passing desktop, 390px, and 320px
   marketplace, inline City Showroom, Daily Featured, preview, and List captures with no
   horizontal overflow.
-- `/tmp/mirtpage-final-showroom-v3` records the adaptive **Back** / **Powered by
-  MirtPage** band and fixed inquiry drawer at desktop and phone widths.
+- `/tmp/suqpage-final-showroom-v3` records the adaptive **Back** / **Powered by
+  Suqpage** band and fixed inquiry drawer at desktop and phone widths.
 - `scripts/test-platform-identity.mjs` and `scripts/test-showroom-renderer.ts`
   passed the platform/tenant identity boundary.
 - `npm run release` passed the production build, HTTP smoke tests, scale

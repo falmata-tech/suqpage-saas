@@ -7,9 +7,9 @@ import { getDb, closeDbForTests } from "./testing/postgres-fixture";
 import { parseRevisionSnapshot, RevisionError, upgradeRevisionSnapshotToV3, } from "../lib/revision-domain";
 import { curatedManifestForLegacyDesign } from "../lib/showroom-manifests";
 async function runPostgresFixture() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-stockless-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-stockless-"));
     const databasePath = path.join(root, "stockless.db");
-    process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
+    process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
     const db = await getDb();
     const tableColumns = async (table: string) => (await db.prepare(`SELECT column_name name FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='${table}'`).all() as Array<{
         name: string;

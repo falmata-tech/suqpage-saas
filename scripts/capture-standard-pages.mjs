@@ -7,9 +7,9 @@ import { chromium,expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
-const base='http://127.0.0.1:3101';const provider=new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);const target=new URL(process.env.MIRTPAGE_POSTGRES_URL);
+const base='http://127.0.0.1:3101';const provider=new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);const target=new URL(process.env.SUQPAGE_POSTGRES_URL);
 assert.ok(['127.0.0.1','localhost'].includes(provider.hostname)&&provider.port==='54321');assert.ok(['127.0.0.1','localhost'].includes(target.hostname)&&target.port==='54322');
-const pool=new pg.Pool({connectionString:target.href});const adminAuth=createClient(provider.origin,process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const pool=new pg.Pool({connectionString:target.href});const adminAuth=createClient(provider.origin,process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const browser=await chromium.launch();const email=`page-ui-${randomUUID()}@example.test`;const out='/tmp/suqpage-standard-page-review';fs.mkdirSync(out,{recursive:true});let providerId;let businessId;const mediaKeys=[];
 const cookieContext=async(email)=>{const context=await browser.newContext();const link=await adminAuth.auth.admin.generateLink({type:'magiclink',email});assert.ok(!link.error&&link.data.properties?.email_otp);const cookies=[];const client=createServerClient(provider.origin,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,{cookies:{getAll:()=>[],setAll:values=>cookies.push(...values)}});const verified=await client.auth.verifyOtp({email,token:link.data.properties.email_otp,type:'email'});assert.ok(!verified.error);await context.addCookies(cookies.map(({name,value})=>({name,value,url:base,sameSite:'Lax'})));return context;};
 const capture=async(page,name)=>{for(const width of [1440,390,320]){await page.setViewportSize({width,height:width===1440?1000:844});await page.evaluate(()=>window.scrollTo(0,0));assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`No overflow ${name} ${width}`);const heading=page.locator('.standard-page-heading');if(await heading.count()){const copy=await heading.locator(':scope > div').boundingBox();const action=heading.locator(':scope > .btn');if(copy&&await action.count()){const box=await action.boundingBox();assert.ok(box&&(width>760||box.y>=copy.y+copy.height+10),`Heading action has clear spacing ${name} ${width}`);}}await page.screenshot({path:`${out}/${name}-${width}.png`,style:'nextjs-portal {visibility:hidden}'});}};
@@ -51,7 +51,7 @@ try{
 }catch(error){console.error('Browser workflow failure:',error instanceof Error?error.message:String(error));throw error;}finally{
  const fixture=businessId?{id:businessId}:(await pool.query('SELECT business_id AS id FROM users WHERE email=$1',[email])).rows[0];
  if(fixture){const cleanup=await pool.connect();try{await cleanup.query('BEGIN');for(const table of ['owner_page_reviews','owner_page_publications','owner_page_events','owner_page_drafts','product_upkeep_commands','published_catalog_versions','audit_logs'])await cleanup.query(`DELETE FROM ${table} WHERE business_id=$1`,[fixture.id]);await cleanup.query('DELETE FROM businesses WHERE id=$1',[fixture.id]);await cleanup.query('COMMIT');}catch(e){await cleanup.query('ROLLBACK');throw e;}finally{cleanup.release();}}
- for(const key of mediaKeys){const response=await adminAuth.storage.from(process.env.MIRTPAGE_SUPABASE_STORAGE_BUCKET||'mirtpage-media').remove([`pages/${key}`]);assert.ok(!response.error,'Fixture media cleanup');}
+ for(const key of mediaKeys){const response=await adminAuth.storage.from(process.env.SUQPAGE_SUPABASE_STORAGE_BUCKET||'mirtpage-media').remove([`pages/${key}`]);assert.ok(!response.error,'Fixture media cleanup');}
  if(providerId){const removed=await adminAuth.auth.admin.deleteUser(providerId);assert.ok(!removed.error,'Local test identity cleanup');}
  await browser.close();await pool.end();
 }

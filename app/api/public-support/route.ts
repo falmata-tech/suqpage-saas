@@ -1,3 +1,4 @@
+import { platformCookie, platformCookies } from "@/lib/platform-state";
 import { NextRequest, NextResponse } from "next/server";
 import { assertSameOrigin, hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
 import {
@@ -28,13 +29,14 @@ function errorResponse(error: unknown) {
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get(PUBLIC_SUPPORT_COOKIE)?.value;
+    const token = platformCookie(request.cookies, "support");
     if (!token) return NextResponse.json({ conversation: null });
     return NextResponse.json({ conversation: await getPublicSupportConversation(token) });
   } catch (error) {
     if (error instanceof SupportError && error.code === "not_found") {
       const response = NextResponse.json({ conversation: null });
       response.cookies.delete(PUBLIC_SUPPORT_COOKIE);
+      response.cookies.delete(platformCookies.support.legacy);
       return response;
     }
     return errorResponse(error);
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
         : (() => { throw new SupportError("Send a form or JSON request.", "invalid_request"); })();
     if (String(body.website || "").trim()) return NextResponse.json({ error: "Request could not be accepted." }, { status: 400 });
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
-    const token = request.cookies.get(PUBLIC_SUPPORT_COOKIE)?.value || "";
+    const token = platformCookie(request.cookies, "support") || "";
 
     if (body.action === "close") {
       await closePublicSupportConversation(token);
@@ -104,6 +106,7 @@ export async function DELETE(request: NextRequest) {
     assertSameOrigin(request);
     const response = NextResponse.json({ conversation: null });
     response.cookies.delete(PUBLIC_SUPPORT_COOKIE);
+    response.cookies.delete(platformCookies.support.legacy);
     return response;
   } catch (error) {
     return errorResponse(error);

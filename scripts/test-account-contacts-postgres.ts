@@ -7,9 +7,9 @@ import { accountContactPort } from "../lib/account-contact-runtime";
 import { saveAccountPhone } from "../lib/account-contacts";
 
 async function main() {
-  const target = new URL(process.env.MIRTPAGE_POSTGRES_URL || "");
+  const target = new URL(process.env.SUQPAGE_POSTGRES_URL || "");
   assert.ok(["localhost", "127.0.0.1"].includes(target.hostname) && target.port === "54322");
-  assert.equal(process.env.MIRTPAGE_DATABASE_DRIVER, "postgres");
+  assert.equal(process.env.SUQPAGE_DATABASE_DRIVER, "postgres");
   const { runner, catalog } = postgresRuntimeServices();
   const rollback = new Error("ROLLBACK_CONTACT_TEST");
   try {

@@ -15,10 +15,10 @@ assert.ok(authenticatedAttachmentRouteSource.indexOf("await getSupportAttachment
 assert.match(publicSupportUiSource, /if \(!document\.hidden\) void loadConversation\(\)/, "public support pauses polling while its browser document is hidden");
 assert.match(supportRefreshSource, /if \(!document\.hidden\) router\.refresh\(\)/, "staff support pauses route refresh while its browser document is hidden");
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-support-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
-    delete process.env.MIRTPAGE_TELEGRAM_BOT_TOKEN;
-    delete process.env.MIRTPAGE_TELEGRAM_SUPPORT_CHAT_ID;
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-support-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+    delete process.env.SUQPAGE_TELEGRAM_BOT_TOKEN;
+    delete process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID;
     const { closeDbForTests, getDb } = await import("./testing/postgres-fixture");
     const { claimSupportConversation, closePublicSupportConversation, closeSupportConversation, createPublicSupportConversation, createSupportConversation, getPublicSupportConversation, getPublicSupportAttachment, getSupportConversation, getSupportAttachment, getSupportAgentSummary, listSupportAgentWorkloads, listSupportAgentWorkloadsPage, postSupportMessage, postPublicSupportMessage, reassignSupportConversation, reopenSupportConversation, SupportError, updateSupportAgentSetting, } = await import("../lib/support");
     const { readSupportAttachment, stageSupportAttachment } = await import("../lib/support-media");

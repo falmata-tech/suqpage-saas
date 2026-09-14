@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mirtpage.com/schemas/showroom-content.schema.json",
-  "title": "MirtPage stockless showroom content proposal",
-  "description": "Portable syntactic guidance. The MirtPage server parser, source, tenant, asset, and relationship checks remain authoritative.",
+  "title": "Suqpage stockless showroom content proposal",
+  "description": "Portable syntactic guidance. The Suqpage server parser, source, tenant, asset, and relationship checks remain authoritative.",
   "type": "object",
   "additionalProperties": false,
   "required": [

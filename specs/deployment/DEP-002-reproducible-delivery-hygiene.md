@@ -76,7 +76,7 @@ four-tenant application behavior and single-instance pilot boundary.
   `next typegen`, `next dev`, or `next build` and is not source authority.
 - Local and CI automation never logs credential values or persists temporary
   customer/runtime data in repository paths or public artifacts.
-- The final image runs as `mirtpage`, uses one persistent volume, and refuses
+- The final image runs as `suqpage`, uses one persistent volume, and refuses
   unsafe production configuration before serving traffic.
 
 ## Contracts
@@ -90,7 +90,7 @@ four-tenant application behavior and single-instance pilot boundary.
   setup credential rows, verifies the runtime user and `/api/health`, and removes
   only resources it created even after failure.
 - Production image builds receive `NEXT_PUBLIC_APP_URL` and optional exact
-  `MIRTPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
+  `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
   configuration must contain the expected host and no wildcard.
 - One pure trusted-origin contract supplies both Next.js configuration and
   custom mutation guards. Development adds only exact localhost origins and the

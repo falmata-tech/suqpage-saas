@@ -10,7 +10,7 @@ and `DEP-011`.
 Research checkpoint: 2026-07-28.
 
 - A schema can guarantee output shape but cannot by itself guarantee design
-  quality. MirtPage therefore needs both strict recipe structure and an
+  quality. Suqpage therefore needs both strict recipe structure and an
   evaluation set with explicit visual criteria.
 - Design choices should be layered. Foundations define semantic visual
   decisions; patterns define functional page anatomy; templates define a
@@ -48,7 +48,7 @@ Primary references:
 
 Research checkpoint: 2026-07-28.
 
-- More component choice does not justify more page chapters. Normal MirtPage
+- More component choice does not justify more page chapters. Normal Suqpage
   showrooms need one predictable information architecture: hero, about,
   process, products, and inquiry. Header and footer remain supporting chrome.
   Visual systems vary the anatomy inside those roles, not the role order.
@@ -59,7 +59,7 @@ Research checkpoint: 2026-07-28.
   sections instead of adjacent pale brand tints.
 - Every emphasized background needs its own paired foreground. WCAG 2.2 checks
   text against the background that actually appears adjacent in normal use:
-  4.5:1 for normal text and 3:1 for large text. MirtPage therefore exports
+  4.5:1 for normal text and 3:1 for large text. Suqpage therefore exports
   `strong/onStrong` and `inverse/onInverse` pairs and tests them directly.
 - Brand accents remain useful for controls, rules, labels, and one important
   full-section moment. They should not color the canvas, about, process, product,
@@ -82,16 +82,16 @@ Research checkpoint: 2026-07-28.
   Carbon similarly collapses header actions into a stacked side-navigation
   model in smaller windows.
 - Footer scale should follow actual content. USWDS defines slim, medium, and big
-  footers and explicitly says the footer need not mirror the header. MirtPage
+  footers and explicitly says the footer need not mirror the header. Suqpage
   therefore distinguishes slim identity, editorial masthead, catalog directory,
   contact-forward, and indexed closes by real regions and density.
 - An inquiry is a scoped task related to the current showroom. Apple describes
   sheets as contextual task surfaces, with near-full-height phone presentation
-  when form content needs room and visible dismissal controls. MirtPage uses a
+  when form content needs room and visible dismissal controls. Suqpage uses a
   floating desktop panel and a phone bottom sheet with one internal scroll area,
   safe-area spacing, focus containment, and an explicit close button.
 - Repeated stripes and divider grids do not communicate section purpose.
-  MirtPage uses semantic neutral surface changes, whitespace, and one bounded
+  Suqpage uses semantic neutral surface changes, whitespace, and one bounded
   directional edge treatment instead. Story/process placement alternates at
   desktop widths while phone reading order remains heading first.
 
@@ -102,7 +102,7 @@ Additional primary references:
 - [Carbon UI shell header](https://carbondesignsystem.com/components/UI-shell-header/style/)
 - [Apple sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)
 
-## MirtPage v1 comparison
+## Suqpage v1 comparison
 
 Desktop and 390px full-page captures of the static v1 homepage and its four
 linked examples were reviewed on 2026-07-27:
@@ -180,7 +180,7 @@ desktop block.
   perpetual marquees, flashing, essential content hidden behind animation,
   hover-only actions, remote animation scripts, and recipe-controlled CSS.
 - Cloning a researched company's layout, typography, text, imagery, color
-  signature, or code. The bank uses generic capabilities and MirtPage-owned
+  signature, or code. The bank uses generic capabilities and Suqpage-owned
   implementations only.
 
 ## Accessibility and performance boundary

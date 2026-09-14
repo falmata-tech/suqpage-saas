@@ -1,6 +1,6 @@
 ---
 id: FE-024
-title: MirtPage marketplace and attention shell
+title: Suqpage marketplace and attention shell
 status: in_progress
 related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, FE-027, FE-028, FE-029, FE-030, FE-033, FE-036, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
 owners: [product, frontend, design, operations]
@@ -8,13 +8,13 @@ last_updated: 2026-08-09
 change_level: L3
 ---
 
-# FE-024 - MirtPage marketplace and attention shell
+# FE-024 - Suqpage marketplace and attention shell
 
 ## Problem and outcome
 
 The public product still presents retired platform and marketplace-destination
 language, its discovery controls compete visually, business previews blend into the map or floor, and
-operations users must visit several queues to discover new work. MirtPage needs
+operations users must visit several queues to discover new work. Suqpage needs
 one coherent Made-in-Ethiopia identity, an app-like mobile-first marketplace,
 and an immediately actionable dashboard summary.
 
@@ -22,7 +22,7 @@ and an immediately actionable dashboard summary.
 
 ### In scope
 
-- MirtPage identity on every active platform-owned public and dashboard surface.
+- Suqpage identity on every active platform-owned public and dashboard surface.
 - **Showroom** as the public destination term; existing `/@handle` routes remain.
 - Inclusive copy for makers, growers, workshops, processors, and growing
   factories serving consumer and B2B buyers.
@@ -57,7 +57,7 @@ and an immediately actionable dashboard summary.
 
 ## Domain language and invariants
 
-- **MirtPage** is the platform; a **showroom** is one business's permanent public
+- **Suqpage** is the platform; a **showroom** is one business's permanent public
   `/@handle` destination and is not conflated with the shared marketplace.
 - **Production scale** is reviewed administrative metadata: `workshop` or
   `growing_factory`. It does not represent revenue, staffing, legal form, or
@@ -166,10 +166,10 @@ the prior UI, and continue serving existing `/@handle` routes.
 
 ## Verification evidence
 
-Prior evidence: the MirtPage identity baseline completed locally on 2026-08-02. `npm run check`, the ordered 10/10 browser
+Prior evidence: the Suqpage identity baseline completed locally on 2026-08-02. `npm run check`, the ordered 10/10 browser
 acceptance suite, and `npm run release` passed. Browser captures in
-`/tmp/mirtpage-discovery-visuals`, `/tmp/mirtpage-dashboard-attention`, and
-`/tmp/mirtpage-factory-final` cover the marketplace, centered preview, Sunday
+`/tmp/suqpage-discovery-visuals`, `/tmp/suqpage-dashboard-attention`, and
+`/tmp/suqpage-factory-final` cover the marketplace, centered preview, Sunday
 floor, role-scoped dashboard summary, and all eight added factories at desktop
 and phone widths with no recorded overflow or console failures.
 
@@ -179,6 +179,6 @@ and seventh-week loop, future-lineup redaction, and at least five sponsored plus
 five Sunday fixtures per industry passed `scripts/test-discovery.ts` and
 `scripts/test-scale-fixtures.ts`. The ordered 10/10 production-browser suite,
 `npm run check`, and `npm run release` passed. Replacement desktop, 390px, and
-320px captures in `/tmp/mirtpage-sponsored-sunday` cover the paid rail, full
+320px captures in `/tmp/suqpage-sponsored-sunday` cover the paid rail, full
 industry schedule, weekday and Sunday floors, city marketplace, and centered
 preview with no recorded overflow or browser errors.

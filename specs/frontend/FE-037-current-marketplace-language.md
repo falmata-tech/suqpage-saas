@@ -18,7 +18,7 @@ the current product is a geographic Marketplace with a separate Daily Featured
 Showrooms program. The result is confusing language and avoidable maintenance
 risk immediately before launch.
 
-MirtPage uses **Marketplace**, **City Showroom**, **Daily Featured**, and
+Suqpage uses **Marketplace**, **City Showroom**, **Daily Featured**, and
 **showroom** consistently in every current visitor, client, staff, URL-state,
 and application contract. Historical database and immutable media identifiers
 may remain inert when renaming them would weaken rollback or data integrity.
@@ -52,7 +52,7 @@ retirement of Bazaar and Expo remains valid; its requirement to expose
 - Current navigation and generated links never use Bazaar, Expo, `/bazaar`,
   `/expo`, `expoDay`, or `ref=expo`.
 - Public and authenticated copy never presents Bazaar, Expo, or the former platform brand as a
-  current MirtPage concept.
+  current Suqpage concept.
 - Retired public and administrator addresses receive the ordinary not-found
   response and are absent from generated links.
 - Daily Featured attribution remains counted in the existing historical
@@ -73,7 +73,7 @@ Scenario: Visitor follows a current Daily Featured booth
 
 Scenario: Visitor follows a retired public bookmark
   GIVEN an old bookmark points to a removed event route
-  WHEN MirtPage receives the request
+  WHEN Suqpage receives the request
   THEN the ordinary not-found response renders
   AND no retired page, redirect, or heading exists
 

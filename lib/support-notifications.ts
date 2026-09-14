@@ -1,11 +1,12 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 export type SupportNotificationResult = "skipped" | "sent" | "failed";
 
 export async function notifySupportQueue(
   conversation: { id: number; publicRef: string; businessName: string; assignedUserName?: string | null },
   options: { send?: typeof fetch; timeoutMs?: number } = {},
 ): Promise<SupportNotificationResult> {
-  const token = process.env.MIRTPAGE_TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.MIRTPAGE_TELEGRAM_SUPPORT_CHAT_ID;
+  const token = platformEnvironment().SUQPAGE_TELEGRAM_BOT_TOKEN;
+  const chatId = platformEnvironment().SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID;
   if (!token || !chatId) return "skipped";
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
   try {

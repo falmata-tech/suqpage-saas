@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage needs managed password and Google authentication without moving tenant
+Suqpage needs managed password and Google authentication without moving tenant
 authorization out of its canonical database or invalidating retained users in
 an uncontrolled cutover.
 
@@ -20,9 +20,9 @@ an uncontrolled cutover.
 
 - `local` and `supabase` are explicit, mutually exclusive auth drivers.
 - A Supabase session grants no application access until its immutable provider
-  UUID maps to one active MirtPage user.
+  UUID maps to one active Suqpage user.
 - Roles, business IDs, capabilities, and staff assignments come only from
-  MirtPage tables. Provider user metadata is never authorization authority.
+  Suqpage tables. Provider user metadata is never authorization authority.
 - Existing compatible bcrypt hashes are copied by an operator-only migration;
   credentials, hashes, tokens, UUIDs, and contact values are never printed.
 - Account creation writes a provider identity first, then the application user
@@ -38,13 +38,13 @@ an uncontrolled cutover.
 
 ```gherkin
 Scenario: Provider identity is not linked
-  GIVEN a valid Supabase or Google session with no MirtPage identity link
+  GIVEN a valid Supabase or Google session with no Suqpage identity link
   WHEN a protected route resolves the current user
   THEN access is denied
   AND no role or tenant is inferred from provider metadata
 
 Scenario: Existing password user migrates
-  GIVEN a retained MirtPage user with a compatible bcrypt hash
+  GIVEN a retained Suqpage user with a compatible bcrypt hash
   WHEN the operator runs the idempotent identity migration
   THEN one Supabase identity and one immutable link exist
   AND the migration output contains aggregate counts only

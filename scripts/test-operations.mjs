@@ -17,18 +17,18 @@ try{
  const url=`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`;
  pool=new pg.Pool({connectionString:url,max:1});
  await pool.query("CREATE TABLE public.archive_fixture(id integer PRIMARY KEY, value text NOT NULL); INSERT INTO public.archive_fixture VALUES(1,'preserved')");
- const env={...process.env,MIRTPAGE_DATABASE_DRIVER:'postgres',MIRTPAGE_POSTGRES_DIRECT_URL:url,MIRTPAGE_BACKUP_ROOT:root,MIRTPAGE_LOCAL_PG_CONTAINER:container};
+ const env={...process.env,SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_DIRECT_URL:url,SUQPAGE_BACKUP_ROOT:root,SUQPAGE_LOCAL_PG_CONTAINER:container};
  const script=(file,args=[],extra={},fail=false)=>run(process.execPath,['--import','tsx',`scripts/${file}`,...args],{...env,...extra},fail);
  script('backup.ts');const directory=fs.readdirSync(root).find(n=>fs.existsSync(path.join(root,n,'postgres.dump')));assert.ok(directory);const from=path.join(root,directory);
  const archive=fs.readFileSync(path.join(from,'postgres.dump'));assert.equal(archive.subarray(0,5).toString(),'PGDMP');assert.equal(fs.statSync(path.join(from,'postgres.dump')).mode&0o777,0o600);
  const originalPlan=script('restore.ts',[`--from=${from}`]);const sourceDigest=originalPlan.stdout.match(/Target digest: ([a-f0-9]{64})/)?.[1];assert.ok(sourceDigest);
  assert.notEqual(script('restore.ts',[`--from=${from}`,'--execute'],{},true).status,0,'approval is required');
- assert.notEqual(script('restore.ts',[`--from=${from}`,'--execute'],{MIRTPAGE_APPROVE_POSTGRES_RESTORE:sourceDigest},true).status,0,'populated target cannot be replaced');
+ assert.notEqual(script('restore.ts',[`--from=${from}`,'--execute'],{SUQPAGE_APPROVE_POSTGRES_RESTORE:sourceDigest},true).status,0,'populated target cannot be replaced');
  assert.equal((await pool.query('SELECT value FROM archive_fixture WHERE id=1')).rows[0].value,'preserved');
  await pool.query('CREATE DATABASE suqpage_restore_test');
- const restoreTarget=new URL(url);restoreTarget.pathname='/suqpage_restore_test';const restoreUrl=restoreTarget.href;const overrides={MIRTPAGE_POSTGRES_DIRECT_URL:restoreUrl};
+ const restoreTarget=new URL(url);restoreTarget.pathname='/suqpage_restore_test';const restoreUrl=restoreTarget.href;const overrides={SUQPAGE_POSTGRES_DIRECT_URL:restoreUrl};
  const plan=script('restore.ts',[`--from=${from}`],overrides);const digest=plan.stdout.match(/Target digest: ([a-f0-9]{64})/)?.[1];assert.ok(digest);
- script('restore.ts',[`--from=${from}`,'--execute'],{...overrides,MIRTPAGE_APPROVE_POSTGRES_RESTORE:digest});
+ script('restore.ts',[`--from=${from}`,'--execute'],{...overrides,SUQPAGE_APPROVE_POSTGRES_RESTORE:digest});
  const restored=new pg.Pool({connectionString:restoreUrl,max:1});try{assert.equal((await restored.query('SELECT value FROM archive_fixture WHERE id=1')).rows[0].value,'preserved');}finally{await restored.end();}
  const metadata=JSON.parse(fs.readFileSync(path.join(from,'backup.json'),'utf8'));metadata.databaseSha256='tampered';fs.writeFileSync(path.join(from,'backup.json'),JSON.stringify(metadata));assert.notEqual(script('restore.ts',[`--from=${from}`],overrides,true).status,0,'tampering fails closed');
  console.log('PostgreSQL archive privacy, integrity, explicit target approval, populated-target denial and isolated restore passed.');

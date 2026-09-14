@@ -1,4 +1,4 @@
-import { createMirtPageSupabaseAdminClient, finalizeSupabaseIdentity, removePendingSupabaseIdentity } from "../lib/supabase-auth";
+import { createSuqpageSupabaseAdminClient, finalizeSupabaseIdentity, removePendingSupabaseIdentity } from "../lib/supabase-auth";
 import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import { runtimeAll, runtimeGet, runtimeRun } from "../lib/runtime-sql";
 
@@ -6,15 +6,15 @@ type RetainedUser = { id: number; email: string; name: string; password_hash: st
 
 async function main() {
   const apply = process.argv.includes("--apply");
-  if (apply && process.env.MIRTPAGE_APPROVE_AUTH_MIGRATION !== "1") {
-    throw new Error("Set MIRTPAGE_APPROVE_AUTH_MIGRATION=1 for this one approved identity migration command.");
+  if (apply && process.env.SUQPAGE_APPROVE_AUTH_MIGRATION !== "1") {
+    throw new Error("Set SUQPAGE_APPROVE_AUTH_MIGRATION=1 for this one approved identity migration command.");
   }
 
   if (!await runtimeGet("SELECT 1 FROM schema_migrations WHERE version=37")) {
     throw new Error("Database migration 37 is required before identity migration.");
   }
 
-  const admin = createMirtPageSupabaseAdminClient();
+  const admin = createSuqpageSupabaseAdminClient();
   const providerUsers = new Map<string, { id: string; linkedUserId: string }>();
   for (let page = 1; ; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
@@ -22,7 +22,7 @@ async function main() {
     for (const user of data.users) {
       if (user.email) providerUsers.set(user.email.trim().toLowerCase(), {
         id: user.id,
-        linkedUserId: String(user.app_metadata?.mirtpage_user_id || ""),
+        linkedUserId: String(user.app_metadata?.suqpage_user_id || ""),
       });
     }
     if (data.users.length < 1000) break;
@@ -59,7 +59,7 @@ async function main() {
         password_hash: user.password_hash,
         email_confirm: true,
         user_metadata: { display_name: user.name },
-        app_metadata: { mirtpage_user_id: String(user.id), mirtpage_link_state: "linked" },
+        app_metadata: { suqpage_user_id: String(user.id), suqpage_link_state: "linked" },
       });
       if (error || !data.user) throw new Error("A retained identity could not be created; migration stopped.");
       providerUserId = data.user.id;

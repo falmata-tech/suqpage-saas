@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
 
-const baseUrl = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
-const outputDir = process.env.MIRTPAGE_TEST_OUTPUT || "/tmp/mirtpage-market-performance";
+const baseUrl = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
+const outputDir = process.env.SUQPAGE_TEST_OUTPUT || "/tmp/suqpage-market-performance";
 fs.mkdirSync(outputDir, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -23,9 +23,9 @@ try {
     const context = await browser.newContext({ viewport: target.viewport, reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      window.__mirtpageLongTasks = [];
+      window.__suqpageLongTasks = [];
       new PerformanceObserver((list) => {
-        window.__mirtpageLongTasks.push(...list.getEntries().map((entry) => entry.duration));
+        window.__suqpageLongTasks.push(...list.getEntries().map((entry) => entry.duration));
       }).observe({ type: "longtask", buffered: true });
     });
     const session = await context.newCDPSession(page);
@@ -42,7 +42,7 @@ try {
     const zoomButton = page.locator(target.name === "phone"
       ? ".discovery-mobile-map-toolbar button[aria-label='Zoom in']"
       : ".discovery-zoom button[aria-label='Zoom in']");
-    await page.evaluate(() => { window.__mirtpageLongTasks = []; });
+    await page.evaluate(() => { window.__suqpageLongTasks = []; });
     await session.send("Profiler.enable");
     await session.send("Profiler.start");
     const startedAt = performance.now();
@@ -73,7 +73,7 @@ try {
       markerCount: Number(element.getAttribute("data-map-marker-count") || 0),
       renderedMarkers: element.querySelectorAll(".leaflet-marker-pane > .leaflet-marker-icon").length,
       loadedTiles: element.querySelectorAll("img.leaflet-tile-loaded").length,
-      longTasks: window.__mirtpageLongTasks || [],
+      longTasks: window.__suqpageLongTasks || [],
       horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     }));
 

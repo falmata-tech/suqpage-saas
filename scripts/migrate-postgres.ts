@@ -1,3 +1,4 @@
+import { platformEnvironment } from "../lib/platform-environment.mjs";
 import {
   createPostgresPool,
   PostgresTransactionRunner,
@@ -6,16 +7,16 @@ import {
 import { migratePostgresDatabase } from "../lib/postgres-migrations";
 
 async function main() {
-  const directUrl = (process.env.MIRTPAGE_POSTGRES_DIRECT_URL || "").trim();
+  const directUrl = (platformEnvironment().SUQPAGE_POSTGRES_DIRECT_URL || "").trim();
   if (!directUrl) {
-    throw new Error("MIRTPAGE_POSTGRES_DIRECT_URL is required for PostgreSQL migrations.");
+    throw new Error("SUQPAGE_POSTGRES_DIRECT_URL is required for PostgreSQL migrations.");
   }
 
   const config = postgresRuntimeConfig({
-    MIRTPAGE_POSTGRES_URL: directUrl,
-    MIRTPAGE_POSTGRES_POOL_MAX: "1",
-    MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: process.env.MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS,
-    MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: process.env.MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS,
+    SUQPAGE_POSTGRES_URL: directUrl,
+    SUQPAGE_POSTGRES_POOL_MAX: "1",
+    SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: platformEnvironment().SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS,
+    SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: platformEnvironment().SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS,
   });
   if (!config) throw new Error("The PostgreSQL migration connection is invalid.");
 
@@ -23,8 +24,8 @@ async function main() {
   try {
     const result = await migratePostgresDatabase(
       new PostgresTransactionRunner(pool),
-      process.env.MIRTPAGE_POSTGRES_MIGRATION_SCHEMA || "public",
-      process.env.MIRTPAGE_POSTGRES_MIGRATION_ROLE || "",
+      platformEnvironment().SUQPAGE_POSTGRES_MIGRATION_SCHEMA || "public",
+      platformEnvironment().SUQPAGE_POSTGRES_MIGRATION_ROLE || "",
     );
     console.log(
       result.applied.length

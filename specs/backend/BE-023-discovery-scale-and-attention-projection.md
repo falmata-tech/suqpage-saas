@@ -35,7 +35,7 @@ preserve tenant isolation and predictable query cost.
 - Sponsored placement is a separate persisted concept and never grants Daily Featured
   eligibility, publication, or endorsement. Retained Sunday-selection rows are
   legacy data and have no public or administrative projection.
-- Internal sponsor placements reference an eligible MirtPage business. Additive
+- Internal sponsor placements reference an eligible Suqpage business. Additive
   migration 35 introduces separately identified external sponsor ads with a
   bounded name, description, approved local image, active flag, position, and
   at least one validated destination: public HTTPS website or normalized phone.

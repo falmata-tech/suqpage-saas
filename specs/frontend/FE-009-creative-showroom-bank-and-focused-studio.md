@@ -14,7 +14,7 @@ change_level: L3
 
 The current bank provides broad combinations but its sections mostly consume
 one business story shape. Staff also must re-import JSON for small corrections.
-MirtPage needs richer, industry-flexible art direction and a focused correction
+Suqpage needs richer, industry-flexible art direction and a focused correction
 surface without turning showrooms into arbitrary themes or exposing code.
 Research-derived patterns and exclusions are recorded in
 `docs/SHOWROOM-DESIGN-RESEARCH.md`.

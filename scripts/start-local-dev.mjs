@@ -1,7 +1,9 @@
+import { platformEnvironment } from "../lib/platform-environment.mjs";
 import { spawn } from "node:child_process";
 import process from "node:process";
 
 process.loadEnvFile(".local/supabase-runtime.env");
+Object.assign(process.env, platformEnvironment());
 
 function assertLoopback(raw, port, label) {
   const url = new URL(raw || "");
@@ -10,17 +12,17 @@ function assertLoopback(raw, port, label) {
   }
 }
 
-if (process.env.MIRTPAGE_DATABASE_DRIVER !== "postgres") {
-  throw new Error("Local development requires MIRTPAGE_DATABASE_DRIVER=postgres.");
+if (process.env.SUQPAGE_DATABASE_DRIVER !== "postgres") {
+  throw new Error("Local development requires SUQPAGE_DATABASE_DRIVER=postgres.");
 }
-if (process.env.MIRTPAGE_AUTH_DRIVER !== "supabase") {
-  throw new Error("Local development requires MIRTPAGE_AUTH_DRIVER=supabase.");
+if (process.env.SUQPAGE_AUTH_DRIVER !== "supabase") {
+  throw new Error("Local development requires SUQPAGE_AUTH_DRIVER=supabase.");
 }
-if (process.env.MIRTPAGE_MEDIA_DRIVER !== "supabase") {
-  throw new Error("Local development requires MIRTPAGE_MEDIA_DRIVER=supabase.");
+if (process.env.SUQPAGE_MEDIA_DRIVER !== "supabase") {
+  throw new Error("Local development requires SUQPAGE_MEDIA_DRIVER=supabase.");
 }
-assertLoopback(process.env.MIRTPAGE_POSTGRES_URL, "54322", "Local database URL");
-assertLoopback(process.env.MIRTPAGE_SUPABASE_URL, "54321", "Local provider URL");
+assertLoopback(process.env.SUQPAGE_POSTGRES_URL, "54322", "Local database URL");
+assertLoopback(process.env.SUQPAGE_SUPABASE_URL, "54321", "Local provider URL");
 
 const port = process.env.PORT || "3000";
 if (!/^\d{4,5}$/.test(port) || Number(port) < 1024 || Number(port) > 65535) {

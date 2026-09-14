@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 Daily Featured Showrooms currently schedules every participant inside one
-window and has no staff-owned schedule. MirtPage needs an all-day program with
+window and has no staff-owned schedule. Suqpage needs an all-day program with
 usable presentation time, deliberate changeovers, sponsor moments, a long
 midday break, and a safe way for staff to adjust a particular day's lineup.
 

@@ -1,3 +1,4 @@
+import { platformCookies } from "./platform-state";
 import crypto from "node:crypto";
 import { hasCapability } from "./capabilities";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
@@ -17,7 +18,7 @@ import type { SessionUser } from "./types";
 
 export const MAX_OPEN_SUPPORT_CONVERSATIONS = 3;
 export const PUBLIC_SUPPORT_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
-export const PUBLIC_SUPPORT_COOKIE = "mirtpage_public_support";
+export const PUBLIC_SUPPORT_COOKIE = platformCookies.support.current;
 
 export type SupportStatus = "waiting" | "open" | "closed";
 export type SupportParticipantKind = "client" | "visitor";

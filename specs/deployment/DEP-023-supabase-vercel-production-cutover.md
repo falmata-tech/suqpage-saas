@@ -12,7 +12,7 @@ change_level: L4
 
 ## Problem and outcome
 
-MirtPage needs one production deployment using the existing Supabase project,
+Suqpage needs one production deployment using the existing Supabase project,
 Vercel, and `mirtpage.com`, without a paid staging environment. The deployment
 must replace local SQLite authority with managed PostgreSQL, move retained media
 to private object storage, protect production secrets from previews, and provide
@@ -20,14 +20,14 @@ a tested rollback before public DNS changes.
 
 ## Named topology
 
-- Supabase project: `mirtpage` (`sjeiiqxgscuqajpgddcc`), West EU (Ireland).
+- Supabase project: `suqpage` (`sjeiiqxgscuqajpgddcc`), West EU (Ireland).
 - Database: Supabase PostgreSQL through its transaction pooler for serverless
   requests; direct connection is reserved for controlled migrations.
 - Media: one private Supabase Storage bucket through BE-024.
 - Application: one Vercel production project; local development and required
   GitHub Actions are the pre-production gate.
 - Domain: apex `mirtpage.com` with canonical `www` behavior recorded at cutover.
-- Identity: existing MirtPage users, bcrypt hashes, sessions, roles, and tenant
+- Identity: existing Suqpage users, bcrypt hashes, sessions, roles, and tenant
   bindings remain authoritative; Supabase Auth is disabled.
 
 ## Scope
@@ -72,12 +72,12 @@ a tested rollback before public DNS changes.
    credential in memory and never prints or persists it. Provider statement
    timeout is disabled only inside the guarded copy transaction; runtime
    statement timeouts remain bounded.
-8. Production uses a dedicated `mirtpage_runtime` login with schema usage,
+8. Production uses a dedicated `suqpage_runtime` login with schema usage,
    application-table DML, and sequence use rather than the database owner. Its
    generated credential is verified through the transaction pooler and retained
    only in ignored mode-0600 operator storage and the deployment secret store.
 9. PostgreSQL schema migrations 31 and 32 are recorded before
-   `MIRTPAGE_DATABASE_DRIVER=postgres` is enabled for this release. Migration 31
+   `SUQPAGE_DATABASE_DRIVER=postgres` is enabled for this release. Migration 31
    reconciles overlapping current showroom projects, records supersession
    events, and installs the partial unique business guard. Migration 32 installs
    the Daily Featured scheduling policy and indexes. Production preflight fails
@@ -137,7 +137,7 @@ Vercel deployment ID, health and workflow smoke results, DNS records, monitoring
 window, and rollback deadline. Secrets, row contents, and customer messages are
 never evidence artifacts.
 
-On 2026-08-05 the linked `mirtpage` project received a transactionally reconciled
+On 2026-08-05 the linked `suqpage` project received a transactionally reconciled
 copy of 44 tables and 3,030 rows with 83 checks, 79 foreign keys, 78 indexes, 14
 triggers, 307 not-null columns, 44 fingerprints, four negative invariants, and a
 byte-identical retained SQLite source. The private `mirtpage-media` bucket was

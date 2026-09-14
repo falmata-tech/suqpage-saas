@@ -6,9 +6,9 @@ import { assertProductionConfiguration, authDriver, supabaseAuthConfig } from ".
 import { getDb } from "./testing/postgres-fixture";
 import { providerDisplayName } from "../lib/supabase-auth";
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-auth-runtime-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
-    process.env.MIRTPAGE_AUTH_DRIVER = "local";
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-auth-runtime-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+    process.env.SUQPAGE_AUTH_DRIVER = "local";
     try {
         const db = await getDb();
         assert.equal(authDriver(), "local");
@@ -16,10 +16,10 @@ async function main() {
         const user = await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('identity@example.test','hash','Identity Test','admin')").run();
         await db.prepare("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase','11111111-1111-4111-8111-111111111111','identity@example.test',?)").run(Number(user.insertedId), Date.now());
         await assert.rejects(async () => await db.prepare("UPDATE auth_identity_links SET provider_user_id='22222222-2222-4222-8222-222222222222' WHERE user_id=?").run(Number(user.insertedId)), /immutable/);
-        process.env.MIRTPAGE_AUTH_DRIVER = "invalid";
+        process.env.SUQPAGE_AUTH_DRIVER = "invalid";
         assert.throws(() => authDriver(), /local or supabase/);
-        process.env.MIRTPAGE_AUTH_DRIVER = "local";
-        process.env.MIRTPAGE_EMAIL_OTP_ENABLED = "1";
+        process.env.SUQPAGE_AUTH_DRIVER = "local";
+        process.env.SUQPAGE_EMAIL_OTP_ENABLED = "1";
         assert.equal(supabaseAuthConfig().requestTimeoutMs, 8000);
         assert.equal(supabaseAuthConfig().emailOtpEnabled, true);
         assert.equal(providerDisplayName({ full_name: "  Aster Bekele  " }), "Aster Bekele");
@@ -55,23 +55,23 @@ async function main() {
         const previousEnvironment = { ...process.env };
         try {
             Object.assign(process.env, {
-                NODE_ENV: "production", MIRTPAGE_RUNTIME_PROFILE: "",
-                MIRTPAGE_DATABASE_DRIVER: "postgres", MIRTPAGE_AUTH_DRIVER: "supabase",
-                MIRTPAGE_MEDIA_DRIVER: "supabase", MIRTPAGE_CANONICAL_URL: "https://suqpage.example.test",
-                MIRTPAGE_POSTGRES_URL: "postgresql://fixture:fixture@postgres.example.test:5432/fixture",
-                MIRTPAGE_SUPABASE_URL: "https://auth.example.test", NEXT_PUBLIC_SUPABASE_URL: "https://auth.example.test",
-                MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY: "fixture-private-key-not-a-provider-secret",
+                NODE_ENV: "production", SUQPAGE_RUNTIME_PROFILE: "",
+                SUQPAGE_DATABASE_DRIVER: "postgres", SUQPAGE_AUTH_DRIVER: "supabase",
+                SUQPAGE_MEDIA_DRIVER: "supabase", SUQPAGE_CANONICAL_URL: "https://suqpage.example.test",
+                SUQPAGE_POSTGRES_URL: "postgresql://fixture:fixture@postgres.example.test:5432/fixture",
+                SUQPAGE_SUPABASE_URL: "https://auth.example.test", NEXT_PUBLIC_SUPABASE_URL: "https://auth.example.test",
+                SUQPAGE_SUPABASE_SERVICE_ROLE_KEY: "fixture-private-key-not-a-provider-secret",
                 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "fixture-public-key-not-a-provider-key",
-                MIRTPAGE_SUPABASE_STORAGE_BUCKET: "fixture-media", PRIVACY_SALT: "fixture-privacy-salt-long-enough",
-                MIRTPAGE_EMAIL_OTP_ENABLED: "1", MIRTPAGE_GOOGLE_AUTH_ENABLED: "0",
+                SUQPAGE_SUPABASE_STORAGE_BUCKET: "fixture-media", PRIVACY_SALT: "fixture-privacy-salt-long-enough",
+                SUQPAGE_EMAIL_OTP_ENABLED: "1", SUQPAGE_GOOGLE_AUTH_ENABLED: "0",
             });
             assert.doesNotThrow(assertProductionConfiguration, "Approved email-only production entry is valid");
             assert.equal(supabaseAuthConfig().googleEnabled, false);
-            process.env.MIRTPAGE_GOOGLE_AUTH_ENABLED = "1";
+            process.env.SUQPAGE_GOOGLE_AUTH_ENABLED = "1";
             assert.doesNotThrow(assertProductionConfiguration);
-            process.env.MIRTPAGE_EMAIL_OTP_ENABLED = "0";
+            process.env.SUQPAGE_EMAIL_OTP_ENABLED = "0";
             assert.throws(assertProductionConfiguration, /requires verified email-code/);
-            process.env.MIRTPAGE_GOOGLE_AUTH_ENABLED = "0";
+            process.env.SUQPAGE_GOOGLE_AUTH_ENABLED = "0";
             assert.throws(assertProductionConfiguration, /requires verified email-code/);
         } finally {
             for (const key of Object.keys(process.env)) if (!(key in previousEnvironment)) delete process.env[key];

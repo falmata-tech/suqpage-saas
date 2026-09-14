@@ -1,6 +1,6 @@
 ---
 id: DEP-020
-title: MirtPage marketplace rollout
+title: Suqpage marketplace rollout
 status: in_progress
 related: [FE-024, FE-025, FE-033, FE-034, BE-023, BE-029, DEP-017, DEP-019, DEP-021, DEP-024, DEP-025, DEP-026]
 owners: [operations, engineering, design]
@@ -8,11 +8,11 @@ last_updated: 2026-08-09
 change_level: L3
 ---
 
-# DEP-020 - MirtPage marketplace rollout
+# DEP-020 - Suqpage marketplace rollout
 
 ## Problem and scope
 
-Admit the MirtPage identity, broader producer positioning, reviewed production
+Admit the Suqpage identity, broader producer positioning, reviewed production
 scale, dashboard attention summary, and refined marketplace interaction into the
 local pre-launch environment without changing stable showroom routes.
 
@@ -64,7 +64,7 @@ reset; production rollout and domain/DNS changes are excluded.
 ```gherkin
 Scenario: Additive local admission succeeds
   GIVEN the retained showrooms and migration-24 database are available
-  WHEN migration 25 and the MirtPage application are applied
+  WHEN migration 25 and the Suqpage application are applied
   THEN existing handle routes remain reachable
   AND reviewed production scale is available without rewriting showroom content
 
@@ -107,4 +107,4 @@ admitted to the disposable local pre-launch environment on 2026-08-02.
 Migration 26 and scale fixtures passed; `npm run check`, the ordered 10/10
 production-browser suite, and `npm run release` passed with zero production
 dependency vulnerabilities. Desktop, 390px, and 320px evidence is stored in
-`/tmp/mirtpage-sponsored-sunday`. No remote or production rollout was performed.
+`/tmp/suqpage-sponsored-sunday`. No remote or production rollout was performed.

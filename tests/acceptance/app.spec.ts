@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
-const mailpitURL = process.env.MIRTPAGE_TEST_MAILPIT_URL!;
+const mailpitURL = process.env.SUQPAGE_TEST_MAILPIT_URL!;
 let loginAttempt = 0;
 const installControlledVideoFixture = (handle = "selam-weave") =>
   JSON.parse(
@@ -59,14 +59,14 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
 test('standard owner, product, admin review and inquiry lifecycle',async({},testInfo)=>{
   test.setTimeout(360_000);
   execFileSync(process.execPath,['--import','tsx',path.join(process.cwd(),'scripts/capture-launch-wiring.mjs')],{
-    env:{...process.env,MIRTPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('workflows')},stdio:'pipe',timeout:330_000,maxBuffer:4*1024*1024,
+    env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('workflows')},stdio:'pipe',timeout:330_000,maxBuffer:4*1024*1024,
   });
 });
 
 test('category pagination retains the map on desktop and phones',async({},testInfo)=>{
   test.setTimeout(180_000);
   execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-category-pagination.mjs')],{
-    env:{...process.env,MIRTPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('category')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
+    env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('category')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
   });
 });
 
@@ -120,4 +120,25 @@ test('business video loads a privacy-enhanced frame only after activation',async
   await page.getByRole('button',{name:/Play business video about/}).click();
   await expect(page.locator('iframe')).toHaveAttribute('src',/^https:\/\/www\.youtube-nocookie\.com\/embed\/wJV9EDe_sFc\?autoplay=1$/);
   await expect(page.frameLocator('iframe').getByText('Controlled video fixture',{exact:true})).toBeVisible();expect(requested).toBe(1);
+});
+
+// BE-036: a retained cart must survive the namespace upgrade in the real renderer.
+test('legacy saved inquiry migrates and bookmarked assets remain available', async ({ page, request }) => {
+  await page.goto('/@selam-weave');
+  await page.locator('a[href*="?product="]').first().click();
+  await page.getByRole('button', { name: 'Add to inquiry', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('suqpage-cart:selam-weave'))).not.toBeNull();
+  const saved = await page.evaluate(() => {
+    const key = 'suqpage-cart:selam-weave';
+    const value = localStorage.getItem(key)!;
+    localStorage.setItem('mirtpage-cart:selam-weave', value);
+    localStorage.removeItem(key);
+    return value;
+  });
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('suqpage-cart:selam-weave'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem('mirtpage-cart:selam-weave'))).toBeNull();
+  for (const url of ['/brand/africmade-mark.svg', '/uploads/seed/mirtpage/icon.png']) {
+    expect((await request.get(url)).status()).toBe(200);
+  }
 });

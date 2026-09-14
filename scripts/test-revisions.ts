@@ -9,8 +9,8 @@ assert.match(revisionEditorSource, /Review saved draft/);
 assert.doesNotMatch(revisionEditorSource, /submitRevisionAction/, "the mutable editor cannot submit a potentially stale saved snapshot");
 assert.match(revisionPreviewSource, /submitRevisionAction/, "the exact saved preview owns review submission");
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-revisions-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-revisions-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
     try {
         const { getDb, getUserById, closeDbForTests, getCatalogByBusinessId } = await import("./testing/postgres-fixture");
         const { FileRequestAttachmentStore } = await import("../lib/request-media");

@@ -9,7 +9,7 @@ export const metadata = {
 export default function AboutPage() {
   return <div className="about-page public-about-experience">
       <section className="about-hero" aria-labelledby="about-title">
-        <Image src="/landing/africmade-about-production-v1.webp" alt="An illustrated collection of food, textiles and everyday products" fill priority sizes="100vw" />
+        <Image src="/landing/suqpage-about-production-v1.webp" alt="An illustrated collection of food, textiles and everyday products" fill priority sizes="100vw" />
         <div className="landing-container about-hero-copy"><span className="landing-eyebrow">About Suqpage</span><h1 id="about-title">Good shops deserve to be found.</h1><p>The shop around the corner. The seller working from home. The one you have not discovered yet.</p></div>
       </section>
       <section className="about-story"><div className="landing-container about-story-grid"><div><span className="landing-eyebrow">Closer than you think</span><h2>A bigger view of your local market.</h2></div><div><p>Finding what you need should not depend on knowing the right street or the right person. Suqpage brings shops and their products into one place, so you can discover more of what is available around you.</p><p>Every shop gets a page of its own. Every buyer gets a direct connection to the seller. Starting in Ethiopia, we are building a market where a small shop can reach beyond its neighborhood without losing its identity.</p></div></div></section>

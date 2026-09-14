@@ -34,6 +34,31 @@ Deployment sequence (operations, L3/L4; DEP-030/031):
   values, verify matching page/account projections and public links. Transaction passed
   for 64 exact matched pages and 47 seed accounts; all 64 live pages expose their email/phone links and omit private phone fields.
 
+## Namespace rename — current request (BE-036, DEP-032, ADR-0021)
+
+- [x] N1. Record clean task baseline (only unrelated deno.lock), namespace audit,
+  applicable specs and nonbreaking compatibility decisions. Definition of Ready met.
+- [x] N2. Canonicalize source/config/docs/assets with bounded compatibility
+  for old environment keys, cookies, carts, public asset URLs and provisioned resources.
+  Evidence: `docs/SUQPAGE-NAMING-COMPATIBILITY.md`, focused namespace/config/state/
+  database regressions pass; 22 tracked paths renamed with exact public rewrites.
+- [x] N3. Apply additive platform-default database migrations 44–45 locally after rehearsal;
+  preserve tenant data, account emails, Auth links and all protected backup files.
+  Local 44–45 applied; protected-backup rehearsal preserved all 50 original table
+  projections except exact standard subscription labels. Hosted apply remains pending.
+- [x] N4. Verify namespace, config/state migration, security and focused local
+  continuity; no layout redesign is included, existing visual approval stands.
+  Evidence: namespace regression, typecheck, eight browser scenarios and clean
+  release pass; custom subscription labels/prices preserved. Core final invitation
+  query timed out under build load and passed unchanged on focused retry and release.
+- [ ] N5. All verification passed; review
+  and commit only task files, preserving deno.lock and ignored operator data.
+  Container context/non-root/origins/trace/fail-closed checks pass. Netlify offline
+  artifact privacy and exact runtime-source comparison pass; production audit has
+  zero vulnerabilities. Commit is the remaining N5 action.
+- [ ] N6. Package clean source, perform approved monitored rollout and record exact
+  compatibility exceptions and hosted configuration gates that remain separate.
+
 ## Decisions
 
 - Suqpage serves product sellers including retail shops, home sellers, growers,
@@ -181,7 +206,7 @@ conflicting concurrent first saves are rejected rather than overwriting a draft.
   An incomplete video URL retains the last valid preview. The YouTube iframe
   response and a stale-save response are intentionally stubbed; real YouTube
   playback/network availability is not asserted by this test.
-  The new-profile run used `MIRTPAGE_TEST_SESSION_BOOTSTRAP=1`, a real locally
+  The new-profile run used `SUQPAGE_TEST_SESSION_BOOTSTRAP=1`, a real locally
   issued Supabase session. Prior local email-entry evidence is unchanged; this
   run does not reverify email entry, hosted Google, SMTP or production Auth.
 - Typecheck, existing renderer checks, specification validation, database-boundary
@@ -200,9 +225,9 @@ The prior local server on port 3000 was left untouched. This checkpoint's server
 
 ```sh
 PORT=3101 NEXT_PUBLIC_APP_URL=http://127.0.0.1:3101 \
-MIRTPAGE_SERVER_ACTION_ORIGINS=http://127.0.0.1:3101 \
+SUQPAGE_SERVER_ACTION_ORIGINS=http://127.0.0.1:3101 \
 SUQPAGE_OWNER_EDITOR_ENABLED=1 \
-MIRTPAGE_NEXT_DIST_DIR=.next-acceptance/mirtpage-acceptance-owner-shop \
+SUQPAGE_NEXT_DIST_DIR=.next-acceptance/suqpage-acceptance-owner-shop \
 npm run dev:local
 ```
 
@@ -292,7 +317,7 @@ rewritten in this checkpoint; those examples remain S6. Logo creation stays in S
   framing. Review real product imagery, business identity and phone density
   before seeking approval; functional coverage does not establish design quality.
 - Isolated Next.js ports also need an exact `NEXT_PUBLIC_APP_URL` and
-  `MIRTPAGE_SERVER_ACTION_ORIGINS` for that port. The first 3101 run omitted
+  `SUQPAGE_SERVER_ACTION_ORIGINS` for that port. The first 3101 run omitted
   them, causing same-origin rejection reported as a login 503. Register the
   local origin before diagnosing a provider failure; do not weaken origin checks.
 - User roles come from `user_access_profiles`, not a column on `users`. Reuse
@@ -329,7 +354,7 @@ About, two cover treatments and hero-switch screenshots are superseded.
   edits/clearing, public phone/email/site links, preview handoff suppression,
   3000-character Read more/keyboard scrolling, missing cover/video, and 1440/390/320
   no-overflow captures. Starting video keeps the product position unchanged.
-  A second allowlisted demo (`MIRTPAGE_TEST_PROFILE_HANDLE=entoto-ceramics`) was
+  A second allowlisted demo (`SUQPAGE_TEST_PROFILE_HANDLE=entoto-ceramics`) was
   used for final contact captures after repeated tests reached the first demo's
   upload limit. Limits were neither cleared nor weakened. Test-created drafts,
   publications and uploads were removed; canonical records were unchanged.

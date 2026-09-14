@@ -390,6 +390,26 @@ export async function migratePostgresDatabase(
       await runner.query("INSERT INTO schema_migrations(version) VALUES(43)");
       applied.push(43);
     }
+    const migration44 = await runner.query("SELECT version FROM schema_migrations WHERE version=44");
+    if (!migration44.rows.length) {
+      // Only the platform-owned default changes; existing labels and tenant data remain verbatim.
+      await runner.query("ALTER TABLE support_conversations ALTER COLUMN requester_label SET DEFAULT 'Suqpage client'");
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(44)");
+      applied.push(44);
+    }
+    const migration45 = await runner.query("SELECT version FROM schema_migrations WHERE version=45");
+    if (!migration45.rows.length) {
+      await runner.query("ALTER TABLE business_subscriptions ALTER COLUMN plan_name SET DEFAULT 'Suqpage monthly'");
+      // Reuse the native trigger contract so fresh installs and upgrades agree.
+      const trigger = baseline.sql.slice(0, baseline.sql.indexOf("")).join("\n")
+        .replace("CREATE FUNCTION", "CREATE OR REPLACE FUNCTION")
+        .replaceAll('"public".', `${quotedSchema(schema)}.`).replaceAll("public.", `${quotedSchema(schema)}.`);
+      await runner.query(trigger);
+      await runner.query("UPDATE business_subscriptions SET plan_name='Suqpage monthly' WHERE plan_name IN (?, ?, ?)",
+        ["MirtPage monthly", "AfricMade monthly", "AfricPage monthly"]);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(45)");
+      applied.push(45);
+    }
     return { applied };
   });
 }

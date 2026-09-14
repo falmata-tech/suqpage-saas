@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
 const handle = process.env.PLAYWRIGHT_SHOWROOM_HANDLE || "demo-abay-machine-works";
-const output = process.env.PLAYWRIGHT_OUTPUT || "/tmp/africmade-public-showroom-shell";
+const output = process.env.PLAYWRIGHT_OUTPUT || "/tmp/suqpage-public-showroom-shell";
 
 await fs.mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -11,7 +11,7 @@ const browser = await chromium.launch({ headless: true });
 async function capture(name, viewport, mobile, returnUrl = "") {
   const page = await browser.newPage({ viewport });
   if (returnUrl) {
-    await page.addInitScript((value) => window.sessionStorage.setItem("mirtpage:last-marketplace-url:v1", value), returnUrl);
+    await page.addInitScript((value) => window.sessionStorage.setItem("suqpage:last-marketplace-url:v1", value), returnUrl);
   }
   await page.goto(`${baseUrl}/@${handle}?ref=discovery`, { waitUntil: "domcontentloaded" });
   await page.locator(".runtime-root.is-public-shell").waitFor({ state: "visible", timeout: 30_000 });
@@ -30,7 +30,7 @@ async function capture(name, viewport, mobile, returnUrl = "") {
     if (!tenantNavVisible) throw new Error(`${name}: tenant section navigation is not visible on a phone`);
     if (platformPhoneNavCount !== 0) throw new Error(`${name}: platform and tenant phone navigation rendered together`);
   } else {
-    if (!railVisible) throw new Error(`${name}: AfricMade rail is not visible on desktop`);
+    if (!railVisible) throw new Error(`${name}: Suqpage rail is not visible on desktop`);
     if (!hostVisible) throw new Error(`${name}: contextual Back to Market bar is not visible on desktop`);
     if (tenantNavVisible) throw new Error(`${name}: phone tenant navigation is visible on desktop`);
   }

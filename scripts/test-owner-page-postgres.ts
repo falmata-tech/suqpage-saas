@@ -11,9 +11,9 @@ import { pagePublicationPort, runtimePublishedPage } from "../lib/owner-page-pub
 import { getMarketplaceDiscoveryView } from "../lib/discovery";
 
 async function main() {
-  const target = new URL(process.env.MIRTPAGE_POSTGRES_URL || "");
+  const target = new URL(process.env.SUQPAGE_POSTGRES_URL || "");
   assert.ok(["localhost", "127.0.0.1"].includes(target.hostname) && target.port === "54322", "Only this project's local Supabase may be tested.");
-  assert.equal(process.env.MIRTPAGE_DATABASE_DRIVER, "postgres");
+  assert.equal(process.env.SUQPAGE_DATABASE_DRIVER, "postgres");
   process.env.SUQPAGE_OWNER_EDITOR_ENABLED = "1";
   const { runner } = postgresRuntimeServices();
   const rollback = new Error("ROLLBACK_TEST_ONLY");

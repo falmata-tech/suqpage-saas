@@ -11,7 +11,7 @@ related: [FE-040, FE-041, BE-032, DEP-030, ADR-0019]
 
 ## Context
 
-The owner approved expanding AfricMade into Suqpage for product sellers beyond
+The owner approved expanding Suqpage into Suqpage for product sellers beyond
 local production and moving routine page creation from staff to customers.
 Customers may choose staff assistance. Existing business content, identities and
 publication history must remain intact throughout the renderer transition.

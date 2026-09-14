@@ -20,7 +20,7 @@ import {
 } from "@/lib/featured-program";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
-const DISCOVERY_RETURN_KEY = "mirtpage:last-marketplace-url:v1";
+const DISCOVERY_RETURN_KEY = "suqpage:last-marketplace-url:v1";
 
 function socialProfileUrl(value: string | undefined, provider: "tiktok" | "youtube") {
   if (!value) return "";
@@ -36,8 +36,8 @@ function socialProfileUrl(value: string | undefined, provider: "tiktok" | "youtu
   }
 }
 
-const MIRTPAGE_TIKTOK_URL = socialProfileUrl(process.env.NEXT_PUBLIC_MIRTPAGE_TIKTOK_URL, "tiktok");
-const MIRTPAGE_YOUTUBE_URL = socialProfileUrl(process.env.NEXT_PUBLIC_MIRTPAGE_YOUTUBE_URL, "youtube");
+const SUQPAGE_TIKTOK_URL = socialProfileUrl(process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL, "tiktok");
+const SUQPAGE_YOUTUBE_URL = socialProfileUrl(process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL, "youtube");
 
 function rememberCurrentPublicWorkspace() {
   try {
@@ -179,15 +179,15 @@ function FeaturedBroadcastStatus({ featured, selectedDay, now, agenda, sponsorPl
   const afternoonRestart = featuredProgramTimeLabel(sessions.afternoon.startMinute, sessions.afternoon.startMinute).split("–")[0];
   const content = phase === "live"
     ? activeWalkthrough
-      ? { title: `TikTok Live · ${activeBooth?.reference || "Booth walkthrough"}`, detail: `${activeBusiness ? `Now visiting ${activeBusiness} · ` : ""}${activeWalkthrough.label} EAT`, action: "Watch live", href: MIRTPAGE_TIKTOK_URL }
+      ? { title: `TikTok Live · ${activeBooth?.reference || "Booth walkthrough"}`, detail: `${activeBusiness ? `Now visiting ${activeBusiness} · ` : ""}${activeWalkthrough.label} EAT`, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
       : activeEntry && (activeEntry.kind === "changeover" || activeEntry.kind === "sponsor_break")
-        ? { title: activeSponsor ? `Sponsor spotlight · ${activeSponsor.name}` : `${activeEntry.label} · ${activeEntry.timeLabel} EAT`, detail: activeSponsor ? `${activeEntry.timeLabel} EAT · Paid placement` : "The next presentation begins shortly.", action: "Watch live", href: MIRTPAGE_TIKTOK_URL }
-        : { title: "TikTok Live program", detail: sessionSummary, action: "Watch live", href: MIRTPAGE_TIKTOK_URL }
+        ? { title: activeSponsor ? `Sponsor spotlight · ${activeSponsor.name}` : `${activeEntry.label} · ${activeEntry.timeLabel} EAT`, detail: activeSponsor ? `${activeEntry.timeLabel} EAT · Paid placement` : "The next presentation begins shortly.", action: "Watch live", href: SUQPAGE_TIKTOK_URL }
+        : { title: "TikTok Live program", detail: sessionSummary, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
     : phase === "intermission"
-      ? { title: `${featured.programPolicy.intermissionLabel} · ${featuredProgramTimeLabel(sessions.morning.endMinute, sessions.afternoon.startMinute)} EAT`, detail: `Evening walkthroughs resume at ${afternoonRestart} EAT.`, action: "TikTok", href: MIRTPAGE_TIKTOK_URL }
+      ? { title: `${featured.programPolicy.intermissionLabel} · ${featuredProgramTimeLabel(sessions.morning.endMinute, sessions.afternoon.startMinute)} EAT`, detail: `Evening walkthroughs resume at ${afternoonRestart} EAT.`, action: "TikTok", href: SUQPAGE_TIKTOK_URL }
       : phase === "ended"
-        ? { title: "Livestream ended", detail: "Watch the business recordings on YouTube.", action: "View recordings", href: MIRTPAGE_YOUTUBE_URL }
-        : { title: featured.isToday ? "Live on TikTok today" : `Live on ${selectedDay.dayLabel}`, detail: sessionSummary, action: "TikTok", href: MIRTPAGE_TIKTOK_URL };
+        ? { title: "Livestream ended", detail: "Watch the business recordings on YouTube.", action: "View recordings", href: SUQPAGE_YOUTUBE_URL }
+        : { title: featured.isToday ? "Live on TikTok today" : `Live on ${selectedDay.dayLabel}`, detail: sessionSummary, action: "TikTok", href: SUQPAGE_TIKTOK_URL };
   return <aside className={`featured-program featured-program-${phase}`} aria-label="Daily Featured livestream status"><span><Radio aria-hidden="true" />{featured.isToday ? "Today’s broadcast" : "Program preview"}</span><strong>{content.title}</strong><small>{content.detail}</small>{content.href ? <a href={content.href} target="_blank" rel="noreferrer">{content.action}<ExternalLink aria-hidden="true" /></a> : null}</aside>;
 }
 

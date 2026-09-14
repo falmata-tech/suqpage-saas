@@ -40,7 +40,7 @@ recipes choose one reviewed detail pattern without supplying executable code.
 - Checkout, payment collection, tax, discounts, inventory, price negotiation,
   unit conversion, livestream hosting, presence detection, or video uploads.
 - Treating a displayed price, capacity, highlight, or live state as verified by
-  MirtPage.
+  Suqpage.
 - Arbitrary iframe markup, arbitrary remote video providers, tenant CSS, or
   tenant-authored components.
 

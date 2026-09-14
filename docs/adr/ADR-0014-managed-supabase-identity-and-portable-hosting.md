@@ -3,7 +3,7 @@ id: ADR-0014
 title: Managed Supabase identity and portable application hosting
 status: accepted
 date: 2026-08-16
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-023, DEP-026, DEP-027, DEP-028, ADR-0013, ADR-0015, ADR-0016, ADR-0017]
 ---
 
@@ -11,7 +11,7 @@ related: [BE-002, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-01
 
 ## Context
 
-MirtPage production already uses Supabase PostgreSQL and private Storage while
+Suqpage production already uses Supabase PostgreSQL and private Storage while
 credentials and sessions remain application-owned. The public map and support
 queue also need a scale path, and the application must be deployable on a free
 commercial host without making authorization depend on that host.
@@ -19,10 +19,10 @@ commercial host without making authorization depend on that host.
 ## Decision
 
 Adopt Supabase Auth behind a selectable identity adapter. Supabase owns password,
-OAuth, refresh-token, and session validity. MirtPage continues to own user roles,
+OAuth, refresh-token, and session validity. Suqpage continues to own user roles,
 business bindings, staff assignments, capabilities, suspension, and every tenant
 authorization decision in application tables. A one-to-one identity-link table
-maps an immutable Supabase user UUID to the existing MirtPage user ID. Roles are
+maps an immutable Supabase user UUID to the existing Suqpage user ID. Roles are
 never trusted from editable user metadata.
 
 Existing bcrypt credentials are imported through an operator-only, idempotent
@@ -37,7 +37,7 @@ working Vercel deployment remains the rollback target until monitored DNS
 cutover completes.
 
 Netlify Deploy Previews and Production use separate remote Supabase projects.
-They share reviewed MirtPage migrations and authorization behavior, but never
+They share reviewed Suqpage migrations and authorization behavior, but never
 database URLs, Auth users/sessions, Storage objects, service-role credentials,
 or lifecycle operations. A preview cannot be promoted by silently pointing it
 at Production; production promotion uses the exact approved commit and the

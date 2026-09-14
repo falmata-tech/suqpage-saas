@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-signup-"));
-process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-signup-"));
+process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
 async function main() {
     try {
         const { closeDbForTests, getDb } = await import("./testing/postgres-fixture");

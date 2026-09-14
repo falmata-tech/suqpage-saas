@@ -36,31 +36,31 @@ export function getEmptyDb() { return active ||= createFixture(false); }
 export async function closeDbForTests() { if (!active) return; const db = await active; active = undefined; await db.close(); }
 
 async function createFixture(installSchema = true) {
-  if (!process.env.MIRTPAGE_TEST_POSTGRES_URL && !process.env.MIRTPAGE_POSTGRES_URL && fs.existsSync('.local/supabase-runtime.env')) process.loadEnvFile('.local/supabase-runtime.env');
-  const connection = process.env.MIRTPAGE_TEST_POSTGRES_URL || process.env.MIRTPAGE_POSTGRES_URL || '';
+  if (!process.env.SUQPAGE_TEST_POSTGRES_URL && !process.env.SUQPAGE_POSTGRES_URL && fs.existsSync('.local/supabase-runtime.env')) process.loadEnvFile('.local/supabase-runtime.env');
+  const connection = process.env.SUQPAGE_TEST_POSTGRES_URL || process.env.SUQPAGE_POSTGRES_URL || '';
   const target = new URL(connection);
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(target.hostname);
-  if (!local && !(process.env.CI === 'true' && process.env.MIRTPAGE_TEST_POSTGRES_URL && ['postgres', 'db'].includes(target.hostname))) throw new Error('Persistence fixtures require an isolated local or CI PostgreSQL service.');
-  const config = postgresRuntimeConfig({ MIRTPAGE_POSTGRES_URL: connection, MIRTPAGE_POSTGRES_POOL_MAX: '1' });
+  if (!local && !(process.env.CI === 'true' && process.env.SUQPAGE_TEST_POSTGRES_URL && ['postgres', 'db'].includes(target.hostname))) throw new Error('Persistence fixtures require an isolated local or CI PostgreSQL service.');
+  const config = postgresRuntimeConfig({ SUQPAGE_POSTGRES_URL: connection, SUQPAGE_POSTGRES_POOL_MAX: '1' });
   if (!config) throw new Error('A local PostgreSQL test connection is required.');
   const pool = createPostgresPool(config);
   const runner = new PostgresTransactionRunner(pool);
   const schema = `suqpage_test_${crypto.randomUUID().replaceAll('-', '')}`;
   await runner.query(`CREATE SCHEMA "${schema}"`);
-  const previous = process.env.MIRTPAGE_POSTGRES_URL;
+  const previous = process.env.SUQPAGE_POSTGRES_URL;
   try {
     if (installSchema) await migratePostgresDatabase(runner, schema);
     target.searchParams.set('options', `-csearch_path=${schema}`);
     await closePostgresRuntimeForTests();
-    process.env.MIRTPAGE_DATABASE_DRIVER = 'postgres';
-    process.env.MIRTPAGE_POSTGRES_URL = target.toString();
-    process.env.MIRTPAGE_AUTH_DRIVER = 'local';
-    process.env.MIRTPAGE_MEDIA_DRIVER = 'filesystem';
+    process.env.SUQPAGE_DATABASE_DRIVER = 'postgres';
+    process.env.SUQPAGE_POSTGRES_URL = target.toString();
+    process.env.SUQPAGE_AUTH_DRIVER = 'local';
+    process.env.SUQPAGE_MEDIA_DRIVER = 'filesystem';
     const database = new FixtureDatabase(postgresRuntimeServices().runner, async () => {
       await closePostgresRuntimeForTests();
       await runner.query(`DROP SCHEMA "${schema}" CASCADE`);
       await pool.end();
-      if (previous === undefined) delete process.env.MIRTPAGE_POSTGRES_URL; else process.env.MIRTPAGE_POSTGRES_URL = previous;
+      if (previous === undefined) delete process.env.SUQPAGE_POSTGRES_URL; else process.env.SUQPAGE_POSTGRES_URL = previous;
     });
     return database;
   } catch (error) {
@@ -84,7 +84,7 @@ export async function seedFixture() {
   if (!/^suqpage_test_[a-f0-9]{32}$/.test(schema)) throw new Error('Demo test seed requires an isolated fixture schema.');
   try {
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(process.execPath, ['--import','tsx','scripts/setup.ts'], { env: { ...process.env, MIRTPAGE_POSTGRES_DIRECT_URL: process.env.MIRTPAGE_POSTGRES_URL, MIRTPAGE_POSTGRES_MIGRATION_SCHEMA: schema, MIRTPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' }, stdio: ['ignore','pipe','pipe'] });
+      const child = spawn(process.execPath, ['--import','tsx','scripts/setup.ts'], { env: { ...process.env, SUQPAGE_POSTGRES_DIRECT_URL: process.env.SUQPAGE_POSTGRES_URL, SUQPAGE_POSTGRES_MIGRATION_SCHEMA: schema, SUQPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' }, stdio: ['ignore','pipe','pipe'] });
       let log = '';
       const timer = setTimeout(() => { child.kill('SIGTERM'); reject(new Error('Native demo fixture setup timed out.')); }, 180_000);
       child.stdout.on('data', value => { log += String(value); });

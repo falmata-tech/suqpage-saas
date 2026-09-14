@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'suqpage-invitations-'));
-process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, 'media');
-process.env.MIRTPAGE_AUTH_DRIVER = 'local';
+process.env.SUQPAGE_MEDIA_ROOT = path.join(root, 'media');
+process.env.SUQPAGE_AUTH_DRIVER = 'local';
 async function main() {
     const { getDb, closeDbForTests } = await import('./testing/postgres-fixture');
     const { createClientInvitation, getActiveInvitation, redeemClientInvitation, hashInvitationToken, INVITATION_LIFETIME_MS } = await import('../lib/invitations');

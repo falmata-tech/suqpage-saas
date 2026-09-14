@@ -1,14 +1,16 @@
+import { platformAssetRewrites } from "./lib/platform-assets";
+import { platformEnvironment } from "./lib/platform-environment.mjs";
 import type { NextConfig } from "next";
 import { trustedOriginPolicy } from "./lib/trusted-origins";
 
 const isDev = process.env.NODE_ENV !== "production";
-const distDir = process.env.MIRTPAGE_NEXT_DIST_DIR || ".next";
-if (distDir !== ".next" && !/^\.next-acceptance\/mirtpage-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
-  throw new Error("MIRTPAGE_NEXT_DIST_DIR must identify a generated MirtPage acceptance directory");
+const distDir = platformEnvironment().SUQPAGE_NEXT_DIST_DIR || ".next";
+if (distDir !== ".next" && !/^\.next-acceptance\/(?:suqpage|mirtpage)-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
+  throw new Error("SUQPAGE_NEXT_DIST_DIR must identify a generated Suqpage acceptance directory");
 }
-const tsconfigPath = process.env.MIRTPAGE_NEXT_TSCONFIG || "tsconfig.json";
-if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-mirtpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
-  throw new Error("MIRTPAGE_NEXT_TSCONFIG must identify a generated MirtPage acceptance config");
+const tsconfigPath = platformEnvironment().SUQPAGE_NEXT_TSCONFIG || "tsconfig.json";
+if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-(?:suqpage|mirtpage)-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
+  throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated Suqpage acceptance config");
 }
 const serverActionOrigins = trustedOriginPolicy(process.env).serverActionHosts;
 const csp = [
@@ -36,12 +38,20 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
 ];
 
+const publicEnvironment = platformEnvironment();
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_SUQPAGE_PWA_ENABLED: publicEnvironment.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED ?? "true",
+    NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER: publicEnvironment.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER ?? "osm-standard",
+    NEXT_PUBLIC_SUQPAGE_TIKTOK_URL: publicEnvironment.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL ?? "",
+    NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL: publicEnvironment.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL ?? "",
+  },
   poweredByHeader: false,
   distDir,
   typescript: { tsconfigPath },
   allowedDevOrigins: serverActionOrigins,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  async rewrites() { return [...platformAssetRewrites]; },
   async redirects() {
     return [
       { source: "/discover", destination: "/", permanent: false },

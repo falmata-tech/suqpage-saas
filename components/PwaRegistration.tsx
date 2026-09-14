@@ -17,7 +17,7 @@ async function removeDevelopmentWorkers() {
 export default function PwaRegistration() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    if (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED === "false") {
+    if (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false") {
       void removeDevelopmentWorkers();
       return;
     }

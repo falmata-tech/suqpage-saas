@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
 import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 import { featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
@@ -344,7 +345,7 @@ const PRIMARY_INDUSTRY_SQL = `COALESCE((
 
 function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,sponsor_position,lower(b.name),b.id") {
   // Latest public snapshot only; no draft join or per-card database requests.
-  const profile = process.env.SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
+  const profile = platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
   return `
     SELECT
       b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,

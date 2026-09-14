@@ -22,8 +22,8 @@ assert.match(config, /minimum_password_length = 12/);
 assert.match(config, /password_requirements = "lower_upper_letters_digits"/);
 assert.match(config, /\[auth\.external\.google\][\s\S]*?enabled = true[\s\S]*?client_id = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID\)"[\s\S]*?secret = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET\)"[\s\S]*?skip_nonce_check = false[\s\S]*?email_optional = false/);
 assert.match(config, /\[storage\.buckets\.mirtpage-media\][\s\S]*?public = false/);
-assert.match(example, /^MIRTPAGE_DATABASE_DRIVER=postgres$/m);
-assert.match(example, /^MIRTPAGE_POSTGRES_URL=postgresql:\/\/postgres:postgres@127\.0\.0\.1:54322\/postgres$/m);
+assert.match(example, /^SUQPAGE_DATABASE_DRIVER=postgres$/m);
+assert.match(example, /^SUQPAGE_POSTGRES_URL=postgresql:\/\/postgres:postgres@127\.0\.0\.1:54322\/postgres$/m);
 assert.match(example, /^SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=$/m);
 assert.match(example, /^SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=$/m);
 assert.match(nativeSetup, /Demo setup only permits a local PostgreSQL target/);
@@ -32,14 +32,14 @@ assert.match(nativeMigrations, /Refusing to install into an unversioned populate
 assert.match(nativeMigrations, /REVOKE ALL ON ALL TABLES/);
 assert.match(generator, /supabase-runtime\.env/);
 assert.match(generator, /providerConfiguration = path\.resolve\("\.env"\)/);
-assert.match(generator, /MIRTPAGE_GOOGLE_AUTH_ENABLED=\$\{googleConfigured \? "1" : "0"\}/);
+assert.match(generator, /SUQPAGE_GOOGLE_AUTH_ENABLED=\$\{googleConfigured \? "1" : "0"\}/);
 assert.match(generator, /mode: 0o600/);
 assert.doesNotMatch(generator, /console\.log\([^)]*(ANON_KEY|SERVICE_ROLE_KEY|publishableKey|serviceRoleKey)/);
-assert.match(runtimeConfig, /MIRTPAGE_DATABASE_DRIVER must be postgres in every environment/);
+assert.match(runtimeConfig, /SUQPAGE_DATABASE_DRIVER must be postgres in every environment/);
 assert.match(runtimeConfig, /isApprovedProviderUrl/);
 assert.match(runtimeConfig, /\["127\.0\.0\.1", "localhost", "\[::1\]"\]/);
-assert.match(compose, /MIRTPAGE_DATABASE_DRIVER: postgres/);
-assert.doesNotMatch(compose, /MIRTPAGE_DATABASE_DRIVER: sqlite/);
+assert.match(compose, /SUQPAGE_DATABASE_DRIVER: postgres/);
+assert.doesNotMatch(compose, /SUQPAGE_DATABASE_DRIVER: sqlite/);
 for (const scriptName of [
     "local:postgres:seed",
     "local:postgres:migrate",
@@ -51,13 +51,13 @@ for (const scriptName of [
 assert.match(packageJson.scripts["local:media:migrate"], /--execute$/);
 assert.equal(packageJson.scripts["dev:local"], "node scripts/start-local-dev.mjs");
 assert.match(localDev, /process\.loadEnvFile\("\.local\/supabase-runtime\.env"\)/);
-assert.match(localDev, /MIRTPAGE_DATABASE_DRIVER !== "postgres"/);
+assert.match(localDev, /SUQPAGE_DATABASE_DRIVER !== "postgres"/);
 assert.match(localDev, /"54322"/);
 assert.match(localDev, /"54321"/);
-assert.match(acceptance, /mirtpage-browser-/);
+assert.match(acceptance, /suqpage-browser-/);
 assert.match(acceptance, /api: 56321, db: 56322/);
-for (const driver of ["MIRTPAGE_DATABASE_DRIVER", "MIRTPAGE_AUTH_DRIVER", "MIRTPAGE_MEDIA_DRIVER"]) {
-    assert.match(acceptance, new RegExp(`${driver}: "${driver === "MIRTPAGE_DATABASE_DRIVER" ? "postgres" : "supabase"}"`));
+for (const driver of ["SUQPAGE_DATABASE_DRIVER", "SUQPAGE_AUTH_DRIVER", "SUQPAGE_MEDIA_DRIVER"]) {
+    assert.match(acceptance, new RegExp(`${driver}: "${driver === "SUQPAGE_DATABASE_DRIVER" ? "postgres" : "supabase"}"`));
 }
 assert.match(acceptance, /supabase", \["stop", "--workdir", supabaseProjectRoot, "--no-backup"\]/);
 assert.doesNotMatch(acceptanceProbe, /node:sqlite|DatabaseSync/);

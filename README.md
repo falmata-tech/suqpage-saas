@@ -44,7 +44,7 @@ account emails are preserved. Optional public channels appear only when provided
 
 ## Engineering and verification
 
-Read `AGENTS.md`, `MIRTPAGE-MASTER-PROMPT.md` and `specs/README.md` before changing
+Read `AGENTS.md`, `SUQPAGE-MASTER-PROMPT.md` and `specs/README.md` before changing
 behavior. The active ordered work is in `docs/SUQPAGE-TRANSITION-CHECKLIST.md`.
 Contracts FE-040–043, BE-032–035, DEP-030–031 and ADR-0018–0020 control the current
 transition. Evidence is mapped in `specs/TRACEABILITY.md`.
@@ -58,7 +58,7 @@ npm run test:launch-wiring
 ```
 
 Persistence tests require an isolated local PostgreSQL service; they use disposable
-schemas and the real native installer. `MIRTPAGE_TEST_POSTGRES_URL` can select a
+schemas and the real native installer. `SUQPAGE_TEST_POSTGRES_URL` can select a
 local/CI test service. Browser acceptance starts a separate Supabase project and
 uses real local Auth/Storage with synthetic users. No external inquiry message is
 sent by the focused launch fixtures.
@@ -90,3 +90,8 @@ private media, email/Google sign-in, host configuration, health and rollback evi
 The current release is live at https://africmade.netlify.app with email-only entry.
 See `docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` for exact deployment, backup and
 verification evidence. Real hosted email delivery remains unverified.
+
+
+Canonical names and compatibility exceptions are documented in
+`docs/SUQPAGE-NAMING-COMPATIBILITY.md`. Existing settings and stored inquiry state
+remain readable during the Suqpage namespace rollout.

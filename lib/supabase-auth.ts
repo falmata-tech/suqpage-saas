@@ -38,7 +38,7 @@ function publicConfig() {
   return config;
 }
 
-export async function createMirtPageSupabaseServerClient() {
+export async function createSuqpageSupabaseServerClient() {
   const config = publicConfig();
   const jar = await cookies();
   return createServerClient(config.url, config.publishableKey, {
@@ -53,7 +53,7 @@ export async function createMirtPageSupabaseServerClient() {
   });
 }
 
-export function createMirtPageSupabaseAdminClient(): SupabaseClient {
+export function createSuqpageSupabaseAdminClient(): SupabaseClient {
   const config = assertSupabaseAuthConfiguration();
   return createClient(config.url, config.serviceRoleKey, {
     global: { fetch: boundedFetch(config.requestTimeoutMs) },
@@ -62,13 +62,13 @@ export function createMirtPageSupabaseAdminClient(): SupabaseClient {
 }
 
 export async function provisionSupabasePasswordIdentity(input: { email: string; password: string; passwordHash?: string; name: string }) {
-  const client = createMirtPageSupabaseAdminClient();
+  const client = createSuqpageSupabaseAdminClient();
   const { data, error } = await client.auth.admin.createUser({
     email: input.email,
     ...(input.passwordHash ? { password_hash: input.passwordHash } : { password: input.password }),
     email_confirm: true,
     user_metadata: { display_name: input.name },
-    app_metadata: { mirtpage_link_state: "pending" },
+    app_metadata: { suqpage_link_state: "pending" },
   });
   if (error || !data.user) {
     if (error?.code === "email_exists" || error?.status === 422) throw new ManagedIdentityError("An account already uses this email.", "conflict");
@@ -78,20 +78,20 @@ export async function provisionSupabasePasswordIdentity(input: { email: string; 
 }
 
 export async function finalizeSupabaseIdentity(providerUserId: string, userId: number) {
-  const client = createMirtPageSupabaseAdminClient();
+  const client = createSuqpageSupabaseAdminClient();
   const { error } = await client.auth.admin.updateUserById(providerUserId, {
-    app_metadata: { mirtpage_user_id: String(userId), mirtpage_link_state: "linked" },
+    app_metadata: { suqpage_user_id: String(userId), suqpage_link_state: "linked" },
   });
   if (error) throw new ManagedIdentityError("Managed identity could not be finalized.");
 }
 
 export async function removePendingSupabaseIdentity(providerUserId: string) {
-  const client = createMirtPageSupabaseAdminClient();
+  const client = createSuqpageSupabaseAdminClient();
   const { error } = await client.auth.admin.deleteUser(providerUserId);
   return !error;
 }
 
-export async function linkedMirtPageUserId(providerUserId: string) {
+export async function linkedSuqpageUserId(providerUserId: string) {
   const link = await runtimeGet<LinkedIdentity>(
     "SELECT user_id FROM auth_identity_links WHERE provider='supabase' AND provider_user_id=?",
     [providerUserId],
@@ -110,11 +110,11 @@ export function providerDisplayName(metadata: unknown) {
 }
 
 async function resolveCurrentSupabaseProviderIdentity(): Promise<SupabaseProviderIdentity | null> {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { data, error } = await client.auth.getUser();
   const email = data.user?.email?.trim().toLowerCase() || "";
   if (error || !data.user || !email) return null;
-  const userId = await linkedMirtPageUserId(data.user.id);
+  const userId = await linkedSuqpageUserId(data.user.id);
   return { providerUserId: data.user.id, userId, email, displayName: providerDisplayName(data.user.user_metadata) };
 }
 
@@ -126,7 +126,7 @@ export const currentSupabaseIdentity = cache(async () => {
 });
 
 export async function requestSupabaseEmailOtp(email: string) {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { error } = await client.auth.signInWithOtp({
     email,
     options: { shouldCreateUser: true },
@@ -135,7 +135,7 @@ export async function requestSupabaseEmailOtp(email: string) {
 }
 
 export async function verifySupabaseEmailOtp(email: string, token: string) {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { data, error } = await client.auth.verifyOtp({ email, token, type: "email" });
   if (error || !data.user) return null;
   const verifiedEmail = data.user.email?.trim().toLowerCase() || "";
@@ -147,15 +147,15 @@ export async function verifySupabaseEmailOtp(email: string, token: string) {
     providerUserId: data.user.id,
     email: verifiedEmail,
     displayName: providerDisplayName(data.user.user_metadata),
-    userId: await linkedMirtPageUserId(data.user.id),
+    userId: await linkedSuqpageUserId(data.user.id),
   } satisfies SupabaseProviderIdentity;
 }
 
 export async function signInWithSupabasePassword(email: string, password: string) {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error || !data.user) return null;
-  const userId = await linkedMirtPageUserId(data.user.id);
+  const userId = await linkedSuqpageUserId(data.user.id);
   if (!userId) {
     await client.auth.signOut({ scope: "local" });
     return null;
@@ -164,14 +164,14 @@ export async function signInWithSupabasePassword(email: string, password: string
 }
 
 export async function signOutSupabaseSession() {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   await client.auth.signOut({ scope: "local" });
 }
 
 export async function beginGoogleSignIn() {
   const config = assertSupabaseAuthConfiguration();
   if (!config.googleEnabled) return null;
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const requestHeaders = await headers();
   const callbackOrigin = googleAuthCallbackOrigin(requestHeaders.get("host"));
   const { data, error } = await client.auth.signInWithOAuth({
@@ -182,7 +182,7 @@ export async function beginGoogleSignIn() {
 }
 
 export async function completeSupabaseCodeExchange(code: string) {
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { data, error } = await client.auth.exchangeCodeForSession(code);
   if (error || !data.user) return null;
   const email = data.user.email?.trim().toLowerCase() || "";
@@ -194,14 +194,14 @@ export async function completeSupabaseCodeExchange(code: string) {
     providerUserId: data.user.id,
     email,
     displayName: providerDisplayName(data.user.user_metadata),
-    userId: await linkedMirtPageUserId(data.user.id),
+    userId: await linkedSuqpageUserId(data.user.id),
   } satisfies SupabaseProviderIdentity;
 }
 
 export async function updateCurrentSupabasePassword(email: string, currentPassword: string, nextPassword: string) {
   const identity = await signInWithSupabasePassword(email, currentPassword);
   if (!identity) return false;
-  const client = await createMirtPageSupabaseServerClient();
+  const client = await createSuqpageSupabaseServerClient();
   const { error } = await client.auth.updateUser({ password: nextPassword });
   return !error;
 }
@@ -212,7 +212,7 @@ export async function updateLinkedSupabasePassword(userId: number, nextPassword:
     [userId],
   );
   if (!link) return false;
-  const client = createMirtPageSupabaseAdminClient();
+  const client = createSuqpageSupabaseAdminClient();
   const { error } = await client.auth.admin.updateUserById(link.provider_user_id, { password: nextPassword });
   return !error;
 }

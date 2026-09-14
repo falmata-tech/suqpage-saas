@@ -13,7 +13,7 @@ change_level: L3
 ## Problem and outcome
 
 Clients should be able to describe onboarding or showroom changes without
-learning MirtPage's catalog and design model. Staff need a clear operations queue,
+learning Suqpage's catalog and design model. Staff need a clear operations queue,
 and clients need a minimal private workspace for requests, inquiries, offerings,
 support, previews, and approval.
 
@@ -40,7 +40,7 @@ they are not the customer's primary mental model.
 - Attributable client/staff clarification messages on each request.
 - Operations-manager inquiry-status tools, while client inquiry views remain
   read-only.
-- Clear attribution when MirtPage submits a request for a client.
+- Clear attribution when Suqpage submits a request for a client.
 - Separate private draft and public/live showroom states.
 - Complete removal of legacy-owner navigation and direct live-content editing.
 
@@ -132,7 +132,7 @@ publication authority.
 - Sending a draft for review freezes that numbered revision. Client rejection
   preserves the decision on that revision and continues the same project with a
   new draft revision; it does not create a second project.
-- Staff-created requests visibly state that MirtPage submitted them for the
+- Staff-created requests visibly state that Suqpage submitted them for the
   client; internal staff identity is not exposed beyond what operations policy
   permits.
 - Preview identifies the exact revision and request. Approve/reject actions are
@@ -160,11 +160,11 @@ publication authority.
   staff account must change its password before entering a workspace.
 - Operations managers see the full request queue and may submit an onboarding
   request for a prospect or an onboarding/change request for an existing client.
-  A manager-created request visibly identifies MirtPage as the submitter.
+  A manager-created request visibly identifies Suqpage as the submitter.
 - Operations managers process customer-inquiry status for a selected business.
   Clients see the same activity read-only.
 - Every request detail provides a bounded clarification composer and an
-  attributable thread. Clients see their own messages and a generic MirtPage
+  attributable thread. Clients see their own messages and a generic Suqpage
   team identity; internal staff retain named attribution for audit/workflow.
 - Assignment selects one team member and, when the request has a business,
   grants that member request/business view scope. Reassignment removes obsolete
@@ -177,7 +177,7 @@ publication authority.
   request detail links back to the queue; invitation/client/request detail
   screens provide a visible breadcrumb and a back action with a deterministic
   parent fallback when browser history is unavailable.
-- Inside an authenticated workspace, the MirtPage brand returns to that actor's
+- Inside an authenticated workspace, the Suqpage brand returns to that actor's
   dashboard context rather than silently exiting to the public site. A separate
   clearly labeled Public site link opens the public experience.
 - Role-appropriate destinations remain reachable through a grouped desktop
@@ -202,7 +202,7 @@ publication authority.
 Scenario: Prospect expresses interest without an account
   GIVEN a prospect without an account or business
   WHEN they submit valid contact, a short interest message, and consent
-  THEN MirtPage stores one private onboarding lead with no attachments
+  THEN Suqpage stores one private onboarding lead with no attachments
   AND shows a reference without creating an account or exposing the internal queue
 
 Scenario: Prospect attempts a public upload
@@ -252,7 +252,7 @@ Scenario: Operator follows and reverses a deep link
 
 Scenario: Authenticated user follows workspace navigation
   GIVEN a valid authenticated session in a dashboard
-  WHEN the user activates the MirtPage brand or another permitted workspace menu
+  WHEN the user activates the Suqpage brand or another permitted workspace menu
   THEN the destination remains authenticated and role-appropriate
   AND public-site navigation is exposed separately and explicitly
 
@@ -271,7 +271,7 @@ Scenario: Client follows private revision progress
 Scenario: Manager submits on behalf of a client
   GIVEN an operations manager and a selected client
   WHEN the manager records the client's change request
-  THEN the client sees it as submitted for them by MirtPage
+  THEN the client sees it as submitted for them by Suqpage
   AND a normal team member never sees the on-behalf control
 
 Scenario: Manager creates a client workspace without a lead

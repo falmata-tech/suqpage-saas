@@ -53,7 +53,7 @@ assert.match(layout, /<PwaRegistration \/>/);
 
 const registration = read("components/PwaRegistration.tsx");
 assert.match(registration, /process\.env\.NODE_ENV !== "production"/);
-assert.match(registration, /NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED === "false"/);
+assert.match(registration, /NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false"/);
 assert.match(registration, /navigator\.serviceWorker\.register\("\/sw\.js"/);
 assert.match(registration, /updateViaCache: "none"/);
 assert.match(registration, /CACHE_PREFIXES\.some\(\(prefix\) => name\.startsWith\(prefix\)\)/);

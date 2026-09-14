@@ -2,7 +2,7 @@
 id: DEP-029
 title: Guarded production Auth configuration changes
 status: done
-related: [DEP-028, ADR-0014]
+related: [DEP-032, DEP-028, ADR-0014]
 owners: [operations, security]
 last_updated: 2026-09-13
 change_level: L3

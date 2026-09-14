@@ -54,14 +54,14 @@ import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "./product-detail-patterns";
 import { withAuthoritativeBusinessSettings } from "./revision-domain";
 
 export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
-  brief: "mirtpage.recipe-brief@1",
-  recipe: "mirtpage.showroom-recipe@1",
-  content: "mirtpage.showroom-content@1",
-  contentBlocks: "mirtpage.showroom-content-blocks@1",
-  design: "mirtpage.showroom-design@2",
-  componentBankSchema: "mirtpage.component-bank@2",
+  brief: "suqpage.recipe-brief@1",
+  recipe: "suqpage.showroom-recipe@1",
+  content: "suqpage.showroom-content@1",
+  contentBlocks: "suqpage.showroom-content-blocks@1",
+  design: "suqpage.showroom-design@2",
+  componentBankSchema: "suqpage.component-bank@2",
   componentBankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
-  designSystems: "mirtpage.showroom-design-systems@2",
+  designSystems: "suqpage.showroom-design-systems@2",
 });
 
 const opaque = (prefix: string, requestId: number, value: string) =>

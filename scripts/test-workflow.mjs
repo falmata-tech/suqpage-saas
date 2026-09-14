@@ -9,7 +9,7 @@ const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
 const acceptanceRunner = fs.readFileSync("scripts/acceptance-runner.mjs", "utf8");
 const typecheckScript = fs.readFileSync("scripts/typecheck.mjs", "utf8");
 const agentContract = fs.readFileSync("AGENTS.md", "utf8");
-const masterPrompt = fs.readFileSync("MIRTPAGE-MASTER-PROMPT.md", "utf8");
+const masterPrompt = fs.readFileSync("SUQPAGE-MASTER-PROMPT.md", "utf8");
 const showroomWorkflow = fs.readFileSync("showroom-projects/WORKFLOW.md", "utf8");
 const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "utf8");
 const showroomReview = fs.readFileSync("showroom-projects/_template/reviews/REVIEW.md", "utf8");
@@ -76,8 +76,8 @@ for (const [packagePath, entry] of Object.entries(packageLock.packages)) {
 }
 assert.match(typecheckScript, /path\.join\(process\.cwd\(\), "\.next", "dev", "types"\)/, "Typecheck cleanup must remain scoped to generated dev types");
 assert.match(typecheckScript, /next\/dist\/bin\/next", "typegen"/, "Typecheck must regenerate framework route types");
-assert.match(acceptanceRunner, /MIRTPAGE_NEXT_DIST_DIR: distDir/, "Acceptance must use its isolated Next.js output");
-assert.match(acceptanceRunner, /MIRTPAGE_NEXT_TSCONFIG: tsconfigName/, "Acceptance must isolate generated TypeScript configuration");
+assert.match(acceptanceRunner, /SUQPAGE_NEXT_DIST_DIR: distDir/, "Acceptance must use its isolated Next.js output");
+assert.match(acceptanceRunner, /SUQPAGE_NEXT_TSCONFIG: tsconfigName/, "Acceptance must isolate generated TypeScript configuration");
 assert.match(acceptanceRunner, /exclude: \["node_modules", "\.next", "\.next-\*"\]/, "Acceptance TypeScript must exclude generated build trees");
 assert.match(acceptanceRunner, /fs\.rmSync\(buildOutputPath/, "Acceptance must clean only its isolated Next.js output");
 assert.match(acceptanceRunner, /fs\.rmSync\(tsconfigPath/, "Acceptance must clean its generated TypeScript configuration");

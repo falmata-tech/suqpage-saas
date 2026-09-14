@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chromium,expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-const base=process.env.MIRTPAGE_TEST_BASE_URL||'http://127.0.0.1:3101';if(!['localhost','127.0.0.1'].includes(new URL(base).hostname))throw new Error('Local browser origin required');
-const out=process.env.MIRTPAGE_TEST_SCREENSHOT_DIR||'/tmp/suqpage-category-review';fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch();
+const base=process.env.SUQPAGE_TEST_BASE_URL||'http://127.0.0.1:3101';if(!['localhost','127.0.0.1'].includes(new URL(base).hostname))throw new Error('Local browser origin required');
+const out=process.env.SUQPAGE_TEST_SCREENSHOT_DIR||'/tmp/suqpage-category-review';fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch();
 try{const context=await browser.newContext();const page=await context.newPage();for(const width of [1440,390,320]){
  await page.setViewportSize({width,height:width===1440?1000:844});await page.goto(`${base}/?industry=electronics`);
  await expect(page.locator('.discovery-search-workspace')).toBeVisible();await expect(page.locator('.discovery-product-results > a')).toHaveCount(5);

@@ -12,7 +12,7 @@ const port = await new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve(selected));
   });
 });
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-acceptance-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-acceptance-"));
 const runId = path.basename(root);
 const distDir = path.posix.join(".next-acceptance", runId);
 const buildOutputPath = path.join(process.cwd(), distDir);
@@ -22,30 +22,30 @@ const baseURL = `http://127.0.0.1:${port}`;
 const credentialsPath = path.join(root, "credentials.txt");
 const supabaseProjectRoot = path.join(root, "supabase-browser-project");
 const supabaseConfigRoot = path.join(supabaseProjectRoot, "supabase");
-const browserSupabaseProjectId = `mirtpage-browser-${process.pid}`;
+const browserSupabaseProjectId = `suqpage-browser-${process.pid}`;
 const browserSupabasePorts = { api: 56321, db: 56322, shadow: 56320, smtp: 56324, pooler: 56329, analytics: 56327 };
 const env = {
   ...process.env,
   NODE_ENV: "production",
   NEXT_TELEMETRY_DISABLED: "1",
   NEXT_PUBLIC_APP_URL: baseURL,
-  MIRTPAGE_CANONICAL_URL: baseURL,
-  MIRTPAGE_RUNTIME_PROFILE: "browser-test",
-  MIRTPAGE_DATABASE_DRIVER: "postgres",
-  MIRTPAGE_AUTH_DRIVER: "supabase",
-  MIRTPAGE_MEDIA_DRIVER: "supabase",
-  MIRTPAGE_MEDIA_ROOT: path.join(root, "media"),
-  MIRTPAGE_BACKUP_ROOT: path.join(root, "backups"),
-  MIRTPAGE_CREDENTIAL_PATH: credentialsPath,
+  SUQPAGE_CANONICAL_URL: baseURL,
+  SUQPAGE_RUNTIME_PROFILE: "browser-test",
+  SUQPAGE_DATABASE_DRIVER: "postgres",
+  SUQPAGE_AUTH_DRIVER: "supabase",
+  SUQPAGE_MEDIA_DRIVER: "supabase",
+  SUQPAGE_MEDIA_ROOT: path.join(root, "media"),
+  SUQPAGE_BACKUP_ROOT: path.join(root, "backups"),
+  SUQPAGE_CREDENTIAL_PATH: credentialsPath,
   PRIVACY_SALT: "acceptance-test-privacy-salt-long-enough",
   PORT: String(port),
-    MIRTPAGE_TEST_BASE_URL: baseURL,
-    MIRTPAGE_TEST_CREDENTIALS: credentialsPath,
-    MIRTPAGE_TEST_MAILPIT_URL: `http://127.0.0.1:${browserSupabasePorts.smtp}`,
-  MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
-  MIRTPAGE_SERVER_ACTION_ORIGINS: baseURL,
-  MIRTPAGE_NEXT_DIST_DIR: distDir,
-  MIRTPAGE_NEXT_TSCONFIG: tsconfigName,
+    SUQPAGE_TEST_BASE_URL: baseURL,
+    SUQPAGE_TEST_CREDENTIALS: credentialsPath,
+    SUQPAGE_TEST_MAILPIT_URL: `http://127.0.0.1:${browserSupabasePorts.smtp}`,
+  SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
+  SUQPAGE_SERVER_ACTION_ORIGINS: baseURL,
+  SUQPAGE_NEXT_DIST_DIR: distDir,
+  SUQPAGE_NEXT_TSCONFIG: tsconfigName,
 };
 
 function parseEnvironment(source) {
@@ -136,26 +136,26 @@ try {
     exclude: ["node_modules", ".next", ".next-*"],
   }, null, 2)}\n`, { flag: "wx" });
   Object.assign(env, {
-    MIRTPAGE_DATABASE_DRIVER: "postgres",
-    MIRTPAGE_POSTGRES_URL: databaseUrl,
-    MIRTPAGE_POSTGRES_DIRECT_URL: databaseUrl,
-    MIRTPAGE_LOCAL_POSTGRES_URL: databaseUrl,
-    MIRTPAGE_LOCAL_SUPABASE_PROFILE: "browser-test",
-    MIRTPAGE_POSTGRES_POOL_MAX: "4",
-    MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "5000",
-    MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "8000",
-    MIRTPAGE_MEDIA_DRIVER: "supabase",
-    MIRTPAGE_SUPABASE_URL: apiUrl,
-    MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY: required(provider, "SERVICE_ROLE_KEY"),
-    MIRTPAGE_SUPABASE_STORAGE_BUCKET: "mirtpage-media",
-    MIRTPAGE_MEDIA_REQUEST_TIMEOUT_MS: "8000",
-    MIRTPAGE_AUTH_DRIVER: "supabase",
+    SUQPAGE_DATABASE_DRIVER: "postgres",
+    SUQPAGE_POSTGRES_URL: databaseUrl,
+    SUQPAGE_POSTGRES_DIRECT_URL: databaseUrl,
+    SUQPAGE_LOCAL_POSTGRES_URL: databaseUrl,
+    SUQPAGE_LOCAL_SUPABASE_PROFILE: "browser-test",
+    SUQPAGE_POSTGRES_POOL_MAX: "4",
+    SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "5000",
+    SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "8000",
+    SUQPAGE_MEDIA_DRIVER: "supabase",
+    SUQPAGE_SUPABASE_URL: apiUrl,
+    SUQPAGE_SUPABASE_SERVICE_ROLE_KEY: required(provider, "SERVICE_ROLE_KEY"),
+    SUQPAGE_SUPABASE_STORAGE_BUCKET: "mirtpage-media",
+    SUQPAGE_MEDIA_REQUEST_TIMEOUT_MS: "8000",
+    SUQPAGE_AUTH_DRIVER: "supabase",
     NEXT_PUBLIC_SUPABASE_URL: apiUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: required(provider, "ANON_KEY"),
-    MIRTPAGE_EMAIL_OTP_ENABLED: "1",
-    MIRTPAGE_GOOGLE_AUTH_ENABLED: "1",
-    MIRTPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS: "8000",
-    MIRTPAGE_APPROVE_AUTH_MIGRATION: "1",
+    SUQPAGE_EMAIL_OTP_ENABLED: "1",
+    SUQPAGE_GOOGLE_AUTH_ENABLED: "1",
+    SUQPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS: "8000",
+    SUQPAGE_APPROVE_AUTH_MIGRATION: "1",
   });
   run(process.execPath, ["--import", "tsx", "scripts/setup.ts"]);
   run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate-supabase-auth.ts", "--apply"]);

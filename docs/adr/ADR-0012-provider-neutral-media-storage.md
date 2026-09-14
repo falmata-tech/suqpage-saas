@@ -3,7 +3,7 @@ id: ADR-0012
 title: Provider-neutral immutable media storage
 status: accepted
 date: 2026-08-02
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [FE-025, BE-024, BE-026, DEP-002, DEP-015, DEP-021, DEP-022, ADR-0013]
 ---
 
@@ -11,7 +11,7 @@ related: [FE-025, BE-024, BE-026, DEP-002, DEP-015, DEP-021, DEP-022, ADR-0013]
 
 ## Context
 
-MirtPage verifies and sanitizes uploads correctly, but product media, request
+Suqpage verifies and sanitizes uploads correctly, but product media, request
 attachments, routes, and revision publication depend directly on a local
 filesystem. The soft launch must preserve the populated demo environment and
 support a later object-storage cutover without rewriting database references or
@@ -20,7 +20,7 @@ giving browsers provider credentials.
 ## Decision drivers
 
 - Preserve every current public and private media reference.
-- Keep tenant authorization in MirtPage rather than provider URLs.
+- Keep tenant authorization in Suqpage rather than provider URLs.
 - Permit a free-first Supabase Storage deployment without requiring it locally.
 - Keep uploads immutable so published-version rollback remains reliable.
 - Avoid coupling domain services to one SDK or network provider.
@@ -32,7 +32,7 @@ giving browsers provider credentials.
 2. Store provider public URLs in business, product, attachment, and revision
    records: easy to render, but leaks provider choice into durable content,
    complicates private media, and requires data rewriting on migration.
-3. Introduce one server-only media port, preserve stable MirtPage references,
+3. Introduce one server-only media port, preserve stable Suqpage references,
    and implement filesystem plus private Supabase Storage adapters.
 
 ## Decision
@@ -40,7 +40,7 @@ giving browsers provider credentials.
 Choose option 3. Application services address validated opaque object names in a
 trusted `public` or `requests` namespace. The filesystem adapter retains current
 layout. The Supabase adapter uses a private bucket through server-side Storage
-API calls. MirtPage routes remain the read boundary, so authorization and stable
+API calls. Suqpage routes remain the read boundary, so authorization and stable
 references are independent of the provider.
 
 New objects always receive random immutable names. Replacements never overwrite
@@ -52,7 +52,7 @@ object-store namespace without changing database rows or deleting local files.
 ### Positive
 
 - Existing recipes, products, and retained revisions need no media rewrite.
-- Private request attachments stay behind MirtPage authorization.
+- Private request attachments stay behind Suqpage authorization.
 - Local development remains external-service free.
 - Object storage can be enabled independently from the future PostgreSQL cutover.
 

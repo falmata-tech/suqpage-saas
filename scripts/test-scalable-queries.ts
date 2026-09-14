@@ -10,9 +10,9 @@ assert.doesNotMatch(postgresCatalogSource, /products\.rows\.map\(async/);
 assert.match(postgresCatalogSource, /getCatalogByBusinessId\(business\.id, false, business\)/);
 assert.match(showroomPageSource, /const catalog\s*=\s*await runtimeCatalogByHandle\(handle\);\s*if\s*\(!catalog\)\s*\{\s*const existing\s*=\s*await runtimeBusinessByHandleAny\(handle\)/);
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-scale-queries-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
-    process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-scale-queries-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+    process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
     try {
         const { closeDbForTests, getDb } = await import("./testing/postgres-fixture");
         const { listBusinessesPage, listBusinessClientAccess, listInquiriesPage, listManagedClientsPage, listProductsPage, listPublicShowrooms, listStaffPage, } = await import("../lib/scalable-queries");

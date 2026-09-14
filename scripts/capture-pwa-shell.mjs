@@ -5,8 +5,8 @@ import path from "node:path";
 import { localBrowserQuery, localBrowserCookies, closeLocalBrowserRuntime } from "./local-browser-auth.mjs";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3101";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-pwa-shell");
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3101";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-pwa-shell");
 fs.mkdirSync(output, { recursive: true });
 
 const [showroom] = await localBrowserQuery("SELECT handle FROM businesses WHERE status='active' ORDER BY id LIMIT 1");
@@ -29,7 +29,7 @@ async function cleanPage(browser, viewport, authenticated = false) {
 
 const browser = await chromium.launch({
   headless: true,
-  executablePath: process.env.MIRTPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
+  executablePath: process.env.SUQPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
 });
 try {
   const desktop = await cleanPage(browser, { width: 1440, height: 1000 });

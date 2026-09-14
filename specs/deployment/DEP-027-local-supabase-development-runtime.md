@@ -18,7 +18,7 @@ below is historical; current acceptance uses PostgreSQL-only fixtures.
 
 ## Problem and outcome
 
-AfricMade needs one PostgreSQL application model in development and production
+Suqpage needs one PostgreSQL application model in development and production
 without allowing local reset, seed, Auth, Storage, or Realtime work to touch the
 hosted Supabase project.
 
@@ -35,7 +35,7 @@ hosted Supabase project.
 - Local Google sign-in preserves the approved loopback hostname that began the
   flow. The callback returns to that same hostname and port so the PKCE verifier
   and resulting Supabase session use one cookie scope. Production ignores the
-  request host and always uses the configured AfricMade origin.
+  request host and always uses the configured Suqpage origin.
 - Local Auth, private Storage, and captured email use local provider endpoints;
   production credentials are absent from local setup scripts. Realtime remains
   disabled until the optional visibility-scoped support adapter is implemented.
@@ -45,7 +45,7 @@ hosted Supabase project.
   control only when both values are present. Hosted Google credentials are not
   copied into local configuration.
 - Analytics, Vector buckets, Edge Runtime, Studio, and the local transaction
-  pooler remain disabled because MirtPage does not depend on them in local
+  pooler remain disabled because Suqpage does not depend on them in local
   development; the direct loopback PostgreSQL port is authoritative.
 - SQLite is identified as compatibility and migration infrastructure, not the
   normal development application database.
@@ -61,7 +61,7 @@ hosted Supabase project.
 - The standalone container gate proves image integrity and fail-closed startup
   without provider credentials. Provider-backed runtime health belongs to the
   browser job, not a SQLite container substitute.
-- Application schema migration remains owned by MirtPage's reviewed PostgreSQL
+- Application schema migration remains owned by Suqpage's reviewed PostgreSQL
   migrations; local Supabase startup never substitutes an unreviewed schema.
 
 ## Scenarios
@@ -69,13 +69,13 @@ hosted Supabase project.
 ```gherkin
 Scenario: Developer starts the application
   GIVEN Docker and the local Supabase stack are healthy
-  WHEN the MirtPage development server starts
+  WHEN the Suqpage development server starts
   THEN it uses loopback PostgreSQL and local provider endpoints
   AND no hosted Supabase credential is required
 
 Scenario: Developer enables local Google entry
   GIVEN a separate local Google Web client is configured in the ignored `.env`
-  WHEN the local Supabase stack and AfricMade development server restart
+  WHEN the local Supabase stack and Suqpage development server restart
   THEN the local provider uses `http://127.0.0.1:54321/auth/v1/callback`
   AND the login page offers Google without exposing either provider secret
 
@@ -94,9 +94,9 @@ Scenario: Local setup receives a hosted database URL
 ```gherkin
 Scenario: Browser acceptance runs beside another Supabase project
   GIVEN another local Supabase project is already running
-  WHEN MirtPage browser acceptance starts
-  THEN it uses the MirtPage browser project ID and dedicated loopback ports
-  AND cleanup stops only the disposable MirtPage browser project
+  WHEN Suqpage browser acceptance starts
+  THEN it uses the Suqpage browser project ID and dedicated loopback ports
+  AND cleanup stops only the disposable Suqpage browser project
 ```
 
 ## Test plan

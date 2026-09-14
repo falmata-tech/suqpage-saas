@@ -5,9 +5,9 @@ import { chromium, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 
-const base = new URL(process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3101");
-const database = new URL(process.env.MIRTPAGE_POSTGRES_URL || "");
-const provider = new URL(process.env.MIRTPAGE_SUPABASE_URL || "");
+const base = new URL(process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3101");
+const database = new URL(process.env.SUQPAGE_POSTGRES_URL || "");
+const provider = new URL(process.env.SUQPAGE_SUPABASE_URL || "");
 for (const [url, port] of [[database, "54322"], [provider, "54321"], [base, "3101"]]) {
   assert.ok(["localhost", "127.0.0.1"].includes(url.hostname) && url.port === port, "This capture uses only the isolated local Shop checkpoint.");
 }
@@ -25,7 +25,7 @@ try {
     JOIN businesses b ON b.id=u.business_id LEFT JOIN owner_page_drafts d ON d.business_id=b.id
     WHERE p.access_role='client' AND d.business_id IS NULL AND b.status='active'
     AND b.handle IN ('alhaya','selam-weave','usashopet','novatech','homevibe','entoto-ceramics')
-    AND ($1::text IS NULL OR b.handle=$1) ORDER BY u.id LIMIT 1`, [process.env.MIRTPAGE_TEST_PROFILE_HANDLE || null])).rows[0];
+    AND ($1::text IS NULL OR b.handle=$1) ORDER BY u.id LIMIT 1`, [process.env.SUQPAGE_TEST_PROFILE_HANDLE || null])).rows[0];
   assert.ok(fixture, "An unchanged local demo owner without an existing Shop draft is required.");
   businessId = fixture.id;
   const before = (await pool.query("SELECT row_to_json(b) AS data FROM businesses b WHERE id=$1", [businessId])).rows[0].data;
@@ -37,9 +37,9 @@ try {
     if (message.type() === "error" && !expected) errors.push(message.text());
   });
   page.on("request", (request) => { if (new URL(request.url()).pathname === "/api/inquiries") inquiryRequests.push(request.method()); });
-  if (process.env.MIRTPAGE_TEST_SESSION_BOOTSTRAP === "1") {
+  if (process.env.SUQPAGE_TEST_SESSION_BOOTSTRAP === "1") {
     // Repeated UI captures use real local provider sessions without consuming OTP quotas.
-    const admin = createClient(provider.origin, process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+    const admin = createClient(provider.origin, process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
     const link = await admin.auth.admin.generateLink({ type: "magiclink", email: fixture.email });
     assert.ok(!link.error && link.data.properties?.email_otp, "Local provider issues the fixture code");
     const cookieValues = [];
@@ -229,7 +229,7 @@ try {
   await expect(cart.getByRole("link")).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(cart).not.toBeVisible();
-  assert.equal(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith("mirtpage-cart:")).length), 0, "Profile preview does not persist carts");
+  assert.equal(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith("suqpage-cart:")).length), 0, "Profile preview does not persist carts");
 
   await preview.getByRole("link", { name: "Back to products", exact: true }).click();
 
@@ -325,7 +325,7 @@ try {
   assert.deepEqual(inquiryRequests, [], "Preview never sends an inquiry request");
   assert.deepEqual(errors, []);
   assert.deepEqual((await pool.query("SELECT row_to_json(b) AS data FROM businesses b WHERE id=$1", [businessId])).rows[0].data, before);
-  console.log(`PASS: ${process.env.MIRTPAGE_TEST_SESSION_BOOTSTRAP === "1" ? "provider-issued local test session (email-entry UI not exercised)" : "managed local email-code login"}, private upload/save/reload, owner publication/restore, anonymous image scope, draft isolation, unchanged catalog, desktop/390/320 public and preview states. Screenshots: /tmp/suqpage-shop-review`);
+  console.log(`PASS: ${process.env.SUQPAGE_TEST_SESSION_BOOTSTRAP === "1" ? "provider-issued local test session (email-entry UI not exercised)" : "managed local email-code login"}, private upload/save/reload, owner publication/restore, anonymous image scope, draft isolation, unchanged catalog, desktop/390/320 public and preview states. Screenshots: /tmp/suqpage-shop-review`);
 } finally {
   await browser.close();
   if (created && businessId) {
@@ -334,8 +334,8 @@ try {
     await pool.query("DELETE FROM owner_page_drafts WHERE business_id=$1", [businessId]);
   }
   if (uploadedKeys.length) {
-    const storage = createClient(provider.origin, process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
-    const cleanup = await storage.storage.from(process.env.MIRTPAGE_SUPABASE_STORAGE_BUCKET || "mirtpage-media").remove(uploadedKeys.map((key) => `pages/${key}`));
+    const storage = createClient(provider.origin, process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+    const cleanup = await storage.storage.from(process.env.SUQPAGE_SUPABASE_STORAGE_BUCKET || "mirtpage-media").remove(uploadedKeys.map((key) => `pages/${key}`));
     assert.ok(!cleanup.error, "Only the test-created private images are cleaned up");
   }
   await pool.end();

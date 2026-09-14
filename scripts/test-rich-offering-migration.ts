@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-rich-offering-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-rich-offering-"));
     try {
         const { closeDbForTests, getDb } = await import("./testing/postgres-fixture");
         const db = await getDb();

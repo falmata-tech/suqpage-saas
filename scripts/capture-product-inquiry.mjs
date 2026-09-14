@@ -4,7 +4,7 @@ import pg from 'pg';
 import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 const base = 'http://127.0.0.1:3101';
-const url = new URL(process.env.MIRTPAGE_POSTGRES_URL);
+const url = new URL(process.env.SUQPAGE_POSTGRES_URL);
 assert.ok(['localhost','127.0.0.1'].includes(url.hostname) && url.port === '54322', 'Only local Supabase');
 const pool = new pg.Pool({ connectionString: url.href });
 const browser = await chromium.launch();
@@ -60,7 +60,7 @@ try {
     console.log(`PASS persistent map, result links and browser back ${width}px`);
 
     await page.goto(`${base}/@${business.handle}`);
-    await page.evaluate(handle=>localStorage.removeItem(`mirtpage-cart:${handle}`),business.handle);
+    await page.evaluate(handle=>localStorage.removeItem(`suqpage-cart:${handle}`),business.handle);
     await page.reload();
     await expect(page.getByRole('button',{name:/Inquiry cart/})).toHaveCount(0);
     await expect(page.locator('[data-business-profile] article').getByText('Video',{exact:true})).toHaveCount(0);

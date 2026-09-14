@@ -1,4 +1,5 @@
 "use client";
+import { readPlatformState } from "@/lib/platform-state";
 
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -47,7 +48,7 @@ import { showroomTokenVariables } from "./bank/tokens";
 import "./showrooms.css";
 
 type CartLine = InquirySelection;
-const PUBLIC_WORKSPACE_RETURN_KEY = "mirtpage:last-marketplace-url:v1";
+const PUBLIC_WORKSPACE_RETURN_KEY = "suqpage:last-marketplace-url:v1";
 const focusableSelector =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -114,7 +115,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   const router = useRouter();
   const searchParams = useSearchParams();
   const routedProduct = businessProfile && !previewMode ? searchParams.get("product") : null;
-  const storageKey = `mirtpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
+  const storageKey = `suqpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -149,7 +150,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   useEffect(() => {
     if(previewMode){setCart([]);return;}
     try {
-      setCart(restoreInquiry(catalog, JSON.parse(localStorage.getItem(storageKey) || "[]")));
+      setCart(restoreInquiry(catalog, JSON.parse(readPlatformState(localStorage, storageKey) || "[]")));
     } catch { setCart([]); }
     setHydratedKey(storageKey);
   }, [storageKey, catalog, previewMode]);
@@ -343,7 +344,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         <button type="button" className="showroom-host-back" aria-label="Back to Market" onClick={() => {
           let remembered: string | null = null;
           try {
-            remembered = window.sessionStorage.getItem(PUBLIC_WORKSPACE_RETURN_KEY);
+            remembered = readPlatformState(window.sessionStorage, PUBLIC_WORKSPACE_RETURN_KEY);
           } catch {}
           const destination = validPublicWorkspaceReturn(remembered, window.location.origin);
           if (destination) {

@@ -1,4 +1,4 @@
-# AfricMade delivery and managed-service runbook
+# Suqpage delivery and managed-service runbook
 
 This runbook is the operator path for local Supabase, repository checks,
 managed Auth and Storage, PostgreSQL, Netlify deployment, and rollback.
@@ -13,7 +13,7 @@ It does not authorize a production launch, DNS change, or destructive cutover.
   database engine, including fixtures and operations (BE-035/DEP-031).
 - Production and Deploy Previews use separate hosted Supabase projects. Each
   selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
-  own private Storage bucket through AfricMade's server-side media port. AfricMade
+  own private Storage bucket through Suqpage's server-side media port. Suqpage
   remains the only role, capability, tenant, and suspension authority.
 - PostgreSQL tooling supports native installation, isolated fixtures, and
   explicitly approved archive recovery. The linked Supabase target has reconciled data,
@@ -52,8 +52,8 @@ rejects remote database destinations. Never run hosted reset or production-copy
 commands for local development. Stop local services with
 `npm run local:supabase:stop`.
 
-The normal AfricMade local project uses API/DB ports `54321`/`54322`. Browser
-acceptance starts a separate disposable `mirtpage-browser-*` project on
+The normal Suqpage local project uses API/DB ports `54321`/`54322`. Browser
+acceptance starts a separate disposable `suqpage-browser-*` project on
 `56321`/`56322`, applies the same schema, copies only an isolated compatibility
 fixture, and runs the production Next.js server with PostgreSQL, Supabase Auth,
 and private Storage. Its cleanup stops only that disposable project. Never reuse
@@ -65,7 +65,7 @@ Use either the Codex GitHub connector or GitHub CLI. Never paste a personal
 access token into chat, a terminal command, `.env`, or repository files.
 
 1. In Codex, open connectors, connect GitHub, and grant access only to the
-   AfricMade repository. Repository read and Actions read are enough for CI
+   Suqpage repository. Repository read and Actions read are enough for CI
    review; write access is needed only when you explicitly ask Codex to push or
    open a pull request.
 2. For local CLI access, run `gh auth login --web --git-protocol https`, finish
@@ -173,7 +173,7 @@ repository path, not an OS sandbox; restrict management credentials accordingly.
 3. Run `npm run migrate:auth:supabase` without `--apply`. Review only aggregate
    retained, existing, create, linked, and conflict counts.
 4. Resolve every conflict. Then run the same exact release with
-   `MIRTPAGE_APPROVE_AUTH_MIGRATION=1 npm run migrate:auth:supabase -- --apply`.
+   `SUQPAGE_APPROVE_AUTH_MIGRATION=1 npm run migrate:auth:supabase -- --apply`.
 5. Configure the exact production site URL and redirect allowlist in Supabase.
    Add the local callback and the selected host's deploy-preview wildcard only
    where needed; do not use a broad production wildcard.
@@ -183,7 +183,7 @@ repository path, not an OS sandbox; restrict management credentials accordingly.
    email address as both sender and username, and a Google app password. Enter
    the app password directly in Supabase; never put it in Netlify, Git, logs, or
    chat. Keep local and browser-test email in the isolated Mailpit instances.
-7. Apply the concise AfricMade magic-link template from
+7. Apply the concise Suqpage magic-link template from
    `supabase/templates/magic-link.html`, which renders `{{ .Token }}` as the
    six-digit sign-in code. Prove delivery, expiry, resend throttling, and one-time
    use. Treat personal Gmail as a bounded launch bridge and move to a
@@ -192,27 +192,27 @@ repository path, not an OS sandbox; restrict management credentials accordingly.
    and secret in the Supabase provider dashboard. The callback URI must be the
    exact Supabase callback shown there. Provider secrets never enter Netlify,
    Git, or chat.
-9. Enable `MIRTPAGE_AUTH_DRIVER=supabase` on one candidate, prove email OTP and
+9. Enable `SUQPAGE_AUTH_DRIVER=supabase` on one candidate, prove email OTP and
    Google login, logout, linked/new-user routing, unlinked denial,
    suspended-user denial, and cross-tenant denial, then monitor before retiring
    local sessions.
 
 Supabase proves identity only. `auth_identity_links` maps its immutable UUID to
-one MirtPage user; roles and business access never come from OAuth metadata.
+one Suqpage user; roles and business access never come from OAuth metadata.
 
 ## Supabase Storage
 
 1. Create a private bucket. Do not make the bucket public.
-2. Keep `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY` server-only. It bypasses bucket
+2. Keep `SUQPAGE_SUPABASE_SERVICE_ROLE_KEY` server-only. It bypasses bucket
    row-level policies and must never enter browser code or build arguments.
-3. Set `MIRTPAGE_MEDIA_DRIVER=supabase`, the HTTPS project URL, private bucket
+3. Set `SUQPAGE_MEDIA_DRIVER=supabase`, the HTTPS project URL, private bucket
    name, service key, and bounded request timeout in the deployment secret
    manager.
 4. Back up the database and filesystem media source.
 5. Run `npm run migrate:media`, then `npm run reconcile:media`. Treat any
    missing or mismatched authoritative object as a failed migration.
 6. Verify a published image and an authorized private request attachment
-   through MirtPage routes. Browser clients must not receive provider keys.
+   through Suqpage routes. Browser clients must not receive provider keys.
 7. Retain source objects through the rollback window. Production continues to
    require private Supabase Storage; never switch its driver to local files.
 
@@ -239,20 +239,20 @@ specified in `docs/POSTGRES-ONLY-RUNBOOK.md`.
 Keep these outside GitHub artifacts and the repository:
 
 - `NEXT_PUBLIC_APP_URL`
-- `MIRTPAGE_CANONICAL_URL`
-- `MIRTPAGE_SERVER_ACTION_ORIGINS`
-- `MIRTPAGE_DATABASE_DRIVER`
-- `MIRTPAGE_POSTGRES_URL` (Supabase transaction pooler on the selected host)
-- `MIRTPAGE_POSTGRES_DIRECT_URL` (operator environment only)
-- `MIRTPAGE_POSTGRES_MIGRATION_ROLE` (operator command only, when required)
-- `MIRTPAGE_MEDIA_ROOT` when using filesystem media
-- `MIRTPAGE_SUPABASE_URL`
-- `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY`
-- `MIRTPAGE_SUPABASE_STORAGE_BUCKET`
-- `MIRTPAGE_AUTH_DRIVER`
+- `SUQPAGE_CANONICAL_URL`
+- `SUQPAGE_SERVER_ACTION_ORIGINS`
+- `SUQPAGE_DATABASE_DRIVER`
+- `SUQPAGE_POSTGRES_URL` (Supabase transaction pooler on the selected host)
+- `SUQPAGE_POSTGRES_DIRECT_URL` (operator environment only)
+- `SUQPAGE_POSTGRES_MIGRATION_ROLE` (operator command only, when required)
+- `SUQPAGE_MEDIA_ROOT` when using filesystem media
+- `SUQPAGE_SUPABASE_URL`
+- `SUQPAGE_SUPABASE_SERVICE_ROLE_KEY`
+- `SUQPAGE_SUPABASE_STORAGE_BUCKET`
+- `SUQPAGE_AUTH_DRIVER`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `MIRTPAGE_GOOGLE_AUTH_ENABLED`
+- `SUQPAGE_GOOGLE_AUTH_ENABLED`
 - `PRIVACY_SALT`
 - notification provider credentials
 
@@ -273,7 +273,7 @@ intentionally does not pin a legacy Next.js plugin.
 
 1. Authenticate the CLI with an isolated local home so an unrelated Netlify
    account or project cannot be selected: `HOME="$PWD/.local/netlify-home" npx
-   --yes netlify-cli@latest login`. Link only the MirtPage GitHub repository and
+   --yes netlify-cli@latest login`. Link only the Suqpage GitHub repository and
    verify the team and site before every deploy. `netlify.toml` supplies
    `npm run build` and Node `24.18.1`.
 2. Add separate Preview- and Production-scoped environment variables in the
@@ -282,7 +282,7 @@ intentionally does not pin a legacy Next.js plugin.
    PostgreSQL pooler, publishable key, service-role key, private bucket, and
    privacy salt. Never place a direct PostgreSQL migration URL in Netlify or
    reuse a secret across scopes.
-3. Keep `mirtpage.com` on its current target. Test the generated Netlify domain
+3. Keep existing custom domains on their verified current targets. Test the generated Netlify domain
    for health, public routes, Auth, upload/read, support, PWA, and tenant denial.
 4. Run the exact release and remote checks. Only then add the custom domain and
    update DNS. Retain the prior Vercel target for the monitored rollback window.
@@ -310,13 +310,13 @@ later controlling DNS at the registrar. Do not paste any secret into chat.
   browser/provider caching headers. An unknown provider setting fails closed.
 - Do not enable PostGIS merely to draw the basemap. At tens of thousands of
   showrooms, add PostGIS points and spatial indexes behind a viewport/nearby
-  query port so the browser receives bounded MirtPage markers. Search, place
+  query port so the browser receives bounded Suqpage markers. Search, place
   filtering, and coordinates remain in Supabase regardless of tile provider.
 
 ## PWA verification and rollback
 
 The production PWA is enabled unless
-`NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED=false` is present at build time. Keep it
+`NEXT_PUBLIC_SUQPAGE_PWA_ENABLED=false` is present at build time. Keep it
 enabled for normal releases and verify over the final HTTPS origin that
 `/manifest.webmanifest` loads, `/sw.js` controls the page after one reload, a
 previously visited public route reaches the branded offline surface without a
@@ -324,10 +324,10 @@ network, and `/api`, `/dashboard`, `/preview`, `/login`, and `/request` never
 appear in Cache Storage.
 
 A service worker survives an ordinary application rollback. To disable the PWA,
-set `NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED=false`, replace `public/sw.js` in the
+set `NEXT_PUBLIC_SUQPAGE_PWA_ENABLED=false`, replace `public/sw.js` in the
 rollback release with the reviewed `scripts/pwa-cleanup-worker.js` artifact,
 and deploy that release at the same origin. Confirm the cleanup worker activates,
-deletes only `mirtpage-pwa-` caches, unregisters itself, and leaves subsequent
+deletes only obsolete Suqpage and prior platform caches, unregisters itself, and leaves subsequent
 navigation network-authoritative. Do not remove the registration component or
 worker route before this cleanup release has reached controlled browsers.
 

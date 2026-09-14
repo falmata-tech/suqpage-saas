@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const forbidden = /node:sqlite|better-sqlite3|sql\.js|\bDatabaseSync\b|MIRTPAGE_DB_PATH|(?:from\s*|import\s*\()["'][^"']*(?:\/db|\/schema|product-upkeep-sqlite|request-sqlite)["']/;
+const forbidden = /node:sqlite|better-sqlite3|sql\.js|\bDatabaseSync\b|(?:MIRTPAGE|SUQPAGE)_DB_PATH|(?:from\s*|import\s*\()["'][^"']*(?:\/db|\/schema|product-upkeep-sqlite|request-sqlite)["']/;
 const violations = [];
 function inspect(root) {
   for (const entry of fs.readdirSync(root, { withFileTypes: true })) {

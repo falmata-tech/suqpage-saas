@@ -11,7 +11,7 @@ for (const file of activeFiles) {
 assert.deepEqual(violations, [], `retired platform identity remains in: ${violations.join(", ")}`);
 assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "suqpage-saas-mvp");
 assert.ok(fs.existsSync("public/brand/suqpage-mark.svg"));
-assert.ok(fs.existsSync("MIRTPAGE-MASTER-PROMPT.md"));
+assert.ok(fs.existsSync("SUQPAGE-MASTER-PROMPT.md"));
 const mark = fs.readFileSync("public/brand/suqpage-mark.svg", "utf8").toLowerCase();
 assert.match(mark, /<title id="title">suqpage<\/title>/);
 assert.ok(mark.includes("#ff4b00"));

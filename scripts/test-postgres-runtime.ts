@@ -191,7 +191,7 @@ async function main() {
     });
 
 
-    process.env.MIRTPAGE_PREFLIGHT_IMPORT_ONLY = "1";
+    process.env.SUQPAGE_PREFLIGHT_IMPORT_ONLY = "1";
     const { preflight } = await import("./preflight");
     await preflight();
     const {
@@ -469,7 +469,7 @@ async function main() {
       clientRequestForm.set("idempotencyKey", `postgres-client-request-${Date.now()}`);
       const clientRequest = await createAuthenticatedClientRequest(supportClient, clientRequestForm);
       assert.equal(clientRequest.duplicate, false);
-      process.env.MIRTPAGE_RECIPE_STUDIO_ENABLED = "1";
+      process.env.SUQPAGE_RECIPE_STUDIO_ENABLED = "1";
       const {
         createDraftRevision,
         decideRevision,

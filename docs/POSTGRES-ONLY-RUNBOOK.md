@@ -16,7 +16,7 @@ npm run dev:local
 ```
 
 Bootstrap writes the protected local runtime configuration, installs native
-PostgreSQL schema 43, seeds an empty local database, reconciles local Auth accounts,
+PostgreSQL schema 45, seeds an empty local database, reconciles local Auth accounts,
 and copies local media into private local Storage. It preserves an existing
 populated database. Demo setup is local-only; it never prints generated passwords.
 The protected `.local/seed-credentials.txt` is a fixture artifact, not a hosted
@@ -37,7 +37,7 @@ must be granted by the separately reviewed least-privilege provisioning operatio
 
 ## Isolated tests
 
-Set `MIRTPAGE_TEST_POSTGRES_URL` to an isolated local PostgreSQL service, or use
+Set `SUQPAGE_TEST_POSTGRES_URL` to an isolated local PostgreSQL service, or use
 the ignored local Supabase runtime file. Each persistence test creates a random
 `suqpage_test_*` schema, installs the native schema, and cleans up its own fixture.
 No retained developer rows or hosted database may be used as fixture data.
@@ -63,10 +63,10 @@ and hosted rollout checks. Passing a focused local test is not deployment eviden
 ## Backup and restore
 
 Use PostgreSQL 17-compatible `pg_dump` and `pg_restore` on PATH or configure
-`MIRTPAGE_PG_BIN_DIR`. For local Supabase, the exact container may instead be set
-in `MIRTPAGE_LOCAL_PG_CONTAINER`; its published loopback port is independently
+`SUQPAGE_PG_BIN_DIR`. For local Supabase, the exact container may instead be set
+in `SUQPAGE_LOCAL_PG_CONTAINER`; its published loopback port is independently
 checked against the configured target. Archive tools require
-`MIRTPAGE_POSTGRES_DIRECT_URL`; credentials are supplied privately, never logged.
+`SUQPAGE_POSTGRES_DIRECT_URL`; credentials are supplied privately, never logged.
 
 ```sh
 npm run backup
@@ -80,7 +80,7 @@ back up provider credentials or media objects.
 
 Restore defaults to a plan containing a target digest. Only after reviewing the
 exact target, stopping relevant writes and explicitly authorizing the operation,
-set `MIRTPAGE_APPROVE_POSTGRES_RESTORE` to that digest for one command and add
+set `SUQPAGE_APPROVE_POSTGRES_RESTORE` to that digest for one command and add
 `--execute`. The tool refuses a populated public schema, verifies archive integrity,
 and restores in one transaction. Use an empty recovery database and verify it
 before any traffic switch. Existing application data is never automatically dropped.

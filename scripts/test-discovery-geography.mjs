@@ -14,8 +14,8 @@ const packageJson = JSON.parse(read("package.json"));
 assert.match(provider, /tileUrlTemplate: "https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png"/);
 assert.match(provider, /https:\/\/www\.openstreetmap\.org\/copyright/);
 assert.match(provider, /OpenStreetMap contributors/);
-assert.match(provider, /NEXT_PUBLIC_MIRTPAGE_MAP_PROVIDER \|\| "osm-standard"/);
-assert.match(environment, /NEXT_PUBLIC_MIRTPAGE_MAP_PROVIDER=osm-standard/);
+assert.match(provider, /NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER \|\| "osm-standard"/);
+assert.match(environment, /NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER=osm-standard/);
 assert.equal(packageJson.dependencies.leaflet, "^1.9.4");
 assert.equal(packageJson.dependencies.supercluster, "^8.0.1");
 for (const dependency of ["d3-geo", "d3-selection", "d3-transition", "d3-zoom"]) {

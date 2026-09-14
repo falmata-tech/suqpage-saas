@@ -6,7 +6,7 @@ import { parseAccountPhone, saveAccountPhone } from "../lib/account-contacts";
 import { publicBusinessCatalog } from "../lib/business-profile";
 import { legacyPublicContacts, publicContactLinks } from "../lib/business-profile-contacts";
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-contacts-"));
-process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
+process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
 async function main() {
     const { getDb, closeDbForTests, getUserById, getBusinessById } = await import("./testing/postgres-fixture");
     const { accountContactPort } = await import("../lib/account-contact-runtime");

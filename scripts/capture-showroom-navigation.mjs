@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-showroom-navigation");
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-showroom-navigation");
 fs.mkdirSync(output, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -16,7 +16,7 @@ async function showroomCapture(name, viewport) {
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(`${baseURL}/@addis-metalworks`, { waitUntil: "domcontentloaded", timeout: 60_000 });
 
-  const host = page.getByRole("navigation", { name: "MirtPage showroom host navigation" });
+  const host = page.getByRole("navigation", { name: "Suqpage showroom host navigation" });
   const tenantNavigation = page.locator('[data-slot="header"] nav[aria-label="Showroom sections"]');
   const mobileNavigation = page.locator(".showroom-mobile-nav");
   await host.waitFor();

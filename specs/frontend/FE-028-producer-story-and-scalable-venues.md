@@ -13,7 +13,7 @@ change_level: L1
 ## Problem and outcome
 
 The public story is earnest but generic, and the virtual City Showroom and Daily Featured
-floors still resemble white diagrams inside gray frames. MirtPage needs concise,
+floors still resemble white diagrams inside gray frames. Suqpage needs concise,
 adult language with a clear point of view, plus inviting top-down venues that
 feel designed without becoming busy or tying booth placement to a static image.
 
@@ -56,11 +56,11 @@ feel designed without becoming busy or tying booth placement to a static image.
 
 ## Contracts
 
-- The home story states a memorable reason to use MirtPage in no more than one
+- The home story states a memorable reason to use Suqpage in no more than one
   headline and one short supporting paragraph before discovery.
 - About connects the risk and discipline of local production to the practical
-  visibility problem, then names MirtPage's showroom, map, and inquiry value.
-- Signup tells producers what MirtPage will create and who it helps them reach.
+  visibility problem, then names Suqpage's showroom, map, and inquiry value.
+- Signup tells producers what Suqpage will create and who it helps them reach.
 - The floor texture contains no people, booths, logos, text, or fixed
   circulation plan and can repeat or scale without exposing false information.
 - Daily Featured and City floors use different surface accents while sharing the same
@@ -89,10 +89,10 @@ feel designed without becoming busy or tying booth placement to a static image.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor understands the MirtPage point of view
+Scenario: Visitor understands the Suqpage point of view
   GIVEN the public homepage or About page is open
   WHEN the visitor reads the primary story
-  THEN MirtPage connects Ethiopian production to households and trade buyers
+  THEN Suqpage connects Ethiopian production to households and trade buyers
   AND direct purchase, wholesale sourcing, and distribution value are clear without generic slogans
 
 Scenario: Daily Featured grows without losing its setting
@@ -173,7 +173,7 @@ Evidence: completed locally on 2026-08-04:
   integrated perimeter planting, four-sided business circulation, zoom/pan,
   and empty center. FE-030 replaces that perimeter geometry with deterministic
   exhibition rows and no empty-center requirement.
-- Reviewed captures in `/tmp/mirtpage-discovery-visuals/` confirm the Daily Featured and
+- Reviewed captures in `/tmp/suqpage-discovery-visuals/` confirm the Daily Featured and
   City Showroom use a quiet architectural floor, restrained planted focal
   points, readable dynamic cards, and pannable mobile layouts without encoding
   businesses or booth positions in the decorative image.

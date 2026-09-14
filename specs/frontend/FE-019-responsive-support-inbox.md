@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-Clients and public visitors need a simple place to ask MirtPage for help, and
+Clients and public visitors need a simple place to ask Suqpage for help, and
 team members need one clear queue that remains usable on phones and with many
 conversations.
 
@@ -28,7 +28,7 @@ conversations.
 - Responsive single-column thread on phones and compact queue/thread workspace
   on wider screens.
 - A public live-chat launcher that creates a privacy-preserving anonymous visitor
-  session without creating a MirtPage account.
+  session without creating a Suqpage account.
 - Required email and phone fields on the first anonymous message so authorized
   support staff can continue the conversation if the browser session disconnects.
 - A visitor-visible **End chat** action that closes the authoritative support
@@ -37,10 +37,10 @@ conversations.
 - A closed transcript remains readable until the visitor chooses **Start another
   chat**. That action removes only the browser's opaque conversation token; it
   does not reopen, delete, or rewrite the retained staff conversation.
-- A bounded visitor choice between **AfricMade help or report** and **Transport
+- A bounded visitor choice between **Suqpage help or report** and **Transport
   arrangements**. Historical conversations retain their original labels.
 - Clear copy that buying, negotiation, payment, and product questions stay
-  between buyer and listed operation. AfricMade may help connect the buyer with
+  between buyer and listed operation. Suqpage may help connect the buyer with
   a transport option but does not book, operate, or guarantee delivery.
 - One optional private attachment per message for visitors, clients, and staff:
   sanitized JPEG, PNG, or WebP images, or a verified PDF document up to 5 MB.
@@ -51,7 +51,7 @@ conversations.
 
 - Multiple attachments in one message, SVG/Office/archive/executable uploads,
   typing indicators, bot-generated advice, provider-hosted chat, or claims that
-  MirtPage has completed an inspection before staff record it.
+  Suqpage has completed an inspection before staff record it.
 
 ## Scenarios
 
@@ -68,13 +68,13 @@ Scenario: Staff claims and closes a conversation
   THEN the client sees the reply and closed state
   AND the team member regains one assignment slot
 
-Scenario: Anonymous visitor asks AfricMade for assistance
+Scenario: Anonymous visitor asks Suqpage for assistance
   GIVEN a public visitor has not signed in
   WHEN they open chat, provide a valid email and phone number, choose an assistance category, and send a bounded message
   THEN the conversation enters the same staff waiting or assignment queue
   AND a secure anonymous browser session can poll and reply only to that conversation
   AND the authorized staff thread exposes the saved contact values for follow-up
-  AND no MirtPage account or public business record is created
+  AND no Suqpage account or public business record is created
 
 Scenario: Anonymous visitor omits reconnect details
   GIVEN a public visitor starts a new support conversation
@@ -83,7 +83,7 @@ Scenario: Anonymous visitor omits reconnect details
   AND no support conversation or message is created
 
 Scenario: Visitor continues browsing independently
-  GIVEN the public chat explains optional MirtPage assistance and has an active conversation
+  GIVEN the public chat explains optional Suqpage assistance and has an active conversation
   WHEN the visitor chooses End chat and confirms the action
   THEN the token-owned conversation closes idempotently
   AND its active staff assignment is released
@@ -92,8 +92,8 @@ Scenario: Visitor continues browsing independently
   AND no inspection, sourcing, negotiation, certification, or delivery guarantee is implied
 
 Scenario: Visitor reports a listing
-  GIVEN a visitor sees a concern on an AfricMade page
-  WHEN they choose AfricMade help or report and send the details
+  GIVEN a visitor sees a concern on an Suqpage page
+  WHEN they choose Suqpage help or report and send the details
   THEN the report enters the support queue with reconnect contact details
   AND the interface does not claim the report has already been verified or resolved
 

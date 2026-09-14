@@ -11,7 +11,7 @@ not authorize retired commands or establish readiness of this candidate.
 - [ ] Confirm all release-affecting specs are `done` and `npm run validate:specs` passes.
 - [ ] Confirm traceability includes implementation, tests, rollout and rollback evidence.
 - [ ] Set a production HTTPS `NEXT_PUBLIC_APP_URL`.
-- [ ] Set `MIRTPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
+- [ ] Set `SUQPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
       pooler URL in Vercel. Keep the direct URL only in the operator environment.
 - [ ] If using Supabase Storage, create a private bucket, configure server-only
       credentials, complete the copy-only hash verification, and retain local
@@ -22,7 +22,7 @@ not authorize retired commands or establish readiness of this candidate.
 - [ ] Change every temporary or migrated account password.
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.
-- [ ] Configure `NEXT_PUBLIC_MIRTPAGE_TIKTOK_URL` and `NEXT_PUBLIC_MIRTPAGE_YOUTUBE_URL` with MirtPage's exact public profiles before promoting Daily Featured Showrooms broadcasts.
+- [ ] Configure `NEXT_PUBLIC_SUQPAGE_TIKTOK_URL` and `NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL` with Suqpage's exact public profiles before promoting Daily Featured Showrooms broadcasts.
 - [ ] Confirm only approved businesses are `active`; keep unfinished showrooms `draft`.
 - [ ] Submit a public expression of interest and confirm an administrator can
       review it with zero attachments; confirm public multipart upload is rejected.

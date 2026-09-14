@@ -11,7 +11,7 @@ last_updated: 2026-07-20
 
 ## Purpose
 
-Define the stable UI contract for the MirtPage platform, four custom showrooms,
+Define the stable UI contract for the Suqpage platform, four custom showrooms,
 and authenticated operations dashboard.
 
 ## Architecture
@@ -20,12 +20,12 @@ and authenticated operations dashboard.
 - Client components own interaction state, including inquiry carts and dialogs.
 - Each showroom retains a separate renderer; shared behavior flows through the
   typed `DesignProps`/catalog contract.
-- Server actions and HTTP APIs are adapters. UI code never queries SQLite.
+- Server actions and HTTP APIs are adapters. UI code never accesses database drivers.
 - Merchant-entered product names and option values remain verbatim.
 
 ## Routing and access
 
-- `/` is the MirtPage platform landing page and intentional directory.
+- `/` is the Suqpage platform landing page and intentional directory.
 - `/@handle` resolves active public showrooms only.
 - `/preview/@handle` requires authentication and authorization.
 - `/dashboard/**` requires a session; temporary-password accounts are restricted

@@ -54,7 +54,7 @@ Neither tool changes the live showroom or weakens review controls.
 - Client access to the studio, public self-service generation, direct provider
   integration, arbitrary code/CSS/HTML, or automatic publication.
 - Automatically publishing AI-created facts without staff/client review.
-- Uploading private image bytes to an external provider from MirtPage.
+- Uploading private image bytes to an external provider from Suqpage.
 - AI-created image URLs, arbitrary remote-image hotlinks, raw iframe/embed HTML,
   or unrestricted video providers.
 - Removing client approval, stale-version checks, manager publication, or
@@ -114,7 +114,7 @@ Neither tool changes the live showroom or weakens review controls.
   their normalized provider/type and title. The UI never accepts embed code.
 - The brief's media manifest contains opaque keys and safe descriptors. If the
   external AI needs visual understanding, staff manually supplies the same
-  approved images in that separate conversation; MirtPage does not transmit them.
+  approved images in that separate conversation; Suqpage does not transmit them.
 - The design bank and focused studio display each component's required/optional
   media slots, accepted media kinds, count, and aspect-ratio guidance.
 - Content blocks assign admitted asset keys to named media slots. Required slots
@@ -146,7 +146,7 @@ Scenario: Staff imports a complete new-showroom recipe
   GIVEN an assigned team member exported the request's sanitized brief
   WHEN they import valid AI JSON with dynamic catalog content, typed page copy,
   allowed media keys, and an approved design combination
-  THEN MirtPage shows the exact candidate preview and structured count/difference report
+  THEN Suqpage shows the exact candidate preview and structured count/difference report
   AND no collection, item, hero, story, or design form must be entered manually
 
 Scenario: Staff imports a complete change recipe

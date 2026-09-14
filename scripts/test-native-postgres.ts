@@ -13,7 +13,7 @@ async function main() {
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 43);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 45);
     const routines = await db.prepare('SELECT prosrc FROM pg_proc WHERE pronamespace=current_schema()::regnamespace').all();
     assert.ok(routines.length >= 11);
     for (const routine of routines) assert.doesNotMatch(routine.prosrc, /(?:"public"|public)\./, 'Fixture triggers never resolve into developer data.');
@@ -28,7 +28,7 @@ async function main() {
 
     const settings = await db.prepare("SELECT COUNT(*) total FROM information_schema.columns WHERE table_schema=current_schema() AND table_name IN ('products','option_values') AND column_name='stock_count'").get();
     assert.equal(settings.total, 0);
-    const env = { ...process.env, MIRTPAGE_POSTGRES_DIRECT_URL: process.env.MIRTPAGE_POSTGRES_URL, MIRTPAGE_POSTGRES_MIGRATION_SCHEMA: schema, MIRTPAGE_MEDIA_ROOT: path.join(root,'media'), MIRTPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' };
+    const env = { ...process.env, SUQPAGE_POSTGRES_DIRECT_URL: process.env.SUQPAGE_POSTGRES_URL, SUQPAGE_POSTGRES_MIGRATION_SCHEMA: schema, SUQPAGE_MEDIA_ROOT: path.join(root,'media'), SUQPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' };
     await new Promise<void>((resolve, reject) => {
       const child = spawn(process.execPath, ['--import','tsx','scripts/setup.ts'], { env, stdio: ['ignore','pipe','pipe'] });
       let log = '';

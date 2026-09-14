@@ -19,7 +19,7 @@ const handles = new Set([
     ...SCALE_DEMO_BUSINESSES.map((business) => business.handle),
 ]);
 async function main() {
-  const target = new URL(process.env.MIRTPAGE_POSTGRES_URL || "");
+  const target = new URL(process.env.SUQPAGE_POSTGRES_URL || "");
   if (!["127.0.0.1", "localhost"].includes(target.hostname)) throw new Error("Demo updates require a local PostgreSQL target.");
   const businesses = await runtimeAll<{ id: number; handle: string; name: string; description: string }>("SELECT id,handle,name,description FROM businesses ORDER BY id");
   let updated = 0;

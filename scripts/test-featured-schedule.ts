@@ -22,7 +22,7 @@ assert.match(lineupSelectorSource, /Daily Featured accepts up to \{limit\} pages
 assert.match(featuredAdminSource, /sponsorForSlot\(entry\.sponsorSlot\)\?\.name/, "the internal agenda names each scheduled sponsor placement");
 assert.match(featuredUiSource, /Sponsor spotlight/, "the public schedule and live rail disclose the active sponsor segment");
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-featured-schedule-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-featured-schedule-"));
     const db = await getDb();
     try {
         const settingsPort: FeaturedProgramWritePort = {

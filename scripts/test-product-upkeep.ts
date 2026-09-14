@@ -5,10 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 async function main() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-upkeep-"));
-    process.env.MIRTPAGE_MEDIA_ROOT = path.join(root, "media");
-    process.env.MIRTPAGE_BACKUP_ROOT = path.join(root, "backups");
-    process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "1";
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-upkeep-"));
+    process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
+    process.env.SUQPAGE_BACKUP_ROOT = path.join(root, "backups");
+    process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "1";
     try {
         const { closeDbForTests, getCatalogByBusinessId, getDb, getUserById } = await import("./testing/postgres-fixture");
         const { catalogToRevisionSnapshot } = await import("../lib/revision-domain");
@@ -220,12 +220,12 @@ async function main() {
         }), replacement);
         assert.equal(managerUpdate.contentVersion, 4);
         const retainedImageRef = String((await db.prepare("SELECT image_path FROM products WHERE id=?").get(tenantA.productId))?.image_path);
-        const retainedImageFile = path.join(process.env.MIRTPAGE_MEDIA_ROOT, path.basename(retainedImageRef));
+        const retainedImageFile = path.join(process.env.SUQPAGE_MEDIA_ROOT, path.basename(retainedImageRef));
         assert.match(retainedImageRef, /^\/media\/product-/);
         assert.equal(fs.existsSync(retainedImageFile), true);
         const staleImage = await stageUploadedImage(new File([imageBytes], "stale.png", { type: "image/png" }), "product");
         assert.ok(staleImage);
-        const staleFile = path.join(process.env.MIRTPAGE_MEDIA_ROOT, path.basename(staleImage.imageRef));
+        const staleFile = path.join(process.env.SUQPAGE_MEDIA_ROOT, path.basename(staleImage.imageRef));
         await assert.rejects(() => executeBasicProductUpkeep(admin, command({
             kind: "update",
             productId: tenantA.productId,
@@ -251,14 +251,14 @@ async function main() {
         assert.equal(String((await db
             .prepare("SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=4")
             .get(tenantA.businessId))?.snapshot_json).includes(retainedImageRef), true);
-        process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "0";
+        process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "0";
         await assert.rejects(() => executeBasicProductUpkeep(clientA, command({
             kind: "update",
             productId: tenantA.productId,
             idempotencyKey: "upkeep_disabled_001",
             expectedContentVersion: 5,
         }), null), throwsCode("feature_disabled"));
-        process.env.MIRTPAGE_PRODUCT_UPKEEP_ENABLED = "1";
+        process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED = "1";
         assert.equal((await db.prepare("SELECT COUNT(*) total FROM pg_constraint WHERE connamespace=current_schema()::regnamespace AND NOT convalidated").get()).total, 0);
         assert.equal((await db
             .prepare("SELECT COUNT(*) count FROM audit_logs WHERE action='product.basic_upkeep_published'")

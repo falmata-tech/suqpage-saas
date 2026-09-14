@@ -19,7 +19,7 @@ semantics, provider security, or retained-version recovery.
 ## Domain invariants
 
 - `price_minor` is nullable or an integer from 0 through 999,999,999 and its
-  currency is `ETB`. It is display context, never an amount charged by MirtPage.
+  currency is `ETB`. It is display context, never an amount charged by Suqpage.
 - `quantity_unit` is optional normalized plain text of at most 40 characters.
 - `highlights_json` parses to an ordered unique array of at most six strings,
   each containing 1-80 characters.
@@ -78,7 +78,7 @@ Scenario: Public discovery reads retained live state
   AND invalid retained data projects as not live without exposing its destination
 
 Scenario: Daily Featured spotlight overlaps merchant live state
-  GIVEN a live business is the current MirtPage Daily Featured walkthrough booth
+  GIVEN a live business is the current Suqpage Daily Featured walkthrough booth
   WHEN marketplace presentation is composed
   THEN Featured now takes visual precedence for that slot
   AND no persistence write changes the merchant live setting
@@ -118,7 +118,7 @@ acceptance also proved the narrow CSP and privacy-enhanced browser embed. No
 production data migration is included.
 
 Reopened on 2026-08-09 to project merchant-controlled live state into public
-discovery and to give the current MirtPage Daily Featured walkthrough presentation
+discovery and to give the current Suqpage Daily Featured walkthrough presentation
 precedence without mutating the merchant setting. Focused live-security and
 discovery integration tests prove canonical provider validation, fail-closed
 handling of an invalid retained URL, current-walkthrough selection, and saved

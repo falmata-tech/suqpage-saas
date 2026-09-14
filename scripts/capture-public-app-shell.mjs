@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "africmade-public-app-shell");
-const scope = process.env.MIRTPAGE_CAPTURE_SCOPE || "all";
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-public-app-shell");
+const scope = process.env.SUQPAGE_CAPTURE_SCOPE || "all";
 fs.mkdirSync(output, { recursive: true });
 
 async function openPage(browser, route, viewport) {
@@ -325,7 +325,7 @@ async function captureSupport(browser, viewport, suffix) {
 
 const browser = await chromium.launch({
   headless: true,
-  executablePath: process.env.MIRTPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
+  executablePath: process.env.SUQPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
 });
 
 try {

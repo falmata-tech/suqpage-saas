@@ -8,8 +8,8 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 
 const base = 'http://127.0.0.1:3101';
-const database = new URL(process.env.MIRTPAGE_POSTGRES_URL);
-const provider = new URL(process.env.MIRTPAGE_SUPABASE_URL);
+const database = new URL(process.env.SUQPAGE_POSTGRES_URL);
+const provider = new URL(process.env.SUQPAGE_SUPABASE_URL);
 for (const [url, port] of [[database, '54322'], [provider, '54321']]) assert.ok(['127.0.0.1', 'localhost'].includes(url.hostname) && url.port === port, 'Local only');
 const pool = new pg.Pool({ connectionString: database.href });
 const browser = await chromium.launch();
@@ -40,7 +40,7 @@ try {
   await expect(anonymousPage).toHaveURL(/\/login/);
   await anon.close();
   const context = await browser.newContext();
-  const admin = createClient(provider.origin, process.env.MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const admin = createClient(provider.origin, process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const link = await admin.auth.admin.generateLink({ type: 'magiclink', email: fixture.email });
   assert.ok(!link.error && link.data.properties?.email_otp);
   const cookieValues = [];
