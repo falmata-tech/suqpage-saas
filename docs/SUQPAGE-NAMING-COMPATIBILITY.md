@@ -43,3 +43,8 @@ logout token coverage, tenant-scoped state migration, asset targets and migratio
 legacy inquiry cart and requests bookmarked assets. Full check, release,
 operations, backup rehearsal and container evidence is recorded in the active
 checklist and traceability map when complete.
+
+
+Rollout evidence: `docs/SUQPAGE-NAMING-ROLLOUT-2026-09-14.md`. Source `51109d8`
+and CDN fix `ce2015b` are published in `6aa80f72843cbebe952f97df`; local/hosted
+schema 45 and all 17 legacy asset byte comparisons pass.

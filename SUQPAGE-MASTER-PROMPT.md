@@ -54,7 +54,7 @@ briefs and visual evidence remain under showroom-projects/WORKFLOW.md; those fil
 do not enable a custom-request application feature.
 
 Suqpage is deployed at the existing generated Netlify origin
-`https://africmade.netlify.app`. The 2026-09-14 release uses PostgreSQL schema 43
+`https://africmade.netlify.app`. The 2026-09-14 release uses PostgreSQL schema 45
 and the approved email-only sign-in configuration. Core, release, operations,
 PostgreSQL, container, seven isolated production-browser scenarios and 72
 accessibility states pass. Live desktop/phone checks verify contact placement,

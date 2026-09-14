@@ -45,7 +45,8 @@ Deployment sequence (operations, L3/L4; DEP-030/031):
 - [x] N3. Apply additive platform-default database migrations 44–45 locally after rehearsal;
   preserve tenant data, account emails, Auth links and all protected backup files.
   Local 44–45 applied; protected-backup rehearsal preserved all 50 original table
-  projections except exact standard subscription labels. Hosted apply remains pending.
+  projections except exact standard subscription labels. Hosted schema 45 is verified
+  under N6 with 55 preserved data-table projections and 66 standard labels renamed.
 - [x] N4. Verify namespace, config/state migration, security and focused local
   continuity; no layout redesign is included, existing visual approval stands.
   Evidence: namespace regression, typecheck, eight browser scenarios and clean
@@ -56,12 +57,15 @@ Deployment sequence (operations, L3/L4; DEP-030/031):
   Container context/non-root/origins/trace/fail-closed checks pass. Netlify offline
   artifact privacy and exact runtime-source comparison pass; production audit has
   zero vulnerabilities. The pre-existing deno.lock remains untouched.
-- [ ] N6. Package clean source, perform approved monitored rollout and record exact
+- [x] N6. Package clean source, perform approved monitored rollout and record exact
   compatibility exceptions and hosted configuration gates that remain separate.
-  - [ ] N6a. Live candidate 6aa80d74354566ace7fd51e8 exposed missing CDN aliases
+  - [x] N6a. Live candidate 6aa80d74354566ace7fd51e8 exposed missing CDN aliases
     for old static asset URLs. Add exact Netlify rules matching the tested Next map,
     verify mapping equality, publish static correction and check every legacy URL.
-    Main pages/health and schema 45 remain verified; no database retry or downgrade.
+    Completed in ce2015b; final deploy 6aa80f72843cbebe952f97df passes all 17
+    byte-for-byte legacy asset comparisons and desktop/phone page/contact/inquiry
+    checks. Hosted schema 45 preserved 55 data-table projections except 66 standard
+    labels. See docs/SUQPAGE-NAMING-ROLLOUT-2026-09-14.md for exact evidence.
 
 ## Decisions
 

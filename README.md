@@ -95,3 +95,7 @@ verification evidence. Real hosted email delivery remains unverified.
 Canonical names and compatibility exceptions are documented in
 `docs/SUQPAGE-NAMING-COMPATIBILITY.md`. Existing settings and stored inquiry state
 remain readable during the Suqpage namespace rollout.
+
+The naming rollout is published with schema 45. See
+`docs/SUQPAGE-NAMING-ROLLOUT-2026-09-14.md` for exact source/deployment IDs,
+compatibility checks and retained provider identifiers.
