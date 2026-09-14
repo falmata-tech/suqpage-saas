@@ -71,20 +71,29 @@ backups and existing developer data are preserved.
 
 ## Remaining launch requirements
 
-- Container gate passes. Visual approval, full `check`, `release`,
-  production browser acceptance, accessibility and archive restore/operations have passed;
-  see the deployment record for evidence and the verified backup and email-only launch decision.
-- Review and task-scoped commit after required gates. Nothing has been pushed or
-  deployed by this audit.
-- Independently verify the exact hosted Preview/Production targets, migration/runtime
-  permissions, Google/email sign-in, inquiry notification delivery, private Storage,
-  health, backups and monitored rollback. DEP-029 governs hosted Auth recovery;
-  local provider credentials must never replace hosted configuration.
-- Two retained non-demo account phone values still need their owners' real numbers.
-  The account form exists; fictional values must not be supplied for real accounts.
+- Source commit `41e2fed` and Netlify production `6aa7fe5a106ca381ba08bba3`
+  are verified. All local release gates, hosted schema 43, private Storage,
+  public desktop/phone workflows, protected-route denial and demo contacts pass.
+- Real hosted sign-in email delivery and authenticated owner/admin smoke remain
+  unverified. The owner approved email-only entry; Google remains hidden.
+- Optional inquiry email notifications need a configured provider key; the
+  platform inquiry inbox is connected. Do not claim external notification delivery.
+- Local non-demo account phone values require their owners' real numbers.
+  The hosted fictional fill matched exact seeded identities only.
+- DEP-029 governs any future hosted Auth configuration maintenance. No local
+  provider credentials may replace hosted configuration. A Preview needs its own
+  isolated providers; no Preview environment or custom domain was provisioned.
 
 Database migrations, archive/restore, media reconciliation and provider maintenance
 are operator commands by design. They do not need public frontend controls.
 Payment checkout, inventory accounting, automatic delivery integrations and optional
 Realtime are outside the accepted launch scope; they are not presented as working
 integrations in this candidate.
+
+## Published rollout
+
+Source `41e2fed` is published as Netlify `6aa7fe5a106ca381ba08bba3` at the existing
+generated origin. Schema 43, private Storage, email-only UI, desktop/phone public
+workflows and permission denial are verified. Real hosted email delivery and
+authenticated hosted owner/admin smoke remain distinct from passing isolated
+acceptance. The deployment record is the current source for rollout evidence.

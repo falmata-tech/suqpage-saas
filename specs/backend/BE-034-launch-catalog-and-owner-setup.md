@@ -10,6 +10,17 @@ change_level: L3
 
 # BE-034 — Launch data and workflow integration
 
+## Current release evidence — 2026-09-14
+
+The owner approved the visual design and deployment. Source `41e2fed` is published
+as Netlify `6aa7fe5a106ca381ba08bba3`; hosted schema 43 and the public desktop/phone
+workflows are verified. Full core/release, seven isolated authenticated/public
+acceptance scenarios, 72 accessibility states, operations, PostgreSQL and container
+gates pass. Earlier approval/full-gate-pending notes below describe intermediate
+local milestones, not a new approval requirement. Remaining hosted email delivery
+and authenticated production smoke are tracked in DEP-030 and
+`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md`; this evidence does not claim those passes.
+
 ## Problem and contracts
 
 FE-043 defines the requested launch scope. Reuse catalog commands, existing media

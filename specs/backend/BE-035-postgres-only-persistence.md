@@ -1,7 +1,7 @@
 ---
 id: BE-035
 title: PostgreSQL-only persistence in every executable environment
-status: in_progress
+status: done
 related: [BE-027, BE-034, DEP-031, ADR-0020]
 owners: [backend, security, operations]
 last_updated: 2026-09-14
@@ -49,3 +49,15 @@ for implementation: PostgreSQL is already authoritative locally and deployed;
 there is no new provider, identity policy or user-facing redesign decision.
 Affected master sections: 2, 15–17, 22 and 24 (current stack, privacy/operations,
 test and launch requirements). Launch wiring FE-043/BE-034 remains active.
+
+## Evidence
+
+Evidence: verified on 2026-09-14.
+
+`npm run check`, `npm run release`, `npm run test:postgres-readiness`,
+`npm run test:operations`, `npm run test:container`, seven acceptance scenarios
+and 72 accessibility states passed. Configuration regressions accept email-only
+entry and reject missing email OTP. Commit `41e2fed` is published as Netlify
+`6aa7fe5a106ca381ba08bba3`. Hosted schema 43 and runtime access controls are
+verified; restoring the approved pre-migration backup preserved all 50 original
+table fingerprints through 39–43. See the deployment record and traceability.

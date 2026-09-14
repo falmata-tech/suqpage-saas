@@ -1,7 +1,7 @@
 ---
 id: DEP-031
 title: Native PostgreSQL setup tests and operations
-status: in_progress
+status: done
 related: [BE-035, DEP-030, DEP-027, ADR-0020]
 owners: [operations, security]
 last_updated: 2026-09-14
@@ -34,3 +34,15 @@ restore to an isolated target. Full release and browser evidence are required
 before launch claims. Retain existing protected PostgreSQL backups. Code rollback
 must stay PostgreSQL-only; historical source databases are not an executable
 rollback path. Hosted mutations still follow DEP-029 and owner approval.
+
+## Evidence
+
+Evidence: verified on 2026-09-14.
+
+`npm run check`, `npm run release`, `npm run test:postgres-readiness`,
+`npm run test:operations`, `npm run test:container`, seven acceptance scenarios
+and 72 accessibility states passed. Configuration regressions accept email-only
+entry and reject missing email OTP. Commit `41e2fed` is published as Netlify
+`6aa7fe5a106ca381ba08bba3`. Hosted schema 43 and runtime access controls are
+verified; restoring the approved pre-migration backup preserved all 50 original
+table fingerprints through 39–43. See the deployment record and traceability.

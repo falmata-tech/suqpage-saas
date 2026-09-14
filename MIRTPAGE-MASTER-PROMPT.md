@@ -53,13 +53,15 @@ records/assets and compatible catalog readers remain preserved. Historical asset
 briefs and visual evidence remain under showroom-projects/WORKFLOW.md; those files
 do not enable a custom-request application feature.
 
-Focused local SQL, security and owner/admin browser evidence is recorded in the
-active transition checklist. Visual and deployment approval was received on 2026-09-14;
-core, release, operations, PostgreSQL, seven production browser scenarios and 72
-accessibility states pass. The remaining container gate, reviewed commits and deployment are tracked separately in
-`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md`. No hosted provider setting or
-production deployment is changed by this local implementation. Remaining operational
-asset retention and rollout work stays in DEP-030 and the transition checklist.
+Suqpage is deployed at the existing generated Netlify origin
+`https://africmade.netlify.app`. The 2026-09-14 release uses PostgreSQL schema 43
+and the approved email-only sign-in configuration. Core, release, operations,
+PostgreSQL, container, seven isolated production-browser scenarios and 72
+accessibility states pass. Live desktop/phone checks verify contact placement,
+linked products, retained-map pagination, email-only entry and private-route denial.
+`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` records the source commit, deployment,
+backup/recovery evidence and limits. Real hosted email delivery and authenticated
+owner/admin delivery smoke remain distinct from passing local workflows.
 
 The official product name is:
 
@@ -1126,8 +1128,9 @@ passing the guard's offline tests.
 
 The controlled MVP uses separate Supabase projects for every executable lane:
 an isolated local project for normal development, a disposable local project on
-dedicated ports for production-mode browser acceptance, and separate managed
-projects for Netlify Preview and Production. Every lane applies the same
+dedicated ports for production-mode browser acceptance, and a managed project for
+Production. A hosted Preview requires its own isolated managed project and
+credentials before it may be enabled. Every lane applies the same
 reviewed PostgreSQL schema and application-owned authorization model and selects
 Supabase PostgreSQL, Auth, and private Storage. PostgreSQL is the only executable
 database engine in application code, local development, fixtures, CI and deployments
@@ -1146,13 +1149,13 @@ uses protected PostgreSQL custom archives with hashes; restore requires a review
 target digest and an empty recovery database. Auth and private Storage have separate
 provider backup requirements. Neither a local test nor a digest grants hosted approval.
 
-Hosted Supabase PostgreSQL and the Netlify candidate rollout are
-controlled by BE-027, DEP-023, and DEP-026. Runtime parity, the reconciled
-Supabase copy, private Storage verification, least-privilege runtime preflight,
-and historical Vercel smoke evidence exist. Deploy Previews and Production must
-never share database, Auth, Storage, or service-role credentials. The exact
-current release still requires host-candidate smoke, DNS verification, and
-rollback monitoring before it is described as production-ready.
+Hosted Supabase PostgreSQL and Netlify operations are controlled by BE-027,
+DEP-023, DEP-026 and DEP-030. The current generated-origin deployment and private
+Storage are verified. Its additive migration preserved original table values,
+retained identities and least-privilege runtime access. Deploy Previews and
+Production must never share database, Auth, Storage or service-role credentials.
+Real hosted email delivery remains an admission check before broad public launch;
+no custom-domain or DNS change is implied by the generated-origin deployment.
 
 Before broad external rollout or multi-instance production scale, complete:
 

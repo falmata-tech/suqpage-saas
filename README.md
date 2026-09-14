@@ -87,4 +87,6 @@ Hosted changes follow DEP-029. Never run `supabase config push`; never replace o
 disable hosted Google/SMTP settings as a recovery shortcut. Preview and Production
 must use separate projects and credentials. Deployment requires verified migrations,
 private media, email/Google sign-in, host configuration, health and rollback evidence.
-No hosted write or deployment is implied by this README or the local launch audit.
+The current release is live at https://africmade.netlify.app with email-only entry.
+See `docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` for exact deployment, backup and
+verification evidence. Real hosted email delivery remains unverified.

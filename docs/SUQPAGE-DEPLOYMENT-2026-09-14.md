@@ -1,91 +1,84 @@
 # Suqpage deployment verification — 2026-09-14
 
-Controlling contracts: FE-035, FE-040–043, BE-032–035, DEP-002, DEP-029–031.
-The owner approved the current visuals and authorized deployment. This record
-separates passing local evidence from hosted publication; nothing is deployed yet.
+Suqpage source `41e2fed154abc594534c47a8facd69d45c242c3d` is published at
+https://africmade.netlify.app as Netlify deployment `6aa7fe5a106ca381ba08bba3`.
+The owner approved visuals, deployment, the exact private production-data backup
+and email-only sign-in. Controlling contracts: FE-035, FE-040–043, BE-032–035,
+DEP-002, DEP-029–031.
 
-## Verified target and rollback
+## Target, data and recovery
 
-- Netlify account `falmatad`, site `26c795eb-5560-4a88-b38d-3cc922c2a5e6`,
-  generated origin `https://africmade.netlify.app` independently verified by API.
-- Published rollback deployment remains `6a8c791bbc9ad7b10122e4a6`.
-- Production Supabase `sjeiiqxgscuqajpgddcc` is active; the existing Netlify runtime
-  configuration points to it, with role `mirtpage_runtime` and schema 38.
-- No Loadgistic resource, DNS record, Supabase Auth setting, database record,
-  Git remote or published deployment was changed. Only the approved Netlify
-  production application flags changed: email OTP `1`, Google entry `0`; all
-  other environment values were verified unchanged.
-- Netlify configuration, schema export and explicitly approved public-schema
-  data backup are retained under ignored `.local/deployment-20260914/`, with
-  directory mode 0700 and file mode 0600. The data backup was restored into a
-  disposable local PostgreSQL 17 instance: all 50 original table fingerprints
-  survived migrations 39–43, a repeat migration was a no-op, runtime CRUD worked
-  and direct anonymous/authenticated reads stayed denied. This does not back up
-  Auth/Storage objects or establish recoverable OAuth credentials.
+- Independently verified Netlify account `falmatad`, site
+  `26c795eb-5560-4a88-b38d-3cc922c2a5e6`; published deployment reports `ready`.
+- Production Supabase `sjeiiqxgscuqajpgddcc` uses runtime role `mirtpage_runtime`.
+  Additive migrations 39–43 are committed. All 66 businesses, 47 users and
+  retained Auth identity links remain. Runtime CRUD grants and direct-client
+  denial on new tables were verified before commit and independently afterward.
+- Netlify flags are `MIRTPAGE_EMAIL_OTP_ENABLED=1` and
+  `MIRTPAGE_GOOGLE_AUTH_ENABLED=0`; unrelated environment values are unchanged.
+  Hosted Auth confirms email enabled/Google disabled; its configuration and
+  credentials were not changed. The configured Storage bucket is private.
+- Protected schema, approved public-schema data export and Netlify configuration
+  backups remain under ignored `.local/deployment-20260914/` (directory 0700,
+  private backups 0600). Restoring the actual data backup into disposable
+  PostgreSQL 17 preserved all 50 original table fingerprints through migrations
+  39–43. Reapplication was a no-op; runtime access and direct-client denial passed.
+  Public-schema exports do not back up Auth credentials or Storage objects.
+- The production migration checked all 50 original table fingerprints inside its
+  transaction before commit. The temporary CLI login cannot read application
+  tables after `SET LOCAL ROLE postgres` ends, so its final readback failed.
+  Independent runtime-role reads confirmed the intended committed schema 43,
+  counts, identity links and access restrictions. No migration retry or restore ran.
+- Previous published deploy `6a8c791bbc9ad7b10122e4a6` remains retained as an
+  incident reference. Routine source rollback must preserve PostgreSQL-only
+  behavior and email-only entry; the historic artifact is not automatically
+  compatible with these requirements. Any restore requires a reviewed exact plan.
+- No Loadgistic resource, DNS record, Git remote, Google/SMTP credential or hosted
+  Auth configuration was changed.
 
-## Passing evidence
+## Verification
 
-- `npm run check`: complete PostgreSQL-based core gate passed.
-- `npm run test:operations`: private custom archive, hash validation, missing
-  approval and populated-target refusal, isolated restore passed.
-- `npm run test:postgres-readiness`: disposable PostgreSQL 17 native install,
-  runtime adapters, security, product/owner workflows, pagination, contacts and
-  media reconciliation passed.
-- `npm run test:acceptance`: all seven production-mode browser scenarios passed.
-  Fixtures use isolated local Auth/PostgreSQL/Storage and local email capture.
-- PWA/mobile-menu check passed after waiting for client hydration.
-- Production schema-only rehearsal with synthetic rows: migrations 39–43 apply,
-  retained synthetic business data survives, repeat migration is a no-op, and
-  direct anonymous/authenticated table reads remain denied.
-- `npm run release`: complete final gate passed, including production build,
-  62 private-file trace checks, isolated production HTTP smoke, scale/compatibility,
-  security and workflow regressions, and zero production dependency vulnerabilities.
-- `npm run test:accessibility`: all 72 public/owner/admin states now pass after
-  the corrections. The owner gallery also passes focused keyboard/Axe checks at 1440/390/320.
-  Updated editor screenshots are under `/tmp/suqpage-deploy-review/`.
-- Production Auth guard: all 37 tests pass, including exact Suqpage email subjects
-  and rejection of old/arbitrary subjects. The hosted email subject/template was
-  not changed; DEP-029 still requires an exact reviewed private plan before apply.
+- `npm run check`, `npm run release`, `npm run test:postgres-readiness`,
+  `npm run test:operations` and `npm run test:container`: passed.
+- `npm run test:acceptance`: 7/7 isolated local production-mode browser scenarios.
+  `npm run test:accessibility`: 72/72 public, owner and administrator states.
+- Current email-only configuration regressions, typecheck, 132-spec validation,
+  PWA/mobile menu, 37 Auth-guard regressions and database boundaries: passed.
+- Clean offline Netlify/OpenNext build: passed with public origin configuration
+  only. The source copy excludes local dotenv files, backups and runtime data.
+  Function archive contains Linux Sharp binaries and no private runtime paths or
+  configured production secret values. SHA-256:
+  `247276c5ebdcba57c48c02c9ae0a8a77276b264bcf414b7dfd9729bf085a3711`
+  (25,052,307 bytes). Publication used `--prod --no-build` and explicit generated
+  static/functions paths; no source archive was uploaded.
+- Live health, homepage, login and reported Nile Sensor Studio page: HTTP 200.
+  At 1440/390px, email-only controls, contact placement after products, linked
+  product reload/back navigation, category pagination retaining the map, private
+  workspace redirects, retired-route 404s and unauthorized draft/media denial pass.
+  No browser application errors. Eight focused screenshots are retained under
+  `/tmp/suqpage-live-20260914/`.
+- Hosted demo contact operation matched 64 exact seed handles and 47 seed account
+  emails. It filled only empty fields from approved local `example.com`/reserved
+  drama-range fixtures. Before/after projection checks preserved all account
+  emails, existing values, nonmatching records and notification destinations.
+  All 64 live pages expose their expected public email/phone links and omit private
+  account-phone fields; all 47 account phones are present. These contacts are
+  fictional display data, not reachable channels.
 
-## Corrections from release verification
+## Remaining checks and limits
 
-Current tests now verify five-row backend pagination, per-product inquiry links,
-the POST-only draft endpoint, and the page's own error alert rather than Next.js's
-route announcer. Native demo password hashing yields to pending PostgreSQL I/O.
-Privacy/terms describe the standard owner-page workflow. The embedded preview
-uses a subordinate heading; cover selection stays keyboard-scrollable while its
-mutations are disabled. Featured, schedule and small legal-page branding contrast
-are corrected. Docker excludes previous `.netlify`/`.vercel` build state.
-
-## Outstanding admission
-
-1. Review and commit the transition source, preserving unrelated `deno.lock`.
-2. Publish the clean, offline Netlify artifact after the scoped commit. Its build
-   passed with public origin configuration only. The 25,052,307-byte function
-   archive includes Linux Sharp binaries, excludes private runtime paths, and
-   contains zero matches for the configured production secrets. SHA-256:
-   `247276c5ebdcba57c48c02c9ae0a8a77276b264bcf414b7dfd9729bf085a3711`.
-3. Apply rehearsed additive migrations 39–43, publish the reviewed artifact to
-   the verified site, and monitor public, Auth, private-media and permission paths.
-4. Real hosted email delivery remains unverified; owner authorization for one
-   test code is requested separately. Optional inquiry email notification has no
-   configured Resend API key; the platform inquiry inbox is the launch channel.
-   Hosted email branding was not changed through the Auth guard.
-
-## Additional final-gate evidence
-
-- Container gate passed after a registry idle timeout: reproducible clean install,
-  production build, non-root runtime, 62 private-path traces and fail-closed startup.
-  A BuildKit package cache retains downloads; `npm ci` still verifies the lockfile.
-- Email-only production configuration regression tests pass. Email OTP is required;
-  disabling Google is accepted, disabling email OTP is rejected. Typecheck and
-  132-spec validation pass after this change.
-- Netlify initially rejected a scoped nonsecret flag creation with HTTP 403.
-  Readback proved no values changed; using its standard all-feature scope for
-  this nonsecret production flag succeeded, with unrelated values preserved.
-- Automatic approval review rejected a secret-bearing local build. The deployable
-  candidate uses the safer offline build from a clean source copy instead.
-
-Visual approval, deployment authorization and the exact private-backup approval
-are satisfied. Provider credential restoration remains outside this email-only
-launch; do not use hosted configuration push or broad Auth recovery.
+- Real hosted sign-in email delivery and authenticated hosted owner/admin smoke
+  remain unverified. The owner has been asked to authorize one test sign-in code;
+  no external email or inquiry was sent during this rollout. The full authenticated
+  workflows passed against isolated local providers, not a production inbox.
+- Optional inquiry email notifications lack a configured Resend API key. The
+  platform inquiry inbox is connected; do not claim notification delivery.
+- Hosted Auth email subject/template branding was not changed. DEP-029 requires
+  an exact reviewed plan before any narrow Auth configuration apply; provider
+  secrets require separately authorized dashboard work.
+- Fictional contacts were not applied to nonmatching businesses. Real owners must
+  provide and verify their own public and private contact information.
+- No custom domain or Preview provider environment was provisioned. A future
+  hosted Preview requires independent provider credentials.
+- `deno.lock` remains an unrelated untracked file. No Git push or remote CI run was
+  requested or performed; Netlify publication and the local release gates are verified.

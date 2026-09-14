@@ -1,7 +1,7 @@
 # Suqpage transition checklist
 
 Controlling contracts: FE-040, BE-032, DEP-030, ADR-0018.
-Last updated: 2026-09-14. Current step: D4 reviewed deployment packaging.
+Last updated: 2026-09-14. Current step: D5 hosted delivery follow-up; publication is complete.
 The owner explicitly approved the current visuals and authorized deployment on
 2026-09-14. S2l is implemented and focused-tested (BE-035/DEP-031). Full gates,
 reviewed packaging, verified hosted targets/backups, rollout and monitoring remain
@@ -19,11 +19,20 @@ Deployment sequence (operations, L3/L4; DEP-030/031):
   migrations. Actual private backup restore preserved all 50 original table
   fingerprints through 39–43. Email-only app flags are verified; DEP-029 still
   governs any provider-secret recovery separately.
-- [ ] D4. Current. Review and package only this transition's source; record scoped commit
-  and exact deployment artifact. Preserve unrelated changes and private files.
+- [x] D4. Review and package only this transition's source; record scoped commit
+  and exact deployment artifact. Source `41e2fed`, clean offline Netlify artifact
+  and privacy/hash checks are recorded in the deployment report. `deno.lock` is preserved.
 - [ ] D5. Apply verified additive migration, publish to the confirmed generated
   Netlify origin, smoke public/owner/admin/Auth/media/inquiries and monitor.
-  Retain prior deployment and compatible schema for rollback; no assumed DNS change.
+  Published `6aa7fe5a106ca381ba08bba3` at the verified generated origin; schema 43,
+  public desktop/phone workflows and access denial pass. Authenticated hosted
+  email delivery/owner/admin follow-up remains; local authenticated workflows pass.
+  Retain prior deployment and compatible schema; no DNS change.
+
+- [x] D6. Carry approved fictional demo contacts to exact hosted seed identities
+  after schema 43; fill missing fields only, preserve account emails and all real
+  values, verify matching page/account projections and public links. Transaction passed
+  for 64 exact matched pages and 47 seed accounts; all 64 live pages expose their email/phone links and omit private phone fields.
 
 ## Decisions
 

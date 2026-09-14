@@ -135,3 +135,12 @@ backup preserved 50 original table fingerprints through additive migrations
 publication and delivery monitoring remain pending. See
 `docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` for the current admission record; earlier
 local-only evidence above does not impose another visual approval gate.
+
+The contact rollout carries the previously approved fictional demo contact data
+into the exact hosted seed identities after schema 43. Match 66 allowlisted seed
+handles and 47 exact seed account emails, fill only empty public email/phone and
+private account-phone fields, and preserve every existing value and account email.
+Emails must end in example.com and phones remain within the reserved drama range.
+No owner publication may be overwritten. Verify exact before/after projections
+in one transaction; retain the protected pre-rollout data backup. This is a
+one-time reviewed demo operation, not a permanent synchronization service.
