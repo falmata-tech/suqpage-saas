@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./lib/platform-environment.mjs";
 import { NextResponse, type NextRequest } from "next/server";
 import { refreshSupabaseAuth } from "./lib/supabase-auth-proxy";
 
@@ -12,7 +13,7 @@ export async function proxy(request: NextRequest) {
       },
     });
   }
-  if (process.env.SUQPAGE_AUTH_DRIVER !== "supabase") return NextResponse.next({ request });
+  if (platformEnvironment().SUQPAGE_AUTH_DRIVER !== "supabase") return NextResponse.next({ request });
   return refreshSupabaseAuth(request);
 }
 

@@ -2,7 +2,7 @@
 id: FE-038
 title: Suqpage identity and passwordless account entry
 status: in_progress
-related: [BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
+related: [DEP-033, BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
 owners: [product, frontend, design, security]
 last_updated: 2026-09-12
 change_level: L3

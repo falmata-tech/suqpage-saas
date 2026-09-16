@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions";
@@ -9,6 +10,7 @@ import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 export const metadata = { title: "Set up your shop", description: "Add your shop and contact details to Suqpage." };
 
 export default async function RequestPage() {
+  await connection();
   const identity = supabaseAuthEnabled() ? await currentSupabaseProviderIdentity() : null;
   if (!identity) redirect("/login");
   if (identity.userId) redirect("/dashboard");

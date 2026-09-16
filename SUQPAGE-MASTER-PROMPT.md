@@ -801,7 +801,9 @@ Suqpage uses one identity-first entry surface for sign-in and account creation.
 The visitor enters an email and six-digit one-time code or continues with Google
 when that provider is configured. Passwords are not requested in the launch
 flow. Existing linked users continue to their permitted dashboard; verified but
-unlinked identities continue to protected business setup.
+unlinked identities continue to protected business setup. Login and setup resolve
+identity at request time, including when production is built without Auth settings;
+reopening either route cannot freeze an anonymous redirect (DEP-033).
 
 The owner approved an email-only production launch on 2026-09-14. Email-code
 entry is required; Google remains hidden until separately restored and verified.
@@ -944,7 +946,9 @@ operational disable switch, not a route back to the retired workflow.
 
 Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
 platform environment adapter accepts the earlier namespace only as a read fallback;
-explicit canonical settings, including empty or disabled values, win. New public
+explicit canonical settings, including empty or disabled values, win. The Auth
+proxy uses this same boundary, and server-side provider URL/key values are read
+at runtime so empty build-time settings cannot override them (DEP-033). New public
 assets and persisted browser state use Suqpage names. Exact asset rewrites (with
 matching Netlify CDN rules at the static publish root) and
 tenant-scoped cart/navigation migration preserve existing links and saved inquiries.
@@ -1319,6 +1323,11 @@ precedence, cookies, tenant-scoped saved state, asset targets and label-only dat
 migrations. Browser acceptance verifies a real saved-cart upgrade and bookmarked
 asset requests. Backup rehearsal compares preserved rows and expected standard-label
 changes before any hosted migration (BE-036/DEP-032).
+
+`npm run test:auth-entry-proxy` verifies legacy/canonical Auth-driver precedence
+and fail-closed cookie handling. Browser acceptance builds without Auth settings,
+asserts login/setup are dynamic, then supplies local provider settings only at
+runtime and exercises anonymous, unlinked, linked and logout transitions (DEP-033).
 
 A feature is not complete merely because the page renders.
 

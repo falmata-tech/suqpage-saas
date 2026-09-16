@@ -633,3 +633,19 @@ Current screenshots: `/tmp/suqpage-launch-review/`; local review URL:
 Explicit visual approval requested under AGENTS.md step 8. Full check/release,
 production browser, archive/operations, container and remote rollout evidence
 must remain unchecked until actually run and passed. No commit or deployment.
+
+
+## Email-entry redirect defect (DEP-033)
+
+- [x] R1. Inspect screenshot and production artifact: `/request` was prerendered
+  without build-time Auth settings, while runtime login redirects unlinked users
+  there. Identify missed legacy Auth-driver compatibility in the root proxy.
+- [x] R2. Make entry/onboarding request-time and normalize proxy configuration;
+  extend acceptance to build without Auth settings and revisit both entry routes.
+- [x] R3. Verify manifest, proxy precedence, real local email/identity transitions,
+  Auth/security/type/release gates; package without production credentials.
+  Evidence: full check/release, eight browser scenarios and 931 source-file
+  comparisons pass on 2026-09-16; both entry routes are dynamic.
+- [ ] R4. Commit scoped fix, publish under existing authorization, verify exact
+  deployment and live redirects, and record limits. No account-email changes,
+  provider configuration writes or messages to the user's mailbox are required.

@@ -2,7 +2,7 @@
 id: BE-036
 title: Suqpage names with persisted-state compatibility
 status: done
-related: [BE-035, FE-038, DEP-032, ADR-0021]
+related: [DEP-033, BE-035, FE-038, DEP-032, ADR-0021]
 owners: [backend, security, operations]
 last_updated: 2026-09-14
 change_level: L3

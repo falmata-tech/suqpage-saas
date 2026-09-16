@@ -71,8 +71,8 @@ export function authDriver() {
 export function supabaseAuthConfig() {
   const timeout = Number(platformEnvironment().SUQPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS || DEFAULT_AUTH_REQUEST_TIMEOUT_MS);
   return {
-    url: (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim().replace(/\/$/, ""),
-    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
+    url: (platformEnvironment().NEXT_PUBLIC_SUPABASE_URL || "").trim().replace(/\/$/, ""),
+    publishableKey: platformEnvironment().NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
     serviceRoleKey: platformEnvironment().SUQPAGE_SUPABASE_SERVICE_ROLE_KEY || "",
     emailOtpEnabled: platformEnvironment().SUQPAGE_EMAIL_OTP_ENABLED === "1",
     googleEnabled: platformEnvironment().SUQPAGE_GOOGLE_AUTH_ENABLED === "1",

@@ -2,7 +2,7 @@
 id: DEP-032
 title: Nonbreaking Suqpage namespace rollout
 status: done
-related: [BE-036, DEP-029, DEP-030, DEP-031, ADR-0021]
+related: [DEP-033, BE-036, DEP-029, DEP-030, DEP-031, ADR-0021]
 owners: [operations, security]
 last_updated: 2026-09-14
 change_level: L3

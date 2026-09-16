@@ -42,6 +42,10 @@ async function signOut(page: Page) { await page.getByRole("button", { name: "Sig
 test('passwordless signup, private account contacts and sign-out',async({page})=>{
   const email=`acceptance-${Date.now()}@example.test`;
   await loginWithEmailCode(page,email,/\/request$/);
+  // DEP-033: a credential-free build must not freeze the anonymous redirect.
+  await page.goto('/login'); await expect(page).toHaveURL(/\/request$/);
+  await expect(page.getByLabel('Your name',{exact:true})).toBeVisible();
+  await page.reload(); await expect(page).toHaveURL(/\/request$/);
   await page.getByLabel('Your name',{exact:true}).fill('Acceptance owner');
   await page.getByLabel('Name buyers will see',{exact:true}).fill('Acceptance signup shop');
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
@@ -53,6 +57,7 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
   await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save account phone',exact:true}).click();
   await page.reload();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
+  await page.goto('/request');await expect(page).toHaveURL(/\/dashboard$/);
   await signOut(page);await page.goto('/dashboard');await expect(page).toHaveURL(/\/login/);
 });
 

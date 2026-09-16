@@ -88,10 +88,10 @@ function prepareBrowserSupabaseProject() {
   );
 }
 
-function run(command, args, { capture = false, allowFailure = false } = {}) {
+function run(command, args, { capture = false, allowFailure = false, environment = env } = {}) {
   const result = spawnSync(command, args, {
     cwd: process.cwd(),
-    env,
+    env: environment,
     ...(capture ? { encoding: "utf8" } : { stdio: "inherit" }),
   });
   if (!allowFailure && result.status !== 0) {
@@ -160,7 +160,19 @@ try {
   run(process.execPath, ["--import", "tsx", "scripts/setup.ts"]);
   run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate-supabase-auth.ts", "--apply"]);
   run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate-media-to-object-storage.ts", "--execute"]);
-  run(process.execPath, ["node_modules/next/dist/bin/next", "build"]);
+  // Match deployment: provider configuration belongs to the runtime, not the build.
+  const buildEnv = { ...env };
+  const buildKeys = new Set(['SUQPAGE_NEXT_DIST_DIR', 'SUQPAGE_NEXT_TSCONFIG', 'SUQPAGE_SERVER_ACTION_ORIGINS', 'SUQPAGE_CANONICAL_URL']);
+  for (const key of Object.keys(buildEnv)) {
+    if (/^(?:SUQPAGE_|MIRTPAGE_|NEXT_PUBLIC_SUPABASE_)/.test(key) && !buildKeys.has(key)) buildEnv[key] = '';
+  }
+  buildEnv.PRIVACY_SALT = '';
+  buildEnv.RESEND_API_KEY = '';
+  run(process.execPath, ["node_modules/next/dist/bin/next", "build"], { environment: buildEnv });
+  const prerendered = JSON.parse(fs.readFileSync(path.join(buildOutputPath, 'prerender-manifest.json'), 'utf8')).routes;
+  for (const route of ['/login', '/request']) {
+    if (route in prerendered) throw new Error(`Auth route ${route} was incorrectly prerendered without runtime settings.`);
+  }
 
   app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port)], {
     cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"], detached: process.platform !== "win32",

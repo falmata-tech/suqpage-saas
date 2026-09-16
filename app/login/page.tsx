@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { googleLoginAction } from "@/app/actions";
@@ -7,6 +8,7 @@ import { supabaseAuthConfig, supabaseAuthEnabled } from "@/lib/config";
 import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
+  await connection();
   const managedAuth = supabaseAuthEnabled();
   const identity = managedAuth ? await currentSupabaseProviderIdentity() : null;
   if (identity) redirect(identity.userId ? "/dashboard" : "/request");
