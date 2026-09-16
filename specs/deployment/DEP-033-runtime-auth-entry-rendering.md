@@ -1,10 +1,10 @@
 ---
 id: DEP-033
 title: Request-time account entry after credential-free builds
-status: in_progress
+status: done
 related: [BE-031, BE-036, FE-038, DEP-032]
 owners: [backend, security, operations]
-last_updated: 2026-09-16
+last_updated: 2026-09-17
 change_level: L3
 ---
 
@@ -55,7 +55,7 @@ rollback; no database downgrade or provider configuration changes are needed.
 
 R1–R4 in the active checklist control packaging and the approved monitored rollout.
 
-## Verified implementation (2026-09-16)
+## Evidence: 2026-09-16 UTC
 
 `connection()` precedes identity/configuration decisions on both entry pages.
 The root proxy and server Auth configuration use the runtime environment adapter.
@@ -66,3 +66,13 @@ local Supabase, including unlinked reload and linked-account entry redirects in
 `tests/acceptance/app.spec.ts`. Full `npm run check` and `npm run release` pass. Production package
 privacy and exact source alignment pass. Final release/publication evidence is
 recorded in `docs/SUQPAGE-AUTH-ENTRY-FIX-2026-09-16.md`.
+
+Source `d47f1c1` is published as Netlify `6aab00e841e9a4687217be7d` and
+independently confirmed ready at `2026-09-16T20:59:19Z`. Live anonymous and invalid
+cookies produce private/no-store login 200 and setup 307-to-login responses.
+Authenticated hosted delivery remains an owner retry; automated identity flows
+used local Supabase/Mailpit. No hosted identity/configuration data was changed.
+
+Live desktop (1440px) and phone (390px) product/contact/progressive-inquiry
+checks, health, all 17 legacy asset byte comparisons, email-only entry and
+anonymous dashboard denial pass. No hosted message or inquiry was sent.

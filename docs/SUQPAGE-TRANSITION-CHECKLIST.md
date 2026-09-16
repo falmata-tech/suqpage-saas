@@ -646,6 +646,9 @@ must remain unchecked until actually run and passed. No commit or deployment.
   Auth/security/type/release gates; package without production credentials.
   Evidence: full check/release, eight browser scenarios and 931 source-file
   comparisons pass on 2026-09-16; both entry routes are dynamic.
-- [ ] R4. Commit scoped fix, publish under existing authorization, verify exact
+- [x] R4. Commit scoped fix, publish under existing authorization, verify exact
   deployment and live redirects, and record limits. No account-email changes,
   provider configuration writes or messages to the user's mailbox are required.
+  Evidence: source d47f1c1, Netlify 6aab00e841e9a4687217be7d confirmed ready;
+  live anonymous/invalid-cookie entry has private/no-store 307-to-login and 200
+  login responses. See docs/SUQPAGE-AUTH-ENTRY-FIX-2026-09-16.md for limits.

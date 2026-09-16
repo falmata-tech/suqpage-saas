@@ -20,7 +20,15 @@ supported legacy Auth-driver namespace with canonical settings taking precedence
   PostgreSQL/scale, type/security/workflow checks and zero production dependency
   vulnerabilities. Its provider smoke was satisfied by the complete separate
   browser suite above.
-- Production publication: pending final confirmation.
+- Source commit `d47f1c1`, published deployment `6aab00e841e9a4687217be7d`: CLI
+  succeeded and independent Netlify readback confirmed `ready` at
+  `2026-09-16T20:59:19Z`.
+- Live anonymous and invalid-cookie checks: `/request` returns 307 to `/login`,
+  login returns 200 with the email entry action, and both use private/no-store
+  caching. No redirect cycle or static anonymous setup response remains.
+- Live desktop (1440px) and phone (390px): contact links, product navigation and
+  progressive inquiry controls pass. Health, all 17 legacy asset byte comparisons,
+  email-only entry and anonymous dashboard denial pass. No inquiry was submitted.
 
 ## Rollout and recovery
 
@@ -30,8 +38,8 @@ Prior application deployment `6aa80f72843cbebe952f97df` is retained for rollback
 No database migration, account rewrite or hosted Auth configuration write is part
 of this fix. Schema 45 and existing provider settings remain in place.
 
-Hosted verification will inspect published deployment identity, anonymous entry
-redirects, invalid-cookie behavior and existing public routes/assets. Real OTP
+Hosted verification confirmed the exact published deployment, anonymous entry
+redirects and invalid-cookie behavior. Real OTP
 and authenticated workflows were exercised against the local provider; delivery
 to the owner's mailbox and their existing browser session require their retry.
 No message was sent to the reported address and its spelling was not changed.
