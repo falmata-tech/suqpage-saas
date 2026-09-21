@@ -1,10 +1,10 @@
 ---
 id: BE-041
 title: Owner publication and immediate location
-status: in_progress
+status: done
 related: [FE-048, DEP-038, BE-033, BE-038, BE-040]
 owners: [product, backend, operations]
-last_updated: 2026-09-20
+last_updated: 2026-09-21
 change_level: L3
 ---
 
@@ -124,3 +124,19 @@ Regression: scripts/test-self-service-publication.ts covers first publish withou
 an intervening location Save and all-word product/business search. Existing active
 Prairie Meadows is an exact local repair of its pending saved proposal with backup
 and unchanged page/product/account content; never a broad customer backfill.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

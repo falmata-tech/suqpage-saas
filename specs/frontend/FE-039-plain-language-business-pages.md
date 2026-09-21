@@ -4,7 +4,7 @@ title: Plain-language Suqpage pages and task-focused copy
 status: done
 related: [FE-044, FE-027, FE-036, FE-037, FE-038, BE-031, DEP-028]
 owners: [product, frontend, design, operations]
-last_updated: 2026-09-12
+last_updated: 2026-09-21
 change_level: L2
 ---
 
@@ -156,3 +156,19 @@ prefill, private category persistence without public classification, focused
 authenticated setup, separate page-project creation, current Suqpage page
 language, and responsive task copy. Approved desktop, 390px, and 320px form and
 public captures show no horizontal overflow.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

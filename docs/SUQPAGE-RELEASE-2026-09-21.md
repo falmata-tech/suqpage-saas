@@ -67,9 +67,11 @@ record exists in production; publishing application code does not copy local ten
 
 ## Rollout and rollback
 
-Scoped source commit, migrations, canonical application environment,
-Netlify publication and monitored public readback are still pending. Do not describe
-this document's candidate evidence as a completed application deployment.
+Source commit: `be134a247c8ea54b18b882f9e2368058f7fbc0ee`. Production schema 47 is
+verified, preserving all 55 original application tables/3,222 rows. Demo corrections and the three canonical application settings are verified.
+Netlify deployment `6ab0d349f099639821fa0f9a` is ready at https://suqpage.com. All 64 demo routes
+and desktop/phone live search pass, alongside public/entry/private-route and
+HTTPS redirect checks. The unrelated deno.lock remains untouched; no Git push occurred.
 
 Migration writes require the protected backup, successful rehearsal and final gates.
 Original table fingerprints must match across the additive upgrade. Demo operations
@@ -78,3 +80,29 @@ post-write preservation checks. Environment changes affect only the three canoni
 URL/origin variables. The previous Netlify deployment and environment values are
 retained privately before cutover. Reverting application code can retain additive
 schema 47; restoring data or Auth configuration is a separate reviewed operation.
+
+Migration verification note: the transaction committed successfully; the temporary
+CLI login then lacked SELECT outside its transaction-local role (42501). A separate
+read-only runtime transaction compared every original table fingerprint with the
+approved backup and verified the new schema and permissions. No migration retry,
+permission change or restore was performed.
+
+Production demo simplification completed: 64 businesses, 256 offerings including
+42 services, and 64 general-area location proposals. The transaction verified
+preservation of existing users, inquiries/items and all non-demo businesses/products.
+Names, prices, imagery and video references remain unchanged.
+
+Final live evidence: all 64 demo pages expose linked offerings and example contacts.
+Search for lotion, LOTION, body-lotion, lotions and a product/location phrase works
+on 1440/390/320, retaining category/type, newer typing, product Back and literal
+no-match behavior without horizontal overflow or browser JavaScript errors.
+Real external email delivery and authenticated hosted owner/admin sessions were
+not tested; local isolated provider workflows passed. Managed search, translation
+and arbitrary typo correction remain deferred.
+
+The contact/dashboard transaction completed for all 64 demos, adding 30 missing
+fictional owners, 58 sample inquiries and 34 sample support conversations. Existing
+accounts, products, inquiries and support were verified unchanged. No messages
+were sent. The first canonical-environment request was rejected with HTTP 400
+before any change; full unchanged readback preceded the corrected SDK-body request.
+All three canonical settings then passed exact readback with unrelated values intact.

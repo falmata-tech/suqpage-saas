@@ -664,8 +664,7 @@ must remain unchecked until actually run and passed. No commit or deployment.
 - [x] S7.3 Use universal offering copy/units and Africa-focused platform narrative;
   preserve map plus paginated results, Featured eligibility and tenant identity.
 - [x] S7.4 Focused data/security/type tests and desktop/390/320 review captures.
-- [ ] S7.5 CURRENT: after explicit visual approval: full check/release/browser, protected
-  migration rehearsal, scoped commit and approved monitored rollout.
+- [x] S7.5 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 ## S8 — Complete starter pages and simple Save (user request 2026-09-17)
 
@@ -696,8 +695,7 @@ Master sections affected by S7/S8: opening contract; 1–5 mission/audience/UI;
   storefront consent; no external geocoder/provider is introduced.
 - [x] S9.4 Focused lookup, forged-ID/coordinate, persistence and privacy tests;
   capture desktop/phone keyboard selection, save/reload and admin approval.
-- [ ] S9.5 After visual approval, include additive migration/recovery and release
-  evidence in the ongoing rollout. Master sections 13, 15, 21 and 22 are affected.
+- [x] S9.5 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 
 S7/S9 local evidence (2026-09-17): service and place migration/domain/security
@@ -723,7 +721,7 @@ are preserved. This does not resolve the separate Save/publication change.
   include original sample artwork and preserve repeat/tenant/data safety.
 - [x] S8a.3 Focused PostgreSQL/signup/invitation tests, typecheck and desktop/phone
   captures of fully populated editors, preview, save/reload and private denial.
-- [ ] S8a.4 CURRENT: explicit visual approval, full gates, scoped commit and rollout.
+- [x] S8a.4 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 Master sections affected: opening checkpoint, 2 current product identity, owner
 onboarding/editor descriptions. Real credentials, exact storefront, operational
@@ -798,8 +796,7 @@ limits and the still-separate visual/production rollout gates.
   matching and unchanged eligible paginated results (FE-047/BE-040).
 - [x] S10.4 Focused persistence/search/startup tests, typecheck, desktop/phone
   captures and accessibility; document implemented/tested limitations.
-- [ ] S10.5 Explicit owner visual approval, then full gates, scoped commit and
-  separately verified rollout. Earlier S7/S8/S9 gates remain pending.
+- [x] S10.5 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 S10 evidence (2026-09-19): focused startup/target guards, discovery and pagination,
 upkeep tenant/version/idempotency/metadata preservation, typecheck pass. Nineteen
@@ -824,7 +821,7 @@ FE-048 / BE-041 / DEP-038 supersede approval queues and five-field-only choice.
   IDs/media/inquiries/non-demo preservation; no hosted mutation in this step.
 - [x] S11.6 Focused integration/type/spec checks and desktop/phone/axe captures;
   document evidence and give local review URL. Do not treat S10 approval as given.
-- [ ] S11.7 CURRENT: visual approval, full/release/acceptance gates, scoped commit and rollout.
+- [x] S11.7 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 S11.4 includes the new city-offset request: deterministic, bounded display-only
 separation for area-mode shops; exact coordinates unchanged, stable across filters,
@@ -850,7 +847,7 @@ Controlling FE-023/BE-022/DEP-019 and FE-048/BE-041/DEP-038; master sections
   keep identities, inquiries, account contacts, non-demo pages and starter defaults.
 - [x] S12.4 Verify all admitted demos and representative public/Featured/dashboard
   browser flows, including inquiry handoff URLs without sending messages.
-- [ ] S12.5 CURRENT: local evidence presented; visual approval/full gates/commit/rollout pending.
+- [x] S12.5 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 S12 accepted input: use `@alhayabrand` even if not real; applied to four social
 usernames. Demo phone/email retained, WhatsApp uses demo phone, website example.com.
@@ -872,7 +869,7 @@ language, card/detail/feedback coverage, accessibility and regression defined.
 - [x] S13.2 clarify detail/card/review buttons and adjacent explanations.
 - [x] S13.3 Verify saved-list independence and no send-on-add at desktop/390/320;
   capture product/service states and run type/focused/spec checks.
-- [ ] S13.4 CURRENT: local review ready; visual/full gates/commit/rollout pending.
+- [x] S13.4 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 S13 evidence: `scripts/capture-inquiry-clarity.mjs` passes at 1440/390/320; nine
 captures in `.local/inquiry-clarity-review/`. Single inquiry contains only the third
@@ -927,7 +924,7 @@ Master sections 5/11/17 affected. Earlier review/rollout gates remain pending.
 - [x] S17.3 Complete branded templates/config/guard and focused regressions.
 - [x] S17.4 Verify local browser/templates, mail delivery and one-time code use;
   prepare exact hosted input patches. Saved CLI support tracked in S19.
-- [ ] S17.5 Visual approval, full gates, scoped commit and authorized hosted rollout.
+- [x] S17.5 Owner approved; full gates, scoped source commit and monitored rollout verified in S20.
 
 ## S18 — connect the owner's suqpage.com domain
 
@@ -957,7 +954,7 @@ DEP-029 protections. L3 non-visual operations adapter; master section 17 affecte
 - [x] Owner approved exact email plan/digest; guarded apply attempted once.
 - [x] Inspect readback: all 27 approved fields match; only 22 matching provider customization flags changed false→true. No credential/provider drift, retry or restore.
 - [x] Verify guard correction: 52 focused tests, typecheck and specs pass. Independent saved readback exactly matches approved fields plus predicted flags. Original attempt remains failed; no retry/restore.
-- [ ] CURRENT: review separate domain Auth plan and obtain direction before further hosted writes; app canonical deployment and prior visual/release gates remain.
+- [x] S20 owner approval resolved the separate Auth-domain plan; exact apply/readback and canonical application deployment are verified.
 
 ## S20 — finish and publish the reviewed release (2026-09-21)
 
@@ -974,9 +971,9 @@ Operations L4 under DEP-026/029/034/035/036/037/038; master section 17 affected.
 - [x] Full check, release, operations, artifact verification and all nine provider browser scenarios pass on the final candidate.
 - [x] Owner-approved private production backup completed; 56 tables restored,
   additive 46/47 rehearsed, all 3,222 application rows preserved; repeat migration no-op.
-- [ ] CURRENT: review/stage only accumulated Suqpage task files and commit passing release.
-- [ ] Apply verified migrations and canonical environment changes; deploy artifact.
-- [ ] Verify suqpage.com public/owner/admin routes, search, links, email entry,
+- [x] Reviewed/staged 198 declared task files; source commit be134a2. Unrelated deno.lock preserved.
+- [x] Schema 47, both exact demo corrections and canonical environment verified; published 6ab0d349f099639821fa0f9a.
+- [x] Verified suqpage.com public routes and anonymous owner/admin denial, search, links, email entry,
   HTTPS/redirects and health; retain rollout and rollback evidence.
 
 ### S20a — lotion category search regression
@@ -1036,3 +1033,31 @@ is bypassed; production migration/application publication remain pending.
 Final full check completed with actual process exit 0; all mandatory gate artifacts
 are successful and newer than the final search code. The approval-review concern
 is resolved through execution evidence. No production write has happened yet.
+
+Production migration committed 46/47; its post-commit SELECT used the temporary
+login outside SET LOCAL ROLE and failed with PostgreSQL 42501. No migration retry
+or restore occurred. Independent read-only reconciliation proves schema 47, all
+55 original application tables/3,222 rows unchanged against the approved archive,
+and unchanged runtime/anonymous permissions. The original failed attempt remains
+retained separately from successful reconciliation evidence.
+
+## Verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+Current handoff: S20 publication is complete. Earlier dated S2–S19 checkpoint
+notes retain history; their visual/commit/rollout dependencies are resolved by
+S20 where within this release. Real external email delivery and authenticated
+hosted owner/admin smoke remain admission checks, not claimed completed tests.

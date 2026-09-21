@@ -4,7 +4,7 @@ title: Tenant-scoped unified offering contract
 status: done
 related: [BE-037, BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, DEP-012]
 owners: [product, backend, security]
-last_updated: 2026-07-29
+last_updated: 2026-09-21
 change_level: L3
 ---
 
@@ -192,3 +192,19 @@ Evidence: verified locally on 2026-07-29.
   rollback.
 - `npm run check`, 10/10 browser acceptance, and `npm run release` passed on
   2026-07-29.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

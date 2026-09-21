@@ -4,7 +4,7 @@ title: Data-preserving Suqpage self-service rollout
 status: in_progress
 related: [DEP-036, DEP-034, DEP-032, DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034]
 owners: [operations, security, product]
-last_updated: 2026-09-14
+last_updated: 2026-09-21
 change_level: L3
 ---
 
@@ -144,3 +144,19 @@ Emails must end in example.com and phones remain within the reserved drama range
 No owner publication may be overwritten. Verify exact before/after projections
 in one transaction; retain the protected pre-rollout data backup. This is a
 one-time reviewed demo operation, not a permanent synchronization service.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

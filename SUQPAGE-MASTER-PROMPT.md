@@ -7,43 +7,27 @@
 ---
 
 
-Transition in progress (FE-042/BE-033, ADR-0019): the owner has retired custom-page
-requests and their design/revision workflow. Standard owner pages, direct business
-staff assignments and owner-controlled publication replace those live features. Category
-results gain five-row backend pagination. Implementation and verification are tracked
-in S2i/S2j; historical managed-workflow descriptions below are superseded, not approval
-to expose or extend those features. Historical data remains preserved.
+Current released product (FE-044–FE-048, BE-037–BE-041, DEP-034–DEP-038):
+Suqpage runs at https://suqpage.com on PostgreSQL schema 47. Standard owner pages,
+complete private starters, Product/Service posting, owner first Publish and live
+Save, immediate public location saves and five-row search results are deployed.
+Custom-page request/design/revision features are retired; historical data remains.
+The map separates approximate city markers while preserving explicit storefronts.
+Email-only sign-in and Suqpage email branding use the canonical domain; the owner's
+Gmail sender and credentials are preserved. www redirects to the apex.
 
-Local review checkpoint (FE-044/BE-037/DEP-034 and FE-045/BE-038/DEP-035):
-service offerings, inclusive African-business copy and canonical city/town selection
-are implemented and approved for release, with focused desktop/phone verification.
-Final rollout is tracked in S20. They are not
-part of the currently hosted schema-45 release. Schema 46 admits services; schema
-47 stores selected public place anchors separately from storefront coordinates.
-The retained local database is now on schema 47 after protected backup, verified
-restore and record-preservation checks (docs/SUQPAGE-LOCAL-SCHEMA-47.md); the
-hosted database remains on schema 45.
-Complete private starters for every new business are implemented locally under
-FE-046/BE-039/DEP-036 (S8a). Samples cover presentation fields and offerings while
-real account details remain separate. Focused signup/invitation, rollback and
-desktop/phone editor verification pass; the owner approved publication and final
-release verification is in progress.
-The local FE-048/BE-041/DEP-038 candidate supports owner first Publish and
-subsequent live Save without staff review, immediate location saves, Product/Service
-selection and stable approximate city markers. The 66 admitted local demo pages
-and 264 offerings have been simplified with a protected backup; customer identities,
-inquiries and non-demo content are preserved. The owner approved publication;
-final release verification is in progress, with no hosted data update implied.
+Production has 64 existing admitted demo pages and 256 simplified offerings,
+including 42 services. Local fixtures have 66 pages/264 offerings; local-only
+businesses are not copied to production. Demo contacts use the supplied example
+username alhayabrand, fictional phone/email and example.com; delivery is not implied.
+Existing accounts, inquiries and non-demo records are preserved. New private starter
+content is separate from the one-time correction of existing demos. Demos retain
+optional-price, scheduled Featured and sponsor examples rather than marking every
+business featured or claiming prerecorded video is live.
 
-Demo capability coverage (FE-023/BE-022/DEP-019, S12): all 66 local demos have
-complete public contact objects. Telegram, TikTok, Instagram and Facebook use the
-user-supplied example username alhayabrand; existence is not verified. Fictional
-public phone/email and example.com remain examples, with WhatsApp using the demo
-public phone. No delivery is implied. Existing accounts/inquiries remain intact;
-missing local demo owner accounts, sample inquiries and support history are filled.
-Real new-account starter defaults are separate. Demos retain one Ask for price
-example, five sponsors and scheduled Featured coverage rather than making every
-business sponsored or claiming prerecorded videos are live.
+The current release and its verified gates, backup, deployment and remaining
+real-email/hosted-session admission limits are recorded in
+`docs/SUQPAGE-RELEASE-2026-09-21.md`.
 
 ## 1. Your role
 
@@ -69,16 +53,16 @@ When a user gives an explicit instruction that conflicts with an older preferenc
 
 ## 2. Product identity
 
-### Current local candidate (FE-040–FE-042, BE-032/BE-033, DEP-030)
+### Current experience (FE-040–FE-042, BE-032/BE-033, DEP-030)
 
 One shared business profile uses each business's canonical catalog or current
-published owner profile. The local candidate serves product sellers and service providers
+published owner profile. The shared profile serves product sellers and service providers
 with a hero/video poster, one About, linked offerings and a separate contact section.
 Public and private account contacts remain separate. The current editor is enabled
 by default and supports saved drafts, private image uploads, consented staff help,
 owner first Publish, subsequent live Save and retained restore. The interactive preview
-cannot send inquiries or persist a visitor cart. New workspaces in the local
-FE-046/BE-039 candidate start with sample text, illustrations, video and public
+cannot send inquiries or persist a visitor cart. New workspaces under
+FE-046/BE-039 start with sample text, illustrations, video and public
 contacts, a general-area example and product/service offerings.
 Owners replace the examples; original account identity and existing pages stay intact.
 
@@ -88,15 +72,14 @@ records/assets and compatible catalog readers remain preserved. Historical asset
 briefs and visual evidence remain under showroom-projects/WORKFLOW.md; those files
 do not enable a custom-request application feature.
 
-Suqpage is deployed at the existing generated Netlify origin
-`https://africmade.netlify.app`. The 2026-09-14 release uses PostgreSQL schema 45
-and the approved email-only sign-in configuration. Core, release, operations,
-PostgreSQL, container, seven isolated production-browser scenarios and 72
-accessibility states pass. Live desktop/phone checks verify contact placement,
-linked products, retained-map pagination, email-only entry and private-route denial.
-`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` records the source commit, deployment,
-backup/recovery evidence and limits. Real hosted email delivery and authenticated
-owner/admin delivery smoke remain distinct from passing local workflows.
+Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
+The generated Netlify origin remains an infrastructure compatibility address.
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` and deployment `6ab0d349f099639821fa0f9a` use schema 47. Full check, release,
+operations, nine isolated provider browser scenarios and private-artifact checks
+pass. Live desktop/phone search, all 64 demo routes, linked offerings, email-only
+entry, private-route denial, HTTPS redirects and health are verified.
+Real hosted email delivery and authenticated hosted owner/admin sessions remain
+separate from passing local workflows. See `docs/SUQPAGE-RELEASE-2026-09-21.md`.
 
 The official product name is:
 
@@ -196,7 +179,7 @@ deliver for, or guarantee a listed participant.
 - a controlled SaaS pilot whose existing fictional Ethiopian catalog includes
   artisans, farms, workshops and small manufacturers. Product retailers and
   home sellers are eligible; additional retailer examples remain checklist S6.
-  The service candidate also admits repair and other service offerings. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
+  The offering contract also admits repair and other service offerings. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
 
@@ -492,10 +475,10 @@ authenticated unlinked identity then submits bounded owner name, business name,
 phone or WhatsApp, and a short description of what the business makes or
 supplies. The server derives identity from the Supabase session, generates a
 safe unique handle, and atomically creates the private draft business, owner,
-client access profile, identity link, and business onboarding record. The local
-FE-046/BE-039 candidate also creates a private saved profile, example location and
-three editable example offerings with media, prices, options and all public-contact
-fields filled. It accepts no public file upload and creates no public marker,
+client access profile, identity link, and business onboarding record.
+FE-046/BE-039 also creates a private saved profile, example location and
+three editable example offerings with names, descriptions, media and prices;
+all editable public-contact fields are filled. It accepts no public file upload and creates no public marker,
 Daily Featured card or public showroom.
 Standalone administrator-created account invitations remain supported. The legacy
 custom-page lead endpoint is retired. The homepage and request flow
@@ -815,14 +798,14 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ---
 
-The local candidate owner editor asks for Product or Service, image, name,
+The owner editor asks for Product or Service, image, name,
 optional YouTube URL, optional ETB price and one description (FE-048/BE-041).
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
 Fresh demo and starter offerings use the simple fields; useful old demo facts are
 included in descriptions. No automatic service inference or translation occurs.
-Visual approval and rollout remain pending.
+The owner approved this experience; release evidence is recorded in docs/SUQPAGE-RELEASE-2026-09-21.md.
 
 ## 10. Market discovery behavior
 
@@ -847,7 +830,7 @@ Default behavior:
   these controls inside the result list;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
-- the local candidate matches all meaningful query terms, in any order,
+- search matches all meaningful query terms, in any order,
   across one offering and its business name/handle/published About/public location.
   Case-insensitive matching handles Unicode, Latin accents, separator punctuation
   and simple English singular/plural alternatives. Common request words are ignored
@@ -857,7 +840,7 @@ Default behavior:
   matches without broadening geography. One-character queries can be submitted; punctuation-only input never expands to
   all listings. Delayed responses preserve newer typing and Back restores the query.
   PostgreSQL evaluates bounded term groups and count queries omit sorting; it does
-  not translate queries or analyze images/videos; rollout is pending;
+  not translate queries or analyze images/videos;
 - keep reviewed production-scale metadata
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
@@ -878,7 +861,7 @@ identity at request time, including when production is built without Auth settin
 reopening either route cannot freeze an anonymous redirect (DEP-033).
 
 The owner approved an email-only production launch on 2026-09-14. Email-code
-entry is required. The local S17 candidate also blocks Google initiation regardless
+entry is required. The email-only policy also blocks Google initiation regardless
 of retained environment flags, and local provisioning leaves Google disabled.
 Existing account identities and sessions are preserved. All six Auth email types
 and seven security notification templates have repository-owned Suqpage branding;
@@ -904,8 +887,8 @@ Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
   generic OTP responses, and managed Supabase identity;
 - derive provider UUID and email only from the verified server-side session;
 - commit the draft tenant, owner, access profile, immutable identity link, and
-  private onboarding profile in one transaction or roll back all of them; the local
-  FE-046/BE-039 candidate includes complete private starter content in that same
+  private onboarding profile in one transaction or roll back all of them;
+  FE-046/BE-039 includes complete private starter content in that same
   transaction for signup and standalone invitations;
 - reject browser-supplied identity, role, tenant, publication, location,
   industry, featured, media, password, or handle authority;
@@ -1102,7 +1085,7 @@ Security requirements are product requirements, not optional cleanup.
 - The account page shows the existing verified sign-in email and a separate private,
   unverified account phone. All roles can update or clear only their own phone;
   posted user IDs/email cannot change identity or another account. Signup records
-  the required account phone privately. In the local FE-046/BE-039 candidate, new
+  the required account phone privately. Under FE-046/BE-039, new
   private pages receive explicitly fictional public phone/email/WhatsApp examples
   independent of that identity, plus all other editable presentation defaults.
   Existing real accounts and intentionally cleared fields are not backfilled. Account phone is not a sign-in factor and is
@@ -1236,13 +1219,13 @@ database engine in application code, local development, fixtures, CI and deploym
 bootstrap. Unsupported database settings fail closed. Both `npm run dev` and
 `npm run dev:local` load the guarded local runtime file and validate PostgreSQL
 and local Auth/Storage before starting. Explicit loopback hostname/port options
-set the matching application origin. The local candidate launcher opens Docker
+set the matching application origin. The local launcher opens Docker
 Desktop on macOS when needed, resumes this project's local Supabase services and
 waits for PostgreSQL/Auth readiness with bounded timeouts (DEP-027). Existing local
 settings are still required. Startup never migrates, seeds, resets or changes
 hosted settings. Stopped engines on other operating systems require manual start.
 
-Native local-candidate schema 47 installs directly into empty PostgreSQL schemas, including taxonomy,
+Native schema 47 installs directly into empty PostgreSQL schemas, including taxonomy,
 schedule defaults, constraints, sequences and tenant triggers. Existing versioned
 schemas use additive/idempotent migrations. Unversioned populated schemas are refused.
 Each persistence fixture uses a disposable local PostgreSQL schema; trigger definitions
@@ -1262,12 +1245,12 @@ target digest and an empty recovery database. Auth and private Storage have sepa
 provider backup requirements. Neither a local test nor a digest grants hosted approval.
 
 Hosted Supabase PostgreSQL and Netlify operations are controlled by BE-027,
-DEP-023, DEP-026 and DEP-030. The current generated-origin deployment and private
+DEP-023, DEP-026 and DEP-030. The current canonical-domain deployment and private
 Storage are verified. Its additive migration preserved original table values,
 retained identities and least-privilege runtime access. Deploy Previews and
 Production must never share database, Auth, Storage or service-role credentials.
 Real hosted email delivery remains an admission check before broad public launch;
-no custom-domain or DNS change is implied by the generated-origin deployment.
+canonical-domain DNS, HTTPS, Auth URLs and application origins are verified.
 
 Before broad external rollout or multi-instance production scale, complete:
 
@@ -1307,7 +1290,7 @@ Rules:
 - allow for long Afaan Oromo strings without layout breakage;
 - do not claim a language is complete until all public UI states are translated and tested;
 - keep the dashboard English-first for the controlled MVP unless multilingual dashboard support is explicitly implemented;
-- local candidate search preserves Unicode content and matches written terms;
+- search preserves Unicode content and matches written terms;
   cross-language semantic matching is not implemented. No managed AI is configured.
 
 ---
@@ -1400,7 +1383,7 @@ structured inquiry, not online checkout.
 
 ## 22. Testing and definition of done
 
-The service/place candidate uses `test:service-offerings`, `test:place-selection`
+Service/place verification uses `test:service-offerings`, `test:place-selection`
 and `scripts/capture-service-place.ts` for additive migration, tenant/privacy,
 service inquiry and keyboard/mobile selection evidence. Its capture uses disposable
 PostgreSQL data and test-issued local sessions, not hosted provider delivery.
@@ -1570,5 +1553,5 @@ Protect that experience.
 Local archive maintenance under DEP-031 now fully parses custom archives without
 executing their SQL and restores only into approved empty targets. Empty namespace
 preparation never uses CASCADE; populated data is never replaced by this tool.
-Local schema 47 and its restore/preservation evidence are documented separately
-from the hosted schema-45 release.
+Local and hosted schema 47 restore/preservation evidence is recorded in
+`docs/SUQPAGE-LOCAL-SCHEMA-47.md` and `docs/SUQPAGE-RELEASE-2026-09-21.md`.

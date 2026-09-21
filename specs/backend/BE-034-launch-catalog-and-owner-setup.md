@@ -4,7 +4,7 @@ title: Launch catalog and owner setup integration
 status: in_progress
 related: [BE-039, BE-038, BE-037, BE-035, FE-043, BE-033, BE-032, BE-009, DEP-030]
 owners: [backend, security, operations]
-last_updated: 2026-09-14
+last_updated: 2026-09-21
 change_level: L3
 ---
 
@@ -63,3 +63,19 @@ setup/permission checks; owner/admin/public browser workflows and media manifest
 fixtures. Additive migration 43 follows protected local backup; rollback preserves
 schema/history. Full gates follow explicit visual approval. No hosted write,
 external notification, destructive reverse migration or production claim.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

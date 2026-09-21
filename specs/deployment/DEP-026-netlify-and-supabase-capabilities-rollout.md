@@ -4,7 +4,7 @@ title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
 related: [FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 owners: [deployment, operations, security]
-last_updated: 2026-08-27
+last_updated: 2026-09-21
 change_level: L4
 ---
 
@@ -163,3 +163,19 @@ than dual writing.
 - [x] Test and exact-commit evidence are planned
 - [x] Rollout and rollback are decided
 - [x] No unresolved decision changes launch preparation
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
