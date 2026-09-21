@@ -109,7 +109,7 @@ All three canonical settings then passed exact readback with unrelated values in
 
 ## S21: ranked spelling matches
 
-Implemented under BE-040, FE-042 and DEP-037; production rollout pending.
+Published under BE-040, FE-042 and DEP-037 at https://suqpage.com.
 Normal results precede approximate results in the existing list, including across
 product/business types and page boundaries. No new UI labels or sections.
 PostgreSQL pg_trgm supplies indexed candidates and similarity; fuzzystrmatch rejects
@@ -142,3 +142,23 @@ acceptance scenarios, final Netlify build and artifact privacy checks passed.
 Focused search tests and the final build include the per-business candidate bound.
 The initial staging build rejected a dependency symlink; a real copy resolved the
 build infrastructure issue. No product check was bypassed or weakened.
+
+The first hosted migration transaction rolled back completely when the verification
+script tried `SET ROLE mirtpage_runtime`. Read-only state showed schema 47 with
+neither new extension nor index; the provider error log confirmed the denied role
+switch. Verification was corrected to inspect privileges in the migration session
+and test the existing runtime connection separately, preserving the same migration
+and permission requirements. No role grants, restore, or configuration repair were
+used to bypass the restriction.
+
+Production migration 48 committed and was independently verified through the
+existing runtime connection, including Amharic similarity/edit-distance execution.
+All original application records were preserved. Netlify deploy
+`6ab0dfee5b7bbcd1cb221ce6` is ready and serves source commit
+`0fc10c0fb26d48cb19857af51c91b2e48e6c8085` on https://suqpage.com.
+Fifteen live route checks pass, covering exact/typo searches, public pages, health,
+email-only sign-in, protected entry redirects and the www-to-apex redirect.
+
+Live 1440/390/320 browser checks also pass for `lotoin`, `lotiom` and
+`body loton`, including visible results, type tabs, no extra match sections,
+no browser errors and no horizontal overflow.

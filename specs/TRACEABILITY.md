@@ -110,3 +110,13 @@ offerings. `capture-human-search.mjs` and `capture-spelling-search.mjs` pass at
 indexed data plus both search extensions. Production backup rehearsal preserves
 all 55 existing application tables / 3,596 records through migration 48.
 Full gates and hosted rollout are recorded separately in the release document.
+
+S21 rollout: migration 48 and the real production runtime connection verified;
+Netlify `6ab0dfee5b7bbcd1cb221ce6` serves `0fc10c0`. All full/release/operations
+and nine browser acceptance scenarios pass, along with 15 live route checks.
+The initial verification-only role-switch error rolled back completely; the
+corrected verifier uses permission inspection plus the real runtime connection.
+
+Live 1440/390/320 browser checks also pass for `lotoin`, `lotiom` and
+`body loton`, including visible results, type tabs, no extra match sections,
+no browser errors and no horizontal overflow.

@@ -1076,6 +1076,12 @@ untracked deno.lock remains outside this task. Master sections 10/17/22 affected
   measure index plans and 10,000-offering performance.
 - [x] Desktop/390/320 captures, full check, release/build/privacy/operations gates
   and nine provider-backed browser scenarios pass.
-- [ ] CURRENT: review/commit explicit task paths; production backup is protected
-  and rehearsal preserves all existing records.
-- [ ] Apply additive migration, publish, verify live searches/health, record evidence.
+- [x] Reviewed and committed explicit task paths as 0fc10c0; protected backup
+  and rehearsal preserve all existing records.
+- [x] Migration 48 and runtime checks passed; deploy 6ab0dfee5b7bbcd1cb221ce6
+  is ready on suqpage.com. Fifteen live route checks passed.
+
+S21 complete: hosted desktop/390/320 typo-search checks passed. Local development
+remains on 127.0.0.1:3102 with schema 48. Existing untracked deno.lock is preserved;
+no Git push was performed. No further search rollout steps remain. The documented
+external-email delivery limitations belong to the earlier release admission work.

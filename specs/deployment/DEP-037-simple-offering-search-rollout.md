@@ -1,7 +1,7 @@
 ---
 id: DEP-037
 title: Simple offering search rollout
-status: in_progress
+status: done
 related: [DEP-038, FE-047, BE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
@@ -116,3 +116,10 @@ Owner authorizes completing and publishing this exact search refinement.
 Typo candidates must also pass bounded word edit distance: one edit for words of
 up to five characters, two for longer words. This rejects shared fragments in
 unrelated words while permitting common adjacent-letter transpositions.
+
+S21 production evidence (2026-09-21): schema 48 committed, 55 existing application
+tables preserved, actual runtime role and Amharic functions verified. Netlify
+`6ab0dfee5b7bbcd1cb221ce6` is ready on suqpage.com from source `0fc10c0`.
+Full check/release/operations/nine browser scenarios and 15 live routes pass.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for rollback and the fully rolled-back initial
+verification-script failure. No Auth or credential changes were made.
