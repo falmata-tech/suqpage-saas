@@ -13,8 +13,9 @@ export function linkedProduct(catalog: Catalog, value: string | null): Product |
 export function inquiryEligible(product: Product): boolean {
   return Boolean(product.is_published) && ["available", "limited"].includes(product.availability);
 }
-export function productSellingUnit(product: Pick<Product, "quantity_unit">): string {
+export function productSellingUnit(product: Pick<Product, "quantity_unit"> & Partial<Pick<Product, "offering_kind">>): string {
   const unit = product.quantity_unit.trim();
+  if (product.offering_kind === "service") return unit ? `Per ${unit.replace(/^per\s+/i, "")}` : "";
   return /^(pieces?|pcs?|units?|each)$/i.test(unit) ? "By the piece" : /^bulk$/i.test(unit) ? "In bulk" : unit ? `Sold by ${unit}` : "";
 }
 export function selectionOptions(product: Product, raw: unknown): Record<string, string> | null {
@@ -55,7 +56,7 @@ export function buildInquiryMessage(business: Pick<Business, "name" | "handle">,
   return [`Hello ${business.name},`, "", "I'd like to ask about:", ...selections.flatMap((line, index) => [
     `${index + 1}. ${line.product.name}`,
     ...Object.entries(line.options).map(([name, value]) => `   ${name}: ${value}`),
-    ...(line.quantity.trim() ? [`   Quantity: ${line.quantity.trim()}`] : []),
+    ...(line.quantity.trim() ? [`   ${line.product.offering_kind === "service" ? "Request" : "Quantity"}: ${line.quantity.trim()}`] : []),
     `   ${origin}${productHref(business.handle, line.product.id)}`,
   ]), "", "Please confirm availability and the next steps."].join("\n");
 }

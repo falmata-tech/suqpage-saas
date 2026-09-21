@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import { initializeBusinessStarter } from './business-starter-postgres';
+import { postgresRuntimeServices } from './postgres-runtime-services';
 import crypto from "node:crypto";
 import { isStrongPassword } from "./passwords";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
@@ -58,6 +60,7 @@ export async function createClientInvitation(raw: CreateInvitationInput, options
     }
     const inserted = await runtimeGet<{ id: number }>("INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,site_title) VALUES(?,?,'composition',?,'draft',?) RETURNING id", [handle, businessName, designManifestJson, businessName]);
     const businessId = Number(inserted!.id);
+    await initializeBusinessStarter(postgresRuntimeServices().runner, { businessId, actorUserId: raw.actorUserId, category: 'other-manufacturing', notificationEmail: email });
     await runtimeRun("UPDATE client_invitations SET revoked_at=? WHERE business_id=? AND accepted_at IS NULL AND revoked_at IS NULL", [now, businessId]);
     const invitation = await runtimeGet<{ id: number }>(`
       INSERT INTO client_invitations(request_id,business_id,email,name,token_hash,expires_at,created_by_user_id,created_at)

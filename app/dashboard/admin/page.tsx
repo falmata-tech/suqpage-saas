@@ -36,20 +36,12 @@ export default async function AdminOverview({
   const counts = await getPlatformCounts();
   const attention = await getDashboardAttention(user);
   const destinations = [
-    {href:"/dashboard/admin/businesses?location=pending",label:"Location reviews",value:attention.locationReviews||0,detail:"Owner locations awaiting marketplace approval",icon:Building2},
     {
       href: "/dashboard/admin/businesses",
       label: "Businesses",
       value: counts.businesses,
-      detail: `${attention.newAccounts || 0} draft account${attention.newAccounts === 1 ? "" : "s"} need review`,
+      detail: `${attention.newAccounts || 0} draft account${attention.newAccounts === 1 ? "" : "s"} being set up`,
       icon: Building2,
-    },
-    {
-      href: "/dashboard/admin/page-reviews",
-      label: "Page reviews",
-      value: attention.pageReviews,
-      detail: "Owner submissions awaiting first publication",
-      icon: ClipboardList,
     },
     {
       href: "/dashboard/support",
@@ -86,8 +78,7 @@ export default async function AdminOverview({
       <div className="dashboard-head admin-overview-head">
         <div>
           <span className="eyebrow">Platform overview</span>
-          <h1>Good afternoon.</h1>
-          <p>Start with work that needs a decision, then move into the relevant queue.</p>
+          <h1>Suqpage administration</h1>
         </div>
         <Link className="btn brand" href="/dashboard/clients/new">Add business</Link>
       </div>
@@ -103,7 +94,7 @@ export default async function AdminOverview({
       <section className="admin-quick-actions" aria-labelledby="admin-quick-title">
         <div><span className="eyebrow">Common actions</span><h2 id="admin-quick-title">Keep work moving</h2></div>
         <div>
-          <Link className="small-btn" href="/dashboard/admin/page-reviews">Review new pages</Link>
+          <Link className="small-btn" href="/dashboard/admin/businesses">Manage businesses</Link>
           <Link className="small-btn" href="/dashboard/support/agents">Manage support capacity</Link>
           <Link className="small-btn" href="/dashboard/account-health">Review monthly accounts</Link>
         </div>

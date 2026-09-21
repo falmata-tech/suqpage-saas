@@ -2,7 +2,7 @@
 id: FE-038
 title: Suqpage identity and passwordless account entry
 status: in_progress
-related: [DEP-033, BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
+related: [FE-046, DEP-033, BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
 owners: [product, frontend, design, security]
 last_updated: 2026-09-12
 change_level: L3
@@ -12,11 +12,11 @@ change_level: L3
 
 ## Problem and outcome
 
-The launch candidate still presents the retired Suqpage name, mark, teal/navy
-palette, and password-first signup. The supplied Suqpage direction establishes
+The launch candidate needs consistent Suqpage identity and email-only entry.
+The supplied Suqpage direction establishes
 an Africa-pin mark, a lower-case two-color wordmark, and a crisp orange,
 charcoal, gray, and white platform system. Account entry must ask only for an
-email code or Google identity; business details belong to a protected onboarding
+email code; business details belong to a protected onboarding
 step after authentication.
 
 The outcome is one coherent Suqpage identity across public, showroom-host,
@@ -31,7 +31,7 @@ flow and a separate authenticated business setup.
   metadata, public copy, workspace chrome, and showroom host provenance.
 - One semantic platform palette based on safety orange, near-black charcoal,
   middle gray, soft gray, and white with derived accessible states.
-- One account entry page for email OTP or Google, with explicit code-entry,
+- One account entry page for email OTP, with explicit code-entry,
   resend, error, loading, and recovery states.
 - An authenticated business-onboarding page that collects business details only
   after identity verification.
@@ -49,21 +49,19 @@ flow and a separate authenticated business setup.
 ## Domain language and invariants
 
 - The product name is **Suqpage** in prose. The visual wordmark renders
-  lower-case **suqpage**, with `afric` in charcoal and `made` in orange.
+  lower-case **suqpage**, with `suq` in charcoal and `page` in orange.
 - Platform-owned UI uses Suqpage tokens; tenant renderers continue to use
   their approved independent palettes.
 - **Sign in** and **Create account** are one identity step. New-user business
-  setup begins only after Supabase verifies an email OTP or Google identity.
+  setup begins only after Supabase verifies an email OTP.
 - Color is never the sole state indicator, and the orange action color must
   retain readable text and visible focus treatment.
 
 ## Contracts
 
-- Account entry initially asks only for email and offers **Continue with
-  Google** when the provider is configured.
+- Account entry asks only for email; Google initiation is disabled.
 - Account entry never exposes rollout or launch-placeholder language. Production
-  configuration requires verified email-code entry; Google is optional and is
-  hidden when disabled. The owner approved an email-only launch on 2026-09-14.
+  configuration requires verified email-code entry; Google is disabled. The owner approved an email-only launch on 2026-09-14.
   A misconfigured non-production
   environment shows one concise temporary-unavailability status instead of a
   control that cannot work.
@@ -76,11 +74,11 @@ flow and a separate authenticated business setup.
 - Successful verification routes a linked user to the dashboard and an
   authenticated but unlinked user to business setup.
 - Business setup asks for owner name, business name, private account phone, and one
-  bounded private business category. A safe Google display name is prefilled
+  bounded private business category. A safe retained provider display name is prefilled
   when available and remains editable. A safe unique public-page handle is
   generated server-side and can be changed later in business settings.
 - Public and workspace navigation use Suqpage labels and assets without
-  exposing retired Suqpage wording.
+  exposing retired platform wording.
 - Public navigation resolves the linked application session on the server:
   anonymous visitors see **Sign in**, while authenticated linked clients see
   **Dashboard** and no competing sign-in action.
@@ -136,14 +134,14 @@ contact data, tokens, cookies, or onboarding request text.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Shared identity and no retired public wording | focused | `scripts/test-platform-identity.mjs` |
-| Email-code and Google entry states | browser/security | `tests/acceptance/app.spec.ts`, focused auth tests |
+| Email-code entry and Google-initiation denial | browser/security | `tests/acceptance/app.spec.ts`, focused auth tests |
 | Phone and desktop composition | browser/visual | `scripts/capture-platform-form-visuals.mjs` |
 | Tenant showroom identity remains independent | integration | `scripts/test-showroom-renderer.ts` |
 | Accessible fields, statuses, focus, and overflow | browser/accessibility | `scripts/test-accessibility-audit.mjs` |
 
 ## Rollout and rollback
 
-Ship behind managed Supabase Auth after SMTP and Google provider smoke evidence.
+Ship behind managed Supabase Auth after email delivery and Google-denial evidence.
 The current Suqpage Netlify deployment remains rollback until Suqpage entry,
 onboarding, workspace, PWA, and representative showroom flows pass. Rollback
 restores the previous deployment; no tenant data is rewritten by the visual
@@ -170,4 +168,40 @@ Google consent/code exchange and the new Suqpage Netlify deployment remain
 rollout gates under DEP-028.
 
 S2g contact separation (BE-032/FE-040): signup phone is private users.account_phone;
-public business contacts and WhatsApp begin empty. Verified account email is retained.
+verified account email is retained. FE-046/BE-039 supersede the empty public
+contact default for NEW private workspaces in the local candidate with explicitly
+fictional editable contact examples, independent of real account identity. Existing
+records and cleared fields remain unchanged; hosted rollout is pending.
+
+## One platform favicon — 2026-09-20 (S14)
+
+GIVEN any Suqpage route, including a business page, linked product or private
+workspace WHEN browser metadata resolves on load or client navigation THEN its
+favicon and Apple touch icon inherit the main Suqpage root metadata. Business
+logos and retained favicon fields must not override browser icons. Business title,
+description, sharing image and on-page logo remain business-specific. Remove the
+obsolete business Browser icon upload control; preserve existing stored assets.
+No migration or account-data change. Verify resolved DOM icon URLs across home,
+business/product, Featured, login and dashboard navigation, plus typecheck and
+existing PWA asset checks. Master section 18 and S14 describe this platform rule.
+
+## Email-only entry and complete email branding — S17
+
+The newest instruction supersedes optional Google entry above. GIVEN any runtime,
+including retained Google credentials or an old enabled flag, WHEN a visitor opens
+sign-in or invokes the old Google action THEN email code is the only offered entry
+and no new Google authorization request is made. Retained identities/sessions remain
+valid. Account settings describe email sign-in without provider implementation copy.
+
+All six Auth email types and seven security notification templates use Suqpage
+subjects and branding. Signup and sign-in remain code-only. Other templates preserve
+their appropriate provider token/link semantics; recovery directs users to email-code
+entry, as no password-reset UI is exposed. Preparing their branding does not
+enable password, phone, OAuth or notification features. Sender display name is
+Suqpage; verified sender address and credentials are preserved. Live hostnames,
+compatibility aliases and tenant content are not blindly rewritten.
+
+Test: focused email-only runtime/Google-start denial, template manifest/content and
+guard tests, local login plus template desktop/phone captures. Hosted configuration
+requires verified access, a protected read-only plan and exact reviewed apply under
+DEP-029. No hosted access or delivery is presumed from local source checks.

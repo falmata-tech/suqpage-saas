@@ -35,7 +35,6 @@ export default async function SettingsPage({
         <div className="field full settings-section-heading"><span className="eyebrow">Identity</span><h2>Business identity</h2></div>
         <div className="field"><label>Business name</label><input aria-label="Business name" required name="name" defaultValue={business.name} /></div>
         <div className="field settings-media-field"><label>Logo</label>{business.logo_path ? <img src={business.logo_path} alt="Current business logo" /> : <div className="settings-media-empty">No logo uploaded</div>}<input aria-label="Replace logo" type="file" name="logo" accept="image/jpeg,image/png,image/webp" /></div>
-        <div className="field settings-media-field"><label>Browser icon</label>{business.favicon_path ? <img src={business.favicon_path} alt="Current browser icon" /> : <div className="settings-media-empty">No browser icon uploaded</div>}<input aria-label="Replace browser icon" type="file" name="favicon" accept="image/jpeg,image/png,image/webp" /></div>
         <div className="field full settings-section-heading"><span className="eyebrow">Contact</span><h2>Buyer contact routes</h2></div>
         <div className="field"><label>Notification email</label><input aria-label="Notification email" type="email" name="contactEmail" defaultValue={business.contact_email} /></div>
         <div className="field"><label>WhatsApp</label><input aria-label="WhatsApp" name="whatsapp" defaultValue={business.whatsapp} placeholder="251911234567" /></div>

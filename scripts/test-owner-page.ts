@@ -47,7 +47,7 @@ function fakePublications() {
   const port: PagePublicationPort = {
     latest: async () => history.at(-1) || null,
     previous: async (_businessId, revision) => history.findLast((entry) => entry.revision < revision) || null,
-    active: async () => active,
+    publishable: async () => active,
     commit: async (actor, draft, revision, selected, action) => {
       if (revision !== history.length) return null;
       const published = { businessId: draft.businessId, revision: revision + 1,

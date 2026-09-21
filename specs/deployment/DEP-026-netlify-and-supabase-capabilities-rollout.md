@@ -18,6 +18,19 @@ turning every free service into an unconditional runtime dependency.
 
 ## Named topology
 
+S18 domain preparation (2026-09-21): owner confirms ownership and completed GoDaddy
+DNS for `suqpage.com`, with apex primary and `www` redirect. Alias-only association
+was rejected without mutation because Netlify requires a primary domain first.
+Register exactly `custom_domain: suqpage.com` and alias `www.suqpage.com` on the
+independently verified existing Netlify site, preserving deploy and environment.
+Retain protected before-state and verify readback. Public DNS now resolves apex
+to 75.2.60.5 and www to the existing generated Netlify host. Preserve NS, email and
+unrelated records. No DNS write by the agent. Provision managed TLS for these hosts.
+Canonical cutover requires DNS/TLS verification and a separately reviewed DEP-029
+Auth plan; missing provider access blocks that step, not a broad config fallback.
+Rollback requires a reviewed restoration of the recorded primary/aliases and DNS
+values. Do not present sign-in as ready until routing, HTTPS and email entry pass.
+
 - Application candidate: Netlify Next.js/OpenNext with Node 24.
 - Canonical data: existing Supabase PostgreSQL transaction pooler.
 - Media: existing private Supabase Storage bucket through BE-024.

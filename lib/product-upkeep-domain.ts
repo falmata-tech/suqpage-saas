@@ -18,6 +18,7 @@ export type ProductImageAction = "keep" | "remove" | "replace";
 export type ProductOptionInput = { name: string; values: string[] };
 
 export type BasicProductCommand = {
+  preserveMetadata?: boolean;
   optionGroups?: ProductOptionInput[];
   isPublished?: boolean;
   kind: ProductUpkeepKind;
@@ -53,6 +54,7 @@ export class ProductUpkeepError extends Error {
 }
 
 const commandKeys = new Set([
+  "preserveMetadata",
   "optionGroups",
   "isPublished",
   "kind",
@@ -138,6 +140,7 @@ export function parseBasicProductCommand(
       "unsupported_fields",
     );
   }
+  if (raw.preserveMetadata !== undefined && typeof raw.preserveMetadata !== "boolean") throw new ProductUpkeepError("Invalid metadata policy.");
   const kind = raw.kind;
   if (kind !== "create" && kind !== "update") {
     throw new ProductUpkeepError("Choose a valid product action.");
@@ -191,6 +194,7 @@ export function parseBasicProductCommand(
   }
   if (raw.isPublished !== undefined && typeof raw.isPublished !== "boolean") throw new ProductUpkeepError("Choose listed or hidden visibility.");
   return {
+    ...(raw.preserveMetadata !== undefined ? { preserveMetadata: raw.preserveMetadata as boolean } : {}),
     ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
     ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
     kind,

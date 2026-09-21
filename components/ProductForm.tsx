@@ -74,7 +74,7 @@ export default function ProductForm({
       ) : null}
 
       <div className="field full">
-        <label htmlFor="product-name">Product name</label>
+        <label htmlFor="product-name">Name</label>
         <input
           id="product-name"
           name="name"
@@ -84,7 +84,6 @@ export default function ProductForm({
           onChange={(event) => setName(event.target.value)}
           autoComplete="off"
         />
-        <small>Name the product, made-to-order work, supply, or capability exactly as customers should see it.</small>
       </div>
 
       <div className="field">
@@ -99,11 +98,11 @@ export default function ProductForm({
           inputMode="decimal"
           value={price}
           onChange={(event) => setPrice(event.target.value)}
-          placeholder="Example: 1250"
+          placeholder="1250"
         />
-        <small>Informational only. Suqpage does not collect payment.</small>
       </div>
 
+      {staffMode ? <>
       <div className="field">
         <label htmlFor="product-unit">Offered by <span className="optional">(optional)</span></label>
         <input
@@ -112,7 +111,7 @@ export default function ProductForm({
           maxLength={40}
           value={quantityUnit}
           onChange={(event) => setQuantityUnit(event.target.value)}
-          placeholder="Example: kg, piece, set, tonne, or project"
+          placeholder="Example: piece, kg, hour, session or project"
         />
       </div>
 
@@ -129,8 +128,10 @@ export default function ProductForm({
         <small>Up to six highlights, each 80 characters or fewer.</small>
       </div>
 
+      </> : null}
+
       <div className="field full">
-        <label htmlFor="product-video">Product YouTube video <span className="optional">(optional)</span></label>
+        <label htmlFor="product-video">YouTube video <span className="optional">(optional)</span></label>
         <input
           id="product-video"
           name="videoUrl"
@@ -139,9 +140,10 @@ export default function ProductForm({
           defaultValue={productVideoUrl(product)}
           placeholder="https://www.youtube.com/watch?v=..."
         />
-        <small>Use a standard YouTube watch or share link.</small>
       </div>
 
+      {!staffMode ? <div className="field"><label htmlFor="product-type">What do you offer?</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">Product</option><option value="service">Service</option></select></div> : null}
+      {staffMode ? <>
       <div className="field">
         <label htmlFor="product-offering-kind">Offering type</label>
         <select
@@ -163,6 +165,8 @@ export default function ProductForm({
         <small>Buyers may add a quantity to their inquiry or leave it open for discussion.</small>
       </div>
 
+      </> : null}
+
       <div className="field full">
         <label htmlFor="product-description">Description</label>
         <textarea
@@ -175,6 +179,7 @@ export default function ProductForm({
         />
       </div>
 
+      {staffMode ? <>
       <div className="field"><label htmlFor="product-visibility">Visibility</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">Listed on my page</option><option value="0">Hidden from buyers</option></select><small>Your business must be published before buyers can see listed products.</small></div>
       <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
 
@@ -195,7 +200,6 @@ export default function ProductForm({
           <option value="unavailable">Unavailable</option>
           <option value="coming_soon">Coming soon</option>
         </select>
-        <small>No inventory count is stored.</small>
       </div>
 
       <div className="field">
@@ -212,8 +216,9 @@ export default function ProductForm({
             </option>
           ))}
         </select>
-        <small>Only categories for this business are shown.</small>
       </div>
+
+      </> : null}
 
       <div className="field">
         <label htmlFor="product-image">Primary image</label>
@@ -274,8 +279,7 @@ export default function ProductForm({
             maxLength={300}
             placeholder="Example: Updated for the client during a support call"
           />
-          <small>This records why a team member changed client content.</small>
-        </div>
+          </div>
       ) : null}
 
       <aside className="field full product-upkeep-preview" aria-live="polite">
@@ -290,26 +294,18 @@ export default function ProductForm({
           <span className={`badge ${availability}`}>
             {availabilityLabel(offeringKind, availability)}
           </span>
-          <small>{offeringKindLabels[offeringKind]}</small>
-          <strong>{name || "Product name preview"}</strong>
-          <p>{description || "The product description will appear here."}</p>
+          {staffMode ? <small>{offeringKindLabels[offeringKind]}</small> : null}
+          <strong>{name || "Name preview"}</strong>
+          {description ? <p>{description}</p> : null}
           {price ? <strong>ETB {price}</strong> : null}
           {quantityUnit ? <p>Offered by {quantityUnit}</p> : null}
           {highlights.trim() ? <ul className="product-upkeep-facts">{highlights.split(/\r?\n/).filter(Boolean).slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul> : null}
         </div>
       </aside>
 
-      <div className="field full product-upkeep-explainer">
-        <strong>Save your product details.</strong>
-        <span>
-          Listed products update on your published page. Hidden products stay private;
-          your earlier catalog versions are retained.
-        </span>
-      </div>
-
       <div className="field full">
         <button className="btn brand" type="submit">
-          {product ? "Save product" : "Add product"}
+          {product ? "Save changes" : "Add item"}
         </button>
       </div>
     </form>

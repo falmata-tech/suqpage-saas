@@ -103,6 +103,7 @@ const mobileLabels: Record<string, string> = {
   "Business details": "Details",
   "Customer inquiries": "Inquiries",
   "My offerings": "Offerings",
+  "Products & services": "Items",
   "Platform overview": "Overview",
   "Page project": "Page",
   "Your page": "Page",

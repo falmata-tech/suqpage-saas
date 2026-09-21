@@ -1,6 +1,7 @@
 "use client";
 
 import Supercluster from "supercluster";
+import { mapDisplayLocation } from "@/lib/map-display-location";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import type { DiscoveryNearbyGroup, DiscoveryShowroom } from "@/lib/discovery";
@@ -96,7 +97,7 @@ function presenceFor(showroom: DiscoveryShowroom, featuredNowBusinessId: number 
 }
 
 const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>(function MarketplaceMap({
-  showrooms,
+  showrooms: sourceShowrooms,
   nearbyGroups,
   featuredNowBusinessId,
   selectedShowroomId,
@@ -106,6 +107,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
   onSelectShowroom,
   onError,
 }, forwardedRef) {
+  const showrooms = useMemo(() => sourceShowrooms.map(mapDisplayLocation), [sourceShowrooms]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const tileLayerRef = useRef<TileLayer | null>(null);
@@ -153,7 +155,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     zoomIn() { mapRef.current?.zoomIn(); },
     zoomOut() { mapRef.current?.zoomOut(); },
     reset() { mapRef.current?.fitBounds(ETHIOPIA_BOUNDS, { animate: true, padding: [12, 12] }); },
-    centerAt(latitude, longitude, zoom = 12) { mapRef.current?.setView([latitude, longitude], zoom, { animate: true }); },
+    centerAt(latitude, longitude, zoom = 12) { mapRef.current?.setView([latitude, longitude], Math.max(zoom, mapRef.current.getZoom()), { animate: true }); },
     getView() {
       const map = mapRef.current;
       if (!map) return { center: ETHIOPIA_CENTER, zoom: DEFAULT_ZOOM };
@@ -302,7 +304,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
                 alt: `${feature.properties.point_count} nearby pages. Zoom to reveal.`,
               }).on("click", () => {
                 const expansionZoom = clusterIndexRef.current.getClusterExpansionZoom(clusterId);
-                map?.setView([latitude, longitude], Math.min(expansionZoom, NEARBY_GROUP_ZOOM), { animate: true });
+                map?.setView([latitude, longitude], Math.min(Math.max(zoom + 1, expansionZoom), NEARBY_GROUP_ZOOM), { animate: true });
               });
               addMarker(marker, `${feature.properties.point_count} nearby pages. Zoom to reveal.`);
               continue;
@@ -327,11 +329,10 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             }).on("click", () => {
               if ((map?.getZoom() || 0) < SHOWROOM_DETAIL_ZOOM) {
                 map?.setView([latitude, longitude], SHOWROOM_DETAIL_ZOOM, { animate: true });
-              } else {
-                callbackRef.current.onSelectShowroom(showroom);
               }
+              callbackRef.current.onSelectShowroom(showroom);
             });
-            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. ${zoom < SHOWROOM_DETAIL_ZOOM ? "Zoom to location." : "Open page preview."}`);
+            addMarker(marker, `${showroom.name}, ${showroom.primaryIndustryLabel}, ${showroom.city}. ${showroom.locationMode === "area" ? "Approximate city area. " : ""}Open page preview.`);
           }
         }
 

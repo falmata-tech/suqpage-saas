@@ -11,6 +11,7 @@ async function main() {
     try {
         const db = await getDb();
         const adminId = Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('invite-admin@example.test','unused','Admin','admin')").run()).insertedId);
+        await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'platform_admin')").run(adminId);
         const input = { requestId: null, clientName: 'Invited owner', email: 'owner@example.test', businessName: 'Invited shop', handle: 'invited-shop', designKey: 'novatech', actorUserId: adminId };
         const now = 1000000;
         const count = async () => (await db.prepare('SELECT COUNT(*) n FROM service_requests').get() as {

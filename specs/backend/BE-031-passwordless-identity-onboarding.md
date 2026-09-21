@@ -2,7 +2,7 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-09-12
 change_level: L3
@@ -12,12 +12,17 @@ change_level: L3
 
 ## Problem and outcome
 
+S17 (2026-09-20) supersedes optional Google initiation: app policy disables new Google
+authorization even with retained enabled environment flags. Existing identity links,
+sessions and callback compatibility remain; email OTP verification is unchanged.
+FE-038 defines all Auth/security-email branding and local/hosted boundaries.
+
 The existing public bootstrap combines identity creation, password selection,
 contact details, handle choice, and showroom briefing in one unauthenticated
 transaction. Suqpage needs a lower-friction identity-first model without
 allowing an unlinked Supabase account to invent a role or tenant.
 
-Supabase verifies email OTP or Google first. PostgreSQL then atomically creates
+Supabase verifies email OTP first. PostgreSQL then atomically creates
 the private business, application user, client access profile, immutable
 identity link, and private onboarding profile from a separately authenticated
 command. Creating a public business-page project is a later deliberate action.
@@ -27,7 +32,7 @@ command. Creating a public business-page project is a later deliberate action.
 ### In scope
 
 - Bounded email-OTP request and verification adapters using Supabase Auth.
-- Google OAuth callback support for linked and new identities.
+- Retained OAuth callback compatibility; new Google initiation is disabled.
 - Read access to the current provider identity without granting application
   authorization.
 - Authenticated, idempotent business bootstrap for an unlinked identity.
@@ -78,7 +83,9 @@ command. Creating a public business-page project is a later deliberate action.
   managed-identity password sentinel; no human password is collected or
   recoverable.
 - The onboarding command does not create a service request, design revision,
-  public category, map point, featured placement, offering, or publication.
+  public category, map point, featured placement or publication. The local BE-039
+  candidate adds a saved private profile and three complete sample offerings,
+  contacts and a private example location in the same transaction.
 - If the database transaction fails, the provider identity remains unlinked so
   the authenticated user can retry. No compensating deletion is attempted.
 - Linked suspended or inactive users fail closed according to the existing
@@ -164,4 +171,7 @@ consent/code exchange and production delivery smoke remain rollout gates under
 DEP-028, so this spec remains in progress.
 
 S2g contact separation (BE-032/FE-040): signup phone is private users.account_phone;
-public business contacts and WhatsApp begin empty. Verified account email is retained.
+verified account email is retained. FE-046/BE-039 supersede the empty public
+contact default for NEW private workspaces in the local candidate with explicitly
+fictional editable contact examples, independent of real account identity. Existing
+records and cleared fields remain unchanged; hosted rollout is pending.

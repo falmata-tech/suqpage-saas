@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { SignupError, parseSignupInput, type SignupIdentity } from "./signup";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
 import { curatedManifestForLegacyDesign } from "./showroom-manifests";
+import { initializeBusinessStarter } from './business-starter-postgres';
 
 function signupFailure(error: unknown): never {
   if (error instanceof SignupError) throw error;
@@ -49,6 +50,7 @@ export async function createPostgresPublicClientWorkspace(
         "INSERT INTO business_onboarding_profiles(business_id,declared_category_key,idempotency_key,created_at,updated_at) VALUES(?,?,?,?,?)",
         [businessId, input.businessCategory, input.idempotencyKey, now, now],
       );
+      await initializeBusinessStarter(runner, { businessId, actorUserId: userId, category: input.businessCategory, notificationEmail: input.email });
       return { userId, businessId };
     });
   } catch (error) {

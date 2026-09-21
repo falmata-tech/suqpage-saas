@@ -1,3 +1,8 @@
+import { demoPublicContacts } from './demo-public-contacts';
+import { initialBusinessProfile } from '../lib/business-profile';
+import { parseShopPageContent } from '../lib/owner-page-domain';
+import { findKnownPlaceByName } from "../lib/place-catalog";
+import { simplifyDemoOffering } from "../lib/simple-demo-offering";
 import { FixtureDatabase } from "./testing/postgres-fixture";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "../lib/postgres-runtime";
 import { migratePostgresDatabase } from "../lib/postgres-migrations";
@@ -46,8 +51,6 @@ async function runPostgresFixture() {
   minimum_order_summary,lead_time_summary,is_published,sort_order
   ,video_ref,price_minor,currency,quantity_unit,highlights_json
 ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?, ?,?,'ETB',?,?)`);
-    const addGroup = db.prepare("INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?)");
-    const addValue = db.prepare("INSERT INTO option_values(option_group_id,value) VALUES(?,?)");
     const benchmarkBusinesses = [
         { handle: "selam-weave", name: "Selam Weave Studio", tagline: "Handwoven cloth for useful everyday rituals.", description: "A small textile atelier producing cotton wraps, table linens and practical woven goods in limited runs.", logo_path: "", hero_title: "Woven slowly. Made to be lived with.", hero_subtitle: "Explore hand-finished textiles, natural fibers and made-to-order color options.", hero_image_path: "/uploads/seed/benchmarks/selam-weave/hero.jpg", contact_email: "", whatsapp: "251911100101", telegram: "selamweave", tiktok: "" },
         { handle: "afia-botanics", name: "Afia Botanics", tagline: "Simple botanical care, mixed in small batches.", description: "Plant-based cleansing and body-care products made with clearly presented ingredients and direct maker guidance.", logo_path: "", hero_title: "A clear ritual from leaf to jar.", hero_subtitle: "Browse small-batch soaps, oils and treatments, then ask the maker about fit and use.", hero_image_path: "/uploads/seed/benchmarks/afia-botanics/hero.jpg", contact_email: "hello@afia.local", whatsapp: "", telegram: "afiabotanics", tiktok: "" },
@@ -188,12 +191,8 @@ async function runPostgresFixture() {
         await sequentialEach(categoryNames, async (name, i) => cats.set(name, Number((await addCategory.run(businessId, null, name, name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), i)).insertedId)));
         await sequentialEach(products, async (p, i) => {
             const profile = seedOfferingProfile(handle, p);
-            const productId = Number((await addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, p.eyebrow, p.description, p.image, p.availability || "available", p.offeringKind || profile.offeringKind, p.quantityMode || profile.quantityMode, p.capacitySummary ?? profile.capacitySummary, p.minimumOrderSummary ?? profile.minimumOrderSummary, p.leadTimeSummary ?? profile.leadTimeSummary, i, p.videoRef || demoOfferingVideoFor(processVideoByBusiness.get(handle)!, p.name, p.category, p.description).ref, p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35000 + i * 12500), p.quantityUnit || (profile.offeringKind === "production_supply" ? "kg" : profile.offeringKind === "manufacturing_capability" ? "project" : "piece"), JSON.stringify(p.highlights || [p.eyebrow || p.category, profile.offeringKind === "standard_product" ? "Available for direct inquiry" : "Requirements confirmed before production"]))).insertedId);
-            const optionGroups = profile.offeringKind === "manufacturing_capability" ? [] : p.options || [];
-            await sequentialEach(optionGroups.slice(0, 4), async (g: any, gi: number) => {
-                const groupId = Number((await addGroup.run(productId, g.name, gi)).insertedId);
-                await sequentialEach(g.values, async (v: string) => await addValue.run(groupId, v));
-            });
+            const simple = simplifyDemoOffering({description:p.description,kind:p.offeringKind || profile.offeringKind,unit:p.quantityUnit,highlights:p.highlights,options:p.options});
+            await addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, '', simple.description, p.image, p.availability || "available", simple.kind, "optional", '', '', '', i, p.videoRef || demoOfferingVideoFor(processVideoByBusiness.get(handle)!, p.name, p.category, p.description).ref, p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35000 + i * 12500), '', '[]');
         });
     }
     type BenchmarkProduct = {
@@ -464,7 +463,10 @@ async function runPostgresFixture() {
             continue;
         const industryKey = industryKeys[0];
         const productionScale = SCALE_DEMO_BUSINESSES.find((business) => business.handle === handle)?.productionScale ?? "workshop";
-        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, profile.latitude, profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, subscriptionNow, subscriptionNow);
+        const place = findKnownPlaceByName(profile.city, profile.region);
+        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, place ? Math.round(place.latitude*10)/10 : profile.latitude, place ? Math.round(place.longitude*10)/10 : profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, subscriptionNow, subscriptionNow);
+        await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
+          VALUES(?,1,?,?,?,'area',?,?,?,1,?)`).run(businessId,industryKey,profile.city,profile.region,place?.id||null,place?.latitude??null,place?.longitude??null,subscriptionNow);
         for (const key of industryKeys)
             await seedBusinessIndustry.run(businessId, key);
     }
@@ -507,7 +509,7 @@ async function runPostgresFixture() {
     }
     const adminUserId = await seedUser("admin", "platform_admin", "Suqpage", process.env.SEED_ADMIN_EMAIL || "admin@mirtpage.local", "Suqpage Admin", null);
     const clientUsersByHandle = new Map<string, number>();
-    for (const business of [...benchmarkBusinesses, ...scaleDemoBusinessRows.slice(0, 24)]) {
+    for (const business of businesses) {
         clientUsersByHandle.set(business.handle, await seedUser("owner", "client", business.name, `${business.handle}@mirtpage.local`, `${business.name} Client`, seeded.get(business.handle)!));
     }
     const operationsStaff = await Promise.all(["Mekdes Operations", "Samuel Operations", "Rahel Operations", "Dawit Operations"]
@@ -597,13 +599,13 @@ async function runPostgresFixture() {
   INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
   VALUES(?,?,?,?,?)
 `);
-    const supportHandles = [...clientUsersByHandle.keys()].slice(0, 30);
+    const supportHandles = [...clientUsersByHandle.keys()];
     const waitingSupportCount = 4;
     const openSupportCount = 12;
     await sequentialEach(supportHandles, async (handle, index) => {
         const status = index < waitingSupportCount ? "waiting" : index < waitingSupportCount + openSupportCount ? "open" : "closed";
         const assigned = status === "waiting" ? null : teamStaff[4 + ((index - waitingSupportCount) % 4)];
-        const createdAt = subscriptionNow - (30 - index) * 45 * 60 * 1000;
+        const createdAt = subscriptionNow - (supportHandles.length - index) * 45 * 60 * 1000;
         const closedAt = status === "closed" ? createdAt + 30 * 60 * 1000 : null;
         const conversationId = Number((await addSupportConversation.run(`DEMO-SUP-${String(index + 1).padStart(5, "0")}`, seeded.get(handle)!, clientUsersByHandle.get(handle)!, [
             "Help updating showroom information",
@@ -741,9 +743,26 @@ async function runPostgresFixture() {
         const inquiryId = Number((await inquiry.run(denseInquiryBusinessId, `Demo Buyer ${String(index).padStart(2, "0")}`, `demo-buyer-${index}@example.test`, "email", `Fictional inquiry ${index} used to exercise server pagination.`, inquiryStatuses[(index - 1) % inquiryStatuses.length], `scale-inquiry-${index}`)).insertedId);
         await inquiryItem.run(inquiryId, denseInquiryProduct.id, denseInquiryProduct.name, null, index % 3 === 0 ? "1 ton" : `${index} units`, denseInquiryProduct.offering_kind, denseInquiryProduct.quantity_mode, JSON.stringify({}));
     }
+    // Every demo owner can inspect an inbox, including one grouped request.
+    for (const [handle, businessId] of seeded) {
+        if (await db.prepare("SELECT 1 FROM inquiries WHERE business_id=? LIMIT 1").get(businessId)) continue;
+        const iid = Number((await inquiry.run(businessId, "Sample customer", "sample-customer@example.test", "email", "Fictional example: please share details about these items.", "new", `demo-coverage-${handle}`)).insertedId);
+        const items = await db.prepare("SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 2").all(businessId);
+        for (const item of items) await inquiryItem.run(iid, item.id, item.name, null, item.offering_kind === "service" ? "One appointment" : "2 pieces", item.offering_kind, item.quantity_mode, "{}");
+    }
     // These rows were created by this empty-target demo seed, never imported accounts.
     await db.exec("UPDATE businesses SET public_email='hello+' || handle || '@example.test', public_phone='+447700900' || lpad(id::text,3,'0')");
     await db.exec("UPDATE users SET account_phone='+447700900' || lpad((id+100)::text,3,'0') WHERE email LIKE '%@mirtpage.local' OR email LIKE '%@demo.mirtpage.local'");
+    for (const [handle, businessId] of seeded) {
+        const business = await db.prepare("SELECT * FROM businesses WHERE id=?").get(businessId) as Business;
+        const catalog: Catalog = { business, collections: [], categories: [], products: [] };
+        const contacts = demoPublicContacts(business.public_email || `hello+${handle}@example.test`, business.public_phone || '+447700900123');
+        const content = JSON.stringify(parseShopPageContent({...initialBusinessProfile(catalog), introduction:'', contacts}));
+        const ownerId = clientUsersByHandle.get(handle)!;
+        await db.prepare("UPDATE businesses SET whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);
+        await db.prepare("INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)").run(businessId,content,ownerId,subscriptionNow);
+        await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(businessId,content,ownerId,subscriptionNow);
+    }
     const credentialPath = path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH || path.join(process.cwd(), ".local", "seed-credentials.txt"));
     fs.mkdirSync(path.dirname(credentialPath), { recursive: true });
     const credentialText = ["Suqpage temporary local credentials", "Change every password on first login.", "", ...generatedCredentials.map(c => `${c.role.toUpperCase()} | ${c.business} | ${c.email} | ${c.password}`)].join("\n");

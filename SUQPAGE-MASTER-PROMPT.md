@@ -9,17 +9,49 @@
 
 Transition in progress (FE-042/BE-033, ADR-0019): the owner has retired custom-page
 requests and their design/revision workflow. Standard owner pages, direct business
-staff assignments and admin first-page review replace those live features. Category
+staff assignments and owner-controlled publication replace those live features. Category
 results gain five-row backend pagination. Implementation and verification are tracked
 in S2i/S2j; historical managed-workflow descriptions below are superseded, not approval
 to expose or extend those features. Historical data remains preserved.
 
+Local review checkpoint (FE-044/BE-037/DEP-034 and FE-045/BE-038/DEP-035):
+service offerings, inclusive African-business copy and canonical city/town selection
+are implemented and approved for release, with focused desktop/phone verification.
+Final rollout is tracked in S20. They are not
+part of the currently hosted schema-45 release. Schema 46 admits services; schema
+47 stores selected public place anchors separately from storefront coordinates.
+The retained local database is now on schema 47 after protected backup, verified
+restore and record-preservation checks (docs/SUQPAGE-LOCAL-SCHEMA-47.md); the
+hosted database remains on schema 45.
+Complete private starters for every new business are implemented locally under
+FE-046/BE-039/DEP-036 (S8a). Samples cover presentation fields and offerings while
+real account details remain separate. Focused signup/invitation, rollback and
+desktop/phone editor verification pass; the owner approved publication and final
+release verification is in progress.
+The local FE-048/BE-041/DEP-038 candidate supports owner first Publish and
+subsequent live Save without staff review, immediate location saves, Product/Service
+selection and stable approximate city markers. The 66 admitted local demo pages
+and 264 offerings have been simplified with a protected backup; customer identities,
+inquiries and non-demo content are preserved. The owner approved publication;
+final release verification is in progress, with no hosted data update implied.
+
+Demo capability coverage (FE-023/BE-022/DEP-019, S12): all 66 local demos have
+complete public contact objects. Telegram, TikTok, Instagram and Facebook use the
+user-supplied example username alhayabrand; existence is not verified. Fictional
+public phone/email and example.com remain examples, with WhatsApp using the demo
+public phone. No delivery is implied. Existing accounts/inquiries remain intact;
+missing local demo owner accounts, sample inquiries and support history are filled.
+Real new-account starter defaults are separate. Demos retain one Ask for price
+example, five sponsors and scheduled Featured coverage rather than making every
+business sponsored or claiming prerecorded videos are live.
+
 ## 1. Your role
 
-You are working on **Suqpage**, a multi-tenant platform for discovering shops and
-products and contacting sellers directly. It serves consumer-facing retailers,
-home sellers, growers, workshops and other product businesses. Sellers may make,
-grow or resell their inventory. The initial market is Ethiopia.
+You are working on **Suqpage**, a multi-tenant platform giving African businesses
+an accessible digital presence and a direct inquiry channel. People discover
+businesses, products, services and custom work through geography, search results
+and featured visibility. Growers, makers, traders, retailers, home businesses and
+service providers retain their own identity. The current catalog begins in Ethiopia.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
@@ -28,7 +60,7 @@ Do not treat Suqpage as a generic website builder or a conventional ecommerce pl
 The central principle is:
 
 > **Suqpage provides one consistent business profile and discovery experience.
-> Each seller owns its content, products and identity; private staff assistance
+> Each business owns its content, offerings and identity; private staff assistance
 > requires revocable consent. Inquiries are not checkout or paid orders.**
 
 When a user gives an explicit instruction that conflicts with an older preference in this file, follow the newest explicit instruction, but preserve security, tenant isolation, and data integrity.
@@ -40,12 +72,15 @@ When a user gives an explicit instruction that conflicts with an older preferenc
 ### Current local candidate (FE-040–FE-042, BE-032/BE-033, DEP-030)
 
 One shared business profile uses each business's canonical catalog or current
-published owner profile. It serves product sellers, retailers, growers and workshops
-with a hero/video poster, one About, linked products and a separate contact section.
+published owner profile. The local candidate serves product sellers and service providers
+with a hero/video poster, one About, linked offerings and a separate contact section.
 Public and private account contacts remain separate. The current editor is enabled
 by default and supports saved drafts, private image uploads, consented staff help,
-first-page admin review and subsequent owner publish/restore. The interactive preview
-cannot send inquiries or persist a visitor cart.
+owner first Publish, subsequent live Save and retained restore. The interactive preview
+cannot send inquiries or persist a visitor cart. New workspaces in the local
+FE-046/BE-039 candidate start with sample text, illustrations, video and public
+contacts, a general-area example and product/service offerings.
+Owners replace the examples; original account identity and existing pages stay intact.
 
 Category/search results use five-row database pages alongside a persistent map.
 Custom request/design/revision features are retired under ADR-0019. Historical
@@ -77,8 +112,10 @@ Launch origin:
 configured HTTPS Netlify origin
 ```
 
-No custom Suqpage domain is owned yet. Never publish or configure an assumed
-domain before the product owner purchases it.
+The owner owns `suqpage.com` and manages DNS at GoDaddy. The approved primary is
+`https://suqpage.com`, with `www` redirecting to it. DNS, hosting registration, HTTPS and the www redirect are verified. Hosted Auth
+uses the apex and /auth/callback after guarded apply/readback. The
+application canonical-origin cutover remains tracked under S18/DEP-026/DEP-029.
 
 Primary support contact:
 
@@ -159,7 +196,7 @@ deliver for, or guarantee a listed participant.
 - a controlled SaaS pilot whose existing fictional Ethiopian catalog includes
   artisans, farms, workshops and small manufacturers. Product retailers and
   home sellers are eligible; additional retailer examples remain checklist S6.
-  Repair-only services are not product sellers. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
+  The service candidate also admits repair and other service offerings. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
 
@@ -183,17 +220,17 @@ Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not ca
 
 ## 5. Non-negotiable design philosophy
 
-### 5.1 One profile, each seller's content
+### 5.1 One profile, each business's content
 
 Every public page and ordinary preview uses BusinessProfile (FE-040/FE-041).
-The structure is image/video poster, name/logo, one About description, Products
-navigation with either a catalog or shareable inline product detail, then a separate
+The structure is image/video poster, name/logo, one About description, product/service
+navigation with either a catalog or shareable inline offering detail, then a separate
 public contact section. The hero image is the video poster; one intentional play
 control loads the privacy-enhanced player. Only configured public links appear.
 Saved selections expose inquiry access; an empty selection offers Explore products.
 There is no separate Introduction field or custom layout selector. Account contacts
 are edited separately from the public contact values. Owners and consented staff
-use the same standard page editor; admin first-review uses the submitted page.
+use the same standard page editor; owner consent governs staff assistance.
 
 ### 5.2 Suqpage must have its own platform identity
 
@@ -203,9 +240,9 @@ TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
 `FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
 venue art direction, and platform visual system. `/` opens directly into the
 geographic Market; there is no intermediate landing lobby or duplicate search.
-A concise heading identifies shops and products near the visitor. One short
-sentence explains finding a shop, exploring its products and contacting the
-seller directly. Visitors can search by product, category or location. Individual
+A concise heading identifies nearby businesses. One short sentence explains
+finding products, services and custom work through the map or search results and
+inquiring directly. Visitors can search by product, category or location. Individual
 and household buyers are the primary public audience; traders and retailers can
 also find repeat supply when a participant actually offers it. This audience
 strategy guides content but is not repeated as promotional taxonomy in every
@@ -314,9 +351,9 @@ Information. Anonymous visitors see Sign in only; authenticated visitors see
 Dashboard only; account creation remains available from the sign-in route. More
 contains direct contact, privacy, and terms rather than repeating the same
 destinations in two navigation surfaces.
-Each screen has one communication job. Market helps visitors find locally made
-and grown products. About explains the local, regional, national, and wider
-African market story. Login explains passwordless account access. Setup
+Each screen has one communication job. Market helps visitors find businesses, products and services. About explains
+an accessible digital presence for African businesses, the Ethiopia-first catalog,
+and discovery through location, search, result lists and Daily Featured. Login explains passwordless account access. Setup
 collects private account details. Support offers platform help, transport help,
 and a way to report a listing.
 No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
@@ -366,10 +403,11 @@ search, account, showroom, or private-location data in tile URLs. OpenStreetMap
 supplies visual road and place context only; Supabase remains authoritative for
 reviewed coordinates, eligibility, industries, search, and place filters.
 Cluster and marker reconciliation occurs after Leaflet movement settles and is
-bounded to the committed viewport. Each eligible business appears at its
-reviewed WGS84 coordinates.
+bounded to the committed viewport. Exact storefront/legacy businesses keep their saved WGS84 coordinates. City/area
+shops use stable business-ID-based offsets within 1.5 km of the public anchor,
+without changing saved coordinates or shifting when filters/pagination change.
 Nearby markers form numbered zoom-dependent clusters. At neighborhood zoom,
-same-city businesses within 800 meters form deterministic balanced nearby groups
+exact/legacy same-city businesses within 800 meters form deterministic balanced nearby groups
 of at most six. Larger cohorts split into separate markers. Activating one opens
 a lightweight two-column phone or three-column desktop card viewer over the
 unchanged map, with no pagination, internal scroll, simulated architecture, or
@@ -381,9 +419,9 @@ map-pin containing a familiar upright storefront and the
 actual business name in a bounded multi-line label. A generic Showroom caption
 and horizontally unbounded names are prohibited.
 Perspective platforms or device-like silhouettes are prohibited.
-Activating one below
-local-detail zoom centers and enlarges the map first; activating it at local
-detail opens the richer business preview. The map marker does not load booth
+Activating an individual marker centers at local-detail zoom and opens the richer
+business preview in one click. Cluster clicks always zoom forward. City/area shops
+remain separately selectable at detailed zoom rather than joining Nearby groups. The map marker does not load booth
 or hero photography. That preview is a non-modal floating inspector centered over a
 restrained low-opacity dismissible scrim: the map remains visible, and on
 phones it becomes a bounded bottom sheet above app navigation. A counted nearby-group
@@ -448,15 +486,17 @@ and a visually distinct merchant CTA closes the page. Public controls have at le
 44-pixel touch targets and the complete composition is verified without
 horizontal overflow at 320 and 390 CSS pixels.
 
-The merchant CTA links to passwordless account entry. Google or a six-digit
+The merchant CTA links to passwordless account entry. A six-digit
 email code verifies identity before any business details are requested. An
 authenticated unlinked identity then submits bounded owner name, business name,
 phone or WhatsApp, and a short description of what the business makes or
 supplies. The server derives identity from the Supabase session, generates a
 safe unique handle, and atomically creates the private draft business, owner,
-client access profile, identity link, and business onboarding record. It accepts no
-public file upload and creates no public marker, Daily Featured card, catalog,
-or showroom.
+client access profile, identity link, and business onboarding record. The local
+FE-046/BE-039 candidate also creates a private saved profile, example location and
+three editable example offerings with media, prices, options and all public-contact
+fields filled. It accepts no public file upload and creates no public marker,
+Daily Featured card or public showroom.
 Standalone administrator-created account invitations remain supported. The legacy
 custom-page lead endpoint is retired. The homepage and request flow
 use professional copy with no development-stage disclaimers. The public
@@ -467,12 +507,23 @@ The public account-entry and authenticated business-setup routes use the same
 Suqpage header, orange, charcoal, white, and cool-neutral platform language
 as Market and About. Each is a focused task surface with one concise context
 panel and one white form panel on wider screens, stacked in semantic order on
-phones. Account entry asks only for an email code or configured Google identity;
+phones. Account entry asks only for an email code;
 business setup follows only after provider verification. Password entry,
 password reset, public role selection, handle selection, and initial catalog
 collection are outside the launch flow.
 
 ### 5.3 Public copy must look finished
+
+Standing UI standard: use clear, specific labels and icons that match the action.
+A message icon opens an inquiry, list-plus adds a selection, clipboard-list reviews
+selections, and send confirms sending. Let those controls explain themselves.
+Do not add filler paragraphs, repeated instructions, implementation details,
+internal notes, release status or backend terminology to public or workspace UI.
+Keep concise errors, outcomes, required input constraints and privacy/consent text
+only where they help someone make a decision. Sample-content warnings remain when
+needed to avoid publishing an unedited starter as genuine business information.
+Apply this standard to all future Suqpage work, not just the current cleanup.
+
 
 Do not place public-facing words such as these on production pages:
 
@@ -581,8 +632,9 @@ Count
 ```
 
 Suqpage uses **Offering** as the internal umbrella for a standard product,
-made-to-order product, manufacturing capability, or production supply. Public
-showrooms label this catalog **Products & Capabilities**. The compatible
+service, made-to-order work, manufacturing capability, or production supply. Public
+pages use **Products**, **Services**, or **Products & services** according to their
+listed content. The compatible
 `products` table and recipe array remain the current transport; they do not
 limit an offering to stocked retail merchandise.
 
@@ -603,13 +655,13 @@ Rules:
    is never compared with, reserved from, or deducted from inventory. Retained
    numeric quantity and `quantity_mode=required` values are compatibility input
    and normalize to current text/optional behavior.
-10. Every current offering declares one kind: `standard_product`,
+10. Every stored offering has one kind: `standard_product`, `service`,
     `made_to_order`, `manufacturing_capability`, or `production_supply`.
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
     merchant facts. The platform and AI must not calculate, verify, or invent
     them. The shared public product view omits these production facts.
 12. An offering may display one optional non-negative ETB price, one normalized
-    merchant-defined offered-by unit, and up to six concise highlights. These
+    merchant-defined offered-by unit (including hours, sessions and projects), and up to six concise highlights. These
     fields support inquiry context only and never create checkout, payment, tax,
     inventory, or price-verification behavior.
 13. Each offering and each showroom may carry one controlled YouTube reference.
@@ -639,7 +691,7 @@ recovery input and are discarded when upgraded to revision schema v3.
 
 Product cards open a shareable `/@handle?product=<id>` view inside the business’s
 product section (FE-041). The route reloads directly, supports browser back/forward,
-and provides Back to products. Unknown, foreign or unpublished product references
+and provides a return link to the page’s product/service catalog. Unknown, foreign or unpublished product references
 show a safe unavailable state. Cards have no Video badge; details show the photo,
 an intentional Watch video action when available, name, description, optional
 price, canonical selling unit and feature chips. Capacity, minimum order, lead time
@@ -649,8 +701,9 @@ groups need no selector; their canonical defaults remain part of the inquiry.
 Expected customer flow:
 
 1. Open a product, review photo/video/features, and choose any available options.
-2. Choose **Inquire about this product** for that selection alone, or **Add to
-   inquiry** to save it while continuing to browse. A direct inquiry never merges
+2. Choose **Inquire about this product only** (or **service only**) for that selection
+   alone, or **Add to inquiry list** to save it while continuing to browse. Cards say **Add to list**, and
+   the selected-item control says **Review item** or **Review list** with a count. A direct inquiry never merges
    with, clears or submits the visitor’s saved group.
 3. A single selection uses a compact product summary. Multiple selections show an
    editable inquiry list; zero selections show no persistent cart button. Saved
@@ -762,6 +815,15 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ---
 
+The local candidate owner editor asks for Product or Service, image, name,
+optional YouTube URL, optional ETB price and one description (FE-048/BE-041).
+Omitted category, availability, units, highlights, options, visibility and legacy
+collection association are preserved under the tenant/version lock. An explicit
+type choice is saved; new items default to Product. Staff retain detailed controls.
+Fresh demo and starter offerings use the simple fields; useful old demo facts are
+included in descriptions. No automatic service inference or translation occurs.
+Visual approval and rollout remain pending.
+
 ## 10. Market discovery behavior
 
 Suqpage’s directory must scale without dumping every tenant onto the page by default.
@@ -785,6 +847,17 @@ Default behavior:
   these controls inside the result list;
 - do not let result panels cover filter controls;
 - support business name, handle, product, industry, and relevant description search;
+- the local candidate matches all meaningful query terms, in any order,
+  across one offering and its business name/handle/published About/public location.
+  Case-insensitive matching handles Unicode, Latin accents, separator punctuation
+  and simple English singular/plural alternatives. Common request words are ignored
+  when substantive terms remain. Literal wildcard escaping, exact/prefix title
+  ranking, eligibility and five-row backend pagination remain (BE-040/BE-041).
+  Query-only links open All categories results. Valid place filters survive zero
+  matches without broadening geography. One-character queries can be submitted; punctuation-only input never expands to
+  all listings. Delayed responses preserve newer typing and Back restores the query.
+  PostgreSQL evaluates bounded term groups and count queries omit sorting; it does
+  not translate queries or analyze images/videos; rollout is pending;
 - keep reviewed production-scale metadata
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
@@ -798,15 +871,20 @@ Default behavior:
 ## 11. Passwordless account entry and business onboarding
 
 Suqpage uses one identity-first entry surface for sign-in and account creation.
-The visitor enters an email and six-digit one-time code or continues with Google
-when that provider is configured. Passwords are not requested in the launch
+The visitor enters an email and six-digit one-time code. Passwords are not requested in the launch
 flow. Existing linked users continue to their permitted dashboard; verified but
 unlinked identities continue to protected business setup. Login and setup resolve
 identity at request time, including when production is built without Auth settings;
 reopening either route cannot freeze an anonymous redirect (DEP-033).
 
 The owner approved an email-only production launch on 2026-09-14. Email-code
-entry is required; Google remains hidden until separately restored and verified.
+entry is required. The local S17 candidate also blocks Google initiation regardless
+of retained environment flags, and local provisioning leaves Google disabled.
+Existing account identities and sessions are preserved. All six Auth email types
+and seven security notification templates have repository-owned Suqpage branding;
+notification enablement and verified sender addresses remain unchanged. Hosted
+template/sender-display application requires the exact DEP-029 reviewed plan.
+Password recovery email points back to email-code entry without a password-reset UI.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
 The Suqpage namespace preserves existing account emails and Auth links. Legacy
@@ -815,7 +893,7 @@ cookies use Suqpage names and logout revokes both local token names (BE-036).
 
 Business setup collects only owner name, verified-email display, phone or
 WhatsApp, organization name, one bounded private production category,
-processing consent, and an idempotency token. A safe Google display name is
+processing consent, and an idempotency token. A safe retained provider display name is
 prefilled when available and remains editable. The public-page handle is
 generated server-side and may be changed later by an authorized operator. There
 are no public file, image, design-brief, password, or free-form offer inputs.
@@ -826,7 +904,9 @@ Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
   generic OTP responses, and managed Supabase identity;
 - derive provider UUID and email only from the verified server-side session;
 - commit the draft tenant, owner, access profile, immutable identity link, and
-  private onboarding profile in one transaction or roll back all of them;
+  private onboarding profile in one transaction or roll back all of them; the local
+  FE-046/BE-039 candidate includes complete private starter content in that same
+  transaction for signup and standalone invitations;
 - reject browser-supplied identity, role, tenant, publication, location,
   industry, featured, media, password, or handle authority;
 - do not create a page project automatically during account setup;
@@ -857,49 +937,35 @@ team member and client. Session identity and tenant scope remain server-authorit
 
 ### Administrator
 
-Administrators manage business accounts, individual staff access, standard page
-first-review decisions, marketplace geography/category approval, sponsorship,
-Daily Featured schedules, customer operations, support and renewals. They can create
-a private business invitation independently of any service request. The dashboard
-shows a paginated Page reviews queue and per-business review/publication status.
-Direct staff assignments belong to the business and can be revoked. First approval
-publishes the owner's exact submitted saved page and catalog versions and activates
-its private business atomically. Stale, already-decided and non-draft submissions
-cannot publish. Requested changes include feedback visible to the owner.
-
-An administrator can suspend or restore an established page's visibility. They
-cannot use assistance to impersonate owner publication or bypass consent. Reviewing
-an exact pending submission grants read-only access to its preview/cover; editing
-its private draft still requires the owner's assistance permission.
+Administrators manage business moderation, staff assignments, marketplace
+visibility, sponsorship, Daily Featured schedules, support and renewals. They can
+invite a private business and suspend or restore established visibility. Page and
+location approval queues/actions are retired; historical records remain. Private
+page editing and draft media access still require current owner assistance consent.
 
 ### Owner (client)
 
-Owners create a private workspace through verified signup or accept an invitation.
-They can add/update products, maintain categories, save and preview their standard
-page, manage public contacts separately from private account contacts, and submit
-its first saved version for review. Product creation no longer requires a prior
-custom-page publication. Categories and product updates advance the catalog version
-so a pending review cannot silently approve changed content.
-
-After first approval, owners can publish saved page edits or restore the prior
-page publication. They can enable/revoke staff page assistance, read buyer inquiries,
-use tenant-scoped support, see renewal status and view aggregate visit statistics.
-They do not assign staff, approve their own first listing, edit other tenants,
-change inquiry status, or operate payment/delivery. Existing canonical product
-option structures and retained catalog snapshots remain compatible.
+Verified signup or an invitation creates a complete private sample workspace.
+Owners replace examples, save business details/location, edit their page and
+products/services, then Publish directly when at least one offering is listed.
+Subsequent page Save updates the live publication atomically; stale/foreign writes
+and self-reactivation of suspended businesses are rejected. Private account
+contacts remain separate from public page contacts. Owners can restore a retained
+publication, revoke assistance, read inquiries, use support, manage account security
+and view aggregate visits. Categories and renewal operations remain available to
+staff without cluttering owner navigation. Existing catalog IDs, options, inquiry
+snapshots and tenant boundaries remain compatible.
 
 ### Operations managers and team members
 
-Operations managers can open business workspaces, create business invitations,
-maintain products with a service note, assist with pages when consented, operate
-inquiries, manage support capacity/assignments and record manual renewals. First
-page approval and business staff assignment are administrator actions.
-
-Team members see only actively assigned businesses and their permitted product
-workspace. Page editing also requires current owner assistance consent. Revocation
-removes that access. Existing support-agent permissions govern support conversations
-independently. No role uses service-request assignments, custom design studios or
-revision-approval projects in the live application.
+Operations managers can open business workspaces, create invitations, maintain
+products with a service note, assist with consented page drafts, operate inquiries,
+manage support assignments and record manual renewals. Business staff assignment
+remains an administrator action. Team members only see actively assigned businesses;
+page editing also requires current owner consent. Staff Save never publishes on
+behalf of the owner. Support-agent permissions govern support conversations.
+No live role uses custom service-request assignments, revision projects or page
+approval queues.
 
 ### Public customer
 
@@ -912,13 +978,21 @@ public projections. Account phone/email never supply public contacts implicitly.
 
 ---
 
-Owner business setup at `/dashboard/business` saves the canonical name/logo and a
-private general-area or storefront location proposal. Public contact fields remain
-in the page editor; private account contacts remain in account settings. Location
-changes immediately withdraw the old map approval. Admins find pending locations
-through the dashboard count and business-directory filter and approve the exact
-proposal version. General-area approval uses coarse coordinates; storefront mode
-requires the owner's explicit choice and valid coordinates (FE-043/BE-034).
+Publication also applies pending saved location/category setup atomically, so a
+populated starter does not need an extra unchanged Business details Save before
+search can find it. Already-applied admin placements/exclusions are preserved.
+
+Owner business setup at `/dashboard/business` saves the name/logo, category and
+public location immediately without staff approval. City/town search resolves one
+of 781 admitted place records server-side. Area mode stores the public place
+anchor separately, removes exact storefront coordinates and uses a coarse public
+centroid. Exact storefront coordinates require explicit owner choice; the GPS
+button fills the form and Save applies it. Unknown manually typed places save text
+but cannot place a pin until a known place is selected. Saving cannot remove an
+administrator exclusion or suspension. City markers receive stable display-only
+offsets within 1.5 km of the public anchor and are labelled approximate; exact GPS
+and unclassified legacy points stay unchanged (FE-048/BE-041). No external geocoder
+is used. Public contacts remain in the page editor and account contacts in settings.
 
 ## 14. Retired custom-page workflow and compatibility
 
@@ -1028,8 +1102,10 @@ Security requirements are product requirements, not optional cleanup.
 - The account page shows the existing verified sign-in email and a separate private,
   unverified account phone. All roles can update or clear only their own phone;
   posted user IDs/email cannot change identity or another account. Signup records
-  the required account phone privately and leaves public phone/email/WhatsApp
-  empty until explicitly provided. Account phone is not a sign-in factor and is
+  the required account phone privately. In the local FE-046/BE-039 candidate, new
+  private pages receive explicitly fictional public phone/email/WhatsApp examples
+  independent of that identity, plus all other editable presentation defaults.
+  Existing real accounts and intentionally cleared fields are not backfilled. Account phone is not a sign-in factor and is
   excluded from session-user and public catalog data (FE-040/BE-032, migration 41).
 - Do not use a hard-coded fallback session secret.
 - Revoke provider sessions after suspected compromise, suspension, or explicit
@@ -1133,6 +1209,13 @@ guarded command pins the production project and HTTPS origin, rejects local and
 unknown settings or credential changes, and creates a read-only review plan with
 a private provider-returned backup. Apply requires the owner's reviewed digest,
 a fresh unchanged remote state, and one narrow write followed by readback.
+Readback predicts only existing customization flags for approved nonempty email
+subjects/templates; all other metadata and provider fields must stay unchanged.
+Credential selection defaults to explicit `SUPABASE_ACCESS_TOKEN`; an opt-in
+`--credential-source cli` reads only the default Supabase CLI macOS Keychain
+entry, with bounded private subprocess output. No credential fallback occurs.
+Version-2 plans bind the selected source and token fingerprint; changed logins
+and old unbound plans are rejected. Management tokens never enter plan files.
 Hosted configuration pushes and raw-command workarounds are prohibited, including
 during incident recovery. Google/SMTP credential changes are separate authorized
 owner operations; masked provider secrets are not claimed recoverable from a
@@ -1150,9 +1233,16 @@ reviewed PostgreSQL schema and application-owned authorization model and selects
 Supabase PostgreSQL, Auth, and private Storage. PostgreSQL is the only executable
 database engine in application code, local development, fixtures, CI and deployments
 (BE-035, DEP-031, ADR-0020). There is no file-database fallback or copy-through-fixture
-bootstrap. Unsupported database settings fail closed.
+bootstrap. Unsupported database settings fail closed. Both `npm run dev` and
+`npm run dev:local` load the guarded local runtime file and validate PostgreSQL
+and local Auth/Storage before starting. Explicit loopback hostname/port options
+set the matching application origin. The local candidate launcher opens Docker
+Desktop on macOS when needed, resumes this project's local Supabase services and
+waits for PostgreSQL/Auth readiness with bounded timeouts (DEP-027). Existing local
+settings are still required. Startup never migrates, seeds, resets or changes
+hosted settings. Stopped engines on other operating systems require manual start.
 
-Native schema 45 installs directly into empty PostgreSQL schemas, including taxonomy,
+Native local-candidate schema 47 installs directly into empty PostgreSQL schemas, including taxonomy,
 schedule defaults, constraints, sequences and tenant triggers. Existing versioned
 schemas use additive/idempotent migrations. Unversioned populated schemas are refused.
 Each persistence fixture uses a disposable local PostgreSQL schema; trigger definitions
@@ -1216,7 +1306,9 @@ Rules:
 - support Arabic right-to-left layout;
 - allow for long Afaan Oromo strings without layout breakage;
 - do not claim a language is complete until all public UI states are translated and tested;
-- keep the dashboard English-first for the controlled MVP unless multilingual dashboard support is explicitly implemented.
+- keep the dashboard English-first for the controlled MVP unless multilingual dashboard support is explicitly implemented;
+- local candidate search preserves Unicode content and matches written terms;
+  cross-language semantic matching is not implemented. No managed AI is configured.
 
 ---
 
@@ -1239,7 +1331,7 @@ Minimum expectations:
 - no silent network failures;
 - no unhandled native-share cancellation errors;
 - cart persistence where appropriate;
-- correct favicon and metadata for every showroom;
+- the main Suqpage favicon on every route, with business-specific title/sharing metadata;
 - business-specific page title, description, canonical URL, and social preview;
 - no blank-tab navigation.
 
@@ -1288,28 +1380,30 @@ structured inquiry, not online checkout.
 
 1. A verified owner creates a private business account or accepts an individual
    invitation. No custom-page request, public upload or fabricated project is created.
-2. The owner adds product categories/products, uploads images and saves the page's
-   About, cover/video and available public contact links in the standard editor.
-3. New product uploads are authorized before writing and stored in the private
-   media namespace. Their stable media route requires scoped access while the
-   business is private; a currently listed product or published cover becomes
-   anonymously readable only for an active business.
-4. The owner submits the exact saved draft and catalog versions. An administrator
-   reviews that candidate, requests explanatory changes or approves first publication.
-   Concurrent/stale edits require resubmission. Decisions and actor attribution are
-   retained, and approval/publication/business activation are one transaction.
-5. Marketplace placement separately requires administrator-reviewed category and
-   geography, listed products and a non-excluded active business. First publication
-   does not invent a location or bypass discovery approval.
-6. Established owners publish/restore saved page content themselves. Optional staff
-   help uses current business assignment and revocable owner editing consent.
-7. Buyer inquiries, support, account access, renewals and visit statistics remain
-   connected to the same business workspace. Full release checks and deployment
-   remain distinct from local implementation and visual review.
+2. The owner replaces starter examples, saves business details and location, then
+   edits About, cover/video, public contacts and simple product/service listings.
+3. Uploads require scoped authorization. Private media stays private until its
+   associated business is active and the offering/cover is public.
+4. First Publish validates current draft/revision and at least one listed offering,
+   activates the draft business, applies any pending saved location/category and
+   retains publication history atomically. No
+   staff approval is required; suspension and tenant/version guards remain.
+5. Owner location/category Save applies a known public area or explicit storefront
+   directly. Discovery still requires an active non-excluded business and listed
+   offerings. Unknown areas have no pin. City offsets are display-only.
+6. Live owner Save applies page changes atomically and retains history. Staff
+   assistance remains draft-only, assigned where required, and revocably consented.
+7. Inquiries, support, security and visits remain connected to the same workspace.
+   Visual approval, full gates and hosted rollout are distinct from local evidence.
 
 ---
 
 ## 22. Testing and definition of done
+
+The service/place candidate uses `test:service-offerings`, `test:place-selection`
+and `scripts/capture-service-place.ts` for additive migration, tenant/privacy,
+service inquiry and keyboard/mobile selection evidence. Its capture uses disposable
+PostgreSQL data and test-issued local sessions, not hosted provider delivery.
 
 Persistence tests execute against isolated PostgreSQL schemas installed from the
 native baseline. Current browser acceptance installs PostgreSQL directly in its
@@ -1359,7 +1453,7 @@ Required verification areas:
 - administrator, client, operations-manager, and assigned-team permissions;
 - cross-tenant denial;
 - active/draft/suspended visibility;
-- saved standard-page edits, stale-version denial, first review, owner publication
+- saved standard-page edits, stale-version denial, first Publish, atomic live Save
   and restoration; retired request/design endpoints must reject reads and writes;
 - versioned basic offering upkeep for every authorized role;
 - compatibility-collection and active product-category integrity;
@@ -1472,3 +1566,9 @@ Every Suqpage change should move the product toward this experience:
 > customer and business without forcing either party into ecommerce checkout.
 
 Protect that experience.
+
+Local archive maintenance under DEP-031 now fully parses custom archives without
+executing their SQL and restores only into approved empty targets. Empty namespace
+preparation never uses CASCADE; populated data is never replaced by this tool.
+Local schema 47 and its restore/preservation evidence are documented separately
+from the hosted schema-45 release.

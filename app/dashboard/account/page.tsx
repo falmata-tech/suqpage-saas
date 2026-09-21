@@ -16,7 +16,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const managed = authDriver() === "supabase";
 
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>Your account</h1><p>{managed ? "Suqpage uses your verified email or Google account for sign-in." : "Use a unique password that is not shared with another service."}</p></div></div>
+    <div className="dashboard-head"><div><h1>Your account</h1></div></div>
     <form className="panel form-grid" action={saveAccountPhoneAction}>
       <div className="field full"><span className="eyebrow">Private contact details</span><h2>Account email &amp; phone</h2><p>These details belong to your account. Public business contacts are managed separately in your page editor.</p></div>
       {params.contact === "saved" ? <p className="notice field full" role="status">Account phone saved.</p> : null}
@@ -25,7 +25,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       <div className="field"><label htmlFor="account-phone">Account phone</label><input id="account-phone" name="accountPhone" type="tel" autoComplete="tel" maxLength={40} defaultValue={contacts?.account_phone || ""} placeholder="+251…" aria-describedby="account-phone-help" /><small id="account-phone-help">Private and unverified. Include the country code. This number is not used to sign in.</small></div>
       <div className="field full"><button className="btn brand">Save account phone</button></div>
     </form>
-    {managed ? <section className="panel"><span className="eyebrow">Passwordless account</span><h2>Managed by Supabase Auth</h2><p className="muted">Sign in with a one-time email code or your connected Google account. Suqpage does not ask you to create or reset a password.</p></section> : <>
+    {managed ? <section className="panel"><h2>Email sign-in</h2><p className="muted">Use a one-time code sent to your account email.</p></section> : <>
       {params.required ? <p className="notice">Change the temporary password before using the dashboard.</p> : null}
       {params.error ? <p className="error">{params.error}</p> : null}
       {params.saved ? <p className="notice">Password updated and other sessions revoked.</p> : null}

@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 const destination = path.resolve(".local/supabase-runtime.env");
-const providerConfiguration = path.resolve(".env");
 
 function parseEnvironment(source) {
   const values = new Map();
@@ -46,13 +45,6 @@ const publishableKey = required(values, "ANON_KEY");
 const serviceRoleKey = required(values, "SERVICE_ROLE_KEY");
 
 const retained = fs.existsSync(destination) ? parseEnvironment(fs.readFileSync(destination, "utf8")) : new Map();
-const providerValues = fs.existsSync(providerConfiguration)
-  ? parseEnvironment(fs.readFileSync(providerConfiguration, "utf8"))
-  : new Map();
-const googleConfigured = Boolean(
-  providerValues.get("SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID")
-  && providerValues.get("SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET"),
-);
 const privacySalt = retained.get("PRIVACY_SALT") || crypto.randomBytes(32).toString("hex");
 const lines = [
   "# Generated from the local Supabase stack. Never commit this file.",
@@ -74,7 +66,7 @@ const lines = [
   `NEXT_PUBLIC_SUPABASE_URL=${apiUrl}`,
   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${publishableKey}`,
   "SUQPAGE_EMAIL_OTP_ENABLED=1",
-  `SUQPAGE_GOOGLE_AUTH_ENABLED=${googleConfigured ? "1" : "0"}`,
+  "SUQPAGE_GOOGLE_AUTH_ENABLED=0",
   "SUQPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS=8000",
   `PRIVACY_SALT=${privacySalt}`,
   "NEXT_PUBLIC_SUQPAGE_PWA_ENABLED=true",

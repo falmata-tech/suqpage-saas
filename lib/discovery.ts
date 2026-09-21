@@ -7,6 +7,7 @@ import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
 import { parseShopPageContent } from "./owner-page-domain";
 import { publicPageContent } from "./business-profile";
+import { SEARCH_SEPARATORS, normalizeSearchText, searchTermGroups } from "./search-terms";
 
 export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
@@ -49,6 +50,7 @@ type DiscoveryRow = {
   logo_path: string;
   hero_image_path: string;
   published_profile_json?: string | null;
+  location_mode?: "area" | "storefront" | "legacy";
   booth_image_path: string;
   city: string;
   zone: string;
@@ -92,6 +94,7 @@ type SponsorPlacementRow = {
 };
 
 export type DiscoveryShowroom = {
+  locationMode?: "area" | "storefront" | "legacy";
   id: number;
   handle: string;
   name: string;
@@ -277,6 +280,7 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     region: row.region,
     latitude: row.latitude,
     longitude: row.longitude,
+    locationMode: row.location_mode || "legacy",
     fallbackStyle: row.fallback_style,
     sponsored: Boolean(row.is_sponsored),
     productionScale: row.production_scale,
@@ -351,15 +355,17 @@ function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,s
       b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
       ${profile ? "publication.content_json" : "NULL"} AS published_profile_json,
       p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+      COALESCE(location.location_mode,'legacy') AS location_mode,
       p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
       COALESCE(s.position,999) AS sponsor_position,p.production_scale,
       b.is_live,b.live_platform,b.live_url,
       ${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
     FROM businesses b
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_location_proposals location ON location.business_id=b.id
     LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
-    ${profile ? `LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
-      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)` : ""}
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=?
@@ -403,20 +409,34 @@ function selectSponsoredSql() {
   `;
 }
 
-const SEARCH_WHERE = `AND (
-  ?='' OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
-  OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
-  OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
-  OR EXISTS(
-    SELECT 1 FROM products product
-    WHERE product.business_id=b.id AND product.is_published=1
-      AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
-  )
-)`;
+// Every term must match one offering plus its business, never different products.
+const BUSINESS_SEARCH_TEXT = "concat_ws(' ',b.name,b.handle,b.tagline,COALESCE(publication.content_json::jsonb->>'about',b.description),p.city,p.zone,p.region)";
+const OFFERING_SEARCH_TEXT = `concat_ws(' ',product.name,product.description,${BUSINESS_SEARCH_TEXT})`;
+function wordMatch(document: string, terms = "?") {
+  const plain = `normalize(${document}, NFKC)`;
+  const folded = `translate(regexp_replace(normalize(${document}, NFKD), '[\u0300-\u036f]', '', 'g'), '${SEARCH_SEPARATORS}', '${' '.repeat(SEARCH_SEPARATORS.length)}')`;
+  const matches = (text: string) => `(${text} ILIKE ALL (ARRAY(SELECT jsonb_array_elements_text(m.terms->'all')))
+    AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(m.terms->'any') a(patterns)
+      WHERE NOT (${text} ILIKE ANY (ARRAY(SELECT jsonb_array_elements_text(a.patterns))))))`;
+  // Most searches use the existing literal path. Accent folding is evaluated only
+  // after that fails and the document contains characters that can need folding.
+  return `(SELECT NOT (m.terms->>'none')::boolean AND (${matches(plain)} OR
+    (${plain} ~ '[^ -~]' AND ${matches(folded)}))
+    FROM (SELECT ${terms}::jsonb AS terms) m)`;
+}
 
+const SEARCH_WHERE = `AND (
+  SELECT ${wordMatch(BUSINESS_SEARCH_TEXT, 'search.terms')} OR EXISTS (
+    SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1
+      AND ${wordMatch(OFFERING_SEARCH_TEXT, 'search.terms')}
+  ) FROM (SELECT ?::jsonb AS terms) search
+)`;
+function searchTerms(query: string) {
+  const groups = searchTermGroups(query).map(group => group.map(term => `%${escapeSearchPattern(term)}%`));
+  return JSON.stringify({ none: Boolean(query.trim()) && !normalizeSearchText(query), all: groups.filter(group => group.length === 1).map(group => group[0]), any: groups.filter(group => group.length > 1) });
+}
 function searchParameters(industryKey: string, query: string) {
-  const search = `%${escapeSearchPattern(query)}%`;
-  return [industryKey, industryKey, query, search, search, search, search, search, search, search, search];
+  return [industryKey, industryKey, searchTerms(query)];
 }
 
 function escapeSearchPattern(value: string) {
@@ -429,6 +449,8 @@ function productSuggestionSql(placeWhere: string) {
     FROM products product
     JOIN businesses b ON b.id=product.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=?
@@ -437,7 +459,7 @@ function productSuggestionSql(placeWhere: string) {
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND product.is_published=1
-      AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
+      AND ${wordMatch(OFFERING_SEARCH_TEXT)}
       ${placeWhere}
     GROUP BY product.name
     ORDER BY
@@ -451,16 +473,17 @@ function productSuggestionSql(placeWhere: string) {
   `;
 }
 
-function productSearchResultSql(placeWhere: string, suffix = "") {
+function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false) {
   return `
-    SELECT
-      product.id,product.name,product.description,product.image_path,
+    SELECT ${countOnly ? "COUNT(*) AS total" : `      product.id,product.name,product.description,product.image_path,
       COALESCE(category.name,'Product') AS category_name,
       b.id AS business_id,b.handle AS business_handle,b.name AS business_name,
-      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
+      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key`}
     FROM products product
     JOIN businesses b ON b.id=product.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     LEFT JOIN categories category ON category.id=product.category_id AND category.business_id=b.id
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
@@ -470,21 +493,16 @@ function productSearchResultSql(placeWhere: string, suffix = "") {
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND product.is_published=1
-      AND (
-        product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\'
-        OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
-        OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
-        OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
-      )
+      AND ${wordMatch(OFFERING_SEARCH_TEXT)}
       ${placeWhere}
-    ORDER BY
+    ${countOnly ? "" : `ORDER BY
       CASE
         WHEN lower(product.name)=lower(?) THEN 0
         WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
         WHEN lower(b.name)=lower(?) THEN 2
         ELSE 3
       END,
-      lower(product.name),lower(b.name),product.id
+      lower(product.name),lower(b.name),product.id`}
     ${suffix}
   `;
 }
@@ -610,7 +628,7 @@ function distanceKm(left: DiscoveryShowroom, right: DiscoveryShowroom) {
 }
 
 export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryNearbyGroup[] {
-  const ordered = [...showrooms].sort((left, right) =>
+  const ordered = showrooms.filter(showroom => showroom.locationMode !== "area").sort((left, right) =>
     left.city.localeCompare(right.city)
     || left.latitude - right.latitude
     || left.longitude - right.longitude
@@ -719,16 +737,21 @@ type MarketplaceBase = Omit<MarketplaceDiscoveryView, "featuredNowBusinessId">;
 
 async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryReadPort): Promise<MarketplaceBase> {
   const { all, get } = port;
-  const industry = normalizeIndustrySelection(options.industry);
-  const rawQuery = (options.q || "").trim().slice(0, 80);
-  const query = rawQuery.length >= 2 ? rawQuery : "";
+  const rawQuery = (options.q || "").normalize("NFKC").trim().slice(0, 80);
+  const query = rawQuery;
+  const industry = normalizeIndustrySelection(options.industry || (query ? "all" : ""));
   const productionScale = normalizeProductionScale(options.scale);
   const projectionIndustryKey = industry.key || ALL_DISCOVERY_INDUSTRIES.key;
   const where = discoveryWhere(productionScale);
   const params = discoveryParameters(projectionIndustryKey, query, productionScale);
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
-  const places = placeOptions(locationRows);
   const requestedPlace = (options.place || "").trim().slice(0, 180);
+  // A valid selected place must not disappear merely because this query has no
+  // matches there. Resolve its eligibility independently of the query in that case.
+  let places = placeOptions(locationRows);
+  if (query && requestedPlace && !places.some(place => place.key === requestedPlace)) {
+    places = placeOptions(await all<DiscoveryRow>(selectSql(where), discoveryParameters(projectionIndustryKey, "", productionScale)));
+  }
   const selectedPlace = places.find((place) => place.key === requestedPlace);
   const placeWhere = selectedPlace?.kind === "city"
     ? " AND lower(p.city)=lower(?) AND lower(p.region)=lower(?)"
@@ -747,18 +770,15 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
   const productParams = [projectionIndustryKey, projectionIndustryKey,
-    ...Array.from({ length: 8 }, () => `%${escapedQuery}%`), ...placeParams,
+    searchTerms(query), ...placeParams,
     query, `${escapedQuery}%`, query];
-  const productSql = productSearchResultSql(placeWhere);
   const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
   const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
-  const businessSql = selectSql(filteredWhere, "", businessOrder);
-  const [productCountRow, businessCountRow] = await Promise.all([
-    get<{ total: number }>(`SELECT COUNT(*) AS total FROM (${productSql}) matched_products`, productParams),
-    get<{ total: number }>(`SELECT COUNT(*) AS total FROM (${businessSql}) matched_businesses`, businessResultParams),
-  ]);
+  const productCountRow = await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams.slice(0, -3));
   const productCount = Number(productCountRow?.total || 0);
-  const businessCount = Number(businessCountRow?.total || 0);
+  // The map already loaded every eligible business using the same predicate.
+  // Reuse that server-side count instead of sorting/hydrating it a second time.
+  const businessCount = rows.length;
   const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
   const total = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
   const request = normalizePageRequest({ page: options.page }, PUBLIC_PAGE_SIZE);
@@ -768,7 +788,7 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const businessOffset = type === "businesses" ? window.offset : Math.max(0, window.offset - productCount);
   const [productSuggestionRows, productResultRows, businessResultRows] = await Promise.all([
     query.length >= 2 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
-      projectionIndustryKey, projectionIndustryKey, `%${escapedQuery}%`, `%${escapedQuery}%`,
+      projectionIndustryKey, projectionIndustryKey, searchTerms(query),
       ...placeParams, query, `${escapedQuery}%`,
     ]) : Promise.resolve([]),
     productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere, "LIMIT ? OFFSET ?"),

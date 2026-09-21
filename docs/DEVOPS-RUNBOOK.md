@@ -32,7 +32,7 @@ npm run local:supabase:configure
 npm run local:postgres:seed
 npm run local:auth:migrate
 npm run local:media:migrate
-npm run dev:local
+npm run dev -- --hostname 127.0.0.1 --port 3102
 ```
 
 `local:supabase:configure` captures only local CLI values into ignored
@@ -138,9 +138,16 @@ PostgreSQL data uses `npm run migrate:postgres`; native test fixtures are isolat
 `npm run ops:auth-config -- plan --project sjeiiqxgscuqajpgddcc --patch /absolute/path/to/patch.json`
 is read-only remotely. The patch must be JSON containing only the intended
 fields, for example `{"mailer_otp_length":6,"mailer_otp_exp":600}`. The tool uses
-no local Supabase config, linked project, dotenv file, or Keychain fallback.
-Supply a management token privately as `SUPABASE_ACCESS_TOKEN` for the approved
-operation only; never include it in a command argument or commit it.
+no local Supabase config, linked project or dotenv file. By default supply a
+management token privately as `SUPABASE_ACCESS_TOKEN` for the approved operation
+only; never include it in a command argument or commit it. Alternatively add
+`--credential-source cli` to both plan and apply to opt into the default Supabase
+CLI macOS Keychain entry. This bounded reader checks account `supabase`, then
+legacy `access-token` only when the first is absent or returns an empty password.
+Missing credentials, locked/denied reads or invalid nonempty credentials stop the
+operation. There is no automatic credential fallback,
+profile/endpoint discovery or support for other saved-login stores. Unset an
+existing environment token before explicitly selecting CLI login.
 
 The output names the pinned project, production origin, proposed safe values,
 plan ID, expiry, and review digest. It never prints current provider settings or
@@ -152,9 +159,14 @@ After the owner reviews that exact plan, use:
 
 `npm run ops:auth-config -- apply --project sjeiiqxgscuqajpgddcc --plan PLAN_ID --approve REVIEWED_DIGEST`
 
+Version-2 plans bind credential source and a token fingerprint without storing the
+token. A changed login/source or older unbound plan requires a fresh review.
 Plans expire after ten minutes. Apply revalidates the backup, digest, scope,
 project health, and unchanged remote state before one narrow PATCH and complete
-readback. Coordinate a single writer during this maintenance window: Supabase's
+readback. Existing customization flags for approved nonempty subject/template
+fields are predicted explicitly, never sent to the provider or ignored wholesale.
+All other provider values must match exactly. Coordinate a single writer during
+this maintenance window: Supabase's
 API does not provide an atomic compare-and-swap for the configuration snapshot.
 Verification detects unexpected readback changes but cannot prevent another
 administrator writing between the precheck and PATCH. An attempt is never
@@ -188,12 +200,12 @@ repository path, not an OS sandbox; restrict management credentials accordingly.
    six-digit sign-in code. Prove delivery, expiry, resend throttling, and one-time
    use. Treat personal Gmail as a bounded launch bridge and move to a
    verified-domain transactional sender before broad public promotion.
-8. For Google sign-in, create a Google Web OAuth client and place its client ID
-   and secret in the Supabase provider dashboard. The callback URI must be the
-   exact Supabase callback shown there. Provider secrets never enter Netlify,
-   Git, or chat.
+8. Google sign-in is disabled under S17. Retain existing provider credentials;
+   do not restore OAuth unless separately requested. The app ignores old enabled
+   flags, and local provisioning sets Google off. Provider-level hosted disablement
+   uses the dashboard under DEP-029, never a broad config push.
 9. Enable `SUQPAGE_AUTH_DRIVER=supabase` on one candidate, prove email OTP and
-   Google login, logout, linked/new-user routing, unlinked denial,
+   Google-initiation denial, logout, linked/new-user routing, unlinked denial,
    suspended-user denial, and cross-tenant denial, then monitor before retiring
    local sessions.
 
@@ -348,3 +360,20 @@ worker route before this cleanup release has reached controlled browsers.
 Record local command results, exact commit, GitHub run ID, backup identifier,
 image digest, limitations, and remaining operator steps in the controlling spec
 or launch verification document. Never record credentials or customer data.
+
+Local development uses the same guarded launcher for `npm run dev` and
+`npm run dev:local`. It loads `.local/supabase-runtime.env`, validates the local
+PostgreSQL/Auth/Storage endpoints, and accepts `--hostname` / `--port`. CLI port
+overrides `PORT`; both app origins follow the chosen address. Startup does not
+migrate or reset the database. Restart an older running Next process after changing
+these settings. Missing runtime settings require `npm run local:supabase:configure`.
+
+After initial local setup, `npm run dev -- --hostname 127.0.0.1 --port 3102`
+checks local PostgreSQL and Auth before launching Next. On macOS it opens Docker
+Desktop if needed, waits up to two minutes for the engine, and starts this local
+Supabase project if services have not resumed. Supabase startup and readiness each
+have a three-minute limit. Healthy services are reused. It never resets, migrates
+or seeds data. Missing local settings still require `local:supabase:configure`;
+Linux/other systems must start their Docker engine manually when it is stopped.
+CLI output containing local keys is not printed by the launcher. A failure points
+to the explicit local command to inspect; no hosted configuration is changed.

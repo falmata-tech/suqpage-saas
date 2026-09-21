@@ -15,8 +15,8 @@ export type PagePublication = {
 export interface PagePublicationPort {
   latest(businessId: number): Promise<PagePublication | null>;
   previous(businessId: number, revision: number): Promise<PagePublication | null>;
-  active(businessId: number): Promise<boolean>;
-  // Serialize with draft edits and publication writes; recheck owner, active
+  publishable(businessId: number): Promise<boolean>;
+  // Serialize with draft edits and publication writes; recheck owner, publishable
   // business, draft version and expected publication revision in the transaction.
   commit(actor: SessionUser, draft: OwnerPageDraft, expectedRevision: number,
     content: ShopPageContent | null, action: "publish" | "restore"): Promise<PagePublication | null>;
@@ -34,7 +34,7 @@ export async function changePagePublication(
   }
   const draft = await readOwnerPage(drafts, actor, businessId);
   if (!draft || draft.version !== version) throw new OwnerPageError("The draft has changed. Reload and review it before publishing.", 409);
-  if (!(await publications.active(businessId))) throw new OwnerPageError("This page is not available for publication yet.", 403);
+  if (!(await publications.publishable(businessId))) throw new OwnerPageError("This page is not available for publication yet.", 403);
   const latest = await publications.latest(businessId);
   if ((latest?.revision || 0) !== input.revision) throw new OwnerPageError("The published page has changed. Reload before continuing.", 409);
   if (input.action === "restore" && !latest) throw new OwnerPageError("There is no previous publication to restore.", 409);

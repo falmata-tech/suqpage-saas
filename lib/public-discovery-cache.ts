@@ -33,7 +33,7 @@ const cachedSponsors = unstable_cache(
 export async function getPublicMarketplaceView(input: { industry?: string; q?: string; place?: string; page?: string; type?: string }) {
   const query = (input.q || "").trim();
   const view = await (query ? getMarketplaceDiscoveryView(input) : cachedMarketplace(input.industry || "", input.place || "", input.page || "1", input.type || "all"));
-  if (!ownerPageEditorEnabled()) return view;
+  if (query || !ownerPageEditorEnabled()) return view;
   const covers = await runtimeCurrentPageCovers(view.showrooms.map((showroom) => showroom.id));
   return { ...view, showrooms: view.showrooms.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })), searchBusinesses: view.searchBusinesses.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })) };
 }

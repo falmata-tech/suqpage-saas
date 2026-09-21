@@ -2,9 +2,9 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042]
+related: [FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042]
 owners: [product, frontend, security]
-last_updated: 2026-09-14
+last_updated: 2026-09-20
 change_level: L2
 ---
 
@@ -143,3 +143,44 @@ explicit visual approval and the required full gates. S2h in
 inbox retry/duplicate evidence with cleanup, preview regression and known stubs.
 The legacy full acceptance runner needs FE-040/FE-041 selector/flow reconciliation
 at the approved gate; no full-suite, build, commit or production claim is made.
+
+FE-047/BE-040 adds local-candidate case-insensitive word matching across one
+offering and its business/location text. Existing five-row backend pagination,
+map persistence, product links and inquiry contracts are retained. No semantic
+translation or media analysis is included; visual/release gates remain pending.
+
+## Inquiry action clarity — 2026-09-20 (S13)
+
+The user requests clearer distinction at the point of selection. Detail actions
+read “Inquire about this product only” (or service) and “Add to inquiry list”.
+Each has adjacent explanatory text: direct inquiry chooses a channel for only that
+item; adding keeps browsing and collects items for one later inquiry. Added state
+reads “Added to list”. Card actions read “Add to list”, with the item named in the
+accessible label. The saved-selection action reads “Review item” for one selection
+or “Review list” for multiple; count remains visible. No send happens on Add.
+
+GIVEN two saved items WHEN direct inquiry is opened for a third THEN its message
+contains only that third item and the saved list remains unchanged after closing.
+GIVEN an eligible card/detail WHEN Add is clicked THEN no composer or message is
+sent, the list count increases once and review exposes the accumulated selections.
+GIVEN desktop/390/320 or a service WHEN controls render THEN scope and later-send
+behavior are visible, accessible and do not overflow. No persistence/API change.
+
+Focused verification: scripts/capture-inquiry-clarity.mjs, test:product-inquiry,
+typecheck. Record screenshots before visual approval/full gates. Master section 9
+customer flow and S13 checklist describe current labels once verified.
+
+S13 focused evidence: nine captures at 1440/390/320 in
+`.local/inquiry-clarity-review/`; product/service/card labels, saved-list independence,
+zero sends on Add, no overflow and scoped axe pass. Inquiry unit tests and typecheck
+pass. Current visuals are local and await explicit approval before release gates.
+
+## Copy standard supersedes S13 helper text — S15
+
+The user's newest instruction removes redundant explanations. Keep the explicit
+single-item versus list labels, remove adjacent helper paragraphs, and use a
+message icon for opening an inquiry, a list-plus icon for adding, and a clipboard
+list icon for reviewing selections. Keep errors, outcomes, field requirements and
+privacy/consent details needed for a decision. Never show implementation notes,
+release status or explanatory filler in product UI. This is the default for future
+Suqpage work; master section 5.3 records the standing rule.

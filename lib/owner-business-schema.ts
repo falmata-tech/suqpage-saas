@@ -14,3 +14,16 @@ CREATE TABLE owner_location_proposals (
  (location_mode='storefront' AND latitude BETWEEN 3 AND 15 AND longitude BETWEEN 32 AND 49 AND latitude IS NOT NULL AND longitude IS NOT NULL))
 );
 `;
+
+export const OWNER_PLACE_ANCHOR_SCHEMA_SQL = `
+ALTER TABLE owner_location_proposals
+ ADD COLUMN place_id TEXT,
+ ADD COLUMN place_latitude DOUBLE PRECISION,
+ ADD COLUMN place_longitude DOUBLE PRECISION,
+ ADD CONSTRAINT owner_location_place_anchor_check CHECK (
+  (place_id IS NULL AND place_latitude IS NULL AND place_longitude IS NULL) OR
+  (place_id IS NOT NULL AND length(place_id) BETWEEN 1 AND 100 AND
+   place_latitude IS NOT NULL AND place_longitude IS NOT NULL AND
+   place_latitude BETWEEN 3 AND 15 AND place_longitude BETWEEN 32 AND 49)
+ );
+`;

@@ -44,7 +44,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
       </section>
       <section className="panel">
         <h2>Edit discovery profile</h2>
-        {proposal?<p className="notice">Owner location: {proposal.city}, {proposal.region}. {proposal.location_mode === "area"?"General area only: approval rounds the marker to an approximate area. Do not use a home address.":"Public storefront coordinates supplied by the owner."} {pending?"Awaiting review.":"Reviewed."}</p>:<p className="hint">The owner has not submitted a location yet.</p>}
+        {proposal?<p className="notice">Owner location: {proposal.city}, {proposal.region}. {proposal.location_mode === "area"?"General area only: the marker is approximate. Do not use a home address.":"Public storefront coordinates supplied by the owner."} Saved by the owner.</p>:<p className="hint">The owner has not saved a location yet.</p>}
         <form action={updateDiscoveryProfileAction} className="form-grid">
           <input type="hidden" name="businessId" value={profile.businessId} /><input type="hidden" name="proposalVersion" value={proposal?.version||0}/>
           <fieldset className="field full">
@@ -66,8 +66,8 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
           <details className="field full admin-form-disclosure">
             <summary>Advanced visibility <span>Map placement, fallback, and sponsorship</span></summary>
             <div className="admin-form-disclosure-body form-grid">
-              <div className="field"><label htmlFor="profile-latitude">Latitude</label><input id="profile-latitude" name="latitude" type="number" min="3" max="15" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.latitude??"":""):profile.latitude??""} required /></div>
-              <div className="field"><label htmlFor="profile-longitude">Longitude</label><input id="profile-longitude" name="longitude" type="number" min="32" max="49" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.longitude??"":""):profile.longitude??""} required /></div>
+              <div className="field"><label htmlFor="profile-latitude">Latitude</label><input id="profile-latitude" name="latitude" type="number" min="3" max="15" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.latitude??"":proposal.place_latitude??""):profile.latitude??""} required /></div>
+              <div className="field"><label htmlFor="profile-longitude">Longitude</label><input id="profile-longitude" name="longitude" type="number" min="32" max="49" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.longitude??"":proposal.place_longitude??""):profile.longitude??""} required /></div>
               <div className="field full"><label htmlFor="profile-fallback">Booth fallback style</label><select id="profile-fallback" name="fallbackStyle" defaultValue={profile.fallbackStyle}>{["workshop", "botanical", "textile", "food", "home", "technical"].map((style) => <option key={style}>{style}</option>)}</select></div>
               <fieldset className="field full">
                 <legend>Homepage sponsor</legend>

@@ -1,5 +1,6 @@
 export const offeringKinds = [
   "standard_product",
+  "service",
   "made_to_order",
   "manufacturing_capability",
   "production_supply",
@@ -12,6 +13,7 @@ export type QuantityMode = (typeof quantityModes)[number];
 
 export const offeringKindLabels: Record<OfferingKind, string> = {
   standard_product: "Standard product",
+  service: "Service",
   made_to_order: "Made to order",
   manufacturing_capability: "Manufacturing capability",
   production_supply: "Production supply",
@@ -19,6 +21,7 @@ export const offeringKindLabels: Record<OfferingKind, string> = {
 
 export const offeringKindDescriptions: Record<OfferingKind, string> = {
   standard_product: "A defined item a customer can request in a desired quantity.",
+  service: "Work, expertise or assistance a customer can inquire about.",
   made_to_order: "A defined product made after specifications and quantity are agreed.",
   manufacturing_capability: "Something this business can repeatedly manufacture or fabricate.",
   production_supply: "A crop, material, ingredient, or production output supplied by cycle or batch.",
@@ -28,6 +31,9 @@ export function availabilityLabel(
   kind: OfferingKind,
   availability: "available" | "limited" | "unavailable" | "coming_soon",
 ) {
+  if (kind === "service") {
+    return { available: "Accepting inquiries", limited: "Limited availability", unavailable: "Not currently available", coming_soon: "Coming soon" }[availability];
+  }
   if (kind === "standard_product") {
     return {
       available: "Available",
@@ -50,6 +56,15 @@ export function availabilityLabel(
     unavailable: "Not accepting inquiries",
     coming_soon: "Planned capability",
   }[availability];
+}
+
+export function offeringNoun(kind: OfferingKind): "service" | "product" {
+  return kind === "service" ? "service" : "product";
+}
+
+export function catalogOfferingLabel(items: readonly { offering_kind: OfferingKind }[]): string {
+  const services = items.some(item => item.offering_kind === "service");
+  return services ? items.some(item => item.offering_kind !== "service") ? "Products & services" : "Services" : "Products";
 }
 
 export function normalizeOfferingKind(value: unknown): OfferingKind {

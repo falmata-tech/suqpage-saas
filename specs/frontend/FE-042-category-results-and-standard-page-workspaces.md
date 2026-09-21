@@ -2,7 +2,7 @@
 id: FE-042
 title: Paginated category results and standard page workspaces
 status: in_progress
-related: [FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043]
+related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043]
 owners: [product, frontend, operations]
 last_updated: 2026-09-14
 change_level: L2
@@ -43,6 +43,10 @@ contracts are reused. This is ready under BE-033; no new external provider is ne
   on desktop/phone entry without scrolling through products; no append/infinite scroll
   or client slicing as pagination authority. URLs support reload/back. Map geography
   remains independent of the selected result page.
+- D3: GIVEN a delayed search response WHEN the visitor types a newer query THEN
+  the older response cannot replace the newer input; the final results match the
+  latest query. Explicit one-character submission works, punctuation-only queries
+  show no matches, and browser Back restores the prior query and results.
 - W1: Navigation, dashboard attention, account rows and owner/staff actions point
   to Products, Your page, Page reviews, Marketplace, Support and Account as permitted.
   No custom request, revision studio, design library/SDK or intake feature remains
@@ -91,3 +95,10 @@ captures cover public category/results and owner/admin workflows using local fix
 accounts. No external notifications are sent. Explicit visual approval precedes
 expensive full gates. Additive review storage is rollback-compatible; dormant legacy
 records remain untouched. Audit evidence belongs in docs/SUQPAGE-APP-WIRING-AUDIT.md.
+
+Current candidate FE-048/BE-041/DEP-038 supersedes staff approval requirements and
+adds a simple Product/Service input. Historical evidence above remains scoped to
+its release; the new candidate awaits focused verification and visual approval.
+
+S20b: a query-only link opens All categories results. A valid selected city remains
+selected when its result count becomes zero; changing text cannot broaden geography.

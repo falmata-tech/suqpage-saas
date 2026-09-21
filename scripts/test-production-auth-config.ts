@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { suqpageEmailBrandingPatch } from "./auth-email-templates";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -6,7 +7,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
-  applyAuthPlan, digest, prepareAuthPlan, PRODUCTION_AUTH, supabaseAuthPort, validatePatch,
+  applyAuthPlan, digest, expectedAuthReadback, prepareAuthPlan, PRODUCTION_AUTH, supabaseAuthPort, validatePatch,
   type AuthConfig, type AuthConfigPort,
 } from "./production-auth-config";
 
@@ -25,6 +26,7 @@ function fixture() {
   let config = fixtureConfig();
   const writes: AuthConfig[] = [];
   const port: AuthConfigPort = {
+    credential: { source: "env", fingerprint: digest("fixture-credential") },
     async project() { return { id: project, status: "ACTIVE_HEALTHY" }; },
     async read() { return structuredClone(config); },
     async patch(patch) { writes.push(structuredClone(patch)); config = { ...config, ...patch }; },
@@ -62,6 +64,40 @@ for (const [index, patch] of forbidden.entries()) {
     } finally { f.dispose(); }
   });
 }
+test("all Suqpage email branding is exact and cannot alter providers or sender addresses", () => {
+  const patch = suqpageEmailBrandingPatch();
+  assert.equal(Object.keys(patch).length, 27);
+  validatePatch(project, patch, template);
+  for (const [key, value] of Object.entries(patch)) {
+    assert.doesNotMatch(value, /africmade|africpage|mirtpage/i);
+    assert.throws(() => validatePatch(project, { [key]: "unreviewed" }, template));
+  }
+  for (const patch of [{ smtp_admin_email: "new@example.test" }, { mailer_notifications_email_changed_enabled: true }]) {
+    assert.throws(() => validatePatch(project, patch, template));
+  }
+});
+
+test("plans bind credential source and login, and reject old unbound plans before provider calls", async () => {
+  const f = fixture();
+  try {
+    const plan = await f.plan();
+    assert.equal(plan.credentialSource, "env");
+    const file = path.join(f.directory, `${plan.id}.json`);
+    const saved = JSON.parse(fs.readFileSync(file, "utf8"));
+    assert.equal(saved.version, 2);
+    assert.ok(!fs.readFileSync(file, "utf8").includes("fixture-credential"));
+    const denied = { ...f.port, async project() { throw Error("Must reject before provider read"); } };
+    for (const credential of [{ source: "cli" as const, fingerprint: f.port.credential.fingerprint },
+      { source: "env" as const, fingerprint: digest("other-login") }]) {
+      await assert.rejects(applyAuthPlan({ ...f, ...plan, port: { ...denied, credential } }), /Credential/);
+    }
+    fs.writeFileSync(file, JSON.stringify({ ...saved, version: 1 }));
+    await assert.rejects(applyAuthPlan({ ...f, ...plan, port: denied }), /Invalid plan/);
+    assert.equal(f.writes.length, 0);
+    assert.ok(!fs.existsSync(`${file}.attempt`));
+  } finally { f.dispose(); }
+});
+
 test("explicit target and safe exact patch are required", async () => {
   assert.throws(() => validatePatch("another-project", { mailer_otp_length: 6 }, template), /project/);
   validatePatch(project, { site_url: PRODUCTION_AUTH.origin, uri_allow_list: `${PRODUCTION_AUTH.origin}/auth/callback`,
@@ -241,4 +277,56 @@ test("CLI refuses unsafe input from another directory without credentials or pro
       assert(!`${result.stdout}${result.stderr}`.includes("DO_NOT_PRINT_THIS"));
     }
   } finally { f.dispose(); }
+});
+
+test("readback predicts only approved customization flags and preserves every other field", async () => {
+  for (const corruption of ["none", "unrelated-flag", "false-flag", "removed", "added", "wrong-type", "content", "credential"]) {
+    const f = fixture();
+    try {
+      const config = f.config();
+      config.mailer_subjects_custom_contents = { MAILER_SUBJECTS_INVITE: false, MAILER_SUBJECTS_RECOVERY: false };
+      config.mailer_templates_custom_contents = { MAILER_TEMPLATES_INVITE_CONTENT: false };
+      const patch = { mailer_subjects_invite: "You are invited to Suqpage",
+        mailer_templates_invite_content: suqpageEmailBrandingPatch().mailer_templates_invite_content };
+      const plan = await f.plan(patch);
+      const originalPatch = f.port.patch;
+      f.port.patch = async request => {
+        assert.deepEqual(request, patch); // Derived flags never enter the write.
+        await originalPatch(request);
+        const after = f.config();
+        const subjects = after.mailer_subjects_custom_contents as Record<string, unknown>;
+        const templates = after.mailer_templates_custom_contents as Record<string, unknown>;
+        subjects.MAILER_SUBJECTS_INVITE = true;
+        templates.MAILER_TEMPLATES_INVITE_CONTENT = true;
+        if (corruption === "unrelated-flag") subjects.MAILER_SUBJECTS_RECOVERY = true;
+        if (corruption === "false-flag") subjects.MAILER_SUBJECTS_INVITE = false;
+        if (corruption === "removed") delete subjects.MAILER_SUBJECTS_RECOVERY;
+        if (corruption === "added") subjects.UNREVIEWED = true;
+        if (corruption === "wrong-type") subjects.MAILER_SUBJECTS_INVITE = "true";
+        if (corruption === "content") after.mailer_subjects_invite = "unexpected";
+        if (corruption === "credential") after.smtp_pass = "changed";
+      };
+      if (corruption === "none") await f.apply(plan);
+      else await assert.rejects(f.apply(plan), /readback/);
+      assert.equal(f.writes.length, 1);
+      assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.verified`)), corruption === "none");
+      await assert.rejects(f.apply(plan), /already attempted/);
+    } finally { f.dispose(); }
+  }
+});
+test("customization metadata is immutable and malformed metadata cannot admit a write", async () => {
+  const before = { mailer_subjects_custom_contents: { MAILER_SUBJECTS_INVITE: false } };
+  const expected = expectedAuthReadback(before, { mailer_subjects_invite: "You are invited to Suqpage" });
+  assert.equal(before.mailer_subjects_custom_contents.MAILER_SUBJECTS_INVITE, false);
+  assert.deepEqual(expected.mailer_subjects_custom_contents, { MAILER_SUBJECTS_INVITE: true });
+  for (const flags of [null, [], { MAILER_SUBJECTS_INVITE: "false" }]) {
+    const f = fixture();
+    try {
+      f.config().mailer_subjects_custom_contents = flags;
+      const plan = await f.plan({ mailer_subjects_invite: "You are invited to Suqpage" });
+      await assert.rejects(f.apply(plan), /metadata/);
+      assert.equal(f.writes.length, 0);
+      assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.attempt`)), false);
+    } finally { f.dispose(); }
+  }
 });

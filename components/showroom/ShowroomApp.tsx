@@ -32,6 +32,8 @@ import type { Catalog, Product } from "@/lib/types";
 import {
   availabilityLabel,
   offeringKindLabels,
+  catalogOfferingLabel,
+  offeringNoun,
 } from "@/lib/offerings";
 import { formatEtbPrice } from "@/lib/offering-presentation";
 import { normalizeProductDetailPattern } from "@/lib/product-detail-patterns";
@@ -228,12 +230,12 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
     const validOptions = selectionOptions(product, options);
     if (!inquiryEligible(product) || product.business_id !== catalog.business.id || !validOptions) { show("Choose the available product options first."); return; }
     const key = selectionKey(product.id, validOptions);
-    if (cart.some(line => selectionKey(line.product.id, line.options) === key)) { show("Already added to your inquiry."); return; }
+    if (cart.some(line => selectionKey(line.product.id, line.options) === key)) { show("Already in your inquiry list."); return; }
     if (cart.length >= MAX_INQUIRY_SELECTIONS) { show("You can include up to 20 selections in one inquiry."); return; }
     setCart(current => current.length >= MAX_INQUIRY_SELECTIONS || current.some(line => selectionKey(line.product.id, line.options) === key)
       ? current : [...current, { product, quantity: "", options: validOptions }]);
     if (!businessProfile) setSelected(null);
-    show(cart.length ? `Added. ${cart.length + 1} products ready to inquire about.` : "Added. Keep browsing or inquire about this item.");
+    show(cart.length ? `Added to list. Review your ${cart.length + 1} items when you’re ready to send one inquiry.` : "Added to list. Keep browsing, then review your selection to send an inquiry.");
   };
   const inquireNow = (product: Product, options: Record<string, string>) => {
     const validOptions = selectionOptions(product, options);
@@ -369,7 +371,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
       {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} on Suqpage</h1> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={cart.map(line => line.product.id)} onBackToProducts={backToProducts}
-        productDetail={selected || routedProduct ? <ProductPage key={selected?.id || "unavailable"} product={selected}
+        productDetail={selected || routedProduct ? <ProductPage catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected}
           backHref={`/@${catalog.business.handle}`} onBack={backToProducts}
           onAdd={options => selected && add(selected, options)} onInquire={options => selected && inquireNow(selected, options)}
           isAdded={options => Boolean(selected && cart.some(line => selectionKey(line.product.id, line.options) === selectionKey(selected.id, options)))}
@@ -635,7 +637,7 @@ function InquiryDrawer({
   const handoffs = inquiryHandoffs(contacts, message);
   async function copyInquiry() {
     if (!cart.length) {
-      show("Add at least one product or capability.");
+      show("Choose at least one product or service.");
       return;
     }
     setPreparedMessage(message);
@@ -704,20 +706,20 @@ function InquiryDrawer({
   const item = (line: CartLine, index: number, grouped: boolean) => <div className={inquiryStyles.summary}>
     {line.product.image_path ? <img src={line.product.image_path} alt="" /> : <span className={inquiryStyles.thumb}><PackageOpen size={24} aria-hidden="true" /></span>}
     <div className={inquiryStyles.itemCopy}><h3>{line.product.name}</h3><p>{Object.entries(line.options).filter(([name]) => (line.product.option_groups?.find(group => group.name === name)?.values.length || 0) > 1).map(([name, value]) => `${name}: ${value}`).join(" · ")}</p>
-      <details className={inquiryStyles.quantity}><summary>{line.quantity ? `Quantity: ${line.quantity}` : "Add quantity (optional)"}</summary><label>Desired quantity<input type="text" value={line.quantity} maxLength={80} placeholder="e.g. 2 pieces or 5 kg" disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
+      <details className={inquiryStyles.quantity}><summary>{line.quantity ? `${line.product.offering_kind === "service" ? "Request" : "Quantity"}: ${line.quantity}` : line.product.offering_kind === "service" ? "Add scope or duration (optional)" : "Add quantity (optional)"}</summary><label>{line.product.offering_kind === "service" ? "Scope or duration" : "Desired quantity"}<input type="text" value={line.quantity} maxLength={80} placeholder={line.product.offering_kind === "service" ? "e.g. one session or a two-hour visit" : "e.g. 2 pieces or 5 kg"} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
     </div>
     {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={`Remove ${line.product.name} from inquiry`}><X size={18} aria-hidden="true" /></button> : null}
   </div>;
   return createPortal(<div className={inquiryStyles.overlay}>
     <div className={inquiryStyles.backdrop} onClick={close} />
-    <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label="Product inquiry" tabIndex={-1}>
-      <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? `Inquire about ${cart.length} products` : "Inquire about this product"}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label="Close inquiry" onClick={close}><X size={20} aria-hidden="true" /></button></header>
+    <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label="Business inquiry" tabIndex={-1}>
+      <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? `Inquire about ${cart.length} items` : `Inquire about this ${cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item"}`}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label="Close inquiry" onClick={close}><X size={20} aria-hidden="true" /></button></header>
       <div className={inquiryStyles.scroll}>
-        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>Choose a product to start an inquiry.</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>Browse products</button></div> : <>
-          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label="Inquiry products">{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
+        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>Choose a product or service to start an inquiry.</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>Browse offerings</button></div> : <>
+          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label="Inquiry items">{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
           {previewOnly ? <p className={inquiryStyles.note}>Preview only. No inquiry will be sent.</p> : platformStep ? <form className={inquiryStyles.platform} onSubmit={sendInquiry}>
             <button className={inquiryStyles.back} type="button" disabled={busy} onClick={() => { setPlatformStep(false); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>("[data-platform-send]")?.focus()); }}><ArrowLeft size={16} aria-hidden="true" />Back to sending options</button>
-            <h3>Send on Suqpage</h3><p>Your inquiry goes to the shop’s inbox. Add a phone number so they can reply.</p>
+            <h3>Send on Suqpage</h3>
             <label>Reply phone number<input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e => updatePhone(e.target.value)} placeholder="+251…" maxLength={40} required disabled={busy || sendState === "sent"} aria-invalid={sendState === "error"} aria-describedby="inquiry-send-status" /></label>
             <button type="submit" className={inquiryStyles.platformButton} disabled={busy || sendState === "sent"}>{sendState === "sent" ? <Check size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}{busy ? "Sending…" : sendState === "sent" ? "Inquiry sent" : "Send inquiry"}</button>
             <p id="inquiry-send-status" className={sendState === "sent" ? inquiryStyles.success : inquiryStyles.error} role={sendState === "error" ? "alert" : "status"}>{sendState === "sent" ? `Sent to ${catalog.business.name}. They can reply using your phone number.` : sendError}</p>
@@ -727,7 +729,6 @@ function InquiryDrawer({
               <button type="button" onClick={copyInquiry}><Copy size={18} aria-hidden="true" />{copyState === "copied" ? "Copied" : "Copy inquiry"}</button>
             </div>
             <button type="button" className={inquiryStyles.platformButton} data-platform-send onClick={() => setPlatformStep(true)}><Send size={18} aria-hidden="true" />Send on Suqpage</button>
-            <p className={inquiryStyles.note}>Messaging apps open a draft for you to review and send.</p>
             <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{copyState === "manual" ? "Select and copy your message" : "Preview inquiry message"}</summary><textarea aria-label="Inquiry message" readOnly value={message} onFocus={e => e.target.select()} /></details>
           </div>}
           {cart.length > 1 ? <button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>Clear inquiry list</button> : null}

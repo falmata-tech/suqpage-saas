@@ -2,7 +2,7 @@
 id: DEP-012
 title: Unified offering migration and rollout
 status: done
-related: [DEP-001, DEP-008, DEP-011, DEP-013, FE-016, BE-014]
+related: [DEP-034, DEP-001, DEP-008, DEP-011, DEP-013, FE-016, BE-014]
 owners: [operations, backend, qa]
 last_updated: 2026-07-29
 change_level: L3

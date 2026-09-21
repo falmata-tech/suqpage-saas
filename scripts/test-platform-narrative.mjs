@@ -20,7 +20,8 @@ const terms = read("app/terms/page.tsx");
 assert.doesNotMatch(privacy + terms, /page project|private project|design is imported/i);
 assert.match(privacy, /account email and phone remain private/);
 assert.match(privacy, /grant or revoke staff assistance/);
-assert.match(terms, /first review before publication/);
+assert.match(terms, /publish it when ready/);
+assert.match(terms, /owner saves update the live page without staff approval/);
 const publicNarrative = [home, publicFrame, discovery, about, signup, signupForm, login, metadata, support, businessPage].join("\n");
 const activeApplicationFiles = ["app", "components"]
   .flatMap((directory) => fs.readdirSync(directory, { recursive: true })
@@ -39,20 +40,23 @@ for (const file of ["components/DiscoveryWorkspace.tsx", "lib/discovery.ts", "li
 }
 assert.doesNotMatch(discovery, retiredGeneratedUrl);
 
-assert.match(home, /Shops and products near you/);
-assert.match(home, /contact the seller directly/);
+assert.match(home, /Discover businesses near you/);
+assert.match(home, /then inquire directly/);
 assert.match(home, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
-assert.match(discovery, /Find shops and products/);
+assert.match(discovery, /Find businesses, products and services/);
 assert.match(discovery, /Open page/);
-assert.match(discovery, /label: "Products"/);
+assert.match(discovery, /label: "Products & services"/);
 assert.match(discovery, /label: "Businesses"/);
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 
-assert.match(about, /Good shops deserve to be found/);
-assert.match(about, /home business to an established store/);
-assert.match(about, /Every shop gets a page of its own/);
+assert.match(about, /Your business deserves to be found/);
+assert.match(about, /home business to an established company/);
+assert.match(about, /each business a page/);
 assert.match(about, /Starting in Ethiopia/);
-for (const action of ["More choice, closer to you", "A place of your own", "People, not just listings", "Your next customer could be nearby"]) {
+assert.match(about, /African businesses|businesses across Africa/);
+assert.match(about, /Growers, makers, traders and service providers/);
+assert.match(about, /Daily Featured/);
+for (const action of ["Find your own way", "Show what makes you different", "Start a conversation", "Make your business easier to find"]) {
   assert.match(about, new RegExp(action));
 }
 assert.doesNotMatch(about, /transport arrangements|report a concern|commercial terms|specifications, quantities/i, "About remains a vision story instead of a support or transaction policy");
@@ -63,9 +67,10 @@ assert.match(signup, /add products and prepare your page after setup/);
 assert.match(signupForm, />Category</);
 assert.match(signupForm, /Finish setup/);
 assert.doesNotMatch(signupForm, /requestText/);
-assert.match(login, /Use a one-time email code or Google/);
+assert.match(login, /Use a one-time email code\./);
+assert.doesNotMatch(login, /Continue with Google|Use your Google account/);
 assert.match(login, /The same sign-in creates your account/);
-assert.match(metadata, /Discover shops and products near you/);
+assert.match(metadata, /Discover businesses, products and services/);
 assert.match(support, /Suqpage help or report/);
 assert.match(support, /Transport arrangements/);
 assert.doesNotMatch(support, /visit a site|observe production|check a specific order/i);
@@ -107,4 +112,4 @@ for (const overclaim of [
   assert.doesNotMatch(publicNarrative, overclaim, `Public narrative contains prohibited overclaim: ${overclaim}`);
 }
 
-console.log("Suqpage shops, products and direct-contact narrative contract passed.");
+console.log("Suqpage African business, product/service and direct-inquiry narrative contract passed.");

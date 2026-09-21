@@ -56,12 +56,13 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.goto('/dashboard/business');await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
   await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
   await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save account phone',exact:true}).click();
+  await expect(page.getByText('Account phone saved.',{exact:true})).toBeVisible();
   await page.reload();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
   await page.goto('/request');await expect(page).toHaveURL(/\/dashboard$/);
   await signOut(page);await page.goto('/dashboard');await expect(page).toHaveURL(/\/login/);
 });
 
-test('standard owner, product, admin review and inquiry lifecycle',async({},testInfo)=>{
+test('self-service owner, staff product controls and inquiry lifecycle',async({},testInfo)=>{
   test.setTimeout(360_000);
   execFileSync(process.execPath,['--import','tsx',path.join(process.cwd(),'scripts/capture-launch-wiring.mjs')],{
     env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('workflows')},stdio:'pipe',timeout:330_000,maxBuffer:4*1024*1024,
@@ -80,7 +81,7 @@ test('linked products, inquiry selection and progressive reply contact',async({p
     await page.setViewportSize({width,height:900});await page.goto('/@selam-weave');
     await page.locator('a[href*="?product="]').first().click();await expect(page).toHaveURL(/product=\d+/);
     const url=page.url();await page.reload();await expect(page).toHaveURL(url);
-    await page.getByRole('button',{name:'Inquire about this product',exact:true}).click();
+    await page.getByRole('button',{name:'Inquire about this product only',exact:true}).click();
     const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
     await expect(page.getByLabel('Reply phone number',{exact:true})).toHaveCount(0);
     await expect(dialog.getByRole('button',{name:'Copy inquiry',exact:true})).toBeVisible();
@@ -131,7 +132,7 @@ test('business video loads a privacy-enhanced frame only after activation',async
 test('legacy saved inquiry migrates and bookmarked assets remain available', async ({ page, request }) => {
   await page.goto('/@selam-weave');
   await page.locator('a[href*="?product="]').first().click();
-  await page.getByRole('button', { name: 'Add to inquiry', exact: true }).click();
+  await page.getByRole('button', { name: 'Add to inquiry list', exact: true }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('suqpage-cart:selam-weave'))).not.toBeNull();
   const saved = await page.evaluate(() => {
     const key = 'suqpage-cart:selam-weave';
@@ -146,4 +147,12 @@ test('legacy saved inquiry migrates and bookmarked assets remain available', asy
   for (const url of ['/brand/africmade-mark.svg', '/uploads/seed/mirtpage/icon.png']) {
     expect((await request.get(url)).status()).toBe(200);
   }
+});
+
+// BE-040/FE-042: real browser regression for late results and query-only links.
+test('human searches preserve latest typing, filters and product navigation',async({},testInfo)=>{
+  test.setTimeout(180_000);
+  execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-human-search.mjs')],{
+    env:{...process.env,SUQPAGE_SEARCH_CAPTURE_DIR:testInfo.outputPath('human-search')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
+  });
 });

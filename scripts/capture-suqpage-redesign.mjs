@@ -44,7 +44,7 @@ try {
           const product = profile.locator("article").first();
           const productName = await product.locator("h3").innerText();
           await product.getByRole("link", { name: `View ${productName}`, exact: true }).click();
-          await page.locator("[data-product-page]").getByRole("button", { name: "Inquire about this product", exact: true }).click();
+          await page.locator("[data-product-page]").getByRole("button", { name: "Inquire about this product only", exact: true }).click();
           await expect(page.getByRole("dialog", { name: "Product inquiry", exact: true })).toContainText(productName);
           await page.keyboard.press("Escape");
           await page.getByRole("link", { name: "Back to products", exact: true }).click();

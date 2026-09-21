@@ -15,7 +15,7 @@ export default async function AdminBusinesses({ searchParams }: {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
-  const businesses = await listBusinessesPage(query);
+  const businesses = await listBusinessesPage({...query, location:undefined});
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Businesses</strong></nav>
     <div className="dashboard-head standard-page-heading"><div><span className="eyebrow">Customer operations</span><h1>Accounts</h1><p>Find any account, then manage its Suqpage page, marketplace presence, access, activity, and service record in one workspace.</p></div><Link className="btn brand" href="/dashboard/clients/new">Add account</Link></div>
@@ -23,14 +23,14 @@ export default async function AdminBusinesses({ searchParams }: {
     {query.saved ? <p className="notice">Business status saved.</p> : null}
     <CollectionToolbar action="/dashboard/admin/businesses" search={query.q || ""} placeholder="Business, handle, or client email" activeFilters={Boolean(query.q || query.status || query.location)}>
       <label><span>Status</span><select name="status" defaultValue={query.status || ""}><option value="">All statuses</option><option>active</option><option>draft</option><option>suspended</option></select></label>
-      <label><span>Location review</span><select name="location" defaultValue={query.location||""}><option value="">All locations</option><option value="pending">Awaiting review</option></select></label>
+
     </CollectionToolbar>
     {businesses.items.length ? <>
-      <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>Account</th><th>Access</th><th>Marketplace</th><th>Review</th><th>Page</th><th><span className="sr-only">Workspace</span></th></tr></thead><tbody>{businesses.items.map((business)=><tr key={business.id}>
+      <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>Account</th><th>Access</th><th>Marketplace</th><th>Page</th><th><span className="sr-only">Workspace</span></th></tr></thead><tbody>{businesses.items.map((business)=><tr key={business.id}>
         <td data-label="Business"><strong>{business.name}</strong><br/><small>@{business.handle}</small></td>
         <td data-label="Access">{business.client_email ? <><strong>{business.client_name}</strong><br/><small>{business.client_email}{business.client_count > 1 ? ` · ${business.client_count} users` : ""}</small></> : <span className="muted">Invitation pending</span>}</td>
-        <td data-label="Marketplace">{business.location_pending?<><Link href={`/dashboard/admin/discovery/${business.id}`} className="small-btn">Review location</Link><br/></>:null}<span className={`badge ${business.marketplace_excluded ? "cancelled" : business.marketplace_approved_at ? "active" : "limited"}`}>{business.marketplace_excluded ? "hidden" : business.marketplace_approved_at ? "visible" : "setup needed"}</span>{business.marketplace_city || business.marketplace_region ? <><br/><small>{[business.marketplace_city,business.marketplace_region].filter(Boolean).join(", ")}</small></> : null}</td>
-        <td data-label="Review">{business.page_review_status ? <Link href={`/dashboard/admin/page-reviews/${business.id}`}>{business.page_review_status.replaceAll("_", " ")}</Link> : "Not submitted"}</td>
+        <td data-label="Marketplace"><span className={`badge ${business.marketplace_excluded ? "cancelled" : business.marketplace_approved_at ? "active" : "limited"}`}>{business.marketplace_excluded ? "hidden" : business.marketplace_approved_at ? "visible" : "setup needed"}</span>{business.marketplace_city || business.marketplace_region ? <><br/><small>{[business.marketplace_city,business.marketplace_region].filter(Boolean).join(", ")}</small></> : null}</td>
+
         <td data-label="Page"><span className={`badge ${business.status}`}>{business.status}</span></td>
         <td data-label="Workspace"><Link className="small-btn" href={`/dashboard?business=${business.id}`}>Open workspace</Link></td>
       </tr>)}</tbody></table></div>

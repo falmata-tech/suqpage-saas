@@ -13,7 +13,7 @@ async function main() {
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 45);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 47);
     const routines = await db.prepare('SELECT prosrc FROM pg_proc WHERE pronamespace=current_schema()::regnamespace').all();
     assert.ok(routines.length >= 11);
     for (const routine of routines) assert.doesNotMatch(routine.prosrc, /(?:"public"|public)\./, 'Fixture triggers never resolve into developer data.');

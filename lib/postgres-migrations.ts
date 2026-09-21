@@ -1,6 +1,6 @@
 import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 import baseline from "./postgres-baseline.json";
-import { OWNER_BUSINESS_SCHEMA_SQL } from "./owner-business-schema";
+import { OWNER_BUSINESS_SCHEMA_SQL, OWNER_PLACE_ANCHOR_SCHEMA_SQL } from "./owner-business-schema";
 import { PAGE_REVIEW_SCHEMA_SQL } from "./page-review-schema";
 import { CONTACT_SCHEMA_SQL } from "./contact-schema";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
@@ -409,6 +409,21 @@ export async function migratePostgresDatabase(
         ["MirtPage monthly", "AfricMade monthly", "AfricPage monthly"]);
       await runner.query("INSERT INTO schema_migrations(version) VALUES(45)");
       applied.push(45);
+    }
+    const migration46 = await runner.query("SELECT version FROM schema_migrations WHERE version=46");
+    if (!migration46.rows.length) {
+      await runner.query(`ALTER TABLE products DROP CONSTRAINT ck_products_6;
+        ALTER TABLE products ADD CONSTRAINT ck_products_6 CHECK (offering_kind IN ('standard_product','service','made_to_order','manufacturing_capability','production_supply'));
+        ALTER TABLE inquiry_items DROP CONSTRAINT ck_inquiry_items_3;
+        ALTER TABLE inquiry_items ADD CONSTRAINT ck_inquiry_items_3 CHECK (offering_kind_snapshot IN ('standard_product','service','made_to_order','manufacturing_capability','production_supply'));`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(46)");
+      applied.push(46);
+    }
+    const migration47 = await runner.query("SELECT version FROM schema_migrations WHERE version=47");
+    if (!migration47.rows.length) {
+      await runner.query(OWNER_PLACE_ANCHOR_SCHEMA_SQL);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(47)");
+      applied.push(47);
     }
     return { applied };
   });

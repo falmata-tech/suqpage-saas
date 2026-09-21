@@ -1,12 +1,11 @@
-import { submitPageReview } from "@/lib/page-review";
-import { pageReviewPort } from "@/lib/page-review-runtime";
+import { saveOwnerPageAndPublication } from "@/lib/owner-page-save-runtime";
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { apiUser } from "@/lib/auth";
 import { assertSameOrigin } from "@/lib/security";
 import { OwnerPageError, ownerPageRecord } from "@/lib/owner-page-domain";
 import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
-import { readOwnerPage, saveOwnerPage, setOwnerPageAssistance, startOwnerPage } from "@/lib/owner-page-service";
+import { readOwnerPage, setOwnerPageAssistance } from "@/lib/owner-page-service";
 import { changePagePublication } from "@/lib/owner-page-publication";
 import { pagePublicationPort } from "@/lib/owner-page-publication-runtime";
 
@@ -51,19 +50,14 @@ export async function POST(request: Request, context: { params: Promise<{ busine
       revalidatePath("/featured");
       return json(publication);
     }
-    if (body.action === "submit-review") {
-      ownerPageRecord(body, ["action", "version"]);
-      const review=await submitPageReview(ownerPagePort,pageReviewPort,user,businessId,body.version);
-      revalidatePath("/dashboard/admin/page-reviews");
-      return json(review);
-    }
-    if (body.action === "start") {
-      ownerPageRecord(body, ["action", "content"]);
-      return json(await startOwnerPage(ownerPagePort, user, businessId, body.content));
-    }
-    if (body.action === "save") {
-      ownerPageRecord(body, ["action", "version", "content"]);
-      return json(await saveOwnerPage(ownerPagePort, user, businessId, body.version, body.content));
+    if (body.action === "submit-review") return json({ error: "Page reviews are retired. Publish your saved page directly." }, 410);
+    if (body.action === "start" || body.action === "save") {
+      ownerPageRecord(body, body.action === "start" ? ["action", "content"] : ["action", "version", "content"]);
+      const saved = await saveOwnerPageAndPublication(user, businessId, {action: body.action, version: body.version, content: body.content});
+      revalidateTag("public-marketplace", { expire: 0 });
+      revalidateTag("public-featured", { expire: 0 });
+      revalidatePath("/"); revalidatePath("/dashboard");
+      return json(saved);
     }
     if (body.action === "assistance") {
       ownerPageRecord(body, ["action", "version", "enabled"]);

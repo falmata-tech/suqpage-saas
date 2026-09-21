@@ -2,7 +2,7 @@
 id: BE-014
 title: Tenant-scoped unified offering contract
 status: done
-related: [BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, DEP-012]
+related: [BE-037, BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, DEP-012]
 owners: [product, backend, security]
 last_updated: 2026-07-29
 change_level: L3
@@ -19,6 +19,13 @@ manufacturing or production capability inquiries.
 The outcome is an additive `Offering` contract over the established Product
 entity. It preserves tenant isolation, publication history, and the compatible
 `products` transport while making type and desired-quantity behavior explicit.
+
+## Service extension
+
+BE-037 / FE-044 add `service` through the same catalog and inquiry contracts.
+DEP-034 controls its additive constraint migration. Existing kinds, identities
+and historical snapshots remain unchanged; the new candidate awaits visual and
+release gates.
 
 ## Accepted optional-quantity correction
 

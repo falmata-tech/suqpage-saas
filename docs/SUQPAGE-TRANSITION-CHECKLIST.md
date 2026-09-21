@@ -652,3 +652,387 @@ must remain unchecked until actually run and passed. No commit or deployment.
   Evidence: source d47f1c1, Netlify 6aab00e841e9a4687217be7d confirmed ready;
   live anonymous/invalid-cookie entry has private/no-store 307-to-login and 200
   login responses. See docs/SUQPAGE-AUTH-ENTRY-FIX-2026-09-16.md for limits.
+
+
+## S7 — Inclusive businesses and services (FE-044 / BE-037 / DEP-034)
+
+- [x] S7.1 Inspect offering, inquiry, discovery, seed and publication contracts.
+  Existing four kinds share products storage; diagnostic/repair demos currently
+  use made_to_order. Adding service need not replace any business or item ID.
+- [x] S7.2 add service kind and compatible native migration; retain
+  optional quantity, canonical inquiry/security, URLs and snapshots.
+- [x] S7.3 Use universal offering copy/units and Africa-focused platform narrative;
+  preserve map plus paginated results, Featured eligibility and tenant identity.
+- [x] S7.4 Focused data/security/type tests and desktop/390/320 review captures.
+- [ ] S7.5 CURRENT: after explicit visual approval: full check/release/browser, protected
+  migration rehearsal, scoped commit and approved monitored rollout.
+
+## S8 — Complete starter pages and simple Save (user request 2026-09-17)
+
+- [ ] S8.1 Resolve initial-content scope, Save visibility and meaning of orders.
+  Questions are pending: demos/new private pages versus empty real pages; Save
+  updates live versus private-only; custom-work inquiry versus checkout.
+- [ ] S8.2 Specify filled initial examples with editable images/text/links/contact
+  fields, repeat-safe application and preservation of real business/account data.
+- [ ] S8.3 Specify and implement removal of edited-page review/separate publishing
+  controls, with transactional save semantics and retained scope/suspension rules.
+- [ ] S8.4 Verify defaults, owner/admin wiring, migrations and privacy; capture
+  complete starter and editor pages for visual approval before release gates.
+
+Master sections affected by S7/S8: opening contract; 1–5 mission/audience/UI;
+6 demos; 7 catalog; 8 inquiry; 11 signup; 13 permissions; 15 architecture/security;
+21 owner workflow; 22 tests. Current behavior remains until verified replacement.
+
+
+## S9 — Existing city/town location selection (FE-045 / BE-038 / DEP-035)
+
+- [x] S9.1 Inspect existing OSM place data: 54 city and 727 town features have
+  English/local names and coordinates; existing area proposals intentionally keep
+  storefront coordinates null. Admin approval currently requires manual map input.
+- [x] S9.2 add bounded place lookup and accessible selection; save the
+  selected canonical place/area anchor with owner version/tenant checks.
+- [x] S9.3 Feed the saved anchor into admin map approval without treating a town
+  centroid as a storefront. Preserve manual entry for missing places and exact
+  storefront consent; no external geocoder/provider is introduced.
+- [x] S9.4 Focused lookup, forged-ID/coordinate, persistence and privacy tests;
+  capture desktop/phone keyboard selection, save/reload and admin approval.
+- [ ] S9.5 After visual approval, include additive migration/recovery and release
+  evidence in the ongoing rollout. Master sections 13, 15, 21 and 22 are affected.
+
+
+S7/S9 local evidence (2026-09-17): service and place migration/domain/security
+regressions, existing product upkeep and launch wiring, homepage/narrative/inquiry
+checks and typecheck pass. The isolated browser creates a service through the
+owner form, verifies product/service/mixed pages and service search results,
+exercises keyboard town selection/save/reload, proves null storefront fields and
+admin anchor prefilling, and passes six owner/About accessibility scans. Twenty-eight
+1440/390/320 screenshots are retained in `.local/service-place-review/`.
+See docs/SUQPAGE-SERVICES-AND-PLACES-REVIEW.md for reproduction and limitations.
+No full release gates, commit, persistent local migration or production rollout
+are claimed. S8 decisions remain pending; no real content or page-publication
+permissions were changed. The pre-existing untracked deno.lock is preserved.
+
+## S8a — Automatic complete new workspaces (FE-046 / BE-039 / DEP-036)
+
+Latest instruction resolves new-account scope: every newly created business gets
+editable sample presentation content. Existing live businesses/account identities
+are preserved. This does not resolve the separate Save/publication change.
+
+- [x] S8a.1 Define scope, no-blank presentation fields, private defaults and tests.
+- [x] S8a.2 Implement shared atomic defaults in signup and invitations;
+  include original sample artwork and preserve repeat/tenant/data safety.
+- [x] S8a.3 Focused PostgreSQL/signup/invitation tests, typecheck and desktop/phone
+  captures of fully populated editors, preview, save/reload and private denial.
+- [ ] S8a.4 CURRENT: explicit visual approval, full gates, scoped commit and rollout.
+
+Master sections affected: opening checkpoint, 2 current product identity, owner
+onboarding/editor descriptions. Real credentials, exact storefront, operational
+inputs and retired product fields are not presentation placeholders.
+
+S8a focused evidence (2026-09-17): `test:business-starters`, `test:signup`,
+`test:standard-invitations`, `test:launch-wiring`, typecheck and 145-spec validation
+pass. `scripts/capture-business-starters.ts` captures 18 desktop/390/320 states,
+asserts every applicable editor field has a value, checks loaded images and
+save/reload, runs three offering accessibility scans, and verifies anonymous
+private-page denial plus disabled preview contact handoffs. Local test-issued
+sessions are used; hosted signup and actual YouTube playback are not claimed.
+Review artifacts: `.local/business-starter-review/`. No existing tenant backfill,
+hosted deployment, full gates or commit has been performed.
+
+## Local startup defect — DEP-027
+
+- [x] Identify `dev` bypassing the existing guarded runtime loader.
+- [x] Route both dev commands through the loader; honor loopback CLI
+  host/port, preserve strict PostgreSQL/provider validation and set matching origin.
+- [x] Verify valid/missing/invalid settings and CLI precedence with fixture child;
+  verify real local startup without schema/provider mutation.
+
+This is a nonvisual correction to the testing command, not visual approval or
+permission to overwrite existing owner content.
+
+Local runtime loader and validation tests pass. Persistent local PostgreSQL remains
+on schema 45 (confirmed read-only); service/place/starter writes need 46/47. A
+protected backup remains required. Installing the PostgreSQL 17 client via Homebrew
+failed with `openssl@3: unknown keyword: :overwrite`; no migration or reset was
+performed. This is environment/tooling, not an approval rejection. Existing Docker
+archive matching was previously blocked by its non-loopback host binding; that
+guard was not weakened. Restore-capable backup tooling is the remaining dependency
+for persistent schema update. Isolated review schemas still support all new features.
+
+## Authorized persistent local update — 2026-09-17 (DEP-034/035/036)
+
+The owner explicitly asked to finish the local database update. Scope is Suqpage
+loopback PostgreSQL on 54322 only; Loadgistic and hosted services are excluded.
+This authorizes local backup, additive migration and verification; visual approval
+and production release remain separate.
+
+- [x] Repair/install PostgreSQL 17 backup clients without weakening archive guards.
+- [x] Verify exact local target; stop Suqpage app writes; protected custom archive
+  and restore rehearsal; record aggregate fingerprints before migration.
+- [x] Apply reviewed migrations 46/47, prove repeat application is a no-op and
+  retained business/user/product/inquiry/location data is unchanged.
+- [x] Verify service writes, selected place persistence and automatic starters
+  against the upgraded database in a rollback-only transaction.
+- [x] Restart port 3102, verify real HTTP endpoints, update evidence and handoff.
+
+Backup validation defect found during the local update: native pg_restore --list
+returns success after the header but Node reports EPIPE while writing the rest.
+DEP-031 now requires full non-executing archive parse to the null device and
+valid/truncated regression coverage before retrying the protected backup.
+
+Persistent local update completed: schema 47, 3,401 retained rows in 55 application
+tables unchanged, verified restore of all 56 archived tables, rollback-only service/
+place/starter writes pass, and port 3102 is healthy. Homebrew/libpq tooling and
+archive validation/empty-target restore defects are resolved. Earlier local-backup
+blockers above are historical. DEP-031 regression/operations tests, typecheck and
+spec validation pass. See docs/SUQPAGE-LOCAL-SCHEMA-47.md for recovery evidence,
+limits and the still-separate visual/production rollout gates.
+
+## S10 — automatic local startup and simple posting (2026-09-18)
+
+- [x] S10.1 Inspect existing state; define FE-047/BE-040/DEP-037 and DEP-027.
+  Ready: preserve existing metadata, no provider/search AI dependency, no data reset.
+- [x] S10.2 automatic bounded Docker Desktop/local Supabase readiness
+  before Next; test ready/stopped/failure/unsafe-target cases (DEP-027).
+- [x] S10.3 Five owner fields with canonical metadata preservation; backend word
+  matching and unchanged eligible paginated results (FE-047/BE-040).
+- [x] S10.4 Focused persistence/search/startup tests, typecheck, desktop/phone
+  captures and accessibility; document implemented/tested limitations.
+- [ ] S10.5 Explicit owner visual approval, then full gates, scoped commit and
+  separately verified rollout. Earlier S7/S8/S9 gates remain pending.
+
+S10 evidence (2026-09-19): focused startup/target guards, discovery and pagination,
+upkeep tenant/version/idempotency/metadata preservation, typecheck pass. Nineteen
+browser captures and three accessibility scans pass at 1440/390/320; create and
+save use exactly five content fields. Review artifacts: `.local/business-starter-review/`.
+Real launcher reused healthy services and reached Next; a separate build directory
+was needed because the owner already runs 3102. Cold Docker boot is unit-tested via
+injected process ports, not forced by stopping the owner's running containers.
+Current next step is S10.5 visual approval; no full gates or deployment yet.
+
+## S11 — self-service workflow, demo cleanup and map/search audit (2026-09-20)
+
+FE-048 / BE-041 / DEP-038 supersede approval queues and five-field-only choice.
+- [x] S11.1 Inspect existing routes/data contracts; classify feature, defect and
+  one-time local demo correction. Newest instruction resolves first-publication
+  and location review decisions. Master sections 7/10/11/13/17/18/21 affected.
+- [x] S11.2 owner first Publish and live Save; immediate private/precise
+  location application; retire review routes/actions with tenant/security tests.
+- [x] S11.3 Simplify owner/admin screens; Product/Service input and demo descriptions.
+- [x] S11.4 Measure/fix search overhead and map/phone interaction defects.
+- [x] S11.5 Protected exact local-demo backup, transactional correction and verify
+  IDs/media/inquiries/non-demo preservation; no hosted mutation in this step.
+- [x] S11.6 Focused integration/type/spec checks and desktop/phone/axe captures;
+  document evidence and give local review URL. Do not treat S10 approval as given.
+- [ ] S11.7 CURRENT: visual approval, full/release/acceptance gates, scoped commit and rollout.
+
+S11.4 includes the new city-offset request: deterministic, bounded display-only
+separation for area-mode shops; exact coordinates unchanged, stable across filters,
+with approximate-location labels and detailed-zoom/browser regression evidence.
+
+Focused evidence: `docs/SUQPAGE-SELF-SERVICE-REVIEW.md`. Local demo transaction
+verified 66 pages/264 offerings (39 services), protected archive, IDs/media/account/
+inquiry and non-demo preservation. Fresh isolated seed proves 264 simple offerings
+and 66 area locations. Map captures pass desktop/390/320 interactions and axe.
+
+## S12 — demo capability coverage and shared example contacts (2026-09-20)
+
+Newest request extends S11; it does not grant visual approval for S11.7.
+Classify as L3 one-time demo-data operation plus recurring seed coverage.
+Controlling FE-023/BE-022/DEP-019 and FE-048/BE-041/DEP-038; master sections
+2/7/10/13/21 affected. Existing customer data and private account contacts stay scoped.
+
+- [x] S12.1 audit public/Featured/search/dashboard coverage and identify
+  exact Alhayarband destinations. Contact mutation depends on verified user input;
+  do not infer an email/phone/social handle from a similar name.
+- [x] S12.2 Record missing-feature matrix and update seed/test contracts before edits.
+- [x] S12.3 Fill approved demo-only gaps with protected backup and exact before-state;
+  keep identities, inquiries, account contacts, non-demo pages and starter defaults.
+- [x] S12.4 Verify all admitted demos and representative public/Featured/dashboard
+  browser flows, including inquiry handoff URLs without sending messages.
+- [ ] S12.5 CURRENT: local evidence presented; visual approval/full gates/commit/rollout pending.
+
+S12 accepted input: use `@alhayabrand` even if not real; applied to four social
+usernames. Demo phone/email retained, WhatsApp uses demo phone, website example.com.
+Native backup verified; one-time local transaction updated 66 contact objects and
+added 32 missing demo owners, 61 sample inquiries, 36 support examples. Existing
+accounts/products/inquiries/support and non-demo business rows hash-identical.
+
+S12 verification: fresh seed and all-66 retained HTTP checks pass; 14 desktop/phone
+contact/inquiry/Featured/owner/admin captures pass. Seven Featured days populated,
+split-word search correct, scoped axe/overflow clear. Typecheck/spec/whitespace pass.
+Evidence: `docs/SUQPAGE-DEMO-CAPABILITY-REVIEW.md`. No hosted delivery/deployment claim.
+
+## S13 — distinguish one-item inquiry from the saved list (2026-09-20)
+
+L1 UI/copy clarification under FE-041, existing BE-001 and DEP-030; behavior stays
+single-item versus independent saved selections. Ready: exact labels, product/service
+language, card/detail/feedback coverage, accessibility and regression defined.
+- [x] S13.1 Inspect current handlers, specs and mobile button sizing.
+- [x] S13.2 clarify detail/card/review buttons and adjacent explanations.
+- [x] S13.3 Verify saved-list independence and no send-on-add at desktop/390/320;
+  capture product/service states and run type/focused/spec checks.
+- [ ] S13.4 CURRENT: local review ready; visual/full gates/commit/rollout pending.
+
+S13 evidence: `scripts/capture-inquiry-clarity.mjs` passes at 1440/390/320; nine
+captures in `.local/inquiry-clarity-review/`. Single inquiry contains only the third
+item while two saved selections survive; Add never opens/sends an inquiry. Product
+and service copy, card wrapping, count/review controls and scoped axe pass.
+
+## S14 — one Suqpage favicon everywhere (2026-09-20)
+
+L1 metadata/UI correction under FE-038 and existing DEP-030. Ready: inherit root
+icons, retain business-specific sharing metadata/logo and stored historical assets.
+- [x] S14.1 Inspect root and business metadata plus business icon upload control.
+- [x] S14.2 remove tenant icon override and obsolete upload field.
+- [x] S14.3 Verify browser icon inheritance across routes/navigation, PWA assets,
+  type/spec checks; preserve earlier visual/release gates.
+
+## S15 — concise UI copy and matching icons (2026-09-20)
+
+Newest instruction supersedes S13 helper paragraphs. FE-041/FE-048, master 5.3.
+- [x] S15.1 Inspect inquiry, posting, page/business editors and dashboard copy.
+- [x] S15.2 remove redundant/internal explanations; keep precise labels,
+  errors/status, input requirements and necessary privacy/consent information.
+- [x] S15.3 Record standing product rule; focused desktop/phone/type/spec checks.
+
+S15 final verification: 29 owner/admin/starter captures and nine inquiry captures
+pass after copy cleanup; typecheck, 151-spec validation and whitespace checks pass.
+No full gate, commit or deployment is claimed; S11.7/S12.5/S13.4 remain pending.
+
+## S16 — Prairie Meadows missing from discovery (2026-09-20)
+
+Defect L2 plus one-time local repair under BE-041/FE-048/DEP-038. Inspection:
+active business and listed item, saved area proposal pending, no discovery profile
+or industry row. No search match can pass those missing eligibility joins.
+- [x] S16.1 Identify publication/location dependency and define atomic regression.
+- [x] S16.2 apply pending saved location during guarded publication.
+- [x] S16.3 Focused atomicity/tenant/privacy/search regression; protected exact
+  local repair and browser search proof. Preserve all page/product/account content.
+- [x] S16.4 Update evidence; earlier visual/full/release/commit gates remain pending.
+
+S14–S16 evidence: `docs/SUQPAGE-DISCOVERY-AND-COPY-REVIEW.md`.
+First publication now atomically applies saved discovery setup; protected local
+repair preserves page/product/account content. Business and product searches pass
+at desktop/390/320. Favicon inheritance and inquiry-list independence pass.
+
+## S17 — email-only access and Suqpage email branding (2026-09-20)
+
+L2 auth defect/UI plus L3 configuration preparation; FE-038/BE-031/DEP-027/DEP-029.
+Ready: disable Google initiation, preserve accounts/OTP, brand all email types,
+preserve verified sender address/credentials, live URLs and compatibility routes.
+Master sections 5/11/17 affected. Earlier review/rollout gates remain pending.
+- [x] S17.1 Inspect auth entry, account copy, local provisioning, templates and old names.
+- [x] S17.2 Enforce email-only policy and remove stale account/provider copy.
+- [x] S17.3 Complete branded templates/config/guard and focused regressions.
+- [x] S17.4 Verify local browser/templates, mail delivery and one-time code use;
+  prepare exact hosted input patches. Saved CLI support tracked in S19.
+- [ ] S17.5 Visual approval, full gates, scoped commit and authorized hosted rollout.
+
+## S18 — connect the owner's suqpage.com domain
+
+Owner confirms GoDaddy DNS; primary `suqpage.com`, `www` redirects to primary.
+Operations preparation under DEP-026/DEP-029; no nameserver or mail-record change.
+- [x] Independently verify Netlify target, inspect DNS and preserve config.
+- [x] Prepare exact GoDaddy records; owner updated DNS and public resolution verifies both targets.
+- [x] Register primary Netlify domain and www alias; readback proves current deployment unchanged.
+- [x] Verify issued managed certificate for apex/www, HTTPS login 200 and www→apex 301.
+- [ ] Review exact Auth callback plan and canonical-domain cutover after resolving S19 readback mismatch.
+- [ ] Verify email entry, public links, redirects and rollback; record rollout evidence.
+
+S17/S18 evidence: `docs/SUQPAGE-EMAIL-AND-DOMAIN-REVIEW.md`. Netlify alias-only
+association rejected (primary domain required); remote readback unchanged. Exact
+GoDaddy replacements resolve correctly (2026-09-21). Subsequent primary/www registration
+and managed TLS succeeded; homepage, About, health and login return 200, www redirects
+301 preserving path/query. Auth/app canonical cutover remains pending.
+
+## S19 — explicitly reuse saved Supabase CLI credentials (2026-09-21)
+
+User accepted the credential-source extension while preserving all existing
+DEP-029 protections. L3 non-visual operations adapter; master section 17 affected.
+- [x] Inspect guard, CLI storage contract and current dirty scope; update spec first.
+- [x] Implement opt-in bounded macOS Keychain reader and bound v2 plans.
+- [x] All 50 focused source/secret-redaction/guard regressions, typecheck and 151-spec validation pass.
+- [x] Produce a read-only hosted email-branding review using saved login after owner allowed macOS Keychain; private backup and review retained.
+- [x] Owner approved exact email plan/digest; guarded apply attempted once.
+- [x] Inspect readback: all 27 approved fields match; only 22 matching provider customization flags changed false→true. No credential/provider drift, retry or restore.
+- [x] Verify guard correction: 52 focused tests, typecheck and specs pass. Independent saved readback exactly matches approved fields plus predicted flags. Original attempt remains failed; no retry/restore.
+- [ ] CURRENT: review separate domain Auth plan and obtain direction before further hosted writes; app canonical deployment and prior visual/release gates remain.
+
+## S20 — finish and publish the reviewed release (2026-09-21)
+
+Newest owner instruction confirms prior approval and explicitly requests completion
+and publication. Treat the prepared S7–S19 design/workflow candidate and the exact
+S18 Auth-domain review as approved for final gates and deployment. No further
+visual/administrative approval pause for the same reviewed scope. Preserve all
+backup, target, single-write, readback, tenant and data-integrity checks. The
+owner directs retention of independently reconciled email branding.
+
+Operations L4 under DEP-026/029/034/035/036/037/038; master section 17 affected.
+- [x] Record current dirty scope; preserve unrelated deno.lock.
+- [x] Applied approved exact Auth-domain plan while fresh; full readback matches.
+- [x] Full check, release, operations, artifact verification and all nine provider browser scenarios pass on the final candidate.
+- [x] Owner-approved private production backup completed; 56 tables restored,
+  additive 46/47 rehearsed, all 3,222 application rows preserved; repeat migration no-op.
+- [ ] CURRENT: review/stage only accumulated Suqpage task files and commit passing release.
+- [ ] Apply verified migrations and canonical environment changes; deploy artifact.
+- [ ] Verify suqpage.com public/owner/admin routes, search, links, email entry,
+  HTTPS/redirects and health; retain rollout and rollback evidence.
+
+### S20a — lotion category search regression
+
+User reports lotion missing under Personal & Homecare. Reproduce local/live,
+check public product/category eligibility, add a regression for the concrete
+category query and verify desktop/phone navigation before release. Direct local
+HTTP currently contains Aloe Body Lotion; production response does not.
+
+Full-check first failure is stale launch-wiring test expectations: it still
+requires location approval after owner Save, contrary to BE-041. Update assertions
+to immediate saved canonical location and retain stale/admin/privacy coverage.
+
+S20a human-query audit: focused matching and 10,000-product performance pass
+(450/436/492 ms). Browser validation found HTML minLength blocked explicit
+one-character submissions; fix and verify. Test delayed responses against newer
+typing, category/type retention, product Back and 1440/390/320 layouts next.
+
+S20a focused completion: case/plural/accent/phrase/Unicode, description/location,
+Prairie Meadows name/handle, category/privacy and literal-negative tests pass.
+Browser delay reproduces and verifies newer-input preservation; 1440/390/320
+search/type/detail/Back/explicit punctuation pass with zero overflow. Full gates
+now running. No managed search provider or translation added.
+
+S20 release gates: full check, release (including provider security smoke), operations,
+151-spec validation and production dependency audit pass. Netlify packaging first
+failed under cached CLI 23.5.0/Deno support; controlled retry with the prior deployment's
+CLI 27.1.1 passed. Artifact privacy, dynamic Auth, Linux sharp and source comparison
+pass. Full browser gate found stale inquiry labels, outdated staff-review/form
+expectations, and fixtures using raw PostgreSQL IDs or old business video storage.
+Update the fixture adapter and acceptance assertions to FE-048/BE-041, retain
+private media, staff options/visibility, inquiry rejection and legacy-cart coverage,
+and rerun the complete browser suite. No application guard was weakened.
+
+S20b: owner reports Prairie Meadows/grass still missing. Production contains neither;
+local has published Prairie Meadows/Farm Grass with Dirt with approved Dodolla setup.
+Browser reproduction also found query-only links show the category chooser. Fix that
+and preserve valid selected places when their query produces no matches; add exact
+negative regressions before rebuilding. Await owner's current URL clarification.
+
+S20b resolution: owner confirmed port 3102, then found the listing after choosing
+Agriculture. Local browser independently confirms Prairie Meadows and grass both
+return one offering and one business. Category filtering stays intact. Query-only
+link and zero-result location regressions pass. Final rebuild/gates are running.
+
+Final nine browser scenarios pass. Additional exact non-Latin regression exposed
+Latin-only fallback detection missing Greek/Cyrillic names. Broaden that detection
+without changing eligibility, predicates or providers; rerun focused Unicode/performance,
+check, release and the combined browser gate before publication.
+
+Final Unicode candidate: release, operations, Netlify artifact verification and all nine
+browser scenarios pass. Account-phone test waits for its save confirmation before
+reload. A repeated full check records its own exit artifact after automatic review
+rejected manual transcription of the earlier successful process result. No gate
+is bypassed; production migration/application publication remain pending.
+
+Final full check completed with actual process exit 0; all mandatory gate artifacts
+are successful and newer than the final search code. The approval-review concern
+is resolved through execution evidence. No production write has happened yet.

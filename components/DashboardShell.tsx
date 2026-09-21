@@ -20,7 +20,6 @@ export default async function DashboardShell({ user, business, children }: { use
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
   const canMaintainProducts = Boolean(business && hasCapability(user, "basic-product:maintain"));
-  const reviewable = Boolean(client && business);
   let pageEditor = false;
   if (business && ownerPageEditorEnabled()) {
     try { await readOwnerPage(ownerPagePort, user, business.id); pageEditor = true; }
@@ -46,7 +45,6 @@ export default async function DashboardShell({ user, business, children }: { use
       { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
     ]),
     group("Operations", [
-      { href: "/dashboard/admin/page-reviews", label: "Page reviews", icon: "pageEditor" },
       { href: "/dashboard/support", label: "Support inbox", icon: "support" },
       { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" },
       { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" },
@@ -62,8 +60,8 @@ export default async function DashboardShell({ user, business, children }: { use
       platformAdmin ? { href: `/dashboard/settings${query}`, label: "Business details", icon: "settings" } : null,
       pageEditor ? { href: `/dashboard/page-editor${query}`, label: "Page draft", icon: "pageEditor" } : null,
       client ? { href: "/dashboard/business", label: "Business details", icon: "settings" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products", icon: "offerings" } : null,
-      canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products & services", icon: "offerings" } : null,
+      !client && canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
       platformAdmin ? { href: `/dashboard/admin/businesses/${business!.id}/team`, label: "Staff assistance", icon: "staff" } : null,
       { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true },
     ]),
@@ -84,12 +82,11 @@ export default async function DashboardShell({ user, business, children }: { use
       { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
       operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
       client ? { href: "/dashboard/business", label: "Business details", icon: "settings" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products", icon: "offerings" } : null,
+      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Products & services", icon: "offerings" } : null,
       pageEditor ? { href: `/dashboard/page-editor${query}`, label: "Your page", icon: "pageEditor" } : null,
-      canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
+      !client && canMaintainProducts ? { href: `/dashboard/catalog${query}`, label: "Categories", icon: "offerings" } : null,
       (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
-      (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
-      reviewable ? { href: `/preview/@${business!.handle}`, label: "Review page", icon: "workspace" } : null,
+      !client && operations && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
       (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true } : null,
       { href: "/dashboard/support", label: client ? "Suqpage support" : "Support inbox", icon: "support" },
     ]),

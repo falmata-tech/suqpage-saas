@@ -38,7 +38,10 @@ async function main(){
   assert.ok((await createClientInvitation(invitation)).businessId);
   const owner=await create();const foreign=await create();const bid=owner.business_id!;
   let catalog=(await runtimeCatalogByBusinessId(bid,true))!;
-  let draft=await startOwnerPage(ownerPagePort,owner,bid,{...initialBusinessProfile(catalog),about:'A fixture shop with carefully described products.'});
+  const seeded=(await readOwnerPage(ownerPagePort,owner,bid))!;
+  let draft=await saveOwnerPage(ownerPagePort,owner,bid,seeded.version,{...seeded.content,about:'A fixture shop with carefully described products.'});
+  // Retain the no-listed-offering rejection case after default examples are created.
+  await runner.query('UPDATE products SET is_published=0 WHERE business_id=?',[bid]);
   await assert.rejects(()=>submitPageReview(ownerPagePort,pageReviewPort,foreign,bid,draft.version),/Only the owner/);
   await assert.rejects(()=>submitPageReview(ownerPagePort,pageReviewPort,owner,bid,draft.version),/Add a product/);
   await changeProductCategory(owner,{kind:'create',businessId:bid,name:'Sensors',slug:'sensors'});

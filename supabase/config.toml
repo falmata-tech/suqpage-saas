@@ -111,7 +111,7 @@ port = 54324
 # smtp_port = 54325
 # pop3_port = 54326
 # admin_email = "admin@email.com"
-# sender_name = "Admin"
+# sender_name = "Suqpage"
 
 [storage]
 enabled = true
@@ -239,6 +239,17 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
+[auth.email.smtp]
+# Local Docker mail catcher only; never push this configuration to a hosted project.
+enabled = true
+host = "supabase_inbucket_mirtpage"
+port = 1025
+# Required CLI fields; the isolated mail catcher has no account authentication.
+user = "suqpage-local"
+pass = "local-mail-catcher"
+admin_email = "no-reply@suqpage.test"
+sender_name = "Suqpage"
+
 # Use a production-ready SMTP server
 # [auth.email.smtp]
 # enabled = true
@@ -247,7 +258,7 @@ otp_expiry = 3600
 # user = "apikey"
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
-# sender_name = "Admin"
+# sender_name = "Suqpage"
 
 [auth.email.template.magic_link]
 subject = "Your Suqpage sign-in code"
@@ -257,11 +268,56 @@ content_path = "./supabase/templates/magic-link.html"
 subject = "Your Suqpage sign-in code"
 content_path = "./supabase/templates/magic-link.html"
 
-# Uncomment to customize notification email template
-# [auth.email.notification.password_changed]
-# enabled = true
-# subject = "Your password has been changed"
-# content_path = "./templates/password_changed_notification.html"
+[auth.email.template.invite]
+subject = "You are invited to Suqpage"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Your Suqpage account access"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your Suqpage email change"
+content_path = "./supabase/templates/email-change.html"
+
+[auth.email.template.reauthentication]
+subject = "Your Suqpage verification code"
+content_path = "./supabase/templates/reauthentication.html"
+
+[auth.email.notification.password_changed]
+enabled = false
+subject = "Your Suqpage password changed"
+content_path = "./supabase/templates/password-changed-notification.html"
+
+[auth.email.notification.email_changed]
+enabled = false
+subject = "Your Suqpage email changed"
+content_path = "./supabase/templates/email-changed-notification.html"
+
+[auth.email.notification.phone_changed]
+enabled = false
+subject = "Your Suqpage phone changed"
+content_path = "./supabase/templates/phone-changed-notification.html"
+
+[auth.email.notification.identity_linked]
+enabled = false
+subject = "Your Suqpage sign-in method changed"
+content_path = "./supabase/templates/identity-linked-notification.html"
+
+[auth.email.notification.identity_unlinked]
+enabled = false
+subject = "Your Suqpage sign-in method changed"
+content_path = "./supabase/templates/identity-unlinked-notification.html"
+
+[auth.email.notification.mfa_factor_enrolled]
+enabled = false
+subject = "Your Suqpage verification method changed"
+content_path = "./supabase/templates/mfa-factor-enrolled-notification.html"
+
+[auth.email.notification.mfa_factor_unenrolled]
+enabled = false
+subject = "Your Suqpage verification method changed"
+content_path = "./supabase/templates/mfa-factor-unenrolled-notification.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
@@ -329,7 +385,7 @@ max_frequency = "5s"
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.google]
-enabled = true
+enabled = false
 client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
 skip_nonce_check = false

@@ -2,7 +2,7 @@
 id: BE-034
 title: Launch catalog and owner setup integration
 status: in_progress
-related: [BE-035, FE-043, BE-033, BE-032, BE-009, DEP-030]
+related: [BE-039, BE-038, BE-037, BE-035, FE-043, BE-033, BE-032, BE-009, DEP-030]
 owners: [backend, security, operations]
 last_updated: 2026-09-14
 change_level: L3

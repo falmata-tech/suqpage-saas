@@ -162,10 +162,10 @@ try {
   // Exercise a hydrated control before screenshot() temporarily changes DOM
   // cursor styles; visibility of the server-rendered input alone is not enough.
   await visitor.getByRole("link", { name: /^View / }).first().click();
-  await visitor.getByRole("button", { name: "Inquire about this product", exact: true }).click();
+  await visitor.getByRole("button", { name: "Inquire about this product only", exact: true }).click();
   await expect(visitor.getByRole("dialog", { name: "Product inquiry", exact: true })).toBeVisible();
   await visitor.keyboard.press("Escape");
-  await visitor.getByRole("button", { name: "Add to inquiry", exact: true }).click();
+  await visitor.getByRole("button", { name: "Add to inquiry list", exact: true }).click();
   await visitor.getByRole("link", { name: "Back to products", exact: true }).click();
   for (const width of [1440, 390, 320]) {
     await visitor.setViewportSize({ width, height: width === 1440 ? 1000 : 844 });
@@ -221,7 +221,7 @@ try {
   await firstProduct.getByRole("link", { name: `View ${productName}`, exact: true }).click();
   const detail = preview.locator("[data-product-page]");
   await expect(detail).toBeVisible();
-  await detail.getByRole("button", { name: "Add to inquiry", exact: true }).click();
+  await detail.getByRole("button", { name: "Add to inquiry list", exact: true }).click();
   await preview.getByRole("button", { name: "Inquiry cart, 1 item", exact: true }).click();
   const cart = page.getByRole("dialog", { name: "Product inquiry" });
   await expect(cart).toContainText(productName);

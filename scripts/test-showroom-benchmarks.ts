@@ -31,14 +31,11 @@ async function runPostgresFixture() {
         for (const product of catalog.products) {
             offeringKinds.add(product.offering_kind);
             quantityModes.add(product.quantity_mode);
-            if (product.offering_kind === "manufacturing_capability") {
-                assert.ok(product.capacity_summary, `${business.handle} capability states capacity`);
-                assert.ok(product.lead_time_summary, `${business.handle} capability states lead time`);
-            }
+            assert.ok(product.description, `${business.handle} offerings have searchable descriptions`);
         }
         assert.ok(fs.existsSync(path.join(process.cwd(), "public", seededMarketplaceBoothPath(business.handle))), `${business.handle} has a generated booth image`);
     }
-    assert.deepEqual([...offeringKinds].sort(), ["made_to_order", "manufacturing_capability", "production_supply", "standard_product"], "reset fixtures exercise every offering kind");
+    assert.deepEqual([...offeringKinds].sort(), ["service", "standard_product"], "reset fixtures demonstrate the simplified product/service choices");
     assert.deepEqual([...quantityModes].sort(), ["optional"], "reset fixtures use optional desired quantity");
     const benchmarkHandles = new Set([
         "selam-weave",

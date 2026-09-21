@@ -39,7 +39,7 @@ export default async function EditProduct({
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            Products
+            Products & services
           </Link>
           <span aria-hidden="true">/</span>
           <span>{product.name}</span>
@@ -47,11 +47,7 @@ export default async function EditProduct({
       </div>
       <div className="dashboard-head standard-page-heading">
         <div>
-          <p className="eyebrow">Product details</p>
           <h1>Edit {product.name}</h1>
-          <p>
-            Update the details buyers see on your page.
-          </p>
         </div>
         <Link
           className="btn secondary"
@@ -63,7 +59,7 @@ export default async function EditProduct({
       </div>
       {query.saved ? (
         <p className="notice">
-          Product saved.
+          Offering saved.
         </p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}

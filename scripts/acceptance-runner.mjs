@@ -71,6 +71,7 @@ function prepareBrowserSupabaseProject() {
   let config = fs.readFileSync(path.join(process.cwd(), "supabase/config.toml"), "utf8");
   config = config
     .replace(/^project_id = ".*"$/m, `project_id = "${browserSupabaseProjectId}"`)
+    .replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)
     .replaceAll("54321", String(browserSupabasePorts.api))
     .replaceAll("54322", String(browserSupabasePorts.db))
     .replaceAll("54320", String(browserSupabasePorts.shadow))

@@ -19,10 +19,15 @@ async function main() {
   if (!config) throw new Error('Invalid PostgreSQL restore target.');
   const pool = createPostgresPool(config);
   try {
-    const result = await pool.query("SELECT (SELECT COUNT(*) FROM pg_class WHERE relnamespace='public'::regnamespace) + (SELECT COUNT(*) FROM pg_proc WHERE pronamespace='public'::regnamespace) total");
+    const result = await pool.query("SELECT (SELECT COUNT(*) FROM pg_class WHERE relnamespace=to_regnamespace('public')) + (SELECT COUNT(*) FROM pg_proc WHERE pronamespace=to_regnamespace('public')) total");
     if (Number(result.rows[0].total)) throw new Error('Restore requires an empty target. Existing data will not be replaced.');
+    // Archives can contain CREATE SCHEMA public. Drop only this empty namespace;
+    // without CASCADE, any other/concurrently created object makes this fail closed.
+    await pool.query('DROP SCHEMA IF EXISTS public');
   } finally { await pool.end(); }
-  const command = archiveCommand('pg_restore', ['--single-transaction', '--exit-on-error', '--clean', '--if-exists', '--no-owner', '--no-privileges', `--dbname=${decodeURIComponent(target.pathname.slice(1))}`], target);
+  // The guard requires an empty target. Cleanup would try to drop triggers on
+  // nonexistent tables, which fails even with --if-exists.
+  const command = archiveCommand('pg_restore', ['--single-transaction', '--exit-on-error', '--no-owner', '--no-privileges', `--dbname=${decodeURIComponent(target.pathname.slice(1))}`], target);
   const result = spawnSync(command.binary, command.args, { env: command.env, input: bytes, maxBuffer: 16 * 1024 * 1024 });
   if (result.error || result.status !== 0) throw new Error('PostgreSQL restore failed; no further writes attempted.');
   console.log('PostgreSQL archive restored to the approved empty target. Object storage is restored separately.');

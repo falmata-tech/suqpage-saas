@@ -2,7 +2,7 @@
 id: BE-033
 title: Standard page lifecycle and server-paginated discovery
 status: in_progress
-related: [FE-042, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034]
+related: [BE-041, FE-042, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034]
 owners: [backend, security, operations]
 last_updated: 2026-09-14
 change_level: L3
@@ -81,3 +81,7 @@ preserved in the dirty worktree; they do not define the current app contract.
 
 Apply additive migration 42 after a protected local backup; keep review tables on
 rollback. Hosted migration and deployment are separate authorization gates.
+
+Current candidate FE-048/BE-041/DEP-038 supersedes staff approval requirements and
+adds a simple Product/Service input. Historical evidence above remains scoped to
+its release; the new candidate awaits focused verification and visual approval.

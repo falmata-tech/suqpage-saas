@@ -21,7 +21,7 @@ all provider values in ignored local environment files.
 npm ci
 npm run local:supabase:start
 npm run local:supabase:bootstrap
-npm run dev:local
+npm run dev -- --hostname 127.0.0.1 --port 3102
 ```
 
 The native installer creates schema and 66 fictional demo businesses in an empty
@@ -99,3 +99,20 @@ remain readable during the Suqpage namespace rollout.
 The naming rollout is published with schema 45. See
 `docs/SUQPAGE-NAMING-ROLLOUT-2026-09-14.md` for exact source/deployment IDs,
 compatibility checks and retained provider identifiers.
+
+Local development uses the same guarded launcher for `npm run dev` and
+`npm run dev:local`. It loads `.local/supabase-runtime.env`, validates the local
+PostgreSQL/Auth/Storage endpoints, and accepts `--hostname` / `--port`. CLI port
+overrides `PORT`; both app origins follow the chosen address. Startup does not
+migrate or reset the database. Restart an older running Next process after changing
+these settings. Missing runtime settings require `npm run local:supabase:configure`.
+
+After initial local setup, `npm run dev -- --hostname 127.0.0.1 --port 3102`
+checks local PostgreSQL and Auth before launching Next. On macOS it opens Docker
+Desktop if needed, waits up to two minutes for the engine, and starts this local
+Supabase project if services have not resumed. Supabase startup and readiness each
+have a three-minute limit. Healthy services are reused. It never resets, migrates
+or seeds data. Missing local settings still require `local:supabase:configure`;
+Linux/other systems must start their Docker engine manually when it is stopped.
+CLI output containing local keys is not printed by the launcher. A failure points
+to the explicit local command to inspect; no hosted configuration is changed.

@@ -262,8 +262,8 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown; 
         ORDER BY u.id LIMIT 1
       ) client_email,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles profile ON profile.user_id=u.id WHERE u.business_id=b.id AND profile.access_role='client') client_count,
-      (SELECT status FROM owner_page_reviews r WHERE r.business_id=b.id) page_review_status,
-      (SELECT COUNT(*) FROM owner_location_proposals ol WHERE ol.business_id=b.id AND ol.version<>ol.reviewed_version) location_pending,
+      NULL::text page_review_status,
+      0::bigint location_pending,
       (SELECT city FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_city,
       (SELECT region FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_region,
       (SELECT approved_at FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_approved_at,
@@ -578,7 +578,7 @@ export async function getPlatformCounts() {
       (SELECT COUNT(*) FROM businesses) businesses,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client') clients,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role IN ('team_member','operations_manager')) staff,
-      (SELECT COUNT(*) FROM owner_page_reviews WHERE status='pending') pending_pages
+      0::bigint pending_pages
   `) as Promise<{
     businesses: number;
     clients: number;

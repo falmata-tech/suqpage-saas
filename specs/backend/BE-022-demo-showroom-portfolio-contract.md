@@ -1,10 +1,10 @@
 ---
 id: BE-022
 title: Demo showroom portfolio contract
-status: done
+status: in_progress
 related: [FE-023, BE-013, BE-021, BE-023, DEP-019]
 owners: [backend, design-systems]
-last_updated: 2026-08-11
+last_updated: 2026-09-20
 change_level: L2
 ---
 
@@ -100,3 +100,28 @@ contract contains 66 admitted client-specific manifests, exactly four offerings
 per showroom, 264 managed offering references, independent logo/hero/booth
 paths, nine growing-factory profiles, and complete custom palettes. Current
 verification is recorded in traceability.
+
+## S12 capability coverage extension — 2026-09-20
+
+The current standard-profile demo contract is FE-023's capability coverage extension,
+with FE-048/BE-041/DEP-038 simplifying offerings/publication. Exact demo admission
+and tenant-preserving before/after checks govern all fixture corrections. Each demo
+has local fictional inquiry/support examples; existing records are never overwritten.
+Private account identities and non-demo data are preserved. Public shared contact
+writes depend on confirmed Alhayarband destinations and validated PublicContacts;
+product handoffs use the same published contact object. No messages are sent.
+Evidence: `scripts/test-simple-demo-seed.ts` and S12 protected audit/operation.
+
+Accepted contact input: the user explicitly supplied `@alhayabrand` even if the
+accounts do not exist. Demo Telegram/TikTok/Instagram/Facebook use this username.
+Existing fictional public phone/email remain; WhatsApp uses that demo public phone;
+website is `https://example.com`. These demonstrate link construction, not verified
+external accounts or delivery. All eight contact actions must render, and WhatsApp/
+Telegram/SMS handoffs must encode the selected products. Never auto-send messages.
+Local missing demo owners may be created with protected generated credentials;
+existing user rows and non-demo identities are preserved.
+
+S12 focused evidence: `docs/SUQPAGE-DEMO-CAPABILITY-REVIEW.md`; all-66 fresh seed
+and retained public-page contact checks, seven Featured days, split-word search,
+14 desktop/phone browser captures and type/spec checks pass. Visual approval,
+full release gates, task-scoped commit and hosted rollout remain pending.

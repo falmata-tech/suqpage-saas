@@ -17,6 +17,8 @@ try{
  const url=`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`;
  pool=new pg.Pool({connectionString:url,max:1});
  await pool.query("CREATE TABLE public.archive_fixture(id integer PRIMARY KEY, value text NOT NULL); INSERT INTO public.archive_fixture VALUES(1,'preserved')");
+ await pool.query('INSERT INTO public.archive_fixture VALUES(2,$1)',[crypto.randomBytes(512*1024).toString('hex')]);
+ await pool.query("CREATE FUNCTION public.archive_fixture_guard() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$; CREATE TRIGGER archive_fixture_guard BEFORE UPDATE ON public.archive_fixture FOR EACH ROW EXECUTE FUNCTION public.archive_fixture_guard()");
  const env={...process.env,SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_DIRECT_URL:url,SUQPAGE_BACKUP_ROOT:root,SUQPAGE_LOCAL_PG_CONTAINER:container};
  const script=(file,args=[],extra={},fail=false)=>run(process.execPath,['--import','tsx',`scripts/${file}`,...args],{...env,...extra},fail);
  script('backup.ts');const directory=fs.readdirSync(root).find(n=>fs.existsSync(path.join(root,n,'postgres.dump')));assert.ok(directory);const from=path.join(root,directory);
@@ -30,6 +32,14 @@ try{
  const plan=script('restore.ts',[`--from=${from}`],overrides);const digest=plan.stdout.match(/Target digest: ([a-f0-9]{64})/)?.[1];assert.ok(digest);
  script('restore.ts',[`--from=${from}`,'--execute'],{...overrides,SUQPAGE_APPROVE_POSTGRES_RESTORE:digest});
  const restored=new pg.Pool({connectionString:restoreUrl,max:1});try{assert.equal((await restored.query('SELECT value FROM archive_fixture WHERE id=1')).rows[0].value,'preserved');}finally{await restored.end();}
+ const originalMetadata=JSON.parse(fs.readFileSync(path.join(from,'backup.json'),'utf8'));
+ const truncated=archive.subarray(0,Math.floor(archive.length/2));
+ fs.writeFileSync(path.join(from,'postgres.dump'),truncated);
+ fs.writeFileSync(path.join(from,'backup.json'),JSON.stringify({...originalMetadata,databaseBytes:truncated.length,databaseSha256:crypto.createHash('sha256').update(truncated).digest('hex')}));
+ const truncatedPlan=script('restore.ts',[`--from=${from}`],overrides,true);
+ assert.notEqual(truncatedPlan.status,0,'matching manifest cannot admit a truncated data payload');
+ assert.match(truncatedPlan.stderr,/archive validation failed/);
+ fs.writeFileSync(path.join(from,'postgres.dump'),archive);fs.writeFileSync(path.join(from,'backup.json'),JSON.stringify(originalMetadata));
  const metadata=JSON.parse(fs.readFileSync(path.join(from,'backup.json'),'utf8'));metadata.databaseSha256='tampered';fs.writeFileSync(path.join(from,'backup.json'),JSON.stringify(metadata));assert.notEqual(script('restore.ts',[`--from=${from}`],overrides,true).status,0,'tampering fails closed');
  console.log('PostgreSQL archive privacy, integrity, explicit target approval, populated-target denial and isolated restore passed.');
 }finally{await pool?.end();spawnSync('docker',['stop',container],{stdio:'ignore'});fs.rmSync(root,{recursive:true,force:true});}

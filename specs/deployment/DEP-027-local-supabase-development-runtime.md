@@ -18,6 +18,12 @@ below is historical; current acceptance uses PostgreSQL-only fixtures.
 
 ## Problem and outcome
 
+S17 email-only update: local Google is disabled, including runtime generation when
+credentials remain present. All Auth templates use the repository Suqpage catalog.
+Local SMTP targets only the existing Docker mail catcher with Suqpage sender name
+and a fictional .test sender address; no external email is sent. Browser acceptance
+rewrites this SMTP host to its own isolated project so messages never cross stacks.
+
 Suqpage needs one PostgreSQL application model in development and production
 without allowing local reset, seed, Auth, Storage, or Realtime work to touch the
 hosted Supabase project.
@@ -159,3 +165,38 @@ read-only migration comparison until the explicit retirement cleanup.
 - [x] Provider and schema ownership are explicit
 - [x] Positive and negative scenarios are written
 - [x] Evidence and rollback are planned
+
+## Standard development command correction — 2026-09-17
+
+`npm run dev` and `npm run dev:local` must use the same guarded launcher. Both
+load the existing ignored `.local/supabase-runtime.env`, require PostgreSQL and
+local Supabase Auth/Storage, and reject remote provider/database destinations.
+The explicit `--hostname 127.0.0.1 --port 3102` command is supported; CLI port
+overrides PORT, with 3000 retained as the default. The launched application's
+canonical/public origin must use that host/port. Missing configuration reports
+the configure command without logging credentials. No migrations, provider
+configuration, schema resets or implicit seeding occur during server startup.
+
+GIVEN local settings WHEN either npm command starts THEN the child receives the
+PostgreSQL driver and local provider settings. GIVEN explicit CLI port and PORT
+WHEN launched THEN CLI port wins. GIVEN a non-loopback host/provider, invalid port
+or missing settings WHEN startup is attempted THEN fail before spawning Next.
+
+Focused evidence: scripts/test-local-dev-launcher.mjs tests the actual launcher
+with a disposable fixture Next executable; test:local-supabase-readiness retains
+configuration guards. Live local HTTP checks verify the real route. This nonvisual
+startup fix does not approve the pending service/starter visual release.
+
+## Automatic readiness — 2026-09-18
+
+GIVEN existing guarded local runtime settings WHEN npm run dev runs with Docker
+Desktop stopped on macOS THEN open Docker Desktop, wait at most 120 seconds for
+its daemon, and start this repository's local Supabase stack if needed. Wait at
+most 180 seconds for local PostgreSQL/auth readiness before spawning Next. Healthy
+services are reused. Missing CLI, unsupported stopped daemon, failed startup or
+readiness timeout returns actionable sanitized error without spawning Next.
+GIVEN unsafe runtime settings WHEN starting THEN reject before any service command.
+Never reset/seed/migrate, stop other stacks, or write hosted configuration. Initial
+installation/configure is still explicit. Supabase output is captured privately
+because CLI status/start output may contain credentials. Test via injected command/
+readiness ports plus the real healthy local stack; no production bypass flag.

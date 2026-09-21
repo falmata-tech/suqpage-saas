@@ -28,9 +28,9 @@ async function main() {
             name: "Aster Food Studio",
             status: "draft",
             contact_email: "aster@example.test",
-            whatsapp: "",
-            public_email: "",
-            public_phone: "",
+            whatsapp: "+447700900123",
+            public_email: "hello@example.test",
+            public_phone: "+447700900123",
         });
         assert.match((await db.prepare("SELECT handle FROM businesses WHERE id=?").get(created.businessId) as {
             handle: string;

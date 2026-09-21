@@ -1,6 +1,3 @@
-import { canReadSubmittedCover } from "@/lib/page-review-runtime";
-import { ownerPageImageKey } from "@/lib/owner-page-domain";
-import { mediaMime } from "@/lib/media";
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
 import { getMediaObjectStore } from "@/lib/media-storage";
@@ -19,9 +16,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ bus
   try {
     const { businessId, filename } = await params;
     const ref=`/api/page-drafts/${businessId}/media/${filename}`;
-    const key=ownerPageImageKey(Number(businessId),ref);
-    const reviewing=actor.access_role==="platform_admin"&&key&&await canReadSubmittedCover(actor.id,Number(businessId),ref);
-    const image=reviewing?await getMediaObjectStore().read("pages",key,mediaMime(key)):await readOwnerPageImage(ownerPagePort,getMediaObjectStore(),actor,Number(businessId),ref);
+    const image=await readOwnerPageImage(ownerPagePort,getMediaObjectStore(),actor,Number(businessId),ref);
     if(!image)return fail(404);
     return new NextResponse(new Uint8Array(image.bytes), { headers: { ...headers, "Content-Type": image.contentType, "Content-Length": String(image.contentLength) } });
   } catch (error) { return fail(error instanceof OwnerPageError ? error.status : 503); }

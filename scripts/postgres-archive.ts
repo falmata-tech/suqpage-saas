@@ -1,6 +1,7 @@
 import { platformEnvironment } from "../lib/platform-environment.mjs";
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { devNull } from 'node:os';
 
 export function archiveTarget() {
   const raw = platformEnvironment().SUQPAGE_POSTGRES_DIRECT_URL;
@@ -32,7 +33,10 @@ export function archiveCommand(command: 'pg_dump' | 'pg_restore', args: string[]
 }
 export function inspectArchive(bytes: Buffer) {
   if (bytes.subarray(0, 5).toString() !== 'PGDMP') throw new Error('Expected a PostgreSQL custom-format archive.');
-  const command = archiveCommand('pg_restore', ['--list']);
+  // --list reads only the header and can close stdin early (EPIPE in spawnSync).
+  // Parse every data block without connecting to a database or exposing its SQL.
+  const nullFile = platformEnvironment().SUQPAGE_LOCAL_PG_CONTAINER ? '/dev/null' : devNull;
+  const command = archiveCommand('pg_restore', [`--file=${nullFile}`]);
   const result = spawnSync(command.binary, command.args, { env: command.env, input: bytes, maxBuffer: 16 * 1024 * 1024 });
   if (result.error || result.status !== 0) throw new Error('PostgreSQL archive validation failed.');
 }

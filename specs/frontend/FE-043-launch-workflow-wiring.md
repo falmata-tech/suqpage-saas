@@ -2,7 +2,7 @@
 id: FE-043
 title: Complete seller and operations launch workflows
 status: in_progress
-related: [FE-042, FE-040, FE-008, BE-034, DEP-030]
+related: [FE-045, FE-042, FE-040, FE-008, BE-034, DEP-030]
 owners: [product, frontend, operations]
 last_updated: 2026-09-14
 change_level: L2

@@ -1,0 +1,7031 @@
+[
+  {
+    "id": "place-553e667e63bb8da0",
+    "name": "Addis Ababa",
+    "localName": "አዲስ አበባ",
+    "kind": "city",
+    "region": "Addis Ababa",
+    "latitude": 9.03581,
+    "longitude": 38.75243
+  },
+  {
+    "id": "place-e4d90f1ead0dc101",
+    "name": "Wolaita Sodo",
+    "localName": "ወላይታ ሶዶ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.85775,
+    "longitude": 37.75785
+  },
+  {
+    "id": "place-da3ce1c05b1ee715",
+    "name": "Dire Dawa",
+    "localName": "ድሬዳዋ",
+    "kind": "city",
+    "region": "Dire Dawa",
+    "latitude": 9.59134,
+    "longitude": 41.85661
+  },
+  {
+    "id": "place-9ecae1af4fcab408",
+    "name": "Adama",
+    "localName": "አዳማ",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 8.54103,
+    "longitude": 39.27055
+  },
+  {
+    "id": "place-d90f3975cdb18e56",
+    "name": "Gonder",
+    "localName": "ጎንደር",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 12.61037,
+    "longitude": 37.46677
+  },
+  {
+    "id": "place-40015765cce7b688",
+    "name": "Jimma",
+    "localName": "ጂማ",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 7.67562,
+    "longitude": 36.84788
+  },
+  {
+    "id": "place-18cd0f4c7aaf0d43",
+    "name": "Mek'elē",
+    "localName": "",
+    "kind": "city",
+    "region": "Tigray",
+    "latitude": 13.49666,
+    "longitude": 39.47683
+  },
+  {
+    "id": "place-a8850ca74563aa23",
+    "name": "Dessie",
+    "localName": "ደሴ",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 11.1226,
+    "longitude": 39.63498
+  },
+  {
+    "id": "place-a34ea5a5213a134c",
+    "name": "Hawassa",
+    "localName": "አዋሳ",
+    "kind": "city",
+    "region": "Sidama",
+    "latitude": 7.0481,
+    "longitude": 38.47861
+  },
+  {
+    "id": "place-86d574c0e33eff79",
+    "name": "Harar",
+    "localName": "ሐረር",
+    "kind": "city",
+    "region": "Harari",
+    "latitude": 9.31183,
+    "longitude": 42.1284
+  },
+  {
+    "id": "place-429ed8be69b197f9",
+    "name": "Asella",
+    "localName": "አሰላ",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 7.95,
+    "longitude": 39.13333
+  },
+  {
+    "id": "place-a9b8401733a40e0f",
+    "name": "Jijiga",
+    "localName": "ጂጂጋ",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 9.35085,
+    "longitude": 42.80038
+  },
+  {
+    "id": "place-31561416253e2105",
+    "name": "Arba Minch",
+    "localName": "አርባ ምንጭ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.02151,
+    "longitude": 37.55398
+  },
+  {
+    "id": "place-dd979372e1d9ce63",
+    "name": "Debre Markos",
+    "localName": "ደብረ ማርቆስ",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 10.33587,
+    "longitude": 37.72856
+  },
+  {
+    "id": "place-a6c38bb7d4a513ba",
+    "name": "Naqamte",
+    "localName": "ነቀምት",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 9.09052,
+    "longitude": 36.54816
+  },
+  {
+    "id": "place-83e3abe22e5baefb",
+    "name": "Kombolcha",
+    "localName": "",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 11.08136,
+    "longitude": 39.74087
+  },
+  {
+    "id": "place-268beea57e91b0a2",
+    "name": "Gode",
+    "localName": "ጎዴ",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 5.9527,
+    "longitude": 43.55223
+  },
+  {
+    "id": "place-e361dfea3eb38345",
+    "name": "Debre Birhan",
+    "localName": "ደብረ ብርሃን",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 9.67521,
+    "longitude": 39.53249
+  },
+  {
+    "id": "place-cfd5314cc47f6e7d",
+    "name": "Dilla",
+    "localName": "ዲላ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.40996,
+    "longitude": 38.31028
+  },
+  {
+    "id": "place-a24a7ca61b559995",
+    "name": "Ambo",
+    "localName": "አምቦ",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 8.9821,
+    "longitude": 37.85544
+  },
+  {
+    "id": "place-4f27088e31486d7d",
+    "name": "Bati",
+    "localName": "",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 11.19163,
+    "longitude": 40.01975
+  },
+  {
+    "id": "place-cfe6ed1ef53cef8b",
+    "name": "Gambela",
+    "localName": "ጋምቤላ",
+    "kind": "city",
+    "region": "Gambela",
+    "latitude": 8.25037,
+    "longitude": 34.58773
+  },
+  {
+    "id": "place-403ea067494d2953",
+    "name": "Fiche",
+    "localName": "",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 9.77196,
+    "longitude": 38.73886
+  },
+  {
+    "id": "place-48cd8df228ca38b9",
+    "name": "Fitche",
+    "localName": "",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 9.78333,
+    "longitude": 38.73333
+  },
+  {
+    "id": "place-f2644fcd40a13292",
+    "name": "Asosa",
+    "localName": "አሶሳ",
+    "kind": "city",
+    "region": "Benishangul Gumuz",
+    "latitude": 10.06464,
+    "longitude": 34.5437
+  },
+  {
+    "id": "place-609270fc591deff0",
+    "name": "Abobo",
+    "localName": "አቦቦ",
+    "kind": "city",
+    "region": "Gambela",
+    "latitude": 7.89794,
+    "longitude": 34.54081
+  },
+  {
+    "id": "place-447a6eb06ec8676d",
+    "name": "Addi Hamli",
+    "localName": "",
+    "kind": "city",
+    "region": "Tigray",
+    "latitude": 13.62419,
+    "longitude": 37.27219
+  },
+  {
+    "id": "place-b9f4031b0f828bac",
+    "name": "Areka",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 7.07324,
+    "longitude": 37.70784
+  },
+  {
+    "id": "place-844e1eb05b5105a3",
+    "name": "Awareh",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 8.2591,
+    "longitude": 44.15878
+  },
+  {
+    "id": "place-a58ec9e640cfba5f",
+    "name": "Badessa",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.87837,
+    "longitude": 37.93519
+  },
+  {
+    "id": "place-f7a0921d5c980374",
+    "name": "Bahir Dar",
+    "localName": "ባሕር-ዳር",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 11.59497,
+    "longitude": 37.38823
+  },
+  {
+    "id": "place-f4642b3c9323d471",
+    "name": "Bale Hawassa",
+    "localName": "በሌ ሀዋሳ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.91811,
+    "longitude": 37.52669
+  },
+  {
+    "id": "place-a4eaa164630b448d",
+    "name": "Baligubadle",
+    "localName": "ባሊጉባድል",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 9.00103,
+    "longitude": 44.00012
+  },
+  {
+    "id": "place-c00fa7ef05e42e06",
+    "name": "Beklo Segno",
+    "localName": "በቅሎ ሰኞ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.83169,
+    "longitude": 37.6191
+  },
+  {
+    "id": "place-2f4250aae2950b72",
+    "name": "Boditi",
+    "localName": "ቦዲቲ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.9549,
+    "longitude": 37.85753
+  },
+  {
+    "id": "place-49bf30d67533072d",
+    "name": "Bombe",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 7.13757,
+    "longitude": 37.58194
+  },
+  {
+    "id": "place-b93ef82cbdba32a4",
+    "name": "Dambidollo",
+    "localName": "",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 8.53527,
+    "longitude": 34.80034
+  },
+  {
+    "id": "place-ee708b050266c2b9",
+    "name": "Dimtu",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.93155,
+    "longitude": 38.12521
+  },
+  {
+    "id": "place-3d697e9b3e030ca2",
+    "name": "Elanle",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 6.56046,
+    "longitude": 45.78577
+  },
+  {
+    "id": "place-858907a6df59b11b",
+    "name": "Gara Godo",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 7.08073,
+    "longitude": 37.77795
+  },
+  {
+    "id": "place-80414ff945cedaa5",
+    "name": "Gasuba",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.72388,
+    "longitude": 37.55519
+  },
+  {
+    "id": "place-3ca9852cfaa8a431",
+    "name": "Geladi",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 6.97299,
+    "longitude": 46.41401
+  },
+  {
+    "id": "place-28e7a7fd0b752b93",
+    "name": "Gununo",
+    "localName": "ጉኑኖ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.92681,
+    "longitude": 37.65221
+  },
+  {
+    "id": "place-a2d7a6f850ed277a",
+    "name": "Hara Gebeya",
+    "localName": "ሃራ ገበያ",
+    "kind": "city",
+    "region": "Amhara",
+    "latitude": 11.84184,
+    "longitude": 39.73865
+  },
+  {
+    "id": "place-4c28d0577557f89a",
+    "name": "Ksad Gimel",
+    "localName": "",
+    "kind": "city",
+    "region": "Tigray",
+    "latitude": 13.61454,
+    "longitude": 37.36627
+  },
+  {
+    "id": "place-755fa1f9dbd23fe9",
+    "name": "Maya City",
+    "localName": "",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 9.39721,
+    "longitude": 42.00126
+  },
+  {
+    "id": "place-0c864c7060dc84b3",
+    "name": "Robe",
+    "localName": "ነጩን",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 7.12427,
+    "longitude": 40.0081
+  },
+  {
+    "id": "place-6ab935fcb00763d0",
+    "name": "Shanto",
+    "localName": "",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 7.02317,
+    "longitude": 37.86077
+  },
+  {
+    "id": "place-6785635758e67e60",
+    "name": "Shashamane",
+    "localName": "ሻሸመኔ",
+    "kind": "city",
+    "region": "Oromia",
+    "latitude": 7.20391,
+    "longitude": 38.60896
+  },
+  {
+    "id": "place-4aad3c2789e70c17",
+    "name": "Shilabo",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 6.0943,
+    "longitude": 44.76883
+  },
+  {
+    "id": "place-c43191110a4e2072",
+    "name": "Tebela",
+    "localName": "ሁምቦ ጠበላ",
+    "kind": "city",
+    "region": "South Ethiopia",
+    "latitude": 6.70628,
+    "longitude": 37.76659
+  },
+  {
+    "id": "place-64ff2ac3e10cd450",
+    "name": "Togechane ቶግ ዋጃሌ",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 9.59767,
+    "longitude": 43.33064
+  },
+  {
+    "id": "place-6982ef0b5b596df1",
+    "name": "Toon Barwaaqo",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 7.32001,
+    "longitude": 45.68264
+  },
+  {
+    "id": "place-8ccee6dd63de2267",
+    "name": "Werder",
+    "localName": "",
+    "kind": "city",
+    "region": "Somali",
+    "latitude": 6.97449,
+    "longitude": 45.34315
+  },
+  {
+    "id": "place-0cb0f5989f3e900f",
+    "name": "Semera",
+    "localName": "ሰመራ",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.79231,
+    "longitude": 41.00892
+  },
+  {
+    "id": "place-21f99087ed02b5fd",
+    "name": "Molale",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.1192,
+    "longitude": 39.66066
+  },
+  {
+    "id": "place-7908f5c03b63d185",
+    "name": "Adigrat",
+    "localName": "ዓዲግራት",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.27741,
+    "longitude": 39.4615
+  },
+  {
+    "id": "place-68bf0e9b20cc59c8",
+    "name": "`Alemaya",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.38333,
+    "longitude": 41.93333
+  },
+  {
+    "id": "place-7d862d24335ea469",
+    "name": "Axum",
+    "localName": "አክሱም",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.1221,
+    "longitude": 38.73217
+  },
+  {
+    "id": "place-161a8df08940d9da",
+    "name": "Bona Qabelanka",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.52875,
+    "longitude": 38.7121
+  },
+  {
+    "id": "place-e62d94adb3c8a444",
+    "name": "Shire",
+    "localName": "ሽሬ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.10243,
+    "longitude": 38.28252
+  },
+  {
+    "id": "place-7d9e2a7779cd9672",
+    "name": "Batu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.93581,
+    "longitude": 38.71649
+  },
+  {
+    "id": "place-9f0d3792cd2877ad",
+    "name": "Degehabur",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 8.22029,
+    "longitude": 43.5584
+  },
+  {
+    "id": "place-268b8a55a7a10295",
+    "name": "Dolo",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 4.17861,
+    "longitude": 42.05889
+  },
+  {
+    "id": "place-9dfc40ae53e838e2",
+    "name": "Bule Hora",
+    "localName": "ሀገረ ማርያም",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.63995,
+    "longitude": 38.23937
+  },
+  {
+    "id": "place-a2b0ef45dd3f9c96",
+    "name": "አዲስ ዘመን / Adis Zemen",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.12529,
+    "longitude": 37.77752
+  },
+  {
+    "id": "place-d2ac00e5cdd00d32",
+    "name": "Asaita",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.56533,
+    "longitude": 41.43859
+  },
+  {
+    "id": "place-7efb2a5776652367",
+    "name": "Metu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.29565,
+    "longitude": 35.58343
+  },
+  {
+    "id": "place-7beecbccb6415fae",
+    "name": "Humera",
+    "localName": "ሁመራ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.28769,
+    "longitude": 36.60884
+  },
+  {
+    "id": "place-29387ae212c0f5d9",
+    "name": "Adet",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.26437,
+    "longitude": 37.48882
+  },
+  {
+    "id": "place-0a454fb6179f6eb4",
+    "name": "Denboya",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.34552,
+    "longitude": 37.95131
+  },
+  {
+    "id": "place-f53e56dbedfd3239",
+    "name": "Bechena",
+    "localName": "ብቸና",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.44806,
+    "longitude": 38.20171
+  },
+  {
+    "id": "place-2d1e3baf11ba1b59",
+    "name": "Ab'aala",
+    "localName": "አባላ (ወረዳ)",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 13.35549,
+    "longitude": 39.75491
+  },
+  {
+    "id": "place-d4a0799697a9a9b1",
+    "name": "Mieso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.23307,
+    "longitude": 40.75485
+  },
+  {
+    "id": "place-2b612011ec83d632",
+    "name": "Mai-Aini Refugee Camp",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.65708,
+    "longitude": 38.15445
+  },
+  {
+    "id": "place-7bf04f6dc195e606",
+    "name": "Awash",
+    "localName": "አዋሽ",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 8.9925,
+    "longitude": 40.16767
+  },
+  {
+    "id": "place-7d4767c7d5f5d494",
+    "name": "Zalambessa",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.52564,
+    "longitude": 39.3871
+  },
+  {
+    "id": "place-9632ed8ed530873e",
+    "name": "Lalibela",
+    "localName": "ላሊበላ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.03606,
+    "longitude": 39.04568
+  },
+  {
+    "id": "place-938fa5093a6cb063",
+    "name": "Rama",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.41197,
+    "longitude": 38.7864
+  },
+  {
+    "id": "place-f391f397157301ff",
+    "name": "Gerba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.77888,
+    "longitude": 38.27101
+  },
+  {
+    "id": "place-126cac6627850b34",
+    "name": "Finchawa",
+    "localName": "ፊንጫዋ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.39413,
+    "longitude": 38.27066
+  },
+  {
+    "id": "place-4651c8a570f57d8d",
+    "name": "Melka Chireti",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 5.337,
+    "longitude": 41.88275
+  },
+  {
+    "id": "place-f30a5a88c1f941c1",
+    "name": "Tore",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.93835,
+    "longitude": 38.15655
+  },
+  {
+    "id": "place-a30c3e630da10450",
+    "name": "Gish Abay",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.98022,
+    "longitude": 37.21004
+  },
+  {
+    "id": "place-26afdf1f0d9880ff",
+    "name": "Derba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.43333,
+    "longitude": 38.65
+  },
+  {
+    "id": "place-ac5c5122536e8b4a",
+    "name": "Dawa Digati",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.32884,
+    "longitude": 38.79235
+  },
+  {
+    "id": "place-53fdc68d4d9f8c1e",
+    "name": "`Arb Gebeya",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.63181,
+    "longitude": 37.74949
+  },
+  {
+    "id": "place-b2cce7215337df0c",
+    "name": "Abadra",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.3229,
+    "longitude": 36.7828
+  },
+  {
+    "id": "place-fabe4d99ff86a5ff",
+    "name": "Abay Yilas",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.37095,
+    "longitude": 38.84829
+  },
+  {
+    "id": "place-8f384c344003c47e",
+    "name": "Abba Jimma",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.37422,
+    "longitude": 39.9062
+  },
+  {
+    "id": "place-659f691e2de11aa8",
+    "name": "Abe dongooroo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.60944,
+    "longitude": 36.93706
+  },
+  {
+    "id": "place-c7f848f592768ef7",
+    "name": "Abertege",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.74325,
+    "longitude": 37.41396
+  },
+  {
+    "id": "place-c8b5acf219415c09",
+    "name": "Abiy Addi",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.62302,
+    "longitude": 39.00005
+  },
+  {
+    "id": "place-57365e09891f116b",
+    "name": "Abomsa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.48915,
+    "longitude": 39.83413
+  },
+  {
+    "id": "place-9822efa07d5538da",
+    "name": "Abora",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.99264,
+    "longitude": 37.02929
+  },
+  {
+    "id": "place-686ad9d8d88c2769",
+    "name": "Achamo",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.66556,
+    "longitude": 38.03888
+  },
+  {
+    "id": "place-fa2eb4ce8259c863",
+    "name": "Achano",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.05846,
+    "longitude": 37.3172
+  },
+  {
+    "id": "place-c20d203a8fb3133f",
+    "name": "Achura",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.15641,
+    "longitude": 37.70039
+  },
+  {
+    "id": "place-21af373f5d5d9569",
+    "name": "Achuwa",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.64876,
+    "longitude": 36.03262
+  },
+  {
+    "id": "place-09d379923aa9c3f7",
+    "name": "Adaba",
+    "localName": "አዳባ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.00725,
+    "longitude": 39.39172
+  },
+  {
+    "id": "place-fa8d5015f0dc5d01",
+    "name": "Adagalla",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 10.42641,
+    "longitude": 42.23883
+  },
+  {
+    "id": "place-8232382ec97c51e7",
+    "name": "Addi Hirdi",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.90773,
+    "longitude": 37.13487
+  },
+  {
+    "id": "place-c191ae497e977ec3",
+    "name": "Addi Khaye",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.27856,
+    "longitude": 38.5945
+  },
+  {
+    "id": "place-827cdeada7729a04",
+    "name": "Addis Alem",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.04664,
+    "longitude": 38.41239
+  },
+  {
+    "id": "place-1c22600047a3e335",
+    "name": "Addis Kidan",
+    "localName": "አዲስ ኪዳን",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.07504,
+    "longitude": 36.88932
+  },
+  {
+    "id": "place-7673b74d3d8a3e76",
+    "name": "Adebay",
+    "localName": "አደባይ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.20223,
+    "longitude": 36.75877
+  },
+  {
+    "id": "place-7cff3e12ff049716",
+    "name": "Adele",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.7929,
+    "longitude": 39.90433
+  },
+  {
+    "id": "place-d2c8c0315271920c",
+    "name": "Adi Abun",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.18802,
+    "longitude": 38.88309
+  },
+  {
+    "id": "place-08ad957e62fd9a40",
+    "name": "Adi Arkay",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.44787,
+    "longitude": 38.06075
+  },
+  {
+    "id": "place-e553b49ffbb28f8d",
+    "name": "Adi Bidera (1)",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.76704,
+    "longitude": 39.81252
+  },
+  {
+    "id": "place-0fc1664a93979801",
+    "name": "Adi Da`Iro",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.30958,
+    "longitude": 38.17155
+  },
+  {
+    "id": "place-30d72dc31dcfe52a",
+    "name": "Adi Goshu",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.16435,
+    "longitude": 37.30964
+  },
+  {
+    "id": "place-8c22ed24e3e94f38",
+    "name": "Adi Mehameday",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.99499,
+    "longitude": 37.82669
+  },
+  {
+    "id": "place-a05ac92f6c9abeaf",
+    "name": "Adi Ramets",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.75174,
+    "longitude": 37.32141
+  },
+  {
+    "id": "place-dc7b13cc06038e92",
+    "name": "Adi Shahu",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.9356,
+    "longitude": 39.51619
+  },
+  {
+    "id": "place-54fbbd191afaf510",
+    "name": "Adi-Nebried",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.41547,
+    "longitude": 38.18703
+  },
+  {
+    "id": "place-851c8271457f5a0c",
+    "name": "Adulala",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.5344,
+    "longitude": 38.90585
+  },
+  {
+    "id": "place-597a4283a31b1bf2",
+    "name": "Adwa",
+    "localName": "አድዋ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.16707,
+    "longitude": 38.89116
+  },
+  {
+    "id": "place-0b83ddd8b3efd5b3",
+    "name": "Āfdem",
+    "localName": "አፍደም",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.46263,
+    "longitude": 40.99808
+  },
+  {
+    "id": "place-d3c1f94fdf4a35fc",
+    "name": "Agarfa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.26891,
+    "longitude": 39.82278
+  },
+  {
+    "id": "place-a5bb8340052d2bee",
+    "name": "Agaro",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.85663,
+    "longitude": 36.58958
+  },
+  {
+    "id": "place-57b683b763ce0d29",
+    "name": "Agena",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.13567,
+    "longitude": 38.00345
+  },
+  {
+    "id": "place-cc6b87b58a4861be",
+    "name": "Agre Salam",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.4884,
+    "longitude": 38.52518
+  },
+  {
+    "id": "place-23028ebc814aabb9",
+    "name": "Agula",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.69415,
+    "longitude": 39.58575
+  },
+  {
+    "id": "place-c42864cde408a07e",
+    "name": "Aira",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.09972,
+    "longitude": 35.39851
+  },
+  {
+    "id": "place-b7dab35cb0a55655",
+    "name": "Akesta",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.87048,
+    "longitude": 39.17769
+  },
+  {
+    "id": "place-28426aabdc6f00af",
+    "name": "Alaba Kulito",
+    "localName": "አላባ ቁሊቶ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.31303,
+    "longitude": 38.08788
+  },
+  {
+    "id": "place-9300bebd88c8f01e",
+    "name": "Alamata",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.4176,
+    "longitude": 39.56032
+  },
+  {
+    "id": "place-637cc919e4884d78",
+    "name": "Aleltu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.46527,
+    "longitude": 38.25388
+  },
+  {
+    "id": "place-493945a139133609",
+    "name": "Alem Gebeya",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.56487,
+    "longitude": 38.17806
+  },
+  {
+    "id": "place-0957dd1c93f0dda3",
+    "name": "Alem Ketema",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.05811,
+    "longitude": 38.99616
+  },
+  {
+    "id": "place-bb084a9ef48a28b4",
+    "name": "Alem Teferi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.90469,
+    "longitude": 35.22719
+  },
+  {
+    "id": "place-6731af0746f4a361",
+    "name": "Alemtena",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.29742,
+    "longitude": 38.94891
+  },
+  {
+    "id": "place-7880f035ca8913c1",
+    "name": "Aleta Wendo",
+    "localName": "አለታ ወንዶ",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.60372,
+    "longitude": 38.42327
+  },
+  {
+    "id": "place-803a18c28835b934",
+    "name": "Alga",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.58087,
+    "longitude": 37.10962
+  },
+  {
+    "id": "place-7bec8ee29f450909",
+    "name": "Ali",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.24334,
+    "longitude": 39.93054
+  },
+  {
+    "id": "place-41ad63e6a6495ee8",
+    "name": "Alibo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.88534,
+    "longitude": 37.07798
+  },
+  {
+    "id": "place-655e20e8455bd299",
+    "name": "Alimu",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.25966,
+    "longitude": 36.38726
+  },
+  {
+    "id": "place-b273ba94d8a26b01",
+    "name": "Almahal",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.54633,
+    "longitude": 35.15683
+  },
+  {
+    "id": "place-677822ccf1f32c1c",
+    "name": "Aman",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 6.95559,
+    "longitude": 35.55371
+  },
+  {
+    "id": "place-51b5f3e73686a87b",
+    "name": "Amanuel",
+    "localName": "አማኑኤል",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.43922,
+    "longitude": 37.56666
+  },
+  {
+    "id": "place-ecfa8e6cab7062af",
+    "name": "Amaya",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.10656,
+    "longitude": 36.67719
+  },
+  {
+    "id": "place-8e16fbc23ec743a5",
+    "name": "Amba Georgis",
+    "localName": "አምባ ጊዮርጊስ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.76806,
+    "longitude": 37.62324
+  },
+  {
+    "id": "place-251ee085cc37627c",
+    "name": "Amba Madre",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.69415,
+    "longitude": 38.17483
+  },
+  {
+    "id": "place-ef8d82c598d221ee",
+    "name": "Amber",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.25262,
+    "longitude": 37.84219
+  },
+  {
+    "id": "place-7326d732ccf110c5",
+    "name": "Ambuye",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.98119,
+    "longitude": 36.901
+  },
+  {
+    "id": "place-0a5318241331c5ac",
+    "name": "Amde Werq",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.42951,
+    "longitude": 38.71609
+  },
+  {
+    "id": "place-a2308bcb8a2b02ca",
+    "name": "Amedber",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.91347,
+    "longitude": 37.88457
+  },
+  {
+    "id": "place-75e2b8730014e88f",
+    "name": "Angacha",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.34899,
+    "longitude": 37.8627
+  },
+  {
+    "id": "place-e71cfa293ee16502",
+    "name": "Angiyo Kolla",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.25,
+    "longitude": 36.55
+  },
+  {
+    "id": "place-bd543352ae73c03b",
+    "name": "Anka Oruwa",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.88151,
+    "longitude": 38.01502
+  },
+  {
+    "id": "place-76645b77beee03b4",
+    "name": "Araarso",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 8.752,
+    "longitude": 43.36798
+  },
+  {
+    "id": "place-3547ef813dc23706",
+    "name": "Arb Gebeya",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.60934,
+    "longitude": 38.53921
+  },
+  {
+    "id": "place-6754e94cd6e5dd4a",
+    "name": "Arbe Gona",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.68874,
+    "longitude": 38.71646
+  },
+  {
+    "id": "place-14666d146c562d31",
+    "name": "Arboye",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.38238,
+    "longitude": 39.6852
+  },
+  {
+    "id": "place-8a4f504efaa5f220",
+    "name": "Arema",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.35993,
+    "longitude": 37.02038
+  },
+  {
+    "id": "place-36ccf4c7d13f2718",
+    "name": "Arerti",
+    "localName": "አረርቲ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 8.92853,
+    "longitude": 39.42516
+  },
+  {
+    "id": "place-93b8f4b85fe1de92",
+    "name": "Arsi Negelle",
+    "localName": "Arisii Nageelle",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.35334,
+    "longitude": 38.67566
+  },
+  {
+    "id": "place-1ef1491b73459248",
+    "name": "Asassa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.09932,
+    "longitude": 39.1953
+  },
+  {
+    "id": "place-549e5b6cff2efdfc",
+    "name": "Asebot",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.17416,
+    "longitude": 40.66608
+  },
+  {
+    "id": "place-a35730018acf5dbc",
+    "name": "Asendabo",
+    "localName": "አሰንዳቦ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.75666,
+    "longitude": 37.22222
+  },
+  {
+    "id": "place-07c9b4374317f76e",
+    "name": "Ashenat",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.46317,
+    "longitude": 38.91432
+  },
+  {
+    "id": "place-d3ddcea6d39e2ea1",
+    "name": "Ashoka Velag",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.02577,
+    "longitude": 38.89647
+  },
+  {
+    "id": "place-0b3dfb79b6f41b49",
+    "name": "Asigori",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.78962,
+    "longitude": 38.33114
+  },
+  {
+    "id": "place-98a91d2144415597",
+    "name": "Asketama",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.40976,
+    "longitude": 39.01476
+  },
+  {
+    "id": "place-9d1ca7587edb62b4",
+    "name": "Ataye",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.3449,
+    "longitude": 39.95746
+  },
+  {
+    "id": "place-de8a9185f7009d42",
+    "name": "Atsbi",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.87681,
+    "longitude": 39.74047
+  },
+  {
+    "id": "place-672f4d9e48d1bf8f",
+    "name": "Ayesha",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 10.75376,
+    "longitude": 42.5703
+  },
+  {
+    "id": "place-0ced0d8e97b60342",
+    "name": "Aykel",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.54787,
+    "longitude": 37.06321
+  },
+  {
+    "id": "place-299eeee155bde366",
+    "name": "Āzayē",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.47975,
+    "longitude": 37.4757
+  },
+  {
+    "id": "place-42aeb67453a4f64e",
+    "name": "Azena",
+    "localName": "አዛና",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.76321,
+    "longitude": 36.81466
+  },
+  {
+    "id": "place-75cd1ce1d9d149a4",
+    "name": "Azezo",
+    "localName": "አዘዞ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.54907,
+    "longitude": 37.42704
+  },
+  {
+    "id": "place-cf52fbaaa18d24f0",
+    "name": "Babich",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.97256,
+    "longitude": 37.54299
+  },
+  {
+    "id": "place-8bd4244b4de91948",
+    "name": "Babille",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.22556,
+    "longitude": 42.33222
+  },
+  {
+    "id": "place-1e29ee29830388bb",
+    "name": "Babo Tower",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.47444,
+    "longitude": 35.19623
+  },
+  {
+    "id": "place-5d792d91cc2a8c5d",
+    "name": "Bako",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.12173,
+    "longitude": 37.06563
+  },
+  {
+    "id": "place-905402a03272264e",
+    "name": "Balchi",
+    "localName": "ባልጪ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 8.91516,
+    "longitude": 39.37096
+  },
+  {
+    "id": "place-6d616b74fa6c42d2",
+    "name": "Bale",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.73086,
+    "longitude": 39.99988
+  },
+  {
+    "id": "place-ca72734c1e6a8d53",
+    "name": "Balemi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.12785,
+    "longitude": 37.5184
+  },
+  {
+    "id": "place-6fd3237828515629",
+    "name": "Balo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.29473,
+    "longitude": 36.21743
+  },
+  {
+    "id": "place-dfebf080de7489fb",
+    "name": "Bambasi",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 9.76042,
+    "longitude": 34.72988
+  },
+  {
+    "id": "place-9266c3dfad72da64",
+    "name": "Banitu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.6151,
+    "longitude": 38.36319
+  },
+  {
+    "id": "place-b8456b56b872933f",
+    "name": "Bareda",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.23005,
+    "longitude": 36.25089
+  },
+  {
+    "id": "place-4c8303b679399ba3",
+    "name": "Bedele",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.45565,
+    "longitude": 36.35254
+  },
+  {
+    "id": "place-01d9838365aec5de",
+    "name": "Bedeno",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.11309,
+    "longitude": 41.63428
+  },
+  {
+    "id": "place-8360a4927d56b865",
+    "name": "Bedessa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.90322,
+    "longitude": 40.77649
+  },
+  {
+    "id": "place-502370aa8b147c03",
+    "name": "Begi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.35078,
+    "longitude": 34.53042
+  },
+  {
+    "id": "place-2ccab7e4cbc3ae3b",
+    "name": "Beke",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.16185,
+    "longitude": 39.04751
+  },
+  {
+    "id": "place-4234cbdb23777f21",
+    "name": "Beke Kelate",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.61466,
+    "longitude": 37.98242
+  },
+  {
+    "id": "place-a5ac013dff0211eb",
+    "name": "Bekoji",
+    "localName": "በቆጂ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.53333,
+    "longitude": 39.25
+  },
+  {
+    "id": "place-36be021baf206422",
+    "name": "Beleho",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.1703,
+    "longitude": 39.10778
+  },
+  {
+    "id": "place-f5286e3913fc50c5",
+    "name": "Belessa",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.58874,
+    "longitude": 37.91999
+  },
+  {
+    "id": "place-f1f81f462eca9662",
+    "name": "Bendi",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.07118,
+    "longitude": 35.64421
+  },
+  {
+    "id": "place-4657b020baa2f69a",
+    "name": "Berehed",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.19742,
+    "longitude": 39.70926
+  },
+  {
+    "id": "place-5b61438256710828",
+    "name": "Betmara",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.02215,
+    "longitude": 39.52679
+  },
+  {
+    "id": "place-f8ef5441e75d04a7",
+    "name": "Beto",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.05561,
+    "longitude": 36.88437
+  },
+  {
+    "id": "place-b682e86364a63dbe",
+    "name": "Bidre",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.91129,
+    "longitude": 39.63879
+  },
+  {
+    "id": "place-558e157849ea8a5b",
+    "name": "Bike",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.53092,
+    "longitude": 41.19736
+  },
+  {
+    "id": "place-dbb8774559d2ff9f",
+    "name": "Bikita",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.01047,
+    "longitude": 38.88757
+  },
+  {
+    "id": "place-9557d822efec40c0",
+    "name": "Bila",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.36929,
+    "longitude": 35.59859
+  },
+  {
+    "id": "place-a6a5b417c7769753",
+    "name": "Bila",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.28923,
+    "longitude": 37.02581
+  },
+  {
+    "id": "place-230bd223ee33eeb0",
+    "name": "Bilbala",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.16762,
+    "longitude": 38.98444
+  },
+  {
+    "id": "place-b485d1a98aa0295e",
+    "name": "Bilo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.89781,
+    "longitude": 37.00012
+  },
+  {
+    "id": "place-b2eaf477fed9ed0a",
+    "name": "Birbirsa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.89821,
+    "longitude": 35.2904
+  },
+  {
+    "id": "place-4e4d07265c31b740",
+    "name": "Bishoftu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.75,
+    "longitude": 38.98173
+  },
+  {
+    "id": "place-dd1b5411c94081d5",
+    "name": "Bitahora",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.40189,
+    "longitude": 35.89161
+  },
+  {
+    "id": "place-9a19ae3120c28931",
+    "name": "Bitana",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.96636,
+    "longitude": 38.0341
+  },
+  {
+    "id": "place-f37d634dc4bab37c",
+    "name": "Bode Ameda",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.21256,
+    "longitude": 38.20821
+  },
+  {
+    "id": "place-d4ad65ddcfdbb03d",
+    "name": "Bofa Town",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.46667,
+    "longitude": 39.45
+  },
+  {
+    "id": "place-14f22369b25ff105",
+    "name": "Boke Tiko",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.72659,
+    "longitude": 40.64347
+  },
+  {
+    "id": "place-e0f001ad3891c19c",
+    "name": "Boko",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.13557,
+    "longitude": 42.07758
+  },
+  {
+    "id": "place-91a3478c8bb58cd0",
+    "name": "Bokoksa",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.44097,
+    "longitude": 39.87933
+  },
+  {
+    "id": "place-2748ddc109d8c17a",
+    "name": "Bole",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.65032,
+    "longitude": 39.75414
+  },
+  {
+    "id": "place-d5efc60e56540a33",
+    "name": "Bollo Silassie",
+    "localName": "ቦሎ ሲላሴ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 8.87822,
+    "longitude": 39.39664
+  },
+  {
+    "id": "place-f2499d2bae50271c",
+    "name": "Bolo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.24443,
+    "longitude": 39.58048
+  },
+  {
+    "id": "place-113291b03f07aa26",
+    "name": "Bombas",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.21803,
+    "longitude": 42.46354
+  },
+  {
+    "id": "place-7ef88cc43df753d2",
+    "name": "Bonga",
+    "localName": "ቦንጋ",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.26454,
+    "longitude": 36.24605
+  },
+  {
+    "id": "place-663fe1965d90f72e",
+    "name": "Bonosha",
+    "localName": "ቦኖሻ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.5112,
+    "longitude": 38.09053
+  },
+  {
+    "id": "place-9ff00ab9f7939733",
+    "name": "Bookh",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 7.43695,
+    "longitude": 46.64695
+  },
+  {
+    "id": "place-f1fca88cc09ffb94",
+    "name": "Bordode",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.0131,
+    "longitude": 40.38902
+  },
+  {
+    "id": "place-851f4a1f783c766e",
+    "name": "Bore",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.35959,
+    "longitude": 38.62216
+  },
+  {
+    "id": "place-b77d963d620d870a",
+    "name": "Boreda",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.33411,
+    "longitude": 41.29035
+  },
+  {
+    "id": "place-56b3b496fa5e5938",
+    "name": "Boreda",
+    "localName": "ቦረዳ",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.47276,
+    "longitude": 37.63565
+  },
+  {
+    "id": "place-5a49f88fda1751fa",
+    "name": "Buee",
+    "localName": "ቡኢ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.31943,
+    "longitude": 38.5499
+  },
+  {
+    "id": "place-ceb6d740249ceccf",
+    "name": "Bulala",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.98571,
+    "longitude": 39.56812
+  },
+  {
+    "id": "place-c98703531138c096",
+    "name": "Bulki",
+    "localName": "ቡልቂ",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.28181,
+    "longitude": 36.81061
+  },
+  {
+    "id": "place-99ed0267b41bef2b",
+    "name": "Burayu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.03597,
+    "longitude": 38.66076
+  },
+  {
+    "id": "place-94d7f11155f65830",
+    "name": "Bure",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.28629,
+    "longitude": 35.0992
+  },
+  {
+    "id": "place-d541657244b764b3",
+    "name": "Burgesole",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.36223,
+    "longitude": 45.95606
+  },
+  {
+    "id": "place-201cd6323290435c",
+    "name": "Burie",
+    "localName": "ቡሬ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.71299,
+    "longitude": 37.06688
+  },
+  {
+    "id": "place-cccecaf1691538d8",
+    "name": "Burka",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.81939,
+    "longitude": 41.56828
+  },
+  {
+    "id": "place-46a674233ab4b875",
+    "name": "Busa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.77654,
+    "longitude": 38.1462
+  },
+  {
+    "id": "place-d7491635624e0b94",
+    "name": "Butajira",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.12062,
+    "longitude": 38.37771
+  },
+  {
+    "id": "place-35940888e41c1c96",
+    "name": "Buundada",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.61572,
+    "longitude": 42.02258
+  },
+  {
+    "id": "place-4e937c2733f19825",
+    "name": "Ch'Emero",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.61918,
+    "longitude": 39.6508
+  },
+  {
+    "id": "place-8d3ca51e786a202c",
+    "name": "Ch'Erch'Er",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.5406,
+    "longitude": 39.77137
+  },
+  {
+    "id": "place-9a5bd4407aa37d4b",
+    "name": "Cha´cha´",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.53382,
+    "longitude": 39.45524
+  },
+  {
+    "id": "place-ddbee17eed41682f",
+    "name": "Chagni",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.95829,
+    "longitude": 36.49895
+  },
+  {
+    "id": "place-25acd9079fc08d6a",
+    "name": "Chancho",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.30388,
+    "longitude": 38.7514
+  },
+  {
+    "id": "place-b796e833af2e78f6",
+    "name": "Chanka",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.8619,
+    "longitude": 35.07197
+  },
+  {
+    "id": "place-e821f6f7347b5df3",
+    "name": "Chefedonsa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.96996,
+    "longitude": 39.12491
+  },
+  {
+    "id": "place-69dddf17d556472b",
+    "name": "Chelala",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.44391,
+    "longitude": 38.25301
+  },
+  {
+    "id": "place-76ec4ba5f9c913e3",
+    "name": "Chele",
+    "localName": "ጨሌ",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.43361,
+    "longitude": 37.61551
+  },
+  {
+    "id": "place-1fc0191caaa71eb2",
+    "name": "Chelena",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.89514,
+    "longitude": 39.34096
+  },
+  {
+    "id": "place-8b0f24914593b9ba",
+    "name": "Chelenko",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.39663,
+    "longitude": 41.56035
+  },
+  {
+    "id": "place-c655adab48555926",
+    "name": "Chencha",
+    "localName": "ጨንቻ",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.2511,
+    "longitude": 37.57295
+  },
+  {
+    "id": "place-ca03fd8efe27c24a",
+    "name": "Chifra",
+    "localName": "ጪፍራ",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.60333,
+    "longitude": 40.01625
+  },
+  {
+    "id": "place-9e94124ef4a64475",
+    "name": "Chinaksen",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.50601,
+    "longitude": 42.60886
+  },
+  {
+    "id": "place-dafdbbf5c6cfb171",
+    "name": "Chiro",
+    "localName": "ጭሮ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.08748,
+    "longitude": 40.86633
+  },
+  {
+    "id": "place-18b0233d42266b72",
+    "name": "Chitu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.60796,
+    "longitude": 37.92378
+  },
+  {
+    "id": "place-14c9ad3f54a724e2",
+    "name": "Chole",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.13797,
+    "longitude": 39.9008
+  },
+  {
+    "id": "place-ae39d27aac2e0c4f",
+    "name": "Chole",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.24904,
+    "longitude": 39.89215
+  },
+  {
+    "id": "place-c9a7b83b8877398b",
+    "name": "Chucko",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.58727,
+    "longitude": 38.3366
+  },
+  {
+    "id": "place-40275b636eea2cd9",
+    "name": "Ciogguar Cudo",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.35198,
+    "longitude": 37.38576
+  },
+  {
+    "id": "place-e3b959c81d8dba92",
+    "name": "Dabat",
+    "localName": "ዳባት",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.98405,
+    "longitude": 37.76514
+  },
+  {
+    "id": "place-7425d9bdeb6d16cb",
+    "name": "Dahana",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.44562,
+    "longitude": 38.84225
+  },
+  {
+    "id": "place-8f71351cc63083c9",
+    "name": "Daka",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.59384,
+    "longitude": 35.76064
+  },
+  {
+    "id": "place-f32b3bf89ff96956",
+    "name": "Dalbo",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.8999,
+    "longitude": 37.83048
+  },
+  {
+    "id": "place-1153d5f2026af7c8",
+    "name": "Daleti",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 9.87843,
+    "longitude": 36.09143
+  },
+  {
+    "id": "place-1110474e8ef1cbf1",
+    "name": "Dalifage",
+    "localName": "ዳሊፋጌ",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 10.62717,
+    "longitude": 40.31315
+  },
+  {
+    "id": "place-ec4ddd615b31a47e",
+    "name": "Dandi Gudi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.67872,
+    "longitude": 35.29657
+  },
+  {
+    "id": "place-77f4850fad2cd522",
+    "name": "Dangla",
+    "localName": "ዳንግላ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.25693,
+    "longitude": 36.84984
+  },
+  {
+    "id": "place-12d22cb7f717eb77",
+    "name": "Dansha",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.56623,
+    "longitude": 36.97235
+  },
+  {
+    "id": "place-78a7d193b0a287e1",
+    "name": "Daratoole",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 7.30214,
+    "longitude": 45.43692
+  },
+  {
+    "id": "place-f873b6dcee31da44",
+    "name": "Darechera",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.40011,
+    "longitude": 37.8817
+  },
+  {
+    "id": "place-2ce5630244a1d3e4",
+    "name": "Daror",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 8.22447,
+    "longitude": 44.69506
+  },
+  {
+    "id": "place-ecca376badc0ca03",
+    "name": "Dawo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.29234,
+    "longitude": 41.8771
+  },
+  {
+    "id": "place-f8838158a36c4427",
+    "name": "Debark",
+    "localName": "ደባርቅ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.1585,
+    "longitude": 37.89904
+  },
+  {
+    "id": "place-c9f4e28d0fee549c",
+    "name": "Debre Gelan",
+    "localName": "ደብረ ገላን",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.83333,
+    "longitude": 38.83333
+  },
+  {
+    "id": "place-dbd332ede4a8af63",
+    "name": "Debrè Kerbe",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.95039,
+    "longitude": 38.45455
+  },
+  {
+    "id": "place-6e19745d8311f31b",
+    "name": "Debre Libanos",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.72957,
+    "longitude": 38.81677
+  },
+  {
+    "id": "place-cc3c1aaf5c72aa97",
+    "name": "Debre Sina",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.85048,
+    "longitude": 39.76348
+  },
+  {
+    "id": "place-f0e4c7331c4ef932",
+    "name": "Debre Tabor",
+    "localName": "ደብረ ታቦር",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.85659,
+    "longitude": 38.00831
+  },
+  {
+    "id": "place-aadfb3d9afc0f279",
+    "name": "Debre Tsige",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.63306,
+    "longitude": 38.83156
+  },
+  {
+    "id": "place-6fd27f1734a561c3",
+    "name": "Debre Work",
+    "localName": "ደብረ ወርቅ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.65784,
+    "longitude": 38.1645
+  },
+  {
+    "id": "place-e04317cd412cee6e",
+    "name": "Dedai",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.91403,
+    "longitude": 41.57354
+  },
+  {
+    "id": "place-1f83eabeec4cb06b",
+    "name": "Dedebit",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.07,
+    "longitude": 37.76234
+  },
+  {
+    "id": "place-cd90088412e8dac6",
+    "name": "Dedecha Bela",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.89661,
+    "longitude": 41.12643
+  },
+  {
+    "id": "place-553d8b9139e1fd1c",
+    "name": "Deder",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.31229,
+    "longitude": 41.44277
+  },
+  {
+    "id": "place-e11a6c433ec90637",
+    "name": "Degan",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.14849,
+    "longitude": 39.9022
+  },
+  {
+    "id": "place-eecb63af862f2202",
+    "name": "Degem Hambiso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.81356,
+    "longitude": 38.63286
+  },
+  {
+    "id": "place-82b1f9aef8866856",
+    "name": "Degolo",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.42215,
+    "longitude": 39.25388
+  },
+  {
+    "id": "place-2cb8c9465a904bc0",
+    "name": "Dejen",
+    "localName": "ደጀን",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.16409,
+    "longitude": 38.15003
+  },
+  {
+    "id": "place-c238570576de08e3",
+    "name": "Dekebora",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.71582,
+    "longitude": 39.20516
+  },
+  {
+    "id": "place-29ba5dea78eac9ce",
+    "name": "Deksis",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.05719,
+    "longitude": 39.55773
+  },
+  {
+    "id": "place-3f068a6da129f7ee",
+    "name": "Del",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.82809,
+    "longitude": 35.82206
+  },
+  {
+    "id": "place-9e493afbe120af5b",
+    "name": "Delosebro",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.2562,
+    "longitude": 40.46813
+  },
+  {
+    "id": "place-b5b0561d4654bd47",
+    "name": "Demebecha",
+    "localName": "ደምበጫ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.56427,
+    "longitude": 37.49196
+  },
+  {
+    "id": "place-bf010602585203f0",
+    "name": "Demobasho",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.26943,
+    "longitude": 37.39233
+  },
+  {
+    "id": "place-c155c61ec3bdefd3",
+    "name": "Denan",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.50914,
+    "longitude": 43.49371
+  },
+  {
+    "id": "place-a6765ecbf12f984e",
+    "name": "Deneba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.84166,
+    "longitude": 37.36751
+  },
+  {
+    "id": "place-80a39c3d0c598a2d",
+    "name": "Deneba",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.76198,
+    "longitude": 39.19248
+  },
+  {
+    "id": "place-965f3c307651d8a4",
+    "name": "Dengolat",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.3086,
+    "longitude": 39.32738
+  },
+  {
+    "id": "place-96e9a3d7317fc215",
+    "name": "Dera",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.33095,
+    "longitude": 39.31805
+  },
+  {
+    "id": "place-b623dfc35e1d012f",
+    "name": "Derek' Amba",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.7,
+    "longitude": 39.26667
+  },
+  {
+    "id": "place-fb208b0ab3330d77",
+    "name": "Dewele",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 11.03291,
+    "longitude": 42.63188
+  },
+  {
+    "id": "place-920d5ca135448d7c",
+    "name": "Dhagahle",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.23972,
+    "longitude": 42.59788
+  },
+  {
+    "id": "place-4f0783992b39a691",
+    "name": "Dhagxanya Cado",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 7.23171,
+    "longitude": 45.50495
+  },
+  {
+    "id": "place-e9d85cc9c22e26e4",
+    "name": "Dhudub",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.92984,
+    "longitude": 46.69491
+  },
+  {
+    "id": "place-729c65c9b38592c1",
+    "name": "Dibdibo",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.26974,
+    "longitude": 39.08962
+  },
+  {
+    "id": "place-9cd8e207e88c3f5f",
+    "name": "Digo Tsion",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.8474,
+    "longitude": 37.73885
+  },
+  {
+    "id": "place-f83d917e65832016",
+    "name": "Dil Yibza",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.11941,
+    "longitude": 38.44257
+  },
+  {
+    "id": "place-aae83cb1361bd4f6",
+    "name": "Dilela",
+    "localName": "ዲለላ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.64008,
+    "longitude": 38.05113
+  },
+  {
+    "id": "place-866d29e225c77431",
+    "name": "Dima",
+    "localName": "ዲማ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.89925,
+    "longitude": 38.58796
+  },
+  {
+    "id": "place-3238bd9bbd9fefbf",
+    "name": "Dima",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 6.50945,
+    "longitude": 35.18409
+  },
+  {
+    "id": "place-97ef62a86e3d4482",
+    "name": "Dimbra",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.29522,
+    "longitude": 35.98839
+  },
+  {
+    "id": "place-0edf319350da9b96",
+    "name": "Dimeka",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.17443,
+    "longitude": 36.54849
+  },
+  {
+    "id": "place-59a10caeb43150a4",
+    "name": "Dimtu Hambella",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.99709,
+    "longitude": 38.42628
+  },
+  {
+    "id": "place-ed479423a162ffe3",
+    "name": "Dinsho",
+    "localName": "ዲንሾ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.10821,
+    "longitude": 39.78015
+  },
+  {
+    "id": "place-0685a6cc5f7bc7b4",
+    "name": "Dire",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.18229,
+    "longitude": 38.92357
+  },
+  {
+    "id": "place-b7c78e9246d15872",
+    "name": "Diri",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.38171,
+    "longitude": 36.28728
+  },
+  {
+    "id": "place-109285dea1dc56bf",
+    "name": "Do'esha",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.59287,
+    "longitude": 38.06875
+  },
+  {
+    "id": "place-13d6541ee7a770a4",
+    "name": "Doba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.28571,
+    "longitude": 41.09141
+  },
+  {
+    "id": "place-917194f1046e4c9b",
+    "name": "Dodolla",
+    "localName": "ዶዶላ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.97894,
+    "longitude": 39.18333
+  },
+  {
+    "id": "place-471288a46c962567",
+    "name": "Doni",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.50734,
+    "longitude": 39.55245
+  },
+  {
+    "id": "place-2232db119646d48c",
+    "name": "Dorze",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.19486,
+    "longitude": 37.57434
+  },
+  {
+    "id": "place-414bc80312010753",
+    "name": "Doyogena",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.35306,
+    "longitude": 37.78308
+  },
+  {
+    "id": "place-3be691b2a57d6c72",
+    "name": "Duber",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.46227,
+    "longitude": 38.88047
+  },
+  {
+    "id": "place-5177bdfb8e489314",
+    "name": "Dubti",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.73683,
+    "longitude": 41.08404
+  },
+  {
+    "id": "place-d8dd116143b5e163",
+    "name": "Dugda",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.16684,
+    "longitude": 38.64071
+  },
+  {
+    "id": "place-1b5b3f9dbedd6f0d",
+    "name": "Dula Bota",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.46138,
+    "longitude": 38.29724
+  },
+  {
+    "id": "place-615c3c3b602c6e69",
+    "name": "Durame",
+    "localName": "ዱራሜ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.24388,
+    "longitude": 37.90499
+  },
+  {
+    "id": "place-20d00d13957154ab",
+    "name": "Duuban",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.67904,
+    "longitude": 46.0669
+  },
+  {
+    "id": "place-0e30234f222994d9",
+    "name": "East Imi",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.46629,
+    "longitude": 42.17527
+  },
+  {
+    "id": "place-b3a79c450aceb13c",
+    "name": "Ebbenat",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.12407,
+    "longitude": 38.05023
+  },
+  {
+    "id": "place-1b2244574021b36d",
+    "name": "Edaga Hamus",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.18597,
+    "longitude": 39.56343
+  },
+  {
+    "id": "place-0d8caf7b2a5e0d9b",
+    "name": "Edjere",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.77878,
+    "longitude": 39.26148
+  },
+  {
+    "id": "place-7d7f67989c3d48df",
+    "name": "Edo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.0121,
+    "longitude": 39.04422
+  },
+  {
+    "id": "place-0245fb0c87d05393",
+    "name": "Edo",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.01273,
+    "longitude": 37.99253
+  },
+  {
+    "id": "place-71fd541162134a3c",
+    "name": "Ehsaa",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.34972,
+    "longitude": 38.96591
+  },
+  {
+    "id": "place-62ae52d350519b2d",
+    "name": "Ejaji",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.99803,
+    "longitude": 37.32824
+  },
+  {
+    "id": "place-32a522452f701423",
+    "name": "Ejere",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.9143,
+    "longitude": 38.51814
+  },
+  {
+    "id": "place-870035c6a11f3d1e",
+    "name": "Ejersa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.48017,
+    "longitude": 39.06224
+  },
+  {
+    "id": "place-dc2d769b20a43f13",
+    "name": "El Dere",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.66797,
+    "longitude": 45.95007
+  },
+  {
+    "id": "place-9c7f05ada48c97e4",
+    "name": "El Ley",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 3.77094,
+    "longitude": 39.22707
+  },
+  {
+    "id": "place-7100c8eee48d99be",
+    "name": "Elias",
+    "localName": "ኤልያስ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.29986,
+    "longitude": 37.46193
+  },
+  {
+    "id": "place-d30f2209f7676285",
+    "name": "Elida'ar",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 12.05304,
+    "longitude": 41.92381
+  },
+  {
+    "id": "place-d661cd1993b73e9a",
+    "name": "Emdibir",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.11999,
+    "longitude": 37.9283
+  },
+  {
+    "id": "place-e38eed131fd138c7",
+    "name": "Enchini",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.81949,
+    "longitude": 37.6636
+  },
+  {
+    "id": "place-b9fc1188716e3105",
+    "name": "Enferaz",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.25556,
+    "longitude": 37.6291
+  },
+  {
+    "id": "place-75e026a97e402557",
+    "name": "Enseno",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.05995,
+    "longitude": 38.48043
+  },
+  {
+    "id": "place-7a094036b4fb5ff9",
+    "name": "Enwari",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.89277,
+    "longitude": 39.14866
+  },
+  {
+    "id": "place-1359ba27e0e74854",
+    "name": "Erer",
+    "localName": "ኤረር",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.55724,
+    "longitude": 41.3854
+  },
+  {
+    "id": "place-59f868b5ee8aa51a",
+    "name": "Erestino",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 3.4577,
+    "longitude": 39.55558
+  },
+  {
+    "id": "place-1ad69e778c65227b",
+    "name": "Esara (Balle)",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 6.89447,
+    "longitude": 37.01599
+  },
+  {
+    "id": "place-1c8c5033a9f8efb7",
+    "name": "Eso",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.35075,
+    "longitude": 37.58979
+  },
+  {
+    "id": "place-cf5238f6b259f6ee",
+    "name": "Fadhigaradle",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.17591,
+    "longitude": 45.29871
+  },
+  {
+    "id": "place-165c9aa2f11d531b",
+    "name": "Fatsi",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.40193,
+    "longitude": 39.37811
+  },
+  {
+    "id": "place-e8591bf6e267151b",
+    "name": "Felege Birhan",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.74696,
+    "longitude": 38.06505
+  },
+  {
+    "id": "place-b3fc44e478ce78ce",
+    "name": "Feres Bet",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.85,
+    "longitude": 37.6
+  },
+  {
+    "id": "place-5413582394b7e6e5",
+    "name": "Fiche Gelila",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.23958,
+    "longitude": 39.19365
+  },
+  {
+    "id": "place-6dc0f507978f532f",
+    "name": "Fik'",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 8.13842,
+    "longitude": 42.29456
+  },
+  {
+    "id": "place-427cd57e5765c63c",
+    "name": "Filakit Gereger",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.76228,
+    "longitude": 38.75017
+  },
+  {
+    "id": "place-e78e85b6bd152ae0",
+    "name": "Filiklik",
+    "localName": "ፍልቅልቅ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 10.05058,
+    "longitude": 38.2486
+  },
+  {
+    "id": "place-9dac09a08eb15d70",
+    "name": "Finicha'a",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.56753,
+    "longitude": 37.36139
+  },
+  {
+    "id": "place-e5695529d4c97a54",
+    "name": "Finote Selam",
+    "localName": "ፍኖተ ሰላም",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.68002,
+    "longitude": 37.26013
+  },
+  {
+    "id": "place-aa6d4fb75a152f58",
+    "name": "Fint'Al Feres",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.16532,
+    "longitude": 38.84087
+  },
+  {
+    "id": "place-41bc415e162bded3",
+    "name": "Finyano",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.80429,
+    "longitude": 39.80217
+  },
+  {
+    "id": "place-ad026bdb83c07841",
+    "name": "Fireselam",
+    "localName": "ፍረሰላም",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.11208,
+    "longitude": 36.94993
+  },
+  {
+    "id": "place-2423cb39e654fcfc",
+    "name": "Fital",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.62287,
+    "longitude": 38.64629
+  },
+  {
+    "id": "place-5791a053f0acf00d",
+    "name": "Fofa",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.8508,
+    "longitude": 37.52009
+  },
+  {
+    "id": "place-1ce5dc4059545a69",
+    "name": "Freweyni",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.05419,
+    "longitude": 39.57725
+  },
+  {
+    "id": "place-1ec41ace375c1a8f",
+    "name": "Gado",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.84585,
+    "longitude": 38.29748
+  },
+  {
+    "id": "place-e04ce2e89a75fd57",
+    "name": "Gado Dona",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.52884,
+    "longitude": 39.47374
+  },
+  {
+    "id": "place-1560e2bdd4b74127",
+    "name": "Galcha",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.94257,
+    "longitude": 37.92393
+  },
+  {
+    "id": "place-7bbb20c0e0950dcb",
+    "name": "Galma",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.25036,
+    "longitude": 37.01796
+  },
+  {
+    "id": "place-519c57660244b85f",
+    "name": "Garanuugle",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 8.22325,
+    "longitude": 45.81996
+  },
+  {
+    "id": "place-dd37db24048c69cc",
+    "name": "Garasse",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.91812,
+    "longitude": 37.30883
+  },
+  {
+    "id": "place-30f18ea85f3ff787",
+    "name": "Garbo",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 7.31268,
+    "longitude": 43.29645
+  },
+  {
+    "id": "place-38a3e4a60913a27d",
+    "name": "Gasay",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.79512,
+    "longitude": 38.14174
+  },
+  {
+    "id": "place-5ee2185e0b7ecb0e",
+    "name": "Gasera",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.37117,
+    "longitude": 40.19098
+  },
+  {
+    "id": "place-6a4bea2651eba23d",
+    "name": "Gatira",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.04244,
+    "longitude": 36.34105
+  },
+  {
+    "id": "place-efe96d305fdf648c",
+    "name": "Gazer",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.90261,
+    "longitude": 36.57736
+  },
+  {
+    "id": "place-9eb2d69d8bec8405",
+    "name": "Geber Shengo",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.12,
+    "longitude": 39.18062
+  },
+  {
+    "id": "place-5ab6a339b57388b3",
+    "name": "Gebeze Mariam",
+    "localName": "ገበዘ ማርያም",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.99907,
+    "longitude": 37.42482
+  },
+  {
+    "id": "place-c286d7a3602d79c2",
+    "name": "Gebre Guracha",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.80386,
+    "longitude": 38.4241
+  },
+  {
+    "id": "place-6de7766078e7140c",
+    "name": "Geche",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.5633,
+    "longitude": 35.40359
+  },
+  {
+    "id": "place-99145082c54c4038",
+    "name": "Gechi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.33297,
+    "longitude": 36.41874
+  },
+  {
+    "id": "place-faa764da2a669f6e",
+    "name": "Gedo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.01192,
+    "longitude": 37.45076
+  },
+  {
+    "id": "place-886e4e55d0efae70",
+    "name": "Gelawdiwos",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.63348,
+    "longitude": 37.81679
+  },
+  {
+    "id": "place-2f5a5284ab372138",
+    "name": "Gelegu",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.21572,
+    "longitude": 35.89421
+  },
+  {
+    "id": "place-e3403654a595dadd",
+    "name": "Gelemso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.81271,
+    "longitude": 40.52205
+  },
+  {
+    "id": "place-30eb2231477568f6",
+    "name": "Gelgel Beles",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.15922,
+    "longitude": 36.34399
+  },
+  {
+    "id": "place-0f7e0ebe2ee366e1",
+    "name": "Gelila",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.84607,
+    "longitude": 36.47764
+  },
+  {
+    "id": "place-67d0ff0927cd6323",
+    "name": "Gembe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.83557,
+    "longitude": 36.67014
+  },
+  {
+    "id": "place-3c6b5065c2540a8e",
+    "name": "Gende Woin",
+    "localName": "ጉንደ ወይን",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.92704,
+    "longitude": 38.08789
+  },
+  {
+    "id": "place-30737532475396d5",
+    "name": "Genet",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.1,
+    "longitude": 36.95
+  },
+  {
+    "id": "place-0a4ee04c7e766cdb",
+    "name": "Gera",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.77911,
+    "longitude": 36.33865
+  },
+  {
+    "id": "place-e0f6a38c9cdbd231",
+    "name": "Gerba",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.16342,
+    "longitude": 39.93476
+  },
+  {
+    "id": "place-f7ca8f6c83cbe7ff",
+    "name": "Gerbo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.4925,
+    "longitude": 38.1424
+  },
+  {
+    "id": "place-1aaf0b8ca7507e10",
+    "name": "Gerhu Sirnay",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.49023,
+    "longitude": 39.17269
+  },
+  {
+    "id": "place-9ca1fc3ff2cb73b9",
+    "name": "Gesa",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.01239,
+    "longitude": 37.27405
+  },
+  {
+    "id": "place-26db2ce21c086653",
+    "name": "Geshena",
+    "localName": "ጋሸና",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.68827,
+    "longitude": 38.92403
+  },
+  {
+    "id": "place-ac8c533f06d5ef8c",
+    "name": "Getema",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.90079,
+    "longitude": 36.48729
+  },
+  {
+    "id": "place-5f73ba0cd17713c2",
+    "name": "Gewane",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 10.15923,
+    "longitude": 40.6616
+  },
+  {
+    "id": "place-24ee5b440c2eb61a",
+    "name": "Ghimbi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.16904,
+    "longitude": 35.83452
+  },
+  {
+    "id": "place-2e614c333a0805c1",
+    "name": "Gida Ayana",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.87791,
+    "longitude": 36.62055
+  },
+  {
+    "id": "place-149774d9718c1401",
+    "name": "Gidole",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.65055,
+    "longitude": 37.36605
+  },
+  {
+    "id": "place-e26ec14126d5a99c",
+    "name": "Gijet",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.32351,
+    "longitude": 39.17402
+  },
+  {
+    "id": "place-93765c51a8e9b710",
+    "name": "Ginido",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.598,
+    "longitude": 37.75813
+  },
+  {
+    "id": "place-dfb76ae20adc6383",
+    "name": "Ginir",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.13842,
+    "longitude": 40.71175
+  },
+  {
+    "id": "place-ac6f067a17e2c593",
+    "name": "Ginsi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.03127,
+    "longitude": 38.14742
+  },
+  {
+    "id": "place-116a20b6af737a46",
+    "name": "Giraara",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.84618,
+    "longitude": 37.87544
+  },
+  {
+    "id": "place-8aad7e11709c7b66",
+    "name": "Girja",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.24816,
+    "longitude": 38.93451
+  },
+  {
+    "id": "place-f4078e90d3f73803",
+    "name": "Giundu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.42205,
+    "longitude": 37.52121
+  },
+  {
+    "id": "place-662ffd6b34392d96",
+    "name": "Goba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.00733,
+    "longitude": 39.96942
+  },
+  {
+    "id": "place-6ec99d321a1d41d4",
+    "name": "Goben",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.17252,
+    "longitude": 37.30887
+  },
+  {
+    "id": "place-5895179a24314b7a",
+    "name": "Gobesa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.6211,
+    "longitude": 39.49495
+  },
+  {
+    "id": "place-8a0586b3b937c412",
+    "name": "Gocho",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.80934,
+    "longitude": 37.37453
+  },
+  {
+    "id": "place-1df5bb9a48925cbb",
+    "name": "Gohala",
+    "localName": "ጎሃላ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.40672,
+    "longitude": 38.08336
+  },
+  {
+    "id": "place-84d0123742265f25",
+    "name": "Gohatsion",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 10.00732,
+    "longitude": 38.24694
+  },
+  {
+    "id": "place-69dad27b48cc7598",
+    "name": "Gojeb",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.41225,
+    "longitude": 36.37275
+  },
+  {
+    "id": "place-18a55c4fe81fe63d",
+    "name": "Gojo Town",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.26664,
+    "longitude": 38.08381
+  },
+  {
+    "id": "place-5d5fcd040e374308",
+    "name": "Gore",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.1526,
+    "longitude": 35.53712
+  },
+  {
+    "id": "place-dec597b1dfc8186e",
+    "name": "Gorki",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.45741,
+    "longitude": 38.08407
+  },
+  {
+    "id": "place-72b5b622088b3757",
+    "name": "Goro",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.99139,
+    "longitude": 40.47993
+  },
+  {
+    "id": "place-d1ce563cbaec9cd6",
+    "name": "Goru",
+    "localName": "ጎሩ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.40047,
+    "longitude": 37.86874
+  },
+  {
+    "id": "place-7d16d356ecde1c80",
+    "name": "Gosh Bado",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.73025,
+    "longitude": 39.45693
+  },
+  {
+    "id": "place-0d8e167c52553890",
+    "name": "Gouder",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.97669,
+    "longitude": 37.76564
+  },
+  {
+    "id": "place-405137bec4506ea0",
+    "name": "Guia",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.61943,
+    "longitude": 38.81811
+  },
+  {
+    "id": "place-d31915ca6a6058c0",
+    "name": "Gulisso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.1638,
+    "longitude": 35.47247
+  },
+  {
+    "id": "place-b76517e9963c9907",
+    "name": "Gumar",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.52821,
+    "longitude": 36.89012
+  },
+  {
+    "id": "place-9188997c7ed0a973",
+    "name": "Gundo Meskel",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 10.2241,
+    "longitude": 38.7057
+  },
+  {
+    "id": "place-52255cad74780868",
+    "name": "Gursum",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.35299,
+    "longitude": 42.40083
+  },
+  {
+    "id": "place-09d29c6d39fcfc10",
+    "name": "Gurura",
+    "localName": "ጉሩራ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.43947,
+    "longitude": 37.92369
+  },
+  {
+    "id": "place-0d9bea05d65c5dd8",
+    "name": "Gutin",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.56475,
+    "longitude": 36.632
+  },
+  {
+    "id": "place-ae8e2df34c97b87c",
+    "name": "Gwyane Diriye",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.10292,
+    "longitude": 45.76205
+  },
+  {
+    "id": "place-4540cf5cc5c5380c",
+    "name": "Habe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.82231,
+    "longitude": 39.78639
+  },
+  {
+    "id": "place-6d62ed74309d7572",
+    "name": "Hadero",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.19644,
+    "longitude": 37.66395
+  },
+  {
+    "id": "place-5f1c33f0c322af1d",
+    "name": "Hagere Selam",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.64973,
+    "longitude": 39.17287
+  },
+  {
+    "id": "place-a5d6dad7502c1932",
+    "name": "Haike Meshal",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.75406,
+    "longitude": 39.70699
+  },
+  {
+    "id": "place-76ceec517fe1cf8c",
+    "name": "Halale",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.75339,
+    "longitude": 37.34232
+  },
+  {
+    "id": "place-5816f63ec94b06df",
+    "name": "Hanaze",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.85782,
+    "longitude": 37.50274
+  },
+  {
+    "id": "place-ffdc93e74c75ddb1",
+    "name": "Hantate",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.69154,
+    "longitude": 38.26022
+  },
+  {
+    "id": "place-d64ffbeaad2154d5",
+    "name": "Harbu",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.9235,
+    "longitude": 39.785
+  },
+  {
+    "id": "place-dd8973499b754dfc",
+    "name": "Hare Wacha",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.17779,
+    "longitude": 41.33905
+  },
+  {
+    "id": "place-12904e819a303ef6",
+    "name": "Hareto",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.36774,
+    "longitude": 37.119
+  },
+  {
+    "id": "place-23c544c72591a29c",
+    "name": "Hargele",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 5.22176,
+    "longitude": 42.18053
+  },
+  {
+    "id": "place-a068a178fdecf875",
+    "name": "Haro",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.84461,
+    "longitude": 36.31301
+  },
+  {
+    "id": "place-939f70b71671e7d9",
+    "name": "Haro Adi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.86902,
+    "longitude": 39.91721
+  },
+  {
+    "id": "place-35ff1625d69f143c",
+    "name": "Haro Dumal",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.75042,
+    "longitude": 40.17434
+  },
+  {
+    "id": "place-ee569661d035064d",
+    "name": "Harodibe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.61827,
+    "longitude": 40.48086
+  },
+  {
+    "id": "place-8fc5824b7463f5db",
+    "name": "Hawzen",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.97973,
+    "longitude": 39.43011
+  },
+  {
+    "id": "place-93ae52ca27b4f202",
+    "name": "Hayq",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.31317,
+    "longitude": 39.67698
+  },
+  {
+    "id": "place-0713a6b8fc2e5e9f",
+    "name": "Hembecho",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.15022,
+    "longitude": 37.66108
+  },
+  {
+    "id": "place-13141da5836fd248",
+    "name": "Hidilola",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 3.74179,
+    "longitude": 38.57881
+  },
+  {
+    "id": "place-9f375117a1f493f8",
+    "name": "Hidmo",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.42177,
+    "longitude": 38.83158
+  },
+  {
+    "id": "place-d29bc5b20cc36d6c",
+    "name": "Hinde",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.97365,
+    "longitude": 36.45259
+  },
+  {
+    "id": "place-7de02507d0fb4b7b",
+    "name": "Hirna",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.21744,
+    "longitude": 41.1018
+  },
+  {
+    "id": "place-a6cbe01853c87999",
+    "name": "Hitsats",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.09481,
+    "longitude": 37.96085
+  },
+  {
+    "id": "place-64eccc7b49bdb672",
+    "name": "Hiwane",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.105,
+    "longitude": 39.49609
+  },
+  {
+    "id": "place-53a67792ef9472b2",
+    "name": "Hiyadima",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.53451,
+    "longitude": 38.80948
+  },
+  {
+    "id": "place-8826c27cfe2df909",
+    "name": "Hobicha Bada",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.76412,
+    "longitude": 37.87457
+  },
+  {
+    "id": "place-ac73ff932e55402d",
+    "name": "Holeta Genet",
+    "localName": "ሆለታ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.06525,
+    "longitude": 38.49368
+  },
+  {
+    "id": "place-2364fc277ec835dc",
+    "name": "Holota",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.06546,
+    "longitude": 38.05519
+  },
+  {
+    "id": "place-a814cfc7f6130009",
+    "name": "Hossana",
+    "localName": "ሆሳዕና",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.55017,
+    "longitude": 37.85282
+  },
+  {
+    "id": "place-92b1c21cf6c1d54f",
+    "name": "Hudat",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 4.75727,
+    "longitude": 39.23684
+  },
+  {
+    "id": "place-8a270ccc4d68eb6a",
+    "name": "Hurta",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.13273,
+    "longitude": 39.43323
+  },
+  {
+    "id": "place-cab0eb52b377ee79",
+    "name": "Huruta / ሁሩታ",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.14868,
+    "longitude": 39.35347
+  },
+  {
+    "id": "place-a2328362a9d3a364",
+    "name": "Huse",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.65778,
+    "longitude": 41.84654
+  },
+  {
+    "id": "place-df3d03becfce85c1",
+    "name": "Ilimo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.46667,
+    "longitude": 35.81666
+  },
+  {
+    "id": "place-75a18cf088c4b968",
+    "name": "Imiye",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.72384,
+    "longitude": 39.42474
+  },
+  {
+    "id": "place-89e7a48e249fd7f3",
+    "name": "Inagabile",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.07681,
+    "longitude": 45.85394
+  },
+  {
+    "id": "place-3b531be8217f8aab",
+    "name": "Inango",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.16778,
+    "longitude": 35.68283
+  },
+  {
+    "id": "place-bf153f061fe91c5f",
+    "name": "InchIni",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.31461,
+    "longitude": 38.3802
+  },
+  {
+    "id": "place-324797d2b3110e6d",
+    "name": "Inda Aba Guna",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.94922,
+    "longitude": 38.1842
+  },
+  {
+    "id": "place-51282fa1a4107286",
+    "name": "Indabaguna",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.56551,
+    "longitude": 38.28114
+  },
+  {
+    "id": "place-6e1282cd36069e28",
+    "name": "Injibara",
+    "localName": "እንጂባራ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.95923,
+    "longitude": 36.93407
+  },
+  {
+    "id": "place-71e6ad8c58afac35",
+    "name": "Inticho",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.27812,
+    "longitude": 39.15065
+  },
+  {
+    "id": "place-8218c5770f147499",
+    "name": "Irgalem",
+    "localName": "ይርጋለም",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.74694,
+    "longitude": 38.40576
+  },
+  {
+    "id": "place-8614765508bfe96b",
+    "name": "Islamge",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.96586,
+    "longitude": 38.26755
+  },
+  {
+    "id": "place-ddc2effb5d322930",
+    "name": "Itang",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.19688,
+    "longitude": 34.26775
+  },
+  {
+    "id": "place-06de482133e5b82d",
+    "name": "Itiya",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.13333,
+    "longitude": 39.23333
+  },
+  {
+    "id": "place-c1dfff05d23aa0fd",
+    "name": "Jaja",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.08131,
+    "longitude": 41.36525
+  },
+  {
+    "id": "place-5ae108390a821e69",
+    "name": "Jara",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.36794,
+    "longitude": 40.49832
+  },
+  {
+    "id": "place-960551e78a65e0ff",
+    "name": "Jarso Tower",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.45063,
+    "longitude": 35.31804
+  },
+  {
+    "id": "place-daaaa6c44f219fc1",
+    "name": "Jawi",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.56499,
+    "longitude": 36.48819
+  },
+  {
+    "id": "place-b4bdbddef9c0f8c7",
+    "name": "Jeba",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 6.25269,
+    "longitude": 35.22429
+  },
+  {
+    "id": "place-0190e98d466f7194",
+    "name": "Jere",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.21671,
+    "longitude": 37.06789
+  },
+  {
+    "id": "place-7a72a704c2900ae2",
+    "name": "Jibri",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.64179,
+    "longitude": 40.43692
+  },
+  {
+    "id": "place-57677b102d8e0aa4",
+    "name": "Jiga",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.67666,
+    "longitude": 37.37731
+  },
+  {
+    "id": "place-e0f908f3525cceeb",
+    "name": "Jihur",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.02081,
+    "longitude": 39.25016
+  },
+  {
+    "id": "place-174342cca8cf457f",
+    "name": "Jima",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.13875,
+    "longitude": 37.89022
+  },
+  {
+    "id": "place-749f4bef5d8c4b4b",
+    "name": "Jimata",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.02981,
+    "longitude": 36.67251
+  },
+  {
+    "id": "place-6fdb3a4806da256d",
+    "name": "Jinka",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.78618,
+    "longitude": 36.56544
+  },
+  {
+    "id": "place-b3d7e8f0d0e1165b",
+    "name": "Jole 1",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.18874,
+    "longitude": 38.47088
+  },
+  {
+    "id": "place-57aca823f6bfac67",
+    "name": "K'Ojora",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.03333,
+    "longitude": 40.1
+  },
+  {
+    "id": "place-2d0d04064f8104a0",
+    "name": "K'Ore / Qoree",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.21931,
+    "longitude": 38.92697
+  },
+  {
+    "id": "place-e6560c3a5bb5172b",
+    "name": "Kachise",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.59965,
+    "longitude": 37.84619
+  },
+  {
+    "id": "place-1cee37d70bdb9dce",
+    "name": "Kamisee",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.71644,
+    "longitude": 39.86703
+  },
+  {
+    "id": "place-ecb41899d13cce65",
+    "name": "Karakore",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.42258,
+    "longitude": 39.93519
+  },
+  {
+    "id": "place-fa5ab102f8f7eb22",
+    "name": "Karamile",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.37427,
+    "longitude": 41.36983
+  },
+  {
+    "id": "place-8613d1f342740b6a",
+    "name": "Karati",
+    "localName": "ካራት",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.33982,
+    "longitude": 37.44237
+  },
+  {
+    "id": "place-505d7df12cf11147",
+    "name": "Kasagita",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.25164,
+    "longitude": 40.21387
+  },
+  {
+    "id": "place-80d9818dc8839b74",
+    "name": "Kebri Beyah",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.10006,
+    "longitude": 43.17867
+  },
+  {
+    "id": "place-6637fd4026e5f0b8",
+    "name": "Kebri Dehar",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.73895,
+    "longitude": 44.28041
+  },
+  {
+    "id": "place-24878f2a41b11c8c",
+    "name": "Kefole",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.0773,
+    "longitude": 38.78168
+  },
+  {
+    "id": "place-fb0df02d3a9be41a",
+    "name": "Kela",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.73269,
+    "longitude": 39.57225
+  },
+  {
+    "id": "place-89388d44e1ca66a1",
+    "name": "Kela",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.25431,
+    "longitude": 38.49512
+  },
+  {
+    "id": "place-eb0f24d0cdd305eb",
+    "name": "Kele",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.83391,
+    "longitude": 37.89773
+  },
+  {
+    "id": "place-59e5d404dfe9848a",
+    "name": "Kelisha",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.64679,
+    "longitude": 39.71873
+  },
+  {
+    "id": "place-254b0a0dacc09db5",
+    "name": "Kellafo",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 5.59223,
+    "longitude": 44.2029
+  },
+  {
+    "id": "place-16a83697640c7400",
+    "name": "Kelo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 10.09955,
+    "longitude": 36.46508
+  },
+  {
+    "id": "place-df472a2d77718d41",
+    "name": "Kemashi",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 9.50445,
+    "longitude": 35.86276
+  },
+  {
+    "id": "place-0fa0cd40c0811f14",
+    "name": "Kemba",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.05985,
+    "longitude": 37.17546
+  },
+  {
+    "id": "place-e6e840b7720cf2a1",
+    "name": "Kercha",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.78047,
+    "longitude": 38.40529
+  },
+  {
+    "id": "place-e4339485f45422ae",
+    "name": "Kercheche",
+    "localName": "ቀርጨጬ",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.95253,
+    "longitude": 37.98531
+  },
+  {
+    "id": "place-d2a607f0e4899126",
+    "name": "Kersa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.53074,
+    "longitude": 38.98553
+  },
+  {
+    "id": "place-fe979967751d9c01",
+    "name": "Kersa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.45488,
+    "longitude": 41.86692
+  },
+  {
+    "id": "place-abc7113b5d5ea8b1",
+    "name": "Ketema Nigus",
+    "localName": "ከተማ ንጉሥ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.39288,
+    "longitude": 37.40125
+  },
+  {
+    "id": "place-2835350a7986ea04",
+    "name": "Keyafer",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.52256,
+    "longitude": 36.73484
+  },
+  {
+    "id": "place-4eddd7254f461cd6",
+    "name": "Khiret",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.45604,
+    "longitude": 37.98265
+  },
+  {
+    "id": "place-6396d9581b915d00",
+    "name": "Khundi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.24897,
+    "longitude": 40.8358
+  },
+  {
+    "id": "place-f827aa330edd8dfe",
+    "name": "Kibet",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.02652,
+    "longitude": 38.33009
+  },
+  {
+    "id": "place-3464d089a8d5b0a9",
+    "name": "Kibre Mengist",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.87336,
+    "longitude": 38.99538
+  },
+  {
+    "id": "place-3c7678f015e5c28f",
+    "name": "Kilaj",
+    "localName": "ቂላ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.71071,
+    "longitude": 36.49384
+  },
+  {
+    "id": "place-abc3fe290c807ca2",
+    "name": "Kile",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.91642,
+    "longitude": 35.35569
+  },
+  {
+    "id": "place-cdf741212f4fa0e6",
+    "name": "Kiltu Kara",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.68916,
+    "longitude": 35.26117
+  },
+  {
+    "id": "place-065818507ec22a5a",
+    "name": "Kimir Dingay",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.81428,
+    "longitude": 38.21647
+  },
+  {
+    "id": "place-79f36197f7a569ca",
+    "name": "Kiremu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.95948,
+    "longitude": 36.86677
+  },
+  {
+    "id": "place-1a5b7047e96f151e",
+    "name": "Kobo",
+    "localName": "ቆቦ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.15063,
+    "longitude": 39.62884
+  },
+  {
+    "id": "place-4dad0f80713afc40",
+    "name": "Kobo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.37641,
+    "longitude": 41.4744
+  },
+  {
+    "id": "place-85b11bb43c4eec26",
+    "name": "Koche",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.89645,
+    "longitude": 36.65955
+  },
+  {
+    "id": "place-ac14b3f8f1241092",
+    "name": "Koibi",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.77272,
+    "longitude": 36.79774
+  },
+  {
+    "id": "place-fd52cc6b72081ffe",
+    "name": "Kokosa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.73935,
+    "longitude": 38.79119
+  },
+  {
+    "id": "place-ba8eab363feb9190",
+    "name": "Kola Diba",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.4253,
+    "longitude": 37.33399
+  },
+  {
+    "id": "place-9c60af1adfe8f5d2",
+    "name": "Kolango",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.49179,
+    "longitude": 37.21779
+  },
+  {
+    "id": "place-4e2028e17ccafc26",
+    "name": "Kombosha",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.50522,
+    "longitude": 37.47493
+  },
+  {
+    "id": "place-6c0f80221a66e5c5",
+    "name": "Komona",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.95065,
+    "longitude": 40.55582
+  },
+  {
+    "id": "place-bd4250dd70d98828",
+    "name": "Kon",
+    "localName": "ኮን",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.60969,
+    "longitude": 38.93126
+  },
+  {
+    "id": "place-b6ac5d8c74bedd05",
+    "name": "Korem",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.50571,
+    "longitude": 39.52225
+  },
+  {
+    "id": "place-042d0c065e127c20",
+    "name": "Koshe",
+    "localName": "ቆሼ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.0133,
+    "longitude": 38.53207
+  },
+  {
+    "id": "place-65fe86b74a982eaa",
+    "name": "Kossober",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.9552,
+    "longitude": 36.93473
+  },
+  {
+    "id": "place-e414e1b03a955988",
+    "name": "Kuergeng",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.33255,
+    "longitude": 33.95663
+  },
+  {
+    "id": "place-1b2dbda55fb6e25c",
+    "name": "Kula",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.97832,
+    "longitude": 39.68811
+  },
+  {
+    "id": "place-2d5abb8ddf62c81a",
+    "name": "Kulubi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.42694,
+    "longitude": 41.68305
+  },
+  {
+    "id": "place-5e249ce76569d3d7",
+    "name": "Kurfa Chele",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.23765,
+    "longitude": 41.82474
+  },
+  {
+    "id": "place-95f5b32e73ce5fb2",
+    "name": "Kurmuk",
+    "localName": "ኩርሙክ",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 10.55688,
+    "longitude": 34.29607
+  },
+  {
+    "id": "place-9dc14e899b0a0eb9",
+    "name": "Kuta Ber",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.27446,
+    "longitude": 39.54454
+  },
+  {
+    "id": "place-3571a3d4457e6d69",
+    "name": "Kuyera",
+    "localName": "ኩየራ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.27863,
+    "longitude": 38.65227
+  },
+  {
+    "id": "place-c1e2a8c2f49a41d2",
+    "name": "Kuyi",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.49784,
+    "longitude": 37.99086
+  },
+  {
+    "id": "place-9d4ceee2950d0ed5",
+    "name": "Ladisa",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.95791,
+    "longitude": 37.73206
+  },
+  {
+    "id": "place-d47efcb1f6e8f6f3",
+    "name": "Laha",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.46954,
+    "longitude": 36.58642
+  },
+  {
+    "id": "place-e68cf85f687a22ed",
+    "name": "Lasarat",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 10.66512,
+    "longitude": 42.45473
+  },
+  {
+    "id": "place-2619d88b9c13ceeb",
+    "name": "Lasho",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.78562,
+    "longitude": 37.47394
+  },
+  {
+    "id": "place-4bf8037b3a037bac",
+    "name": "Lasoano",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.2555,
+    "longitude": 45.38498
+  },
+  {
+    "id": "place-7680a2feea0afd61",
+    "name": "Leera",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.08564,
+    "longitude": 37.87182
+  },
+  {
+    "id": "place-5c46e65784093687",
+    "name": "Leka",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.08827,
+    "longitude": 35.66753
+  },
+  {
+    "id": "place-64a7150356e4782b",
+    "name": "Lemen",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.60805,
+    "longitude": 38.6075
+  },
+  {
+    "id": "place-3a759c5423698c5d",
+    "name": "Lemi",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.80283,
+    "longitude": 38.90738
+  },
+  {
+    "id": "place-e5360a381a2d6508",
+    "name": "Lera",
+    "localName": "Lera",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.74683,
+    "longitude": 37.89465
+  },
+  {
+    "id": "place-6b26473c549ca8c8",
+    "name": "Liben",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.69706,
+    "longitude": 36.94155
+  },
+  {
+    "id": "place-2e09f68d4fae848d",
+    "name": "Libo",
+    "localName": "ሊቦ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.20419,
+    "longitude": 37.872
+  },
+  {
+    "id": "place-bac5e1626579698d",
+    "name": "Limushay",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.97425,
+    "longitude": 36.69065
+  },
+  {
+    "id": "place-0a75d74dd10deaed",
+    "name": "Logiya",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 11.72309,
+    "longitude": 40.9761
+  },
+  {
+    "id": "place-1f3a908b2d86fa23",
+    "name": "Lumame",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.25183,
+    "longitude": 37.93892
+  },
+  {
+    "id": "place-800ea8c444a0ae7b",
+    "name": "Magaala Dabbasoo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.84969,
+    "longitude": 35.65075
+  },
+  {
+    "id": "place-895503fb10f8769e",
+    "name": "Maheber Dego",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.02841,
+    "longitude": 38.77992
+  },
+  {
+    "id": "place-ec61ee9920793626",
+    "name": "Mai Kadra",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.07218,
+    "longitude": 36.56573
+  },
+  {
+    "id": "place-d171b7e2e801ac87",
+    "name": "Maiwoini",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.0816,
+    "longitude": 37.21197
+  },
+  {
+    "id": "place-1d90d2dc76a4b7d8",
+    "name": "Majete",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.49269,
+    "longitude": 39.86447
+  },
+  {
+    "id": "place-8890c1532e51e8f1",
+    "name": "Maksegnit",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.37963,
+    "longitude": 37.55608
+  },
+  {
+    "id": "place-2796c90a8723f949",
+    "name": "Malek Sanca",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.03508,
+    "longitude": 38.77
+  },
+  {
+    "id": "place-87d17e6fb53b7dcb",
+    "name": "Manasebo",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 10.63132,
+    "longitude": 35.6645
+  },
+  {
+    "id": "place-cfe6ba5a3e5f6ed3",
+    "name": "Manbuk",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.30001,
+    "longitude": 36.24757
+  },
+  {
+    "id": "place-30193b09ca818e23",
+    "name": "Mancusa",
+    "localName": "ማንኩሳ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.69989,
+    "longitude": 37.17685
+  },
+  {
+    "id": "place-3934c3535692fe6c",
+    "name": "Mare",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.43013,
+    "longitude": 37.81505
+  },
+  {
+    "id": "place-50152102fa39021d",
+    "name": "Masha",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.74745,
+    "longitude": 35.47595
+  },
+  {
+    "id": "place-9dbb7f474eb446b8",
+    "name": "Matar",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.35671,
+    "longitude": 33.44556
+  },
+  {
+    "id": "place-3396eda97a16e8f8",
+    "name": "May Hansse",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.12576,
+    "longitude": 37.87809
+  },
+  {
+    "id": "place-4aabddbaef1596c3",
+    "name": "May Tsebri",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.56145,
+    "longitude": 38.13151
+  },
+  {
+    "id": "place-6691dd04ac04e25e",
+    "name": "Maychew",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.78412,
+    "longitude": 39.53934
+  },
+  {
+    "id": "place-f07befcd91259a4c",
+    "name": "Maymekden",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.5809,
+    "longitude": 39.56692
+  },
+  {
+    "id": "place-27f402fec0516888",
+    "name": "Mechara",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.73577,
+    "longitude": 34.99544
+  },
+  {
+    "id": "place-e3ac3dc1264c4cd6",
+    "name": "Mechara",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.59977,
+    "longitude": 40.32448
+  },
+  {
+    "id": "place-778c40f531710701",
+    "name": "Mechitu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.43707,
+    "longitude": 39.47793
+  },
+  {
+    "id": "place-f5fa837baff33198",
+    "name": "Medina",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.92025,
+    "longitude": 40.02268
+  },
+  {
+    "id": "place-4a3335fa5c3ddcb3",
+    "name": "Mega",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 4.0588,
+    "longitude": 38.32089
+  },
+  {
+    "id": "place-899e43f246eed118",
+    "name": "Mehal Meda",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.31219,
+    "longitude": 39.65798
+  },
+  {
+    "id": "place-29bdfbdc2e28360e",
+    "name": "Mekane Berhan",
+    "localName": "መካነ ብርሃን",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.0047,
+    "longitude": 38.10416
+  },
+  {
+    "id": "place-373a62242b4b264b",
+    "name": "Mekane Eyesus",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.60961,
+    "longitude": 38.06404
+  },
+  {
+    "id": "place-d5ed35c7eac2de88",
+    "name": "Mekane Selam",
+    "localName": "መካነ ሰላም",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.74778,
+    "longitude": 38.75521
+  },
+  {
+    "id": "place-94f6485bfe58dbd3",
+    "name": "Meki",
+    "localName": "መቂ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.15184,
+    "longitude": 38.82109
+  },
+  {
+    "id": "place-e7ea0f04addccba7",
+    "name": "Meko",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.68333,
+    "longitude": 36.03333
+  },
+  {
+    "id": "place-b05d2223c5927e10",
+    "name": "Mekoni",
+    "localName": "መኾኒ",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.8035,
+    "longitude": 39.64602
+  },
+  {
+    "id": "place-f8520e8a79147b0f",
+    "name": "Meliyu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.02283,
+    "longitude": 40.35839
+  },
+  {
+    "id": "place-03e1a2e7172dbfe4",
+    "name": "Melka Awash",
+    "localName": "መልካ አዋሽና",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.70707,
+    "longitude": 38.61162
+  },
+  {
+    "id": "place-0177ff5be172b4cc",
+    "name": "Melka Jebdu",
+    "localName": "መልካ ጀብዱ",
+    "kind": "town",
+    "region": "Dire Dawa",
+    "latitude": 9.61932,
+    "longitude": 41.78368
+  },
+  {
+    "id": "place-81cfcae911419753",
+    "name": "Melkasa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.40485,
+    "longitude": 39.33648
+  },
+  {
+    "id": "place-6fe71b6bd0f071f2",
+    "name": "Menagesha",
+    "localName": "መናገሻ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.05438,
+    "longitude": 38.57072
+  },
+  {
+    "id": "place-3f9ad350e26d3f32",
+    "name": "Mendi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.8,
+    "longitude": 35.1
+  },
+  {
+    "id": "place-db2c193b90fd0d10",
+    "name": "Mengie",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 10.38459,
+    "longitude": 34.76557
+  },
+  {
+    "id": "place-1feb6acf9b78f59f",
+    "name": "Meraro",
+    "localName": "መራሮ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.40795,
+    "longitude": 39.24175
+  },
+  {
+    "id": "place-7585d643c22a67fc",
+    "name": "Merawi",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.41795,
+    "longitude": 37.16029
+  },
+  {
+    "id": "place-9a9bc079197a6418",
+    "name": "Mersa",
+    "localName": "መርሳ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.66667,
+    "longitude": 39.65933
+  },
+  {
+    "id": "place-1f60e6df0beed4bc",
+    "name": "Mertule Mariam",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.86759,
+    "longitude": 38.27094
+  },
+  {
+    "id": "place-0ba2e63244fca2f0",
+    "name": "Mesela",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.07998,
+    "longitude": 41.17386
+  },
+  {
+    "id": "place-744b44824440ea3f",
+    "name": "Metehara",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.90251,
+    "longitude": 39.91814
+  },
+  {
+    "id": "place-0f94c1637c1f70c3",
+    "name": "Metemma",
+    "localName": "መተማ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.9538,
+    "longitude": 36.15637
+  },
+  {
+    "id": "place-6c8f1f2ec69b550d",
+    "name": "Metemmeli",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.86465,
+    "longitude": 36.88738
+  },
+  {
+    "id": "place-196aac64998fd00c",
+    "name": "Meti Chafi / Tilk u Meti",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 7.23407,
+    "longitude": 35.31534
+  },
+  {
+    "id": "place-fa013cf11fc60bad",
+    "name": "Micha Biliso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.45621,
+    "longitude": 40.97934
+  },
+  {
+    "id": "place-6750b67dc50083e3",
+    "name": "Micheta",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.57276,
+    "longitude": 40.31735
+  },
+  {
+    "id": "place-9b664a526c8a3ae8",
+    "name": "Midre Genet",
+    "localName": "ምድረ ገነት",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 13.69638,
+    "longitude": 36.4734
+  },
+  {
+    "id": "place-a60b97a2dc42625f",
+    "name": "Minare",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.60108,
+    "longitude": 38.27628
+  },
+  {
+    "id": "place-a297d622ae2b7f73",
+    "name": "Mindeera",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.25229,
+    "longitude": 36.3772
+  },
+  {
+    "id": "place-d165a5cc252d29dc",
+    "name": "Mintamir",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.12882,
+    "longitude": 39.55787
+  },
+  {
+    "id": "place-5322aa6d791631e8",
+    "name": "Mirab Abaya",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.29231,
+    "longitude": 37.76898
+  },
+  {
+    "id": "place-c01d6e266cf49cc7",
+    "name": "Mistima",
+    "localName": "ሚስቲማ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.33916,
+    "longitude": 39.77211
+  },
+  {
+    "id": "place-49e567552d24eb47",
+    "name": "Mizan Aman",
+    "localName": "ሚዛን ተፈሪ",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 6.99529,
+    "longitude": 35.58689
+  },
+  {
+    "id": "place-d9516735dff8be51",
+    "name": "Moje",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.28276,
+    "longitude": 39.85231
+  },
+  {
+    "id": "place-1640cf329f0ffb39",
+    "name": "Mojo",
+    "localName": "ሞጆ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.58699,
+    "longitude": 39.125
+  },
+  {
+    "id": "place-3969a53d0703cfd5",
+    "name": "Mota",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.08141,
+    "longitude": 37.88099
+  },
+  {
+    "id": "place-9d67e31437d8e3ea",
+    "name": "Mote",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.82429,
+    "longitude": 36.92363
+  },
+  {
+    "id": "place-01e3a0b66d565182",
+    "name": "Mudula",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.28521,
+    "longitude": 37.54501
+  },
+  {
+    "id": "place-0a9d1fd23af30743",
+    "name": "Muger",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.44266,
+    "longitude": 38.34287
+  },
+  {
+    "id": "place-bc85a7087953e7e9",
+    "name": "Muja",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.00944,
+    "longitude": 39.29123
+  },
+  {
+    "id": "place-cbe1c73aa5304afa",
+    "name": "Muketuri",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.55009,
+    "longitude": 38.87266
+  },
+  {
+    "id": "place-66a4d60320844696",
+    "name": "Mulo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.29662,
+    "longitude": 38.56495
+  },
+  {
+    "id": "place-e388f42044efe264",
+    "name": "Mustakhil'",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 5.24546,
+    "longitude": 44.73184
+  },
+  {
+    "id": "place-fdfffefa277449de",
+    "name": "Namelafen",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 10.92656,
+    "longitude": 40.20802
+  },
+  {
+    "id": "place-72b5075f38d59b6b",
+    "name": "Nedjo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.50446,
+    "longitude": 35.502
+  },
+  {
+    "id": "place-29aedbbba469d712",
+    "name": "Nefas Meewcha",
+    "localName": "ነፋስ መውጫ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.73863,
+    "longitude": 38.47275
+  },
+  {
+    "id": "place-ea3c2415ed40c924",
+    "name": "Negash",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.87996,
+    "longitude": 39.59807
+  },
+  {
+    "id": "place-32348349effc33a9",
+    "name": "Negele",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.33282,
+    "longitude": 39.58066
+  },
+  {
+    "id": "place-d95dddeeb497dc94",
+    "name": "Nunu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.76471,
+    "longitude": 36.63989
+  },
+  {
+    "id": "place-ccdee6c2ea48b3de",
+    "name": "Obera Bota",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.17408,
+    "longitude": 40.17794
+  },
+  {
+    "id": "place-f5cab43a074fdb35",
+    "name": "Oda",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.09934,
+    "longitude": 36.51873
+  },
+  {
+    "id": "place-4c8387279f984eff",
+    "name": "Ombole",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.36667,
+    "longitude": 38.78333
+  },
+  {
+    "id": "place-c1aebfb63733165a",
+    "name": "Omonada",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.63383,
+    "longitude": 37.25154
+  },
+  {
+    "id": "place-1f3528e9083a9ea9",
+    "name": "Omorate",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 4.80324,
+    "longitude": 36.05044
+  },
+  {
+    "id": "place-8873ae7d27faf286",
+    "name": "Pagak (South Sudan)",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.47466,
+    "longitude": 34.02463
+  },
+  {
+    "id": "place-10ed33d6b15023bc",
+    "name": "Pagak(Gambella, Ethiopia)",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.4595,
+    "longitude": 34.00547
+  },
+  {
+    "id": "place-b6ad14bb98d3a19d",
+    "name": "Paracho",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.66354,
+    "longitude": 37.83857
+  },
+  {
+    "id": "place-0cc31b8623b2b007",
+    "name": "Pawi",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.32501,
+    "longitude": 36.4088
+  },
+  {
+    "id": "place-4f1ef90014db6b3a",
+    "name": "Pinyudo",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 7.64702,
+    "longitude": 34.25723
+  },
+  {
+    "id": "place-93280424ee29c81e",
+    "name": "Qoqa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.44098,
+    "longitude": 39.03474
+  },
+  {
+    "id": "place-40937adae2d92d23",
+    "name": "Qorof",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.58416,
+    "longitude": 46.43528
+  },
+  {
+    "id": "place-0cf18e3b4cf561f0",
+    "name": "Quiha",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.47653,
+    "longitude": 39.54633
+  },
+  {
+    "id": "place-3520dd2caec7cd02",
+    "name": "Raaso",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.54691,
+    "longitude": 41.79703
+  },
+  {
+    "id": "place-c34825b8820976a9",
+    "name": "Raqo",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.4193,
+    "longitude": 45.85259
+  },
+  {
+    "id": "place-aa19f3577e68b0b3",
+    "name": "Rob Gebeya",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.6876,
+    "longitude": 34.88005
+  },
+  {
+    "id": "place-a804dda107b4ae33",
+    "name": "Robe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.86558,
+    "longitude": 39.62988
+  },
+  {
+    "id": "place-17a969c81bbb62f4",
+    "name": "Robe Gerjeda",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.19047,
+    "longitude": 39.43017
+  },
+  {
+    "id": "place-22954aa441fc60f4",
+    "name": "Ropi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.14074,
+    "longitude": 38.10917
+  },
+  {
+    "id": "place-add78e589720b607",
+    "name": "Sagure",
+    "localName": "ሳጉሬ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.75118,
+    "longitude": 39.15639
+  },
+  {
+    "id": "place-a52a3681cc1b2667",
+    "name": "Saja",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.96898,
+    "longitude": 37.43922
+  },
+  {
+    "id": "place-7cd773aab5c3e13a",
+    "name": "Saja",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.50447,
+    "longitude": 36.07025
+  },
+  {
+    "id": "place-08ac5737cccbb5bd",
+    "name": "Samre",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.18818,
+    "longitude": 39.20907
+  },
+  {
+    "id": "place-9cecee31f6f7257b",
+    "name": "Sanja",
+    "localName": "ሳንጃ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.99276,
+    "longitude": 37.2953
+  },
+  {
+    "id": "place-7bcf9bde1d58af84",
+    "name": "Sawla",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.3,
+    "longitude": 36.88333
+  },
+  {
+    "id": "place-d6160c2f5c8bd70a",
+    "name": "Sebeta",
+    "localName": "ሰበታ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.91225,
+    "longitude": 38.62402
+  },
+  {
+    "id": "place-95e2e2ba9ca7c112",
+    "name": "Segen",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.58866,
+    "longitude": 37.5465
+  },
+  {
+    "id": "place-d3cf6518a45a9940",
+    "name": "Seka",
+    "localName": "ሰቃ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.60279,
+    "longitude": 36.72394
+  },
+  {
+    "id": "place-aa9d4b5c20aafa34",
+    "name": "Sekoro",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.67415,
+    "longitude": 39.02228
+  },
+  {
+    "id": "place-47c2dbce44681f1c",
+    "name": "Selam Ber ሰላምበር",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.47534,
+    "longitude": 37.46329
+  },
+  {
+    "id": "place-222d2ffdff4be102",
+    "name": "Sele",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.53905,
+    "longitude": 39.03934
+  },
+  {
+    "id": "place-a111a0ec23bccb91",
+    "name": "Selekleka",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.11547,
+    "longitude": 38.47176
+  },
+  {
+    "id": "place-042abf3f4d2212a9",
+    "name": "Sendafa",
+    "localName": "ሰንዳፋ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.15587,
+    "longitude": 39.02381
+  },
+  {
+    "id": "place-4b421e3da5a22807",
+    "name": "Serera",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.30745,
+    "longitude": 37.78957
+  },
+  {
+    "id": "place-a2b29bc2425906e8",
+    "name": "Seru",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.67561,
+    "longitude": 40.20136
+  },
+  {
+    "id": "place-b5a9e3e5e339f649",
+    "name": "Seyo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.76524,
+    "longitude": 37.26412
+  },
+  {
+    "id": "place-2e3fc1f73a8bee23",
+    "name": "Shahadi",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.77992,
+    "longitude": 36.4047
+  },
+  {
+    "id": "place-27a4300c622f86a0",
+    "name": "Shahura (Alefa)",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.93407,
+    "longitude": 36.87253
+  },
+  {
+    "id": "place-4db51e3bc442f401",
+    "name": "Shakiso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.77468,
+    "longitude": 38.90285
+  },
+  {
+    "id": "place-1b71f0d0b09ce581",
+    "name": "Shambu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.56669,
+    "longitude": 37.1007
+  },
+  {
+    "id": "place-518c03ef3bb2ab09",
+    "name": "Shano",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.33333,
+    "longitude": 39.3
+  },
+  {
+    "id": "place-22078fe51ee919f2",
+    "name": "Shebe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.50345,
+    "longitude": 36.51134
+  },
+  {
+    "id": "place-f18f2fc6ad64e935",
+    "name": "Shebel",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.48913,
+    "longitude": 34.58411
+  },
+  {
+    "id": "place-0861d61bf2f678a9",
+    "name": "Sheik Hussein",
+    "localName": "ሼክ ሁሴን",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.74634,
+    "longitude": 40.70364
+  },
+  {
+    "id": "place-f0b864da95bbe7f0",
+    "name": "Shenen",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.72852,
+    "longitude": 37.47458
+  },
+  {
+    "id": "place-e30472b7f88b5a65",
+    "name": "Sheno",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.31608,
+    "longitude": 38.27223
+  },
+  {
+    "id": "place-2f1f29eb6a4fae2a",
+    "name": "Sheraro",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.39306,
+    "longitude": 37.7714
+  },
+  {
+    "id": "place-c7c05922bba64f9c",
+    "name": "Shime",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.41345,
+    "longitude": 37.95356
+  },
+  {
+    "id": "place-2b0804224bacd6cc",
+    "name": "Shimelba",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.17705,
+    "longitude": 37.72443
+  },
+  {
+    "id": "place-382bd56bf70d47ea",
+    "name": "Shinile",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.68806,
+    "longitude": 41.84472
+  },
+  {
+    "id": "place-8d7865f4856adf69",
+    "name": "Shinshicho",
+    "localName": "ሺንሺቾ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.20616,
+    "longitude": 37.77689
+  },
+  {
+    "id": "place-1c84dbe49ab5aaaa",
+    "name": "Shira",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.74462,
+    "longitude": 36.25009
+  },
+  {
+    "id": "place-63509d75cb0935bf",
+    "name": "Shoa Robit",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 9.99376,
+    "longitude": 39.90087
+  },
+  {
+    "id": "place-85b312dda53ca31f",
+    "name": "Shoboka",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.09328,
+    "longitude": 37.12336
+  },
+  {
+    "id": "place-006e44a735eb4eb5",
+    "name": "Shone",
+    "localName": "ሾኔ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.14421,
+    "longitude": 37.95558
+  },
+  {
+    "id": "place-aa43341b222ebead",
+    "name": "Shufune",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.13242,
+    "longitude": 38.74468
+  },
+  {
+    "id": "place-84ffbc6683d58a1c",
+    "name": "Shukute",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.38081,
+    "longitude": 38.02533
+  },
+  {
+    "id": "place-8efc55832a08e3db",
+    "name": "Shul",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.48323,
+    "longitude": 37.02352
+  },
+  {
+    "id": "place-109d5a3fb09050f4",
+    "name": "Sibo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.24064,
+    "longitude": 35.23975
+  },
+  {
+    "id": "place-9f9d9c415b7d5af7",
+    "name": "Sigmo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.91055,
+    "longitude": 36.0975
+  },
+  {
+    "id": "place-b1493f5451919ce3",
+    "name": "Sirambi",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.53628,
+    "longitude": 37.42929
+  },
+  {
+    "id": "place-9ca20ef529cd45ef",
+    "name": "Sire",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.27641,
+    "longitude": 39.49274
+  },
+  {
+    "id": "place-f5b43c9c59850a84",
+    "name": "Sire Robe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.47552,
+    "longitude": 39.1599
+  },
+  {
+    "id": "place-78cda2fc2b250521",
+    "name": "Sof Omar",
+    "localName": "ሶፍ-ዑመር",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.90135,
+    "longitude": 40.84383
+  },
+  {
+    "id": "place-0c9ecaca15db48fb",
+    "name": "Softu",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 3.97107,
+    "longitude": 41.85545
+  },
+  {
+    "id": "place-30d940e59e988417",
+    "name": "Soge",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 9.3598,
+    "longitude": 36.18852
+  },
+  {
+    "id": "place-792698ee41d5a636",
+    "name": "Sokoru",
+    "localName": "ሰኮሩ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.92568,
+    "longitude": 37.41791
+  },
+  {
+    "id": "place-7aa1fdc884d944c1",
+    "name": "Solemo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.08988,
+    "longitude": 38.5924
+  },
+  {
+    "id": "place-3922a67457696752",
+    "name": "Sologiorgis",
+    "localName": "ሶሎጊዮርጊስ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 8.83805,
+    "longitude": 39.36355
+  },
+  {
+    "id": "place-65fc2263d60d812f",
+    "name": "Sorto",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.90921,
+    "longitude": 37.61577
+  },
+  {
+    "id": "place-26688f729774263d",
+    "name": "Soyama",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.48531,
+    "longitude": 37.86077
+  },
+  {
+    "id": "place-95441673c988fbd5",
+    "name": "Sululta",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.18126,
+    "longitude": 38.75938
+  },
+  {
+    "id": "place-a29277ab8e50d2ed",
+    "name": "Sumbo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.53942,
+    "longitude": 38.25228
+  },
+  {
+    "id": "place-dd15c5e92334b452",
+    "name": "Sup'E",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.52036,
+    "longitude": 35.66297
+  },
+  {
+    "id": "place-c71ac22b101bfb89",
+    "name": "Tarcha",
+    "localName": "ታርጫ",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.14685,
+    "longitude": 37.17513
+  },
+  {
+    "id": "place-2303a694e9b843b8",
+    "name": "Teferī Ber",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 9.78348,
+    "longitude": 43.22399
+  },
+  {
+    "id": "place-87115ca5f1177c97",
+    "name": "Tefki",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.84791,
+    "longitude": 38.4993
+  },
+  {
+    "id": "place-3222f6f0eeb4ad7b",
+    "name": "Teji",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.83904,
+    "longitude": 38.37964
+  },
+  {
+    "id": "place-5b642f5ffdce2694",
+    "name": "Telo",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.11854,
+    "longitude": 36.46922
+  },
+  {
+    "id": "place-2112cf580dd1ef91",
+    "name": "Tenta",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.54226,
+    "longitude": 38.32412
+  },
+  {
+    "id": "place-6f4da43883ab46b8",
+    "name": "Tepi",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.19707,
+    "longitude": 35.42182
+  },
+  {
+    "id": "place-8ff507ff6b91f55b",
+    "name": "Terre",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.53224,
+    "longitude": 38.62647
+  },
+  {
+    "id": "place-ca9e3ef81c66d38a",
+    "name": "Tharpham",
+    "localName": "",
+    "kind": "town",
+    "region": "Gambela",
+    "latitude": 8.25806,
+    "longitude": 34.27674
+  },
+  {
+    "id": "place-0a877c791719651f",
+    "name": "Tibe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.05905,
+    "longitude": 37.18017
+  },
+  {
+    "id": "place-8d0b395787dea083",
+    "name": "Ticho",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.80776,
+    "longitude": 39.51666
+  },
+  {
+    "id": "place-1a44c981a0311007",
+    "name": "Tijo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.69062,
+    "longitude": 39.24784
+  },
+  {
+    "id": "place-81d26740a08645ba",
+    "name": "Tis Abay",
+    "localName": "ጥስ እሳት",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.48617,
+    "longitude": 37.58581
+  },
+  {
+    "id": "place-155fb5009fedea5f",
+    "name": "Tiya",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.43733,
+    "longitude": 38.6093
+  },
+  {
+    "id": "place-58ee8a224eeb8610",
+    "name": "Tobba",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.003,
+    "longitude": 36.49267
+  },
+  {
+    "id": "place-a5ac036bb4a32965",
+    "name": "Tocha",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.0884,
+    "longitude": 37.04092
+  },
+  {
+    "id": "place-435ba6155c42c55a",
+    "name": "Tongo",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 9.37418,
+    "longitude": 34.43903
+  },
+  {
+    "id": "place-0a8131af86c7dd71",
+    "name": "Tora",
+    "localName": "ጦራ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.85967,
+    "longitude": 38.42309
+  },
+  {
+    "id": "place-501983edafb837b1",
+    "name": "Ts'Abat",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.67218,
+    "longitude": 39.67065
+  },
+  {
+    "id": "place-29968f45e565f669",
+    "name": "Tsege",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.18867,
+    "longitude": 36.50545
+  },
+  {
+    "id": "place-cb64048cbbff335b",
+    "name": "Tulu Bolo",
+    "localName": "ቱሉ ቦሎ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.66103,
+    "longitude": 38.21401
+  },
+  {
+    "id": "place-81e9770d0b66bc66",
+    "name": "Tulu Milki",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.9081,
+    "longitude": 38.34699
+  },
+  {
+    "id": "place-43906bb9a81533f6",
+    "name": "Ufa",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.40703,
+    "longitude": 36.23046
+  },
+  {
+    "id": "place-a17e2d35fdec120c",
+    "name": "Uke",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.37608,
+    "longitude": 36.5262
+  },
+  {
+    "id": "place-d55ba2451d3cfba8",
+    "name": "Uoter",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.3575,
+    "longitude": 41.77083
+  },
+  {
+    "id": "place-bffc13703d9afbf3",
+    "name": "Urmadag",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.67148,
+    "longitude": 46.2631
+  },
+  {
+    "id": "place-fba13ad0456162d9",
+    "name": "Wabe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.01399,
+    "longitude": 39.02253
+  },
+  {
+    "id": "place-3490a0f67ea38455",
+    "name": "Wachiga",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.74873,
+    "longitude": 37.662
+  },
+  {
+    "id": "place-a7ef5ada7f7ccb4f",
+    "name": "WachIle",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 4.5451,
+    "longitude": 39.06119
+  },
+  {
+    "id": "place-252219f6f21146af",
+    "name": "Wachu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.8484,
+    "longitude": 40.62336
+  },
+  {
+    "id": "place-ab573a893030f31e",
+    "name": "Wadera",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 5.77731,
+    "longitude": 39.31057
+  },
+  {
+    "id": "place-eb44cd10ac8bf8d4",
+    "name": "Wahisa Abo",
+    "localName": "ዋህሳ አቦ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.89514,
+    "longitude": 36.97191
+  },
+  {
+    "id": "place-760158cc7ba5f881",
+    "name": "Waliso",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.53886,
+    "longitude": 37.97619
+  },
+  {
+    "id": "place-c778a5eedffe5663",
+    "name": "Wamura",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.76724,
+    "longitude": 37.40332
+  },
+  {
+    "id": "place-ec26e4c9fb055799",
+    "name": "Washa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.03519,
+    "longitude": 39.47317
+  },
+  {
+    "id": "place-9ede571ebcb4a189",
+    "name": "Wayu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.23056,
+    "longitude": 37.3608
+  },
+  {
+    "id": "place-e799534b3ce0b101",
+    "name": "Wedarage",
+    "localName": "",
+    "kind": "town",
+    "region": "Afar",
+    "latitude": 10.81505,
+    "longitude": 40.18318
+  },
+  {
+    "id": "place-ac68b8942f8ec269",
+    "name": "Wefe",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.69783,
+    "longitude": 40.30892
+  },
+  {
+    "id": "place-352abee8877abecf",
+    "name": "Wegeda",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.39809,
+    "longitude": 38.23907
+  },
+  {
+    "id": "place-ae73bc78d50fa2db",
+    "name": "Wegide",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.38381,
+    "longitude": 38.0363
+  },
+  {
+    "id": "place-30a4bea32fb2702c",
+    "name": "Wekepeche",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.01195,
+    "longitude": 37.97383
+  },
+  {
+    "id": "place-0e72190471c29e8d",
+    "name": "Welenchiti",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.66325,
+    "longitude": 39.43432
+  },
+  {
+    "id": "place-33b13100977c3815",
+    "name": "Welkite",
+    "localName": "ወልቂጤ",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 8.28609,
+    "longitude": 37.78184
+  },
+  {
+    "id": "place-4a6d1b7d5a9c55ad",
+    "name": "Wenji",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.4541,
+    "longitude": 39.21752
+  },
+  {
+    "id": "place-26ab1302a7e97fc8",
+    "name": "Wereta",
+    "localName": "ወረታ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.92367,
+    "longitude": 37.69643
+  },
+  {
+    "id": "place-cf65d263984b66db",
+    "name": "Werka",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 6.58763,
+    "longitude": 39.10635
+  },
+  {
+    "id": "place-9b618000a96cd441",
+    "name": "Werkamba",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.73338,
+    "longitude": 39.00092
+  },
+  {
+    "id": "place-e5e7980d50094702",
+    "name": "West Imi",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.45751,
+    "longitude": 42.13912
+  },
+  {
+    "id": "place-8bf148aed5b259af",
+    "name": "Woito",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 5.37596,
+    "longitude": 36.99333
+  },
+  {
+    "id": "place-f9aa14bae0d99860",
+    "name": "Woldehane",
+    "localName": "",
+    "kind": "town",
+    "region": "South West Ethiopia",
+    "latitude": 7.24087,
+    "longitude": 37.27043
+  },
+  {
+    "id": "place-6c711142cb68f9ee",
+    "name": "Woldia",
+    "localName": "ወልዲያ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.82885,
+    "longitude": 39.59633
+  },
+  {
+    "id": "place-f1b51d14e25d1723",
+    "name": "Wolenkomi",
+    "localName": "ወለንኮሚ",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 9.00171,
+    "longitude": 38.24669
+  },
+  {
+    "id": "place-41c3003aa809c418",
+    "name": "Woncho",
+    "localName": "",
+    "kind": "town",
+    "region": "Sidama",
+    "latitude": 6.75572,
+    "longitude": 38.50786
+  },
+  {
+    "id": "place-ede59f8c07f70c12",
+    "name": "Worabe",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.85345,
+    "longitude": 38.1873
+  },
+  {
+    "id": "place-5612c17272d23335",
+    "name": "Workmeda",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.36199,
+    "longitude": 36.64688
+  },
+  {
+    "id": "place-57a13bc932a61948",
+    "name": "Worqicha",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 7.01668,
+    "longitude": 38.09148
+  },
+  {
+    "id": "place-991f2f2747a91920",
+    "name": "Wukro",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.78625,
+    "longitude": 39.60153
+  },
+  {
+    "id": "place-7a748026142ab355",
+    "name": "Wukro Maray",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.1232,
+    "longitude": 38.59363
+  },
+  {
+    "id": "place-e018bf697b1cd4b5",
+    "name": "Wulbareg",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.73901,
+    "longitude": 38.12193
+  },
+  {
+    "id": "place-cd68a1419cd4ce49",
+    "name": "Wurgessa",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.54352,
+    "longitude": 39.61851
+  },
+  {
+    "id": "place-70e2337ee39e79f6",
+    "name": "Yabēlo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 4.89257,
+    "longitude": 38.09499
+  },
+  {
+    "id": "place-90fb2ee709e3550b",
+    "name": "Yamaaruglay",
+    "localName": "",
+    "kind": "town",
+    "region": "Somali",
+    "latitude": 6.80853,
+    "longitude": 46.08437
+  },
+  {
+    "id": "place-605ba8fed674f791",
+    "name": "Yanfa",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.24499,
+    "longitude": 36.60305
+  },
+  {
+    "id": "place-0026ea5bdc30f081",
+    "name": "Yayu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.34149,
+    "longitude": 35.81224
+  },
+  {
+    "id": "place-b11896b6fd869b64",
+    "name": "Yebokile",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.44459,
+    "longitude": 37.89261
+  },
+  {
+    "id": "place-7ee2d86bcb43c127",
+    "name": "Yebu",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 7.78461,
+    "longitude": 36.7266
+  },
+  {
+    "id": "place-dc5683488e999805",
+    "name": "Yechila",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 13.28634,
+    "longitude": 38.99591
+  },
+  {
+    "id": "place-05739cd1b3add52c",
+    "name": "Yejube",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.15,
+    "longitude": 37.75
+  },
+  {
+    "id": "place-43f6c07cea6ff949",
+    "name": "Yelamgej",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.05686,
+    "longitude": 37.83753
+  },
+  {
+    "id": "place-81ee89f317eb080d",
+    "name": "Yetmen",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 10.332,
+    "longitude": 38.1465
+  },
+  {
+    "id": "place-c607a16dd93a2df3",
+    "name": "Yirga Cheffe",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.16196,
+    "longitude": 38.20289
+  },
+  {
+    "id": "place-344c4270cfdf6246",
+    "name": "Yubdo",
+    "localName": "",
+    "kind": "town",
+    "region": "Oromia",
+    "latitude": 8.95458,
+    "longitude": 35.45123
+  },
+  {
+    "id": "place-2cb2a0f920e5c434",
+    "name": "Zaro",
+    "localName": "",
+    "kind": "town",
+    "region": "South Ethiopia",
+    "latitude": 6.80325,
+    "longitude": 37.35114
+  },
+  {
+    "id": "place-fe094ab3c4d360fb",
+    "name": "Zizencio",
+    "localName": "",
+    "kind": "town",
+    "region": "Central Ethiopia",
+    "latitude": 7.95822,
+    "longitude": 38.03732
+  },
+  {
+    "id": "place-e1807ae3948e0d36",
+    "name": "መስዋእቲ ከተማ",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 12.69492,
+    "longitude": 39.54317
+  },
+  {
+    "id": "place-b64e4eb8b9391461",
+    "name": "መሸንቲ / Meshenti",
+    "localName": "መሸንቲ",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 11.4739,
+    "longitude": 37.28702
+  },
+  {
+    "id": "place-e00d43b9e4191548",
+    "name": "ሰቆጣ / Sekota",
+    "localName": "",
+    "kind": "town",
+    "region": "Amhara",
+    "latitude": 12.6257,
+    "longitude": 39.03544
+  },
+  {
+    "id": "place-a44854fcee634709",
+    "name": "ብዘት / Bizet",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.2828,
+    "longitude": 39.29113
+  },
+  {
+    "id": "place-0fb2403edddbf131",
+    "name": "ከተማ ሕብረት",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.04721,
+    "longitude": 38.03301
+  },
+  {
+    "id": "place-fe55727e11a3eb8a",
+    "name": "ከተማ ክሳድ ጋባ",
+    "localName": "",
+    "kind": "town",
+    "region": "Tigray",
+    "latitude": 14.12104,
+    "longitude": 38.09833
+  },
+  {
+    "id": "place-09956bda2b3088a5",
+    "name": "ጉባ / Guba",
+    "localName": "",
+    "kind": "town",
+    "region": "Benishangul Gumuz",
+    "latitude": 11.26647,
+    "longitude": 35.29162
+  }
+]

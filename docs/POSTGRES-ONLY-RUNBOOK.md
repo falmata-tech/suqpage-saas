@@ -12,7 +12,7 @@ Docker and Supabase CLI. Keep local provider values in ignored environment files
 npm ci
 npm run local:supabase:start
 npm run local:supabase:bootstrap
-npm run dev:local
+npm run dev -- --hostname 127.0.0.1 --port 3102
 ```
 
 Bootstrap writes the protected local runtime configuration, installs native
@@ -20,7 +20,7 @@ PostgreSQL schema 45, seeds an empty local database, reconciles local Auth accou
 and copies local media into private local Storage. It preserves an existing
 populated database. Demo setup is local-only; it never prints generated passwords.
 The protected `.local/seed-credentials.txt` is a fixture artifact, not a hosted
-credential source. Normal application sign-in uses Supabase email codes/Google.
+credential source. Normal application sign-in uses Supabase email codes only.
 Do not copy local Google/SMTP credentials to a hosted project.
 
 `npm run setup` may be rerun safely on a populated local database: it preserves
@@ -99,3 +99,20 @@ permissions, private media, health and rollback against the exact release candid
 Historical file-database backups remain inert protected records. No application,
 fixture, build, CI job or operations command opens them. Source/data retirement is
 not permission to delete historical customer data or backups.
+
+Local development uses the same guarded launcher for `npm run dev` and
+`npm run dev:local`. It loads `.local/supabase-runtime.env`, validates the local
+PostgreSQL/Auth/Storage endpoints, and accepts `--hostname` / `--port`. CLI port
+overrides `PORT`; both app origins follow the chosen address. Startup does not
+migrate or reset the database. Restart an older running Next process after changing
+these settings. Missing runtime settings require `npm run local:supabase:configure`.
+
+After initial local setup, `npm run dev -- --hostname 127.0.0.1 --port 3102`
+checks local PostgreSQL and Auth before launching Next. On macOS it opens Docker
+Desktop if needed, waits up to two minutes for the engine, and starts this local
+Supabase project if services have not resumed. Supabase startup and readiness each
+have a three-minute limit. Healthy services are reused. It never resets, migrates
+or seeds data. Missing local settings still require `local:supabase:configure`;
+Linux/other systems must start their Docker engine manually when it is stopped.
+CLI output containing local keys is not printed by the launcher. A failure points
+to the explicit local command to inspect; no hosted configuration is changed.

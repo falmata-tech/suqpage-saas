@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { getDb, closeDbForTests, getUserById } from './testing/postgres-fixture';
+import { ownerPagePort } from '../lib/owner-page-runtime';
+import { changePagePublication } from '../lib/owner-page-publication';
+import { pagePublicationPort } from '../lib/owner-page-publication-runtime';
+import { saveOwnerPageAndPublication } from '../lib/owner-page-save-runtime';
+import { setOwnerPageAssistance } from '../lib/owner-page-service';
+import { saveOwnerBusiness } from '../lib/owner-business-runtime';
+import { findPlaceSuggestions } from '../lib/place-catalog';
+import { mapDisplayLocation } from '../lib/map-display-location';
+import { getMarketplaceDiscoveryView } from '../lib/discovery';
+import { readOwnerPageImage } from '../lib/owner-page-media';
+import type { MediaObjectStore } from '../lib/media-storage';
+
+async function main() {
+  const db = await getDb();
+  try {
+    const bid=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('self-service-fixture','Self service fixture','composition','draft')").run()).insertedId);
+    const uid=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES('self-service@example.test','unused','Owner','owner',?)").run(bid)).insertedId);
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(uid);
+    const owner=(await getUserById(uid))!;
+    const content={template:'profile-v1',coverStyle:'blended',introduction:'',about:'Original description',heroImage:'',videoUrl:''};
+    let draft=await saveOwnerPageAndPublication(owner,bid,{action:'start',content});
+    assert.equal(draft.publication,null);
+    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:1,revision:0}),/not available/);
+    await db.prepare("INSERT INTO products(business_id,name,slug,description,is_published) VALUES(?,'Visit service','visit-service','A helpful service',1)").run(bid);
+    const savedPlace=findPlaceSuggestions('Addis Ababa')[0];
+    await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
+      VALUES(?,1,'electronics',?,?,'area',?,?,?,0,1)`).run(bid,savedPlace.name,savedPlace.region,savedPlace.id,savedPlace.latitude,savedPlace.longitude);
+    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,{...owner,business_id:bid+1},bid,{action:'publish',version:1,revision:0}),/Only the owner/);
+    await db.exec("CREATE FUNCTION reject_discovery() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture discovery failure'; END; $$; CREATE TRIGGER reject_discovery BEFORE INSERT ON business_discovery_profiles FOR EACH ROW EXECUTE FUNCTION reject_discovery();");
+    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:1,revision:0}),/fixture discovery failure/);
+    assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(bid)).status,'draft');
+    assert.equal((await db.prepare('SELECT COUNT(*) n FROM owner_page_publications').get()).n,0);
+    assert.equal((await db.prepare('SELECT COUNT(*) n FROM business_industries').get()).n,0);
+    await db.exec('DROP TRIGGER reject_discovery ON business_discovery_profiles; DROP FUNCTION reject_discovery();');
+    const first=await changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:1,revision:0});
+    assert.equal(first.revision,1);
+    assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(bid)).status,'active');
+    assert.equal((await db.prepare('SELECT COUNT(*) n FROM owner_page_reviews').get()).n,0);
+    assert.equal((await getMarketplaceDiscoveryView({q:'Self service fixture',type:'businesses'})).resultCounts.businesses,1);
+    assert.equal((await getMarketplaceDiscoveryView({q:'Visit Addis',type:'products'})).resultCounts.products,1);
+    assert.equal((await db.prepare('SELECT reviewed_version FROM owner_location_proposals WHERE business_id=?').get(bid)).reviewed_version,1);
+    draft=await saveOwnerPageAndPublication(owner,bid,{action:'save',version:1,content:{...content,about:'Immediate public changes'}});
+    assert.equal(draft.publication?.content?.about,'Immediate public changes');
+    await assert.rejects(()=>saveOwnerPageAndPublication(owner,bid,{action:'save',version:1,content}),/newer saved/);
+    const before=await ownerPagePort.read(bid);
+    await db.exec("CREATE FUNCTION reject_publication() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture publication failure'; END; $$; CREATE TRIGGER reject_publication BEFORE INSERT ON owner_page_publications FOR EACH ROW EXECUTE FUNCTION reject_publication();");
+    await assert.rejects(()=>saveOwnerPageAndPublication(owner,bid,{action:'save',version:draft.version,content}),/fixture publication failure/);
+    assert.deepEqual(await ownerPagePort.read(bid),before,'Failed publication rolls back draft update');
+    await db.exec('DROP TRIGGER reject_publication ON owner_page_publications; DROP FUNCTION reject_publication();');
+    const staffId=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('staff-simple@example.test','unused','Staff','admin')").run()).insertedId);
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'platform_admin')").run(staffId);
+    const staff=(await getUserById(staffId))!;
+    let mediaReads=0;
+    const store:MediaObjectStore={provider:'filesystem',put:async()=>{},remove:async()=>{},read:async()=>{mediaReads++;return null;}};
+    await assert.rejects(()=>readOwnerPageImage(ownerPagePort,store,staff,bid,`/api/page-drafts/${bid}/media/page-${bid}-33333333-3333-4333-8333-333333333339.png`));
+    assert.equal(mediaReads,0,'Staff without consent cannot reach private cover storage');
+    const mediaRoute=fs.readFileSync('app/api/page-drafts/[businessId]/media/[filename]/route.ts','utf8');
+    assert.ok(!mediaRoute.includes('canReadSubmittedCover'),'Retired review cannot grant a route-level media bypass');
+    const consent=await setOwnerPageAssistance(ownerPagePort,owner,bid,draft.version,true);
+    draft=await saveOwnerPageAndPublication(staff,bid,{action:'save',version:consent.version,content:{...content,about:'Staff private changes'}});
+    assert.equal(draft.publication?.content?.about,'Immediate public changes');
+    const place=findPlaceSuggestions('Addis Ababa')[0];
+    const location={name:'Self service fixture',expectedVersion:1,locationVersion:1,category:'electronics',city:'forged',region:'forged',placeId:place.id,mode:'storefront',latitude:9.023456,longitude:38.765432};
+    await saveOwnerBusiness(owner,bid,location);
+    let profile=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(bid);
+    assert.equal(profile.latitude,location.latitude);
+    assert.ok(profile.approved_at>0);
+    assert.equal((await getMarketplaceDiscoveryView({q:'Immediate public'})).resultCounts.businesses,1,'Search uses public About, not private draft');
+    await db.prepare('UPDATE business_discovery_profiles SET is_excluded=1 WHERE business_id=?').run(bid);
+    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:2,locationVersion:2,mode:'area'});
+    profile=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(bid);
+    assert.equal(profile.is_excluded,1);
+    assert.equal(profile.latitude,Math.round(place.latitude*10)/10);
+    assert.notEqual(profile.latitude,location.latitude);
+    assert.equal((await db.prepare('SELECT latitude FROM owner_location_proposals WHERE business_id=?').get(bid)).latitude,null);
+    await db.prepare("UPDATE businesses SET status='suspended' WHERE id=?").run(bid);
+    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:draft.version,revision:2}),/not available/);
+    const points=Array.from({length:1000},(_,i)=>({id:i+1,latitude:9,longitude:38,locationMode:'area' as const}));
+    const displayed=points.map(mapDisplayLocation);
+    assert.equal(new Set(displayed.map(p=>`${p.latitude},${p.longitude}`)).size,points.length);
+    for(const point of displayed) {
+      assert.ok(Math.hypot((point.latitude-9)*110.574,(point.longitude-38)*111.32*Math.cos(9*Math.PI/180))<1.5);
+      assert.deepEqual(mapDisplayLocation(points[point.id-1]),point);
+    }
+    const exact={id:1,latitude:9.02345,longitude:38.76543,locationMode:'storefront' as const};
+    assert.deepEqual(mapDisplayLocation(exact),exact);
+    assert.deepEqual(points[0],{id:1,latitude:9,longitude:38,locationMode:'area'});
+    console.log('PASS direct publish, live-save atomicity, staff privacy, stale/foreign/suspended denial, immediate GPS/area privacy, public About search and 1,000 stable bounded city offsets.');
+  } finally {await closeDbForTests();}
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

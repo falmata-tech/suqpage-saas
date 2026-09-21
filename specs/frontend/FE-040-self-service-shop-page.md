@@ -2,7 +2,7 @@
 id: FE-040
 title: Simple owner-controlled business profiles
 status: in_progress
-related: [FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
+related: [FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
 owners: [product, frontend]
 last_updated: 2026-09-14
 change_level: L2
@@ -334,3 +334,12 @@ form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
 Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## New-workspace starter override (FE-046 / BE-039)
+
+The local candidate now initializes every newly created private business with
+complete editable examples: page/media/contacts, location and three offerings.
+This supersedes empty initial presentation defaults only; existing page records,
+cleared fields and true account identity are preserved. Samples are labelled and
+private preview handoffs remain disabled. Full evidence and pending visual/release
+gates are recorded under FE-046 and checklist S8a.

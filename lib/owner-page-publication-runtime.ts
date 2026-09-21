@@ -1,3 +1,4 @@
+import { applyPendingOwnerLocation } from "./owner-business-runtime";
 import { isPageOwner, parseShopPageContent, type ShopPageContent } from "./owner-page-domain";
 import type { PagePublication, PagePublicationPort } from "./owner-page-publication";
 import { ownerPageEditorEnabled } from "./owner-page-runtime";
@@ -25,7 +26,10 @@ async function active(businessId: number): Promise<boolean> {
   return Boolean(await runtimeGet("SELECT 1 FROM businesses WHERE id=? AND status='active'", [businessId]));
 }
 export const pagePublicationPort: PagePublicationPort = {
-  latest, active,
+  latest,
+  async publishable(businessId) {
+    return Boolean(await runtimeGet("SELECT 1 FROM businesses b WHERE b.id=? AND (b.status='active' OR (b.status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=b.id AND p.is_published=1)))", [businessId]));
+  },
   async previous(businessId, revision) {
     const row = await runtimeGet<PublicationRow>("SELECT * FROM owner_page_publications WHERE business_id=? AND revision<? ORDER BY revision DESC LIMIT 1", [businessId, revision]);
     return row ? publication(row) : null;
@@ -40,7 +44,9 @@ export const pagePublicationPort: PagePublicationPort = {
           WHERE u.id=? AND u.business_id=owner_page_drafts.business_id
           AND COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END)='client')`,
       [draft.businessId, draft.version, actor.id]);
-      if (!locked.changes || !(await active(draft.businessId))) return null;
+      if (!locked.changes) return null;
+      const business = await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=? AND (status='active' OR (status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=businesses.id AND p.is_published=1)))", [draft.businessId]);
+      if (!business.changes) return null;
       const current = await latest(draft.businessId);
       if ((current?.revision || 0) !== expectedRevision) return null;
       const now = Date.now();
@@ -48,6 +54,8 @@ export const pagePublicationPort: PagePublicationPort = {
         (business_id,revision,draft_version,content_json,action,published_by,published_at)
         VALUES(?,?,?,?,?,?,?)`, [draft.businessId, expectedRevision + 1, draft.version,
         content ? JSON.stringify(content) : null, action, actor.id, now]);
+      await runtimeRun("UPDATE businesses SET status='active' WHERE id=? AND status='draft'", [draft.businessId]);
+      await applyPendingOwnerLocation(draft.businessId);
       return latest(draft.businessId);
     });
   },

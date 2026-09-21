@@ -25,7 +25,6 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
   const description = profile ? businessProfileDescription(profile) : business.description || business.hero_subtitle;
   const image = profile ? profile.heroImage : business.hero_image_path;
   return { title, description,
-    icons: business.favicon_path || business.logo_path ? { icon: business.favicon_path || business.logo_path } : undefined,
     openGraph: { title, description, images: image ? [image] : [] },
     twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] },
     robots: { index: true, follow: true } };

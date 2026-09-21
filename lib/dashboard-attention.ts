@@ -20,7 +20,7 @@ export async function getDashboardAttention(
 ): Promise<DashboardAttention> {
   if (hasCapability(user, "operations:manage") && !businessId) {
     return {
-      locationReviews: hasCapability(user,"platform:admin") ? await count("SELECT COUNT(*) total FROM owner_location_proposals WHERE version<>reviewed_version") : 0,
+      locationReviews: 0,
       newAccounts: await count(`
         SELECT COUNT(*) total FROM businesses b
         WHERE b.status='draft'
@@ -30,7 +30,7 @@ export async function getDashboardAttention(
             WHERE u.business_id=b.id AND p.access_role='client'
           )
       `),
-      pageReviews: await count("SELECT COUNT(*) total FROM owner_page_reviews WHERE status='pending'"),
+      pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
@@ -68,7 +68,7 @@ export async function getDashboardAttention(
   if (!scopedBusinessId) return { pageReviews: 0, supportReplies: 0 };
   const client = user.access_role === "client";
   return {
-    pageReviews: await count("SELECT COUNT(*) total FROM owner_page_reviews WHERE business_id=? AND status=?", scopedBusinessId, client ? 'changes_requested' : 'pending'),
+    pageReviews: 0,
     customerInquiries: await count(
       "SELECT COUNT(*) total FROM inquiries WHERE business_id=? AND status='new'",
       scopedBusinessId,

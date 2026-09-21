@@ -24,10 +24,10 @@
 .options label { display: grid; gap: 7px; font-size: 13px; font-weight: 600; }
 .options select { width: 100%; min-height: 44px; padding: 8px; border: 1px solid #cdd3d4; border-radius: 6px; background: #fff; color: #252a2d; }
 .actions { display: grid; gap: 10px; margin-top: 26px; }
-.actions button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px; border-radius: 7px; font-size: 14px; font-weight: 650; }
+.actions button { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px; border-radius: 7px; font-size: 14px; font-weight: 650; }
+.actions button svg { flex: none; }
 .primary { background: #c23806; color: #fff; border: 1px solid #c23806; }
 .secondary { background: #fff; color: #252a2d; border: 1px solid #cdd3d4; }
-.hint { margin-top: 12px !important; font-size: 12px; line-height: 1.5; color: #667178; }
 .unavailable { display: grid; justify-items: center; gap: 16px; padding: 60px 12px; text-align: center; }
 @container (max-width: 700px) { .layout { grid-template-columns: minmax(0,1fr); gap: 24px; } .stage { aspect-ratio: 4 / 3; } .navigation { gap: 8px; } .navigation a, .navigation button { font-size: 12px; } .navigation button { max-width: 120px; } }
 @media (prefers-reduced-motion: reduce) { .page { scroll-behavior: auto; } }

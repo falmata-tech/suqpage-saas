@@ -2,7 +2,7 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034]
+related: [BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034]
 owners: [product, backend, security]
 last_updated: 2026-07-28
 change_level: L3
@@ -20,6 +20,12 @@ storage and authorized reads until active publication; suspension removes public
 access. Existing idempotency, validation and retained catalog snapshots remain.
 Focused product-upkeep and local PostgreSQL evidence is mapped in BE-033 and the
 application wiring audit. This note does not claim a completed hosted rollout.
+
+The local candidate FE-047/BE-040 supersedes the owner editor's detailed controls:
+five content fields are submitted; omitted metadata is preserved from canonical
+rows under the tenant/version lock. Staff retain detailed controls. Existing
+version, tenant, idempotency, image and retained-history guarantees still apply.
+Visual approval and rollout remain pending under DEP-037.
 
 ## Problem and outcome
 

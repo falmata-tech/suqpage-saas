@@ -1,7 +1,6 @@
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { googleLoginAction } from "@/app/actions";
 import SuqpageBrand from "@/components/SuqpageBrand";
 import PasswordlessLoginForm from "@/components/PasswordlessLoginForm";
 import { supabaseAuthConfig, supabaseAuthEnabled } from "@/lib/config";
@@ -15,14 +14,9 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
   const p=await searchParams;
   const config=supabaseAuthConfig();
   const emailEnabled=managedAuth&&config.emailOtpEnabled;
-  const googleEnabled=managedAuth&&config.googleEnabled;
-  const accessMessage=emailEnabled&&googleEnabled
-    ? "Use a one-time email code or Google."
-    : emailEnabled
-      ? "Use a one-time email code."
-      : googleEnabled
-        ? "Use your Google account."
-        : "Account access is temporarily unavailable.";
+  const accessMessage=emailEnabled
+    ? "Use a one-time email code."
+    : "Account access is temporarily unavailable.";
   return <div className="landing-home platform-task-page">
     <header className="landing-header"><div className="landing-container landing-nav"><SuqpageBrand className="landing-brand" /><nav className="landing-desktop-nav" aria-label="Public navigation"><Link href="/">Market</Link><Link href="/about">About</Link></nav><details className="landing-mobile-menu"><summary aria-label="Open public navigation"><span /><span /><span /></summary><nav aria-label="Mobile public navigation"><Link href="/">Market</Link><Link href="/about">About</Link></nav></details></div></header>
     <main className="platform-task-main">
@@ -36,8 +30,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>Passwordless access</span><h2>Continue to your account</h2><p>{accessMessage}</p></div>
           <PasswordlessLoginForm emailEnabled={emailEnabled} initialError={p.error || ""} />
-          {!emailEnabled&&!googleEnabled?<p className="platform-form-note" role="status">Please try again later or contact Suqpage support.</p>:null}
-          {googleEnabled?<><div className="platform-provider-divider"><span>or</span></div><form className="platform-login-provider" action={googleLoginAction}><button type="submit">Continue with Google</button></form></>:null}
+          {!emailEnabled?<p className="platform-form-note" role="status">Please try again later or contact Suqpage support.</p>:null}
           <Link className="platform-return-link" href="/">Return to Market</Link>
         </div>
       </section>

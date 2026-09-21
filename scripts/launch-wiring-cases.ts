@@ -25,24 +25,27 @@ export async function launchWiringCases(port:BasicProductUpkeepPort,owner:Sessio
  await assert.rejects(()=>executeBasicProductUpkeep(port,foreign,{...command,kind:'update',productId,imageAction:'keep',idempotencyKey:randomUUID(),optionGroups:options},null),/cannot maintain/);
 
  const setup=await readOwnerBusiness(owner,bid);
- const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:0,category:'electronics',city:'Addis Ababa',region:'Addis Ababa',mode:'storefront',latitude:9.01234,longitude:38.76543};
+ const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:setup.proposal?.version||0,category:'electronics',city:'Addis Ababa',region:'Addis Ababa',mode:'storefront',latitude:9.01234,longitude:38.76543};
  await assert.rejects(()=>saveOwnerBusiness(foreign,bid,proposed),/Only the owner/);
  await saveOwnerBusiness(owner,bid,proposed);
  await assert.rejects(()=>saveOwnerBusiness(owner,bid,proposed),/changed/);
- assert.equal((await readLocationProposal(bid))?.version,1);
- assert.ok((await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid));
- const approval={businessId:bid,proposalVersion:1,industryKeys:['electronics'],boothImagePath:'',city:'Addis Ababa',zone:'Addis Ababa',region:'Addis Ababa',latitude:9.01234,longitude:38.76543,fallbackStyle:'technical',productionScale:'workshop',sponsored:false,sponsorPosition:100,excluded:false};
+ const firstVersion=(setup.proposal?.version||0)+1;assert.equal((await readLocationProposal(bid))?.version,firstVersion);
+ assert.ok(!(await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid),'Owner location Save requires no review');
+ assert.equal((await readLocationProposal(bid))?.reviewed_version,firstVersion);
+ assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9.01234,longitude:38.76543});
+ const approval={businessId:bid,proposalVersion:firstVersion,industryKeys:['electronics'],boothImagePath:'',city:'Addis Ababa',zone:'Addis Ababa',region:'Addis Ababa',latitude:9.01234,longitude:38.76543,fallbackStyle:'technical',productionScale:'workshop',sponsored:false,sponsorPosition:100,excluded:false};
  await updateDiscoveryProfile(approval);
  assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
- const area={...proposed,mode:'area',expectedVersion:(await current()).business.content_version,locationVersion:1};
+ const area={...proposed,mode:'area',expectedVersion:(await current()).business.content_version,locationVersion:firstVersion};
  assert.equal(parseOwnerBusinessChange(area).location?.latitude,null,'area mode discards submitted precise coordinates');
  await saveOwnerBusiness(owner,bid,area);
  assert.equal((await readLocationProposal(bid))?.latitude,null);assert.equal((await readLocationProposal(bid))?.longitude,null);
- assert.equal((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at,0);
+ assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
+ assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9,longitude:38.8},'Area Save replaces exact GPS immediately');
  await assert.rejects(()=>updateDiscoveryProfile(approval),/owner changed/);
- await updateDiscoveryProfile({...approval,proposalVersion:2});
+ await updateDiscoveryProfile({...approval,proposalVersion:firstVersion+1});
  const location=await runtimeGet<{latitude:number;longitude:number}>('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]);assert.equal(location?.latitude,9);assert.equal(location?.longitude,38.8);
- assert.equal((await readLocationProposal(bid))?.reviewed_version,2);
+ assert.equal((await readLocationProposal(bid))?.reviewed_version,firstVersion+1);
  assert.ok(!(await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid));
 
  // A local fixture has no notification destination, so valid inbox writes cannot send email.

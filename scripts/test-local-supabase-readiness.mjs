@@ -20,7 +20,7 @@ assert.match(config, /\[edge_runtime\][\s\S]*?enabled = false/);
 assert.match(config, /\[analytics\][\s\S]*?enabled = false/);
 assert.match(config, /minimum_password_length = 12/);
 assert.match(config, /password_requirements = "lower_upper_letters_digits"/);
-assert.match(config, /\[auth\.external\.google\][\s\S]*?enabled = true[\s\S]*?client_id = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID\)"[\s\S]*?secret = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET\)"[\s\S]*?skip_nonce_check = false[\s\S]*?email_optional = false/);
+assert.match(config, /\[auth\.external\.google\][\s\S]*?enabled = false[\s\S]*?client_id = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID\)"[\s\S]*?secret = "env\(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET\)"[\s\S]*?skip_nonce_check = false[\s\S]*?email_optional = false/);
 assert.match(config, /\[storage\.buckets\.mirtpage-media\][\s\S]*?public = false/);
 assert.match(example, /^SUQPAGE_DATABASE_DRIVER=postgres$/m);
 assert.match(example, /^SUQPAGE_POSTGRES_URL=postgresql:\/\/postgres:postgres@127\.0\.0\.1:54322\/postgres$/m);
@@ -31,8 +31,8 @@ assert.match(nativeSetup, /existing data preserved/);
 assert.match(nativeMigrations, /Refusing to install into an unversioned populated schema/);
 assert.match(nativeMigrations, /REVOKE ALL ON ALL TABLES/);
 assert.match(generator, /supabase-runtime\.env/);
-assert.match(generator, /providerConfiguration = path\.resolve\("\.env"\)/);
-assert.match(generator, /SUQPAGE_GOOGLE_AUTH_ENABLED=\$\{googleConfigured \? "1" : "0"\}/);
+assert.doesNotMatch(generator, /googleConfigured|providerConfiguration/);
+assert.match(generator, /SUQPAGE_GOOGLE_AUTH_ENABLED=0/);
 assert.match(generator, /mode: 0o600/);
 assert.doesNotMatch(generator, /console\.log\([^)]*(ANON_KEY|SERVICE_ROLE_KEY|publishableKey|serviceRoleKey)/);
 assert.match(runtimeConfig, /SUQPAGE_DATABASE_DRIVER must be postgres in every environment/);
@@ -50,11 +50,13 @@ for (const scriptName of [
 }
 assert.match(packageJson.scripts["local:media:migrate"], /--execute$/);
 assert.equal(packageJson.scripts["dev:local"], "node scripts/start-local-dev.mjs");
+assert.equal(packageJson.scripts.dev, packageJson.scripts['dev:local']);
 assert.match(localDev, /process\.loadEnvFile\("\.local\/supabase-runtime\.env"\)/);
 assert.match(localDev, /SUQPAGE_DATABASE_DRIVER !== "postgres"/);
 assert.match(localDev, /"54322"/);
 assert.match(localDev, /"54321"/);
 assert.match(acceptance, /suqpage-browser-/);
+assert.ok(acceptance.includes('.replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)'), "Browser fixtures use their isolated mail catcher");
 assert.match(acceptance, /api: 56321, db: 56322/);
 for (const driver of ["SUQPAGE_DATABASE_DRIVER", "SUQPAGE_AUTH_DRIVER", "SUQPAGE_MEDIA_DRIVER"]) {
     assert.match(acceptance, new RegExp(`${driver}: "${driver === "SUQPAGE_DATABASE_DRIVER" ? "postgres" : "supabase"}"`));

@@ -75,7 +75,8 @@ export function supabaseAuthConfig() {
     publishableKey: platformEnvironment().NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
     serviceRoleKey: platformEnvironment().SUQPAGE_SUPABASE_SERVICE_ROLE_KEY || "",
     emailOtpEnabled: platformEnvironment().SUQPAGE_EMAIL_OTP_ENABLED === "1",
-    googleEnabled: platformEnvironment().SUQPAGE_GOOGLE_AUTH_ENABLED === "1",
+    // Email-only policy: retained OAuth credentials/flags cannot re-enable entry.
+    googleEnabled: false,
     requestTimeoutMs: timeout,
   };
 }

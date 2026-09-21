@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { assertProductionConfiguration, authDriver, supabaseAuthConfig } from "../lib/config";
 import { getDb } from "./testing/postgres-fixture";
-import { providerDisplayName } from "../lib/supabase-auth";
+import { beginGoogleSignIn, providerDisplayName } from "../lib/supabase-auth";
 async function main() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-auth-runtime-"));
     process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
@@ -69,6 +69,11 @@ async function main() {
             assert.equal(supabaseAuthConfig().googleEnabled, false);
             process.env.SUQPAGE_GOOGLE_AUTH_ENABLED = "1";
             assert.doesNotThrow(assertProductionConfiguration);
+            assert.equal(supabaseAuthConfig().googleEnabled, false, "Retained flags cannot enable Google");
+            const previousFetch = globalThis.fetch;
+            globalThis.fetch = async () => { throw new Error("Google must not contact a provider"); };
+            try { assert.equal(await beginGoogleSignIn(), null); }
+            finally { globalThis.fetch = previousFetch; }
             process.env.SUQPAGE_EMAIL_OTP_ENABLED = "0";
             assert.throws(assertProductionConfiguration, /requires verified email-code/);
             process.env.SUQPAGE_GOOGLE_AUTH_ENABLED = "0";

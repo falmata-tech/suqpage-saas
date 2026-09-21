@@ -3,22 +3,26 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
+import { suqpageEmailBrandingPatch } from "./auth-email-templates";
+import { AuthCredentialError, resolveAuthCredential, type CredentialSource } from "./auth-credentials";
 
 export const PRODUCTION_AUTH = Object.freeze({
   project: "sjeiiqxgscuqajpgddcc",
-  origin: "https://africmade.netlify.app",
+  origin: "https://suqpage.com",
 });
 const MAX_BYTES = 512 * 1024;
 const PLAN_TTL = 10 * 60 * 1000;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export type AuthConfig = Record<string, unknown>;
 export interface AuthConfigPort {
+  readonly credential: { source: CredentialSource; fingerprint: string };
   project(): Promise<{ id: string; status: string }>;
   read(): Promise<AuthConfig>;
   patch(patch: AuthConfig): Promise<void>;
 }
 type Plan = {
-  version: 1;
+  version: 2;
+  credential: AuthConfigPort["credential"];
   project: string;
   createdAt: number;
   before: AuthConfig;
@@ -45,6 +49,7 @@ export function validatePatch(project: string, patch: unknown, template: string)
   requireGuard(project === PRODUCTION_AUTH.project, "Wrong production project.");
   requireGuard(record(patch) && Object.keys(patch).length > 0, "A nonempty JSON patch is required.");
   const permitted: AuthConfig = {
+    ...suqpageEmailBrandingPatch(),
     site_url: PRODUCTION_AUTH.origin,
     uri_allow_list: `${PRODUCTION_AUTH.origin}/auth/callback`,
     mailer_otp_length: 6,
@@ -116,15 +121,36 @@ export async function prepareAuthPlan(input: {
   privateDirectory(input.directory);
   const before = await readCurrent(input.port);
   requireGuard(Object.keys(patch).some((key) => canonical(before[key]) !== canonical(patch[key])), "There are no changes to apply.");
-  const plan: Plan = { version: 1, project: input.project, createdAt: input.now ?? Date.now(), before, patch };
+  const plan: Plan = { version: 2, credential: { ...input.port.credential }, project: input.project, createdAt: input.now ?? Date.now(), before, patch };
   const id = crypto.randomBytes(12).toString("hex");
   const file = planPath(input.directory, id);
   writePrivate(file, plan);
   requireGuard(digest(readJson(file, true)) === digest(plan), "Backup verification failed.");
   return { id, approval: digest(plan), project: plan.project, origin: PRODUCTION_AUTH.origin,
+    credentialSource: plan.credential.source,
     expiresAt: plan.createdAt + PLAN_TTL,
     changes: Object.keys(plan.patch).sort().map((field) => ({ field,
       value: field.startsWith("mailer_templates_") ? "Reviewed repository email template" : plan.patch[field] })) };
+}
+
+export function expectedAuthReadback(before: AuthConfig, patch: AuthConfig): AuthConfig {
+  const expected = { ...before, ...patch };
+  for (const [map, prefix] of [["mailer_subjects_custom_contents", "mailer_subjects_"],
+    ["mailer_templates_custom_contents", "mailer_templates_"]] as const) {
+    if (!Object.hasOwn(before, map)) continue;
+    const flags = before[map];
+    requireGuard(record(flags), "Invalid provider email customization metadata.");
+    const updated = { ...flags };
+    for (const [field, value] of Object.entries(patch)) {
+      const key = field.toUpperCase();
+      if (!field.startsWith(prefix) || !Object.hasOwn(flags, key)) continue;
+      requireGuard(typeof flags[key] === "boolean" && typeof value === "string" && value.length > 0,
+        "Invalid provider email customization metadata.");
+      updated[key] = true;
+    }
+    expected[map] = updated;
+  }
+  return expected;
 }
 
 export async function applyAuthPlan(input: {
@@ -133,8 +159,10 @@ export async function applyAuthPlan(input: {
   requireGuard(input.project === PRODUCTION_AUTH.project, "Wrong production project.");
   const file = planPath(input.directory, input.id);
   const raw = readJson(file, true);
-  requireGuard(record(raw) && raw.version === 1 && raw.project === input.project && record(raw.before)
+  requireGuard(record(raw) && raw.version === 2 && raw.project === input.project && record(raw.before)
     && typeof raw.createdAt === "number" && Number.isFinite(raw.createdAt), "Invalid plan.");
+  requireGuard(record(raw.credential) && canonical(raw.credential) === canonical(input.port.credential),
+    "Credential source or login changed after planning; prepare a new review plan. No provider write was made.");
   validatePatch(raw.project as string, raw.patch, input.template);
   const age = (input.now ?? Date.now()) - raw.createdAt;
   requireGuard(age >= 0 && age <= PLAN_TTL, "Plan expired or has a future timestamp; prepare another read-only plan.");
@@ -142,15 +170,16 @@ export async function applyAuthPlan(input: {
   requireGuard(!fs.existsSync(`${file}.attempt`), "This plan was already attempted; inspect provider state before replanning.");
   const current = await readCurrent(input.port);
   requireGuard(digest(current) === digest(raw.before), "Provider configuration changed after review; no write was made.");
+  const expected = expectedAuthReadback(current, raw.patch);
   // Reserve the attempt before sending: a timeout may still have committed remotely.
   writePrivate(`${file}.attempt`, { attemptedAt: input.now ?? Date.now(), approval: input.approval });
   await input.port.patch(raw.patch);
   const after = await readCurrent(input.port);
-  requireGuard(digest(after) === digest({ ...current, ...raw.patch }), "Provider readback differs from the exact approved change; stop and inspect, do not retry or auto-restore.");
+  requireGuard(digest(after) === digest(expected), "Provider readback differs from the exact approved change; stop and inspect, do not retry or auto-restore.");
   writePrivate(`${file}.verified`, { verifiedAt: Date.now(), approval: input.approval });
 }
 
-export function supabaseAuthPort(token: string, fetcher: typeof fetch = fetch): AuthConfigPort {
+export function supabaseAuthPort(token: string, fetcher: typeof fetch = fetch, source: CredentialSource = "env"): AuthConfigPort {
   requireGuard(Boolean(token) && !/[\r\n]/.test(token), "An explicit SUPABASE_ACCESS_TOKEN is required; no stored credentials are discovered.");
   const base = `https://api.supabase.com/v1/projects/${PRODUCTION_AUTH.project}`;
   async function request(suffix: string, patch?: AuthConfig): Promise<unknown> {
@@ -179,6 +208,7 @@ export function supabaseAuthPort(token: string, fetcher: typeof fetch = fetch): 
     }
   }
   return {
+    credential: Object.freeze({ source, fingerprint: digest(token) }),
     async project() {
       const value = await request("");
       requireGuard(record(value) && typeof value.id === "string" && typeof value.status === "string", "Invalid project response.");
@@ -196,6 +226,7 @@ export function supabaseAuthPort(token: string, fetcher: typeof fetch = fetch): 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
     project: { type: "string" }, patch: { type: "string" }, plan: { type: "string" }, approve: { type: "string" },
+    "credential-source": { type: "string", default: "env" },
   } });
   const mode = positionals[0];
   requireGuard(positionals.length === 1 && (mode === "plan" || mode === "apply"),
@@ -213,7 +244,8 @@ async function main(): Promise<void> {
     && (stat.mode & 0o022) === 0, "Unsafe repository-local directory.");
   const directory = path.join(local, "production-auth-plans");
   if (!fs.existsSync(directory)) fs.mkdirSync(directory, { mode: 0o700 });
-  const port = supabaseAuthPort(process.env.SUPABASE_ACCESS_TOKEN || "");
+  const credential = await resolveAuthCredential(values["credential-source"], process.env.SUPABASE_ACCESS_TOKEN || "");
+  const port = supabaseAuthPort(credential.token, fetch, credential.source);
   if (mode === "plan") console.log(JSON.stringify(await prepareAuthPlan({ project: values.project, patch, template, directory, port }), null, 2));
   else {
     await applyAuthPlan({ project: values.project, id: values.plan!, approval: values.approve!, template, directory, port });
@@ -223,7 +255,7 @@ async function main(): Promise<void> {
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   void main().catch((error: unknown) => {
-    console.error(error instanceof GuardError ? error.message : "Auth configuration stopped because arguments or local I/O failed. No provider response or credentials were printed.");
+    console.error(error instanceof GuardError || error instanceof AuthCredentialError ? error.message : "Auth configuration stopped because arguments or local I/O failed. No provider response or credentials were printed.");
     process.exitCode = 1;
   });
 }

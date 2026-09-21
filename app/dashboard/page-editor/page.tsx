@@ -1,4 +1,3 @@
-import { pageReviewPort } from "@/lib/page-review-runtime";
 import { notFound } from "next/navigation";
 import DashboardShell from "@/components/DashboardShell";
 import OwnerPageEditor from "@/components/OwnerPageEditor";
@@ -24,6 +23,6 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
   if (!catalog) notFound();
   const publication = await pagePublicationPort.latest(business.id);
   return <DashboardShell user={user} business={business}>
-    <OwnerPageEditor catalog={catalog} initialDraft={draft} initialPublication={publication} initialReview={await pageReviewPort.read(business.id)} owner={isPageOwner(user, business.id)} />
+    <OwnerPageEditor catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
   </DashboardShell>;
 }

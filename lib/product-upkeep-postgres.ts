@@ -7,7 +7,8 @@ import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
-import type { SessionUser } from "./types";
+import { parseOfferingHighlightsJson } from "./offering-presentation";
+import type { Product, SessionUser } from "./types";
 
 type StoredCommand = {
   payload_hash: string;
@@ -90,7 +91,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
     Object.assign(product, {
       ...(command.optionGroups !== undefined ? { optionGroups: command.optionGroups } : {}),
       ...(command.isPublished !== undefined ? { published: command.isPublished } : {}),
-      collectionKey: null,
+      ...(!command.preserveMetadata ? { collectionKey: null } : {}),
       categoryKey,
       name: command.name,
       description: command.description,
@@ -135,11 +136,25 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       if (business.content_version !== command.expectedContentVersion) {
         throw new ProductUpkeepError("The showroom changed while this form was open. Refresh and review the latest version.", 409, "stale_version");
       }
-      await validateStructure(command);
       const existing = command.kind === "update"
-        ? await runtimeGet<{ id: number; image_path: string }>("SELECT id,image_path FROM products WHERE id=? AND business_id=?", [command.productId, command.businessId])
+        ? await runtimeGet<Product & { highlights_json: string }>("SELECT * FROM products WHERE id=? AND business_id=?", [command.productId, command.businessId])
         : null;
       if (command.kind === "update" && !existing) throw new ProductUpkeepError("Product not found.", 404, "not_found");
+      if (command.preserveMetadata) {
+        // Resolve under the tenant/version lock; never trust a hidden browser snapshot.
+        command = { ...command, optionGroups: undefined, isPublished: undefined,
+          availability: existing?.availability ?? "available",
+          offeringKind: command.offeringKind,
+          quantityMode: existing?.quantity_mode ?? "optional",
+          categoryId: existing?.category_id ?? null,
+          quantityUnit: existing?.quantity_unit ?? "",
+          highlights: parseOfferingHighlightsJson(existing?.highlights_json),
+          capacitySummary: existing?.capacity_summary ?? "",
+          minimumOrderSummary: existing?.minimum_order_summary ?? "",
+          leadTimeSummary: existing?.lead_time_summary ?? "",
+        };
+      }
+      await validateStructure(command);
       const imageRef = command.imageAction === "replace"
         ? stagedImage!.imageRef
         : command.imageAction === "remove" ? "" : existing?.image_path || "";
@@ -174,11 +189,11 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       } else {
         productId = existing!.id;
         const changed = await runtimeRun(
-          `UPDATE products SET collection_id=NULL,category_id=?,name=?,description=?,image_path=?,
+          `UPDATE products SET collection_id=CASE WHEN ?=1 THEN collection_id ELSE NULL END,category_id=?,name=?,description=?,image_path=?,
             availability=?,offering_kind=?,quantity_mode=?,capacity_summary=?,minimum_order_summary=?,
             lead_time_summary=?,video_ref=?,price_minor=?,currency='ETB',quantity_unit=?,highlights_json=?
            WHERE id=? AND business_id=?`,
-          [command.categoryId, command.name, command.description, imageRef, command.availability,
+          [Number(Boolean(command.preserveMetadata)), command.categoryId, command.name, command.description, imageRef, command.availability,
             command.offeringKind, command.quantityMode, command.capacitySummary, command.minimumOrderSummary,
             command.leadTimeSummary, command.videoRef, command.priceMinor, command.quantityUnit,
             JSON.stringify(command.highlights), productId, command.businessId],

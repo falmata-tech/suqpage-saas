@@ -6,16 +6,15 @@ import ShowroomApp from "./showroom/ShowroomApp";
 import { businessProfileDescription, initialBusinessProfile } from "@/lib/business-profile";
 import type { Catalog } from "@/lib/types";
 import { parseShopPageContent, type OwnerPageDraft, type ShopPageContent } from "@/lib/owner-page-domain";
-import type { PageReview } from "@/lib/page-review";
 import type { PagePublication } from "@/lib/owner-page-publication";
 import { legacyPublicContacts, publicContactFields } from "@/lib/business-profile-contacts";
 import styles from "./OwnerPageEditor.module.css";
+import { STARTER_NOTICE } from '@/lib/business-starter';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, initialReview = null, owner }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; initialReview?: PageReview | null; owner: boolean }) {
-  const [review, setReview] = useState(initialReview);
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean }) {
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
-  const [confirmation, setConfirmation] = useState<"publish" | "restore" | "submit-review" | null>(null);
+  const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const [content, setContent] = useState<ShopPageContent>(initialDraft?.content || initialBusinessProfile(catalog));
   const [mode, setMode] = useState<"edit" | "preview">("edit");
@@ -28,7 +27,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   const deferred = useDeferredValue(content);
   const dirty = JSON.stringify(draft?.content || initialBusinessProfile(catalog)) !== JSON.stringify(content);
   const matchesPublication = Boolean(publication?.content && JSON.stringify(publication.content) === JSON.stringify(draft?.content));
-  const activePage = catalog.business.status === "active";
+  const [activePage, setActivePage] = useState(catalog.business.status === "active");
   const preview = useMemo(() => {
     try { return { profile: parseShopPageContent(deferred), error: "" }; }
     catch (failure) { return { profile: null, error: failure instanceof Error ? failure.message : "Check the profile fields." }; }
@@ -64,6 +63,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "The draft could not be saved.");
       setDraft(result);
+      if (result.publication) setPublication(result.publication);
       if (action !== "assistance") setContent(result.content);
     } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not connect. Your edits are still here."); }
     finally { setBusy(false); }
@@ -94,49 +94,46 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
     try {
       const response = await fetch(`/api/page-drafts/${catalog.business.id}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: confirmation, version: draft.version, ...(confirmation !== "submit-review" ? { revision: publication?.revision || 0 } : {}) }),
+        body: JSON.stringify({ action: confirmation, version: draft.version, revision: publication?.revision || 0 }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Publication could not be confirmed. Reload before trying again.");
-      confirmation === "submit-review" ? setReview(result) : setPublication(result);
+      setPublication(result); setActivePage(true);
     } catch (failure) { setError(failure instanceof Error ? failure.message : "Publication could not be confirmed. Reload before trying again."); }
     finally { setBusy(false); setConfirmation(null); }
   }
 
-  const needsResubmission = review?.status === "pending" && (review.draftVersion !== draft?.version || review.contentVersion !== catalog.business.content_version);
   return <section className={styles.editor} aria-label="Business profile editor" aria-busy={!ready || busy || uploading}>
+    {catalog.business.description.startsWith('Sample page:') && catalog.business.status === 'draft' ? <p className="notice">{STARTER_NOTICE}</p> : null}
     <header className={styles.toolbar}>
-      <div><h1>Business profile</h1><p role="status">{dirty ? "Unsaved changes" : draft ? "Private draft saved" : "Private preview"}</p></div>
+      <div><h1>Business profile</h1><p role="status">{dirty ? "Unsaved changes" : draft ? activePage && matchesPublication ? "Changes saved to your live page" : "Private draft saved" : "Private preview"}</p></div>
       <div className={styles.modes} aria-label="Editor view">
         <button type="button" aria-pressed={mode === "edit"} onClick={() => setMode("edit")}><Pencil size={17} />Edit</button>
         <button type="button" aria-pressed={mode === "preview"} onClick={() => setMode("preview")}><Eye size={17} />Preview</button>
       </div>
-      <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !dirty)}
+      <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !dirty && (!activePage || matchesPublication))}
         onClick={() => command("save")}>
         {busy ? <LoaderCircle size={18} /> : <Save size={18} />}
-        Save draft
+        Save
       </button>
     </header>
     {owner ? <div className={styles.publication} aria-label="Page publication">
-      <p role="status">{!activePage ? review?.status === "pending" ? needsResubmission ? "Changes need resubmission" : "Submitted for review" : review?.status === "changes_requested" ? "Changes requested" : catalog.business.status === "suspended" ? "Page suspended" : "Private page" : publication?.content ? "Profile published" : "Page live"}</p>
-      {review?.feedback ? <p>{review.feedback}</p> : null}
+      <p role="status">{activePage ? "Your page is live" : catalog.business.status === "suspended" ? "Page suspended — contact support" : "Private until you publish"}</p>
       <div className={styles.publicationActions}>
-        {catalog.business.status === "draft" ? <button type="button" className={styles.publish} disabled={!ready || busy || uploading || !draft || dirty || Boolean(preview.error) || !catalog.products.some(product => Boolean(product.is_published)) || (review?.status === "pending" && review.draftVersion === draft?.version && review.contentVersion === catalog.business.content_version)} onClick={() => setConfirmation("submit-review")}><Globe size={16} aria-hidden="true" />Submit for review</button> : null}
+        {!activePage && catalog.business.status === "draft" ? <button type="button" className={styles.publish} disabled={!ready || busy || uploading || !draft || dirty || Boolean(preview.error) || !catalog.products.some(product => Boolean(product.is_published))} onClick={() => setConfirmation("publish")}><Globe size={16} aria-hidden="true" />Publish</button> : null}
         {activePage ? <a href={`/@${catalog.business.handle}`} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} aria-hidden="true" />View page<span className="sr-only"> (new tab)</span></a> : null}
         {publication && activePage ? <button type="button" disabled={!ready || busy || uploading} onClick={() => setConfirmation("restore")}><Undo2 size={16} aria-hidden="true" />Restore previous</button> : null}
-        {activePage ? <button type="button" className={styles.publish} disabled={!ready || busy || uploading || !draft || dirty || Boolean(preview.error) || matchesPublication}
-          onClick={() => setConfirmation("publish")}><Globe size={16} aria-hidden="true" />Publish</button> : null}
       </div>
     </div> : null}
     <dialog ref={confirmDialog} className={styles.confirmation} aria-labelledby="page-publication-title"
       onCancel={(event) => { if (busy) event.preventDefault(); else setConfirmation(null); }}
       onClose={() => setConfirmation(null)}>
-      <h2 id="page-publication-title">{confirmation === "restore" ? "Restore the previous page?" : confirmation === "submit-review" ? "Submit your page for review?" : `Publish ${catalog.business.name}?`}</h2>
-      <p>{confirmation === "restore" ? "Visitors will see the previous published page. Your draft will stay saved." : confirmation === "submit-review" ? "An administrator will review your saved page and products before making it public." : "Your saved profile will replace the page visitors see at your current address."}</p>
+      <h2 id="page-publication-title">{confirmation === "restore" ? "Restore the previous page?" : `Publish ${catalog.business.name}?`}</h2>
+      <p>{confirmation === "restore" ? "Visitors will see the previous published page. Your draft will stay saved." : "Your page and listed products or services will be visible to customers. You can update them any time."}</p>
       <div><button type="button" autoFocus disabled={busy} onClick={() => setConfirmation(null)}>Cancel</button>
         <button type="button" className={styles.publish} disabled={busy} onClick={() => void publishSavedPage()}>
           {busy ? <LoaderCircle size={16} aria-hidden="true" /> : confirmation === "restore" ? <Undo2 size={16} aria-hidden="true" /> : <Globe size={16} aria-hidden="true" />}
-          {confirmation === "restore" ? "Restore previous" : confirmation === "submit-review" ? "Submit page" : "Publish page"}
+          {confirmation === "restore" ? "Restore previous" : "Publish page"}
         </button></div>
     </dialog>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
@@ -173,7 +170,6 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
           <legend className="sr-only">Public contact details</legend>
           <details className={styles.contactFields}>
             <summary>Public contact details <span className={styles.optional}>(optional)</span></summary>
-            <p className={styles.uploadStatus}>Choose how visitors can reach you. These details appear on your page when you publish.</p>
             {publicContactFields.map((field) => <div key={field.key}>
               <label htmlFor={`public-${field.key}`}>{field.label}</label>
               <input id={`public-${field.key}`} type={field.type} maxLength={500} placeholder={field.placeholder}
@@ -185,7 +181,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         {preview.error ? <p role="alert" className={styles.error}>{preview.error}</p> : null}
         {owner && draft ? <div className={styles.assistance}>
           <label><input type="checkbox" checked={draft.assistanceEnabled} disabled={!ready || busy || uploading} onChange={(e) => command("assistance", e.target.checked)} />Allow team editing</label>
-          <p>The team can edit this draft. You decide when to publish.</p>
+          <p>The team can prepare changes. Your Save applies them to your live page.</p>
         </div> : draft ? <p className={styles.note}>Team editing is enabled by the owner.</p> : null}
       </div>
       <div className={styles.preview} aria-label="Page preview">

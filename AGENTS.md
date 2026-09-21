@@ -149,6 +149,11 @@ or treat generated illustrative media as a factual product photograph.
   followed by the guarded apply command after the owner reviews its exact target,
   fields, and digest. Producing a digest does not grant approval to apply it.
   No raw-command fallback is permitted when the guard refuses an operation.
+- DEP-029 permits an explicitly selected `--credential-source cli` to reuse the
+  macOS default Supabase CLI Keychain login. This is a narrow credential-source
+  exception, not permission to discover arbitrary secrets, profiles or targets.
+  Keep credential bytes out of output/files; bind plans to the credential and
+  retain every project, backup, approval, drift and verification check.
 - Google client IDs/secrets, provider enablement, SMTP credentials, signing keys,
   and other secret changes require separate explicit owner authorization and a
   recoverable source. Make those changes in the provider dashboard; never copy
