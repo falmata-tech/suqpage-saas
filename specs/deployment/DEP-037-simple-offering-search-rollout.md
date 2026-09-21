@@ -144,3 +144,10 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+S22–S24 rollout verified: source `c565f91`, Netlify `6ab13a1acad8a70492ba56a9` ready at
+https://suqpage.com. Required gates, protected restore rehearsal and live routes,
+category/inquiry/pagination checks pass. Desktop map state passes; combined live
+phone-map verification remains limited by network/marker-readiness timeouts.
+Schema stays 48; no hosted configuration or data migration occurred.
+See the combined release evidence for the precise scope and remaining limits.

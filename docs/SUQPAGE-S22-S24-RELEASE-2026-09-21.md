@@ -41,10 +41,28 @@ accounts remain usable through OTP if application code is rolled back.
 
 ## Rollout
 
-All required gates passed; the candidate is approved for publication after the scoped commit.
-No Git push is required. The unrelated user-owned `deno.lock` remains untouched.
-Source and deployment IDs and monitored live results will be recorded here after
-independent readback.
+Source `c565f917281238333fbebc260ed40942a92fb6de` is published as Netlify `6ab13a1acad8a70492ba56a9` at https://suqpage.com.
+Independent provider readback confirms the expected source and ready deployment;
+a subsequent monitoring check confirms that deployment remains active and healthy.
+Fifteen public/entry/health/search checks and the www redirect pass. Live category,
+About, Featured and independent single/group inquiry checks pass at 1440/390/320.
+Separate live pagination checks reach page 2 at all three widths. The desktop
+map-state check proves retained page/results, map identity/zoom/bounds and keyboard
+focus/Escape/inert behavior. No inquiry was sent.
+
+The combined live drawer test remains inconclusive under variable network timing.
+Measured successful pagination took 9–10 seconds; direct public HTML/CSS requests
+took 8–12 seconds from the verification machine. The initial Escape assertion
+also raced next-frame focus transfer. The test now waits for rendered markers and
+focus, uses DOM readiness instead of generic network idle, and allows bounded
+30-second hosted navigation while retaining short local interaction assertions.
+A later phone run still timed out waiting for markers, so complete live phone-map
+interaction verification is not claimed. The updated full drawer test passes locally at 1440/390/320, including focus,
+Escape, retained filters/pages, stable map, previews and reduced motion. All nine
+isolated provider browser scenarios also pass; these remain separate from the
+hosted phone-map verification limitation.
+
+No Git push occurred. The unrelated user-owned `deno.lock` remains untouched.
 
 ## Limits
 
@@ -52,4 +70,5 @@ Real external email delivery and authenticated hosted owner/admin sessions have
 not been exercised; isolated local provider workflows provide the automated
 Auth/tenant evidence. Demo contact destinations remain examples. Inquiry email
 alerts require their separate Resend configuration; the persisted dashboard inbox
-works independently of email. Live verification will not send customer inquiries.
+works independently of email. Live verification sent no customer inquiries. Complete live phone-map interaction
+verification remains outstanding after loading/marker timeouts.

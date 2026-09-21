@@ -1098,7 +1098,7 @@ S21, and the new visual states require the repository's focused review step.
   with a toggleable drawer, retaining map and query state.
 - [x] Focused database/type/homepage/discovery tests and desktop/390/320 captures pass.
 - [x] Owner approved the combined local visuals on 2026-09-21 (AGENTS.md §8).
-- [ ] Run applicable full/release gates, commit task paths and publish if authorized.
+- [x] Full/release gates, scoped commit and approved publication completed with S23/S24.
 
 Existing untracked deno.lock is outside this task. No migration or hosted settings
 change is needed. Rollback is the previous presentation/default code.
@@ -1168,12 +1168,23 @@ DEP_BASE / DEP-037; existing schema 48, Auth configuration and tenant data remai
 
 - [x] Record visual approval and deployment authorization for S22–S24.
 - [x] Full check, release, all nine isolated provider browser scenarios and operations pass.
-- [ ] CURRENT: scoped commit; production target and protected restore evidence verified.
-- [ ] Build and inspect isolated Netlify artifact, publish, verify live workflows.
-- [ ] Record deployment/source IDs and monitored results; preserve deno.lock.
+- [x] Scoped source commit `c565f91`; production target and protected restore verified.
+- [x] Inspected artifact published as `6ab13a1acad8a70492ba56a9`; monitored routes and core flows.
+- [x] Source/deploy IDs, monitored evidence and limitations recorded; deno.lock preserved.
 
 Rollback republishes S21 deploy 6ab0dfee5b7bbcd1cb221ce6; no schema rollback.
 No Git push or provider-configuration change is required.
 
 Approved-release evidence above supersedes the earlier S22–S24 pending-review
 notes. Current rollout: `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+S22–S24 published: https://suqpage.com serves `c565f91` via Netlify
+`6ab13a1acad8a70492ba56a9`. Required release gates pass. Hosted category/inquiry
+checks and pagination pass at 1440/390/320; desktop drawer/map state also passes.
+
+- [ ] Complete combined live phone-map interaction verification after network/
+  marker-readiness timeouts. This is an explicitly retained verification limit,
+  not a failed local acceptance gate or a claim of successful live phone testing.
+
+Real-email/hosted-session limits remain documented separately. Local development
+remains at 127.0.0.1:3102. Current evidence supersedes earlier pending-publication notes.

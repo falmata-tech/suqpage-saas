@@ -165,3 +165,11 @@ assertions now verify the labelled drawer and shared category control.
 S22–S24 pending-review/gate notes above are superseded; publication evidence:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`. FE-038/BE-031 and earlier admission
 limits retain their separate unverified real-email/hosted-session scope.
+
+S22–S24 production evidence: source `c565f917281238333fbebc260ed40942a92fb6de`, Netlify `6ab13a1acad8a70492ba56a9`
+is ready on https://suqpage.com. Fifteen route checks, canonical redirect and
+1440/390/320 category/Featured/About, pagination and single/group inquiry flows
+pass. Desktop drawer/map state passes; complete combined live phone-map interaction
+verification remains inconclusive after network/marker timeouts. No real inquiry
+sent. Required local/full release gates pass. Recovery and remaining limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
