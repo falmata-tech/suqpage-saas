@@ -221,3 +221,26 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S23 audit correction — managed account recovery
+
+GIVEN email-code authentication WHEN administrators open owner access THEN show
+email-code identity status, never a temporary-password form or password-change
+badge. Retained local rollback mode keeps its password form. BE-031 guards the
+corresponding server actions as well. Test: focused wiring browser audit and
+password-mode policy regression; no provider credentials or sessions are changed.
+
+Managed staff creation and invitation acceptance also omit password fields and
+password-change badges. Invitation acceptance continues to email sign-in without
+claiming the recipient is authenticated. Remove retired pending-page-review counts
+from the staff table; active assignment counts remain. Local rollback keeps its
+password inputs. Browser tests verify staff creation, invitation acceptance,
+correct tenant/role links, and no session from invitation redemption alone.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

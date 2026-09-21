@@ -31,7 +31,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     {query.saved ? <p className="notice">Sponsor placements updated.</p> : null}
 
     <section className="panel sponsor-public-preview">
-      <div><span className="eyebrow">Currently public</span><h2>Five-placement rail</h2><p>The lowest active positions appear in this exact order across every Daily Featured day.</p></div>
+      <div><span className="eyebrow">Currently public</span><h2>Current sponsors</h2><p>Up to five active sponsors appear in this order.</p></div>
       {publicPlacements.length ? <ol>{publicPlacements.map((placement) => <li key={placement.id}><img src={placement.imagePath} alt=""/><span><small>{placement.kind === "showroom" ? "Suqpage page" : "External advertiser"}</small><strong>{placement.name}</strong><em>Position {placement.position}</em></span></li>)}</ol> : <div className="empty-state">No active sponsor placement is currently eligible.</div>}
     </section>
 
@@ -50,7 +50,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     </section>
 
     <section className="panel">
-      <div className="dashboard-section-head"><div><span className="eyebrow">External ads</span><h2>Manage advertiser cards</h2><p>Changes update the public rail without creating a Suqpage business account.</p></div></div>
+      <div className="dashboard-section-head"><div><span className="eyebrow">External ads</span><h2>Manage advertiser cards</h2><p>Changes update the sponsor card on Featured.</p></div></div>
       {externalAds.items.length ? <div className="sponsor-admin-list">{externalAds.items.map((ad) => <details key={ad.id} className="admin-form-disclosure">
         <summary><span><strong>{ad.name}</strong><small>{ad.active ? `Active · position ${ad.position}` : "Inactive"}</small></span><img src={ad.imagePath} alt=""/></summary>
         <form action={updateExternalSponsorAdAction} className="admin-form-disclosure-body form-grid">
@@ -69,7 +69,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     </section>
 
     <section className="panel">
-      <div className="dashboard-section-head"><div><span className="eyebrow">Suqpage accounts</span><h2>Sponsor a Suqpage page</h2><p>Search the bounded account list and set paid placement independently from marketplace eligibility.</p></div></div>
+      <div className="dashboard-section-head"><div><span className="eyebrow">Suqpage accounts</span><h2>Sponsor a Suqpage page</h2><p>Find a business and choose its sponsor position.</p></div></div>
       <CollectionToolbar action="/dashboard/admin/sponsors" search={query.q || ""} placeholder="Business, handle, or location" activeFilters={Boolean(query.q)}/>
       {businesses.items.length ? <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>Business</th><th>Marketplace</th><th>Paid placement</th></tr></thead><tbody>{businesses.items.map((business) => <tr key={business.businessId}>
         <td data-label="Business"><strong>{business.businessName}</strong><br/><small>@{business.handle}</small></td>

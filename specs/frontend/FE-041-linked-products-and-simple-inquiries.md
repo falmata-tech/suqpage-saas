@@ -200,3 +200,30 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S24 — plain inquiry language
+
+GIVEN a product/service card or detail WHEN selecting the grouped path THEN its
+visible label is "Add to inquiry list", followed by "Added to inquiry list".
+The saved-selection entry is "View inquiry list" at any nonzero count; remove
+ambiguous "Review item", "Review list" and "Add to list" labels. The single-item
+action continues to explicitly refer to that product/service only and does not
+alter the saved list. Confirmation is one short sentence, with no instructions
+repeating the button. Product/service words replace platform-owned "offering";
+merchant content and legacy stored field names remain unchanged. Existing single/
+group sending, delayed phone input, media and return-navigation contracts stand.
+Test: focused product/browser copy checks at desktop/390/320 and product-inquiry
+regressions. No mutation contract or schema changes.
+
+Local evidence: `test:product-inquiry` passes; `capture-inquiry-clarity.mjs`
+verifies the new labels, independent single/group actions, no send on Add,
+service wording, accessibility and layouts at 1440/390/320. Screenshots:
+`.local/inquiry-clarity-review/`. Visual approval and release remain pending.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

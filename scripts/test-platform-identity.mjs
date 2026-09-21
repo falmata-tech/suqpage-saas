@@ -40,7 +40,9 @@ assert.ok(showroomStyles.includes("background:rgb(255 255 255 / 96%)"));
 assert.ok(showroomStyles.includes("outline:3px solid #ff4b00"));
 const discoveryWorkspace = fs.readFileSync("components/DiscoveryWorkspace.tsx", "utf8");
 assert.doesNotMatch(discoveryWorkspace, /aria-label="Production scale"/);
-assert.match(discoveryWorkspace, /className="discovery-summary"/);
+// FE-042 keeps the search surface inside the optional, labelled map drawer.
+assert.match(discoveryWorkspace, /id="discovery-search-panel" className="discovery-summary discovery-search-panel"/);
+assert.match(discoveryWorkspace, /aria-labelledby="discovery-panel-title" aria-hidden=\{!panelOpen\} inert=\{!panelOpen\}/);
 assert.match(discoveryWorkspace, /className="discovery-search" role="search"/);
 for (const publicRoute of ["app/(public)/page.tsx", "app/discover/page.tsx"]) {
   assert.doesNotMatch(fs.readFileSync(publicRoute, "utf8"), /query\.scale/);

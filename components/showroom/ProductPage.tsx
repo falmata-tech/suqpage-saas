@@ -28,7 +28,7 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
   const unit = product ? productSellingUnit(product) : "";
   return <article className={styles.page} data-product-page>
     <div className={styles.navigation}><a href={backHref} onClick={onBack}><ArrowLeft size={18} aria-hidden="true" />Back to {catalogLabel.toLowerCase()}</a>{product ? <button type="button" onClick={copyLink}><Copy size={16} aria-hidden="true" />Copy {noun} link</button> : null}</div>
-    {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>Item unavailable</h2><p>This item is no longer listed here. Explore the business’s current offerings.</p></div> : <div className={styles.layout}>
+    {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>Item unavailable</h2><p>This item is no longer listed. Browse the shop’s other products and services.</p></div> : <div className={styles.layout}>
       <div className={styles.media}>
         <div className={styles.stage}>
           {playing && video ? <iframe src={`${video}?autoplay=1`} title={`${product.name} video`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
@@ -50,7 +50,7 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
             <button type="button" className={styles.primary} disabled={!inquiryEligible(product)} onClick={() => onInquire(options)}><MessageCircle size={18} aria-hidden="true" /><span>Inquire about this {noun} only</span></button>
           </div>
           <div>
-            <button type="button" className={styles.secondary} disabled={!inquiryEligible(product) || isAdded(options)} onClick={() => onAdd(options)}>{isAdded(options) ? <Check size={18} aria-hidden="true" /> : <ListPlus size={18} aria-hidden="true" />}<span>{isAdded(options) ? "Added to list" : "Add to inquiry list"}</span></button>
+            <button type="button" className={styles.secondary} disabled={!inquiryEligible(product) || isAdded(options)} onClick={() => onAdd(options)}>{isAdded(options) ? <Check size={18} aria-hidden="true" /> : <ListPlus size={18} aria-hidden="true" />}<span>{isAdded(options) ? "Added to inquiry list" : "Add to inquiry list"}</span></button>
           </div>
         </div>
       </div>

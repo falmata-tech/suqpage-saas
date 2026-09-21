@@ -565,7 +565,7 @@ export function BankCatalogSection({
                   {availabilityLabel(product.offeringKind, product.availability)}
                 </span>
                 <button type="button" onClick={() => context.onAddProduct(product)}>
-                  Add to inquiry
+                  Add to inquiry list
                 </button>
               </div>
             </div>

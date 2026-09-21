@@ -7,10 +7,11 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, currentUser, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { authDriver } from "@/lib/config";
-import { canMaintainBasicProducts, canManageBusiness, canOperateBusiness, hasCapability } from "@/lib/capabilities";
+import { canMaintainBasicProducts, canManageBusiness, hasCapability } from "@/lib/capabilities";
 import { runtimeBusinessById, runtimeUserByEmail } from "@/lib/catalog-runtime";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "@/lib/runtime-sql";
 import { saveUploadedImage, stageUploadedImage, type StagedImage } from "@/lib/media";
+import { updateInquiryStatus } from "@/lib/inquiry-status-runtime";
 import { isStrongPassword } from "@/lib/passwords";
 import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
 import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
@@ -19,7 +20,7 @@ import { consumeRuntimeRateLimit, resetRuntimeRateLimit } from "@/lib/rate-limit
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
 import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
 import { validateLiveSettings } from "@/lib/live-showroom";
-import { beginGoogleSignIn, signInWithSupabasePassword, updateCurrentSupabasePassword, updateLinkedSupabasePassword } from "@/lib/supabase-auth";
+import { beginGoogleSignIn } from "@/lib/supabase-auth";
 
 const text = (fd:FormData,key:string,max=500) => cleanText(fd.get(key),max);
 const int = (fd:FormData,key:string,fallback=0) => { const value=Number.parseInt(text(fd,key,30),10); return Number.isFinite(value)?value:fallback; };
@@ -40,23 +41,15 @@ async function authorizedBusinessId(requested:number) {
   return {businessId:requested,user};
 }
 
-async function authorizedOperationsBusinessId(requested:number) {
-  const user=await requireUser();
-  if(!canOperateBusiness(user,requested))throw new Error("Operations manager access required.");
-  if(!await runtimeBusinessById(requested))throw new Error("Business not found.");
-  return {businessId:requested,user};
-}
-
 export async function loginAction(formData:FormData) {
+  if(authDriver()!=="local")go("/login",{error:"Use an email code to sign in."});
   const email=text(formData,"email",160).toLowerCase();
   const password=String(formData.get("password")||"");
   const identity=await currentRequestIdentity();
   const rate=await consumeRuntimeRateLimit(`login:${identity.ipHash}:${email}`,5,15*60*1000,30*60*1000);
   if(!rate.allowed)go("/login",{error:"Too many attempts. Try again later."});
   const user=await runtimeUserByEmail(email);
-  const authenticated=user&&password.length<=200&&(authDriver()==="supabase"
-    ? (await signInWithSupabasePassword(email,password))?.userId===user.id
-    : await bcrypt.compare(password,user.password_hash));
+  const authenticated=user&&password.length<=200&&await bcrypt.compare(password,user.password_hash);
   if(!authenticated||!user){
     await audit("auth.login_failed",{detail:{email},ipHash:identity.ipHash});
     go("/login",{error:"Invalid email or password."});
@@ -78,6 +71,7 @@ export async function logoutAction(){const user=await currentUser();if(user)awai
 
 export async function changePasswordAction(formData:FormData){
   const user=await requireUser({allowTemporaryPassword:true});
+  if(authDriver()!=="local")go("/dashboard/account");
   const current=String(formData.get("currentPassword")||"");
   const password=String(formData.get("newPassword")||"");
   const confirm=String(formData.get("confirmPassword")||"");
@@ -85,9 +79,7 @@ export async function changePasswordAction(formData:FormData){
   if(password!==confirm)go("/dashboard/account",{error:"New passwords do not match."});
   const stored=await runtimeGet<{password_hash:string}>("SELECT password_hash FROM users WHERE id=?",[user.id]);
   if(!stored)go("/dashboard/account",{error:"Current password is incorrect."});
-  const currentMatches=authDriver()==="supabase"
-    ? await updateCurrentSupabasePassword(user.email,current,password)
-    : await bcrypt.compare(current,stored.password_hash);
+  const currentMatches=await bcrypt.compare(current,stored.password_hash);
   if(!currentMatches)go("/dashboard/account",{error:"Current password is incorrect."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=0,password_updated_at=CURRENT_TIMESTAMP WHERE id=?",[passwordHash,user.id]);
@@ -104,8 +96,8 @@ export async function updateBusinessAction(formData:FormData){
     const logoPath=await saveUploadedImage(formData.get("logo"),existing.logo_path,"logo");
     const favicon=await saveUploadedImage(formData.get("favicon"),existing.favicon_path,"favicon");
     const live=validateLiveSettings({isLive:formData.get("isLive"),platform:text(formData,"livePlatform",30),url:text(formData,"liveUrl",500)});
-    await runtimeRun(`UPDATE businesses SET name=?,logo_path=?,contact_email=?,whatsapp=?,telegram=?,tiktok=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=?,content_version=content_version+1 WHERE id=?`,[
-      text(formData,"name",100),logoPath,text(formData,"contactEmail",160),text(formData,"whatsapp",40).replace(/\D/g,""),text(formData,"telegram",80).replace(/^@/,""),text(formData,"tiktok",80).replace(/^@/,""),live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
+    await runtimeRun(`UPDATE businesses SET name=?,logo_path=?,contact_email=?,is_live=?,live_platform=?,live_url=?,site_title=?,site_description=?,favicon_path=?,content_version=content_version+1 WHERE id=?`,[
+      text(formData,"name",100),logoPath,text(formData,"contactEmail",160),live.isLive?1:0,live.platform,live.url,text(formData,"siteTitle",120),text(formData,"siteDescription",240),favicon,businessId
     ]);
     await audit("business.updated",{userId:user.id,businessId});
   }catch(error){go("/dashboard/settings",{business:businessId,error:error instanceof Error?error.message:"Could not save settings."});}
@@ -128,10 +120,10 @@ export async function adminUpdateBusinessAction(formData:FormData){
 
 export async function adminResetClientPasswordAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
+  if(authDriver()!=="local")go("/dashboard/settings",{business:int(formData,"businessId"),accessError:"Owners sign in with an email code. Password resets are unavailable."});
   const userId=int(formData,"userId"),businessId=int(formData,"businessId"),password=String(formData.get("temporaryPassword")||"");
   const target=await runtimeGet<{id:number;business_id:number|null}>("SELECT u.id,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='client'",[userId]);
   if(!target||target.business_id!==businessId||!isStrongPassword(password))go("/dashboard/settings",{business:businessId,accessError:"Choose the authorized owner and use a 12+ character password with upper-case, lower-case, and a number."});
-  if(authDriver()==="supabase"&&!await updateLinkedSupabasePassword(userId,password))go("/dashboard/settings",{business:businessId,accessError:"The managed identity provider could not update this password."});
   const passwordHash=await bcrypt.hash(password,12);
   await runtimeRun("UPDATE users SET password_hash=?,must_change_password=1 WHERE id=?",[passwordHash,userId]);
   await revokeAllUserSessions(userId);await audit("admin.client_password_reset",{userId:user.id,businessId:target.business_id,detail:{targetUserId:userId}});
@@ -237,4 +229,12 @@ export async function basicProductUpkeepAction(formData:FormData){
   go(`/dashboard/products/${result.productId}`,{business:businessId,saved:1,version:result.contentVersion});
 }
 
-export async function updateInquiryStatusAction(formData:FormData){const {businessId,user}=await authorizedOperationsBusinessId(int(formData,"businessId"));const status=text(formData,"status",20);if(!new Set(["new","contacted","confirmed","closed","cancelled"]).has(status))throw new Error("Invalid inquiry status.");await runtimeRun("UPDATE inquiries SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND business_id=?",[status,int(formData,"inquiryId"),businessId]);await audit("inquiry.status_updated",{userId:user.id,businessId,detail:{status}});revalidatePath("/dashboard/inquiries");go("/dashboard/inquiries",{business:businessId,saved:1,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined});}
+export async function updateInquiryStatusAction(formData:FormData){
+  const user=await requireUser();
+  const businessId=int(formData,"businessId");
+  const params={business:businessId,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined};
+  try { await updateInquiryStatus(user,{businessId,inquiryId:int(formData,"inquiryId"),status:text(formData,"status",20)}); }
+  catch { go("/dashboard/inquiries",{...params,error:"The inquiry could not be updated. Refresh and try again."}); }
+  revalidatePath("/dashboard/inquiries");revalidatePath("/dashboard");
+  go("/dashboard/inquiries",{...params,saved:1});
+}

@@ -49,14 +49,14 @@ assert.match(discovery, /label: "Products & services"/);
 assert.match(discovery, /label: "Businesses"/);
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 
-assert.match(about, /Your business deserves to be found/);
-assert.match(about, /home business to an established company/);
-assert.match(about, /each business a page/);
-assert.match(about, /Starting in Ethiopia/);
+assert.match(about, /Local businesses\. Easier to find/);
+assert.match(about, /grow, make, sell or provide a service/);
+assert.match(about, /gives your business a page/);
+assert.match(about, /starting in Ethiopia/i);
 assert.match(about, /African businesses|businesses across Africa/);
-assert.match(about, /Growers, makers, traders and service providers/);
+assert.match(about, /photos, videos, products, services and contact details/);
 assert.match(about, /Daily Featured/);
-for (const action of ["Find your own way", "Show what makes you different", "Start a conversation", "Make your business easier to find"]) {
+for (const action of ["Find a business", "See what they offer", "Ask the business", "Make your business easier to find"]) {
   assert.match(about, new RegExp(action));
 }
 assert.doesNotMatch(about, /transport arrangements|report a concern|commercial terms|specifications, quantities/i, "About remains a vision story instead of a support or transaction policy");

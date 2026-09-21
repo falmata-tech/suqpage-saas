@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { catalogOfferingLabel } from "@/lib/offerings";
 import { productHref } from "@/lib/product-inquiry";
 
-import { ArrowUpRight, Globe, Mail, MessageCircle, Music2, PackageOpen, Phone, Play, ListPlus, Search, ClipboardList, X, Camera, Send } from "lucide-react";
+import { ArrowUpRight, Globe, Mail, MessageCircle, Music2, PackageOpen, Phone, Play, ListPlus, Search, ClipboardList, X, Camera, Send, Check } from "lucide-react";
 import { useId, useState } from "react";
 import type { ShopPageContent } from "@/lib/owner-page-domain";
 import { formatEtbPrice } from "@/lib/offering-presentation";
@@ -65,8 +65,8 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
     </section>
     <nav className={styles.navigation} aria-label="Business profile sections">
       <a href={`#${productsId}`} aria-current="location" onClick={p.productDetail ? e => { e.preventDefault(); p.onBackToProducts?.(); } : undefined}>{catalogLabel} <span>{p.catalog.products.filter((product) => product.is_published).length}</span></a>
-      {p.cartCount > 0 ? <button type="button" className={styles.cart} onClick={p.openCart} aria-label={`Inquiry cart, ${p.cartCount} ${p.cartCount === 1 ? "item" : "items"}`}>
-        <ClipboardList size={18} aria-hidden="true" /><span>{p.cartCount > 1 ? "Review list" : "Review item"}</span><span className={styles.count} aria-hidden="true">{p.cartCount}</span>
+      {p.cartCount > 0 ? <button type="button" className={styles.cart} onClick={p.openCart} aria-label={`View inquiry list, ${p.cartCount} ${p.cartCount === 1 ? "item" : "items"}`}>
+        <ClipboardList size={18} aria-hidden="true" /><span>View inquiry list</span><span className={styles.count} aria-hidden="true">{p.cartCount}</span>
       </button> : null}
     </nav>
     <section id={productsId} className={styles.productsSection} aria-label={catalogLabel}>
@@ -96,8 +96,8 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
             {product.availability !== "available" ? <span className={styles.availability}>{({ limited: "Limited availability", unavailable: "Unavailable", coming_soon: "Coming soon" })[product.availability]}</span> : null}
             <div className={styles.productActions}>
               <span className={styles.price}>{product.price_minor !== null ? formatEtbPrice(product.price_minor) : "Ask for price"}</span>
-              <button type="button" className={styles.add} aria-label={`Add ${product.name} to inquiry list`} title="Add to your list and inquire about several items together"
-                disabled={product.availability === "unavailable" || product.availability === "coming_soon" || p.selectedIds?.includes(product.id)} onClick={() => p.addProduct(product)}><ListPlus size={16} aria-hidden="true" /><span>{p.selectedIds?.includes(product.id) ? "Added to list" : "Add to list"}</span></button>
+              <button type="button" className={styles.add} aria-label={`${p.selectedIds?.includes(product.id) ? "Added to inquiry list" : "Add to inquiry list"}: ${product.name}`} title="Add to inquiry list"
+                disabled={product.availability === "unavailable" || product.availability === "coming_soon" || p.selectedIds?.includes(product.id)} onClick={() => p.addProduct(product)}>{p.selectedIds?.includes(product.id) ? <Check size={16} aria-hidden="true" /> : <ListPlus size={16} aria-hidden="true" />}<span>{p.selectedIds?.includes(product.id) ? "Added to inquiry list" : "Add to inquiry list"}</span></button>
             </div>
           </div>
         </article>)}

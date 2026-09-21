@@ -1,3 +1,4 @@
+import CategoryIllustration from "@/components/CategoryIllustration";
 import { redirect } from "next/navigation";
 import { CalendarClock } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
@@ -79,7 +80,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
           <button className="small-btn" type="submit">Open date</button>
         </form>
         <div><small>Assigned day</small><strong>{assignment.dayLabel}</strong></div>
-        <div><small>Industry</small><strong>{assignment.industry.label}</strong></div>
+        <div><small>Category</small><strong>{assignment.industry.label}</strong></div>
         <div><small>Current mode</small><strong>{effectiveMode === "manual" ? "Manual lineup" : "Automatic"}</strong></div>
         <div><small>Participants</small><strong>{effectiveIds.length}</strong></div>
         <div><small>Sponsor placements</small><strong>{sponsorPlacements.length}</strong></div>
@@ -104,7 +105,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
 
       <section className="panel featured-lineup-panel">
         <div className="featured-lineup-heading">
-          <div><span className="eyebrow">{requestedDate}</span><h2>{assignment.industry.label}</h2><p>Automatic schedules the first {MAX_FEATURED_SHOWROOMS} eligible pages in name order. Manual lets you choose and reorder up to {MAX_FEATURED_SHOWROOMS} for this date.</p></div>
+          <div><span className="eyebrow">{requestedDate}</span><h2><CategoryIllustration name={assignment.industry.key} size={36}/>{assignment.industry.label}</h2><p>Automatic schedules the first {MAX_FEATURED_SHOWROOMS} eligible pages in name order. Manual lets you choose and reorder up to {MAX_FEATURED_SHOWROOMS} for this date.</p></div>
           <span className="badge active">{effectiveIds.length} scheduled</span>
         </div>
         <form action={saveFeaturedProgramDayAction}>
@@ -121,13 +122,13 @@ export default async function FeaturedSchedulePage({ searchParams }: {
               selected: effectiveOrder.has(business.id),
               position: effectiveOrder.get(business.id) || Math.min(index + 1, MAX_FEATURED_SHOWROOMS),
             }))}
-          /> : <div className="empty-state">No eligible page has approved discovery details, an image, and a published offering for this industry.</div>}
+          /> : <div className="empty-state">No businesses in this category are ready to feature yet.</div>}
           <div className="featured-lineup-actions"><p>Eligibility is checked again when you save and whenever the public schedule is read.</p><button className="btn" type="submit" disabled={!eligible.length}>Save lineup</button></div>
         </form>
       </section>
 
       <section className="panel featured-agenda-preview">
-        <div className="featured-lineup-heading"><div><span className="eyebrow">Generated preview</span><h2>Broadcast agenda</h2><p>Smaller lineups contract toward midday and late evening. Times expand toward full capacity as participation grows.</p></div></div>
+        <div className="featured-lineup-heading"><div><span className="eyebrow">Generated preview</span><h2>Broadcast agenda</h2><p>Times adjust to the number of businesses featured.</p></div></div>
         <ol tabIndex={0} aria-label="Generated Daily Featured broadcast agenda">
           {agenda.map((entry, index) => <li className={`agenda-${entry.kind}`} key={`${entry.kind}-${entry.start}-${index}`}>
             <time>{entry.kind === "booth" ? entry.label : entry.timeLabel}</time>

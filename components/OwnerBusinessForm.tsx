@@ -2,7 +2,7 @@
 import PlaceSearch from './PlaceSearch';
 import type { KnownPlace } from '@/lib/place-search';
 import { useState } from 'react';
-import { BUSINESS_CATEGORY_OPTIONS } from '@/lib/business-categories';
+import CategorySelect from './CategorySelect';
 import type { readOwnerBusiness } from '@/lib/owner-business-runtime';
 type Setup = Awaited<ReturnType<typeof readOwnerBusiness>>;
 export default function OwnerBusinessForm({setup,action}:{setup:Setup;action:(form:FormData)=>Promise<void>}){
@@ -20,7 +20,7 @@ export default function OwnerBusinessForm({setup,action}:{setup:Setup;action:(fo
   {setup.business.logo_path?<label className="field full check-field"><input type="checkbox" name="removeLogo"/>Remove logo</label>:null}
   <div className="field full"><h2>Where buyers can find you</h2><p>Choose a general area or a public storefront.</p></div>
   {!setup.existing && setup.proposal ? <p className="field full hint">Example location: choose your city before publishing.</p> : null}
-  <div className="field full"><label htmlFor="owner-category">Business category</label><select id="owner-category" name="category" defaultValue={setup.category}><option value="">Choose a category</option>{BUSINESS_CATEGORY_OPTIONS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select></div>
+  <div className="field full"><label htmlFor="owner-category">Business category</label><CategorySelect id="owner-category" name="category" defaultValue={setup.category}/></div>
   <div className="field"><label htmlFor="owner-city">City or town</label><PlaceSearch value={city} selected={place} onChange={value=>{setCity(value);setPlace(null);}} onSelect={value=>{setPlace(value);setCity(value.name);setRegion(value.region);}}/></div>
   <div className="field"><label htmlFor="owner-region">Region</label><input id="owner-region" name="region" maxLength={100} value={region} readOnly={Boolean(place)} onChange={event=>setRegion(event.target.value)}/></div>
   <div className="field full"><label htmlFor="owner-location-mode">Public location</label><select id="owner-location-mode" name="mode" value={mode} onChange={e=>setMode(e.target.value as 'area'|'storefront')}><option value="area">General area</option><option value="storefront">Public storefront</option></select></div>

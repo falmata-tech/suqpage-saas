@@ -77,3 +77,39 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S24 — readable categories and app language
+
+GIVEN category controls on Market, Featured, setup/admin or About WHEN displayed
+THEN show text alongside recognizable product-object illustrations (phone, soap,
+wheat, food, tools, furniture, clothing; shop for other/all). Use one shared local
+illustration component with a safe fallback, no external images or new dependency.
+The Market chooser expands only on request, keeps All categories available, and
+uses keyboard-accessible buttons with visible selected state. Other forms retain
+native selection semantics and show the chosen illustration; visible names stay
+consistent. Existing keys, saved classifications and backend filters do not change.
+
+GIVEN public/owner/admin platform copy WHEN naming actions or describing Suqpage
+THEN use short, everyday English without implementation terms or repeated filler.
+About explains finding African businesses (starting in Ethiopia), viewing products
+or services, and contacting the business; it offers working category links.
+Preserve legal meaning, privacy guidance and merchant-authored content.
+
+Tests: shared-icon/fallback rendering and label contracts; browser category
+selection and all reset, Featured/About links, product single/list separation,
+keyboard/Escape and 1440/390/320 overflow/screenshots. Full release gates await
+visual approval. Rollback is presentation code only; no data changes.
+
+Local evidence: `test:narrative` (including rendered artwork/fallback checks),
+`test:homepage`, typecheck and spec validation pass. Category/drawer browser checks
+pass at 1440/390/320 with selection, all reset, keyboard/Escape, working About links,
+accessibility and no overflow. Captures: `.local/category-language-review/`.
+Visual approval, full gates and deployment remain pending.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

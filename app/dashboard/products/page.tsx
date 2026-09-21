@@ -31,7 +31,7 @@ export default async function ProductsPage({
         <nav aria-label="Breadcrumb">
           <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
           <span aria-hidden="true">/</span>
-          <span>My offerings</span>
+          <span>Products & services</span>
         </nav>
       </div>
       <div className="dashboard-head">
@@ -46,7 +46,7 @@ export default async function ProductsPage({
         </Link>
       </div>
       {query.saved ? (
-        <p className="notice">Offering saved.</p>
+        <p className="notice">Item saved.</p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}
       <CollectionToolbar
@@ -66,8 +66,8 @@ export default async function ProductsPage({
         </>
       ) : (
         <section className="empty-state">
-          <h2>{query.q ? "No matching offerings" : "No offerings yet"}</h2>
-          <p>{query.q ? "Try a broader search." : "Add the first product or service to your page."}</p>
+          <h2>{query.q ? "No matching items" : "No products or services yet"}</h2>
+          <p>{query.q ? "Try another name or category." : "Add the first product or service to your page."}</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}

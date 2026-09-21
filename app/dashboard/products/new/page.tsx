@@ -29,7 +29,7 @@ export default async function NewProduct({
             Products & services
           </Link>
           <span aria-hidden="true">/</span>
-          <span>Add offering</span>
+          <span>Add product or service</span>
         </nav>
       </div>
       <div className="dashboard-head standard-page-heading">

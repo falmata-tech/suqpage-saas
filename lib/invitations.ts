@@ -10,7 +10,7 @@ import {
 } from "./showroom-manifests";
 import type { ClientInvitation } from "./types";
 import { authDriver } from "./config";
-import { finalizeSupabaseIdentity, provisionSupabasePasswordIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
+import { finalizeSupabaseIdentity, provisionSupabaseEmailIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
 
 export const INVITATION_LIFETIME_MS = 72 * 60 * 60 * 1000;
 
@@ -87,16 +87,17 @@ export async function redeemClientInvitation(raw: { token:string; name:string; p
   if (!/^[A-Za-z0-9_-]{40,100}$/.test(token)) throw new InvitationError("This invitation is not valid.");
   const name = clean(raw.name, 100);
   if (!name) throw new InvitationError("Enter your name.");
-  if (!isStrongPassword(raw.password)) throw new InvitationError("Use at least 12 characters with upper-case, lower-case, and a number.");
+  const managed = authDriver() === "supabase";
+  if (!managed && !isStrongPassword(raw.password)) throw new InvitationError("Use at least 12 characters with upper-case, lower-case, and a number.");
   const tokenHash = hashInvitationToken(token);
   const activeInvitation = await getActiveInvitation(token, now);
   if (!activeInvitation) {
     throw new InvitationError("This invitation is invalid, expired, or already used.");
   }
-  const passwordHash = await bcrypt.hash(raw.password, 12);
+  const passwordHash = managed ? "!supabase-managed-identity" : await bcrypt.hash(raw.password, 12);
   let providerUserId = "";
-  if (authDriver() === "supabase") {
-    try { providerUserId = await provisionSupabasePasswordIdentity({ email:activeInvitation.email, password:raw.password, name }); }
+  if (managed) {
+    try { providerUserId = await provisionSupabaseEmailIdentity({ email:activeInvitation.email, name }); }
     catch { throw new InvitationError("Account access is temporarily unavailable. Try again."); }
   }
   try {

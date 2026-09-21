@@ -10,7 +10,7 @@ import { listInquiriesPage } from "@/lib/scalable-queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string;page?:string;q?:string;status?:string}> }) {
+export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string;error?:string;page?:string;q?:string;status?:string}> }) {
   const user = await requireUser();
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
@@ -19,12 +19,13 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   const client = isClient(user);
   const inquiries = await listInquiriesPage(business.id, query);
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>Customer inquiries</h1><p>{client ? "Review inquiries sent from your Suqpage page." : "Review customer contacts and requested offerings."}</p></div></div>
-    {query.saved ? <p className="notice">Inquiry status updated.</p> : null}
+    <div className="dashboard-head"><div><h1>Customer inquiries</h1><p>{client ? "Review inquiries sent from your Suqpage page." : "See what customers asked about and how to reach them."}</p></div></div>
+    {query.error ? <p className="error" role="alert">{query.error}</p> : null}
+    {!query.error && query.saved ? <p className="notice">Inquiry status updated.</p> : null}
     <CollectionToolbar
       action="/dashboard/inquiries"
       search={query.q || ""}
-      placeholder="Customer, contact, or offering"
+      placeholder="Customer, contact, product or service"
       hidden={{ business: business.id }}
       activeFilters={Boolean(query.q || query.status)}
     >
@@ -37,7 +38,7 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
         </div>
         <div className="record-items">{inquiry.items.map((item) => {
           const quantityIntent = item.quantity_intent || (item.quantity === null ? "" : String(item.quantity));
-          return <div key={item.id}><strong>{item.product_name_snapshot}</strong><div>Desired quantity: {quantityIntent || "Open for discussion"}</div>{item.options_json !== "{}" ? <div>{Object.entries(JSON.parse(item.options_json)).map(([key,value]) => `${key}: ${value}`).join(" · ")}</div> : null}</div>;
+          return <div key={item.id}><strong>{item.product_name_snapshot}</strong><div>Quantity: {quantityIntent || "Open for discussion"}</div>{item.options_json !== "{}" ? <div>{Object.entries(JSON.parse(item.options_json)).map(([key,value]) => `${key}: ${value}`).join(" · ")}</div> : null}</div>;
         })}</div>
         {inquiry.note ? <p className="hint">{inquiry.note}</p> : null}
       </section>;

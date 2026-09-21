@@ -384,10 +384,7 @@ export async function listStaffPage(input: PageInput & { role?: unknown }) {
         SELECT COUNT(*) FROM staff_business_assignments a
         WHERE a.user_id=u.id AND a.active=1
       ) active_assignments,
-      (
-        SELECT COUNT(*) FROM owner_page_reviews r JOIN staff_business_assignments a ON a.business_id=r.business_id
-        WHERE a.user_id=u.id AND a.active=1 AND r.status='pending'
-      ) pending_pages
+      0::bigint pending_pages
      ${from}
      ORDER BY p.access_role,lower(u.name),u.id
      LIMIT ? OFFSET ?`,

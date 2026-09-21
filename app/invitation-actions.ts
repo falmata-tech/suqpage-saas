@@ -7,7 +7,6 @@ import { appUrl } from "@/lib/app-url";
 import { hasCapability } from "@/lib/capabilities";
 import { createClientInvitation, InvitationError, redeemClientInvitation } from "@/lib/invitations";
 import { audit, cleanText } from "@/lib/security";
-import { signInWithSupabasePassword } from "@/lib/supabase-auth";
 
 export type InvitationActionState = { error?:string; invitationUrl?:string };
 
@@ -36,15 +35,13 @@ export async function redeemInvitationAction(formData: FormData) {
   const password = String(formData.get("password") || "");
   const confirm = String(formData.get("confirmPassword") || "");
   const path = `/invite/${encodeURIComponent(token)}`;
-  if (password !== confirm) redirect(`${path}?error=mismatch`);
+  if (authDriver() === "local" && password !== confirm) redirect(`${path}?error=mismatch`);
   try {
     const redeemed = await redeemClientInvitation({ token, name:cleanText(formData.get("name"), 100), password });
-    if(authDriver()==="supabase"){
-      if(!(await signInWithSupabasePassword(redeemed.email,password)))throw new InvitationError("Account access is temporarily unavailable. Try again.");
-    }else await setSession(redeemed.userId);
+    if(authDriver()==="local") await setSession(redeemed.userId);
     await audit("client_invitation.accepted", { userId:redeemed.userId, businessId:redeemed.businessId, detail:redeemed.requestId === null ? {} : { requestId:redeemed.requestId } });
   } catch (error) {
     redirect(`${path}?error=${error instanceof InvitationError ? error.code : "invalid"}`);
   }
-  redirect("/dashboard");
+  redirect(authDriver() === "supabase" ? "/login" : "/dashboard");
 }

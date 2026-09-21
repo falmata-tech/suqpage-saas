@@ -85,7 +85,7 @@ test('linked products, inquiry selection and progressive reply contact',async({p
     const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
     await expect(page.getByLabel('Reply phone number',{exact:true})).toHaveCount(0);
     await expect(dialog.getByRole('button',{name:'Copy inquiry',exact:true})).toBeVisible();
-    await dialog.getByRole('button',{name:'Send on Suqpage',exact:true}).click();
+    await dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true}).click();
     await expect(page.getByLabel('Reply phone number',{exact:true})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);

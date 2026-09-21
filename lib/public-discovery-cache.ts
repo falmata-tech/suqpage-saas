@@ -14,7 +14,7 @@ const PUBLIC_DISCOVERY_REVALIDATE_SECONDS = 20;
 
 const cachedMarketplace = unstable_cache(
   async (industry: string, place: string, page: string, type: string): Promise<MarketplaceDiscoveryView> => getMarketplaceDiscoveryView({ industry, place, page, type }),
-  ["public-marketplace-v4-paginated-results", String(ownerPageEditorEnabled())],
+  ["public-marketplace-v5-default-all", String(ownerPageEditorEnabled())],
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-marketplace"] },
 );
 

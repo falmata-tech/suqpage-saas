@@ -120,3 +120,48 @@ corrected verifier uses permission inspection plus the real runtime connection.
 Live 1440/390/320 browser checks also pass for `lotoin`, `lotiom` and
 `body loton`, including visible results, type tabs, no extra match sections,
 no browser errors and no horizontal overflow.
+
+S22 local candidate (FE-042 / BE-040): `test-discovery-pagination.ts` passes six
+scenarios including omitted/invalid default-all equivalence. `test-discovery.ts`,
+`test-homepage-composition.mjs`, typecheck and spec validation pass.
+`capture-search-drawer.mjs` passes at 1440/390/320: retained category/place/query/page,
+map node and zoom preservation, default map-only state, optional overlay, keyboard
+focus/Escape, business previews, deep links, reduced motion and no overflow.
+Visual approval, full/release gates and publication remain pending; S21 remains live.
+
+## S23 — workflow wiring audit, local evidence 2026-09-21
+
+FE-038/BE-031 and FE-048/BE-041: managed account/recovery paths, canonical public
+contact editing, truthful inquiry updates and staff/suspension guidance corrected.
+`test:wiring-audit`, security/Auth, self-service, launch wiring, invitations,
+support, featured schedule, account health, scalable queries, product inquiries,
+typecheck, spec validation and database boundaries pass. Dedicated browser audit
+verifies actual local provider staff/invitation entry, admin settings, owner inbox,
+stale inquiry failure and nine admin routes at desktop/390/320. Evidence and mocks:
+`docs/SUQPAGE-WORKFLOW-WIRING-AUDIT-2026-09-21.md`. Visual approval, full/release/build,
+commit and deployment pending; S22 drawer approval remains separate and pending.
+
+## S24 — plain language and category illustrations, local evidence 2026-09-21
+
+FE-041/FE-044: shared Add/Added/View inquiry-list labels, shorter public/workspace
+copy, object illustrations across category surfaces and linked About categories.
+`test:narrative` includes actual SVG rendering, distinct artwork, unknown-category
+fallback and decorative accessibility; homepage, product inquiries, service
+offerings, discovery pagination, typecheck and spec validation pass.
+`capture-category-language.mjs`, `capture-search-drawer.mjs` and
+`capture-inquiry-clarity.mjs` pass at 1440/390/320: category/all selection, keyboard,
+Escape/focus, working links, accessibility, map retention, single/group separation
+and no horizontal overflow. Screenshots under `.local/category-language-review/`
+and `.local/inquiry-clarity-review/`. Native form names are preserved and typechecked.
+No new schema, provider or dependency. Visual approval, full gates, commit and
+deployment remain pending; production remains the S21 release.
+
+## S22–S24 approved release gates
+
+Owner visual approval and deployment authorization received 2026-09-21.
+Full check, release/build/dependency audit, operations, nine isolated provider
+browser scenarios and final artifact privacy pass. The two old source-layout
+assertions now verify the labelled drawer and shared category control.
+S22–S24 pending-review/gate notes above are superseded; publication evidence:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`. FE-038/BE-031 and earlier admission
+limits retain their separate unverified real-email/hosted-session scope.

@@ -235,7 +235,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
     setCart(current => current.length >= MAX_INQUIRY_SELECTIONS || current.some(line => selectionKey(line.product.id, line.options) === key)
       ? current : [...current, { product, quantity: "", options: validOptions }]);
     if (!businessProfile) setSelected(null);
-    show(cart.length ? `Added to list. Review your ${cart.length + 1} items when you’re ready to send one inquiry.` : "Added to list. Keep browsing, then review your selection to send an inquiry.");
+    show("Added to inquiry list.");
   };
   const inquireNow = (product: Product, options: Record<string, string>) => {
     const validOptions = selectionOptions(product, options);
@@ -501,7 +501,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
                   disabled={!["available", "limited"].includes(selected.availability)}
                   onClick={() => add(selected, selections)}
                 >
-                  Add to inquiry
+                  Add to inquiry list
                 </button>
               </div>
             </div>
@@ -706,7 +706,7 @@ function InquiryDrawer({
   const item = (line: CartLine, index: number, grouped: boolean) => <div className={inquiryStyles.summary}>
     {line.product.image_path ? <img src={line.product.image_path} alt="" /> : <span className={inquiryStyles.thumb}><PackageOpen size={24} aria-hidden="true" /></span>}
     <div className={inquiryStyles.itemCopy}><h3>{line.product.name}</h3><p>{Object.entries(line.options).filter(([name]) => (line.product.option_groups?.find(group => group.name === name)?.values.length || 0) > 1).map(([name, value]) => `${name}: ${value}`).join(" · ")}</p>
-      <details className={inquiryStyles.quantity}><summary>{line.quantity ? `${line.product.offering_kind === "service" ? "Request" : "Quantity"}: ${line.quantity}` : line.product.offering_kind === "service" ? "Add scope or duration (optional)" : "Add quantity (optional)"}</summary><label>{line.product.offering_kind === "service" ? "Scope or duration" : "Desired quantity"}<input type="text" value={line.quantity} maxLength={80} placeholder={line.product.offering_kind === "service" ? "e.g. one session or a two-hour visit" : "e.g. 2 pieces or 5 kg"} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
+      <details className={inquiryStyles.quantity}><summary>{line.quantity ? `${line.product.offering_kind === "service" ? "Request" : "Quantity"}: ${line.quantity}` : line.product.offering_kind === "service" ? "Add hours or details (optional)" : "Add quantity (optional)"}</summary><label>{line.product.offering_kind === "service" ? "Hours or details" : "Quantity"}<input type="text" value={line.quantity} maxLength={80} placeholder={line.product.offering_kind === "service" ? "e.g. one session or a two-hour visit" : "e.g. 2 pieces or 5 kg"} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
     </div>
     {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={`Remove ${line.product.name} from inquiry`}><X size={18} aria-hidden="true" /></button> : null}
   </div>;
@@ -715,11 +715,11 @@ function InquiryDrawer({
     <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label="Business inquiry" tabIndex={-1}>
       <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? `Inquire about ${cart.length} items` : `Inquire about this ${cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item"}`}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label="Close inquiry" onClick={close}><X size={20} aria-hidden="true" /></button></header>
       <div className={inquiryStyles.scroll}>
-        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>Choose a product or service to start an inquiry.</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>Browse offerings</button></div> : <>
+        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>Choose a product or service to start an inquiry.</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>Browse products & services</button></div> : <>
           {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label="Inquiry items">{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
           {previewOnly ? <p className={inquiryStyles.note}>Preview only. No inquiry will be sent.</p> : platformStep ? <form className={inquiryStyles.platform} onSubmit={sendInquiry}>
             <button className={inquiryStyles.back} type="button" disabled={busy} onClick={() => { setPlatformStep(false); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>("[data-platform-send]")?.focus()); }}><ArrowLeft size={16} aria-hidden="true" />Back to sending options</button>
-            <h3>Send on Suqpage</h3>
+            <h3>Send inquiry on Suqpage</h3>
             <label>Reply phone number<input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e => updatePhone(e.target.value)} placeholder="+251…" maxLength={40} required disabled={busy || sendState === "sent"} aria-invalid={sendState === "error"} aria-describedby="inquiry-send-status" /></label>
             <button type="submit" className={inquiryStyles.platformButton} disabled={busy || sendState === "sent"}>{sendState === "sent" ? <Check size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}{busy ? "Sending…" : sendState === "sent" ? "Inquiry sent" : "Send inquiry"}</button>
             <p id="inquiry-send-status" className={sendState === "sent" ? inquiryStyles.success : inquiryStyles.error} role={sendState === "error" ? "alert" : "status"}>{sendState === "sent" ? `Sent to ${catalog.business.name}. They can reply using your phone number.` : sendError}</p>
@@ -728,8 +728,8 @@ function InquiryDrawer({
             <div className={inquiryStyles.channels}>{handoffs.map(link => <a key={link.kind} href={link.href} target={link.kind === "sms" ? undefined : "_blank"} rel={link.kind === "sms" ? undefined : "noopener noreferrer"} onClick={() => setPreparedMessage(message)}>{link.kind === "sms" ? <Smartphone size={18} aria-hidden="true" /> : link.kind === "telegram" ? <Send size={18} aria-hidden="true" /> : <MessageCircle size={18} aria-hidden="true" />}{link.label}{link.kind !== "sms" ? <span className="sr-only"> (new tab)</span> : null}</a>)}
               <button type="button" onClick={copyInquiry}><Copy size={18} aria-hidden="true" />{copyState === "copied" ? "Copied" : "Copy inquiry"}</button>
             </div>
-            <button type="button" className={inquiryStyles.platformButton} data-platform-send onClick={() => setPlatformStep(true)}><Send size={18} aria-hidden="true" />Send on Suqpage</button>
-            <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{copyState === "manual" ? "Select and copy your message" : "Preview inquiry message"}</summary><textarea aria-label="Inquiry message" readOnly value={message} onFocus={e => e.target.select()} /></details>
+            <button type="button" className={inquiryStyles.platformButton} data-platform-send onClick={() => setPlatformStep(true)}><Send size={18} aria-hidden="true" />Send inquiry on Suqpage</button>
+            <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{copyState === "manual" ? "Select and copy your message" : "View inquiry message"}</summary><textarea aria-label="Inquiry message" readOnly value={message} onFocus={e => e.target.select()} /></details>
           </div>}
           {cart.length > 1 ? <button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>Clear inquiry list</button> : null}
         </>}

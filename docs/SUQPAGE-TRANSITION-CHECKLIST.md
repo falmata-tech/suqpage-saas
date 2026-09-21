@@ -1085,3 +1085,95 @@ S21 complete: hosted desktop/390/320 typo-search checks passed. Local developmen
 remains on 127.0.0.1:3102 with schema 48. Existing untracked deno.lock is preserved;
 no Git push was performed. No further search rollout steps remain. The documented
 external-email delivery limitations belong to the earlier release admission work.
+
+## S22 — optional map-overlay search drawer
+
+Feature L2; FE-042 / BE-040 / DEP-037. User requests sliding search/results/filters
+and All categories by default. No material open choices. Master sections 5/10/22
+contain affected presentation/default statements; prior deployment approval covered
+S21, and the new visual states require the repository's focused review step.
+
+- [x] Inspect existing map/search/session/CSS and define acceptance criteria.
+- [x] Default all categories; replace chooser/fixed layout/filter sheet
+  with a toggleable drawer, retaining map and query state.
+- [x] Focused database/type/homepage/discovery tests and desktop/390/320 captures pass.
+- [x] Owner approved the combined local visuals on 2026-09-21 (AGENTS.md §8).
+- [ ] Run applicable full/release gates, commit task paths and publish if authorized.
+
+Existing untracked deno.lock is outside this task. No migration or hosted settings
+change is needed. Rollback is the previous presentation/default code.
+
+Review URL: http://127.0.0.1:3102. Focused captures: `.local/search-drawer-review/`
+map/search at 1440, 390 and 320 pixels. The new dedicated browser suite passes;
+full/release/deployment gates and task commit await the visual review.
+
+## S23 — workflow wiring audit (2026-09-21)
+
+Defect/security L2; FE-038/BE-031 and FE-048/BE-041. Audit public, owner and
+admin controls against real commands, persistence, permissions and feedback.
+S22 remains locally tested, awaiting visual review; it is not replaced or approved
+by this audit. Master sections 11/13/16 are affected. Definition of Ready:
+confirmed defects below, no new permissions/providers/schema, isolated fixtures,
+negative tests, focused desktop/phone review, rollback by reverting task code.
+
+- [x] Trace navigation, Auth, publishing, contacts, offerings, inquiries, support,
+  insights, featured schedules, sponsors and retired routes.
+- [x] Fix managed-password recovery, shadowed admin contact fields,
+  no-op inquiry success and inaccurate staff/suspended publication guidance;
+  also fix managed staff/invitation password setup and obsolete review counts.
+- [x] Verify positive/negative persistence, role/privacy behavior and focused UI.
+- [x] Record audit evidence and remaining provider/rollout limits in
+  `docs/SUQPAGE-WORKFLOW-WIRING-AUDIT-2026-09-21.md`.
+- [x] Owner visual approval and applicable full/release gates pass; commit/publication tracked below.
+
+No real messages, hosted changes, or existing customer-data mutations are needed.
+Preserve the pre-existing S22 changes and user-owned deno.lock.
+
+## S24 — plain language and recognizable categories
+
+UI/copy feature L1, FE-041/FE-044, existing BE-001/BE-037 contracts unchanged.
+S22/S23 remain pending review; this request adds clearer language and category
+presentation, not new search eligibility or inquiry behavior. Master 5/8/18/19
+are affected. Ready: exact terminology, physical-object category illustrations,
+accessible text labels, local assets, mobile tests and no backend changes.
+
+- [x] Inspect current product/composer, category definitions, Featured, About,
+  owner/admin language and prior task boundaries.
+- [x] Apply consistent inquiry-list labels, shorten public/workspace copy,
+  and share recognizable category illustrations across category surfaces.
+- [x] Verify single/group actions, category filtering, keyboard use, long labels,
+  desktop/390/320 layouts; record focused evidence and review URLs.
+- [x] Owner visual approval and full gates pass; commit/publication with S22/S23 tracked below.
+
+Use existing category keys and preserve tenant-authored names/descriptions, prices,
+options, permissions, links and data. No image provider, new package or photo fetch.
+
+Local evidence: typecheck, spec validation, narrative/artwork/fallback, homepage,
+product-inquiry, service-offerings and discovery-pagination tests pass. Focused
+category, drawer and inquiry browser checks pass at 1440/390/320, including
+keyboard/Escape, category/all reset, About links, accessibility, preserved map,
+single/group separation and no horizontal overflow. Captures:
+`.local/category-language-review/`, `.local/inquiry-clarity-review/` and
+`.local/search-drawer-review/`. Product 320, category 390, Featured 390 and About
+390 images inspected locally. Native owner/admin selects preserve field names;
+their category picture integration is typechecked, not a new hosted workflow test.
+Review at http://127.0.0.1:3102/?view=search, /featured and /about.
+No S22–S24 commit, full release gate or publication is claimed.
+
+## S22–S24 — approved release (2026-09-21)
+
+The owner reviewed the local candidate and explicitly said “ok looks good deploy”.
+This approves the combined visual candidate and publication. Operations L4,
+DEP_BASE / DEP-037; existing schema 48, Auth configuration and tenant data remain.
+
+- [x] Record visual approval and deployment authorization for S22–S24.
+- [x] Full check, release, all nine isolated provider browser scenarios and operations pass.
+- [ ] CURRENT: scoped commit; production target and protected restore evidence verified.
+- [ ] Build and inspect isolated Netlify artifact, publish, verify live workflows.
+- [ ] Record deployment/source IDs and monitored results; preserve deno.lock.
+
+Rollback republishes S21 deploy 6ab0dfee5b7bbcd1cb221ce6; no schema rollback.
+No Git push or provider-configuration change is required.
+
+Approved-release evidence above supersedes the earlier S22–S24 pending-review
+notes. Current rollout: `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

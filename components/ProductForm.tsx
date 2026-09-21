@@ -145,7 +145,7 @@ export default function ProductForm({
       {!staffMode ? <div className="field"><label htmlFor="product-type">What do you offer?</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">Product</option><option value="service">Service</option></select></div> : null}
       {staffMode ? <>
       <div className="field">
-        <label htmlFor="product-offering-kind">Offering type</label>
+        <label htmlFor="product-offering-kind">Product or service type</label>
         <select
           id="product-offering-kind"
           name="offeringKind"

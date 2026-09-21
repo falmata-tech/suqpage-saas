@@ -9,7 +9,6 @@ import { hasCapability } from '@/lib/capabilities';
 import { listBusinessesPage,listAssignedBusinessesPage,getBusinessActivityCounts } from '@/lib/scalable-queries';
 import { getDashboardAttention } from '@/lib/dashboard-attention';
 import { readOwnerBusiness } from '@/lib/owner-business-runtime';
-import { pagePublicationPort } from '@/lib/owner-page-publication-runtime';
 import { ownerPagePort } from '@/lib/owner-page-runtime';
 import { readOwnerPage } from '@/lib/owner-page-service';
 import { OwnerPageError } from '@/lib/owner-page-domain';
@@ -36,7 +35,6 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
    {businesses?.items.length?<><div className="compact-business-list">{businesses.items.map(b=><Link key={b.id} className="compact-business-row" href={`/dashboard?business=${b.id}`}><span><strong>{b.name}</strong><small>@{b.handle}</small></span><span className={`badge ${b.status}`}>{b.status}</span><b>Open workspace</b></Link>)}</div><PaginationNav result={businesses} pathname="/dashboard" params={{q:params.q}}/></>:<div className="empty-state">No businesses match this view.</div>}
   </DashboardShell>;
  }
- const publication=await pagePublicationPort.latest(business.id);
  const activity=await getBusinessActivityCounts(business.id);const attention=await getDashboardAttention(user,business.id);
  let editable=false;try{await readOwnerPage(ownerPagePort,user,business.id);editable=true;}catch(error){if(!(error instanceof OwnerPageError&&error.status===403))throw error;}
  const insights=user.access_role!=="team_member"?await getShowroomInsights(user,business.id):null;
@@ -47,7 +45,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
  return <DashboardShell user={user} business={business}>
  <div className="dashboard-head standard-page-heading"><div><span className="eyebrow">Business workspace</span><h1>{business.name}</h1></div>{editable?<Link className="btn brand" href={`/dashboard/page-editor${suffix}`}>Edit page</Link>:<Link className="btn" href={`/preview/@${business.handle}`}>Preview page</Link>}</div>
  {params.error?<p className="error">{params.error}</p>:null}{params.saved?<p className="notice">Changes saved.</p>:null}
- <div className="cards"><article className="metric"><span>Page status</span><strong>{pageStatus}</strong><small>{publication?'Save updates your live page':'Set up your page and items, then publish when ready.'}</small></article><Link className="metric" href={`/dashboard/products${suffix}`}><span>Products & services</span><strong>{activity.products}</strong></Link>{user.access_role!=='team_member'?<Link className="metric" href={`/dashboard/inquiries${suffix}`}><span>New inquiries</span><strong>{attention.customerInquiries||0}</strong></Link>:null}</div>
+ <div className="cards"><article className="metric"><span>Page status</span><strong>{pageStatus}</strong><small>{business.status==='suspended'?'Contact support to restore access.':user.access_role!=='client'?'The owner publishes page changes.':business.status==='active'?'Save updates your live page':'Set up your page and items, then publish when ready.'}</small></article><Link className="metric" href={`/dashboard/products${suffix}`}><span>Products & services</span><strong>{activity.products}</strong></Link>{user.access_role!=='team_member'?<Link className="metric" href={`/dashboard/inquiries${suffix}`}><span>New inquiries</span><strong>{attention.customerInquiries||0}</strong></Link>:null}</div>
  {insights?<ShowroomVisitSummary insights={insights} businessName={business.name}/>:null}
  {setup && business.status==='draft'?<section className="panel" aria-label="Get your business online"><h2>Get your business online</h2><ol><li><Link href="/dashboard/business">Set up your business and location</Link></li><li><Link href="/dashboard/page-editor">Add your cover, About and contacts</Link></li><li><Link href="/dashboard/products">Add products or services</Link></li><li><Link href="/dashboard/page-editor">Preview and publish your page</Link></li></ol></section>:null}
  <section className="client-workspace-actions" aria-label="Suqpage page workspace">

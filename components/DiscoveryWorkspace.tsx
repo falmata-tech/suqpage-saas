@@ -3,10 +3,11 @@ import { mapDisplayLocation } from "@/lib/map-display-location";
 import { readPlatformState } from "@/lib/platform-state";
 
 import Image from "next/image";
+import CategoryChooser from "./CategoryChooser";
 import { productHref } from "@/lib/product-inquiry";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Crosshair, LocateFixed, Map as MapIcon, Minus, Package, Plus, Search, SlidersHorizontal, Store, X } from "lucide-react";
+import { ArrowLeft, Crosshair, LocateFixed, Map as MapIcon, Minus, Package, Plus, Search, Store, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import MarketplaceMap, { type MarketplaceMapController } from "@/components/MarketplaceMap";
@@ -68,17 +69,6 @@ function rememberCurrentPublicWorkspace() {
   } catch {}
 }
 
-const compactIndustryLabels: Record<string, string> = {
-  all: "All categories",
-  electronics: "Electronics & electrical",
-  "beauty-wellness": "Personal & home care",
-  "agriculture-growers": "Farms, livestock & feed",
-  "food-farming": "Food & drink",
-  "machinery-tools": "Tools & metalwork",
-  "home-living": "Furniture, art & building",
-  "fashion-textiles": "Clothing & textiles",
-};
-
 type ShowroomPresence = {
   kind: "featured" | "live" | "";
   label: string;
@@ -91,22 +81,6 @@ function showroomPresence(showroom: DiscoveryShowroom, featuredNowBusinessId: nu
     return { kind: "live", label: `Live on ${LIVE_PLATFORM_LABELS[showroom.livePlatform]}`, shortLabel: "Live" };
   }
   return { kind: "", label: "", shortLabel: "" };
-}
-
-const iconPath: Record<string, string> = {
-  grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
-  circuit: "M4 4h6v6H4zM14 14h6v6h-6zM10 7h4v10h-4M7 10v4h10",
-  leaf: "M19 4C11 4 5 8 5 15c4 1 9-1 12-5-3 4-7 6-12 7M5 20c1-6 5-10 11-13",
-  sprout: "M12 21v-9M12 14c-5 0-8-3-8-8 5 0 8 3 8 8ZM12 11c0-4 3-7 8-7 0 5-3 8-8 8",
-  bowl: "M4 10h16c0 5-3 9-8 9s-8-4-8-9ZM7 6c1-2 3-3 5-3s4 1 5 3M8 22h8",
-  tool: "M14 6 6 14l4 4 8-8M15 3l6 6-3 3-6-6zM4 16l4 4-2 2H2v-4z",
-  frame: "M4 5h16v14H4zM7 16l4-5 3 3 2-2 4 4M8 9h.01",
-  thread: "M7 4h10v4H7zM8 8h8l2 12H6zM9 12h6M8 16h8",
-  live: "M8 8.5a5 5 0 0 0 0 7M5 5.5a9 9 0 0 0 0 13M16 8l5-3v14l-5-3zM3 8h13v8H3z",
-};
-
-function IndustryIcon({ name }: { name: string }) {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconPath[name] || iconPath.home} /></svg>;
 }
 
 function MapPinIcon() {
@@ -128,34 +102,16 @@ function DiscoverySearch({ id, value, suggestions, onChange, onSelect, onSubmit,
     onSelect(suggestion.query);
   };
   return <form className="discovery-search" role="search" onSubmit={(event) => { event.preventDefault(); setOpen(false); setActiveIndex(-1); onSubmit(value); }} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) { setOpen(false); setActiveIndex(-1); } }}>
-    <label><span className="sr-only">Search by business, offering, capability, or place. Results and suggestions update as you type.</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.5-4.5M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id={id} name="q" type="search" role="combobox" value={value} onFocus={() => setOpen(true)} onChange={(event) => { setOpen(true); setActiveIndex(-1); onChange(event.target.value); }} onKeyDown={(event) => {
+    <label><span className="sr-only">Search products, services, businesses or places</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.5-4.5M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id={id} name="q" type="search" role="combobox" value={value} onFocus={() => setOpen(true)} onChange={(event) => { setOpen(true); setActiveIndex(-1); onChange(event.target.value); }} onKeyDown={(event) => {
       if (event.key === "ArrowDown" && visibleSuggestions.length) { event.preventDefault(); setOpen(true); setActiveIndex((current) => Math.min(current + 1, visibleSuggestions.length - 1)); }
       if (event.key === "ArrowUp" && visibleSuggestions.length) { event.preventDefault(); setOpen(true); setActiveIndex((current) => current <= 0 ? visibleSuggestions.length - 1 : current - 1); }
       if (event.key === "Enter" && expanded && activeIndex >= 0) { event.preventDefault(); choose(visibleSuggestions[activeIndex]); }
       if (event.key === "Escape") { setOpen(false); setActiveIndex(-1); }
-    }} maxLength={80} autoComplete="off" aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? listboxId : undefined} aria-activedescendant={activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined} placeholder="Search products or businesses" /></label>
+    }} maxLength={80} autoComplete="off" aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? listboxId : undefined} aria-activedescendant={activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined} placeholder="Search products, services or shops" /></label>
     {value ? <button className="discovery-search-clear" type="button" onClick={() => { setOpen(false); setActiveIndex(-1); onClear(); }} aria-label="Clear marketplace search" title="Clear search"><X aria-hidden="true" /></button> : null}
     <button className="discovery-search-submit" type="submit" aria-label="Show search results" title="Search"><Search aria-hidden="true" /><span>Search</span></button>
-    {expanded ? <div id={listboxId} className="discovery-search-suggestions" role="listbox" aria-label="Search suggestions">{visibleSuggestions.map((suggestion, index) => <button id={`${listboxId}-${index}`} key={`${suggestion.kind}-${suggestion.query}`} type="button" role="option" aria-selected={index === activeIndex} onMouseEnter={() => setActiveIndex(index)} onClick={() => choose(suggestion)}><span><b>{suggestion.label}</b><small>{suggestion.detail}</small></span><em>{suggestion.kind === "offering" ? "Offering" : suggestion.kind === "showroom" ? "Page" : "Place"}</em></button>)}</div> : null}
+    {expanded ? <div id={listboxId} className="discovery-search-suggestions" role="listbox" aria-label="Search suggestions">{visibleSuggestions.map((suggestion, index) => <button id={`${listboxId}-${index}`} key={`${suggestion.kind}-${suggestion.query}`} type="button" role="option" aria-selected={index === activeIndex} onMouseEnter={() => setActiveIndex(index)} onClick={() => choose(suggestion)}><span><b>{suggestion.label}</b><small>{suggestion.detail}</small></span><em>{suggestion.kind === "offering" ? "Item" : suggestion.kind === "showroom" ? "Business" : "Place"}</em></button>)}</div> : null}
   </form>;
-}
-
-function IndustryPicker({ discovery, action, view, resultType }: { discovery: MarketplaceDiscoveryView; action: string; view: DiscoveryViewMode; resultType: SearchResultType }) {
-  return <details className="discovery-industry-picker">
-    <summary data-industry={discovery.industry.key} aria-label="Choose a category"><IndustryIcon name={discovery.industry.icon} /><span><small>Category</small><b>{compactIndustryLabels[discovery.industry.key] || discovery.industry.label}</b></span><i aria-hidden="true">⌄</i></summary>
-    <div className="discovery-industry-menu" role="menu" aria-label="Filter by category">
-      {discovery.industries.map((industry) => <Link key={industry.key} data-industry={industry.key} role="menuitemradio" aria-checked={industry.key === discovery.industry.key} href={discoveryHref(action, { industry: industry.key, q: discovery.query, place: discovery.place, view, type: resultType })}><i className="industry-accent-swatch" aria-hidden="true" /><IndustryIcon name={industry.icon} /><span>{industry.label}</span></Link>)}
-    </div>
-  </details>;
-}
-
-function IndustryStartChooser({ discovery, action }: { discovery: MarketplaceDiscoveryView; action: string }) {
-  return <section className="discovery-industry-start" aria-labelledby="discovery-industry-start-title">
-    <span className="discovery-kicker">Choose what you need</span>
-    <h2 id="discovery-industry-start-title">Choose a category</h2>
-    <p>Select one category, or continue with all categories.</p>
-    <div>{discovery.industries.map((industry) => <Link key={industry.key} data-industry={industry.key} href={discoveryHref(action, { industry: industry.key })}><span aria-hidden="true"><IndustryIcon name={industry.icon} /></span><b>{industry.shortLabel}</b><small>{industry.label}</small></Link>)}</div>
-  </section>;
 }
 
 function discoveryHref(action: string, values: Record<string, string | number | undefined>, hash = "discover") {
@@ -213,8 +169,7 @@ function MarketplaceSearchResults({
 
   return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title">
     <header className="discovery-search-workspace-head">
-      <div><h2 id="discovery-search-results-title">{discovery.query ? `Results for “${discovery.query}”` : discovery.industry.label}</h2><p aria-live="polite">{discovery.resultCounts.products} offerings · {discovery.resultCounts.businesses} businesses</p></div>
-      <Link className="discovery-search-map-action" aria-label="Clear results" href={discoveryHref(action, { industry: discovery.query ? discovery.industry.key : "", place: discovery.place, view: "map", type: resultType })}><X aria-hidden="true" /></Link>
+      <div><h2 id="discovery-search-results-title">{discovery.query ? `Results for “${discovery.query}”` : discovery.industry.label}</h2><p aria-live="polite">{discovery.resultCounts.products} items · {discovery.resultCounts.businesses} businesses</p></div>
     </header>
     <nav className="discovery-search-result-types" aria-label="Search result type">
       {types.map((type) => {
@@ -257,8 +212,18 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
   const [activeNearbyGroupKey, setActiveNearbyGroupKey] = useState<string | null>(null);
   const [requestedView, setRequestedView] = useState<MapView | null>(null);
   const [nearMeStatus, setNearMeStatus] = useState("");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const filterDialogRef = useRef<HTMLDialogElement | null>(null);
+  const [panelOpen, setPanelOpen] = useState(Boolean(discovery.query || discovery.place || discovery.industry.key !== "all" || view === "search"));
+  const panelOpener = useRef<HTMLButtonElement | null>(null);
+  const panelCloser = useRef<HTMLButtonElement | null>(null);
+  const panelFocusRequested = useRef(false);
+  function hidePanel() { panelFocusRequested.current=true; setPanelOpen(false); }
+  function showPanel() { panelFocusRequested.current=true; setPanelOpen(true); }
+  useEffect(()=>{
+    if (!panelFocusRequested.current) return;
+    panelFocusRequested.current=false;
+    const frame=requestAnimationFrame(()=>(panelOpen ? panelCloser : panelOpener).current?.focus());
+    return ()=>cancelAnimationFrame(frame);
+  },[panelOpen]);
   const mapRef = useRef<MarketplaceMapController | null>(null);
   const mapViewRef = useRef<MapView>({ center: [9.145, 40.4897], zoom: 5 });
   const navigationScope = useMemo(() => [action, discovery.industry.key, discovery.place].join("|"), [action, discovery.industry.key, discovery.place]);
@@ -308,13 +273,6 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
     searchEditing.current = true;
     setSearchInput(value);
   }
-
-  useEffect(() => {
-    const dialog = filterDialogRef.current;
-    if (!dialog) return;
-    if (mobileFiltersOpen && !dialog.open) dialog.showModal();
-    if (!mobileFiltersOpen && dialog.open) dialog.close();
-  }, [mobileFiltersOpen]);
 
   useEffect(() => {
     const nextQuery = searchInput.trim();
@@ -398,49 +356,37 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
     });
   }
 
-  const industrySelected = Boolean(discovery.industry.key);
-  const searchActive = industrySelected;
   return <section className="discovery discovery-marketplace" id="discover" aria-label="Suqpage Market">
     {!hideIntro ? <div className="discovery-switcher">
-      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Suqpage Market</span><h2 id="discovery-title">Find businesses, products and services.</h2></div><p>Search by business, offering or location.</p></div>
+      <div className="discovery-switcher-head"><div><span className="discovery-kicker">Suqpage Market</span><h2 id="discovery-title">Find businesses, products and services.</h2></div><p>Search by product, service, business or place.</p></div>
     </div> : null}
 
-    <div className={`discovery-workbench discovery-workbench-map${industrySelected ? "" : " discovery-workbench-unselected"}${searchActive ? " discovery-workbench-search" : ""}`}>
-    {industrySelected ? <div className="discovery-summary">
-      <div className="discovery-command-search"><DiscoverySearch id="discovery-search" value={searchInput} suggestions={searchActive ? [] : discovery.suggestions} onChange={editSearch} onSelect={applySearch} onSubmit={applySearch} onClear={() => applySearch("")} /></div>
-      {searchActive ? <MarketplaceSearchResults action={action} discovery={discovery} resultType={resultType} businesses={searchBusinesses} onSelectBusiness={(businessId) => {
-        const shop = showroomById.get(businessId);
-        if (shop) { const point = mapDisplayLocation(shop); mapRef.current?.centerAt(point.latitude, point.longitude, 14); }
-        setActiveNearbyGroupKey(null); setSelectedShowroomId(businessId); rememberNavigation(null, mapViewRef.current, businessId);
-      }} /> : <div className="discovery-search-welcome"><Search aria-hidden="true" /><h2>Find something you’ll love.</h2><p>Search for a product, service or business, or explore the map.</p><span>{discovery.total} {discovery.total === 1 ? "shop" : "shops"} · {discovery.locationCount} {discovery.locationCount === 1 ? "location" : "locations"}</span></div>}
-      <span className="sr-only" aria-live="polite">{nearMeStatus}</span>
-    </div> : null}
-
-    <dialog ref={filterDialogRef} id="discovery-mobile-filters" className="discovery-filter-sheet" aria-labelledby="discovery-filter-title" onClose={() => setMobileFiltersOpen(false)} onCancel={() => setMobileFiltersOpen(false)} onClick={(event) => { if (event.target === filterDialogRef.current) setMobileFiltersOpen(false); }}>
-      <section>
-        <header><div><span>{searchActive ? "Refine results" : "Refine the map"}</span><h3 id="discovery-filter-title">Filters</h3></div><button type="button" onClick={() => setMobileFiltersOpen(false)} aria-label="Close filters"><X aria-hidden="true" /></button></header>
-        <div className="discovery-filter-body">
-          <fieldset><legend>Category</legend><div className="discovery-filter-industries">{discovery.industries.map((industry) => <Link key={industry.key} data-industry={industry.key} className={industry.key === discovery.industry.key ? "active" : ""} aria-current={industry.key === discovery.industry.key ? "true" : undefined} href={discoveryHref(action, { industry: industry.key, q: discovery.query, place: discovery.place, view, type: resultType })} onClick={() => setMobileFiltersOpen(false)}><i className="industry-accent-swatch" aria-hidden="true" /><IndustryIcon name={industry.icon} /><span>{compactIndustryLabels[industry.key] || industry.label}</span></Link>)}</div></fieldset>
-          <label className="discovery-filter-place"><span>Region or city</span><select aria-label="Filter by region or city" value={discovery.place} onChange={(event) => { setMobileFiltersOpen(false); router.replace(discoveryHref(action, { industry: discovery.industry.key, q: discovery.query, place: event.target.value, view, type: resultType }), { scroll: false }); }}><option value="">All Ethiopia</option><optgroup label="Regions">{discovery.places.filter((place) => place.kind === "region").map((place) => <option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup><optgroup label="Cities">{discovery.places.filter((place) => place.kind === "city").map((place) => <option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup></select></label>
+    <div className="discovery-workbench discovery-workbench-map discovery-drawer-workbench" data-panel-open={panelOpen}>
+      <button ref={panelOpener} type="button" className="discovery-panel-opener" aria-controls="discovery-search-panel" aria-expanded={panelOpen} onClick={showPanel} hidden={panelOpen}><Search aria-hidden="true" /><span>Search & filters</span></button>
+      <aside id="discovery-search-panel" className="discovery-summary discovery-search-panel" aria-labelledby="discovery-panel-title" aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); hidePanel(); }}}>
+        <header className="discovery-panel-header"><h2 id="discovery-panel-title">Search & filters</h2><button ref={panelCloser} type="button" onClick={hidePanel} aria-label="Hide search and filters"><ArrowLeft aria-hidden="true" /></button></header>
+        <div className="discovery-command-search"><DiscoverySearch id="discovery-search" value={searchInput} suggestions={[]} onChange={editSearch} onSelect={applySearch} onSubmit={applySearch} onClear={() => applySearch("")} /></div>
+        <div className="discovery-panel-filters">
+          <div><span>Category</span><CategoryChooser categories={discovery.industries} value={discovery.industry.key} onChange={key=>router.replace(discoveryHref(action,{industry:key,q:discovery.query,place:discovery.place,view:"search",type:resultType}),{scroll:false})}/></div>
+          <label><span>Region or city</span><select aria-label="Filter by region or city" value={discovery.place} onChange={event=>router.replace(discoveryHref(action,{industry:discovery.industry.key,q:discovery.query,place:event.target.value,view:"search",type:resultType}),{scroll:false})}><option value="">All Ethiopia</option><optgroup label="Regions">{discovery.places.filter(place=>place.kind === "region").map(place=><option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup><optgroup label="Cities">{discovery.places.filter(place=>place.kind === "city").map(place=><option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup></select></label>
         </div>
-        <button className="discovery-filter-done" type="button" onClick={() => setMobileFiltersOpen(false)}>{searchActive ? "Apply filters" : `Show ${discovery.total} ${discovery.total === 1 ? "result" : "results"}`}</button>
-      </section>
-    </dialog>
-
+        <MarketplaceSearchResults action={action} discovery={discovery} resultType={resultType} businesses={searchBusinesses} onSelectBusiness={businessId=>{
+          const shop=showroomById.get(businessId);
+          if(shop) { const point=mapDisplayLocation(shop);mapRef.current?.centerAt(point.latitude,point.longitude,14); }
+          setActiveNearbyGroupKey(null);setSelectedShowroomId(businessId);rememberNavigation(null,mapViewRef.current,businessId);hidePanel();
+        }} />
+      </aside>
+      <span className="sr-only" aria-live="polite">{nearMeStatus}</span>
     <div className="discovery-map-shell">
       <div className="discovery-map-stage">
-      {industrySelected ? <div className="discovery-floating-tools">
-        <div className="discovery-floating-filters"><IndustryPicker discovery={discovery} action={action} view={view} resultType={resultType} />
-          <label className="discovery-location-picker"><span className="sr-only">Filter by region or city</span><select aria-label="Filter by region or city" value={discovery.place} onChange={(event) => router.replace(discoveryHref(action, { industry: discovery.industry.key, q: discovery.query, place: event.target.value, view, type: resultType }), { scroll: false })}><option value="">All Ethiopia</option><optgroup label="Regions">{discovery.places.filter(place => place.kind === "region").map(place => <option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup><optgroup label="Cities">{discovery.places.filter(place => place.kind === "city").map(place => <option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup></select></label>
-        </div>
+      <div className="discovery-floating-tools">
         <div className="discovery-floating-buttons" aria-label="Map controls">
-          <button className="discovery-floating-filter-button" type="button" onClick={() => setMobileFiltersOpen(true)} aria-haspopup="dialog" aria-expanded={mobileFiltersOpen} aria-controls="discovery-mobile-filters" aria-label="Open category and location filters"><SlidersHorizontal aria-hidden="true" /><span>Filters</span></button>
           <button type="button" onClick={useNearMe} aria-label="Center the map near me" title="Near me"><LocateFixed aria-hidden="true" /></button>
           <button type="button" onClick={() => zoomBy(1.5)} aria-label="Zoom in" title="Zoom in"><Plus aria-hidden="true" /></button>
           <button type="button" onClick={() => zoomBy(1 / 1.5)} aria-label="Zoom out" title="Zoom out"><Minus aria-hidden="true" /></button>
           <button type="button" onClick={resetMap} aria-label="Center Ethiopia" title="Center Ethiopia"><Crosshair aria-hidden="true" /></button>
         </div>
-      </div> : null}
+      </div>
         {mapFailed ? <div className="discovery-map-fallback"><p>The marketplace map is temporarily unavailable.</p><button type="button" onClick={() => window.location.reload()}>Retry map</button></div> : null}
         {!mapFailed ? <MarketplaceMap
           ref={mapRef}
@@ -462,7 +408,6 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
           }}
           onError={() => setMapFailed(true)}
         /> : null}
-        {!industrySelected ? <IndustryStartChooser discovery={discovery} action={action} /> : null}
         {activeNearbyGroup ? <NearbyShowroomsViewer group={activeNearbyGroup} showrooms={activeNearbyShowrooms} featuredNowBusinessId={discovery.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} onSelect={(showroomId) => {
           setSelectedShowroomId(showroomId);
           rememberNavigation(activeNearbyGroup.key, mapViewRef.current, showroomId);

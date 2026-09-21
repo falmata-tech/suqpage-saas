@@ -1,3 +1,4 @@
+import { authDriver } from "@/lib/config";
 import NavigationTrail from "@/components/NavigationTrail";
 import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import { redeemInvitationAction } from "@/app/invitation-actions";
@@ -11,6 +12,7 @@ const maskEmail = (email:string) => {
 };
 
 export default async function InvitationPage({ params, searchParams }: { params:Promise<{token:string}>; searchParams:Promise<{error?:string}> }) {
+  const managed = authDriver() === "supabase";
   const token = (await params).token;
   const query = await searchParams;
   const invitation = await getActiveInvitation(token);
@@ -27,7 +29,7 @@ export default async function InvitationPage({ params, searchParams }: { params:
       <span className="eyebrow">Private client invitation</span><h1>Join {invitation.business_name}</h1><p>Set up your private client workspace. You’ll use it to edit your page, manage products, follow inquiries, and contact support.</p>
       <div className="invite-summary"><div><small>Account email</small><strong>{maskEmail(invitation.email)}</strong></div><div><small>Link expires</small><strong>{new Date(invitation.expires_at).toLocaleString()}</strong></div></div>
       {query.error && <p className="error" role="alert">{errors[query.error] || errors.invalid}</p>}
-      <form action={redeemInvitationAction} className="form-grid"><input type="hidden" name="token" value={token}/><div className="field full"><label htmlFor="invite-account-name">Your name</label><input id="invite-account-name" name="name" autoComplete="name" required maxLength={100}/></div><div className="field"><label htmlFor="invite-password">Password</label><input id="invite-password" type="password" name="password" autoComplete="new-password" minLength={12} required/></div><div className="field"><label htmlFor="invite-confirm">Confirm password</label><input id="invite-confirm" type="password" name="confirmPassword" autoComplete="new-password" minLength={12} required/></div><div className="field full"><small>Use 12–128 characters with upper-case, lower-case, and a number.</small></div><div className="field full"><button className="btn brand">Create private workspace</button></div></form>
+      <form action={redeemInvitationAction} className="form-grid"><input type="hidden" name="token" value={token}/><div className="field full"><label htmlFor="invite-account-name">Your name</label><input id="invite-account-name" name="name" autoComplete="name" required maxLength={100}/></div>{!managed ? <><div className="field"><label htmlFor="invite-password">Password</label><input id="invite-password" type="password" name="password" autoComplete="new-password" minLength={12} required/></div><div className="field"><label htmlFor="invite-confirm">Confirm password</label><input id="invite-confirm" type="password" name="confirmPassword" autoComplete="new-password" minLength={12} required/></div><div className="field full"><small>Use 12–128 characters with upper-case, lower-case, and a number.</small></div></> : null}<div className="field full"><button className="btn brand">{managed ? "Accept invitation and sign in" : "Create private workspace"}</button></div></form>
     </>}
   </div></main><PublicMobileNavigation /></>;
 }

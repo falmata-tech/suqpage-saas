@@ -128,3 +128,37 @@ There is no separate Possible matches section, label or new filter. Empty catego
 browsing retains its existing product/business grouping. Five-row pagination, type
 counts, URL/Back and stable map remain. Owner explicitly requested completion and
 publication of this refinement; no repeat approval pause for this exact scope.
+
+## S22 — optional search drawer and All categories default
+
+This visual refinement supersedes the initial category chooser, fixed side column,
+and phone filter sheet. L2 under BE-040/DEP-037; no database migration or provider.
+Definition of Ready: scope and accessibility outcomes are specified below; public
+eligibility, ranking, five-row paging, and tenant privacy remain unchanged.
+
+- GIVEN a fresh Market visit WHEN it loads THEN all eligible categories appear on
+  the full workspace map without a category prompt; the search drawer is closed.
+- GIVEN the map WHEN Search & filters is opened THEN one panel slides in from the
+  left over the unchanged map, containing search, optional category/place filters,
+  result type tabs and backend-paginated results on desktop and phones.
+- GIVEN an open drawer WHEN hidden or Escape is pressed THEN it slides out and
+  returns focus to its opener; reopening retains query, filters, page and map view.
+  Hidden controls are inert and cannot receive keyboard focus. Reduced motion
+  disables sliding. No extra explanatory UI is introduced.
+- GIVEN a query/category/place deep link WHEN loaded THEN its drawer opens with
+  those results. Filter changes reset pagination and apply to map and results.
+- GIVEN a result business WHEN selected THEN the drawer closes so its map preview
+  is visible. The map remains mounted when opening, hiding, filtering or paging.
+
+Focused evidence: default-all PostgreSQL assertions, typecheck, and desktop/390/320
+browser captures for opening/hiding, state retention, filtering, pagination, map
+identity, focus/Escape, reduced motion, and overflow. Explicit visual approval of
+these local states precedes full/release/deployment gates per AGENTS.md step 8.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

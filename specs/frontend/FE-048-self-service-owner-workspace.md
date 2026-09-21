@@ -131,3 +131,28 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S23 audit correction — truthful controls and feedback
+
+- GIVEN published profile contacts WHEN opening admin Business details THEN public
+  contact editing points to the consented page editor. Remove legacy social inputs
+  that save into fields shadowed by published content. Notification email remains
+  separately labeled and private. Without assistance consent, explain how the
+  owner enables access; do not offer an unusable editor link.
+- GIVEN an inquiry was deleted or belongs to another business WHEN operations
+  submits a status change THEN show an error, never a saved notice.
+- GIVEN staff assistance or a suspended business WHEN reading page status THEN do
+  not claim staff Save publishes or that the suspended page is live. Owners of
+  active pages retain immediate live Save; staff edits remain drafts.
+
+FE-038/BE-031 separately cover obsolete managed-password recovery. Focused browser
+checks cover desktop/phone settings, inquiry failure/success and role-specific
+status text; BE-041 persistence tests prove no false success or cross-tenant write.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

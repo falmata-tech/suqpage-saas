@@ -14,6 +14,16 @@ async function runPostgresFixture() {
     }
     await db.prepare("INSERT INTO discovery_sponsorships(business_id,position,active,updated_at) VALUES(2,1,1,1)").run();
     const keys = (v: Awaited<ReturnType<typeof getMarketplaceDiscoveryView>>) => [...v.searchProducts.map(p => `p${p.id}`), ...v.searchBusinesses.map(b => `b${b.id}`)];
+    test('omitted and invalid categories default to All categories without narrowing results', async () => {
+        const explicit=await getMarketplaceDiscoveryView({industry:'all'});
+        for(const industry of [undefined,'','not-a-category']) {
+            const actual=await getMarketplaceDiscoveryView({industry});
+            assert.equal(actual.industry.key,'all');
+            assert.deepEqual(actual.resultCounts,explicit.resultCounts);
+            assert.deepEqual(actual.showrooms.map(row=>row.id),explicit.showrooms.map(row=>row.id));
+            assert.deepEqual(keys(actual),keys(explicit));
+        }
+    });
     test('category results use bounded database pages with stable totals and complete traversal', async () => {
         const first = await getMarketplaceDiscoveryView({ industry: 'electronics' });
         assert.deepEqual(first.resultCounts, { products: 14, businesses: 2 });

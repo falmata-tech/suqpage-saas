@@ -59,7 +59,7 @@ export default async function EditProduct({
       </div>
       {query.saved ? (
         <p className="notice">
-          Offering saved.
+          Item saved.
         </p>
       ) : null}
       {query.error ? <p className="error">{query.error}</p> : null}

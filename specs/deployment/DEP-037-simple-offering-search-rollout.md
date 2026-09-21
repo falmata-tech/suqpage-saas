@@ -123,3 +123,24 @@ tables preserved, actual runtime role and Amharic functions verified. Netlify
 Full check/release/operations/nine browser scenarios and 15 live routes pass.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for rollback and the fully rolled-back initial
 verification-script failure. No Auth or credential changes were made.
+
+## S22–S24 approved presentation and wiring release
+
+The owner approved the combined visual candidate and publication on 2026-09-21.
+Publish the optional map drawer, default-all category scope, plain inquiry/category
+presentation and audited email-only workspace fixes together after full check,
+release, isolated provider acceptance, operations and artifact privacy gates.
+No schema, provider configuration or data backfill changes. Independently verify
+Suqpage account/site/domain, retain a protected schema-48 archive with local restore
+proof, and use S21 deploy `6ab0dfee5b7bbcd1cb221ce6` for code rollback.
+Monitor public search/drawer/category/inquiry flows, health and protected entry.
+Do not send real inquiries or messages during smoke checks. Evidence and remaining
+provider limits: `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

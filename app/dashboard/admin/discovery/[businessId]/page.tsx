@@ -1,3 +1,4 @@
+import CategoryIllustration from "@/components/CategoryIllustration";
 import Link from "next/link";
 import { readLocationProposal } from "@/lib/owner-business-runtime";
 import { notFound, redirect } from "next/navigation";
@@ -49,7 +50,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
           <input type="hidden" name="businessId" value={profile.businessId} /><input type="hidden" name="proposalVersion" value={proposal?.version||0}/>
           <fieldset className="field full">
             <legend>Industries</legend>
-            <div className="recipe-checks">{DISCOVERY_INDUSTRIES.map((industry) => <label key={industry.key} className="check-field"><input type="checkbox" name="industryKeys" value={industry.key} defaultChecked={pending?proposal.category_key===industry.key:profile.industryKeys.includes(industry.key)} />{industry.label}</label>)}</div>
+            <div className="recipe-checks">{DISCOVERY_INDUSTRIES.map((industry) => <label key={industry.key} className="check-field"><input type="checkbox" name="industryKeys" value={industry.key} defaultChecked={pending?proposal.category_key===industry.key:profile.industryKeys.includes(industry.key)} /><CategoryIllustration name={industry.key} size={32}/>{industry.label}</label>)}</div>
           </fieldset>
           <div className="field full"><label htmlFor="profile-scale">Production scale</label><select id="profile-scale" name="productionScale" defaultValue={profile.productionScale}><option value="workshop">Workshop / producer</option><option value="growing_factory">Growing factory</option></select></div>
           <input type="hidden" name="existingBoothImagePath" value={profile.boothImagePath} />

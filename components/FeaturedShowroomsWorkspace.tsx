@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import CategoryIllustration from "./CategoryIllustration";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarClock, ChevronDown, ExternalLink, Radio, X } from "lucide-react";
@@ -43,21 +44,6 @@ function rememberCurrentPublicWorkspace() {
   try {
     window.sessionStorage.setItem(DISCOVERY_RETURN_KEY, `${window.location.pathname}${window.location.search}`);
   } catch {}
-}
-
-const iconPath: Record<string, string> = {
-  grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
-  circuit: "M4 4h6v6H4zM14 14h6v6h-6zM10 7h4v10h-4M7 10v4h10",
-  leaf: "M19 4C11 4 5 8 5 15c4 1 9-1 12-5-3 4-7 6-12 7M5 20c1-6 5-10 11-13",
-  sprout: "M12 21v-9M12 14c-5 0-8-3-8-8 5 0 8 3 8 8ZM12 11c0-4 3-7 8-7 0 5-3 8-8 8",
-  bowl: "M4 10h16c0 5-3 9-8 9s-8-4-8-9ZM7 6c1-2 3-3 5-3s4 1 5 3M8 22h8",
-  tool: "M14 6 6 14l4 4 8-8M15 3l6 6-3 3-6-6zM4 16l4 4-2 2H2v-4z",
-  frame: "M4 5h16v14H4zM7 16l4-5 3 3 2-2 4 4M8 9h.01",
-  thread: "M7 4h10v4H7zM8 8h8l2 12H6zM9 12h6M8 16h8",
-};
-
-function IndustryIcon({ name }: { name: string }) {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconPath[name] || iconPath.home} /></svg>;
 }
 
 type ShowroomPresence = {
@@ -109,13 +95,13 @@ function FeaturedGallery({ featured, walkthroughs, featuredNowBusinessId, now }:
   }, [featured.booths, featured.isToday, now, walkthroughs]);
   useEffect(() => setSelected(null), [featured.dateLabel, featured.industryCode]);
 
-  if (!featured.booths.length) return <div className="discovery-empty"><h3>Today&apos;s featured lineup is being prepared.</h3><p>More participants will appear as their Suqpage pages are published.</p></div>;
+  if (!featured.booths.length) return <div className="discovery-empty"><h3>Today&apos;s featured lineup is being prepared.</h3><p>More businesses will appear as they publish their pages.</p></div>;
   return <div className="featured-gallery-wrap"><div className="featured-gallery" aria-label={`${featured.title}, ${featured.boothCount} featured businesses`}>
     {displayBooths.map((booth) => {
       const walkthrough = walkthroughs.find((entry) => entry.slot === booth.slot);
       const walkthroughLabel = walkthrough ? `${walkthrough.label} EAT` : `${featuredProgramTimeLabel(sessions.morning.startMinute, sessions.afternoon.endMinute)} EAT`;
       const isCurrent = Boolean(featured.isToday && booth.revealed && booth.showroom.id === featuredNowBusinessId);
-      if (!booth.revealed) return <article key={booth.reference} data-featured-slot={booth.slot} className="featured-card featured-card-preview" aria-label={`${booth.reference}, future featured participant, ${walkthroughLabel}`}><span className="featured-card-media"><span className="featured-card-placeholder" aria-hidden="true"><i /><i /><i /></span><b>{booth.reference}</b></span><span className="featured-card-copy"><small>Featured schedule</small><strong>Participant announced that day</strong><span>{walkthroughLabel}</span></span></article>;
+      if (!booth.revealed) return <article key={booth.reference} data-featured-slot={booth.slot} className="featured-card featured-card-preview" aria-label={`${booth.reference}, upcoming business, ${walkthroughLabel}`}><span className="featured-card-media"><span className="featured-card-placeholder" aria-hidden="true"><i /><i /><i /></span><b>{booth.reference}</b></span><span className="featured-card-copy"><small>Featured schedule</small><strong>Participant announced that day</strong><span>{walkthroughLabel}</span></span></article>;
       const showroom = booth.showroom;
       const presence = showroomPresence(showroom, featuredNowBusinessId);
       return <button key={showroom.id} data-business-id={showroom.id} data-hero-image={showroom.heroImagePath || undefined} data-walkthrough-current={isCurrent || undefined} data-presence={presence.kind || undefined} type="button" className={`featured-card${isCurrent ? " walkthrough-current" : presence.kind === "live" ? " merchant-live" : ""}${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={`${booth.reference}, ${showroom.name}, ${showroom.city}, walkthrough ${walkthroughLabel}${presence.label ? `, ${presence.label}` : ""}`}><span className="featured-card-media"><ShowroomImage showroom={showroom} /><b>{booth.reference}</b>{presence.kind ? <i className={`featured-card-presence featured-card-presence-${presence.kind}`}>{presence.shortLabel}</i> : null}</span><span className="featured-card-copy"><small>{showroom.city} · {showroom.primaryIndustryShortLabel}</small><strong>{showroom.name}</strong><span>{presence.label || walkthroughLabel}</span></span></button>;
@@ -124,7 +110,7 @@ function FeaturedGallery({ featured, walkthroughs, featuredNowBusinessId, now }:
 }
 
 function FeaturedWeekNav({ featured }: { featured: WeeklyFeaturedProgram }) {
-  return <nav className="featured-week" aria-label="Daily Featured schedule">{featured.schedule.map((day) => <Link key={day.weekday} href={featuredHref(day.weekday)} className={[day.weekday === featured.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === featured.selectedWeekday ? "date" : undefined} aria-label={`${day.dayLabel}, ${day.dateLabel}, ${day.industryLabel}${day.isToday ? ", today" : ""}`}><span><IndustryIcon name={day.industryIcon} /></span><b>{day.dayLabel.slice(0, 3)}</b><small>{day.dateLabel}</small><em>{day.industryLabel}</em>{day.isToday ? <mark>Today</mark> : null}</Link>)}</nav>;
+  return <nav className="featured-week" aria-label="Daily Featured schedule">{featured.schedule.map((day) => <Link key={day.weekday} href={featuredHref(day.weekday)} className={[day.weekday === featured.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === featured.selectedWeekday ? "date" : undefined} aria-label={`${day.dayLabel}, ${day.dateLabel}, ${day.industryLabel}${day.isToday ? ", today" : ""}`}><span><CategoryIllustration name={day.industryIcon} size={40} /></span><b>{day.dayLabel.slice(0, 3)}</b><small>{day.dateLabel}</small><em>{day.industryLabel}</em>{day.isToday ? <mark>Today</mark> : null}</Link>)}</nav>;
 }
 
 function sponsorForSlot(placements: SponsorPlacement[], slot: number | undefined) {
@@ -148,7 +134,7 @@ function TodayProgramSchedule({ featured, agenda, sponsorPlacements }: { feature
       ? <li key={`booth-${entry.slot}`} className={entry.current ? "current" : undefined} aria-current={entry.current ? "time" : undefined}><time>{entry.label}</time><span><b>{boothName(entry.slot)}</b><small>Booth {String(entry.slot).padStart(2, "0")}</small></span></li>
       : <li key={`${entry.kind}-${entry.start}`} className={`featured-agenda-break${entry.current ? " current" : ""}`} aria-current={entry.current ? "time" : undefined}><time>{entry.timeLabel}</time><span><b>{sponsorForSlot(sponsorPlacements, entry.sponsorSlot)?.name || entry.label}</b><small>{entry.sponsorSlot ? "Sponsor spotlight" : "Program break"}</small></span></li>)}</ol></section>;
   };
-  return <details className="featured-agenda"><summary><CalendarClock aria-hidden="true" /><span><small>Today&apos;s schedule</small><strong>{sessionSummary || "No presentations scheduled"}</strong></span><em>{featured.boothCount} {featured.boothCount === 1 ? "participant" : "participants"}</em><ChevronDown className="featured-agenda-chevron" aria-hidden="true" /></summary><div className="featured-agenda-body">{sessionSection("morning", "Morning session")}{intermission?.kind === "intermission" ? <div className={`featured-agenda-intermission${intermission.current ? " current" : ""}`} aria-current={intermission.current ? "time" : undefined}><span>{intermission.label}</span><strong>{intermission.timeLabel} EAT</strong></div> : null}{sessionSection("afternoon", "Evening session")}<p>Five-minute changeovers are included between listed presentations unless a sponsor break is shown.</p></div></details>;
+  return <details className="featured-agenda"><summary><CalendarClock aria-hidden="true" /><span><small>Today&apos;s schedule</small><strong>{sessionSummary || "No presentations scheduled"}</strong></span><em>{featured.boothCount} {featured.boothCount === 1 ? "business" : "businesses"}</em><ChevronDown className="featured-agenda-chevron" aria-hidden="true" /></summary><div className="featured-agenda-body">{sessionSection("morning", "Morning session")}{intermission?.kind === "intermission" ? <div className={`featured-agenda-intermission${intermission.current ? " current" : ""}`} aria-current={intermission.current ? "time" : undefined}><span>{intermission.label}</span><strong>{intermission.timeLabel} EAT</strong></div> : null}{sessionSection("afternoon", "Evening session")}<p>Five-minute changeovers are included between listed presentations unless a sponsor break is shown.</p></div></details>;
 }
 
 function SponsoredRail({ placements, activeSponsorSlot }: { placements: SponsorPlacement[]; activeSponsorSlot?: number }) {
@@ -179,12 +165,12 @@ function FeaturedBroadcastStatus({ featured, selectedDay, now, agenda, sponsorPl
   const afternoonRestart = featuredProgramTimeLabel(sessions.afternoon.startMinute, sessions.afternoon.startMinute).split("–")[0];
   const content = phase === "live"
     ? activeWalkthrough
-      ? { title: `TikTok Live · ${activeBooth?.reference || "Booth walkthrough"}`, detail: `${activeBusiness ? `Now visiting ${activeBusiness} · ` : ""}${activeWalkthrough.label} EAT`, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
+      ? { title: `TikTok Live · ${activeBooth?.reference || "Featured business"}`, detail: `${activeBusiness ? `Now visiting ${activeBusiness} · ` : ""}${activeWalkthrough.label} EAT`, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
       : activeEntry && (activeEntry.kind === "changeover" || activeEntry.kind === "sponsor_break")
         ? { title: activeSponsor ? `Sponsor spotlight · ${activeSponsor.name}` : `${activeEntry.label} · ${activeEntry.timeLabel} EAT`, detail: activeSponsor ? `${activeEntry.timeLabel} EAT · Paid placement` : "The next presentation begins shortly.", action: "Watch live", href: SUQPAGE_TIKTOK_URL }
         : { title: "TikTok Live program", detail: sessionSummary, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
     : phase === "intermission"
-      ? { title: `${featured.programPolicy.intermissionLabel} · ${featuredProgramTimeLabel(sessions.morning.endMinute, sessions.afternoon.startMinute)} EAT`, detail: `Evening walkthroughs resume at ${afternoonRestart} EAT.`, action: "TikTok", href: SUQPAGE_TIKTOK_URL }
+      ? { title: `${featured.programPolicy.intermissionLabel} · ${featuredProgramTimeLabel(sessions.morning.endMinute, sessions.afternoon.startMinute)} EAT`, detail: `Evening features start at ${afternoonRestart} EAT.`, action: "TikTok", href: SUQPAGE_TIKTOK_URL }
       : phase === "ended"
         ? { title: "Livestream ended", detail: "Watch the business recordings on YouTube.", action: "View recordings", href: SUQPAGE_YOUTUBE_URL }
         : { title: featured.isToday ? "Live on TikTok today" : `Live on ${selectedDay.dayLabel}`, detail: sessionSummary, action: "TikTok", href: SUQPAGE_TIKTOK_URL };
@@ -210,7 +196,7 @@ function WeeklyFeatured({ featured, sponsorPlacements, featuredNowBusinessId }: 
     const timer = window.setTimeout(() => router.replace(featuredHref(today.weekday), { scroll: false }), 6_000);
     return () => window.clearTimeout(timer);
   }, [featured.isToday, featured.selectedWeekday, router, today]);
-  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title"><div className="featured-program-header"><header className="daily-featured-head"><div><span className="discovery-kicker">{featured.industryLabel} · {featured.dayLabel} · {featured.dateLabel} · Ethiopia</span><h1 id="daily-featured-title">{featured.title}</h1><p>{featured.isToday ? `Meet today's selected ${featured.industryLabel.toLowerCase()} participants, then open any Suqpage page for products, capabilities, and direct contact.` : `Preview the ${featured.dayLabel} program. Participants are revealed when their featured day opens.`}</p></div><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} agenda={agenda} sponsorPlacements={sponsorPlacements} /></header><TodayProgramSchedule featured={featured} agenda={agenda} sponsorPlacements={sponsorPlacements} /></div><div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={featuredNowBusinessId} now={broadcastNow} /><SponsoredRail placements={sponsorPlacements} activeSponsorSlot={activeSponsorEntry?.sponsorSlot} /></div></section>;
+  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title"><div className="featured-program-header"><header className="daily-featured-head"><div><span className="discovery-kicker">{featured.industryLabel} · {featured.dayLabel} · {featured.dateLabel} · Ethiopia</span><h1 id="daily-featured-title">{featured.title}</h1><p>{featured.isToday ? `Explore today’s ${featured.industryLabel.toLowerCase()} businesses. See their products and services, then get in touch.` : `See what’s coming on ${featured.dayLabel}. Businesses appear here on their featured day.`}</p></div><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} agenda={agenda} sponsorPlacements={sponsorPlacements} /></header><TodayProgramSchedule featured={featured} agenda={agenda} sponsorPlacements={sponsorPlacements} /></div><div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={featuredNowBusinessId} now={broadcastNow} /><SponsoredRail placements={sponsorPlacements} activeSponsorSlot={activeSponsorEntry?.sponsorSlot} /></div></section>;
 }
 
 export default function FeaturedShowroomsWorkspace({ discovery, sponsoredShowrooms }: { discovery: FeaturedShowroomsView; sponsoredShowrooms: SponsorPlacement[] }) {

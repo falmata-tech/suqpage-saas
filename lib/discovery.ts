@@ -244,7 +244,7 @@ function normalizeIndustry(key: string | undefined) {
 
 function normalizeIndustrySelection(key: string | undefined): DiscoveryIndustrySelection {
   if (key === ALL_DISCOVERY_INDUSTRIES.key) return ALL_DISCOVERY_INDUSTRIES;
-  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || UNSELECTED_DISCOVERY_INDUSTRY;
+  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || ALL_DISCOVERY_INDUSTRIES;
 }
 
 function normalizeProductionScale(value: string | undefined): ProductionScale | "" {

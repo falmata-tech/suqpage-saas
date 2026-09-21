@@ -140,3 +140,25 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S23 audit correction — settings and inquiry outcomes
+
+Admin Business details updates operational identity/live/sharing/notification
+fields only; public contacts remain owned by the consented profile workflow.
+Removing legacy social inputs must preserve their retained values and all draft/
+publication contacts, including deliberately empty public contacts.
+
+Inquiry status changes validate the existing operations capability and allowed
+status, update by both inquiry and business IDs, and fail when no row matches.
+Only a persisted change produces a success audit/redirect. Owner and team-member
+permissions remain unchanged. Tests: isolated PostgreSQL status updates, foreign/
+missing IDs, invalid status and unauthorized roles, plus real browser forms.
+No migration/provider change; rollback retains all data.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

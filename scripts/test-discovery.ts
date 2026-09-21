@@ -21,8 +21,9 @@ async function runPostgresFixture() {
     assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
     assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
     assert.match(discoveryUiSource, /Filter by region or city/);
-    assert.match(discoveryUiSource, /discovery-industry-menu/);
-    assert.match(discoveryUiSource, /industry-accent-swatch/);
+    assert.match(discoveryMapSource, /<CategoryChooser categories=\{discovery\.industries\} value=\{discovery\.industry\.key\}/);
+    assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label="Filter by category"/);
+    assert.match(discoveryUiSource, /discovery-search-panel/);
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
     assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
     assert.match(discoveryUiSource, /showroom\.primaryIndustryShortLabel/);
@@ -34,7 +35,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(nearbyViewerSource, /Row \{row\}|padStart|pagination|Show more/, "nearby cards expose no scheduled references, pagination, or incremental loading");
     assert.match(discoveryUiSource, /<b>\{booth\.reference\}<\/b>/, "Daily Featured Showrooms retains scheduled booth references");
     assert.doesNotMatch(discoveryUiSource, /discovery-industries-static/);
-    assert.match(discoveryUiSource, /function IndustryStartChooser/);
+    assert.doesNotMatch(discoveryUiSource, /function IndustryStartChooser/);
     assert.match(discoveryUiSource, /className="featured-gallery"/);
     assert.match(discoveryUiSource, /className={`featured-card/);
     assert.doesNotMatch(discoveryUiSource, /featured-floor|featured-booth-platform|buildScrollableFeaturedVenueLayout/);
@@ -99,7 +100,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
     assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
-    assert.match(publicDiscoveryCacheSource, /public-marketplace-v4-paginated-results/, "the marketplace cache identity tracks the nearby-group projection contract");
+    assert.match(publicDiscoveryCacheSource, /public-marketplace-v5-default-all/, "the marketplace cache identity tracks the nearby-group projection contract");
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));
     const db = await getDb();
     function distanceKm(left: {
@@ -241,7 +242,7 @@ async function runPostgresFixture() {
             const sponsorsOnly = await getSponsoredShowrooms({});
             assert.equal(sponsorsOnly.length, 4, "the sponsor route merges showroom and external placements into the bounded global paid pool");
             assert.deepEqual(sponsorsOnly[0] && { kind: sponsorsOnly[0].kind, name: sponsorsOnly[0].name, href: sponsorsOnly[0].href }, { kind: "external", name: "Addis Trade Services", href: "https://sponsor.example/partners" }, "external sponsor details project without creating a showroom route");
-            assert.equal(allIndustries.industry.key, "", "public discovery retains an unset orientation state until the visitor chooses");
+            assert.equal(allIndustries.industry.key, "all", "public discovery defaults to All categories without a chooser");
             assert.equal(allIndustries.industries.at(-1)?.key, ALL_DISCOVERY_INDUSTRIES.key, "All categories is the eighth and final public choice");
             assert.equal(allIndustries.industries.length, 8, "the orientation chooser contains seven categories plus All categories");
             assert.equal(allIndustries.total, 54, "the initial map loads every eligible industry behind the chooser");
@@ -406,7 +407,7 @@ async function runPostgresFixture() {
             assert.equal(sundayToday.featured.booths.length, 3);
             assert.ok(sundayToday.featured.booths.every((booth) => booth.revealed), "today's Sunday agriculture floor reveals eligible showrooms");
             const invalidIndustry = await getDiscoveryView({ industry: "not-real" });
-            assert.equal(invalidIndustry.industry.key, "", "an unknown industry keeps the required chooser open");
+            assert.equal(invalidIndustry.industry.key, "all", "an unknown category defaults to All categories");
             assert.equal(invalidIndustry.total, allIndustries.total, "an unknown industry still projects the safe de-duplicated combined map behind the chooser");
             const indexes = await db.prepare("SELECT indexname FROM pg_indexes WHERE schemaname=current_schema() AND tablename='business_industries'").all();
             assert.ok(indexes.some(row => row.indexname === 'business_industry_lookup_idx'), "industry membership has the required index");

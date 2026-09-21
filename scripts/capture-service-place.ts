@@ -51,7 +51,7 @@ async function main() {
   await owner.getByLabel('Offering type',{exact:true}).selectOption('service');
   await owner.getByLabel('Offered by',{exact:false}).fill('hour');
   for(const width of [1440,390]){await owner.setViewportSize({width,height:900});await capture(owner,'service-editor',width);}
-  await owner.getByRole('button',{name:'Add item',exact:true}).click();await expect(owner.getByText('Offering saved.',{exact:true})).toBeVisible();
+  await owner.getByRole('button',{name:'Add item',exact:true}).click();await expect(owner.getByText('Item saved.',{exact:true})).toBeVisible();
   const authored=await db.prepare("SELECT offering_kind,quantity_unit FROM products WHERE business_id=? AND name='Equipment support session'").get(created[2]);assert.equal(authored.offering_kind,'service');assert.equal(authored.quantity_unit,'hour');
   for(const width of [1440,390,320]){
    await page.setViewportSize({width,height:900});await owner.setViewportSize({width,height:900});

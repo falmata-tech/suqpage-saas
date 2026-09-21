@@ -191,3 +191,29 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S23 audit correction — dormant password operations
+
+GIVEN Supabase managed authentication WHEN legacy password login/change/admin-reset
+is invoked THEN reject before password verification, provider calls, database
+writes or session revocation. Keep the local rollback implementation available
+only in local Auth mode. FE-038 hides the unavailable recovery form. Tests cover
+both modes and action guard placement; the browser checks actual admin markup.
+
+GIVEN managed Auth WHEN an authorized administrator creates staff or a valid
+invitation is redeemed THEN provision an email-only provider identity with an
+unusable local password sentinel and no temporary-password requirement. Invitation
+redemption links the same intended tenant but creates no authenticated browser
+session; the recipient verifies their email through normal code entry. Provider
+failure, duplicate email, expired/replayed tokens and transaction failure retain
+existing safeguards. No email is sent as part of provisioning. Retained local Auth
+still requires a strong password. Tests exercise real local provider provisioning,
+email identity links and invitation replay, plus isolated local rollback tests.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

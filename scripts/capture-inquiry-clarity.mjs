@@ -14,11 +14,11 @@ try{
  for(const width of [1440,390,320]){
   const context=await browser.newContext({viewport:{width,height:900}});const page=await context.newPage();let posts=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/api/inquiries'))posts++;});
   await page.goto(`${base}/@${products[0].handle}`);
-  await page.getByRole('button',{name:`Add ${products[0].name} to inquiry list`,exact:true}).click();
+  await page.getByRole('button',{name:`Add to inquiry list: ${products[0].name}`,exact:true}).click();
   await expect(page.getByRole('dialog',{name:'Business inquiry'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Inquiry cart, 1 item',exact:true})).toContainText('Review item');
-  await page.getByRole('button',{name:`Add ${products[1].name} to inquiry list`,exact:true}).click();
-  await expect(page.getByRole('button',{name:'Inquiry cart, 2 items',exact:true})).toContainText('Review list');
+  await expect(page.getByRole('button',{name:'View inquiry list, 1 item',exact:true})).toContainText('View inquiry list');
+  await page.getByRole('button',{name:`Add to inquiry list: ${products[1].name}`,exact:true}).click();
+  await expect(page.getByRole('button',{name:'View inquiry list, 2 items',exact:true})).toContainText('View inquiry list');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:`${out}/cards-${width}.png`,fullPage:true});captures.push(`cards-${width}`);
   await page.goto(`${base}/@${products[2].handle}?product=${products[2].id}`);
@@ -33,7 +33,7 @@ try{
   await expect(dialog.getByRole('list',{name:'Inquiry items'})).toHaveCount(0);
   await dialog.getByRole('button',{name:'Close inquiry'}).click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('suqpage-cart:selam-weave')),saved);
-  await page.getByRole('button',{name:'Inquiry cart, 2 items',exact:true}).click();
+  await page.getByRole('button',{name:'View inquiry list, 2 items',exact:true}).click();
   await expect(dialog.getByRole('list',{name:'Inquiry items'}).locator('li')).toHaveCount(2);
   const grouped=await dialog.locator('textarea[aria-label="Inquiry message"]').inputValue();
   for(const p of products.slice(0,2))assert.ok(grouped.includes(p.name));assert.ok(!grouped.includes(products[2].name));
@@ -41,7 +41,7 @@ try{
   await page.goto(`${base}/@${service.handle}?product=${service.id}`);
   await expect(page.getByRole('button',{name:'Inquire about this service only',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Add to inquiry list',exact:true}).click();
-  await expect(page.getByRole('button',{name:'Added to list',exact:true})).toBeDisabled();await expect(page.getByRole('dialog',{name:'Business inquiry'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Added to inquiry list',exact:true})).toBeDisabled();await expect(page.getByRole('dialog',{name:'Business inquiry'})).toHaveCount(0);
   await page.locator('[data-product-page]').screenshot({path:`${out}/service-${width}.png`});captures.push(`service-${width}`);
   const axe=await new AxeBuilder({page}).include('[data-product-page]').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations,[]);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.equal(posts,0);await context.close();

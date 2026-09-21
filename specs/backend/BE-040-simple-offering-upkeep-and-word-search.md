@@ -184,3 +184,16 @@ unrelated words while permitting common adjacent-letter transpositions.
 Candidate probes admit at most 32 records per indexed field per eligible term
 (first eight terms), and expand each candidate business into at most 32 published
 offerings. Approximate search is intentionally best-effort within these limits.
+
+S22 (FE-042): omitted or invalid category selection resolves to All categories
+for both map and backend-paginated results, even with no query. Explicit valid
+categories and places still constrain eligibility; no search or privacy rule is
+relaxed. Default-all and explicit-all projections must agree in regression tests.
+
+## S22–S24 approved release evidence
+
+The owner approved the combined visuals and deployment on 2026-09-21. Full check,
+release, operations, nine isolated provider browser scenarios and Netlify artifact
+privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
+Deployment evidence and remaining hosted-email limits:
+`docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.

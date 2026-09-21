@@ -211,6 +211,10 @@ navigation with either a catalog or shareable inline offering detail, then a sep
 public contact section. The hero image is the video poster; one intentional play
 control loads the privacy-enhanced player. Only configured public links appear.
 Saved selections expose inquiry access; an empty selection offers Explore products.
+Category controls use recognizable, shared object illustrations
+in category controls, Featured, business setup/admin and About. Market categories
+expand on request with keyboard selection and an All categories option; setup forms
+retain native selects.
 There is no separate Introduction field or custom layout selector. Account contacts
 are edited separately from the public contact values. Owners and consented staff
 use the same standard page editor; owner consent governs staff assistance.
@@ -236,18 +240,14 @@ education remains on `/about`. The
 Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
-branding. The combined marketplace map loads immediately, while a centered
-first-use chooser requires an explicit orientation choice before the visitor
-continues: one of seven production industries or **All industries** as the
-eighth and final option. After that choice, live search, the current industry control, the available
-region/city selector, the privacy-preserving **Near me** map framing action,
-zoom, and the exact-location Ethiopia map remain within the same bounded
-surface. Desktop search results occupy the panel beside the still-mounted map.
-Filters and map actions float on the map; on phones a Filters button opens
-category/place choices in a bottom sheet. Search, a bounded map, and results
-below it share the remaining workspace. Map attribution stays clear. Market and an
-opened nearby-page viewer consume the remaining application viewport above fixed
-phone navigation.
+branding. The combined marketplace map loads immediately with **All categories**
+and no orientation chooser. Search & filters opens a left drawer over the full
+map. The same drawer contains search, optional category/place selectors, result
+type tabs and five-row result pages on desktop and phones. It starts closed on a
+fresh visit and opens for query/category/place deep links. Hiding and reopening
+retains the query, filters, result page, map center and zoom. Map controls remain
+on the right; attribution and fixed phone navigation stay visible. Selecting a
+result business hides the drawer to expose its map preview. The map stays mounted.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -257,10 +257,8 @@ tenant's single section/inquiry navigation may stay fixed at the bottom. The
 Back action restores the exact recorded map, filter, nearby-group, or Featured
 state before consulting older browser history. A direct Suqpage page URL renders
 the same responsive shell without requiring prior Market history.
-Desktop retains the complete side command panel. Its opened industry
-menu matches the trigger width and wraps long labels instead of spanning across
-the map. The menu and phone Filters sheet use one restrained accent for each of
-the seven industries and a neutral combined treatment for **All industries**.
+Category selection is optional in the drawer, with **All categories** selected by
+default. Native selects work with touch and keyboards at narrow phone widths.
 Industry accents may identify nearby-page cards, but individual geographic markers and numbered clusters use one
 consistent Suqpage orange action treatment. The isolated marker uses a compact storefront pin smaller than a cluster core,
 with no visible halo and an independent touch-sized transparent target;
@@ -268,9 +266,8 @@ white and cool-gray remain the dominant content surfaces, and visible industry t
 color is never the only identifier. After two typed characters, search exposes no more than six
 server-authoritative eligible page, published offering, and reviewed-place
 suggestions. The combobox supports pointer, touch and keyboard interaction.
-Selecting a category already opens the bounded result panel; a meaningful query
-refines it. The panel stays beside the map on desktop and below its bounded canvas
-on phones. All, Products and Businesses show accurate scoped totals. Five results
+Category and place selection refine the drawer and map together. All, Products
+and Businesses show accurate scoped totals. Five results
 are selected by SQL COUNT/LIMIT/OFFSET with deterministic unpaid ordering and
 Previous/Next controls. All traverses products then businesses; category, query,
 place or type changes reset the result page. Direct product links and business
@@ -685,20 +682,21 @@ Expected customer flow:
 
 1. Open a product, review photo/video/features, and choose any available options.
 2. Choose **Inquire about this product only** (or **service only**) for that selection
-   alone, or **Add to inquiry list** to save it while continuing to browse. Cards say **Add to list**, and
-   the selected-item control says **Review item** or **Review list** with a count. A direct inquiry never merges
+   alone, or **Add to inquiry list** to save it while continuing to browse.
+   Cards use the same label, then **Added to inquiry list**; the selected-item
+   control says **View inquiry list** with a count. A direct inquiry never merges
    with, clears or submits the visitor’s saved group.
 3. A single selection uses a compact product summary. Multiple selections show an
    editable inquiry list; zero selections show no persistent cart button. Saved
    references are revalidated against current tenant products/options and capped
    at 20, matching server limits. Desired quantity remains optional bounded text.
-4. Choose configured WhatsApp, Telegram or SMS, **Copy inquiry**, or **Send on
+4. Choose configured WhatsApp, Telegram or SMS, **Copy inquiry**, or **Send inquiry on
    Suqpage**. Only validated effective public contacts supply handoff destinations;
    SMS uses public phone and never implies WhatsApp availability.
 5. App actions prepare a message for the visitor to review and send. Copy retains
    visible/selectable text, including a clipboard-failure fallback. None of these
    actions creates an inbox inquiry or claims external delivery.
-6. Only choosing **Send on Suqpage** reveals the reply-phone field and explicit
+6. Only choosing **Send inquiry on Suqpage** reveals the reply-phone field and explicit
    **Send inquiry** confirmation. Back to sending options hides the phone again.
    Sending disables edits; bounded failure, retry-safe idempotency and explicit
    success remain. An obsolete response cannot mark a different selection sent.
@@ -824,22 +822,21 @@ Suqpage’s directory must scale without dumping every tenant onto the page by d
 
 Default behavior:
 
-- load the combined geographic map behind a required first-use orientation
-  chooser with seven industries plus **All industries** as the final option;
+- load the combined geographic map with All categories selected; no chooser is required;
 - selecting a category, including All categories, opens its paginated results;
   list ranking remains independent of sponsorship;
 - de-duplicate businesses with more than one industry membership and keep the
   Daily Featured weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
-- show five-row category- or query-driven Products/Businesses result pages beside the persistent
-  map on desktop, or below its bounded canvas on phones. Product results link
+- show five-row category- or query-driven Products/Businesses result pages in the optional
+  left drawer over the persistent map on desktop and phones. Product results link
   directly to the selected product; query/type changes retain map center/zoom;
 - after two characters, provide at most six de-duplicated, public-eligible
   Suqpage page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place. Hide duplicate autocomplete once full results appear;
-- provide one category control and location filter on the map; do not duplicate
-  these controls inside the result list;
-- do not let result panels cover filter controls;
+- keep search, category and location controls together in the result drawer;
+- hide the drawer without clearing filters; its hidden controls are inert, Escape
+  returns focus to the opener, and reduced-motion preferences disable sliding;
 - support business name, handle, product, industry, and relevant description search;
 - search matches all meaningful query terms, in any order,
   across one offering and its business name/handle/published About/public location.
@@ -856,7 +853,7 @@ Default behavior:
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
   controls within one discovery workbench; progressively disclose industry and
-  place in a phone bottom sheet and place phone map navigation on the map;
+  place in the same optional drawer on phones and keep map navigation on the map;
 - ignore legacy public `scale` query state so no invisible filter narrows results;
 - ensure mobile usability and keyboard accessibility.
 
@@ -879,6 +876,10 @@ and seven security notification templates have repository-owned Suqpage branding
 notification enablement and verified sender addresses remain unchanged. Hosted
 template/sender-display application requires the exact DEP-029 reviewed plan.
 Password recovery email points back to email-code entry without a password-reset UI.
+Email-only access also applies to administrator-created staff and invitation
+acceptance. Neither collects a password; invitation acceptance
+continues to code sign-in and grants no session itself. Managed password actions
+are unavailable.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
 The Suqpage namespace preserves existing account emails and Auth links. Legacy
@@ -936,6 +937,10 @@ visibility, sponsorship, Daily Featured schedules, support and renewals. They ca
 invite a private business and suspend or restore established visibility. Page and
 location approval queues/actions are retired; historical records remain. Private
 page editing and draft media access still require current owner assistance consent.
+Business details edits operational identity,
+notification, live and sharing settings; public contacts link to the consented page
+editor. Legacy social values are preserved. Staff tables omit retired page-review
+counts, and status guidance distinguishes staff drafts from owner live Save.
 
 ### Owner (client)
 
@@ -963,7 +968,7 @@ approval queues.
 
 ### Public customer
 
-Visitors browse category/search results in five-row backend pages beside the map,
+Visitors browse category/search results in five-row backend pages in the optional map drawer,
 open shareable products, choose relevant options and inquire about one product or
 an independently saved group. Configured app handoffs and copy need no reply-phone
 form; Send on Suqpage reveals that field and confirms canonical inbox persistence.
@@ -1102,6 +1107,9 @@ Security requirements are product requirements, not optional cleanup.
   Existing real accounts and intentionally cleared fields are not backfilled. Account phone is not a sign-in factor and is
   excluded from session-user and public catalog data (FE-040/BE-032, migration 41).
 - Do not use a hard-coded fallback session secret.
+- Inquiry-status mutations require a matching inquiry/business pair and commit
+  the success audit with the change. Missing/foreign records produce an error,
+  never a saved notice; operations permissions remain unchanged.
 - Revoke provider sessions after suspected compromise, suspension, or explicit
   administrative recovery.
 - Rate-limit OTP request, OTP verification, OAuth callback, and onboarding
@@ -1297,6 +1305,11 @@ Afar
 
 Rules:
 
+- Use short, everyday English throughout public pages and dashboards. Name the
+  actual action: add to an inquiry list, view it, or send an inquiry. Use products,
+  services and businesses rather than platform jargon. Do not add filler,
+  repeated button explanations, internal notes or implementation terminology.
+  Preserve meaningful privacy/security guidance and merchant-authored content.
 - translate interface labels, buttons, help text, status labels, and platform copy;
 - do not translate product names;
 - do not translate brand names;
@@ -1324,6 +1337,8 @@ Minimum expectations:
 - keyboard-accessible dialogs and drawers;
 - focus trapping and restoration where appropriate;
 - semantic buttons and labels;
+- recognizable category pictures alongside text; decorative artwork is hidden
+  from assistive technology, with accessible category names retained;
 - descriptive image alt text;
 - readable availability states;
 - clear loading, success, empty, and failure states;
@@ -1398,6 +1413,11 @@ structured inquiry, not online checkout.
 ---
 
 ## 22. Testing and definition of done
+
+S22 uses `capture-search-drawer.mjs` for full-map defaults, sliding overlays,
+filter/page retention, map identity/zoom, keyboard focus/Escape, previews,
+reduced motion and 1440/390/320 overflow. Default-all projections are compared
+with explicit All categories in `test-discovery-pagination.ts`.
 
 Spelling search is covered by `test:discovery-pagination` (including English and
 Amharic, ranking, privacy and write consistency), `test:search-performance` (10,000

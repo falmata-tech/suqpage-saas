@@ -61,11 +61,19 @@ export function createSuqpageSupabaseAdminClient(): SupabaseClient {
   });
 }
 
-export async function provisionSupabasePasswordIdentity(input: { email: string; password: string; passwordHash?: string; name: string }) {
+export function provisionSupabasePasswordIdentity(input: { email: string; password: string; passwordHash?: string; name: string }) {
+  return provisionSupabaseIdentity(input);
+}
+
+export function provisionSupabaseEmailIdentity(input: { email: string; name: string }) {
+  return provisionSupabaseIdentity({ email: input.email, name: input.name });
+}
+
+async function provisionSupabaseIdentity(input: { email: string; name: string; password?: string; passwordHash?: string }) {
   const client = createSuqpageSupabaseAdminClient();
   const { data, error } = await client.auth.admin.createUser({
     email: input.email,
-    ...(input.passwordHash ? { password_hash: input.passwordHash } : { password: input.password }),
+    ...(input.passwordHash ? { password_hash: input.passwordHash } : input.password ? { password: input.password } : {}),
     email_confirm: true,
     user_metadata: { display_name: input.name },
     app_metadata: { suqpage_link_state: "pending" },

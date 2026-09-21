@@ -64,19 +64,20 @@ assert.doesNotMatch(landingCss, /\.public-lobby/);
 
 assert.match(discoveryUi, /const action = "\/"/);
 assert.match(discoveryUi, /discovery-workbench/);
-assert.match(discoveryUi, /discovery-industry-menu/);
-assert.match(discoveryUi, /aria-label="Filter by category"/);
+assert.match(discoveryUi, /discovery-panel-filters/);
+assert.match(discoveryUi, /<CategoryChooser/);
+assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label="Filter by category"/);
 assert.match(discoveryRuntime, /ALL_DISCOVERY_INDUSTRIES = \{ key: "all", label: "All categories"/);
 assert.match(discoveryRuntime, /DISCOVERY_INDUSTRY_OPTIONS = \[\.\.\.DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES\]/);
 assert.match(discoveryRuntime, /normalizeIndustrySelection/);
 assert.match(discoveryRuntime, /export async function getMarketplaceDiscoveryView/);
 assert.match(discoveryRuntime, /export async function getFeaturedShowroomsView/);
 assert.match(discoveryRuntime, /export async function getSponsoredShowrooms/);
-assert.match(discoveryUi, /discovery-filter-sheet/);
-assert.match(discoveryUi, /Open category and location filters/);
+assert.doesNotMatch(discoveryUi, /discovery-filter-sheet/);
+assert.match(discoveryUi, /Search & filters/);
 assert.match(discoveryUi, /discovery-floating-tools/);
-assert.match(discoveryUi, /function IndustryStartChooser/);
-assert.match(discoveryUi, /Choose a category/);
+assert.doesNotMatch(discoveryUi, /function IndustryStartChooser/);
+assert.match(discoveryUi, /inert=\{!panelOpen\}/);
 assert.doesNotMatch(discoveryUi, /discovery-mobile-view-tabs|aria-label="List view"/);
 assert.match(featuredUi, /export default function FeaturedShowroomsWorkspace/);
 assert.match(discoveryUi, /function SponsoredRail/);
@@ -104,7 +105,8 @@ assert.match(discoveryUi, /aria-label="Search result type"/);
 assert.match(discoveryUi, /label: "Products & services"/);
 assert.match(discoveryUi, /label: "Businesses"/);
 assert.match(discoveryUi, /view: "search"/);
-assert.match(discoveryUi, /className="discovery-search-map-action"/);
+// S22/S24: the drawer hide control replaces the former separate map action.
+assert.match(discoveryUi, /aria-label="Hide search and filters"/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
 // FE-042 replaces the former fixed result cap with a bounded database page.
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);

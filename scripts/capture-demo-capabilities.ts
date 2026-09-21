@@ -38,7 +38,7 @@ async function main(){
    await expect(dialog.getByRole('link',{name:'SMS',exact:true})).toHaveAttribute('href',/^sms:/);
    await expect(dialog.getByRole('textbox',{name:'Reply phone number'})).toHaveCount(0);
    await page.screenshot({path:`${out}/inquiry-${width}.png`});captures.push(`inquiry-${width}`);
-   await dialog.getByRole('button',{name:'Send on Suqpage',exact:true}).click();await expect(dialog.getByRole('textbox',{name:'Reply phone number'})).toBeVisible();
+   await dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true}).click();await expect(dialog.getByRole('textbox',{name:'Reply phone number'})).toBeVisible();
    await dialog.getByRole('button',{name:'Close inquiry'}).click();
    for(const product of products){await page.goto(`${base}/@${shop.handle}?product=${product.id}`);await page.getByRole('button',{name:'Add to inquiry list',exact:true}).click();}
    await page.getByRole('button',{name:'Inquire about selected items',exact:true}).click();

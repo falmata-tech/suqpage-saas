@@ -90,7 +90,7 @@ async function main() {
   }
   const metadataBefore=await db.prepare('SELECT offering_kind,category_id,quantity_unit,highlights_json,availability,is_published FROM products WHERE id=?').get(products[2].id);
   await owner.getByLabel('Name',{exact:true}).fill('My own custom work');
-  await owner.getByRole('button',{name:'Save changes',exact:true}).click();await expect(owner.getByText('Offering saved.',{exact:true})).toBeVisible();
+  await owner.getByRole('button',{name:'Save changes',exact:true}).click();await expect(owner.getByText('Item saved.',{exact:true})).toBeVisible();
   assert.equal((await db.prepare('SELECT name FROM products WHERE id=?').get(products[2].id)).name,'My own custom work');
   assert.deepEqual(await db.prepare('SELECT offering_kind,category_id,quantity_unit,highlights_json,availability,is_published FROM products WHERE id=?').get(products[2].id),metadataBefore);
   await owner.goto(base+'/dashboard/products/new');
@@ -98,7 +98,7 @@ async function main() {
   await owner.getByLabel('Description',{exact:true}).fill('Home visits and repairs in your neighborhood.');
   await capture(owner,'new-offering',320);
   await owner.getByRole('button',{name:'Add item',exact:true}).click();
-  await expect(owner.getByText('Offering saved.',{exact:true})).toBeVisible();
+  await expect(owner.getByText('Item saved.',{exact:true})).toBeVisible();
   assert.equal((await db.prepare('SELECT COUNT(*) AS total FROM products WHERE business_id=? AND name=?').get(workspace.businessId,'A new local service')).total,1);
   // Owner setup to public page has no staff review step.
   await owner.goto(base+'/dashboard/business');

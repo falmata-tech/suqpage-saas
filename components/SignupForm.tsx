@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { BUSINESS_CATEGORY_OPTIONS } from "@/lib/business-categories";
+import CategorySelect from "./CategorySelect";
 
 type State = { kind: "idle" } | { kind: "sending" } | { kind: "error"; message: string };
 
@@ -30,7 +30,7 @@ export default function SignupForm({ email, initialName }: { email: string; init
     <div className="field"><label htmlFor="signup-name">Your name</label><input id="signup-name" name="name" autoComplete="name" required minLength={2} maxLength={100} defaultValue={initialName} /></div>
     <div className="field"><label>Verified email</label><div className="verified-identity">{email}</div></div>
     <div className="field"><label htmlFor="signup-business">Name buyers will see</label><input id="signup-business" name="businessName" autoComplete="organization" required minLength={2} maxLength={120} /></div>
-    <div className="field"><label htmlFor="signup-category">Category</label><select id="signup-category" name="businessCategory" required defaultValue=""><option value="" disabled>Choose a category</option>{BUSINESS_CATEGORY_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select></div>
+    <div className="field"><label htmlFor="signup-category">Category</label><CategorySelect id="signup-category" name="businessCategory" required/></div>
     <div className="field"><label htmlFor="signup-phone">Account phone (private)</label><input id="signup-phone" name="phone" type="tel" autoComplete="tel" required minLength={9} maxLength={40} placeholder="+251…" /></div>
     <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> I agree to the Suqpage Terms and Privacy Policy.</label></div>
     {state.kind === "error" ? <div className="field full error" role="alert">{state.message}</div> : null}
