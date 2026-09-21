@@ -1,3 +1,4 @@
+import { findSpellingMatches, type SpellingMatch } from './spelling-search';
 import { platformEnvironment } from "./platform-environment.mjs";
 import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
 import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
@@ -218,6 +219,7 @@ export type DiscoveryView = {
   suggestions: DiscoverySearchSuggestion[];
   searchProducts: DiscoveryProductResult[];
   searchBusinesses: DiscoveryShowroom[];
+  searchOrder?: Array<Pick<SpellingMatch, 'kind' | 'id'>>;
   resultCounts: { products: number; businesses: number };
   resultPage: Omit<PageResult<never>, "items">;
   place: string;
@@ -473,7 +475,7 @@ function productSuggestionSql(placeWhere: string) {
   `;
 }
 
-function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false) {
+function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false, byId = false) {
   return `
     SELECT ${countOnly ? "COUNT(*) AS total" : `      product.id,product.name,product.description,product.image_path,
       COALESCE(category.name,'Product') AS category_name,
@@ -493,7 +495,7 @@ function productSearchResultSql(placeWhere: string, suffix = "", countOnly = fal
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND product.is_published=1
-      AND ${wordMatch(OFFERING_SEARCH_TEXT)}
+      AND ${byId ? "product.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)" : wordMatch(OFFERING_SEARCH_TEXT)}
       ${placeWhere}
     ${countOnly ? "" : `ORDER BY
       CASE
@@ -774,20 +776,31 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     query, `${escapedQuery}%`, query];
   const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
   const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
-  const productCountRow = await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams.slice(0, -3));
+  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams.slice(0, -3)) : undefined;
   const productCount = Number(productCountRow?.total || 0);
   // The map already loaded every eligible business using the same predicate.
   // Reuse that server-side count instead of sorting/hydrating it a second time.
   const businessCount = rows.length;
+  const spelling = await findSpellingMatches({query,industry:projectionIndustryKey,
+    city:selectedPlace?.kind === "city" ? selectedPlace.city : "",
+    region:selectedPlace?.region || "",scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id)},port);
   const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
-  const total = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
+  const approximate = spelling.filter(match=>type === "all" || (type === "products" ? match.kind === "product" : match.kind === "business"));
+  const normalTotal = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
+  const total = normalTotal + approximate.length;
   const request = normalizePageRequest({ page: options.page }, PUBLIC_PAGE_SIZE);
   const window = pageWindow(total, request);
   const productLimit = type === "businesses" ? 0 : Math.max(0, Math.min(window.limit, productCount - window.offset));
-  const businessLimit = type === "products" ? 0 : window.limit - productLimit;
   const businessOffset = type === "businesses" ? window.offset : Math.max(0, window.offset - productCount);
-  const [productSuggestionRows, productResultRows, businessResultRows] = await Promise.all([
-    query.length >= 2 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
+  const businessLimit = type === "products" ? 0 : Math.max(0,Math.min(window.limit - productLimit,businessCount-businessOffset));
+  // Only the bounded ranked references are sliced on the server; catalog rows
+  // remain in PostgreSQL and are hydrated for this five-item page only.
+  const approximatePage = approximate.slice(Math.max(0,window.offset-normalTotal),Math.max(0,window.offset+window.limit-normalTotal));
+  const approximateProducts = approximatePage.filter(match=>match.kind === "product").map(match=>match.id);
+  const normalBusinessIds = new Set(rows.map(row=>row.id));
+  const mapIds = [...new Set(spelling.map(match=>match.businessId))].filter(id=>!normalBusinessIds.has(id));
+  const [productSuggestionRows, productResultRows, businessResultRows, approximateProductRows, approximateMapRows] = await Promise.all([
+    query.length >= 2 && productCount > 0 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
       projectionIndustryKey, projectionIndustryKey, searchTerms(query),
       ...placeParams, query, `${escapedQuery}%`,
     ]) : Promise.resolve([]),
@@ -795,8 +808,22 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
       [...productParams, productLimit, window.offset]) : Promise.resolve([]),
     businessLimit ? all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?", businessOrder),
       [...businessResultParams, businessLimit, businessOffset]) : Promise.resolve([]),
+    approximateProducts.length ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere,"",false,true),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...placeParams,query,`${escapedQuery}%`,query]) : Promise.resolve([]),
+    mapIds.length ? all<DiscoveryRow>(selectSql("AND b.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)"),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(mapIds)]) : Promise.resolve([]),
   ]);
-  const { items: _items, ...resultPage } = pageResult(Array.from({ length: productResultRows.length + businessResultRows.length }), total, request);
+  const searchOrder = [
+    ...productResultRows.map(row=>({kind:"product" as const,id:row.id})),
+    ...businessResultRows.map(row=>({kind:"business" as const,id:row.id})),
+    ...approximatePage.map(({kind,id})=>({kind,id})),
+  ];
+  const approximateBusinessIds = new Set(approximatePage.filter(match=>match.kind === "business").map(match=>match.id));
+  productResultRows.push(...approximateProductRows);
+  businessResultRows.push(...approximateMapRows.filter(row=>approximateBusinessIds.has(row.id)));
+  rows.push(...approximateMapRows);
+  if (!selectedPlace) places=placeOptions(rows);
+  const { items: _items, ...resultPage } = pageResult(Array.from({ length: searchOrder.length }), total, request);
   const showrooms = rows.map(toShowroom);
   const nearbyGroups = groupNearbyShowrooms(showrooms);
   const suggestions = buildSearchSuggestions(query, rows, places, productSuggestionRows);
@@ -808,7 +835,8 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     suggestions,
     searchProducts: productResultRows.map(toProductResult),
     searchBusinesses: businessResultRows.map(toShowroom),
-    resultCounts: { products: productCount, businesses: businessCount },
+    searchOrder,
+    resultCounts: { products: productCount + spelling.filter(match=>match.kind === "product").length, businesses: businessCount + spelling.filter(match=>match.kind === "business").length },
     resultPage,
     place: selectedPlace?.key || "",
     places,

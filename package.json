@@ -108,7 +108,7 @@
     "test:self-service": "node --import tsx scripts/test-self-service-publication.ts",
     "test:simple-demo-seed": "node --import tsx scripts/test-simple-demo-seed.ts",
     "test:search-performance": "node --import tsx scripts/test-search-performance.ts",
-    "test:discovery-pagination": "node --import tsx scripts/test-human-search.ts && node --import tsx scripts/test-discovery-pagination.ts",
+    "test:discovery-pagination": "node --import tsx scripts/test-spelling-search.ts && node --import tsx scripts/test-human-search.ts && node --import tsx scripts/test-discovery-pagination.ts",
     "test:page-review": "node --import tsx scripts/test-page-review.ts",
     "test:standard-pages:postgres": "node --env-file=.local/supabase-runtime.env --import tsx scripts/test-standard-page-postgres.ts",
     "test:standard-pages:visual": "node --env-file=.local/supabase-runtime.env scripts/capture-standard-pages.mjs",

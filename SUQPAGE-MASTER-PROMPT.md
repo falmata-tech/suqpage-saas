@@ -809,6 +809,17 @@ The owner approved this experience; release evidence is recorded in docs/SUQPAGE
 
 ## 10. Market discovery behavior
 
+Under BE-040/FE-042/DEP-037, query results form one backend-paginated list:
+normal matches first, then spelling matches ranked by PostgreSQL similarity.
+There is no separate match section or badge. English and Amharic typo fixtures
+are verified; this is spelling tolerance, not translation or semantic search.
+Exact results remain complete. Indexed probes and per-business offering expansion
+are bounded, with at most 100 approximate products and 100 approximate businesses.
+Filters and public visibility apply before admission. Current text is indexed
+directly, so edits require no synchronization service. Schema 48 adds pg_trgm,
+fuzzystrmatch and four expression indexes; backups retain extension dependencies.
+Operational and quality evidence is in docs/SUQPAGE-RELEASE-2026-09-21.md (S21).
+
 Suqpage’s directory must scale without dumping every tenant onto the page by default.
 
 Default behavior:
@@ -1187,6 +1198,11 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
+Schema 48 adds pg_trgm/fuzzystrmatch in the reviewed `extensions` namespace and
+four expression GiST indexes. Existing extensions are never relocated implicitly.
+Archive backups include both extension definitions; restoration creates their
+namespace in the approved empty target. Prior application code remains compatible.
+
 DEP-029 governs production Auth configuration maintenance. The repository's
 guarded command pins the production project and HTTPS origin, rejects local and
 unknown settings or credential changes, and creates a read-only review plan with
@@ -1382,6 +1398,11 @@ structured inquiry, not online checkout.
 ---
 
 ## 22. Testing and definition of done
+
+Spelling search is covered by `test:discovery-pagination` (including English and
+Amharic, ranking, privacy and write consistency), `test:search-performance` (10,000
+offerings and index-plan evidence), and desktop/390/320 captures from
+`capture-spelling-search.mjs`. Approximate matching is bounded and best-effort.
 
 Service/place verification uses `test:service-offerings`, `test:place-selection`
 and `scripts/capture-service-place.ts` for additive migration, tenant/privacy,

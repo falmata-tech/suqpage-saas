@@ -118,3 +118,13 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S21 ranked search refinement (BE-040 / DEP-037)
+
+A nonempty query uses one result sequence: normal matches first, then admitted
+approximate matches ordered by quality. Product and business cards retain their
+existing actions and appearance; All results follows the server order across kinds.
+There is no separate Possible matches section, label or new filter. Empty category
+browsing retains its existing product/business grouping. Five-row pagination, type
+counts, URL/Back and stable map remain. Owner explicitly requested completion and
+publication of this refinement; no repeat approval pause for this exact scope.

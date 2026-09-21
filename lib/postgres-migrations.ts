@@ -1,3 +1,4 @@
+import { SPELLING_INDEX_SQL } from "./search-index";
 import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 import baseline from "./postgres-baseline.json";
 import { OWNER_BUSINESS_SCHEMA_SQL, OWNER_PLACE_ANCHOR_SCHEMA_SQL } from "./owner-business-schema";
@@ -28,6 +29,7 @@ export async function migratePostgresDatabase(
     await runner.query(`SET LOCAL search_path TO ${quotedSchema(schema)}`);
     await runner.query("SELECT pg_advisory_xact_lock(6870619271341)");
     const installed = await runner.query<{ name: string | null }>("SELECT to_regclass('schema_migrations')::text name");
+    const applied: number[] = [];
     if (!installed.rows[0]?.name) {
       const existing = await runner.query<{ total: number }>("SELECT COUNT(*) total FROM information_schema.tables WHERE table_schema=current_schema() AND table_type='BASE TABLE'");
       if (Number(existing.rows[0]?.total)) throw new Error("Refusing to install into an unversioned populated schema.");
@@ -48,13 +50,11 @@ export async function migratePostgresDatabase(
           await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
         }
       }
-      return { applied: Array.from({ length: baseline.version }, (_, index) => index + 1) };
+      applied.push(...Array.from({ length: baseline.version }, (_, index) => index + 1));
     }
     const migration31 = await runner.query<{ version: number }>(
       "SELECT version FROM schema_migrations WHERE version=31",
     );
-    const applied: number[] = [];
-
     if (!migration31.rows.length) {
       await runner.query(`
       WITH ranked AS (
@@ -424,6 +424,20 @@ export async function migratePostgresDatabase(
       await runner.query(OWNER_PLACE_ANCHOR_SCHEMA_SQL);
       await runner.query("INSERT INTO schema_migrations(version) VALUES(47)");
       applied.push(47);
+    }
+    const migration48 = await runner.query("SELECT version FROM schema_migrations WHERE version=48");
+    if (!migration48.rows.length) {
+      await runner.query('CREATE SCHEMA IF NOT EXISTS extensions');
+      for (const name of ['pg_trgm','fuzzystrmatch']) {
+        const extension = await runner.query<{ schema: string }>("SELECT n.nspname AS schema FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace WHERE e.extname=?",[name]);
+        if (extension.rows.length && extension.rows[0].schema !== 'extensions') throw new Error(`${name} must use the reviewed extensions schema; do not relocate it automatically.`);
+        await runner.query(`CREATE EXTENSION IF NOT EXISTS ${name} WITH SCHEMA extensions`);
+      }
+      const runtimeRoles = await runner.query<{ rolname: string }>("SELECT rolname FROM pg_roles WHERE rolname IN ('suqpage_runtime','mirtpage_runtime')");
+      for (const role of runtimeRoles.rows) await runner.query(`GRANT USAGE ON SCHEMA extensions TO ${quotedRole(role.rolname)}`);
+      await runner.query(SPELLING_INDEX_SQL);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(48)");
+      applied.push(48);
     }
     return { applied };
   });

@@ -100,3 +100,13 @@ specs before a material behavior change.
 | Human-query search regression (S20a) | FE-042 | BE-040 | DEP-037 | search-terms.ts, discovery.ts, DiscoveryWorkspace.tsx | test-human-search.ts, test-discovery-pagination.ts: case/plural/accent/phrase/Unicode/description/location/brand, literal and eligibility negatives; capture-human-search.mjs: delayed responses, desktop/390/320, typing/back/type; 10,000-product benchmark 450/436/492 ms; full release pending  S20 full gates and monitored deployment 6ab0d349f099639821fa0f9a verified; current evidence: docs/SUQPAGE-RELEASE-2026-09-21.md. | done |
 
 | Verified S7–S20 release | FE-044–FE-048 | BE-037–BE-041 | DEP-034–DEP-038 | Source be134a247c8ea54b18b882f9e2368058f7fbc0ee | Full check/release/operations, nine provider browser scenarios, schema 47 preservation, 64 demo routes and live 1440/390/320 search; Netlify 6ab0d349f099639821fa0f9a; docs/SUQPAGE-RELEASE-2026-09-21.md | done |
+
+S21 (BE-040 / FE-042 / DEP-037): `scripts/test-spelling-search.ts` proves
+English/Amharic typo admission, normal-first cross-type ordering, five-row page
+traversal, filters, visibility, update/unpublish consistency and migration no-op.
+`test-search-performance.ts` verifies index use and normal/typo searches on 10,000
+offerings. `capture-human-search.mjs` and `capture-spelling-search.mjs` pass at
+1440/390/320; no separate approximate-match section. `test-operations.mjs` restores
+indexed data plus both search extensions. Production backup rehearsal preserves
+all 55 existing application tables / 3,596 records through migration 48.
+Full gates and hosted rollout are recorded separately in the release document.

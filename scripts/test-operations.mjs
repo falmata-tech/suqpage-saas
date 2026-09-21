@@ -17,6 +17,7 @@ try{
  const url=`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`;
  pool=new pg.Pool({connectionString:url,max:1});
  await pool.query("CREATE TABLE public.archive_fixture(id integer PRIMARY KEY, value text NOT NULL); INSERT INTO public.archive_fixture VALUES(1,'preserved')");
+ await pool.query("CREATE SCHEMA extensions; CREATE EXTENSION pg_trgm WITH SCHEMA extensions; CREATE EXTENSION fuzzystrmatch WITH SCHEMA extensions; CREATE INDEX archive_search_idx ON public.archive_fixture USING gist (value extensions.gist_trgm_ops) WHERE id=1");
  await pool.query('INSERT INTO public.archive_fixture VALUES(2,$1)',[crypto.randomBytes(512*1024).toString('hex')]);
  await pool.query("CREATE FUNCTION public.archive_fixture_guard() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$; CREATE TRIGGER archive_fixture_guard BEFORE UPDATE ON public.archive_fixture FOR EACH ROW EXECUTE FUNCTION public.archive_fixture_guard()");
  const env={...process.env,SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_DIRECT_URL:url,SUQPAGE_BACKUP_ROOT:root,SUQPAGE_LOCAL_PG_CONTAINER:container};
@@ -31,7 +32,7 @@ try{
  const restoreTarget=new URL(url);restoreTarget.pathname='/suqpage_restore_test';const restoreUrl=restoreTarget.href;const overrides={SUQPAGE_POSTGRES_DIRECT_URL:restoreUrl};
  const plan=script('restore.ts',[`--from=${from}`],overrides);const digest=plan.stdout.match(/Target digest: ([a-f0-9]{64})/)?.[1];assert.ok(digest);
  script('restore.ts',[`--from=${from}`,'--execute'],{...overrides,SUQPAGE_APPROVE_POSTGRES_RESTORE:digest});
- const restored=new pg.Pool({connectionString:restoreUrl,max:1});try{assert.equal((await restored.query('SELECT value FROM archive_fixture WHERE id=1')).rows[0].value,'preserved');}finally{await restored.end();}
+ const restored=new pg.Pool({connectionString:restoreUrl,max:1});try{assert.equal((await restored.query('SELECT value FROM archive_fixture WHERE id=1')).rows[0].value,'preserved');assert.equal((await restored.query("SELECT count(*)::int total FROM pg_extension WHERE extname IN ('pg_trgm','fuzzystrmatch')")).rows[0].total,2);assert.ok((await restored.query("SELECT to_regclass('public.archive_search_idx') name")).rows[0].name);}finally{await restored.end();}
  const originalMetadata=JSON.parse(fs.readFileSync(path.join(from,'backup.json'),'utf8'));
  const truncated=archive.subarray(0,Math.floor(archive.length/2));
  fs.writeFileSync(path.join(from,'postgres.dump'),truncated);

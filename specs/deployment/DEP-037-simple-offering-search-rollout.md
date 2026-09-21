@@ -1,7 +1,7 @@
 ---
 id: DEP-037
 title: Simple offering search rollout
-status: done
+status: in_progress
 related: [DEP-038, FE-047, BE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
@@ -102,3 +102,17 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S21 indexed typo-matching rollout
+
+Add schema 48 with pg_trgm, fuzzystrmatch, and expression indexes on existing search text. No new
+tenant table or data rewrite. Empty installs and upgrades must agree, preserve
+all original rows/permissions, and repeat as a no-op. Archive/restore must include
+the extension dependency. Existing code remains compatible with the additive indexes.
+Use a protected backup and restore rehearsal, approved scoped source, passing full
+gates and monitored deployment. Never relocate an existing extension silently.
+Owner authorizes completing and publishing this exact search refinement.
+
+Typo candidates must also pass bounded word edit distance: one edit for words of
+up to five characters, two for longer words. This rejects shared fragments in
+unrelated words while permitting common adjacent-letter transpositions.

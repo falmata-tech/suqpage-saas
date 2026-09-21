@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { getDb, closeDbForTests } from './testing/postgres-fixture';
+import { SPELLING_SEARCH_SQL, spellingTerms } from '../lib/spelling-search';
 import { getMarketplaceDiscoveryView } from '../lib/discovery';
 
 async function main() {
@@ -22,7 +23,17 @@ async function main() {
       assert.equal(view.resultCounts.products,9500);assert.equal(view.resultCounts.businesses,500);
       assert.equal(view.searchProducts.length,5);assert.equal(view.showrooms.length,500);
     }
-    console.log(JSON.stringify({passed:true,businesses:500,products:10000,returnedProducts:5,queryMilliseconds:timings}));
+    const typoTimings:number[]=[];
+    for (const q of ['repiar Addis','ጥገነ Addis','zzzzzzz Addis']) {
+      const start=performance.now();const view=await getMarketplaceDiscoveryView({q,industry:'electronics',type:'products'});
+      typoTimings.push(Math.round(performance.now()-start));
+      assert.ok(view.searchProducts.length<=5);assert.ok(view.resultPage.totalItems<=100);
+      assert.equal(view.searchProducts.length,q.startsWith('zzz')?0:5,q);
+    }
+    const plan=await db.runner.query('EXPLAIN (FORMAT JSON) '+SPELLING_SEARCH_SQL,['electronics','','','', '[]',JSON.stringify(spellingTerms('repiar Addis'))]);
+    assert.match(JSON.stringify(plan.rows),/products_spelling_gist/,'Candidate retrieval uses the expression index');
+    assert.ok(Math.max(...timings,...typoTimings)<2500,'Search stays within the local 2.5 second fixture budget');
+    console.log(JSON.stringify({passed:true,businesses:500,products:10000,returnedProducts:5,queryMilliseconds:timings,typoMilliseconds:typoTimings}));
   } finally {await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

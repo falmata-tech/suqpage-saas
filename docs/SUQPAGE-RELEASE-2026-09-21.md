@@ -106,3 +106,39 @@ accounts, products, inquiries and support were verified unchanged. No messages
 were sent. The first canonical-environment request was rejected with HTTP 400
 before any change; full unchanged readback preceded the corrected SDK-body request.
 All three canonical settings then passed exact readback with unrelated values intact.
+
+## S21: ranked spelling matches
+
+Implemented under BE-040, FE-042 and DEP-037; production rollout pending.
+Normal results precede approximate results in the existing list, including across
+product/business types and page boundaries. No new UI labels or sections.
+PostgreSQL pg_trgm supplies indexed candidates and similarity; fuzzystrmatch rejects
+unrelated fragments with bounded edit distance. English and Amharic fixtures pass.
+This provides typo tolerance, not translation, synonyms or semantic search.
+
+Retrieval uses 32 candidates per field/term, at most eight fuzzy terms, and 32
+published offerings per candidate business. Final alternatives are capped at 100
+products and 100 businesses. Exact matches remain complete; counts describe the
+admitted result set. Larger catalogs can have relevant alternatives outside these
+limits. No managed provider, extra npm dependency, duplicate search table or sync
+job was added.
+
+Focused search regressions, privacy/filter/page/update tests, index-plan checks,
+and desktop/390/320 browser captures pass. On a 500-business/10,000-offering local
+fixture, normal queries took 557–663 ms and typo/no-match queries 800–1,308 ms
+after the final per-business bound; timings are measurements, not SLAs.
+
+The fresh protected schema-47 backup was parsed and restored into a disposable
+local database. Migration 48 preserves all 55 application tables / 3,596 records
+and a second run is a no-op. Backups now include the two search extensions;
+restoration of a trigram index and its data passes the isolated operations gate.
+Rollback: republish the previous deploy `6ab0d349f099639821fa0f9a`; schema 48 is
+additive and compatible with that code. Do not drop indexes/extensions or restore
+over production data as an automatic rollback. Auth, SMTP and domain settings
+are unchanged by this rollout. Existing real-email-delivery limitations remain.
+
+Validation: `npm run check`, `npm run release`, isolated operations, nine browser
+acceptance scenarios, final Netlify build and artifact privacy checks passed.
+Focused search tests and the final build include the per-business candidate bound.
+The initial staging build rejected a dependency symlink; a real copy resolved the
+build infrastructure issue. No product check was bypassed or weakened.

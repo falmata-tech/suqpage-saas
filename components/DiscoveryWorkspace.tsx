@@ -208,6 +208,9 @@ function MarketplaceSearchResults({
     { key: "businesses", label: "Businesses", count: discovery.resultCounts.businesses, icon: Store },
   ];
 
+  const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <Link key={product.id} href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} data-industry={product.primaryIndustryKey} aria-label={`${product.name} from ${product.businessName}, ${product.city}. View details.`}><span className="discovery-product-result-media"><ProductResultImage product={product} /></span><span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong><p>{product.description}</p><span>{product.businessName}</span><em>{product.city}, {product.region}</em></span></Link>;
+  const renderBusiness = (business: DiscoveryShowroom) => <button key={business.id} type="button" data-industry={business.primaryIndustryKey} onClick={() => onSelectBusiness(business.id)} aria-label={`${business.name}, ${business.primaryIndustryLabel}, ${business.city}. View details.`}><span className="discovery-business-result-media"><ShowroomImage showroom={business} /></span><span className="discovery-business-result-copy"><small>{business.primaryIndustryShortLabel}</small><strong>{business.name}</strong><p>{business.tagline}</p><em>{business.city}, {business.region}</em></span></button>;
+
   return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title">
     <header className="discovery-search-workspace-head">
       <div><h2 id="discovery-search-results-title">{discovery.query ? `Results for “${discovery.query}”` : discovery.industry.label}</h2><p aria-live="polite">{discovery.resultCounts.products} offerings · {discovery.resultCounts.businesses} businesses</p></div>
@@ -228,8 +231,18 @@ function MarketplaceSearchResults({
     </nav> : null}
     <div ref={resultList} className="discovery-search-results">
       {visibleCount === 0 ? <div className="discovery-search-empty"><Search aria-hidden="true" /><h3>No matches found</h3><p>Try another product, business, category, or place.</p></div> : null}
-      {visibleProducts.length ? <section className="discovery-search-result-section" aria-labelledby="discovery-product-results-title"><header><h3 id="discovery-product-results-title">Products & services</h3><span>{visibleProducts.length} shown</span></header><div className="discovery-product-results">{visibleProducts.map((product) => <Link key={product.id} href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} data-industry={product.primaryIndustryKey} aria-label={`${product.name} from ${product.businessName}, ${product.city}. View details.`}><span className="discovery-product-result-media"><ProductResultImage product={product} /></span><span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong><p>{product.description}</p><span>{product.businessName}</span><em>{product.city}, {product.region}</em></span></Link>)}</div></section> : null}
-      {visibleBusinesses.length ? <section className="discovery-search-result-section" aria-labelledby="discovery-business-results-title"><header><h3 id="discovery-business-results-title">Businesses</h3><span>{visibleBusinesses.length} shown</span></header><div className="discovery-business-results">{visibleBusinesses.map((business) => <button key={business.id} type="button" data-industry={business.primaryIndustryKey} onClick={() => onSelectBusiness(business.id)} aria-label={`${business.name}, ${business.primaryIndustryLabel}, ${business.city}. View details.`}><span className="discovery-business-result-media"><ShowroomImage showroom={business} /></span><span className="discovery-business-result-copy"><small>{business.primaryIndustryShortLabel}</small><strong>{business.name}</strong><p>{business.tagline}</p><em>{business.city}, {business.region}</em></span></button>)}</div></section> : null}
+      {discovery.query && discovery.searchOrder ? discovery.searchOrder.map(result => {
+        if (result.kind === "product") {
+          const product = visibleProducts.find(item=>item.id === result.id);
+          return product ? <div key={`product-${result.id}`} className="discovery-product-results">{renderProduct(product)}</div> : null;
+        }
+        const business = visibleBusinesses.find(item=>item.id === result.id);
+        return business ? <div key={`business-${result.id}`} className="discovery-business-results">{renderBusiness(business)}</div> : null;
+      }) : <>
+      {visibleProducts.length ? <section className="discovery-search-result-section" aria-labelledby="discovery-product-results-title"><header><h3 id="discovery-product-results-title">Products & services</h3><span>{visibleProducts.length} shown</span></header><div className="discovery-product-results">{visibleProducts.map(renderProduct)}</div></section> : null}
+      {visibleBusinesses.length ? <section className="discovery-search-result-section" aria-labelledby="discovery-business-results-title"><header><h3 id="discovery-business-results-title">Businesses</h3><span>{visibleBusinesses.length} shown</span></header><div className="discovery-business-results">{visibleBusinesses.map(renderBusiness)}</div></section> : null}
+      </>}
+
     </div>
   </section>;
 }

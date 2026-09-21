@@ -1061,3 +1061,21 @@ Current handoff: S20 publication is complete. Earlier dated S2–S19 checkpoint
 notes retain history; their visual/commit/rollout dependencies are resolved by
 S20 where within this release. Real external email delivery and authenticated
 hosted owner/admin smoke remain admission checks, not claimed completed tests.
+
+## S21 — efficient spelling matches and publish (2026-09-21)
+
+Feature/operations L3/L4 under BE-040, FE-042, DEP-037. Owner explicitly approves
+finishing and publishing the single ranked-list refinement. No new UI section.
+Definition of Ready: scope, ordering, capped alternatives, eligibility, Unicode,
+index/write consistency, backup/rollback and tests are specified above. Existing
+untracked deno.lock remains outside this task. Master sections 10/17/22 affected.
+
+- [x] Inspect current search/schema/ports and record contracts before code.
+- [x] Implement additive indexes and bounded candidate/ranking queries.
+- [x] Prove English/Amharic quality, exact-first ordering, privacy and paging;
+  measure index plans and 10,000-offering performance.
+- [x] Desktop/390/320 captures, full check, release/build/privacy/operations gates
+  and nine provider-backed browser scenarios pass.
+- [ ] CURRENT: review/commit explicit task paths; production backup is protected
+  and rehearsal preserves all existing records.
+- [ ] Apply additive migration, publish, verify live searches/health, record evidence.

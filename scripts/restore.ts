@@ -24,6 +24,8 @@ async function main() {
     // Archives can contain CREATE SCHEMA public. Drop only this empty namespace;
     // without CASCADE, any other/concurrently created object makes this fail closed.
     await pool.query('DROP SCHEMA IF EXISTS public');
+    // App archives include the two search extensions, whose namespace is outside public.
+    await pool.query('CREATE SCHEMA IF NOT EXISTS extensions');
   } finally { await pool.end(); }
   // The guard requires an empty target. Cleanup would try to drop triggers on
   // nonexistent tables, which fails even with --if-exists.

@@ -143,3 +143,44 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## S21 — bounded spelling matches in the existing result list
+
+Owner authorizes implementation and publication. Exact/normal all-term matches
+precede spelling alternatives in one ranked, five-row database-paginated sequence.
+Within alternatives, stronger PostgreSQL similarity sorts first; stable name/type/ID
+ties prevent repeats. Existing category browsing order is unchanged for empty queries.
+No new match section, badges, explanatory UI, provider, AI or translation.
+
+Use pg_trgm indexes and PostgreSQL fuzzystrmatch edit-distance validation over existing product, business, published About and public
+location text. Candidate retrieval and reranking are bounded; all meaningful terms
+must match the same offering plus its business metadata, or that business. Retain
+literal escaping, normalization, common plural alternatives and query length 80.
+Very short or punctuation-only terms do not initiate approximate retrieval. Exact
+results remain complete; approximate results are capped at 100 strongest products and 100 businesses,
+with counts/pagination referring to that admitted set. Never silently broaden filters.
+
+- GIVEN exact and misspelled eligible matches WHEN searching THEN every normal
+  match precedes alternatives across product/business types and across pages.
+- GIVEN English and Amharic character typos WHEN similarity is sufficient THEN
+  results appear by quality; unrelated words and punctuation do not match.
+- GIVEN private, hidden, excluded, suspended or foreign-category/place content
+  WHEN retrieving/ranking candidates THEN it cannot appear or consume the visible
+  result limit. No unpublished About text enters search.
+- GIVEN edited names/descriptions/locations/publications WHEN committed THEN
+  indexes and canonical read predicates immediately reflect edits without a sync job.
+- GIVEN empty query, long query, rapid typing, Back or type changes THEN existing
+  category, map and navigation behavior remains, with accurate bounded pages.
+
+Evidence required: focused PostgreSQL relevance/negative/pagination tests, EXPLAIN
+index-use checks, 10,000-offering English/Amharic performance comparison, existing
+search regressions, desktop/390/320 browser capture, typecheck, full/release/browser
+gates and monitored publication. No performance guarantee before measurement.
+
+Typo candidates must also pass bounded word edit distance: one edit for words of
+up to five characters, two for longer words. This rejects shared fragments in
+unrelated words while permitting common adjacent-letter transpositions.
+
+Candidate probes admit at most 32 records per indexed field per eligible term
+(first eight terms), and expand each candidate business into at most 32 published
+offerings. Approximate search is intentionally best-effort within these limits.
