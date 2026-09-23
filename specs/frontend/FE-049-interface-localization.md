@@ -92,3 +92,7 @@ publication evidence remain pending.
 Full check, release, all nine production-mode provider/browser scenarios,
 operations, final Netlify build and artifact privacy verification pass.
 Deployment is separately recorded in docs/SUQPAGE-S25-RELEASE-2026-09-23.md.
+
+Published and independently verified as 6ab399ae7a6f90b9daec07dc;
+five-language live browser checks and monitored health pass. See S25 release
+evidence for the resolved packaging incident and retained linguistic limits.

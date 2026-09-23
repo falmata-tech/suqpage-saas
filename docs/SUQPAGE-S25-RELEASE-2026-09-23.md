@@ -90,3 +90,27 @@ Corrected archive passes Linux/x64 Node 24 PNG transformation and artifact
 privacy/source verification. SHA-256:
 `320b98d144c541ecff23d6c75cbc7b722e4697e815a88afbdf6de3c920b17047`.
 The original archive fails the same test; no application code changed for recovery.
+
+## Verified publication — 2026-09-23
+
+The corrected release is live at https://suqpage.com. Netlify deployment
+`6ab399ae7a6f90b9daec07dc`, source `f16f2e3131a5739a96790bd362de767cbe1aaffc`
+(application change `0195bbd1fb03b6bf32584fd3eb0247543458f794`). The production
+account/domain/deployment identity is independently verified; 15 public checks
+pass, including health, spelling searches, email-only entry, private-route
+redirects and www canonical redirect.
+
+Live browser verification passes 20 locale/route combinations across all five
+languages at desktop/390/320 widths; original-title ordering, immediate search,
+direct-product inquiry-list selection/reload, and language/unsaved-email
+persistence pass without browser errors or customer messages. The 390px results
+screenshot was inspected: four complete product cards and visible footer paging.
+The Grass product used by the local regression is absent from the production
+catalog; production ranking was checked using the existing Aloe offerings.
+A transient measurement before panel visibility was corrected to await visible
+results; the resulting explicit layout/state assertions pass.
+
+Post-browser monitoring confirms this deployment remains active and healthy.
+The earlier pending-publication statements above are superseded by this evidence.
+All application data and provider settings remain unchanged. No Git push was
+requested; the pre-existing untracked deno.lock remains untouched.

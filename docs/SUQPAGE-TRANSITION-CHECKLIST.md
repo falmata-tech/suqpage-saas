@@ -1306,8 +1306,8 @@ again. No hosted Auth/SMTP, DNS, database schema or merchant-data change is plan
 - [x] Complete five-language public/owner/admin focused browser checks.
 - [x] Run check, release, acceptance and operations in a clean isolated candidate.
 - [x] Verify production target, protected recovery archive and rollback deployment.
-- [ ] Review/stage exact task files, commit, package and publish the tested source.
-- [ ] Independently verify and monitor the live deployment and update evidence.
+- [x] Review/stage exact task files, commit, package and publish the tested source.
+- [x] Independently verify and monitor the live deployment and update evidence.
 
 The existing untracked deno.lock remains excluded. No Git push is requested.
 
@@ -1350,3 +1350,9 @@ Current recovery: DEP-026 exact-artifact Linux transform gate, restore only
 lockfile-matched native packages in the isolated build, rebuild/verify, scoped
 commit and republish after the new gate passes. Existing application gates remain
 valid; the defect is native packaging, not localization or runtime configuration.
+
+S25 complete: corrected deployment 6ab399ae7a6f90b9daec07dc is independently
+verified and monitored healthy. Five-language live browser and public checks
+pass; protected data/settings unchanged. The initial packaging incident,
+rollback, added Linux archive gate, recovery source and limits are recorded in
+docs/SUQPAGE-S25-RELEASE-2026-09-23.md. This supersedes earlier pending S25 notes.

@@ -272,3 +272,9 @@ missing Linux Sharp/libvips; application rollback verified homepage/health 200.
 `scripts/test-netlify-native.mjs` reproduces failure from the exact uploaded
 archive in Linux/x64/glibc. Corrected build and passing archive evidence are
 required before recovery publication; see the S25 release document.
+
+S25 verified publication: 6ab399ae7a6f90b9daec07dc, source f16f2e3131a5739a96790bd362de767cbe1aaffc.
+All gates, corrected Linux native archive transform/privacy, 15 live public
+checks and five-language browser checks pass. The exact rollback/recovery,
+archive hash, screenshots and limits are recorded in
+docs/SUQPAGE-S25-RELEASE-2026-09-23.md. Previous pending notes are superseded.

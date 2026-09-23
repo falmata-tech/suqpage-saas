@@ -86,3 +86,10 @@ fix, separate from replacing the test's unbounded map network-idle wait.
 The disposable operations database disconnected during initial startup; one
 controlled rerun passed all privacy/integrity/restore assertions. No product
 backup/restore code or assertions were weakened.
+
+Publication is now verified: all full/release/operations/acceptance gates pass,
+and corrected deployment 6ab399ae7a6f90b9daec07dc passes live public,
+five-language/phone and monitored-health checks. An initial Linux native
+packaging failure was rolled back, reproduced, corrected and retested. See
+docs/SUQPAGE-S25-RELEASE-2026-09-23.md. Earlier pending-publication notes are
+superseded; linguistic/external-message/hosted-auth limits above still apply.
