@@ -1341,3 +1341,12 @@ and typecheck checks and is included in the final build.
 
 All nine production-mode acceptance scenarios pass. Full gate set is green;
 current step is scoped source commit and publication of the verified artifact.
+
+S25 publication incident: deployment 6ab397a6fa1799d61d40c665 returned HTTP 500
+because its Mac-built archive lacked Linux Sharp/libvips optional packages.
+The planned application rollback restored 6ab13a1acad8a70492ba56a9; homepage
+and health return 200. No database or Auth configuration was changed.
+Current recovery: DEP-026 exact-artifact Linux transform gate, restore only
+lockfile-matched native packages in the isolated build, rebuild/verify, scoped
+commit and republish after the new gate passes. Existing application gates remain
+valid; the defect is native packaging, not localization or runtime configuration.

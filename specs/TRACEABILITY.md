@@ -266,3 +266,9 @@ Final S25 gates: check, release, operations, all nine production-mode acceptance
 scenarios and final Netlify build/artifact privacy pass. The last search-readiness
 change additionally passes typecheck and immediate-typing browser regression.
 See docs/SUQPAGE-S25-RELEASE-2026-09-23.md for publication and recovery evidence.
+
+DEP-026 S25 packaging correction: first publication returned HTTP 500 due to
+missing Linux Sharp/libvips; application rollback verified homepage/health 200.
+`scripts/test-netlify-native.mjs` reproduces failure from the exact uploaded
+archive in Linux/x64/glibc. Corrected build and passing archive evidence are
+required before recovery publication; see the S25 release document.

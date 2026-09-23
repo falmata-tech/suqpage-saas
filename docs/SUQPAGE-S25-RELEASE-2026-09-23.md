@@ -63,3 +63,30 @@ and external video playback are not established. Hosted OTP delivery and real
 hosted authenticated sessions are not exercised; isolated provider acceptance
 covers local provider integration. No claim of exhaustive defect coverage or
 production-scale latency is made. Existing untracked `deno.lock` is excluded.
+
+## First publication and controlled rollback
+
+Source `0195bbd1fb03b6bf32584fd3eb0247543458f794` published as Netlify
+`6ab397a6fa1799d61d40c665`. Independent homepage verification returned HTTP 500.
+Function logs identified missing Linux/x64 Sharp/libvips optional dependencies
+in the Mac-built archive. Existing output tracing included those paths, but
+the native packages were absent from the build tree. The earlier artifact
+privacy check did not test runtime native loading.
+
+The planned rollback restored `6ab13a1acad8a70492ba56a9`; independent homepage
+and health checks returned 200. No database, customer records, Auth, SMTP or
+DNS configuration changed. The failed deployment remains available for diagnosis.
+
+Recovery adds `node scripts/test-netlify-native.mjs <function.zip>` to publication
+readiness. It extracts the exact archive into a private temporary directory and
+performs a PNG transform using that archive's Sharp in Node 24 Linux/x64/glibc,
+without network or a writable application filesystem. It rejects the first
+archive with the same runtime error. A rebuild includes only the two native
+packages at package-lock versions with tarball integrity verified. Record the
+passing archive SHA before publication; never infer native readiness from a Mac
+build or a successful JavaScript compile. Recovery publication remains pending.
+
+Corrected archive passes Linux/x64 Node 24 PNG transformation and artifact
+privacy/source verification. SHA-256:
+`320b98d144c541ecff23d6c75cbc7b722e4697e815a88afbdf6de3c920b17047`.
+The original archive fails the same test; no application code changed for recovery.

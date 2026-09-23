@@ -179,3 +179,20 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## Cross-platform native artifact readiness — 2026-09-23
+
+GIVEN a deployment bundle built on macOS WHEN preparing a Linux/x64 Netlify
+publication THEN the exact function archive must execute an image transform
+with its own Sharp/libvips dependencies in an isolated Linux/glibc container.
+A missing native package fails publication readiness even if Next build,
+privacy scan and application browser tests pass on the build host.
+The archive SHA binds this evidence to the uploaded artifact.
+
+Evidence: scripts/test-netlify-native.mjs rejects the S25 archive missing Linux
+optional dependencies; corrected-archive evidence is required before republishing.
+
+Corrected archive passes Linux/x64 Node 24 PNG transformation and artifact
+privacy/source verification. SHA-256:
+`320b98d144c541ecff23d6c75cbc7b722e4697e815a88afbdf6de3c920b17047`.
+The original archive fails the same test; no application code changed for recovery.

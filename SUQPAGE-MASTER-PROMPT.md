@@ -1059,6 +1059,10 @@ Sharp for verified image processing
 Server-rendered routes and server actions
 ```
 
+Netlify publication readiness includes a Linux/x64/glibc image transform using
+the exact generated function archive (DEP-026), in addition to application gates
+and privacy scans. A build on another OS does not prove native-library readiness.
+
 Important directories:
 
 ```text
