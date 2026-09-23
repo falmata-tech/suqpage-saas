@@ -10,7 +10,7 @@ fs.mkdirSync(out,{recursive:true,mode:0o700});
 const browser=await chromium.launch();
 try {
  for(const width of [1440,390,320]) {
-  const page=await browser.newPage({viewport:{width,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await browser.newPage({viewport:{width,height:width===1440?1000:width===390?844:740}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   page.setDefaultNavigationTimeout(hosted?60_000:30_000);
   await page.goto(base+'/',{waitUntil:'domcontentloaded'});
   const panel=page.locator('#discovery-search-panel'),map=page.locator('.discovery-map');
@@ -24,22 +24,45 @@ try {
   const zoom=await map.getAttribute('data-map-zoom');
   const bounds=await map.boundingBox();
   await page.screenshot({path:`${out}/map-${width}.png`});
-  await opener.click();await expect(panel).toBeVisible();
+  await opener.click();await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
   await expect(page.getByLabel('Filter by category')).toContainText('All categories');
   await expect(page.getByRole('button',{name:'Hide search and filters'})).toBeFocused();
   assert.deepEqual(await map.boundingBox(),bounds,'Drawer overlays rather than resizes the map');
+  const filters=panel.locator('.discovery-filter-toolbar button');
+  await expect(filters).toHaveAttribute('aria-expanded','false');
+  await expect(page.getByLabel('Filter by category')).toBeHidden();
+  const visibility=await panel.evaluate(el=>{
+    const list=el.querySelector('.discovery-search-results').getBoundingClientRect();
+    const cards=[...el.querySelectorAll('.discovery-product-results > a,.discovery-business-results > button')].map(card=>card.getBoundingClientRect());
+    const paging=el.querySelector('.discovery-pagination').getBoundingClientRect();
+    const panelRight=el.getBoundingClientRect().right;
+    const clipped=[...el.querySelectorAll('.discovery-search-result-types a,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
+    return {clipped,firstOffset:cards[0].top-el.getBoundingClientRect().top,fullCards:cards.filter(card=>card.top>=list.top&&card.bottom<=list.bottom).length,listBottom:list.bottom,pagingTop:paging.top};
+  });
+  assert.ok(visibility.firstOffset<=230,JSON.stringify(visibility));
+  assert.ok(visibility.fullCards>=2,JSON.stringify(visibility));
+  assert.equal(visibility.clipped,false,'Tabs, cards and paging must fit inside the panel');
+  assert.ok(visibility.pagingTop>=visibility.listBottom-1,'Paging sits after the rows');
+  await page.screenshot({path:`${out}/results-${width}.png`});
+  await filters.click();await expect(filters).toHaveAttribute('aria-expanded','true');
+  await expect(page.getByLabel('Filter by category')).toBeVisible();
+  await page.screenshot({path:`${out}/filters-${width}.png`});
+  await page.getByLabel('Filter by region or city').focus();await page.keyboard.press('Escape');
+  await expect(filters).toHaveAttribute('aria-expanded','false');await expect(filters).toBeFocused();
+  await panel.locator('.discovery-search-results').evaluate(el=>el.scrollTop=el.scrollHeight);
   await page.getByRole('link',{name:'Next page',exact:true}).click();
   await expect(page).toHaveURL(url=>url.searchParams.get('page')==='2',navigationWait);
+  await expect.poll(()=>panel.locator('.discovery-search-results').evaluate(el=>el.scrollTop)).toBe(0);
   const rows=await panel.locator('.discovery-product-results strong,.discovery-business-results strong').allTextContents();
   const url=page.url();
   await page.getByRole('button',{name:'Hide search and filters'}).click();await expect(panel).toBeHidden();await expect(opener).toBeFocused();
   assert.equal(await map.getAttribute('data-map-zoom'),zoom,'Drawer toggling retains zoom');
   assert.equal(page.url(),url);assert.equal(await panel.getAttribute('inert'),'');
-  await opener.click();await expect(panel).toBeVisible();
+  await opener.click();await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
   await expect(page.getByRole('button',{name:'Hide search and filters'})).toBeFocused();
   assert.deepEqual(await panel.locator('.discovery-product-results strong,.discovery-business-results strong').allTextContents(),rows);
   await page.keyboard.press('Escape');await expect(panel).toBeHidden();await expect(opener).toBeFocused();await opener.click();
-  await page.getByLabel('Filter by category').click();await page.getByRole('group',{name:'Categories',exact:true}).getByRole('button',{name:'Personal & home care',exact:true}).click();
+  await filters.click();await page.getByLabel('Filter by category').click();await page.getByRole('group',{name:'Categories',exact:true}).getByRole('button',{name:'Personal & home care',exact:true}).click();
   await expect(page).toHaveURL(url=>url.searchParams.get('industry')==='beauty-wellness'&&!url.searchParams.has('page'),navigationWait);
   await page.locator('#discovery-search').fill('lotoin');
   await expect(page).toHaveURL(url=>url.searchParams.get('q')==='lotoin',navigationWait);
@@ -47,6 +70,8 @@ try {
   const city=await page.getByLabel('Filter by region or city').locator('optgroup[label="Cities"] option').filter({hasText:'Addis Ababa'}).first().getAttribute('value');
   assert.ok(city);await page.getByLabel('Filter by region or city').selectOption(city);
   await expect(page).toHaveURL(url=>url.searchParams.get('place')===city,navigationWait);
+  await filters.click();await expect(filters).toHaveAttribute('aria-expanded','false');
+  await expect(panel.locator('.discovery-active-filters')).toContainText('Addis Ababa');
   await page.getByRole('button',{name:'Hide search and filters'}).click();await expect(panel).toBeHidden();await opener.click();
   await expect(page.getByLabel('Filter by region or city')).toHaveValue(city);
   await expect(page.locator('#discovery-search')).toHaveValue('lotoin');await expect(page.getByLabel('Filter by category')).toContainText('Personal & home care');
@@ -58,10 +83,33 @@ try {
   await panel.locator('.discovery-business-results button').filter({hasText:'Aloe Field Care'}).click();
   await expect(panel).toBeHidden();await expect(page.locator('.discovery-preview')).toBeVisible();
   await page.getByRole('button',{name:'Close page preview',exact:true}).click();
-  await page.goto(base+'/?q=lotion',{waitUntil:'domcontentloaded'});await expect(panel).toBeVisible();await expect(page.getByLabel('Filter by category')).toContainText('All categories');
+  await page.goto(base+'/?q=lotion',{waitUntil:'domcontentloaded'});await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');await expect(page.getByLabel('Filter by category')).toContainText('All categories');
   await page.emulateMedia({reducedMotion:'reduce'});
   assert.equal(await panel.evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS desktop/390/320: default-all map, sliding overlay, retained filters/pages, focus/Escape, deep links, stable map, previews, reduced motion and overflow.');
+ for(const locale of ['am','om','so','ti']) for(const width of [1440,390,320]) {
+  const context=await browser.newContext({viewport:{width,height:width===1440?1000:width===390?844:740}});
+  await context.addCookies([{name:'suqpage-language',value:locale,url:base}]);
+  const page=await context.newPage();await page.goto(base+'/?view=search',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('html')).toHaveAttribute('lang',locale);
+  const panel=page.locator('#discovery-search-panel');await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+  await expect(panel.locator('.discovery-product-results > a').first()).toBeVisible();
+  const fit=await panel.evaluate(el=>{
+    const list=el.querySelector('.discovery-search-results').getBoundingClientRect();
+    const cards=[...el.querySelectorAll('.discovery-product-results > a')].map(card=>card.getBoundingClientRect());
+    const panelRight=el.getBoundingClientRect().right;
+    const clipped=[...el.querySelectorAll('.discovery-search-result-types a,.discovery-search-result-types span,.discovery-search-result-types b,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
+    return {clipped,top:cards[0].top-el.getBoundingClientRect().top,full:cards.filter(card=>card.top>=list.top&&card.bottom<=list.bottom).length,overflow:el.scrollWidth>el.clientWidth};
+  });
+  assert.ok(fit.top<=230&&fit.full>=2&&!fit.overflow&&!fit.clipped,`${locale}/${width}: ${JSON.stringify(fit)}`);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.screenshot({path:`${out}/${locale}-results-${width}.png`});
+  await panel.locator('.discovery-filter-toolbar button').click();
+  await expect(panel.locator('#discovery-filter-fields')).toBeVisible();
+  assert.ok(await panel.evaluate(el=>el.scrollWidth<=el.clientWidth));
+  await page.screenshot({path:`${out}/${locale}-filters-${width}.png`});
+  await context.close();
+ }
+ console.log('PASS desktop/390/320, five locales: two or more fully visible cards, compact filters, footer paging, no clipped controls, retained filters/pages, focus/Escape, stable map and reduced motion.');
 }finally{await browser.close();}

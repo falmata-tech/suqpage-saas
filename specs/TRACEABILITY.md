@@ -173,3 +173,96 @@ pass. Desktop drawer/map state passes; complete combined live phone-map interact
 verification remains inconclusive after network/marker timeouts. No real inquiry
 sent. Required local/full release gates pass. Recovery and remaining limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+## FE-049 — Five-language interface (in progress)
+
+Plan: `docs/SUQPAGE-TRANSITION-CHECKLIST.md` S25; architecture ADR-0022.
+Focused translation, state-preservation and responsive evidence pending. No
+localization deployment or native-speaker review is claimed.
+
+## FE-042 — compact result drawer (local candidate, 2026-09-23)
+
+`components/DiscoveryWorkspace.tsx` and `app/discovery.css` place search and a
+Filters disclosure above compact type tabs; redundant headings are removed and
+paging sits below independently scrollable rows. Selected category/place values,
+backend five-row paging and map state remain intact.
+
+Evidence: typecheck, spec validation, catalog freshness and four FE-049 safety
+tests pass. Updated `scripts/capture-search-drawer.mjs` passes desktop/390/320
+and all five languages: first result within 230px of panel top, at least two full
+cards, no clipped tabs/cards/paging, footer location, disclosure, focus/Escape,
+retained map, URL paging and row scroll reset. Updated
+`scripts/capture-category-language.mjs` passes keyboard/category reset/About
+links and Axe accessibility. Screenshots `.local/search-drawer-review/` show
+four complete cards at 390×844 and three at 320×740; inspected English phone and
+Somali 320 captures. No hosted mutation, commit, release or native-language
+review is claimed. Owner visual approval remains the next release gate; broader
+FE-049 text coverage and authenticated browser validation remain in progress.
+
+## BE-040 — original-term search ranking (2026-09-23, local)
+
+`lib/discovery.ts` ranks all original terms in a product title before matches from
+business/description text and plural-only alternatives, retaining exact/prefix
+priority and server pagination. Suggestions use normalized original-term priority.
+`scripts/test-search-ranking.ts` is wired into `test:discovery-pagination`; proved
+failure before and pass after. Existing spelling, 21 human-query variations and
+six PostgreSQL pagination/visibility tests pass, as do typecheck/spec validation.
+The existing local catalog's `gras` result moves Farm Grass with Dirt from eighth
+to first with the same 39 total results. Read-only browser verification at
+1440/390/320 confirms the first-visible result and next/back paging; screenshots
+are under `.local/search-ranking/`.
+
+10,000-offering performance: isolated retry normal 945/886/832ms, typo
+1192/1560/1355ms; index-use assertion passes. Initial concurrent browser/fixture
+run exceeded 2.5 seconds; no production latency inference. No application-data,
+schema or provider changes. Full combined build/release, commit and deployment
+remain pending behind the existing visual candidate approval and FE-049 work.
+
+## FE-032/FE-033 and BE-018/FE-019 — demo workflow corrections (2026-09-23)
+
+Audit: `docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md`.
+Clock/header: `lib/clock-display.ts`, `components/ClockInput.tsx`, Featured/public
+shell and dashboard formatting. `test-clock-display.ts` covers 1,440 round trips,
+noon/midnight and invariant agenda timestamps; `test:featured-schedule` passes.
+`capture-clock-display.mjs` checks 1440/390/320, no redundant logo caption,
+AM/PM controls/machine values, and no broadcast claim without a configured URL.
+Public phone screenshot inspected; private admin captures remain ignored.
+
+Support: prepared HttpOnly session, stable UI request keys through reopening,
+serialized start replay, duplicate attachment cleanup and retry-load recovery.
+`test:support` passes existing permission/tenant/attachment/assignment/expiry
+checks and `test-support-retries.ts` concurrency/replay/quota/isolation coverage.
+`capture-support-retries.ts` passes real UI + API handlers + isolated PostgreSQL;
+only transport is intercepted to lose committed responses, with notifications
+disabled. `capture-launch-wiring.mjs` now proves actual buyer form → HTTP API →
+owner inbox with chosen option in addition to its existing setup/publish/edit/
+visibility/private-media and route/accessibility checks.
+
+Typecheck, catalog freshness/localization safety and 153-spec validation pass.
+These are focused local corrections. Full combined gates, visual approval,
+commit and rollout remain pending; FE-049 coverage remains incomplete. No
+hosted login delivery, real external-message receipt or full launch-readiness
+claim is made.
+
+## S25 completion verification — 2026-09-23
+
+The owner approved finishing and publishing the reviewed candidate. This
+supersedes the earlier pending-approval and incomplete-localization notes above.
+FE-049: 982 keys per translated catalog, six safety/coverage/payload tests and
+85 browser checks on public/owner/admin pages pass at 1440/390/320. Merchant
+content, unsaved fields and inquiry selections survive language changes.
+Documented English fallbacks remain; no native-speaker review is claimed.
+FE-041: twelve immediate direct-product selections/reloads pass in
+`scripts/capture-product-ready.mjs`; actions wait for saved-list restoration.
+FE-042: search input/submit/clear wait for hydration. Immediate typing, rapid
+changes, spelling variations, category/type preservation and back navigation
+pass in `capture-human-search.mjs` at all three widths. Category paging
+checks use actual viewport/navigation bounds and pass at all three widths.
+Operations and release gates pass. Full check and nine-scenario acceptance
+are still running; their final evidence and publication belong in the release
+document. No schema, hosted Auth or merchant-data changes are required.
+
+Final S25 gates: check, release, operations, all nine production-mode acceptance
+scenarios and final Netlify build/artifact privacy pass. The last search-readiness
+change additionally passes typecheck and immediate-typing browser regression.
+See docs/SUQPAGE-S25-RELEASE-2026-09-23.md for publication and recovery evidence.

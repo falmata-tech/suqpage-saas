@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { FileText, Headphones, Paperclip, Send, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -37,12 +39,15 @@ function idempotencyKey() {
 }
 
 export default function PublicSupportChat() {
+  const t = useUiText();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const attachmentRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const attempt = useRef<{draft:string;attachment:File|null;key:string}|null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [category, setCategory] = useState<(typeof categories)[number]["key"]>("general");
   const [email, setEmail] = useState("");
@@ -58,6 +63,8 @@ export default function PublicSupportChat() {
       if (!response.ok) throw new Error("Support could not be refreshed.");
       const payload = await response.json() as { conversation: Conversation | null };
       setConversation(payload.conversation);
+      setSessionReady(true);
+      setError("");
       setLoaded(true);
     } catch {
       setLoaded(true);
@@ -70,8 +77,8 @@ export default function PublicSupportChat() {
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
-    if (open && !loaded) void loadConversation();
-  }, [open, loaded]);
+    if (open) void loadConversation();
+  }, [open]);
 
   useEffect(() => {
     if (!open || !conversation || conversation.status === "closed") return;
@@ -92,7 +99,7 @@ export default function PublicSupportChat() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!message.trim() || busy) return;
+    if (!message.trim() || busy || !sessionReady) return;
     setBusy(true);
     setError("");
     try {
@@ -102,7 +109,13 @@ export default function PublicSupportChat() {
       body.set("email", conversation ? "" : email);
       body.set("phone", conversation ? "" : phone);
       body.set("message", message);
-      body.set("idempotencyKey", idempotencyKey());
+      // Reopening help can recover a chat after its first response was lost.
+      // Keep the same key even when that recovery changes start into reply.
+      const draft = JSON.stringify([category, email, phone, message]);
+      if (!attempt.current || attempt.current.draft !== draft || attempt.current.attachment !== attachment) {
+        attempt.current = {draft,attachment,key:idempotencyKey()};
+      }
+      body.set("idempotencyKey", attempt.current.key);
       body.set("website", "");
       if (attachment) body.set("attachment", attachment);
       const response = await fetch("/api/public-support", {
@@ -112,6 +125,7 @@ export default function PublicSupportChat() {
       const payload = await response.json() as { conversation?: Conversation; error?: string };
       if (!response.ok || !payload.conversation) throw new Error(payload.error || "Message could not be sent.");
       setConversation(payload.conversation);
+      attempt.current = null;
       setMessage("");
       setAttachment(null);
       if (attachmentRef.current) attachmentRef.current.value = "";
@@ -124,7 +138,7 @@ export default function PublicSupportChat() {
   }
 
   async function endChat() {
-    if (!conversation || busy || !window.confirm("End this support chat? You can still read the closed conversation here.")) return;
+    if (!conversation || busy || !window.confirm(t("End this support chat? You can still read the closed conversation here."))) return;
     setBusy(true);
     setError("");
     try {
@@ -151,11 +165,13 @@ export default function PublicSupportChat() {
       const response = await fetch("/api/public-support", { method: "DELETE" });
       if (!response.ok) throw new Error("A new chat could not be started.");
       setConversation(null);
+      setSessionReady(false);
+      attempt.current = null;
       setCategory("general");
       setMessage("");
       setAttachment(null);
       if (attachmentRef.current) attachmentRef.current.value = "";
-      setLoaded(true);
+      await loadConversation();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "A new chat could not be started.");
     } finally {
@@ -169,45 +185,46 @@ export default function PublicSupportChat() {
   }
 
   return <>
-    <button ref={launcherRef} className="public-support-launcher" type="button" onClick={() => setOpen(true)} aria-label="Get help" aria-haspopup="dialog" aria-expanded={open}>
+    <button ref={launcherRef} className="public-support-launcher" type="button" onClick={() => setOpen(true)} aria-label={t("Get help")} aria-haspopup="dialog" aria-expanded={open}>
       <Headphones aria-hidden="true" />
-      <span>Get help</span>
+      <span>{t("Get help")}</span>
     </button>
     <dialog ref={dialogRef} className="public-support-dialog" aria-labelledby="public-support-title" onClose={() => setOpen(false)} onCancel={(event) => { event.preventDefault(); close(); }} onClick={(event) => { if (event.target === dialogRef.current) close(); }}>
       <section className={conversation ? "has-conversation" : "new-conversation"}>
         <header>
-          <div><span>Live support</span><h2 id="public-support-title">Suqpage help</h2></div>
-          <button type="button" onClick={close} aria-label="Close support"><X aria-hidden="true" /></button>
+          <div><span>{t("Live support")}</span><h2 id="public-support-title">{t("Suqpage help")}</h2></div>
+          <button type="button" onClick={close} aria-label={t("Close support")}><X aria-hidden="true" /></button>
         </header>
-        {!loaded ? <p className="public-support-loading" role="status">Opening support…</p> : conversation ? <>
-          <div className="public-support-state"><span><strong>{conversation.status === "waiting" ? "Waiting for a team member" : conversation.status === "closed" ? "Conversation closed" : `Connected${conversation.assignedUserName ? ` with ${conversation.assignedUserName}` : ""}`}</strong><small>{conversation.publicRef}</small></span>{conversation.status !== "closed" ? <button type="button" onClick={endChat} disabled={busy}>End chat</button> : <button type="button" onClick={startAnotherChat} disabled={busy}>Start another chat</button>}</div>
-          <div ref={threadRef} className="public-support-thread" aria-live="polite" aria-label="Support messages">
+        {!sessionReady && loaded ? <button type="button" onClick={() => void loadConversation()}>{t("Retry")}</button> : null}
+        {!loaded ? <p className="public-support-loading" role="status">{t("Opening support…")}</p> : conversation ? <>
+          <div className="public-support-state"><span><strong>{conversation.status === "waiting" ? t("Waiting for a team member") : conversation.status === "closed" ? t("Conversation closed") : conversation.assignedUserName ? t("Connected with {name}", {name: conversation.assignedUserName}) : t("Connected")}</strong><small>{conversation.publicRef}</small></span>{conversation.status !== "closed" ? <button type="button" onClick={endChat} disabled={busy}>{t("End chat")}</button> : <button type="button" onClick={startAnotherChat} disabled={busy}>{t("Start another chat")}</button>}</div>
+          <div ref={threadRef} className="public-support-thread" aria-live="polite" aria-label={t("Support messages")}>
             {conversation.messages.map((item) => <article key={item.id} className={item.sender}>
               <strong>{item.senderName}</strong>
               <p>{item.body}</p>
               {item.attachment ? item.attachment.mimeType.startsWith("image/")
                 ? <a className="public-support-attachment image" href={`/api/public-support/attachments/${item.attachment.id}`} target="_blank" rel="noreferrer"><img src={`/api/public-support/attachments/${item.attachment.id}`} alt={item.attachment.originalName} loading="lazy" /><span>{item.attachment.originalName} · {fileSize(item.attachment.byteSize)}</span></a>
-                : <a className="public-support-attachment file" href={`/api/public-support/attachments/${item.attachment.id}`}><FileText aria-hidden="true" /><span><b>{item.attachment.originalName}</b><small>PDF · {fileSize(item.attachment.byteSize)}</small></span></a>
+                : <a className="public-support-attachment file" href={`/api/public-support/attachments/${item.attachment.id}`}><FileText aria-hidden="true" /><span><b>{item.attachment.originalName}</b><small>{t("PDF ·")}{" "}{fileSize(item.attachment.byteSize)}</small></span></a>
                 : null}
             </article>)}
           </div>
         </> : <div className="public-support-intro">
-          <p>Ask how Suqpage works, get help arranging transport, or report a concern about a listing.</p>
-          <small>Buying, payment, product details, and commercial terms stay between you and the listed operation.</small>
-          <label className="public-support-category" htmlFor="public-support-category">What do you need?<select id="public-support-category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number]["key"])}>{categories.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select></label>
+          <p>{t("Ask how Suqpage works, get help arranging transport, or report a concern about a listing.")}</p>
+          <small>{t("Buying, payment, product details, and commercial terms stay between you and the listed operation.")}</small>
+          <label className="public-support-category" htmlFor="public-support-category">{t("What do you need?")}<select id="public-support-category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number]["key"])}>{categories.map((option) => <option key={option.key} value={option.key}>{t(option.label)}</option>)}</select></label>
         </div>}
-        {conversation?.status === "closed" ? error ? <p className="public-support-error" role="alert">{error}</p> : null : loaded ? <form onSubmit={submit}>
+        {conversation?.status === "closed" ? error ? <p className="public-support-error" role="alert">{t(error)}</p> : null : loaded ? <form onSubmit={submit}>
           {!conversation ? <div className="public-support-contact-fields">
-            <label htmlFor="public-support-email">Email<input id="public-support-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} required placeholder="you@example.com" /></label>
-            <label htmlFor="public-support-phone">Phone<input id="public-support-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
-            <small>Required so our team can continue by email or phone if this chat disconnects.</small>
+            <label htmlFor="public-support-email">{t("Email")}<input id="public-support-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} required placeholder="you@example.com" /></label>
+            <label htmlFor="public-support-phone">{t("Phone")}<input id="public-support-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
+            <small>{t("Required so our team can continue by email or phone if this chat disconnects.")}</small>
           </div> : null}
-          <label htmlFor="public-support-message">{conversation ? "Reply" : "Your message"}</label>
-          <textarea id="public-support-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} rows={3} required placeholder={conversation ? "Write a reply…" : "Tell us what you need…"} />
-          <label className="public-support-attachment-input" htmlFor="public-support-attachment"><Paperclip aria-hidden="true" /><span>{attachment ? attachment.name : "Attach image or PDF"}</span><input ref={attachmentRef} id="public-support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(event) => setAttachment(event.target.files?.[0] || null)} /></label>
-          <small className="public-support-attachment-help">Optional · one JPEG, PNG, WebP, or PDF · 5 MB maximum</small>
-          {error ? <p className="public-support-error" role="alert">{error}</p> : null}
-          <button type="submit" disabled={busy || !message.trim() || (!conversation && (!email.trim() || !phone.trim()))}><Send aria-hidden="true" /><span>{busy ? "Sending…" : "Send"}</span></button>
+          <label htmlFor="public-support-message">{conversation ? t("Reply") : t("Your message")}</label>
+          <textarea id="public-support-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} rows={3} required placeholder={conversation ? t("Write a reply…") : t("Tell us what you need…")} />
+          <label className="public-support-attachment-input" htmlFor="public-support-attachment"><Paperclip aria-hidden="true" /><span>{attachment ? attachment.name : t("Attach image or PDF")}</span><input ref={attachmentRef} id="public-support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(event) => setAttachment(event.target.files?.[0] || null)} /></label>
+          <small className="public-support-attachment-help">{t("Optional · one JPEG, PNG, WebP, or PDF · 5 MB maximum")}</small>
+          {error ? <p className="public-support-error" role="alert">{t(error)}</p> : null}
+          <button type="submit" disabled={busy || !sessionReady || !message.trim() || (!conversation && (!email.trim() || !phone.trim()))}><Send aria-hidden="true" /><span>{busy ? t("Sending…") : t("Send")}</span></button>
         </form> : null}
       </section>
     </dialog>

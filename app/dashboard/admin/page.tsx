@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -21,6 +23,7 @@ export default async function AdminOverview({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
   const query = await searchParams;
@@ -38,35 +41,35 @@ export default async function AdminOverview({
   const destinations = [
     {
       href: "/dashboard/admin/businesses",
-      label: "Businesses",
+      label: t("Businesses"),
       value: counts.businesses,
       detail: `${attention.newAccounts || 0} draft account${attention.newAccounts === 1 ? "" : "s"} being set up`,
       icon: Building2,
     },
     {
       href: "/dashboard/support",
-      label: "Support inbox",
+      label: t("Support inbox"),
       value: attention.supportReplies,
       detail: "Waiting or unread conversations",
       icon: Headphones,
     },
     {
       href: "/dashboard/admin/staff",
-      label: "Staff & access",
+      label: t("Staff & access"),
       value: counts.staff,
       detail: "Individual roles and sign-in readiness",
       icon: UserCog,
     },
     {
       href: "/dashboard/admin/featured-schedule",
-      label: "Featured schedule",
+      label: t("Featured schedule"),
       value: "Daily",
       detail: "Automatic timing and date-specific lineups",
       icon: CalendarClock,
     },
     {
       href: "/dashboard/account-health",
-      label: "Renewals",
+      label: t("Renewals"),
       value: "Open",
       detail: "Manual service periods and renewal records",
       icon: CalendarClock,
@@ -77,12 +80,12 @@ export default async function AdminOverview({
     <DashboardShell user={user} business={null}>
       <div className="dashboard-head admin-overview-head">
         <div>
-          <span className="eyebrow">Platform overview</span>
-          <h1>Suqpage administration</h1>
+          <span className="eyebrow">{t("Platform overview")}</span>
+          <h1>{t("Suqpage administration")}</h1>
         </div>
-        <Link className="btn brand" href="/dashboard/clients/new">Add business</Link>
+        <Link className="btn brand" href="/dashboard/clients/new">{t("Add business")}</Link>
       </div>
-      <section className="admin-command-grid" aria-label="Platform work areas">
+      <section className="admin-command-grid" aria-label={t("Platform work areas")}>
         {destinations.map(({ icon: Icon, ...destination }) => (
           <Link className="admin-command" href={destination.href} key={destination.href}>
             <Icon aria-hidden="true" size={20}/>
@@ -92,11 +95,11 @@ export default async function AdminOverview({
         ))}
       </section>
       <section className="admin-quick-actions" aria-labelledby="admin-quick-title">
-        <div><span className="eyebrow">Common actions</span><h2 id="admin-quick-title">Keep work moving</h2></div>
+        <div><span className="eyebrow">{t("Common actions")}</span><h2 id="admin-quick-title">{t("Keep work moving")}</h2></div>
         <div>
-          <Link className="small-btn" href="/dashboard/admin/businesses">Manage businesses</Link>
-          <Link className="small-btn" href="/dashboard/support/agents">Manage support capacity</Link>
-          <Link className="small-btn" href="/dashboard/account-health">Review monthly accounts</Link>
+          <Link className="small-btn" href="/dashboard/admin/businesses">{t("Manage businesses")}</Link>
+          <Link className="small-btn" href="/dashboard/support/agents">{t("Manage support capacity")}</Link>
+          <Link className="small-btn" href="/dashboard/account-health">{t("Review monthly accounts")}</Link>
         </div>
       </section>
     </DashboardShell>

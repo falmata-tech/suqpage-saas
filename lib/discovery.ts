@@ -433,8 +433,8 @@ const SEARCH_WHERE = `AND (
       AND ${wordMatch(OFFERING_SEARCH_TEXT, 'search.terms')}
   ) FROM (SELECT ?::jsonb AS terms) search
 )`;
-function searchTerms(query: string) {
-  const groups = searchTermGroups(query).map(group => group.map(term => `%${escapeSearchPattern(term)}%`));
+function searchTerms(query: string, originalsOnly = false) {
+  const groups = searchTermGroups(query).map(group => (originalsOnly ? group.slice(0, 1) : group).map(term => `%${escapeSearchPattern(term)}%`));
   return JSON.stringify({ none: Boolean(query.trim()) && !normalizeSearchText(query), all: groups.filter(group => group.length === 1).map(group => group[0]), any: groups.filter(group => group.length > 1) });
 }
 function searchParameters(industryKey: string, query: string) {
@@ -468,7 +468,8 @@ function productSuggestionSql(placeWhere: string) {
       CASE
         WHEN lower(product.name)=lower(?) THEN 0
         WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
-        ELSE 2
+        WHEN ${wordMatch('product.name')} THEN 2
+        ELSE 3
       END,
       lower(product.name)
     LIMIT 8
@@ -501,8 +502,10 @@ function productSearchResultSql(placeWhere: string, suffix = "", countOnly = fal
       CASE
         WHEN lower(product.name)=lower(?) THEN 0
         WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
-        WHEN lower(b.name)=lower(?) THEN 2
-        ELSE 3
+        WHEN ${wordMatch('product.name')} THEN 2
+        WHEN lower(b.name)=lower(?) THEN 3
+        WHEN ${wordMatch(OFFERING_SEARCH_TEXT)} THEN 4
+        ELSE 5
       END,
       lower(product.name),lower(b.name),product.id`}
     ${suffix}
@@ -515,14 +518,15 @@ function buildSearchSuggestions(
   places: DiscoveryPlaceOption[],
   productRows: Array<{ label: string; detail: string }>,
 ): DiscoverySearchSuggestion[] {
-  const normalizedQuery = query.toLocaleLowerCase();
+  const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length < 2) return [];
+  const originalWords = searchTermGroups(query).map(group => group[0]);
   const candidates: Array<DiscoverySearchSuggestion & { score: number }> = [];
   const score = (value: string) => {
-    const normalized = value.toLocaleLowerCase();
+    const normalized = normalizeSearchText(value);
     if (normalized === normalizedQuery) return 0;
     if (normalized.startsWith(normalizedQuery)) return 1;
-    return normalized.includes(normalizedQuery) ? 2 : 3;
+    return originalWords.every(word => normalized.includes(word)) ? 2 : 3;
   };
   for (const product of productRows) {
     candidates.push({ kind: "offering", label: product.label, detail: `Offering from ${product.detail}`, query: product.label, score: score(product.label) });
@@ -771,12 +775,15 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
+  // Rank what was actually typed before plural alternatives (e.g. gras -> gra).
+  // Title words need not occur at the beginning of a multiword product name.
+  const originalTerms = searchTerms(query, true);
+  const productRankParams = [query, `${escapedQuery}%`, originalTerms, query, originalTerms];
   const productParams = [projectionIndustryKey, projectionIndustryKey,
-    searchTerms(query), ...placeParams,
-    query, `${escapedQuery}%`, query];
+    searchTerms(query), ...placeParams];
   const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
   const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
-  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams.slice(0, -3)) : undefined;
+  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams) : undefined;
   const productCount = Number(productCountRow?.total || 0);
   // The map already loaded every eligible business using the same predicate.
   // Reuse that server-side count instead of sorting/hydrating it a second time.
@@ -802,14 +809,14 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const [productSuggestionRows, productResultRows, businessResultRows, approximateProductRows, approximateMapRows] = await Promise.all([
     query.length >= 2 && productCount > 0 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
       projectionIndustryKey, projectionIndustryKey, searchTerms(query),
-      ...placeParams, query, `${escapedQuery}%`,
+      ...placeParams, query, `${escapedQuery}%`, originalTerms,
     ]) : Promise.resolve([]),
     productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere, "LIMIT ? OFFSET ?"),
-      [...productParams, productLimit, window.offset]) : Promise.resolve([]),
+      [...productParams, ...productRankParams, productLimit, window.offset]) : Promise.resolve([]),
     businessLimit ? all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?", businessOrder),
       [...businessResultParams, businessLimit, businessOffset]) : Promise.resolve([]),
     approximateProducts.length ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere,"",false,true),
-      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...placeParams,query,`${escapedQuery}%`,query]) : Promise.resolve([]),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...placeParams,...productRankParams]) : Promise.resolve([]),
     mapIds.length ? all<DiscoveryRow>(selectSql("AND b.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)"),
       [projectionIndustryKey,projectionIndustryKey,JSON.stringify(mapIds)]) : Promise.resolve([]),
   ]);

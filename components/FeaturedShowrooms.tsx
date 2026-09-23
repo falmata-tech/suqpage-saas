@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +9,7 @@ import type { ShowroomDirectoryEntry } from "@/components/ShowroomDirectory";
 import { HOMEPAGE_FEATURED_ADVANCE_MS } from "@/lib/marketplace-home";
 
 function FeaturedCard({ entry, clone = false }: { entry: ShowroomDirectoryEntry; clone?: boolean }) {
+  const t = useUiText();
   return (
     <Link
       href={`/@${entry.handle}`}
@@ -21,7 +24,7 @@ function FeaturedCard({ entry, clone = false }: { entry: ShowroomDirectoryEntry;
         ) : (
           <span className="market-media-fallback" aria-hidden="true">{entry.name.slice(0, 1)}</span>
         )}
-        <span>Featured</span>
+        <span>{t("Featured")}</span>
       </div>
       <div>
         <strong>{entry.name}</strong>
@@ -33,6 +36,7 @@ function FeaturedCard({ entry, clone = false }: { entry: ShowroomDirectoryEntry;
 }
 
 export default function FeaturedShowrooms({ entries }: { entries: ShowroomDirectoryEntry[] }) {
+  const t = useUiText();
   const railRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef(0);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -84,7 +88,7 @@ export default function FeaturedShowrooms({ entries }: { entries: ShowroomDirect
         if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
       }}
     >
-      <div className="featured-rail" ref={railRef} aria-label="Featured pages">
+      <div className="featured-rail" ref={railRef} aria-label={t("Featured pages")}>
         {entries.map((entry) => <FeaturedCard entry={entry} key={entry.id} />)}
         {entries.length > 1 && entries.map((entry) => <FeaturedCard entry={entry} clone key={`clone-${entry.id}`} />)}
       </div>

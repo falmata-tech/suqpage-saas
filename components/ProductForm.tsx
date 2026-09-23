@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { useEffect, useRef, useState } from "react";
 import ProductOptionsFields from "@/components/ProductOptionsFields";
@@ -34,6 +36,7 @@ export default function ProductForm({
   idempotencyKey: string;
   staffMode: boolean;
 }) {
+  const t = useUiText();
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
   const [availability, setAvailability] = useState(
@@ -74,7 +77,7 @@ export default function ProductForm({
       ) : null}
 
       <div className="field full">
-        <label htmlFor="product-name">Name</label>
+        <label htmlFor="product-name">{t("Name")}</label>
         <input
           id="product-name"
           name="name"
@@ -87,7 +90,7 @@ export default function ProductForm({
       </div>
 
       <div className="field">
-        <label htmlFor="product-price">Price in ETB <span className="optional">(optional)</span></label>
+        <label htmlFor="product-price">{t("Price in ETB")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
           id="product-price"
           name="priceEtb"
@@ -104,34 +107,34 @@ export default function ProductForm({
 
       {staffMode ? <>
       <div className="field">
-        <label htmlFor="product-unit">Offered by <span className="optional">(optional)</span></label>
+        <label htmlFor="product-unit">{t("Offered by")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
           id="product-unit"
           name="quantityUnit"
           maxLength={40}
           value={quantityUnit}
           onChange={(event) => setQuantityUnit(event.target.value)}
-          placeholder="Example: piece, kg, hour, session or project"
+          placeholder={t("Example: piece, kg, hour, session or project")}
         />
       </div>
 
       <div className="field full">
-        <label htmlFor="product-highlights">Highlights <span className="optional">(optional)</span></label>
+        <label htmlFor="product-highlights">{t("Highlights")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <textarea
           id="product-highlights"
           name="highlights"
           maxLength={485}
           value={highlights}
           onChange={(event) => setHighlights(event.target.value)}
-          placeholder={"One highlight per line\nLocally serviceable\nFood-safe stainless steel"}
+          placeholder={t("One highlight per line Locally serviceable Food-safe stainless steel")}
         />
-        <small>Up to six highlights, each 80 characters or fewer.</small>
+        <small>{t("Up to six highlights, each 80 characters or fewer.")}</small>
       </div>
 
       </> : null}
 
       <div className="field full">
-        <label htmlFor="product-video">YouTube video <span className="optional">(optional)</span></label>
+        <label htmlFor="product-video">{t("YouTube video")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
           id="product-video"
           name="videoUrl"
@@ -142,10 +145,10 @@ export default function ProductForm({
         />
       </div>
 
-      {!staffMode ? <div className="field"><label htmlFor="product-type">What do you offer?</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">Product</option><option value="service">Service</option></select></div> : null}
+      {!staffMode ? <div className="field"><label htmlFor="product-type">{t("What do you offer?")}</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">{t("Product")}</option><option value="service">{t("Service")}</option></select></div> : null}
       {staffMode ? <>
       <div className="field">
-        <label htmlFor="product-offering-kind">Product or service type</label>
+        <label htmlFor="product-offering-kind">{t("Product or service type")}</label>
         <select
           id="product-offering-kind"
           name="offeringKind"
@@ -153,7 +156,7 @@ export default function ProductForm({
           onChange={(event) => setOfferingKind(event.target.value as OfferingKind)}
         >
           {offeringKinds.map((kind) => (
-            <option key={kind} value={kind}>{offeringKindLabels[kind]}</option>
+            <option key={kind} value={kind}>{t(offeringKindLabels[kind])}</option>
           ))}
         </select>
         <small>{offeringKindDescriptions[offeringKind]}</small>
@@ -161,14 +164,14 @@ export default function ProductForm({
 
       <input type="hidden" name="quantityMode" value="optional" />
       <div className="field product-quantity-note">
-        <strong>Desired quantity is optional</strong>
-        <small>Buyers may add a quantity to their inquiry or leave it open for discussion.</small>
+        <strong>{t("Desired quantity is optional")}</strong>
+        <small>{t("Buyers may add a quantity to their inquiry or leave it open for discussion.")}</small>
       </div>
 
       </> : null}
 
       <div className="field full">
-        <label htmlFor="product-description">Description</label>
+        <label htmlFor="product-description">{t("Description")}</label>
         <textarea
           id="product-description"
           name="description"
@@ -180,11 +183,11 @@ export default function ProductForm({
       </div>
 
       {staffMode ? <>
-      <div className="field"><label htmlFor="product-visibility">Visibility</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">Listed on my page</option><option value="0">Hidden from buyers</option></select><small>Your business must be published before buyers can see listed products.</small></div>
+      <div className="field"><label htmlFor="product-visibility">{t("Visibility")}</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">{t("Listed on my page")}</option><option value="0">{t("Hidden from buyers")}</option></select><small>{t("Your business must be published before buyers can see listed products.")}</small></div>
       <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
 
       <div className="field">
-        <label htmlFor="product-availability">Availability</label>
+        <label htmlFor="product-availability">{t("Availability")}</label>
         <select
           id="product-availability"
           name="availability"
@@ -195,21 +198,21 @@ export default function ProductForm({
             )
           }
         >
-          <option value="available">Available</option>
-          <option value="limited">Limited availability</option>
-          <option value="unavailable">Unavailable</option>
-          <option value="coming_soon">Coming soon</option>
+          <option value="available">{t("Available")}</option>
+          <option value="limited">{t("Limited availability")}</option>
+          <option value="unavailable">{t("Unavailable")}</option>
+          <option value="coming_soon">{t("Coming soon")}</option>
         </select>
       </div>
 
       <div className="field">
-        <label htmlFor="product-category">Category</label>
+        <label htmlFor="product-category">{t("Category")}</label>
         <select
           id="product-category"
           name="categoryId"
           defaultValue={product?.category_id || ""}
         >
-          <option value="">Unassigned</option>
+          <option value="">{t("Unassigned")}</option>
           {catalog.categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -221,7 +224,7 @@ export default function ProductForm({
       </> : null}
 
       <div className="field">
-        <label htmlFor="product-image">Primary image</label>
+        <label htmlFor="product-image">{t("Primary image")}</label>
         <input
           id="product-image"
           ref={imageInput}
@@ -243,7 +246,7 @@ export default function ProductForm({
             }
           }}
         />
-        <small>JPEG, PNG, or WebP; up to 5 MB.</small>
+        <small>{t("JPEG, PNG, or WebP; up to 5 MB.")}</small>
       </div>
 
       {product?.image_path ? (
@@ -264,20 +267,19 @@ export default function ProductForm({
                 }
               }}
             />
-            Remove the current image without replacing it
-          </label>
+            {t("Remove the current image without replacing it")}</label>
         </div>
       ) : null}
 
       {staffMode ? (
         <div className="field full">
-          <label htmlFor="service-note">Customer-service note</label>
+          <label htmlFor="service-note">{t("Customer-service note")}</label>
           <input
             id="service-note"
             name="serviceNote"
             required
             maxLength={300}
-            placeholder="Example: Updated for the client during a support call"
+            placeholder={t("Example: Updated for the client during a support call")}
           />
           </div>
       ) : null}
@@ -292,20 +294,20 @@ export default function ProductForm({
         </div>
         <div>
           <span className={`badge ${availability}`}>
-            {availabilityLabel(offeringKind, availability)}
+            {t(availabilityLabel(offeringKind, availability))}
           </span>
-          {staffMode ? <small>{offeringKindLabels[offeringKind]}</small> : null}
-          <strong>{name || "Name preview"}</strong>
+          {staffMode ? <small>{t(offeringKindLabels[offeringKind])}</small> : null}
+          <strong>{name || t("Name preview")}</strong>
           {description ? <p>{description}</p> : null}
           {price ? <strong>ETB {price}</strong> : null}
-          {quantityUnit ? <p>Offered by {quantityUnit}</p> : null}
+          {quantityUnit ? <p>{t("Offered by")}{" "}{quantityUnit}</p> : null}
           {highlights.trim() ? <ul className="product-upkeep-facts">{highlights.split(/\r?\n/).filter(Boolean).slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul> : null}
         </div>
       </aside>
 
       <div className="field full">
         <button className="btn brand" type="submit">
-          {product ? "Save changes" : "Add item"}
+          {product ? t("Save changes") : t("Add item")}
         </button>
       </div>
     </form>

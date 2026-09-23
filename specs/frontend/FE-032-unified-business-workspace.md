@@ -4,13 +4,17 @@ title: Unified business directory and task-oriented workspace
 status: in_progress
 related: [FE-003, FE-017, FE-018, FE-026, FE-031, FE-035, BE-015, BE-017, BE-023, DEP-023, FE-042]
 owners: [product, frontend, operations, design]
-last_updated: 2026-08-11
+last_updated: 2026-09-23
 change_level: L2
 ---
 
 # FE-032 - Unified business directory and task-oriented workspace
 
 ## Problem and outcome
+
+Header refinement (2026-09-23, local L0): remove the redundant “Ethiopia Market”
+caption beside the public Suqpage logo in every locale. Keep the logo, navigation
+and useful header controls. Verify desktop/phone captures; no routing changes.
 
 The administration interface exposes Businesses, Clients, Discovery profiles,
 Monthly accounts, Client overview, and Account and insights as competing places.
@@ -191,3 +195,5 @@ user, discovery, subscription, analytics, request, or media data.
 - [x] Legacy-link behavior defined
 - [x] Responsive, performance, and rollback impacts defined
 - [x] Observable scenarios and evidence mapped
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

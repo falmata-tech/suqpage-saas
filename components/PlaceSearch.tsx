@@ -1,4 +1,6 @@
 'use client';
+import { useUiText } from "@/lib/i18n/ui";
+
 import { useEffect, useId, useRef, useState } from 'react';
 import type { KnownPlace } from '@/lib/place-search';
 import styles from './PlaceSearch.module.css';
@@ -6,6 +8,7 @@ import styles from './PlaceSearch.module.css';
 export default function PlaceSearch({ value, selected, onChange, onSelect }: {
   value: string; selected: KnownPlace | null; onChange: (value: string) => void; onSelect: (place: KnownPlace) => void;
 }) {
+  const t = useUiText();
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -38,7 +41,7 @@ export default function PlaceSearch({ value, selected, onChange, onSelect }: {
     <input ref={input} id="owner-city" name="city" value={value} maxLength={80} autoComplete="off" role="combobox"
       aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? `${id}-results` : undefined}
       aria-activedescendant={expanded && active >= 0 ? `${id}-${active}` : undefined} aria-describedby={`${id}-status`}
-      placeholder="Search a city or town" onFocus={event => { setOpen(true); if (window.matchMedia("(max-width: 700px)").matches) event.currentTarget.scrollIntoView({block:"center",behavior:"instant"}); }} onBlur={() => setOpen(false)}
+      placeholder={t("Search a city or town")} onFocus={event => { setOpen(true); if (window.matchMedia("(max-width: 700px)").matches) event.currentTarget.scrollIntoView({block:"center",behavior:"instant"}); }} onBlur={() => setOpen(false)}
       onChange={event => { onChange(event.target.value); setOpen(true); }}
       onKeyDown={event => {
         if (event.key === 'Escape') { setOpen(false); setActive(-1); }
@@ -47,14 +50,14 @@ export default function PlaceSearch({ value, selected, onChange, onSelect }: {
         if (event.key === 'Enter' && expanded) { event.preventDefault(); if (active >= 0) choose(results[active]); }
       }} />
     <input type="hidden" name="placeId" value={selected?.id || ''} />
-    {expanded ? <ul id={`${id}-results`} role="listbox" aria-label="Matching cities and towns" className={styles.results}>
+    {expanded ? <ul id={`${id}-results`} role="listbox" aria-label={t("Matching cities and towns")} className={styles.results}>
       {results.map((place,index) => <li id={`${id}-${index}`} key={place.id} role="option" aria-selected={active === index}
         onPointerDown={event => event.preventDefault()} onClick={() => choose(place)}>
         <strong>{place.name}{place.localName && place.localName !== place.name ? <span> · {place.localName}</span> : null}</strong>
         <small>{place.region} · {place.kind} · {place.latitude.toFixed(3)}, {place.longitude.toFixed(3)}</small>
       </li>)}
     </ul> : null}
-    <small id={`${id}-status`} role="status">{selected ? `Selected: ${selected.name}, ${selected.region}. Area coordinates filled.` : status || 'Search by city or town name, including local names.'}</small>
-    <small className={styles.attribution}>Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors<span className="sr-only"> (new tab)</span></a>.</small>
+    <small id={`${id}-status`} role="status">{selected ? t("Selected: {value1}, {value2}. Area coordinates filled.", { value1: selected.name, value2: selected.region }) : t(status) || t("Search by city or town name, including local names.")}</small>
+    <small className={styles.attribution}>{t("Place data ©")}{" "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{t("OpenStreetMap contributors")}<span className="sr-only"> {" "}{t("(new tab)")}</span></a>.</small>
   </div>;
 }

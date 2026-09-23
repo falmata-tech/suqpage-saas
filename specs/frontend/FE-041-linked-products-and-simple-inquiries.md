@@ -2,9 +2,9 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042]
+related: [FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049]
 owners: [product, frontend, security]
-last_updated: 2026-09-21
+last_updated: 2026-09-23
 change_level: L2
 ---
 
@@ -227,3 +227,12 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+### Direct-link initialization (2026-09-23)
+
+GIVEN a customer opens a product URL directly WHEN the saved inquiry list has not
+finished restoring THEN the product inquiry buttons stay disabled. WHEN ready
+THEN the first click adds the selection exactly once and survives language
+switching and reload. Do not allow an initialization effect to discard that click.
+Evidence: focused direct-link regression and FE-049 browser matrix. No schema or
+server inquiry contract change.

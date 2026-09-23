@@ -8,9 +8,9 @@ const browser=await chromium.launch();const evidence=[];
 try {
  for(const width of [1440,390,320]){
   const context=await browser.newContext({viewport:{width,height:1000}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/?q=lotion',{waitUntil:'networkidle'});
+  await page.goto(base+'/?q=lotion',{waitUntil:'domcontentloaded'});
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
-  await page.goto(base+'/?industry=beauty-wellness',{waitUntil:'networkidle'});
+  await page.goto(base+'/?industry=beauty-wellness',{waitUntil:'domcontentloaded'});
   const input=page.locator('#discovery-search');
   for(const query of ['lotion','LOTION','body-lotion','lotions','find lotions in Addis Ababa']){
    await input.fill(query);
@@ -39,7 +39,7 @@ try {
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No horizontal overflow');
   await page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'}).click();
   await expect(page.locator('[data-product-page]')).toBeVisible();
-  await page.goBack();await page.waitForLoadState('networkidle');await expect(input).toHaveValue('lotion');
+  await page.goBack();await page.waitForLoadState('domcontentloaded');await expect(input).toHaveValue('lotion');
   await input.fill('%');await input.press('Enter');
   await expect(page).toHaveURL(url=>url.searchParams.get('q')==='%');
   await expect(page.getByText('No matches found',{exact:true})).toBeVisible();

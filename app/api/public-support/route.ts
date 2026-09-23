@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { platformCookie, platformCookies } from "@/lib/platform-state";
 import { NextRequest, NextResponse } from "next/server";
 import { assertSameOrigin, hashPrivateValue, requestIpFromHeaders } from "@/lib/security";
@@ -6,6 +7,7 @@ import {
   createPublicSupportConversation,
   getPublicSupportConversation,
   postPublicSupportMessage,
+  publicSupportSessionIsUsable,
   PUBLIC_SUPPORT_COOKIE,
   PUBLIC_SUPPORT_SESSION_MS,
   SupportError,
@@ -27,15 +29,26 @@ function errorResponse(error: unknown) {
   return NextResponse.json({ error: known.message, code: known.code }, { status });
 }
 
+function emptySupportSession() {
+  const response = NextResponse.json({ conversation: null });
+  response.cookies.set(PUBLIC_SUPPORT_COOKIE, crypto.randomBytes(32).toString("base64url"), {
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",
+    path: "/", maxAge: Math.floor(PUBLIC_SUPPORT_SESSION_MS / 1000),
+  });
+  return response;
+}
+
 export async function GET(request: NextRequest) {
+  const token = platformCookie(request.cookies, "support");
   try {
-    const token = platformCookie(request.cookies, "support");
-    if (!token) return NextResponse.json({ conversation: null });
+    if (!token) return emptySupportSession();
     return NextResponse.json({ conversation: await getPublicSupportConversation(token) });
   } catch (error) {
     if (error instanceof SupportError && error.code === "not_found") {
-      const response = NextResponse.json({ conversation: null });
-      response.cookies.delete(PUBLIC_SUPPORT_COOKIE);
+      // Keep an unused prepared session stable, including while its first write
+      // is still in flight. Only expired/invalid sessions need a new token.
+      if (await publicSupportSessionIsUsable(token)) return NextResponse.json({ conversation: null });
+      const response = emptySupportSession();
       response.cookies.delete(platformCookies.support.legacy);
       return response;
     }
@@ -84,7 +97,8 @@ export async function POST(request: NextRequest) {
       message: body.message,
       idempotencyKey: body.idempotencyKey,
       attachment: staged,
-    }, ipHash);
+    }, ipHash, Date.now(), token || undefined);
+    if (created.duplicate) await staged?.discard();
     staged = null;
     const response = NextResponse.json({ conversation: await getPublicSupportConversation(created.token) }, { status: 201 });
     response.cookies.set(PUBLIC_SUPPORT_COOKIE, created.token, {

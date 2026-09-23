@@ -1,3 +1,6 @@
+
+import { useUiText } from "@/lib/i18n/ui";
+import { getUiText } from "@/lib/i18n/server";
 import { Suspense } from "react";
 import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
 import { MarketWorkspaceLoading } from "@/components/PublicWorkspaceLoading";
@@ -12,6 +15,7 @@ export const metadata = {
 type MarketSearchParams = Promise<{ industry?: string; q?: string; place?: string; showroom?: string; view?: string; type?: string; page?: string }>;
 
 async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchParams }) {
+  const t = await getUiText();
   const query = await searchParams;
   const discovery = await getPublicMarketplaceView({
     industry: query.industry,
@@ -22,7 +26,7 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
   });
 
   return <>
-    {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">That page is temporarily unavailable. Explore other local products in the Market.</div> : null}
+    {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">{t("That page is temporarily unavailable. Explore other local products in the Market.")}</div> : null}
     <DiscoveryWorkspace
       discovery={discovery}
       hideIntro
@@ -35,11 +39,12 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
 export default function MarketPage({ searchParams }: {
   searchParams: MarketSearchParams;
 }) {
+  const t = useUiText();
   return <div className="public-experience public-market-experience">
       <header className="public-experience-head">
-        <span>Suqpage Market</span>
-        <h1>Discover businesses near you.</h1>
-        <p>Find products, services and custom work. Explore the map or search the listings, then inquire directly.</p>
+        <span>{t("Suqpage Market")}</span>
+        <h1>{t("Discover businesses near you.")}</h1>
+        <p>{t("Find products, services and custom work. Explore the map or search the listings, then inquire directly.")}</p>
       </header>
       <Suspense fallback={<MarketWorkspaceLoading />}><MarketWorkspace searchParams={searchParams} /></Suspense>
     </div>;

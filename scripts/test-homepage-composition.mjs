@@ -50,11 +50,11 @@ assert.match(mobileNavigation, /href: "\/featured", label: "Featured", icon: Sta
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /CalendarClock/);
 assert.match(publicFrame, /href="\/about"/);
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
-assert.match(publicFrame, /aria-label="Explore Suqpage"/);
+assert.match(publicFrame, /aria-label=\{t\("Explore Suqpage"\)\}/);
 assert.match(mobileNavigation, /href: "\/", label: "Market"/);
 assert.match(mobileNavigation, /href: "\/about", label: "About"/);
 assert.match(mobileNavigation, /aria-haspopup="dialog"/);
-assert.match(mobileNavigation, /<span>More<\/span>/);
+assert.match(mobileNavigation, /<span>\{t\("More"\)\}<\/span>/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);
 
 assert.match(landingCss, /suqpage-public-app-canvas-v1\.webp/);
@@ -66,7 +66,7 @@ assert.match(discoveryUi, /const action = "\/"/);
 assert.match(discoveryUi, /discovery-workbench/);
 assert.match(discoveryUi, /discovery-panel-filters/);
 assert.match(discoveryUi, /<CategoryChooser/);
-assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label="Filter by category"/);
+assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label=\{t\("Filter by category"\)\}/);
 assert.match(discoveryRuntime, /ALL_DISCOVERY_INDUSTRIES = \{ key: "all", label: "All categories"/);
 assert.match(discoveryRuntime, /DISCOVERY_INDUSTRY_OPTIONS = \[\.\.\.DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES\]/);
 assert.match(discoveryRuntime, /normalizeIndustrySelection/);
@@ -101,12 +101,12 @@ assert.match(discoveryRuntime, /\.slice\(0, 6\)/);
 assert.match(discoveryRuntime, /product\.is_published=1/);
 assert.match(discoveryCss, /\.discovery-search-suggestions\s*\{[^}]*position:\s*absolute/);
 assert.match(discoveryUi, /function MarketplaceSearchResults/);
-assert.match(discoveryUi, /aria-label="Search result type"/);
-assert.match(discoveryUi, /label: "Products & services"/);
-assert.match(discoveryUi, /label: "Businesses"/);
+assert.match(discoveryUi, /aria-label=\{t\("Search result type"\)\}/);
+assert.match(discoveryUi, /label: t\("Products & services"\)/);
+assert.match(discoveryUi, /label: t\("Businesses"\)/);
 assert.match(discoveryUi, /view: "search"/);
 // S22/S24: the drawer hide control replaces the former separate map action.
-assert.match(discoveryUi, /aria-label="Hide search and filters"/);
+assert.match(discoveryUi, /aria-label=\{t\("Hide search and filters"\)\}/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
 // FE-042 replaces the former fixed result cap with a bounded database page.
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);

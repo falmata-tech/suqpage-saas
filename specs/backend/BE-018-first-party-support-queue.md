@@ -4,7 +4,7 @@ title: First-party customer support queue
 status: in_progress
 related: [FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014]
 owners: [backend, security, customer-support]
-last_updated: 2026-08-15
+last_updated: 2026-09-23
 change_level: L3
 ---
 
@@ -17,6 +17,22 @@ without adopting a costly per-agent SaaS or operating a second large support
 platform.
 
 ## Scope
+
+### Retry completion — 2026-09-23
+
+The public GET adapter prepares a random HttpOnly session cookie when none is
+present. Starting a chat may reuse that opaque token; its existing unique hash
+identifies one conversation. Serialize concurrent starts by token in a PostgreSQL
+transaction. A same-key/same-body retry recovers the original chat and cookie
+without duplicate message, notification, assignment or quota consumption. A
+changed opening payload/key under an already-used token fails without mutation.
+Keep expiry checks and token isolation. Duplicate staged attachments are discarded.
+Clients without a prepared token retain random-token creation compatibility.
+No new schema/provider; rollback restores adapters/application code.
+
+DOR met: bounded data-integrity correction under existing support contracts.
+Verify serial/concurrent retry, altered-payload denial, distinct-token isolation,
+reply idempotency, browser response loss and the existing support suite.
 
 ### In scope
 
@@ -234,3 +250,5 @@ closed, and four enabled agents at three open conversations each. Ordered
 browser acceptance proves the client mobile waiting flow and operations queue
 and workload controls. `npm run check` and `npm run release` passed on
 2026-07-30.
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

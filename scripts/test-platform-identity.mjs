@@ -16,7 +16,7 @@ const mark = fs.readFileSync("public/brand/suqpage-mark.svg", "utf8").toLowerCas
 assert.match(mark, /<title id="title">suqpage<\/title>/);
 assert.ok(mark.includes("#ff4b00"));
 const brand = fs.readFileSync("components/SuqpageBrand.tsx", "utf8");
-assert.match(brand, /aria-label="Suqpage home"/);
+assert.match(brand, /aria-label=\{t\("Suqpage home"\)\}/);
 assert.match(brand, /<span>suq<\/span><span>page<\/span>/);
 const platformStyles = ["app/globals.css", "app/landing.css", "app/discovery.css"]
   .map((file) => fs.readFileSync(file, "utf8").toLowerCase())
@@ -31,8 +31,8 @@ const showroomApp = fs.readFileSync("components/showroom/ShowroomApp.tsx", "utf8
 const showroomStyles = fs.readFileSync("components/showroom/showrooms.css", "utf8").toLowerCase();
 assert.match(showroomApp, /className=\{`showroom-host-bar/);
 assert.match(showroomApp, /showroom-host-bar-shell/);
-assert.match(showroomApp, /aria-label="Back to Market"/);
-assert.match(showroomApp, />Back to Market</);
+assert.match(showroomApp, /aria-label=\{t\("Back to Market"\)\}/);
+assert.match(showroomApp, />\{t\("Back to Market"\)\}</);
 assert.doesNotMatch(showroomApp, /Powered by/);
 assert.match(showroomApp, /style=\{runtimeTokenVariables as CSSProperties/);
 assert.ok(showroomStyles.includes(".showroom-host-bar"));

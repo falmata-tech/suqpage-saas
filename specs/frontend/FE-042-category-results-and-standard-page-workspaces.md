@@ -4,7 +4,7 @@ title: Paginated category results and standard page workspaces
 status: in_progress
 related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043]
 owners: [product, frontend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-09-23
 change_level: L2
 ---
 
@@ -39,7 +39,7 @@ contracts are reused. This is ready under BE-033; no new external provider is ne
 - D2: Five results per page are selected by database COUNT/LIMIT/OFFSET with stable
   ordering, accurate total counts and bounded/normalized page numbers. All combines
   products then businesses into one paginated sequence; type tabs have scoped total
-  counts. Previous/Next and page position sit above the result rows and are visible
+  counts. Previous/Next and page position sit below the result rows and are visible
   on desktop/phone entry without scrolling through products; no append/infinite scroll
   or client slicing as pagination authority. URLs support reload/back. Map geography
   remains independent of the selected result page.
@@ -131,6 +131,48 @@ publication of this refinement; no repeat approval pause for this exact scope.
 
 ## S22 — optional search drawer and All categories default
 
+### Compact results refinement — 2026-09-23, local candidate
+
+The phone screenshot shows controls crowding out the actual results. This L1
+refinement keeps the S22 drawer, ranking and pagination contracts and supersedes
+the previous control placement. Definition of Ready is satisfied: no data,
+provider, eligibility or tenant behavior changes; accessible disclosure and
+long translated labels are included in the focused browser checks.
+
+- GIVEN an open drawer WHEN results load THEN search and a Filters toggle precede
+  compact result-type tabs; category/place controls start collapsed. Repeated
+  category titles, result counts and product section headings consume no space.
+- GIVEN Filters WHEN opened by touch or keyboard THEN the existing category and
+  place controls are available with an accurate expanded state. Collapsing them
+  preserves their values; applied filters remain visible in a compact summary.
+- GIVEN backend result pages WHEN Next/Previous is used THEN controls below the
+  independently scrollable rows update the URL and reset row scroll. The controls
+  remain reachable without scrolling through all rows; map state is retained.
+- GIVEN 390×844 or 320×740 English phone viewports WHEN the drawer opens with
+  filters collapsed THEN the first result begins within 230px of the drawer top
+  and at least two complete result cards are visible without scrolling. At all
+  five supported locales, controls and rows fit horizontally without clipping.
+- GIVEN the drawer WHEN hidden, reopened or dismissed with Escape THEN existing
+  focus restoration, inert hidden controls and mounted-map behavior remain.
+
+Evidence: typecheck and `scripts/capture-search-drawer.mjs`, including desktop,
+phone, pagination, disclosure, overflow and selected-language captures. Visual
+approval precedes full release gates. Rollback is the prior drawer source; no
+migration is needed. Master prompt §§5 and 10 cover the affected current layout.
+
+Focused evidence (2026-09-23): typecheck, 153-spec validation and the updated
+drawer browser checks pass at 1440×1000, 390×844 and 320×740. All five locale
+layouts show at least two complete cards with the first card within 230px of the
+drawer top; tabs/cards/paging fit inside the panel. English captures show four
+complete cards at 390px and three at 320px. Category/Featured/About keyboard,
+selection/reset and Axe checks pass at all three widths. A disabled pagination
+label found by Axe was corrected to expose a disabled link role.
+
+Captures: `.local/search-drawer-review/` (`results-390.png`, `results-320.png`,
+`filters-320.png`, and locale-prefixed states). English 390/320 and Somali 320
+images were visually inspected. Owner visual approval, full release gates,
+scoped commit and deployment are pending; these are local-only checks.
+
 This visual refinement supersedes the initial category chooser, fixed side column,
 and phone filter sheet. L2 under BE-040/DEP-037; no database migration or provider.
 Definition of Ready: scope and accessibility outcomes are specified below; public
@@ -162,3 +204,8 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+S25 readiness: GIVEN a newly loaded market WHEN the search input becomes editable
+THEN its input handlers are ready and the first typed query updates results.
+The search field and submit/clear actions remain disabled until hydration;
+capture-human-search.mjs types immediately without an arbitrary readiness delay.

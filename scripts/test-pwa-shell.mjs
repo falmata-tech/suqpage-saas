@@ -60,12 +60,12 @@ assert.match(registration, /CACHE_PREFIXES\.some\(\(prefix\) => name\.startsWith
 
 const publicNavigation = read("components/PublicMobileNavigation.tsx");
 for (const label of ["Market", "Featured", "About"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
-for (const label of ["Sign in", "Dashboard"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
+for (const label of ["Sign in", "Dashboard"]) assert.match(publicNavigation, new RegExp(`label: t\\("${label}"\\)`));
 assert.doesNotMatch(publicNavigation, /label: "Sign up"/);
 assert.match(publicNavigation, /signedIn\s*\? \{ href: "\/dashboard"/);
 assert.match(read("components/PublicAppFrame.tsx"), /signedIn\s*\? <Link href="\/dashboard"/);
 assert.match(read("components/PublicAppFrame.tsx"), /: <Link href="\/login"/);
-assert.match(publicNavigation, /<span>More<\/span>/);
+assert.match(publicNavigation, /<span>\{t\("More"\)\}<\/span>/);
 assert.match(publicNavigation, /aria-haspopup="dialog"/);
 assert.match(publicNavigation, /aria-current=\{active \? "page" : undefined\}/);
 

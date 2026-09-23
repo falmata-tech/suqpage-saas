@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import crypto from "node:crypto";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -22,6 +24,7 @@ export default async function EditProduct({
     error?: string;
   }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
   const route = await params;
@@ -35,34 +38,31 @@ export default async function EditProduct({
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
-        <nav aria-label="Breadcrumb">
-          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+        <nav aria-label={t("Breadcrumb")}>
+          <Link href={`/dashboard?business=${business.id}`}>{t("Overview")}</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            Products & services
-          </Link>
+            {t("Products & services")}</Link>
           <span aria-hidden="true">/</span>
           <span>{product.name}</span>
         </nav>
       </div>
       <div className="dashboard-head standard-page-heading">
         <div>
-          <h1>Edit {product.name}</h1>
+          <h1>{t("Edit")}{" "}{product.name}</h1>
         </div>
         <Link
           className="btn secondary"
           href={`/preview/@${business.handle}`}
           target="_blank"
         >
-          Open preview ↗
-        </Link>
+          {t("Open preview ↗")}</Link>
       </div>
       {query.saved ? (
         <p className="notice">
-          Item saved.
-        </p>
+          {t("Item saved.")}</p>
       ) : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
       <ProductForm
         catalog={catalog}
         product={product}

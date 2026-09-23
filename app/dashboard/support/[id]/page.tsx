@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import crypto from "node:crypto";
 import Link from "next/link";
 import {
@@ -19,6 +21,7 @@ function dateTime(value: number) {
   return new Intl.DateTimeFormat("en-ET", {
     dateStyle: "medium",
     timeStyle: "short",
+    hour12: true,
     timeZone: "Africa/Addis_Ababa",
   }).format(new Date(value));
 }
@@ -34,6 +37,7 @@ export default async function SupportThread({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; sent?: string; claimed?: string; closed?: string; reopened?: string }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const id = Number.parseInt((await params).id, 10);
   const query = await searchParams;
@@ -50,51 +54,51 @@ export default async function SupportThread({
       <SupportThreadRefresh active={data.conversation.status !== "closed"} />
       <div className="support-thread-head">
         <div>
-          <Link href="/dashboard/support">Back to support inbox</Link>
+          <Link href="/dashboard/support">{t("Back to support inbox")}</Link>
           <span className="eyebrow">{data.conversation.publicRef}</span>
           <h1>{data.conversation.subject}</h1>
-          <p>{data.conversation.businessName}{data.conversation.participantKind === "visitor" ? ` · ${data.conversation.assistanceCategory.replaceAll("_", " ")}` : ""} · <span className={`badge ${data.conversation.status}`}>{data.conversation.status}</span></p>
+          <p>{data.conversation.businessName}{data.conversation.participantKind === "visitor" ? t(" · {value1}", { value1: data.conversation.assistanceCategory.replaceAll("_", " ") }) : ""} · <span className={`badge ${t(data.conversation.status)}`}>{t(data.conversation.status)}</span></p>
         </div>
         <div className="support-thread-actions">
           {!client && data.conversation.status === "waiting" ? (
-            <form action={claimSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn brand">Claim conversation</button></form>
+            <form action={claimSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn brand">{t("Claim conversation")}</button></form>
           ) : null}
           {data.conversation.status !== "closed" ? (
-            <form action={closeSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn secondary">Close</button></form>
+            <form action={closeSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn secondary">{t("Close")}</button></form>
           ) : (
-            <form action={reopenSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn brand">Reopen</button></form>
+            <form action={reopenSupportConversationAction}><input type="hidden" name="conversationId" value={id} /><button className="btn brand">{t("Reopen")}</button></form>
           )}
           {operations ? (
             <form action={reassignSupportConversationAction} className="support-reassign">
               <input type="hidden" name="conversationId" value={id} />
-              <select name="assignedUserId" aria-label="Assign support agent" defaultValue={data.conversation.assignedUserId || ""}>
-                <option value="">Waiting queue</option>
+              <select name="assignedUserId" aria-label={t("Assign support agent")} defaultValue={data.conversation.assignedUserId || ""}>
+                <option value="">{t("Waiting queue")}</option>
                 {agents.map((agent) => <option key={agent.userId} value={agent.userId}>{agent.name} ({agent.openConversations}/{agent.maxOpenConversations})</option>)}
               </select>
-              <button className="small-btn">Assign</button>
+              <button className="small-btn">{t("Assign")}</button>
             </form>
           ) : null}
         </div>
       </div>
       {!client && data.conversation.participantKind === "visitor" ? (
         <section className="panel support-visitor-contact" aria-labelledby="visitor-contact-title">
-          <div><span className="eyebrow">Reconnect details</span><h2 id="visitor-contact-title">Visitor contact</h2><p>Use these details only to continue this support conversation.</p></div>
+          <div><span className="eyebrow">{t("Reconnect details")}</span><h2 id="visitor-contact-title">{t("Visitor contact")}</h2><p>{t("Use these details only to continue this support conversation.")}</p></div>
           <div>
-            {data.conversation.visitorEmail ? <a href={`mailto:${data.conversation.visitorEmail}`}>{data.conversation.visitorEmail}</a> : <span>Email unavailable for this older conversation</span>}
-            {data.conversation.visitorPhone ? <a href={`tel:${data.conversation.visitorPhone}`}>{data.conversation.visitorPhone}</a> : <span>Phone unavailable for this older conversation</span>}
+            {data.conversation.visitorEmail ? <a href={`mailto:${data.conversation.visitorEmail}`}>{data.conversation.visitorEmail}</a> : <span>{t("Email unavailable for this older conversation")}</span>}
+            {data.conversation.visitorPhone ? <a href={`tel:${data.conversation.visitorPhone}`}>{data.conversation.visitorPhone}</a> : <span>{t("Phone unavailable for this older conversation")}</span>}
           </div>
         </section>
       ) : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
-      {query.sent ? <p className="notice">Reply sent.</p> : null}
-      <section className="support-thread" aria-label="Support message history" tabIndex={0}>
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
+      {query.sent ? <p className="notice">{t("Reply sent.")}</p> : null}
+      <section className="support-thread" aria-label={t("Support message history")} tabIndex={0}>
         {data.messages.map((message) => (
           <article className={`support-message ${message.senderRole === "client" || message.senderRole === "visitor" ? "client" : "staff"}`} key={message.id}>
             <header><strong>{message.senderName}</strong><time dateTime={new Date(message.createdAt).toISOString()}>{dateTime(message.createdAt)}</time></header>
             <p>{message.body}</p>
             {message.attachment ? message.attachment.mimeType.startsWith("image/")
               ? <a className="support-message-attachment image" href={`/api/support/${id}/attachments/${message.attachment.id}`} target="_blank" rel="noreferrer"><img src={`/api/support/${id}/attachments/${message.attachment.id}`} alt={message.attachment.originalName} loading="lazy" /><span>{message.attachment.originalName} · {fileSize(message.attachment.byteSize)}</span></a>
-              : <a className="support-message-attachment file" href={`/api/support/${id}/attachments/${message.attachment.id}`}><strong>{message.attachment.originalName}</strong><small>PDF · {fileSize(message.attachment.byteSize)}</small></a>
+              : <a className="support-message-attachment file" href={`/api/support/${id}/attachments/${message.attachment.id}`}><strong>{message.attachment.originalName}</strong><small>{t("PDF ·")}{" "}{fileSize(message.attachment.byteSize)}</small></a>
               : null}
           </article>
         ))}
@@ -103,15 +107,15 @@ export default async function SupportThread({
         <form className="panel support-reply" action={postSupportMessageAction} encType="multipart/form-data">
           <input type="hidden" name="conversationId" value={id} />
           <input type="hidden" name="idempotencyKey" value={crypto.randomBytes(16).toString("hex")} />
-          <label htmlFor="support-reply">Reply</label>
+          <label htmlFor="support-reply">{t("Reply")}</label>
           <textarea id="support-reply" name="message" maxLength={4000} required rows={4} />
-          <label htmlFor="support-reply-attachment">Attachment <span className="muted">(optional)</span></label>
+          <label htmlFor="support-reply-attachment">{t("Attachment")}{" "}<span className="muted">{t("(optional)")}</span></label>
           <input id="support-reply-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
-          <small>One JPEG, PNG, WebP, or PDF up to 5 MB.</small>
-          <button className="btn brand">Send reply</button>
+          <small>{t("One JPEG, PNG, WebP, or PDF up to 5 MB.")}</small>
+          <button className="btn brand">{t("Send reply")}</button>
         </form>
       ) : data.conversation.status === "waiting" && !client ? (
-        <p className="notice">Claim this conversation before replying.</p>
+        <p className="notice">{t("Claim this conversation before replying.")}</p>
       ) : null}
     </DashboardShell>
   );

@@ -1188,3 +1188,156 @@ checks and pagination pass at 1440/390/320; desktop drawer/map state also passes
 
 Real-email/hosted-session limits remain documented separately. Local development
 remains at 127.0.0.1:3102. Current evidence supersedes earlier pending-publication notes.
+
+## S25 — five-language interface (FE-049, 2026-09-22)
+
+Feature L2, dependent on the deployed S22–S24 baseline. Latest request covers
+English, Amharic, Afaan Oromo, Somali and Tigrinya across public and dashboards.
+Preserve user content and use clear language with English fallback for unclear
+terms. No hosted/provider/database mutation is needed.
+
+- [x] Inventory existing hard-coded text; record FE-049 and ADR-0022; DOR met.
+- [x] Language context, selected catalog and persistent accessible selector.
+- [x] Explicit UI text wiring, translations and reviewed fallback inventory.
+- [x] Focused type/security/content-preservation tests and desktop/phone captures.
+- [x] Owner directed completion and publication on 2026-09-23.
+- [ ] Full applicable gates, scoped commit and separately verified rollout.
+
+Prior live phone-map verification limit remains open above. Existing untracked
+deno.lock is user-owned and outside this task. Native-speaker review is not claimed.
+
+### S25 priority refinement — visible mobile results (2026-09-23, FE-042)
+
+The owner's screenshot shows controls crowding out results. Continue localization
+while fixing this focused visual defect; no backend or hosted mutation.
+
+- [x] Record compact controls/disclosure, footer pagination and visibility criteria
+  in FE-042; DOR met. Master prompt §§5/10 statements affected.
+- [x] Compact search row, optional Filters, remove repeated headings,
+  put paging below the scrollable results; keep map and backend paging contracts.
+- [x] Focused typecheck/browser checks at desktop/390/320 and all five locales;
+  capture collapsed/expanded/paged states and inspect the phone result area.
+- [x] Owner approval to proceed through release/publication on 2026-09-23.
+  Preview: http://127.0.0.1:3102/?view=search.
+
+Evidence: typecheck, catalog freshness, four localization safety tests and
+153-spec validation pass. `capture-search-drawer.mjs` verifies visible cards,
+unclipped tabs/paging, disclosure, paging scroll reset, retained map and keyboard
+behavior. `capture-category-language.mjs` passes category controls, keyboard and
+Axe accessibility at 1440/390/320. Phone images inspected in
+`.local/search-drawer-review/`: four full cards at 390×844 and three at 320×740.
+No full release gate, commit or deployment was run for this candidate.
+
+S25 language coverage remains in progress; this refinement does not claim the
+whole localization rollout complete or the draft translations native-reviewed.
+
+### Search ranking defect — BE-040 (2026-09-23)
+
+- [x] Reproduce `gras`: Farm Grass with Dirt is eighth locally; original-title
+  matching ties with the plural alternative `gra` and alphabetical order wins.
+- [x] Define original-term title/document precedence before variant-only matches;
+  preserve all eligibility, counts, five-row pagination and bounded spelling rules.
+- [x] Add isolated PostgreSQL regression, implement ranking in results
+  and suggestions, prove first-page relevance and stable later pages.
+- [x] Verify existing word/spelling/pagination, performance fixture, typecheck and
+  local browser results. Record evidence without claiming publication.
+
+Evidence: regression fails before and passes after; `test:discovery-pagination`
+passes new ranking, existing spelling, 21 human-query variants and six database
+cases. Typecheck/spec validation pass. Local `gras` keeps 39 results but moves Farm
+Grass with Dirt from eighth to first. Browser 1440/390/320 confirms first-visible
+placement and stable page navigation; captures `.local/search-ranking/`.
+10,000-offering performance passes on the controlled isolated retry (normal
+832–945ms, spelling 1192–1560ms); first concurrent run exceeded 2.5 seconds and is
+retained as a measurement limit. No application database records were changed.
+- [ ] **Current release dependency:** earlier visual candidate approval, combined
+  build/release gates, scoped commit and publication remain pending. No ranking
+  deployment or production performance claim.
+
+### Launch-demo review and clock labels — 2026-09-23
+
+The owner will present **suqpage.com**. Local findings must not be represented as
+live fixes. FE-032/FE-033 govern header/clock changes; earlier FE-049 and compact
+drawer rollout remain open. Demo readiness is an evidence-based review, not a
+promise that every external channel or hosted email delivery works.
+
+- [x] DOR: remove logo caption; use AM/PM for displayed times and admin controls;
+  preserve machine values, EAT timezone and exact agenda boundaries.
+- [x] Implement clock/header refinement and focused regressions.
+- [x] Read-only live public audit: health/routes, search/map, Featured, product
+  images/video controls, single/group inquiries and contact destinations, login.
+- [x] Exercise local owner/admin flows using disposable fixtures; identify live
+  coverage limits. Do not message customers or alter real merchant records.
+- [x] Record confirmed workflow gaps, corrections and evidence in
+  `docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md`.
+- [ ] Candidate visual approval, remaining FE-049 coverage and full applicable
+  gates before authorized rollout.
+
+Owner clarification: prioritize incomplete end-to-end workflows, including local
+behavior, rather than describing local-versus-live rollout as the audit finding.
+Confirmed gap: Featured announces TikTok Live with no configured watch URL.
+Fix that misleading state; inspect support retries and exercise UI→persistence→
+owner receipt, not only HTTP route status. Existing disposable owner workflow
+passes identity/location/product options/publish/live save/inquiry receipt and
+owner/admin destinations. No external messages were sent.
+
+Earlier compact drawer visual approval and broader localization remain pending;
+this focused backend defect does not approve or replace either task.
+
+Support retry correction evidence (BE-018/FE-019): real UI + real API handlers +
+isolated PostgreSQL pass failed-load recovery, lost opening response/reopen/retry,
+lost reply/retry, same persisted counts, close and new chat. Only HTTP transport
+is intercepted to lose responses; external notifications are disabled. Existing
+support permission/attachment/assignment tests pass. Local customer Send button
+also reaches the real owner inbox with its selected product option. Typecheck,
+localization safety/freshness and spec validation pass; no release claim.
+
+
+### S25 release authorization — 2026-09-23
+
+The owner explicitly directed “go ahead” after the workflow audit and local
+candidate evidence. This approves proceeding through remaining localization,
+full verification and production publication; do not request the same approval
+again. No hosted Auth/SMTP, DNS, database schema or merchant-data change is planned.
+
+- [x] Candidate approval and deployment authorization recorded.
+- [x] Close platform-text coverage and selected-client-catalog gaps;
+  retain documented English terms and preserve all merchant content.
+- [x] Complete five-language public/owner/admin focused browser checks.
+- [x] Run check, release, acceptance and operations in a clean isolated candidate.
+- [x] Verify production target, protected recovery archive and rollback deployment.
+- [ ] Review/stage exact task files, commit, package and publish the tested source.
+- [ ] Independently verify and monitor the live deployment and update evidence.
+
+The existing untracked deno.lock remains excluded. No Git push is requested.
+
+Release verification found a reproducible direct-product first-click race: the
+initial inquiry-list restore could overwrite a selection. FE-041 now requires
+ready-before-send/add controls; implement and retest the direct link before
+resuming final gates. This is within the approved workflow completion scope.
+
+FE-049 focused completion: 982 catalog entries per language, six locale/content/
+payload/coverage tests and 85 browser checks across public/owner/admin routes at
+1440/390/320 pass. English fallbacks for retained technical/legacy/design copy are
+explicit in locales/english-fallbacks.json. Client context excludes server-only
+copy. Native-speaker review is not claimed. Final common inquiry feedback and
+support statuses retain the same tested formatting and data boundaries.
+
+FE-041 direct-link regression failed before and passes after: twelve immediate
+selections persist across reload. Product buttons wait for inquiry restoration.
+Regression retained in scripts/capture-product-ready.mjs. The production backup
+restores 56 tables and preserves 3,607 rows across 55 application tables; schema
+48 is unchanged. Full check and provider acceptance are currently running.
+
+Final browser verification found pre-hydration search typing could be lost.
+FE-042 requires ready-before-edit search controls; preserve immediate-typing
+regression and rerun affected gates before packaging.
+
+Full check, release, operations and final Netlify packaging pass. Generated
+artifact privacy scan excludes protected files and known production credentials;
+application source bytes match the working candidate. Final production-mode
+acceptance is the current gate. Updated search readiness passes focused browser
+and typecheck checks and is included in the final build.
+
+All nine production-mode acceptance scenarios pass. Full gate set is green;
+current step is scoped source commit and publication of the verified artifact.

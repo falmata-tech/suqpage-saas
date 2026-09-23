@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import crypto from "node:crypto";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -35,6 +37,7 @@ export default async function AccountHealthPage({
     error?: string;
   }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
@@ -45,18 +48,18 @@ export default async function AccountHealthPage({
     const accounts = await listAccountHealthPage(user, query);
     return (
       <DashboardShell user={user} business={null}>
-        <div className="dashboard-head"><div><span className="eyebrow">Service operations</span><h1>Renewals</h1><p>Review current and overdue manual service periods. Renewal dates do not control publication.</p></div></div>
-        <CollectionToolbar action="/dashboard/account-health" search={query.q || ""} placeholder="Business or handle" activeFilters={Boolean(query.q || query.status)}>
-          <label><span>Renewal state</span><select name="status" defaultValue={query.status || ""}><option value="">All states</option><option value="active">Current period</option><option value="grace">Renewal due</option><option value="inactive">Renewal overdue</option></select></label>
+        <div className="dashboard-head"><div><span className="eyebrow">{t("Service operations")}</span><h1>{t("Renewals")}</h1><p>{t("Review current and overdue manual service periods. Renewal dates do not control publication.")}</p></div></div>
+        <CollectionToolbar action="/dashboard/account-health" search={query.q || ""} placeholder={t("Business or handle")} activeFilters={Boolean(query.q || query.status)}>
+          <label><span>{t("Renewal state")}</span><select name="status" defaultValue={query.status || ""}><option value="">{t("All states")}</option><option value="active">{t("Current period")}</option><option value="grace">{t("Renewal due")}</option><option value="inactive">{t("Renewal overdue")}</option></select></label>
         </CollectionToolbar>
         <div className="account-health-list">
           {accounts.items.map((account) => (
             <Link className="account-health-row" href={`/dashboard/account-health?business=${account.businessId}`} key={account.businessId}>
-              <span><strong>{account.businessName}</strong><small>/@{account.handle} · Period ends {date(account.currentPeriodEnd)}</small></span>
+              <span><strong>{account.businessName}</strong><small>/@{account.handle} {" "}{t("· Period ends")}{" "}{date(account.currentPeriodEnd)}</small></span>
               <span className={`badge ${account.state}`}>{account.state}</span>
             </Link>
           ))}
-          {!accounts.items.length ? <div className="empty-state">No accounts match this view.</div> : null}
+          {!accounts.items.length ? <div className="empty-state">{t("No accounts match this view.")}</div> : null}
         </div>
         <PaginationNav result={accounts} pathname="/dashboard/account-health" params={{ q: query.q, status: query.status }} />
       </DashboardShell>
@@ -70,28 +73,28 @@ export default async function AccountHealthPage({
   return (
     <DashboardShell user={user} business={business}>
       <div className="dashboard-head">
-        <div><span className="eyebrow">Business workspace</span><h1>Renewal</h1><p>Review the manual service period and renewal history for {business.name}.</p></div>
-        {operations ? <Link className="btn secondary" href="/dashboard/account-health">All renewals</Link> : null}
+        <div><span className="eyebrow">{t("Business workspace")}</span><h1>{t("Renewal")}</h1><p>{t("Renewal history for {business}", {business: business.name})}</p></div>
+        {operations ? <Link className="btn secondary" href="/dashboard/account-health">{t("All renewals")}</Link> : null}
       </div>
-      {query.saved ? <p className="notice">Payment recorded and the monthly period renewed.</p> : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.saved ? <p className="notice">{t("Payment recorded and the monthly period renewed.")}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
       <section className={`account-status-panel ${subscription.state}`}>
-        <div><span className="eyebrow">Manual renewal record</span><h2>{subscription.state === "active" ? "Current period" : subscription.state === "grace" ? "Renewal due" : "Renewal overdue"}</h2></div>
-        <div className="account-dates"><span><small>Current period</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>Grace deadline</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
-        <p>{subscription.state === "active" ? "This manual renewal record is current." : subscription.state === "grace" ? "Contact Suqpage to confirm the next manual renewal." : "This manual renewal record is overdue."} Publication is controlled separately: an active published page remains public unless an administrator suspends it.</p>
+        <div><span className="eyebrow">{t("Manual renewal record")}</span><h2>{subscription.state === "active" ? t("Current period") : subscription.state === "grace" ? t("Renewal due") : t("Renewal overdue")}</h2></div>
+        <div className="account-dates"><span><small>{t("Current period")}</small><strong>{date(subscription.currentPeriodStart)} - {date(subscription.currentPeriodEnd)}</strong></span><span><small>{t("Grace deadline")}</small><strong>{date(subscription.graceEndsAt)}</strong></span></div>
+        <p>{subscription.state === "active" ? t("This manual renewal record is current.") : subscription.state === "grace" ? t("Contact Suqpage to confirm the next manual renewal.") : t("This manual renewal record is overdue.")} {" "}{t("Publication is controlled separately: an active published page remains public unless an administrator suspends it.")}</p>
       </section>
       {operations ? (
         <form className="panel form-grid account-payment" action={recordManualPaymentAction}>
-          <h2 className="full">Record an accepted payment</h2>
+          <h2 className="full">{t("Record an accepted payment")}</h2>
           <input type="hidden" name="businessId" value={business.id} />
           <input type="hidden" name="idempotencyKey" value={crypto.randomBytes(16).toString("hex")} />
-          <div className="field full"><label htmlFor="payment-date">Renewal received date</label><input id="payment-date" name="paidAt" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required /></div>
-          <div className="field full"><button className="btn brand">Record payment and renew one month</button></div>
+          <div className="field full"><label htmlFor="payment-date">{t("Renewal received date")}</label><input id="payment-date" name="paidAt" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required /></div>
+          <div className="field full"><button className="btn brand">{t("Record payment and renew one month")}</button></div>
         </form>
       ) : null}
       <section className="panel">
-        <h2>Payment history</h2>
-        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>Renewal recorded by Suqpage</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">No renewal records have been added yet.</p>}
+        <h2>{t("Payment history")}</h2>
+        {payments.length ? <div className="account-payment-history">{payments.map((payment) => <div key={payment.id}><span><strong>{payment.public_ref}</strong><small>{t("Renewal recorded by Suqpage")}</small></span><span><small>{date(payment.paid_at || payment.created_at)}</small></span></div>)}</div> : <p className="muted">{t("No renewal records have been added yet.")}</p>}
       </section>
     </DashboardShell>
   );

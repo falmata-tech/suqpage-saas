@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
@@ -20,6 +22,7 @@ export default async function ProductsPage({
     q?: string;
   }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
   const business = await resolveProductBusiness(user, query.business);
@@ -28,31 +31,30 @@ export default async function ProductsPage({
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
-        <nav aria-label="Breadcrumb">
-          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+        <nav aria-label={t("Breadcrumb")}>
+          <Link href={`/dashboard?business=${business.id}`}>{t("Overview")}</Link>
           <span aria-hidden="true">/</span>
-          <span>Products & services</span>
+          <span>{t("Products & services")}</span>
         </nav>
       </div>
       <div className="dashboard-head">
         <div>
-          <h1>Products & services</h1>
+          <h1>{t("Products & services")}</h1>
         </div>
         <Link
           className="btn brand"
           href={`/dashboard/products/new?business=${business.id}`}
         >
-          Add product or service
-        </Link>
+          {t("Add product or service")}</Link>
       </div>
       {query.saved ? (
-        <p className="notice">Item saved.</p>
+        <p className="notice">{t("Item saved.")}</p>
       ) : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
       <CollectionToolbar
         action="/dashboard/products"
         search={query.q || ""}
-        placeholder="Name, category, type, or availability"
+        placeholder={t("Name, category, type, or availability")}
         hidden={{ business: business.id }}
       />
       {products.items.length ? (
@@ -66,14 +68,13 @@ export default async function ProductsPage({
         </>
       ) : (
         <section className="empty-state">
-          <h2>{query.q ? "No matching items" : "No products or services yet"}</h2>
-          <p>{query.q ? "Try another name or category." : "Add the first product or service to your page."}</p>
+          <h2>{query.q ? t("No matching items") : t("No products or services yet")}</h2>
+          <p>{query.q ? t("Try another name or category.") : t("Add the first product or service to your page.")}</p>
           <Link
             className="btn brand"
             href={`/dashboard/products/new?business=${business.id}`}
           >
-            Add first product or service
-          </Link>
+            {t("Add first product or service")}</Link>
         </section>
       )}
     </DashboardShell>

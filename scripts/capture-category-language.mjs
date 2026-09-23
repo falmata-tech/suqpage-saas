@@ -10,6 +10,7 @@ try{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}/?view=search`);
   const panel=page.locator('#discovery-search-panel');await expect(panel).toBeVisible();
+  await panel.getByRole('button',{name:'Filters',exact:true}).click();
   const chooser=page.getByLabel('Filter by category',{exact:true});
   await expect(chooser).toContainText('All categories');await chooser.focus();await page.keyboard.press('Enter');
   const categories=page.getByRole('group',{name:'Categories',exact:true});await expect(categories).toBeVisible();

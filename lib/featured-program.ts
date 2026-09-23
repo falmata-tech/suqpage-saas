@@ -1,3 +1,5 @@
+import { clockTimeLabel } from "./clock-display";
+
 export type FeaturedProgramPolicy = {
   morningStartMinute: number;
   morningEndMinute: number;
@@ -114,14 +116,14 @@ export function validateFeaturedProgramDate(dateIso: string) {
   if (calendar.getUTCFullYear() !== year || calendar.getUTCMonth() !== month - 1 || calendar.getUTCDate() !== day) throw new Error("Featured program date is invalid.");
 }
 
-function timeLabel(minutesFromMidnight: number) {
+function machineTime(minutesFromMidnight: number) {
   const hours = Math.floor(minutesFromMidnight / 60);
   const minutes = minutesFromMidnight % 60;
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
 function atEthiopiaMinute(dateIso: string, minutesFromMidnight: number) {
-  return Date.parse(`${dateIso}T${timeLabel(minutesFromMidnight)}:00+03:00`);
+  return Date.parse(`${dateIso}T${machineTime(minutesFromMidnight)}:00+03:00`);
 }
 
 function splitBoothCount(boothCount: number, policy: FeaturedProgramPolicy) {
@@ -177,7 +179,7 @@ export function resolveFeaturedProgramSessions(
 }
 
 export function featuredProgramTimeLabel(startMinute: number, endMinute: number) {
-  return `${timeLabel(startMinute)}–${timeLabel(endMinute)}`;
+  return `${clockTimeLabel(startMinute)}–${clockTimeLabel(endMinute)}`;
 }
 
 function sessionAgenda(input: {

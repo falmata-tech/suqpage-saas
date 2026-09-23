@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import {
   createCategoryAction,
   deleteCategoryAction,
@@ -19,6 +21,7 @@ export default async function CatalogPage({
     error?: string;
   }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
   const business = await resolveBusiness(user, query.business);
@@ -29,27 +32,27 @@ export default async function CatalogPage({
     <DashboardShell user={user} business={business}>
       <div className="dashboard-head">
         <div>
-          <h1>Product categories</h1>
-          <p>Create, correct, order, deactivate, or remove product categories.</p>
+          <h1>{t("Product categories")}</h1>
+          <p>{t("Create, correct, order, deactivate, or remove product categories.")}</p>
         </div>
       </div>
-      {query.saved ? <p className="notice">Product categories saved.</p> : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.saved ? <p className="notice">{t("Product categories saved.")}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
 
       <section className="panel">
-        <h2>Add category</h2>
+        <h2>{t("Add category")}</h2>
         <form action={createCategoryAction} className="form-grid">
           <input type="hidden" name="businessId" value={business.id} />
           <div className="field">
-            <label htmlFor="new-category-name">Name</label>
+            <label htmlFor="new-category-name">{t("Name")}</label>
             <input id="new-category-name" name="name" required />
           </div>
           <div className="field">
-            <label htmlFor="new-category-slug">Slug</label>
+            <label htmlFor="new-category-slug">{t("Slug")}</label>
             <input id="new-category-slug" name="slug" />
           </div>
           <div className="field">
-            <label htmlFor="new-category-order">Sort order</label>
+            <label htmlFor="new-category-order">{t("Sort order")}</label>
             <input
               id="new-category-order"
               name="sortOrder"
@@ -58,13 +61,13 @@ export default async function CatalogPage({
             />
           </div>
           <div className="field" style={{ alignSelf: "end" }}>
-            <button className="btn">Add category</button>
+            <button className="btn">{t("Add category")}</button>
           </div>
         </form>
       </section>
 
       <section className="panel">
-        <h2>Categories</h2>
+        <h2>{t("Categories")}</h2>
         {catalog.categories.map((category) => (
           <form
             key={category.id}
@@ -75,7 +78,7 @@ export default async function CatalogPage({
             <input type="hidden" name="businessId" value={business.id} />
             <input type="hidden" name="categoryId" value={category.id} />
             <div className="field">
-              <label htmlFor={`category-${category.id}-name`}>Name</label>
+              <label htmlFor={`category-${category.id}-name`}>{t("Name")}</label>
               <input
                 id={`category-${category.id}-name`}
                 name="name"
@@ -83,7 +86,7 @@ export default async function CatalogPage({
               />
             </div>
             <div className="field">
-              <label htmlFor={`category-${category.id}-slug`}>Slug</label>
+              <label htmlFor={`category-${category.id}-slug`}>{t("Slug")}</label>
               <input
                 id={`category-${category.id}-slug`}
                 name="slug"
@@ -91,7 +94,7 @@ export default async function CatalogPage({
               />
             </div>
             <div className="field">
-              <label htmlFor={`category-${category.id}-order`}>Sort</label>
+              <label htmlFor={`category-${category.id}-order`}>{t("Sort")}</label>
               <input
                 id={`category-${category.id}-order`}
                 type="number"
@@ -106,17 +109,15 @@ export default async function CatalogPage({
                   name="isActive"
                   defaultChecked={Boolean(category.is_active)}
                 />{" "}
-                Active
-              </label>
+                {t("Active")}</label>
             </div>
             <div className="inline-actions">
-              <button className="small-btn">Save</button>
+              <button className="small-btn">{t("Save")}</button>
               <button
                 className="small-btn danger"
                 formAction={deleteCategoryAction}
               >
-                Delete
-              </button>
+                {t("Delete")}</button>
             </div>
           </form>
         ))}

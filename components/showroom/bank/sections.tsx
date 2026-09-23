@@ -1,3 +1,5 @@
+
+import { useUiText } from "@/lib/i18n/ui";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import {
   privacyEnhancedYouTubeEmbedUrl,
@@ -122,6 +124,7 @@ function ControlledVideoFrame({
   asset: string;
   title: string;
 }) {
+  const t = useUiText();
   const [playing, setPlaying] = useState(false);
   if (!asset) return null;
   let src = "";
@@ -141,11 +144,11 @@ function ControlledVideoFrame({
           allowFullScreen
         />
       ) : (
-        <button type="button" onClick={() => setPlaying(true)} aria-label={`Play ${title}`}>
+        <button type="button" onClick={() => setPlaying(true)} aria-label={t("Play {value1}", { value1: title })}>
           <i aria-hidden="true" />
           <span>
-            <strong>Watch the process</strong>
-            <small>Play securely on this page</small>
+            <strong>{t("Watch the process")}</strong>
+            <small>{t("Play securely on this page")}</small>
           </span>
         </button>
       )}
@@ -154,10 +157,11 @@ function ControlledVideoFrame({
 }
 
 function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"] }) {
+  const t = useUiText();
   return (
     <ControlledVideoFrame
       asset={mediaAsset(block, "video")}
-      title={block?.title || "Page video"}
+      title={block?.title || t("Page video")}
     />
   );
 }
@@ -186,6 +190,7 @@ function ShowroomSectionNavigation({
 }: {
   context: BankPresentationContext;
 }) {
+  const t = useUiText();
   const links = [
     ["Home", context.sectionAnchorIds.home],
     ["Story", context.sectionAnchorIds.story],
@@ -193,7 +198,7 @@ function ShowroomSectionNavigation({
     ["Contact", context.sectionAnchorIds.contact],
   ] as const;
   return (
-    <nav className={styles.showroomSectionNav} aria-label="Page sections">
+    <nav className={styles.showroomSectionNav} aria-label={t("Page sections")}>
       {links.filter(([, anchorId]) => Boolean(anchorId)).map(([label, anchorId]) => (
         <a key={anchorId} href={`#${anchorId}`}>
           {label}
@@ -210,6 +215,7 @@ export function BankHeaderSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   return (
     <header
@@ -236,7 +242,7 @@ export function BankHeaderSection({
       data-surface={
         surfaceRole
       }
-      aria-label={`${definition.name} preview`}
+      aria-label={t("{value1} preview", { value1: definition.name })}
     >
       <BrandMark context={context} />
       <ShowroomSectionNavigation context={context} />
@@ -250,7 +256,7 @@ export function BankHeaderSection({
               rel="noreferrer"
             >
               <i aria-hidden="true" />
-              Live on: {LIVE_PLATFORM_LABELS[context.business.livePlatform]}
+              {t("Live on:")}{" "}{LIVE_PLATFORM_LABELS[context.business.livePlatform]}
             </a>
           ) : null}
         </span>
@@ -268,6 +274,7 @@ export function BankHeroSection({
   mediaIntegration: selectedMediaIntegration,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   const heroImage = mediaAsset(contentBlock, "hero_image") || context.business.heroImageRef;
   const supportingHeroImages = context.products
@@ -289,7 +296,7 @@ export function BankHeroSection({
       anchorId={context.sectionAnchorIds.home}
       slot="hero"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       mediaIntegration={mediaIntegration}
@@ -300,8 +307,7 @@ export function BankHeroSection({
         <h2>{contentBlock?.title || context.business.heroTitle}</h2>
         <p>{contentBlock?.body || context.business.heroSubtitle}</p>
         <a href={`#${context.sectionAnchorIds.offerings}`} onClick={() => context.onCategoryChange("all")}>
-          Explore products
-        </a>
+          {t("Explore products")}</a>
       </div>
       <div
         className={styles.heroVisual}
@@ -329,25 +335,25 @@ export function BankNavigationSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   return (
     <SectionRoot
       slot="navigation"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       surfaceRole={surfaceRole}
     >
-      <div className={styles.navigationLabel}>Browse the catalog</div>
-      <nav className={styles.categoryNav} aria-label="Product categories">
+      <div className={styles.navigationLabel}>{t("Browse the catalog")}</div>
+      <nav className={styles.categoryNav} aria-label={t("Product categories")}>
         <button
           type="button"
           aria-pressed={context.selectedCategory === "all"}
           onClick={() => context.onCategoryChange("all")}
         >
-          All products
-        </button>
+          {t("All products")}</button>
         {context.categories.map((item, index) => (
           <button
             type="button"
@@ -373,6 +379,7 @@ export function BankContentSection({
   mediaIntegration: selectedMediaIntegration,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   const statements = blockItems(contentBlock).map((item) =>
     "label" in item
@@ -390,7 +397,7 @@ export function BankContentSection({
         anchorId={context.sectionAnchorIds.story}
         slot="content"
         variant={variant}
-        label={`${definition.name} preview`}
+        label={t("{value1} preview", { value1: definition.name })}
         experience={experience}
         properties={properties}
         mediaIntegration={selectedMediaIntegration ?? "natural"}
@@ -413,7 +420,7 @@ export function BankContentSection({
       anchorId={context.sectionAnchorIds.story}
       slot="content"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       mediaIntegration={selectedMediaIntegration ?? "natural"}
@@ -432,10 +439,10 @@ export function BankContentSection({
         <p>{contentBlock?.body || context.business.description}</p>
         {processVideoRef ? (
           <div className={styles.processVideo}>
-            <span>Inside the process</span>
+            <span>{t("Inside the process")}</span>
             <ControlledVideoFrame
               asset={processVideoRef}
-              title={`${context.business.name} process video`}
+              title={t("{value1} process video", { value1: context.business.name })}
             />
           </div>
         ) : null}
@@ -464,27 +471,27 @@ function CatalogControls({
   showSearch: boolean;
   showFilters: boolean;
 }) {
+  const t = useUiText();
   return (
     <div className={styles.catalogControls}>
       {showSearch ? (
         <label>
-          <span>Search products and capabilities</span>
+          <span>{t("Search products and capabilities")}</span>
           <input
             value={context.query}
             onChange={(event) => context.onQueryChange(event.target.value)}
-            placeholder="Search the catalog"
+            placeholder={t("Search the catalog")}
           />
         </label>
       ) : null}
       {showFilters ? (
-        <div className={styles.catalogFilters} aria-label="Catalog filters">
+        <div className={styles.catalogFilters} aria-label={t("Catalog filters")}>
           <button
             type="button"
             aria-pressed={context.selectedCategory === "all"}
             onClick={() => context.onCategoryChange("all")}
           >
-            All
-          </button>
+            {t("All")}</button>
           {context.categories.slice(0, 4).map((category) => (
             <button
               type="button"
@@ -508,6 +515,7 @@ export function BankCatalogSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   const normalizedQuery = context.query.trim().toLowerCase();
   const products = context.products.filter(
@@ -521,7 +529,7 @@ export function BankCatalogSection({
     <SectionRoot
       slot="catalog"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       surfaceRole={surfaceRole}
@@ -529,8 +537,8 @@ export function BankCatalogSection({
     >
       <div className={styles.catalogHeading}>
         <div>
-          <span className={styles.kicker}>Products &amp; capabilities</span>
-          <h2>What {context.business.name} offers</h2>
+          <span className={styles.kicker}>{t("Products & capabilities")}</span>
+          <h2>{t("What")}{" "}{context.business.name} {" "}{t("offers")}</h2>
         </div>
         <CatalogControls
           context={context}
@@ -545,7 +553,7 @@ export function BankCatalogSection({
               type="button"
               className={styles.productOpen}
               onClick={() => context.onOpenProduct(product)}
-              aria-label={`View ${product.name}`}
+              aria-label={t("View {value1}", { value1: product.name })}
             >
               <ProductVisual product={product} />
             </button>
@@ -557,7 +565,7 @@ export function BankCatalogSection({
               <p>{product.description}</p>
               {product.capacitySummary ? (
                 <small className={styles.productFact}>
-                  Capacity: {product.capacitySummary}
+                  {t("Capacity:")}{" "}{product.capacitySummary}
                 </small>
               ) : null}
               <div className={styles.productActions}>
@@ -565,8 +573,7 @@ export function BankCatalogSection({
                   {availabilityLabel(product.offeringKind, product.availability)}
                 </span>
                 <button type="button" onClick={() => context.onAddProduct(product)}>
-                  Add to inquiry list
-                </button>
+                  {t("Add to inquiry list")}</button>
               </div>
             </div>
           </article>
@@ -584,6 +591,7 @@ export function BankTrustSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   const facts = blockItems(contentBlock).length
     ? blockItems(contentBlock).map((item) =>
@@ -597,14 +605,14 @@ export function BankTrustSection({
     <SectionRoot
       slot="trust"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       surfaceRole={surfaceRole}
     >
       <div className={styles.trustIntro}>
         <span className={styles.kicker}>{contentBlock?.kicker || definition.name}</span>
-        <h2>{contentBlock?.title || `Information from ${context.business.name}`}</h2>
+        <h2>{contentBlock?.title || t("Information from {value1}", { value1: context.business.name })}</h2>
         {contentBlock?.body ? <p>{contentBlock.body}</p> : null}
       </div>
       <div className={styles.trustGrid}>
@@ -660,6 +668,7 @@ export function BankCallToActionSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   const copy = ctaCopy[variant] || ctaCopy.inquiry;
   const button =
@@ -669,7 +678,7 @@ export function BankCallToActionSection({
       anchorId={context.sectionAnchorIds.contact}
       slot="callToAction"
       variant={variant}
-      label={`${definition.name} preview`}
+      label={t("{value1} preview", { value1: definition.name })}
       experience={experience}
       properties={properties}
       surfaceRole={surfaceRole}
@@ -693,6 +702,7 @@ export function BankFooterSection({
   properties,
   surfaceRole,
 }: BankSectionRendererProps) {
+  const t = useUiText();
   const variant = variantName(definition.id);
   return (
     <footer
@@ -717,7 +727,7 @@ export function BankFooterSection({
           : undefined
       }
       data-surface={surfaceRole}
-      aria-label={`${definition.name} preview`}
+      aria-label={t("{value1} preview", { value1: definition.name })}
     >
       <div className={styles.footerIdentity}>
         <BrandMark context={context} />
@@ -726,11 +736,11 @@ export function BankFooterSection({
         ) : null}
       </div>
       <div className={styles.footerShowroom}>
-        <span>Permanent Suqpage page</span>
+        <span>{t("Permanent Suqpage page")}</span>
         <strong>@{context.business.handle}</strong>
       </div>
       <div className={styles.footerContact}>
-        <span>Products and capabilities</span>
+        <span>{t("Products and capabilities")}</span>
         <strong>{context.business.contactLabel}</strong>
       </div>
     </footer>

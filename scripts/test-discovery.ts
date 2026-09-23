@@ -22,7 +22,7 @@ async function runPostgresFixture() {
     assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
     assert.match(discoveryUiSource, /Filter by region or city/);
     assert.match(discoveryMapSource, /<CategoryChooser categories=\{discovery\.industries\} value=\{discovery\.industry\.key\}/);
-    assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label="Filter by category"/);
+    assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label=\{t\("Filter by category"\)\}/);
     assert.match(discoveryUiSource, /discovery-search-panel/);
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
     assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
@@ -85,12 +85,12 @@ async function runPostgresFixture() {
     const agendaAtStart = buildFeaturedProgramAgenda("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
     const walkthroughsAtStart = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
     assert.equal(walkthroughsAtStart.length, 10);
-    assert.equal(walkthroughsAtStart[0].label, "10:05–10:35");
+    assert.equal(walkthroughsAtStart[0].label, "10:05 AM–10:35 AM");
     assert.equal(walkthroughsAtStart.filter((walkthrough) => walkthrough.current).length, 1);
     assert.equal(walkthroughsAtStart[0].current, true);
     assert.equal(agendaAtStart.filter((entry) => entry.kind === "sponsor_break").length, 2);
     const intermissionAtStart = agendaAtStart.find((entry) => entry.kind === "intermission");
-    assert.equal(intermissionAtStart?.kind === "intermission" ? intermissionAtStart.timeLabel : "", "13:00–19:05");
+    assert.equal(intermissionAtStart?.kind === "intermission" ? intermissionAtStart.timeLabel : "", "1:00 PM–7:05 PM");
     const walkthroughsAtSecond = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:40:00+03:00"));
     assert.equal(walkthroughsAtSecond[1].current, true);
     assert.equal(walkthroughsAtSecond[0].current, false);

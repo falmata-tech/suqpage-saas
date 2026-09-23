@@ -169,7 +169,10 @@ deliver for, or guarantee a listed participant.
   browser token to begin a separate conversation; visitors, clients, and
   authorized staff may attach one private sanitized image or verified PDF up to
   5 MB to a message, with conversation-scoped reads through the configured media
-  adapter;
+  adapter. The verified local BE-018/FE-019 retry refinement prepares the
+  HttpOnly visitor token before sending and retains a submission key through
+  lost responses and reopening, so retries recover the same chat/message;
+  publication of this refinement remains pending;
 - one shared business profile with each seller's own identity, introduction,
   images, products and optional About video;
 - a permanent public discovery surface where visitors choose an industry,
@@ -248,6 +251,10 @@ fresh visit and opens for query/category/place deep links. Hiding and reopening
 retains the query, filters, result page, map center and zoom. Map controls remain
 on the right; attribution and fixed phone navigation stay visible. Selecting a
 result business hides the drawer to expose its map preview. The map stays mounted.
+The verified local FE-042 candidate uses a Filters disclosure for category/place
+controls, removes repeated headings and places paging below independently
+scrollable result rows. Desktop and phone checks pass; this layout awaits owner
+visual approval and deployment. Production still uses the previous expanded controls.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -284,7 +291,7 @@ ordering do not change with industry, search, place, or selected program day.
 Desktop shows all five beside the gallery. Phones show two at a time in a compact
 automatically rotating strip without scroll, pause, or carousel controls. Every
 day has one stable assigned industry, including Agriculture on Sunday. The
-Daily Featured capacity windows are 08:00–13:00 and 17:00–22:00 Ethiopia time,
+Daily Featured capacity windows are 8:00 AM–1:00 PM and 5:00 PM–10:00 PM Ethiopia time,
 with five-minute booth changeovers and a ten-minute sponsor break after every
 third presentation in each session. Non-empty sessions target 30 presentation
 minutes per booth and remain at least one hour long. A smaller morning lineup
@@ -303,7 +310,11 @@ expose future-day business identity. Every revealed card shows its EAT range; ex
 visibly current during a presentation, while transitions, sponsor breaks, and
 intermission identify no business. The status names the active booth or current
 break and provides the configured recordings destination after 22:00. Provider
-links are never invented.
+links are never invented. The verified local FE-033 refinement labels an
+unconfigured broadcast as a schedule, without claiming TikTok is live or offering
+a watch action. Public and dashboard time labels use 12-hour AM/PM; admin time
+controls retain 24-hour machine values and unchanged EAT scheduling boundaries.
+These display refinements await candidate approval and publication.
 Today's gallery rotates as a circular schedule queue: the current presentation
 leads; during breaks the most recently completed presentation remains first;
 and the next card leads only when its presentation starts. References, airtime,
@@ -835,6 +846,9 @@ Default behavior:
   Suqpage page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place. Hide duplicate autocomplete once full results appear;
 - keep search, category and location controls together in the result drawer;
+  the verified local compact-results candidate keeps category/location behind
+  Filters, displays active selections in a short summary and fixes page controls
+  below the scrollable rows. Visual approval and publication remain pending;
 - hide the drawer without clearing filters; its hidden controls are inert, Escape
   returns focus to the opener, and reduced-motion preferences disable sliding;
 - support business name, handle, product, industry, and relevant description search;
@@ -849,6 +863,11 @@ Default behavior:
   all listings. Delayed responses preserve newer typing and Back restores the query.
   PostgreSQL evaluates bounded term groups and count queries omit sorting; it does
   not translate queries or analyze images/videos;
+- the verified local BE-040 ranking correction prefers the original meaningful
+  words anywhere in an offering title over description-only or plural-alternative
+  matches, after exact-title/whole-title-prefix matches. Thus `gras` puts Farm
+  Grass with Dirt ahead of grain matches. Counts, eligibility and five-row SQL
+  pagination remain unchanged. This correction is not yet deployed;
 - keep reviewed production-scale metadata
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
@@ -1292,16 +1311,14 @@ configuration, and preflight checks.
 
 ## 18. Language and localization rules
 
-Target public languages include:
-
-```text
-English
-Amharic
-Afaan Oromo
-Arabic
-Somali
-Afar
-```
+FE-049 provides shared public and dashboard interface localization for English,
+Amharic, Afaan Oromo, Somali and Tigrinya. A validated one-year cookie remembers
+the selection while preserving URLs, merchant content and unsaved form/inquiry
+state. Only the selected language catalog is loaded; server-only text is excluded
+from client messages. Technical terms, legacy/custom-design copy and unknown
+provider errors may retain English. Translations have not had native-speaker
+review. Arabic/RTL and Afar remain future work. Publication evidence is recorded
+in the S25 release document; implemented behavior alone is not a rollout claim.
 
 Rules:
 
@@ -1315,10 +1332,10 @@ Rules:
 - do not translate brand names;
 - do not translate color names entered by the merchant;
 - do not translate sizes, model numbers, storage values, specifications, or option values entered by the merchant;
-- support Arabic right-to-left layout;
+- preserve a path to future Arabic right-to-left layout;
 - allow for long Afaan Oromo strings without layout breakage;
 - do not claim a language is complete until all public UI states are translated and tested;
-- keep the dashboard English-first for the controlled MVP unless multilingual dashboard support is explicitly implemented;
+- apply FE-049 to dashboard and public interface text alike; retain English as the default and fallback for unclear terms;
 - search preserves Unicode content and matches written terms;
   cross-language semantic matching is not implemented. No managed AI is configured.
 

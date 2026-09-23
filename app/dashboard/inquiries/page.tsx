@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
 import PaginationNav from "@/components/PaginationNav";
@@ -11,6 +13,7 @@ import { listInquiriesPage } from "@/lib/scalable-queries";
 export const dynamic = "force-dynamic";
 
 export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string;error?:string;page?:string;q?:string;status?:string}> }) {
+  const t = await getUiText();
   const user = await requireUser();
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
@@ -19,30 +22,30 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   const client = isClient(user);
   const inquiries = await listInquiriesPage(business.id, query);
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>Customer inquiries</h1><p>{client ? "Review inquiries sent from your Suqpage page." : "See what customers asked about and how to reach them."}</p></div></div>
-    {query.error ? <p className="error" role="alert">{query.error}</p> : null}
-    {!query.error && query.saved ? <p className="notice">Inquiry status updated.</p> : null}
+    <div className="dashboard-head"><div><h1>{t("Customer inquiries")}</h1><p>{client ? t("Review inquiries sent from your Suqpage page.") : t("See what customers asked about and how to reach them.")}</p></div></div>
+    {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
+    {!query.error && query.saved ? <p className="notice">{t("Inquiry status updated.")}</p> : null}
     <CollectionToolbar
       action="/dashboard/inquiries"
       search={query.q || ""}
-      placeholder="Customer, contact, product or service"
+      placeholder={t("Customer, contact, product or service")}
       hidden={{ business: business.id }}
       activeFilters={Boolean(query.q || query.status)}
     >
-      <label><span>Status</span><select name="status" defaultValue={query.status || ""}><option value="">All statuses</option><option>new</option><option>contacted</option><option>confirmed</option><option>closed</option><option>cancelled</option></select></label>
+      <label><span>{t("Status")}</span><select name="status" defaultValue={query.status || ""}><option value="">{t("All statuses")}</option><option value="new">{t("new")}</option><option value="contacted">{t("contacted")}</option><option value="confirmed">{t("confirmed")}</option><option value="closed">{t("closed")}</option><option value="cancelled">{t("cancelled")}</option></select></label>
     </CollectionToolbar>
     {inquiries.items.length ? <div className="record-list">{inquiries.items.map((inquiry) => {
       return <section className="panel record-panel" key={inquiry.id}>
-        <div className="record-head"><div><span className={`badge ${inquiry.status}`}>{inquiry.status}</span><h2>{inquiry.customer_name}</h2><p>{inquiry.contact_method}: {inquiry.contact} · {new Date(inquiry.created_at).toLocaleString()}</p></div>
-          {!client ? <form action={updateInquiryStatusAction} className="inline-actions"><input type="hidden" name="businessId" value={business.id}/><input type="hidden" name="inquiryId" value={inquiry.id}/><input type="hidden" name="returnQ" value={query.q || ""}/><input type="hidden" name="returnStatus" value={query.status || ""}/><input type="hidden" name="returnPage" value={query.page || ""}/><select aria-label="Inquiry status" name="status" defaultValue={inquiry.status}><option>new</option><option>contacted</option><option>confirmed</option><option>closed</option><option>cancelled</option></select><button className="small-btn">Update</button></form> : null}
+        <div className="record-head"><div><span className={`badge ${t(inquiry.status)}`}>{t(inquiry.status)}</span><h2>{inquiry.customer_name}</h2><p>{t(inquiry.contact_method)}: {inquiry.contact} · {new Date(inquiry.created_at).toLocaleString("en-US", { hour12: true })}</p></div>
+          {!client ? <form action={updateInquiryStatusAction} className="inline-actions"><input type="hidden" name="businessId" value={business.id}/><input type="hidden" name="inquiryId" value={inquiry.id}/><input type="hidden" name="returnQ" value={query.q || ""}/><input type="hidden" name="returnStatus" value={query.status || ""}/><input type="hidden" name="returnPage" value={query.page || ""}/><select aria-label={t("Inquiry status")} name="status" defaultValue={t(inquiry.status)}><option value="new">{t("new")}</option><option value="contacted">{t("contacted")}</option><option value="confirmed">{t("confirmed")}</option><option value="closed">{t("closed")}</option><option value="cancelled">{t("cancelled")}</option></select><button className="small-btn">{t("Update")}</button></form> : null}
         </div>
         <div className="record-items">{inquiry.items.map((item) => {
           const quantityIntent = item.quantity_intent || (item.quantity === null ? "" : String(item.quantity));
-          return <div key={item.id}><strong>{item.product_name_snapshot}</strong><div>Quantity: {quantityIntent || "Open for discussion"}</div>{item.options_json !== "{}" ? <div>{Object.entries(JSON.parse(item.options_json)).map(([key,value]) => `${key}: ${value}`).join(" · ")}</div> : null}</div>;
+          return <div key={item.id}><strong>{item.product_name_snapshot}</strong><div>{t("Quantity:")}{" "}{quantityIntent || t("Open for discussion")}</div>{item.options_json !== "{}" ? <div>{Object.entries(JSON.parse(item.options_json)).map(([key,value]) => `${key}: ${value}`).join(" · ")}</div> : null}</div>;
         })}</div>
         {inquiry.note ? <p className="hint">{inquiry.note}</p> : null}
       </section>;
-    })}</div> : <div className="empty-state">No customer inquiries match this view.</div>}
+    })}</div> : <div className="empty-state">{t("No customer inquiries match this view.")}</div>}
     <PaginationNav
       result={inquiries}
       pathname="/dashboard/inquiries"

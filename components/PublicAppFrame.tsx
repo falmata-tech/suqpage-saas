@@ -1,5 +1,8 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
 
+
+import LanguageSelector from "@/components/LanguageSelector";
 import Link from "next/link";
 import { FileText, Info, LayoutDashboard, LogIn, Mail, Map, Menu, Shield, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -19,43 +22,44 @@ function isCurrent(pathname: string, href: string) {
 }
 
 function PublicAppFrameContent({ children, signedIn }: { children: ReactNode; signedIn: boolean }) {
+  const t = useUiText();
   const pathname = usePathname();
   const showroomOpen = pathname.startsWith("/@");
 
   return <div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
     <header className="public-app-header">
       <SuqpageBrand className="public-app-brand" />
-      <span className="public-app-purpose">Ethiopia Market</span>
+      <LanguageSelector />
     </header>
     <aside className="public-app-rail">
       <section className="public-app-rail-group">
-        <span>Explore</span>
-        <nav aria-label="Explore Suqpage">
+        <span>{t("Explore")}</span>
+        <nav aria-label={t("Explore Suqpage")}>
           {exploreDestinations.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={isCurrent(pathname, href) ? "page" : undefined}>
             <Icon aria-hidden="true" />
-            <span>{label}</span>
-            <NavigationPendingIndicator label={label} />
+            <span>{t(label)}</span>
+            <NavigationPendingIndicator label={t(label)} />
           </Link>)}
         </nav>
       </section>
       <section className="public-app-rail-group">
-        <span>Account</span>
-        <nav aria-label="Suqpage account">
+        <span>{t("Account")}</span>
+        <nav aria-label={t("Suqpage account")}>
           {signedIn
-            ? <Link href="/dashboard"><LayoutDashboard aria-hidden="true" /><span>Dashboard</span><NavigationPendingIndicator label="Dashboard" /></Link>
-            : <Link href="/login"><LogIn aria-hidden="true" /><span>Sign in</span><NavigationPendingIndicator label="Sign in" /></Link>}
+            ? <Link href="/dashboard"><LayoutDashboard aria-hidden="true" /><span>{t("Dashboard")}</span><NavigationPendingIndicator label={t("Dashboard")} /></Link>
+            : <Link href="/login"><LogIn aria-hidden="true" /><span>{t("Sign in")}</span><NavigationPendingIndicator label={t("Sign in")} /></Link>}
         </nav>
       </section>
       <section className="public-app-rail-group public-app-rail-information">
-        <span>Information</span>
-        <nav aria-label="Suqpage information">
-          <Link href="/about" aria-current={isCurrent(pathname, "/about") ? "page" : undefined}><Info aria-hidden="true" /><span>About</span><NavigationPendingIndicator label="About" /></Link>
+        <span>{t("Information")}</span>
+        <nav aria-label={t("Suqpage information")}>
+          <Link href="/about" aria-current={isCurrent(pathname, "/about") ? "page" : undefined}><Info aria-hidden="true" /><span>{t("About")}</span><NavigationPendingIndicator label={t("About")} /></Link>
           <details className="public-app-more">
-            <summary><Menu aria-hidden="true" /><span>More</span></summary>
+            <summary><Menu aria-hidden="true" /><span>{t("More")}</span></summary>
             <div>
-              <a href="mailto:falmata.dawano@gmail.com"><Mail aria-hidden="true" /><span>Contact Suqpage</span></a>
-              <Link href="/privacy"><Shield aria-hidden="true" /><span>Privacy</span><NavigationPendingIndicator label="Privacy" /></Link>
-              <Link href="/terms"><FileText aria-hidden="true" /><span>Terms</span><NavigationPendingIndicator label="Terms" /></Link>
+              <a href="mailto:falmata.dawano@gmail.com"><Mail aria-hidden="true" /><span>{t("Contact Suqpage")}</span></a>
+              <Link href="/privacy"><Shield aria-hidden="true" /><span>{t("Privacy")}</span><NavigationPendingIndicator label={t("Privacy")} /></Link>
+              <Link href="/terms"><FileText aria-hidden="true" /><span>{t("Terms")}</span><NavigationPendingIndicator label={t("Terms")} /></Link>
             </div>
           </details>
         </nav>

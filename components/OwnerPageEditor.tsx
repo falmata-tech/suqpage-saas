@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { Eye, Pencil, Save, LoaderCircle, Check, Upload, Globe, Undo2, ExternalLink } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +14,7 @@ import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
 
 export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean }) {
+  const t = useUiText();
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
   const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
@@ -103,63 +106,62 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
     finally { setBusy(false); setConfirmation(null); }
   }
 
-  return <section className={styles.editor} aria-label="Business profile editor" aria-busy={!ready || busy || uploading}>
-    {catalog.business.description.startsWith('Sample page:') && catalog.business.status === 'draft' ? <p className="notice">{STARTER_NOTICE}</p> : null}
+  return <section className={styles.editor} aria-label={t("Business profile editor")} aria-busy={!ready || busy || uploading}>
+    {catalog.business.description.startsWith('Sample page:') && catalog.business.status === 'draft' ? <p className="notice">{t(STARTER_NOTICE)}</p> : null}
     <header className={styles.toolbar}>
-      <div><h1>Business profile</h1><p role="status">{dirty ? "Unsaved changes" : draft ? activePage && matchesPublication ? "Changes saved to your live page" : "Private draft saved" : "Private preview"}</p></div>
-      <div className={styles.modes} aria-label="Editor view">
-        <button type="button" aria-pressed={mode === "edit"} onClick={() => setMode("edit")}><Pencil size={17} />Edit</button>
-        <button type="button" aria-pressed={mode === "preview"} onClick={() => setMode("preview")}><Eye size={17} />Preview</button>
+      <div><h1>{t("Business profile")}</h1><p role="status">{dirty ? t("Unsaved changes") : draft ? activePage && matchesPublication ? t("Changes saved to your live page") : t("Private draft saved") : t("Private preview")}</p></div>
+      <div className={styles.modes} aria-label={t("Editor view")}>
+        <button type="button" aria-pressed={mode === "edit"} onClick={() => setMode("edit")}><Pencil size={17} />{t("Edit")}</button>
+        <button type="button" aria-pressed={mode === "preview"} onClick={() => setMode("preview")}><Eye size={17} />{t("Preview")}</button>
       </div>
       <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !dirty && (!activePage || matchesPublication))}
         onClick={() => command("save")}>
         {busy ? <LoaderCircle size={18} /> : <Save size={18} />}
-        Save
-      </button>
+        {t("Save")}</button>
     </header>
-    {owner ? <div className={styles.publication} aria-label="Page publication">
-      <p role="status">{activePage ? "Your page is live" : catalog.business.status === "suspended" ? "Page suspended — contact support" : "Private until you publish"}</p>
+    {owner ? <div className={styles.publication} aria-label={t("Page publication")}>
+      <p role="status">{activePage ? t("Your page is live") : catalog.business.status === "suspended" ? t("Page suspended — contact support") : t("Private until you publish")}</p>
       <div className={styles.publicationActions}>
-        {!activePage && catalog.business.status === "draft" ? <button type="button" className={styles.publish} disabled={!ready || busy || uploading || !draft || dirty || Boolean(preview.error) || !catalog.products.some(product => Boolean(product.is_published))} onClick={() => setConfirmation("publish")}><Globe size={16} aria-hidden="true" />Publish</button> : null}
-        {activePage ? <a href={`/@${catalog.business.handle}`} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} aria-hidden="true" />View page<span className="sr-only"> (new tab)</span></a> : null}
-        {publication && activePage ? <button type="button" disabled={!ready || busy || uploading} onClick={() => setConfirmation("restore")}><Undo2 size={16} aria-hidden="true" />Restore previous</button> : null}
+        {!activePage && catalog.business.status === "draft" ? <button type="button" className={styles.publish} disabled={!ready || busy || uploading || !draft || dirty || Boolean(preview.error) || !catalog.products.some(product => Boolean(product.is_published))} onClick={() => setConfirmation("publish")}><Globe size={16} aria-hidden="true" />{t("Publish")}</button> : null}
+        {activePage ? <a href={`/@${catalog.business.handle}`} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} aria-hidden="true" />{t("View page")}<span className="sr-only"> {" "}{t("(new tab)")}</span></a> : null}
+        {publication && activePage ? <button type="button" disabled={!ready || busy || uploading} onClick={() => setConfirmation("restore")}><Undo2 size={16} aria-hidden="true" />{t("Restore previous")}</button> : null}
       </div>
     </div> : null}
     <dialog ref={confirmDialog} className={styles.confirmation} aria-labelledby="page-publication-title"
       onCancel={(event) => { if (busy) event.preventDefault(); else setConfirmation(null); }}
       onClose={() => setConfirmation(null)}>
-      <h2 id="page-publication-title">{confirmation === "restore" ? "Restore the previous page?" : `Publish ${catalog.business.name}?`}</h2>
-      <p>{confirmation === "restore" ? "Visitors will see the previous published page. Your draft will stay saved." : "Your page and listed products or services will be visible to customers. You can update them any time."}</p>
-      <div><button type="button" autoFocus disabled={busy} onClick={() => setConfirmation(null)}>Cancel</button>
+      <h2 id="page-publication-title">{confirmation === "restore" ? t("Restore the previous page?") : t("Publish {value1}?", { value1: catalog.business.name })}</h2>
+      <p>{confirmation === "restore" ? t("Visitors will see the previous published page. Your draft will stay saved.") : t("Your page and listed products or services will be visible to customers. You can update them any time.")}</p>
+      <div><button type="button" autoFocus disabled={busy} onClick={() => setConfirmation(null)}>{t("Cancel")}</button>
         <button type="button" className={styles.publish} disabled={busy} onClick={() => void publishSavedPage()}>
           {busy ? <LoaderCircle size={16} aria-hidden="true" /> : confirmation === "restore" ? <Undo2 size={16} aria-hidden="true" /> : <Globe size={16} aria-hidden="true" />}
-          {confirmation === "restore" ? "Restore previous" : "Publish page"}
+          {confirmation === "restore" ? t("Restore previous") : t("Publish page")}
         </button></div>
     </dialog>
-    {error ? <p role="alert" className={styles.error}>{error}</p> : null}
+    {error ? <p role="alert" className={styles.error}>{t(error)}</p> : null}
     <div className={styles.workspace} data-mode={mode}>
       <div className={styles.fields}>
         <fieldset disabled={!ready || busy || uploading}>
           <legend>{catalog.business.name}</legend>
-          <label htmlFor="shop-about">About the business</label>
+          <label htmlFor="shop-about">{t("About the business")}</label>
           <textarea id="shop-about" rows={5} maxLength={3000} value={businessProfileDescription(content)} onChange={(e) => setContent({ ...content, introduction: "", about: e.target.value })} />
-          <span className={styles.uploadStatus}>Tell visitors what makes your shop and products worth exploring.</span>
-          <label htmlFor="shop-video">Business video <span className={styles.optional}>(optional)</span></label>
-          <input id="shop-video" type="url" placeholder="YouTube link" maxLength={500} value={content.videoUrl} onChange={(e) => setContent({ ...content, videoUrl: e.target.value })} />
-          <span id="shop-cover-label" className={styles.label}>Cover image</span>
-          <input ref={fileInput} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label="Choose cover image file" onChange={(event) => {
+          <span className={styles.uploadStatus}>{t("Tell visitors what makes your shop and products worth exploring.")}</span>
+          <label htmlFor="shop-video">{t("Business video")}{" "}<span className={styles.optional}>{t("(optional)")}</span></label>
+          <input id="shop-video" type="url" placeholder={t("YouTube link")} maxLength={500} value={content.videoUrl} onChange={(e) => setContent({ ...content, videoUrl: e.target.value })} />
+          <span id="shop-cover-label" className={styles.label}>{t("Cover image")}</span>
+          <input ref={fileInput} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label={t("Choose cover image file")} onChange={(event) => {
             const file = event.currentTarget.files?.[0]; event.currentTarget.value = "";
             if (file) void uploadCover(file);
           }} />
           <button type="button" className={styles.upload} onClick={() => fileInput.current?.click()}>
             {uploading ? <LoaderCircle size={18} aria-hidden="true" /> : <Upload size={18} aria-hidden="true" />}
-            {uploading ? "Uploading image..." : "Upload image"}
+            {uploading ? t("Uploading image...") : t("Upload image")}
           </button>
-          <span className={styles.uploadStatus} role="status">{uploading ? "Uploading your cover image..." : "JPG, PNG or WebP. Up to 5 MB."}</span>
+          <span className={styles.uploadStatus} role="status">{uploading ? t("Uploading your cover image...") : t("JPG, PNG or WebP. Up to 5 MB.")}</span>
         </fieldset>
           <div className={styles.images} role="group" aria-labelledby="shop-cover-label" tabIndex={0}>
-            <button type="button" disabled={!ready || busy || uploading} aria-pressed={!content.heroImage} onClick={() => setContent({ ...content, heroImage: "" })}>No image</button>
-            {images.map((image, index) => <button key={image} type="button" aria-label={`Use shop image ${index + 1}`} title={`Shop image ${index + 1}`}
+            <button type="button" disabled={!ready || busy || uploading} aria-pressed={!content.heroImage} onClick={() => setContent({ ...content, heroImage: "" })}>{t("No image")}</button>
+            {images.map((image, index) => <button key={image} type="button" aria-label={t("Use shop image {value1}", { value1: index + 1 })} title={t("Shop image {value1}", { value1: index + 1 })}
               disabled={!ready || busy || uploading} aria-pressed={content.heroImage === image} onClick={() => setContent({ ...content, heroImage: image })}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt="" loading="lazy" />
@@ -167,26 +169,26 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
             </button>)}
           </div>
         <fieldset disabled={!ready || busy || uploading}>
-          <legend className="sr-only">Public contact details</legend>
+          <legend className="sr-only">{t("Public contact details")}</legend>
           <details className={styles.contactFields}>
-            <summary>Public contact details <span className={styles.optional}>(optional)</span></summary>
+            <summary>{t("Public contact details")}{" "}<span className={styles.optional}>{t("(optional)")}</span></summary>
             {publicContactFields.map((field) => <div key={field.key}>
-              <label htmlFor={`public-${field.key}`}>{field.label}</label>
+              <label htmlFor={`public-${field.key}`}>{t(field.label)}</label>
               <input id={`public-${field.key}`} type={field.type} maxLength={500} placeholder={field.placeholder}
                 value={(content.contacts || legacyPublicContacts(catalog.business))[field.key] || ""}
                 onChange={(event) => setContent({ ...content, contacts: { ...(content.contacts || legacyPublicContacts(catalog.business)), [field.key]: event.target.value } })} />
             </div>)}
           </details>
         </fieldset>
-        {preview.error ? <p role="alert" className={styles.error}>{preview.error}</p> : null}
+        {preview.error ? <p role="alert" className={styles.error}>{t(preview.error)}</p> : null}
         {owner && draft ? <div className={styles.assistance}>
-          <label><input type="checkbox" checked={draft.assistanceEnabled} disabled={!ready || busy || uploading} onChange={(e) => command("assistance", e.target.checked)} />Allow team editing</label>
-          <p>The team can prepare changes. Your Save applies them to your live page.</p>
-        </div> : draft ? <p className={styles.note}>Team editing is enabled by the owner.</p> : null}
+          <label><input type="checkbox" checked={draft.assistanceEnabled} disabled={!ready || busy || uploading} onChange={(e) => command("assistance", e.target.checked)} />{t("Allow team editing")}</label>
+          <p>{t("The team can prepare changes. Your Save applies them to your live page.")}</p>
+        </div> : draft ? <p className={styles.note}>{t("Team editing is enabled by the owner.")}</p> : null}
       </div>
-      <div className={styles.preview} aria-label="Page preview">
-        <div className={styles.previewLabel}><Eye size={16} />Private preview</div>
-        {renderedProfile ? <ShowroomApp catalog={catalog} businessProfile={renderedProfile} previewMode embedded /> : <p role="status" className={styles.error}>Complete the profile fields to preview.</p>}
+      <div className={styles.preview} aria-label={t("Page preview")}>
+        <div className={styles.previewLabel}><Eye size={16} />{t("Private preview")}</div>
+        {renderedProfile ? <ShowroomApp catalog={catalog} businessProfile={renderedProfile} previewMode embedded /> : <p role="status" className={styles.error}>{t("Complete the profile fields to preview.")}</p>}
       </div>
     </div>
   </section>;

@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
@@ -14,6 +16,7 @@ const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceN
 };
 
 export default async function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
+  const t = await getUiText();
   const query = business ? `?business=${business.id}` : "";
   const client = isClient(user);
   const operations = hasCapability(user, "operations:manage");
@@ -104,7 +107,7 @@ export default async function DashboardShell({ user, business, children }: { use
   const groups = globalGroups || focusedStaffGroups || standardGroups;
 
   return <NavigationPendingProvider><div className="dashboard">
-    <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={identityContext} groups={groups} />
-    <NavigationPendingMain className="main">{authDriver() === "local" && user.must_change_password ? <div className="error temporary-password">Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div> : null}{children}</NavigationPendingMain>
+    <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={business ? identityContext : t(identityContext)} groups={groups} />
+    <NavigationPendingMain className="main">{authDriver() === "local" && user.must_change_password ? <div className="error temporary-password">{t("Your password is temporary.")}{" "}<Link href="/dashboard/account?required=1">{t("Change it now.")}</Link></div> : null}{children}</NavigationPendingMain>
   </div></NavigationPendingProvider>;
 }

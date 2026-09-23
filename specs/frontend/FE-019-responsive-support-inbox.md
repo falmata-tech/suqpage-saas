@@ -4,7 +4,7 @@ title: Responsive client and staff support inbox
 status: in_progress
 related: [FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012]
 owners: [frontend, customer-support]
-last_updated: 2026-08-15
+last_updated: 2026-09-23
 change_level: L3
 ---
 
@@ -17,6 +17,19 @@ team members need one clear queue that remains usable on phones and with many
 conversations.
 
 ## Scope
+
+### Retry completion — 2026-09-23
+
+GIVEN a support response is lost after persistence WHEN the visitor retries the
+unchanged draft THEN the same submission key is reused and only one message/chat
+exists. Editing the draft creates a new attempt; confirmed success clears it.
+Opening support prepares the anonymous HttpOnly session before Send is enabled;
+failed session loading offers Retry. An existing conversation is recovered before
+a new reply is sent. No automatic user-message retry or new UI explanation.
+
+Focused browser failure injection plus real PostgreSQL replay/isolation tests
+must cover opening and replying. First-message retries use the prepared opaque
+cookie, never contact data or an idempotency key as access authority.
 
 ### In scope
 
@@ -173,3 +186,5 @@ reassign, queue, and capacity behavior. Ordered browser acceptance proves a
 client can create a waiting conversation at 390px without page overflow and an
 operations manager can inspect the waiting queue and workload controls.
 `npm run check` and `npm run release` passed on 2026-07-30.
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

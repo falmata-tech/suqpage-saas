@@ -1,10 +1,10 @@
 ---
 id: BE-040
 title: Simple offering upkeep and word search
-status: done
+status: in_progress
 related: [BE-041, BE-009, FE-047, DEP-037]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-09-23
 change_level: L2
 ---
 
@@ -43,6 +43,47 @@ queries; punctuation cannot expand to all listings. Delayed results must not ove
 newer typing, and browser Back restores the query for the restored results. Measure the 10,000-offering fixture.
 
 ## Scenarios
+
+### Original-term ranking correction — 2026-09-23
+
+L2 defect: `gras` expands to `gras`/`gra`, and a title such as `Farm Grass with
+Dirt` previously tied with grain/graphic matches because it does not start with
+the whole query. Keep eligibility, plural recall, spelling candidate bounds,
+product/business sequence, counts and five-row SQL pagination unchanged.
+Within normal product matches, rank exact title, whole-title prefix, all original
+meaningful terms anywhere in the title, exact business name, original terms in
+the combined searchable text, then variant-only matches. Original terms use the
+existing normalization/escaping but no plural alternatives. Suggestions use the
+same title preference. No popularity, new service, schema or UI control.
+
+- GIVEN more than five variant-only grain/graphic matches and published Farm Grass
+  with Dirt WHEN searching `gras` THEN that product appears first on page one.
+- GIVEN literal original-term title and description matches plus variant-only
+  matches WHEN paging THEN stronger title matches precede description matches,
+  which precede variant-only matches, with stable ties and no duplicates.
+- GIVEN exact and prefixed titles WHEN searching THEN they retain priority;
+  request words, case, punctuation and accents do not defeat original-term ranking.
+- GIVEN hidden products or category/place filters THEN rank cannot bypass them;
+  blank browsing, simple plural recall and spelling matching remain supported.
+
+DOR met: no unresolved data/product choice. Focused real-PostgreSQL regression,
+existing word/pagination/spelling tests, 10,000-offering performance fixture and
+local browser result verification are required. Master §10 is affected. Rollback
+is the previous ranking code; no database mutation or deployment is required.
+
+Local evidence: `scripts/test-search-ranking.ts` failed before the fix and passes
+afterward; it is included in `test:discovery-pagination`. Existing spelling tests,
+21 human-query cases and six PostgreSQL pagination/search tests pass. Typecheck
+and 153-spec validation pass. Read-only checks of the local catalog move Farm Grass
+with Dirt from eighth to first for `gras`, preserving all 39 eligible results.
+Browser checks at 1440/390/320 confirm its first row is visible and Next/Previous
+retain the order (`.local/search-ranking/gras-*.png`). No tenant content was edited.
+
+The 10,000-offering performance fixture initially exceeded its 2.5-second budget
+while browser checks were running. One controlled isolated retry passes: normal
+queries 945/886/832ms and typo queries 1192/1560/1355ms; indexed candidate retrieval
+passes. These are local measurements, not production latency guarantees. Full
+build/release and publication remain pending alongside the earlier visual candidate.
 
 - GIVEN an owner WHEN opening add/edit on desktop or phone THEN only five content
   fields appear, with image actions and one Save/Add action; staff still have controls.

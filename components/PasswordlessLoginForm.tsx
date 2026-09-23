@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { useState } from "react";
 
@@ -6,6 +8,7 @@ type Stage = "email" | "code";
 type RequestState = "idle" | "sending" | "error";
 
 export default function PasswordlessLoginForm({ emailEnabled, initialError = "" }: { emailEnabled: boolean; initialError?: string }) {
+  const t = useUiText();
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -61,16 +64,16 @@ export default function PasswordlessLoginForm({ emailEnabled, initialError = "" 
   if (!emailEnabled) return null;
 
   if (stage === "code") return <form className="platform-login-form" onSubmit={verifyEmail}>
-    <div className="platform-code-heading"><span>Code sent to</span><strong>{email}</strong><button type="button" onClick={() => { setStage("email"); setCode(""); setMessage(""); setRequestState("idle"); }}>Change email</button></div>
-    <div className="field"><label htmlFor="login-code">Six-digit code</label><input id="login-code" name="code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus /></div>
-    {message ? <p className={requestState === "error" ? "error" : "platform-form-note"} role={requestState === "error" ? "alert" : "status"}>{message}</p> : null}
-    <button type="submit" disabled={requestState === "sending" || code.length !== 6}>{requestState === "sending" ? "Checking code..." : "Continue"}</button>
-    <button className="platform-text-button" type="button" disabled={requestState === "sending"} onClick={() => void requestCode()}>Send another code</button>
+    <div className="platform-code-heading"><span>{t("Code sent to")}</span><strong>{email}</strong><button type="button" onClick={() => { setStage("email"); setCode(""); setMessage(""); setRequestState("idle"); }}>{t("Change email")}</button></div>
+    <div className="field"><label htmlFor="login-code">{t("Six-digit code")}</label><input id="login-code" name="code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus /></div>
+    {message ? <p className={requestState === "error" ? "error" : "platform-form-note"} role={requestState === "error" ? "alert" : "status"}>{t(message)}</p> : null}
+    <button type="submit" disabled={requestState === "sending" || code.length !== 6}>{requestState === "sending" ? t("Checking code...") : t("Continue")}</button>
+    <button className="platform-text-button" type="button" disabled={requestState === "sending"} onClick={() => void requestCode()}>{t("Send another code")}</button>
   </form>;
 
   return <form className="platform-login-form" onSubmit={startEmail}>
-    <div className="field"><label htmlFor="login-email">Email</label><input id="login-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={160} /></div>
-    {message ? <p className="error" role="alert">{message}</p> : null}
-    <button type="submit" disabled={requestState === "sending"}>{requestState === "sending" ? "Sending code..." : "Continue with email"}</button>
+    <div className="field"><label htmlFor="login-email">{t("Email")}</label><input id="login-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={160} /></div>
+    {message ? <p className="error" role="alert">{t(message)}</p> : null}
+    <button type="submit" disabled={requestState === "sending"}>{requestState === "sending" ? t("Sending code...") : t("Continue with email")}</button>
   </form>;
 }

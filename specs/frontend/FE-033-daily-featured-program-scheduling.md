@@ -4,7 +4,7 @@ title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
 related: [FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-08-14
+last_updated: 2026-09-23
 change_level: L3
 ---
 
@@ -23,6 +23,29 @@ one date's participant order, while the public gallery continues to derive every
 time and active highlight from one authoritative agenda.
 
 ## Scope
+
+### 12-hour display refinement (2026-09-23, local candidate)
+
+GIVEN a public or dashboard schedule WHEN a clock time is displayed THEN it uses
+1–12 hours, two-digit minutes and explicit AM/PM, including noon and midnight.
+Ranges label both endpoints; the existing EAT timezone remains. Support/inquiry/
+invitation timestamps use the same 12-hour rule. Admin hour/minute/AM-PM controls
+submit the same validated HH:mm machine value, preserving authorization and
+persistence. All interface languages retain AM/PM. Date-only labels and elapsed
+durations are unaffected. ISO timestamps and agenda calculations never consume
+display labels. This supersedes the earlier native-time-control UI.
+
+DOR met: L1 display refinement; no schema/provider/timezone change. Focused tests
+cover noon/midnight/PM, agenda epoch boundaries and form round trips. Desktop/phone
+captures precede visual approval/full gates. Rollback restores source without
+migrating schedule data. Master §§5/19 affected.
+
+Demo-audit correction: GIVEN no valid platform TikTok destination WHEN any
+schedule phase renders THEN it shows Featured schedule/current/break/ended status
+without claiming a TikTok broadcast or offering a dead watch action. Configured
+provider links retain their existing behavior. Schedule timing never proves an
+external stream exists. Verify absent/configured destination states in browser;
+no new provider integration or production configuration mutation.
 
 ### In scope
 
@@ -232,3 +255,5 @@ ignores them and continues its prior deterministic schedule.
 ## Completion evidence
 
 Implementation and focused evidence are in progress.
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

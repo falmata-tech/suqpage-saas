@@ -32,7 +32,7 @@ async function main() {
     }
     const plan=await db.runner.query('EXPLAIN (FORMAT JSON) '+SPELLING_SEARCH_SQL,['electronics','','','', '[]',JSON.stringify(spellingTerms('repiar Addis'))]);
     assert.match(JSON.stringify(plan.rows),/products_spelling_gist/,'Candidate retrieval uses the expression index');
-    assert.ok(Math.max(...timings,...typoTimings)<2500,'Search stays within the local 2.5 second fixture budget');
+    assert.ok(Math.max(...timings,...typoTimings)<2500,`Search stays within the local 2.5 second fixture budget: ${JSON.stringify({queryMilliseconds:timings,typoMilliseconds:typoTimings})}`);
     console.log(JSON.stringify({passed:true,businesses:500,products:10000,returnedProducts:5,queryMilliseconds:timings,typoMilliseconds:typoTimings}));
   } finally {await closeDbForTests();}
 }

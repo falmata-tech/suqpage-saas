@@ -1,4 +1,7 @@
 "use client";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useUiText } from "@/lib/i18n/ui";
+
 import { readPlatformState } from "@/lib/platform-state";
 
 import { createPortal } from "react-dom";
@@ -114,6 +117,7 @@ function trapTab(event: KeyboardEvent, root: HTMLElement) {
 }
 
 export default function ShowroomApp({ catalog, previewMode = false, embedded = false, withinPublicApp = false, businessProfile }: { catalog: Catalog; previewMode?: boolean; embedded?: boolean; withinPublicApp?: boolean; businessProfile?: ShopPageContent }) {
+  const t = useUiText();
   const router = useRouter();
   const searchParams = useSearchParams();
   const routedProduct = businessProfile && !previewMode ? searchParams.get("product") : null;
@@ -341,9 +345,9 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
     <>
       {!(previewMode && businessProfile) ? <nav
         className={`showroom-host-bar${withinPublicApp ? " showroom-host-bar-shell" : ""}`}
-        aria-label="Page return navigation"
+        aria-label={t("Page return navigation")}
       >
-        <button type="button" className="showroom-host-back" aria-label="Back to Market" onClick={() => {
+        <button type="button" className="showroom-host-back" aria-label={t("Back to Market")} onClick={() => {
           let remembered: string | null = null;
           try {
             remembered = readPlatformState(window.sessionStorage, PUBLIC_WORKSPACE_RETURN_KEY);
@@ -361,17 +365,18 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
           router.push("/");
         }}>
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
-          <span>Back to Market</span>
+          <span>{t("Back to Market")}</span>
         </button>
+        <span className="showroom-language"><LanguageSelector /></span>
       </nav> : null}
       <ShowroomRoot
         className={`runtime-root theme-${catalog.business.design_key}${withinPublicApp ? " is-public-shell" : ""}${compositionManifest && !previewMode && !embedded ? " has-showroom-mobile-nav" : ""}`}
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
-      {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} on Suqpage</h1> : null}
+      {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on Suqpage")}</h1> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={cart.map(line => line.product.id)} onBackToProducts={backToProducts}
-        productDetail={selected || routedProduct ? <ProductPage catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected}
+        productDetail={selected || routedProduct ? <ProductPage ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected}
           backHref={`/@${catalog.business.handle}`} onBack={backToProducts}
           onAdd={options => selected && add(selected, options)} onInquire={options => selected && inquireNow(selected, options)}
           isAdded={options => Boolean(selected && cart.some(line => selectionKey(line.product.id, line.options) === selectionKey(selected.id, options)))}
@@ -390,25 +395,25 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
       {!previewMode && !businessProfile ? <button
         type="button"
         className={`floating-inquiry-trigger${cartCount ? " has-items" : ""}`}
-        aria-label={`Inquiry, ${cartCount} selected ${cartCount === 1 ? "item" : "items"}`}
-        title="Open inquiry"
+        aria-label={t("Inquiry, {value1} selected {value2}", { value1: cartCount, value2: cartCount === 1 ? "item" : "items" })}
+        title={t("Open inquiry")}
         onClick={openCart}
       >
         <span className="floating-inquiry-icon" aria-hidden="true" />
-        <span className="floating-inquiry-label">Inquiry</span>
+        <span className="floating-inquiry-label">{t("Inquiry")}</span>
         {cartCount ? (
           <span className="floating-inquiry-count" aria-hidden="true">{cartCount}</span>
         ) : null}
       </button> : null}
       {compositionManifest && !previewMode && !embedded ? (
-        <nav className="showroom-mobile-nav" aria-label="Page sections">
-          <a href="#showroom-home"><Home aria-hidden="true" /><span>Home</span></a>
-          <a href="#showroom-story"><BookOpen aria-hidden="true" /><span>Story</span></a>
-          <a href="#showroom-catalog"><LayoutGrid aria-hidden="true" /><span>Offerings</span></a>
-          <a href="#showroom-contact"><MessageCircle aria-hidden="true" /><span>Contact</span></a>
-          <button type="button" onClick={openCart} aria-label={`Inquiry, ${cartCount} selected ${cartCount === 1 ? "item" : "items"}`}>
+        <nav className="showroom-mobile-nav" aria-label={t("Page sections")}>
+          <a href="#showroom-home"><Home aria-hidden="true" /><span>{t("Home")}</span></a>
+          <a href="#showroom-story"><BookOpen aria-hidden="true" /><span>{t("Story")}</span></a>
+          <a href="#showroom-catalog"><LayoutGrid aria-hidden="true" /><span>{t("Offerings")}</span></a>
+          <a href="#showroom-contact"><MessageCircle aria-hidden="true" /><span>{t("Contact")}</span></a>
+          <button type="button" onClick={openCart} aria-label={t("Inquiry, {value1} selected {value2}", { value1: cartCount, value2: cartCount === 1 ? "item" : "items" })}>
             <span className="showroom-mobile-nav-icon"><ShoppingBag aria-hidden="true" />{cartCount ? <b aria-hidden="true">{cartCount}</b> : null}</span>
-            <span>Inquiry</span>
+            <span>{t("Inquiry")}</span>
           </button>
         </nav>
       ) : null}
@@ -425,30 +430,28 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
             className={`product-dialog-panel${selected.image_path || selected.video_ref ? "" : " no-media"}`}
             data-detail-pattern={productDetailPattern}
           >
-            <button className="icon-button dialog-close" aria-label="Close product" onClick={() => setSelected(null)}>
+            <button className="icon-button dialog-close" aria-label={t("Close product")} onClick={() => setSelected(null)}>
               ×
             </button>
             <div className={`product-dialog-grid${selected.image_path || selected.video_ref ? "" : " no-media"}`}>
               {selected.image_path || selected.video_ref ? (
                 <div className="product-dialog-media">
                   {selected.image_path && selected.video_ref ? (
-                    <div className="product-dialog-media-tabs" aria-label="Product media">
+                    <div className="product-dialog-media-tabs" aria-label={t("Product media")}>
                       <button
                         type="button"
                         className={productMediaMode === "image" ? "active" : ""}
                         aria-pressed={productMediaMode === "image"}
                         onClick={() => setProductMediaMode("image")}
                       >
-                        Photo
-                      </button>
+                        {t("Photo")}</button>
                       <button
                         type="button"
                         className={productMediaMode === "video" ? "active" : ""}
                         aria-pressed={productMediaMode === "video"}
                         onClick={() => setProductMediaMode("video")}
                       >
-                        Video
-                      </button>
+                        {t("Video")}</button>
                     </div>
                   ) : null}
                   {selected.image_path && productMediaMode === "image" ? (
@@ -469,16 +472,16 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
                 ) : null}
                 <p className="product-dialog-description">{selected.description}</p>
                 {selected.highlights.length ? (
-                  <ul className="product-dialog-highlights" aria-label="Offering highlights">
+                  <ul className="product-dialog-highlights" aria-label={t("Offering highlights")}>
                     {selected.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
                   </ul>
                 ) : null}
                 <dl className="product-dialog-facts">
-                  <div><dt>Status</dt><dd>{availabilityLabel(selected.offering_kind, selected.availability)}</dd></div>
-                  {selected.quantity_unit ? <div><dt>Offered by</dt><dd>{selected.quantity_unit}</dd></div> : null}
-                  {selected.capacity_summary ? <div><dt>Capacity</dt><dd>{selected.capacity_summary}</dd></div> : null}
-                  {selected.minimum_order_summary ? <div><dt>Minimum order</dt><dd>{selected.minimum_order_summary}</dd></div> : null}
-                  {selected.lead_time_summary ? <div><dt>Lead time</dt><dd>{selected.lead_time_summary}</dd></div> : null}
+                  <div><dt>{t("Status")}</dt><dd>{availabilityLabel(selected.offering_kind, selected.availability)}</dd></div>
+                  {selected.quantity_unit ? <div><dt>{t("Offered by")}</dt><dd>{selected.quantity_unit}</dd></div> : null}
+                  {selected.capacity_summary ? <div><dt>{t("Capacity")}</dt><dd>{selected.capacity_summary}</dd></div> : null}
+                  {selected.minimum_order_summary ? <div><dt>{t("Minimum order")}</dt><dd>{selected.minimum_order_summary}</dd></div> : null}
+                  {selected.lead_time_summary ? <div><dt>{t("Lead time")}</dt><dd>{selected.lead_time_summary}</dd></div> : null}
                 </dl>
                 {selected.option_groups?.map((group) => (
                   <label className="option-set" key={group.id}>
@@ -497,12 +500,11 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
                 ))}
                 <button
                   className="sr-cart-trigger"
-                  aria-label="Add selected item"
+                  aria-label={t("Add selected item")}
                   disabled={!["available", "limited"].includes(selected.availability)}
                   onClick={() => add(selected, selections)}
                 >
-                  Add to inquiry list
-                </button>
+                  {t("Add to inquiry list")}</button>
               </div>
             </div>
           </div>
@@ -524,7 +526,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
       /> : null}
       {toast && (
         <div className="toast" role="status">
-          {toast}
+          {t(toast)}
         </div>
       )}
       </ShowroomRoot>
@@ -533,6 +535,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
 }
 
 function ProductVideo({ product }: { product: Product }) {
+  const t = useUiText();
   let src = "";
   try {
     src = privacyEnhancedYouTubeEmbedUrl(product.video_ref);
@@ -543,7 +546,7 @@ function ProductVideo({ product }: { product: Product }) {
     <div className="product-dialog-video">
       <iframe
         src={src}
-        title={`${product.name} video`}
+        title={t("{value1} video", { value1: product.name })}
         loading="lazy"
         allow="encrypted-media; picture-in-picture; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
@@ -581,6 +584,7 @@ function InquiryDrawer({
   contacts: PublicContacts;
   directOnly?: boolean;
 }) {
+  const t = useUiText();
   const [platformStep, setPlatformStep] = useState(false);
   const [preparedMessage, setPreparedMessage] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
@@ -706,32 +710,32 @@ function InquiryDrawer({
   const item = (line: CartLine, index: number, grouped: boolean) => <div className={inquiryStyles.summary}>
     {line.product.image_path ? <img src={line.product.image_path} alt="" /> : <span className={inquiryStyles.thumb}><PackageOpen size={24} aria-hidden="true" /></span>}
     <div className={inquiryStyles.itemCopy}><h3>{line.product.name}</h3><p>{Object.entries(line.options).filter(([name]) => (line.product.option_groups?.find(group => group.name === name)?.values.length || 0) > 1).map(([name, value]) => `${name}: ${value}`).join(" · ")}</p>
-      <details className={inquiryStyles.quantity}><summary>{line.quantity ? `${line.product.offering_kind === "service" ? "Request" : "Quantity"}: ${line.quantity}` : line.product.offering_kind === "service" ? "Add hours or details (optional)" : "Add quantity (optional)"}</summary><label>{line.product.offering_kind === "service" ? "Hours or details" : "Quantity"}<input type="text" value={line.quantity} maxLength={80} placeholder={line.product.offering_kind === "service" ? "e.g. one session or a two-hour visit" : "e.g. 2 pieces or 5 kg"} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
+      <details className={inquiryStyles.quantity}><summary>{line.quantity ? t("{value1}: {value2}", { value1: line.product.offering_kind === "service" ? "Request" : "Quantity", value2: line.quantity }) : line.product.offering_kind === "service" ? t("Add hours or details (optional)") : t("Add quantity (optional)")}</summary><label>{line.product.offering_kind === "service" ? t("Hours or details") : t("Quantity")}<input type="text" value={line.quantity} maxLength={80} placeholder={line.product.offering_kind === "service" ? t("e.g. one session or a two-hour visit") : t("e.g. 2 pieces or 5 kg")} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
     </div>
-    {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={`Remove ${line.product.name} from inquiry`}><X size={18} aria-hidden="true" /></button> : null}
+    {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={t("Remove {value1} from inquiry", { value1: line.product.name })}><X size={18} aria-hidden="true" /></button> : null}
   </div>;
   return createPortal(<div className={inquiryStyles.overlay}>
     <div className={inquiryStyles.backdrop} onClick={close} />
-    <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label="Business inquiry" tabIndex={-1}>
-      <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? `Inquire about ${cart.length} items` : `Inquire about this ${cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item"}`}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label="Close inquiry" onClick={close}><X size={20} aria-hidden="true" /></button></header>
+    <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label={t("Business inquiry")} tabIndex={-1}>
+      <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? t("Inquire about {value1} items", { value1: cart.length }) : t("Inquire about this {value1}", { value1: cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item" })}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label={t("Close inquiry")} onClick={close}><X size={20} aria-hidden="true" /></button></header>
       <div className={inquiryStyles.scroll}>
-        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>Choose a product or service to start an inquiry.</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>Browse products & services</button></div> : <>
-          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label="Inquiry items">{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
-          {previewOnly ? <p className={inquiryStyles.note}>Preview only. No inquiry will be sent.</p> : platformStep ? <form className={inquiryStyles.platform} onSubmit={sendInquiry}>
-            <button className={inquiryStyles.back} type="button" disabled={busy} onClick={() => { setPlatformStep(false); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>("[data-platform-send]")?.focus()); }}><ArrowLeft size={16} aria-hidden="true" />Back to sending options</button>
-            <h3>Send inquiry on Suqpage</h3>
-            <label>Reply phone number<input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e => updatePhone(e.target.value)} placeholder="+251…" maxLength={40} required disabled={busy || sendState === "sent"} aria-invalid={sendState === "error"} aria-describedby="inquiry-send-status" /></label>
-            <button type="submit" className={inquiryStyles.platformButton} disabled={busy || sendState === "sent"}>{sendState === "sent" ? <Check size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}{busy ? "Sending…" : sendState === "sent" ? "Inquiry sent" : "Send inquiry"}</button>
-            <p id="inquiry-send-status" className={sendState === "sent" ? inquiryStyles.success : inquiryStyles.error} role={sendState === "error" ? "alert" : "status"}>{sendState === "sent" ? `Sent to ${catalog.business.name}. They can reply using your phone number.` : sendError}</p>
+        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>{t("Choose a product or service to start an inquiry.")}</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>{t("Browse products & services")}</button></div> : <>
+          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label={t("Inquiry items")}>{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
+          {previewOnly ? <p className={inquiryStyles.note}>{t("Preview only. No inquiry will be sent.")}</p> : platformStep ? <form className={inquiryStyles.platform} onSubmit={sendInquiry}>
+            <button className={inquiryStyles.back} type="button" disabled={busy} onClick={() => { setPlatformStep(false); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>("[data-platform-send]")?.focus()); }}><ArrowLeft size={16} aria-hidden="true" />{t("Back to sending options")}</button>
+            <h3>{t("Send inquiry on Suqpage")}</h3>
+            <label>{t("Reply phone number")}<input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e => updatePhone(e.target.value)} placeholder="+251…" maxLength={40} required disabled={busy || sendState === "sent"} aria-invalid={sendState === "error"} aria-describedby="inquiry-send-status" /></label>
+            <button type="submit" className={inquiryStyles.platformButton} disabled={busy || sendState === "sent"}>{sendState === "sent" ? <Check size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}{busy ? t("Sending…") : sendState === "sent" ? t("Inquiry sent") : t("Send inquiry")}</button>
+            <p id="inquiry-send-status" className={sendState === "sent" ? inquiryStyles.success : inquiryStyles.error} role={sendState === "error" ? "alert" : "status"}>{sendState === "sent" ? t("Sent to {value1}. They can reply using your phone number.", { value1: catalog.business.name }) : t(sendError)}</p>
           </form> : <div className={inquiryStyles.methods}>
-            <h3>How would you like to send it?</h3>
-            <div className={inquiryStyles.channels}>{handoffs.map(link => <a key={link.kind} href={link.href} target={link.kind === "sms" ? undefined : "_blank"} rel={link.kind === "sms" ? undefined : "noopener noreferrer"} onClick={() => setPreparedMessage(message)}>{link.kind === "sms" ? <Smartphone size={18} aria-hidden="true" /> : link.kind === "telegram" ? <Send size={18} aria-hidden="true" /> : <MessageCircle size={18} aria-hidden="true" />}{link.label}{link.kind !== "sms" ? <span className="sr-only"> (new tab)</span> : null}</a>)}
-              <button type="button" onClick={copyInquiry}><Copy size={18} aria-hidden="true" />{copyState === "copied" ? "Copied" : "Copy inquiry"}</button>
+            <h3>{t("How would you like to send it?")}</h3>
+            <div className={inquiryStyles.channels}>{handoffs.map(link => <a key={link.kind} href={link.href} target={link.kind === "sms" ? undefined : "_blank"} rel={link.kind === "sms" ? undefined : "noopener noreferrer"} onClick={() => setPreparedMessage(message)}>{link.kind === "sms" ? <Smartphone size={18} aria-hidden="true" /> : link.kind === "telegram" ? <Send size={18} aria-hidden="true" /> : <MessageCircle size={18} aria-hidden="true" />}{link.label}{link.kind !== "sms" ? <span className="sr-only"> {" "}{t("(new tab)")}</span> : null}</a>)}
+              <button type="button" onClick={copyInquiry}><Copy size={18} aria-hidden="true" />{copyState === "copied" ? t("Copied") : t("Copy inquiry")}</button>
             </div>
-            <button type="button" className={inquiryStyles.platformButton} data-platform-send onClick={() => setPlatformStep(true)}><Send size={18} aria-hidden="true" />Send inquiry on Suqpage</button>
-            <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{copyState === "manual" ? "Select and copy your message" : "View inquiry message"}</summary><textarea aria-label="Inquiry message" readOnly value={message} onFocus={e => e.target.select()} /></details>
+            <button type="button" className={inquiryStyles.platformButton} data-platform-send onClick={() => setPlatformStep(true)}><Send size={18} aria-hidden="true" />{t("Send inquiry on Suqpage")}</button>
+            <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{copyState === "manual" ? t("Select and copy your message") : t("View inquiry message")}</summary><textarea aria-label={t("Inquiry message")} readOnly value={message} onFocus={e => e.target.select()} /></details>
           </div>}
-          {cart.length > 1 ? <button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>Clear inquiry list</button> : null}
+          {cart.length > 1 ? <button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>{t("Clear inquiry list")}</button> : null}
         </>}
       </div>
     </aside>

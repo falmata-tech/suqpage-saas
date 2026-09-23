@@ -406,6 +406,7 @@ export async function createPublicSupportConversation(
   input: { category: unknown; email: unknown; phone: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
   ipHash: string,
   now = Date.now(),
+  preparedToken?: string,
 ) {
   const category = assistanceCategory(input.category);
   const email = visitorEmail(input.email);
@@ -414,15 +415,29 @@ export async function createPublicSupportConversation(
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
   if (!message) throw new SupportError("Write a message for the Suqpage team.", "message_required");
-  const rate = await consumeRuntimeRateLimit(`public-support:create:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
-  if (!rate.allowed) throw new SupportError("Too many conversations were started. Please try again later.", "rate_limited");
 
-  const token = crypto.randomBytes(32).toString("base64url");
+  const token = preparedToken ? publicSupportToken(preparedToken) : crypto.randomBytes(32).toString("base64url");
   const tokenHash = hashPrivateValue(`public-support:${token}`);
   const senderKey = visitorSenderKey(tokenHash);
   const categoryLabel = PUBLIC_SUPPORT_CATEGORIES.find((option) => option.key === category)!.label;
   const expiresAt = now + PUBLIC_SUPPORT_SESSION_MS;
   const created = await runtimeTransaction(async () => {
+    // Cookie ownership, not contact details or the request key, authorizes replay.
+    await runtimeGet("SELECT pg_advisory_xact_lock(hashtextextended(?,0))", [`support-start:${tokenHash}`]);
+    const existing = await runtimeGet<{id:number;public_ref:string;visitor_session_expires_at:number;visitor_email:string;visitor_phone:string;assistance_category:string;body:string;idempotency_key:string}>(`
+      SELECT c.id,c.public_ref,c.visitor_session_expires_at,c.visitor_email,c.visitor_phone,
+        c.assistance_category,m.body,m.idempotency_key
+      FROM support_conversations c JOIN support_messages m ON m.conversation_id=c.id
+      WHERE c.visitor_token_hash=? ORDER BY m.id LIMIT 1`, [tokenHash]);
+    if (existing) {
+      if (existing.visitor_session_expires_at < now) throw new SupportError("Support session expired. Reopen help and try again.", "not_found");
+      if (existing.idempotency_key !== key || existing.body !== message || existing.visitor_email !== email || existing.visitor_phone !== phone || existing.assistance_category !== category) {
+        throw new SupportError("A support chat is already open. Reopen help to continue.", "conflict");
+      }
+      return {id:existing.id,publicRef:existing.public_ref,assignedUserName:null,expiresAt:existing.visitor_session_expires_at,duplicate:true};
+    }
+    const rate = await consumeRuntimeRateLimit(`public-support:create:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
+    if (!rate.allowed) throw new SupportError("Too many conversations were started. Please try again later.", "rate_limited");
     const publicRef = `SUP-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
     const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_conversations(
@@ -447,15 +462,22 @@ export async function createPublicSupportConversation(
     `, [conversationId, `public visitor request:${category}`, now]);
     const agent = await leastLoadedAgent();
     if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
-    return { id: conversationId, publicRef, assignedUserName: agent?.name || null };
+    return { id: conversationId, publicRef, assignedUserName: agent?.name || null, expiresAt, duplicate: false };
   });
-  void notifySupportQueue({
+  if (!created.duplicate) void notifySupportQueue({
     publicRef: created.publicRef,
     businessName: "Website visitor",
     assignedUserName: created.assignedUserName,
     id: created.id,
   });
-  return { id: created.id, publicRef: created.publicRef, token, expiresAt };
+  return { id: created.id, publicRef: created.publicRef, token, expiresAt: created.expiresAt, duplicate: created.duplicate };
+}
+
+export async function publicSupportSessionIsUsable(token: unknown, now = Date.now()) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{40,120}$/.test(token)) return false;
+  const tokenHash = hashPrivateValue(`public-support:${token}`);
+  const existing = await runtimeGet<{visitor_session_expires_at:number}>("SELECT visitor_session_expires_at FROM support_conversations WHERE visitor_token_hash=?", [tokenHash]);
+  return !existing || existing.visitor_session_expires_at >= now;
 }
 
 async function requirePublicConversation(token: unknown, now = Date.now()) {

@@ -1,3 +1,4 @@
+import createNextIntlPlugin from "next-intl/plugin";
 import { platformAssetRewrites } from "./lib/platform-assets";
 import { platformEnvironment } from "./lib/platform-environment.mjs";
 import type { NextConfig } from "next";
@@ -101,4 +102,4 @@ const nextConfig: NextConfig = {
     { source: "/(.*)", headers: securityHeaders },
   ]; },
 };
-export default nextConfig;
+export default createNextIntlPlugin("./i18n/request.ts")(nextConfig);

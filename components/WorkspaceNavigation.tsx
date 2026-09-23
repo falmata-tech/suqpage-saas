@@ -1,5 +1,8 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
 
+
+import LanguageSelector from "@/components/LanguageSelector";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -131,40 +134,41 @@ export type WorkspaceNavGroup = {
 };
 
 function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[]; onNavigate?: () => void }) {
+  const t = useUiText();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
   return (
-    <nav className="workspace-nav" aria-label="Workspace">
+    <nav className="workspace-nav" aria-label={t("Workspace")}>
       {groups.map((group) => (
-        <div className="workspace-nav-group" key={group.label}>
-          <span className="workspace-nav-label">{group.label}</span>
+        <div className="workspace-nav-group" key={t(group.label)}>
+          <span className="workspace-nav-label">{t(group.label)}</span>
           {group.items.map((item) => {
             const path = item.href.split("?")[0];
             const active = item.href === activeHref;
             return (
               <Link
                 href={item.href}
-                key={`${group.label}-${item.href}-${item.label}`}
+                key={`${t(group.label)}-${item.href}-${t(item.label)}`}
                 aria-current={active ? "page" : undefined}
                 target={item.external ? "_blank" : undefined}
                 rel={item.external ? "noreferrer" : undefined}
                 onClick={onNavigate}
               >
                 <NavIcon name={item.icon} />
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
                 {item.external ? <ExternalLink className="workspace-nav-external" aria-hidden="true" size={14} /> : null}
-                {item.external ? null : <NavigationPendingIndicator label={item.label} />}
+                {item.external ? null : <NavigationPendingIndicator label={t(item.label)} />}
               </Link>
             );
           })}
         </div>
       ))}
       <div className="workspace-nav-group workspace-nav-utility">
-        <span className="workspace-nav-label">Account</span>
-        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>Account security</span><NavigationPendingIndicator label="Account security" /></Link>
-        <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>Public site</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
-        <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>Sign out</span></button></form>
+        <span className="workspace-nav-label">{t("Account")}</span>
+        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>
+        <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>{t("Public site")}</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
+        <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>{t("Sign out")}</span></button></form>
       </div>
     </nav>
   );
@@ -181,6 +185,7 @@ export default function WorkspaceNavigation({
   context: string;
   groups: WorkspaceNavGroup[];
 }) {
+  const t = useUiText();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams.toString()}`;
@@ -213,7 +218,7 @@ export default function WorkspaceNavigation({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const dialog = dialogRef.current;
-    const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') || []);
+    const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), select:not([disabled])') || []);
     focusable()[0]?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -246,22 +251,23 @@ export default function WorkspaceNavigation({
     <>
       <aside className="sidebar">
         <SuqpageBrand href={dashboardHref} className="workspace-brand" />
+      <LanguageSelector />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>
-      <nav className="workspace-mobile-tabs" aria-label="Workspace application navigation">
+      <nav className="workspace-mobile-tabs" aria-label={t("Workspace application navigation")}>
         {primaryItems.map((item) => {
           const active = item.href === activeHref;
-          return <Link key={`mobile-${item.href}-${item.label}`} href={item.href} aria-current={active ? "page" : undefined} aria-label={item.label}>
+          return <Link key={`mobile-${item.href}-${t(item.label)}`} href={item.href} aria-current={active ? "page" : undefined} aria-label={t(item.label)}>
             <NavIcon name={item.icon} />
-            <span>{mobileLabels[item.label] || item.label}</span>
-            <NavigationPendingIndicator label={item.label} />
+            <span>{t(mobileLabels[item.label] || item.label)}</span>
+            <NavigationPendingIndicator label={t(item.label)} />
           </Link>;
         })}
         <button
           className="workspace-menu-button"
           type="button"
-          aria-label="Open all workspace navigation"
+          aria-label={t("Open all workspace navigation")}
           aria-expanded={open}
           aria-controls="workspace-mobile-menu"
           data-active={open || !primaryContainsActive || undefined}
@@ -269,17 +275,17 @@ export default function WorkspaceNavigation({
           ref={openerRef}
         >
           <Menu aria-hidden="true" size={22}/>
-          <span>More</span>
+          <span>{t("More")}</span>
         </button>
       </nav>
       {open ? (
         <div className="workspace-drawer-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
-          <div className="workspace-drawer" id="workspace-mobile-menu" role="dialog" aria-modal="true" aria-label="Workspace menu" ref={dialogRef}>
+          <div className="workspace-drawer" id="workspace-mobile-menu" role="dialog" aria-modal="true" aria-label={t("Workspace menu")} ref={dialogRef}>
             <div className="workspace-drawer-head">
               <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
-              <button className="workspace-menu-close" type="button" aria-label="Close workspace menu" onClick={() => setOpen(false)}><X aria-hidden="true" size={22}/></button>
+              <button className="workspace-menu-close" type="button" aria-label={t("Close workspace menu")} onClick={() => setOpen(false)}><X aria-hidden="true" size={22}/></button>
             </div>
-            <NavigationGroups groups={groups} onNavigate={() => setOpen(false)} />
+            <LanguageSelector /><NavigationGroups groups={groups} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       ) : null}

@@ -1,3 +1,5 @@
+
+import { useUiText } from "@/lib/i18n/ui";
 import Image from "next/image";
 import Link from "next/link";
 import PaginationNav from "@/components/PaginationNav";
@@ -19,6 +21,7 @@ export default function ShowroomDirectory({
   industry: string;
   sort: string;
 }) {
+  const t = useUiText();
   const shared = {
     showroomQ: query || undefined,
     showroomIndustry: industry === "all" ? undefined : industry,
@@ -31,25 +34,25 @@ export default function ShowroomDirectory({
           <input type="hidden" name="showroomIndustry" value={industry} />
         ) : null}
         <label className="directory-search">
-          <span className="sr-only">Search showrooms</span>
+          <span className="sr-only">{t("Search showrooms")}</span>
           <span className="directory-search-icon" aria-hidden="true" />
           <input
             name="showroomQ"
             defaultValue={query}
             maxLength={120}
-            placeholder="Search by name, /@handle, product..."
-            aria-label="Search showrooms"
+            placeholder={t("Search by name, /@handle, product...")}
+            aria-label={t("Search showrooms")}
           />
         </label>
         <div className="directory-sort">
           <label>
-            <span className="sr-only">Sort</span>
-            <select name="showroomSort" defaultValue={sort} aria-label="Sort selector">
-              <option value="name">Sort by name</option>
-              <option value="handle">Sort by handle</option>
+            <span className="sr-only">{t("Sort")}</span>
+            <select name="showroomSort" defaultValue={sort} aria-label={t("Sort selector")}>
+              <option value="name">{t("Sort by name")}</option>
+              <option value="handle">{t("Sort by handle")}</option>
             </select>
           </label>
-          <button type="submit">Apply</button>
+          <button type="submit">{t("Apply")}</button>
           {query ? (
             <Link
               href={pageHref("/", {
@@ -57,13 +60,12 @@ export default function ShowroomDirectory({
                 showroomSort: sort === "name" ? undefined : sort,
               }, "showrooms")}
             >
-              Clear
-            </Link>
+              {t("Clear")}</Link>
           ) : null}
         </div>
       </form>
 
-      <nav className="directory-filters" aria-label="Showroom industry filters">
+      <nav className="directory-filters" aria-label={t("Showroom industry filters")}>
         <Link
           className={industry === "all" ? "active" : ""}
           href={pageHref("/", {
@@ -71,8 +73,7 @@ export default function ShowroomDirectory({
             showroomSort: sort === "name" ? undefined : sort,
           }, "showrooms")}
         >
-          All industries
-        </Link>
+          {t("All industries")}</Link>
         {industries.map((option) => (
           <Link
             key={option.key}
@@ -108,7 +109,7 @@ export default function ShowroomDirectory({
                     </span>
                   )}
                   {entry.featured ? (
-                    <span className="market-featured-label">Featured</span>
+                    <span className="market-featured-label">{t("Featured")}</span>
                   ) : null}
                 </div>
                 <div className="market-showroom-copy">
@@ -117,7 +118,7 @@ export default function ShowroomDirectory({
                   <strong>/@{entry.handle}</strong>
                   <p>{entry.tagline}</p>
                   <span className="market-card-link">
-                    Open page <span aria-hidden="true">→</span>
+                    {t("Open page")}{" "}<span aria-hidden="true">→</span>
                   </span>
                 </div>
               </Link>
@@ -132,7 +133,7 @@ export default function ShowroomDirectory({
           />
         </>
       ) : (
-        <div className="directory-empty">No showrooms match that search.</div>
+        <div className="directory-empty">{t("No showrooms match that search.")}</div>
       )}
     </div>
   );

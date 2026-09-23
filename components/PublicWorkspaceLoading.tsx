@@ -1,3 +1,5 @@
+
+import { useUiText } from "@/lib/i18n/ui";
 type LoadingVariant = "market" | "featured" | "page";
 
 function WorkspaceDataLoading({ variant }: { variant: "market" | "featured" }) {
@@ -10,20 +12,23 @@ function WorkspaceDataLoading({ variant }: { variant: "market" | "featured" }) {
 }
 
 export function MarketWorkspaceLoading() {
+  const t = useUiText();
   return <section className="public-workspace-data-loading" aria-busy="true" aria-live="polite">
-    <span className="sr-only">Updating Market results</span>
+    <span className="sr-only">{t("Updating Market results")}</span>
     <WorkspaceDataLoading variant="market" />
   </section>;
 }
 
 export function FeaturedWorkspaceLoading() {
+  const t = useUiText();
   return <section className="public-workspace-data-loading" aria-busy="true" aria-live="polite">
-    <span className="sr-only">Loading Daily Featured</span>
+    <span className="sr-only">{t("Loading Daily Featured")}</span>
     <WorkspaceDataLoading variant="featured" />
   </section>;
 }
 
 export default function PublicWorkspaceLoading({ variant }: { variant: LoadingVariant }) {
+  const t = useUiText();
   const label = variant === "market"
     ? "Loading Market results"
     : variant === "featured"
@@ -32,7 +37,7 @@ export default function PublicWorkspaceLoading({ variant }: { variant: LoadingVa
 
   if (variant === "page") {
     return <section className="public-workspace-loading public-page-loading" aria-busy="true" aria-live="polite">
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{t(label)}</span>
       <div className="public-loading-page-bar" aria-hidden="true" />
       <div className="public-loading-page-hero" aria-hidden="true"><i /><i /><i /></div>
       <div className="public-loading-page-grid" aria-hidden="true"><i /><i /><i /></div>
@@ -40,7 +45,7 @@ export default function PublicWorkspaceLoading({ variant }: { variant: LoadingVa
   }
 
   return <section className={`public-experience public-${variant}-experience public-workspace-loading`} aria-busy="true" aria-live="polite">
-    <span className="sr-only">{label}</span>
+    <span className="sr-only">{t(label)}</span>
     <header className="public-loading-heading" aria-hidden="true"><i /><b /><i /></header>
     <WorkspaceDataLoading variant={variant} />
   </section>;

@@ -1,3 +1,5 @@
+
+import { useUiText } from "@/lib/i18n/ui";
 export default function CollectionToolbar({
   action,
   search,
@@ -13,6 +15,7 @@ export default function CollectionToolbar({
   activeFilters?: boolean;
   children?: React.ReactNode;
 }) {
+  const t = useUiText();
   const clearParams = new URLSearchParams();
   for (const [name, value] of Object.entries(hidden)) {
     if (value !== undefined && value !== "") clearParams.set(name, String(value));
@@ -26,7 +29,7 @@ export default function CollectionToolbar({
         ),
       )}
       <label className="collection-search">
-        <span>Search</span>
+        <span>{t("Search")}</span>
         <input
           type="search"
           name="q"
@@ -37,12 +40,10 @@ export default function CollectionToolbar({
       </label>
       {children}
       <button className="btn" type="submit">
-        Apply
-      </button>
+        {t("Apply")}</button>
       {activeFilters ?? Boolean(search) ? (
         <a className="small-btn" href={clearHref}>
-          Clear
-        </a>
+          {t("Clear")}</a>
       ) : null}
     </form>
   );

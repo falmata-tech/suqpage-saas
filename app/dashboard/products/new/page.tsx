@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import crypto from "node:crypto";
 import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
@@ -14,6 +16,7 @@ export default async function NewProduct({
 }: {
   searchParams: Promise<{ business?: string; error?: string }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
   const business = await resolveProductBusiness(user, query.business);
@@ -22,22 +25,21 @@ export default async function NewProduct({
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
-        <nav aria-label="Breadcrumb">
-          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+        <nav aria-label={t("Breadcrumb")}>
+          <Link href={`/dashboard?business=${business.id}`}>{t("Overview")}</Link>
           <span aria-hidden="true">/</span>
           <Link href={`/dashboard/products?business=${business.id}`}>
-            Products & services
-          </Link>
+            {t("Products & services")}</Link>
           <span aria-hidden="true">/</span>
-          <span>Add product or service</span>
+          <span>{t("Add product or service")}</span>
         </nav>
       </div>
       <div className="dashboard-head standard-page-heading">
         <div>
-          <h1>Add a product or service</h1>
+          <h1>{t("Add a product or service")}</h1>
         </div>
       </div>
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
       <ProductForm
         catalog={catalog}
         action={basicProductUpkeepAction}

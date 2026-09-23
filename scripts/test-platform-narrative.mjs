@@ -45,8 +45,8 @@ assert.match(home, /then inquire directly/);
 assert.match(home, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
 assert.match(discovery, /Find businesses, products and services/);
 assert.match(discovery, /Open page/);
-assert.match(discovery, /label: "Products & services"/);
-assert.match(discovery, /label: "Businesses"/);
+assert.match(discovery, /label: t\("Products & services"\)/);
+assert.match(discovery, /label: t\("Businesses"\)/);
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 
 assert.match(about, /Local businesses\. Easier to find/);
@@ -64,7 +64,7 @@ assert.doesNotMatch(about, /transport arrangements|report a concern|commercial t
 assert.match(signup, /Set up your shop/);
 assert.match(signup, /name, category, and contact number/);
 assert.match(signup, /add products and prepare your page after setup/);
-assert.match(signupForm, />Category</);
+assert.match(signupForm, />\{t\("Category"\)\}</);
 assert.match(signupForm, /Finish setup/);
 assert.doesNotMatch(signupForm, /requestText/);
 assert.match(login, /Use a one-time email code\./);
