@@ -388,8 +388,7 @@ Business logos and media remain independent. The shared business-profile layout
 uses the platform's restrained palette rather than legacy custom design tokens.
 On phones, public pages, account entry and private workspaces retain a compact
 Suqpage mark/wordmark and language header. Primary app navigation stays in the
-bottom bar; the Market viewport reserves space for both. S30 is implemented
-locally under FE-038 and visually approved; production publication is in progress.
+bottom bar; the Market viewport reserves space for both (FE-038 / FE-034).
 
 Nearby-group viewers use no architectural shell, venue, floor, hall, or
 decorative environment. Daily Featured likewise presents up to forty image-led cards in responsive columns with

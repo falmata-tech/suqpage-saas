@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-### S30 — mobile brand visibility (L1, visually approved; release in progress)
+### S30 — mobile brand visibility (L1, approved and deployed)
 
 - GIVEN a phone from 320px wide WHEN opening Market, Featured, About, sign-in
   or a private workspace THEN the Suqpage mark and wordmark are visible in a
@@ -34,7 +34,9 @@ Rollback: revert the scoped shell styles and brand placement; no migration.
 Evidence: 39 public and 51 authenticated responsive browser checks pass at
 1440/390/320 across all five locales; phone result-list scroll/collapse checks,
 typecheck, spec validation and PWA shell contract pass. Captures/receipts in
-`.local/mobile-brand-review/`. The owner approved deployment; full gates, commit and publication are in progress.
+`.local/mobile-brand-review/`. The owner approved deployment; all release gates pass.
+Source `87aaced` is live as `6ab3dc37aea724cbcfbcb994`; 90 responsive checks
+also pass against production. See docs/SUQPAGE-S30-RELEASE-2026-09-23.md.
 
 The launch candidate needs consistent Suqpage identity and email-only entry.
 The supplied Suqpage direction establishes

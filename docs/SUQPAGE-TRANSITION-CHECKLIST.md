@@ -1469,8 +1469,8 @@ and the workspace has no visible brand outside its hidden sidebar.
 - [x] Focused browser checks at desktop/390/320, all locales, map height and
   shop return navigation; typecheck/spec validation; capture review images.
 - [x] Owner visual approval: explicit “deploy” instruction on 2026-09-23.
-- [ ] Current: applicable full gates and task-scoped commit.
-- [ ] Authorized publication and independent live verification.
+- [x] Applicable full gates and task-scoped commit `87aaced`.
+- [x] Authorized publication and independent live verification.
 
 Unrelated `deno.lock` remains untouched. No database or hosted Auth change.
 
@@ -1482,4 +1482,9 @@ search panels retain >250px of scrollable results and collapse successfully;
 `test-pwa-shell.mjs` pass. No email sent. New mobile appearance shared for
 review and explicitly approved. Full check, release, nine provider acceptance
 scenarios, operations and artifact/native verification now pass. Publication
-and final monitoring remain; see `docs/SUQPAGE-S30-RELEASE-2026-09-23.md`.
+and final monitoring pass; see `docs/SUQPAGE-S30-RELEASE-2026-09-23.md`.
+
+S30 complete: live deployment `6ab3dc37aea724cbcfbcb994`, source `87aaced`.
+All required gates, 90 live responsive checks, phone search-panel checks and
+15 public checks pass. Fresh backup restores all 57 tables/3,781 rows; temporary
+restore role removed. Schema 50 unchanged; no hosted configuration changes.

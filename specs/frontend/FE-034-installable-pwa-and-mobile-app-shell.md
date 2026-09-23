@@ -11,7 +11,9 @@ change_level: L2
 # FE-034 - Installable PWA and mobile application shell
 
 S30 corrects mobile brand visibility under FE-038. Local responsive captures,
-typecheck and the updated PWA shell contract pass; the owner approved this header correction and its release is in progress. Existing worker/cache policy is unchanged.
+typecheck, PWA shell contract and all required release gates pass. The approved
+change is deployed and verified live; see docs/SUQPAGE-S30-RELEASE-2026-09-23.md.
+Existing worker/cache policy is unchanged.
 
 ## Problem and outcome
 

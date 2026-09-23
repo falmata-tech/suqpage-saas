@@ -45,5 +45,13 @@ The user-owned `deno.lock` is excluded. No Git push is requested.
 
 ## Publication
 
-Pending final gates and independent live checks. No outgoing test email or
-merchant-content mutation is part of verification.
+Published source `87aaced6798756c65bafc922ddc0c93c1add532d` as Netlify deployment
+`6ab3dc37aea724cbcfbcb994` at https://suqpage.com. Independent provider
+readback and 15 public health/search/access/redirect checks pass. All 39 public
+and 51 authenticated responsive branding checks pass live at desktop/390/320
+across five locales. Both live phone result panels scroll and collapse correctly.
+Loaded shop/product screenshots confirm branding with visible media.
+
+No outgoing test email or merchant-content mutation occurred. The demo-owner
+verification session is signed out, and final deployment/health monitoring is
+recorded privately. The only unrelated worktree path is `deno.lock`.
