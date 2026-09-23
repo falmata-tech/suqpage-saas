@@ -7,14 +7,17 @@
 ---
 
 
-Current released product (FE-044–FE-048, BE-037–BE-041, DEP-034–DEP-038):
-Suqpage runs at https://suqpage.com on PostgreSQL schema 47. Standard owner pages,
+Current released product (FE-044–FE-051, BE-037–BE-043, DEP-034–DEP-040):
+Suqpage runs at https://suqpage.com on PostgreSQL schema 50. Standard owner pages,
 complete private starters, Product/Service posting, owner first Publish and live
 Save, immediate public location saves and five-row search results are deployed.
 Custom-page request/design/revision features are retired; historical data remains.
 The map separates approximate city markers while preserving explicit storefronts.
 Email-only sign-in and Suqpage email branding use the canonical domain; the owner's
 Gmail sender and credentials are preserved. www redirects to the apex.
+Ordered photo/video galleries, automatic populated private signup previews,
+monthly handle changes with retained old links, and the stable five-language
+wordmark are deployed. Existing merchant content and demo sign-in aliases remain.
 
 Production has 64 existing admitted demo pages and 256 simplified offerings,
 including 42 services. Local fixtures have 66 pages/264 offerings; local-only
@@ -30,7 +33,7 @@ business featured or claiming prerecorded video is live.
 
 The current release and its verified gates, backup, deployment and remaining
 real-email/hosted-session admission limits are recorded in
-`docs/SUQPAGE-RELEASE-2026-09-21.md`.
+`docs/SUQPAGE-S28-RELEASE-2026-09-23.md`.
 
 ## 1. Your role
 

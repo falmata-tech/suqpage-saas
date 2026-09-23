@@ -51,8 +51,10 @@ A fresh protected public PostgreSQL backup restores successfully: 56 tables,
 media; schema 50 adds handle-change timestamps and a reserved-handle registry.
 The local restore/migration/reapply rehearsal preserves all pre-existing field
 values and passes anonymous/authenticated denial for the server-only registry.
-Repeat migration is a no-op. Production application and schema publication are
-pending final gates and independent readback.
+Repeat migration is a no-op. Production migrations 49/50 are applied and independently
+verified: original rows and demo aliases are unchanged, all current handles are
+registered, anonymous/authenticated access is denied and the server runtime has
+required access. Production runtime preflight passes.
 
 Protected evidence remains under `.local/publish-s28-20260923/`. No credentials,
 private backups, demo sign-in directory or unrelated `deno.lock` enter the build
@@ -68,3 +70,27 @@ external video playback and inbox delivery are separate from gallery interaction
 and session verification. Examples remain editable private starters; existing
 business content is not replaced. A fixture reset recreates generic seed emails;
 see `docs/SUQPAGE-DEMO-ACCOUNT-ACCESS.md` for the private current alias directory.
+
+## Verified publication
+
+Live at https://suqpage.com, source `90094c685f224555bbed7ff396fb7c2e19c6ae7b`,
+Netlify deployment `6ab3c4e43c9a7f1e972648ad`. Independent provider readback,
+15 public checks and post-browser health monitoring pass. The protected archive
+SHA-256 is `532c6fd3b5a57024d251771f93eeac6d6121b8bcb3706cfde48653986b01a4f3`.
+
+Nine live browser checks pass: gallery thumbnails/arrows at 1440/390/320, matching
+wordmark geometry across five locales, authenticated owner multi-photo/video
+editor, handle controls, taken-address check, anonymous denial and sign-out.
+The initial logo assertion used the 320px login layout, which hides the header;
+the corrected desktop check matches the focused pre-release review. Gallery
+screenshots are captured after scroll animations settle, with one aligned slide
+and the corresponding selected thumbnail. No application fix was needed.
+Desktop/phone gallery and owner editor captures were inspected. Hosted checks
+use a generated one-time code without sending mail and do not edit merchant content.
+
+The demo account directory remains
+`.local/demo-account-emails-20260923/SIGN-IN-ACCOUNTS.md`. Current demo aliases,
+provider links, passwords, public contacts and business IDs were preserved.
+The only remaining unrelated worktree path is user-owned `deno.lock`.
+No Git push or remote CI run was requested; the verified artifact is published
+and the release commits remain local.

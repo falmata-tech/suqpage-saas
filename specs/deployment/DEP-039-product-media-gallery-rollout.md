@@ -1,7 +1,7 @@
 ---
 id: DEP-039
 title: Product gallery compatibility rollout
-status: in_progress
+status: done
 related: [DEP-040, FE-050, BE-042, DEP-026]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-09-23
@@ -58,7 +58,7 @@ Master §§7/8/9/10/13/17/19 will describe verified gallery behavior.
 
 ## Rollout
 
-Local implementation and schema 49 only; visual review and release gates pending.
+Implemented and deployed with schema 50 after owner visual approval and passing release gates.
 No hosted migration before backup and reviewed additive SQL. Rollback application
 keeps the new column/data (do not drop it); old code shows the retained cover/video.
 Runtime native-artifact check DEP-026 remains mandatory for publication.
@@ -69,4 +69,14 @@ Focused evidence (2026-09-23): `test:product-upkeep` (including
 Browser coverage passes: `scripts/capture-launch-wiring.mjs`, including
 1440/390/320, focused Axe, editor reload/reorder/remove, repeat save without
 reupload, viewer arrows/thumbnails/keyboard/scroll/video switching, publication
-and inquiry delivery to the local inbox. Captures inspected; visual approval pending.
+and inquiry delivery to the local inbox. Captures inspected and visually approved; deployment verified below.
+
+## Release evidence — 2026-09-23
+
+Evidence: `docs/SUQPAGE-S28-RELEASE-2026-09-23.md` records source `90094c6`,
+Netlify `6ab3c4e43c9a7f1e972648ad`, verified schema 50, protected backup and
+rollback target. Full check, release, operations, nine production-mode acceptance
+scenarios and exact-artifact Linux/privacy gates pass. Live public and gallery/
+owner/handle/five-language wordmark checks and health monitoring pass. Existing
+merchant content and demo account aliases are preserved; mail delivery and
+external video playback are not asserted by the no-delivery live smoke.

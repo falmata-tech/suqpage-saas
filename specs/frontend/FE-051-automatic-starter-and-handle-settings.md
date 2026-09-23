@@ -1,7 +1,7 @@
 ---
 id: FE-051
 title: Automatic starter and editable address
-status: in_progress
+status: done
 related: [FE-038, FE-046, FE-049, BE-043, DEP-040]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-09-23
@@ -41,7 +41,7 @@ existing accounts. No new media provider or business-specific redesign.
   identified as examples, editable and private until owner publication.
 
 Definition of Ready met. Existing S26 is revised by this newest instruction;
-S27 gallery remains pending visual approval. Master §§5/7/11/13/17/18/19/22 affected.
+The final S27 gallery and S28 starter/handle design are visually approved and deployed. Master §§5/7/11/13/17/18/19/22 affected.
 
 ## Test plan
 
@@ -57,8 +57,7 @@ and release after explicit approval.
 Additive schema 50: last-change timestamp and reserved address registry seeded
 from existing handles, with transactional uniqueness for all insertion/update
 paths. Existing data must remain intact. Keep table server-only and include it
-in backup/grant verification. Local migration first; production backup/release
-and visual gates still pending. Application rollback retains registry/history;
+in backup/grant verification. Local rehearsal and production backup/migration/release gates pass. Application rollback retains registry/history;
 do not drop it or release reserved addresses during rollback.
 
 
@@ -68,5 +67,14 @@ Focused signup/lifecycle, starter, native schema, invitation and gallery tests
 pass; see S28 in TRACEABILITY. Real local browser signup/rename/admin override/
 redirect/privacy flows and all-locale logo equality pass at desktop/390/320.
 Starter field/image/save/reload/private-preview review passes 29 captures.
-Local schema 50 applied. Status remains in progress pending visual approval,
-full/release gates and hosted migration/publication; no commit yet.
+Local and hosted schema 50 are applied; visual approval, full/release gates and publication are complete.
+
+## Release evidence — 2026-09-23
+
+Evidence: `docs/SUQPAGE-S28-RELEASE-2026-09-23.md` records source `90094c6`,
+Netlify `6ab3c4e43c9a7f1e972648ad`, verified schema 50, protected backup and
+rollback target. Full check, release, operations, nine production-mode acceptance
+scenarios and exact-artifact Linux/privacy gates pass. Live public and gallery/
+owner/handle/five-language wordmark checks and health monitoring pass. Existing
+merchant content and demo account aliases are preserved; mail delivery and
+external video playback are not asserted by the no-delivery live smoke.

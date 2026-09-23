@@ -327,8 +327,8 @@ S28 local evidence (2026-09-23), FE-051 / BE-043 / DEP-040:
 - Typecheck, localization, identity, database boundaries, spec validation and
   whitespace checks pass. Local schema 50 is applied, preflight requires it.
 Evidence: `.local/starter-handle-review`, `.local/business-starter-review`.
-Visual approval, full/release gates, scoped commit and hosted rollout pending;
-existing production remains S25/schema 48. User-owned `deno.lock` is preserved.
+Visual approval, full/release gates, scoped commit and hosted rollout pass;
+production is S28/schema 50. User-owned `deno.lock` is preserved.
 
 ## S29 — demo account email aliases (DEP-041)
 
@@ -342,3 +342,13 @@ owner, administrator, operations and team sessions pass actual app OTP verificat
 dashboard and sign-out locally and live; owner product lists load. Health 200.
 Spec validation passes (154 isolated / 160 working). No delivery test, app deployment, schema or Auth
 configuration change. Source/operational evidence isolated from pending S26–S28.
+
+S28 release evidence (FE-050/BE-042/DEP-039; FE-051/BE-043/DEP-040):
+`docs/SUQPAGE-S28-RELEASE-2026-09-23.md` records commit `90094c6`, live deploy
+`6ab3c4e43c9a7f1e972648ad`, full check/release/operations, all nine isolated
+provider acceptance tests, archive privacy/Linux transform, production backup/
+restore/migration/reapply, preserved rows/aliases and runtime preflight. Fifteen
+public and nine gallery/owner/handle/wordmark checks plus settled slide alignment
+and health monitoring pass. Reviewed desktop/390/320 captures remain protected
+under `.local/publish-s28-20260923/screenshots`. No test email sent or merchant
+content changed; actual external video playback/inbox delivery not claimed.
