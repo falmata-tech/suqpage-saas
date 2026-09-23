@@ -50,6 +50,10 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
         VALUES(?,?,?,?,?,'Editable example',?,?,?,?,?,?,?,'optional','available',1,?) RETURNING id`, [input.businessId, collectionId, category.rows[0].id,
         offering.name, offering.slug, offering.description, offering.image, STARTER_VIDEO_REF, offering.priceMinor, offering.unit,
         JSON.stringify(offering.highlights), offering.kind, index]);
+      await runner.query('UPDATE products SET media_json=? WHERE id=?', [JSON.stringify([
+        {kind:'image',ref:offering.image},{kind:'image',ref:offering.galleryImage},
+        {kind:'video',ref:STARTER_VIDEO_REF},{kind:'video',ref:'youtube:aqz-KE-bpKQ'},
+      ]),product.rows[0].id]);
       if (offering.option && offering.values.length) {
       const group = await runner.query<{ id: number }>('INSERT INTO option_groups(product_id,name,position) VALUES(?,?,0) RETURNING id', [product.rows[0].id, offering.option]);
       for (const value of offering.values) await runner.query('INSERT INTO option_values(option_group_id,value) VALUES(?,?)', [group.rows[0].id, value]);

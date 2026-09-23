@@ -45,6 +45,7 @@ const DIRECT_PUBLIC_COLUMNS: ColumnSource[] = [
 ];
 
 const JSON_DOCUMENT_COLUMNS: ColumnSource[] = [
+  { table: "products", column: "media_json" },
   { table: "businesses", column: "content_blocks_json" },
   { table: "businesses", column: "design_manifest_json" },
   { table: "content_revisions", column: "snapshot_json" },

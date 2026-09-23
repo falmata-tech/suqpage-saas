@@ -29,6 +29,8 @@ async function main() {
         assert.ok(p.price_minor! > 0); assert.equal(p.highlights.length, 0);
         assert.equal(p.option_groups?.length, 0);
         assert.ok(fs.existsSync(`public${p.image_path}`));
+        assert.equal(p.media?.length,4);assert.equal(p.media?.filter(item=>item.kind==='image').length,2);
+        for(const item of p.media||[])if(item.kind==='image')assert.ok(fs.existsSync(`public${item.ref}`));
       }
       const draft = (await ownerPagePort.read(businessId))!;
       assert.ok(draft.content.about && draft.content.videoUrl && draft.content.heroImage);

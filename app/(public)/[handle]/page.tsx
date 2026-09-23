@@ -30,7 +30,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     robots: { index: true, follow: true } };
 }
 export default async function ShowroomPage({ params, searchParams }: {
-  params: Promise<{ handle: string }>; searchParams: Promise<{ ref?: string }>;
+  params: Promise<{ handle: string }>; searchParams: Promise<Record<string,string|string[]|undefined>>;
 }) {
   const handle = cleanHandle((await params).handle);
   const catalog = await runtimeCatalogByHandle(handle);
@@ -38,6 +38,11 @@ export default async function ShowroomPage({ params, searchParams }: {
     const existing = await runtimeBusinessByHandleAny(handle);
     if (existing?.status === "suspended") redirect("/?showroom=inactive");
     notFound();
+  }
+  if(handle!==catalog.business.handle){
+    const query=new URLSearchParams();
+    for(const [key,value] of Object.entries(await searchParams))for(const entry of Array.isArray(value)?value:value===undefined?[]:[value])query.append(key,entry);
+    redirect(`/@${catalog.business.handle}${query.size?`?${query}`:''}`);
   }
   const profile = await runtimePublishedPage(catalog.business.id) || initialBusinessProfile(catalog);
   const query = await searchParams;

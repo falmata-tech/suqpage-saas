@@ -2,7 +2,7 @@
 id: FE-046
 title: Complete new business starter pages
 status: done
-related: [FE-038, BE-039, DEP-036, FE-040]
+related: [FE-051, FE-038, BE-039, DEP-036, FE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L2
@@ -108,3 +108,16 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+
+## S28 local extension — 2026-09-23
+
+FE-051 / BE-043 / DEP-040 supersede S26's required signup handle field: signup
+allocates an unused address and opens the populated private page preview.
+Handle edits move to Business details, first change immediate then once every
+30 days; a platform administrator may override with an audited support reason.
+Reserved old handles redirect public product links without bypassing privacy.
+New examples reuse admitted fictional ceramics imagery and include two photos
+and two YouTube links per offering. Account identity/consent stays real; existing
+content is untouched. The Suqpage wordmark has fixed Latin typography in every
+locale. Local focused tests/captures are separate from visual/release approval.

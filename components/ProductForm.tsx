@@ -2,7 +2,8 @@
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import ProductMediaFields from "@/components/ProductMediaFields";
 import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
 import {
@@ -12,13 +13,6 @@ import {
   offeringKinds,
   type OfferingKind,
 } from "@/lib/offerings";
-import { controlledYouTubeWatchUrl } from "@/lib/youtube-provider";
-
-function productVideoUrl(product?: Product) {
-  if (!product?.video_ref) return "";
-  try { return controlledYouTubeWatchUrl(product.video_ref); } catch { return ""; }
-}
-
 export default function ProductForm({
   catalog,
   product,
@@ -51,19 +45,9 @@ export default function ProductForm({
   const [quantityUnit, setQuantityUnit] = useState(product?.quantity_unit || "");
   const [highlights, setHighlights] = useState((product?.highlights || []).join("\n"));
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
-  const [removeImage, setRemoveImage] = useState(false);
-  const imageInput = useRef<HTMLInputElement>(null);
-  const temporaryImageUrl = useRef<string | null>(null);
-  useEffect(
-    () => () => {
-      if (temporaryImageUrl.current) {
-        URL.revokeObjectURL(temporaryImageUrl.current);
-      }
-    },
-    [],
-  );
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   return (
-    <form action={action} className="panel form-grid product-upkeep-form">
+    <form action={async formData => {for (const file of galleryFiles) formData.append("mediaImages",file); await action(formData);}} className="panel form-grid product-upkeep-form">
       <input type="hidden" name="businessId" value={businessId} />
       <input
         type="hidden"
@@ -133,17 +117,7 @@ export default function ProductForm({
 
       </> : null}
 
-      <div className="field full">
-        <label htmlFor="product-video">{t("YouTube video")}{" "}<span className="optional">{t("(optional)")}</span></label>
-        <input
-          id="product-video"
-          name="videoUrl"
-          type="url"
-          maxLength={500}
-          defaultValue={productVideoUrl(product)}
-          placeholder="https://www.youtube.com/watch?v=..."
-        />
-      </div>
+
 
       {!staffMode ? <div className="field"><label htmlFor="product-type">{t("What do you offer?")}</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">{t("Product")}</option><option value="service">{t("Service")}</option></select></div> : null}
       {staffMode ? <>
@@ -223,53 +197,7 @@ export default function ProductForm({
 
       </> : null}
 
-      <div className="field">
-        <label htmlFor="product-image">{t("Primary image")}</label>
-        <input
-          id="product-image"
-          ref={imageInput}
-          type="file"
-          name="image"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(event) => {
-            if (temporaryImageUrl.current) {
-              URL.revokeObjectURL(temporaryImageUrl.current);
-              temporaryImageUrl.current = null;
-            }
-            const file = event.target.files?.[0];
-            if (file) {
-              temporaryImageUrl.current = URL.createObjectURL(file);
-              setImagePreview(temporaryImageUrl.current);
-              setRemoveImage(false);
-            } else {
-              setImagePreview(product?.image_path || "");
-            }
-          }}
-        />
-        <small>{t("JPEG, PNG, or WebP; up to 5 MB.")}</small>
-      </div>
-
-      {product?.image_path ? (
-        <div className="field full product-current-media">
-          <img src={product.image_path} alt="" />
-          <label className="check-field">
-            <input
-              type="checkbox"
-              name="removeImage"
-              checked={removeImage}
-              onChange={(event) => {
-                setRemoveImage(event.target.checked);
-                if (event.target.checked && imageInput.current) {
-                  imageInput.current.value = "";
-                  setImagePreview("");
-                } else {
-                  setImagePreview(product.image_path);
-                }
-              }}
-            />
-            {t("Remove the current image without replacing it")}</label>
-        </div>
-      ) : null}
+      <ProductMediaFields product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
 
       {staffMode ? (
         <div className="field full">
@@ -286,7 +214,7 @@ export default function ProductForm({
 
       <aside className="field full product-upkeep-preview" aria-live="polite">
         <div className="product-upkeep-preview-image">
-          {!removeImage && imagePreview ? (
+          {imagePreview ? (
             <img src={imagePreview} alt="" />
           ) : (
             <span aria-hidden="true">◇</span>

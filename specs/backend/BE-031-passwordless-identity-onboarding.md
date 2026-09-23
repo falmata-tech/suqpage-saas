@@ -2,7 +2,7 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-09-21
 change_level: L3
@@ -217,3 +217,43 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+## Owner-selected handle at setup — 2026-09-23
+
+This accepted change supersedes generated-only handle selection. New setup UI
+requires a chosen handle and displays suqpage.com/@handle with concise localized
+availability feedback. Normalize surrounding whitespace, one optional leading @
+and case; accept 3–60 ASCII letters/digits with internal single hyphens. Reject
+reserved platform identities (suqpage, admin, support). Existing handles remain
+unchanged; renaming existing pages is outside this change. Older clients that
+omit the handle retain generated-handle compatibility; an explicitly empty or
+invalid handle is rejected.
+
+- GIVEN a verified identity WHEN checking a valid handle THEN return only the
+  canonical handle and availability, considering every business status and case;
+  no private business/account information is returned. Anonymous checks are denied.
+- GIVEN typing WHEN checks are pending/fail/out of order THEN only the current
+  input receives feedback; a failed check never claims availability.
+- GIVEN two signups choosing the same available handle WHEN they save concurrently
+  THEN only one workspace commits; the other receives a clear conflict without
+  partial tenant/user records. The check is advisory, never a reservation.
+- GIVEN existing setup/session defenses WHEN handle selection is added THEN
+  identity, tenant, role, publication and private starter-content rules remain.
+
+Test plan: validation/reserved/case checks, actual PostgreSQL availability and
+concurrent creation/conflict/rollback tests, authenticated API checks and
+desktop/390/320 form states. No migration/provider change. Master §§5.2 and 11
+(onboarding statements) affected. Focused visual review precedes full gates.
+
+
+## S28 local extension — 2026-09-23
+
+FE-051 / BE-043 / DEP-040 supersede S26's required signup handle field: signup
+allocates an unused address and opens the populated private page preview.
+Handle edits move to Business details, first change immediate then once every
+30 days; a platform administrator may override with an audited support reason.
+Reserved old handles redirect public product links without bypassing privacy.
+New examples reuse admitted fictional ceramics imagery and include two photos
+and two YouTube links per offering. Account identity/consent stays real; existing
+content is untouched. The Suqpage wordmark has fixed Latin typography in every
+locale. Local focused tests/captures are separate from visual/release approval.

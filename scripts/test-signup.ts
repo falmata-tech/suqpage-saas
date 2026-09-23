@@ -82,8 +82,32 @@ async function main() {
         assert.deepEqual(await counts(), beforeConflict, "duplicate verified email creates no partial tenant state");
         const parsed = parseSignupInput({ ...valid, email: "forged@example.test", handle: "forged", password: "forged" }, { providerUserId: "33333333-3333-4333-8333-333333333333", email: "verified@example.test" });
         assert.equal(parsed.email, "verified@example.test");
-        assert.notEqual(parsed.handle, "forged");
+        assert.equal(parsed.handle, "forged", "Handle is user-chosen; verified identity remains server-owned");
         assert.throws(() => parseSignupInput(valid, { providerUserId: "bad", email: "bad" }), SignupError);
+        const {parseBusinessHandle} = await import('../lib/business-handle');
+        const {getHandleAvailability} = await import('../lib/handle-availability');
+        assert.equal(parseBusinessHandle(' @My-Shop '), 'my-shop');
+        for (const invalid of ['', 'ab', '-shop', 'shop-', 'a--b', 'shop/name', 'hello world', 'ሱቅ', 'a'.repeat(61), 'suqpage', 'ADMIN', 'support']) {
+            assert.throws(() => parseBusinessHandle(invalid));
+            assert.throws(() => parseSignupInput({...valid,handle:invalid}, identity), SignupError);
+        }
+        const handle = 'chosen-handle';
+        assert.deepEqual(await getHandleAvailability(handle), {handle,available:true});
+        const beforeRace = await counts();
+        const race = await Promise.allSettled([
+            createPublicClientWorkspace({...valid,handle:' @Chosen-Handle ',idempotencyKey:'signup-handle-race-0001'}, {providerUserId:'44444444-4444-4444-8444-444444444444',email:'handle-one@example.test'}),
+            createPublicClientWorkspace({...valid,handle:'CHOSEN-HANDLE',idempotencyKey:'signup-handle-race-0002'}, {providerUserId:'55555555-5555-4555-8555-555555555555',email:'handle-two@example.test'}),
+        ]);
+        assert.equal(race.filter(result=>result.status==='fulfilled').length,1);
+        const failure = race.find(result=>result.status==='rejected');
+        assert.ok(failure?.status==='rejected' && failure.reason instanceof SignupError && failure.reason.code==='handle_conflict' && failure.reason.status===409);
+        const afterRace = await counts();
+        assert.equal(afterRace.businesses,beforeRace.businesses+1);
+        assert.equal(afterRace.users,beforeRace.users+1);
+        assert.equal(afterRace.onboardingProfiles,beforeRace.onboardingProfiles+1);
+        assert.deepEqual(await getHandleAvailability('CHOSEN-HANDLE'), {handle,available:false}, 'Private drafts reserve handles without disclosing their identity');
+        await db.prepare("UPDATE businesses SET status='suspended' WHERE handle=?").run(handle);
+        assert.equal((await getHandleAvailability(handle)).available,false);
         console.log("Private account bootstrap, category privacy, atomicity, and conflict tests passed.");
         await closeDbForTests();
     }

@@ -2,12 +2,13 @@
 import { useUiText } from "@/lib/i18n/ui";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
-import { ArrowLeft, Check, Copy, PackageOpen, Play, ListPlus, MessageCircle } from "lucide-react";
+import { ArrowLeft, Check, Copy, PackageOpen, ListPlus, MessageCircle } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { inquiryEligible, productSellingUnit } from "@/lib/product-inquiry";
 import { offeringNoun } from "@/lib/offerings";
 import { formatEtbPrice } from "@/lib/offering-presentation";
-import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
+import { productMedia } from "@/lib/product-media";
+import ProductMediaGallery from "./ProductMediaGallery";
 import styles from "./ProductPage.module.css";
 
 export default function ProductPage({ product, backHref, onBack, onAdd, onInquire, isAdded, copyLink, ready, catalogLabel = "Products" }: {
@@ -19,28 +20,14 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
 }) {
   const t = useUiText();
   const heading = useRef<HTMLHeadingElement>(null);
-  const photo = useRef<HTMLImageElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
-  const hasPhoto = Boolean(product?.image_path) && !imageFailed;
   const [options, setOptions] = useState<Record<string, string>>(() => Object.fromEntries((product?.option_groups || []).map(g => [g.name, g.values[0]?.value || ""])));
-  useEffect(() => { if (photo.current?.complete && photo.current.naturalWidth === 0) setImageFailed(true); }, []);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); heading.current?.closest("[data-product-page]")?.scrollIntoView({ block: "start" }); }, []);
-  let video = "";
-  if (product?.video_ref) { try { video = privacyEnhancedYouTubeEmbedUrl(product.video_ref); } catch {} }
   const noun = product ? offeringNoun(product.offering_kind) : "item";
   const unit = product ? productSellingUnit(product) : "";
   return <article className={styles.page} data-product-page>
     <div className={styles.navigation}><a href={backHref} onClick={onBack}><ArrowLeft size={18} aria-hidden="true" />{t("Back to {value1}", { value1: t(catalogLabel).toLowerCase() })}</a>{product ? <button type="button" onClick={copyLink}><Copy size={16} aria-hidden="true" />{t("Copy {value1} link", { value1: t(noun) })}</button> : null}</div>
     {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>{t("Item unavailable")}</h2><p>{t("This item is no longer listed. Browse the shop’s other products and services.")}</p></div> : <div className={styles.layout}>
-      <div className={styles.media}>
-        <div className={styles.stage}>
-          {playing && video ? <iframe src={`${video}?autoplay=1`} title={t("{value1} video", { value1: product.name })} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
-            : hasPhoto ? <img ref={photo} src={product.image_path} alt={product.name} onError={() => setImageFailed(true)} /> : <div className={styles.placeholder}><PackageOpen size={40} aria-hidden="true" /><span>{video ? t("See more in the video") : t("No photo yet")}</span></div>}
-          {!playing && video ? <button type="button" className={styles.play} onClick={() => setPlaying(true)}><Play size={18} aria-hidden="true" />{t("Watch video")}</button> : null}
-        </div>
-        {playing ? <button className={styles.photo} type="button" onClick={() => setPlaying(false)}>{hasPhoto ? t("Back to photo") : t("Close video")}</button> : null}
-      </div>
+      <div className={styles.media}><ProductMediaGallery key={product.id} items={productMedia(product)} name={product.name} /></div>
       <div className={styles.copy}>
         {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>

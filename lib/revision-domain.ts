@@ -1,3 +1,4 @@
+import { parseProductMedia, productMedia, type ProductMedia } from "./product-media";
 import {
   isLegacyShowroomDesignKey,
   parsePublishedDesignManifest,
@@ -102,6 +103,7 @@ export type RevisionCategory = {
 export type RevisionOptionGroup = { name: string; values: string[] };
 
 export type RevisionProduct = {
+  media?: ProductMedia[];
   key: string;
   collectionKey: string | null;
   categoryKey: string | null;
@@ -381,6 +383,7 @@ export function parseRevisionContent(
         "description",
         "imageRef",
         "videoRef",
+        "media",
         "priceMinor",
         "currency",
         "quantityUnit",
@@ -477,6 +480,7 @@ export function parseRevisionContent(
       slug: slug(value.slug, itemName),
       eyebrow: clean(value.eyebrow, 100),
       description: clean(value.description, 3000),
+      ...(value.media !== undefined ? {media: parseProductMedia(value.media)} : {}),
       imageRef: image(value.imageRef),
       videoRef: youtubeRef(value.videoRef),
       priceMinor,
@@ -685,6 +689,7 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
       slug: item.slug,
       eyebrow: item.eyebrow,
       description: item.description,
+      media: productMedia(item),
       imageRef: item.image_path,
       videoRef: item.video_ref || "",
       priceMinor: item.price_minor ?? null,
@@ -763,6 +768,7 @@ export function snapshotToCatalog(
     slug: item.slug,
     eyebrow: item.eyebrow,
     description: item.description,
+    media: (item.media || productMedia({image_path:item.imageRef,video_ref:item.videoRef})).map(media=>({...media,ref:media.kind === "image" ? resolveImage(media.ref) : media.ref})),
     image_path: resolveImage(item.imageRef),
     video_ref: item.videoRef || "",
     price_minor: item.priceMinor ?? null,

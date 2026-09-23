@@ -1,3 +1,4 @@
+import { productMedia } from "./product-media";
 import { normalizeQuantityMode } from "./offerings";
 import { parseOfferingHighlightsJson } from "./offering-presentation";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
@@ -20,14 +21,14 @@ export class PostgresCatalogRepository {
   async getBusinessByHandle(handle: string): Promise<Business | undefined> {
     const found = await this.runner.query<Business>(`
       SELECT b.* FROM businesses b
-      WHERE lower(b.handle)=lower(?) AND b.status='active'
+      WHERE b.id=(SELECT business_id FROM business_handles WHERE handle=lower(?)) AND b.status='active'
     `, [handle.replace(/^@/, "")]);
     return found.rows[0];
   }
 
   async getBusinessByHandleAny(handle: string): Promise<Business | undefined> {
     const found = await this.runner.query<Business>(
-      "SELECT * FROM businesses WHERE lower(handle)=lower(?)",
+      "SELECT * FROM businesses WHERE id=(SELECT business_id FROM business_handles WHERE handle=lower(?))",
       [handle.replace(/^@/, "")],
     );
     return found.rows[0];
@@ -107,6 +108,7 @@ export class PostgresCatalogRepository {
       else groupsByProduct.set(group.product_id, [hydratedGroup]);
     }
     const hydratedProducts = products.rows.map((product) => {
+      product.media = productMedia(product);
       product.quantity_mode = normalizeQuantityMode(product.quantity_mode);
       product.highlights = parseOfferingHighlightsJson(product.highlights_json);
       product.option_groups = groupsByProduct.get(product.id) || [];

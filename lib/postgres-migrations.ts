@@ -439,6 +439,46 @@ export async function migratePostgresDatabase(
       await runner.query("INSERT INTO schema_migrations(version) VALUES(48)");
       applied.push(48);
     }
+    const migration49 = await runner.query("SELECT version FROM schema_migrations WHERE version=49");
+    if (!migration49.rows.length) {
+      await runner.query(`ALTER TABLE products ADD COLUMN media_json TEXT NOT NULL DEFAULT '[]'
+        CHECK (jsonb_typeof(media_json::jsonb)='array' AND jsonb_array_length(media_json::jsonb)<=12)`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(49)");
+      applied.push(49);
+    }
+    const migration50 = await runner.query("SELECT version FROM schema_migrations WHERE version=50");
+    if (!migration50.rows.length) {
+      await runner.query(`ALTER TABLE businesses ADD COLUMN handle_changed_at BIGINT NOT NULL DEFAULT 0;
+        CREATE TABLE business_handles (
+          handle TEXT PRIMARY KEY CHECK(handle=lower(handle)),
+          business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE
+        );
+        CREATE INDEX business_handles_business_idx ON business_handles(business_id);
+        INSERT INTO business_handles(handle,business_id) SELECT lower(handle),id FROM businesses;
+        REVOKE ALL ON business_handles FROM PUBLIC;
+        ALTER TABLE business_handles ENABLE ROW LEVEL SECURITY;
+        CREATE FUNCTION reserve_business_handle() RETURNS trigger LANGUAGE plpgsql
+          SET search_path=${quotedSchema(schema)} AS $$
+        BEGIN
+          INSERT INTO business_handles(handle,business_id) VALUES(lower(NEW.handle),NEW.id)
+            ON CONFLICT(handle) DO NOTHING;
+          IF NOT EXISTS(SELECT 1 FROM business_handles WHERE handle=lower(NEW.handle) AND business_id=NEW.id) THEN
+            RAISE EXCEPTION 'Business handle is already reserved' USING ERRCODE='23505', CONSTRAINT='business_handles_pkey';
+          END IF;
+          RETURN NEW;
+        END $$;
+        CREATE TRIGGER reserve_business_handle AFTER INSERT OR UPDATE OF handle ON businesses
+          FOR EACH ROW EXECUTE FUNCTION reserve_business_handle();`);
+      const roles = await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated')");
+      for(const role of roles.rows) await runner.query(`REVOKE ALL ON business_handles FROM ${quotedRole(role.rolname)}`);
+      const runtimeRoles = await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('suqpage_runtime','mirtpage_runtime')");
+      for(const role of runtimeRoles.rows) {
+        await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON business_handles TO ${quotedRole(role.rolname)}`);
+        await runner.query(`CREATE POLICY ${quotedRole(`handle_access_${role.rolname}`)} ON business_handles TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+      }
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(50)");
+      applied.push(50);
+    }
     return { applied };
   });
 }

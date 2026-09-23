@@ -48,11 +48,12 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.reload(); await expect(page).toHaveURL(/\/request$/);
   await page.getByLabel('Your name',{exact:true}).fill('Acceptance owner');
   await page.getByLabel('Name buyers will see',{exact:true}).fill('Acceptance signup shop');
+  await expect(page.getByLabel('Page handle',{exact:true})).toHaveCount(0);
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
   await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
   await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();
-  await expect(page).toHaveURL(/\/dashboard$/);await expect(page.getByText('Private draft',{exact:true})).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard\/page-editor\?view=preview$/);await expect(page.getByLabel('Page preview',{exact:true})).toBeVisible();
   await page.goto('/dashboard/business');await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
   await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
   await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save account phone',exact:true}).click();

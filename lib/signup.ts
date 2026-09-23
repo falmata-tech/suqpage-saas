@@ -1,3 +1,4 @@
+import { parseBusinessHandle } from "./business-handle";
 import { parseAccountPhone } from "./account-contacts";
 import crypto from "node:crypto";
 import { isBusinessCategoryKey, type BusinessCategoryKey } from "./business-categories";
@@ -27,10 +28,10 @@ const text = (value: unknown) => String(value ?? "").trim().replace(/[\u0000-\u0
 const normalizeEmail = (value: unknown) => text(value).toLowerCase();
 const normalizeHandle = (value: unknown) => text(value).normalize("NFKD").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-function generatedHandle(businessName: string, providerUserId: string) {
+export function generatedHandle(businessName: string, providerUserId: string) {
   const base = normalizeHandle(businessName) || "business";
   const suffix = crypto.createHash("sha256").update(providerUserId).digest("hex").slice(0, 12);
-  return `${base.slice(0, Math.max(3, 67 - suffix.length)).replace(/-+$/g, "")}-${suffix}`;
+  return `${base.slice(0, Math.max(3, 59 - suffix.length)).replace(/-+$/g, "")}-${suffix}`;
 }
 
 
@@ -53,7 +54,12 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   if (!isBusinessCategoryKey(businessCategory)) throw new SignupError("Choose the category that best describes your work.");
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new SignupError("The setup session is invalid. Refresh and try again.");
   if (!consent) throw new SignupError("Agree to the Terms and Privacy Policy to continue.");
-  return { name, email, phone, businessName, handle: generatedHandle(businessName, providerUserId), businessCategory, idempotencyKey };
+  let handle = generatedHandle(businessName, providerUserId);
+  if (Object.hasOwn(raw, "handle")) {
+    try { handle = parseBusinessHandle(raw.handle); }
+    catch (error) { throw new SignupError(error instanceof Error ? error.message : "Enter a page handle."); }
+  }
+  return { name, email, phone, businessName, handle, businessCategory, idempotencyKey };
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>, identity: SignupIdentity) {

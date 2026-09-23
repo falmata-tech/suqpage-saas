@@ -25,7 +25,7 @@ async function mediaAccess(filename:string,actor:SessionUser|null){
  const businessId=tenantProductMediaBusiness(filename);if(!businessId)return null;
  const business=await runtimeGet<{status:string;content_json:string|null;logo_path:string;favicon_path:string}>(`SELECT b.status,b.logo_path,b.favicon_path,p.content_json FROM businesses b LEFT JOIN owner_page_publications p ON p.business_id=b.id AND p.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id) WHERE b.id=?`,[businessId]);if(!business)return null;
  const ref=`/media/${filename}`;
- const product=await runtimeGet<{is_published:number}>('SELECT is_published FROM products WHERE business_id=? AND image_path=? LIMIT 1',[businessId,ref]);
+ const product=await runtimeGet<{is_published:number}>("SELECT is_published FROM products WHERE business_id=? AND (image_path=? OR media_json::jsonb @> ?::jsonb) ORDER BY is_published DESC LIMIT 1",[businessId,ref,JSON.stringify([{kind:'image',ref}])]);
  let cover=false;try{cover=Boolean(business.content_json&&JSON.parse(business.content_json).heroImage===ref);}catch{}
  const identity=business.logo_path===ref||business.favicon_path===ref;
  const isPublic=business.status==='active'&&Boolean(product?.is_published||cover||identity);

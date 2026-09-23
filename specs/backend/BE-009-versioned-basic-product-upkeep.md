@@ -2,7 +2,7 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034]
+related: [BE-042, BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034]
 owners: [product, backend, security]
 last_updated: 2026-09-21
 change_level: L3

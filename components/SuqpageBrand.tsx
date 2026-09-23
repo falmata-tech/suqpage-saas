@@ -13,7 +13,7 @@ export default function SuqpageBrand({
   return (
     <Link className={`suqpage-brand ${className}`.trim()} href={href} aria-label={t("Suqpage home")}>
       <img src="/brand/suqpage-mark.svg" alt="" width="40" height="44" />
-      <span className="suqpage-wordmark"><span>suq</span><span>page</span></span>
+      <span className="suqpage-wordmark" lang="en" translate="no"><span>suq</span><span>page</span></span>
     </Link>
   );
 }

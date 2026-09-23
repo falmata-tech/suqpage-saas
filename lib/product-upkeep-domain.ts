@@ -1,3 +1,4 @@
+import { parseProductMedia, type ProductMedia } from "./product-media";
 import type { Product } from "./types";
 import {
   normalizeQuantityMode,
@@ -18,6 +19,7 @@ export type ProductImageAction = "keep" | "remove" | "replace";
 export type ProductOptionInput = { name: string; values: string[] };
 
 export type BasicProductCommand = {
+  media?: ProductMedia[];
   preserveMetadata?: boolean;
   optionGroups?: ProductOptionInput[];
   isPublished?: boolean;
@@ -54,6 +56,7 @@ export class ProductUpkeepError extends Error {
 }
 
 const commandKeys = new Set([
+  "media",
   "preserveMetadata",
   "optionGroups",
   "isPublished",
@@ -194,6 +197,7 @@ export function parseBasicProductCommand(
   }
   if (raw.isPublished !== undefined && typeof raw.isPublished !== "boolean") throw new ProductUpkeepError("Choose listed or hidden visibility.");
   return {
+    ...(raw.media !== undefined ? {media: (() => {try {return parseProductMedia(raw.media);} catch(error) {throw new ProductUpkeepError(error instanceof Error ? error.message : "Invalid product media.");}})()} : {}),
     ...(raw.preserveMetadata !== undefined ? { preserveMetadata: raw.preserveMetadata as boolean } : {}),
     ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
     ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),

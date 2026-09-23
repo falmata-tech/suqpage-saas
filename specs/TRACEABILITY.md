@@ -278,3 +278,67 @@ All gates, corrected Linux native archive transform/privacy, 15 live public
 checks and five-language browser checks pass. The exact rollback/recovery,
 archive hash, screenshots and limits are recorded in
 docs/SUQPAGE-S25-RELEASE-2026-09-23.md. Previous pending notes are superseded.
+
+
+## S26/S27 local candidates — 2026-09-23
+
+FE-038 / BE-031: owner-selected handles have shared validation, authenticated
+availability checks and authoritative conflict/race handling. `test:signup`,
+`scripts/capture-handle-setup.mjs` and typecheck pass. Browser checks cover invalid,
+taken, available, stale responses, retry, rate limits and 1440/390/320 widths.
+
+FE-050 / BE-042 / DEP-039: gallery persistence, ordering, canonical cover, legacy
+compatibility, tenant/privacy denial, snapshot retention and idempotent cleanup
+pass `test:product-upkeep`, `test:revision-v4`, `test:media-reconciliation` and
+`test:native-postgres`. Local schema 49, typecheck, localization and database
+boundaries pass. Browser script: `scripts/capture-launch-wiring.mjs`.
+Evidence is local in `.local/handle-review` and `.local/gallery-review`.
+Visual approval, full gates, scoped commit and hosted rollout remain pending;
+production stays at schema 48/S25.
+
+S27 focused browser workflow passes (2026-09-23): mixed gallery, arrows/thumbs,
+keyboard/scroll, explicit-play iframe lifecycle, saved cover/reorder/reload,
+repeat edit without reupload, removal, private draft media, publication and buyer
+inquiry into the owner inbox. Desktop/390/320 no-overflow and focused Axe checks
+pass. Captures inspected: `product-gallery-{1440,390,320}.png` and
+`simple-product-390.png` in `.local/gallery-review`. Handle available/taken checks
+and screenshots pass separately. Fixture images are plain test swatches; external
+YouTube delivery and physical-device gestures are not asserted by this evidence.
+No commit or hosted write for S26/S27 before the pending visual/release gates.
+
+FE-051 / BE-043 / DEP-040: S28 local candidate in progress. Scope and tests in
+new specs; no verified or deployed claim yet. Supersedes required S26 signup handle.
+
+
+S28 local evidence (2026-09-23), FE-051 / BE-043 / DEP-040:
+- `test:signup` / `test-business-handles.ts`: automatic collision retry, canonical
+  validation, private/reserved addresses, rename concurrency/cooldown, no-op,
+  forged/foreign roles, audited administrator override and RLS/grant boundary.
+- `test:business-starters`, `test:native-postgres`, `test:standard-invitations`,
+  `test:product-upkeep`: populated galleries, rollback/no overwrite, clean schema
+  50 installation/reapply and existing product/media protections pass.
+- `capture-handle-setup.mjs`: actual local signup opens the filled preview;
+  availability/stale/retry/rate checks, owner change/cooldown/support, administrator
+  correction, old product links and privacy pass. Five-language logo pixels/font
+  metrics are identical. Desktop/390/320 captures inspected.
+- `capture-business-starters.ts`: 29 captures, populated fields/images, editing,
+  reload, private-route and contact safety pass. Media are admitted fictional
+  samples; provider sessions are test-issued. No external email/video playback claim.
+- Typecheck, localization, identity, database boundaries, spec validation and
+  whitespace checks pass. Local schema 50 is applied, preflight requires it.
+Evidence: `.local/starter-handle-review`, `.local/business-starter-review`.
+Visual approval, full/release gates, scoped commit and hosted rollout pending;
+existing production remains S25/schema 48. User-owned `deno.lock` is preserved.
+
+## S29 — demo account email aliases (DEP-041)
+
+Evidence: `docs/SUQPAGE-DEMO-ACCOUNT-ACCESS.md`; protected one-time plan,
+rehearsal, apply journal, full reconciliation and real-app session checks under
+`.local/demo-account-emails-20260923/`. All 79 local / 77 hosted demo accounts
+use distinct owner-inbox aliases; 32 / 30 missing provider links created. Real
+accounts, existing UUIDs/links and 13 tenant/public/role tables per target unchanged.
+Admission, collision and bounded-alias negative checks pass. Existing/newly linked
+owner, administrator, operations and team sessions pass actual app OTP verification,
+dashboard and sign-out locally and live; owner product lists load. Health 200.
+Spec validation passes (154 isolated / 160 working). No delivery test, app deployment, schema or Auth
+configuration change. Source/operational evidence isolated from pending S26–S28.

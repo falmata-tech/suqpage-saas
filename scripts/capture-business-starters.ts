@@ -83,7 +83,7 @@ async function main() {
    for(const [index,product] of products.entries()){
     await owner.goto(`${base}/dashboard/products/${product.id}`);
     await filled('.product-upkeep-form input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]), .product-upkeep-form textarea, .product-upkeep-form select');
-    assert.deepEqual(await owner.locator('.product-upkeep-form input:not([type="hidden"]):not([type="checkbox"]), .product-upkeep-form textarea, .product-upkeep-form select').evaluateAll(elements=>elements.map(el=>el.getAttribute('name')).sort()),['description','image','name','offeringKind','priceEtb','videoUrl']);
+    assert.deepEqual(await owner.locator('.product-upkeep-form input:not([type="hidden"]):not([type="checkbox"]), .product-upkeep-form textarea, .product-upkeep-form select').evaluateAll(elements=>elements.map(el=>el.getAttribute('name')).filter(Boolean).sort()),['description','name','offeringKind','priceEtb']);
     await capture(owner,`offering-${index}`,width);
    }
    const scan=await new AxeBuilder({page:owner}).include('main').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(scan.violations,[]);

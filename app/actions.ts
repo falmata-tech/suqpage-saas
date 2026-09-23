@@ -1,4 +1,5 @@
 "use server";
+import { MAX_PRODUCT_UPLOAD_BYTES, parseProductMedia } from "@/lib/product-media";
 
 import bcrypt from "bcryptjs";
 import { changeProductCategory } from "@/lib/product-categories";
@@ -160,6 +161,8 @@ const productFormFields = new Set([
   "quantityUnit",
   "highlights",
   "videoUrl",
+  "mediaOrder",
+  "mediaImages",
   "categoryId",
   "removeImage",
   "image",
@@ -173,6 +176,7 @@ export async function basicProductUpkeepAction(formData:FormData){
   const returnPath=productId?`/dashboard/products/${productId}`:"/dashboard/products/new";
   let result:{productId:number;contentVersion:number};
   let staged:StagedImage|null=null;
+  const galleryUploads:StagedImage[]=[];
   try{
     const unsupported=[...formData.keys()].filter(key=>!productFormFields.has(key)&&!key.startsWith("$ACTION_"));
     if(unsupported.length)throw new ProductUpkeepError("The product form contains unsupported fields.");
@@ -181,6 +185,34 @@ export async function basicProductUpkeepAction(formData:FormData){
     const removeImage=Boolean(formData.get("removeImage"));
     if(hasFile&&removeImage)throw new ProductUpkeepError("Choose either a replacement image or remove the current image.");
     staged=await stageTenantProductImage(user,businessId,file);
+    let media;
+    if (formData.has("mediaOrder")) {
+      if(hasFile||removeImage)throw new ProductUpkeepError("Use the photos and videos editor to change media.");
+      const orderText=String(formData.get("mediaOrder"));
+      if(orderText.length>12000)throw new ProductUpkeepError("Product media is too long.");
+      const order:unknown=JSON.parse(orderText);
+      if(!Array.isArray(order)||order.length>12)throw new ProductUpkeepError("Use up to 8 photos and 4 videos.");
+      const files=formData.getAll("mediaImages");
+      if(files.length>8||files.reduce((total,file)=>total+(file instanceof File?file.size:0),0)>MAX_PRODUCT_UPLOAD_BYTES)throw new ProductUpkeepError("Choose photos totaling 5 MB or less.");
+      const uploaded=new Map<number,StagedImage>();
+      const entries=[];
+      for(const rawEntry of order as unknown[]){
+        if(!rawEntry||typeof rawEntry!=="object"||Array.isArray(rawEntry))throw new ProductUpkeepError("Invalid product media.");
+        const entry=rawEntry as Record<string,unknown>;
+        if(entry.kind==="upload"){
+          const index=entry.index;
+          if(typeof index!=="number"||!Number.isInteger(index)||index<0||index>=files.length||!(files[index] instanceof File))throw new ProductUpkeepError("Choose a valid photo.");
+          let image=uploaded.get(index);
+          if(!image){image=await stageTenantProductImage(user,businessId,files[index])||undefined;if(!image)throw new ProductUpkeepError("Choose a valid photo.");uploaded.set(index,image);galleryUploads.push(image);}
+          entries.push({kind:"image",ref:image.imageRef});
+        }else if(entry.kind==="video"){
+          if(typeof entry.url!=="string"||entry.url.length>500)throw new ProductUpkeepError("Use a supported YouTube video.");
+          entries.push({kind:"video",ref:normalizeControlledYouTubeUrl(entry.url).managedRef});
+        }else entries.push(entry);
+      }
+      if(uploaded.size!==files.length)throw new ProductUpkeepError("An uploaded photo is missing from the gallery.");
+      media=parseProductMedia(entries);
+    }
     const previous=productId?await runtimeGet<{capacity_summary:string;minimum_order_summary:string;lead_time_summary:string}>("SELECT capacity_summary,minimum_order_summary,lead_time_summary FROM products WHERE id=? AND business_id=?",[productId,businessId]):undefined;
     const optionText=String(formData.get("optionGroups")||"[]");
     if(optionText.length>25000)throw new ProductUpkeepError("Product options are too long.");
@@ -189,6 +221,7 @@ export async function basicProductUpkeepAction(formData:FormData){
     if(priceValue!==null&&(!Number.isFinite(priceValue)||priceValue<0||priceValue>9999999.99))throw new ProductUpkeepError("Price must be a valid non-negative ETB amount.");
     const videoInput=text(formData,"videoUrl",500);
     result=await executeBasicProductUpkeep(runtimeProductUpkeepPort(),user,{
+      ...(media !== undefined ? {media} : {}),
       ...(formData.has("optionGroups")?{optionGroups:JSON.parse(optionText)}:{}),
       ...(formData.has("isPublished")?{isPublished:formData.get("isPublished")==="1"}:{}),
       preserveMetadata:user.access_role==="client",
@@ -212,9 +245,10 @@ export async function basicProductUpkeepAction(formData:FormData){
       categoryId:int(formData,"categoryId")||null,
       imageAction:hasFile?"replace":removeImage?"remove":"keep",
       serviceNote:text(formData,"serviceNote",300),
-    },staged);
+    },staged,galleryUploads);
   }catch(error){
     await staged?.discard();
+    await Promise.all(galleryUploads.map(image=>image.discard()));
     go(returnPath,{
       business:businessId||undefined,
       error:error instanceof Error?error.message:"Could not save product.",

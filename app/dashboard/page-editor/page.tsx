@@ -11,10 +11,11 @@ import { pagePublicationPort } from "@/lib/owner-page-publication-runtime";
 
 export const dynamic = "force-dynamic";
 
-export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string }> }) {
+export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string; view?: string }> }) {
   if (!ownerPageEditorEnabled()) notFound();
   const user = await requireUser();
-  const business = await resolveBusiness(user, (await searchParams).business);
+  const query = await searchParams;
+  const business = await resolveBusiness(user, query.business);
   if (!business) notFound();
   let draft;
   try { draft = await readOwnerPage(ownerPagePort, user, business.id); }
@@ -23,6 +24,6 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
   if (!catalog) notFound();
   const publication = await pagePublicationPort.latest(business.id);
   return <DashboardShell user={user} business={business}>
-    <OwnerPageEditor catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
+    <OwnerPageEditor initialPreview={query.view === "preview"} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
   </DashboardShell>;
 }

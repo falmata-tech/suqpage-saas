@@ -1,3 +1,4 @@
+import type { ProductMedia } from "./product-media";
 export type Business = {
   id: number; handle: string; name: string; design_key: string; design_manifest_json:string; content_blocks_json:string; tagline: string; description: string;
   logo_path: string; hero_title: string; hero_subtitle: string; hero_image_path: string;
@@ -12,7 +13,7 @@ export type OptionGroup = { id:number; product_id:number; name:string; position:
 export type OptionValue = { id:number; option_group_id:number; value:string };
 import type { OfferingKind, QuantityMode } from "./offerings";
 
-export type Product = { id:number; business_id:number; collection_id:number|null; category_id:number|null; name:string; slug:string; eyebrow:string; description:string; image_path:string; video_ref:string; price_minor:number|null; currency:"ETB"; quantity_unit:string; highlights_json:string; highlights:string[]; availability:"available"|"limited"|"unavailable"|"coming_soon"; offering_kind:OfferingKind; quantity_mode:QuantityMode; capacity_summary:string; minimum_order_summary:string; lead_time_summary:string; is_published:number; sort_order:number; collection_name?:string; category_name?:string; option_groups?:OptionGroup[] };
+export type Product = { media?:ProductMedia[]; media_json?:string; id:number; business_id:number; collection_id:number|null; category_id:number|null; name:string; slug:string; eyebrow:string; description:string; image_path:string; video_ref:string; price_minor:number|null; currency:"ETB"; quantity_unit:string; highlights_json:string; highlights:string[]; availability:"available"|"limited"|"unavailable"|"coming_soon"; offering_kind:OfferingKind; quantity_mode:QuantityMode; capacity_summary:string; minimum_order_summary:string; lead_time_summary:string; is_published:number; sort_order:number; collection_name?:string; category_name?:string; option_groups?:OptionGroup[] };
 export type Catalog = { business:Business; collections:Collection[]; categories:Category[]; products:Product[] };
 export type AccessRole = "platform_admin" | "client" | "team_member" | "operations_manager";
 export type SessionUser = {

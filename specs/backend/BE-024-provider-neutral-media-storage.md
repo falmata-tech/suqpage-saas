@@ -2,7 +2,7 @@
 id: BE-024
 title: Provider-neutral media storage
 status: done
-related: [BE-010, BE-018, BE-026, BE-028, FE-009, FE-019, FE-025, FE-031, DEP-015, DEP-021, DEP-022, DEP-026, DEP-027, ADR-0012, ADR-0013, ADR-0014, ADR-0015]
+related: [BE-042, BE-010, BE-018, BE-026, BE-028, FE-009, FE-019, FE-025, FE-031, DEP-015, DEP-021, DEP-022, DEP-026, DEP-027, ADR-0012, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
 last_updated: 2026-08-02
 change_level: L3

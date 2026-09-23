@@ -2,7 +2,7 @@
 id: DEP-026
 title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
-related: [FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
+related: [DEP-039, FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 owners: [deployment, operations, security]
 last_updated: 2026-09-21
 change_level: L4

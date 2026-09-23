@@ -2,7 +2,7 @@
 id: FE-047
 title: Five-field offering editor
 status: done
-related: [FE-048, FE-041, BE-040, DEP-037]
+related: [FE-050, FE-048, FE-041, BE-040, DEP-037]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L2
@@ -102,3 +102,11 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## Ordered media extension — 2026-09-23
+
+FE-050 / BE-042 supersede the single-photo/single-video controls for the local
+candidate. Owners add/remove/reorder up to eight photos and four YouTube links.
+The linked product view uses thumbnails, arrows and horizontal scrolling; an
+explicit play action starts the selected video. Save/reload retains the order
+and existing records expand without backfill. DEP-039 gates hosted rollout.

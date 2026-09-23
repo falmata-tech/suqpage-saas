@@ -1,3 +1,6 @@
+import HandleSettingsForm from '@/components/HandleSettingsForm';
+import {readHandleSettings} from '@/lib/business-handle-runtime';
+import {saveBusinessHandleAction} from './handle-actions';
 
 import { getUiText } from "@/lib/i18n/server";
 import Link from 'next/link';
@@ -16,5 +19,5 @@ export default async function OwnerBusinessPage({searchParams}:{searchParams:Pro
  return <DashboardShell user={actor} business={business||null}><div className="dashboard-head standard-page-heading"><div><h1>{t("Business details")}</h1><p>{t("Your identity and the area buyers can find you in.")}</p></div><Link href="/dashboard/page-editor" className="btn secondary">{t("Edit page and contacts")}</Link></div>
  {query.error?<p className="error" role="alert">{t(query.error)}</p>:null}{query.saved?<p className="notice" role="status">{t("Business details saved.")}</p>:null}
  <p className="notice">{setup.existing?.is_excluded?t("Your map listing is hidden. Contact support for help."):setup.existing?.approved_at?t("Location saved. It appears on the map when your page is live."):t("Choose your city or town to add a map location. No approval is needed.")}</p>
- <OwnerBusinessForm setup={setup} action={saveOwnerBusinessAction}/></DashboardShell>;
+ <HandleSettingsForm key={setup.business.content_version} settings={await readHandleSettings(actor,actor.business_id!)} businessId={actor.business_id!} action={saveBusinessHandleAction}/><OwnerBusinessForm setup={setup} action={saveOwnerBusinessAction}/></DashboardShell>;
 }

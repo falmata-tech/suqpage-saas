@@ -3,6 +3,7 @@ import { useUiText } from "@/lib/i18n/ui";
 
 
 import { useRef, useState } from "react";
+
 import CategorySelect from "./CategorySelect";
 
 type State = { kind: "idle" } | { kind: "sending" } | { kind: "error"; message: string };
@@ -21,7 +22,7 @@ export default function SignupForm({ email, initialName }: { email: string; init
     setState({ kind: "sending" });
     try {
       const response = await fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      const result = await response.json() as { destination?: string; error?: string };
+      const result = await response.json() as { destination?: string; error?: string; code?: string };
       if (!response.ok || !result.destination) throw new Error(result.error || "Your workspace could not be created.");
       window.location.assign(result.destination);
     } catch (error) {
@@ -36,7 +37,7 @@ export default function SignupForm({ email, initialName }: { email: string; init
     <div className="field"><label htmlFor="signup-category">{t("Category")}</label><CategorySelect id="signup-category" name="businessCategory" required/></div>
     <div className="field"><label htmlFor="signup-phone">{t("Account phone (private)")}</label><input id="signup-phone" name="phone" type="tel" autoComplete="tel" required minLength={9} maxLength={40} placeholder="+251…" /></div>
     <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> {" "}{t("I agree to the Suqpage Terms and Privacy Policy.")}</label></div>
-    {state.kind === "error" ? <div className="field full error" role="alert">{state.message}</div> : null}
+    {state.kind === "error" ? <div className="field full error" role="alert">{t(state.message)}</div> : null}
     <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending"}>{state.kind === "sending" ? t("Finishing setup...") : t("Finish setup")}</button></div>
   </div></form>;
 }

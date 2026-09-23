@@ -1356,3 +1356,99 @@ verified and monitored healthy. Five-language live browser and public checks
 pass; protected data/settings unchanged. The initial packaging incident,
 rollback, added Linux archive gate, recovery source and limits are recorded in
 docs/SUQPAGE-S25-RELEASE-2026-09-23.md. This supersedes earlier pending S25 notes.
+
+## S26 — owner-selected setup handle (FE-038 / BE-031)
+
+Classification: feature with tenant-creation integrity implications. Definition
+of Ready met: explicit creation-only scope, format/availability/privacy/failure
+contracts and compatibility above; no schema or hosted configuration changes.
+- [x] Shared validation and authoritative case-insensitive availability.
+- [x] Authenticated bounded check and final creation conflict/race handling.
+- [x] Simple localized handle field, address preview and current-input feedback.
+- [x] Focused PostgreSQL/security/browser tests and desktop/phone captures.
+- [ ] User visual review before full/release gates and scoped commit/publication.
+Existing deno.lock is user-owned and excluded.
+
+## S27 — product photo/video gallery (FE-050 / BE-042 / DEP-039)
+
+Added user request alongside S26; not replacing handle work. Classification:
+feature + additive persistence. S26 focused signup/race/browser checks pass.
+- [x] Additive media contract/schema and legacy compatibility.
+- [x] Tenant-scoped save, snapshot/retention, media access and cleanup integration.
+- [x] Simple photos/videos editor and horizontal thumbnail/arrow/swipe viewer.
+- [x] Focused persistence/security/browser tests and desktop/phone captures.
+- [ ] Combined visual review of S26/S27 before full/release/rollout gates.
+
+Focused persistence, revision, retention, native migration, typecheck and
+localization pass. Browser workflow passes: four mixed media entries, arrows/thumbnails, keyboard
+and horizontal scroll, explicit video play/unmount, reorder/reload, adding a
+photo then saving another edit without reupload, removal, publication, private
+media and inquiries. Desktop/390/320 captures inspected in `.local/gallery-review`;
+handle screenshots inspected in `.local/handle-review`. Current: user visual approval remains
+required before full gates, scoped commit and production migration/deployment.
+
+
+## S28 — automatic starter, handle settings and fixed logo (FE-051/BE-043/DEP-040)
+
+Newest instruction supersedes manual handle entry in S26 signup. Preserve S27
+and the prior task edits; only unrelated pre-existing `deno.lock` stays untouched.
+Classification: branding defect + feature with persistence/tenant invariants.
+- [x] Automatic available handle, atomic sample galleries and signup preview destination.
+- [x] Registry/cooldown, owner settings, support link and audited admin override.
+- [x] Fixed wordmark font in all five locales.
+- [x] Focused migration/security/browser tests; desktop/phone captures.
+- [ ] User visual approval, then full/build/release gates and scoped commit/rollout.
+Use 30 days between changes; first change immediate; reserve old links and redirect.
+
+S28 focused evidence: signup and lifecycle tests, starter completeness, native
+schema install/reapply, invitations, product-upkeep/gallery, typecheck, identity,
+localization (1,013 messages per local catalog), spec and boundary checks pass.
+`capture-handle-setup.mjs` passes real local signup → populated preview, checks,
+rename/cooldown/support, administrator exception, old product redirects/private
+denial and 1440/390/320 captures. All five wordmark captures have identical bytes.
+`capture-business-starters.ts` passes 29 captures, all active fields/images,
+save/reload, tenant denial and private contact safety. Captures inspected in
+`.local/starter-handle-review` and `.local/business-starter-review`.
+Local schema 50 applied; preflight now requires it. Production remains S25/schema
+48. Current: visual approval before full/build/release gates, scoped commit and
+backup/migration/publication. No outgoing emails or remote configuration changes.
+Original S26 signup selection is superseded by automatic signup + settings edits.
+
+## S29 — usable demo sign-in aliases (DEP-041 / BE-022 / BE-030)
+
+Classification: one-time operations/identity correction; newest explicit owner
+request authorizes local and live demo accounts using the supplied plus-address
+inbox. Preserve S26–S28 work and unrelated deno.lock. No app deployment involved.
+- [x] Inventory and admit exact demo accounts; collision and target checks.
+- [x] Protected before-images; local provider rehearsal and negative checks.
+- [x] Apply locally, reconcile identities/access/public-data invariants.
+- [x] Apply hosted exact account plan, verify identities/access and public health.
+- [x] Private sign-in directory, spec/trace evidence and operational handoff.
+Missing provider links must be created for existing demo users; existing UUIDs
+remain unchanged. No outgoing messages or hosted configuration changes.
+
+S29 complete: 79 local / 77 hosted accounts corrected, including 32 / 30 new
+provider links. Private before-images and journals retained; real account emails,
+all existing provider UUIDs/links and 13 public-content/role tables per target
+unchanged. All account readbacks and ten representative application sign-in/
+dashboard/sign-out paths pass. Health 200; spec validation passes (154 isolated / 160 working). Directory:
+`.local/demo-account-emails-20260923/SIGN-IN-ACCOUNTS.md`. No test mail sent;
+inbox receipt not claimed. No app deployment, schema or hosted config change.
+See `docs/SUQPAGE-DEMO-ACCOUNT-ACCESS.md`. S26–S28 remain independently pending.
+
+## S26–S28 approved release — 2026-09-23
+
+Owner explicitly approved the visual result and deployment. This satisfies the
+visual checkpoint for the gallery, automatic starter, handle settings and logo.
+- [x] Visual approval recorded; demo email directory supplied.
+- [x] Full check, release, provider acceptance and operations gates.
+- [x] Fresh protected production backup; restore/migrate/reapply rehearsal.
+- [ ] Review exact additive schema 49/50 SQL, apply and verify production.
+- [ ] Scope/source commit; Netlify artifact privacy and Linux native gate.
+- [ ] Publish, live gallery/handle/account checks, monitoring and release record.
+S29 aliases must remain unchanged. Roll back the app to the current S25 deploy
+if needed; retain additive columns/registry and all customer/gallery data.
+
+S28 full gates pass, including nine provider-backed browser workflows and the
+exact Netlify Linux image transform/privacy checks. Production migration and
+independent readback are current; no hosted Auth/SMTP changes.

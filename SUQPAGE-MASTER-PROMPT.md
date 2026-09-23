@@ -20,6 +20,9 @@ Production has 64 existing admitted demo pages and 256 simplified offerings,
 including 42 services. Local fixtures have 66 pages/264 offerings; local-only
 businesses are not copied to production. Demo contacts use the supplied example
 username alhayabrand, fictional phone/email and example.com; delivery is not implied.
+Demo sign-in accounts use unique aliases of the owner's approved inbox (DEP-041),
+with linked provider identities and a private account directory. Public demo contacts
+remain examples; account inbox aliases never become public contacts implicitly.
 Existing accounts, inquiries and non-demo records are preserved. New private starter
 content is separate from the one-time correction of existing demos. Demos retain
 optional-price, scheduled Featured and sponsor examples rather than marking every
@@ -481,11 +484,15 @@ The merchant CTA links to passwordless account entry. A six-digit
 email code verifies identity before any business details are requested. An
 authenticated unlinked identity then submits bounded owner name, business name,
 phone or WhatsApp, and a short description of what the business makes or
-supplies. The server derives identity from the Supabase session, generates a
-safe unique handle, and atomically creates the private draft business, owner,
+supplies. Signup assigns an available generated page handle and opens the
+complete private sample page in preview. The owner can edit the address later
+under Business details. The server derives identity from the Supabase session and atomically creates the private draft business, owner,
 client access profile, identity link, and business onboarding record.
 FE-046/BE-039 also creates a private saved profile, example location and
-three editable example offerings with names, descriptions, media and prices;
+three editable example offerings with names, descriptions, media and prices.
+Each new offering demonstrates two photos and two YouTube links; admitted
+fictional ceramics demo imagery and concise sample descriptions show the layout.
+These are editable examples, not claims about the new business;
 all editable public-contact fields are filled. It accepts no public file upload and creates no public marker,
 Daily Featured card or public showroom.
 Standalone administrator-created account invitations remain supported. The legacy
@@ -500,7 +507,7 @@ as Market and About. Each is a focused task surface with one concise context
 panel and one white form panel on wider screens, stacked in semantic order on
 phones. Account entry asks only for an email code;
 business setup follows only after provider verification. Password entry,
-password reset, public role selection, handle selection, and initial catalog
+password reset, public role selection, and initial catalog
 collection are outside the launch flow.
 
 ### 5.3 Public copy must look finished
@@ -594,8 +601,7 @@ Core hierarchy:
 Business
 └── Product category
     └── Product
-        ├── Images
-        ├── Controlled video
+        ├── Ordered photos and controlled YouTube videos (FE-050 local candidate)
         ├── Availability
         ├── Optional ETB display price, offered-by unit, and highlights
         └── Up to four option groups
@@ -683,8 +689,7 @@ recovery input and are discarded when upgraded to revision schema v3.
 Product cards open a shareable `/@handle?product=<id>` view inside the business’s
 product section (FE-041). The route reloads directly, supports browser back/forward,
 and provides a return link to the page’s product/service catalog. Unknown, foreign or unpublished product references
-show a safe unavailable state. Cards have no Video badge; details show the photo,
-an intentional Watch video action when available, name, description, optional
+show a safe unavailable state. Cards have no Video badge; details use an ordered photo/video gallery (FE-050/BE-042), name, description, optional
 price, canonical selling unit and feature chips. Capacity, minimum order, lead time
 and internal offering-kind labels stay out of this public view. Single-value option
 groups need no selector; their canonical defaults remain part of the inquiry.
@@ -807,8 +812,16 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ---
 
-The owner editor asks for Product or Service, image, name,
-optional YouTube URL, optional ETB price and one description (FE-048/BE-041).
+The owner editor asks for Product or Service, name, optional ETB price and one
+description (FE-048/BE-041). FE-050/BE-042 extends media to eight photos and four
+YouTube links, with add/remove/reorder controls and a combined 5 MiB photo-upload
+budget per save. The public gallery has thumbnails, arrows, keyboard navigation
+and horizontal touch scrolling. Video playback requires an explicit play action
+and stops when the selected media changes. The first photo stays the cover for
+search/cards; legacy single-photo/video products need no backfill. Extra photos
+follow existing tenant/public access and snapshot-retention rules. This gallery
+is a local candidate on additive schema 49; hosted schema 48/S25 remains live
+until visual review and DEP-039 release gates pass.
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
@@ -901,16 +914,30 @@ continues to code sign-in and grants no session itself. Managed password actions
 are unavailable.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
-The Suqpage namespace preserves existing account emails and Auth links. Legacy
+The Suqpage namespace preserves existing account emails and Auth links. DEP-041's
+explicitly authorized demo-email correction is separate: only admitted fictional
+accounts change email, existing provider UUIDs stay intact, and previously unlinked
+demo accounts gain one identity link. Real account emails remain unchanged. Legacy
 local session cookies remain readable through the same authorization checks; new
 cookies use Suqpage names and logout revokes both local token names (BE-036).
 
-Business setup collects only owner name, verified-email display, phone or
-WhatsApp, organization name, one bounded private production category,
-processing consent, and an idempotency token. A safe retained provider display name is
-prefilled when available and remains editable. The public-page handle is
-generated server-side and may be changed later by an authorized operator. There
-are no public file, image, design-brief, password, or free-form offer inputs.
+Business setup collects owner name, verified-email display, private phone,
+organization name, category and consent. A safe provider display name may be
+prefilled. FE-051/BE-043 automatically assign an unused generated handle with
+bounded database-authoritative collision retries, then open
+`/dashboard/page-editor?view=preview`. Compatible callers can still request an
+explicit valid handle. No media upload or separate starter action is needed.
+
+Owners edit their handle in Business details (3–60 English letters, digits and
+internal hyphens). Authenticated bounded availability checks expose no account
+details. The first change is immediate, then changes are limited to one every
+30 days under a database row lock. Unchanged saves consume no allowance. A
+support link is shown during the interval; platform administrators can override
+with an audited reason. Current and retired addresses stay reserved to the same
+business; old public links redirect to the current address with product/query
+parameters preserved and privacy enforced. Existing addresses are unchanged.
+This is the local S28/schema-50 candidate; hosted rollout remains pending.
+
 
 Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
 
@@ -922,7 +949,7 @@ Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
   FE-046/BE-039 includes complete private starter content in that same
   transaction for signup and standalone invitations;
 - reject browser-supplied identity, role, tenant, publication, location,
-  industry, featured, media, password, or handle authority;
+  industry, featured, media, or password authority;
 - do not create a page project automatically during account setup;
 - keep the draft absent from public page, map, featured, and Daily Featured
   surfaces until exact authorized publication;
@@ -964,6 +991,9 @@ counts, and status guidance distinguishes staff drafts from owner live Save.
 ### Owner (client)
 
 Verified signup or an invitation creates a complete private sample workspace.
+New signup opens the filled page preview automatically. Owners can change their
+generated address in Business details; its first change is immediate and later
+changes have a 30-day interval (support exceptions require an audited administrator).
 Owners replace examples, save business details/location, edit their page and
 products/services, then Publish directly when at least one offering is listed.
 Subsequent page Save updates the live publication atomically; stale/foreign writes
@@ -972,7 +1002,9 @@ contacts remain separate from public page contacts. Owners can restore a retaine
 publication, revoke assistance, read inquiries, use support, manage account security
 and view aggregate visits. Categories and renewal operations remain available to
 staff without cluttering owner navigation. Existing catalog IDs, options, inquiry
-snapshots and tenant boundaries remain compatible.
+snapshots and tenant boundaries remain compatible. The S27 local editor adds
+ordered photos/video links and resets uploaded-file state to saved references
+after a successful save; later description edits reuse those saved images.
 
 ### Operations managers and team members
 
@@ -1229,6 +1261,15 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ## 17. Data, migrations, and deployment boundary
 
+DEP-039 adds `products.media_json` at schema 49 for the local gallery candidate.
+DEP-040/schema 50 adds a server-only, RLS-enabled reserved-handle registry and
+last-change timestamp. Registry uniqueness covers every business insert/handle
+update, including invitations. Retained addresses stay reserved across renames.
+The first photo/video remain in legacy columns; old records need no backfill.
+Retained publication/revision snapshots and reconciliation include every gallery
+photo. Hosted migration and publication remain pending visual/release gates;
+rollback retains the additive column and returns to the prior application.
+
 Schema 48 adds pg_trgm/fuzzystrmatch in the reviewed `extensions` namespace and
 four expression GiST indexes. Existing extensions are never relocated implicitly.
 Archive backups include both extension definitions; restoration creates their
@@ -1272,7 +1313,7 @@ waits for PostgreSQL/Auth readiness with bounded timeouts (DEP-027). Existing lo
 settings are still required. Startup never migrates, seeds, resets or changes
 hosted settings. Stopped engines on other operating systems require manual start.
 
-Native schema 47 installs directly into empty PostgreSQL schemas, including taxonomy,
+The native schema installs directly into empty PostgreSQL schemas, including taxonomy,
 schedule defaults, constraints, sequences and tenant triggers. Existing versioned
 schemas use additive/idempotent migrations. Unversioned populated schemas are refused.
 Each persistence fixture uses a disposable local PostgreSQL schema; trigger definitions
@@ -1315,6 +1356,9 @@ configuration, and preflight checks.
 
 ## 18. Language and localization rules
 
+The Suqpage wordmark remains Latin with a fixed font, weight and spacing in all
+five languages. Surrounding interface typography may follow the selected script.
+
 FE-049 provides shared public and dashboard interface localization for English,
 Amharic, Afaan Oromo, Somali and Tigrinya. A validated one-year cookie remembers
 the selection while preserving URLs, merchant content and unsaved form/inquiry
@@ -1356,6 +1400,8 @@ Minimum expectations:
 - adequate tap targets;
 - visible focus states;
 - keyboard-accessible dialogs and drawers;
+- product galleries support thumbnails, arrows and touch scrolling, respect
+  reduced motion and load video frames only after intentional playback;
 - focus trapping and restoration where appropriate;
 - semantic buttons and labels;
 - recognizable category pictures alongside text; decorative artwork is hidden
@@ -1434,6 +1480,13 @@ structured inquiry, not online checkout.
 ---
 
 ## 22. Testing and definition of done
+
+S26/S27/S28 local candidates use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
+`test:business-starters`,
+`test:product-upkeep` (including gallery security/retention cases),
+`test:revision-v4`, `test:media-reconciliation`, `test:native-postgres` and
+`capture-launch-wiring.mjs`. Disposable local identities do not prove hosted OTP
+or external YouTube availability. Visual approval and rollout remain separate.
 
 S22 uses `capture-search-drawer.mjs` for full-map defaults, sliding overlays,
 filter/page retention, map identity/zoom, keyboard focus/Escape, previews,

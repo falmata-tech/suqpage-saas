@@ -2,7 +2,7 @@
 id: FE-049
 title: Five-language interface
 status: done
-related: [FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
+related: [FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
 owners: [product, frontend]
 last_updated: 2026-09-23
 change_level: L2
@@ -96,3 +96,16 @@ Deployment is separately recorded in docs/SUQPAGE-S25-RELEASE-2026-09-23.md.
 Published and independently verified as 6ab399ae7a6f90b9daec07dc;
 five-language live browser checks and monitored health pass. See S25 release
 evidence for the resolved packaging incident and retained linguistic limits.
+
+
+## S28 local extension — 2026-09-23
+
+FE-051 / BE-043 / DEP-040 supersede S26's required signup handle field: signup
+allocates an unused address and opens the populated private page preview.
+Handle edits move to Business details, first change immediate then once every
+30 days; a platform administrator may override with an audited support reason.
+Reserved old handles redirect public product links without bypassing privacy.
+New examples reuse admitted fictional ceramics imagery and include two photos
+and two YouTube links per offering. Account identity/consent stays real; existing
+content is untouched. The Suqpage wordmark has fixed Latin typography in every
+locale. Local focused tests/captures are separate from visual/release approval.

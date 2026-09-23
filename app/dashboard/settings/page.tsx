@@ -1,3 +1,6 @@
+import HandleSettingsForm from '@/components/HandleSettingsForm';
+import {readHandleSettings} from '@/lib/business-handle-runtime';
+import {saveBusinessHandleAction} from '@/app/dashboard/business/handle-actions';
 
 import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
@@ -43,6 +46,7 @@ export default async function SettingsPage({
       </div>
       {params.saved === "password" && !managed ? <p className="notice">{t("Temporary owner password saved. Existing sessions were revoked.")}</p> : params.saved ? <p className="notice">{t("Business details saved.")}</p> : null}
       {params.error ? <p className="error">{params.error}</p> : null}
+      {platformAdmin?<HandleSettingsForm key={business.content_version} settings={await readHandleSettings(user,business.id)} businessId={business.id} admin action={saveBusinessHandleAction}/>:null}
       <form className="panel form-grid" action={updateBusinessAction}>
         <input type="hidden" name="businessId" value={business.id} />
         <div className="field full settings-section-heading"><span className="eyebrow">{t("Identity")}</span><h2>{t("Business identity")}</h2></div>

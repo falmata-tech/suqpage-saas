@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     if (identity.userId) return NextResponse.json({ destination: "/dashboard" }, { status: 409, headers: { "Cache-Control": "no-store" } });
     const body = await readBody(request);
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new SignupError("The signup request is invalid.");
-    const forbidden = ["email", "providerUserId", "userId", "businessId", "role", "accessRole", "status", "published", "handle", "password", "confirmPassword"];
+    const forbidden = ["email", "providerUserId", "userId", "businessId", "role", "accessRole", "status", "published", "password", "confirmPassword"];
     if (forbidden.some((key) => Object.prototype.hasOwnProperty.call(body, key))) throw new SignupError("The business setup form is out of date. Refresh and try again.");
     const emailHash = hashPrivateValue(identity.email);
     const ipRate = await consumeRuntimeRateLimit(`signup:ip:${ipHash}`, 5, 60 * 60 * 1000, 60 * 60 * 1000);
@@ -40,10 +40,10 @@ export async function POST(request: Request) {
     const created = await createPublicClientWorkspace(body, { providerUserId: identity.providerUserId, email: identity.email });
     await finalizeSupabaseIdentity(identity.providerUserId, created.userId).catch(() => undefined);
     await audit("client.self_signup_created", { userId: created.userId, businessId: created.businessId, detail: { outcome: "private_profile_created" }, ipHash });
-    return NextResponse.json({ destination: "/dashboard" }, { status: 201, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ destination: "/dashboard/page-editor?view=preview" }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const known = error instanceof SignupError ? error : new SignupError("Your private workspace could not be created.", 500, "unexpected");
     await audit("client.self_signup_failed", { detail: { code: known.code }, ipHash });
-    return NextResponse.json({ error: known.message }, { status: known.status, headers: { "Cache-Control": "no-store", ...(known.status === 429 ? { "Retry-After": "3600" } : {}) } });
+    return NextResponse.json({ error: known.message, code: known.code }, { status: known.status, headers: { "Cache-Control": "no-store", ...(known.status === 429 ? { "Retry-After": "3600" } : {}) } });
   }
 }

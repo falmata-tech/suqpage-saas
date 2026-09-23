@@ -64,6 +64,7 @@ export default async function EditProduct({
       ) : null}
       {query.error ? <p className="error">{t(query.error)}</p> : null}
       <ProductForm
+        key={`${product.id}:${business.content_version}`}
         catalog={catalog}
         product={product}
         action={basicProductUpkeepAction}

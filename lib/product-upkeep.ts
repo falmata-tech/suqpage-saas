@@ -25,6 +25,7 @@ export interface BasicProductUpkeepPort {
     command: BasicProductCommand,
     stagedImage: StagedProductImage | null,
     payloadHash: string,
+    stagedGallery?: StagedProductImage[],
   ): ProductUpkeepResult | Promise<ProductUpkeepResult>;
 }
 
@@ -42,6 +43,7 @@ export async function executeBasicProductUpkeep(
   user: SessionUser,
   rawCommand: Record<string, unknown>,
   stagedImage: StagedProductImage | null,
+  stagedGallery: StagedProductImage[] = [],
 ): Promise<ProductUpkeepResult> {
   try {
     const command = parseBasicProductCommand(rawCommand);
@@ -60,12 +62,14 @@ export async function executeBasicProductUpkeep(
       user,
       command,
       stagedImage,
-      commandHash(command, stagedImage?.digest || ""),
+      commandHash({...command, ...(command.media ? {media:command.media.map(item=>({...item,ref:stagedGallery.find(image=>image.imageRef===item.ref)?.digest || item.ref}))} : {})}, [stagedImage?.digest || "",...stagedGallery.map(image=>image.digest)].join(":")),
+      stagedGallery,
     );
-    if (result.duplicate) await stagedImage?.discard();
+    if (result.duplicate) {await stagedImage?.discard(); await Promise.all(stagedGallery.map(image=>image.discard()));}
     return result;
   } catch (error) {
     await stagedImage?.discard();
+    await Promise.all(stagedGallery.map(image=>image.discard()));
     throw error;
   }
 }

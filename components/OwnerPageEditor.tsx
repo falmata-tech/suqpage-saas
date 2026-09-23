@@ -13,14 +13,14 @@ import { legacyPublicContacts, publicContactFields } from "@/lib/business-profil
 import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean }) {
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean }) {
   const t = useUiText();
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
   const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const [content, setContent] = useState<ShopPageContent>(initialDraft?.content || initialBusinessProfile(catalog));
-  const [mode, setMode] = useState<"edit" | "preview">("edit");
+  const [mode, setMode] = useState<"edit" | "preview">(initialPreview ? "preview" : "edit");
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);

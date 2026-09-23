@@ -1,3 +1,4 @@
+import { productMedia, updateLegacyMedia } from "./product-media";
 import { canMaintainBasicProducts } from "./capabilities";
 import { runtimeBusinessById, runtimeCatalogByBusinessId, runtimeHasRetainedPublication } from "./catalog-runtime";
 import { productUpkeepEnabled } from "./config";
@@ -70,6 +71,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       eyebrow: "",
       description: command.description,
       imageRef,
+      ...(command.media ? {media:command.media} : {}),
       videoRef: command.videoRef,
       priceMinor: command.priceMinor,
       currency: "ETB",
@@ -96,6 +98,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       name: command.name,
       description: command.description,
       imageRef,
+      ...(command.media ? {media:command.media} : {}),
       videoRef: command.videoRef,
       priceMinor: command.priceMinor,
       currency: "ETB",
@@ -116,7 +119,7 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
   async assertAuthorized(user, command) {
     await authorize(user, command);
   },
-  async publish(user, command, stagedImage, payloadHash): Promise<ProductUpkeepResult> {
+  async publish(user, command, stagedImage, payloadHash, stagedGallery = []): Promise<ProductUpkeepResult> {
     return runtimeTransaction(async () => {
       await authorize(user, command);
       const locked=await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=?",[command.businessId]);
@@ -155,9 +158,18 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         };
       }
       await validateStructure(command);
-      const imageRef = command.imageAction === "replace"
+      let imageRef = command.imageAction === "replace"
         ? stagedImage!.imageRef
         : command.imageAction === "remove" ? "" : existing?.image_path || "";
+      const media = command.media ?? updateLegacyMedia(existing || null, imageRef, command.videoRef);
+      const ownedImages = new Set([
+        ...(existing ? productMedia(existing).filter(item=>item.kind==='image').map(item=>item.ref) : []),
+        ...(stagedImage ? [stagedImage.imageRef] : []), ...stagedGallery.map(image=>image.imageRef),
+      ]);
+      if (media.some(item=>item.kind==='image' && !ownedImages.has(item.ref))) throw new ProductUpkeepError("Choose photos belonging to this product.",403,"foreign_media");
+      if (stagedGallery.some(image=>!media.some(item=>item.kind==='image' && item.ref===image.imageRef))) throw new ProductUpkeepError("An uploaded photo is missing from the gallery.");
+      imageRef = media.find(item=>item.kind==='image')?.ref || '';
+      command = {...command,media,videoRef:media.find(item=>item.kind==='video')?.ref || ''};
       const slug = command.kind === "create" ? await uniqueSlug(command.businessId, command.name) : undefined;
       await validateProspectiveSnapshot(command, imageRef, slug);
 
@@ -201,6 +213,7 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         if (changed.changes !== 1) throw new ProductUpkeepError("The product changed while saving.", 409, "write_conflict");
       }
 
+      await runtimeRun("UPDATE products SET media_json=? WHERE id=? AND business_id=?",[JSON.stringify(media),productId,command.businessId]);
       if (command.isPublished !== undefined) await runtimeRun("UPDATE products SET is_published=? WHERE id=? AND business_id=?", [Number(command.isPublished), productId, command.businessId]);
       if (command.optionGroups !== undefined) {
         const previous = await runtimeAll<{id:number;name:string}>("SELECT id,name FROM option_groups WHERE product_id=?", [productId]);

@@ -10,7 +10,7 @@ function signupFailure(error: unknown): never {
     const detail = `${error.message} ${"constraint" in error ? String(error.constraint || "") : ""}`.toLowerCase();
     if (detail.includes("provider_user_id") || detail.includes("auth_identity")) throw new SignupError("This account already has a Suqpage workspace.", 409, "already_linked");
     if (detail.includes("email")) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
-    if (detail.includes("handle")) throw new SignupError("A workspace address collision occurred. Try again.", 409, "handle_conflict");
+    if ((detail.includes("handle") || detail.includes("uq_businesses_2"))) throw new SignupError("This handle is already taken. Choose another.", 409, "handle_conflict");
   }
   throw new SignupError("Your private workspace could not be created.", 500, "unexpected");
 }
@@ -21,15 +21,17 @@ export async function createPostgresPublicClientWorkspace(
   identity: SignupIdentity,
 ) {
   const input = parseSignupInput(raw, identity);
+  const automaticHandle = !Object.hasOwn(raw, "handle");
   const passwordSentinel = `!supabase-passwordless:${crypto.randomBytes(24).toString("base64url")}`;
   try {
-    return await runner.transaction(async () => {
+    for(let attempt=0;attempt<5;attempt++){
+     try { return await runner.transaction(async () => {
       const existingLink = await runner.query("SELECT user_id FROM auth_identity_links WHERE provider='supabase' AND provider_user_id=? LIMIT 1", [identity.providerUserId]);
       if (existingLink.rows.length) throw new SignupError("This account already has a Suqpage workspace.", 409, "already_linked");
       const existingEmail = await runner.query("SELECT 1 FROM users WHERE lower(email)=lower(?) LIMIT 1", [input.email]);
       if (existingEmail.rows.length) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
-      const existingHandle = await runner.query("SELECT 1 FROM businesses WHERE lower(handle)=lower(?) LIMIT 1", [input.handle]);
-      if (existingHandle.rows.length) throw new SignupError("A workspace address collision occurred. Try again.", 409, "handle_conflict");
+      const existingHandle = await runner.query("SELECT 1 FROM business_handles WHERE handle=lower(?) LIMIT 1", [input.handle]);
+      if (existingHandle.rows.length) throw new SignupError("This handle is already taken. Choose another.", 409, "handle_conflict");
       const manifest = JSON.stringify(curatedManifestForLegacyDesign("novatech"));
       const business = await runner.query<{ id: number }>(
         "INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,site_title,contact_email) VALUES(?,?,'composition',?,'draft',?,?) RETURNING id",
@@ -52,7 +54,14 @@ export async function createPostgresPublicClientWorkspace(
       );
       await initializeBusinessStarter(runner, { businessId, actorUserId: userId, category: input.businessCategory, notificationEmail: input.email });
       return { userId, businessId };
-    });
+    }); } catch(error) {
+      const conflict = (error instanceof SignupError && error.code==='handle_conflict') ||
+        (error instanceof Error && 'code' in error && error.code==='23505' && /handle|uq_businesses_2/i.test(`${error.message} ${'constraint' in error?error.constraint:''}`));
+      if(!automaticHandle||!conflict||attempt===4)throw error;
+      input.handle=`shop-${crypto.randomBytes(8).toString('hex')}`;
+     }
+    }
+    throw new Error('Could not allocate an address.');
   } catch (error) {
     return signupFailure(error);
   }

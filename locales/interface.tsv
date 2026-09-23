@@ -812,3 +812,34 @@ Enter a valid phone number with 7 to 15 digits.	ከ7 እስከ 15 አሃዞች �
 Enter a valid phone number.	ትክክለኛ ስልክ ያስገቡ።	Lakkoofsa bilbilaa sirrii galchi.	Geli telefoon sax ah.	ትኽክለኛ ስልኪ ኣእትዉ።
 Write a message for the Suqpage team.	ለSuqpage ቡድን መልዕክት ይጻፉ።	Garee Suqpage'f ergaa barreessi.	Farriin u qor kooxda Suqpage.	ንጉጅለ Suqpage መልእኽቲ ጽሓፉ።
 This conversation is closed.	ይህ ውይይት ተዘግቷል።	Mariin kun cufameera.	Wada hadalkan waa la xiray.	እዚ ዘተ ተዓጽዩ።
+Enter a page handle.	የገጽ መለያ ያስገቡ።	Teessoo fuulaa galchi.	Geli magaca bogga.	መለለዪ ገጽ ኣእቱ።
+Use 3–60 English letters, numbers or hyphens.	ከ3–60 የእንግሊዝኛ ፊደላት፣ ቁጥሮች ወይም አጭር ሰረዞች ይጠቀሙ።	Qubee Ingilizii, lakkoofsa ykn sarara gabaabaa 3–60 fayyadami.	Isticmaal 3–60 xaraf oo Ingiriisi ah, tirooyin ama jiitin.	ካብ 3–60 ፊደላት እንግሊዝኛ፣ ቁጽርታት ወይ ሓጸርቲ ሕንጻጻት ተጠቐም።
+This handle is not available.	ይህን መለያ መጠቀም አይቻልም።	Teessoon kun hin argamu.	Magacan lama heli karo.	እዚ መለለዪ ኣይርከብን።
+This handle is already taken. Choose another.	ይህ መለያ ተወስዷል። ሌላ ይምረጡ።	Teessoon kun qabameera. Kan biraa filadhu.	Magacan waa la isticmaalay. Mid kale dooro.	እዚ መለለዪ ተወሲዱ እዩ። ካልእ ምረጽ።
+Could not check this handle. Try again.	መለያውን ማረጋገጥ አልተቻለም። እንደገና ይሞክሩ።	Teessoo kana mirkaneessuun hin dandaʼamne. Irra deebiʼii yaali.	Magacan lama hubin karin. Mar kale isku day.	ነዚ መለለዪ ከነረጋግጽ ኣይከኣልናን። እንደገና ፈትን።
+Checking…	በማረጋገጥ ላይ…	Mirkaneessaa jira…	Waa la hubinayaa…	ይረጋገጽ ኣሎ…
+Photos and videos	ፎቶዎች እና ቪዲዮዎች	Suuraalee fi viidiyoowwan	Sawirro iyo muuqaallo	ስእልታትን ቪድዮታትን
+Add photos	ፎቶዎች ያክሉ	Suuraalee dabali	Ku dar sawirro	ስእልታት ወስኽ
+Add video link	የቪዲዮ አገናኝ ያክሉ	Geessituu viidiyoo dabali	Ku dar xiriir muuqaal	መላግቦ ቪድዮ ወስኽ
+Photo {number}	ፎቶ {number}	Suuraa {number}	Sawirka {number}	ስእሊ {number}
+Video {number}	ቪዲዮ {number}	Viidiyoo {number}	Muuqaalka {number}	ቪድዮ {number}
+Video link {number}	የቪዲዮ አገናኝ {number}	Geessituu viidiyoo {number}	Xiriirka muuqaalka {number}	መላግቦ ቪድዮ {number}
+Move media left	ወደ ግራ ያንቀሳቅሱ	Gara bitaatti siqsi	U dhaqaaji bidix	ናብ ጸጋም ኣንቀሳቕስ
+Move media right	ወደ ቀኝ ያንቀሳቅሱ	Gara mirgaatti siqsi	U dhaqaaji midig	ናብ የማን ኣንቀሳቕስ
+Remove media {number}	ፎቶ ወይም ቪዲዮ {number} ያስወግዱ	Suuraa ykn viidiyoo {number} haqi	Ka saar sawirka ama muuqaalka {number}	ስእሊ ወይ ቪድዮ {number} ኣውጽእ
+Previous media	ያለፈው	Kan duraa	Kii hore	ዝሓለፈ
+Next media	ቀጣዩ	Kan itti aanu	Kan xiga	ዝቕጽል
+Media {number} of {total}	ከ{total} ውስጥ {number}	{total} keessaa {number}	{number} ka mid ah {total}	ካብ {total}፣ {number}
+Play video {number}	ቪዲዮ {number} ያጫውቱ	Viidiyoo {number} taphachiisi	Daar muuqaalka {number}	ቪድዮ {number} ኣጻውት
+Photo unavailable	ፎቶው አይገኝም	Suuraan hin argamu	Sawirka lama heli karo	ስእሊ ኣይርከብን
+Use up to 8 photos and 4 videos.	እስከ 8 ፎቶዎች እና 4 ቪዲዮዎች ይጠቀሙ።	Hanga suuraa 8 fi viidiyoo 4 fayyadami.	Isticmaal ilaa 8 sawir iyo 4 muuqaal.	ክሳብ 8 ስእልታትን 4 ቪድዮታትን ተጠቐም።
+Choose photos totaling 5 MB or less.	አጠቃላይ መጠናቸው ከ5 MB ያልበለጠ ፎቶዎች ይምረጡ።	Suuraalee walumaagalatti 5 MB ykn isaa gadi filadhu.	Dooro sawirro wadartoodu tahay 5 MB ama ka yar.	ብድምር 5 MB ወይ ትሕቲኡ ዝኾኑ ስእልታት ምረጽ።
+Up to 8 photos and 4 videos. Photos: 5 MB total per save.	እስከ 8 ፎቶዎች እና 4 ቪዲዮዎች። በአንድ ጊዜ የሚቀመጡ ፎቶዎች፦ በድምሩ 5 MB።	Hanga suuraa 8 fi viidiyoo 4. Suuraalee yeroo tokko qusatan: walumaagalatti 5 MB.	Ilaa 8 sawir iyo 4 muuqaal. Sawirrada halkii kaydin: wadar 5 MB.	ክሳብ 8 ስእልታትን 4 ቪድዮታትን። ስእልታት ኣብ ሓደ ግዜ ብድምር 5 MB።
+Play video	ቪዲዮ ያጫውቱ	Viidiyoo taphachiisi	Daar muuqaalka	ቪድዮ ኣጻውት
+Page address	የገጽ አድራሻ	Teessoo fuulaa	Cinwaanka bogga	ኣድራሻ ገጽ
+Save handle	መለያውን አስቀምጥ	Maqaa fuulaa qusadhu	Kaydi magaca bogga	መለለዪ ኣቐምጥ
+Support reason	የእገዛ ምክንያት	Sababa deeggarsaa	Sababta taageerada	ምኽንያት ደገፍ
+You can change your handle once every 30 days.	የገጽ መለያዎን በየ30 ቀኑ አንድ ጊዜ መቀየር ይችላሉ።	Maqaa fuulaa guyyoota 30 keessatti yeroo tokko jijjiiruu dandeessa.	Waxaad magaca bogga beddeli kartaa hal mar 30 maalmood kasta.	መለለዪ ገጽካ ኣብ 30 መዓልቲ ሓንሳብ ክትቅይር ትኽእል።
+You can change your handle once every 30 days. Contact support for help.	የገጽ መለያዎን በየ30 ቀኑ አንድ ጊዜ መቀየር ይችላሉ። ለእርዳታ ያነጋግሩን።	Maqaa fuulaa guyyoota 30 keessatti yeroo tokko jijjiiruu dandeessa. Gargaarsaaf nu qunnami.	Waxaad magaca bogga beddeli kartaa hal mar 30 maalmood kasta. La xiriir taageerada si laguu caawiyo.	መለለዪ ገጽካ ኣብ 30 መዓልቲ ሓንሳብ ክትቅይር ትኽእል። ንሓገዝ ርኸበና።
+Contact support	እገዛ ያግኙ	Deeggarsa qunnami	La xiriir taageerada	ደገፍ ርኸብ
+Saving...	በማስቀመጥ ላይ...	Qusachaa jira...	Waa la kaydinayaa...	ይቕመጥ ኣሎ...

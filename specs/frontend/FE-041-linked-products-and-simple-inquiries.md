@@ -2,7 +2,7 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049]
+related: [FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049]
 owners: [product, frontend, security]
 last_updated: 2026-09-23
 change_level: L2
@@ -236,3 +236,11 @@ THEN the first click adds the selection exactly once and survives language
 switching and reload. Do not allow an initialization effect to discard that click.
 Evidence: focused direct-link regression and FE-049 browser matrix. No schema or
 server inquiry contract change.
+
+## Ordered media extension — 2026-09-23
+
+FE-050 / BE-042 supersede the single-photo/single-video controls for the local
+candidate. Owners add/remove/reorder up to eight photos and four YouTube links.
+The linked product view uses thumbnails, arrows and horizontal scrolling; an
+explicit play action starts the selected video. Save/reload retains the order
+and existing records expand without backfill. DEP-039 gates hosted rollout.

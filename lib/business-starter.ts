@@ -4,10 +4,12 @@ import type { OfferingKind } from './offerings';
 
 // Explicit sample content for NEW private workspaces, never runtime fallbacks.
 export const STARTER_NOTICE = 'Your page is filled with editable examples. Replace the sample text, images, video, prices, location and contact links with your own before sharing your business.';
-export const STARTER_ABOUT = 'Sample page: Welcome to our business. Explore our products, services and custom work, read the details, and tell us what you need. We can help you choose an item, arrange a service or discuss a made-to-order request. Replace this introduction with your own story and what makes your business special.';
+export const STARTER_ABOUT = 'Sample page: Thoughtful pieces, personal service and custom work. Browse our collection, explore a service or tell us about something you would like made. Based in Addis Ababa, we welcome questions and help you choose what suits your needs.';
 export const STARTER_VIDEO_REF = 'youtube:M7lc1UVf-VE';
 export const STARTER_VIDEO_URL = 'https://www.youtube.com/watch?v=M7lc1UVf-VE';
 export const STARTER_IMAGE_ROOT = '/uploads/seed/starter';
+// Reuse admitted fictional ceramics demo photography as editable sample media.
+export const STARTER_PHOTO_ROOT = '/uploads/seed/benchmarks/entoto-ceramics';
 export const starterContacts = parsePublicContacts({
   email: 'hello@example.test', phone: '+447700900123', website: 'https://example.com',
   whatsapp: '+447700900123', tiktok: 'your_business_example',
@@ -15,24 +17,24 @@ export const starterContacts = parsePublicContacts({
 });
 export const starterPage = parseShopPageContent({
   template: 'profile-v1', coverStyle: 'blended', introduction: '', about: STARTER_ABOUT,
-  heroImage: `${STARTER_IMAGE_ROOT}/cover.png`, videoUrl: STARTER_VIDEO_URL, contacts: starterContacts,
+  heroImage: `${STARTER_PHOTO_ROOT}/hero.jpg`, videoUrl: STARTER_VIDEO_URL, contacts: starterContacts,
 });
 
 export type StarterOffering = {
-  name: string; slug: string; description: string; kind: OfferingKind; image: string;
+  name: string; slug: string; description: string; kind: OfferingKind; image: string; galleryImage: string;
   unit: string; priceMinor: number; highlights: string[]; option: string; values: string[];
 };
 export const starterOfferings: readonly StarterOffering[] = [
   { name: 'Sample everyday product', slug: 'sample-everyday-product', kind: 'standard_product',
-    description: 'Sample product: Describe what this item does, who it is for and the choices you offer. The illustration, price and description are examples to replace with your own.',
-    image: `${STARTER_IMAGE_ROOT}/product.png`, unit: '', priceMinor: 50000,
+    description: 'Sample product: A ceramic cup for everyday coffee or tea. A simple shape, a comfortable handle and a soft neutral finish make it easy to use at home or give as a gift. Ask about colors and matching pieces.',
+    image: `${STARTER_PHOTO_ROOT}/product-1.jpg`, galleryImage: `${STARTER_PHOTO_ROOT}/product-2.jpg`, unit: '', priceMinor: 50000,
     highlights: [], option: '', values: [] },
   { name: 'Sample consultation service', slug: 'sample-consultation-service', kind: 'service',
-    description: 'Sample service: Introduce the help or expertise you offer. Explain what a session includes and invite customers to discuss their needs. Describe your session length, location and price.',
-    image: `${STARTER_IMAGE_ROOT}/service.png`, unit: '', priceMinor: 75000,
+    description: 'Sample service: A one-to-one session to plan a collection for your home, shop or event. Share your ideas, compare styles and talk through your budget. Contact us to arrange a time.',
+    image: `${STARTER_PHOTO_ROOT}/product-3.jpg`, galleryImage: `${STARTER_PHOTO_ROOT}/product-4.jpg`, unit: '', priceMinor: 75000,
     highlights: [], option: '', values: [] },
   { name: 'Sample custom order', slug: 'sample-custom-order', kind: 'standard_product',
-    description: 'Sample custom work: Show something you can make to a customer’s requirements. Invite them to share ideas and agree the details through an inquiry. This example is not a checkout or confirmed order.',
-    image: `${STARTER_IMAGE_ROOT}/custom.png`, unit: '', priceMinor: 150000,
+    description: 'Sample custom work: A made-to-order set for your table, a special gift or your business. Tell us the colors, shapes and number of pieces you have in mind. We will discuss the design and quote before work begins.',
+    image: `${STARTER_PHOTO_ROOT}/product-2.jpg`, galleryImage: `${STARTER_PHOTO_ROOT}/product-1.jpg`, unit: '', priceMinor: 150000,
     highlights: [], option: '', values: [] },
 ];
