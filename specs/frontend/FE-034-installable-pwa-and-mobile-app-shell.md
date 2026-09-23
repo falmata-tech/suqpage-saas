@@ -4,11 +4,14 @@ title: Installable PWA and mobile application shell
 status: done
 related: [FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE-038, FE_BASE, DEP-020, DEP-023, DEP-025]
 owners: [product, frontend, design]
-last_updated: 2026-08-14
+last_updated: 2026-09-23
 change_level: L2
 ---
 
 # FE-034 - Installable PWA and mobile application shell
+
+S30 corrects mobile brand visibility under FE-038. Local responsive captures,
+typecheck and the updated PWA shell contract pass; the owner approved this header correction and its release is in progress. Existing worker/cache policy is unchanged.
 
 ## Problem and outcome
 
@@ -28,12 +31,12 @@ useful offline failure state without caching private or mutable business data.
 - A shared four-target public phone bar for Market, Featured, About, and More.
   More exposes signup, workspace access, contact, privacy, and
   terms in a bounded sheet.
-- Removal of desktop-style public headers and full public footers at phone
-  widths while retaining Suqpage identity inside primary page content.
+- Compact Suqpage mark/wordmark and language header on phones (FE-038 S30);
+  desktop navigation and full public footers remain hidden.
 - A role-derived authenticated phone tab bar whose **More** action opens the
   existing complete authorized workspace menu.
-- Removal of the authenticated mobile top header once equivalent bottom
-  navigation is available.
+- Compact authenticated brand/language header; task navigation stays in the
+  bottom bar.
 - Removal of composed showroom footers on phones. The compact Suqpage host bar
   and business identity remain because they provide Back, hosting provenance,
   live status, and tenant identity rather than duplicate platform navigation.
@@ -59,12 +62,13 @@ useful offline failure state without caching private or mutable business data.
   requests are never stored in the PWA cache.
 - Service-worker cache names are versioned; activation deletes only prior
   Suqpage-managed caches and claims open clients.
-- At phone widths, public pages expose no desktop header, hamburger menu, or
-  full footer. The fixed bottom bar respects the device safe area, contains four
+- At phone widths, public application pages expose a compact brand/language
+  header without desktop navigation or a full footer. Focused account-entry
+  forms retain their bounded public menu. The fixed bottom bar respects the device safe area, contains four
   labeled icon targets of at least 44 CSS pixels, exposes active-page semantics,
   and does not cover page actions or dialogs.
-- The root Market retains compact Suqpage identity and context without adding
-  a replacement mobile top navigation bar.
+- The root Market reserves height for the compact brand header and bottom bar;
+  map/results remain within the available viewport.
 - Authenticated phone navigation is derived only from links already admitted by
   role and business context. Up to four primary tasks appear in the bottom bar;
   **More** opens every remaining authorized destination with the existing focus
@@ -84,14 +88,14 @@ Scenario: Visitor installs Suqpage
 Scenario: Phone visitor uses the marketplace as an application
   GIVEN the public homepage is open at 320 or 390 CSS pixels
   WHEN the visitor moves among Market, Featured, About, and More
-  THEN no desktop public header, hamburger menu, or full footer consumes the viewport
+  THEN the compact Suqpage brand/language header is visible without desktop navigation or a full footer
   AND one safe-area-aware bottom navigation bar remains reachable
   AND the current destination is identified without color alone
 
 Scenario: Authenticated actor uses the phone workspace
   GIVEN an authorized client, team member, or administrator opens a workspace at phone width
   WHEN the workspace renders
-  THEN no mobile top header is shown
+  THEN a compact Suqpage brand/language header is visible
   AND the bottom bar contains only authorized primary tasks
   AND More opens every remaining authorized destination and account action
 

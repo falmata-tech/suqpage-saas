@@ -12,6 +12,30 @@ change_level: L3
 
 ## Problem and outcome
 
+### S30 — mobile brand visibility (L1, visually approved; release in progress)
+
+- GIVEN a phone from 320px wide WHEN opening Market, Featured, About, sign-in
+  or a private workspace THEN the Suqpage mark and wordmark are visible in a
+  compact header without opening a menu; language selection remains accessible.
+- GIVEN a public shop or product on a phone WHEN it opens THEN the existing
+  return bar contains the same brand, an accessible Back to Market control and
+  language selection in one row; tenant branding stays independent.
+- GIVEN any of the five locales WHEN viewing that header THEN Latin wordmark
+  typography stays fixed, controls do not overlap, and no horizontal overflow
+  occurs. Desktop keeps its existing header and navigation.
+- GIVEN the mobile map/results workspace THEN its height accounts for the
+  header and bottom navigation so results remain scrollable and reachable.
+
+Scope: shell presentation only; no data, authentication or routing changes.
+Master impact: public showroom framing and shared identity in §5.2.
+Verification: `scripts/capture-mobile-brand.mjs`, typecheck and spec validation;
+desktop/320/390 captures precede visual approval and full release gates.
+Rollback: revert the scoped shell styles and brand placement; no migration.
+Evidence: 39 public and 51 authenticated responsive browser checks pass at
+1440/390/320 across all five locales; phone result-list scroll/collapse checks,
+typecheck, spec validation and PWA shell contract pass. Captures/receipts in
+`.local/mobile-brand-review/`. The owner approved deployment; full gates, commit and publication are in progress.
+
 The launch candidate needs consistent Suqpage identity and email-only entry.
 The supplied Suqpage direction establishes
 an Africa-pin mark, a lower-case two-color wordmark, and a crisp orange,

@@ -1,5 +1,6 @@
 "use client";
 import LanguageSelector from "@/components/LanguageSelector";
+import SuqpageBrand from "@/components/SuqpageBrand";
 import { useUiText } from "@/lib/i18n/ui";
 
 import { readPlatformState } from "@/lib/platform-state";
@@ -367,6 +368,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
           <span>{t("Back to Market")}</span>
         </button>
+        {withinPublicApp ? <SuqpageBrand className="showroom-host-brand" /> : null}
         <span className="showroom-language"><LanguageSelector /></span>
       </nav> : null}
       <ShowroomRoot

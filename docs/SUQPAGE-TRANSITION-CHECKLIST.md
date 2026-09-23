@@ -1458,3 +1458,28 @@ owner/handle/wordmark checks, 15 public checks and health monitoring pass.
 `docs/SUQPAGE-S28-RELEASE-2026-09-23.md` contains exact evidence and limits.
 Demo emails remain in `.local/demo-account-emails-20260923/SIGN-IN-ACCOUNTS.md`.
 Only unrelated `deno.lock` remains outside the release; no Git push performed.
+
+## S30 — visible mobile Suqpage brand (FE-038 / FE-032 / FE-051)
+
+Classification: L1 visual defect. Existing mobile rules hide the public header
+and the workspace has no visible brand outside its hidden sidebar.
+- [x] Inspect shell/brand rules; define responsive acceptance in FE-038.
+- [x] Restore compact public/workspace branding and use the existing
+  shop return row; preserve locale typography and tenant identity.
+- [x] Focused browser checks at desktop/390/320, all locales, map height and
+  shop return navigation; typecheck/spec validation; capture review images.
+- [x] Owner visual approval: explicit “deploy” instruction on 2026-09-23.
+- [ ] Current: applicable full gates and task-scoped commit.
+- [ ] Authorized publication and independent live verification.
+
+Unrelated `deno.lock` remains untouched. No database or hosted Auth change.
+
+Local evidence: 39 public + 51 authenticated responsive checks pass, including
+all five locales and desktop/390/320. Private captures and JSON receipts are in
+`.local/mobile-brand-review/` and its `authenticated/` directory. Both phone
+search panels retain >250px of scrollable results and collapse successfully;
+`results-verified.json` records dimensions. Typecheck, 160-spec validation and
+`test-pwa-shell.mjs` pass. No email sent. New mobile appearance shared for
+review and explicitly approved. Full check, release, nine provider acceptance
+scenarios, operations and artifact/native verification now pass. Publication
+and final monitoring remain; see `docs/SUQPAGE-S30-RELEASE-2026-09-23.md`.

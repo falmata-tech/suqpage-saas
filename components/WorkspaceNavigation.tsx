@@ -255,6 +255,10 @@ export default function WorkspaceNavigation({
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} />
       </aside>
+      <header className="workspace-mobile-header">
+        <SuqpageBrand href={dashboardHref} className="workspace-brand" />
+        <LanguageSelector />
+      </header>
       <nav className="workspace-mobile-tabs" aria-label={t("Workspace application navigation")}>
         {primaryItems.map((item) => {
           const active = item.href === activeHref;

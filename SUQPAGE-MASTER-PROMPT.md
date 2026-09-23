@@ -369,7 +369,8 @@ certification, import-substitution, sales, or other outcomes for every listed
 participant, and Suqpage mission copy must not be injected into client-owned
 pages. A public Suqpage page on desktop or tablet is framed by the Suqpage
 application shell without a duplicate host band. Its mobile presentation uses
-one compact **Back to Market** bar with no redundant platform credit.
+one compact row containing a **Back to Market** arrow, the Suqpage mark/wordmark
+and language selection, with no redundant platform credit.
 Private previews retain their authorized workspace framing. Platform chrome
 sits outside the tenant renderer and must not replace, obscure, recolor, or
 visually compete with the tenant's logo, header, navigation, or content.
@@ -385,6 +386,10 @@ Public pages, task forms, discovery, and authenticated workspaces share the
 same shop/map vector mark and split-color lower-case `suqpage` wordmark.
 Business logos and media remain independent. The shared business-profile layout
 uses the platform's restrained palette rather than legacy custom design tokens.
+On phones, public pages, account entry and private workspaces retain a compact
+Suqpage mark/wordmark and language header. Primary app navigation stays in the
+bottom bar; the Market viewport reserves space for both. S30 is implemented
+locally under FE-038 and visually approved; production publication is in progress.
 
 Nearby-group viewers use no architectural shell, venue, floor, hall, or
 decorative environment. Daily Featured likewise presents up to forty image-led cards in responsive columns with

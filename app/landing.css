@@ -318,7 +318,14 @@
 }
 
 @media (max-width: 680px) {
-  .landing-header,.landing-footer { display: none; }
+  .landing-footer { display: none; }
+  .landing-header { padding-top: env(safe-area-inset-top); }
+  .landing-nav { gap: 6px; }
+  .landing-nav .suqpage-brand { min-height: 44px; gap: 5px; }
+  .landing-nav .suqpage-brand img { width: 28px; height: 32px; flex-basis: 28px; }
+  .landing-nav .suqpage-wordmark { font-size: 20px; }
+  .landing-nav .language-selector select { max-width: 110px; font-size: 12px; }
+  .landing-nav .language-selector > svg { display: none; }
   .public-mobile-page { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
   .landing-home,.discover-page { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .landing-market-hero { width: 100%; min-height: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto auto auto; align-items: start; gap: 0; padding: max(14px, env(safe-area-inset-top)) 10px 12px; }
@@ -532,13 +539,17 @@
 @media (max-width: 680px) {
   .public-app-shell { display: block; min-height: 100dvh; padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .public-app-shell-showroom { padding-bottom: 0; }
-  .public-app-header,.public-app-rail { display: none; }
-  .public-app-main { min-height: calc(100dvh - 64px); background-position: center top,58% top; background-size: 100% 620px,auto 520px; }
+  .public-app-rail,.public-app-shell-showroom > .public-app-header { display: none; }
+  .public-app-header { height: calc(54px + env(safe-area-inset-top)); gap: 12px; padding: env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); }
+  .public-app-header .suqpage-brand { min-height: 44px; gap: 7px; }
+  .public-app-header .suqpage-brand img { width: 30px; height: 34px; flex-basis: 30px; }
+  .public-app-header .suqpage-wordmark { font-size: 20px; }
+  .public-app-main { min-height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); background-position: center top,58% top; background-size: 100% 620px,auto 520px; }
   .public-app-showroom-main { height: auto; min-height: 100dvh; overflow: visible; background: #fff; }
   .public-app-shell-showroom .public-support-launcher { display: none; }
   .public-experience { width: 100%; padding: 0; }
-  .public-featured-experience { height: calc(100dvh - 64px - env(safe-area-inset-bottom)); padding: 0; }
-  .public-market-experience { height: calc(100dvh - 64px - env(safe-area-inset-bottom)); padding: 0; }
+  .public-featured-experience { height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 0; }
+  .public-market-experience { height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 0; }
   .public-market-experience > .public-experience-head { min-height: 66px; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 1px; margin: 0; padding: max(7px, env(safe-area-inset-top)) 10px 7px; border-bottom: 1px solid var(--mp-line); background: rgb(255 255 255 / 92%); }
   .public-market-experience > .public-experience-head > span,.public-market-experience > .public-experience-head h1 { grid-column: 1; }
   .public-market-experience > .public-experience-head h1 { font-size: 1.08rem; line-height: 1.08; }
@@ -570,7 +581,7 @@
   .public-app-shell:has(.discovery-map-stage.city-open) .public-mobile-tabs { display: none; }
   .public-support-launcher { right: 10px; bottom: calc(70px + env(safe-area-inset-bottom)); width: 46px; min-height: 46px; justify-content: center; padding: 0; }
   .public-support-launcher span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
-  .public-app-shell:has(.public-about-experience) .public-support-launcher { position: absolute; top: max(12px,env(safe-area-inset-top)); bottom: auto; }
+  .public-app-shell:has(.public-about-experience) .public-support-launcher { position: fixed; top: auto; }
   .public-support-dialog { inset: auto 0 calc(64px + env(safe-area-inset-bottom)) 0; width: 100%; max-height: calc(100dvh - 72px - env(safe-area-inset-bottom)); border-inline: 0; border-bottom: 0; border-radius: 8px 8px 0 0; }
   .public-support-dialog::backdrop { background: rgb(11 29 58 / 16%); }
   .public-support-contact-fields { grid-template-columns: minmax(0,1fr); }

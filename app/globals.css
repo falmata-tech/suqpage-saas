@@ -259,7 +259,7 @@ html,body{overflow-x:clip}
 .featured-agenda-preview small{color:#56636b}
 .client-picker{min-width:0;max-width:100%;overflow:hidden}.client-picker .table-wrap{min-width:0;max-width:100%;overflow-x:auto}
 @media(max-width:900px){
-  .workspace-mobile-header{display:none}
+  .workspace-mobile-header{display:flex;height:calc(54px + env(safe-area-inset-top));gap:12px;padding-top:env(safe-area-inset-top)}
   .workspace-mobile-tabs{display:grid;position:fixed;z-index:76;right:0;bottom:0;left:0;grid-template-columns:repeat(5,minmax(0,1fr));min-height:calc(62px + env(safe-area-inset-bottom));padding:4px 4px env(safe-area-inset-bottom);border-top:1px solid var(--mp-line);background:rgb(255 255 255 / 97%);box-shadow:0 -8px 24px rgb(11 29 58 / 10%);backdrop-filter:blur(16px)}
   .workspace-mobile-tabs>a,.workspace-mobile-tabs>.workspace-menu-button{display:grid;position:relative;width:auto;height:auto;min-width:0;min-height:58px;place-content:center;justify-items:center;gap:3px;border:0;border-radius:0;background:transparent;padding:2px 3px;color:#5b6d74;text-align:center}
   .workspace-mobile-tabs>a::before,.workspace-mobile-tabs>.workspace-menu-button::before{position:absolute;top:-4px;right:24%;left:24%;height:3px;border-radius:0 0 3px 3px;background:transparent;content:""}
@@ -294,6 +294,16 @@ html:lang(am) input,html:lang(am) button,html:lang(am) select,html:lang(am) text
 @media(max-width:420px){.public-app-header .public-app-purpose{display:none}.language-selector select{max-width:136px;font-size:12px}}
 
 .showroom-language{margin-left:auto;display:none}
+.showroom-host-brand{display:none}
+@media(max-width:680px){
+  .showroom-host-bar.showroom-host-bar-shell{flex-wrap:nowrap;gap:4px;padding-top:max(4px,env(safe-area-inset-top))}
+  .showroom-host-bar-shell .showroom-host-back{width:44px;flex:0 0 44px;justify-content:center;padding:0}
+  .showroom-host-bar-shell .showroom-host-back>span{display:none}
+  .showroom-host-bar-shell .showroom-host-brand{display:flex;min-height:44px;gap:5px}
+  .showroom-host-brand img{width:25px;height:30px;flex-basis:25px}
+  .showroom-host-brand>.suqpage-wordmark{font-size:18px}
+  .showroom-host-bar-shell .language-selector select{max-width:116px;font-size:12px}
+}
 @media(max-width:900px){.showroom-language{display:inline-flex}.showroom-host-bar{gap:8px;flex-wrap:wrap}.public-more-sheet .language-selector{margin:8px 0 16px}}
 html:lang(am) body,html:lang(ti) body{font-family:"Noto Sans Ethiopic","Nyala","Kefa",system-ui,sans-serif}
 html:lang(am) .eyebrow,html:lang(ti) .eyebrow{letter-spacing:normal}

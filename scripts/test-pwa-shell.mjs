@@ -86,13 +86,14 @@ for (const file of ["app/login/page.tsx", "app/request/page.tsx"]) {
 assert.match(read("app/discover/page.tsx"), /redirect\(/);
 
 const landingCss = read("app/landing.css");
-assert.match(landingCss, /\.landing-header,\.landing-footer \{ display: none; \}/);
+assert.match(landingCss, /\.landing-footer \{ display: none; \}/);
+assert.doesNotMatch(landingCss, /\.landing-header,\.landing-footer \{ display: none; \}/);
 assert.match(landingCss, /\.public-mobile-tabs \{ display: grid; position: fixed;/);
 assert.match(landingCss, /env\(safe-area-inset-bottom\)/);
 assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\(4/);
 
 const workspace = read("components/WorkspaceNavigation.tsx");
-assert.doesNotMatch(workspace, /<header className="workspace-mobile-header">/);
+assert.match(workspace, /<header className="workspace-mobile-header">/);
 assert.match(workspace, /className="workspace-mobile-tabs"/);
 assert.match(workspace, /const primaryItems = priority/);
 assert.match(workspace, /<NavigationGroups groups=\{groups\} onNavigate=/);
