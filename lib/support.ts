@@ -1,3 +1,4 @@
+import { buyingService, isCallbackRequest, type BuyingService } from "./buying-assistance";
 import { platformCookies } from "./platform-state";
 import crypto from "node:crypto";
 import { hasCapability } from "./capabilities";
@@ -20,9 +21,10 @@ export const MAX_OPEN_SUPPORT_CONVERSATIONS = 3;
 export const PUBLIC_SUPPORT_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 export const PUBLIC_SUPPORT_COOKIE = platformCookies.support.current;
 
+export type SupportQueueScope = "all" | "support" | "transport";
 export type SupportStatus = "waiting" | "open" | "closed";
 export type SupportParticipantKind = "client" | "visitor";
-export type SupportAssistanceCategory = "general" | "sourcing" | "document_review" | "site_visit" | "shipment_observation";
+export type SupportAssistanceCategory = "general" | "sourcing" | "document_review" | "site_visit" | "shipment_observation" | "buying_assistance";
 
 export const PUBLIC_SUPPORT_CATEGORIES: ReadonlyArray<{
   key: SupportAssistanceCategory;
@@ -30,6 +32,7 @@ export const PUBLIC_SUPPORT_CATEGORIES: ReadonlyArray<{
   description: string;
 }> = [
   { key: "general", label: "Suqpage help or report", description: "Ask how Suqpage works or report a concern about a listing." },
+  { key: "buying_assistance", label: "Buying assistance", description: "Get help checking a seller, checking product quality, or making a purchase." },
   { key: "shipment_observation", label: "Transport arrangements", description: "Ask for help connecting with a transport option for a purchase." },
 ] as const;
 
@@ -42,6 +45,10 @@ export type SupportConversation = {
   openedByUserId: number | null;
   assistanceCategory: SupportAssistanceCategory;
   requesterLabel: string;
+  buyingService: BuyingService | null;
+  transportOrigin: string | null;
+  transportDestination: string | null;
+  transportCompany: string | null;
   visitorEmail: string | null;
   visitorPhone: string | null;
   subject: string;
@@ -51,10 +58,13 @@ export type SupportConversation = {
   lastMessageAt: number;
   createdAt: number;
   closedAt: number | null;
+  resolvedAt: number | null;
+  requestSummary: string;
   unread: boolean;
 };
 
 export type SupportMessage = {
+  visitorVisible: boolean;
   id: number;
   conversationId: number;
   senderUserId: number | null;
@@ -81,6 +91,7 @@ export type SupportAgentWorkload = {
   name: string;
   email: string;
   enabled: boolean;
+  queueScope: SupportQueueScope;
   maxOpenConversations: number;
   openConversations: number;
 };
@@ -111,6 +122,10 @@ type ConversationRow = {
   visitor_session_expires_at: number | null;
   assistance_category: SupportAssistanceCategory;
   requester_label: string;
+  buying_service: BuyingService | null;
+  transport_origin: string | null;
+  transport_destination: string | null;
+  transport_company?: string | null;
   visitor_email: string | null;
   visitor_phone: string | null;
   subject: string;
@@ -123,6 +138,8 @@ type ConversationRow = {
   created_at: number;
   last_message_at: number;
   closed_at: number | null;
+  resolved_at: number | null;
+  request_summary: string;
 };
 
 type AttachmentColumns = {
@@ -155,6 +172,10 @@ function conversationView(row: ConversationRow, user: SessionUser): SupportConve
     openedByUserId: row.opened_by_user_id,
     assistanceCategory: row.assistance_category,
     requesterLabel: row.requester_label,
+    buyingService: row.buying_service,
+    transportOrigin: row.transport_origin,
+    transportDestination: row.transport_destination,
+    transportCompany: row.transport_company || null,
     visitorEmail: row.visitor_email,
     visitorPhone: row.visitor_phone,
     subject: row.subject,
@@ -164,13 +185,18 @@ function conversationView(row: ConversationRow, user: SessionUser): SupportConve
     lastMessageAt: row.last_message_at,
     createdAt: row.created_at,
     closedAt: row.closed_at,
+    resolvedAt: row.resolved_at,
+    requestSummary: row.request_summary || "",
     unread: row.last_message_id > lastRead,
   };
 }
 
-function baseSelect() {
+function baseSelect(includeTransportCompany = false) {
   return `
-    SELECT c.*,COALESCE(b.name,c.requester_label) business_name,assignee.name assigned_user_name,
+    SELECT c.*,${includeTransportCompany ? `(SELECT e.detail::jsonb->>'company' FROM support_events e
+      WHERE e.conversation_id=c.id AND e.event_type='transport_handoff' ORDER BY e.id DESC LIMIT 1) transport_company,` : ""}
+      COALESCE(b.name,c.requester_label) business_name,assignee.name assigned_user_name,
+      (SELECT m.body FROM support_messages m WHERE m.conversation_id=c.id ORDER BY m.id LIMIT 1) request_summary,
       COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id),0) last_message_id
     FROM support_conversations c
     LEFT JOIN businesses b ON b.id=c.business_id
@@ -178,18 +204,20 @@ function baseSelect() {
   `;
 }
 
-function canRead(user: SessionUser, row: Pick<ConversationRow, "business_id" | "status" | "assigned_user_id">) {
+async function canRead(user: SessionUser, row: Pick<ConversationRow, "business_id" | "status" | "assigned_user_id" | "assistance_category">) {
   if (user.access_role === "client") return Boolean(row.business_id) && user.business_id === row.business_id;
   if (hasCapability(user, "operations:manage")) return true;
   if (user.access_role === "team_member") {
-    return row.status === "waiting" || row.assigned_user_id === user.id;
+    if (row.assigned_user_id === user.id) return true;
+    const workload = await supportAgentWorkload(user.id);
+    return row.status === "waiting" && Boolean(workload?.enabled && acceptsQueue(workload.queue_scope, row.assistance_category));
   }
   return false;
 }
 
 async function requireConversation(user: SessionUser, conversationId: number) {
   const row = await runtimeGet<ConversationRow>(`${baseSelect()} WHERE c.id=?`, [conversationId]);
-  if (!row || !canRead(user, row)) {
+  if (!row || !(await canRead(user, row))) {
     throw new SupportError("Support conversation was not found.", "not_found");
   }
   return row;
@@ -268,23 +296,36 @@ function visitorSenderKey(tokenHash: string) {
   return `visitor:${tokenHash}`;
 }
 
+function acceptsQueue(scope: SupportQueueScope, category: SupportAssistanceCategory) {
+  return scope === "all" || scope === (isCallbackRequest(category) ? "transport" : "support");
+}
+async function lockSupportWork() {
+  await runtimeGet("SELECT pg_advisory_xact_lock(hashtextextended(current_schema() || ':support-work',0))");
+}
+export const SUPPORT_WAITING_SCOPE_SQL = `EXISTS(SELECT 1 FROM support_agent_settings s
+  WHERE s.user_id=? AND s.enabled=1 AND (s.queue_scope='all'
+    OR (s.queue_scope='transport' AND c.assistance_category IN ('shipment_observation','buying_assistance'))
+    OR (s.queue_scope='support' AND c.assistance_category NOT IN ('shipment_observation','buying_assistance'))))`;
+
 async function supportAgentWorkload(userId: number) {
   return runtimeGet<{
     enabled: number;
+    queue_scope: SupportQueueScope;
     max_open_conversations: number;
     open_count: number;
   }>(`
-    SELECT s.enabled,s.max_open_conversations,
+    SELECT s.enabled,s.queue_scope,s.max_open_conversations,
       (SELECT COUNT(*) FROM support_conversations c
        WHERE c.assigned_user_id=s.user_id AND c.status='open') open_count
     FROM support_agent_settings s WHERE s.user_id=?
   `, [userId]);
 }
 
-async function leastLoadedAgent() {
+async function leastLoadedAgent(category: SupportAssistanceCategory = "general") {
   return runtimeGet<{
     id: number;
     name: string;
+    queue_scope: SupportQueueScope;
     max_open_conversations: number;
     open_count: number;
   }>(`
@@ -296,11 +337,12 @@ async function leastLoadedAgent() {
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
+      AND (s.queue_scope='all' OR s.queue_scope=?)
     GROUP BY u.id,u.name,s.max_open_conversations
     HAVING COUNT(c.id)<s.max_open_conversations
     ORDER BY COUNT(c.id),u.id
     LIMIT 1
-  `);
+  `, [isCallbackRequest(category) ? "transport" : "support"]);
 }
 
 async function assignConversation(
@@ -321,7 +363,7 @@ async function assignConversation(
   `, [conversationId, assignedUserId, assignedByUserId, reason, now]);
   await runtimeRun(`
     UPDATE support_conversations
-    SET status='open',assigned_user_id=?,updated_at=?,closed_at=NULL
+    SET status='open',assigned_user_id=?,updated_at=?,closed_at=NULL,resolved_at=NULL
     WHERE id=?
   `, [assignedUserId, now, conversationId]);
   await runtimeRun(`
@@ -346,6 +388,7 @@ export async function createSupportConversation(
   if (!message) throw new SupportError("Write a support message.", "message_required");
 
   const created = await runtimeTransaction(async () => {
+    await lockSupportWork();
     const duplicate = await runtimeGet<{ id: number; public_ref: string; business_name: string }>(`
       SELECT c.id,c.public_ref,b.name business_name
       FROM support_messages m
@@ -403,17 +446,26 @@ export async function createSupportConversation(
 }
 
 export async function createPublicSupportConversation(
-  input: { category: unknown; email: unknown; phone: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { category: unknown; email?: unknown; phone: unknown; message?: unknown; name?: unknown; service?: unknown; origin?: unknown; destination?: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
   ipHash: string,
   now = Date.now(),
   preparedToken?: string,
 ) {
   const category = assistanceCategory(input.category);
-  const email = visitorEmail(input.email);
+  const transport = category === "shipment_observation";
+  const callback = isCallbackRequest(category);
+  const service = category === "buying_assistance" ? buyingService(input.service) : null;
+  if (category === "buying_assistance" && input.service != null && !service) throw new SupportError("Choose what you need help with.", "invalid_service");
+  const name = callback ? transportField(input.name, "Enter your name.", 80) : "Website visitor";
+  const origin = transport ? transportField(input.origin, "Enter the pickup location.", 120) : null;
+  const destination = transport ? transportField(input.destination, "Enter the destination.", 120) : null;
+  const email = callback ? null : visitorEmail(input.email);
   const phone = visitorPhone(input.phone);
-  const message = cleanText(input.message, 4000);
+  if (category === "buying_assistance" && (typeof input.message !== "string" || input.message.trim().length > 4000)) throw new SupportError("Describe what you need in 4,000 characters or fewer.", "invalid_request");
+  const message = transport ? `From: ${origin}\nTo: ${destination}` : cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
+  if (callback && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
   if (!message) throw new SupportError("Write a message for the Suqpage team.", "message_required");
 
   const token = preparedToken ? publicSupportToken(preparedToken) : crypto.randomBytes(32).toString("base64url");
@@ -422,16 +474,17 @@ export async function createPublicSupportConversation(
   const categoryLabel = PUBLIC_SUPPORT_CATEGORIES.find((option) => option.key === category)!.label;
   const expiresAt = now + PUBLIC_SUPPORT_SESSION_MS;
   const created = await runtimeTransaction(async () => {
+    await lockSupportWork();
     // Cookie ownership, not contact details or the request key, authorizes replay.
     await runtimeGet("SELECT pg_advisory_xact_lock(hashtextextended(?,0))", [`support-start:${tokenHash}`]);
-    const existing = await runtimeGet<{id:number;public_ref:string;visitor_session_expires_at:number;visitor_email:string;visitor_phone:string;assistance_category:string;body:string;idempotency_key:string}>(`
-      SELECT c.id,c.public_ref,c.visitor_session_expires_at,c.visitor_email,c.visitor_phone,
-        c.assistance_category,m.body,m.idempotency_key
+    const existing = await runtimeGet<{id:number;public_ref:string;visitor_session_expires_at:number;visitor_email:string|null;visitor_phone:string;requester_label:string;assistance_category:string;buying_service:BuyingService|null;body:string;idempotency_key:string}>(`
+      SELECT c.id,c.public_ref,c.visitor_session_expires_at,c.visitor_email,c.visitor_phone,c.requester_label,
+        c.assistance_category,c.buying_service,m.body,m.idempotency_key
       FROM support_conversations c JOIN support_messages m ON m.conversation_id=c.id
       WHERE c.visitor_token_hash=? ORDER BY m.id LIMIT 1`, [tokenHash]);
     if (existing) {
       if (existing.visitor_session_expires_at < now) throw new SupportError("Support session expired. Reopen help and try again.", "not_found");
-      if (existing.idempotency_key !== key || existing.body !== message || existing.visitor_email !== email || existing.visitor_phone !== phone || existing.assistance_category !== category) {
+      if (existing.idempotency_key !== key || existing.body !== message || existing.visitor_email !== email || existing.visitor_phone !== phone || existing.assistance_category !== category || existing.requester_label !== name || existing.buying_service !== service) {
         throw new SupportError("A support chat is already open. Reopen help to continue.", "conflict");
       }
       return {id:existing.id,publicRef:existing.public_ref,assignedUserName:null,expiresAt:existing.visitor_session_expires_at,duplicate:true};
@@ -442,10 +495,10 @@ export async function createPublicSupportConversation(
     const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_conversations(
         public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,
-        assistance_category,requester_label,visitor_email,visitor_phone,
+        assistance_category,requester_label,visitor_email,visitor_phone,transport_origin,transport_destination,buying_service,
         subject,status,created_at,updated_at,last_message_at
-      ) VALUES(?,'visitor',?,?,?,?,?,?,?,'waiting',?,?,?) RETURNING id
-    `, [publicRef, tokenHash, expiresAt, category, "Website visitor", email, phone, categoryLabel, now, now, now]);
+      ) VALUES(?,'visitor',?,?,?,?,?,?,?,?,?,?,'waiting',?,?,?) RETURNING id
+    `, [publicRef, tokenHash, expiresAt, category, name, email, phone, origin, destination, service, transport ? `${origin} → ${destination}`.slice(0,120) : categoryLabel, now, now, now]);
     const conversationId = Number(result!.id);
     const messageResult = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(
@@ -460,7 +513,7 @@ export async function createPublicSupportConversation(
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,NULL,'created',?,?)
     `, [conversationId, `public visitor request:${category}`, now]);
-    const agent = await leastLoadedAgent();
+    const agent = await leastLoadedAgent(category);
     if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
     return { id: conversationId, publicRef, assignedUserName: agent?.name || null, expiresAt, duplicate: false };
   });
@@ -493,6 +546,11 @@ async function requirePublicConversation(token: unknown, now = Date.now()) {
 
 export async function getPublicSupportConversation(token: unknown, now = Date.now()) {
   const { row } = await requirePublicConversation(token, now);
+  // Historical transport keeps receipts; buying exposes only explicit replies.
+  if (row.assistance_category === "shipment_observation") return {
+    id: row.id, publicRef: row.public_ref, category: row.assistance_category,
+    status: row.status, assignedUserName: null, messages: [],
+  };
   const messages = (await runtimeAll<{
     id: number;
     sender_kind: "user" | "visitor";
@@ -506,15 +564,15 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
     FROM support_messages m
     LEFT JOIN users u ON u.id=m.sender_user_id
     LEFT JOIN support_attachments a ON a.message_id=m.id
-    WHERE m.conversation_id=?
+    WHERE m.conversation_id=? AND (? <> 'buying_assistance' OR m.sender_kind='visitor' OR m.visitor_visible=TRUE)
     ORDER BY m.id DESC LIMIT 100
-  `, [row.id])).reverse();
+  `, [row.id, row.assistance_category])).reverse();
   const lastId = messages.at(-1)?.id || 0;
   await runtimeRun(`
     UPDATE support_conversations
     SET visitor_last_read_message_id=CASE WHEN visitor_last_read_message_id<? THEN ? ELSE visitor_last_read_message_id END
-    WHERE id=?
-  `, [lastId, lastId, row.id]);
+    WHERE id=? AND visitor_last_read_message_id<?
+  `, [lastId, lastId, row.id, lastId]);
   return {
     id: row.id,
     publicRef: row.public_ref,
@@ -527,7 +585,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
       senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "Suqpage support",
       body: message.body,
       createdAt: message.created_at,
-      attachment: attachmentView(message),
+      attachment: row.assistance_category === "buying_assistance" ? null : attachmentView(message),
     })),
   };
 }
@@ -535,6 +593,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
 export async function getPublicSupportAttachment(token: unknown, attachmentId: number, now = Date.now()) {
   if (!Number.isSafeInteger(attachmentId) || attachmentId < 1) throw new SupportError("Attachment was not found.", "not_found");
   const { row } = await requirePublicConversation(token, now);
+  if (isCallbackRequest(row.assistance_category)) throw new SupportError("Attachment was not found.", "not_found");
   const attachment = await runtimeGet<{
     storage_key: string;
     original_name: string;
@@ -556,20 +615,29 @@ export async function postPublicSupportMessage(
   ipHash: string,
   now = Date.now(),
 ) {
+  if (typeof input.message !== "string" || input.message.trim().length > 4000) throw new SupportError("Describe what you need in 4,000 characters or fewer.", "invalid_request");
   const body = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
   if (!body) throw new SupportError("Write a message for the Suqpage team.", "message_required");
   const { row, tokenHash } = await requirePublicConversation(token, now);
+  if (row.assistance_category === "shipment_observation") throw new SupportError("Our team will call you about your request.", "request_only");
+  if (row.assistance_category === "buying_assistance" && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
   if (row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
   const rate = await consumeRuntimeRateLimit(`public-support:message:${ipHash}:${tokenHash}`, 30, 10 * 60 * 1000, 30 * 60 * 1000);
   if (!rate.allowed) throw new SupportError("Too many messages were sent. Please try again later.", "rate_limited");
   const senderKey = visitorSenderKey(tokenHash);
   return runtimeTransaction(async () => {
-    const existing = await runtimeGet<{ id: number }>(`
-      SELECT id FROM support_messages WHERE sender_key=? AND idempotency_key=?
+    await lockSupportWork();
+    const current = await requirePublicConversation(token, now);
+    if (current.row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
+    const existing = await runtimeGet<{ id: number; conversation_id: number; body: string }>(`
+      SELECT id,conversation_id,body FROM support_messages WHERE sender_key=? AND idempotency_key=?
     `, [senderKey, key]);
-    if (existing) return { id: existing.id, duplicate: true };
+    if (existing) {
+      if (existing.conversation_id !== row.id || existing.body !== body) throw new SupportError("Request could not be accepted.", "idempotency_conflict");
+      return { id: existing.id, duplicate: true };
+    }
     const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(
         conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
@@ -592,7 +660,9 @@ export async function postPublicSupportMessage(
 
 export async function closePublicSupportConversation(token: unknown, now = Date.now()) {
   return runtimeTransaction(async () => {
+    await lockSupportWork();
     const { row } = await requirePublicConversation(token, now);
+    if (row.assistance_category === "shipment_observation") throw new SupportError("Our team will call you about your request.", "request_only");
     if (row.status === "closed") return { duplicate: true };
     await runtimeRun(`
       UPDATE support_conversations SET status='closed',closed_at=?,updated_at=? WHERE id=?
@@ -611,7 +681,7 @@ export async function closePublicSupportConversation(token: unknown, now = Date.
 
 export async function listSupportConversations(
   user: SessionUser,
-  input: { page?: unknown; q?: unknown; status?: unknown },
+  input: { page?: unknown; q?: unknown; status?: unknown; queue?: unknown },
 ): Promise<PageResult<SupportConversation>> {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["waiting", "open", "closed"].includes(String(input.status))
@@ -624,19 +694,27 @@ export async function listSupportConversations(
     where += " AND c.business_id=?";
     params.push(user.business_id);
   } else if (user.access_role === "team_member") {
-    where += " AND (c.status='waiting' OR c.assigned_user_id=?)";
-    params.push(user.id);
+    where += ` AND ((c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL}) OR c.assigned_user_id=?)`;
+    params.push(user.id, user.id);
   } else if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Support access is required.", "forbidden");
   }
-  if (status) {
+  if (input.queue === "transport") {
+    if (user.access_role !== "team_member" && !hasCapability(user, "operations:manage")) throw new SupportError("Transport queue access is required.", "forbidden");
+    where += " AND c.assistance_category IN ('shipment_observation','buying_assistance')";
+  }
+  if (input.queue === "support") where += " AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')";
+  if (input.status === "active") where += " AND c.status IN ('waiting','open')";
+  else if (input.status === "history") where += " AND c.status='closed' AND c.resolved_at IS NULL";
+  else if (input.status === "resolved") where += " AND c.resolved_at IS NOT NULL";
+  else if (status) {
     where += " AND c.status=?";
     params.push(status);
   }
   if (request.search) {
     const pattern = likePattern(request.search);
-    where += " AND (lower(c.subject) LIKE ? ESCAPE '\\' OR lower(c.public_ref) LIKE ? ESCAPE '\\' OR lower(COALESCE(b.name,c.requester_label)) LIKE ? ESCAPE '\\')";
-    params.push(pattern, pattern, pattern);
+    where += " AND (lower(c.subject) LIKE ? ESCAPE '\\' OR lower(c.public_ref) LIKE ? ESCAPE '\\' OR lower(COALESCE(b.name,c.requester_label)) LIKE ? ESCAPE '\\' OR COALESCE(c.visitor_phone,'') LIKE ? ESCAPE '\\')";
+    params.push(pattern, pattern, pattern, pattern);
   }
   const total = Number((await runtimeGet<{ total: number }>(`
     SELECT COUNT(*) total FROM support_conversations c
@@ -644,7 +722,7 @@ export async function listSupportConversations(
   `, params))?.total || 0);
   const window = pageWindow(total, request);
   const rows = await runtimeAll<ConversationRow>(`
-    ${baseSelect()}${where}
+    ${baseSelect(input.queue === "transport")}${where}
     ORDER BY CASE c.status WHEN 'waiting' THEN 0 WHEN 'open' THEN 1 ELSE 2 END,
       c.last_message_at DESC,c.id DESC
     LIMIT ? OFFSET ?
@@ -661,6 +739,7 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
     sender_kind: "user" | "visitor";
     sender_name: string;
     sender_role: string;
+    visitor_visible: boolean;
     body: string;
     created_at: number;
   } & AttachmentColumns>(`
@@ -668,7 +747,7 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
       CASE WHEN m.sender_kind='visitor' THEN c.requester_label ELSE u.name END sender_name,
       CASE WHEN m.sender_kind='visitor' THEN 'visitor'
         ELSE COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) END sender_role,
-      m.body,m.created_at,a.id attachment_id,a.original_name attachment_original_name,
+      m.visitor_visible,m.body,m.created_at,a.id attachment_id,a.original_name attachment_original_name,
       a.mime_type attachment_mime_type,a.byte_size attachment_byte_size
     FROM support_messages m
     JOIN support_conversations c ON c.id=m.conversation_id
@@ -693,6 +772,7 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
       senderUserId: message.sender_user_id,
       senderName: message.sender_name,
       senderRole: message.sender_role,
+      visitorVisible: message.visitor_visible,
       body: message.body,
       createdAt: message.created_at,
       attachment: attachmentView(message),
@@ -721,7 +801,7 @@ export async function getSupportAttachment(user: SessionUser, conversationId: nu
 export async function postSupportMessage(
   user: SessionUser,
   conversationId: number,
-  input: { message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { audience?: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
   now = Date.now(),
 ) {
   const body = cleanText(input.message, 4000);
@@ -729,20 +809,28 @@ export async function postSupportMessage(
   const attachment = supportAttachment(input.attachment);
   if (!body) throw new SupportError("Write a support message.", "message_required");
   return runtimeTransaction(async () => {
+    await lockSupportWork();
     const row = await requireConversation(user, conversationId);
-    if (row.status === "closed") throw new SupportError("Reopen this conversation before replying.", "closed");
+    const closedNote = row.assistance_category === "buying_assistance" && user.access_role !== "client" && input.audience === "note";
+    if (row.status === "closed" && !closedNote) throw new SupportError("Reopen this conversation before replying.", "closed");
     if (user.access_role !== "client" && row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Claim this conversation before replying.", "unassigned");
     }
-    const existing = await runtimeGet<{ id: number }>(`
-      SELECT id FROM support_messages WHERE sender_key=? AND idempotency_key=?
+    if (input.audience != null && input.audience !== "reply" && input.audience !== "note") throw new SupportError("Request could not be accepted.", "invalid_audience");
+    const visible = row.assistance_category === "buying_assistance" && input.audience === "reply";
+    if (visible && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
+    const existing = await runtimeGet<{ id: number; conversation_id: number; body: string; visitor_visible: boolean }>(`
+      SELECT id,conversation_id,body,visitor_visible FROM support_messages WHERE sender_key=? AND idempotency_key=?
     `, [`user:${user.id}`, key]);
-    if (existing) return { id: existing.id, duplicate: true };
+    if (existing) {
+      if (existing.conversation_id !== conversationId || existing.body !== body || existing.visitor_visible !== visible) throw new SupportError("Request could not be accepted.", "idempotency_conflict");
+      return { id: existing.id, duplicate: true };
+    }
     const result = await runtimeGet<{ id: number }>(`
       INSERT INTO support_messages(
-        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at
-      ) VALUES(?,?,'user',?,?,?,?) RETURNING id
-    `, [conversationId, user.id, `user:${user.id}`, body, key, now]);
+        conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,visitor_visible
+      ) VALUES(?,?,'user',?,?,?,?,?) RETURNING id
+    `, [conversationId, user.id, `user:${user.id}`, body, key, now, visible ? "true" : "false"]);
     const messageId = Number(result!.id);
     await insertSupportAttachment(messageId, attachment, now);
     const readColumn = user.access_role === "client"
@@ -777,13 +865,14 @@ export async function claimSupportConversation(
     throw new SupportError("Staff access is required.", "forbidden");
   }
   return runtimeTransaction(async () => {
+    await lockSupportWork();
     const row = await requireConversation(user, conversationId);
     if (row.status !== "waiting") {
       if (row.assigned_user_id === user.id && row.status === "open") return { duplicate: true };
       throw new SupportError("This conversation is already assigned.", "already_assigned");
     }
     const workload = await supportAgentWorkload(user.id);
-    if (!workload?.enabled) {
+    if (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category)) {
       throw new SupportError("This account is not enabled for support assignments.", "not_support_agent");
     }
     if (workload.open_count >= workload.max_open_conversations) {
@@ -796,6 +885,7 @@ export async function claimSupportConversation(
 
 export async function closeSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
   return runtimeTransaction(async () => {
+    await lockSupportWork();
     const row = await requireConversation(user, conversationId);
     if (
       user.access_role !== "client" &&
@@ -804,38 +894,41 @@ export async function closeSupportConversation(user: SessionUser, conversationId
     ) {
       throw new SupportError("Only the assigned team member can close this conversation.", "forbidden");
     }
+    const resolving = row.assistance_category === "buying_assistance";
+    if (row.status === "closed" && (!resolving || row.resolved_at !== null)) return;
     await runtimeRun(`
-      UPDATE support_conversations SET status='closed',closed_at=?,updated_at=? WHERE id=?
-    `, [now, now, conversationId]);
+      UPDATE support_conversations SET status='closed',closed_at=COALESCE(closed_at,?),resolved_at=?,updated_at=? WHERE id=?
+    `, [now, resolving ? now : null, now, conversationId]);
     await runtimeRun(`
       UPDATE support_assignments SET released_at=?
       WHERE conversation_id=? AND released_at IS NULL
     `, [now, conversationId]);
     await runtimeRun(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-      VALUES(?,?,'closed','conversation closed',?)
-    `, [conversationId, user.id, now]);
+      VALUES(?,?,'closed',?,?)
+    `, [conversationId, user.id, resolving ? "request resolved" : "conversation closed", now]);
   });
 }
 
 export async function reopenSupportConversation(user: SessionUser, conversationId: number, now = Date.now()) {
   return runtimeTransaction(async () => {
+    await lockSupportWork();
     const row = await requireConversation(user, conversationId);
     if (row.status !== "closed") return;
-    if (user.access_role === "client") {
-      const agent = await leastLoadedAgent();
+    if (user.access_role === "client" || hasCapability(user, "operations:manage")) {
+      const agent = await leastLoadedAgent(row.assistance_category);
       if (agent) {
         await assignConversation(conversationId, agent.id, user.id, "reopened", now);
       } else {
         await runtimeRun(`
           UPDATE support_conversations
-          SET status='waiting',assigned_user_id=NULL,closed_at=NULL,updated_at=?
+          SET status='waiting',assigned_user_id=NULL,closed_at=NULL,resolved_at=NULL,updated_at=?
           WHERE id=?
         `, [now, conversationId]);
       }
       await runtimeRun(`
         INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-        VALUES(?,?,'reopened','client reopened',?)
+        VALUES(?,?,'reopened','conversation reopened',?)
       `, [conversationId, user.id, now]);
       return;
     }
@@ -843,7 +936,7 @@ export async function reopenSupportConversation(user: SessionUser, conversationI
       throw new SupportError("Only the assigned team member can reopen this conversation.", "forbidden");
     }
     const workload = row.assigned_user_id ? await supportAgentWorkload(row.assigned_user_id) : null;
-    if (row.assigned_user_id && (!workload?.enabled || workload.open_count >= workload.max_open_conversations)) {
+    if (row.assigned_user_id && (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category) || workload.open_count >= workload.max_open_conversations)) {
       throw new SupportError("The assigned team member is at capacity.", "capacity");
     }
     if (!row.assigned_user_id) throw new SupportError("Assign an agent before reopening.", "unassigned");
@@ -864,10 +957,11 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
     name: string;
     email: string;
     enabled: number;
+    queue_scope: SupportQueueScope;
     max_open_conversations: number;
     open_count: number;
   }>(`
-    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,
+    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COALESCE(s.max_open_conversations,3) max_open_conversations,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
@@ -875,7 +969,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE p.access_role IN ('team_member','operations_manager')
-    GROUP BY u.id,u.name,u.email,s.enabled,s.max_open_conversations
+    GROUP BY u.id,u.name,u.email,s.enabled,s.queue_scope,s.max_open_conversations
     ORDER BY COALESCE(s.enabled,0) DESC,COUNT(c.id),lower(u.name)
   `)).map((value) => {
     return {
@@ -883,6 +977,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
       name: value.name,
       email: value.email,
       enabled: Boolean(value.enabled),
+      queueScope: value.queue_scope,
       maxOpenConversations: value.max_open_conversations,
       openConversations: value.open_count,
     };
@@ -891,7 +986,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
 
 function supportAgentRows() {
   return `
-    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,
+    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COALESCE(s.max_open_conversations,3) max_open_conversations,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
@@ -899,7 +994,7 @@ function supportAgentRows() {
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE p.access_role IN ('team_member','operations_manager')
-    GROUP BY u.id,u.name,u.email,s.enabled,s.max_open_conversations
+    GROUP BY u.id,u.name,u.email,s.enabled,s.queue_scope,s.max_open_conversations
   `;
 }
 
@@ -908,6 +1003,7 @@ function workloadView(row: {
   name: string;
   email: string;
   enabled: number;
+  queue_scope: SupportQueueScope;
   max_open_conversations: number;
   open_count: number;
 }): SupportAgentWorkload {
@@ -916,6 +1012,7 @@ function workloadView(row: {
     name: row.name,
     email: row.email,
     enabled: Boolean(row.enabled),
+    queueScope: row.queue_scope,
     maxOpenConversations: row.max_open_conversations,
     openConversations: row.open_count,
   };
@@ -952,6 +1049,7 @@ export async function listSupportAgentWorkloadsPage(
     name: string;
     email: string;
     enabled: number;
+    queue_scope: SupportQueueScope;
     max_open_conversations: number;
     open_count: number;
   }>(`
@@ -997,46 +1095,56 @@ export async function getSupportAgentSummary(user: SessionUser): Promise<Support
 
 export async function updateSupportAgentSetting(
   user: SessionUser,
-  input: { userId: unknown; enabled: unknown; maxOpenConversations: unknown },
+  input: { userId: unknown; enabled: unknown; maxOpenConversations: unknown; queueScope?: unknown },
   now = Date.now(),
 ) {
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
-  const userId = Number.parseInt(String(input.userId ?? ""), 10);
-  const maximum = Number.parseInt(String(input.maxOpenConversations ?? ""), 10);
-  const enabled = input.enabled === true || input.enabled === "1" || input.enabled === "on";
-  if (!Number.isInteger(userId) || !Number.isInteger(maximum) || maximum < 1 || maximum > 20) {
-    throw new SupportError("Support agent settings are invalid.", "invalid_setting");
-  }
-  const staff = await runtimeGet(`
-    SELECT 1 FROM user_access_profiles
-    WHERE user_id=? AND access_role IN ('team_member','operations_manager')
-  `, [userId]);
-  if (!staff) throw new SupportError("Support agent was not found.", "invalid_agent");
-  const openConversations = await activeAssignmentCount(userId);
-  if (openConversations > maximum) {
-    throw new SupportError(
-      `Reassign or close ${openConversations - maximum} conversation(s) before lowering this limit.`,
-      "capacity",
-    );
-  }
-  if (!enabled && openConversations > 0) {
-    throw new SupportError(
-      "Reassign or close this agent's conversations before disabling support assignments.",
-      "capacity",
-    );
-  }
-  await runtimeRun(`
-    INSERT INTO support_agent_settings(
-      user_id,enabled,max_open_conversations,updated_by_user_id,updated_at
-    ) VALUES(?,?,?,?,?)
-    ON CONFLICT(user_id) DO UPDATE SET
-      enabled=excluded.enabled,
-      max_open_conversations=excluded.max_open_conversations,
-      updated_by_user_id=excluded.updated_by_user_id,
-      updated_at=excluded.updated_at
-  `, [userId, enabled ? 1 : 0, maximum, user.id, now]);
+  return runtimeTransaction(async () => {
+    await lockSupportWork();
+    const userId = Number.parseInt(String(input.userId ?? ""), 10);
+    const maximum = Number.parseInt(String(input.maxOpenConversations ?? ""), 10);
+    const enabled = input.enabled === true || input.enabled === "1" || input.enabled === "on";
+    if (!Number.isInteger(userId) || !Number.isInteger(maximum) || maximum < 1 || maximum > 20) {
+      throw new SupportError("Support agent settings are invalid.", "invalid_setting");
+    }
+    const staff = await runtimeGet(`
+      SELECT 1 FROM user_access_profiles
+      WHERE user_id=? AND access_role IN ('team_member','operations_manager')
+    `, [userId]);
+    if (!staff) throw new SupportError("Support agent was not found.", "invalid_agent");
+    const scope = input.queueScope === undefined ? (await supportAgentWorkload(userId))?.queue_scope || "all" : input.queueScope;
+    if (scope !== "all" && scope !== "support" && scope !== "transport") throw new SupportError("Choose a support queue.", "invalid_setting");
+    const incompatible = await runtimeGet<{count:number}>(`SELECT COUNT(*) count FROM support_conversations
+      WHERE assigned_user_id=? AND status='open' AND ?<>'all' AND
+      (CASE WHEN assistance_category IN ('shipment_observation','buying_assistance') THEN 'transport' ELSE 'support' END)<>?`, [userId,scope,scope]);
+    if (Number(incompatible?.count)) throw new SupportError("Reassign open conversations before changing this queue.", "capacity");
+    const openConversations = await activeAssignmentCount(userId);
+    if (openConversations > maximum) {
+      throw new SupportError(
+        `Reassign or close ${openConversations - maximum} conversation(s) before lowering this limit.`,
+        "capacity",
+      );
+    }
+    if (!enabled && openConversations > 0) {
+      throw new SupportError(
+        "Reassign or close this agent's conversations before disabling support assignments.",
+        "capacity",
+      );
+    }
+    await runtimeRun(`
+      INSERT INTO support_agent_settings(
+        user_id,enabled,max_open_conversations,updated_by_user_id,updated_at,queue_scope
+      ) VALUES(?,?,?,?,?,?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        enabled=excluded.enabled,
+        queue_scope=excluded.queue_scope,
+        max_open_conversations=excluded.max_open_conversations,
+        updated_by_user_id=excluded.updated_by_user_id,
+        updated_at=excluded.updated_at
+    `, [userId, enabled ? 1 : 0, maximum, user.id, now, scope]);
+  });
 }
 
 export async function reassignSupportConversation(
@@ -1049,7 +1157,10 @@ export async function reassignSupportConversation(
     throw new SupportError("Operations access is required.", "forbidden");
   }
   return runtimeTransaction(async () => {
-    await requireConversation(user, conversationId);
+    await lockSupportWork();
+    const row = await requireConversation(user, conversationId);
+    if (row.status === "closed") throw new SupportError("Reopen this conversation before assigning it.", "closed");
+    if (row.assigned_user_id === assignedUserId) return;
     if (assignedUserId === null) {
       await runtimeRun(`
         UPDATE support_assignments SET released_at=?
@@ -1062,7 +1173,7 @@ export async function reassignSupportConversation(
       `, [now, conversationId]);
     } else {
       const workload = await supportAgentWorkload(assignedUserId);
-      if (!workload?.enabled || workload.open_count >= workload.max_open_conversations) {
+      if (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category) || workload.open_count >= workload.max_open_conversations) {
         throw new SupportError("That support agent is unavailable or at capacity.", "capacity");
       }
       await assignConversation(conversationId, assignedUserId, user.id, "reassigned", now);
@@ -1072,4 +1183,54 @@ export async function reassignSupportConversation(
       VALUES(?,?,'reassigned',?,?)
     `, [conversationId, user.id, assignedUserId === null ? "waiting" : `agent:${assignedUserId}`, now]);
   });
+}
+
+function transportField(value: unknown, message: string, max: number) {
+  if (typeof value !== "string" || value.trim().length > max) throw new SupportError(message, "invalid_transport");
+  const text = cleanText(value, max).replace(/\s+/g, " ").trim();
+  if (!text) throw new SupportError(message, "invalid_transport");
+  return text;
+}
+
+export type TransportHandoff = { id: number; company: string; contact: string; createdAt: number };
+
+export async function getTransportHandoff(user: SessionUser, conversationId: number): Promise<TransportHandoff | null> {
+  const row = await requireConversation(user, conversationId);
+  if (!hasCapability(user, "operations:manage") && !(user.access_role === "team_member" && row.assigned_user_id === user.id)) throw new SupportError("Transport queue access is required.", "forbidden");
+  if (row.assistance_category !== "shipment_observation") throw new SupportError("Transport request was not found.", "not_found");
+  const event = await runtimeGet<{id:number;detail:string;created_at:number}>(
+    "SELECT id,detail,created_at FROM support_events WHERE conversation_id=? AND event_type='transport_handoff' ORDER BY id DESC LIMIT 1", [conversationId]);
+  if (!event) return null;
+  const detail = JSON.parse(event.detail) as {company:string;contact:string};
+  return {id:event.id,company:detail.company,contact:detail.contact,createdAt:event.created_at};
+}
+
+export async function saveTransportHandoff(user: SessionUser, conversationId: number,
+  input: {company:unknown;contact:unknown;previousId:unknown}, now=Date.now()) {
+  const company = transportField(input.company, "Enter the company name.", 120);
+  const contact = transportField(input.contact, "Enter the company contact.", 254);
+  const previousId = Number(input.previousId);
+  if (!Number.isSafeInteger(previousId) || previousId < 0) throw new SupportError("Reload this request and try again.", "conflict");
+  return runtimeTransaction(async () => {
+    await lockSupportWork();
+    await runtimeGet("SELECT id FROM support_conversations WHERE id=? FOR UPDATE", [conversationId]);
+    const row = await requireConversation(user, conversationId);
+    if (row.status === "closed") throw new SupportError("Reopen this request before changing the company.", "closed");
+    const current = await getTransportHandoff(user, conversationId);
+    if (current?.company === company && current.contact === contact) return current;
+    if ((current?.id || 0) !== previousId) throw new SupportError("The company was changed by someone else. Reload and try again.", "conflict");
+    const event = await runtimeGet<{id:number}>(`INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+      VALUES(?,?,'transport_handoff',?,?) RETURNING id`, [conversationId,user.id,JSON.stringify({company,contact}),now]);
+    return {id:event!.id,company,contact,createdAt:now};
+  });
+}
+
+export async function getSupportAssignmentHistory(user: SessionUser, conversationId: number) {
+  if (user.access_role === "client") throw new SupportError("Staff access is required.", "forbidden");
+  await requireConversation(user, conversationId);
+  return runtimeAll<{id:number;agent_name:string;assigned_by:string|null;reason:string;assigned_at:number;released_at:number|null}>(`
+    SELECT a.id,u.name agent_name,actor.name assigned_by,a.reason,a.assigned_at,a.released_at
+    FROM support_assignments a JOIN users u ON u.id=a.assigned_user_id
+    LEFT JOIN users actor ON actor.id=a.assigned_by_user_id
+    WHERE a.conversation_id=? ORDER BY a.id DESC LIMIT 20`, [conversationId]);
 }

@@ -2,9 +2,9 @@
 id: FE-033
 title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
-related: [FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
+related: [FE-052, FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-09-24
 change_level: L3
 ---
 
@@ -12,15 +12,57 @@ change_level: L3
 
 ## Problem and outcome
 
-Daily Featured Showrooms currently schedules every participant inside one
-window and has no staff-owned schedule. Suqpage needs an all-day program with
-usable presentation time, deliberate changeovers, sponsor moments, a long
-midday break, and a safe way for staff to adjust a particular day's lineup.
+The official Daily Featured broadcast window is 8:30 PM–12:00 AM Ethiopia time.
+The prior two-session policy and 40-business capacity are superseded. Automatic
+lineups showcase at most six eligible businesses with four five-minute sponsor
+mentions. Staff can replace and order a date's lineup, then restore Automatic.
 
-The default schedule is generated automatically from that day's eligible
-showrooms. Platform administrators can edit the global timing policy or replace
-one date's participant order, while the public gallery continues to derive every
-time and active highlight from one authoritative agenda.
+## S36 — evening broadcast (implemented and focused-tested locally)
+
+- GIVEN six eligible businesses WHEN the agenda is generated THEN six 30-minute
+  presentations, four five-minute sponsor mentions and two five-minute changeovers
+  fill 8:30 PM through midnight, with no overlap or morning/intermission session.
+- GIVEN fewer than six businesses THEN use only eligible businesses, at most
+  30 minutes each; retain four sponsor mentions and finish within the official
+  window rather than invent businesses or stretch presentations. Zero businesses
+  yields an empty agenda. Adjacent sponsor mentions may share a boundary on small
+  lineups. Midnight belongs to the following date and displays 12:00 AM.
+- Automatic is the default without daily setup or a cron job. A deterministic
+  weekly rotation selects up to six from the category's eligible pool. Admin and
+  public use the same eligibility/order/selection contract. Sponsor mentions use
+  the ordered active placement pool, repeating when fewer than four are available;
+  absent placements leave clearly unassigned inventory, never invented sponsors.
+- Manual mode selects/reorders up to six for a date; save recalculates all times.
+  Returning to Automatic removes only that date's override. Stale/ineligible
+  candidates remain excluded; old oversized overrides expose at most six without
+  deleting stored history. Public cache invalidation makes manual edits visible.
+- The official time window and segment durations are fixed product rules; retire
+  the old morning/evening policy form and write action. Retain its historical DB
+  row without using it as current authority. No schema change is required.
+- Scheduling is a Suqpage rundown; it does not start or schedule TikTok itself.
+  Ads remain separate from editorial selection. Current sponsor and business
+  states must agree with the agenda at starts, transitions and midnight.
+
+Ready: bounded scheduling change under existing admin/eligibility ports. Tests
+cover capacity/totals/midnight/empty and small lineups, weekly rotation, manual
+save/revert and privacy/reveal rules. Capture public/admin at desktop and phone;
+visual approval precedes full release gates. Master §§3/5/19 and operations docs
+need current single-evening behavior. Older sections below are retained history
+where they describe morning/intermission/global-policy or 40-business behavior.
+
+## S36 verification
+
+Schedule/clock, discovery, localization, homepage composition and typecheck pass.
+Tests cover 0–6 participants, exact 210-minute full agendas, four mentions,
+midnight, deterministic rotating eligibility, manual transaction rejection and
+revert. A real browser save against a warmed cache exposed and verified a fix for
+stale public lineups; manual order and return to Automatic now display immediately.
+Seven public language/viewport states and admin at 320/390/1440 pass without
+horizontal overflow. Screenshots and receipt: `.local/evening-featured-review/`.
+The single-session agenda uses the full width; phone time ranges have more space.
+Original local schedule rows were restored after the test. Staff procedure:
+`docs/operations/FEATURED-SCHEDULE.md`. Owner visual approval, full gates, commit
+and deployment remain pending; status stays in_progress.
 
 ## Scope
 

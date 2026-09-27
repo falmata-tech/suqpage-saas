@@ -52,7 +52,7 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
         JSON.stringify(offering.highlights), offering.kind, index]);
       await runner.query('UPDATE products SET media_json=? WHERE id=?', [JSON.stringify([
         {kind:'image',ref:offering.image},{kind:'image',ref:offering.galleryImage},
-        {kind:'video',ref:STARTER_VIDEO_REF},{kind:'video',ref:'youtube:aqz-KE-bpKQ'},
+        {kind:'video',ref:STARTER_VIDEO_REF},
       ]),product.rows[0].id]);
       if (offering.option && offering.values.length) {
       const group = await runner.query<{ id: number }>('INSERT INTO option_groups(product_id,name,position) VALUES(?,?,0) RETURNING id', [product.rows[0].id, offering.option]);

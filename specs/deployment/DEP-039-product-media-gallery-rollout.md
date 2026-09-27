@@ -1,14 +1,49 @@
 ---
 id: DEP-039
 title: Product gallery compatibility rollout
-status: done
-related: [DEP-040, FE-050, BE-042, DEP-026]
+status: in_progress
+related: [DEP-040, FE-050, BE-042, DEP-026, FE-019, BE-018, BE-032, BE-040]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-09-27
 change_level: L3
 ---
 
 # DEP-039 — Product gallery compatibility rollout
+
+## S48 — staff-reviewed showroom and product videos (in progress)
+
+Owner requested this before the approved S43 publication. Normal page/product
+saves may keep existing videos or the platform example, but cannot introduce an
+unreviewed video. New offerings and new page headers use the current starter
+example. Existing customer/demo videos are preserved, not bulk replaced.
+GIVEN an owner requests a header/product video THEN accept an HTTPS source link
+and optional note, bind a support ticket to the canonical business/target, and
+keep current/example media public until review. The platform does not download or
+upload videos; a supported YouTube video from any channel may be approved.
+GIVEN the assigned support agent or manager reviews the ticket THEN approve a
+normalized YouTube link by entering its URL and choosing Approve video, or
+decline with a reply. Channel ownership and configuration are not prerequisites. Approval changes only that target's video, records
+the reviewer and audit, and informs the owner in the existing support thread.
+Product galleries keep photos/order and approved additional videos (maximum four);
+the starter example is replaced on first approval. Header approval changes only
+video fields in draft and current publication, preserving other saved/unpublished
+content and respecting business suspension. Duplicate approval is harmless;
+changed target videos, deleted targets, foreign owners, unrelated staff, wrong
+targets and forged normal-save video refs fail closed. Staff make the approval decision; the platform does not claim automated
+channel ownership verification.
+
+L3 FE-019/BE-018/BE-032/BE-040/DEP-039. Add a server-only RLS-protected support
+video request table at migration 58; private source URLs and reviewer details are
+never public. Approval is manual, not an automated YouTube integration. URL input is validated and never fetched by the server. Reuse owner
+support assignment/reply workflow and transaction boundaries. Master public media,
+owner publishing, support workflow and schema statements are affected.
+
+Ready: no new external provider, direct upload or arbitrary-video bypass; current
+example stays the default. No official channel or channel configuration is
+required: valid YouTube links from any channel are eligible for staff approval. Test forged writes, tenant/agent isolation,
+replay/stale target, exact-field preservation and default media; then phone/desktop
+workflow review and refreshed S43 release/migration/backup rehearsal gates. Retain
+additive request data on rollback; never restore unrestricted owner video entry.
 
 ## Problem
 
@@ -80,3 +115,11 @@ scenarios and exact-artifact Linux/privacy gates pass. Live public and gallery/
 owner/handle/five-language wordmark checks and health monitoring pass. Existing
 merchant content and demo account aliases are preserved; mail delivery and
 external video playback are not asserted by the no-delivery live smoke.
+
+S48 local evidence: `scripts/test-video-requests.ts`,
+`scripts/test-business-starters.ts`, `scripts/test-owner-page-postgres.ts`,
+`scripts/capture-video-requests.ts` pass; see S48 in TRACEABILITY.md. Real forms
+cover submission, invalid-link recovery, assignment, approval without channel configuration,
+decline/reply and preserved default at phone/desktop widths. Schema 58 is local
+only. The owner approved S48 visuals and publication on 2026-09-27. Refreshed release
+and operations gates pass; the final browser/check continuation is in progress.

@@ -118,6 +118,12 @@ Handle edits move to Business details, first change immediate then once every
 30 days; a platform administrator may override with an audited support reason.
 Reserved old handles redirect public product links without bypassing privacy.
 New examples reuse admitted fictional ceramics imagery and include two photos
-and two YouTube links per offering. Account identity/consent stays real; existing
+and one platform example video per offering. Account identity/consent stays real; existing
 content is untouched. The Suqpage wordmark has fixed Latin typography in every
 locale. Local focused tests/captures are separate from visual/release approval.
+
+S48: new signup offerings use the same single starter video as newly posted
+products. Existing businesses are not backfilled. Replacement videos follow
+FE-019/BE-018 support review; approved videos may come from any YouTube channel.
+Evidence: `scripts/test-business-starters.ts` asserts the exact starter reference
+for signup and invitations, and `scripts/test-video-requests.ts` covers posting.

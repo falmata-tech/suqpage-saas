@@ -1,4 +1,6 @@
 import { productMedia, updateLegacyMedia } from "./product-media";
+import { STARTER_VIDEO_REF } from "./business-starter";
+import { retainedVideo } from "./video-request-policy";
 import { canMaintainBasicProducts } from "./capabilities";
 import { runtimeBusinessById, runtimeCatalogByBusinessId, runtimeHasRetainedPublication } from "./catalog-runtime";
 import { productUpkeepEnabled } from "./config";
@@ -161,7 +163,10 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       let imageRef = command.imageAction === "replace"
         ? stagedImage!.imageRef
         : command.imageAction === "remove" ? "" : existing?.image_path || "";
-      const media = command.media ?? updateLegacyMedia(existing || null, imageRef, command.videoRef);
+      let media = command.media ?? updateLegacyMedia(existing || null, imageRef, command.videoRef);
+      const currentVideos = existing ? productMedia(existing).filter(item => item.kind === "video").map(item => item.ref) : [];
+      if (media.some(item => item.kind === "video" && !retainedVideo(item.ref, currentVideos))) throw new ProductUpkeepError("Request a video through support before adding it.", 403, "video_review_required");
+      if (!existing && !media.some(item => item.kind === "video")) media = [...media, {kind:"video", ref:STARTER_VIDEO_REF}];
       const ownedImages = new Set([
         ...(existing ? productMedia(existing).filter(item=>item.kind==='image').map(item=>item.ref) : []),
         ...(stagedImage ? [stagedImage.imageRef] : []), ...stagedGallery.map(image=>image.imageRef),

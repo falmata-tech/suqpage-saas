@@ -1,5 +1,6 @@
 import type { ProductMedia } from "./product-media";
 export type Business = {
+  is_demo?: number;
   id: number; handle: string; name: string; design_key: string; design_manifest_json:string; content_blocks_json:string; tagline: string; description: string;
   logo_path: string; hero_title: string; hero_subtitle: string; hero_image_path: string;
   public_email?: string; public_phone?: string;

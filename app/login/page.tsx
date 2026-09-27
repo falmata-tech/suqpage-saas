@@ -28,11 +28,11 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         <div className="platform-task-context">
           <span className="platform-task-eyebrow">{t("Account access")}</span>
           <h1 id="login-title">{t("Sign in to Suqpage.")}</h1>
-          <p>{t("Your shop, products, and customer inquiries in one place.")}</p>
-          <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("The same sign-in creates your account. Add your shop details next.")}</span></div>
+          <p>{t("Manage your showroom, products, services and customer inquiries.")}</p>
+          <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("New business? Enter your email to create your account.")}</span></div>
         </div>
         <div className="platform-form-panel">
-          <div className="platform-form-heading"><span>{t("Passwordless access")}</span><h2>{t("Continue to your account")}</h2><p>{t(accessMessage)}</p></div>
+          <div className="platform-form-heading"><span>{t("Email sign-in")}</span><h2>{t("Continue to your account")}</h2><p>{t(accessMessage)}</p></div>
           <PasswordlessLoginForm emailEnabled={emailEnabled} initialError={p.error || ""} />
           {!emailEnabled?<p className="platform-form-note" role="status">{t("Please try again later or contact Suqpage support.")}</p>:null}
           <Link className="platform-return-link" href="/">{t("Return to Market")}</Link>

@@ -2,7 +2,7 @@
 id: FE-049
 title: Five-language interface
 status: done
-related: [FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
+related: [FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
 owners: [product, frontend]
 last_updated: 2026-09-23
 change_level: L2
@@ -109,3 +109,12 @@ New examples reuse admitted fictional ceramics imagery and include two photos
 and two YouTube links per offering. Account identity/consent stays real; existing
 content is untouched. The Suqpage wordmark has fixed Latin typography in every
 locale. Local focused tests/captures are separate from visual/release approval.
+
+## Contextual writing revision (FE-052, local)
+
+`locales/README.md` records writing decisions for discovery, inquiry, publishing,
+owner management and manual transport support. The local catalogs now contain
+1,133 messages each, including support, callback receipts, evening schedule labels S40 showroom-value copy and S41 clearable category filters. This is a focused contextual rewrite of key journeys, not a
+claim that every retained phrase has received native-speaker review. Merchant
+content and canonical status values remain unchanged. Revised phone/desktop
+screenshots and checks are tracked under FE-052.

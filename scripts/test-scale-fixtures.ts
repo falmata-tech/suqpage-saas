@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { getSeededBusinesses as getAllBusinesses, getDb, seedFixture, closeDbForTests } from "./testing/postgres-fixture";
 import { DISCOVERY_INDUSTRIES, FEATURED_WEEK, getDiscoveryView } from "../lib/discovery";
 import { SEEDED_FEATURED_HANDLES } from "../lib/marketplace-seed";
+import { MAX_FEATURED_SHOWROOMS } from "../lib/featured-program";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 async function main() {
     await seedFixture();
@@ -89,7 +90,7 @@ async function main() {
             const showroom = showroomById.get(showroomId);
             return showroom?.city === group.city && showroom.region === group.region;
         })), `${industry.label} nearby viewers never cross reviewed city or region boundaries`);
-        assert.equal(discovery.featured.booths.length, Math.min(discovery.showrooms.length, 40), `${industry.label} Daily Featured includes the complete result set up to its forty-showroom capacity`);
+        assert.equal(discovery.featured.booths.length, Math.min(discovery.showrooms.length, MAX_FEATURED_SHOWROOMS), `${industry.label} Daily Featured fits the six-showroom evening broadcast capacity`);
         assert.deepEqual(discovery.featured.booths.map((booth) => booth.slot), Array.from({ length: discovery.featured.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
         assert.equal(new Set(discovery.featured.booths.map((booth) => booth.reference)).size, discovery.featured.boothCount, `${industry.label} floor references remain unique`);
         assert.equal((await getDiscoveryView({ industry: industry.key, scale: "growing_factory" })).total, 0, `${industry.label} demo data stays within the small-scale launch scope`);
@@ -101,7 +102,7 @@ async function main() {
     assert.notEqual(seededElectronics[2]?.profile.longitude, seededElectronics[0]?.profile.longitude, "other Addis showrooms do not collapse into the shared-address marker");
     const searchedMonday = await getDiscoveryView({ industry: "electronics", q: "Nova Assembly", featuredDay: 1 });
     assert.equal(searchedMonday.total, 1, "map search narrows geographic results");
-    assert.equal(searchedMonday.featured.booths.length, industryCounts[0], "map search does not shrink the selected Daily Featured program");
+    assert.equal(searchedMonday.featured.booths.length, Math.min(industryCounts[0], MAX_FEATURED_SHOWROOMS), "map search does not shrink the selected Daily Featured program");
     assert.ok(industryCounts.reduce((total, count) => total + count, 0) >= 66, "the seven industry projections retain the complete scale baseline");
     assert.ok(Number((await db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get() as {
         total: number;

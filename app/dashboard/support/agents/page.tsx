@@ -1,3 +1,4 @@
+import styles from "@/components/TransportSupport.module.css";
 
 import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
@@ -37,12 +38,13 @@ export default async function SupportAgents({ searchParams }: {
     <CollectionToolbar action="/dashboard/support/agents" search={query.q || ""} placeholder={t("Agent name or email")} activeFilters={Boolean(query.q || query.status)}>
       <label><span>{t("Availability")}</span><select name="status" defaultValue={query.status || ""}><option value="">{t("All agents")}</option><option value="available">{t("Available")}</option><option value="full">{t("At capacity")}</option><option value="enabled">{t("Receiving support")}</option><option value="disabled">{t("Not receiving support")}</option></select></label>
     </CollectionToolbar>
-    <section className="support-agent-list" aria-label={t("Support agent settings")}>
+    <section className={`support-agent-list ${styles.agentList}`} aria-label={t("Support agent settings")}>
       {result.items.map((agent)=><form action={updateSupportAgentSettingAction} key={agent.userId}>
         <input type="hidden" name="userId" value={agent.userId}/>
         <div className="support-agent-identity"><strong>{agent.name}</strong><small>{agent.email}</small></div>
         <div className="support-agent-load"><span>{agent.openConversations} {" "}{t("of")}{" "}{agent.maxOpenConversations} {" "}{t("open")}</span><progress max={agent.maxOpenConversations} value={agent.openConversations}>{agent.openConversations}</progress></div>
         <label className="support-agent-toggle"><input type="checkbox" name="enabled" defaultChecked={agent.enabled}/><span>{t("Receives support")}</span></label>
+        <label className="support-agent-limit"><span>{t("Queue")}</span><select name="queueScope" defaultValue={agent.queueScope}><option value="all">{t("All requests")}</option><option value="support">{t("Business support")}</option><option value="transport">{t("Buying assistance")}</option></select></label>
         <label className="support-agent-limit"><span>{t("Conversation limit")}</span><input type="number" name="maxOpenConversations" min="1" max="20" defaultValue={agent.maxOpenConversations}/></label>
         <button className="small-btn">{t("Save")}</button>
       </form>)}

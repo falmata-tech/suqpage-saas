@@ -1,10 +1,10 @@
 ---
 id: BE-042
 title: Ordered tenant product media
-status: done
-related: [FE-050, BE-009, BE-010, BE-024, DEP-039]
+status: in_progress
+related: [FE-050, BE-009, BE-010, BE-024, DEP-039, FE-019, BE-018]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-09-27
 change_level: L3
 ---
 
@@ -80,3 +80,15 @@ scenarios and exact-artifact Linux/privacy gates pass. Live public and gallery/
 owner/handle/five-language wordmark checks and health monitoring pass. Existing
 merchant content and demo account aliases are preserved; mail delivery and
 external video playback are not asserted by the no-delivery live smoke.
+
+## S48 reviewed video entry
+
+FE-019/BE-018 and DEP-039 govern video changes. Normal owner/staff media saves
+retain existing references or the example; new links require a target-bound
+support request and assigned staff review. Staff may approve a supported
+YouTube URL from any channel without channel configuration. Existing photos,
+other fields and previously admitted videos remain unchanged. New products use
+the starter video. `scripts/test-video-requests.ts` covers tenant/agent boundaries,
+forged saves, approval without channel setup, retries, stale targets and exact-field
+preservation; `scripts/capture-video-requests.ts` covers the real owner/staff forms.
+Local evidence passes; refreshed release and publication gates remain pending.

@@ -10,6 +10,21 @@ change_level: L3
 
 # BE-023 - Discovery scale and attention projection
 
+## S41 current discovery filter contract
+
+FE-030 S41 supersedes single-category public filtering. `industry` accepts a
+single key, a comma-separated set, or repeated route values. Canonicalize against
+DISCOVERY_INDUSTRIES in catalog order, bound parsing, remove duplicates and
+unknown keys; no valid keys means all categories. Legacy `all` remains compatible.
+Selected categories are ORed using parameterized membership EXISTS; location,
+query, scale and all existing public eligibility rules are ANDed. Apply the same
+scope before exact/fuzzy candidates, totals, suggestions, hydration and paging.
+Do not alter Daily Featured's single-day industry or indexes/schema. Cache keys
+use canonical category sets. A globally eligible selected location survives a
+category/query change that yields zero matches. No client slicing is authority.
+Real PostgreSQL regressions: scripts/test-discovery-multicategory.ts plus existing
+pagination, spelling and discovery suites. UI/browser contract: FE-030 S41.
+
 ## Problem and outcome
 
 Discovery cannot distinguish workshops from growing factories, and dashboards
@@ -42,11 +57,11 @@ preserve tenant isolation and predictable query cost.
   External ads never create a tenant, showroom, product, or map record.
 - Region and city values are selected only from place keys derived from the
   current marketplace result set. Unknown keys are ignored and never become SQL.
-- An absent or invalid public industry filter returns the de-duplicated combined
-  marketplace projection for the required orientation chooser. Explicit `all`
-  returns the same combined result and closes the chooser. Neither value is a
-  persisted business industry, and neither changes the selected weekday's Daily
-  Featured Showrooms industry.
+- An absent or wholly invalid category set returns the de-duplicated combined
+  marketplace projection, with no orientation chooser. Explicit `all` is a
+  compatible empty selection. Valid categories in mixed input survive invalid
+  entries; canonical sets never become persisted business industries and never
+  change the selected weekday's Daily Featured industry.
 - A public showroom's primary visual industry is the first of its memberships
   in the canonical `DISCOVERY_INDUSTRIES` order. It is deterministic display
   metadata only: cross-listed businesses remain eligible through every assigned

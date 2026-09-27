@@ -41,7 +41,12 @@ You are working on **Suqpage**, a multi-tenant platform giving African businesse
 an accessible digital presence and a direct inquiry channel. People discover
 businesses, products, services and custom work through geography, search results
 and featured visibility. Growers, makers, traders, retailers, home businesses and
-service providers retain their own identity. The current catalog begins in Ethiopia.
+service providers retain their own identity. Suqpage is an online showroom for
+makers and manufacturers who have no physical retail store or showroom, an
+online extension of existing shops, and a shopfront for people selling from home.
+Customers discover offerings and contact the business directly; this promise does
+not imply platform checkout or require a public home address. The current catalog
+begins in Ethiopia.
 
 Act as a senior product architect, full-stack engineer, security-conscious SaaS developer, UX designer, and quality reviewer. Preserve the product vision while making the application more reliable, usable, secure, and commercially credible.
 
@@ -147,12 +152,34 @@ Suqpage gives each shop a consistent public page. It organizes each
 participant's story, process, products, capabilities, reviewed location, and
 contact options; supports map, region, category, product, and capability search;
 and lets buyers contact the participant directly for small purchases, custom
-work, repeat orders, or larger trade inquiries. Suqpage public support may
-help with using the platform, transport arrangements, or reporting a concern
-about a listing. Suqpage does not inspect, certify, endorse, negotiate for,
-deliver for, or guarantee a listed participant.
+work, repeat orders, or larger trade inquiries. Business owners can contact Suqpage support from their authenticated dashboard. Buying assistance accepts
+requests to purchase on a customer's behalf, check a business, or check product
+quality. Staff discuss the work in the buying conversation or by phone; submitting a request does
+not complete a purchase or certify or guarantee a listed participant.
 
 ---
+
+S42 (FE-019/BE-018, ADR-0023) adds live text replies and status to Buying
+assistance locally. Public pages show Buying assistance with a chat icon and Live chat beneath the name. The Live chat dialog
+asks for a message first, then name and phone; Start chat opens the token-scoped
+conversation. Saved messages show Sent, and Chat connected reflects the server
+connection rather than staff presence. Customers see Waiting for our team until a public staff reply, even after
+auto-assignment; guidance explains automatic replies and returning in the same
+browser. Thereafter they see assignment or closed state; assignment is not online presence. Open visible dialogs refresh
+every five seconds with bounded failure backoff and same-browser session recovery.
+Public Help, Transport and unqualified legacy entry points stay retired.
+Only explicit staff replies are visible; historical messages and Internal notes
+remain private. Buying attachments remain unavailable. End chat closes the visitor’s own case,
+releases assignment once and preserves history; the dismiss X only hides the dialog.
+Ended buying chats remain in staff Chat history with name, phone and original
+request. Authorized staff can call and add private notes without reopening. Mark
+resolved is a separate staff decision, moves the case to Resolved and is safe to
+retry; reopening clears resolution and restores the existing assignment workflow.
+Staff inboxes refresh while visible and retain queue scope, capacity, claim,
+reassign, close/reopen and history. Owner dashboard support remains unchanged.
+Local schema 57 includes default-private message visibility and separate buying resolution; existing 68 businesses
+are preserved. Visual approval is complete; hosted migration and final release gates remain pending.
+No hosted Realtime configuration or native app has been deployed.
 
 ## 4. What Suqpage is—and is not
 
@@ -166,19 +193,13 @@ deliver for, or guarantee a listed participant.
   and SMS handoffs, copy, and phone-required submission into the business’s inbox;
 - an inquiry management dashboard;
 - a first-party customer support workspace;
-- an anonymous, token-scoped public support drawer that enters the same staff
-  queue for platform help or listing reports and transport-arrangement help,
-  requiring private reconnect email and phone values on the first message
-  without creating a buyer account or implying certification, endorsement,
-  delivery operation, or a guaranteed outcome; visitors may
-  end an active chat, retain its readable transcript, and clear only their
-  browser token to begin a separate conversation; visitors, clients, and
-  authorized staff may attach one private sanitized image or verified PDF up to
-  5 MB to a message, with conversation-scoped reads through the configured media
-  adapter. The verified local BE-018/FE-019 retry refinement prepares the
-  HttpOnly visitor token before sending and retains a submission key through
-  lost responses and reopening, so retries recover the same chat/message;
-  publication of this refinement remains pending;
+- anonymous, token-scoped Buying assistance conversations with live text replies,
+  status, private staff notes and retry-safe persistence. Name, phone and details
+  are required. No email field or attachments. Closed cases can start another
+  request without deleting staff history;
+- authenticated owner-dashboard support with live replies, tenant isolation and
+  private sanitized image/PDF attachments up to 5 MB. Support staff assignment,
+  capacity, claim, close/reopen and history remain available;
 - one shared business profile with each seller's own identity, introduction,
   images, products and optional About video;
 - a permanent public discovery surface where visitors choose an industry,
@@ -236,9 +257,13 @@ TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
 `FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
 venue art direction, and platform visual system. `/` opens directly into the
 geographic Market; there is no intermediate landing lobby or duplicate search.
-A concise heading identifies nearby businesses. One short sentence explains
-finding products, services and custom work through the map or search results and
-inquiring directly. Visitors can search by product, category or location. Individual
+The compact introduction presents the showroom benefit: everything a business
+offers in one place. Supporting copy invites visitors to discover nearby
+businesses, their story, offerings, capabilities and location, then make direct
+contact. It remains visible on phones. About pairs this with the owner promise:
+one shareable link to what they offer, alongside their existing social channels. Functional
+navigation and action labels stay task-specific. Visitors can search by product,
+category or location. Individual
 and household buyers are the primary public audience; traders and retailers can
 also find repeat supply when a participant actually offers it. This audience
 strategy guides content but is not repeated as promotional taxonomy in every
@@ -250,17 +275,28 @@ Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
 branding. The combined marketplace map loads immediately with **All categories**
-and no orientation chooser. Search & filters opens a left drawer over the full
-map. The same drawer contains search, optional category/place selectors, result
-type tabs and five-row result pages on desktop and phones. It starts closed on a
+and no orientation chooser. Search & results opens a left drawer over the full
+map. The same drawer contains search, always-visible optional category/place selectors and
+two result-type checkboxes above one five-row paginated list. Products & services
+and Businesses are both selected by default; at least one remains selected.
+Type changes keep query/category/place and reset paging, while pagination keeps
+the chosen types. There are no result tabs. It starts closed on a
 fresh visit and opens for query/category/place deep links. Hiding and reopening
 retains the query, filters, result page, map center and zoom. Map controls remain
 on the right; attribution and fixed phone navigation stay visible. Selecting a
-result business hides the drawer to expose its map preview. The map stays mounted.
-The verified local FE-042 candidate uses a Filters disclosure for category/place
-controls, removes repeated headings and places paging below independently
-scrollable result rows. Desktop and phone checks pass; this layout awaits owner
-visual approval and deployment. Production still uses the previous expanded controls.
+result business opens its preview above the drawer. The map stays mounted.
+The local FE-030/FE-042 implementation places Category and Region or city side
+by side above result types; there is no Filters disclosure. No selected category
+means all categories, shown only as the control's empty-state label, not a menu
+option. Visitors may select several categories and remove individual selections
+or clear them together. Category sets match any selected membership; location
+and query further narrow that set. Each scope has its own clear action, changes
+reset paging and preserve the other scope, and a selected valid location remains
+even when its new category scope returns no matches. Parameterized PostgreSQL
+exact/fuzzy queries, map rows, counts and pagination use the same canonical
+category set; cross-listed records are returned once. No schema change is needed.
+Buying help uses a compact accessible icon alongside an open drawer on narrow
+screens so it cannot cover pagination. Visual approval is complete; final release gates and deployment remain pending.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -297,30 +333,31 @@ ordering do not change with industry, search, place, or selected program day.
 Desktop shows all five beside the gallery. Phones show two at a time in a compact
 automatically rotating strip without scroll, pause, or carousel controls. Every
 day has one stable assigned industry, including Agriculture on Sunday. The
-Daily Featured capacity windows are 8:00 AM–1:00 PM and 5:00 PM–10:00 PM Ethiopia time,
-with five-minute booth changeovers and a ten-minute sponsor break after every
-third presentation in each session. Non-empty sessions target 30 presentation
-minutes per booth and remain at least one hour long. A smaller morning lineup
-contracts toward its 13:00 end and a smaller evening lineup contracts toward
-its 22:00 end; larger lineups expand toward the complete capacity windows. The
-midday interval is never shorter than 13:00–17:00. Automatic mode
-uses the first forty rows in the current deterministic eligible set; a platform
-administrator may retain an ordered eligible subset of at most forty for one
-date. Airtime is recalculated from the authoritative
-policy and lineup. Today's public header includes one compact schedule
-disclosure derived from that same agenda. Its closed state names the actual
-participant-responsive morning and evening windows; its open state lists each
-participating showroom and EAT range, sponsor breaks, and the complete
-intermission. It remains collapsed by default on desktop and phone and does not
-expose future-day business identity. Every revealed card shows its EAT range; exactly one card may be
-visibly current during a presentation, while transitions, sponsor breaks, and
-intermission identify no business. The status names the active booth or current
-break and provides the configured recordings destination after 22:00. Provider
-links are never invented. The verified local FE-033 refinement labels an
-unconfigured broadcast as a schedule, without claiming TikTok is live or offering
-a watch action. Public and dashboard time labels use 12-hour AM/PM; admin time
-controls retain 24-hour machine values and unchanged EAT scheduling boundaries.
-These display refinements await candidate approval and publication.
+The verified local S36 Daily Featured window is 8:30 PM–12:00 AM Ethiopia time
+(EAT, UTC+3). Six businesses receive 30 minutes each, four sponsor mentions receive
+five minutes each, and two five-minute changeovers fill the remaining ten minutes.
+The final sponsor mention ends at midnight on the following date. Fewer than six
+eligible businesses produce a shorter evening from the same 8:30 PM start; no
+business is invented or given artificially long airtime. An empty lineup has no
+agenda. There are no morning or intermission sessions.
+Automatic mode rotates up to six businesses from the current alphabetically
+ordered eligible category pool each week. No daily setup or cron is needed.
+Platform administrators can select/order up to six for a date or return it to
+Automatic. Public and admin use matching eligibility/order and selection rules.
+Manual saves invalidate public projections; an indexed weekly override-version
+read also forms part of the public cache key so retained changes appear on the
+next request even if tag invalidation is delayed. The old global timing-policy
+form/action is retired; its historical DB row is retained but does not control
+the official evening schedule. Existing oversized overrides are read at the new
+six-business limit without deleting their stored history.
+Today's compact schedule disclosure names actual EAT times and lists business
+presentations and sponsor mentions. It remains collapsed by default on phones
+and desktop and does not reveal future-day identities. Every revealed card shows
+its range. The browser updates the current card from the same agenda and refreshes
+at the EAT date boundary; breaks and the midnight cutoff identify no business.
+All times use 12-hour AM/PM, including 12:00 AM at the end. This is a Suqpage
+rundown, not an integration that starts or schedules TikTok broadcasts. Provider
+links are never invented. The owner approved the candidate; release remains pending.
 Today's gallery rotates as a circular schedule queue: the current presentation
 leads; during breaks the most recently completed presentation remains first;
 and the next card leads only when its presentation starts. References, airtime,
@@ -351,8 +388,10 @@ destinations in two navigation surfaces.
 Each screen has one communication job. Market helps visitors find businesses, products and services. About explains
 an accessible digital presence for African businesses, the Ethiopia-first catalog,
 and discovery through location, search, result lists and Daily Featured. Login explains passwordless account access. Setup
-collects private account details. Support offers platform help, transport help,
-and a way to report a listing.
+collects private account details. Business owners use Dashboard → Support for
+platform questions. There is no public Ask for help entry. Buying assistance, with a Live chat sublabel, opens message-first intake with name and phone,
+followed by a text conversation and request status.
+General visitor support remains closed; buying assistance is the only guest chat.
 No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
 the complete platform narrative. **Custom work**, **ready products**, and
 **wholesale supply** remain optional capability labels, not a slogan or a
@@ -389,9 +428,12 @@ uses the platform's restrained palette rather than legacy custom design tokens.
 On phones, public pages, account entry and private workspaces retain a compact
 Suqpage mark/wordmark and language header. Primary app navigation stays in the
 bottom bar; the Market viewport reserves space for both (FE-038 / FE-034).
+S31's locally verified refinement uses a 4px icon/text gap and consistent
+32px/24px standard, 28px/22px phone and 24px/18px compact-shop icon/wordmark
+sizes. It preserves the icon ratio and Latin typeface; visual approval is complete and publication is pending under FE-038.
 
 Nearby-group viewers use no architectural shell, venue, floor, hall, or
-decorative environment. Daily Featured likewise presents up to forty image-led cards in responsive columns with
+decorative environment. Daily Featured likewise presents up to six image-led cards in responsive columns with
 ordinary vertical scrolling and no simulated hall, map-style zoom, pagination,
 or hidden overflow.
 
@@ -423,13 +465,16 @@ Perspective platforms or device-like silhouettes are prohibited.
 Activating an individual marker centers at local-detail zoom and opens the richer
 business preview in one click. Cluster clicks always zoom forward. City/area shops
 remain separately selectable at detailed zoom rather than joining Nearby groups. The map marker does not load booth
-or hero photography. That preview is a non-modal floating inspector centered over a
-restrained low-opacity dismissible scrim: the map remains visible, and on
-phones it becomes a bounded bottom sheet above app navigation. A counted nearby-group
+or hero photography. Map previews and nearby groups use a native modal above
+the search drawer and map, bounded to the viewport with scrollable content.
+Close, Escape or backdrop dismissal preserves search and drawer state and returns
+focus to the trigger or a visible drawer control after marker redraw. Selecting
+a business result also preserves the open drawer. Short landscape windows let
+the drawer scroll rather than squeezing its results to zero height. A counted nearby-group
 group marker uses the same accessible action-orange cluster language and exact count so
 it cannot be mistaken for one business marker.
-Activating a revealed Daily Featured booth opens this same inspector before any
-tenant route change; only its explicit **Open showroom** action navigates.
+Activating a revealed Daily Featured booth opens its existing preview before any
+tenant route change; only the explicit **Open page** action navigates.
 Valid tenant-controlled live state appears on clusters, showroom markers,
 nearby-group cards, and today's featured cards. The business in Suqpage's current
 Daily Featured walkthrough slot is labeled **Featured now** everywhere it is visible; this
@@ -497,7 +542,7 @@ under Business details. The server derives identity from the Supabase session an
 client access profile, identity link, and business onboarding record.
 FE-046/BE-039 also creates a private saved profile, example location and
 three editable example offerings with names, descriptions, media and prices.
-Each new offering demonstrates two photos and two YouTube links; admitted
+Each new offering demonstrates two photos and the platform example video; admitted
 fictional ceramics demo imagery and concise sample descriptions show the layout.
 These are editable examples, not claims about the new business;
 all editable public-contact fields are filled. It accepts no public file upload and creates no public marker,
@@ -668,7 +713,9 @@ Rules:
     merchant-defined offered-by unit (including hours, sessions and projects), and up to six concise highlights. These
     fields support inquiry context only and never create checkout, payment, tax,
     inventory, or price-verification behavior.
-13. Each offering and each showroom may carry one controlled YouTube reference.
+13. Each offering may carry up to four reviewed YouTube references; a showroom
+    header has one. New items/headers use the platform example, and owners request
+    replacements through support. Existing admitted videos remain usable.
     Public rendering derives a privacy-enhanced embed or normal watch link from
     the canonical provider ID; recipes and users cannot supply iframe markup.
     The showroom-level process video appears inside the canonical combined
@@ -821,14 +868,24 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 The owner editor asks for Product or Service, name, optional ETB price and one
 description (FE-048/BE-041). FE-050/BE-042 extends media to eight photos and four
-YouTube links, with add/remove/reorder controls and a combined 5 MiB photo-upload
-budget per save. The public gallery has thumbnails, arrows, keyboard navigation
+reviewed YouTube links, with photo upload and media remove/reorder controls and
+a combined 5 MiB photo-upload budget per save. New items include the starter video.
+Owners use Request a video for a saved product or showroom header and submit an
+HTTPS source link plus an optional note. This creates a tenant-bound owner support
+ticket; it never replaces public media before approval. Assigned agents or
+managers review the submitted source and enter a supported
+YouTube URL from any channel, then approve or decline with a reply. Approval
+updates only the target video and preserves other draft/public fields, photos
+and visibility. No official Suqpage channel, channel setting or channel ownership
+confirmation is required. Staff upload any source files outside Suqpage if needed;
+there is no integrated YouTube upload or ownership API.
+The public gallery has thumbnails, arrows, keyboard navigation
 and horizontal touch scrolling. Video playback requires an explicit play action
 and stops when the selected media changes. The first photo stays the cover for
 search/cards; legacy single-photo/video products need no backfill. Extra photos
 follow existing tenant/public access and snapshot-retention rules. This gallery
-is a local candidate on additive schema 49; hosted schema 48/S25 remains live
-until visual review and DEP-039 release gates pass.
+was deployed on schema 50. The S48 support-review extension is verified locally
+on schema 58 with owner visual approval; final DEP-039 release gates are pending.
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
@@ -866,9 +923,10 @@ Default behavior:
   Suqpage page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place. Hide duplicate autocomplete once full results appear;
 - keep search, category and location controls together in the result drawer;
-  the verified local compact-results candidate keeps category/location behind
-  Filters, displays active selections in a short summary and fixes page controls
-  below the scrollable rows. Visual approval and publication remain pending;
+  the local compact-results candidate keeps category/location visible side by
+  side, supports multiple clearable categories and a clearable location, places
+  Products & services / Businesses checkboxes above one list, and fixes page controls
+  below the scrollable rows. Visual approval is complete; publication remains pending;
 - hide the drawer without clearing filters; its hidden controls are inert, Escape
   returns focus to the opener, and reduced-motion preferences disable sliding;
 - support business name, handle, product, industry, and relevant description search;
@@ -1020,7 +1078,23 @@ products with a service note, assist with consented page drafts, operate inquiri
 manage support assignments and record manual renewals. Business staff assignment
 remains an administrator action. Team members only see actively assigned businesses;
 page editing also requires current owner consent. Staff Save never publishes on
-behalf of the owner. Support-agent permissions govern support conversations.
+behalf of the owner. Support-agent settings enable Business support, Buying assistance or All requests
+and set a shared open-case limit. Team members see eligible waiting requests and
+their own assigned history; managers see both queues. Assignment and capacity checks
+are transactional across concurrent workers. Staff can claim, reply, close and
+reopen authorized cases; managers can reassign open cases and inspect assignment
+history. Assigned buying-assistance staff and managers choose Reply for a
+visitor-facing message or Internal note for private work. Existing staff messages
+remain private; only explicit new replies are shared. Buying assistance has Active,
+Chat history (ended but unresolved), and Resolved lists with server pagination and
+search by requester/name, phone or reference. Intake summaries appear in the list
+and full original intake/contact in the case. Ended and resolved buying cases
+accept private follow-up notes, but public replies require reopening. Mark resolved
+closes any active chat, releases capacity, and records the staff decision; visitor
+End chat never marks a request resolved. Historical transport cases
+retain private notes and audited company handoffs. Unassigned
+staff cannot reply, add notes, close or route a waiting request before
+claiming it. Visitor messages contribute to the staff unread count.
 No live role uses custom service-request assignments, revision projects or page
 approval queues.
 
@@ -1074,6 +1148,12 @@ operational disable switch, not a route back to the retired workflow.
 ---
 
 ## 15. Current technical architecture
+
+ADR-0023 and `docs/MOBILE-MONOREPO-PREP.md` prepare an Expo React Native app beside
+Next.js using npm workspaces. This is a migration plan, not a current monorepo or
+native build. Pure contracts/domain/localization can be shared; native screens,
+map/media adapters and authenticated mobile APIs still require implementation.
+The current root layout and web deployment paths remain unchanged.
 
 Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
 platform environment adapter accepts the earlier namespace only as a read fallback;
@@ -1267,6 +1347,17 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 ---
 
 ## 17. Data, migrations, and deployment boundary
+
+S42/schema 56 adds `support_messages.visitor_visible` with a false default.
+No historical note is exposed. Apply this additive migration before deploying
+live buying replies and retain the column on rollback. S47/schema 57 adds nullable
+`support_conversations.resolved_at`, constrained to closed buying requests. Existing
+closed records remain unresolved; staff resolution is explicit and audited. Preflight
+requires schema 58 after S48: `support_video_requests` stores private target/source
+and review records with server-only access and RLS. Retain these additive columns
+and records on rollback; do not restore unrestricted owner video entry.
+Local migration and isolated install/preservation tests pass. Production rollout
+still requires the documented backup and release gates.
 
 DEP-039 adds `products.media_json` at schema 49 for the local gallery candidate.
 DEP-040/schema 50 adds a server-only, RLS-enabled reserved-handle registry and
@@ -1677,3 +1768,13 @@ executing their SQL and restores only into approved empty targets. Empty namespa
 preparation never uses CASCADE; populated data is never replaced by this tool.
 Local and hosted schema 47 restore/preservation evidence is recorded in
 `docs/SUQPAGE-LOCAL-SCHEMA-47.md` and `docs/SUQPAGE-RELEASE-2026-09-21.md`.
+
+## Local launch-clarity candidate — FE-052
+
+S33 adds owner-managed inquiries, a labeled search/results drawer opener, clear examples,
+a first-publication review and contextual locale copy. Public copy does not
+mention pricing. Focused database and browser checks pass locally; visual approval is complete and final release gates remain pending. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md`.
+Local schema 55 includes seeded demo identity, scoped support queues and general
+buying requests; production remains schema 50. Buying assistance is a manual staff
+service. Historical transport requests remain accessible; provider accounts,
+dispatch, checkout and booking integrations are out of scope.

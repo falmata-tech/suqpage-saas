@@ -751,6 +751,7 @@ async function runPostgresFixture() {
         for (const item of items) await inquiryItem.run(iid, item.id, item.name, null, item.offering_kind === "service" ? "One appointment" : "2 pieces", item.offering_kind, item.quantity_mode, "{}");
     }
     // These rows were created by this empty-target demo seed, never imported accounts.
+    await db.exec("UPDATE businesses SET is_demo=1");
     await db.exec("UPDATE businesses SET public_email='hello+' || handle || '@example.test', public_phone='+447700900' || lpad(id::text,3,'0')");
     await db.exec("UPDATE users SET account_phone='+447700900' || lpad((id+100)::text,3,'0') WHERE email LIKE '%@mirtpage.local' OR email LIKE '%@demo.mirtpage.local'");
     for (const [handle, businessId] of seeded) {

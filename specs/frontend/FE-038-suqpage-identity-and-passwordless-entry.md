@@ -12,6 +12,44 @@ change_level: L3
 
 ## Problem and outcome
 
+### S31 — compact horizontal logo (L1, locally verified; visual review pending)
+
+Owner selected the existing icon plus wordmark comparison over the experimental
+S-in-pin concept. Final refinement: center the rendered icon and lettering
+vertically, including optical glyph bounds rather than only CSS line boxes.
+GIVEN desktop/phone branding WHEN rendered THEN icon/text visible vertical
+centers differ by no more than 1 CSS pixel, retaining the 4px horizontal gap,
+chosen proportions and all-locale consistency. Verify measured screenshots.
+
+Scope: the existing Suqpage icon/wordmark proportions and spacing only. Preserve
+the icon artwork, colors, Latin typeface, links and accessible names; standalone
+icons and tenant branding are unchanged. No backend or deployment configuration.
+Master impact: shared platform identity in §5.2.
+
+- GIVEN a horizontal Suqpage logo WHEN displayed in public, account or workspace
+  chrome THEN icon/text spacing is 4px and both use consistent proportions.
+  Standard size: 32px-wide icon / 24px wordmark; phone headers: 28px / 22px;
+  the compact shop return row uses 24px / 18px. Preserve the icon's 9:10 ratio.
+- GIVEN any supported language or a 320px phone WHEN the header renders THEN
+  wordmark children inherit its intended size, the font stays unchanged, and
+  brand/language/back controls remain visible without overlap or overflow.
+- GIVEN desktop or phone headers WHEN the logo is focused or activated THEN
+  its accessible name, home destination and usable touch target remain intact.
+
+Readiness: no data/security/tenant change; bounded CSS/component adjustment,
+focused geometry/capture checks, typecheck/spec validation, then visual approval
+before full gates or release. Verify with `scripts/capture-mobile-brand.mjs`
+and before/after header captures in `.local/brand-spacing-review/`.
+Rollback: revert the scoped brand styles and image dimensions.
+
+Evidence: 39 public and 51 authenticated responsive checks pass across five
+locales at 1440/390/320, including 4px measured gaps, actual letter sizes,
+undistorted icons, 44px touch targets, no overlap and preserved return navigation.
+Before captures prove the old 10px desktop gap and unintended 16px phone text;
+after captures confirm the specified sizes. Typecheck, spec validation and PWA
+shell contract pass. `.local/brand-spacing-review/comparison.png` is the review
+sheet. No full release gates, commit or deployment before visual approval.
+
 ### S30 — mobile brand visibility (L1, approved and deployed)
 
 - GIVEN a phone from 320px wide WHEN opening Market, Featured, About, sign-in

@@ -1,13 +1,16 @@
-.chooser { position: relative; min-width: 0; }
-.chooser summary { display:flex; align-items:center; gap:8px; min-height:48px; padding:6px 10px; background:#fff; border:1px solid #d4d9dc; border-radius:9px; cursor:pointer; list-style:none; font-size:13px; font-weight:600; }
+.field { display:flex; min-width:0; border:1px solid #d4d9dc; border-radius:7px; background:#fff; }
+.chooser { min-width:0; flex:1; }
+.chooser summary { display:flex; align-items:center; gap:4px; min-height:44px; padding:6px 8px; cursor:pointer; list-style:none; font-size:12px; font-weight:500; }
 .chooser summary::-webkit-details-marker { display:none; }
-.chooser summary span { flex:1; min-width:0; }
-.options { max-height:min(360px,40dvh); overflow:auto; overscroll-behavior:contain; display:grid; gap:4px; padding:6px; margin-top:6px; border:1px solid #d4d9dc; border-radius:10px; background:#fff; }
-.options button { display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:6px 8px; border:1px solid transparent; border-radius:7px; background:#fff; text-align:left; font:inherit; font-size:13px; color:#252a2d; cursor:pointer; }
+.chooser summary span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.chooser summary svg { flex:none; }
+/* Anchored to the two-field filter row, not the half-width trigger. */
+.options { position:absolute; z-index:10; top:100%; left:10px; right:10px; max-height:min(280px,40dvh); overflow:auto; overscroll-behavior:contain; display:grid; gap:4px; padding:6px; margin-top:2px; border:1px solid #d4d9dc; border-radius:8px; background:#fff; box-shadow:0 8px 20px #18372c26; }
+.options button { display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:6px 8px; border:1px solid transparent; border-radius:6px; background:#fff; text-align:left; font:inherit; font-size:13px; color:#252a2d; cursor:pointer; }
 .options button span { flex:1; }
 .options button:hover { background:#f5f6f4; }
 .options button[aria-pressed=true] { border-color:#c23806; background:#fff3ed; }
-.chooser summary:focus-visible,.options button:focus-visible { outline:3px solid #c23806; outline-offset:2px; }
-.native { position:relative; min-width:0; }
-.native > svg { position:absolute; top:50%; left:10px; transform:translateY(-50%); pointer-events:none; }
-.native select { width:100%; min-height:48px; padding-left:50px; }
+.options button[aria-disabled=true] { cursor:wait; }
+.clear { flex:none; display:grid; place-items:center; width:30px; min-height:44px; padding:0; border:0; border-left:1px solid #e5eae7; border-radius:0 7px 7px 0; background:#fff; color:#52645a; cursor:pointer; }
+.clear:hover { background:#fff3ed; }
+.chooser summary:focus-visible,.options button:focus-visible,.clear:focus-visible { outline:3px solid #c23806; outline-offset:-3px; }

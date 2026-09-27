@@ -1,0 +1,84 @@
+.dialog :global(section.new-conversation) { display:block; overflow-y:auto; overscroll-behavior:contain; }
+.dialog :global(.public-support-contact-fields) label { font-size:13px; gap:6px; }
+.dialog :global(.public-support-contact-fields) input { font-size:16px; min-height:46px; }
+.dialog :global(.public-support-contact-fields) { gap:12px; }
+.dialog form .submit { grid-column:1 / -1; display:flex; width:100%; justify-content:center; align-items:center; gap:10px; min-height:48px; margin-top:6px; padding:12px; font-size:16px; }
+.dialog form .submit span { position:static; width:auto; height:auto; overflow:visible; clip:auto; }
+.tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+.tabs a { padding:10px 14px; border:1px solid #cbd5d5; border-radius:8px; color:inherit; text-decoration:none; }
+.tabs a[aria-current=page] { background:#fff1e9; border-color:#c83b00; font-weight:750; }
+.handoff { display:grid; gap:12px; margin:20px 0; }
+.handoff label { display:grid; gap:6px; font-weight:650; }
+.handoff input, .handoff textarea { width:100%; min-width:0; font:inherit; padding:10px; border:1px solid #cbd5d5; border-radius:8px; }
+.handoff textarea { min-height:130px; resize:vertical; }
+.handoff h2, .handoff p { margin:0; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+.actions :global(.btn) { display:inline-flex; align-items:center; gap:8px; }
+
+.dialog .receivedSection { display:grid; grid-template-rows:auto minmax(0,1fr); }
+.receipt { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:40px 24px; min-height:min(420px,55dvh); overflow-y:auto; text-align:center; background:#f5faf8; }
+.receipt > svg { width:64px; height:64px; flex:none; color:#087f6d; }
+.receipt h3 { margin:0; font-size:24px; line-height:1.25; }
+.receipt p { margin:0; max-width:34ch; line-height:1.5; color:#4d6367; }
+.receipt button { min-height:48px; max-width:100%; border:1px solid #c3ced0; border-radius:8px; background:#fff; color:#202b30; font:inherit; font-weight:700; padding:12px 18px; cursor:pointer; }
+.receipt button:focus-visible { outline:3px solid #263c42; outline-offset:3px; }
+.receipt button:disabled { opacity:.6; cursor:wait; }
+@media(max-height:500px) { .receipt { justify-content:flex-start; gap:12px; padding:20px; } }
+
+.launchers:global(.public-support-launcher) { display:flex; gap:0; padding:0; max-width:calc(100vw - 24px); overflow:visible; }
+.launcher { display:flex; align-items:center; justify-content:center; gap:8px; min-height:48px; min-width:0; padding:10px 14px; border:0; background:#fff; color:#a93000; font:inherit; font-size:14px; font-weight:750; cursor:pointer; }
+.launcher:first-child { border-radius:6px 0 0 6px; }
+.launcher[data-channel=buying] { border-radius:6px; background:#b83200; color:#fff; }
+.launchers .launcher span { display:inline; position:static; width:auto; height:auto; clip:auto; overflow:visible; white-space:normal; }
+.launcher svg { flex:none; width:20px; height:20px; }
+.launchers .launcher .launcherLabel { display:grid; gap:2px; text-align:left; line-height:1.25; }
+.launcherLabel strong { font-size:inherit; font-weight:750; }
+.launcherLabel small { font-size:11px; font-weight:500; }
+.launcher:focus-visible { outline:3px solid #263c42; outline-offset:3px; }
+@media(max-width:600px) {
+ .launchers:global(.public-support-launcher) { width:auto; height:auto; right:12px; }
+ .launcher { gap:6px; padding:9px 10px; font-size:12px; flex:1; }
+}
+
+.agentList:global(.support-agent-list) > form { grid-template-columns:minmax(0,1fr) minmax(130px,.7fr) minmax(130px,.7fr); }
+.agentList :global(.support-agent-limit) { min-width:0; grid-column:auto; grid-row:auto; }
+.agentList select { min-height:44px; width:100%; max-width:100%; font:inherit; }
+@media(max-width:720px) {
+ .agentList:global(.support-agent-list) > form { grid-template-columns:minmax(0,1fr); }
+ .agentList:global(.support-agent-list) > form > * { grid-column:1; grid-row:auto; }
+}
+
+/* Leave the open Market drawer and its pagination unobstructed on narrow screens. */
+@media (max-width: 900px) {
+ :global(body:has(.discovery-drawer-workbench[data-panel-open="true"])) .launchers { right:8px; width:44px; }
+ :global(body:has(.discovery-drawer-workbench[data-panel-open="true"])) .launcher { min-height:44px; width:44px; padding:10px; }
+ :global(body:has(.discovery-drawer-workbench[data-panel-open="true"])) .launchers .launcher span { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+}
+
+.replyAudience { display:grid; gap:8px; }
+.replyAudience select { width:100%; min-height:44px; padding:8px 10px; font:inherit; color:inherit; background:#fff; border:1px solid #bac9ca; border-radius:6px; }
+.replyAudience select:focus-visible { outline:3px solid #263c42; outline-offset:2px; }
+
+/* Buying chat entry: message first, then the two follow-up details. */
+.dialog header .chatEyebrow { display:flex; align-items:center; gap:5px; font-size:11px; letter-spacing:.04em; color:#a43108; }
+.chatEyebrow svg { width:13px; height:13px; }
+.welcome { display:grid; gap:8px; padding:20px 18px 16px; background:linear-gradient(135deg,#fff4ec,#fff 80%); }
+.welcomeIcon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#ffe4d2; color:#a63108; }
+.welcomeIcon svg { width:22px; height:22px; }
+.welcome h3 { margin:0; font-size:21px; line-height:1.2; letter-spacing:-.02em; }
+.welcome p { margin:0; max-width:36ch; color:#4d6065; font-size:14px; line-height:1.45; }
+.dialog .intake { grid-template-columns:minmax(0,1fr); gap:9px; padding:14px 18px 18px; }
+.dialog .intake > label { font-size:13px; }
+.dialog .intake textarea { width:100%; font-size:16px; min-height:92px; }
+.dialog .intake :global(.public-support-contact-fields) { gap:10px; margin-top:3px; }
+.dialog .intake :global(.public-support-contact-fields) label { grid-column:auto; }
+@media(max-width:360px) {
+ .welcome { padding:14px 14px 12px; }
+ .welcome h3 { font-size:20px; }
+ .dialog .intake { padding:12px 14px 14px; }
+}
+@media(max-height:600px) { .welcomeIcon { display:none; } .welcome { padding-block:12px; } }
+
+.requestExcerpt { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.requestDetails { white-space:pre-wrap; overflow-wrap:anywhere; }

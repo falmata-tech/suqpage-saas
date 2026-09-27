@@ -1,113 +1,35 @@
 import { clockTimeLabel } from "./clock-display";
 
 export type FeaturedProgramPolicy = {
-  morningStartMinute: number;
-  morningEndMinute: number;
-  afternoonStartMinute: number;
-  afternoonEndMinute: number;
+  startMinute: number;
+  endMinute: number;
+  presentationMinutes: number;
   changeoverMinutes: number;
-  sponsorBreakEvery: number;
-  sponsorBreakMinutes: number;
-  sponsorBreakLabel: string;
-  intermissionLabel: string;
+  sponsorMentionCount: number;
+  sponsorMentionMinutes: number;
 };
 
-export const DEFAULT_FEATURED_PROGRAM_POLICY: FeaturedProgramPolicy = {
-  morningStartMinute: 8 * 60,
-  morningEndMinute: 13 * 60,
-  afternoonStartMinute: 17 * 60,
-  afternoonEndMinute: 22 * 60,
+export const DEFAULT_FEATURED_PROGRAM_POLICY: FeaturedProgramPolicy = Object.freeze({
+  startMinute: 20 * 60 + 30,
+  endMinute: 24 * 60,
+  presentationMinutes: 30,
   changeoverMinutes: 5,
-  sponsorBreakEvery: 3,
-  sponsorBreakMinutes: 10,
-  sponsorBreakLabel: "Sponsor break",
-  intermissionLabel: "Lunch and program break",
-};
-
-export const FEATURED_PROGRAM_TARGET_PRESENTATION_MINUTES = 30;
-export const FEATURED_PROGRAM_MIN_SESSION_MINUTES = 60;
-export const MAX_FEATURED_SHOWROOMS = 40;
-
-export type FeaturedBroadcastPhase = "scheduled" | "live" | "intermission" | "ended";
-export type FeaturedProgramSession = "morning" | "afternoon";
-
-export type ResolvedFeaturedProgramSessions = {
-  morning: { session: "morning"; startMinute: number; endMinute: number; boothCount: number };
-  afternoon: { session: "afternoon"; startMinute: number; endMinute: number; boothCount: number };
-};
-
+  sponsorMentionCount: 4,
+  sponsorMentionMinutes: 5,
+});
+export const MAX_FEATURED_SHOWROOMS = 6;
+export type FeaturedBroadcastPhase = "scheduled" | "live" | "ended";
+export type FeaturedProgramSession = "evening";
 export type FeaturedBoothWalkthrough = {
-  kind: "booth";
-  slot: number;
-  session: FeaturedProgramSession;
-  start: number;
-  end: number;
-  label: string;
-  current: boolean;
+  kind: "booth"; slot: number; session: FeaturedProgramSession;
+  start: number; end: number; label: string; current: boolean;
 };
-
 export type FeaturedProgramBreak = {
-  kind: "changeover" | "sponsor_break" | "intermission";
-  session: FeaturedProgramSession | "intermission";
-  start: number;
-  end: number;
-  label: string;
-  timeLabel: string;
-  current: boolean;
-  sponsorSlot?: number;
+  kind: "changeover" | "sponsor_break"; session: FeaturedProgramSession;
+  start: number; end: number; label: string; timeLabel: string;
+  current: boolean; sponsorSlot?: number;
 };
-
 export type FeaturedProgramAgendaEntry = FeaturedBoothWalkthrough | FeaturedProgramBreak;
-
-export function featuredProgramDisplayOrder(
-  walkthroughs: readonly FeaturedBoothWalkthrough[],
-  now: number | Date,
-) {
-  if (!walkthroughs.length) return [];
-  const value = now instanceof Date ? now.getTime() : Number(now);
-  if (!Number.isFinite(value)) throw new Error("Featured program display time is invalid.");
-  const current = walkthroughs.find((entry) => value >= entry.start && value < entry.end);
-  const completed = walkthroughs.filter((entry) => entry.end <= value).at(-1);
-  const anchor = current || completed || walkthroughs[0];
-  const anchorIndex = walkthroughs.indexOf(anchor);
-  return [...walkthroughs.slice(anchorIndex), ...walkthroughs.slice(0, anchorIndex)].map((entry) => entry.slot);
-}
-
-function validLabel(value: string, field: string) {
-  const cleaned = String(value || "").trim();
-  if (cleaned.length < 2 || cleaned.length > 60 || /[\u0000-\u001F\u007F]/.test(cleaned)) {
-    throw new Error(`${field} must be 2 to 60 plain-text characters.`);
-  }
-  return cleaned;
-}
-
-export function validateFeaturedProgramPolicy(input: FeaturedProgramPolicy): FeaturedProgramPolicy {
-  const values = [
-    input.morningStartMinute,
-    input.morningEndMinute,
-    input.afternoonStartMinute,
-    input.afternoonEndMinute,
-    input.changeoverMinutes,
-    input.sponsorBreakEvery,
-    input.sponsorBreakMinutes,
-  ];
-  if (!values.every(Number.isSafeInteger)) throw new Error("Featured program times and intervals must use whole minutes.");
-  if (
-    input.morningStartMinute < 0 ||
-    input.morningStartMinute >= input.morningEndMinute ||
-    input.morningEndMinute + 30 > input.afternoonStartMinute ||
-    input.afternoonStartMinute >= input.afternoonEndMinute ||
-    input.afternoonEndMinute > 23 * 60 + 59
-  ) throw new Error("Featured program sessions must be ordered on one day with at least a 30-minute intermission.");
-  if (input.changeoverMinutes < 2 || input.changeoverMinutes > 20) throw new Error("Booth changeovers must be between 2 and 20 minutes.");
-  if (input.sponsorBreakEvery < 2 || input.sponsorBreakEvery > 8) throw new Error("Sponsor breaks must occur after every 2 to 8 booths.");
-  if (input.sponsorBreakMinutes < 5 || input.sponsorBreakMinutes > 30) throw new Error("Sponsor breaks must be between 5 and 30 minutes.");
-  return {
-    ...input,
-    sponsorBreakLabel: validLabel(input.sponsorBreakLabel, "Sponsor break label"),
-    intermissionLabel: validLabel(input.intermissionLabel, "Intermission label"),
-  };
-}
 
 export function validateFeaturedProgramDate(dateIso: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) throw new Error("Featured program date must use YYYY-MM-DD.");
@@ -115,186 +37,77 @@ export function validateFeaturedProgramDate(dateIso: string) {
   const calendar = new Date(Date.UTC(year, month - 1, day));
   if (calendar.getUTCFullYear() !== year || calendar.getUTCMonth() !== month - 1 || calendar.getUTCDate() !== day) throw new Error("Featured program date is invalid.");
 }
-
-function machineTime(minutesFromMidnight: number) {
-  const hours = Math.floor(minutesFromMidnight / 60);
-  const minutes = minutesFromMidnight % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+function countWithinCapacity(count: number) {
+  if (!Number.isSafeInteger(count) || count < 0 || count > MAX_FEATURED_SHOWROOMS) throw new Error(`Featured program booth count must be between 0 and ${MAX_FEATURED_SHOWROOMS}.`);
 }
-
-function atEthiopiaMinute(dateIso: string, minutesFromMidnight: number) {
-  return Date.parse(`${dateIso}T${machineTime(minutesFromMidnight)}:00+03:00`);
+function officialPolicy(policy: FeaturedProgramPolicy) {
+  if (Object.entries(DEFAULT_FEATURED_PROGRAM_POLICY).some(([key,value]) => policy[key as keyof FeaturedProgramPolicy] !== value)) throw new Error("Daily Featured uses the official evening schedule.");
+  return policy;
 }
-
-function splitBoothCount(boothCount: number, policy: FeaturedProgramPolicy) {
-  const morningMinutes = policy.morningEndMinute - policy.morningStartMinute;
-  const afternoonMinutes = policy.afternoonEndMinute - policy.afternoonStartMinute;
-  const morningCount = boothCount < 2
-    ? boothCount
-    : Math.max(1, Math.min(boothCount - 1, Math.round(boothCount * morningMinutes / (morningMinutes + afternoonMinutes))));
-  return { morningCount, afternoonCount: boothCount - morningCount };
-}
-
-function boundaryMinutes(count: number, policy: FeaturedProgramPolicy) {
-  let total = 0;
-  for (let index = 1; index < count; index += 1) {
-    total += index % policy.sponsorBreakEvery === 0
-      ? policy.sponsorBreakMinutes
-      : policy.changeoverMinutes;
-  }
-  return total;
-}
-
-function contractedSessionStart(startMinute: number, endMinute: number, count: number, policy: FeaturedProgramPolicy) {
-  if (!count) return endMinute;
-  const capacity = endMinute - startMinute;
-  const required = count * FEATURED_PROGRAM_TARGET_PRESENTATION_MINUTES + boundaryMinutes(count, policy);
-  const minimum = Math.min(FEATURED_PROGRAM_MIN_SESSION_MINUTES, capacity);
-  return endMinute - Math.min(capacity, Math.max(minimum, required));
-}
-
-export function resolveFeaturedProgramSessions(
-  boothCount: number,
-  rawPolicy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
-): ResolvedFeaturedProgramSessions {
-  if (!Number.isSafeInteger(boothCount) || boothCount < 0 || boothCount > MAX_FEATURED_SHOWROOMS) {
-    throw new Error(`Featured program booth count must be between 0 and ${MAX_FEATURED_SHOWROOMS}.`);
-  }
-  const policy = validateFeaturedProgramPolicy(rawPolicy);
-  const { morningCount, afternoonCount } = splitBoothCount(boothCount, policy);
-  return {
-    morning: {
-      session: "morning",
-      startMinute: contractedSessionStart(policy.morningStartMinute, policy.morningEndMinute, morningCount, policy),
-      endMinute: policy.morningEndMinute,
-      boothCount: morningCount,
-    },
-    afternoon: {
-      session: "afternoon",
-      startMinute: contractedSessionStart(policy.afternoonStartMinute, policy.afternoonEndMinute, afternoonCount, policy),
-      endMinute: policy.afternoonEndMinute,
-      boothCount: afternoonCount,
-    },
-  };
-}
-
 export function featuredProgramTimeLabel(startMinute: number, endMinute: number) {
   return `${clockTimeLabel(startMinute)}–${clockTimeLabel(endMinute)}`;
 }
 
-function sessionAgenda(input: {
-  dateIso: string;
-  session: FeaturedProgramSession;
-  startMinute: number;
-  endMinute: number;
-  count: number;
-  slotOffset: number;
-  policy: FeaturedProgramPolicy;
-  now: number;
-}): FeaturedProgramAgendaEntry[] {
-  if (input.count === 0) return [];
-  const boundaryKinds = Array.from({ length: Math.max(0, input.count - 1) }, (_, index) =>
-    (index + 1) % input.policy.sponsorBreakEvery === 0 ? "sponsor_break" as const : "changeover" as const);
-  const reservedMinutes = boundaryKinds.reduce((total, kind) => total + (kind === "sponsor_break" ? input.policy.sponsorBreakMinutes : input.policy.changeoverMinutes), 0);
-  const sessionMinutes = input.endMinute - input.startMinute;
-  const presentationMinutes = sessionMinutes - reservedMinutes;
-  if (presentationMinutes < input.count) throw new Error("The featured program policy cannot fit every participating booth into its sessions.");
-  const baseDuration = Math.floor(presentationMinutes / input.count);
-  const remainder = presentationMinutes % input.count;
-  const entries: FeaturedProgramAgendaEntry[] = [];
-  let cursor = input.startMinute;
-  for (let index = 0; index < input.count; index += 1) {
-    const duration = baseDuration + (index < remainder ? 1 : 0);
-    const endMinute = cursor + duration;
-    const start = atEthiopiaMinute(input.dateIso, cursor);
-    const end = atEthiopiaMinute(input.dateIso, endMinute);
-    entries.push({
-      kind: "booth",
-      slot: input.slotOffset + index + 1,
-      session: input.session,
-      start,
-      end,
-      label: featuredProgramTimeLabel(cursor, endMinute),
-      current: input.now >= start && input.now < end,
-    });
-    cursor = endMinute;
-    const boundaryKind = boundaryKinds[index];
-    if (!boundaryKind) continue;
-    const breakMinutes = boundaryKind === "sponsor_break" ? input.policy.sponsorBreakMinutes : input.policy.changeoverMinutes;
-    const breakEnd = cursor + breakMinutes;
-    const breakStartEpoch = atEthiopiaMinute(input.dateIso, cursor);
-    const breakEndEpoch = atEthiopiaMinute(input.dateIso, breakEnd);
-    entries.push({
-      kind: boundaryKind,
-      session: input.session,
-      start: breakStartEpoch,
-      end: breakEndEpoch,
-      label: boundaryKind === "sponsor_break" ? input.policy.sponsorBreakLabel : "Booth changeover",
-      timeLabel: featuredProgramTimeLabel(cursor, breakEnd),
-      current: input.now >= breakStartEpoch && input.now < breakEndEpoch,
-    });
-    cursor = breakEnd;
-  }
-  return entries;
+// A category recurs weekly. Rotating its alphabetical pool avoids a permanent
+// first-six shortlist while keeping the same lineup throughout a given date.
+export function automaticFeaturedLineup<T>(dateIso: string, eligible: readonly T[]): T[] {
+  validateFeaturedProgramDate(dateIso);
+  if (!eligible.length) return [];
+  const week = Math.floor((Date.parse(`${dateIso}T00:00:00Z`) - Date.UTC(2026,0,5)) / (7 * 86400000));
+  const offset = ((week * MAX_FEATURED_SHOWROOMS) % eligible.length + eligible.length) % eligible.length;
+  return Array.from({length:Math.min(eligible.length,MAX_FEATURED_SHOWROOMS)},(_,index)=>eligible[(offset+index)%eligible.length]);
 }
 
-export function buildFeaturedProgramAgenda(
-  dateIso: string,
-  boothCount: number,
-  now: number | Date,
-  rawPolicy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
-): FeaturedProgramAgendaEntry[] {
-  validateFeaturedProgramDate(dateIso);
-  if (!Number.isSafeInteger(boothCount) || boothCount < 0 || boothCount > MAX_FEATURED_SHOWROOMS) {
-    throw new Error(`Featured program booth count must be between 0 and ${MAX_FEATURED_SHOWROOMS}.`);
-  }
-  const policy = validateFeaturedProgramPolicy(rawPolicy);
+export function buildFeaturedProgramAgenda(dateIso: string, boothCount: number, now: number | Date, rawPolicy = DEFAULT_FEATURED_PROGRAM_POLICY): FeaturedProgramAgendaEntry[] {
+  validateFeaturedProgramDate(dateIso); countWithinCapacity(boothCount);
+  const policy = officialPolicy(rawPolicy);
   const value = now instanceof Date ? now.getTime() : now;
   if (!Number.isFinite(value)) throw new Error("Featured program current time is invalid.");
-  const sessions = resolveFeaturedProgramSessions(boothCount, policy);
-  const morning = sessionAgenda({ dateIso, session: "morning", startMinute: sessions.morning.startMinute, endMinute: sessions.morning.endMinute, count: sessions.morning.boothCount, slotOffset: 0, policy, now: value });
-  const intermissionStart = atEthiopiaMinute(dateIso, policy.morningEndMinute);
-  const intermissionEndMinute = sessions.afternoon.boothCount ? sessions.afternoon.startMinute : policy.morningEndMinute;
-  const intermissionEnd = atEthiopiaMinute(dateIso, intermissionEndMinute);
-  const intermission: FeaturedProgramBreak = {
-    kind: "intermission",
-    session: "intermission",
-    start: intermissionStart,
-    end: intermissionEnd,
-    label: policy.intermissionLabel,
-    timeLabel: featuredProgramTimeLabel(policy.morningEndMinute, intermissionEndMinute),
-    current: value >= intermissionStart && value < intermissionEnd,
+  if (!boothCount) return [];
+  // Numeric minute offsets make midnight the following day, never 24:00 PM.
+  const midnight = Date.parse(`${dateIso}T00:00:00+03:00`);
+  const entries: FeaturedProgramAgendaEntry[] = [];
+  const sponsorsAfter = Array.from({length:policy.sponsorMentionCount},(_,i)=>Math.ceil(boothCount*(i+1)/policy.sponsorMentionCount));
+  let cursor=policy.startMinute, sponsorSlot=0;
+  const interval=(minutes:number)=>{
+    const start=midnight+cursor*60000; const label=featuredProgramTimeLabel(cursor,cursor+minutes);
+    cursor+=minutes; const end=midnight+cursor*60000;
+    return {start,end,label,current:value>=start && value<end,session:"evening" as const};
   };
-  const afternoon = sessionAgenda({ dateIso, session: "afternoon", startMinute: sessions.afternoon.startMinute, endMinute: sessions.afternoon.endMinute, count: sessions.afternoon.boothCount, slotOffset: sessions.morning.boothCount, policy, now: value });
-  let sponsorSlot = 0;
-  return [...morning, intermission, ...afternoon].map((entry) => entry.kind === "sponsor_break"
-    ? { ...entry, sponsorSlot: ++sponsorSlot }
-    : entry);
+  for(let slot=1;slot<=boothCount;slot++) {
+    entries.push({kind:"booth",slot,...interval(policy.presentationMinutes)});
+    const mentions=sponsorsAfter.filter(boundary=>boundary===slot).length;
+    for(let i=0;i<mentions;i++) {
+      const span=interval(policy.sponsorMentionMinutes);
+      entries.push({...span,kind:"sponsor_break",label:"Sponsor mention",timeLabel:span.label,sponsorSlot:++sponsorSlot});
+    }
+    if(!mentions && slot<boothCount) {
+      const span=interval(policy.changeoverMinutes);
+      entries.push({...span,kind:"changeover",label:"Booth changeover",timeLabel:span.label});
+    }
+  }
+  if(cursor>policy.endMinute) throw new Error("The lineup exceeds the evening broadcast window.");
+  return entries;
 }
-
-export function featuredBroadcastPhase(
-  dateIso: string,
-  boothCount: number,
-  now: number | Date,
-  rawPolicy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
-): FeaturedBroadcastPhase {
-  validateFeaturedProgramDate(dateIso);
-  const policy = validateFeaturedProgramPolicy(rawPolicy);
-  const sessions = resolveFeaturedProgramSessions(boothCount, policy);
-  const value = now instanceof Date ? now.getTime() : now;
-  if (value < atEthiopiaMinute(dateIso, sessions.morning.startMinute)) return "scheduled";
-  if (sessions.morning.boothCount && value < atEthiopiaMinute(dateIso, sessions.morning.endMinute)) return "live";
-  if (!sessions.afternoon.boothCount) return "ended";
-  if (value < atEthiopiaMinute(dateIso, sessions.afternoon.startMinute)) return "intermission";
-  if (value < atEthiopiaMinute(dateIso, sessions.afternoon.endMinute)) return "live";
-  return "ended";
+export function resolveFeaturedProgramSessions(boothCount:number,policy=DEFAULT_FEATURED_PROGRAM_POLICY) {
+  const agenda=buildFeaturedProgramAgenda("2026-01-01",boothCount,0,policy);
+  const midnight=Date.parse("2026-01-01T00:00:00+03:00");
+  return {evening:{session:"evening" as const,startMinute:policy.startMinute,endMinute:agenda.length?(agenda.at(-1)!.end-midnight)/60000:policy.startMinute,boothCount}};
 }
-
-export function featuredBoothWalkthroughs(
-  dateIso: string,
-  boothCount: number,
-  now: number | Date,
-  policy: FeaturedProgramPolicy = DEFAULT_FEATURED_PROGRAM_POLICY,
-): FeaturedBoothWalkthrough[] {
-  return buildFeaturedProgramAgenda(dateIso, boothCount, now, policy).filter((entry): entry is FeaturedBoothWalkthrough => entry.kind === "booth");
+export function featuredBroadcastPhase(dateIso:string,boothCount:number,now:number|Date,policy=DEFAULT_FEATURED_PROGRAM_POLICY):FeaturedBroadcastPhase {
+  const agenda=buildFeaturedProgramAgenda(dateIso,boothCount,now,policy);
+  const value=now instanceof Date?now.getTime():now;
+  if(!agenda.length) return "ended";
+  return value<agenda[0].start?"scheduled":value<agenda.at(-1)!.end?"live":"ended";
+}
+export function featuredBoothWalkthroughs(dateIso:string,boothCount:number,now:number|Date,policy=DEFAULT_FEATURED_PROGRAM_POLICY):FeaturedBoothWalkthrough[] {
+  return buildFeaturedProgramAgenda(dateIso,boothCount,now,policy).filter((entry):entry is FeaturedBoothWalkthrough=>entry.kind==="booth");
+}
+export function featuredProgramDisplayOrder(walkthroughs:readonly FeaturedBoothWalkthrough[],now:number|Date) {
+  if(!walkthroughs.length) return [];
+  const value=now instanceof Date?now.getTime():now;
+  if(!Number.isFinite(value)) throw new Error("Featured program display time is invalid.");
+  const anchor=walkthroughs.find(entry=>value>=entry.start&&value<entry.end)||walkthroughs.filter(entry=>entry.end<=value).at(-1)||walkthroughs[0];
+  const index=walkthroughs.indexOf(anchor);
+  return [...walkthroughs.slice(index),...walkthroughs.slice(0,index)].map(entry=>entry.slot);
 }

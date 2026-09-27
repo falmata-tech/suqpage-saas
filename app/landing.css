@@ -321,9 +321,7 @@
   .landing-footer { display: none; }
   .landing-header { padding-top: env(safe-area-inset-top); }
   .landing-nav { gap: 6px; }
-  .landing-nav .suqpage-brand { min-height: 44px; gap: 5px; }
-  .landing-nav .suqpage-brand img { width: 28px; height: 32px; flex-basis: 28px; }
-  .landing-nav .suqpage-wordmark { font-size: 20px; }
+  .landing-nav .suqpage-brand { --suqpage-mark-width: 28px; --suqpage-wordmark-size: 22px; }
   .landing-nav .language-selector select { max-width: 110px; font-size: 12px; }
   .landing-nav .language-selector > svg { display: none; }
   .public-mobile-page { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
@@ -378,7 +376,6 @@
 .public-app-shell { display: grid; position: relative; min-height: 100dvh; grid-template-columns: 212px minmax(0, 1fr); grid-template-rows: 66px minmax(0, 1fr); background: var(--mp-canvas); }
 .public-app-header { display: flex; position: sticky; z-index: 70; top: 0; grid-column: 1 / -1; grid-row: 1; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--mp-line); background: rgb(255 255 255 / 96%); backdrop-filter: blur(16px); }
 .public-app-brand { font-size: 1rem; }
-.public-app-brand img { width: 36px; height: 36px; }
 .public-app-purpose { color: #64767c; font-size: .7rem; font-weight: 750; }
 .public-app-rail { display: flex; position: sticky; z-index: 40; top: 66px; height: calc(100dvh - 66px); grid-column: 1; grid-row: 2; flex-direction: column; gap: 18px; padding: 18px 13px 16px; border-right: 1px solid var(--mp-line); background: rgb(255 255 255 / 94%); backdrop-filter: blur(14px); }
 .public-app-rail-group { display: grid; gap: 6px; }
@@ -541,9 +538,7 @@
   .public-app-shell-showroom { padding-bottom: 0; }
   .public-app-rail,.public-app-shell-showroom > .public-app-header { display: none; }
   .public-app-header { height: calc(54px + env(safe-area-inset-top)); gap: 12px; padding: env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); }
-  .public-app-header .suqpage-brand { min-height: 44px; gap: 7px; }
-  .public-app-header .suqpage-brand img { width: 30px; height: 34px; flex-basis: 30px; }
-  .public-app-header .suqpage-wordmark { font-size: 20px; }
+  .public-app-header .suqpage-brand { --suqpage-mark-width: 28px; --suqpage-wordmark-size: 22px; }
   .public-app-main { min-height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); background-position: center top,58% top; background-size: 100% 620px,auto 520px; }
   .public-app-showroom-main { height: auto; min-height: 100dvh; overflow: visible; background: #fff; }
   .public-app-shell-showroom .public-support-launcher { display: none; }
@@ -591,4 +586,13 @@
 
 @media (max-width: 350px) {
   .public-mobile-tabs > a,.public-mobile-tabs > button { font-size: .54rem; }
+}
+
+/* Explain the showroom value without replacing the Market with a landing page. */
+.public-market-experience .public-experience-head { grid-template-columns: minmax(0,1fr); gap: 4px; padding: 12px 16px; }
+.public-market-experience .public-experience-head h1 { font-size: clamp(1.15rem,2.2vw,1.6rem); line-height: 1.18; }
+.public-market-experience .public-experience-head p { display: block; grid-column: 1; grid-row: auto; max-width: 850px; font-size: .8rem; line-height: 1.45; }
+@media (max-width: 600px) {
+  .public-market-experience .public-experience-head { gap: 3px; padding: 8px 12px; }
+  .public-market-experience .public-experience-head p { font-size: .75rem; line-height: 1.4; }
 }

@@ -15,7 +15,7 @@ try{const context=await browser.newContext();const page=await context.newPage();
  assert.notEqual(await page.locator('.discovery-product-results > a').first().getAttribute('href'),before);await expect(map).toHaveAttribute('data-pagination-retained','yes');
  await page.getByRole('link',{name:'Previous page',exact:true}).click();await expect(page.locator('.discovery-pagination')).toContainText('Page 1');
  await expect(page.locator('.discovery-product-results > a').first()).toHaveAttribute('href',before);
- await page.locator('.discovery-search-result-types').getByRole('link',{name:/Businesses/}).click();await expect(page.locator('.discovery-product-results > a')).toHaveCount(0);assert.ok(await page.locator('.discovery-business-results > button').count()<=5);await expect(map).toHaveAttribute('data-pagination-retained','yes');
+ await page.getByRole('checkbox',{name:'Products & services',exact:true}).click();await expect(page).toHaveURL(/type=businesses/);await expect(page.locator('.discovery-product-results > a')).toHaveCount(0);assert.ok(await page.locator('.discovery-business-results > button').count()<=5);await expect(map).toHaveAttribute('data-pagination-retained','yes');
  await page.reload();await expect(page.locator('.discovery-business-results > button').first()).toBeVisible();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const audit=await new AxeBuilder({page}).include('.discovery-summary').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(audit.violations,[]);

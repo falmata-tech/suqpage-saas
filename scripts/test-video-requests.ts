@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {getDb,getUserById,closeDbForTests} from './testing/postgres-fixture';
+import {createVideoRequest,reviewVideoRequest,getVideoRequest} from '../lib/support-video-requests';
+import {updateSupportAgentSetting,getSupportConversation} from '../lib/support';
+import {executeBasicProductUpkeep} from '../lib/product-upkeep';
+import {postgresProductUpkeepPort} from '../lib/product-upkeep-postgres';
+import {ownerPagePort} from '../lib/owner-page-runtime';
+import {starterPage,STARTER_VIDEO_REF,STARTER_VIDEO_URL} from '../lib/business-starter';
+import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
+import type {SessionUser} from '../lib/types';
+async function main(){
+ const db=await getDb();process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED='1';process.env.SUQPAGE_TELEGRAM_BOT_TOKEN='';process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID='';delete process.env.SUQPAGE_YOUTUBE_CHANNEL_URL;
+ try{
+ const business=async(handle:string)=>Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,hero_image_path) VALUES(?,?,'composition',?,'draft',?)").run(handle,handle,JSON.stringify(curatedManifestForLegacyDesign('novatech')),starterPage.heroImage)).insertedId);
+ const a=await business('video-a'),b=await business('video-b');
+ const user=async(name:string,role:SessionUser['access_role'],bid:number|null)=>{const id=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES(?,'unused',?,?,?)").run(`${name}@example.test`,name,role==='client'?'owner':'admin',bid)).insertedId);await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);return (await getUserById(id))!;};
+ const owner=await user('owner','client',a),foreign=await user('foreign','client',b),staff=await user('staff','operations_manager',null),other=await user('other','team_member',null);
+ await updateSupportAgentSetting(staff,{userId:staff.id,enabled:true,maxOpenConversations:10,queueScope:'support'});
+ const command={kind:'create',businessId:a,productId:null,expectedContentVersion:1,idempotencyKey:crypto.randomUUID(),name:'Example item',description:'Original description',availability:'available',offeringKind:'standard_product',quantityMode:'optional',categoryId:null,imageAction:'keep',videoRef:''};
+ const created=await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,command,null);
+ let product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,STARTER_VIDEO_REF);
+ await assert.rejects(()=>executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:created.contentVersion,idempotencyKey:crypto.randomUUID(),videoRef:'youtube:aqz-KE-bpKQ'},null),/Request a video/);
+ const input={target:'product',productId:created.productId,sourceUrl:'https://example.com/video',note:'Please use this product demonstration.',idempotencyKey:crypto.randomUUID()};
+ await assert.rejects(()=>createVideoRequest(foreign,input));await assert.rejects(()=>createVideoRequest(owner,{...input,sourceUrl:'javascript:alert(1)'}));
+ const request=await createVideoRequest(owner,input);assert.equal((await createVideoRequest(owner,input)).id,request.id);
+ await assert.rejects(()=>createVideoRequest(owner,{...input,sourceUrl:'https://example.com/changed'}));
+ const approve={decision:'approved',youtubeUrl:'https://www.youtube.com/watch?v=aqz-KE-bpKQ',reply:'Your product video is ready.'};
+ await assert.rejects(()=>reviewVideoRequest(owner,request.id,approve));await assert.rejects(()=>reviewVideoRequest(other,request.id,approve));await assert.rejects(()=>getVideoRequest(foreign,request.id));
+ await assert.rejects(()=>reviewVideoRequest(staff,request.id,{...approve,youtubeUrl:'https://example.com/not-youtube'}));
+ assert.equal((await getVideoRequest(owner,request.id))?.status,'pending');
+ const decisions=await Promise.all([reviewVideoRequest(staff,request.id,approve),reviewVideoRequest(staff,request.id,approve)]);assert.equal(decisions.filter(r=>r.duplicate).length,1);
+ product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,'youtube:aqz-KE-bpKQ');assert.equal(product.description,'Original description');assert.equal(JSON.parse(String(product.media_json)).length,1);
+ assert.equal((await getVideoRequest(owner,request.id))?.status,'approved');assert.equal((await getSupportConversation(owner,request.id)).messages.filter(m=>m.body.includes('Your product video is ready.')).length,1);
+ const second=await createVideoRequest(owner,{...input,idempotencyKey:crypto.randomUUID()});
+ await db.prepare('UPDATE products SET video_ref=?,media_json=? WHERE id=?').run(STARTER_VIDEO_REF,JSON.stringify([{kind:'video',ref:STARTER_VIDEO_REF}]),created.productId);
+ await assert.rejects(()=>reviewVideoRequest(staff,second.id,approve),/video changed/);
+ await reviewVideoRequest(staff,second.id,{decision:'declined',reply:'Please send the correct product video.'});assert.equal((await getVideoRequest(owner,second.id))?.status,'declined');
+ const draft=await ownerPagePort.create(a,owner.id,{...starterPage,about:'Unpublished owner text'});
+ await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(a,JSON.stringify({...starterPage,about:'Existing public text'}),owner.id,Date.now());
+ await assert.rejects(()=>ownerPagePort.commit(owner,draft,{kind:'content',content:{...draft.content,videoUrl:approve.youtubeUrl}}),/Request a video/);
+ const header=await createVideoRequest(owner,{target:'header',sourceUrl:'https://example.com/header',idempotencyKey:crypto.randomUUID()});
+ await reviewVideoRequest(staff,header.id,approve);
+ const saved=await ownerPagePort.read(a);assert.equal(saved?.content.about,'Unpublished owner text');assert.equal(saved?.content.videoUrl,approve.youtubeUrl);
+ const pub=JSON.parse(String((await db.prepare('SELECT content_json FROM owner_page_publications WHERE business_id=? ORDER BY revision DESC LIMIT 1').get(a)).content_json));assert.equal(pub.about,'Existing public text');assert.equal(pub.videoUrl,approve.youtubeUrl);
+ assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(a)).status,'draft');
+ assert.equal(Number((await db.prepare('SELECT count(*) n FROM support_video_requests').get()).n),3);
+ assert.equal((await db.prepare("SELECT relrowsecurity enabled FROM pg_class WHERE oid='support_video_requests'::regclass").get()).enabled,true);
+ console.log('PASS default videos, normal-save bypass denial, target/tenant/staff isolation, approval without a configured channel, invalid provider denial, idempotent review, stale video denial, owner reply, private request records and exact draft/public field preservation.');
+ }finally{delete process.env.SUQPAGE_YOUTUBE_CHANNEL_URL;await closeDbForTests();}
+}
+main().catch(error=>{console.error(error);process.exitCode=1});

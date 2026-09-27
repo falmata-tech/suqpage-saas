@@ -14,3 +14,15 @@ export const DISCOVERY_INDUSTRIES = [
   { key: "home-living", label: "Furniture, art & building", shortLabel: "Furniture, art & building", icon: "frame", code: "HOM" },
   { key: "fashion-textiles", label: "Clothes, fabrics & leather", shortLabel: "Clothes & fabrics", icon: "thread", code: "FSH" },
 ] as const;
+
+/** Public category scope: bounded, allowlisted, stable and safe for cache/SQL parameters. */
+export function normalizeDiscoveryCategories(value?: string | readonly string[]): string[] {
+  const parts = (typeof value === "string" ? [value] : value || []).slice(0, 32)
+    .flatMap(item => item.slice(0, 1024).split(",").map(key => key.trim()));
+  const requested = new Set(parts);
+  return DISCOVERY_INDUSTRIES.filter(category => requested.has(category.key)).map(category => category.key);
+}
+
+export function discoveryCategoryKey(value?: string | readonly string[]): string {
+  return normalizeDiscoveryCategories(value).join(",") || "all";
+}

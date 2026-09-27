@@ -3,7 +3,7 @@ import { parseShopPageContent } from './owner-page-domain';
 import type { OfferingKind } from './offerings';
 
 // Explicit sample content for NEW private workspaces, never runtime fallbacks.
-export const STARTER_NOTICE = 'Your page is filled with editable examples. Replace the sample text, images, video, prices, location and contact links with your own before sharing your business.';
+export const STARTER_NOTICE = 'Make this example page your own before publishing.';
 export const STARTER_ABOUT = 'Sample page: Thoughtful pieces, personal service and custom work. Browse our collection, explore a service or tell us about something you would like made. Based in Addis Ababa, we welcome questions and help you choose what suits your needs.';
 export const STARTER_VIDEO_REF = 'youtube:M7lc1UVf-VE';
 export const STARTER_VIDEO_URL = 'https://www.youtube.com/watch?v=M7lc1UVf-VE';

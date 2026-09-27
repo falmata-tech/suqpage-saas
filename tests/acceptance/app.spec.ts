@@ -157,3 +157,15 @@ test('human searches preserve latest typing, filters and product navigation',asy
     env:{...process.env,SUQPAGE_SEARCH_CAPTURE_DIR:testInfo.outputPath('human-search')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
   });
 });
+
+// FE-019/BE-018: real production-mode staff actions, not canned API successes.
+for (const [name, script] of [
+  ['buying replies, private notes and ended/resolved history', 'capture-live-buying-staff.ts'],
+  ['video request approval and public gallery update', 'capture-video-requests.ts'],
+]) test(name, async ({}, testInfo) => {
+  test.setTimeout(180_000);
+  execFileSync(process.execPath, ['--import', 'tsx', path.join(process.cwd(), 'scripts', script)], {
+    env: {...process.env, SUQPAGE_TEST_SCREENSHOT_DIR: testInfo.outputPath('workflow')},
+    stdio: 'pipe', timeout: 150_000, maxBuffer: 4 * 1024 * 1024,
+  });
+});

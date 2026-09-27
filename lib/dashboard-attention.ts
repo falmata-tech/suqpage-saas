@@ -1,3 +1,4 @@
+import { SUPPORT_WAITING_SCOPE_SQL } from "./support";
 import { hasCapability } from "./capabilities";
 import { runtimeGet } from "./runtime-sql";
 import type { SessionUser } from "./types";
@@ -36,11 +37,11 @@ export async function getDashboardAttention(
         WHERE c.status='waiting'
           OR (c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
-            JOIN users u ON u.id=m.sender_user_id
-            JOIN user_access_profiles p ON p.user_id=u.id
+            LEFT JOIN users u ON u.id=m.sender_user_id
+            LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
               AND m.id>c.staff_last_read_message_id
-              AND p.access_role='client'
+              AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
       `),
     };
@@ -51,16 +52,16 @@ export async function getDashboardAttention(
       pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
-        WHERE c.status='waiting'
+        WHERE (c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL})
           OR (c.assigned_user_id=? AND c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
-            JOIN users u ON u.id=m.sender_user_id
-            JOIN user_access_profiles p ON p.user_id=u.id
+            LEFT JOIN users u ON u.id=m.sender_user_id
+            LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
               AND m.id>c.staff_last_read_message_id
-              AND p.access_role='client'
+              AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
-      `, user.id),
+      `, user.id, user.id),
     };
   }
 
@@ -82,7 +83,7 @@ export async function getDashboardAttention(
             AND m.id>c.${client ? "client_last_read_message_id" : "staff_last_read_message_id"}
             AND ${client
               ? "m.sender_user_id<>?"
-              : "EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=m.sender_user_id AND p.access_role='client')"}
+              : "EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=m.sender_user_id AND (m.sender_kind='visitor' OR p.access_role='client'))"}
         )
     `, ...[scopedBusinessId, ...(client ? [user.id] : [])]),
   };

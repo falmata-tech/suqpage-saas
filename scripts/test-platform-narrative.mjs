@@ -40,8 +40,8 @@ for (const file of ["components/DiscoveryWorkspace.tsx", "lib/discovery.ts", "li
 }
 assert.doesNotMatch(discovery, retiredGeneratedUrl);
 
-assert.match(home, /Discover businesses near you/);
-assert.match(home, /then inquire directly/);
+assert.match(home, /Everything a business offers, in one place/);
+assert.match(home, /Discover businesses near you\. Explore their story, products, services and capabilities/);
 assert.match(home, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
 assert.match(discovery, /Find businesses, products and services/);
 assert.match(discovery, /Open page/);
@@ -50,29 +50,36 @@ assert.match(discovery, /label: t\("Businesses"\)/);
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 
 assert.match(about, /Local businesses\. Easier to find/);
-assert.match(about, /grow, make, sell or provide a service/);
-assert.match(about, /gives your business a page/);
-assert.match(about, /starting in Ethiopia/i);
+assert.match(about, /manufacturers, makers, retailers and home businesses/);
+assert.match(about, /online showroom for their products and services/);
+assert.match(about, /shopfront without a physical store/);
+assert.match(about, /extend your existing shop online/);
+assert.doesNotMatch(about, /Already have a shop\?|Selling from home\?/);
+assert.match(about, /Find businesses in Ethiopia, see what they offer, and contact them directly\./);
+assert.doesNotMatch(about, /free during|pricing|launch offer/i, 'FE-052: no platform pricing claims');
 assert.match(about, /African businesses|businesses across Africa/);
-assert.match(about, /photos, videos, products, services and contact details/);
+assert.match(about, /Give customers one place to explore your business and what you offer/);
+assert.match(about, /Receive inquiries on Suqpage or through your social channels/);
 assert.match(about, /Daily Featured/);
 for (const action of ["Find a business", "See what they offer", "Ask the business", "Make your business easier to find"]) {
   assert.match(about, new RegExp(action));
 }
 assert.doesNotMatch(about, /transport arrangements|report a concern|commercial terms|specifications, quantities/i, "About remains a vision story instead of a support or transaction policy");
 
-assert.match(signup, /Set up your shop/);
+assert.match(signup, /Set up your business/);
 assert.match(signup, /name, category, and contact number/);
-assert.match(signup, /add products and prepare your page after setup/);
+assert.match(signup, /Next, make the example page your own/);
 assert.match(signupForm, />\{t\("Category"\)\}</);
 assert.match(signupForm, /Finish setup/);
 assert.doesNotMatch(signupForm, /requestText/);
 assert.match(login, /Use a one-time email code\./);
 assert.doesNotMatch(login, /Continue with Google|Use your Google account/);
-assert.match(login, /The same sign-in creates your account/);
+assert.match(login, /New business\? Enter your email to create your account/);
 assert.match(metadata, /Discover businesses, products and services/);
-assert.match(support, /Suqpage help or report/);
-assert.match(support, /Transport arrangements/);
+assert.doesNotMatch(support, /Ask for help/);
+assert.match(support, /Buying assistance/);
+assert.match(support, /Live chat/);
+assert.match(support, /Start chat/);
 assert.doesNotMatch(support, /visit a site|observe production|check a specific order/i);
 // FE-041 replaces the repeated page footer with a direct link per selected product.
 assert.match(businessPage, /buildInquiryMessage/);

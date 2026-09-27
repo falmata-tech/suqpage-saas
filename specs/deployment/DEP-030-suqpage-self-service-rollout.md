@@ -2,13 +2,38 @@
 id: DEP-030
 title: Data-preserving Suqpage self-service rollout
 status: in_progress
-related: [DEP-036, DEP-034, DEP-032, DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034]
+related: [FE-052, DEP-036, DEP-034, DEP-032, DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034]
 owners: [operations, security, product]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # DEP-030 - Data-preserving Suqpage self-service rollout
+
+## S43 final approved web rollout — 2026-09-27
+
+Owner approval covers cumulative S31–S47 web features and revised screens. Deploy
+only after check/release/provider acceptance/operations pass on isolated source.
+Verify Netlify site/account and Supabase project independently, take private
+public-schema backup, restore/rehearse 51–57, and prove original-column/table
+fingerprints unchanged. New demo flags and nullable support fields are additive;
+existing staff notes remain private. Retain schema on rollback; rollback code
+must preserve retired guest support and handle buying conversations safely.
+Bind commit, artifact/native validation and deployment receipt; monitor the exact
+published site. No Auth/SMTP, Storage or DNS configuration changes are required.
+Expo/mobile work waits until rollout is terminal.
+
+## S42 buying conversation rollout
+
+Before serving live buying code, back up and apply additive schema 56 following
+the release sequence. New `support_messages.visitor_visible` defaults false;
+never backfill private historical notes. Preflight requires migration 56.
+Rollback retains the column and messages. General guest Help/Transport stay
+retired; buying replies are explicitly visible text only. Local migration
+preserved 68 businesses; fresh/idempotent PostgreSQL tests pass. No hosted
+Realtime setting or provider credentials change. Native preparation in ADR-0023
+and docs/MOBILE-MONOREPO-PREP.md does not change deployment paths. Visual approval,
+full/build/release gates and monitored hosted rollout remain outstanding.
 
 ## Problem and outcome
 

@@ -2,7 +2,7 @@
 id: FE-046
 title: Complete new business starter pages
 status: done
-related: [FE-051, FE-038, BE-039, DEP-036, FE-040]
+related: [FE-052, FE-051, FE-038, BE-039, DEP-036, FE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L2
@@ -118,6 +118,21 @@ Handle edits move to Business details, first change immediate then once every
 30 days; a platform administrator may override with an audited support reason.
 Reserved old handles redirect public product links without bypassing privacy.
 New examples reuse admitted fictional ceramics imagery and include two photos
-and two YouTube links per offering. Account identity/consent stays real; existing
+and one platform example video per offering. Account identity/consent stays real; existing
 content is untouched. The Suqpage wordmark has fixed Latin typography in every
 locale. Local focused tests/captures are separate from visual/release approval.
+
+## First-publication review (FE-052, local)
+
+The rich private starter remains automatic. Before first publication, its owner
+must replace starter About/contact details, confirm the location, and replace or
+remove listed sample offerings while retaining at least one real offering.
+Optional contact channels can be cleared. The short reminder is translated in
+all supported languages; the publishing checklist links to unfinished sections.
+Existing demos and already-active businesses retain their current Save behavior.
+
+S48: new signup offerings use the same single starter video as newly posted
+products. Existing businesses are not backfilled. Replacement videos follow
+FE-019/BE-018 support review; approved videos may come from any YouTube channel.
+Evidence: `scripts/test-business-starters.ts` asserts the exact starter reference
+for signup and invitations, and `scripts/test-video-requests.ts` covers posting.

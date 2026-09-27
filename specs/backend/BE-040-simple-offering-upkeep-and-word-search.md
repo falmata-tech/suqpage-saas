@@ -2,9 +2,9 @@
 id: BE-040
 title: Simple offering upkeep and word search
 status: in_progress
-related: [BE-041, BE-009, FE-047, DEP-037]
+related: [BE-041, BE-009, FE-047, DEP-037, FE-019, BE-018, DEP-039]
 owners: [product, backend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-09-27
 change_level: L2
 ---
 
@@ -12,8 +12,8 @@ change_level: L2
 
 ## Problem, scope and contracts
 
-Owners post using image, name, optional YouTube URL, optional ETB price and one
-required description. Staff retain their existing detailed controls. Omitted
+Owners post using image, name, optional ETB price and one required description.
+Video changes use the S48 support-request workflow below. Staff retain their existing detailed controls. Omitted
 owner metadata is resolved server-side: updates preserve type, availability,
 category, units, highlights, options and visibility; new items use the existing
 standard-product storage kind, available status and optional quantity without
@@ -238,3 +238,15 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+## S48 reviewed video entry
+
+FE-019/BE-018 and DEP-039 govern video changes. Normal owner/staff media saves
+retain existing references or the example; new links require a target-bound
+support request and assigned staff review. Staff may approve a supported
+YouTube URL from any channel without channel configuration. Existing photos,
+other fields and previously admitted videos remain unchanged. New products use
+the starter video. `scripts/test-video-requests.ts` covers tenant/agent boundaries,
+forged saves, approval without channel setup, retries, stale targets and exact-field
+preservation; `scripts/capture-video-requests.ts` covers the real owner/staff forms.
+Local evidence passes; refreshed release and publication gates remain pending.

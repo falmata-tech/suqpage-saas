@@ -17,7 +17,8 @@ async function main() {
     const audits=async()=>(await db.prepare("SELECT COUNT(*) n FROM audit_logs WHERE action='inquiry.status_updated'").get()).n;
     await updateInquiryStatus(actor,change); assert.equal(await status(),'contacted'); assert.equal(await audits(),1);
     for(const invalid of [{...change,businessId:otherId},{...change,inquiryId:inquiryId+1000},{...change,status:'fake'},{...change,inquiryId:NaN}]) await assert.rejects(()=>updateInquiryStatus(actor,invalid));
-    for(const access_role of ['client','team_member'] as const) await assert.rejects(()=>updateInquiryStatus({...actor,access_role,business_id:businessId},change),/access required/);
+    await assert.rejects(()=>updateInquiryStatus({...actor,access_role:'client',business_id:otherId},change),/access required/);
+    await assert.rejects(()=>updateInquiryStatus({...actor,access_role:'team_member',business_id:businessId},change),/access required/);
     assert.equal(await status(),'contacted'); assert.equal(await audits(),1,'Denied/no-op commands never record success');
     await updateInquiryStatus({...actor,access_role:'operations_manager'},{...change,status:'closed'}); assert.equal(await status(),'closed');
     await db.exec("CREATE FUNCTION reject_wiring_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture audit failure'; END; $$; CREATE TRIGGER reject_wiring_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION reject_wiring_audit();");

@@ -1,3 +1,5 @@
+import { firstPublicationIssues } from "./publication-readiness-runtime";
+import { OwnerPageError } from "./owner-page-domain";
 import { applyPendingOwnerLocation } from "./owner-business-runtime";
 import { isPageOwner, parseShopPageContent, type ShopPageContent } from "./owner-page-domain";
 import type { PagePublication, PagePublicationPort } from "./owner-page-publication";
@@ -49,6 +51,10 @@ export const pagePublicationPort: PagePublicationPort = {
       if (!business.changes) return null;
       const current = await latest(draft.businessId);
       if ((current?.revision || 0) !== expectedRevision) return null;
+      if (action === "publish" && content) {
+        const issues = await firstPublicationIssues(draft.businessId, content);
+        if (issues.length) throw new OwnerPageError(issues[0].label);
+      }
       const now = Date.now();
       await runtimeRun(`INSERT INTO owner_page_publications
         (business_id,revision,draft_version,content_json,action,published_by,published_at)

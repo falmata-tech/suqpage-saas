@@ -1,3 +1,4 @@
+import { publicationLocationConfirmed } from "@/lib/publication-readiness-runtime";
 import { notFound } from "next/navigation";
 import DashboardShell from "@/components/DashboardShell";
 import OwnerPageEditor from "@/components/OwnerPageEditor";
@@ -24,6 +25,6 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
   if (!catalog) notFound();
   const publication = await pagePublicationPort.latest(business.id);
   return <DashboardShell user={user} business={business}>
-    <OwnerPageEditor initialPreview={query.view === "preview"} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
+    <OwnerPageEditor locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.view === "preview"} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
   </DashboardShell>;
 }

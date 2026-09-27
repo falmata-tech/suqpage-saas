@@ -35,8 +35,8 @@ async function main() {
       assert.equal(created.version, 1);
       await assert.rejects(readOwnerPage(ownerPagePort, admin, businessId), (error: unknown) => error instanceof OwnerPageError && error.status === 403);
       const granted = await setOwnerPageAssistance(ownerPagePort, owner, businessId, 1, true);
-      const saved = await saveOwnerPage(ownerPagePort, admin, businessId, granted.version, { ...content, coverStyle: "overlay", videoUrl: "https://youtu.be/abcdefghijk", about: "Private profile test.", contacts: { email: "public@example.com", website: "https://example.com/" } });
-      assert.equal(saved.content.videoUrl, "https://www.youtube.com/watch?v=abcdefghijk");
+      const saved = await saveOwnerPage(ownerPagePort, admin, businessId, granted.version, { ...content, coverStyle: "overlay", videoUrl: "https://youtu.be/M7lc1UVf-VE", about: "Private profile test.", contacts: { email: "public@example.com", website: "https://example.com/" } });
+      assert.equal(saved.content.videoUrl, "https://www.youtube.com/watch?v=M7lc1UVf-VE");
       assert.equal(saved.content.coverStyle, "overlay");
       assert.equal(saved.updatedBy, admin.id);
       await assert.rejects(saveOwnerPage(ownerPagePort, owner, businessId, granted.version, content), (error: unknown) => error instanceof OwnerPageError && error.status === 409);
@@ -76,7 +76,13 @@ async function main() {
       for (const status of ["draft", "suspended"]) {
         await runner.query("UPDATE businesses SET status=? WHERE id=?", [status, businessId]);
         assert.equal(await runtimePublishedPage(businessId), undefined);
-        assert.equal(await pagePublicationPort.commit(owner, nextDraft, 3, nextDraft.content, "publish"), null);
+        if (status === "draft") {
+          // Draft owners may publish once ready; this fixture removed its cover.
+          await assert.rejects(pagePublicationPort.commit(owner, nextDraft, 3, nextDraft.content, "publish"),
+            (error: unknown) => error instanceof OwnerPageError);
+        } else {
+          assert.equal(await pagePublicationPort.commit(owner, nextDraft, 3, nextDraft.content, "publish"), null);
+        }
       }
       await runner.query("UPDATE businesses SET status='active' WHERE id=?", [businessId]);
       assert.deepEqual(await runtimeCatalogByBusinessId(businessId, true), before, "Publish and restore preserve products, contacts, handle, design and approval fields.");

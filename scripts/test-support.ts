@@ -8,11 +8,11 @@ const publicAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "ap
 const authenticatedAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/support/[conversationId]/attachments/[attachmentId]/route.ts"), "utf8");
 const publicSupportUiSource = fs.readFileSync(path.join(process.cwd(), "components/PublicSupportChat.tsx"), "utf8");
 const supportRefreshSource = fs.readFileSync(path.join(process.cwd(), "components/SupportThreadRefresh.tsx"), "utf8");
-assert.match(publicSupportRouteSource, /await staged\?\.discard\(\)\.catch/, "failed public writes clean staged support objects");
-assert.match(publicSupportRouteSource, /if \(result\.duplicate\) await staged\?\.discard\(\)/, "idempotent public retries clean duplicate staged objects");
-assert.ok(publicAttachmentRouteSource.indexOf("await getPublicSupportAttachment") < publicAttachmentRouteSource.indexOf("await readSupportAttachment"), "public token authorization precedes private storage reads");
+assert.doesNotMatch(publicSupportRouteSource, /stageSupportAttachment/, "Public API cannot upload attachments; buying replies and closure are covered by channel tests");
+assert.match(publicAttachmentRouteSource, /status: 404/, "Public files remain inaccessible");
+assert.doesNotMatch(publicAttachmentRouteSource, /readSupportAttachment/, "Retired file endpoint never reads storage");
 assert.ok(authenticatedAttachmentRouteSource.indexOf("await getSupportAttachment") < authenticatedAttachmentRouteSource.indexOf("await readSupportAttachment"), "tenant/staff authorization precedes private storage reads");
-assert.match(publicSupportUiSource, /if \(!document\.hidden\) void loadConversation\(\)/, "public support pauses polling while its browser document is hidden");
+assert.doesNotMatch(publicSupportUiSource, /setInterval|Ask for help|public-support-thread/, "Public launcher cannot reopen general guest support; buying chat is a scoped component");
 assert.match(supportRefreshSource, /if \(!document\.hidden\) router\.refresh\(\)/, "staff support pauses route refresh while its browser document is hidden");
 async function main() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-support-"));
@@ -141,21 +141,22 @@ async function main() {
         total: number;
     }).total), visitorCountBeforeInvalid, "invalid visitor contacts create no support row");
     const visitor = await createPublicSupportConversation({
-        category: "shipment_observation",
+        category: "general",
+        name: "Test visitor", origin: "Addis Ababa", destination: "Adama",
         email: "Visitor@Example.Test",
         phone: "+251 (911) 223-344",
-        message: "Please help me find a transport option for this purchase.",
+        message: "Please help me update my page.",
         idempotencyKey: "public-support-create-0001",
     }, "visitor-ip-one", visitorNow);
     const visitorThread = await getPublicSupportConversation(visitor.token, visitorNow + 1);
-    assert.equal(visitorThread.category, "shipment_observation");
+    assert.equal(visitorThread.category, "general");
     assert.equal(visitorThread.messages[0]?.sender, "visitor");
     assert.equal("visitorEmail" in visitorThread, false, "the public thread projection does not echo private reconnect details");
     const storedVisitorContact = await db.prepare("SELECT visitor_email,visitor_phone FROM support_conversations WHERE id=?").get(visitor.id) as {
         visitor_email: string;
         visitor_phone: string;
     };
-    assert.equal(storedVisitorContact.visitor_email, "visitor@example.test", "visitor email is normalized before persistence");
+    assert.equal(storedVisitorContact.visitor_email, "visitor@example.test", "help retains private reconnect email");
     assert.equal(storedVisitorContact.visitor_phone, "+251911223344", "visitor phone is normalized before persistence");
     await assert.rejects(() => getPublicSupportConversation(`${visitor.token}x`, visitorNow + 1), SupportError);
     await assert.rejects(() => getSupportConversation(clientA, visitor.id), SupportError);

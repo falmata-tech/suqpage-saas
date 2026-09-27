@@ -7,7 +7,7 @@ export interface InquiryStatusPort {
 }
 
 export async function changeInquiryStatus(port: InquiryStatusPort, actor: SessionUser, change: InquiryStatusChange) {
-  if (!canOperateBusiness(actor, change.businessId)) throw new Error("Operations manager access required.");
+  if (!(actor.access_role === "client" && actor.business_id === change.businessId) && !canOperateBusiness(actor, change.businessId)) throw new Error("Inquiry access required.");
   if (![change.businessId, change.inquiryId].every(id => Number.isSafeInteger(id) && id > 0)
     || !["new", "contacted", "confirmed", "closed", "cancelled"].includes(change.status)) throw new Error("Invalid inquiry update.");
   if (!await port.update(actor, change)) throw new Error("Inquiry not found.");

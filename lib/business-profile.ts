@@ -1,3 +1,4 @@
+import { STARTER_VIDEO_URL } from "./business-starter";
 import type { Catalog } from "./types";
 import { ownerPageImageKey, type ShopPageContent } from "./owner-page-domain";
 import { controlledYouTubeWatchUrl } from "./youtube-provider";
@@ -8,7 +9,7 @@ export function publicPageContent(businessId: number, content: ShopPageContent):
 }
 
 export function initialBusinessProfile(catalog: Catalog): ShopPageContent {
-  let videoUrl = "";
+  let videoUrl = STARTER_VIDEO_URL;
   if (catalog.business.process_video_ref) {
     try { videoUrl = controlledYouTubeWatchUrl(catalog.business.process_video_ref); } catch {}
   }

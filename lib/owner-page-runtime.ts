@@ -6,6 +6,8 @@ import { runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { ownerPageImageKey } from "./owner-page-media";
 import { getMediaObjectStore } from "./media-storage";
 import { mediaMime } from "./media";
+import { retainedVideo } from "./video-request-policy";
+import { normalizeControlledYouTubeUrl } from "./youtube-provider";
 
 export function ownerPageEditorEnabled(): boolean {
   return platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
@@ -33,6 +35,8 @@ export const ownerPagePort: OwnerPagePort = {
   },
   async create(businessId, actorId, content) {
     return runtimeTransaction(async () => {
+      const business = await runtimeGet<{process_video_ref:string}>("SELECT process_video_ref FROM businesses WHERE id=?", [businessId]);
+      if (content.videoUrl && !retainedVideo(normalizeControlledYouTubeUrl(content.videoUrl).managedRef, [business?.process_video_ref || ""])) throw new OwnerPageError("Request a video through support before adding it.", 403);
       const now = Date.now();
       const result = await runtimeRun(`INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at)
         VALUES(?,1,?,0,?,?) ON CONFLICT(business_id) DO NOTHING`, [businessId, JSON.stringify(content), actorId, now]);
@@ -56,6 +60,10 @@ export const ownerPagePort: OwnerPagePort = {
           ))))
         )`, [value, actor.id, now, before.businessId, before.version, Number(isOwner), Number(operator), Number(team), actor.id]);
       if (!result.changes) return null;
+      // A stale version or revoked permission remains a conflict. A disallowed video
+      // rolls back this transaction, including the conditional update above.
+      if (change.kind === "content" && change.content.videoUrl && !retainedVideo(normalizeControlledYouTubeUrl(change.content.videoUrl).managedRef,
+        before.content.videoUrl ? [normalizeControlledYouTubeUrl(before.content.videoUrl).managedRef] : [])) throw new OwnerPageError("Request a video through support before adding it.", 403);
       const kind = change.kind === "content" ? "content" : change.enabled ? "consent_enabled" : "consent_revoked";
       await runtimeRun("INSERT INTO owner_page_events(business_id,version,actor_user_id,kind,created_at) VALUES(?,?,?,?,?)", [before.businessId, before.version + 1, actor.id, kind, now]);
       return read(before.businessId);

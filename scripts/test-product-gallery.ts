@@ -28,8 +28,11 @@ async function main(){
   const stage=()=>stageTenantProductImage(user,a,new File([new Uint8Array(png)],'photo.png',{type:'image/png'}));
   const first=(await stage())!,second=(await stage())!;
   const media=[{kind:'image' as const,ref:first.imageRef},video,{kind:'image' as const,ref:second.imageRef},{kind:'video' as const,ref:'youtube:aqz-KE-bpKQ'}];
-  const command={kind:'create',businessId:a,productId:null,expectedContentVersion:1,idempotencyKey:crypto.randomUUID(),name:'Gallery product',description:'Multiple photos and videos',availability:'available',offeringKind:'standard_product',quantityMode:'optional',categoryId:null,imageAction:'keep',videoRef:'',media};
+  const command={kind:'create',businessId:a,productId:null,expectedContentVersion:1,idempotencyKey:crypto.randomUUID(),name:'Gallery product',description:'Multiple photos and videos',availability:'available',offeringKind:'standard_product',quantityMode:'optional',categoryId:null,imageAction:'keep',videoRef:'',media:media.slice(0,-1)};
   const created=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,command,null,[first,second]);
+  // Imported/reviewed gallery fixture: adding a new owner video now requires the
+  // separately tested support approval workflow; gallery reordering remains supported.
+  await db.prepare('UPDATE products SET media_json=? WHERE id=?').run(JSON.stringify(media),created.productId);
   let catalog=(await getCatalogByBusinessId(a,true))!;let product=catalog.products.find(p=>p.id===created.productId)!;
   assert.deepEqual(product.media,media);assert.equal(product.image_path,first.imageRef);assert.equal(product.video_ref,video.ref);
   const snap=catalogToRevisionSnapshotV4(catalog);assert.deepEqual(snap.products[0].media,media);
@@ -50,11 +53,11 @@ async function main(){
   await assert.rejects(()=>executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...update,businessId:b,idempotencyKey:crypto.randomUUID()},null),/cannot maintain/);
   await assert.rejects(()=>executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...update,idempotencyKey:crypto.randomUUID()},null),/changed while/);
   const dupeA=(await stage())!,dupeB=(await stage())!;
-  const duplicate=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...command,media:media.map(item=>({...item,ref:item.ref===first.imageRef?dupeA.imageRef:item.ref===second.imageRef?dupeB.imageRef:item.ref}))},null,[dupeA,dupeB]);assert.equal(duplicate.duplicate,true);assert.equal(await readTenantProductImage(dupeA.imageRef.slice(7),user),null);
+  const duplicate=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...command,media:command.media.map(item=>({...item,ref:item.ref===first.imageRef?dupeA.imageRef:item.ref===second.imageRef?dupeB.imageRef:item.ref}))},null,[dupeA,dupeB]);assert.equal(duplicate.duplicate,true);assert.equal(await readTenantProductImage(dupeA.imageRef.slice(7),user),null);
   const manifest=await buildRuntimeMediaReferenceManifest();assert.ok(manifest.references.some(ref=>ref.key===second.imageRef.slice(7)&&ref.sources.some(source=>source.includes('media_json'))));
   const cleared=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...update,expectedContentVersion:saved.contentVersion,idempotencyKey:crypto.randomUUID(),media:[]},null);assert.ok(cleared.contentVersion>saved.contentVersion);const empty=(await getCatalogByBusinessId(a,true))!.products[0];assert.deepEqual(productMedia(empty),[]);assert.equal(empty.image_path,'');assert.equal(empty.video_ref,'');assert.equal(await readTenantProductImage(first.imageRef.slice(7),null),null,'Removed gallery image no longer publicly readable');const retained=await buildRuntimeMediaReferenceManifest();assert.ok(retained.references.some(ref=>ref.key===first.imageRef.slice(7)&&ref.sources.some(source=>source.includes('snapshot'))),'Retained snapshots protect removed photos');
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,50);
-  console.log('PASS gallery validation, save/reorder/reload, legacy compatibility, snapshot retention, private access, tenant/stale/foreign denial, duplicate cleanup and schema 50.');
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,58);
+  console.log('PASS gallery validation, save/reorder/reload, legacy compatibility, snapshot retention, private access, tenant/stale/foreign denial, duplicate cleanup and schema 58.');
  }finally{await closeDbForTests();fs.rmSync(root,{recursive:true,force:true});}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

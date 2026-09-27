@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { createVideoRequest, reviewVideoRequest } from "@/lib/support-video-requests";
+import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import {
   claimSupportConversation,
   closeSupportConversation,
@@ -11,6 +13,7 @@ import {
   reopenSupportConversation,
   reassignSupportConversation,
   SupportError,
+  saveTransportHandoff,
   updateSupportAgentSetting,
 } from "@/lib/support";
 import { audit } from "@/lib/security";
@@ -20,6 +23,34 @@ function conversationId(formData: FormData) {
   const value = Number.parseInt(String(formData.get("conversationId") || ""), 10);
   if (!Number.isInteger(value) || value < 1) redirect("/dashboard/support?error=invalid");
   return value;
+}
+
+export async function createVideoRequestAction(formData: FormData) {
+  const user = await requireUser();
+  const target = formData.get("target");
+  const productId = Number(formData.get("productId"));
+  const returnPath = target === "header" ? "/dashboard/support?video=header"
+    : target === "product" && Number.isSafeInteger(productId) && productId > 0
+      ? `/dashboard/support?video=product&product=${productId}` : "/dashboard/support";
+  let result: Awaited<ReturnType<typeof createVideoRequest>>;
+  try {
+    result = await createVideoRequest(user, {target:formData.get("target"),productId:formData.get("productId"),sourceUrl:formData.get("sourceUrl"),note:formData.get("note"),idempotencyKey:formData.get("idempotencyKey")});
+  } catch(error) { failure(returnPath,error); }
+  revalidatePath("/dashboard/support");
+  redirect(`/dashboard/support/${result!.id}`);
+}
+
+export async function reviewVideoRequestAction(formData: FormData) {
+  const user = await requireUser();
+  const id = conversationId(formData);
+  try {
+    const result = await reviewVideoRequest(user,id,{decision:formData.get("decision"),youtubeUrl:formData.get("youtubeUrl"),reply:formData.get("reply")});
+    const business = await runtimeBusinessById(result.businessId);
+    if(business) { revalidatePath(`/@${business.handle}`,"layout"); revalidatePath(`/preview/@${business.handle}`,"layout"); }
+    revalidatePath("/dashboard/page-editor"); revalidatePath("/dashboard/products","layout"); revalidatePath("/");
+  } catch(error) { failure(`/dashboard/support/${id}`,error); }
+  revalidatePath(`/dashboard/support/${id}`);
+  redirect(`/dashboard/support/${id}`);
 }
 
 function failure(path: string, error: unknown): never {
@@ -59,6 +90,7 @@ export async function postSupportMessageAction(formData: FormData) {
   try {
     staged = await stageSupportAttachment(formData.get("attachment"));
     const posted = await postSupportMessage(user, id, {
+      audience: formData.get("audience"),
       message: formData.get("message"),
       idempotencyKey: formData.get("idempotencyKey"),
       attachment: staged,
@@ -71,7 +103,7 @@ export async function postSupportMessageAction(formData: FormData) {
     failure(`/dashboard/support/${id}`, error);
   }
   revalidatePath(`/dashboard/support/${id}`);
-  redirect(`/dashboard/support/${id}?sent=1`);
+  redirect(`/dashboard/support/${id}?sent=${formData.get("audience") === "note" ? "note" : "1"}`);
 }
 
 export async function claimSupportConversationAction(formData: FormData) {
@@ -120,6 +152,7 @@ export async function updateSupportAgentSettingAction(formData: FormData) {
       userId: formData.get("userId"),
       enabled: formData.get("enabled"),
       maxOpenConversations: formData.get("maxOpenConversations"),
+      queueScope: formData.get("queueScope") ?? undefined,
     });
     await audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
   } catch (error) {
@@ -143,4 +176,17 @@ export async function reassignSupportConversationAction(formData: FormData) {
   }
   revalidatePath("/dashboard/support");
   redirect(`/dashboard/support/${id}?assigned=1`);
+}
+
+export async function saveTransportHandoffAction(formData: FormData) {
+  const user = await requireUser();
+  const id = conversationId(formData);
+  try {
+    await saveTransportHandoff(user, id, {
+      company: formData.get("company"), contact: formData.get("contact"), previousId: formData.get("previousId"),
+    });
+  } catch (error) { failure(`/dashboard/support/${id}`, error); }
+  revalidatePath("/dashboard/support");
+  revalidatePath(`/dashboard/support/${id}`);
+  redirect(`/dashboard/support/${id}?routed=1`);
 }

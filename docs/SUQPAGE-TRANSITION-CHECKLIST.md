@@ -1488,3 +1488,436 @@ S30 complete: live deployment `6ab3dc37aea724cbcfbcb994`, source `87aaced`.
 All required gates, 90 live responsive checks, phone search-panel checks and
 15 public checks pass. Fresh backup restores all 57 tables/3,781 rows; temporary
 restore role removed. Schema 50 unchanged; no hosted configuration changes.
+
+## S31 — horizontal logo proportions and spacing (FE-038 / FE-051)
+
+Owner selected the comparison's icon-plus-wordmark design and requested vertical
+centering. S-in-pin images remain mockups only. Actual glyph/pin centers are
+now corrected and verified; current dependency is final visual approval and
+the applicable release gates. Preserve existing S31 work and unrelated `deno.lock`.
+
+Classification: L1 visual refinement; preserve S30 visibility and existing brand.
+- [x] Inspect the shared component and responsive overrides; define FE-038 scope.
+- [x] Measure/capture the existing headers; consolidate icon/text sizes
+  and reduce the gap to 4px without changing artwork or locale typography.
+- [x] Focused desktop/390/320 and locale checks; compare header captures;
+  typecheck/spec validation and review the result with the owner.
+- [ ] Current: visual approval, applicable full gates and task-scoped commit.
+- [ ] Publication and live verification if approved.
+
+Only unrelated `deno.lock` predates this task. No data, Auth or provider changes.
+
+S31 local evidence: 39 public + 51 owner checks pass across all five locales.
+Measured gap 4px; desktop text 24px, mobile 22px, shop return row 18px; 9:10
+icon ratio and >=44px link height. Typecheck/spec/PWA contracts pass. Captures,
+before/after measurements and comparison: `.local/brand-spacing-review/`.
+No outgoing mail, full gates, commit or publication claimed for S31.
+
+## S32 — simple transport requests and admin queue (FE-019 / BE-018 / DEP-015)
+
+Confirmed app: Suqpage. L2 feature with additive migration (L3 rollout).
+Customer enters only name, phone, origin and destination; no email, message or
+attachment required for transport intake. Existing help flow remains available.
+- [x] Inspect existing public support, authorization and persistence; define scope.
+- [x] Implement four-field intake, category-filtered paginated admin list,
+  private manual company handoff and audit, preserving existing conversations.
+- [x] Verify validation, replay, tenant/role denial, concurrent handoff, migration
+  and old help flow with PostgreSQL tests; capture desktop and phone workflows.
+- [ ] Current: owner visual review, then full check/release/acceptance and scoped commit.
+- [ ] Production backup/migration/publication only with applicable rollout gates.
+
+S31 remains pending final visual review and release; preserve its edits and
+unrelated deno.lock. No carrier booking integration or external message sending.
+
+S32 focused evidence: local migration 51 applied. Existing support and replay
+tests plus the new transport suite pass. Typecheck, 160 specs and all six
+localization checks pass. Public real-handler/isolated-database browser checks
+pass at 1440/390/320; admin queue, save/replay and copy feedback pass at the
+same widths. Temporary admin request removed; no email or external contact
+sent. Screenshots: `.local/transport-support-review/`. Release/build/production
+gates and commit remain pending visual approval; production is still schema 50.
+
+S31 optical follow-up: 39 public and 51 owner responsive checks now pass with
+rendered icon/wordmark centers within 1 CSS pixel, across all five locales.
+One public asset-load timeout passed on a controlled retry; no assertion was
+weakened. Final centered captures are under `centered-public` and `centered-owner`.
+
+## S33 — launch clarity and contextual language (FE-052)
+
+L2 behavior/security/visual work with L3 additive schema 52 rollout. Preserve S31/S32; unrelated deno.lock unchanged.
+- [x] Inspect public experience, owner permissions and publication; record specs.
+- [x] Owner inquiry actions with tenant checks; visible search, honest
+  demo/Featured labels, first-publish review and clear business value.
+- [x] Review locale copy by UI purpose across public, owner and admin surfaces;
+  preserve merchant content and canonical machine values.
+- [x] Focused security, persistence, localization and desktop/phone browser checks.
+- [ ] Current: explicit visual approval, then applicable full gates and scoped commit.
+- [ ] Publication only through existing backup/release controls when requested.
+
+Transport is manual outside the platform; no driver/provider accounts. Newest owner instruction overrides the earlier offer: no pricing copy.
+
+S33 local evidence: first publication, owner inquiry persistence/tenant checks,
+schema 52 migration/seed/preservation, support and localization checks pass.
+Public, owner inquiry and first-publish browser matrices cover all five locales
+at 1440/390/320; map search/result/collapse and no overflow are verified.
+See `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md` for scripts, screenshots and limitations.
+No pricing copy, native-speaker certification, commit or hosted rollout claimed.
+
+S33 visual follow-up: a cold-rendered Featured preview could accept a click before
+its client handler was ready. The button now waits for hydration, and the
+retained morning/evening summary is translated. All 15 fully rendered gallery
+and preview combinations pass. Final typecheck, seven localization tests and
+161-spec validation pass; visual approval remains the current gate.
+
+### S33 owner correction — panel opener
+
+The owner rejected the search input outside the panel. This supersedes S33's
+map-level search form; preserve the other S31–S33 changes.
+- [x] Update FE-052: one labeled opener with search icon, filters label and
+  right arrow; all search/filter/results controls stay inside the drawer.
+- [x] Implement the opener, update locale labels and focused capture.
+- [x] Verify open/search/collapse/reopen and focus at phone/desktop widths.
+- [ ] Current: review screenshots before full/release gates; no deployment in this step.
+
+Panel correction evidence: all 15 language/viewport combinations pass at
+320/390/1440; typecheck, seven localization tests, 161-spec validation and
+homepage contracts pass. Screenshots and `panel-verified.json` are in
+`.local/launch-clarity-review/`. No full release gate, commit or deployment.
+
+### S33 narrative clarification — showroom and shopfront
+
+L0 copy refinement: preserve the approved audience intent without changing roles,
+location privacy or inquiry behavior. No pricing claims.
+- [x] Record FE-052 scope: manufacturers/makers without retail space, physical
+  shops seeking online discovery, and sellers working from home.
+- [x] Update About/login copy and contextual versions in all languages.
+- [x] Run copy/localization checks and inspect desktop/phone layouts.
+- [ ] Current: owner visual review; full gates and deployment remain pending.
+
+Copy direction clarified: professional customer-facing prose, without rhetorical
+questions or reproducing the internal audience discussion. This supersedes the
+initial conversational draft before its review.
+
+Showroom-copy evidence: narrative/category checks, seven localization checks,
+typecheck and 161-spec validation pass. Fourteen About/login browser states pass:
+all five locales at 320px plus English at 390/1440; no overflow or browser errors.
+Screenshots: `.local/showroom-copy-review/`. No runtime/data/role changes,
+commit, full release gate or publication in this copy refinement.
+
+### S33 Market introduction — focused copy review
+
+L0, FE-052 scenario 8 / FE-030: align the buyer-facing intro with online showrooms.
+Definition of Ready met: no new behavior, data, roles or layout; all five locales.
+Master section 5.2 is affected. Existing functional labels already fit their tasks.
+- [x] Review Market, public navigation, Featured, About and dashboard labels.
+- [x] Refine only the Market heading, supporting sentence and metadata;
+  update translations and the existing narrative contract.
+- [x] Verify narrative/localization/spec checks and focused phone/desktop capture.
+- [ ] Current: owner visual review before full/release gates and deployment.
+
+Market intro evidence: narrative/category, seven localization tests and 161-spec
+validation pass. Seven header states pass (five locales at 320px, English at
+390/1440), with no overflow or browser errors. English screenshots inspected;
+header remains compact. These captures verify copy/layout, not map tile readiness.
+Evidence: `.local/showroom-copy-review/market-verified.json`. Not deployed.
+
+### S33 map preview above the search drawer
+
+L1 defect, FE-052 scenario 9 / FE-030. Ready: preserve discovery/query behavior,
+use the browser modal layer for single and nearby previews; no backend changes.
+Master section 5.2 map-preview behavior is affected. A free-map-space layout is
+too narrow on phones; use one consistent overlay with scrollable content.
+- [x] Inspect stacking and both single/nearby preview paths; record acceptance.
+- [x] Implement modal layering, dismissal, focus and bounded scrolling;
+  preserve the open drawer on selection from its results.
+- [x] Focused browser checks: marker/results, nearby list/detail/back, Escape,
+  backdrop, focus, long content, phone/landscape/desktop and resizing; type/spec.
+- [ ] Current: owner visual review before full/release gates or deployment.
+
+Map-preview evidence: eight live-local viewport/language states pass; actual
+pointer clicks with an open drawer also pass at 390/1440. Four nearby component
+fixture states cover six entries, list/detail/back, long descriptions and focus.
+No exact-location groups exist in local demo data; the group fixture stubs map,
+navigation, image and localization adapters, with the real modal/viewer. No data
+was changed. A landscape result-height defect found during review is fixed.
+Typecheck, localization, 161-spec validation and discovery regression pass;
+10,000-page grouping took 92.4ms. Screenshots inspected at desktop/phone widths.
+Evidence: `.local/map-preview-review/`. No full gate, commit or deployment.
+
+
+### S34 — separate help/transport entry and working staff queues
+
+L3, FE-019 / BE-018. Dependencies: retain S32 transport and S33 UI changes.
+Master support behavior sections affected; no external messaging or provider roles.
+- [x] Inspect visitor sessions, staff queue permissions, assignment and handoff.
+- [x] Record acceptance, role/privacy boundaries and additive schema plan.
+- [x] Independent channel sessions and two external launch actions; seven browser states pass.
+- [x] Staff queue scope, scoped assignment/handoff and visible assignment history.
+- [x] Four support suites and real local admin/team browser workflows pass; temporary fixtures removed.
+- [x] Local migration 53 applied; 1440/390/320 public/staff captures in `.local/support-channels-review/`; mobile Assign overflow fixed and verified.
+- [ ] Current gate: owner visual approval before full/build/release gates, commit and deployment.
+
+### S35 — transport is a callback request, not live chat
+
+FE-019 / BE-018. Supersedes S34 transport-chat behavior; retain staff routing.
+- [x] Record four-field request, receipt, private staff notes and retry contracts.
+- [x] Receipt UI, no transport chat/polling; another route retains prior request.
+- [x] Receipt-only transport reads; public reply/close/attachments denied in the service.
+- [x] Four support suites, transport persistence/recovery browser checks, seven locale/viewport cases and Help retries pass.
+- [x] Master, traceability and staff procedure updated; receipt screenshots inspected.
+- [ ] Owner visual approval, full/release gates, commit and deployment remain pending.
+
+### S36 — official evening Featured broadcast
+
+FE-033, existing discovery/sponsor ports; preserve S31–S35 pending work.
+- [x] Inspect auto/manual schedule and record evening-window acceptance.
+- [x] Single evening agenda, six-business cap, four sponsor mentions, midnight formatting.
+- [x] Shared rotating automatic selection; manual ordering and public invalidation verified.
+- [x] Replace obsolete timing UI with official schedule and clear manual/sponsor controls.
+- [x] Focused schedule/discovery/localization/typecheck and homepage composition pass; real manual save/revert plus seven public locale/viewport and three admin viewport cases pass. Evidence: `.local/evening-featured-review/verified.json`.
+- [x] Master, traceability and `docs/operations/FEATURED-SCHEDULE.md` updated.
+- [ ] Visual approval, full/release gates, commit and deployment pending.
+
+### S37 — Buying assistance replaces public transport requests
+
+FE-019 / BE-018. Preserve S31–S36, unrelated deno.lock, and legacy requests.
+- [x] Record three-choice callback intake, staff queue, compatibility and privacy contracts.
+- [x] Additive migration 54 applied locally; validated intake, independent buying session and scoped routing. Existing 68 businesses preserved.
+- [x] Localized form/receipt, Buying assistance staff labels and Terms updated.
+- [x] Five support suites, native PostgreSQL, typecheck, localization and specs pass; three-width real intake and staff actions plus fifteen locale/viewport forms pass. Evidence: `.local/buying-assistance-review/`.
+- [x] Master, traceability, rollout spec and staff procedure updated with local evidence.
+- [ ] Visual approval, full/release gates, commit and deployment pending.
+
+### S38 — simplify Buying assistance to one request
+
+FE-019 / BE-018; supersedes S37 service selection only.
+- [x] Record one three-field request and legacy-data compatibility.
+- [x] Service selection removed; migration 55 allows general requests and preserves prior classifications.
+- [x] Generic intake, replay, privacy and staff workflow tests pass; real-handler form/receipt checks pass at 320/390/1440. Typecheck/localization pass.
+- [x] Master, specs, traceability and staff procedure updated for the three-field form.
+- [ ] Visual approval, full/release gates, commit and deployment pending.
+
+### S39 — reserve live support for business owners
+
+FE-019 / BE-018; preserve existing records and owner support.
+- [x] Define public buying-only API/UI and retained owner-dashboard chat.
+- [x] Single Buying assistance launcher; retired public chat entry/actions/files denied; owner support retained.
+- [x] Five support suites pass. Browser: four public surfaces, owner controls at 390/1440, buying receipts at three widths, fifteen locale/viewport forms. Evidence: `.local/owner-only-support-review/` and `.local/buying-assistance-review/`.
+- [x] Master, staff procedure, rollout spec and traceability updated; no migration required.
+- [ ] Visual approval, full/release gates, commit and deployment pending.
+
+### S40 — organized-showroom value and one filtered result list
+
+L1, FE-030 / FE-052, existing BE-023 / FE-042 contracts. Master public-home
+composition and showroom narrative affected. Preserve S31–S39 and deno.lock.
+- [x] Inspect current layout/URL contracts; record readiness and acceptance.
+- [x] Strengthen Market/About copy and five locales; show mobile intro.
+  Owner-refined headline: Everything a business offers, in one place.
+- [x] Move result type into two filters, preserve server paging, fix filter spacing.
+- [x] Focused type/narrative/localization/spec checks; 15 viewport/locale filter,
+  paging/history cases plus landscape scope; three category/paging/accessibility
+  cases pass. Final landscape control spacing verified separately.
+- [x] Update master/traceability with verified behavior.
+- [ ] Owner visual approval before full/release gates, commit and deployment.
+
+S40 evidence: `.local/market-filters-review/verified.json` and screenshots,
+plus `/tmp/suqpage-category-review/` accessibility captures. A subsequent
+map-ready screenshot pass timed out once waiting for external tiles at 1440/om;
+an isolated retry loaded tiles without failed requests. This is not a claim of
+map-provider availability. No data changes, full/release gates, commit or deploy.
+
+### S41 — visible category/location controls and multiple categories
+
+L2 FE-030 / FE-042 / BE-023. Ready: reuse membership table and URL-backed
+PostgreSQL queries; no migration. Master discovery composition, filter semantics
+and rollout statements affected. Preserve S31–S40 and unrelated deno.lock.
+- [x] Inspect contracts; define OR categories / AND location; record readiness.
+- [x] Canonical category-set input, shared exact/fuzzy SQL and cache scope.
+- [x] Always-visible compact controls, multi-selection and individual clear actions.
+- [x] Real PostgreSQL scope/privacy/pagination, ranking, spelling and human-query
+  checks pass; typecheck/localization/spec validation pass. Discovery behavior
+  assertions passed, but its final fixture cleanup hit the local 8s timeout.
+- [x] All 15 phone/desktop locale cases pass (final case verified on targeted
+  retry), plus landscape/repeated parameters and keyboard clearing. Three
+  English-width scoped accessibility audits pass; screenshots inspected.
+- [x] Master/traceability updated; evidence in `.local/multicategory-review/`.
+- [ ] Visual approval before full/build/release gates, commit and deployment.
+
+S41 remaining gate: the broader discovery suite passed its geography/Featured
+assertions but exited on temporary-schema cleanup timeout. Ranking passed an
+instrumented run without timeout changes after two local read timeouts; setup
+and cleanup were the slow operations. No production timeout or check was weakened.
+Build/full/release checks, visual approval, commit and deployment remain pending.
+
+### S42 — live Buying assistance and Expo monorepo preparation
+
+L2 FE-019 / BE-018; architecture ADR-0023. Preserve S31–S41 and deno.lock.
+- [x] Owner selected live messages and status; audit legacy notes and permissions.
+- [x] Define private-by-default migration and transport/mobile boundaries.
+- [x] Implement visible buying replies, scoped API and resilient UI refresh.
+- [x] Verify real PG privacy, retries, staff workflow, typecheck and localization.
+- [x] Capture desktop/phone conversation states and update current-behavior docs.
+- [x] Record Expo package/API migration inventory and ordered readiness plan.
+- [ ] Owner visual approval before build/full/release gates, commit or deployment.
+
+Mobile preparation is an architecture deliverable, not an untested file move or
+claim that a native app exists. No change to deployment root until migration gates.
+
+S42 final evidence: `.local/live-buying-review/`; all five focused support suites,
+final buying API negatives, PostgreSQL migration/install/preservation, typecheck,
+localization and spec validation pass. Staff real server-action forms and customer
+outage/retry recovery pass. No commit/deployment; CURRENT gate is visual review.
+
+### S43 — publish the approved web release (2026-09-27)
+
+L4 operations; DEP-030/DEP-026, FE-019/FE-030/FE-033/FE-052 and BE-018/BE-023.
+The owner explicitly approved deploying all web work built so far. This grants
+visual approval for the current cumulative S31–S42 web candidate and authorizes
+its release, additive migrations, private backup and live verification. Earlier
+pending visual-review notes are superseded for this candidate. Expo remains prep.
+- [x] Record approval, dirty tree and deployment scope; preserve deno.lock.
+- [ ] CURRENT: isolated source, locked install and full check/release/acceptance gates.
+- [ ] Verify Netlify account/site and linked Supabase project; protected backup.
+- [ ] Rehearse migrations 51–57 against the backup and verify preservation/access.
+- [ ] Review task diff, scoped commit and exact deploy artifact/native validation.
+- [ ] Apply guarded additive migration, verify runtime, publish and monitor.
+- [ ] Record deploy/source IDs, live checks, rollback and remaining limitations.
+
+### S44 — make Buying assistance clearly conversational before S43 publication
+
+L1 FE-019 / FE-049, existing BE-018/S42 contract. New owner steering is a
+prerequisite to S43; no deployment or production mutation has started. The first
+S43 source snapshot is stale and must be regenerated after this change.
+- [x] Define chat entry, conversational intake and truthful state labels.
+- [x] Chat launcher/header, message-first intake, Start chat, sent feedback.
+- [x] Focused privacy/workflow, five-language and responsive screenshot checks.
+- [ ] Show updated visuals for approval, then resume S43 release/deployment.
+
+No fabricated online staff, typing activity, read receipt, response-time promise
+or automated assistant. Connected means a successful server refresh only.
+
+S44 evidence: ten entry locale/width states, English scoped accessibility,
+320/390/1440 real-handler chat workflows, final five-language phone conversation,
+connection outage/retry, close/reopen and another-chat persistence pass. The
+first translated-chat pass exposed a test fixture assumption: page reload clears
+unsaved name/phone; the test now fills them for the next chat. No application
+behavior was changed for that test. Typecheck, narrative, localization (1,125),
+spec validation and whitespace checks pass. Screenshots inspected in
+`.local/buying-chat-entry-review/` and `.local/live-buying-review/`.
+CURRENT: revised design review before resuming the already-authorized S43 deploy.
+
+### S45 — visitor End chat; retain Buying assistance name
+
+L2 FE-019/BE-018. Supersedes S42's visitor-close denial for buying only.
+- [x] Define idempotent closure, assignment release, token/reference guards.
+- [x] Wire End chat UI/API and retain Buying assistance naming; five support suites and real-handler 320/390/1440 end/reopen/retry/new-request browser checks pass.
+- [x] Verify privacy, duplicate closure, staff reopen and phone/desktop UI: support suites and 320/390/1440 browser runs pass.
+- [x] Update S45 evidence in traceability/master/operations; S43 awaits current visual review. No hosted changes yet.
+
+### S46 — Live chat sublabel and clear waiting state
+
+L1 FE-019; preserves BE-018. Latest reference is visual guidance, not a transport service.
+- [x] Record launcher/waiting/reply acceptance and dependencies before editing.
+- [x] Add secondary launcher label, honest waiting banner and concise return guidance; retain message-first intake and End chat.
+- [x] Verify translated desktop/phone entry and real-handler waiting/reply/close workflow; typecheck, 1,127-message localization, narrative/spec/whitespace checks pass. Master, operations and traceability updated; screenshots in `.local/live-buying-review/` and `.local/buying-chat-entry-review/`.
+- [ ] CURRENT: await visual approval under AGENTS step 8, then resume already-authorized S43 publication.
+
+### S47 — retained buying requests, history and resolution
+
+L2 FE-019 / BE-018. Extends S45; S43 deployment remains authorized and pending.
+- [x] Define ended versus resolved, retained contact/intake, private notes and permission boundaries.
+- [x] Add migration 57 and resolution/filter contracts; wire staff history/resolved and intake summary.
+- [x] Focused support/security, native PG installation/preservation, typecheck and localization/spec checks pass; local schema 57 preserves 68 businesses. Actual staff actions and public phone conversation captures pass.
+- [x] Update current master, operations and traceability with verified local behavior.
+- [ ] CURRENT: visual review before release gates/commit/deployment. Preview staff history and ended cases in `.local/live-buying-review/`.
+
+### S43 resumed — final web publication approval (2026-09-27)
+
+The owner explicitly requested following all workflows and deploying before mobile
+work. This approves S44–S47 visual refinements and all cumulative S31–S47 web
+changes. No further visual approval is needed for this candidate. Preserve the
+unrelated deno.lock. Expo remains preparation only.
+- [x] Confirm final visual/deployment approval, dirty worktree and scope.
+- [ ] CURRENT: regenerate isolated source and locked install; full check/release/provider acceptance/operations gates.
+- [ ] Independently verify production target; protected backup and migration 51–57 rehearsal with original-column fingerprints.
+- [ ] Reviewed task-scoped commit; exact Netlify artifact and Linux native validation.
+- [ ] Guarded schema update, runtime verification, publish and live monitoring.
+- [ ] Final evidence, rollback/limits and concise handoff before mobile work.
+
+### S48 — reviewed YouTube videos before publication
+
+Owner added this to S43 before production writes. The schema-50 backup is verified;
+S43 gates currently running describe the pre-S48 candidate and cannot authorize
+the changed video workflow. Preserve their evidence and refresh affected gates.
+- [x] Define target-scoped support intake, manual review, examples and private data.
+- [x] Request persistence and normal-save safeguards; owner request links and staff approve/decline workflow.
+- [x] Security/retention/default tests, local migration 58 and phone/desktop captures.
+- [x] Update current master, affected specs, staff procedure and traceability.
+- [ ] CURRENT: explicit visual review of new S48 screens under AGENTS step 8.
+- [ ] Refresh isolated release source, full gates and 51–58 rehearsal; resume the authorized S43 publication.
+
+S48 final channel decision: no official channel is required. Owner requests and
+staff replies work; staff can approve a supported YouTube video from any channel.
+The earlier channel gate was removed at the owner’s request. Private phone/desktop previews are in
+`.local/video-request-review/`; visual approval was requested after real-handler
+checks. Existing S43 schema-50 backup remains protected; no hosted mutation.
+Pre-S48 gates found two stale assertions (gallery schema 55 and featured cap 40);
+focused replacements pass against schema 58 and the approved six-business cap.
+Those old gate attempts do not authorize the changed release candidate.
+
+### S48 correction — channel-independent manual approval
+
+The owner's latest instruction supersedes the channel setup prerequisite. Any
+supported YouTube video can be displayed after assigned staff/manager approval;
+normal owner saves still require a support request for new video references.
+FE-019/BE-018/DEP-039; L2. No new migration or external provider.
+- [x] Revise acceptance: staff URL + approval, no configured/official channel.
+- [x] Remove the channel gate and redundant channel confirmation UI.
+- [x] Prove owner bypass denial, approval without channel setup, public product
+  embed selection, header draft/publication updates, retained media and reply/decline.
+- [x] Update translations/current docs and capture revised phone/desktop controls.
+- [ ] Revised visual approval, then resume S43 full gates and publication.
+
+S48 correction evidence: PostgreSQL review tests pass with the channel variable
+unset, including invalid providers, duplicate/stale approval and header field
+preservation. Actual owner/staff browser submission, approval, public product
+embed selection and decline pass at 390/1440. External YouTube playback is stubbed;
+this verifies Suqpage rendering, not third-party availability. Typecheck, all seven
+localization tests (1,149 messages), 162-spec validation and whitespace checks pass.
+No commit or deployment while revised visual/release gates remain outstanding.
+
+### S43 final approval — S48 channel-independent candidate
+
+The owner approved deployment after reviewing the revised manual video approval
+flow and requested a final real-user workflow audit. This approves all S31–S48
+visual changes. No more visual approval is needed for this release candidate.
+- [x] Record approval and preserve unrelated `deno.lock`.
+- [ ] CURRENT: regenerate isolated source; locked install, full check/release,
+  provider acceptance and operations gates; fix demonstrated defects.
+- [ ] Fresh private backup and schema 50→58 preservation/access rehearsal.
+- [ ] Scoped review/commit, exact artifact privacy/Linux native checks.
+- [ ] Guarded migration, runtime preflight, publish and independent live checks.
+- [ ] Record source/deploy/evidence and remaining operational limits.
+
+S43/S48 final audit progress: locked install, optimized release, operations backup/restore,
+Netlify artifact privacy/source scan and exact Linux native image transform pass.
+The fresh schema-50 production backup restores 57 tables / 3,821 rows; rehearsal
+applies 51–58 with every original-column fingerprint retained, private notes
+unchanged and the new video-request table inaccessible to anonymous/Auth roles.
+No hosted write has occurred. Browser tests exposed an outdated publication fixture
+(sample contacts/items intentionally block Publish); the revised real owner-edit
+workflow passes. Video decline verification now waits for the staff server action
+to finish before refreshing the owner. The original failure logs are retained.
+Full-check continuation retries a timed-out disposable demo seed without relaxing
+its 180-second limit or changing application behavior.
+
+S43/S48 final gates are verified: all 11 production-mode browser workflows pass;
+full check coverage is the successful initial prefix plus the unchanged complete
+continuation. Release, operations, Netlify build, exact artifact privacy/source
+and Linux native image checks pass. Original failed attempts remain in private
+evidence with their test-fixture/timing corrections.
+- [x] Locked install and all required check/release/acceptance/operations coverage.
+- [x] Fresh protected backup and 51–58 preservation/access rehearsal.
+- [x] Exact deployment artifact and Linux native validation.
+- [ ] CURRENT: reviewed scoped commit, guarded schema update and publication.
+- [ ] Independent live verification, monitoring and final deployment record.

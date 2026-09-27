@@ -20,14 +20,14 @@ async function main() {
     const uid=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES('self-service@example.test','unused','Owner','owner',?)").run(bid)).insertedId);
     await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(uid);
     const owner=(await getUserById(uid))!;
-    const content={template:'profile-v1',coverStyle:'blended',introduction:'',about:'Original description',heroImage:'',videoUrl:''};
+    const content={template:'profile-v1',coverStyle:'blended',introduction:'',about:'Original description',heroImage:'',videoUrl:'',contacts:{phone:'+251911234567'}};
     let draft=await saveOwnerPageAndPublication(owner,bid,{action:'start',content});
     assert.equal(draft.publication,null);
     await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:1,revision:0}),/not available/);
     await db.prepare("INSERT INTO products(business_id,name,slug,description,is_published) VALUES(?,'Visit service','visit-service','A helpful service',1)").run(bid);
     const savedPlace=findPlaceSuggestions('Addis Ababa')[0];
     await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
-      VALUES(?,1,'electronics',?,?,'area',?,?,?,0,1)`).run(bid,savedPlace.name,savedPlace.region,savedPlace.id,savedPlace.latitude,savedPlace.longitude);
+      VALUES(?,2,'electronics',?,?,'area',?,?,?,0,1)`).run(bid,savedPlace.name,savedPlace.region,savedPlace.id,savedPlace.latitude,savedPlace.longitude);
     await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,{...owner,business_id:bid+1},bid,{action:'publish',version:1,revision:0}),/Only the owner/);
     await db.exec("CREATE FUNCTION reject_discovery() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture discovery failure'; END; $$; CREATE TRIGGER reject_discovery BEFORE INSERT ON business_discovery_profiles FOR EACH ROW EXECUTE FUNCTION reject_discovery();");
     await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:1,revision:0}),/fixture discovery failure/);
@@ -41,7 +41,7 @@ async function main() {
     assert.equal((await db.prepare('SELECT COUNT(*) n FROM owner_page_reviews').get()).n,0);
     assert.equal((await getMarketplaceDiscoveryView({q:'Self service fixture',type:'businesses'})).resultCounts.businesses,1);
     assert.equal((await getMarketplaceDiscoveryView({q:'Visit Addis',type:'products'})).resultCounts.products,1);
-    assert.equal((await db.prepare('SELECT reviewed_version FROM owner_location_proposals WHERE business_id=?').get(bid)).reviewed_version,1);
+    assert.equal((await db.prepare('SELECT reviewed_version FROM owner_location_proposals WHERE business_id=?').get(bid)).reviewed_version,2);
     draft=await saveOwnerPageAndPublication(owner,bid,{action:'save',version:1,content:{...content,about:'Immediate public changes'}});
     assert.equal(draft.publication?.content?.about,'Immediate public changes');
     await assert.rejects(()=>saveOwnerPageAndPublication(owner,bid,{action:'save',version:1,content}),/newer saved/);
@@ -63,14 +63,14 @@ async function main() {
     draft=await saveOwnerPageAndPublication(staff,bid,{action:'save',version:consent.version,content:{...content,about:'Staff private changes'}});
     assert.equal(draft.publication?.content?.about,'Immediate public changes');
     const place=findPlaceSuggestions('Addis Ababa')[0];
-    const location={name:'Self service fixture',expectedVersion:1,locationVersion:1,category:'electronics',city:'forged',region:'forged',placeId:place.id,mode:'storefront',latitude:9.023456,longitude:38.765432};
+    const location={name:'Self service fixture',expectedVersion:1,locationVersion:2,category:'electronics',city:'forged',region:'forged',placeId:place.id,mode:'storefront',latitude:9.023456,longitude:38.765432};
     await saveOwnerBusiness(owner,bid,location);
     let profile=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(bid);
     assert.equal(profile.latitude,location.latitude);
     assert.ok(profile.approved_at>0);
     assert.equal((await getMarketplaceDiscoveryView({q:'Immediate public'})).resultCounts.businesses,1,'Search uses public About, not private draft');
     await db.prepare('UPDATE business_discovery_profiles SET is_excluded=1 WHERE business_id=?').run(bid);
-    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:2,locationVersion:2,mode:'area'});
+    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:2,locationVersion:3,mode:'area'});
     profile=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(bid);
     assert.equal(profile.is_excluded,1);
     assert.equal(profile.latitude,Math.round(place.latitude*10)/10);

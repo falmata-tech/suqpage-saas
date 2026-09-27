@@ -1,6 +1,6 @@
 // Display values only: scheduling and form submission keep 24-hour machine values.
 export function clockTimeLabel(minutesFromMidnight: number): string {
-  const hour = Math.floor(minutesFromMidnight / 60);
+  const hour = Math.floor(minutesFromMidnight / 60) % 24;
   const minute = minutesFromMidnight % 60;
   return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
 }

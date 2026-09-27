@@ -1,8 +1,8 @@
 import { findSpellingMatches, type SpellingMatch } from './spelling-search';
 import { platformEnvironment } from "./platform-environment.mjs";
 import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
-import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
-import { featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
+import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, discoveryCategoryKey, type ProductionScale } from "./discovery-contract";
+import { automaticFeaturedLineup, featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
 import { getFeaturedProgramDaySelection, getFeaturedProgramPolicy, type FeaturedProgramDayMode } from "./featured-program-settings";
 import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
@@ -19,7 +19,7 @@ export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All categories", s
 export const UNSELECTED_DISCOVERY_INDUSTRY = { key: "", label: "Choose a category", shortLabel: "Choose a category", icon: "grid", code: "" } as const;
 export const DISCOVERY_INDUSTRY_OPTIONS = [...DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES] as const;
 export type DiscoveryIndustryOption = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES;
-export type DiscoveryIndustrySelection = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES | typeof UNSELECTED_DISCOVERY_INDUSTRY;
+export type DiscoveryIndustrySelection = { key: string; label: string; shortLabel: string; icon: string; code: string };
 export const FEATURED_WEEK = [
   { weekday: 1, dayLabel: "Monday", industryKey: "electronics" },
   { weekday: 2, dayLabel: "Tuesday", industryKey: "beauty-wellness" },
@@ -43,6 +43,7 @@ export function featuredProgramAssignment(dateIso: string) {
 const ETHIOPIA_TIME_ZONE = "Africa/Addis_Ababa";
 
 type DiscoveryRow = {
+  is_demo?: number;
   id: number;
   handle: string;
   name: string;
@@ -69,6 +70,7 @@ type DiscoveryRow = {
 };
 
 type DiscoveryProductResultRow = {
+  is_demo?: number;
   id: number;
   name: string;
   description: string;
@@ -95,6 +97,7 @@ type SponsorPlacementRow = {
 };
 
 export type DiscoveryShowroom = {
+  isDemo?: boolean;
   locationMode?: "area" | "storefront" | "legacy";
   id: number;
   handle: string;
@@ -169,6 +172,7 @@ export type DiscoverySearchSuggestion = {
 };
 
 export type DiscoveryProductResult = {
+  isDemo?: boolean;
   id: number;
   name: string;
   description: string;
@@ -242,9 +246,11 @@ function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
 }
 
-function normalizeIndustrySelection(key: string | undefined): DiscoveryIndustrySelection {
-  if (key === ALL_DISCOVERY_INDUSTRIES.key) return ALL_DISCOVERY_INDUSTRIES;
-  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || ALL_DISCOVERY_INDUSTRIES;
+function normalizeIndustrySelection(value: string | readonly string[] | undefined): DiscoveryIndustrySelection {
+  const key = discoveryCategoryKey(value);
+  if (key === "all") return ALL_DISCOVERY_INDUSTRIES;
+  return DISCOVERY_INDUSTRIES.find(industry => industry.key === key)
+    || { key, label: "Categories", shortLabel: "Categories", icon: "grid", code: "" };
 }
 
 function normalizeProductionScale(value: string | undefined): ProductionScale | "" {
@@ -258,7 +264,7 @@ function normalizeWeekday(value: string | number | undefined, fallback: number) 
 
 function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
   let live: { isLive: boolean; platform: LivePlatform | ""; url: string } = { isLive: false, platform: "", url: "" };
-  if (row.is_live) {
+  if (row.is_live && !row.is_demo) {
     try {
       live = validateLiveSettings({ isLive: true, platform: row.live_platform, url: row.live_url });
     } catch {
@@ -270,6 +276,7 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
   return {
     id: row.id,
     handle: row.handle,
+    isDemo: Boolean(row.is_demo),
     name: row.name,
     tagline: row.tagline,
     description: row.description,
@@ -324,6 +331,7 @@ function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult
     categoryName: row.category_name,
     businessId: row.business_id,
     businessHandle: row.business_handle,
+    isDemo: Boolean(row.is_demo),
     businessName: row.business_name,
     city: row.city,
     region: row.region,
@@ -354,7 +362,7 @@ function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,s
   const profile = platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
   return `
     SELECT
-      b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
+      b.id,b.is_demo,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
       ${profile ? "publication.content_json" : "NULL"} AS published_profile_json,
       p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
       COALESCE(location.location_mode,'legacy') AS location_mode,
@@ -370,7 +378,7 @@ function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,s
       AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
@@ -455,7 +463,7 @@ function productSuggestionSql(placeWhere: string) {
       AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
@@ -480,7 +488,7 @@ function productSearchResultSql(placeWhere: string, suffix = "", countOnly = fal
   return `
     SELECT ${countOnly ? "COUNT(*) AS total" : `      product.id,product.name,product.description,product.image_path,
       COALESCE(category.name,'Product') AS category_name,
-      b.id AS business_id,b.handle AS business_handle,b.name AS business_name,
+      b.id AS business_id,b.is_demo,b.handle AS business_handle,b.name AS business_name,
       p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key`}
     FROM products product
     JOIN businesses b ON b.id=product.business_id
@@ -490,7 +498,7 @@ function productSearchResultSql(placeWhere: string, suffix = "", countOnly = fal
     LEFT JOIN categories category ON category.id=product.category_id AND category.business_id=b.id
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
@@ -721,7 +729,7 @@ export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryN
 type DiscoveryOptions = {
   page?: string | number;
   type?: string;
-  industry?: string;
+  industry?: string | readonly string[];
   q?: string;
   place?: string;
   featuredDay?: string | number;
@@ -752,11 +760,11 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const params = discoveryParameters(projectionIndustryKey, query, productionScale);
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
   const requestedPlace = (options.place || "").trim().slice(0, 180);
-  // A valid selected place must not disappear merely because this query has no
-  // matches there. Resolve its eligibility independently of the query in that case.
+  // Retain eligible locations even when new categories/query have no matches.
+  // Resolve a missing selection against public places without category/query scope.
   let places = placeOptions(locationRows);
-  if (query && requestedPlace && !places.some(place => place.key === requestedPlace)) {
-    places = placeOptions(await all<DiscoveryRow>(selectSql(where), discoveryParameters(projectionIndustryKey, "", productionScale)));
+  if (requestedPlace && !places.some(place => place.key === requestedPlace)) {
+    places = placeOptions(await all<DiscoveryRow>(selectSql(where), discoveryParameters("all", "", productionScale)));
   }
   const selectedPlace = places.find((place) => place.key === requestedPlace);
   const placeWhere = selectedPlace?.kind === "city"
@@ -863,17 +871,17 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const selectedWeekday = normalizeWeekday(options.featuredDay, schedule.todayWeekday);
   const selectedDay = schedule.days.find((entry) => entry.weekday === selectedWeekday) || schedule.days[0];
   const featuredIndustry = normalizeIndustry(selectedDay.industryKey);
-  const programPolicy = await getFeaturedProgramPolicy(port);
+  const programPolicy = await getFeaturedProgramPolicy();
   const featuredRowsForDay = async (day: WeeklyFeaturedDay) => {
     const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
-    if (selection.mode !== "manual") return { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
+    if (selection.mode !== "manual") return { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };
     const byId = new Map(eligibleRows.map((row) => [row.id, row]));
     const manualRows = selection.businessIds.map((businessId) => byId.get(businessId)).filter((row): row is DiscoveryRow => Boolean(row)).slice(0, MAX_FEATURED_SHOWROOMS);
     return manualRows.length
       ? { rows: manualRows, mode: "manual" as const }
-      : { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
+      : { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };
   };
   const selectedProgram = await featuredRowsForDay(selectedDay);
   const revealFeatured = selectedDay.isToday;

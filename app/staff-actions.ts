@@ -1,7 +1,7 @@
 "use server";
 
 import { getDiscoveryProfileAdminView } from "@/lib/discovery-admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
@@ -9,10 +9,8 @@ import { DiscoveryAdminError, updateDiscoveryProfile } from "@/lib/discovery-adm
 import { featuredProgramAssignment } from "@/lib/discovery";
 import {
   FeaturedProgramSettingsError,
-  featuredProgramPolicyFromForm,
   listFeaturedProgramEligibleBusinesses,
   saveFeaturedProgramDay,
-  updateFeaturedProgramPolicy,
 } from "@/lib/featured-program-settings";
 import { createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
 import { audit, cleanText } from "@/lib/security";
@@ -132,42 +130,6 @@ export async function setBusinessSponsorshipAction(formData: FormData) {
   redirect("/dashboard/admin/sponsors?saved=showroom");
 }
 
-export async function updateFeaturedProgramPolicyAction(formData: FormData) {
-  const user = await requireUser();
-  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
-  const dateIso = cleanText(formData.get("dateIso"), 10);
-  try {
-    const policy = featuredProgramPolicyFromForm({
-      morningStart: formData.get("morningStart"),
-      morningEnd: formData.get("morningEnd"),
-      afternoonStart: formData.get("afternoonStart"),
-      afternoonEnd: formData.get("afternoonEnd"),
-      changeoverMinutes: formData.get("changeoverMinutes"),
-      sponsorBreakEvery: formData.get("sponsorBreakEvery"),
-      sponsorBreakMinutes: formData.get("sponsorBreakMinutes"),
-      sponsorBreakLabel: formData.get("sponsorBreakLabel"),
-      intermissionLabel: formData.get("intermissionLabel"),
-    });
-    await updateFeaturedProgramPolicy(policy, user.id);
-    await audit("featured_program.policy_updated", { userId: user.id, detail: {
-      morningStartMinute: policy.morningStartMinute,
-      morningEndMinute: policy.morningEndMinute,
-      afternoonStartMinute: policy.afternoonStartMinute,
-      afternoonEndMinute: policy.afternoonEndMinute,
-      changeoverMinutes: policy.changeoverMinutes,
-      sponsorBreakEvery: policy.sponsorBreakEvery,
-      sponsorBreakMinutes: policy.sponsorBreakMinutes,
-    } });
-  } catch (error) {
-    const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not update the program policy.";
-    redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&error=${encodeURIComponent(message)}`);
-  }
-  revalidatePath("/");
-  revalidatePath("/discover");
-  revalidatePath("/dashboard/admin/featured-schedule");
-  redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&saved=policy`);
-}
-
 export async function saveFeaturedProgramDayAction(formData: FormData) {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
@@ -203,6 +165,9 @@ export async function saveFeaturedProgramDayAction(formData: FormData) {
     const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not save the featured-showroom lineup.";
     redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&error=${encodeURIComponent(message)}`);
   }
+  updateTag("public-featured");
+  updateTag("public-marketplace");
+  revalidatePath("/featured");
   revalidatePath("/");
   revalidatePath("/discover");
   revalidatePath("/dashboard/admin/featured-schedule");

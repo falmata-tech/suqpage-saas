@@ -1,232 +1,109 @@
 "use client";
 import { useUiText } from "@/lib/i18n/ui";
-
-
-import { FileText, Headphones, Paperclip, Send, X } from "lucide-react";
+import styles from "./TransportSupport.module.css";
+import { MessageCircle, ShoppingBag, X } from "lucide-react";
+import { createPortal } from "react-dom";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
-const categories = [
-  { key: "general", label: "Suqpage help or report" },
-  { key: "shipment_observation", label: "Transport arrangements" },
-] as const;
-
-type Conversation = {
-  publicRef: string;
-  category: string;
-  status: "waiting" | "open" | "closed";
-  assignedUserName: string | null;
-  messages: Array<{
-    id: number;
-    sender: "visitor" | "staff";
-    senderName: string;
-    body: string;
-    createdAt: number;
-    attachment: {
-      id: number;
-      originalName: string;
-      mimeType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
-      byteSize: number;
-    } | null;
-  }>;
-};
-
-function fileSize(value: number) {
-  return value >= 1024 * 1024 ? `${(value / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(value / 1024))} KB`;
-}
-
-function idempotencyKey() {
-  return crypto.randomUUID().replaceAll("-", "");
-}
+import BuyingConversation from "./BuyingConversation";
+import type { BuyingConversation as Receipt } from "@/lib/buying-conversation-contract";
+const endpoint = "/api/public-support?channel=buying";
 
 export default function PublicSupportChat() {
   const t = useUiText();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const launcherRef = useRef<HTMLButtonElement | null>(null);
-  const threadRef = useRef<HTMLDivElement | null>(null);
-  const attachmentRef = useRef<HTMLInputElement | null>(null);
+  const attempt = useRef<{ draft: string; key: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
-  const attempt = useRef<{draft:string;attachment:File|null;key:string}|null>(null);
-  const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [category, setCategory] = useState<(typeof categories)[number]["key"]>("general");
-  const [email, setEmail] = useState("");
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
-  const [attachment, setAttachment] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function loadConversation() {
+  async function loadReceipt() {
     try {
-      const response = await fetch("/api/public-support", { cache: "no-store" });
+      const response = await fetch(endpoint, { cache: "no-store" });
       if (!response.ok) throw new Error("Support could not be refreshed.");
-      const payload = await response.json() as { conversation: Conversation | null };
-      setConversation(payload.conversation);
+      const payload = await response.json() as { conversation: Receipt | null };
+      setReceipt(payload.conversation);
       setSessionReady(true);
       setError("");
-      setLoaded(true);
     } catch {
-      setLoaded(true);
+      setSessionReady(false);
       setError("Support is temporarily unavailable. Please try again.");
-    }
+    } finally { setLoaded(true); }
   }
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
-    if (open) void loadConversation();
+    if (open) void loadReceipt();
   }, [open]);
-
-  useEffect(() => {
-    if (!open || !conversation || conversation.status === "closed") return;
-    const refreshVisibleConversation = () => {
-      if (!document.hidden) void loadConversation();
-    };
-    const interval = window.setInterval(refreshVisibleConversation, 5_000);
-    document.addEventListener("visibilitychange", refreshVisibleConversation);
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", refreshVisibleConversation);
-    };
-  }, [open, conversation?.publicRef, conversation?.status]);
-
-  useEffect(() => {
-    threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
-  }, [conversation?.messages.length]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!message.trim() || busy || !sessionReady) return;
-    setBusy(true);
-    setError("");
+    if (busy || !sessionReady || receipt || !name.trim() || !phone.trim() || !message.trim()) return;
+    setBusy(true); setError("");
     try {
-      const body = new FormData();
-      body.set("action", conversation ? "message" : "start");
-      body.set("category", category);
-      body.set("email", conversation ? "" : email);
-      body.set("phone", conversation ? "" : phone);
-      body.set("message", message);
-      // Reopening help can recover a chat after its first response was lost.
-      // Keep the same key even when that recovery changes start into reply.
-      const draft = JSON.stringify([category, email, phone, message]);
-      if (!attempt.current || attempt.current.draft !== draft || attempt.current.attachment !== attachment) {
-        attempt.current = {draft,attachment,key:idempotencyKey()};
-      }
-      body.set("idempotencyKey", attempt.current.key);
-      body.set("website", "");
-      if (attachment) body.set("attachment", attachment);
-      const response = await fetch("/api/public-support", {
-        method: "POST",
-        body,
-      });
-      const payload = await response.json() as { conversation?: Conversation; error?: string };
+      const draft = JSON.stringify([name, phone, message]);
+      if (!attempt.current || attempt.current.draft !== draft) attempt.current = {draft,key:crypto.randomUUID().replaceAll("-", "")};
+      const response = await fetch(endpoint, { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify({
+        action:"start", category:"buying_assistance", name, phone, message, idempotencyKey:attempt.current.key, website:"",
+      }) });
+      const payload = await response.json() as { conversation?: Receipt; error?: string };
       if (!response.ok || !payload.conversation) throw new Error(payload.error || "Message could not be sent.");
-      setConversation(payload.conversation);
-      attempt.current = null;
-      setMessage("");
-      setAttachment(null);
-      if (attachmentRef.current) attachmentRef.current.value = "";
-      setLoaded(true);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Message could not be sent.");
-    } finally {
-      setBusy(false);
-    }
+      setReceipt(payload.conversation); attempt.current = null; setMessage("");
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Message could not be sent."); }
+    finally { setBusy(false); }
   }
-
-  async function endChat() {
-    if (!conversation || busy || !window.confirm(t("End this support chat? You can still read the closed conversation here."))) return;
-    setBusy(true);
-    setError("");
-    try {
-      const response = await fetch("/api/public-support", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "close" }),
-      });
-      const payload = await response.json() as { conversation?: Conversation; error?: string };
-      if (!response.ok || !payload.conversation) throw new Error(payload.error || "The chat could not be ended.");
-      setConversation(payload.conversation);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The chat could not be ended.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function startAnotherChat() {
+  async function anotherRequest() {
     if (busy) return;
-    setBusy(true);
-    setError("");
+    setBusy(true); setError("");
     try {
-      const response = await fetch("/api/public-support", { method: "DELETE" });
-      if (!response.ok) throw new Error("A new chat could not be started.");
-      setConversation(null);
-      setSessionReady(false);
-      attempt.current = null;
-      setCategory("general");
-      setMessage("");
-      setAttachment(null);
-      if (attachmentRef.current) attachmentRef.current.value = "";
-      await loadConversation();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "A new chat could not be started.");
-    } finally {
-      setBusy(false);
-    }
+      const response = await fetch(endpoint, {method:"DELETE"});
+      if (!response.ok) throw new Error("Request could not be accepted.");
+      setReceipt(null); setSessionReady(false); attempt.current = null; setMessage("");
+      await loadReceipt();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Request could not be accepted."); }
+    finally { setBusy(false); }
   }
-
-  function close() {
-    setOpen(false);
-    launcherRef.current?.focus();
-  }
+  function close() { setOpen(false); launcherRef.current?.focus(); }
 
   return <>
-    <button ref={launcherRef} className="public-support-launcher" type="button" onClick={() => setOpen(true)} aria-label={t("Get help")} aria-haspopup="dialog" aria-expanded={open}>
-      <Headphones aria-hidden="true" />
-      <span>{t("Get help")}</span>
-    </button>
-    <dialog ref={dialogRef} className="public-support-dialog" aria-labelledby="public-support-title" onClose={() => setOpen(false)} onCancel={(event) => { event.preventDefault(); close(); }} onClick={(event) => { if (event.target === dialogRef.current) close(); }}>
-      <section className={conversation ? "has-conversation" : "new-conversation"}>
-        <header>
-          <div><span>{t("Live support")}</span><h2 id="public-support-title">{t("Suqpage help")}</h2></div>
-          <button type="button" onClick={close} aria-label={t("Close support")}><X aria-hidden="true" /></button>
-        </header>
-        {!sessionReady && loaded ? <button type="button" onClick={() => void loadConversation()}>{t("Retry")}</button> : null}
-        {!loaded ? <p className="public-support-loading" role="status">{t("Opening support…")}</p> : conversation ? <>
-          <div className="public-support-state"><span><strong>{conversation.status === "waiting" ? t("Waiting for a team member") : conversation.status === "closed" ? t("Conversation closed") : conversation.assignedUserName ? t("Connected with {name}", {name: conversation.assignedUserName}) : t("Connected")}</strong><small>{conversation.publicRef}</small></span>{conversation.status !== "closed" ? <button type="button" onClick={endChat} disabled={busy}>{t("End chat")}</button> : <button type="button" onClick={startAnotherChat} disabled={busy}>{t("Start another chat")}</button>}</div>
-          <div ref={threadRef} className="public-support-thread" aria-live="polite" aria-label={t("Support messages")}>
-            {conversation.messages.map((item) => <article key={item.id} className={item.sender}>
-              <strong>{item.senderName}</strong>
-              <p>{item.body}</p>
-              {item.attachment ? item.attachment.mimeType.startsWith("image/")
-                ? <a className="public-support-attachment image" href={`/api/public-support/attachments/${item.attachment.id}`} target="_blank" rel="noreferrer"><img src={`/api/public-support/attachments/${item.attachment.id}`} alt={item.attachment.originalName} loading="lazy" /><span>{item.attachment.originalName} · {fileSize(item.attachment.byteSize)}</span></a>
-                : <a className="public-support-attachment file" href={`/api/public-support/attachments/${item.attachment.id}`}><FileText aria-hidden="true" /><span><b>{item.attachment.originalName}</b><small>{t("PDF ·")}{" "}{fileSize(item.attachment.byteSize)}</small></span></a>
-                : null}
-            </article>)}
+    <div className={`public-support-launcher ${styles.launchers}`}>
+      <button ref={launcherRef} className={styles.launcher} data-channel="buying" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}>
+        <MessageCircle aria-hidden="true" /><span className={styles.launcherLabel}><strong>{t("Buying assistance")}</strong><small>{t("Live chat")}</small></span>
+      </button>
+    </div>
+    {mounted ? createPortal(<dialog ref={dialogRef} className={`public-support-dialog ${styles.dialog}`} aria-labelledby="public-buying-title" onClose={() => setOpen(false)} onCancel={event => {event.preventDefault();close();}} onClick={event => {if(event.target === dialogRef.current)close();}}>
+      <section className={receipt ? styles.receivedSection : "new-conversation"}>
+        <header><div><span className={styles.chatEyebrow}><MessageCircle aria-hidden="true" />{t("Live chat")}</span><h2 id="public-buying-title">{t("Buying assistance")}</h2></div><button type="button" onClick={close} aria-label={t("Close")}><X aria-hidden="true" /></button></header>
+        {!sessionReady && loaded ? <button type="button" onClick={() => void loadReceipt()}>{t("Retry")}</button> : null}
+        {!loaded ? <p className="public-support-loading" role="status">{t("Loading…")}</p> : receipt ? <><BuyingConversation initial={receipt} active={open} onAnother={() => void anotherRequest()} />{error ? <p role="alert">{t(error)}</p> : null}</> : <>
+          <div className={styles.welcome}>
+            <div className={styles.welcomeIcon}><ShoppingBag aria-hidden="true" /></div>
+            <h3>{t("What can we help you with?")}</h3>
+            <p>{t("Talk with our team about a purchase, a seller or product quality.")}</p>
           </div>
-        </> : <div className="public-support-intro">
-          <p>{t("Ask how Suqpage works, get help arranging transport, or report a concern about a listing.")}</p>
-          <small>{t("Buying, payment, product details, and commercial terms stay between you and the listed operation.")}</small>
-          <label className="public-support-category" htmlFor="public-support-category">{t("What do you need?")}<select id="public-support-category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number]["key"])}>{categories.map((option) => <option key={option.key} value={option.key}>{t(option.label)}</option>)}</select></label>
-        </div>}
-        {conversation?.status === "closed" ? error ? <p className="public-support-error" role="alert">{t(error)}</p> : null : loaded ? <form onSubmit={submit}>
-          {!conversation ? <div className="public-support-contact-fields">
-            <label htmlFor="public-support-email">{t("Email")}<input id="public-support-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} required placeholder="you@example.com" /></label>
-            <label htmlFor="public-support-phone">{t("Phone")}<input id="public-support-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
-            <small>{t("Required so our team can continue by email or phone if this chat disconnects.")}</small>
-          </div> : null}
-          <label htmlFor="public-support-message">{conversation ? t("Reply") : t("Your message")}</label>
-          <textarea id="public-support-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} rows={3} required placeholder={conversation ? t("Write a reply…") : t("Tell us what you need…")} />
-          <label className="public-support-attachment-input" htmlFor="public-support-attachment"><Paperclip aria-hidden="true" /><span>{attachment ? attachment.name : t("Attach image or PDF")}</span><input ref={attachmentRef} id="public-support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(event) => setAttachment(event.target.files?.[0] || null)} /></label>
-          <small className="public-support-attachment-help">{t("Optional · one JPEG, PNG, WebP, or PDF · 5 MB maximum")}</small>
-          {error ? <p className="public-support-error" role="alert">{t(error)}</p> : null}
-          <button type="submit" disabled={busy || !sessionReady || !message.trim() || (!conversation && (!email.trim() || !phone.trim()))}><Send aria-hidden="true" /><span>{busy ? t("Sending…") : t("Send")}</span></button>
-        </form> : null}
+          <form className={styles.intake} onSubmit={submit}>
+            <label htmlFor="public-buying-message">{t("Your message")}</label>
+            <textarea id="public-buying-message" value={message} onChange={event=>setMessage(event.target.value)} maxLength={4000} rows={3} required placeholder={t("Tell us what you need. You can include a product or shop link.")} />
+            <div className="public-support-contact-fields">
+              <label htmlFor="public-buying-name">{t("Name")}<input id="public-buying-name" autoComplete="name" value={name} onChange={event=>setName(event.target.value)} maxLength={80} required placeholder={t("Your name")} /></label>
+              <label htmlFor="public-buying-phone">{t("Phone")}<input id="public-buying-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={event=>setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
+            </div>
+            {error ? <p className="public-support-error" role="alert">{t(error)}</p> : null}
+            <button type="submit" className={styles.submit} disabled={busy || !sessionReady || !name.trim() || !phone.trim() || !message.trim()}><MessageCircle aria-hidden="true" /><span>{busy ? t("Sending…") : t("Start chat")}</span></button>
+          </form>
+        </>}
       </section>
-    </dialog>
+    </dialog>,document.body) : null}
   </>;
 }

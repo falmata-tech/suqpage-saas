@@ -3,8 +3,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { getDb, closeDbForTests } from "./testing/postgres-fixture";
-import { buildFeaturedProgramAgenda, DEFAULT_FEATURED_PROGRAM_POLICY, featuredBroadcastPhase, featuredProgramDisplayOrder, MAX_FEATURED_SHOWROOMS, resolveFeaturedProgramSessions, type FeaturedBoothWalkthrough, type FeaturedProgramBreak, } from "../lib/featured-program";
-import { FeaturedProgramSettingsError, featuredProgramPolicyFromForm, getFeaturedProgramDaySelection, getFeaturedProgramPolicy, listFeaturedProgramEligibleBusinesses, saveFeaturedProgramDay, updateFeaturedProgramPolicy, type FeaturedProgramWritePort, } from "../lib/featured-program-settings";
+import { automaticFeaturedLineup, buildFeaturedProgramAgenda, DEFAULT_FEATURED_PROGRAM_POLICY, featuredBroadcastPhase, featuredProgramDisplayOrder, MAX_FEATURED_SHOWROOMS, resolveFeaturedProgramSessions, type FeaturedBoothWalkthrough, type FeaturedProgramBreak, } from "../lib/featured-program";
+import { FeaturedProgramSettingsError, getFeaturedProgramDaySelection, getFeaturedProgramPolicy, getFeaturedProgramCacheVersion, listFeaturedProgramEligibleBusinesses, saveFeaturedProgramDay, type FeaturedProgramWritePort, } from "../lib/featured-program-settings";
+import {getFeaturedShowroomsView} from "../lib/discovery";
 import type { RuntimeSqlValue } from "../lib/runtime-sql";
 const featuredUiSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"), "utf8");
 const discoveryCssSource = fs.readFileSync(path.join(process.cwd(), "app/discovery.css"), "utf8");
@@ -17,7 +18,7 @@ assert.match(featuredUiSource, /featured\.booths\[slot - 1\]/, "public schedule 
 assert.match(featuredUiSource, /entry\.kind === "booth" \|\| entry\.kind === "sponsor_break"/, "visitor schedule includes presentations and sponsor breaks without an expanded changeover wall");
 assert.match(discoveryCssSource, /\.featured-agenda-body/);
 assert.match(discoveryCssSource, /max-height:\s*min\(470px, 58dvh\)/, "the opened phone schedule remains bounded");
-assert.match(lineupSelectorSource, /disabled=\{!selected && capacityReached\}/, "the admin selector prevents a forty-first browser selection");
+assert.match(lineupSelectorSource, /disabled=\{!selected && capacityReached\}/, "the admin selector prevents a seventh browser selection");
 assert.match(lineupSelectorSource, /t\("Daily Featured accepts up to \{limit\} pages\."\s*,\s*\{limit\}\)/, "the admin selector explains the capacity");
 assert.match(featuredAdminSource, /sponsorForSlot\(entry\.sponsorSlot\)\?\.name/, "the internal agenda names each scheduled sponsor placement");
 assert.match(featuredUiSource, /Sponsor spotlight/, "the public schedule and live rail disclose the active sponsor segment");
@@ -34,60 +35,44 @@ async function main() {
             },
         };
         assert.ok(await db.prepare("SELECT 1 FROM schema_migrations WHERE version=32").get(), "migration 32 is recorded");
-        assert.deepEqual(await getFeaturedProgramPolicy(settingsPort), DEFAULT_FEATURED_PROGRAM_POLICY, "migration 32 installs the 08:00-22:00 default policy");
-        const agenda = buildFeaturedProgramAgenda("2026-08-10", 10, new Date("2026-08-10T10:05:00+03:00"));
-        const booths = agenda.filter((entry) => entry.kind === "booth");
-        assert.equal(booths.length, 10);
-        assert.equal(booths.filter((entry) => entry.session === "morning").length, 5);
-        assert.equal(booths.filter((entry) => entry.session === "afternoon").length, 5);
-        assert.equal(booths[0].label, "10:05 AM–10:35 AM");
-        assert.equal(booths[5].label, "7:05 PM–7:35 PM");
-        assert.equal(agenda.filter((entry) => entry.kind === "sponsor_break").length, 2);
-        const sponsorBreaks = agenda.filter((entry): entry is FeaturedProgramBreak => entry.kind === "sponsor_break");
-        assert.deepEqual(sponsorBreaks.map((entry) => entry.sponsorSlot), [1, 2], "sponsor segments receive chronological placement slots");
-        const intermission = agenda.find((entry) => entry.kind === "intermission");
-        assert.equal(intermission?.kind === "intermission" ? intermission.timeLabel : "", "1:00 PM–7:05 PM");
-        assert.equal(agenda.filter((entry) => entry.current).length, 1);
-        const orderedWalkthroughs = agenda.filter((entry): entry is FeaturedBoothWalkthrough => entry.kind === "booth");
-        assert.deepEqual(featuredProgramDisplayOrder(orderedWalkthroughs, new Date("2026-08-10T09:00:00+03:00")), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "the first slot leads before the program starts");
-        assert.deepEqual(featuredProgramDisplayOrder(orderedWalkthroughs, orderedWalkthroughs[1].start + 1), [2, 3, 4, 5, 6, 7, 8, 9, 10, 1], "the current presentation rotates to the lead");
-        assert.deepEqual(featuredProgramDisplayOrder(orderedWalkthroughs, orderedWalkthroughs[1].end + 1), [2, 3, 4, 5, 6, 7, 8, 9, 10, 1], "the latest completed presentation remains first during a break");
-        assert.deepEqual(featuredProgramDisplayOrder(orderedWalkthroughs, orderedWalkthroughs.at(-1)!.end + 1), [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], "the final presentation remains first after the program ends");
-        assert.equal(featuredBroadcastPhase("2026-08-10", 10, new Date("2026-08-10T15:00:00+03:00")), "intermission");
-        assert.equal(buildFeaturedProgramAgenda("2026-08-10", 10, new Date("2026-08-10T15:00:00+03:00")).some((entry) => entry.kind === "booth" && entry.current), false);
-        for (let index = 1; index < agenda.length; index += 1) {
-            assert.ok(agenda[index - 1].end <= agenda[index].start, "agenda entries never overlap");
+        assert.deepEqual(await getFeaturedProgramPolicy(), DEFAULT_FEATURED_PROGRAM_POLICY, "historical DB policy cannot restore morning sessions");
+        const date="2026-08-10", start=Date.parse(date+"T20:30:00+03:00"), end=Date.parse("2026-08-11T00:00:00+03:00");
+        for(let count=0;count<=6;count++) {
+          const agenda=buildFeaturedProgramAgenda(date,count,start);
+          assert.equal(agenda.filter(entry=>entry.kind==='booth').length,count);
+          if(!count){assert.deepEqual(agenda,[]);continue;}
+          assert.equal(agenda[0].start,start);assert.ok(agenda.at(-1)!.end<=end);
+          assert.equal(agenda.filter(entry=>entry.kind==='sponsor_break').length,4);
+          assert.deepEqual(agenda.filter((entry):entry is FeaturedProgramBreak=>entry.kind==='sponsor_break').map(entry=>entry.sponsorSlot),[1,2,3,4]);
+          assert.ok(agenda.every(entry=>entry.session==='evening'));
+          for(let i=0;i<agenda.length;i++) {
+            const entry=agenda[i];assert.ok(entry.end>entry.start);
+            assert.equal(entry.end-entry.start,(entry.kind==='booth'?30:5)*60000);
+            if(i)assert.equal(agenda[i-1].end,entry.start);
+            const atBoundary=buildFeaturedProgramAgenda(date,count,entry.start);
+            assert.equal(atBoundary.filter(row=>row.current).length,1);
+            assert.equal(atBoundary[i].current,true);
+          }
         }
-        const leanSessions = resolveFeaturedProgramSessions(10);
-        assert.deepEqual(leanSessions, {
-            morning: { session: "morning", startMinute: 605, endMinute: 780, boothCount: 5 },
-            afternoon: { session: "afternoon", startMinute: 1145, endMinute: 1320, boothCount: 5 },
-        }, "ten booths contract into 10:05-13:00 and 19:05-22:00 sessions");
-        const leanAgenda = buildFeaturedProgramAgenda("2026-08-10", 10, new Date("2026-08-10T10:05:00+03:00"));
-        assert.ok(leanAgenda.filter((entry) => entry.kind === "booth").every((entry) => entry.end - entry.start === 30 * 60 * 1000), "contracted booth presentations retain the 30-minute target");
-        assert.equal(leanAgenda.find((entry) => entry.kind === "booth")?.label, "10:05 AM–10:35 AM");
-        const leanIntermission = leanAgenda.find((entry) => entry.kind === "intermission");
-        assert.equal(leanIntermission?.kind === "intermission" ? leanIntermission.timeLabel : "", "1:00 PM–7:05 PM");
-        assert.equal(featuredBroadcastPhase("2026-08-10", 10, new Date("2026-08-10T18:00:00+03:00")), "intermission");
-        assert.equal(featuredBroadcastPhase("2026-08-10", 10, new Date("2026-08-10T19:05:00+03:00")), "live");
-        assert.deepEqual(resolveFeaturedProgramSessions(2), {
-            morning: { session: "morning", startMinute: 720, endMinute: 780, boothCount: 1 },
-            afternoon: { session: "afternoon", startMinute: 1260, endMinute: 1320, boothCount: 1 },
-        }, "the smallest two-booth lineup keeps one bounded session in both parts of the day");
-        const fullAgenda = buildFeaturedProgramAgenda("2026-08-10", MAX_FEATURED_SHOWROOMS, new Date("2026-08-10T08:02:00+03:00"));
-        const fullBooths = fullAgenda.filter((entry) => entry.kind === "booth");
-        assert.equal(fullBooths.length, 40, "the agenda supports the complete forty-showroom Daily Featured floor");
-        assert.equal(fullBooths.filter((entry) => entry.session === "morning").length, 20);
-        assert.equal(fullBooths.filter((entry) => entry.session === "afternoon").length, 20);
-        assert.equal(fullBooths[0].label, "8:00 AM–8:09 AM");
-        assert.equal(fullBooths[20].label, "5:00 PM–5:09 PM");
-        assert.equal(fullAgenda.filter((entry) => entry.kind === "sponsor_break").length, 12);
-        const fullIntermission = fullAgenda.find((entry) => entry.kind === "intermission");
-        assert.equal(fullIntermission?.kind === "intermission" ? fullIntermission.timeLabel : "", "1:00 PM–5:00 PM");
-        for (let index = 1; index < fullAgenda.length; index += 1) {
-            assert.ok(fullAgenda[index - 1].end <= fullAgenda[index].start, "the forty-showroom agenda never overlaps");
-        }
-        assert.throws(() => resolveFeaturedProgramSessions(MAX_FEATURED_SHOWROOMS + 1), /between 0 and 40/, "the agenda domain rejects an oversized featured floor");
+        const agenda=buildFeaturedProgramAgenda(date,6,start),booths=agenda.filter((entry):entry is FeaturedBoothWalkthrough=>entry.kind==='booth');
+        assert.equal(agenda.at(-1)!.end,end);assert.equal(agenda.filter(entry=>entry.kind==='changeover').length,2);
+        const last=agenda.at(-1)!;assert.equal(last.kind==='sponsor_break'?last.timeLabel:'','11:55 PM–12:00 AM');
+        assert.equal(featuredBroadcastPhase(date,6,start-1),'scheduled');assert.equal(featuredBroadcastPhase(date,6,start),'live');assert.equal(featuredBroadcastPhase(date,6,end),'ended');
+        assert.ok(!buildFeaturedProgramAgenda(date,6,end).some(entry=>entry.current));
+        assert.equal(booths[0].label,'8:30 PM–9:00 PM');
+        assert.deepEqual(featuredProgramDisplayOrder(booths,booths[1].start),[2,3,4,5,6,1]);
+        assert.deepEqual(featuredProgramDisplayOrder(booths,booths[1].end),[2,3,4,5,6,1]);
+        assert.deepEqual(resolveFeaturedProgramSessions(6),{evening:{session:'evening',startMinute:1230,endMinute:1440,boothCount:6}});
+        for(const invalid of [-1,7,1.5,NaN])assert.throws(()=>buildFeaturedProgramAgenda(date,invalid,start));
+        assert.throws(()=>buildFeaturedProgramAgenda('2026-02-30',6,start));
+        assert.throws(()=>buildFeaturedProgramAgenda(date,6,NaN));
+        const pool=Array.from({length:13},(_,i)=>i+1);
+        assert.deepEqual(automaticFeaturedLineup(date,pool),automaticFeaturedLineup(date,pool));
+        assert.equal(new Set(automaticFeaturedLineup(date,pool)).size,6);
+        assert.notDeepEqual(automaticFeaturedLineup(date,pool),automaticFeaturedLineup('2026-08-17',pool));
+        const reached=new Set(Array.from({length:13},(_,i)=>automaticFeaturedLineup(new Date(Date.parse(date)+i*7*86400000).toISOString().slice(0,10),pool)).flat());
+        assert.equal(reached.size,13);assert.deepEqual(automaticFeaturedLineup(date,[]),[]);
+        assert.equal(automaticFeaturedLineup(date,[1,2]).length,2);
         const adminId = Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES(?,?,?,'admin')").run("schedule-admin@example.test", "hash", "Schedule Admin")).insertedId);
         await db.prepare("INSERT INTO discovery_industries(key,label,icon,position,active) VALUES('electronics','Electronics, electrical & appliances','circuit',1,1) ON CONFLICT(key) DO NOTHING").run();
         const scheduleBusinessNames = [
@@ -108,22 +93,20 @@ async function main() {
             await db.prepare("INSERT INTO products(business_id,name,slug,is_published) VALUES(?,?,?,1)").run(businessId, `${name} offering`, "primary-offering");
             return businessId;
         }));
-        const parsedPolicy = featuredProgramPolicyFromForm({
-            morningStart: "08:00",
-            morningEnd: "13:00",
-            afternoonStart: "17:00",
-            afternoonEnd: "22:00",
-            changeoverMinutes: "5",
-            sponsorBreakEvery: "3",
-            sponsorBreakMinutes: "10",
-            sponsorBreakLabel: "Partner message",
-            intermissionLabel: "Lunch and program break",
-        });
-        await updateFeaturedProgramPolicy(parsedPolicy, adminId, settingsPort);
-        assert.equal((await getFeaturedProgramPolicy(settingsPort)).sponsorBreakLabel, "Partner message");
         const eligible = await listFeaturedProgramEligibleBusinesses("electronics", settingsPort);
         assert.equal(eligible.length, 41);
         assert.deepEqual(eligible.slice(0, 3).map((business) => business.name), ["Alpha Workshop", "Beta Works", "Delta Makers"]);
+        const projectionOptions={featuredDay:1,now:new Date('2026-08-10T21:00:00+03:00'),readPort:settingsPort};
+        const autoView=await getFeaturedShowroomsView(projectionOptions);
+        assert.deepEqual(autoView.featured.booths.flatMap(booth=>booth.revealed?[booth.showroom.id]:[]),automaticFeaturedLineup('2026-08-10',eligible).map(row=>row.id),'Admin and public share automatic order');
+        const autoVersion=await getFeaturedProgramCacheVersion(projectionOptions.now,settingsPort);
+        await saveFeaturedProgramDay({dateIso:'2026-08-10',mode:'manual',businessIds:[businessIds[2],businessIds[0]],eligibleBusinessIds:businessIds,actorUserId:adminId},settingsPort);
+        assert.notEqual(await getFeaturedProgramCacheVersion(projectionOptions.now,settingsPort),autoVersion);
+        const manualView=await getFeaturedShowroomsView(projectionOptions);
+        assert.deepEqual(manualView.featured.booths.flatMap(booth=>booth.revealed?[booth.showroom.id]:[]),[businessIds[2],businessIds[0]]);
+        await saveFeaturedProgramDay({dateIso:'2026-08-10',mode:'automatic',businessIds:[],eligibleBusinessIds:businessIds,actorUserId:adminId},settingsPort);
+        assert.deepEqual((await getFeaturedShowroomsView(projectionOptions)).featured.booths,autoView.featured.booths);
+        assert.equal(await getFeaturedProgramCacheVersion(projectionOptions.now,settingsPort),autoVersion);
         await saveFeaturedProgramDay({
             dateIso: "2026-08-11",
             mode: "manual",
@@ -150,7 +133,7 @@ async function main() {
             businessIds,
             eligibleBusinessIds: businessIds,
             actorUserId: adminId,
-        }, settingsPort), /no more than 40/);
+        }, settingsPort), /no more than 6/);
         assert.deepEqual((await getFeaturedProgramDaySelection("2026-08-11", settingsPort)).businessIds, [businessIds[2], businessIds[0]], "an oversized lineup leaves the retained order unchanged");
         const automatic = await saveFeaturedProgramDay({
             dateIso: "2026-08-11",

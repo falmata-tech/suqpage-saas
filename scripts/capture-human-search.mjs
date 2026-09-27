@@ -32,7 +32,7 @@ try {
   for(const query of ['unknownbrand','body soap','lotion']){await input.fill(query);await page.waitForTimeout(60);}
   await expect(page).toHaveURL(url=>url.searchParams.get('q')==='lotion',{timeout:15000});
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
-  await page.locator('.discovery-search-result-types a').filter({hasText:'Products & services'}).click();
+  await page.getByRole('checkbox',{name:'Businesses',exact:true}).click();
   await expect(page).toHaveURL(url=>url.searchParams.get('type')==='products');
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
   await page.screenshot({path:`${out}/lotion-${width}.png`,fullPage:true});

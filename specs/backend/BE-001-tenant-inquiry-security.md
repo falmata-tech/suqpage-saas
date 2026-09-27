@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033]
+related: [FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L2
@@ -93,3 +93,14 @@ form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
 Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## S33 local extension — FE-052
+
+An authenticated client may update status only for their own business's inquiry.
+Operations authorization is retained; another owner or a team member is denied.
+Canonical status values are validated server-side and the update/audit commit
+atomically. UI translation never changes submitted values. Phone contact offers
+Call and SMS; email remains available for retained email inquiries. Opening a
+contact link does not imply message delivery. Local regression evidence is in
+`scripts/test-launch-clarity.ts` and `scripts/test-workflow-wiring-audit.ts`;
+publication remains pending FE-052 visual/release gates.

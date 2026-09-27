@@ -5,6 +5,7 @@ Evidence must be reproducible; avoid transient chat claims.
 
 | Capability | FE | BE | DEP | Primary code | Automated evidence | Status |
 |---|---|---|---|---|---|---|
+| Simple transport intake and admin referral queue (S32) | FE-019 | BE-018 | DEP-015 | PublicSupportChat, support service/actions, admin support pages, PostgreSQL migration 51 | Support/replay/transport security suites, typecheck, 160-spec validation, six localization checks; real public intake and admin save/copy flows at 1440/390/320. Local migration applied; review captures in .local/transport-support-review/. Visual/full gates, commit and rollout pending. | in_progress |
 | Canonical city/town selection | FE-045 | BE-038 | DEP-035 | Existing place data and owner location proposal boundary | 2026-09-17: 781-place lookup, canonical save/privacy and migration tests, owner/admin wiring, keyboard/browser save/reload and six accessibility scans pass locally; visual/full-release gates pending. See docs/SUQPAGE-SERVICES-AND-PLACES-REVIEW.md  S20 full gates and monitored deployment 6ab0d349f099639821fa0f9a verified; current evidence: docs/SUQPAGE-RELEASE-2026-09-21.md. | done |
 | Inclusive business discovery and service offerings | FE-044 | BE-037 | DEP-034 | Existing offering/catalog/inquiry ports with additive service kind | 2026-09-17: service migration/upkeep/inquiry compatibility, typecheck and actual owner service creation, product/service/mixed and search/browser flows pass locally; 28 screenshots, visual/full-release gates pending. See docs/SUQPAGE-SERVICES-AND-PLACES-REVIEW.md  S20 full gates and monitored deployment 6ab0d349f099639821fa0f9a verified; current evidence: docs/SUQPAGE-RELEASE-2026-09-21.md. | done |
 | Runtime email entry without cached redirect loops | FE-038 | BE-031, BE-036 | DEP-033 | Request-time entry pages and compatible Auth proxy | 2026-09-16: dynamic entry manifest, runtime-only local Auth and eight browser scenarios pass; proxy precedence, full check, release and secret-free package checks pass. Source d47f1c1 published as 6aab00e841e9a4687217be7d (ready); live anonymous/invalid-cookie entry uses private/no-store responses without loops. See docs/SUQPAGE-AUTH-ENTRY-FIX-2026-09-16.md | done |
@@ -26,10 +27,11 @@ Evidence must be reproducible; avoid transient chat claims.
 | Cross-role accessibility and interface clarity | FE-035 | — | DEP-002 | Shared public, showroom, administrator, operations, and client interfaces; semantic landmark and heading corrections; responsive table containment; accessible color roles; state-aware dialogs and drawers; `scripts/test-accessibility-audit.mjs`; `tests/acceptance/app.spec.ts` | 2026-09-14: all 72 current public/owner/admin states at 1440/390/320 pass, plus focused editor keyboard checks; seven production browser scenarios pass. Current evidence: docs/SUQPAGE-DEPLOYMENT-2026-09-14.md. Historical 2026-08-11: 88 desktop/390px cross-role accessibility states and 10/10 ordered browser workflows pass, including interactive public discovery, hosted-showroom, admin, manager, team-member, and client states. Structured evidence: `/tmp/suqpage-accessibility-audit.json`; reviewed captures: `/tmp/suqpage-audit-discovery-final`, `/tmp/suqpage-audit-workspaces-final-2`, `/tmp/suqpage-audit-focused-final-3`. | done |
 | Installable PWA and mobile application shell | FE-034 | — | DEP-025 | Standards-based manifest and icon set, cache-bounded first-party worker, branded offline route, shared public phone tabs across public and onboarding routes, role-derived workspace phone tabs and More sheet, safe-area mobile shell, and reviewed cleanup-worker rollback artifact | On 2026-08-15, the worker contract passes with cache version v2 and `/featured` in the bounded network-first public allowlist while API, dashboard, preview, login, request, and mutation exclusions remain unchanged. Fresh production worker-control and offline-route evidence is required after visual approval and deployment. | in_progress |
 | Mobile brand visibility (S30) | FE-038, FE-034, FE-032, FE-051 | — | DEP-025 | Public/account/workspace headers and shop return row; shared fixed-type wordmark | 90 responsive checks, phone result scroll/collapse, full check/release, nine provider acceptance workflows, operations, protected restore and Netlify artifact/native checks pass. Owner-approved source 87aaced deployed as 6ab3dc37aea724cbcfbcb994; 90 live responsive checks, phone results and 15 public checks pass. See docs/SUQPAGE-S30-RELEASE-2026-09-23.md. | done |
-| Automatic and adjustable Daily Featured scheduling | FE-033 | BE-029 | DEP-024 | Migration-32 schedule policy, participant-responsive morning/evening agenda, sparse manual lineup overrides, platform-admin editor, compact public Today's schedule disclosure, circular current-presentation ordering, and public presentation/break/intermission/sponsor status in `lib/featured-program.ts`, `lib/featured-program-settings.ts`, `lib/discovery.ts`, `app/dashboard/admin/featured-schedule/page.tsx`, and `components/DiscoveryWorkspace.tsx` | Earlier agenda and responsive evidence remains valid. On 2026-08-15, `npm run typecheck`, `npm run validate:specs`, `npm run test:featured-schedule`, and `npm run test:discovery` pass, proving stable circular presentation order plus chronological sponsor slots resolved to the active ordered sponsor pool in both the admin agenda and public Sponsor spotlight state. User visual approval remains pending before complete release, PostgreSQL rehearsal, acceptance, and remote gates. | in_progress |
+| Horizontal logo proportions (S31) | FE-038, FE-051 | — | DEP-025 | Shared brand sizing variables, 4px gap, corrected wordmark inheritance and intrinsic image ratio | 90 local responsive geometry/navigation checks across five locales, including <=1px rendered optical centering, typecheck, specs and PWA shell contract pass. Before/after review in .local/brand-spacing-review/. Visual approval and release pending. | in_progress |
+| Automatic and adjustable Daily Featured scheduling | FE-033 | BE-029 | DEP-024 | S36 single 8:30 PM–midnight EAT agenda; six-business rotating automatic selection; four sponsor mentions; per-date manual selection/order/revert; immediate public cache version and invalidation; fixed official schedule replaces historical policy editing | Local typecheck, schedule/clock, discovery, localization and homepage composition pass. Real admin save/reorder/revert verified against warm public cache; seven public locale/viewport and three admin viewport states pass. Evidence `.local/evening-featured-review/verified.json`; staff guide `docs/operations/FEATURED-SCHEDULE.md`. Owner visual approval, full/release gates, commit and rollout pending. | in_progress |
 | Unified business directory and task-oriented workspace | FE-032 | BE-003, BE-015, BE-017, BE-023 | DEP-023 | One Businesses directory; business-scoped Overview with visit aggregates, Details with owner recovery, one state-aware Showroom project, paginated Showroom history, direct editing or optional AI redesign, Offerings, Marketplace, Inquiries, and Renewal; legacy collection redirects; unchanged tenant and persistence boundaries | 2026-08-10 focused request, revision, type, spec, and desktop/390px browser evidence passes. Browser evidence proves update intake omits setup-only questions and direct editing plus AI redesign resume the same revision. Migration 31 reconciles legacy overlaps and enforces one active project per business; full release and PostgreSQL rehearsal remain pending visual approval. | in_progress |
 | Focused client workspace and canonical story/process chapter | FE-031 | BE-028 | DEP-023 | One current recipe chapter for business context, process steps, and controlled process video; legacy reads canonicalize without destructive writes; staff remain in an explicit client/request workflow with a deferred unsaved desktop/phone preview; logo, hero, browser-icon, chapter, and offering fields admit request-scoped image replacements or normalized controlled YouTube references in place; discovery booth media uses the provider-neutral upload path | On 2026-08-14, focused domain, recipe, renderer, media, navigation, palette, type/build, and desktop/phone evidence pass. The 10/10 acceptance run proves the canonical chapter, media/video replacement, settings ownership, unsaved previews, readable palette pairing, and stable invalid-edit behavior. The complete release, GitHub Actions run `31750355870`, and production deployment `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` pass. | done |
-| Search-led marketplace homepage | FE-030 | BE-023 | — | Product-led public imagery, map discovery, bounded product and business Search workspace, URL-backed result-type controls, preserved map state, bounded nearby-business viewers, sponsor pool, Daily Featured gallery, responsive business inspector, and compact public navigation in `app/(public)/page.tsx`, `components/DiscoveryWorkspace.tsx`, `components/FeaturedShowroomsWorkspace.tsx`, `lib/discovery.ts`, `lib/featured-program.ts`, `app/landing.css`, and `app/discovery.css` | Approved Chromium evidence at 1440, 390, and 320 CSS pixels under `/tmp/suqpage-search-review` proves Search replaces only the map canvas, filters work, cards open the inspector first, map state survives return, and no viewport overflows. `npm run check`, `npm run release`, and 10/10 ordered browser workflows pass on 2026-09-12. | done |
+| Search-led marketplace homepage | FE-030 | BE-023 | — | Product-led public imagery, map discovery, bounded product and business Search workspace, URL-backed result-type controls, preserved map state, bounded nearby-business viewers, sponsor pool, Daily Featured gallery, responsive business inspector, and compact public navigation in `app/(public)/page.tsx`, `components/DiscoveryWorkspace.tsx`, `components/FeaturedShowroomsWorkspace.tsx`, `lib/discovery.ts`, `lib/featured-program.ts`, `app/landing.css`, and `app/discovery.css` | Approved Chromium evidence at 1440, 390, and 320 CSS pixels under `/tmp/suqpage-search-review` proves Search replaces only the map canvas, filters work, cards open the inspector first, map state survives return, and no viewport overflows. `npm run check`, `npm run release`, and 10/10 ordered browser workflows pass on 2026-09-12. | in_progress |
 | Supabase PostgreSQL runtime and Vercel production cutover | — | BE-027 | DEP-023 | Driver-selectable asynchronous persistence, PostgreSQL adapters for every authoritative workflow, Supabase private Storage, production startup validation, guarded empty-target copy/reconciliation with an optional transaction-local migration role, least-privilege runtime provisioning, production-only Vercel configuration, preview isolation, and rollback controls | On 2026-08-14, a mode-0600 PostgreSQL backup archive, 44-table disposable PostgreSQL 17 restore drill, additive migrations 31 and 32, immediate current-schema rerun, private Storage check, and least-privilege runtime preflight pass. Release commits `7fb5d04` and `5d353be` pass GitHub Actions runs `31686699133` and `31750355870`; final code deployment `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` passes generated-origin route, health, PWA, and log checks. Apex and `www` aliases are attached, but public DNS returns `NXDOMAIN`; registrar correction and monitored canonical-domain rollout remain pending. | in_progress |
 | Suqpage platform visual system refresh | FE-029 | — | — | Shared semantic platform tokens, compact Suqpage mark/wordmark, public discovery and venue presentation, public task forms, authenticated workspace shell, and adaptive showroom host band; tenant showroom palettes remain independent | Completed locally on 2026-08-04: `npm run check`; 10/10 production acceptance workflows; zero-failure desktop/390px/320px discovery, inline City Showroom, Daily Featured, form, workspace, host-band, and fixed-inquiry captures under `/tmp/suqpage-final-discovery-v6` and `/tmp/suqpage-final-showroom-v3`; `npm run release` passed with zero production vulnerabilities | done |
 | Editorial producer story and scalable landscaped virtual venues | FE-028 | — | — | `app/page.tsx`, `components/DiscoveryWorkspace.tsx`, `lib/discovery-venue-layout.ts`, `app/discovery.css`, and `public/landing/venue-hall-shell-v1.webp` | Prior architectural evidence passed on 2026-08-04; FE-030 now governs row-based floor geometry and final visual admission remains pending | in_progress |
@@ -353,3 +355,290 @@ public and nine gallery/owner/handle/wordmark checks plus settled slide alignmen
 and health monitoring pass. Reviewed desktop/390/320 captures remain protected
 under `.local/publish-s28-20260923/screenshots`. No test email sent or merchant
 content changed; actual external video playback/inbox delivery not claimed.
+
+| Launch clarity and contextual interface writing | FE-052, FE-049 | BE-001, BE-032 | DEP-030 | Owner inquiries, discovery, demo labels, first publication, locale catalogs | scripts/test-launch-clarity.ts; scripts/capture-launch-clarity.mjs; docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md (local; visual/full/release gates pending) | in_progress |
+
+FE-052 scenario 8 / FE-030 Market copy: narrative, seven localization tests and
+161-spec validation pass; seven focused header states cover all five languages
+at 320px and English at 390/1440 without overflow. Evidence and retained-label
+review: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md`. Visual approval/deployment pending.
+
+FE-052 scenario 9 / FE-030 map previews: typecheck, localization/spec validation
+and discovery regression pass. Eight local viewport/locale states, two actual
+pointer-marker states with the drawer open, and four nearby component-fixture
+states pass; see `scripts/capture-map-preview.mjs`,
+`scripts/capture-nearby-preview.mjs` and the launch-clarity review for scope and
+fixture limitations. Local implementation only; owner visual review pending.
+
+## FE-019 / BE-018 — separate support channels and staff queues (S34, 2026-09-24)
+
+Implemented locally: external fixed-channel launchers, independent HttpOnly
+sessions and private attachments, staff queue scope, capacity-safe assignments,
+assigned-team transport handoff, assignment history and visitor unread attention.
+Migration 53 applied locally; production remains schema 50. Four support suites
+pass, including API isolation and concurrent capacity. Seven public browser states
+(all five languages at 320px, English 390/1440), existing retry/transport browser
+flows, and real local staff/admin claim/reply/handoff/close/reopen/reassign/settings
+actions pass. Mobile Assign overflow reproduced, corrected and reverified.
+Typecheck, seven localization tests, narrative and 161-spec validation pass.
+Protected evidence: `.local/support-channels-review/`; temporary browser accounts
+and cases removed. Procedure: `docs/operations/SUPPORT-AND-TRANSPORT.md`.
+Visual approval/full/release/acceptance gates, commit and rollout remain pending.
+
+## FE-019 / BE-018 — transport callback receipt (S35, 2026-09-24)
+
+S35 supersedes visitor transport chat: four-field request → receipt and phone
+follow-up, with another-route action, no polling/transcript/composer/End chat.
+Existing staff routing/history/handoff remains; transport messages are private
+notes. Public reads hide notes/files/agent names and reject transport replies and
+close. No migration added. All four support suites, transport browser flows at
+1440/390/320, seven public locale/viewport cases and Help retry browser checks
+pass. Typecheck, seven localization tests, narrative and 161-spec validation pass.
+Receipts inspected in `.local/transport-support-review/submitted-*.png` and
+`.local/support-channels-review/receipt-*.png`. Full/release/visual approval and
+rollout remain pending; implementation is local, not deployed.
+
+Real local staff browser actions also pass private transport note, Help reply,
+claim/handoff/close/reopen/reassignment and settings; temporary fixtures removed.
+
+## FE-019 / BE-018 — Buying assistance (S37)
+
+Public transport intake is replaced by Get buying help: Buy for me, Check a
+business, or Check product quality; name, phone and details; callback receipt.
+Migration 54 preserves historical transport requests and adds constrained buying
+service data. Existing scoped assignment, capacity, claim, private notes,
+close/reopen and reassignment apply to the Buying assistance queue.
+
+Evidence: `npm run test:support` (five suites), `scripts/test-native-postgres.ts`,
+typecheck, localization, narrative and spec validation pass. Actual handlers in
+`capture-buying-assistance.ts` prove persisted intake, no polling, lost-response
+recovery and another request at 320/390/1440. Real staff/admin browser actions and
+15 locale/viewport form states pass; screenshots and receipts under
+`.local/buying-assistance-review/`. Local schema 54 is applied, preserving existing
+business data. No hosted change, email or payment was made. Visual approval,
+full/release gates, commit and deployment remain pending. Staff procedure:
+`docs/operations/SUPPORT-AND-TRANSPORT.md`; rollout: DEP-026.
+
+## FE-019 / BE-018 — one Buying assistance request (S38)
+
+Supersedes S37's service selector. Name, phone and details create a general Buying
+assistance case; schema 55 preserves old classifications. Focused buying request
+PG/API tests, typecheck/localization/spec validation and 320/390/1440 persisted
+intake/receipt/retry browser checks pass. Evidence:
+`.local/buying-assistance-review/`. Visual approval, release gates, commit and
+production rollout remain pending.
+
+## FE-019 / BE-018 — owner-only live support (S39)
+
+Public Help is removed, with a buying-only request component and HTTP boundary.
+Only `channel=buying` can start/read/reset callback requests; public legacy chat
+and all public attachment routes are retired. Owner dashboard support retains
+scoped conversations, replies and attachments. Historical visitor messages become
+private staff notes in the workspace; records are preserved.
+
+Evidence: five support suites, typecheck, localization, narrative and specs pass;
+`test-support-channels.ts` verifies retired-route bypasses and unchanged records;
+`test-support.ts` covers owner/staff behavior and tenant isolation. Browser evidence
+under `.local/owner-only-support-review/` confirms all four public surfaces and
+retained owner support; `.local/buying-assistance-review/` verifies receipt/recovery
+and fifteen locale/viewport forms. No migration or hosted rollout. Visual/release
+gates, commit and deployment remain pending.
+
+## S40 — showroom value and result filters (2026-09-25, local)
+
+FE-030 / FE-052 use one compact Market introduction and an owner-facing About
+promise, localized in five languages. Products & services and Businesses are
+checkbox filters above one result list; existing server pagination/ranking and
+map state are preserved. Category/place rows do not overlap; buying assistance
+uses a compact accessible icon beside an open narrow-screen drawer. Short
+landscape map controls use two columns.
+
+- `capture-market-filters.mjs`: 15 width/locale combinations (320/390/1440,
+  en/am/om/so/ti) pass type selection, last-selection protection, query/type
+  URLs, pagination/reset, history, label reachability and overflow checks.
+  Landscape scope/result reachability passes. `.local/market-filters-review/`
+  retains screenshots and verified records; desktop/phone captures inspected.
+- `capture-category-pagination.mjs`: all three widths pass category results,
+  retained map, server paging, type change/reload and scoped WCAG checks.
+- Short-landscape map/help separation additionally checked at 844×390 after
+  adjusting the map controls. An extra tile-ready screenshot run hit a 20s
+  external tile timeout at 1440/om; isolated retry loaded tiles with no failed
+  requests. Provider availability is not guaranteed by these UI checks.
+- Typecheck, homepage composition, narrative/category artwork, localization
+  (1,111 strings per translated catalog), 161-spec validation and whitespace
+  checks pass. Existing human/typo/drawer capture selectors were updated for
+  checkboxes; those entire historical suites were not rerun in S40.
+- Prior pending changes and unrelated `deno.lock` remain. No schema/data changes,
+  new dependency, full/release gate, commit or deployment. Owner visual approval
+  remains the next gate; these local results do not describe production.
+
+## S41 — visible clearable category sets (2026-09-26, local)
+
+FE-030 / FE-042 / BE-023: `discovery-contract.ts` canonicalizes bounded single,
+comma-separated and repeated category input; `discovery.ts` and
+`spelling-search.ts` use parameterized membership EXISTS/ANY for exact/fuzzy
+queries, suggestions, map rows, counts and paging. `public-discovery-cache.ts`
+uses canonical v8 keys; the public route accepts repeated category parameters.
+No schema change or data rewrite. Location is retained when a new category scope
+has zero matches. CategoryChooser and DiscoveryWorkspace place visible clearable
+scopes side by side; All categories is an empty-state label, not a menu item.
+
+Passing evidence:
+- `test-discovery-multicategory.ts`: real isolated PostgreSQL category union,
+  duplicates, invalid/repeated input, single-key compatibility, exact/fuzzy scope,
+  private/excluded/unpublished/unapproved records, complete bounded pagination,
+  retained zero-result location and clearing. Included in test:discovery-pagination.
+- Existing ranking, spelling, 21 human-query variations and six pagination tests
+  pass. The broader test-discovery.ts completed geographic/Featured assertions
+  (10,000-row grouping 1414.1ms) but failed during fixture cleanup; its complete
+  process is NOT recorded as a passing gate. Timing diagnostics reproduced a
+  passing ranking run without changing any timeout; CREATE/DROP fixture operations
+  were slow. Release checks must resolve the local test-infrastructure limitation.
+- `capture-multicategory-filters.mjs`: 14 initial viewport/locale cases passed;
+  1440/ti passed its targeted retry after a navigation timeout. Three-width
+  English scoped WCAG checks pass. A scoped selector correction allowed the
+  separate landscape/repeated-parameter/menu-reachability check to pass.
+  `.local/multicategory-review/` contains screenshots, targeted case evidence,
+  `case-landscape-verified.json` and `keyboard-clear.json`; the latter also proves
+  removing the last category and clearing query preserve location. Menu and
+  phone/desktop/landscape screenshots inspected. No customer data changed.
+- Typecheck, homepage composition, 1,114-message localization catalogs, 161-spec
+  validation and whitespace checks pass. Current launch/market capture selectors
+  reflect visible controls; full historical visual suites were not rerun.
+
+No new dependencies, hosted changes, full/build/release gates, commit or deployment.
+Visual approval is pending. Existing S31–S40 changes and unrelated deno.lock remain.
+
+## S42 — live buying and mobile preparation (local, 2026-09-27)
+
+FE-019 / BE-018 / ADR-0023: schema 56 and explicit visitor-visible staff replies;
+existing notes stay private. `test-buying-assistance.ts`, all five `test:support`
+suites and `test-native-postgres.ts` pass. Route guards, stale-tab binding,
+idempotency/conflict, expiry, closure, assignment and channel/privacy checks map
+to S42 acceptance criteria. `capture-buying-assistance.ts` verifies actual handlers
+against isolated PostgreSQL at 320/390/1440; final phone retry includes lost reply
+response. Screenshots in `.local/live-buying-review/`. Typecheck and localization
+1,117 messages pass. Local 68 businesses preserved at schema 56. No production
+writes, WebSocket claim, native build, commit or deployment. Expo preparation and
+API/adapter inventory: `docs/MOBILE-MONOREPO-PREP.md`. Full/release gates await
+visual approval; the earlier S41 broader-test cleanup timeout remains documented.
+
+S42 staff browser evidence: `scripts/capture-live-buying-staff.ts` used a temporary
+local Supabase Auth staff identity and case. Actual server-action Reply/Internal
+note submissions pass with visitor privacy checks and 390/1440 screenshots;
+fixtures were removed. `.local/live-buying-review/staff-*.png`.
+Final S42 phone check also passes simulated refresh outage warning/recovery and
+lost-reply-response retry. Staff Send scrolls fully above mobile navigation.
+Final localization (1,117 messages), typecheck, spec validation and whitespace
+checks pass. No full/build/release gates or deployment have run.
+
+## S44 — conversational buying entry (2026-09-27)
+
+FE-019 / FE-049: chat launcher and Live chat header, message-first intake,
+Start chat, server-acknowledged Sent and Chat connected indicators. No presence,
+read-receipt or response-time fabrication; no backend/schema change.
+`capture-buying-chat-entry.mjs`: ten entry states/five languages, keyboard focus,
+reachable controls and English scoped accessibility. `capture-buying-assistance.ts`:
+three viewport workflows plus final five-language phone conversation, reconnect,
+idempotent reply retry, closure/reopen and another request after reload. Typecheck,
+narrative, 1,125-message localization, specs and whitespace pass. Evidence:
+`.local/buying-chat-entry-review/`, `.local/live-buying-review/`.
+S43 deployment remains authorized; the new visual change awaits review before its
+gates. The first S43 source snapshot is stale. No production mutation or deploy.
+
+## S45–S46 — end chat, stable name and waiting guidance (2026-09-27)
+
+FE-019 / BE-018 / FE-049: Buying assistance keeps its service name with Live chat
+beneath it. Message-first intake opens a saved conversation; a highlighted waiting
+state persists through automatic assignment until a public staff reply. Return
+guidance describes automatic replies without promising staff presence or speed.
+Visitor End chat validates token, origin, channel and public reference; closure
+is idempotent, releases assignment and preserves messages and private notes.
+
+Evidence: all five `test:support` suites pass, including duplicate close, foreign/
+missing token and mismatched reference, closed-message rejection and staff reopen.
+`capture-buying-assistance.ts` passes 320/390/1440 intake, waiting, actual staff
+reply, reconnect, lost-response retry, dismissal without closing, End chat, staff
+reopen and new-request recovery. It uses actual handlers and an isolated local
+PostgreSQL fixture; no external messages. `capture-buying-chat-entry.mjs` passes
+five-language 320/1440 label ordering, accessible name, controls/focus and English
+scoped accessibility. Conversation locale checks pass on phone. Typecheck, 1,127
+message localization, narrative, spec validation and whitespace checks pass.
+Screenshots: `.local/live-buying-review/waiting-{320,390,1440}.png` and
+`.local/buying-chat-entry-review/launcher-{320,1440}-{locale}.png`.
+
+Implemented and focused-tested locally; visual approval, full release gates,
+commit and S43 deployment remain pending. No production writes. Unrelated
+`deno.lock` remains untouched.
+
+## S47 — retained buying history and explicit resolution (local, 2026-09-27)
+
+FE-019 / BE-018 / FE-049: Active, Chat history and Resolved are paginated staff
+views. Visitor closure retains name/phone, original intake, assignment and stored
+messages. Staff can add private phone-follow-up notes while closed; public replies
+remain disabled. Mark resolved is audited/idempotent and separate from visitor
+closure; reopen clears resolution with existing assignment/capacity enforcement.
+Original intake is fetched independently of the bounded recent-message transcript.
+
+Evidence: all five support suites pass (buying suite rerun after correcting its
+expected cumulative resolution-event count for an earlier close/reopen cycle).
+New regression checks cover retained phone/intake, phone search, active/history/
+resolved filtering, forbidden staff, private ended-case notes, duplicate resolution,
+closed-message denial and constraint-protected reopen. Native PostgreSQL install
+and idempotent preservation pass. Additive migration 57 applied only locally,
+preserving 68 businesses; existing closed records default to unresolved.
+`capture-live-buying-staff.ts` passes actual authenticated server-action note,
+resolve and reopen flows, contact/summary retention, history/resolved search and
+phone/desktop layout. `capture-buying-assistance.ts --phone-only` passes public
+chat, retry, ended/reopened cases and session recovery with private notes excluded.
+Typecheck, 1,133-message localization, specification validation and whitespace pass.
+Screenshots: `.local/live-buying-review/staff-history-{390,1440}.png`,
+`staff-ended-{390,1440}.png`, `staff-resolved-390.png`. All browser data is local
+test fixtures; temporary staff accounts/cases removed, no external messages.
+
+Visual approval, full build/release gates, coherent commit and authorized S43
+production rollout remain pending. Preflight now requires migration 57. No hosted
+writes, deploy or Git publication in this iteration; unrelated deno.lock preserved.
+
+## S48 — reviewed owner videos (local, 2026-09-27)
+
+FE-019 / BE-018 / BE-032 / BE-039 / BE-040 / BE-042 / FE-046 / DEP-039.
+Implementation: `lib/support-video-requests.ts`, `lib/video-request-policy.ts`,
+migration 58, owner/product save adapters, support actions
+and owner/staff forms. Signup and invitations now use the same single starter
+video as new products. Existing admitted media is preserved. Requests work without
+an official channel, and staff can approve supported YouTube URLs from any
+channel. No channel setting or confirmation is required; no YouTube API is claimed.
+
+Focused evidence: `scripts/test-video-requests.ts` passes target/tenant/staff
+isolation, invalid URL and forged saves, approval without channel setup,
+idempotent decisions, stale-target handling, retained text and distinct draft/
+public content. `scripts/test-business-starters.ts` passes exact starter video,
+signup/invitation completeness and rollback. `scripts/test-owner-page-postgres.ts`
+passes permission revocation, stale version handling and publication preservation.
+Its prior blanket draft-publication denial was stale: incomplete drafts now reject
+readiness while suspended businesses still cannot publish. Disallowed video saves
+roll back atomically after permission/version checks.
+
+`scripts/capture-video-requests.ts` passes actual owner request submission,
+invalid-URL return to the same form, agent assignment, manual approval,
+staff reply/decline and unchanged public example at 390/1440. Private screenshots:
+`.local/video-request-review/`. Temporary identities and requests removed.
+Typecheck/spec/localization, gallery, native PostgreSQL and scale checks pass.
+Local schema 58 preserves all 68 businesses. Visual approval and refreshed full
+release/acceptance/operations gates remain pending; nothing from S48 is deployed.
+
+### S43/S48 pre-publication audit — 2026-09-27
+
+The owner approved the cumulative web release and S48 visuals. Locked install,
+release/build, operations restore, exact artifact privacy/source matching and Linux
+native image transform pass. Complete check-chain continuation passes unchanged
+after the demo fixture's initial timeout. Eleven production-mode browser workflows
+pass across the original run and focused owner/video reruns. The owner fixture now
+replaces sample details before Publish; video decline waits for server completion.
+The real buying browser case includes anonymous intake, automatic staff reply,
+private-note denial, End chat, retained history, resolution and reopening.
+Production schema 50→58 rehearsal preserves all 3,821 original rows across 57
+tables, verifies restricted video-request access and repeat migration no-op.
+Evidence and rollout limits: `docs/SUQPAGE-RELEASE-2026-09-27.md`; protected raw
+evidence: `.local/publish-s48-20260927/`. Hosted writes remain pending.

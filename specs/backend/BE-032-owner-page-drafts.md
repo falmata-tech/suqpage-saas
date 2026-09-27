@@ -2,9 +2,9 @@
 id: BE-032
 title: Tenant-owned page drafts and revocable staff assistance
 status: in_progress
-related: [BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034]
+related: [FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039]
 owners: [backend, security]
-last_updated: 2026-09-14
+last_updated: 2026-09-27
 change_level: L2
 ---
 
@@ -280,3 +280,27 @@ Approved fictional contacts populated for 66 demo pages and 47 demo users, retai
 account emails. Two non-demo account phones require owner input. Evidence and
 screenshots: docs/SUQPAGE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
 commit and hosted rollout remain pending.
+
+## S33 first-publication readiness — FE-052 (local)
+
+For the current self-service first-Publish flow, the server rejects an unchanged
+starter About, any retained starter contact value, an unreviewed example location,
+and missing real offerings or listed starter offerings. The owner can replace or
+remove optional sample contacts and offerings. UI readiness links lead to the
+relevant editable fields; the server rechecks while holding publication locks.
+Existing active-page Save, consent and tenant/version guards are preserved.
+`scripts/test-launch-clarity.ts` and `scripts/test-self-service-publication.ts`
+cover denial, correction, publication, atomic failure and immediate live Save.
+This local extension is not a hosted rollout claim.
+
+## S48 reviewed video entry
+
+FE-019/BE-018 and DEP-039 govern video changes. Normal owner/staff media saves
+retain existing references or the example; new links require a target-bound
+support request and assigned staff review. Staff may approve a supported
+YouTube URL from any channel without channel configuration. Existing photos,
+other fields and previously admitted videos remain unchanged. New products use
+the starter video. `scripts/test-video-requests.ts` covers tenant/agent boundaries,
+forged saves, approval without channel setup, retries, stale targets and exact-field
+preservation; `scripts/capture-video-requests.ts` covers the real owner/staff forms.
+Local evidence passes; refreshed release and publication gates remain pending.

@@ -15,11 +15,15 @@ try {
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   }
   await page.screenshot({path:`${out}/spelling-${width}.png`,fullPage:true});
-  await page.locator('.discovery-search-result-types a').filter({hasText:'Businesses'}).click();
+  await page.getByRole('checkbox',{name:'Products & services',exact:true}).click();
+  await expect(page).toHaveURL(/type=businesses/);
   await expect(page.locator('.discovery-business-results button').filter({hasText:'Aloe Field Care'})).toBeVisible();
-  await page.locator('.discovery-search-result-types a').filter({hasText:'Products & services'}).click();
+  await page.getByRole('checkbox',{name:'Products & services',exact:true}).click();
+  await expect(page.getByRole('checkbox',{name:'Businesses',exact:true})).toBeEnabled();
+  await page.getByRole('checkbox',{name:'Businesses',exact:true}).click();
+  await expect(page).toHaveURL(/type=products/);
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS ranked-list typo searches and type tabs on desktop/390/320, without additional match sections or overflow.');
+ console.log('PASS ranked-list typo searches and result filters on desktop/390/320, without additional match sections or overflow.');
 } finally {await browser.close();}

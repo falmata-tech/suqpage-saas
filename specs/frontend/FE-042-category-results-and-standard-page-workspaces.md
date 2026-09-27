@@ -33,6 +33,11 @@ contracts are reused. This is ready under BE-033; no new external provider is ne
 
 ## Acceptance criteria
 
+FE-030 S41 supersedes singular category and result-tab language below: category
+sets use OR, location/query use AND, and visible controls are individually
+clearable. Existing bounded server pagination and public visibility remain.
+
+
 - D1: Selecting any category, including All categories, shows products/businesses
   in the result panel without requiring search text. The map stays mounted. Query,
   category and region/city compose; changing a filter or result type resets page.

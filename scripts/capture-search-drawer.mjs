@@ -36,7 +36,7 @@ try {
     const cards=[...el.querySelectorAll('.discovery-product-results > a,.discovery-business-results > button')].map(card=>card.getBoundingClientRect());
     const paging=el.querySelector('.discovery-pagination').getBoundingClientRect();
     const panelRight=el.getBoundingClientRect().right;
-    const clipped=[...el.querySelectorAll('.discovery-search-result-types a,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
+    const clipped=[...el.querySelectorAll('.discovery-result-filters label,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
     return {clipped,firstOffset:cards[0].top-el.getBoundingClientRect().top,fullCards:cards.filter(card=>card.top>=list.top&&card.bottom<=list.bottom).length,listBottom:list.bottom,pagingTop:paging.top};
   });
   assert.ok(visibility.firstOffset<=230,JSON.stringify(visibility));
@@ -99,7 +99,7 @@ try {
     const list=el.querySelector('.discovery-search-results').getBoundingClientRect();
     const cards=[...el.querySelectorAll('.discovery-product-results > a')].map(card=>card.getBoundingClientRect());
     const panelRight=el.getBoundingClientRect().right;
-    const clipped=[...el.querySelectorAll('.discovery-search-result-types a,.discovery-search-result-types span,.discovery-search-result-types b,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
+    const clipped=[...el.querySelectorAll('.discovery-result-filters label,.discovery-result-filters span,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
     return {clipped,top:cards[0].top-el.getBoundingClientRect().top,full:cards.filter(card=>card.top>=list.top&&card.bottom<=list.bottom).length,overflow:el.scrollWidth>el.clientWidth};
   });
   assert.ok(fit.top<=230&&fit.full>=2&&!fit.overflow&&!fit.clipped,`${locale}/${width}: ${JSON.stringify(fit)}`);

@@ -127,3 +127,6 @@ and 10/10 ordered browser acceptance prove the retired dashboard and Malikt API
 paths return 404 and no role exposes a logistics action. Security, scalable
 query, non-destructive migration, backup/restore, release, and container gates
 passed while dormant compatibility tables remained untouched.
+
+Transport support referrals in FE-019/BE-018 are manual internal support work,
+not a revival of the retired delivery API, booking workflow or carrier integration.

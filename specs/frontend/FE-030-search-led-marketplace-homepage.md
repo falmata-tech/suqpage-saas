@@ -1,14 +1,71 @@
 ---
 id: FE-030
 title: Search-led marketplace homepage
-status: done
-related: [FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
+status: in_progress
+related: [FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
 owners: [product, frontend, design]
-last_updated: 2026-09-12
+last_updated: 2026-09-25
 change_level: L2
 ---
 
 # FE-030 - Search-led marketplace homepage
+
+## S41 — visible, clearable multi-category filters (2026-09-26)
+
+Supersedes S40's category/place disclosure. Ready: L2; FE-042 pagination and
+BE-023 public eligibility remain controlling. No new provider or schema change.
+
+- GIVEN an open drawer THEN Category and Region or city are visible side by side
+  above one result list, without a Filters disclosure. Both controls fit 320px
+  phones and long translations; menus scroll without pushing results down.
+- GIVEN no category selection THEN all categories are searched, but “All
+  categories” is only an empty-state label, never a selectable category.
+- GIVEN multiple selected categories THEN map, exact/approximate results,
+  suggestions and counts match ANY selected category AND the selected location
+  and search query. Cross-listed businesses/products occur once.
+- WHEN selecting/unselecting categories or clearing either filter THEN reset
+  pagination and preserve other selections/query/result types. Removing the last
+  category returns the unrestricted category scope. All filters are clearable.
+- GIVEN a selected eligible place with no matches under new categories THEN
+  retain that place and show zero results. Never silently widen its scope.
+- GIVEN reload/history/legacy single-category links or repeated industry params
+  THEN the same canonical selections are restored. Malformed/unknown category
+  values cannot become SQL; valid values survive mixed input.
+
+Verify real isolated PostgreSQL union, de-duplication, privacy, typo and paging
+cases; browser phone/desktop clear/multi-select/reload/history/focus/overflow;
+localized copy/type/spec gates. Visual approval precedes full/build/release gates.
+Rollback reverts application selection behavior; no stored data changes.
+
+## Current refinement — S40, 2026-09-25
+
+This section supersedes older category-gating, map replacement and result-tab
+clauses below. FE-052 defines the accompanying showroom value proposition.
+Definition of Ready: L1 UI refinement; reuse existing BE-023/FE-042 URL and
+server pagination contracts. No schema, visibility, ranking, provider or tenant
+changes. No new dependency. Existing pending work and unrelated files remain.
+
+1. GIVEN the open search drawer WHEN choosing result types THEN Businesses and
+   Products & services are independently selectable filters above one result
+   list, without result tabs. Both selected means `type=all`; one selected uses
+   the existing `businesses` or `products` value. At least one remains selected.
+2. GIVEN a query/category/place and a later result page WHEN changing type THEN
+   the other filters remain, pagination resets and the backend returns only the
+   chosen types. Paging retains the type. Browser history restores URL state.
+3. GIVEN a phone, desktop or short landscape viewport WHEN opening filters or
+   categories THEN labels, choices and controls do not overlap, long localized
+   labels wrap, all choices are reachable and results remain scrollable. The buying
+   help launcher must not cover result pagination; use its accessible compact
+   icon beside an open drawer on narrow screens.
+4. GIVEN any supported locale WHEN arriving at Market THEN its compact intro
+   explains organized business showrooms and direct inquiries, including mobile.
+   About explains the owner benefit: story, media, offerings and contacts in one
+   shareable showroom alongside existing social channels. No checkout claims.
+
+Verification: focused type/localization/narrative checks plus live local browser
+filter, pagination, back-navigation and layout checks in five locales. Capture
+phone/desktop evidence before owner visual approval and full/release gates.
+Rollback is a UI revert; URLs/data and existing search contracts stay compatible.
 
 ## Problem and outcome
 
@@ -88,6 +145,17 @@ business search without being forced through one undifferentiated ranked directo
   the existing server-authoritative discovery projection.
 
 ## Contracts
+
+Current Market introduction (FE-052 scenario 8): Suqpage Market / Discover
+products and services. Supporting copy introduces online showrooms from local
+businesses and direct contact. This supersedes the historical hero wording below;
+existing functional labels and the compact mobile header remain unchanged.
+
+Current map previews (FE-052 scenario 9) supersede the historical non-modal
+inspector: single/nearby previews use the browser modal layer above the drawer,
+bounded scrolling, keyboard containment and restored focus. Search state and the
+open panel survive dismissal. Short landscape drawers scroll as one surface to
+keep business results reachable. Featured previews are unchanged by this fix.
 
 - Desktop opens with a restrained public header, one literal marketplace
   headline, short supporting copy, and a product-led production visual with no
@@ -475,3 +543,22 @@ form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
 Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## S40 local evidence
+
+See `specs/TRACEABILITY.md` S40 for type, localization, 15 filter-flow combinations,
+landscape and three category/pagination/accessibility checks. Screenshots:
+`.local/market-filters-review/`. `scripts/capture-market-filters.mjs` maps current
+acceptance criteria; source composition/narrative checks guard the copy and tab
+removal. Current implementation is local, awaiting visual approval and release
+checks. One external tile-ready capture timeout and its passing isolated retry
+are distinguished from the passing filter-workflow evidence.
+
+## S41 local evidence
+
+See TRACEABILITY S41 for real PostgreSQL filtering/privacy/pagination tests and
+15 phone/desktop locale checks plus landscape and keyboard clearing. Evidence:
+`.local/multicategory-review/`; run `scripts/capture-multicategory-filters.mjs`.
+Type/localization/spec checks pass. Broader discovery assertions pass, but its
+fixture-cleanup timeout remains an unresolved test-infrastructure gate. Current
+changes await visual approval, full/build/release checks, commit and deployment.

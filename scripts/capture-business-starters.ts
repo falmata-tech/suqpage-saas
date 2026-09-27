@@ -58,7 +58,7 @@ async function main() {
   for(const width of [1440,390,320]){
    await owner.setViewportSize({width,height:900});
    await owner.goto(base+'/dashboard/page-editor');
-   await expect(owner.getByText('Your page is filled with editable examples.',{exact:false})).toBeVisible();
+   await expect(owner.getByText('Make this example page your own before publishing.',{exact:false})).toBeVisible();
    await owner.locator('summary').filter({hasText:'Public contact details'}).click();
    await filled('#shop-about, #shop-video');for(const {key} of publicContactFields)await filled(`#public-${key}`);
    await capture(owner,'page-editor',width);

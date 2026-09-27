@@ -1,3 +1,4 @@
+import { SCALE_DEMO_BUSINESSES } from "./scale-demo-seed";
 import { SPELLING_INDEX_SQL } from "./search-index";
 import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 import baseline from "./postgres-baseline.json";
@@ -478,6 +479,160 @@ export async function migratePostgresDatabase(
       }
       await runner.query("INSERT INTO schema_migrations(version) VALUES(50)");
       applied.push(50);
+    }
+    const migration51 = await runner.query("SELECT version FROM schema_migrations WHERE version=51");
+    if (!migration51.rows.length) {
+      await runner.query(`
+        ALTER TABLE support_conversations
+          ADD COLUMN transport_origin TEXT,
+          ADD COLUMN transport_destination TEXT,
+          DROP CONSTRAINT IF EXISTS support_visitor_contact_check;
+        CREATE OR REPLACE FUNCTION enforce_support_visitor_contact() RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+          IF NEW.participant_kind='visitor' AND (
+            NEW.visitor_phone IS NULL OR NEW.visitor_phone !~ '^\\+?[0-9]{7,15}$'
+            OR (NEW.assistance_category<>'shipment_observation' AND (
+              NEW.visitor_email IS NULL OR length(btrim(NEW.visitor_email)) NOT BETWEEN 3 AND 254
+              OR position('@' IN NEW.visitor_email)<=1
+            ))
+          ) THEN RAISE EXCEPTION USING ERRCODE='23514', MESSAGE='visitor contact required'; END IF;
+          RETURN NEW;
+        END $$;
+        DROP TRIGGER IF EXISTS support_visitor_contact_insert ON support_conversations;
+        DROP TRIGGER IF EXISTS support_visitor_contact_update ON support_conversations;
+        CREATE TRIGGER support_visitor_contact_insert BEFORE INSERT ON support_conversations
+          FOR EACH ROW EXECUTE FUNCTION enforce_support_visitor_contact();
+        CREATE TRIGGER support_visitor_contact_update BEFORE UPDATE OF participant_kind,assistance_category,visitor_email,visitor_phone ON support_conversations
+          FOR EACH ROW EXECUTE FUNCTION enforce_support_visitor_contact();
+        ALTER TABLE support_conversations ADD CONSTRAINT support_transport_route_check CHECK(
+          (transport_origin IS NULL AND transport_destination IS NULL) OR (
+            assistance_category='shipment_observation'
+            AND transport_origin IS NOT NULL AND length(btrim(transport_origin)) BETWEEN 1 AND 120
+            AND transport_destination IS NOT NULL AND length(btrim(transport_destination)) BETWEEN 1 AND 120
+            AND length(btrim(requester_label)) BETWEEN 1 AND 80
+          )
+        );
+        ALTER TABLE support_events DROP CONSTRAINT ck_support_events_1;
+        ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(
+          event_type IN ('created','assigned','reassigned','message','closed','reopened','transport_handoff')
+        );
+        CREATE INDEX support_transport_queue_idx ON support_conversations(status,last_message_at DESC,id DESC)
+          WHERE assistance_category='shipment_observation';
+        CREATE INDEX support_transport_handoff_idx ON support_events(conversation_id,id DESC)
+          WHERE event_type='transport_handoff';
+      `);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(51)");
+      applied.push(51);
+    }
+    const migration52 = await runner.query("SELECT version FROM schema_migrations WHERE version=52");
+    if (!migration52.rows.length) {
+      await runner.query("ALTER TABLE businesses ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0 CHECK(is_demo IN (0,1))");
+      // Classify only the explicit seeded identities, including retained handles.
+      const demoHandles = ["selam-weave","afia-botanics","warka-furniture","addis-metalworks",
+        "green-terrace-farm","blue-nile-apiary","rift-valley-mill","entoto-ceramics","koba-leather","nova-assembly",
+        ...SCALE_DEMO_BUSINESSES.map(business => business.handle)];
+      await runner.query(`UPDATE businesses SET is_demo=1 WHERE id IN (
+        SELECT business_id FROM business_handles WHERE handle IN (${demoHandles.map(() => "?").join(",")})
+      )`, demoHandles);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(52)");
+      applied.push(52);
+    }
+    const migration53 = await runner.query("SELECT version FROM schema_migrations WHERE version=53");
+    if (!migration53.rows.length) {
+      await runner.query("ALTER TABLE support_agent_settings ADD COLUMN queue_scope TEXT NOT NULL DEFAULT 'all' CHECK(queue_scope IN ('all','support','transport'))");
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(53)");
+      applied.push(53);
+    }
+    const migration54 = await runner.query("SELECT version FROM schema_migrations WHERE version=54");
+    if (!migration54.rows.length) {
+      await runner.query(`
+        ALTER TABLE support_conversations DROP CONSTRAINT IF EXISTS support_assistance_category_check;
+        ALTER TABLE support_conversations DROP CONSTRAINT IF EXISTS ck_support_conversations_2;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_assistance_category_check CHECK(
+          assistance_category IN ('general','sourcing','document_review','site_visit','shipment_observation','buying_assistance'));
+        ALTER TABLE support_conversations ADD COLUMN buying_service TEXT;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_buying_service_check CHECK(
+          (assistance_category='buying_assistance' AND buying_service IS NOT NULL
+            AND buying_service IN ('purchase','business_check','quality_check') AND participant_kind='visitor')
+          OR (assistance_category<>'buying_assistance' AND buying_service IS NULL));
+        CREATE OR REPLACE FUNCTION enforce_support_visitor_contact() RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+          IF NEW.participant_kind='visitor' AND (
+            NEW.visitor_phone IS NULL OR NEW.visitor_phone !~ '^\\+?[0-9]{7,15}$'
+            OR (NEW.assistance_category NOT IN ('shipment_observation','buying_assistance') AND (
+              NEW.visitor_email IS NULL OR length(btrim(NEW.visitor_email)) NOT BETWEEN 3 AND 254
+              OR position('@' IN NEW.visitor_email)<=1
+            ))
+          ) THEN RAISE EXCEPTION USING ERRCODE='23514', MESSAGE='visitor contact required'; END IF;
+          RETURN NEW;
+        END $$;
+        CREATE INDEX support_buying_queue_idx ON support_conversations(status,last_message_at DESC,id DESC)
+          WHERE assistance_category='buying_assistance';
+      `);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(54)");
+      applied.push(54);
+    }
+    const migration55 = await runner.query("SELECT version FROM schema_migrations WHERE version=55");
+    if (!migration55.rows.length) {
+      await runner.query(`
+        ALTER TABLE support_conversations DROP CONSTRAINT support_buying_service_check;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_buying_service_check CHECK(
+          (assistance_category='buying_assistance' AND participant_kind='visitor'
+            AND (buying_service IS NULL OR buying_service IN ('purchase','business_check','quality_check')))
+          OR (assistance_category<>'buying_assistance' AND buying_service IS NULL));
+      `);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(55)");
+      applied.push(55);
+    }
+    const migration56 = await runner.query("SELECT version FROM schema_migrations WHERE version=56");
+    if (!migration56.rows.length) {
+      // Existing staff messages were private notes. Never backfill them as replies.
+      await runner.query("ALTER TABLE support_messages ADD COLUMN visitor_visible BOOLEAN NOT NULL DEFAULT FALSE");
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(56)");
+      applied.push(56);
+    }
+    const migration57 = await runner.query("SELECT version FROM schema_migrations WHERE version=57");
+    if (!migration57.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations ADD COLUMN resolved_at BIGINT;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_resolution_check CHECK
+          (resolved_at IS NULL OR (status='closed' AND assistance_category='buying_assistance'));`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(57)");
+      applied.push(57);
+    }
+    const migration58 = await runner.query("SELECT version FROM schema_migrations WHERE version=58");
+    if (!migration58.rows.length) {
+      await runner.query(`CREATE TABLE support_video_requests (
+        conversation_id INTEGER PRIMARY KEY REFERENCES support_conversations(id) ON DELETE CASCADE,
+        business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+        target_kind TEXT NOT NULL CHECK(target_kind IN ('header','product')),
+        product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
+        target_label TEXT NOT NULL,
+        source_url TEXT NOT NULL CHECK(length(source_url)<=1500),
+        request_note TEXT NOT NULL DEFAULT '',
+        baseline_videos TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','declined')),
+        approved_ref TEXT,
+        reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at BIGINT,
+        created_at BIGINT NOT NULL,
+        CHECK(target_kind='product' OR product_id IS NULL),
+        CHECK((status='pending' AND reviewed_at IS NULL AND approved_ref IS NULL) OR
+          (status='declined' AND reviewed_at IS NOT NULL AND approved_ref IS NULL) OR
+          (status='approved' AND reviewed_at IS NOT NULL AND approved_ref IS NOT NULL))
+      );
+      CREATE INDEX support_video_business_idx ON support_video_requests(business_id,created_at DESC);
+      REVOKE ALL ON support_video_requests FROM PUBLIC;
+      ALTER TABLE support_video_requests ENABLE ROW LEVEL SECURITY;`);
+      const roles = await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated','suqpage_runtime','mirtpage_runtime')");
+      for (const role of roles.rows) {
+        if (role.rolname === "anon" || role.rolname === "authenticated") await runner.query(`REVOKE ALL ON support_video_requests FROM ${quotedRole(role.rolname)}`);
+        else {
+          await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON support_video_requests TO ${quotedRole(role.rolname)}`);
+          await runner.query(`CREATE POLICY ${quotedRole(`video_request_${role.rolname}`)} ON support_video_requests TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+        }
+      }
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(58)");
+      applied.push(58);
     }
     return { applied };
   });

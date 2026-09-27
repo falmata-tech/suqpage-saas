@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import sharp from "sharp";
 import { chromium, expect } from "@playwright/test";
 
 const base = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3102";
@@ -34,13 +35,46 @@ try {
         await expect.poll(() => brand.locator("img").evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
         const geometry = await header.evaluate(element => {
           const brand = element.querySelector(".suqpage-brand").getBoundingClientRect();
+          const mark = element.querySelector(".suqpage-brand img").getBoundingClientRect();
+          const wordmark = element.querySelector(".suqpage-wordmark");
           const language = element.querySelector("select").getBoundingClientRect();
           return { brandTop: brand.top, brandRight: brand.right, languageLeft: language.left,
+            brandHeight: brand.height, markRatio: mark.width / mark.height,
+            gap: wordmark.getBoundingClientRect().left - mark.right,
+            wordmarkSize: getComputedStyle(wordmark).fontSize,
+            letterSize: getComputedStyle(wordmark.firstElementChild).fontSize,
             sameRow: Math.abs(brand.top - language.top) < 14,
             overflow: document.documentElement.scrollWidth > innerWidth + 1 };
         });
         assert.ok(!geometry.overflow, `${route} ${width} ${locale}: overflow`);
         assert.ok(geometry.brandTop >= 0 && geometry.brandTop < 80, "Brand visible immediately");
+        assert.ok(Math.abs(geometry.gap - 4) < 0.5, "Compact icon-to-text spacing");
+        assert.ok(Math.abs(geometry.markRatio - 0.9) < 0.005, "Icon preserves its proportions");
+        assert.ok(geometry.brandHeight >= 44, "Brand retains its touch target");
+        const expectedTextSize = shopPage && width <= 680 ? "18px" : width <= (dashboard ? 900 : 680) ? "22px" : "24px";
+        assert.equal(geometry.wordmarkSize, expectedTextSize);
+        assert.equal(geometry.letterSize, expectedTextSize, "Responsive rules do not shrink individual letters");
+        // Check visible glyphs, not just line boxes: font ascenders can make a
+        // mathematically centered wordmark look lower than the pin.
+        const extents = await brand.evaluate(element => {
+          const outer = element.getBoundingClientRect();
+          return { width: outer.width,
+            iconRight: element.querySelector("img").getBoundingClientRect().right - outer.left,
+            textLeft: element.querySelector(".suqpage-wordmark").getBoundingClientRect().left - outer.left };
+        });
+        const { data, info } = await sharp(await brand.screenshot()).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+        const scale = info.width / extents.width;
+        const ink = { icon: [Infinity, -1], text: [Infinity, -1] };
+        for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) {
+          const offset = (y * info.width + x) * 4;
+          const [r, g, b, alpha] = data.subarray(offset, offset + 4);
+          if (alpha < 200 || !((r > 150 && g < 140 && b < 80) || (r < 100 && g < 100 && b < 100))) continue;
+          const part = x < extents.iconRight * scale ? "icon" : x >= extents.textLeft * scale ? "text" : null;
+          if (part) { ink[part][0] = Math.min(ink[part][0], y); ink[part][1] = Math.max(ink[part][1], y); }
+        }
+        assert.ok(ink.icon[1] >= 0 && ink.text[1] >= 0, "Both brand elements render visible ink");
+        const opticalOffset = Math.abs((ink.icon[0] + ink.icon[1] - ink.text[0] - ink.text[1]) / (2 * scale));
+        assert.ok(opticalOffset <= 1, `Icon/text vertical centers differ by ${opticalOffset.toFixed(2)}px`);
         if (width <= 680) {
           assert.ok(geometry.sameRow && geometry.brandRight <= geometry.languageLeft, "Brand and language fit in one row");
         }

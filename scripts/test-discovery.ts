@@ -62,9 +62,9 @@ async function runPostgresFixture() {
     assert.match(discoveryUiSource, /selectedShowroomId: number \| null/);
     assert.match(discoveryUiSource, /setSelectedShowroomId\(savedSelection && selectionBelongsToGroup/);
     assert.match(discoveryUiSource, /rememberCurrentPublicWorkspace/);
-    assert.match(discoveryUiSource, /querySelector<HTMLElement>\("\.discovery-map-stage"\)/, "the map preview mounts inside the map canvas");
-    assert.match(discoveryUiSource, /discovery-preview-layer discovery-preview-layer-map/, "the map preview uses its bounded map overlay");
-    assert.match(discoveryCssSource, /\.discovery-preview-layer-map\s*\{[^}]*position:\s*absolute/, "the map preview is positioned against the map rather than the viewport");
+    assert.match(discoveryMapSource, /dialog\.showModal\(\)/, "map previews use the browser top layer above the search drawer");
+    assert.match(discoveryMapSource, /onCancel=/, "Escape dismisses the modal");
+    assert.match(nearbyViewerSource, /<MapPreviewDialog/, "nearby groups share the protected modal layer");
     assert.match(nearbyViewerSource, /onClick=\{\(\) => onSelect\(showroom\.id\)\}/);
     assert.match(discoveryMapSource, /mapViewRef\.current = mapView/);
     assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
@@ -77,30 +77,19 @@ async function runPostgresFixture() {
     assert.match(discoveryCssSource, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
     assert.match(discoveryCssSource, /\.featured-card-media > img/);
     assert.doesNotMatch(discoveryCssSource, /\.featured-floor|\.featured-booth/);
-    assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T10:04:59+03:00")), "scheduled");
-    assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00")), "live");
-    assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T13:00:00+03:00")), "intermission");
-    assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T19:05:00+03:00")), "live");
-    assert.equal(featuredBroadcastPhase("2026-08-09", 10, new Date("2026-08-09T22:00:00+03:00")), "ended");
-    const agendaAtStart = buildFeaturedProgramAgenda("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
-    const walkthroughsAtStart = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:05:00+03:00"));
-    assert.equal(walkthroughsAtStart.length, 10);
-    assert.equal(walkthroughsAtStart[0].label, "10:05 AM–10:35 AM");
-    assert.equal(walkthroughsAtStart.filter((walkthrough) => walkthrough.current).length, 1);
-    assert.equal(walkthroughsAtStart[0].current, true);
-    assert.equal(agendaAtStart.filter((entry) => entry.kind === "sponsor_break").length, 2);
-    const intermissionAtStart = agendaAtStart.find((entry) => entry.kind === "intermission");
-    assert.equal(intermissionAtStart?.kind === "intermission" ? intermissionAtStart.timeLabel : "", "1:00 PM–7:05 PM");
-    const walkthroughsAtSecond = featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T10:40:00+03:00"));
-    assert.equal(walkthroughsAtSecond[1].current, true);
-    assert.equal(walkthroughsAtSecond[0].current, false);
-    assert.equal(featuredBoothWalkthroughs("2026-08-09", 10, new Date("2026-08-09T14:00:00+03:00")).some((walkthrough) => walkthrough.current), false);
+    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-09T20:29:59+03:00")),"scheduled");
+    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-09T20:30:00+03:00")),"live");
+    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-10T00:00:00+03:00")),"ended");
+    const walkthroughsAtStart=featuredBoothWalkthroughs("2026-08-09",6,new Date("2026-08-09T20:30:00+03:00"));
+    assert.equal(walkthroughsAtStart.length,6);assert.equal(walkthroughsAtStart[0].label,"8:30 PM–9:00 PM");
+    assert.equal(walkthroughsAtStart.filter(row=>row.current).length,1);
+    assert.equal(buildFeaturedProgramAgenda("2026-08-09",6,0).filter(row=>row.kind==='sponsor_break').length,4);
     assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
     assert.match(featuredPageSource, /components\/FeaturedShowroomsWorkspace/);
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
     assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
-    assert.match(publicDiscoveryCacheSource, /public-marketplace-v5-default-all/, "the marketplace cache identity tracks the nearby-group projection contract");
+    assert.match(publicDiscoveryCacheSource, /public-marketplace-v8-category-sets/, "the marketplace cache identity includes canonical category-set filtering");
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));
     const db = await getDb();
     function distanceKm(left: {
@@ -301,7 +290,7 @@ async function runPostgresFixture() {
             const machineryView = await getDiscoveryView({ industry: "machinery-tools", featuredDay: 4, now: monday });
             assert.equal(machineryView.total, 1, "a cross-listed showroom remains eligible through its non-primary industry membership");
             assert.equal(machineryView.showrooms[0].primaryIndustryKey, "electronics", "filter membership does not rewrite stable primary visual metadata");
-            assert.equal(view.featured.boothCount, 40, "automatic Daily Featured projection is capped at forty");
+            assert.equal(view.featured.boothCount, 6, "automatic Daily Featured projection is capped at six");
             assert.equal(view.featured.mode, "featured");
             assert.equal(view.featured.isToday, true);
             assert.equal(view.featured.selectedWeekday, 1);
@@ -310,10 +299,10 @@ async function runPostgresFixture() {
             assert.equal(view.featured.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
             assert.ok(view.showrooms.every((showroom) => showroom.heroImagePath === `/heroes/${showroom.handle}.webp`), "map detail records project each business page hero image");
             assert.ok(view.featured.booths.every((booth) => booth.revealed && booth.showroom.heroImagePath === `/heroes/${booth.showroom.handle}.webp`), "today's Daily Featured uses each business page hero image");
-            assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 40 }, (_, index) => index + 1), "the bounded Daily Featured lineup receives one continuous floor slot per business");
+            assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 6 }, (_, index) => index + 1), "the bounded Daily Featured lineup receives one continuous floor slot per business");
             assert.equal(new Set(view.featured.booths.map((booth) => booth.reference)).size, view.featured.booths.length, "Daily Featured booth references are unique");
             assert.match(view.featured.booths[0].reference, /^ELC-B\d{2}$/);
-            const activeFeaturedTime = new Date("2026-07-27T08:02:00+03:00");
+            const activeFeaturedTime = new Date("2026-07-27T20:32:00+03:00");
             const activeFeatured = await getDiscoveryView({ industry: "electronics", featuredDay: 1, now: activeFeaturedTime });
             assert.ok(activeFeatured.featuredNowBusinessId, "the live Daily Featured session identifies one current deterministic booth");
             const activeFeaturedBooth = activeFeatured.featured.booths.find((booth) => booth.revealed && booth.showroom.id === activeFeatured.featuredNowBusinessId);
@@ -324,7 +313,7 @@ async function runPostgresFixture() {
             const anotherDatePreview = await getDiscoveryView({ industry: "electronics", featuredDay: 2, now: activeFeaturedTime });
             assert.equal(anotherDatePreview.featuredNowBusinessId, activeFeatured.featuredNowBusinessId, "previewing another Daily Featured date does not change today's active spotlight business");
             const duringIntermission = await getDiscoveryView({ industry: "electronics", featuredDay: 1, now: new Date("2026-07-27T14:01:00+03:00") });
-            assert.equal(duringIntermission.featuredNowBusinessId, null, "the Daily Featured spotlight clears during the four-hour intermission");
+            assert.equal(duringIntermission.featuredNowBusinessId, null, "the Daily Featured spotlight clears before the evening broadcast");
             assert.equal("list" in view, false, "the map-only Market projection does not serialize a duplicate ranked List surface");
             assert.equal("view" in view, false, "the map-only Market projection does not serialize a view-mode contract");
             assert.equal(view.searchProducts.length, 5, "category browsing returns the first database page without requiring text");
@@ -344,7 +333,7 @@ async function runPostgresFixture() {
             assert.equal(search.total, 1, "published offering text is searchable");
             assert.equal(search.showrooms[0].city, "Addis Ababa");
             assert.equal(search.nearbyGroups.length, 0, "a single searched result remains an isolated storefront marker");
-            assert.equal(search.featured.booths.length, 40, "map search does not narrow the independently scheduled bounded Daily Featured");
+            assert.equal(search.featured.booths.length, 6, "map search does not narrow the independently scheduled bounded Daily Featured");
             assert.deepEqual(search.sponsoredShowrooms.map((showroom) => showroom.handle), view.sponsoredShowrooms.map((showroom) => showroom.handle), "map search does not alter the global sponsor pool");
             assert.deepEqual(search.suggestions[0], {
                 kind: "offering",
@@ -361,6 +350,7 @@ async function runPostgresFixture() {
                 categoryName: "Product",
                 businessId: firstAddisBusinessId,
                 businessHandle: "addis-device-1",
+                isDemo: false,
                 businessName: "addis device 1",
                 city: "Addis Ababa",
                 region: "Addis Ababa",
@@ -479,9 +469,12 @@ async function runPostgresFixture() {
                     position: number;
                     active: number;
                 }) }, { position: 2, active: 1 }, "admin discovery updates persist paid sponsorship independently");
+            await db.prepare("INSERT INTO featured_program_days(date_iso,mode,updated_at) VALUES('2026-07-27','manual',?)").run(Date.now());
+            await db.prepare("INSERT INTO featured_program_lineup(date_iso,business_id,position) VALUES('2026-07-27',?,1)").run(firstAddisBusinessId);
             const refreshedToday = await getDiscoveryView({ industry: "electronics", featuredDay: 1, now: monday });
             const updatedBooth = refreshedToday.featured.booths.find((booth) => booth.revealed && booth.showroom.id === firstAddisBusinessId);
             assert.equal(updatedBooth?.revealed ? updatedBooth.showroom.heroImagePath : null, "/heroes/addis-device-1.webp", "retained booth configuration cannot override the published page hero");
+            await db.prepare("DELETE FROM featured_program_days WHERE date_iso='2026-07-27'").run();
             assert.deepEqual((await db.prepare("SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key").all(firstAddisBusinessId) as Array<{
                 industry_key: string;
             }>).map((row) => row.industry_key), ["electronics", "machinery-tools"], "admin discovery updates replace indexed industry membership atomically");
@@ -504,7 +497,7 @@ async function runPostgresFixture() {
             const missingHeroMedia = await getDiscoveryView({ industry: "electronics", featuredDay: 1, now: monday });
             assert.equal(missingHeroMedia.total, 50, "missing hero setup does not erase an otherwise eligible geographic page");
             assert.equal(missingHeroMedia.showrooms.find((showroom) => showroom.handle === "bishoftu-repair")?.heroImagePath, "", "the map detail record does not substitute retained booth artwork for a missing page hero");
-            assert.equal(missingHeroMedia.featured.boothCount, 40, "a business without its published page hero does not receive a Daily Featured slot and the projection remains capped");
+            assert.equal(missingHeroMedia.featured.boothCount, 6, "a business without its published page hero does not receive a Daily Featured slot and the projection remains capped");
             assert.equal(missingHeroMedia.featured.booths.some((booth) => booth.revealed && booth.showroom.handle === "bishoftu-repair"), false, "the page missing its hero is excluded even when enough replacements preserve capacity");
             console.log(`Geographic page discovery and weekly category Daily Featured tests passed; 10,000-page grouping completed in ${groupingDurationMs.toFixed(1)}ms.`);
         }

@@ -1,4 +1,5 @@
 "use client";
+import launchStyles from "../LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -57,6 +58,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const BusinessHeading = p.embedded ? "h2" : "h1";
   const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business));
   return <div className={styles.profile} data-business-profile>
+    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Demo business — products and contact details are examples.")}</div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />
       <div className={styles.identity}>

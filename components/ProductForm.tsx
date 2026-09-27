@@ -197,7 +197,7 @@ export default function ProductForm({
 
       </> : null}
 
-      <ProductMediaFields product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
+      <ProductMediaFields staffMode={staffMode} product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
 
       {staffMode ? (
         <div className="field full">

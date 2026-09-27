@@ -9,10 +9,10 @@ import { getPublicMarketplaceView } from "@/lib/public-discovery-cache";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Market",
-  description: "Discover businesses, products and services. Explore the map, search the listings and inquire directly on Suqpage.",
+  description: "Find local businesses on Suqpage. Explore products, services, photos and videos in one organized showroom, and inquire directly.",
 };
 
-type MarketSearchParams = Promise<{ industry?: string; q?: string; place?: string; showroom?: string; view?: string; type?: string; page?: string }>;
+type MarketSearchParams = Promise<{ industry?: string | string[]; q?: string; place?: string; showroom?: string; view?: string; type?: string; page?: string }>;
 
 async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchParams }) {
   const t = await getUiText();
@@ -43,8 +43,8 @@ export default function MarketPage({ searchParams }: {
   return <div className="public-experience public-market-experience">
       <header className="public-experience-head">
         <span>{t("Suqpage Market")}</span>
-        <h1>{t("Discover businesses near you.")}</h1>
-        <p>{t("Find products, services and custom work. Explore the map or search the listings, then inquire directly.")}</p>
+        <h1>{t("Everything a business offers, in one place.")}</h1>
+        <p>{t("Discover businesses near you. Explore their story, products, services and capabilities—then find their location and get in touch directly.")}</p>
       </header>
       <Suspense fallback={<MarketWorkspaceLoading />}><MarketWorkspace searchParams={searchParams} /></Suspense>
     </div>;

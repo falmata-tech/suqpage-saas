@@ -10,6 +10,7 @@ import { ownerPagePort } from '../lib/owner-page-runtime';
 import { readOwnerPage, saveOwnerPage } from '../lib/owner-page-service';
 import { parsePublicContacts, publicContactFields } from '../lib/business-profile-contacts';
 import { getDiscoveryView } from '../lib/discovery';
+import { STARTER_VIDEO_REF } from '../lib/business-starter';
 
 async function main() {
   const db = await getDb();
@@ -29,7 +30,8 @@ async function main() {
         assert.ok(p.price_minor! > 0); assert.equal(p.highlights.length, 0);
         assert.equal(p.option_groups?.length, 0);
         assert.ok(fs.existsSync(`public${p.image_path}`));
-        assert.equal(p.media?.length,4);assert.equal(p.media?.filter(item=>item.kind==='image').length,2);
+        assert.equal(p.media?.length,3);assert.equal(p.media?.filter(item=>item.kind==='image').length,2);
+        assert.deepEqual(p.media?.filter(item=>item.kind==='video'),[{kind:'video',ref:STARTER_VIDEO_REF}]);
         for(const item of p.media||[])if(item.kind==='image')assert.ok(fs.existsSync(`public${item.ref}`));
       }
       const draft = (await ownerPagePort.read(businessId))!;

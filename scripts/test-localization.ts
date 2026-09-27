@@ -77,3 +77,16 @@ test('FE-049: server-only copy is excluded from client messages', async()=>{
   assert.equal(selected[messageKey(privacy)],undefined);
   assert.ok(Object.keys(selected).length<Object.keys(catalogs.am).length);
 });
+
+test('FE-052: shared starter and publication-checklist messages reach every client catalog', async () => {
+  const { STARTER_NOTICE, starterPage } = await import('../lib/business-starter');
+  const { publicationReadiness } = await import('../lib/publication-readiness');
+  const { clientMessages } = await import('../lib/i18n/client-messages');
+  // These keys come from shared values rather than literal t() calls in JSX.
+  // The starter reminder previously escaped the explicit-call coverage check.
+  const messages = [STARTER_NOTICE, ...publicationReadiness(starterPage, [], false).map(check => check.label)];
+  for (const locale of locales.filter(value => value !== 'en')) {
+    const selected = clientMessages(catalogs[locale]);
+    for (const message of messages) assert.ok(selected[messageKey(message)], `${locale}: ${message}`);
+  }
+});

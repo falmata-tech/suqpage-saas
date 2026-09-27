@@ -1,3 +1,4 @@
+import { discoveryCategoryKey } from "./discovery-contract";
 import { indexedSearchText } from './search-index';
 import { normalizeSearchText, searchTermGroups } from './search-terms';
 
@@ -18,7 +19,7 @@ export function spellingTerms(query: string) {
   }));
 }
 const eligible = `b.status='active' AND p.is_excluded=0 AND p.approved_at>0
-  AND (scope.industry='all' OR EXISTS(SELECT 1 FROM business_industries i WHERE i.business_id=b.id AND i.industry_key=scope.industry))
+  AND (scope.industry='all' OR EXISTS(SELECT 1 FROM business_industries i WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(scope.industry,','))))
   AND (scope.city='' OR lower(p.city)=lower(scope.city)) AND (scope.region='' OR lower(p.region)=lower(scope.region))
   AND (scope.scale='' OR p.production_scale=scope.scale)
   AND EXISTS(SELECT 1 FROM products listed WHERE listed.business_id=b.id AND listed.is_published=1)`;
@@ -92,5 +93,5 @@ ORDER BY score DESC,lower(name),kind,id`;
 export async function findSpellingMatches(scope: SpellingScope, port: SpellingSearchPort): Promise<SpellingMatch[]> {
   const terms = spellingTerms(scope.query);
   if (!normalizeSearchText(scope.query) || !terms.some(term => term.fuzzy)) return [];
-  return port.all<SpellingMatch>(SPELLING_SEARCH_SQL,[scope.industry,scope.city,scope.region,scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
+  return port.all<SpellingMatch>(SPELLING_SEARCH_SQL,[discoveryCategoryKey(scope.industry),scope.city,scope.region,scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
 }

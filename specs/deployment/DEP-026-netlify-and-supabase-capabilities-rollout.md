@@ -10,6 +10,27 @@ change_level: L4
 
 # DEP-026 - Netlify and bounded Supabase capabilities rollout
 
+## S39 owner-only live support
+
+No migration: local schema stays 55. Deploy the public buying-only API and UI
+together. Help/Transport/missing-channel endpoints return 410; public attachment
+reads return 404. Existing owner-dashboard support remains authenticated and
+scoped. Preserve historical visitor records; they remain staff-visible with
+private notes. Rollback must not reopen guest chat; retain the retired-entry guard.
+Focused tests and local browser review precede visual approval and full release.
+
+
+## S37/S38 buying-assistance rollout
+
+FE-019 / BE-018 replaces the public transport button with Buying assistance.
+Apply additive migrations 54–55 before serving the new request category: they
+expand category validation and permit callback intake without email or a service
+classification. Existing classified rows remain intact. Historical transport data and internal scope keys remain.
+Local schema 55 is applied; production remains pending backup, visual approval
+and release gates. Rollback retains schema/data and must continue recognizing
+buying cases; an old binary that treats them as chat is not a safe rollback.
+
+
 ## Problem and outcome
 
 Suqpage needs a reversible Netlify production option and a disciplined way to

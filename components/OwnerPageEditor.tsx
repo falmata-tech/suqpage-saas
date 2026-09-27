@@ -1,4 +1,6 @@
 "use client";
+import { publicationReadiness } from "@/lib/publication-readiness";
+import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -13,13 +15,14 @@ import { legacyPublicContacts, publicContactFields } from "@/lib/business-profil
 import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean }) {
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean }) {
   const t = useUiText();
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
   const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const [content, setContent] = useState<ShopPageContent>(initialDraft?.content || initialBusinessProfile(catalog));
+  const checks = publicationReadiness(content, catalog.products, locationConfirmed);
   const [mode, setMode] = useState<"edit" | "preview">(initialPreview ? "preview" : "edit");
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -132,8 +135,9 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
       onClose={() => setConfirmation(null)}>
       <h2 id="page-publication-title">{confirmation === "restore" ? t("Restore the previous page?") : t("Publish {value1}?", { value1: catalog.business.name })}</h2>
       <p>{confirmation === "restore" ? t("Visitors will see the previous published page. Your draft will stay saved.") : t("Your page and listed products or services will be visible to customers. You can update them any time.")}</p>
+      {confirmation === "publish" && !activePage ? <ul className={launchStyles.review}>{checks.map(check => <li key={check.key}>{check.ready ? <Check size={18} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}<a href={check.href} onClick={() => { setConfirmation(null); if (check.key === "contacts") { const details = document.getElementById("public-phone")?.closest("details"); if (details) details.open = true; } }}>{t(check.label)}</a></li>)}</ul> : null}
       <div><button type="button" autoFocus disabled={busy} onClick={() => setConfirmation(null)}>{t("Cancel")}</button>
-        <button type="button" className={styles.publish} disabled={busy} onClick={() => void publishSavedPage()}>
+        <button type="button" className={styles.publish} disabled={busy || (confirmation === "publish" && !activePage && checks.some(check => !check.ready))} onClick={() => void publishSavedPage()}>
           {busy ? <LoaderCircle size={16} aria-hidden="true" /> : confirmation === "restore" ? <Undo2 size={16} aria-hidden="true" /> : <Globe size={16} aria-hidden="true" />}
           {confirmation === "restore" ? t("Restore previous") : t("Publish page")}
         </button></div>
@@ -147,7 +151,9 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
           <textarea id="shop-about" rows={5} maxLength={3000} value={businessProfileDescription(content)} onChange={(e) => setContent({ ...content, introduction: "", about: e.target.value })} />
           <span className={styles.uploadStatus}>{t("Tell visitors what makes your shop and products worth exploring.")}</span>
           <label htmlFor="shop-video">{t("Business video")}{" "}<span className={styles.optional}>{t("(optional)")}</span></label>
-          <input id="shop-video" type="url" placeholder={t("YouTube link")} maxLength={500} value={content.videoUrl} onChange={(e) => setContent({ ...content, videoUrl: e.target.value })} />
+          <input id="shop-video" type="url" placeholder={t("YouTube link")} maxLength={500} value={content.videoUrl} readOnly />
+          <a className="btn secondary" href={owner ? "/dashboard/support?video=header" : "/dashboard/support?queue=support"} target="_blank" rel="noreferrer">{t(owner ? "Request a video" : "Video requests")}</a>
+          <small>{t("Send us a video link. Our team will review it for your page.")}</small>
           <span id="shop-cover-label" className={styles.label}>{t("Cover image")}</span>
           <input ref={fileInput} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label={t("Choose cover image file")} onChange={(event) => {
             const file = event.currentTarget.files?.[0]; event.currentTarget.value = "";
@@ -171,7 +177,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         <fieldset disabled={!ready || busy || uploading}>
           <legend className="sr-only">{t("Public contact details")}</legend>
           <details className={styles.contactFields}>
-            <summary>{t("Public contact details")}{" "}<span className={styles.optional}>{t("(optional)")}</span></summary>
+            <summary>{t("Public contact details")}</summary>
             {publicContactFields.map((field) => <div key={field.key}>
               <label htmlFor={`public-${field.key}`}>{t(field.label)}</label>
               <input id={`public-${field.key}`} type={field.type} maxLength={500} placeholder={field.placeholder}

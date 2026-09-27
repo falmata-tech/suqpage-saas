@@ -1,0 +1,33 @@
+.dialog {
+  width: min(500px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #202428;
+  box-shadow: 0 22px 70px rgb(11 29 58 / 34%);
+}
+.dialog::backdrop { background: rgb(11 29 58 / 30%); }
+.dialog[data-wide="true"] { width: min(760px, calc(100vw - 24px)); }
+.dialog :global(.discovery-preview) { width: 100%; max-height: inherit; overflow: hidden; box-shadow: none; }
+.dialog :global(.discovery-preview article) { max-height: inherit; overflow-y: auto; overscroll-behavior: contain; }
+.dialog :global(.discovery-preview-copy) { overflow-wrap: anywhere; }
+.dialog :global(.nearby-showroom-viewer) {
+  position: relative; inset: auto; display: flex; flex-direction: column;
+  width: 100%; max-height: inherit; transform: none; box-shadow: none;
+}
+.dialog :global(.nearby-showroom-viewer > header) { flex: none; }
+.dialog :global(.nearby-showroom-grid), .dialog :global(.nearby-showroom-detail) {
+  min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+}
+.dialog :global(.nearby-showroom-detail) { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .dialog :global(.discovery-preview article) { grid-template-rows: 120px auto; }
+  .dialog :global(.nearby-showroom-grid) { grid-template-columns: 1fr; }
+  .dialog :global(.nearby-showroom-detail) { display: block; }
+  .dialog :global(.nearby-showroom-detail > img), .dialog :global(.nearby-showroom-detail > .discovery-image-fallback) { height: 120px; min-height: 120px; }
+}

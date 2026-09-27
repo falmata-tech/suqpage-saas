@@ -1,4 +1,6 @@
 "use client";
+import launchStyles from "./LaunchClarity.module.css";
+import previewStyles from "./MapPreviewDialog.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
 import { mapDisplayLocation } from "@/lib/map-display-location";
@@ -9,9 +11,8 @@ import CategoryChooser from "./CategoryChooser";
 import { productHref } from "@/lib/product-inquiry";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronLeft, ChevronRight, Crosshair, LocateFixed, Map as MapIcon, Minus, Package, Plus, Search, SlidersHorizontal, Store, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Crosshair, LocateFixed, Map as MapIcon, Minus, Package, Plus, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import MarketplaceMap, { type MarketplaceMapController } from "@/components/MarketplaceMap";
 import type { DiscoveryNearbyGroup, DiscoveryProductResult, DiscoverySearchSuggestion, DiscoveryShowroom, MarketplaceDiscoveryView } from "@/lib/discovery";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
@@ -164,23 +165,11 @@ function MarketplaceSearchResults({
   const visibleProducts = showProducts ? discovery.searchProducts : [];
   const visibleBusinesses = showBusinesses ? businesses : [];
   const visibleCount = visibleProducts.length + visibleBusinesses.length;
-  const types: Array<{ key: SearchResultType; label: string; count: number; icon: typeof Package }> = [
-    { key: "all", label: t("All"), count: discovery.resultCounts.products + discovery.resultCounts.businesses, icon: Search },
-    { key: "products", label: t("Products & services"), count: discovery.resultCounts.products, icon: Package },
-    { key: "businesses", label: t("Businesses"), count: discovery.resultCounts.businesses, icon: Store },
-  ];
-
-  const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <Link key={product.id} href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} data-industry={product.primaryIndustryKey} aria-label={t("{value1} from {value2}, {value3}. View details.", { value1: product.name, value2: product.businessName, value3: product.city })}><span className="discovery-product-result-media"><ProductResultImage product={product} /></span><span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong><p>{product.description}</p><span>{product.businessName}</span><em>{product.city}, {product.region}</em></span></Link>;
-  const renderBusiness = (business: DiscoveryShowroom) => <button key={business.id} type="button" data-industry={business.primaryIndustryKey} onClick={() => onSelectBusiness(business.id)} aria-label={t("{value1}, {value2}, {value3}. View details.", { value1: business.name, value2: business.primaryIndustryLabel, value3: business.city })}><span className="discovery-business-result-media"><ShowroomImage showroom={business} /></span><span className="discovery-business-result-copy"><small>{business.primaryIndustryShortLabel}</small><strong>{business.name}</strong><p>{business.tagline}</p><em>{business.city}, {business.region}</em></span></button>;
+  const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <Link key={product.id} href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} data-industry={product.primaryIndustryKey} aria-label={t("{value1} from {value2}, {value3}. View details.", { value1: product.name, value2: product.businessName, value3: product.city })}><span className="discovery-product-result-media"><ProductResultImage product={product} /></span><span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong>{product.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{product.description}</p><span>{product.businessName}</span><em>{product.city}, {product.region}</em></span></Link>;
+  const renderBusiness = (business: DiscoveryShowroom) => <button key={business.id} type="button" data-industry={business.primaryIndustryKey} onClick={() => onSelectBusiness(business.id)} aria-label={t("{value1}, {value2}, {value3}. View details.", { value1: business.name, value2: business.primaryIndustryLabel, value3: business.city })}><span className="discovery-business-result-media"><ShowroomImage showroom={business} /></span><span className="discovery-business-result-copy"><small>{business.primaryIndustryShortLabel}</small><strong>{business.name}</strong>{business.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{business.tagline}</p><em>{business.city}, {business.region}</em></span></button>;
 
   return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title">
     <h2 id="discovery-search-results-title" className="sr-only">{t("Search results")}</h2>
-    <nav className="discovery-search-result-types" aria-label={t("Search result type")}>
-      {types.map((type) => {
-        const Icon = type.icon;
-        return <Link key={type.key} className={resultType === type.key ? "active" : ""} aria-current={resultType === type.key ? "page" : undefined} href={discoveryHref(action, { industry: discovery.industry.key, q: discovery.query, place: discovery.place, view: "search", type: type.key })}><Icon aria-hidden="true" /><span>{t(type.label)}</span><b>{type.count}</b></Link>;
-      })}
-    </nav>
     <div ref={resultList} className="discovery-search-results">
       {visibleCount === 0 ? <div className="discovery-search-empty"><Search aria-hidden="true" /><h3>{t("No matches found")}</h3><p>{t("Try another product, business, category, or place.")}</p></div> : null}
       {discovery.query && discovery.searchOrder ? discovery.searchOrder.map(result => {
@@ -218,13 +207,23 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
   const [requestedView, setRequestedView] = useState<MapView | null>(null);
   const [nearMeStatus, setNearMeStatus] = useState("");
   const [panelOpen, setPanelOpen] = useState(Boolean(discovery.query || discovery.place || discovery.industry.key !== "all" || view === "search"));
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const filterToggle = useRef<HTMLButtonElement>(null);
-  const activeFilterCount = Number(discovery.industry.key !== "all") + Number(Boolean(discovery.place));
-  const activeFilterSummary = [
-    discovery.industry.key !== "all" ? t(discovery.industry.label) : "",
-    discovery.places.find(place => place.key === discovery.place)?.label || "",
-  ].filter(Boolean).join(" · ");
+  const [typePending, startTypeTransition] = useTransition();
+  const resultFilters: Array<{ key: Exclude<SearchResultType, "all">; label: string }> = [
+    { key: "products", label: t("Products & services") },
+    { key: "businesses", label: t("Businesses") },
+  ];
+  function toggleResultType(key: Exclude<SearchResultType, "all">) {
+    const type = resultType === "all" ? (key === "products" ? "businesses" : "products") : "all";
+    startTypeTransition(() => router.push(discoveryHref(action, {
+      industry: discovery.industry.key, q: discovery.query, place: discovery.place, view: "search", type,
+    }), { scroll: false }));
+  }
+
+  function changeFilters(industry: string, place: string) {
+    startTypeTransition(() => router.push(discoveryHref(action, {
+      industry, place, q: discovery.query, view: "search", type: resultType,
+    }), { scroll: false }));
+  }
   const panelOpener = useRef<HTMLButtonElement | null>(null);
   const panelCloser = useRef<HTMLButtonElement | null>(null);
   const panelFocusRequested = useRef(false);
@@ -374,27 +373,40 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
     </div> : null}
 
     <div className="discovery-workbench discovery-workbench-map discovery-drawer-workbench" data-panel-open={panelOpen}>
-      <button ref={panelOpener} type="button" className="discovery-panel-opener" aria-controls="discovery-search-panel" aria-expanded={panelOpen} onClick={showPanel} hidden={panelOpen}><Search aria-hidden="true" /><span>{t("Search & filters")}</span></button>
+      <button ref={panelOpener} type="button" className={`discovery-panel-opener ${launchStyles.panelOpener}`} hidden={panelOpen} aria-controls="discovery-search-panel" aria-expanded={panelOpen} onClick={showPanel}>
+        <Search aria-hidden="true" />
+        <span className={launchStyles.openerLabel}><strong>{t("Search & results")}</strong><small>{t("Filters")}</small></span>
+        <span className={launchStyles.openerArrow}><ArrowRight aria-hidden="true" /></span>
+      </button>
       <aside id="discovery-search-panel" className="discovery-summary discovery-search-panel" aria-labelledby="discovery-panel-title" aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); hidePanel(); }}}>
         <h2 id="discovery-panel-title" className="sr-only">{t("Search & filters")}</h2>
         <div className="discovery-panel-search-row">
           <button ref={panelCloser} type="button" className="discovery-panel-close" onClick={hidePanel} aria-label={t("Hide search and filters")}><ArrowLeft aria-hidden="true" /></button>
           <div className="discovery-command-search"><DiscoverySearch id="discovery-search" value={searchInput} suggestions={[]} onChange={editSearch} onSelect={applySearch} onSubmit={applySearch} onClear={() => applySearch("")} /></div>
         </div>
-        <div className="discovery-filter-toolbar">
-          <button ref={filterToggle} type="button" aria-expanded={filtersOpen} aria-controls="discovery-filter-fields" onClick={() => setFiltersOpen(open => !open)}><SlidersHorizontal aria-hidden="true" />{t("Filters")}{activeFilterCount > 0 ? <b>{activeFilterCount}</b> : null}</button>
-          {activeFilterSummary ? <span className="discovery-active-filters" title={activeFilterSummary}>{activeFilterSummary}</span> : null}
+        <div id="discovery-filter-fields" className="discovery-panel-filters">
+          <div><span>{t("Category")}</span><CategoryChooser categories={discovery.industries} value={discovery.industry.key} disabled={typePending} onChange={key => changeFilters(key, discovery.place)} /></div>
+          <div><label htmlFor="discovery-place">{t("Region or city")}</label><div className="discovery-place-input">
+            <select id="discovery-place" aria-label={t("Filter by region or city")} disabled={typePending} value={discovery.place} onChange={event => changeFilters(discovery.industry.key, event.target.value)}>
+              <option value="">{t("All Ethiopia")}</option>
+              <optgroup label={t("Regions")}>{discovery.places.filter(place => place.kind === "region").map(place => <option key={place.key} value={place.key}>{place.label}</option>)}</optgroup>
+              <optgroup label={t("Cities")}>{discovery.places.filter(place => place.kind === "city").map(place => <option key={place.key} value={place.key}>{place.label}</option>)}</optgroup>
+            </select>
+            {discovery.place ? <button type="button" disabled={typePending} aria-label={t("Clear location")} title={t("Clear location")} onClick={() => changeFilters(discovery.industry.key, "")}><X size={16} aria-hidden="true" /></button> : null}
+          </div></div>
         </div>
-        <div id="discovery-filter-fields" className="discovery-panel-filters" hidden={!filtersOpen} onKeyDown={event => {
-          if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); setFiltersOpen(false); filterToggle.current?.focus(); }
-        }}>
-          <div><span>{t("Category")}</span><CategoryChooser categories={discovery.industries} value={discovery.industry.key} onChange={key=>router.replace(discoveryHref(action,{industry:key,q:discovery.query,place:discovery.place,view:"search",type:resultType}),{scroll:false})}/></div>
-          <label><span>{t("Region or city")}</span><select aria-label={t("Filter by region or city")} value={discovery.place} onChange={event=>router.replace(discoveryHref(action,{industry:discovery.industry.key,q:discovery.query,place:event.target.value,view:"search",type:resultType}),{scroll:false})}><option value="">{t("All Ethiopia")}</option><optgroup label={t("Regions")}>{discovery.places.filter(place=>place.kind === "region").map(place=><option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup><optgroup label={t("Cities")}>{discovery.places.filter(place=>place.kind === "city").map(place=><option key={place.key} value={place.key}>{place.label} ({place.count})</option>)}</optgroup></select></label>
-        </div>
+        <fieldset className="discovery-result-filters" aria-busy={typePending}>
+          <legend className="sr-only">{t("Search result type")}</legend>
+          {resultFilters.map(filter => <label key={filter.key}>
+            <input type="checkbox" value={filter.key} checked={resultType === "all" || resultType === filter.key}
+              disabled={typePending || resultType === filter.key} onChange={() => toggleResultType(filter.key)} />
+            <span>{filter.label}</span>
+          </label>)}
+        </fieldset>
         <MarketplaceSearchResults action={action} discovery={discovery} resultType={resultType} businesses={searchBusinesses} onSelectBusiness={businessId=>{
           const shop=showroomById.get(businessId);
           if(shop) { const point=mapDisplayLocation(shop);mapRef.current?.centerAt(point.latitude,point.longitude,14); }
-          setActiveNearbyGroupKey(null);setSelectedShowroomId(businessId);rememberNavigation(null,mapViewRef.current,businessId);hidePanel();
+          setActiveNearbyGroupKey(null);setSelectedShowroomId(businessId);rememberNavigation(null,mapViewRef.current,businessId);
         }} />
       </aside>
       <span className="sr-only" aria-live="polite">{nearMeStatus}</span>
@@ -456,25 +468,46 @@ function ShowroomImage({ showroom }: { showroom: DiscoveryShowroom }) {
   return showroom.heroImagePath && !failed ? <Image src={showroom.heroImagePath} unoptimized={showroom.heroImagePath.startsWith("/api/page-media/")} alt="" width={240} height={150} onError={() => setFailed(true)} /> : <span className={`discovery-image-fallback ${showroom.fallbackStyle}`} aria-hidden="true"><i>{showroom.name.slice(0, 1)}</i><b>{showroom.name}</b></span>;
 }
 
+function MapPreviewDialog({ labelledBy, onClose, children, wide = false }: { labelledBy: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.showModal();
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      // Leaflet may replace the selected marker while centering the map.
+      if (previousFocus && previousFocus !== document.body && previousFocus.isConnected && previousFocus.getClientRects().length) {
+        previousFocus.focus({ preventScroll: true });
+      } else {
+        document.querySelector<HTMLElement>('.discovery-workbench[data-panel-open="true"] .discovery-panel-close, .discovery-panel-opener:not([hidden])')?.focus({ preventScroll: true });
+      }
+    };
+  }, []);
+  return <dialog ref={dialogRef} className={previewStyles.dialog} data-wide={wide} aria-labelledby={labelledBy}
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onKeyDown={event => {
+      if (event.key !== "Tab") return;
+      const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]')].filter(element => element.getClientRects().length);
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }}
+    onClick={event => {
+      if (event.target !== event.currentTarget) return;
+      const bounds = event.currentTarget.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();
+    }}>{children}</dialog>;
+}
+
 function ShowroomPreview({ showroom, source, onClose, onOpen, label, presence }: { showroom: DiscoveryShowroom; source: "discovery" | "featured"; onClose: () => void; onOpen?: () => void; label?: string; presence?: ShowroomPresence }) {
   const t = useUiText();
-  const previewRef = useRef<HTMLElement | null>(null);
-  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    setPortalRoot(document.querySelector<HTMLElement>(".discovery-map-stage"));
-  }, []);
-  useEffect(() => {
-    if (!portalRoot) return;
-    previewRef.current?.focus({ preventScroll: true });
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [onClose, portalRoot, showroom.id]);
-  if (!portalRoot) return null;
   const status = presence?.label || label || (showroom.sponsored ? "Sponsored" : showroom.primaryIndustryShortLabel);
-  return createPortal(<div className="discovery-preview-layer discovery-preview-layer-map"><button className="discovery-preview-scrim" type="button" tabIndex={-1} onClick={onClose} aria-label={t("Dismiss page preview")} /><aside ref={previewRef} className="discovery-preview" role="dialog" aria-modal="false" aria-labelledby={`showroom-preview-${showroom.id}`} data-hero-image={showroom.heroImagePath || undefined} tabIndex={-1}><article><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence?.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3><p>{showroom.tagline}</p><small>{showroom.city} · {showroom.region}{showroom.locationMode === "area" ? t("· Approximate area") : ""}</small><Link href={`/@${showroom.handle}?ref=${source}`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></div>, portalRoot);
+  return <MapPreviewDialog labelledBy={`showroom-preview-${showroom.id}`} onClose={onClose}><aside className="discovery-preview" data-hero-image={showroom.heroImagePath || undefined}><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><article><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence?.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3>{showroom.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{showroom.tagline}</p><small>{showroom.city} · {showroom.region}{showroom.locationMode === "area" ? t("· Approximate area") : ""}</small><Link href={`/@${showroom.handle}?ref=${source}`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></MapPreviewDialog>;
 }
 
 function NearbyShowroomsViewer({
@@ -499,33 +532,38 @@ function NearbyShowroomsViewer({
   const t = useUiText();
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const backRef = useRef<HTMLButtonElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const lastSelectedId = useRef<number | null>(null);
   const selectedShowroom = showrooms.find((showroom) => showroom.id === selectedShowroomId) || null;
   useEffect(() => {
     closeRef.current?.focus({ preventScroll: true });
   }, [group.key]);
   useEffect(() => {
-    if (selectedShowroom) backRef.current?.focus({ preventScroll: true });
+    if (selectedShowroom) {
+      lastSelectedId.current = selectedShowroom.id;
+      backRef.current?.focus({ preventScroll: true });
+    } else if (lastSelectedId.current !== null) {
+      listRef.current?.querySelector<HTMLButtonElement>(`[data-showroom-id="${lastSelectedId.current}"]`)?.focus({ preventScroll: true });
+    }
   }, [selectedShowroomId]);
 
-  return <aside className={`nearby-showroom-viewer${selectedShowroom ? " detail-open" : ""}`} role="dialog" aria-modal="false" aria-labelledby="nearby-showroom-title" onKeyDown={(event) => {
-    if (event.key === "Escape") onClose();
-  }}>
+  return <MapPreviewDialog labelledBy="nearby-showroom-title" onClose={onClose} wide><aside className={`nearby-showroom-viewer${selectedShowroom ? " detail-open" : ""}`}>
     <header>
       {selectedShowroom
         ? <button ref={backRef} className="nearby-showroom-back" type="button" onClick={onBack}><ArrowLeft aria-hidden="true" /><span>{t("Back to results")}</span></button>
         : <div className="nearby-showroom-heading"><span>{group.city}</span><h2 id="nearby-showroom-title">{t("Nearby pages")}</h2><p>{group.count} {group.count === 1 ? t("result") : t("results")} {" "}{t("in this area")}</p></div>}
       <button ref={closeRef} type="button" onClick={onClose} aria-label={t("Close nearby results")}><X aria-hidden="true" /></button>
     </header>
-    {selectedShowroom ? <NearbyShowroomDetail showroom={selectedShowroom} presence={showroomPresence(selectedShowroom, featuredNowBusinessId, t)} onOpen={onOpen} /> : <div className="nearby-showroom-grid">
+    {selectedShowroom ? <NearbyShowroomDetail showroom={selectedShowroom} presence={showroomPresence(selectedShowroom, featuredNowBusinessId, t)} onOpen={onOpen} /> : <div ref={listRef} className="nearby-showroom-grid">
       {showrooms.map((showroom) => {
         const presence = showroomPresence(showroom, featuredNowBusinessId, t);
         return <button key={showroom.id} type="button" data-showroom-id={showroom.id} data-industry={showroom.primaryIndustryKey} data-presence={presence.kind || undefined} className={`${presence.kind ? ` ${presence.kind}` : ""}${selectedShowroomId === showroom.id ? " selected" : ""}`} onClick={() => onSelect(showroom.id)} aria-label={t("{value1}, {value2}, {value3}.{value4} View details.", { value1: showroom.name, value2: showroom.primaryIndustryLabel, value3: showroom.city, value4: presence.label ? ` ${t(presence.label)}.` : "" })}>
           <span className="nearby-showroom-media"><ShowroomImage showroom={showroom} />{presence.kind ? <i>{t(presence.shortLabel)}</i> : null}</span>
-          <span className="nearby-showroom-copy"><small>{t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong><em>{t("View details")}</em></span>
+          <span className="nearby-showroom-copy"><small>{t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong>{showroom.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<em>{t("View details")}</em></span>
         </button>;
       })}
     </div>}
-  </aside>;
+  </aside></MapPreviewDialog>;
 }
 
 function NearbyShowroomDetail({ showroom, presence, onOpen }: { showroom: DiscoveryShowroom; presence: ShowroomPresence; onOpen: () => void }) {
