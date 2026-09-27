@@ -1,10 +1,10 @@
 ---
 id: FE-052
 title: Clear launch journeys and natural interface language
-status: in_progress
+status: done
 related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030]
 owners: [product, frontend, backend]
-last_updated: 2026-09-24
+last_updated: 2026-09-27
 change_level: L3
 ---
 
@@ -107,7 +107,7 @@ acceptance gates. Retain prior data and existing S32 migration. No deployment
 or pricing charge occurs in this task. Rollback removes UI refinements but must
 preserve recorded requests/inquiries and tenant authorization.
 
-## Local evidence — 2026-09-24
+## Evidence: focused checks and verified rollout
 
 Implementation and focused checks are recorded in
 `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md`. Relevant scripts:
@@ -116,5 +116,7 @@ Implementation and focused checks are recorded in
 `test-platform-narrative.mjs` and `capture-launch-clarity.mjs`.
 Desktop/390/320 public, owner inquiry and first-publication checks cover all five
 locales. S32 transport persistence/browser checks are retained. Native schema 52
-installation and preservation pass. Visual approval and full/release/acceptance
-gates remain pending; status is deliberately in_progress.
+installation and preservation pass. The owner approved the visuals and deployment.
+Full check/release/acceptance/operations coverage and live checks pass; production
+schema 58 preserves existing rows. Publication evidence and operating limits are
+recorded in `docs/SUQPAGE-RELEASE-2026-09-27.md`.

@@ -120,6 +120,7 @@ S48 local evidence: `scripts/test-video-requests.ts`,
 `scripts/test-business-starters.ts`, `scripts/test-owner-page-postgres.ts`,
 `scripts/capture-video-requests.ts` pass; see S48 in TRACEABILITY.md. Real forms
 cover submission, invalid-link recovery, assignment, approval without channel configuration,
-decline/reply and preserved default at phone/desktop widths. Schema 58 is local
-only. The owner approved S48 visuals and publication on 2026-09-27. Refreshed release
-and operations gates pass; the final browser/check continuation is in progress.
+decline/reply and preserved default at phone/desktop widths. Schema 58 is deployed. The owner approved S48 visuals and publication on 2026-09-27.
+Complete check, release, operations and all 11 browser workflows pass. Exact artifact,
+live routes/mobile/map/buying entry and health checks pass. See
+`docs/SUQPAGE-RELEASE-2026-09-27.md`, including the initial edge-502 incident and recovery.

@@ -1,7 +1,7 @@
 # Daily Featured scheduling
 
-FE-033 / BE-029 / DEP-024 · S36 local candidate, 2026-09-24.
-Pending owner visual approval and release gates; not deployed.
+FE-033 / BE-029 / DEP-024 · S36, deployed 2026-09-27.
+Owner-approved; release and live checks pass. See `../SUQPAGE-RELEASE-2026-09-27.md`.
 
 ## Automatic schedule
 

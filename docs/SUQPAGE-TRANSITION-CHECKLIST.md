@@ -1919,5 +1919,23 @@ evidence with their test-fixture/timing corrections.
 - [x] Locked install and all required check/release/acceptance/operations coverage.
 - [x] Fresh protected backup and 51–58 preservation/access rehearsal.
 - [x] Exact deployment artifact and Linux native validation.
-- [ ] CURRENT: reviewed scoped commit, guarded schema update and publication.
-- [ ] Independent live verification, monitoring and final deployment record.
+- [x] Reviewed scoped commit, guarded schema update and publication.
+- [x] Independent live verification, monitoring and final deployment record.
+
+### S43/S48 publication complete — 2026-09-27
+
+- [x] Reviewed task commit `d2ebacd`; unrelated `deno.lock` preserved.
+- [x] Guarded production 51–58 migration; original records/private notes retained,
+  runtime privileges and repeat no-op verified; preflight passes.
+- [x] Exact artifact published as Netlify `6ab98e309c70ac17fe871293`.
+- [x] Independent 19-route/API/search/redirect checks; 39 phone/desktop/language states;
+  buying intake/session/close and real map marker/drawer preview checks pass.
+- [x] Follow-up deployment/health monitoring passes. Initial edge-502 and natural
+  recovery are documented; no blind redeploy or configuration recovery was used.
+- [x] Master, specs, operations and release record reflect deployed behavior.
+
+The release record is `docs/SUQPAGE-RELEASE-2026-09-27.md`. Earlier S31–S48 pending
+visual/release entries are satisfied by the explicit S43 approval and these gates.
+Mobile remains preparation only; no unrelated mobile work began. No Git push or
+remote CI was run. Staff must monitor Support; third-party playback and live inbox
+mail delivery are not claimed by local-provider tests.

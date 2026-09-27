@@ -59,10 +59,10 @@ requests are automatically closed or deleted.
 
 ## Release and rollback
 
-Local schema 58 preserves optional buying classifications, default-private
+Production schema 58 preserves optional buying classifications, default-private
 message visibility and a separate resolved timestamp. Existing staff notes are never backfilled as public replies.
-Production is still schema 50: back up and apply additive migrations 51–58 under
-the deployment procedure after visual/release gates. Preserve existing rows,
+The 2026-09-27 release applied migrations 51–58 after a protected backup, restore
+rehearsal and release gates. Original-column fingerprints were preserved. Retain rows,
 assignments, tokens and audit history. A rollback must keep schema 58 and use
 application code that recognizes buying cases and keeps general public support retired; do not relabel or delete them.
 

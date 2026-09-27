@@ -177,8 +177,8 @@ resolved is a separate staff decision, moves the case to Resolved and is safe to
 retry; reopening clears resolution and restores the existing assignment workflow.
 Staff inboxes refresh while visible and retain queue scope, capacity, claim,
 reassign, close/reopen and history. Owner dashboard support remains unchanged.
-Local schema 57 includes default-private message visibility and separate buying resolution; existing 68 businesses
-are preserved. Visual approval is complete; hosted migration and final release gates remain pending.
+Production schema 58 includes default-private message visibility and separate buying resolution.
+Existing records were preserved during the verified 2026-09-27 rollout.
 No hosted Realtime configuration or native app has been deployed.
 
 ## 4. What Suqpage is—and is not
@@ -296,7 +296,7 @@ even when its new category scope returns no matches. Parameterized PostgreSQL
 exact/fuzzy queries, map rows, counts and pagination use the same canonical
 category set; cross-listed records are returned once. No schema change is needed.
 Buying help uses a compact accessible icon alongside an open drawer on narrow
-screens so it cannot cover pagination. Visual approval is complete; final release gates and deployment remain pending.
+screens so it cannot cover pagination. These controls are deployed and verified on phones and desktop.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -357,7 +357,7 @@ its range. The browser updates the current card from the same agenda and refresh
 at the EAT date boundary; breaks and the midnight cutoff identify no business.
 All times use 12-hour AM/PM, including 12:00 AM at the end. This is a Suqpage
 rundown, not an integration that starts or schedules TikTok broadcasts. Provider
-links are never invented. The owner approved the candidate; release remains pending.
+links are never invented. The evening schedule is deployed under DEP-024.
 Today's gallery rotates as a circular schedule queue: the current presentation
 leads; during breaks the most recently completed presentation remains first;
 and the next card leads only when its presentation starts. References, airtime,
@@ -428,9 +428,9 @@ uses the platform's restrained palette rather than legacy custom design tokens.
 On phones, public pages, account entry and private workspaces retain a compact
 Suqpage mark/wordmark and language header. Primary app navigation stays in the
 bottom bar; the Market viewport reserves space for both (FE-038 / FE-034).
-S31's locally verified refinement uses a 4px icon/text gap and consistent
+The deployed brand uses a 4px icon/text gap and consistent
 32px/24px standard, 28px/22px phone and 24px/18px compact-shop icon/wordmark
-sizes. It preserves the icon ratio and Latin typeface; visual approval is complete and publication is pending under FE-038.
+sizes. It preserves the icon ratio and Latin typeface; deployment and multilingual phone/desktop checks pass under FE-038.
 
 Nearby-group viewers use no architectural shell, venue, floor, hall, or
 decorative environment. Daily Featured likewise presents up to six image-led cards in responsive columns with
@@ -653,7 +653,7 @@ Core hierarchy:
 Business
 └── Product category
     └── Product
-        ├── Ordered photos and controlled YouTube videos (FE-050 local candidate)
+        ├── Ordered photos and reviewed YouTube videos (FE-050 / FE-019)
         ├── Availability
         ├── Optional ETB display price, offered-by unit, and highlights
         └── Up to four option groups
@@ -884,8 +884,8 @@ and horizontal touch scrolling. Video playback requires an explicit play action
 and stops when the selected media changes. The first photo stays the cover for
 search/cards; legacy single-photo/video products need no backfill. Extra photos
 follow existing tenant/public access and snapshot-retention rules. This gallery
-was deployed on schema 50. The S48 support-review extension is verified locally
-on schema 58 with owner visual approval; final DEP-039 release gates are pending.
+was deployed on schema 50. The S48 support-review extension is deployed on schema 58;
+owner/staff approval, decline, public embed selection and preservation tests pass.
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
@@ -923,10 +923,10 @@ Default behavior:
   Suqpage page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place. Hide duplicate autocomplete once full results appear;
 - keep search, category and location controls together in the result drawer;
-  the local compact-results candidate keeps category/location visible side by
+  the compact result panel keeps category/location visible side by
   side, supports multiple clearable categories and a clearable location, places
   Products & services / Businesses checkboxes above one list, and fixes page controls
-  below the scrollable rows. Visual approval is complete; publication remains pending;
+  below the scrollable rows. The deployed interface passes phone/desktop checks;
 - hide the drawer without clearing filters; its hidden controls are inert, Escape
   returns focus to the opener, and reduced-motion preferences disable sliding;
 - support business name, handle, product, industry, and relevant description search;
@@ -941,11 +941,11 @@ Default behavior:
   all listings. Delayed responses preserve newer typing and Back restores the query.
   PostgreSQL evaluates bounded term groups and count queries omit sorting; it does
   not translate queries or analyze images/videos;
-- the verified local BE-040 ranking correction prefers the original meaningful
+- the deployed BE-040 ranking correction prefers the original meaningful
   words anywhere in an offering title over description-only or plural-alternative
   matches, after exact-title/whole-title-prefix matches. Thus `gras` puts Farm
   Grass with Dirt ahead of grain matches. Counts, eligibility and five-row SQL
-  pagination remain unchanged. This correction is not yet deployed;
+  pagination remain unchanged;
 - keep reviewed production-scale metadata
   available to authorized administrators without exposing it as a public filter;
 - keep live search, available-location filtering, and zoom/center
@@ -1001,7 +1001,7 @@ support link is shown during the interval; platform administrators can override
 with an audited reason. Current and retired addresses stay reserved to the same
 business; old public links redirect to the current address with product/query
 parameters preserved and privacy enforced. Existing addresses are unchanged.
-This is the local S28/schema-50 candidate; hosted rollout remains pending.
+This handle lifecycle is deployed; subsequent schema-58 rollout preserves existing handles and accounts.
 
 
 Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
@@ -1356,17 +1356,18 @@ closed records remain unresolved; staff resolution is explicit and audited. Pref
 requires schema 58 after S48: `support_video_requests` stores private target/source
 and review records with server-only access and RLS. Retain these additive columns
 and records on rollback; do not restore unrestricted owner video entry.
-Local migration and isolated install/preservation tests pass. Production rollout
-still requires the documented backup and release gates.
+Production schema 58 and isolated install/preservation tests pass. The protected
+backup, restore rehearsal, original-column fingerprints, runtime access and release
+gates are recorded in `docs/SUQPAGE-RELEASE-2026-09-27.md`.
 
-DEP-039 adds `products.media_json` at schema 49 for the local gallery candidate.
+DEP-039 adds `products.media_json` at schema 49 for the deployed product gallery.
 DEP-040/schema 50 adds a server-only, RLS-enabled reserved-handle registry and
 last-change timestamp. Registry uniqueness covers every business insert/handle
 update, including invitations. Retained addresses stay reserved across renames.
 The first photo/video remain in legacy columns; old records need no backfill.
 Retained publication/revision snapshots and reconciliation include every gallery
-photo. Hosted migration and publication remain pending visual/release gates;
-rollback retains the additive column and returns to the prior application.
+photo. Hosted schema and publication are verified. Rollback retains additive data
+and must preserve private notes, buying cases and staff video review.
 
 Schema 48 adds pg_trgm/fuzzystrmatch in the reviewed `extensions` namespace and
 four expression GiST indexes. Existing extensions are never relocated implicitly.
@@ -1579,7 +1580,7 @@ structured inquiry, not online checkout.
 
 ## 22. Testing and definition of done
 
-S26/S27/S28 local candidates use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
+The deployed S26/S27/S28 workflows use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
 `test:business-starters`,
 `test:product-upkeep` (including gallery security/retention cases),
 `test:revision-v4`, `test:media-reconciliation`, `test:native-postgres` and
@@ -1773,8 +1774,10 @@ Local and hosted schema 47 restore/preservation evidence is recorded in
 
 S33 adds owner-managed inquiries, a labeled search/results drawer opener, clear examples,
 a first-publication review and contextual locale copy. Public copy does not
-mention pricing. Focused database and browser checks pass locally; visual approval is complete and final release gates remain pending. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md`.
-Local schema 55 includes seeded demo identity, scoped support queues and general
-buying requests; production remains schema 50. Buying assistance is a manual staff
+mention pricing. Focused database/browser and full release gates pass; the approved
+experience is deployed. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md` and
+`docs/SUQPAGE-RELEASE-2026-09-27.md`.
+Production schema 58 includes seeded demo identity, scoped support queues and
+buying requests with retained live messages and resolution. Buying assistance is a manual staff
 service. Historical transport requests remain accessible; provider accounts,
 dispatch, checkout and booking integrations are out of scope.

@@ -641,4 +641,8 @@ private-note denial, End chat, retained history, resolution and reopening.
 Production schema 50→58 rehearsal preserves all 3,821 original rows across 57
 tables, verifies restricted video-request access and repeat migration no-op.
 Evidence and rollout limits: `docs/SUQPAGE-RELEASE-2026-09-27.md`; protected raw
-evidence: `.local/publish-s48-20260927/`. Hosted writes remain pending.
+evidence: `.local/publish-s48-20260927/`. Hosted schema 58 and Netlify deployment
+`6ab98e309c70ac17fe871293` are verified against source `d2ebacd`. Live 19-route,
+39-layout/language, buying intake and map/drawer preview checks pass; monitored
+health remains good. The initial edge-502 and successful read-only recovery checks
+are recorded in the release document. No Auth/configuration recovery write occurred.

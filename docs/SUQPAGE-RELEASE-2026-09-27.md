@@ -30,7 +30,7 @@ search/category/pagination, mobile map, and buying replies/private notes/history
 The owner fixture was updated to replace its starter products/contacts before Publish,
 matching the existing readiness contract. Video review verification waits for the
 staff server action before refreshing the owner page. All 11 browser workflows now pass across the initial run and focused reruns.
-Publication is pending; this document does not yet assert a live release.
+Deployment is verified at https://suqpage.com.
 
 Private evidence: `.local/publish-s48-20260927/`. No credentials, customer records
 or raw browser logs belong in this document.
@@ -63,3 +63,30 @@ automatically restore a backup after an ambiguous write.
 
 Staff procedures: [Support and buying assistance](operations/SUPPORT-AND-TRANSPORT.md)
 and [Featured schedule](operations/FEATURED-SCHEDULE.md).
+
+## Published evidence
+
+- Application commit: `d2ebacdaead00e73541d1db7597e5140065b0144`.
+- Netlify deploy: `6ab98e309c70ac17fe871293`; site `26c795eb-5560-4a88-b38d-3cc922c2a5e6`.
+- Supabase project: `sjeiiqxgscuqajpgddcc`; schema 58 verified with existing records preserved.
+- Function archive SHA-256: `676da3d48755998a5df0c4a5cd7bce289d34c790bb12d7fe4885bc811a25c03c`.
+- Private backup SHA-256: `5253ee6d494205944a32e646d9deb78bf57849aba1024ab0ac65ee0c06caefdd`.
+- Independent live checks pass: 19 route/API/search/redirect checks, 39 public
+  layout/language states, buying intake/session/dismiss at 320/390/1440, and
+  actual map tiles/markers/preview focus/dismissal with an open drawer at 390/1440.
+- Follow-up monitoring confirms the expected deployment and healthy runtime.
+  Four production support team accounts are enabled; availability still depends
+  on staff monitoring and remaining assignment capacity.
+
+Initial live checks returned an edge-handler HTTP 502 after publication. A later
+read-only request recovered without another deployment or configuration change.
+The historical edge-log query returned no entries, so the underlying cause is not
+proven. The complete route, mobile, buying and map retries then passed, followed by
+healthy monitoring. Preserve the initial failure evidence; investigate recurrence
+in Netlify edge logs rather than silently redeploying or changing Auth settings.
+
+No real customer request, message or email was sent by the post-publication checks.
+Authenticated workflows were verified against isolated production-mode providers;
+the live responsive sweep covers public pages. Git publication was not requested:
+the local release commit was deployed directly, without a Git push or remote CI run.
+The unrelated `deno.lock` remains untracked and excluded from the release.
