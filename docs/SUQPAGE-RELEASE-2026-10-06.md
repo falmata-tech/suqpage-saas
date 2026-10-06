@@ -55,3 +55,16 @@ Retain the additive schema and all chat history if reverting the web artifact.
 Do not restore customer data or broad Auth configuration as an automatic rollback.
 Private gate receipts, target metadata, backup and artifact manifests are under
 `.local/release-s61/`, excluded from Git and deployment.
+
+## First rollout and recovery
+
+Source commit `71d88a1` and production migration 59 completed. The first Netlify
+deploy `6ac515411ac0d651ef5449bf` returned 502: the CLI expired its two-minute
+function-manifest cache, repackaged the handler and broke its run-config path.
+Restored the previous web deployment `6ab98e309c70ac17fe871293`; live health is
+200. Schema 59 and existing data are retained. No Auth/data restore occurred.
+The original archive initializes successfully in Linux. The correction verifies
+its digest/identity and refreshes the CLI cache receipt immediately before upload.
+`test-netlify-function-cache.mjs` rejects digest/path/runtime/bundler drift; the
+stronger native test now initializes the complete handler as well as Sharp.
+Next step: upload a draft, verify it, then promote that exact deployment.

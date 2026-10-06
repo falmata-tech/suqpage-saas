@@ -2427,3 +2427,8 @@ Android's unchanged audit still fails on two Expo build-tool advisories (20 grap
 entries). Fresh Android export excludes both affected packages; it does not prove
 a signed APK or remove build-tool risk. A one-artifact internal-testing exception
 is awaiting an explicit owner decision. Google Play remains deferred.
+
+S61 rollout checkpoint: commit 71d88a1; schema 59 and production preflight pass.
+First web publish returned 502 because Netlify CLI re-bundled an expired function
+cache. Previous web artifact restored and health verified; retain schema59.
+Current: verify draft using the exact tested archive, then promote and monitor.

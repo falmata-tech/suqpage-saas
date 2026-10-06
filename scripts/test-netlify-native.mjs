@@ -32,12 +32,16 @@ if(fs.existsSync(entry)) {
   anchor=path.resolve('/artifact',target);
   assert.ok(anchor.startsWith('/artifact/') && fs.existsSync(anchor),'Packaged handler must exist inside the archive');
 }
+if (anchor.endsWith('.mjs')) {
+  const handler=await import(anchor);
+  assert.equal(typeof handler.default,'function','Packaged handler must initialize');
+}
 const require=createRequire(anchor);
 const sharp=require('sharp');
 const image=await sharp({create:{width:4,height:4,channels:3,background:'#fff'}}).resize(2,2).png().toBuffer();
 const info=await sharp(image).metadata();
 assert.equal(info.width,2);assert.equal(info.height,2);assert.equal(info.format,'png');
-console.log('PASS exact Netlify archive Sharp image transform on Linux x64/glibc.');
+console.log('PASS exact Netlify handler initialization and Sharp image transform on Linux x64/glibc.');
 `],{stdio:'inherit'});
   console.log('Archive SHA-256:',crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'));
 } finally {fs.rmSync(root,{recursive:true,force:true});}

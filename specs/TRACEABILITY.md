@@ -807,3 +807,9 @@ See docs/SUQPAGE-RELEASE-2026-10-06.md and S61 checklist.
 S61 scoped-template regression: `node scripts/test-staged-template.mjs` permits
 only the exact mobile localhost/blank-key example, rejects populated keys, extra
 secret fields, undeclared paths and real nested environment files.
+
+S61 packaging correction: first deployment was rolled back after live 502 errors;
+schema 59 retained and previous health verified. `test-netlify-function-cache.mjs`
+checks immutable ZIP bytes and rejects digest/path/bundler/runtime drift. Enhanced
+`test-netlify-native.mjs` passes complete handler initialization and Sharp transform
+on the existing reviewed archive. Draft verification precedes the next promotion.

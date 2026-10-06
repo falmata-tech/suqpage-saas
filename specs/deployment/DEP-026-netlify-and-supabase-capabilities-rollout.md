@@ -239,3 +239,12 @@ only the two Linux/x64 packages already locked by the application, verify tarbal
 integrity, and retain the existing output-file inclusions. No version/lock change
 or host-library fallback is permitted. The exact archive must still transform an
 image inside a network-disabled Linux container before deployment.
+
+S61 rollout correction: Netlify CLI expires its function manifest after two
+minutes; a delayed no-build deploy can repackage the tested function with different
+bundling semantics. The first deployment returned 502 (`/run-config.json` missing)
+and was restored to the preceding web artifact; schema 59 remains compatible.
+Before upload, verify the exact archive SHA-256, expected handler identity, path
+and runtime, then refresh only the cache manifest timestamp. Reject drift. Test
+complete handler import as well as Sharp in the exact Linux archive. Upload a
+draft and verify it before promotion; no implicit live retry after a failed deploy.
