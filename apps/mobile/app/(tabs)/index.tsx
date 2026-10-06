@@ -140,7 +140,7 @@ export default function MarketScreen() {
       {text.length>0 && <Pressable accessibilityRole="button" accessibilityLabel={t("Clear search")} onPress={()=>choose(()=>{setText("");setQuery("");})} style={{width:44,minHeight:44,alignItems:"center",justifyContent:"center"}}><Icon name="close" size={16}/></Pressable>}
     </View>
     <Pressable accessibilityRole="button" accessibilityLabel={t("Search")} onPress={submit} style={m.searchButton}><Icon name="search" size={20} color="white"/></Pressable>
-    {[{scope:"category",label:"Category",value:categories.length ? t("Categories")+` (${categories.length})` : t("All categories"),icon:"grid",active:categories.length>0},{scope:"place",label:"Region or city",value:chosenPlace||t("All Ethiopia"),icon:"pin",active:!!place}].map(filter=><Pressable key={filter.scope} accessibilityRole="button" accessibilityLabel={t(filter.label)+": "+filter.value} accessibilityState={{selected:filter.active}} onPress={()=>setPicker(filter.scope)} style={[m.compactButton,filter.active && m.activeFilter]}><Icon name={filter.icon} size={21}/>{filter.active && <View style={m.activeDot}/>}</Pressable>)}
+    {[{scope:"category",label:"Category",value:categories.length ? t("Categories")+` (${categories.length})` : t("All categories"),icon:"grid",count:categories.length,active:categories.length>0},{scope:"place",label:"Region or city",value:chosenPlace||t("All Ethiopia"),icon:"pin",count:selectedPlaces.length,active:!!place}].map(filter=><Pressable key={filter.scope} accessibilityRole="button" accessibilityLabel={t(filter.label)+": "+filter.value} accessibilityState={{selected:filter.active}} onPress={()=>setPicker(filter.scope)} style={[m.compactButton,filter.active && m.activeFilter]}><Icon name={filter.icon} size={21}/>{filter.count > 0 && <Text testID={`${filter.scope}-count`} style={m.filterCount}>{filter.count}</Text>}</Pressable>)}
   </View>;
   return (
     <Screen scroll={false}>
@@ -230,25 +230,26 @@ export default function MarketScreen() {
                   {t("{count} results", { count: data.total })}
                 </Text>
                 {data.items.filter(item => item.kind === "product").map((item) => (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={item.name}
-                    key={item.kind + "-" + item.id}
-                    onPress={() => router.push({ pathname: "/product", params: { handle: item.handle, id: item.id } })}
-                    style={m.result}
-                  >
-                    <View style={{ width: 78 }}>
-                      <Photo refPath={item.image} height={92} />
-                    </View>
-                    <View style={{ flex: 1, gap: 6, paddingVertical: 7 }}>
-                      <Text numberOfLines={2} style={m.resultName}>
-                        {item.name}
-                      </Text>
-                      <Text numberOfLines={2} style={m.small}>
-                        {item.businessName}
-                      </Text>
-                    </View>
-                  </Pressable>
+                  <View key={item.kind + "-" + item.id} style={m.result}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={item.name}
+                      onPress={() => router.push({ pathname: "/product", params: { handle: item.handle, id: item.id } })}
+                      style={m.resultProduct}
+                    >
+                      <View style={{ width: 78 }}>
+                        <Photo refPath={item.image} height={92} />
+                      </View>
+                      <View style={{ flex: 1, gap: 6, paddingVertical: 7 }}>
+                        <Text numberOfLines={2} style={m.resultName}>
+                          {item.name}
+                        </Text>
+                      </View>
+                    </Pressable>
+                    <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: "/shop/[handle]", params: { handle: item.handle } })} style={m.resultBusiness}>
+                      <Text style={m.resultBusinessName}>{t("From {business}", { business: item.businessName })}</Text>
+                    </Pressable>
+                  </View>
                 ))}
                 {data.items.length === 0 && (
                   <Copy>{t("No matches found")}</Copy>
@@ -403,7 +404,7 @@ const m = StyleSheet.create({
   compactToolbar:{position:"absolute",left:10,right:10,top:10,zIndex:10,maxWidth:680,flexDirection:"row",alignItems:"center",gap:6},
   compactButton:{width:44,height:44,flexShrink:0,alignItems:"center",justifyContent:"center",borderWidth:1,borderColor:colors.line,borderRadius:7,backgroundColor:"white"},
   activeFilter:{borderColor:colors.brand,backgroundColor:colors.soft},
-  activeDot:{position:"absolute",top:4,right:4,width:7,height:7,borderRadius:4,backgroundColor:colors.brand},
+  filterCount:{position:"absolute",top:1,right:2,minWidth:14,paddingHorizontal:2,borderRadius:8,backgroundColor:colors.brand,color:"#fff",fontSize:10,lineHeight:14,fontWeight:"700",textAlign:"center"},
   floatingControls: { position:"absolute",left:10,top:12,gap:8 },
   opener: {
     alignSelf:"flex-start",
@@ -482,14 +483,14 @@ const m = StyleSheet.create({
     justifyContent: "center",
   },
   count: { fontSize: 12, color: colors.muted, paddingTop: 4 },
+  resultProduct: { flexDirection: "row", gap: 10, paddingRight: 8 },
+  resultBusiness: { marginLeft: 88, minHeight: 44, justifyContent: "center", paddingVertical: 4, paddingRight: 8 },
+  resultBusinessName: { color: colors.brand, fontSize: 12, lineHeight: 18, fontWeight: "700", textDecorationLine: "underline" },
   result: {
-    flexDirection: "row",
-    gap: 10,
     borderWidth: 1,
     borderColor: colors.line,
     borderRadius: 8,
     overflow: "hidden",
-    paddingRight: 8,
     minHeight: 94,
   },
   resultName: {

@@ -33,7 +33,7 @@ try {
   await expect(page.getByLabel('Filter by category')).toBeHidden();
   const visibility=await panel.evaluate(el=>{
     const list=el.querySelector('.discovery-search-results').getBoundingClientRect();
-    const cards=[...el.querySelectorAll('.discovery-product-results > a,.discovery-business-results > button')].map(card=>card.getBoundingClientRect());
+    const cards=[...el.querySelectorAll('.discovery-product-card,.discovery-business-results > button')].map(card=>card.getBoundingClientRect());
     const paging=el.querySelector('.discovery-pagination').getBoundingClientRect();
     const panelRight=el.getBoundingClientRect().right;
     const clipped=[...el.querySelectorAll('.discovery-result-filters label,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
@@ -94,10 +94,10 @@ try {
   const page=await context.newPage();await page.goto(base+'/?view=search',{waitUntil:'domcontentloaded'});
   await expect(page.locator('html')).toHaveAttribute('lang',locale);
   const panel=page.locator('#discovery-search-panel');await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
-  await expect(panel.locator('.discovery-product-results > a').first()).toBeVisible();
+  await expect(panel.locator('.discovery-product-results .discovery-product-link').first()).toBeVisible();
   const fit=await panel.evaluate(el=>{
     const list=el.querySelector('.discovery-search-results').getBoundingClientRect();
-    const cards=[...el.querySelectorAll('.discovery-product-results > a')].map(card=>card.getBoundingClientRect());
+    const cards=[...el.querySelectorAll('.discovery-product-card')].map(card=>card.getBoundingClientRect());
     const panelRight=el.getBoundingClientRect().right;
     const clipped=[...el.querySelectorAll('.discovery-result-filters label,.discovery-result-filters span,.discovery-pagination a,.discovery-search-results a')].some(item=>item.getBoundingClientRect().right>panelRight);
     return {clipped,top:cards[0].top-el.getBoundingClientRect().top,full:cards.filter(card=>card.top>=list.top&&card.bottom<=list.bottom).length,overflow:el.scrollWidth>el.clientWidth};

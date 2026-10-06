@@ -689,3 +689,40 @@ S59 browser regression alignment: category/search capture scripts explicitly ope
 DOM identity, typing races, detail/back and empty-result checks, reject the removed
 business result selector, and verify legacy type=businesses URLs still render
 offerings. No product behavior is changed to satisfy a retired test contract.
+
+## S64 — selection counts and product business links (2026-10-06)
+
+Ready, L1. Uses existing FE-042/BE-023 discovery data and FE-053 navigation;
+no API, schema, ranking, eligibility or tenant change. Master §5.2 is affected.
+- GIVEN zero, one or multiple selected locations WHEN viewing the closed or open
+  toolbar THEN the pin shows no badge, 1, or the selected count respectively.
+  Clearing, deselecting and restoring URL state update the count. Category and
+  location badges use the same treatment on web and native mobile.
+- GIVEN a product result THEN its business is identified by a localized
+  “From {business}” link, preserving the business name verbatim. WHEN following
+  that link THEN open that business's main showroom; WHEN opening the product
+  THEN open its product details. Links must not nest or trigger each other.
+- GIVEN a narrow phone, long business name or translated interface THEN controls
+  remain usable, names wrap, focus is visible, and the toolbar stays one row.
+
+Verify web/mobile typechecks, localization, spec validation and focused browser
+checks at desktop/390/320px: zero/one/two/clear/reload badge states, independent
+product/store navigation, and return-to-market state. Capture both clients.
+Native browser evidence is not device evidence. Visual approval precedes full
+release gates; rollout reverts these UI files with no data migration.
+
+S64 local evidence: web/mobile typechecks, eight localization tests (1,256
+messages per non-English catalog) and validation of 167 specs/ADRs pass.
+`capture-multiple-locations.mjs` passes 16 captures, including 0/1/2/clear,
+reload and open/closed-panel count checks. `capture-result-business-links.mjs`
+with --web, --native and --locales passes 15 captures: independent destinations,
+web keyboard order, 44px store targets, long-name wrapping and all five locales
+at desktop/390/320px. Web browser Back and the mobile app Back preserve search.
+Private evidence: `.local/multiple-location-review/` and
+`.local/result-business-links/`; basemap tiles are controlled fixtures, local
+catalog reads are real, long-name captures use a DOM-only display fixture.
+The initial duplicate-business locator was scoped to one card; Metro was
+restarted to refresh shared catalogs. Expo browser history navigation can reset
+Market state; the mobile app Back was verified instead. No physical-device or
+native-speaker signoff is claimed. Visual approval and full release gates remain
+pending; this change is not deployed or included in the existing S62 APK build.

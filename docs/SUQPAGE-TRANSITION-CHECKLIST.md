@@ -2501,3 +2501,30 @@ automated OSM traffic, with actual local catalog data and no mutations. Checked
 localized metadata, audience CTAs, account entry, wrapping and no page errors.
 Mobile app evidence is Expo browser rendering, not a rebuilt native APK. Copy is
 agent-authored; no native-speaker approval claimed. Live deployment remains S62.
+
+
+S64 — location counts and business attribution (FE-030 / FE-053 / FE-049, L1)
+- [x] Ready: existing location selections and result handles suffice; no backend
+  change. Preserve unrelated untracked deno.lock. Master §5.2 affected.
+- [x] Add matching numeric filter badges and separate localized business
+  links to web/native product results; preserve product and return navigation.
+- [x] Verify focused type/localization/spec checks and browser interactions;
+  capture desktop/phone states with long-name and locale coverage.
+- [x] Record evidence; task-only commit follows the staged-scope check.
+- [ ] Owner visual approval, full/release gates and deployment (separate stages).
+
+S64 local evidence: web/mobile typechecks, eight localization tests (1,256
+messages per non-English catalog) and validation of 167 specs/ADRs pass.
+`capture-multiple-locations.mjs` passes 16 captures, including 0/1/2/clear,
+reload and open/closed-panel count checks. `capture-result-business-links.mjs`
+with --web, --native and --locales passes 15 captures: independent destinations,
+web keyboard order, 44px store targets, long-name wrapping and all five locales
+at desktop/390/320px. Web browser Back and the mobile app Back preserve search.
+Private evidence: `.local/multiple-location-review/` and
+`.local/result-business-links/`; basemap tiles are controlled fixtures, local
+catalog reads are real, long-name captures use a DOM-only display fixture.
+The initial duplicate-business locator was scoped to one card; Metro was
+restarted to refresh shared catalogs. Expo browser history navigation can reset
+Market state; the mobile app Back was verified instead. No physical-device or
+native-speaker signoff is claimed. Visual approval and full release gates remain
+pending; this change is not deployed or included in the existing S62 APK build.

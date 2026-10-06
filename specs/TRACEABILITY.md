@@ -863,3 +863,28 @@ and real local catalog reads. Initial retired-selector, stale-Metro and full-pag
 locale-reset capture failures are retained; the passing run uses the real mobile
 CTA navigation. No native-device or human language-review claim. Owner visual
 approval, full release gates and rollout remain pending; the S62 APK excludes S63.
+
+## S64 — location badges and business attribution (FE-030 / FE-053 / FE-049)
+
+`DiscoveryWorkspace.tsx`, `discovery.css` and mobile Market use the existing
+normalized location selection count. Native category badges now also show counts.
+Product cards have separate product and localized business-store links, using
+existing authorized result handles with no API, persistence or ranking changes.
+Five-language business attribution preserves merchant names. Older browser
+selectors now distinguish product targets from store links and measure full cards.
+
+S64 local evidence: web/mobile typechecks, eight localization tests (1,256
+messages per non-English catalog) and validation of 167 specs/ADRs pass.
+`capture-multiple-locations.mjs` passes 16 captures, including 0/1/2/clear,
+reload and open/closed-panel count checks. `capture-result-business-links.mjs`
+with --web, --native and --locales passes 15 captures: independent destinations,
+web keyboard order, 44px store targets, long-name wrapping and all five locales
+at desktop/390/320px. Web browser Back and the mobile app Back preserve search.
+Private evidence: `.local/multiple-location-review/` and
+`.local/result-business-links/`; basemap tiles are controlled fixtures, local
+catalog reads are real, long-name captures use a DOM-only display fixture.
+The initial duplicate-business locator was scoped to one card; Metro was
+restarted to refresh shared catalogs. Expo browser history navigation can reset
+Market state; the mobile app Back was verified instead. No physical-device or
+native-speaker signoff is claimed. Visual approval and full release gates remain
+pending; this change is not deployed or included in the existing S62 APK build.

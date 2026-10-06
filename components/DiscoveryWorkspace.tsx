@@ -155,7 +155,13 @@ function MarketplaceSearchResults({ action, discovery }: {
   const visibleProducts = discovery.searchOrder
     ? discovery.searchOrder.flatMap(result => result.kind === "product" && productsById.has(result.id) ? [productsById.get(result.id)!] : [])
     : discovery.searchProducts;
-  const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <Link key={product.id} href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} data-industry={product.primaryIndustryKey} aria-label={t("{value1} from {value2}, {value3}. View details.", { value1: product.name, value2: product.businessName, value3: product.city })}><span className="discovery-product-result-media"><ProductResultImage product={product} /></span><span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong>{product.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{product.description}</p><span>{product.businessName}</span><em>{product.city}, {product.region}</em></span></Link>;
+  const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <article key={product.id} className="discovery-product-card" data-industry={product.primaryIndustryKey}>
+    <Link className="discovery-product-link" href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} aria-label={t("{value1} from {value2}, {value3}. View details.", { value1: product.name, value2: product.businessName, value3: product.city })}>
+      <span className="discovery-product-result-media"><ProductResultImage product={product} /></span>
+      <span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong>{product.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{product.description}</p><em>{product.city}, {product.region}</em></span>
+    </Link>
+    <Link className="discovery-product-business" href={`/@${encodeURIComponent(product.businessHandle)}?ref=discovery`} onClick={rememberCurrentPublicWorkspace}>{t("From {business}", { business: product.businessName })}</Link>
+  </article>;
 
   return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title">
     <h2 id="discovery-search-results-title" className="discovery-results-heading">{t("Products & services")}</h2>
@@ -355,7 +361,7 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
     <div className="discovery-command-search"><DiscoverySearch id="discovery-search" value={searchInput} suggestions={[]} onChange={editSearch} onSelect={applySearch} onSubmit={applySearch} onClear={() => applySearch("")} /></div>
     <CategoryChooser compact categories={discovery.industries} value={discovery.industry.key} disabled={filtersPending} onChange={key => changeFilters(key, discovery.place)} />
     <details ref={locationMenu} className="discovery-location-menu" data-active={Boolean(discovery.place)} onKeyDown={event=>{if(event.key === "Escape" && event.currentTarget.open){event.preventDefault();event.stopPropagation();event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus();}}}>
-      <summary aria-label={t("Filter by region or city")} title={`${t("Region or city")}: ${discovery.places.filter(place=>selectedPlaces.includes(place.key)).map(place=>place.label).join(", ") || t("All Ethiopia")}`}><MapPin size={21} aria-hidden="true"/>{discovery.place ? <i aria-hidden="true"/> : null}</summary>
+      <summary aria-label={t("Filter by region or city")} aria-describedby={selectedPlaces.length ? "discovery-location-count" : undefined} title={`${t("Region or city")}: ${discovery.places.filter(place=>selectedPlaces.includes(place.key)).map(place=>place.label).join(", ") || t("All Ethiopia")}`}><MapPin size={21} aria-hidden="true"/>{selectedPlaces.length > 0 ? <b id="discovery-location-count" className="discovery-filter-count">{selectedPlaces.length}</b> : null}</summary>
       <div className="discovery-location-options">
         <strong>{t("Region or city")}</strong>
         <div role="group" aria-label={t("Region or city")}>

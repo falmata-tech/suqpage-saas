@@ -32,7 +32,7 @@ try {
     const map=page.locator('.leaflet-container');
     await expect(map).toBeVisible();
     await expect(map).toHaveAttribute('data-tile-status','ready',{timeout:25000});
-    await expect(page.locator('.discovery-product-results > a').first()).toBeVisible();
+    await expect(page.locator('.discovery-product-results .discovery-product-link').first()).toBeVisible();
     await map.evaluate(el=>el.dataset.retainedMap='yes');
     await page.getByRole('button',{name:'Zoom in',exact:true}).click();
     await page.getByRole('combobox',{name:/Search/}).fill('linen');
@@ -48,7 +48,7 @@ try {
     const mapAudit=await new AxeBuilder({page}).include('.discovery-summary').include('.discovery-floating-tools').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     assert.deepEqual(mapAudit.violations,[]);
     await screenshot(page,'search-map',width);
-    const result=page.locator('.discovery-product-results > a').first();
+    const result=page.locator('.discovery-product-results .discovery-product-link').first();
     const href=await result.getAttribute('href');assert.match(href,/\?product=\d+&ref=discovery/);
     const resultName=await result.locator('strong').innerText();
     await result.click();

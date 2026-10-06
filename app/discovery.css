@@ -1196,8 +1196,8 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-summary .discovery-search-result-types a { flex: 1; min-width: 0; min-height: 44px; gap: 4px; padding: 7px 5px; font-size: 11px; }
 .discovery-summary .discovery-search-result-types svg { display: none; }
 .discovery-summary .discovery-product-results, .discovery-summary .discovery-business-results { grid-template-columns: minmax(0,1fr); gap: 10px; }
-.discovery-summary .discovery-product-results > a, .discovery-summary .discovery-business-results > button { display: grid; grid-template-columns: 86px minmax(0,1fr); min-height: 108px; min-width: 0; overflow: hidden; border: 1px solid #e1e5e4; border-radius: 8px; background: #fff; color: #252a2d; text-decoration: none; text-align: left; box-shadow: none; }
-.discovery-summary .discovery-product-results > a:hover, .discovery-summary .discovery-business-results > button:hover { background: #f7f8f7; border-color: #9cacaa; }
+.discovery-summary .discovery-product-card, .discovery-summary .discovery-business-results > button { display: grid; grid-template-columns: 86px minmax(0,1fr); min-height: 108px; min-width: 0; overflow: hidden; border: 1px solid #e1e5e4; border-radius: 8px; background: #fff; color: #252a2d; text-decoration: none; text-align: left; box-shadow: none; }
+.discovery-summary .discovery-product-card:hover, .discovery-summary .discovery-business-results > button:hover { background: #f7f8f7; border-color: #9cacaa; }
 .discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) { padding: 11px; gap: 5px; }
 .discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) strong { font-family: inherit; font-size: 13px; line-height: 1.4; }
 .discovery-summary :is(.discovery-product-result-copy,.discovery-business-result-copy) p { display: none; }
@@ -1362,7 +1362,7 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-location-menu { flex:none; }
 .discovery-location-menu > summary { list-style:none; position:relative; }
 .discovery-location-menu > summary::-webkit-details-marker { display:none; }
-.discovery-location-menu > summary i { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:#c43a00; }
+.discovery-location-menu > summary .discovery-filter-count { position:absolute; top:1px; right:2px; min-width:14px; padding:0 2px; border-radius:8px; background:#c43a00; color:#fff; font-size:10px; line-height:14px; text-align:center; }
 .discovery-location-options { position:absolute; top:100%; left:0; right:0; margin-top:6px; display:grid; gap:10px; padding:12px; border:1px solid #d4dcd9; border-radius:8px; background:#fff; box-shadow:0 8px 20px #18372c26; }
 .discovery-location-options label { font-size:13px; font-weight:650; }
 .discovery-location-options select,.discovery-location-options button { min-height:44px; width:100%; min-width:0; border:1px solid #d4dcd9; border-radius:6px; padding:8px; background:#fff; color:#283a33; font-size:14px; }
@@ -1375,3 +1375,10 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-location-options [role=group] strong { font-size:12px; color:#52645a; padding:8px 0 3px; }
 .discovery-location-options [role=group] label { display:flex; align-items:center; gap:8px; min-height:44px; font-size:14px; cursor:pointer; }
 .discovery-location-options input[type=checkbox] { width:18px; height:18px; flex:none; accent-color:#c43a00; }
+
+/* Separate product and store destinations, with a full-width product target. */
+.discovery-summary .discovery-product-card { display:flex; flex-direction:column; }
+.discovery-product-link { display:grid; grid-template-columns:86px minmax(0,1fr); min-width:0; color:inherit; text-decoration:none; }
+.discovery-product-business { display:flex; align-items:center; min-height:44px; margin-left:86px; padding:4px 11px; color:#8e2c08; font-size:12px; font-weight:700; line-height:1.4; overflow-wrap:anywhere; text-decoration:underline; text-underline-offset:3px; }
+.discovery-product-business:hover { color:#c43a00; background:#fff3ed; }
+.discovery-product-link:focus-visible,.discovery-product-business:focus-visible { outline:3px solid #c43a00; outline-offset:-3px; }

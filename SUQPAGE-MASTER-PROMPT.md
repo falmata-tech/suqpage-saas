@@ -291,12 +291,16 @@ no people, factual business attribution, unsupported statistics, or tenant
 branding. The combined marketplace map loads immediately with **All categories**
 and no orientation chooser. The local S56 candidate uses one compact horizontal
 map toolbar: results toggle at far left, search, category and location icon buttons.
-Filter menus open on demand and show active selections; the toolbar is the shared
+Category and location icons show the number of active selections, with no badge
+when cleared. Filter menus open on demand and show active selections; the toolbar is the shared
 header for map-only and open-results views. The product list and zoom tools start
 below it, preserving map space at 320px. Only one active control set is mounted.
 Closed-view searches/filters update the map without opening results; open-view
 changes update both map and list. The drawer contains
-one five-row paginated list labeled Products & services. The local S54 candidate
+one five-row paginated list labeled Products & services. Each result identifies its
+business with a localized “From {business}” link to the main showroom, separate
+from the product-details target; merchant names remain verbatim on web and mobile.
+The local S54 candidate
 removes business cards and result-type controls; businesses remain on the filtered
 map with their existing previews. Public web/mobile boundaries normalize old
 type parameters before SQL counts/pagination. There are no result tabs. It starts closed on a
