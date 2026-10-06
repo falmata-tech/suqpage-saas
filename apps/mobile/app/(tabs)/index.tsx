@@ -26,7 +26,7 @@ import {
   Icon,
   colors,
   Button,
-  openLink,
+  useOpenLink,
 } from "../../src/ui";
 import {
   BuyingLauncher,
@@ -38,6 +38,7 @@ import MarketMap from "../../src/MarketMap";
 import type { MapControls } from "../../src/map-contract";
 export default function MarketScreen() {
   const { t } = useApp();
+  const openLink = useOpenLink();
   const { width } = useWindowDimensions();
   const [stageHeight, setStageHeight] = useState(500),
     [panel, setPanel] = useState(false),
@@ -286,7 +287,7 @@ export default function MarketScreen() {
         </View>
       </View>
       <Pressable accessibilityRole="link"
-        onPress={() => void openLink("https://www.openstreetmap.org/copyright").catch(() => {})}
+        onPress={() => void openLink("https://www.openstreetmap.org/copyright")}
         style={{backgroundColor: "white", padding: 5}}>
         <Text style={{textAlign: "right", fontSize: 11, color: colors.ink}}>© OpenStreetMap contributors</Text>
       </Pressable>

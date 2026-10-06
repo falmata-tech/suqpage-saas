@@ -888,3 +888,25 @@ restarted to refresh shared catalogs. Expo browser history navigation can reset
 Market state; the mobile app Back was verified instead. No physical-device or
 native-speaker signoff is claimed. Visual approval and full release gates remain
 pending; this change is not deployed or included in the existing S62 APK build.
+
+## S65 — native external browsing (FE-053 / ADR-0023)
+
+`apps/mobile/src/link-policy.ts` defines URL/text/launch contracts;
+`open-link.ts` adapts existing Expo WebBrowser and React Native Linking.
+`ui.tsx` supplies localized launch errors and literal description links;
+showroom/product/contact/sponsor/policy/owner callers use the shared adapter.
+Existing YouTube isolation, inquiry state and API authority remain unchanged.
+
+S65 local verification (2026-10-06): six `test:mobile:links` cases pass, including
+actual adapter bundling with controlled React Native/Expo ports, malicious URLs,
+Unicode inquiry text, installed/missing social apps and sanitized failures.
+Both typechecks, eight localization tests (1,257 messages) and spec validation
+pass. Android JavaScript/Hermes export passes at `.local/mobile-links/android-export`;
+this is not an APK or device test. `capture-mobile-links.mjs` passes four 390/320px
+captures plus description/story/Website navigation, isolated popup, retained screen
+and simulated launch-error checks. Real catalog reads use response-only description
+fixtures; example.org is intercepted, with no merchant data writes or real contact
+messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initially
+waited for a click before dismissing its alert; the corrected concurrent handler
+passes. No new dependency, database migration, hosted mutation or deployment.
+Native browser sheet, installed social apps, iOS and release checks remain open.

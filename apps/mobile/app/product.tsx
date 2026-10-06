@@ -7,7 +7,7 @@ import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import type { Shop } from "@suqpage/contracts";
 import { useApp, useLoad, request } from "../src/runtime";
-import { Screen, Copy, Card, Button, Chip, Status, s } from "../src/ui";
+import { Screen, Copy, LinkedText, Card, Button, Chip, Status, s } from "../src/ui";
 import Gallery from "../src/Gallery";
 export default function Product() {
   const { handle, id } = useLocalSearchParams<{ handle: string; id: string }>(),
@@ -72,7 +72,7 @@ export default function Product() {
           {product.priceMinor !== null && (
             <Copy big>{(product.priceMinor / 100).toLocaleString()} ETB</Copy>
           )}
-          <Copy>{product.description}</Copy>
+          <LinkedText>{product.description}</LinkedText>
           {product.options.map((o) => (
             <Card key={o.name}>
               <Copy>{o.name}</Copy>

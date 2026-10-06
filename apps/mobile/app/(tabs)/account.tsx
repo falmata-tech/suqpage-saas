@@ -11,12 +11,13 @@ import {
   Button,
   Status,
   s,
-  openLink,
+  useOpenLink,
   Icon,
   colors,
 } from "../../src/ui";
 export default function Account() {
   const { session, ready, t, ownerRequest, signOut } = useApp();
+  const openLink = useOpenLink();
   const [email, setEmail] = useState(""),
     [code, setCode] = useState(""),
     [sent, setSent] = useState(false),

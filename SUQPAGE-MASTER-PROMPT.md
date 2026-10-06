@@ -854,6 +854,14 @@ Use idempotency, rate limiting, canonical database validation, and tenant checks
 
 ## 9. Social messaging and clipboard behavior
 
+The native app opens ordinary HTTPS links in a system in-app browser with a
+Close/Back control. Recognized WhatsApp phone and Telegram username links try the
+installed app first and fall back to their original HTTPS destination. Phone,
+SMS and email use system handlers. Closing or returning from these destinations
+never confirms message delivery, payment or an order. Other apps control their
+own return behavior. Merchant HTTPS/www links in native descriptions and business
+stories are tappable plain text, not embedded HTML.
+
 Do not make the workflow depend entirely on `navigator.clipboard.writeText()`.
 
 Android Chrome, Google Search in-app browsing, TikTok in-app browsers, and other embedded browsers may block clipboard access, show permission prompts, lose the user gesture, or open blank tabs.
@@ -1236,6 +1244,13 @@ The native candidate now uses storefront/name markers, numbered clusters, nearby
 lists and public live/featured badges matching the web map. Native marker selection
 opens the existing preview; scope changes clear stale selection. The authenticated
 page preview includes the edited cover/story/contacts and offering galleries.
+External browsing uses the installed Expo WebBrowser adapter (Custom Tabs on
+Android, Safari sheet on iOS); it sends no Suqpage bearer tokens and injects no
+JavaScript into third-party sites. The validated URL policy rejects executable
+schemes, credential-bearing URLs and control characters. Only the configured
+local development API origin may use HTTP; merchant links require HTTPS.
+Expo browser preview opens separate isolated windows/tabs. Native browser-sheet
+and installed-social-app testing remain required before a release-ready claim.
 Owner route navigation, photo-backed offering save/hide, location confirmation and
 first publication have local browser persistence evidence. Read and write rate
 budgets are separate, and explicit native listing state saves preserve advanced

@@ -12,8 +12,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   type TextInputProps,
-  Linking,
+  Alert,
+  type TextProps,
 } from "react-native";
+import { openLink } from "./open-link";
+import { descriptionLinks } from "./link-policy";
+export { openLink } from "./open-link";
 import Svg, { Path } from "react-native-svg";
 import { useApp, mediaUrl, API } from "./runtime";
 export const colors = {
@@ -329,10 +333,25 @@ export function Photo({
     />
   );
 }
-export async function openLink(url: string) {
-  if (!/^(https:\/\/|mailto:|tel:|sms:)/i.test(url))
-    throw Error("This link is unavailable.");
-  await Linking.openURL(url);
+/** Safe default for taps without a screen-specific error handler. */
+export function useOpenLink() {
+  const { t } = useApp();
+  return async (url: string) => {
+    try { await openLink(url); return true; }
+    catch {
+      if (Platform.OS === "web") globalThis.alert(t("Could not open link"));
+      else Alert.alert(t("Could not open link"), t("Try again"), [{ text: t("Close") }]);
+      return false;
+    }
+  };
+}
+export function LinkedText({ children, style, ...props }: Omit<TextProps, "children"> & { children: string }) {
+  const open = useOpenLink();
+  return <Text {...props} style={[{ fontSize: 16, lineHeight: 24, color: colors.ink }, style]}>
+    {descriptionLinks(children).map((part, index) => part.url
+      ? <Text key={index} accessibilityRole="link" onPress={() => void open(part.url!)} style={{ color: colors.brand, textDecorationLine: "underline" }}>{part.text}</Text>
+      : part.text)}
+  </Text>;
 }
 export const s = StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },

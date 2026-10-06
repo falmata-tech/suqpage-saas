@@ -2528,3 +2528,40 @@ restarted to refresh shared catalogs. Expo browser history navigation can reset
 Market state; the mobile app Back was verified instead. No physical-device or
 native-speaker signoff is claimed. Visual approval and full release gates remain
 pending; this change is not deployed or included in the existing S62 APK build.
+
+
+S65 — in-app browser and social handoffs (FE-053 / ADR-0023, L2)
+- [x] Ready: reuse installed Expo browser; HTTPS websites stay in a native browser
+  sheet, supported social contacts try installed apps then the HTTPS fallback.
+  Native UI cannot host WhatsApp/Telegram sessions or confirm outside purchases.
+- [x] Implement validated link policy and Expo adapter; handle launch
+  failures and link plain-text merchant descriptions without injecting HTML.
+- [x] Verify focused security/port tests, mobile typecheck, localization and export;
+  capture browser-preview contact/description interactions with controlled sites.
+- [x] Reconcile master/spec/ADR/evidence; scoped commit follows verified staging.
+- [ ] Native-device review and rebuilt APK/release rollout remain separate.
+
+
+S66 — recognized suqpage.com links (feasibility question, not implemented)
+The owner asked whether outside HTTPS links can open the installed app. Explained
+Android App Links/iOS Universal Links and browser fallback. Current config only
+registers suqpage://, with no Android intent filters, associated domains or hosted
+association files. A future implementation needs reviewed public-route mapping,
+verified Android SHA-256 signing certificate/package identities, iOS team/app
+identity when available, website deployment and rebuilt/device-tested clients.
+Do not claim outside suqpage.com links open the app yet. General third-party web
+browsing (S65) is a separate implemented client boundary.
+
+S65 local verification (2026-10-06): six `test:mobile:links` cases pass, including
+actual adapter bundling with controlled React Native/Expo ports, malicious URLs,
+Unicode inquiry text, installed/missing social apps and sanitized failures.
+Both typechecks, eight localization tests (1,257 messages) and spec validation
+pass. Android JavaScript/Hermes export passes at `.local/mobile-links/android-export`;
+this is not an APK or device test. `capture-mobile-links.mjs` passes four 390/320px
+captures plus description/story/Website navigation, isolated popup, retained screen
+and simulated launch-error checks. Real catalog reads use response-only description
+fixtures; example.org is intercepted, with no merchant data writes or real contact
+messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initially
+waited for a click before dismissing its alert; the corrected concurrent handler
+passes. No new dependency, database migration, hosted mutation or deployment.
+Native browser sheet, installed social apps, iOS and release checks remain open.

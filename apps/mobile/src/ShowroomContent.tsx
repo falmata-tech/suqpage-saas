@@ -13,8 +13,9 @@ import type { Shop, Offering } from "@suqpage/contracts";
 import { useApp, API } from "./runtime";
 import {
   Photo,
+  LinkedText,
   Button,
-  openLink,
+  useOpenLink,
   colors,
   Icon,
 } from "./ui";
@@ -24,6 +25,7 @@ import Gallery from "./Gallery";
 export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview?: boolean }) {
   const { t, basket } = useApp(), { fontScale } = useWindowDimensions();
   const accent = storefrontAccent(shop.accentColor);
+  const openLink = useOpenLink();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Offering | null>(null);
   if (preview && selected) return <View style={{ gap: 14 }}>
@@ -31,7 +33,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
     <Gallery media={selected.media} privateImage />
     <Text style={v.title}>{selected.name}</Text>
     {selected.priceMinor !== null && <Text style={v.price}>{(selected.priceMinor / 100).toLocaleString()} ETB</Text>}
-    <Text style={v.body}>{selected.description}</Text>
+    <LinkedText style={v.body}>{selected.description}</LinkedText>
   </View>;
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
   const products =
@@ -75,7 +77,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
               {accent && shop.logo ? <View style={{ width: 60, padding: 5, borderRadius: 12, borderWidth: 2, borderColor: accent.edge, backgroundColor: accent.soft }}><Photo refPath={shop.logo} height={46} privateImage={preview} /></View> : null}
               <Text style={v.handle}>@{shop.handle}</Text>
               <Text style={v.title}>{shop.name}</Text>
-              <Text style={v.body}>{shop.about}</Text>
+              <LinkedText style={v.body}>{shop.about}</LinkedText>
             </View>
             <View style={v.section}>
               <Text style={[v.heading, accent && { color: accent.ink, borderBottomWidth: 3, borderColor: accent.edge, paddingBottom: 12 }]}>

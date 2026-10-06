@@ -16,7 +16,7 @@ import {
   Photo,
   Status,
   s,
-  openLink,
+  useOpenLink,
 } from "./ui";
 export function useAction() {
   const [busy, setBusy] = useState(false),
@@ -80,6 +80,7 @@ export async function pickImages(multiple = false) {
   return result.canceled ? [] : result.assets;
 }
 export function Setup() {
+  const openLink = useOpenLink();
   const { t, ownerRequest } = useApp(),
     action = useAction();
   const [name, setName] = useState(""),

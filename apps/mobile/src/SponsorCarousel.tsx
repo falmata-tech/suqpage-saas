@@ -4,7 +4,7 @@ import { useFocusEffect } from "expo-router";
 import type { Featured } from "@suqpage/contracts";
 import { useSponsorRotation } from "../../../lib/use-sponsor-rotation";
 import { API, useApp } from "./runtime";
-import { colors, Icon, openLink, Photo } from "./ui";
+import { colors, Icon, useOpenLink, Photo } from "./ui";
 
 export function SponsorCarousel({ sponsors, visible }: { sponsors: Featured["sponsors"]; visible: boolean }) {
   return sponsors.length ? <Carousel key={sponsors.map(s => s.id).join(",")} sponsors={sponsors} visible={visible} /> : null;
@@ -12,6 +12,7 @@ export function SponsorCarousel({ sponsors, visible }: { sponsors: Featured["spo
 
 function Carousel({ sponsors, visible }: { sponsors: Featured["sponsors"]; visible: boolean }) {
   const { t } = useApp();
+  const openLink = useOpenLink();
   const [focusedScreen, setFocusedScreen] = useState(false);
   const [foreground, setForeground] = useState(AppState.currentState === "active");
   const [reduced, setReduced] = useState(true);

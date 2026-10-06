@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { SvgXml } from "react-native-svg";
 import { useApp, languageNames, locales, API } from "./runtime";
-import { Brand, Icon, colors, openLink } from "./ui";
+import { Brand, Icon, colors, useOpenLink } from "./ui";
 import { categoryArt } from "./category-art";
 export function CategoryArt({
   name,
@@ -170,6 +170,7 @@ export function MoreSheet({
   onClose: () => void;
 }) {
   const { t, session } = useApp();
+  const openLink = useOpenLink();
   return (
     <Sheet visible={visible} title={t("More")} onClose={onClose}>
       <Pressable

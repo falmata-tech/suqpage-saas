@@ -100,3 +100,18 @@ six-second sponsor rotation. Scripts/capture-storefront-copy.mjs records 69
 web/browser-mobile locale/layout states; capture-sponsor-rotation.mjs covers
 cycles and controls. This is browser evidence, not Android/iOS AppState or
 screen-reader/gesture proof. Existing S50 native and release gates remain open.
+
+## External links — S65
+
+Run `npm run test:mobile:links` and `node scripts/capture-mobile-links.mjs` with
+local web/API 3102 and Expo web 8082 running. Browser fixtures do not update shops.
+Android JS export proves bundling only. Before releasing a rebuilt app, verify:
+- Website opens in the native browser sheet; Close/Back returns to the same
+  product/inquiry without losing its selections or message.
+- WhatsApp/Telegram installed: correct recipient and draft, no automatic send.
+- App absent: original HTTPS fallback; unavailable browser/handler: visible error.
+- SMS/email/phone remain system actions; no app tokens reach third-party pages.
+- Description links preserve text; invalid schemes remain inert.
+
+Outside `suqpage.com` links opening the app require separate Android App Links/iOS
+Universal Links setup. Only the custom `suqpage://` scheme exists currently.

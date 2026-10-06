@@ -94,3 +94,20 @@ longer supports this adapter, so rebuild native clients. Respect OSM attribution
 client identification and caching; no bulk/offline downloads. Public tile hosting
 is best-effort, not an unlimited production SLA. Native compilation/device checks
 remain release requirements. See docs/MOBILE-MAP-RESEARCH.md, FE-053 and DEP-042.
+
+## S65 external navigation — 2026-10-06
+
+Use the already-installed expo-web-browser module for external websites, through
+an explicit pure link-policy/launch-port contract and a native adapter. Prefer
+system browser UI (address and Close/Back controls, native website compatibility)
+to a general WebView or injected bridge. This does not replace native app screens
+or the isolated YouTube player. The browser receives only the validated URL, no
+app credentials. Recognized WhatsApp/Telegram HTTPS contacts map to bounded app
+schemes; a failed app launch falls back once to the original HTTPS URL. Caller
+screens retain inquiry data and handle failure. No outside delivery/payment or
+automatic-return guarantee is made. Web preview uses a noopener/noreferrer window.
+
+Primary references checked against installed Expo 57.0.3 APIs:
+- https://docs.expo.dev/versions/latest/sdk/webbrowser/
+- https://core.telegram.org/api/links
+- https://faq.whatsapp.com/5913398998672934

@@ -407,3 +407,50 @@ restarted to refresh shared catalogs. Expo browser history navigation can reset
 Market state; the mobile app Back was verified instead. No physical-device or
 native-speaker signoff is claimed. Visual approval and full release gates remain
 pending; this change is not deployed or included in the existing S62 APK build.
+
+## S65 — in-app websites and social handoffs (2026-10-06)
+
+Ready, L2 client adapter. Existing expo-web-browser is installed; no package,
+backend, authentication or checkout change. Master §9 handoffs and §15 native-client behavior
+and ADR-0023 are affected. No production or store rollout in this increment.
+
+- GIVEN an HTTPS website/contact/policy/sponsor link WHEN opened on native THEN
+  use the system in-app browser (Android Custom Tabs / iOS Safari sheet) with
+  visible browser identity and a close/back control. Keep the Suqpage screen and
+  inquiry state; do not forward app tokens, inject scripts or intercept payments.
+- GIVEN a recognized WhatsApp phone or Telegram username HTTPS link WHEN tapped
+  THEN try its corresponding app with the existing message text. If unavailable,
+  use the original HTTPS URL in the in-app browser. Other HTTPS links use that
+  browser directly. Calls, SMS and email use their installed handlers.
+- GIVEN user descriptions containing explicit HTTPS or www URLs THEN make those
+  spans accessible links using the same opener while preserving all visible text.
+  Unsupported schemes, malformed URLs, credentials and control characters must
+  not execute. Merchant text is never HTML or executable script.
+- GIVEN a failed browser/app launch THEN show a localized failure, allow retry,
+  and retain the inquiry. Closing a browser is not proof of message delivery,
+  purchase or payment. The OS controls return from another installed app; no
+  automatic third-party callback is promised.
+- GIVEN Expo web preview THEN open external HTTPS links in a separate browser
+  window/tab preserving Suqpage. Browser preview cannot demonstrate native sheets.
+  Existing in-app YouTube playback remains unchanged.
+
+Verification: pure URL/classification/port tests for allowed schemes, malicious
+lookalike domains, text/parameter preservation, app success/fallback, browser
+failure/cancel and no duplicate fallback. Type/localization checks plus Android
+JavaScript export and focused description/contact browser evidence. Native device
+verification and visual review remain release prerequisites. Rollback only
+reverts the client adapter; no data migration or provider configuration change.
+
+S65 local verification (2026-10-06): six `test:mobile:links` cases pass, including
+actual adapter bundling with controlled React Native/Expo ports, malicious URLs,
+Unicode inquiry text, installed/missing social apps and sanitized failures.
+Both typechecks, eight localization tests (1,257 messages) and spec validation
+pass. Android JavaScript/Hermes export passes at `.local/mobile-links/android-export`;
+this is not an APK or device test. `capture-mobile-links.mjs` passes four 390/320px
+captures plus description/story/Website navigation, isolated popup, retained screen
+and simulated launch-error checks. Real catalog reads use response-only description
+fixtures; example.org is intercepted, with no merchant data writes or real contact
+messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initially
+waited for a click before dismissing its alert; the corrected concurrent handler
+passes. No new dependency, database migration, hosted mutation or deployment.
+Native browser sheet, installed social apps, iOS and release checks remain open.

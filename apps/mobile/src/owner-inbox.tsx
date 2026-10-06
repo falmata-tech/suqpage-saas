@@ -52,7 +52,7 @@ export function Inquiries() {
           ))}
           {i.items.map((item,j)=>Object.keys(item.options||{}).length>0&&<Copy key={`options-${j}`}>{Object.entries(item.options).map(([k,v])=>`${k}: ${v}`).join(" · ")}</Copy>)}
           {i.note && <Copy>{i.note}</Copy>}
-          {inquiryContactLinks(i.contactMethod,i.contact).map(link=><Button key={link.label} secondary label={t(link.label)} onPress={()=>void openLink(link.href)}/>)}
+          {inquiryContactLinks(i.contactMethod,i.contact).map(link=><Button key={link.label} secondary label={t(link.label)} onPress={()=>void action.run(()=>openLink(link.href))}/>)}
           <View style={s.wrap}>
             {["new", "contacted", "confirmed", "closed", "cancelled"].map(
               (v) => (
