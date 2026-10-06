@@ -2462,3 +2462,7 @@ Image/quoting regressions, mobile checks and the fresh Android export pass; the
 remaining full audit matches exactly the two approved roots. The patched isolated
 web release passes end to end with zero web audit findings. Rebuild and publish
 the affected web artifact; no schema change. Private evidence: `.local/release-s62/`.
+
+S62 upload inspection caught EAS retaining its shallow `.git` directory before any
+Android upload. Correct the exact-path ignore rule, add a regression, and inspect
+a new clean archive before submitting. This changes packaging only.

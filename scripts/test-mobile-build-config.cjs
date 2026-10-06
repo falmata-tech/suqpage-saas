@@ -12,3 +12,9 @@ assert.equal(mobileBuildSettings({SUQPAGE_MOBILE_BUILD_PROFILE:'preview'},{valid
 const missing=spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{env:{PATH:process.env.PATH,SUQPAGE_MOBILE_BUILD_PROFILE:'preview'},encoding:'utf8'});
 assert.notEqual(missing.status,0);assert.match(missing.stderr,/API origin is required/);
 console.log('Mobile build config checks passed: explicit hosted targets, public keys, EAS prerequisites and separate preview identity.');
+
+const fs=require('node:fs');
+const ignore=require('ignore')().add(fs.readFileSync('.easignore','utf8'));
+for(const filename of ['.git','.git/objects/example','.local/review.json','.env.local','apps/mobile/.env.local','credentials.json','keys/private.keystore'])assert.equal(ignore.ignores(filename),true,`Private upload path: ${filename}`);
+for(const filename of ['package.json','package-lock.json','apps/mobile/app.config.ts'])assert.equal(ignore.ignores(filename),false,`Required build path: ${filename}`);
+console.log('Expo upload excludes the literal .git path and private runtime/signing files.');

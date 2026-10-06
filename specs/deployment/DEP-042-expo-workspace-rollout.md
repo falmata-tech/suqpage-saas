@@ -227,3 +227,9 @@ librsvg >=2.63.2, PNG/JPEG transformations, locked install and audit reduction t
 only the two approved roots. Re-export mobile and run native build gates; rebuild
 and verify the affected web runtime before declaring the patch deployed. No
 provider, database, feature or UI change is part of this remediation.
+
+S62 archive privacy correction: EAS checks the literal `.git` path when stripping
+its temporary shallow clone. A directory-only `.git/` rule does not satisfy that
+check. Exclude both the literal path and its descendants; verify with the same
+ignore semantics and a fresh `eas build:inspect --stage archive`. No Git objects,
+local configuration, backups or signing files may enter the uploaded archive.
