@@ -65,7 +65,7 @@ export default function Account() {
           <Copy big>{t("Your digital storefront")}</Copy>
           <Copy muted>
             {t(
-              "Manage your business page, products, services and customer inquiries.",
+              "Create a professional store for your products and services, or sign in to manage your page and customer inquiries.",
             )}
           </Copy>
           <Card>

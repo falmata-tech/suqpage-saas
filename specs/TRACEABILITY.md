@@ -843,3 +843,23 @@ Git metadata. Expo accepted build `2018cc70-edef-472c-8aca-06db2699fe84`,
 preview/internal, version 0.1.0 (1), existing signing credential and production API.
 Private receipts: `.local/release-s62/`. APK completion and native-device evidence
 remain pending; a submitted build is not a delivered APK.
+
+
+## S63 — clearer storefront narrative (FE-052 / FE-049 / FE-053)
+
+Shared customer copy explicitly names businesses followed on social media, their
+map locations, organized products/services and direct contact to order without
+post clutter. Owner About/account copy explains a professional store for followers.
+English plus contextual Amharic/Oromo/Somali/Tigrinya use the existing catalogs;
+merchant content and discovery behavior are unchanged. Root/Market/About metadata
+uses the same selected-locale narrative.
+
+Web/mobile typechecks, `test:narrative`, eight localization tests (1,255 messages),
+`validate:specs` and `capture-storefront-copy.mjs --copy-only` pass. The final run
+captures 69 states across 1440/390/320 web and Expo browser mobile in all locales,
+checking metadata, customer/owner navigation, copy presence and no overflow or
+page errors. Private evidence `.local/copy-s63/screens/` uses stubbed basemap tiles
+and real local catalog reads. Initial retired-selector, stale-Metro and full-page
+locale-reset capture failures are retained; the passing run uses the real mobile
+CTA navigation. No native-device or human language-review claim. Owner visual
+approval, full release gates and rollout remain pending; the S62 APK excludes S63.

@@ -4,7 +4,7 @@ title: Clear launch journeys and natural interface language
 status: in_progress
 related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053]
 owners: [product, frontend, backend]
-last_updated: 2026-10-05
+last_updated: 2026-10-06
 change_level: L3
 ---
 
@@ -171,3 +171,37 @@ checks (1,228 messages), sponsor rotation browser fixtures and 69 final viewport
 language captures pass. Evidence in specs/TRACEABILITY.md and checklist S51.
 Native-device checks, owner visual approval, full release gates, commit and
 rollout remain pending. Earlier copy drafts are superseded.
+
+## S63 — local discovery and uncluttered social-business stores (ready, L1)
+
+GIVEN Market on desktop web, mobile web or the native app WHEN read in any
+supported language THEN the compact introduction explicitly names the businesses
+customers follow on social media, shows the value of finding their location and
+browsing products/services in professional, organized stores, and explains direct
+contact to order without getting lost in post clutter. Nearby discovery remains
+included. Search/map behavior and placement are unchanged; no automatic social
+matching, computed distance, confirmed stock or in-app checkout is implied.
+
+GIVEN About or account entry WHEN a visitor reads it THEN customer copy explains
+browsing and direct inquiries, while a separate owner section explains organizing
+offerings, sharing a store link and appearing on the map. Keep useful existing
+workflow labels, non-social businesses, home sellers and services included. Do not
+add pricing, verification, stock guarantees or claims of automatic social imports.
+Merchant content is never rewritten or translated.
+
+English, Amharic, Afaan Oromo, Somali and Tigrinya use contextual local phrasing,
+not English word order or forced literal equivalents. Retain familiar brand names.
+This is agent-authored language, not a claim of human native-speaker approval.
+Reuse shared copy and FE-049 catalogs on both clients. No API/database changes.
+Affected master sections: 3, 18, 22 and storefront-positioning narrative.
+
+Readiness: audiences, copy boundary and all five locales are explicit. Verify
+narrative/localization coverage, typechecks and actual 1440/390/320 web plus mobile
+browser views before owner visual review. Use focused `capture-storefront-copy.mjs`
+evidence; do not run full release gates or replace the submitted S62 APK until
+this visual change is approved. Rollback restores copy/catalogs only.
+
+S63 local evidence: both client typechecks, narrative/localization checks and 69
+copy-only browser states pass across all five languages. Details in TRACEABILITY
+and checklist S63. This is local implementation and browser review; owner visual
+approval and web/native rollout remain pending. No native-speaker signoff claimed.

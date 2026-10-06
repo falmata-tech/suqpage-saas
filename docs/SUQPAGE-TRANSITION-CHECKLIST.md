@@ -2472,3 +2472,32 @@ S62 production web patch delivered: `6ac52555a812ad5c89621401`, 28 live checks
 and three responsive checks pass. Android build
 `2018cc70-edef-472c-8aca-06db2699fe84` is accepted in Expo's queue. Source 4550be8;
 no completed APK/device pass yet. Do not submit a duplicate while this build exists.
+
+S63 — clearer social-business storefront copy (FE-052 / FE-049 / FE-053, L1)
+- [x] Revise shared customer/owner narrative and aligned entry/metadata
+  copy; write contextual Amharic, Afaan Oromo, Somali and Tigrinya versions.
+- [x] Regenerate catalogs; verify narrative, locale/content boundaries and both
+  client typechecks. Keep discovery/features and merchant content unchanged.
+- [x] Capture desktop, mobile-web and mobile-app browser views in all languages;
+  inspect wrapping and CTA visibility, then supply local review URLs/screenshots.
+- [ ] CURRENT: owner visual approval before full release gates and a new rollout. S62's
+  existing Expo build remains tracked separately; it cannot contain these edits.
+- [x] Record verified evidence and reconcile master/traceability; scoped commit
+  only this task's files. Preserve unrelated deno.lock.
+
+S63 final wording follows the owner's refinements: explicitly name the businesses
+people follow on social media, show their location and organized offerings, and
+use “contact them to order” without implying platform checkout. Keep the phrase
+“without getting lost in the clutter of social media posts.” The first capture
+used a retired drawer selector; the next exposed a stale Metro bundle. After a
+Suqpage-only restart, account capture now follows the real in-app CTA to preserve
+the selected locale. These are recorded harness/preview corrections, not hidden
+product passes. No full release gate or new deployment in this copy task.
+
+S63 evidence: web/mobile typechecks, narrative/artwork checks, eight localization
+tests (1,255 messages per language), spec validation and 69 final browser states
+pass. Screenshots/receipt: `.local/copy-s63/screens/`; tiles were stubbed to avoid
+automated OSM traffic, with actual local catalog data and no mutations. Checked
+localized metadata, audience CTAs, account entry, wrapping and no page errors.
+Mobile app evidence is Expo browser rendering, not a rebuilt native APK. Copy is
+agent-authored; no native-speaker approval claimed. Live deployment remains S62.

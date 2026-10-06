@@ -1,13 +1,14 @@
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import { ArrowRight, MapPin, MessageCircle, Search, Store } from "lucide-react";
 import { useUiText } from "@/lib/i18n/ui";
-import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "@/lib/storefront-copy";
+import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY, MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
 import styles from "@/components/AboutStorefront.module.css";
 
-export const metadata = {
-  title: "About Suqpage",
-  description: "Find the products behind social posts. Organized digital storefronts for African businesses, with product details, direct inquiries and map discovery. Starting in Ethiopia.",
-};
+export async function generateMetadata() {
+  const t = await getUiText();
+  return { title: t("About Suqpage"), description: `${t(MARKET_STOREFRONT_COPY.title)} ${t(MARKET_STOREFRONT_COPY.description)}` };
+}
 const icons = { shop: Store, map: MapPin, chat: MessageCircle, search: Search };
 
 export default function AboutPage() {

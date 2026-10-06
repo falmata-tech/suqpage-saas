@@ -8,10 +8,10 @@ import { MarketWorkspaceLoading } from "@/components/PublicWorkspaceLoading";
 import { getPublicMarketplaceView } from "@/lib/public-discovery-cache";
 
 export const dynamic = "force-dynamic";
-export const metadata = {
-  title: "Market",
-  description: "Explore organized storefronts from the businesses you follow. Browse products, services and options, then inquire directly on Suqpage.",
-};
+export async function generateMetadata() {
+  const t = await getUiText();
+  return { title: t("Market"), description: `${t(MARKET_STOREFRONT_COPY.title)} ${t(MARKET_STOREFRONT_COPY.description)}` };
+}
 
 type MarketSearchParams = Promise<{ industry?: string | string[]; q?: string; place?: string | string[]; showroom?: string; view?: string; type?: string; page?: string }>;
 

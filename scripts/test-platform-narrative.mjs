@@ -43,8 +43,8 @@ assert.doesNotMatch(discovery, retiredGeneratedUrl);
 
 assert.match(home, /t\(MARKET_STOREFRONT_COPY.title\)/);
 assert.match(home, /t\(MARKET_STOREFRONT_COPY.description\)/);
-assert.match(storefrontCopy, /businesses you follow/);
-assert.match(storefrontCopy, /without digging through old posts/);
+assert.match(storefrontCopy, /Find the businesses you follow on social media/);
+assert.match(storefrontCopy, /without getting lost in the clutter of social media posts/);
 assert.match(home, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
 assert.match(discovery, /Find businesses, products and services/);
 assert.match(discovery, /Open page/);
@@ -57,12 +57,12 @@ assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:com
 assert.match(about, /ABOUT_STOREFRONT_SECTIONS/);
 assert.match(storefrontCopy, /For customers/);
 assert.match(storefrontCopy, /For businesses/);
-assert.match(storefrontCopy, /You know the business/);
+assert.match(storefrontCopy, /Discover businesses on the map or open a store you already follow/);
 assert.match(storefrontCopy, /TikTok, Telegram or WhatsApp/);
 assert.match(storefrontCopy, /No physical shop required/);
 assert.match(storefrontCopy, /on Suqpage or through its social channels/);
 assert.doesNotMatch(storefrontCopy, /verified businesses|guaranteed sales|public home address|free during|launch offer/i);
-assert.match(about, /African businesses/);
+assert.match(storefrontCopy, /professional online store/);
 for (const file of ['apps/mobile/app/(tabs)/index.tsx', 'apps/mobile/app/(tabs)/about.tsx']) {
   assert.match(read(file), file.includes('index') ? /MARKET_STOREFRONT_COPY/ : /ABOUT_STOREFRONT_SECTIONS/);
 }
@@ -79,7 +79,8 @@ assert.doesNotMatch(signupForm, /requestText/);
 assert.match(login, /Use a one-time email code\./);
 assert.doesNotMatch(login, /Continue with Google|Use your Google account/);
 assert.match(login, /New business\? Enter your email to create your account/);
-assert.match(metadata, /Discover businesses, products and services/);
+assert.match(metadata, /t\(MARKET_STOREFRONT_COPY.title\)/);
+assert.match(metadata, /t\(MARKET_STOREFRONT_COPY.description\)/);
 assert.doesNotMatch(support, /Ask for help/);
 assert.match(support, /Transport & delivery/);
 assert.doesNotMatch(support, /Buying assistance/);

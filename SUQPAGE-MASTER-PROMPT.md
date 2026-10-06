@@ -132,18 +132,20 @@ The Suqpage page is designed to turn passive browsing into a structured product 
 
 ## 3. The problem Suqpage solves
 
-Suqpage gives businesses promoting or selling through social media a professional
-digital storefront. Products, services, photos, videos, the business story and
-contact details have one organized destination alongside social channels. Owners
-share that page from their profiles. The primary narrative addresses customers
-who already know or follow a seller and want an organized view of its offerings,
-without piecing together old posts. Visitors browse names/styles/media/details
-and inquire about the specific items they want. Map, category and search remain
-full discovery features with unchanged prominence and behavior. Physical shops, makers, growers,
-service businesses and home sellers remain included; social accounts are not a
-prerequisite. The initial market is Ethiopia, with wider African discovery as a
-future direction. S51 copy implements this positioning on web/native. The web version is deployed
-in S61; the Expo artifact remains pending its separate gates (FE-052/FE-053).
+Suqpage helps customers see where the social-media sellers they follow are and
+browse their products and services in organized, professional online stores.
+Customers can explore nearby businesses or open a store they already follow,
+see the offering details without searching through scattered posts, and inquire
+directly to discuss an order. No automatic social-account matching or distance
+calculation is promised. Owners bring their catalog, photos, videos, story and contacts together,
+share their Suqpage link through social channels, and show their shop or area on
+the map. Map, category and search retain their existing prominence and behavior.
+Physical shops, makers, growers, service businesses and home sellers remain
+included; a social account or physical shop is not a prerequisite. The initial
+market is Ethiopia, with wider African discovery as a future direction.
+S63 applies this clearer positioning to desktop web, mobile web and the mobile
+app in all five languages (FE-052/FE-053). It is a local copy candidate awaiting
+visual approval and rollout; the previously submitted S62 APK does not include it.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -1559,7 +1561,7 @@ Rules:
   actual action: add to an inquiry list, view it, or send an inquiry. Use products,
   services and businesses rather than platform jargon. Do not add filler,
   repeated button explanations, internal notes or implementation terminology.
-  S51 storefront copy uses local phrasing in each language rather than English
+  S63 storefront copy uses local phrasing in each language rather than English
   sentence structure; brands and appropriate technical terms retain English.
   Preserve meaningful privacy/security guidance and merchant-authored content.
 - translate interface labels, buttons, help text, status labels, and platform copy;
@@ -1675,6 +1677,12 @@ structured inquiry, not online checkout.
 ---
 
 ## 22. Testing and definition of done
+
+S63 copy uses shared web/native constants and all five locale catalogs. Focused
+narrative, localization/content-boundary and type checks precede viewport review;
+`capture-storefront-copy.mjs --copy-only` checks customer/owner copy, account entry
+and localized metadata. Browser-mobile evidence does not prove a new native APK.
+Full release gates and publication follow visual approval.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the
@@ -1924,9 +1932,8 @@ independent of broadcast spotlights, with pause/navigation and accessibility
 safeguards. Visitor/owner copy positions Suqpage as a professional digital
 storefront alongside social-media selling, including shop or area map location.
 Focused carousel tests and 69 final web/mobile-browser language/viewport states
-pass. About separates customer browsing from the business-owner offer. The
-narrative centers customers who know/follow the seller and want its organized
-offerings; map/search features remain unchanged.
+pass. About separates customer browsing from the business-owner offer. The S63 local copy revision addresses nearby social-media businesses and their
+organized offerings, while keeping existing map/search features unchanged.
 agent-authored translations have not received native-speaker approval. Native
 AppState/device checks and Android release gates remain pending. Web deployment
 and live verification completed in S61.
