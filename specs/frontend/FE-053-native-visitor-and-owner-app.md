@@ -2,9 +2,9 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052]
+related: [FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-05
+last_updated: 2026-10-06
 change_level: L3
 ---
 
@@ -507,3 +507,25 @@ clean 1,493-file archive are ready; the original one-artifact exception expired
 with finished build 2018cc70. Owner renewal for the next exact source is pending
 in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
 verification or iOS association is claimed. Private receipts: .local/app-links/.
+
+## S67 — latest internal rebuild and starter preview
+
+Owner approves the renewed one-APK exception and latest changes, including a
+contextual five-language copy pass and native first-setup private-preview parity
+under FE-049/FE-051. Rebind approval to the final reviewed source after these edits.
+No dependencies/advisories may expand the two reviewed tooling roots. Build,
+archive, signing, live API and native device gates remain required. No Play/iOS
+submission or invitation sending. Coverage is engineering evidence, not independent
+native-speaker signoff. Keep store/offer content verbatim in every locale.
+
+S67 focus regression: GIVEN a language sheet is closed after switching languages
+WHEN an owner focuses and edits a field THEN hidden dialog content cannot capture
+focus or discard edits. Hidden native/browser sheets must unmount their focus
+boundary; retain open-sheet semantics. Verify actual deletion, saved empty contacts,
+editor re-entry and first publication after switching all five languages.
+
+S67 verified local gates: focused five-language setup/preview and persisted
+editing/publication regression passes; full check, production build/trace, provider
+smoke and 11 acceptance workflows pass. Release audit remains failed solely on
+the approved two-root internal-APK exception; final native artifact checks pending.
+See S67 in TRACEABILITY for evidence boundaries and protected capture paths.

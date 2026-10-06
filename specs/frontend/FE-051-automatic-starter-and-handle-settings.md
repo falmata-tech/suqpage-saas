@@ -2,9 +2,9 @@
 id: FE-051
 title: Automatic starter and editable address
 status: done
-related: [FE-038, FE-046, FE-049, BE-043, DEP-040]
+related: [FE-053, FE-038, FE-046, FE-049, BE-043, DEP-040]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-10-06
 change_level: L3
 ---
 
@@ -78,3 +78,27 @@ scenarios and exact-artifact Linux/privacy gates pass. Live public and gallery/
 owner/handle/five-language wordmark checks and health monitoring pass. Existing
 merchant content and demo account aliases are preserved; mail delivery and
 external video playback are not asserted by the no-delivery live smoke.
+
+## S67 — native first-setup preview parity (2026-10-06)
+
+Owner reiterates: essential setup creates the complete styled private example
+before any page/media/product work. Web already returns the preview destination.
+Native signup must pass the preview view to the owner page editor and start in
+preview mode. Normal later editor visits may open editing. The unique generated
+handle remains visible/editable in account settings; no handle selection is
+required before seeing the starter. The existing setup fields (verified identity,
+name, account phone, business name/category and consent) remain authoritative.
+
+GIVEN completed native signup WHEN its owner page opens THEN show the saved sample
+cover, About, contacts and three offerings in a private preview with Edit available.
+WHEN Edit is selected THEN expose existing editable page components and owner
+navigation to business/location/handle/products. Do not publish, hide sample items
+from private preview or replace real account details. GIVEN ordinary editor entry
+THEN preserve current edit flow. Verify real local signup/starter/privacy and
+native preview transition; no migration or new signup authority is required.
+
+S67 verified local gates: focused five-language setup/preview and persisted
+editing/publication regression passes; full check, production build/trace, provider
+smoke and 11 acceptance workflows pass. Release audit remains failed solely on
+the approved two-root internal-APK exception; final native artifact checks pending.
+See S67 in TRACEABILITY for evidence boundaries and protected capture paths.

@@ -144,8 +144,9 @@ Physical shops, makers, growers, service businesses and home sellers remain
 included; a social account or physical shop is not a prerequisite. The initial
 market is Ethiopia, with wider African discovery as a future direction.
 S63 applies this clearer positioning to desktop web, mobile web and the mobile
-app in all five languages (FE-052/FE-053). It is a local copy candidate awaiting
-visual approval and rollout; the previously submitted S62 APK does not include it.
+app in all five languages (FE-052/FE-053). Its local viewport checks pass and the
+owner approved inclusion in the next Android testing build. Updated web copy
+rollout remains separate; the older S62 APK does not include it.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -1040,7 +1041,10 @@ FE-054 color selection lives only in the Page editor with the actual storefront
 preview. A safe provider display name may be
 prefilled. FE-051/BE-043 automatically assign an unused generated handle with
 bounded database-authoritative collision retries, then open
-`/dashboard/page-editor?view=preview`. Compatible callers can still request an
+`/dashboard/page-editor?view=preview` on web and `/owner/page?view=preview` in
+the native app. Both open the styled private sample before the editing form;
+Edit and owner navigation expose its page, business/location, handle and offering
+settings. Later normal editor visits keep their existing editing flow. Compatible callers can still request an
 explicit valid handle. No media upload or separate starter action is needed.
 
 Owners edit their handle in Business details (3–60 English letters, digits and
@@ -1211,7 +1215,9 @@ The versioned web API is deployed and verified in S61. Native
 visitor pages and business-owner screens use versioned `/api/mobile/v1` adapters;
 private calls verify Supabase bearer identity and reload tenant/role authority.
 Admin/staff management stays on the web. Device sessions use SecureStore; the
-browser preview keeps sessions in memory. PostgreSQL remains server-only. FE-054
+browser preview keeps sessions in memory. Native first signup opens the saved
+private starter preview using the existing owner-home projection; no second
+initializer or client-side signup authority exists. PostgreSQL remains server-only. FE-054
 shares a pure validated accent/palette between clients and server; optional native
 profile/shop DTO fields carry the business choice through existing save contracts.
 
@@ -1236,7 +1242,9 @@ local implementation. Moving Next.js to apps/web remains a separate migration.
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
 Those API paths have real isolated PostgreSQL regression evidence. Expo project
-`@falmatad/suqpage` and preview signing are configured; APK distribution, full release gates and live API rollout remain incomplete.
+`@falmatad/suqpage` and preview signing are configured. The versioned live API
+rollout is verified in S61; the latest APK artifact and native-device gates remain
+pending under S67.
 The FE-053/DEP-042 local candidate uses native MapLibre with OSM raster tiles;
 focused type/projection/export checks, Android native compilation and emulator
 first-render/drawer checks pass. Physical-phone and release checks remain open.
@@ -1590,7 +1598,8 @@ Rules:
   repeated button explanations, internal notes or implementation terminology.
   S63 storefront copy uses local phrasing in each language rather than English
   sentence structure; brands and appropriate technical terms retain English.
-  Preserve meaningful privacy/security guidance and merchant-authored content.
+  The S67 copy pass clarifies inquiry-list actions, transport labels, video loading
+  and retry wording in context. Preserve meaningful privacy/security guidance and merchant-authored content.
 - translate interface labels, buttons, help text, status labels, and platform copy;
 - do not translate product names;
 - do not translate brand names;
@@ -1623,7 +1632,8 @@ Minimum expectations:
 - no overlapping menus, filters, or result panels;
 - adequate tap targets;
 - visible focus states;
-- keyboard-accessible dialogs and drawers;
+- keyboard-accessible dialogs and drawers; hidden native/browser sheets unmount
+  their focus boundary so closing the language picker cannot block field editing;
 - product galleries support thumbnails, arrows and touch scrolling, respect
   reduced motion and load video frames only after intentional playback;
 - focus trapping and restoration where appropriate;
@@ -1717,7 +1727,8 @@ existing severity. Normal monorepo/mobile installs retain the guarded compatibil
 adapter and unchanged full native audit. S61 verifies the web check chain, all 11
 isolated acceptance workflows, release stages, private backup/migration rehearsal
 and exact Linux artifact. The owner approved S62's one-artifact Expo internal-testing exception for the two
-documented tooling advisories; the audit remains failed/reportable. Signing, APK
+documented tooling advisories, then renewed one additional internal APK for the
+latest approved source in S67. The audit remains failed/reportable. Signing, APK
 inspection and native-device gates remain required; Google Play is deferred. Rollout evidence and
 current publication state: `docs/SUQPAGE-RELEASE-2026-10-06.md`.
 

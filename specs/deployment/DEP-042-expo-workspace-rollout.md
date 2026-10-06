@@ -4,7 +4,7 @@ title: Expo workspace rollout
 status: in_progress
 related: [DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023]
 owners: [product, frontend, backend, security]
-last_updated: 2026-09-27
+last_updated: 2026-10-06
 change_level: L3
 ---
 
@@ -274,3 +274,14 @@ clean 1,493-file archive are ready; the original one-artifact exception expired
 with finished build 2018cc70. Owner renewal for the next exact source is pending
 in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
 verification or iOS association is claimed. Private receipts: .local/app-links/.
+
+## S67 — renewed internal APK scope
+
+The owner's latest instruction approves one additional internal Android APK with
+all latest changes plus the contextual locale review and preview-first setup.
+Rebind that approval to the exact tested final commit before submission. The fresh
+audit remains failed: 20 high graph findings, zero critical, exactly the existing
+braces/node-forge roots. No new advisory or dependency is accepted. Preserve the
+free queue, existing signing identity, production public configuration and all
+other source/archive/runtime/signature/device gates. Play and iOS remain deferred;
+no invitations or credentials/configuration mutations are authorized by this build.

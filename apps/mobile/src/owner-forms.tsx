@@ -154,7 +154,7 @@ export function Setup() {
             });
             router.replace({
               pathname: "/owner/[section]",
-              params: { section: "page" },
+              params: { section: "page", view: "preview" },
             });
           }, "Your page is ready to edit")
         }
@@ -165,9 +165,11 @@ export function Setup() {
 export function PageEditor({
   home,
   reload,
+  initialPreview = false,
 }: {
   home: OwnerHome;
   reload: () => void;
+  initialPreview?: boolean;
 }) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
@@ -187,7 +189,7 @@ export function PageEditor({
     [video, setVideo] = useState(""),
     [videoKey, setVideoKey] = useState(() => Crypto.randomUUID());
   const [version, setVersion] = useState(home.draft?.version),
-    [preview, setPreview] = useState(false),
+    [preview, setPreview] = useState(initialPreview),
     [colorOpen, setColorOpen] = useState(false);
   const update = (key: keyof Profile, value: unknown) =>
     setContent((p) => ({ ...p, [key]: value }));

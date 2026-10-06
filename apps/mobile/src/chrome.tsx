@@ -64,6 +64,8 @@ export function Sheet({
 }) {
   const insets = useSafeAreaInsets();
   const { t } = useApp();
+  // A hidden sheet must release its portal/focus boundary, including on web.
+  if (!visible) return null;
   return (
     <Modal
       visible={visible}

@@ -9,9 +9,10 @@ import { Setup, PageEditor, ProductEditor } from "../../src/owner-forms";
 import { BusinessForm, Settings } from "../../src/owner-business";
 import { Inquiries, SupportList, OwnerChat } from "../../src/owner-inbox";
 export default function OwnerScreen() {
-  const { section: screen, id } = useLocalSearchParams<{
+  const { section: screen, id, view } = useLocalSearchParams<{
       section: string;
       id?: string;
+      view?: string;
     }>(),
     { session, t, ownerRequest } = useApp();
   const load = useLoad(
@@ -45,7 +46,7 @@ export default function OwnerScreen() {
         {load.data && (
           <>
             {screen === "page" ? (
-              <PageEditor home={load.data} reload={load.reload} />
+              <PageEditor home={load.data} reload={load.reload} initialPreview={view === "preview"} />
             ) : screen === "business" ? (
               <BusinessForm />
             ) : screen === "settings" ? (

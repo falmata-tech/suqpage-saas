@@ -37,7 +37,7 @@ Checking code...	ኮድ በማረጋገጥ ላይ…	Koodiin mirkanaa'aa jira…
 Six-digit code	ባለ 6 አሃዝ ኮድ	Koodii lakkoofsa 6 qabu	Koodh lix lambar ah	ናይ 6 ኣሃዝ ኮድ
 Code sent to	ኮድ የተላከው ለ	Koodiin kan ergameef	Koodhka waxaa loo diray	ኮድ ተላኢኹ ናብ
 Change email	ኢሜይል ይቀይሩ	Imeelii jijjiiri	Beddel iimaylka	ኢመይል ቀይር
-Send another code	ኮዱን እንደገና ላክ	Koodii irra deebi'ii ergi	Mar kale dir koodhka	ኮድ እንደገና ስደዱ
+Send another code	ኮዱን እንደገና ላክ	Koodii irra deebi'ii ergi	Mar kale dir koodhka	ኮድ ዳግማይ ስደዱ
 Continue	ይቀጥሉ	Itti fufi	Sii wad	ቀጽሉ
 Continue to your account	ወደ መለያዎ ይግቡ	Gara herrega keetti seeni	Gal akoonkaaga	ናብ መለያኹም እተዉ
 Check your email for a six-digit code.	ባለ 6 አሃዝ ኮዱን በኢሜይልዎ ይመልከቱ።	Koodii lakkoofsa 6 qabu imeelii kee keessaa ilaali.	Ka eeg iimaylkaaga koodhka lixda lambar ah.	ናይ 6 ኣሃዝ ኮድ ኣብ ኢመይልካ ርአ።
@@ -49,7 +49,7 @@ Join Suqpage	Suqpageን ይቀላቀሉ	Suqpage makami	Ku biir Suqpage	ናብ Su
 Get your business online	ንግድዎን በኢንተርኔት ያሳዩ	Daldala kee interneetii irratti agarsiisi	Ganacsigaaga keen internetka	ንግድኻ ኣብ ኢንተርነት ኣቕርብ
 Finish setup	መለያ ፍጠር	Galmee xumuri	Dhammaystir diiwaangelinta	ምዝገባ ዛዝሙ
 Finishing setup...	ዝግጅቱ እየተጠናቀቀ ነው…	Qophiin xumuramaa jira…	Diyaarinta waa la dhammaystirayaa…	ምድላው ይዛዘም ኣሎ…
-Account setup	መለያ ማዘጋጀት	Herrega qopheessuu	Diyaarinta akoonka	ሕሳብ ምድላው
+Account setup	መለያ ማዘጋጀት	Herrega qopheessuu	Diyaarinta akoonka	መለያ ምድላው
 Business name	የንግድ ስም	Maqaa daldalaa	Magaca ganacsiga	ስም ንግዲ
 Name buyers will see	የንግድዎ ስም	Maqaa daldala keetii	Magaca ganacsigaaga	ስም ንግድኹም
 Account phone (private)	የመለያ ስልክ (የግል)	Bilbila herregaa (dhuunfaa)	Telefoonka akoonka (gaar ah)	ተሌፎን ሕሳብ (ናይ ውልቂ)
@@ -103,7 +103,7 @@ Center Ethiopia	ኢትዮጵያን በመሃል አሳይ	Itoophiyaa gidduutti a
 Map controls	የካርታ መቆጣጠሪያዎች	To'annoo kaartaa	Maamulka khariidadda	መቆጻጸሪ ካርታ
 Zoom in	አቅርብ	Dhiheessi	Soo dhowee	ኣቕርብ
 Zoom out	አርቅ	Fageessi	Ka fogee	ኣርሕቕ
-Retry map	ካርታውን እንደገና ክፈት	Kaartaa irra deebi'i	Mar kale fur khariidadda	ካርታ እንደገና ክፈት
+Retry map	ካርታውን እንደገና ይክፈቱ	Kaartaa irra deebi'i	Mar kale fur khariidadda	ካርታ ዳግማይ ክፈቱ
 Back to results	ወደ ውጤቶች ተመለስ	Gara bu'aatti deebi'i	Ku noqo natiijooyinka	ናብ ውጽኢት ተመለስ
 No matches found	የፈለጉት አልተገኘም	Wanti barbaadde hin argamne	Wixii aad raadisay lama helin	ዝደለኹምዎ ኣይተረኽበን
 No businesses match this search.	ከዚህ ፍለጋ ጋር የሚዛመድ ንግድ አልተገኘም።	Daldalli barbaacha kanaan walsimu hin argamne.	Lama helin ganacsi ku habboon raadintan.	ምስዚ ምድላይ ዝሰማማዕ ንግዲ ኣይተረኽበን።
@@ -150,9 +150,9 @@ Unavailable	አይገኝም	Hin jiru	Lama heli karo	ኣይርከብን
 Currently unavailable	በአሁኑ ጊዜ አይገኝም	Yeroo ammaa hin jiru	Hadda lama heli karo	ኣብዚ ግዜ ኣይርከብን
 Coming soon	በቅርብ ቀን	Dhiheenyatti	Dhawaan	ኣብ ቀረባ ግዜ
 Inquire about this item only	ስለዚህ ዕቃ ብቻ ይጠይቁ	Wanta kana qofa gaafadhu	Weydii shaygan oo keliya	ብዛዕባ እዚ ኣቕሓ ጥራይ ሕተት
-Add to inquiry list	አብረው ለመጠየቅ ያክሉ	Waliin gaafachuuf dabali	Ku dar waxyaabaha aad weydiinayso	ብሓባር ንምሕታት ወስኹ
+Add to inquiry list	ወደ ጥያቄ ዝርዝር ያክሉ	Tarree gaaffii keetti dabali	Ku dar liiska weydiinta	ናብ ዝርዝር ሕቶ ወስኹ
 Added to inquiry list	ወደ ጥያቄ ዝርዝርዎ ተጨምሯል	Tarree gaaffii keetti dabalameera	Liiskaaga ayaa lagu daray	ናብ ዝርዝር ሕቶኹም ተወሲኹ
-View inquiry list	የመረጡትን ይመልከቱ	Kan filatte ilaali	Eeg waxyaabaha aad xulatay	ዝመረጽኩምዎ ርኣዩ
+View inquiry list	የጥያቄ ዝርዝሩን ይመልከቱ	Tarree gaaffii kee ilaali	Eeg liiska weydiinta	ዝርዝር ሕቶ ርኣዩ
 Clear inquiry list	የመረጡትን ሁሉ አስወግድ	Kan filatte hunda haqi	Ka saar dhammaan xulashooyinka	ዝመረጽኩምዎ ኩሉ ኣውጽኡ
 Inquiry	ጥያቄ	Gaaffii	Weydiin	ሕቶ
 Inquiries	ጥያቄዎች	Gaaffiiwwan	Weydiimaha	ሕቶታት
@@ -170,7 +170,7 @@ Copy inquiry	ጥያቄውን ቅዳ	Gaaffii garagalchi	Nuqul ka samee weydiinta	
 Copied	ተቀድቷል	Garagalchameera	Waa la koobiyeeyay	ተቐዲሑ
 View inquiry message	የጥያቄ መልዕክት ይመልከቱ	Ergaa gaaffii ilaali	Eeg farriinta weydiinta	መልእኽቲ ሕቶ ርአ
 Select and copy your message	መልዕክትዎን መርጠው ይቅዱ	Ergaa kee filadhuutii garagalchi	Dooro oo koobiyee farriintaada	መልእኽትኻ መሪጽካ ቅዳሕ
-Close	ዝጋ	Cufi	Xir	ዕጸዉ
+Close	ይዝጉ	Cufi	Xir	ዕጸዉ
 Close inquiry	ጥያቄውን ዝጋ	Gaaffii cufi	Xir weydiinta	ሕቶ ዕጸው
 Quantity	ብዛት	Baay'ina	Tirada	ብዝሒ
 Quantity:	ብዛት፦	Baay'ina:	Tirada:	ብዝሒ፦
@@ -181,9 +181,9 @@ Cancel	ይቅር	Dhiisi	Ka noqo	ይትረፍ
 Delete	ሰርዝ	Haqi	Tirtir	ደምስስ
 Remove	አስወግድ	Haqi	Ka saar	ኣውጽእ
 Save	ያስቀምጡ	Olkaa'i	Kaydi	ዓቅቡ
-Save changes	ለውጦችን አስቀምጥ	Jijjiirama olkaa'i	Kaydi isbeddellada	ለውጥታት ዓቅብ
+Save changes	ለውጦችን ያስቀምጡ	Jijjiirama olkaa'i	Kaydi isbeddellada	ለውጥታት ዓቅቡ
 Changes saved.	ለውጦች ተቀምጠዋል።	Jijjiiramni olkaa'ameera.	Isbeddellada waa la kaydiyey.	ለውጥታት ተዓቂቦም።
-Edit	አስተካክል	Gulaali	Wax ka beddel	ኣስተኻኽል
+Edit	ያስተካክሉ	Gulaali	Wax ka beddel	ኣስተኻኽሉ
 Preview	ቅድመ ዕይታ	Dursee ilaali	Horay u eeg	ቅድመ ትርኢት
 Publish	ለሁሉም ክፍት አድርግ	Namni hundi akka argu godhi	Dadweynaha u bandhig	ንህዝቢ ክፉት ግበሩ
 Publish page	ገጹን ለሁሉም ክፍት አድርግ	Fuula namootaaf banaa godhi	Bogga dadweynaha u bandhig	ገጽ ንህዝቢ ክፉት ግበሩ
@@ -218,7 +218,7 @@ Customer support	የደንበኛ ድጋፍ	Deeggarsa maamilaa	Taageerada macaami
 Support	ድጋፍ	Deeggarsa	Taageero	ደገፍ
 Suqpage support	የSuqpage ድጋፍ	Deeggarsa Suqpage	Taageerada Suqpage	ደገፍ Suqpage
 Contact Suqpage	Suqpageን ያግኙ	Suqpage quunnami	La xiriir Suqpage	ምስ Suqpage ተራኸብ
-Account security	የመለያ ደህንነት	Nageenya herregaa	Amniga akoonka	ድሕነት ሕሳብ
+Account security	የመለያ ደህንነት	Nageenya herregaa	Amniga akoonka	ድሕነት መለያ
 Save account phone	የመለያ ስልክ አስቀምጥ	Bilbila herregaa olkaa'i	Kaydi telefoonka akoonka	ተሌፎን ሕሳብ ዓቅብ
 Account phone saved.	የመለያ ስልክ ተቀምጧል።	Bilbilli herregaa olkaa'ameera.	Telefoonka akoonka waa la kaydiyey.	ተሌፎን ሕሳብ ተዓቂቡ።
 Your sign-in email.	የመግቢያ ኢሜይልዎ።	Imeelii seensaa kee.	Iimaylka aad ku soo gasho.	ናይ መእተዊ ኢመይልካ።
@@ -285,7 +285,7 @@ What do you need?	ምን ይፈልጋሉ?	Maal barbaadda?	Maxaad u baahan tahay?
 Tell us what you need…	የሚፈልጉትን ይንገሩን…	Waan barbaaddu nutti himi…	Noo sheeg waxa aad u baahan tahay…	ዘድልየካ ንገረና…
 Start a conversation	ውይይት ጀምር	Marii jalqabi	Bilow wada hadal	ዝርርብ ጀምር
 Start another chat	ሌላ ውይይት ጀምር	Marii biraa jalqabi	Bilow wada hadal kale	ካልእ ዝርርብ ጀምር
-End chat	ውይይት ጨርስ	Marii xumuri	Jooji wada hadalka	ዝርርብ ዛዝም
+End chat	ውይይቱን ያቁሙ	Marii xumuri	Jooji wada hadalka	ዝርርብ ዛዝሙ
 Close support	ድጋፍ ዝጋ	Deeggarsa cufi	Xir taageerada	ደገፍ ዕጸው
 Opening support…	ድጋፍ በመክፈት ላይ…	Deeggarsi banamaa jira…	Taageerada waa la furayaa…	ደገፍ ይኽፈት ኣሎ…
 Reply	ምላሽ	Deebii	Jawaab	መልሲ
@@ -368,7 +368,7 @@ Account access	ወደ መለያ መግባት	Herrega seenuu	Gelitaanka akoonka	�
 Passwordless access	ያለ የይለፍ ቃል መግባት	Jecha iccitii malee seenuu	Gelitaan aan furaha sirta lahayn	ብዘይ ቃል ምስጢር ምእታው
 Use a one-time email code.	በኢሜይል የሚላክ የአንድ ጊዜ ኮድ ይጠቀሙ።	Koodii imeelii yeroo tokkoo fayyadami.	Isticmaal koodh iimayl oo hal mar ah.	ናይ ሓደ ግዜ ኮድ ኢመይል ተጠቐም።
 Account access is temporarily unavailable.	በአሁኑ ጊዜ ወደ መለያ መግባት አይቻልም።	Yeroo ammaa herrega seenuun hin danda'amu.	Gelitaanka akoonka si ku meel gaar ah uma shaqaynayo.	ናብ ሕሳብ ምእታው ንግዚኡ ኣይከኣልን።
-Please try again later or contact Suqpage support.	ቆይተው ይሞክሩ ወይም የSuqpage ድጋፍን ያግኙ።	Booda irra deebi'i yookaan deeggarsa Suqpage quunnami.	Mar kale isku day goor dambe ama la xiriir taageerada Suqpage.	ጸኒሕካ እንደገና ፈትን ወይ ንደገፍ Suqpage ተወከስ።
+Please try again later or contact Suqpage support.	ቆይተው ይሞክሩ ወይም የSuqpage ድጋፍን ያግኙ።	Booda irra deebi'i yookaan deeggarsa Suqpage quunnami.	Mar kale isku day goor dambe ama la xiriir taageerada Suqpage.	ጸኒሕኩም ዳግማይ ፈትኑ ወይ ንደገፍ Suqpage ተወከሱ።
 Platform	መድረክ	Waltajjii	Madal	መድረኽ
 Platform administration	የመድረክ አስተዳደር	Bulchiinsa waltajjii	Maamulka madasha	ምምሕዳር መድረኽ
 Platform overview	የመድረክ አጠቃላይ ዕይታ	Waliigala waltajjii	Guudmarka madasha	ሓፈሻዊ ትርኢት መድረኽ
@@ -426,7 +426,7 @@ Not receiving support	ድጋፍ እየሰጠ አይደለም	Deeggarsa kennaa hi
 Conversation limit	የውይይት ገደብ	Daangaa marii	Xadka wada hadallada	ደረት ዝርርብ
 Open inbox	የመልዕክት ሳጥን ክፈት	Saanduqa ergaa bani	Fur sanduuqa farriimaha	ሳጹን መልእኽቲ ክፈት
 Claim conversation	ይህን ጥያቄ ልያዝ	Gaaffii kana ani nan ilaala	Aniga ayaa codsigan qabanaya	ነዚ ሕቶ ክሕዞ
-Reopen	እንደገና ክፈት	Irra deebi'ii bani	Dib u fur	እንደገና ክፈት
+Reopen	እንደገና ክፈት	Irra deebi'ii bani	Dib u fur	ዳግማይ ክፈቱ
 Waiting queue	የጥበቃ ተራ	Tarree eegumsaa	Safka sugitaanka	ተርታ ምጽባይ
 Renewal	እድሳት	Haaromsa	Cusboonaysiin	ምሕዳስ
 Renewals	እድሳቶች	Haaromsawwan	Cusboonaysiinta	ምሕዳሳት
@@ -478,8 +478,8 @@ Offered by	የሚቀርበው በ	Kan dhiheessu	Waxaa bixiya	ዘቕርቦ
 The marketplace map is temporarily unavailable.	የገበያ ካርታው ለጊዜው አይገኝም።	Kaartaan gabaa yeroo ammaa hin argamu.	Khariidadda suuqa si ku meel gaar ah looma heli karo.	ካርታ ዕዳጋ ንግዚኡ ኣይርከብን።
 You are offline	ኢንተርኔት አልተገናኘም	Interneetii irraa citeetta	Internet ma lihid	ምስ ኢንተርነት ኣይተራኸብካን
 Suqpage cannot reach the network.	Suqpage ከአውታረ መረቡ ጋር መገናኘት አልቻለም።	Suqpage interneetii quunnamuu hin dandeenye.	Suqpage kuma xirmi karo shabakadda.	Suqpage ምስ መርበብ ክራኸብ ኣይከኣለን።
-Reconnect to refresh Suqpage pages, inquiries, and workspace information.	የSuqpage ገጾችን፣ ጥያቄዎችንና የመሥሪያ መረጃን ለማደስ እንደገና ይገናኙ።	Fuulota, gaaffiiwwanii fi odeeffannoo hojii Suqpage haaromsuuf irra deebi'ii wal qunnamsiisi.	Dib ugu xidh internetka si aad u cusboonaysiiso bogagga, weydiimaha iyo xogta maamulka Suqpage.	ገጻት፣ ሕቶታትን ሓበሬታ መስርሕን Suqpage ንምሕዳስ እንደገና ተራኸብ።
-Try the marketplace again	ገበያውን እንደገና ይሞክሩ	Gabaa irra deebi'ii yaali	Mar kale isku day suuqa	ዕዳጋ እንደገና ፈትን
+Reconnect to refresh Suqpage pages, inquiries, and workspace information.	የSuqpage ገጾችን፣ ጥያቄዎችንና የመሥሪያ መረጃን ለማደስ እንደገና ይገናኙ።	Fuulota, gaaffiiwwanii fi odeeffannoo hojii Suqpage haaromsuuf irra deebi'ii wal qunnamsiisi.	Dib ugu xidh internetka si aad u cusboonaysiiso bogagga, weydiimaha iyo xogta maamulka Suqpage.	ገጻት፣ ሕቶታትን ሓበሬታ መስርሕን Suqpage ንምሕዳስ ዳግማይ ተራኸቡ።
+Try the marketplace again	ገበያውን እንደገና ይሞክሩ	Gabaa irra deebi'ii yaali	Mar kale isku day suuqa	ዕዳጋ ዳግማይ ፈትኑ
 Search result type	የፍለጋ ውጤት ዓይነት	Gosa bu'aa barbaachaa	Nooca natiijada raadinta	ዓይነት ውጽኢት ምድላይ
 results	ውጤቶች	bu'aawwan	natiijooyin	ውጽኢታት
 result	ውጤት	bu'aa	natiijo	ውጽኢት
@@ -566,7 +566,7 @@ Create sponsor ad	የስፖንሰር ማስታወቂያ ፍጠር	Beeksisa ispoo
 Save sponsor ad	የስፖንሰር ማስታወቂያ አስቀምጥ	Beeksisa ispoonsaraa olkaa'i	Kaydi xayeysiiska maalgelinta	መወዓውዒ ስፖንሰር ዓቅብ
 Homepage sponsor	የዋና ገጽ ስፖንሰር	Ispoonsara fuula jalqabaa	Maalgeliyaha bogga hore	ስፖንሰር ቀንዲ ገጽ
 Current sponsors	የአሁኑ ስፖንሰሮች	Ispoonsaroota ammaa	Maalgeliyayaasha hadda	ናይ ሕጂ ስፖንሰራት
-The lineup was saved and the public timetable recalculated.	ዝርዝሩ ተቀምጦ ይፋ መርሐ ግብሩ እንደገና ተዘጋጅቷል።	Tarreen olkaa'amee sagantaan ifaa irra deebi'amee qophaa'eera.	Liiska waa la kaydiyey, jadwalkii dadweynahana waa dib loo xisaabiyey.	ዝርዝር ተዓቂቡ፣ ዕላዊ መደብ ድማ እንደገና ተዳልዩ።
+The lineup was saved and the public timetable recalculated.	ዝርዝሩ ተቀምጦ ይፋ መርሐ ግብሩ እንደገና ተዘጋጅቷል።	Tarreen olkaa'amee sagantaan ifaa irra deebi'amee qophaa'eera.	Liiska waa la kaydiyey, jadwalkii dadweynahana waa dib loo xisaabiyey.	ዝርዝር ተዓቂቡ፣ ዕላዊ መደብ ድማ ዳግማይ ተዳልዩ።
 Program times and break rules updated.	የፕሮግራም ሰዓቶችና የእረፍት ደንቦች ተዘምነዋል።	Yeroon sagantaa fi dambiin boqonnaa haaromfameera.	Waqtiyada barnaamijka iyo xeerarka nasashada waa la cusboonaysiiyey.	ሰዓታት መደብን ሕግታት ዕረፍትን ተሓዲሶም።
 Suqpage stores account details, page content, product inquiries, and support conversations to operate the service and help customers contact the relevant seller.	አገልግሎቱን ለማስኬድና ደንበኞችን ከሻጮች ጋር ለማገናኘት Suqpage የመለያ ዝርዝሮችን፣ የገጽ ይዘትን፣ የምርት ጥያቄዎችንና የድጋፍ ውይይቶችን ያስቀምጣል።	Suqpage tajaajila kana hojjechiisuu fi maamiltoota gurgurtoota barbaachisan waliin wal qunnamsiisuuf odeeffannoo herregaa, qabiyyee fuulaa, gaaffii oomishaa fi marii deeggarsaa olkaa’a.	Suqpage wuxuu kaydiyaa xogta akoonka, waxa ku jira bogagga, weydiimaha alaabta iyo wada hadallada taageerada si adeeggu u shaqeeyo, macaamiishana loogu xiro iibiyaha ay doonayaan.	Suqpage ነቲ ኣገልግሎት ንምስራሕን ዓማዊል ምስ ሸየጥቲ ንምርኻብን ሓበሬታ ሕሳብ፣ ትሕዝቶ ገጽ፣ ሕቶታት ፍርያትን ዝርርብ ደገፍን ይዕቅብ።
 Account entry uses Supabase Auth. After sign-in, setup collects your name, account phone number, business name, and category. Your account email and phone remain private. You choose the separate contact details to display on your public page.	ወደ መለያ መግባት በSupabase Auth ይካሄዳል። ከገቡ በኋላ በዝግጅቱ ላይ ስምዎ፣ የመለያ ስልክዎ፣ የንግድ ስምና ምድብ ይጠየቃሉ። የመለያ ኢሜይልና ስልክዎ የግል ናቸው። በይፋ ገጽዎ የሚታዩትን የተለዩ መገኛዎች እርስዎ ይመርጣሉ።	Seensi herregaa Supabase Auth fayyadama. Erga seentee booda qophiin maqaa kee, bilbila herregaa, maqaa daldalaa fi ramaddii gaafata. Imeelii fi bilbilli herrega kee dhuunfaa dha. Quunnamtii fuula ifaa kee irratti mul’atu adda baaftee filatta.	Gelitaanka akoonka wuxuu adeegsadaa Supabase Auth. Markaad soo gasho, diyaarintu waxay kaa qaadaysaa magacaaga, telefoonka akoonka, magaca ganacsiga iyo qaybta. Iimaylka iyo telefoonka akoonkaagu waa gaar. Adiga ayaa dooranaya xogta xiriirka ee goonida ah ee ka muuqanaysa boggaaga dadweynaha.	ናብ ሕሳብ ምእታው ብSupabase Auth ይካየድ። ድሕሪ ምእታው፣ ስምካ፣ ተሌፎን ሕሳብካ፣ ስም ንግድን ምድብን ይሕተቱ። ኢመይልን ተሌፎንን ሕሳብካ ብሕታዊ እዩ። ኣብ ዕላዊ ገጽካ ዝርአ ፍሉይ ሓበሬታ ርክብ ንስኻ ትመርጽ።
@@ -823,7 +823,7 @@ Enter a page handle.	የገጽ መለያ ያስገቡ።	Teessoo fuulaa galchi.	
 Use 3–60 English letters, numbers or hyphens.	ከ3–60 የእንግሊዝኛ ፊደላት፣ ቁጥሮች ወይም አጭር ሰረዞች ይጠቀሙ።	Qubee Ingilizii, lakkoofsa ykn sarara gabaabaa 3–60 fayyadami.	Isticmaal 3–60 xaraf oo Ingiriisi ah, tirooyin ama jiitin.	ካብ 3–60 ፊደላት እንግሊዝኛ፣ ቁጽርታት ወይ ሓጸርቲ ሕንጻጻት ተጠቐም።
 This handle is not available.	ይህን መለያ መጠቀም አይቻልም።	Teessoon kun hin argamu.	Magacan lama heli karo.	እዚ መለለዪ ኣይርከብን።
 This handle is already taken. Choose another.	ይህ መለያ ተወስዷል። ሌላ ይምረጡ።	Teessoon kun qabameera. Kan biraa filadhu.	Magacan waa la isticmaalay. Mid kale dooro.	እዚ መለለዪ ተወሲዱ እዩ። ካልእ ምረጽ።
-Could not check this handle. Try again.	መለያውን ማረጋገጥ አልተቻለም። እንደገና ይሞክሩ።	Teessoo kana mirkaneessuun hin dandaʼamne. Irra deebiʼii yaali.	Magacan lama hubin karin. Mar kale isku day.	ነዚ መለለዪ ከነረጋግጽ ኣይከኣልናን። እንደገና ፈትን።
+Could not check this handle. Try again.	መለያውን ማረጋገጥ አልተቻለም። እንደገና ይሞክሩ።	Teessoo kana mirkaneessuun hin dandaʼamne. Irra deebiʼii yaali.	Magacan lama hubin karin. Mar kale isku day.	ነዚ መለለዪ ከነረጋግጽ ኣይከኣልናን። ዳግማይ ፈትኑ።
 Checking…	በማረጋገጥ ላይ…	Mirkaneessaa jira…	Waa la hubinayaa…	ይረጋገጽ ኣሎ…
 Photos and videos	ፎቶዎች እና ቪዲዮዎች	Suuraalee fi viidiyoowwan	Sawirro iyo muuqaallo	ስእልታትን ቪድዮታትን
 Add photos	ፎቶዎች ያክሉ	Suuraalee dabali	Ku dar sawirro	ስእልታት ወስኽ
@@ -853,9 +853,9 @@ Saving...	በማስቀመጥ ላይ...	Qusachaa jira...	Waa la kaydinayaa...	ይ
 Transport	መጓጓዣ	Geejjiba	Gaadiid	መጓዓዝያ
 Where is it going?	ከየት ወዴት ይላክ?	Eessaa gara eessaatti geeffama?	Xaggee laga qaadayaa, xaggeese loo dirayaa?	ካበይ ናበይ ይለኣኽ?
 From	መነሻ	Bakka irraa ka'u	Goobta laga qaadayo	መበገሲ
-To	መድረሻ	Bakka itti geessu	Goobta loo dirayo	መዕረፊ
+To	መድረሻ	Bakka itti geessu	Goobta loo dirayo	መብጽሒ
 Pickup city or area	የመነሻ ከተማ ወይም አካባቢ	Magaalaa ykn naannoo irraa ka'u	Magaalada ama aagga laga qaadayo	ከተማ ወይ ከባቢ መበገሲ
-Destination city or area	የመድረሻ ከተማ ወይም አካባቢ	Magaalaa ykn naannoo itti geessu	Magaalada ama aagga loo dirayo	ከተማ ወይ ከባቢ መዕረፊ
+Destination city or area	የመድረሻ ከተማ ወይም አካባቢ	Magaalaa ykn naannoo itti geessu	Magaalada ama aagga loo dirayo	ከተማ ወይ ከባቢ መብጽሒ
 Request transport	መጓጓዣ ይጠይቁ	Geejjiba gaafadhu	Codso gaadiid	መጓዓዝያ ሕተቱ
 Transport requests	የመጓጓዣ ጥያቄዎች	Gaaffilee geejjibaa	Codsiyada gaadiidka	ሕቶታት መጓዓዝያ
 Support queues	የእርዳታ ዝርዝሮች	Tarree gargaarsaa	Liisaska caawinta	ዝርዝራት ሓገዝ
@@ -899,7 +899,7 @@ Suqpage gives manufacturers, makers, retailers and home businesses an online sho
 Create a shopfront without a physical store, or extend your existing shop online. Share photos and videos, get discovered through search, the map and Daily Featured, and receive inquiries directly from customers.	ሱቅ ሳይከፍቱ በኦንላይን የንግድ ገጽ ይፍጠሩ፣ ወይም ያለዎትን ሱቅ በኦንላይንም ያስተዋውቁ። ፎቶና ቪዲዮ ያጋሩ፣ በፍለጋ፣ በካርታና በዕለቱ ተመራጮች ላይ ይታዩ፣ የደንበኞችንም ጥያቄዎች በቀጥታ ይቀበሉ።	Suqii banuu malee fuula daldalaa onlaayinii irratti qabaadhu, ykn suqii kee jiru onlaayinii irrattis beeksisi. Suuraa fi viidiyoo qoodi; barbaacha, kaartaa fi Filannoo guyyaatiin maamiltoota bira ga’i, gaaffii isaaniis kallattiin fudhadhu.	Samee dukaan internetka ah adigoon goob ganacsi furin, ama dukaankaaga jira internetka ku soo bandhig. La wadaag sawirro iyo muuqaallo, macaamiishuna ha kaa helaan raadinta, khariidadda iyo xulashada maanta, oo su’aalahooda si toos ah kaaga weydiiyaan.	ድኳን ከይከፈትኩም ናይ ኦንላይን ገጽ ንግዲ ፍጠሩ፣ ወይ ነቲ ዘለኩም ድኳን ብኦንላይን እውን ኣፋልጡ። ስእልን ቪድዮን ኣካፍሉ፣ ብምድላይ፣ ብካርታን ብናይ መዓልቲ ምርጫን ተረኸቡ፣ ሕቶታት ዓማዊል ድማ ብቐጥታ ተቐበሉ።
 Manage your showroom, products, services and customer inquiries.	ማሳያ ገጽዎን፣ ምርቶችዎን፣ አገልግሎቶችዎንና የደንበኞችን ጥያቄዎች ያስተዳድሩ።	Fuula agarsiisaa kee, oomisha, tajaajilaa fi gaaffii maamiltootaa bulchi.	Maamul bogga bandhiggaaga, alaabta, adeegyada iyo su’aalaha macaamiisha.	መርኣዪ ገጽኩም፣ ፍርያት፣ ኣገልግሎታትን ሕቶታት ዓማዊልን ኣመሓድሩ።
 Ask for help	እርዳታ ይጠይቁ	Gargaarsa gaafadhu	Caawimo codso	ሓገዝ ሕተት
-Start chat	ውይይት ጀምር	Haasawa jalqabi	Bilow wada hadal	ዝርርብ ጀምር
+Start chat	ውይይት ይጀምሩ	Haasawa jalqabi	Bilow wada hadal	ዝርርብ ጀምሩ
 Share your route. Our team will contact you by phone.	ከየት ወደ የት መላክ እንደሚፈልጉ ይግለጹ። ቡድናችን በስልክ ያነጋግርዎታል።	Bakka fe’umsaa fi bakka itti geessitu galchi. Gareen keenya bilbilaan si qunnama.	Sheeg meesha laga qaadayo iyo halka loo wado. Kooxdayadu telefoon ayay kugula soo xiriiri doontaa.	ካበይ ናበይ ክለኣኽ ከም እትደሊ ግለጽ። ጋንታና ብስልኪ ክትረኽበካ እያ።
 Help requests	የእርዳታ ጥያቄዎች	Gaaffilee gargaarsaa	Codsiyada caawimada	ሕቶታት ሓገዝ
 Help & transport	እርዳታ እና ትራንስፖርት	Gargaarsaa fi geejjiba	Caawimo iyo gaadiid	ሓገዝን መጓዓዝያን
@@ -954,7 +954,7 @@ Clear categories	የምድብ ምርጫን አጽዳ	Filannoo ramaddii haqi	Ka s
 Clear location	የቦታ ምርጫን አጽዳ	Filannoo bakka haqi	Ka saar goobta la doortay	ምርጫ ቦታ ኣጽርዩ
 {count} categories	{count} ምድቦች	Ramaddii {count}	{count} qaybood	{count} ምድባት
 Message type	የመልእክት ዓይነት	Gosa ergaa	Nooca farriinta	ዓይነት መልእኽቲ
-Connection interrupted. Retrying…	ግንኙነቱ ተቋርጧል። እንደገና በመሞከር ላይ…	Walqunnamtiin citeera. Irra deebi’uun yaalaa jira…	Xiriirkii ayaa go’ay. Dib ayaa loo isku dayayaa…	ርክብ ተቛሪጹ። እንደገና ይፍተን ኣሎ…
+Connection interrupted. Retrying…	ግንኙነቱ ተቋርጧል። እንደገና በመሞከር ላይ…	Walqunnamtiin citeera. Irra deebi’uun yaalaa jira…	Xiriirkii ayaa go’ay. Dib ayaa loo isku dayayaa…	ርክብ ተቛሪጹ። ዳግማይ ይፍተን ኣሎ…
 You	እርስዎ	Ati	Adiga	ንስኹም
 Chat for buying help	ለግዢ እርዳታ ያነጋግሩን	Gargaarsa bittaaf nu qunnami	Nagala hadal caawinta iibsiga	ንሓገዝ ዕድጊ ዘራርቡና
 Live chat	ቀጥታ ውይይት	Haasawa kallattii	Wada hadal toos ah	ቀጥታዊ ዝርርብ
@@ -1003,7 +1003,7 @@ Reconnecting…	እንደገና በማገናኘት ላይ…	Irra deebi'ee walqu
 Show on my page	በገጼ ላይ አሳይ	Fuula koo irratti agarsiisi	Ku muuji boggayga	ኣብ ገጸይ ኣርኢ
 Tell us what you need. Our team can help you buy, check a business or check product quality.	ምን እንደሚፈልጉ ይንገሩን። በግዢ፣ ንግድን በማጣራት ወይም የምርት ጥራትን በመመርመር እናግዝዎታለን።	Waan barbaaddu nutti himi. Bituu, daldala mirkaneessuu ykn qulqullina oomishaa ilaaluuf si gargaarra.	Noo sheeg waxaad u baahan tahay. Waxaan kaa caawin karnaa iibsashada, hubinta ganacsiga ama tayada alaabta.	ዝደለኹምዎ ንገሩና። ኣብ ዕድጊ፣ ንግዲ ኣብ ምጽራይ ወይ ጽሬት ፍርያት ኣብ ምፍታሽ ክንሕግዘኩም ንኽእል።
 The business can contact you using your phone number.	ንግዱ ባስገቡት ስልክ ሊያገኝዎ ይችላል።	Daldalaan lakkoofsa bilbila keetiin si qunnamuu danda'a.	Ganacsigu wuxuu kaala soo xidhiidhi karaa lambarkaaga.	እቲ ንግዲ ብዝሃብኩምዎ ቁጽሪ ተሌፎን ክረኽበኩም ይኽእል።
-Try again	እንደገና ሞክር	Irra deebi'ii yaali	Mar kale isku day	እንደገና ፈትን
+Try again	እንደገና ይሞክሩ	Irra deebi'ii yaali	Mar kale isku day	ዳግማይ ፈትኑ
 Verification code	የማረጋገጫ ኮድ	Koodii mirkaneessaa	Koodhka xaqiijinta	ናይ መረጋገጺ ኮድ
 What would you like help buying?	ምን ለመግዛት እንድናግዝዎ ይፈልጋሉ?	Maal bituuf gargaarsa barbaadda?	Maxaad rabtaa inaan kaa caawino iibsashadiisa?	እንታይ ንምግዛእ ክንሕግዘኩም ትደልዩ?
 Your business	የእርስዎ ንግድ	Daldala kee	Ganacsigaaga	ንግድኹም
@@ -1012,13 +1012,13 @@ Your inquiry list is empty.	ለመጠየቅ የመረጡት ዕቃ የለም።	
 {count} results	{count} ውጤቶች	Bu'aa {count}	{count} natiijo	{count} ውጽኢታት
 Map only	ካርታ ብቻ	Kaartaa qofa	Khariidadda oo keliya	ካርታ ጥራይ
 Saved	ተቀምጧል	Olkaa'ameera	Waa la kaydiyey	ተዓቂቡ
-Send code	ኮድ ላክ	Koodii ergi	Dir koodhka	ኮድ ስደድ
-Verify code	ኮዱን አረጋግጥ	Koodii mirkaneessi	Xaqiiji koodhka	ኮድ ኣረጋግጽ
+Send code	ኮድ ይላኩ	Koodii ergi	Dir koodhka	ኮድ ስደዱ
+Verify code	ኮዱን ያረጋግጡ	Koodii mirkaneessi	Xaqiiji koodhka	ኮድ ኣረጋግጹ
 Photo ready. Save your page to apply it.	ፎቶው ዝግጁ ነው። እንዲታይ ገጽዎን ያስቀምጡ።	Suuraan qophaa'eera. Akka mul'atuuf fuula kee olkaa'i.	Sawirku waa diyaar. Kaydi bogga si uu u muuqdo.	እቲ ስእሊ ድሉው እዩ። ንኽርአ ገጽኩም ዓቅቡ።
 Edit offering	ምርት ወይም አገልግሎት አስተካክል	Oomisha ykn tajaajila gulaali	Wax ka beddel alaabta ama adeegga	ፍርያት ወይ ኣገልግሎት ኣስተኻኽል
 Use up to 20 items per inquiry.	በአንድ ጥያቄ እስከ 20 ዕቃዎች ይምረጡ።	Gaaffii tokkoof hanga meeshaalee 20 filadhu.	Hal weydiin ku dar ugu badnaan 20 shay.	ኣብ ሓደ ሕቶ ክሳብ 20 ኣቕሑ ምረጹ።
 Video unavailable	ቪዲዮውን ማጫወት አልተቻለም	Viidiyoon kun taphachuu hin dandeenye	Fiidyowgan lama daawan karo	ቪድዮ ክጻወት ኣይከኣለን
-Loading video…	ቪዲዮው እየተጫነ ነው…	Viidiyoon fe’amaa jira…	Fiidyowga waa la soo gelinayaa…	ቪድዮ ይጽዓን ኣሎ…
+Loading video…	ቪዲዮው እየተጫነ ነው…	Viidiyoon fe’amaa jira…	Fiidyowga waa la furayaa…	ቪድዮ ይጽዓን ኣሎ…
 Attach file	ፋይል አያይዝ	Faayila dabali	Ku lifaaq fayl	ፋይል ኣተሓሕዝ
 Save or share file	ፋይሉን አስቀምጥ ወይም አጋራ	Faayila kuusi ykn qoodi	Kaydi ama wadaag faylka	ፋይል ኣቐምጥ ወይ ኣካፍል
 Business map	የንግዶች ካርታ	Kaartaa daldalaa	Khariidadda ganacsiyada	ካርታ ንግድታት
@@ -1061,7 +1061,7 @@ Start with a clearer inquiry.	ደንበኛው ምን እንደሚፈልግ ይ�
 See which items a customer is asking about, so you can spend less time identifying the product and more time helping them.	ደንበኛው ስለየትኛው ዕቃ እንደጠየቀ ከመልእክቱ ጋር ይታያል። የትኛውን ማለቱ እንደሆነ ሳይገምቱ ለጥያቄው መልስ ይስጡ።	Maamilaan meeshaa kam irratti akka gaafatu ergaa isaa wajjin argita. Meeshaa sana adda baasuuf yeroo fixuu mannaa gaaffii isaa deebisi.	Farriinta macmiilka waxaa la socda alaabta uu ka hadlayo. Uma baahnid inaad qiyaasto waxa uu ula jeedo; si toos ah uga caawi waxa uu rabo.	ዓሚል ብዛዕባ ኣየናይ ኣቕሓ ከም ዝሓትት ምስ መልእኽቱ ትርእዩ። ኣየናይ ማለቱ ምዃኑ ከይገመትኩም ንሕቶኡ መልሲ ሃቡ።
 Explore nearby, too.	በአቅራቢያዎም ያሉትን ያግኙ።	Naannoo kees ilaali.	Kuwa kuu dhowna ogow.	ኣብ ቀረባኹም ዘለዉ እውን ርኸቡ።
 Use the map to browse businesses in your area, then open their storefront to see what they offer.	በካርታው የአካባቢዎን ንግዶች ይመልከቱ። ገጻቸውን ከፍተውም ምን እንደሚያቀርቡ ይወቁ።	Daldala naannoo kee kaartaa irratti ilaali. Fuula isaanii banuun waan dhiheessan bari.	Khariidadda ka eeg ganacsiyada deegaankaaga. Boggooda fur si aad u aragto waxa ay bixiyaan.	ንግድታት ከባቢኹም ኣብ ካርታ ተመልከቱ። ገጾም ከፊትኩም እንታይ ከም ዘቕርቡ ፍለጡ።
-Find the businesses you follow on social media.	በማህበራዊ ሚዲያ የሚከታተሏቸውን ንግዶች ያግኙ።	Daldaltoota miidiyaa hawaasaa irratti hordoftu argadhu.	Hel ganacsiyada aad baraha bulshada kala socoto.	ኣብ ማሕበራዊ ሚድያ እትከታተልዎም ንግድታት ርኸቡ።
+Find the businesses you follow on social media.	በማህበራዊ ሚዲያ የሚከታተሏቸውን ሻጮች ያግኙ።	Daldaltoota miidiyaa hawaasaa irratti hordoftu argadhu.	Hel ganacsiyada aad baraha bulshada kala socoto.	ኣብ ማሕበራዊ ሚድያ እትከታተልዎም ነጋዶ ርኸቡ።
 See where they’re located, browse their products and services in professional, organized digital stores, and contact them to order—without getting lost in the clutter of social media posts.	የት እንዳሉ ይወቁ። በተደባለቁ ፖስቶች መሃል ሳይደናገሩ፣ ምርቶቻቸውንና አገልግሎቶቻቸውን በተደራጀና ለማየት በሚያመች የኦንላይን ሱቅ ይመልከቱ። ለማዘዝም በቀጥታ ያነጋግሯቸው።	Eessa akka jiran ilaali. Maxxansa miidiyaa hawaasaa wal keessa makame keessatti osoo hin burjaaja’in, oomishaa fi tajaajila isaanii suuqii onlaayinii bareedaa fi qindaa’e keessatti ilaali; ajajuufis kallattiin isaan qunnami.	Ogow halka ay joogaan, alaabta iyo adeegyada ka eeg dukaamadooda onlaynka ah ee quruxda badan, habaysanna. La xiriir si aad u dalbato, adigoon ku dhex lumin qoraallada badan ee isku dhex yaacsan baraha bulshada.	ኣበይ ከም ዝርከቡ ፍለጡ። ኣብ ዝተሓዋወሰ ፖስት ከይተደናገርኩም፣ ፍርያቶምን ኣገልግሎታቶምን ኣብ ዝተሰርዐን ንምርኣይ ዝጥዕምን ድኳን ኦንላይን ርኣዩ። ንምእዛዝ ድማ ብቐጥታ ተወከሱዎም።
 Browse local businesses, without the clutter.	የአካባቢዎ ንግዶች የሚያቀርቡትን በቀላሉ ይመልከቱ።	Waan daldaltoonni naannoo kee dhiheessan salphaatti ilaali.	Si fudud u eeg waxa ganacsiyada kuu dhow ay kuu hayaan.	ንግድታት ከባቢኹም እንታይ ከም ዘቕርቡ ብቐሊሉ ርኣዩ።
 Discover businesses on the map or open a store you already follow. Browse their products and services together, with photos, videos and details in one place.	በካርታው አዳዲስ ንግዶችን ያግኙ፣ ወይም የሚከታተሉትን ንግድ ገጽ ይክፈቱ። ምርቶችንና አገልግሎቶችን ከፎቶ፣ ከቪዲዮና ከዝርዝር መረጃ ጋር በአንድ ቦታ ይመልከቱ።	Kaartaa irraa daldaltoota haaraa argadhu; yookaan fuula daldala duraan hordoftuu bani. Oomishaa fi tajaajila isaanii suuraa, viidiyoo fi ibsa waliin bakka tokkotti ilaali.	Khariidadda ka hel ganacsiyo cusub ama fur bogga ganacsi aad hore ula socotay. Alaabta, adeegyada, sawirrada, fiidyowyada iyo faahfaahinta hal meel ka eeg.	ኣብ ካርታ ሓደስቲ ንግድታት ርኸቡ፣ ወይ ገጽ ናይቲ ድሮ እትከታተልዎ ንግዲ ክፈቱ። ፍርያትን ኣገልግሎታትን ምስ ስእሊ፣ ቪድዮን ዝርዝር ሓበሬታን ኣብ ሓደ ቦታ ተመልከቱ።
@@ -1077,7 +1077,7 @@ Enter a color like #087F75.	እንደ #087F75 ያለ የቀለም ኮድ ያስ�
 Color	ቀለም	Halluu	Midab	ሕብሪ
 Color strength	የቀለሙ ጥንካሬ	Cimina halluu	Xoogga midabka	ጽዓት ሕብሪ
 Brightness	ብሩህነት	Ifa	Iftiin	ብርሃን
-Transport & delivery	የዕቃ ማጓጓዣ	Geessituu meeshaalee	Rarista iyo gaarsiinta	መጓዓዝያ ኣቕሑ
+Transport & delivery	የዕቃ ማጓጓዣ	Geejjibaa fi geessuu	Rarista iyo gaarsiinta	መጓዓዝያ ኣቕሑ
 Transport dispatch	የማጓጓዣ አስተባባሪዎች	Qindeessitoota geejjibaa	Isku-duwayaasha gaadiidka	ኣወሃሃድቲ መጓዓዝያ
 Let us arrange your delivery	ዕቃዎን የሚያደርስልዎ እንፈልግ	Meeshaa keessan kan geessu isiniif barbaanna	Aan kuu helno cid alaabta kuu qaadda	ኣቕሑኹም ዘብጽሕ ንድለየልኩም
 Tell us where your goods need to go. Our team will help find a carrier and arrange the details.	ዕቃዎ ከየት ተነስቶ ወዴት እንደሚደርስ ይንገሩን። የሚያጓጉዝልዎ ፈልገን ዝርዝሩን እናስተባብራለን።	Meeshaan keessan eessaa ka'ee eessa akka ga'u nuuf himaa. Geejjibaa isiniif barbaadnee haala itti geeffamu qindeessina.	Noo sheeg meesha alaabta laga qaadayo iyo meesha la geynayo. Waxaan kuu raadineynaa cid qaadda, faahfaahintana waan kula diyaarineynaa.	ኣቕሑኹም ካበይ ናበይ ክበጽሕ ከም ዘለዎ ንገሩና። ዘጓዕዘልኩም ደሊና ነቲ ዝርዝር ነወሃህዶ።

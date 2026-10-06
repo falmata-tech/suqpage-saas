@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import sharp from "sharp";
 import { chromium, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { createUiText, languageNames } from "../lib/i18n/core.ts";
 
 // Local-only, uniquely named disposable owner. Never modify a demo or real owner.
 process.loadEnvFile(".local/supabase-runtime.env");
@@ -34,11 +35,8 @@ async function call(path, body) {
   assert.equal(r.status, 200, JSON.stringify(data));
   return data;
 }
-await call("signup", { name: "Mobile Audit Owner", phone: "+251911000123",
-  businessName: "Mobile Workflow Audit", businessCategory: "agriculture-growers",
-  consent: true, idempotencyKey: crypto.randomUUID() });
-let home = await call("owner/home");
-const handle = home.shop.handle;
+let home;
+let handle;
 const browser = await chromium.launch();
 const errors = [];
 const checks = [];
@@ -46,6 +44,23 @@ try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.route("https://tile.openstreetmap.org/**", r => r.abort());
   const page = await context.newPage();
+  page.on("response", async response => {
+    if (response.status() >= 400 && response.url().startsWith(api + "owner/"))
+      fs.writeFileSync(out + "/owner-failure.json", JSON.stringify({ path: new URL(response.url()).pathname, status: response.status(), response: await response.json().catch(() => null) }, null, 2), { mode: 0o600 });
+  });
+  let locale = "en";
+  let t = createUiText({});
+  async function selectLanguage(next) {
+    await page.getByRole("button", { name: t("Language"), exact: true }).click();
+    await page.getByRole("radio", { name: languageNames[next], exact: true }).click();
+    locale = next;
+    t = createUiText(next === "en" ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${next}.json`, "utf8")));
+    await page.getByRole("button", { name: t("Close"), exact: true }).last().click();
+  }
+  async function localizedCapture(state) {
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${state}/${locale}: no overflow`);
+    await page.screenshot({ path: `${out}/${state}-${locale}-phone.png` });
+  }
   page.on("pageerror", e => errors.push(e.message));
   await page.goto(web + "/account");
   await page.getByLabel("Email", { exact: true }).fill(email);
@@ -55,17 +70,62 @@ try {
   assert.equal(login.error, null);
   await page.getByLabel("Verification code", { exact: true }).fill(login.data.properties.email_otp);
   await page.getByRole("button", { name: "Verify code", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Your page", exact: true })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole("button", { name: "Create your business page", exact: true })).toBeVisible({ timeout: 30000 });
+  await page.getByRole("button", { name: "Create your business page", exact: true }).click();
+  for (const next of ["en", "am", "om", "so", "ti"]) {
+    if (next !== locale) await selectLanguage(next);
+    await expect(page.getByLabel(t("Your name"), { exact: true })).toBeVisible();
+    await expect(page.getByLabel(t("Account phone"), { exact: true })).toBeVisible();
+    await expect(page.getByLabel(t("Business name"), { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: t("Create your business page"), exact: true })).toBeDisabled();
+    await localizedCapture("essential-setup");
+  }
+  await selectLanguage("en");
+  await page.getByLabel("Your name", { exact: true }).fill("Mobile Audit Owner");
+  await page.getByLabel("Account phone", { exact: true }).fill("+251911000123");
+  await page.getByLabel("Business name", { exact: true }).fill("Mobile Workflow Audit");
+  await page.getByRole("button", { name: "Farms, livestock & feed", exact: true }).click();
+  await page.getByRole("button", { name: "I agree to the Terms and Privacy Policy", exact: true }).click();
+  await page.getByRole("button", { name: "Create your business page", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Edit", exact: true })).toBeVisible({ timeout: 30000 });
+  home = await call("owner/home");
+  handle = home.shop.handle;
+  assert.equal(home.shop.status, "draft");
+  assert.equal(home.shop.products.length, 3);
+  assert.ok(home.shop.cover && home.shop.videoUrl && home.shop.contacts.website);
+  await expect(page.getByLabel("About the business", { exact: true })).toHaveCount(0);
+  await expect(page.getByText(home.shop.name, { exact: true })).toBeVisible();
+  for (const item of home.shop.products)
+    await expect(page.getByRole("button", { name: item.name, exact: true })).toBeVisible();
+  assert.equal((await fetch(api + "shops/" + handle)).status, 404);
+  await page.screenshot({ path: out + "/initial-starter-preview-phone.png" });
+  for (const next of ["en", "am", "om", "so", "ti"]) {
+    if (next !== locale) await selectLanguage(next);
+    await expect(page.getByRole("button", { name: t("Edit"), exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: t("Page color"), exact: true })).toBeVisible();
+    await expect(page.getByText(home.shop.name, { exact: true })).toBeVisible();
+    for (const item of home.shop.products)
+      await expect(page.getByRole("button", { name: item.name, exact: true })).toBeVisible();
+    await localizedCapture("initial-starter-preview");
+  }
+  await selectLanguage("en");
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await expect(page.getByLabel("About the business", { exact: true })).toBeVisible();
+  checks.push("real first signup opens complete styled private sample before editing; setup and preview work in all five languages with merchant values unchanged");
   // Navigation preserves the browser-preview's intentionally memory-only session.
   async function owner(label) {
     await page.getByRole("tab", { name: "Overview", exact: true }).click();
     await page.getByRole("button", { name: label, exact: true }).click();
   }
-  await page.getByRole("button", { name: "Your page", exact: true }).click();
   const about = "Locally tested repairs and crafted goods, available by appointment.";
   await page.getByLabel("About the business", { exact: true }).fill(about);
-  for (const label of ["Email", "WhatsApp", "Telegram", "TikTok", "Instagram", "Facebook", "Website"])
-    await page.getByLabel(label, { exact: true }).fill("");
+  for (const label of ["Email", "WhatsApp", "Telegram", "TikTok", "Instagram", "Facebook", "Website"]) {
+    const field = page.getByLabel(label, { exact: true });
+    // Exercise the same deletion events a person generates in React Native Web.
+    await field.press("ControlOrMeta+A");
+    await field.press("Backspace");
+    await expect(field).toHaveValue("");
+  }
   await page.getByLabel("Phone", { exact: true }).fill("+251911000123");
   const image = await sharp({ create: { width: 300, height: 300, channels: 3, background: "#e45b17" } }).png().toBuffer();
   async function choosePhoto(button) {
@@ -91,6 +151,10 @@ try {
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Saved", { exact: true }).filter({visible:true})).toBeVisible({ timeout: 30000 });
   assert.equal((await call("owner/home")).draft.content.about, about);
+  const savedContacts = (await call("owner/home")).draft.content.contacts;
+  assert.equal(savedContacts.phone, "+251911000123");
+  for (const key of ["email", "whatsapp", "telegram", "tiktok", "instagram", "facebook", "website"])
+    assert.equal(savedContacts[key], "", `cleared ${key} persists after save`);
   assert.equal((await fetch(api + "shops/" + handle)).status, 404);
   checks.push("private unsaved preview, gallery, contacts, save and draft privacy");
   await owner("Products & services");
@@ -131,6 +195,9 @@ try {
   await expect(page.getByText("Saved", { exact: true }).filter({visible:true})).toBeVisible({ timeout: 30000 });
   assert.equal((await call("owner/business")).proposal.city, "Hawassa");
   await owner("Your page");
+  await expect(page.getByLabel("Phone", { exact: true })).toHaveValue("+251911000123");
+  for (const label of ["Email", "WhatsApp", "Telegram", "TikTok", "Instagram", "Facebook", "Website"])
+    await expect(page.getByLabel(label, { exact: true })).toHaveValue("");
   await page.getByRole("button", { name: "Publish page", exact: true }).click();
   await expect(page.getByRole("button", { name: "Publish page", exact: true })).toHaveCount(0, { timeout: 30000 });
   const published = await fetch(api + "shops/" + handle);
@@ -150,6 +217,6 @@ try {
   const database = new URL(process.env.SUQPAGE_POSTGRES_URL);
   assert.equal(database.hostname, "127.0.0.1"); assert.equal(database.port, "54322");
   const pool = new pg.default.Pool({ connectionString: database.href });
-  try { await pool.query("UPDATE businesses SET status='draft' WHERE id=$1 AND handle=$2", [home.shop.id, handle]); }
+  try { if (home) await pool.query("UPDATE businesses SET status='draft' WHERE id=$1 AND handle=$2", [home.shop.id, handle]); }
   finally { await pool.end(); await browser.close(); }
 }

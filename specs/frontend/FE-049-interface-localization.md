@@ -4,7 +4,7 @@ title: Five-language interface
 status: done
 related: [FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
 owners: [product, frontend]
-last_updated: 2026-09-23
+last_updated: 2026-10-06
 change_level: L2
 ---
 
@@ -118,3 +118,25 @@ owner management and manual transport support. The local catalogs now contain
 claim that every retained phrase has received native-speaker review. Merchant
 content and canonical status values remain unchanged. Revised phone/desktop
 screenshots and checks are tracked under FE-052.
+
+## S67 — contextual copy pass before Android rebuild (2026-10-06)
+
+Owner authorizes latest mobile build and language review. Review active UI labels
+and prose by purpose, preserve English narrative/merchant values, and correct
+cross-language contamination or confusing action terms. Technical words may retain
+English where clearer. Five locales must have catalog coverage, literal placeholder
+preservation and readable mobile screens across public and owner workflows. No
+claim of independent human/native-speaker signoff. Verify localized preview-first
+setup and inquiry/transport distinctions; this is L1 copy, not domain behavior.
+
+S67 focus regression: GIVEN a language sheet is closed after switching languages
+WHEN an owner focuses and edits a field THEN hidden dialog content cannot capture
+focus or discard edits. Hidden native/browser sheets must unmount their focus
+boundary; retain open-sheet semantics. Verify actual deletion, saved empty contacts,
+editor re-entry and first publication after switching all five languages.
+
+S67 verified local gates: focused five-language setup/preview and persisted
+editing/publication regression passes; full check, production build/trace, provider
+smoke and 11 acceptance workflows pass. Release audit remains failed solely on
+the approved two-root internal-APK exception; final native artifact checks pending.
+See S67 in TRACEABILITY for evidence boundaries and protected capture paths.

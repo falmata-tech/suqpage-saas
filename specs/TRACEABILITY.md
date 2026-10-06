@@ -941,3 +941,30 @@ clean 1,493-file archive are ready; the original one-artifact exception expired
 with finished build 2018cc70. Owner renewal for the next exact source is pending
 in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
 verification or iOS association is claimed. Private receipts: .local/app-links/.
+
+## S67 — preview-first setup and contextual locales (FE-049 / FE-051 / FE-053 / DEP-042)
+
+Native Setup passes the preview view into OwnerScreen/PageEditor; normal editor
+entries remain forms. Shared catalogs clarify inquiry actions, transport, retry
+and video-loading terminology while preserving merchant values. Hidden Sheet
+unmounts its focus boundary. Real five-language browser tests reproduced focus
+being retained on Close after locale switches; the lifecycle correction passes
+actual contact deletion/save/re-entry and first publication without weakening
+publication readiness. No backend initializer, schema or hosted Auth change.
+
+Focused evidence: starter PostgreSQL completeness/privacy/rollback tests pass;
+mobile API/contracts, link/map/video/build tests pass. Eight localization tests
+cover all 1,257 keys in four non-English catalogs. Five-language public copy
+capture passes 69 web/Expo viewport states. Updated capture-mobile-owner.mjs
+passes essential setup and initial preview in all five locales, literal merchant
+values, photo upload/private draft, persisted contact removal, service creation/
+update/hide, city save and first publication. Screenshots and protected logs:
+.local/rebuild-s67/, .local/mobile-owner-review/, .local/copy-s63/screens/.
+Browser and catalog checks are not independent native-speaker/device signoff.
+Final full check passes. Production build/66 trace privacy, provider-backed HTTP
+smoke (after one isolated service-start retry), release behavioral/security gates
+and all 11 production-mode acceptance workflows pass. The unchanged release audit
+fails only on the two approved tooling roots (20 high, zero critical); final Hermes
+export excludes both from 1,569 runtime sources. Acceptance server emits canceled
+stream messages only after the passing suite and shutdown. Rebuilt APK/signature/
+OS verification remain pending under the renewed one-artifact exception.

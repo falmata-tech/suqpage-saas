@@ -2611,3 +2611,45 @@ clean 1,493-file archive are ready; the original one-artifact exception expired
 with finished build 2018cc70. Owner renewal for the next exact source is pending
 in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
 verification or iOS association is claimed. Private receipts: .local/app-links/.
+
+
+S67 — approved Android rebuild, contextual language review and preview-first setup
+(FE-049 / FE-051 / FE-053 / DEP-042, L1 UI plus L3 build)
+- [x] Owner renews one internal APK exception and approves latest mobile changes.
+  Latest direction also asks for contextual copy in all five locales and immediate
+  styled private sample preview after essential setup. Preserve deno.lock.
+- [x] Review shared UI catalogs by usage/context; correct clear wording
+  defects, keeping merchant text literal. Verify both starter flows; make mobile
+  signup open its already-generated private sample preview before editing.
+- [x] Captured five-language public/owner/setup states; preserved preview/privacy
+  and product editing. Focused/type/spec, full check and 11 acceptance workflows
+  pass. All release stages before the unchanged two-root audit pass; approved
+  single-artifact exception remains bounded (20 high, zero critical).
+- [ ] CURRENT: commit exact source, inspect clean EAS archive/public settings and rebind the
+  renewed one-artifact exception to latest approved source. No advisory expansion.
+- [ ] Build one free Expo internal APK; verify final certificate/runtime/manifest,
+  install and check native links/maps/media/locales and user workflows.
+- [ ] Record artifact/download/evidence/limits. Google Play and iOS remain deferred.
+Master §§11, 15, 18 and 19 affected. No hosted Auth/schema change, paid build,
+invitation sending, signing-key replacement or automatic starter publication.
+
+S67 diagnosis: multilingual owner capture found a closed language sheet retaining
+focus on Close and preventing actual field edits in React Native Web. Correct the
+hidden Sheet lifecycle before artifact publication; regression asserts real
+contact deletion/save/re-entry and publication after all five locale switches.
+No publication-readiness rule is weakened.
+
+S68 — logo-led demo accents (FE-054, one-time demo data correction)
+- [x] Inventory authorized demo logos/briefs and existing saved palette
+  values. Keep one selectable accent with derived shades; preserve Suqpage chrome,
+  photos, videos, content, accounts and non-demo businesses.
+- [x] Prepared a per-demo color manifest and representative private desktop/390/320
+  web/native previews using the existing shared palette; record asset authority
+  and review evidence in the showroom project folders.
+- [x] Owner explicitly approves the linked logo-matched accents for all 66 demos.
+- [ ] CURRENT: apply approved accents through scoped/versioned saved profiles with protected
+  before-state and rollback evidence, verify public/native projection and all demo
+  coverage. Refresh seed defaults only if a concrete repeatability requirement is
+  confirmed. No new colors-per-owner setting, schema, media or dependencies.
+Dependency: the current S67 Android source freeze/rebuild continues independently;
+these are server-stored accents consumed by the same app, not new APK functionality.
