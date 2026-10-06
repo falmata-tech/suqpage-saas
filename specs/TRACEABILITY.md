@@ -835,5 +835,11 @@ contains 1,561 sources and excludes server runtimes and the two affected tool
 packages. Expo identity, free plan and preview public configuration readback pass.
 The patched isolated `npm run release:web` passes end to end, including provider
 smoke, scale, migration, security and zero-finding web audit.
-Private receipts: `.local/release-s62/`. Signed APK, native-device and patched-web
-publication evidence remain pending; an export is not a delivered APK.
+Patched web deploy `6ac52555a812ad5c89621401` passes exact Linux artifact checks,
+28 live checks and 1440/390/320 rendering checks. EAS archive inspection caught
+the literal `.git` exclusion mismatch; 4550be8 corrects it with an ignore-semantics
+regression. The corrected archive has 1,482 files and no checked private paths or
+Git metadata. Expo accepted build `2018cc70-edef-472c-8aca-06db2699fe84`,
+preview/internal, version 0.1.0 (1), existing signing credential and production API.
+Private receipts: `.local/release-s62/`. APK completion and native-device evidence
+remain pending; a submitted build is not a delivered APK.

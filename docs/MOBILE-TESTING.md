@@ -1,8 +1,9 @@
 # Test the Suqpage mobile app
 
-Local preview, September 28, 2026. FE-053 / BE-044 / DEP-042 remain in progress.
-The published website is unchanged. This preview uses the local PostgreSQL/Supabase
-runtime and real API workflows; it does not connect to production accounts.
+Local development uses PostgreSQL/Supabase and real API workflows. The S62 Expo
+preview APK uses the live Suqpage API and production accounts; see
+[MOBILE-DISTRIBUTION.md](MOBILE-DISTRIBUTION.md) for build status. FE-053 / BE-044 /
+DEP-042 remain in progress until signed-device checks are complete.
 
 ## Browser
 
@@ -61,7 +62,7 @@ use the web dashboard for administration.
 Try Market search/filter/map markers, Featured, a showroom's image/video gallery,
 a direct inquiry and a grouped inquiry. Then sign in, edit a draft page/location,
 create an offering, submit a video request, view inquiries, open owner support,
-and sign out. Buying assistance has its own guest chat session and End chat;
+and sign out. Transport assistance has its own guest chat session and End chat;
 it does not grant owner access. Local messages require a staff member in the local
 web dashboard to answer them.
 
@@ -79,10 +80,12 @@ MOBILE-MAP-RESEARCH.md. Physical-phone gestures, preview interaction, YouTube
 playback/fullscreen and offline recovery remain explicit checks. Support attachments now have scoped API regression evidence; browser/device
 interaction verification remains part of the release audit.
 
-Production dependency audit reached zero advisories after the bounded decoder/UUID
-compatibility fix. Full npm run check passed before the MapLibre change. Focused
-map tests and native gates are recorded in MOBILE-MAP-RESEARCH.md and TRACEABILITY.
-No signed tester APK, store submission or production API rollout is claimed yet.
+Current release status: the web/API is deployed with a clean isolated web audit.
+The full mobile toolchain audit retains two upstream advisory roots under the
+owner-approved S62 one-artifact testing exception. Focused map checks and prior
+native evidence are recorded in MOBILE-MAP-RESEARCH.md and TRACEABILITY. The S62
+managed APK is submitted; completion, signature and native-device checks remain
+required. No store submission is claimed.
 
 Setup references: [Expo device testing](https://docs.expo.dev/get-started/start-developing/),
 [Android acceleration](https://developer.android.com/studio/run/emulator-acceleration),

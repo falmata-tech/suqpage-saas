@@ -41,9 +41,8 @@ Expo target is `@falmatad/suqpage`, preview/internal APK, production API. The cu
 full native audit remains failed: braces 3.0.3 and node-forge 1.4.0 produce 20 graph
 findings. No compatible upstream fix is offered. The fresh Android export maps
 1,561 sources and excludes both packages; Expo's standard Metro runtime loader is
-expected. This is not final APK/device evidence. A narrow one-artifact exception
-is pending owner decision; it is not inferred from deployment approval. No build,
-paid service, Play submission or invitation has been initiated.
+expected. This is not final APK/device evidence. The owner explicitly approved the narrow one-artifact exception in S62.
+All non-audit signing/artifact/device gates remain required; Play is deferred.
 
 ## Rollout and rollback
 
@@ -89,6 +88,30 @@ local extraction lost ZIP symlinks; the harness now preserves safe relative link
 Original harness failures and the rollback are retained in private evidence.
 Final live checks above verify the real hosted runtime.
 
-The Expo testing APK remains blocked by the pending explicit two-advisory
-exception or upstream remediation. No build/download link, native device pass,
-Google Play upload or Git push is claimed. `deno.lock` is unrelated and untouched.
+S62 supersedes the pending exception above: the owner explicitly approved it.
+No native-device pass or completed APK delivery is claimed until its checks finish.
+Google Play and Git push remain outside this delivery. `deno.lock` is untouched.
+
+
+## S62 security patch and Android build continuation
+
+New registry advisories required sharp 0.35.5 / librsvg 2.63.2 and shell-quote
+1.12.0. The full native audit now contains only the two explicitly accepted roots
+(20 high graph findings, zero critical). PNG/JPEG and command-quoting regression
+tests, mobile type/contracts/API/map/video/build checks, locked installation and
+a fresh 1,561-source Android export pass. The isolated web release passes in one
+complete run with zero web audit findings.
+
+The patched web artifact is live: deploy `6ac52555a812ad5c89621401`, source
+`7a88aa8`, archive SHA-256
+`5875f59e61018088007ca65a4d53cbc208df11811a22db4ff3cef33b4040eab6`.
+Exact Linux handler/image/health/login checks, 28 live checks, responsive checks
+at 1440/390/320 and post-release monitoring pass. No schema or Auth change.
+Previous healthy deploy `6ac519154e7f2c72e452f5be` is the code rollback target.
+
+Android source `4550be8` additionally fixes EAS's literal `.git` ignore check.
+Initial archive inspection caught a shallow Git directory before any upload; the
+corrected 1,482-file archive excludes it and all checked private paths. Regression
+coverage is in `scripts/test-mobile-build-config.cjs`. The managed preview APK
+submission uses the existing signing credential and free-plan Expo project.
+Private evidence is under `.local/release-s62/`.

@@ -27,7 +27,7 @@ Private signing material remains in EAS and has not been downloaded.
   is deployed and verified in S61.
 - Configure public API origin, Supabase URL/publishable key for the preview environment. No service-role or management key.
 - Verify the signing identity, installed map, email login, photo picker, embedded
-  video, inquiry, owner edits and buying/support conversations on an Android device.
+  video, inquiry, owner edits and transport/support conversations on an Android device.
 
 ## Build types
 
@@ -122,3 +122,12 @@ The owner approved the narrow two-advisory, one-APK exception on 2026-10-06.
 The full audit still fails and remains visible; no new advisory is included.
 Build/signature/device checks still apply. Use the existing preview identity and
 Expo project with the now-verified production API. No Play or paid build.
+
+
+S62 build submitted: [Expo Android build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/2018cc70-edef-472c-8aca-06db2699fe84),
+source `4550be8`, app `com.suqpage.app.preview`, version 0.1.0 (1).
+The provider has accepted it for the existing free-plan project; it is not yet a
+verified download. Use this build's completed Install link only after artifact
+and native-device checks. No invitations were sent. Local development codes still
+appear in the local inbox; this production-connected APK sends sign-in codes to
+the user's actual email.

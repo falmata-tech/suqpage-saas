@@ -2448,9 +2448,10 @@ S62 — Expo internal Android APK (DEP-042 / FE-053 / BE-044, L4 operations)
 - [x] Owner explicitly approved the one-artifact, two-advisory exception; keep
   native audit failed/reportable and Play deferred. Record clean baseline except
   unrelated deno.lock; recheck the exact advisory set and current API health.
-- [ ] CURRENT: verify mobile gates, Expo account/project/public settings and
-  signing; commit this scoped decision and prepare an isolated clean source tree.
-- [ ] Submit one free-tier managed preview APK build, monitor to completion,
+- [x] Verify mobile gates, Expo account/project/public settings and signing;
+  commit the scoped decision and prepare an isolated clean source tree.
+  Evidence: 7a88aa8 / 4550be8, corrected archive inspection and EAS signing readback.
+- [ ] CURRENT: submit one free-tier managed preview APK build, monitor to completion,
   inspect final package/signature/runtime configuration and checksum.
 - [ ] Install on the Suqpage emulator and verify native visitor/owner workflows;
   use isolated fixtures for mutations, retain explicit real-device limits.
@@ -2466,3 +2467,8 @@ the affected web artifact; no schema change. Private evidence: `.local/release-s
 S62 upload inspection caught EAS retaining its shallow `.git` directory before any
 Android upload. Correct the exact-path ignore rule, add a regression, and inspect
 a new clean archive before submitting. This changes packaging only.
+
+S62 production web patch delivered: `6ac52555a812ad5c89621401`, 28 live checks
+and three responsive checks pass. Android build
+`2018cc70-edef-472c-8aca-06db2699fe84` is accepted in Expo's queue. Source 4550be8;
+no completed APK/device pass yet. Do not submit a duplicate while this build exists.
