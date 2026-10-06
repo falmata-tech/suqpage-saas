@@ -200,3 +200,30 @@ S61 web/API is deployed and independently verified at https://suqpage.com, deplo
 `6ac519154e7f2c72e452f5be`. Production schema59, protected routes, transport
 sessions and native market/featured/shop endpoints pass live checks. Expo APK
 publication still awaits its explicit risk decision/remediation and device gates.
+
+## S62 — approved one-artifact Expo testing exception
+
+On 2026-10-06 the owner explicitly accepted the reviewed exception for one
+preview/internal Android APK in `@falmatad/suqpage`, using the deployed production
+API. Limit it to braces 3.0.3 / GHSA-vfj7-8cjw-p6xm and node-forge 1.4.0 /
+GHSA-86w9-cpqp-85rv in the existing reviewed tool graph. Continue to report the full
+audit as failed. Recheck the advisory set and lockfile; any new advisory or
+dependency change needs reassessment. All other gates remain required: mobile
+type/contracts/API/map/video/build checks, trusted clean source, public settings,
+existing signing identity, APK inspection and native-device verification.
+
+Use Expo internal distribution only; no Play submission, paid build, invitations,
+provider-secret change or application-data migration. The exception expires with
+this delivery and is not a general audit bypass. Readiness is met for operations;
+S61 web/API gates and schema59 remain verified. Master section22 and the S62
+checklist record the approved scope and actual artifact state.
+
+S62 fresh-audit reassessment: the registry now reports sharp <0.35.5 and
+shell-quote >=1.8.4 <1.11.0 in addition to the approved advisories. These new
+findings are NOT accepted. Pin sharp 0.35.5 (including Next's override) and
+shell-quote 1.12.0 (above the 1.11.0 fix floor), preserving SDK/application APIs and other lock versions.
+Use `scripts/test-release-dependency-security.cjs` to verify blocked comment/newline injection, ordinary Unicode quoting, installed
+librsvg >=2.63.2, PNG/JPEG transformations, locked install and audit reduction to
+only the two approved roots. Re-export mobile and run native build gates; rebuild
+and verify the affected web runtime before declaring the patch deployed. No
+provider, database, feature or UI change is part of this remediation.

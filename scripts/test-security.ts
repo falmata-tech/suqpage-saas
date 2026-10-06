@@ -67,7 +67,7 @@ async function main() {
     assert.equal(Number((await db.prepare("SELECT COUNT(*) count FROM inquiries").get() as any).count), inquiriesBeforeInvalidContact);
     assert.throws(() => verifyImage(Buffer.from("<html>bad</html>"), "text/html"), /Only valid/);
     const sharp = (await import("sharp")).default;
-    assert.equal(sharp.versions.sharp, "0.35.4");
+    assert.equal(sharp.versions.sharp, "0.35.5");
     const png = await sharp({ create: { width: 1, height: 1, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } } }).png().toBuffer();
     assert.equal(verifyImage(png, "image/png").ext, "png");
     const saved = await saveUploadedImage(new File([new Uint8Array(png)], "safe.png", { type: "image/png" }), "", "product");

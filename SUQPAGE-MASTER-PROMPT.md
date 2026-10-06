@@ -1681,8 +1681,9 @@ and native tooling; the selected full audit includes build dependencies at the
 existing severity. Normal monorepo/mobile installs retain the guarded compatibility
 adapter and unchanged full native audit. S61 verifies the web check chain, all 11
 isolated acceptance workflows, release stages, private backup/migration rehearsal
-and exact Linux artifact. Android's Expo internal APK is pending its tooling-risk
-decision and native-device gates; Google Play is deferred. Rollout evidence and
+and exact Linux artifact. The owner approved S62's one-artifact Expo internal-testing exception for the two
+documented tooling advisories; the audit remains failed/reportable. Signing, APK
+inspection and native-device gates remain required; Google Play is deferred. Rollout evidence and
 current publication state: `docs/SUQPAGE-RELEASE-2026-10-06.md`.
 
 FE-054 adds `test:storefront-accent` to the full check: validation, 4,096 palette
@@ -1710,7 +1711,8 @@ S59 also patches source-map-js to 1.2.2; invalid/nested source-map offset and no
 mapping regressions pass. The owner approved coordinated web/mobile release and
 Expo preview/production public runtime settings are verified. Web/API rollout
 completed in S61 with 28 live checks and three responsive browser checks; Expo
-artifact distribution remains blocked by its unchanged audit and device gates.
+artifact distribution proceeds under the S62 one-artifact tooling exception;
+signing, artifact and native-device verification remain required.
 
 The deployed S26/S27/S28 workflows use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
 `test:business-starters`,

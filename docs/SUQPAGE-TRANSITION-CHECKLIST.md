@@ -2443,3 +2443,22 @@ and an explicitly dummy unused Blobs context. Actual production checks then pass
 Initial rollback and test-harness extraction/context limitations remain recorded.
 Android: explicit two-advisory internal-testing exception still pending; no APK
 build/upload or Play submission. Unrelated `deno.lock` remains untouched.
+
+S62 — Expo internal Android APK (DEP-042 / FE-053 / BE-044, L4 operations)
+- [x] Owner explicitly approved the one-artifact, two-advisory exception; keep
+  native audit failed/reportable and Play deferred. Record clean baseline except
+  unrelated deno.lock; recheck the exact advisory set and current API health.
+- [ ] CURRENT: verify mobile gates, Expo account/project/public settings and
+  signing; commit this scoped decision and prepare an isolated clean source tree.
+- [ ] Submit one free-tier managed preview APK build, monitor to completion,
+  inspect final package/signature/runtime configuration and checksum.
+- [ ] Install on the Suqpage emulator and verify native visitor/owner workflows;
+  use isolated fixtures for mutations, retain explicit real-device limits.
+- [ ] Record build/source IDs, evidence and managed tester download instructions.
+  No invitations, Play upload or misleading all-features/device claims.
+
+S62 audit correction: newly reported sharp/shell-quote advisories are patched.
+Image/quoting regressions, mobile checks and the fresh Android export pass; the
+remaining full audit matches exactly the two approved roots. The patched isolated
+web release passes end to end with zero web audit findings. Rebuild and publish
+the affected web artifact; no schema change. Private evidence: `.local/release-s62/`.

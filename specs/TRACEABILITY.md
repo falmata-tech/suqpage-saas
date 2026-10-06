@@ -820,3 +820,20 @@ plus packaging fix `8361f13`, schema59; 28 live API/page/boundary checks and
 relative ZIP symlinks. The first rollout was restored before correction; draft
 configuration isolation and explicit local cache fixture limits are recorded in
 docs/SUQPAGE-RELEASE-2026-10-06.md. Android distribution remains pending.
+
+
+## S62 — internal APK exception and patched dependencies (DEP-042)
+
+Owner explicitly approved one Expo internal APK with the unchanged braces /
+node-forge advisories. The audit remains failed: 20 high graph findings from those
+two roots, no critical findings; no broader exception or Play submission.
+New sharp/shell-quote advisories were remediated with sharp 0.35.5 (librsvg
+2.63.2) and shell-quote 1.12.0. Normal locked install,
+`scripts/test-release-dependency-security.cjs`, security integration, mobile
+type/contracts/PostgreSQL API/build/map/video checks pass. A fresh Android export
+contains 1,561 sources and excludes server runtimes and the two affected tool
+packages. Expo identity, free plan and preview public configuration readback pass.
+The patched isolated `npm run release:web` passes end to end, including provider
+smoke, scale, migration, security and zero-finding web audit.
+Private receipts: `.local/release-s62/`. Signed APK, native-device and patched-web
+publication evidence remain pending; an export is not a delivered APK.

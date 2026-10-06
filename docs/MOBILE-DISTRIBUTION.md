@@ -24,7 +24,7 @@ Private signing material remains in EAS and has not been downloaded.
 
 - Pass the workflow, security, web release and native bundle checks in S50.
 - Deploy and verify `/api/mobile/v1` on the configured API origin. The live site
-  returned 404 during this audit; a build must not be distributed against it yet.
+  is deployed and verified in S61.
 - Configure public API origin, Supabase URL/publishable key for the preview environment. No service-role or management key.
 - Verify the signing identity, installed map, email login, photo picker, embedded
   video, inquiry, owner edits and buying/support conversations on an Android device.
@@ -115,3 +115,10 @@ remain required. No managed build/download link exists yet. See
 S61 web prerequisite is complete: production mobile market/featured/showroom
 endpoints and unauthenticated owner/session denial are verified on suqpage.com.
 The internal APK audit decision and signed-device gates remain open.
+
+## S62 — owner-approved Expo testing build
+
+The owner approved the narrow two-advisory, one-APK exception on 2026-10-06.
+The full audit still fails and remains visible; no new advisory is included.
+Build/signature/device checks still apply. Use the existing preview identity and
+Expo project with the now-verified production API. No Play or paid build.
