@@ -1289,8 +1289,8 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-panel-filters[hidden] { display: none; }
 .discovery-panel-filters label { display: grid; grid-template-columns: minmax(0,1fr); align-items: start; gap: 5px; font-size: 12px; font-weight: 650; color: #52645a; }
 .discovery-panel-filters select { width: 100%; min-width: 0; height: 44px; border: 1px solid #d4dcd9; border-radius: 7px; background-color: #fff; color: #283a33; font-size: 12px; text-overflow: ellipsis; }
-.discovery-drawer-workbench .discovery-search-panel .discovery-search-workspace { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; overflow: hidden; padding: 0 10px 6px; }
-.discovery-drawer-workbench .discovery-search-panel .discovery-search-workspace:has(> .discovery-pagination) { grid-template-rows: minmax(0, 1fr) auto; }
+.discovery-drawer-workbench .discovery-search-panel .discovery-search-workspace { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; overflow: hidden; padding: 0 10px 6px; }
+.discovery-drawer-workbench .discovery-search-panel .discovery-search-workspace:has(> .discovery-pagination) { grid-template-rows: auto minmax(0, 1fr) auto; }
 .discovery-search-panel .discovery-search-result-types { margin: 0 0 10px; }
 .discovery-search-panel .discovery-search-result-types a { flex-direction: column; padding: 6px 4px; gap: 3px; font-size: 11px; text-align: center; }
 .discovery-search-panel .discovery-search-result-types a span { max-width: 100%; overflow-wrap: anywhere; }
@@ -1343,3 +1343,35 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-panel-filters .discovery-place-input select { flex:1; min-width:0; height:44px; padding:6px; border:0; font-size:12px; font-weight:500; border-radius:7px; }
 .discovery-place-input button { display:grid; place-items:center; flex:none; width:30px; min-height:44px; padding:0; border:0; border-left:1px solid #e5eae7; border-radius:0 7px 7px 0; background:#fff; color:#52645a; cursor:pointer; }
 .discovery-place-input button:focus-visible { outline:3px solid #c93600; outline-offset:-3px; }
+
+/* Offering-only results: a compact heading replaces result-type controls. */
+.discovery-search-workspace > .discovery-results-heading { margin: 0; padding: 10px 12px 6px; font-size: 1rem; line-height: 1.3; font-weight: 750; }
+
+/* S56: shared compact header, with results and map tools below it. */
+.discovery-compact-toolbar { position:absolute; z-index:850; top:10px; left:10px; right:10px; max-width:680px; display:flex; align-items:center; gap:6px; min-width:0; }
+.discovery-compact-toolbar .discovery-command-search { flex:1; min-width:0; padding:0; border:0; }
+.discovery-compact-toolbar .discovery-search { min-width:0; gap:4px; margin:0; }
+.discovery-compact-toolbar .discovery-search label > svg { display:none; }
+.discovery-compact-toolbar .discovery-search label { min-width:0; min-height:44px; height:44px; padding:0; }
+.discovery-compact-toolbar .discovery-search input { min-width:0; padding:8px; height:42px; font-size:14px; }
+.discovery-compact-toolbar .discovery-search-submit { flex:0 0 44px; width:44px; min-width:44px; min-height:44px; height:44px; padding:0; }
+.discovery-compact-toolbar .discovery-search-submit span { display:none; }
+.discovery-compact-toolbar .discovery-search-clear { flex:0 0 44px; width:44px; min-width:44px; min-height:44px; padding:0; }
+.discovery-results-toggle,.discovery-location-menu > summary { display:flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0; border:1px solid #d4dcd9; border-radius:7px; background:#fff; color:#283a33; cursor:pointer; box-shadow:0 2px 6px #0001; flex:none; }
+.discovery-results-toggle[aria-expanded=true],.discovery-location-menu[data-active=true] > summary { border-color:#c43a00; background:#fff1e9; }
+.discovery-location-menu { flex:none; }
+.discovery-location-menu > summary { list-style:none; position:relative; }
+.discovery-location-menu > summary::-webkit-details-marker { display:none; }
+.discovery-location-menu > summary i { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:#c43a00; }
+.discovery-location-options { position:absolute; top:100%; left:0; right:0; margin-top:6px; display:grid; gap:10px; padding:12px; border:1px solid #d4dcd9; border-radius:8px; background:#fff; box-shadow:0 8px 20px #18372c26; }
+.discovery-location-options label { font-size:13px; font-weight:650; }
+.discovery-location-options select,.discovery-location-options button { min-height:44px; width:100%; min-width:0; border:1px solid #d4dcd9; border-radius:6px; padding:8px; background:#fff; color:#283a33; font-size:14px; }
+.discovery-location-options button { display:flex; align-items:center; justify-content:center; gap:8px; }
+.discovery-results-toggle:focus-visible,.discovery-location-menu > summary:focus-visible { outline:3px solid #c43a00; outline-offset:2px; }
+.public-market-experience .discovery-drawer-workbench > #discovery-search-panel { top:64px; height:calc(100% - 64px); }
+.discovery-drawer-workbench .discovery-floating-tools { top:64px; }
+.discovery-location-options { max-height:min(380px,55dvh); overflow:auto; overscroll-behavior:contain; }
+.discovery-location-options [role=group] > div { display:grid; gap:3px; }
+.discovery-location-options [role=group] strong { font-size:12px; color:#52645a; padding:8px 0 3px; }
+.discovery-location-options [role=group] label { display:flex; align-items:center; gap:8px; min-height:44px; font-size:14px; cursor:pointer; }
+.discovery-location-options input[type=checkbox] { width:18px; height:18px; flex:none; accent-color:#c43a00; }

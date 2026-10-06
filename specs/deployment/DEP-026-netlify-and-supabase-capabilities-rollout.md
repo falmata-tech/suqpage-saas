@@ -2,7 +2,7 @@
 id: DEP-026
 title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
-related: [DEP-039, FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
+related: [DEP-042, DEP-039, FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 owners: [deployment, operations, security]
 last_updated: 2026-09-21
 change_level: L4
@@ -217,3 +217,25 @@ Corrected archive passes Linux/x64 Node 24 PNG transformation and artifact
 privacy/source verification. SHA-256:
 `320b98d144c541ecff23d6c75cbc7b722e4697e815a88afbdf6de3c920b17047`.
 The original archive fails the same test; no application code changed for recovery.
+
+## S61 root web workspace build
+
+The root Next app is intentionally outside the mobile/shared workspace list.
+The CLI selects only child workspaces when invoked at the workspace root, and
+its offline build plan omitted the Next adapter. Invoke from outside the source
+root with an explicit `--cwd` and declare the existing Next adapter in
+`netlify.toml` without pinning/installing it in application dependencies. Retain
+provider-managed adapter versions. Verify the build plan includes its lifecycle,
+then exact archive privacy, native Linux checks and route/API smoke before publish.
+This fixes real deployment selection; it does not move the app or introduce a
+new provider. See DEP-042 for root/shared install and audit isolation.
+
+S61 artifact check found the current adapter stores its handler under a generated
+path instead of the ZIP root. Resolve native modules from the actual packaged
+handler identified by the entry point, not an invented root package.json. Build
+from a canonical filesystem path on macOS to avoid `/var` versus `/private/var`
+layout mismatches. A Mac install also lacks Linux optional Sharp binaries: stage
+only the two Linux/x64 packages already locked by the application, verify tarball
+integrity, and retain the existing output-file inclusions. No version/lock change
+or host-library fallback is permitted. The exact archive must still transform an
+image inside a network-disabled Linux container before deployment.

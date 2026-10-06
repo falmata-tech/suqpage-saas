@@ -1,3 +1,4 @@
+import { isCallbackRequest } from "@/lib/buying-assistance";
 import SupportThreadRefresh from "@/components/SupportThreadRefresh";
 import styles from "@/components/TransportSupport.module.css";
 
@@ -39,7 +40,7 @@ export default async function SupportInbox({
       <div className="dashboard-head">
         <div>
           <span className="eyebrow">{client ? t("Suqpage support") : t("Customer support")}</span>
-          <h1>{client ? t("How can we help?") : (transport ? t("Buying assistance") : t("Support inbox"))}</h1>
+          <h1>{client ? t("How can we help?") : (transport ? t("Transport & delivery") : t("Support inbox"))}</h1>
           {client ? <p>{t("Keep questions and replies together with your Suqpage account.")}</p> : null}
         </div>
         {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">{t("Emergency WhatsApp")}</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">{t("Manage support agents")}</Link> : null}
@@ -47,7 +48,7 @@ export default async function SupportInbox({
       {!client ? <nav className={styles.tabs} aria-label={t("Support queues")}>
         <Link href="/dashboard/support" aria-current={!transport && !help ? "page" : undefined}>{t("All support")}</Link>
         <Link href="/dashboard/support?queue=support" aria-current={help ? "page" : undefined}>{t("Business support")}</Link>
-        <Link href="/dashboard/support?queue=transport" aria-current={transport ? "page" : undefined}>{t("Buying assistance")}</Link>
+        <Link href="/dashboard/support?queue=transport" aria-current={transport ? "page" : undefined}>{t("Transport & delivery")}</Link>
       </nav> : null}
       {transport && !client ? <nav className={styles.tabs} aria-label={t("Request status")}>
         {(["active", "history", "resolved"] as const).map(value => <Link key={value} href={`/dashboard/support?${new URLSearchParams({queue:"transport", status:value, ...(query.q ? {q:query.q} : {})})}`} aria-current={status === value ? "page" : undefined}>{t(value === "active" ? "Active" : value === "history" ? "Chat history" : "Resolved")}</Link>)}
@@ -93,13 +94,13 @@ export default async function SupportInbox({
             <span>
               <small>{conversation.publicRef} · {conversation.businessName}{conversation.participantKind === "visitor" ? t(" · {value1}", { value1: conversation.assistanceCategory === "buying_assistance" ? t("Buying assistance") : conversation.assistanceCategory === "shipment_observation" ? t("Transport") : t("Get help") }) : ""}</small>
               <strong>{conversation.assistanceCategory === "buying_assistance" ? t(conversation.subject) : conversation.subject}</strong>
-              {conversation.assistanceCategory === "buying_assistance" ? <small className={styles.requestExcerpt}>{conversation.requestSummary}</small> : null}
+              {isCallbackRequest(conversation.assistanceCategory) ? <small className={styles.requestExcerpt}>{conversation.requestSummary}</small> : null}
               {transport && conversation.assistanceCategory === "shipment_observation" ? <small>{conversation.transportCompany ? `${t("Transport company")}: ${conversation.transportCompany}` : t("No company selected")}</small> : null}
               <small>{conversation.assignedUserName ? t("Assigned to {value1}", { value1: conversation.assignedUserName }) : t("Waiting for a team member")}</small>
             </span>
             <span>
               {conversation.unread ? <b className="support-unread">{t("New")}</b> : null}
-              <b className={`badge ${conversation.status}`}>{t(conversation.assistanceCategory === "buying_assistance" && conversation.status === "closed" ? conversation.resolvedAt ? "Resolved" : "Chat ended" : conversation.status)}</b>
+              <b className={`badge ${conversation.status}`}>{t(isCallbackRequest(conversation.assistanceCategory) && conversation.status === "closed" ? conversation.resolvedAt ? "Resolved" : "Chat ended" : conversation.status)}</b>
             </span>
           </Link>
         ))}

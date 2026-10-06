@@ -1,3 +1,4 @@
+import { parseAccentColor } from "./storefront-accent";
 import { parseBusinessHandle } from "./business-handle";
 import { parseAccountPhone } from "./account-contacts";
 import crypto from "node:crypto";
@@ -21,6 +22,7 @@ export type SignupInput = {
   businessName: string;
   handle: string;
   businessCategory: BusinessCategoryKey;
+  accentColor?: string;
   idempotencyKey: string;
 };
 
@@ -59,7 +61,10 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
     try { handle = parseBusinessHandle(raw.handle); }
     catch (error) { throw new SignupError(error instanceof Error ? error.message : "Enter a page handle."); }
   }
-  return { name, email, phone, businessName, handle, businessCategory, idempotencyKey };
+  let accentColor: string;
+  try { accentColor = parseAccentColor(raw.accentColor); }
+  catch (error) { throw new SignupError((error as Error).message); }
+  return { name, email, phone, businessName, handle, businessCategory, idempotencyKey, ...(accentColor ? { accentColor } : {}) };
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>, identity: SignupIdentity) {

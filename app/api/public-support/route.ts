@@ -21,7 +21,7 @@ function privateJson(body: unknown, init: ResponseInit = {}) {
   return response;
 }
 function retiredEntry(request: NextRequest) {
-  return request.nextUrl.searchParams.get("channel") === "buying" ? null : privateJson(
+  return ["buying", "transport"].includes(request.nextUrl.searchParams.get("channel") || "") ? null : privateJson(
     {error:"Live support is available from your business dashboard.",code:"public_chat_retired"},
     {status:410,headers:{"Cache-Control":"private, no-store"}},
   );
@@ -95,16 +95,16 @@ export async function POST(request: NextRequest) {
     const body = parsed as Record<string, unknown>;
     if (String(body.website || "").trim()) return privateJson({ error: "Request could not be accepted." }, { status: 400 });
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
-    const { token, cookieName } = await publicSupportSession(request.cookies, "buying");
+    const { token, cookieName, channel } = await publicSupportSession(request.cookies, request.nextUrl.searchParams.get("channel"));
     if (body.attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
     if (body.action === "message" || body.action === "close") {
-      const current = await channelConversation(token, "buying");
+      const current = await channelConversation(token, channel);
       if (body.publicRef !== current.publicRef) throw new SupportError("Request could not be accepted.", "conversation_changed");
       if (body.action === "close") await closePublicSupportConversation(token);
       else await postPublicSupportMessage(token, { message: body.message, idempotencyKey: body.idempotencyKey }, ipHash);
-      return privateJson({ conversation: await channelConversation(token, "buying") });
+      return privateJson({ conversation: await channelConversation(token, channel) });
     }
-    if (body.action !== "start" || body.category !== "buying_assistance") throw new SupportError("Choose how Suqpage can help.", "invalid_channel");
+    if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how Suqpage can help.", "invalid_channel");
     const created = await createPublicSupportConversation({
       category: body.category,
       name: body.name,

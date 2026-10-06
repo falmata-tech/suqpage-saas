@@ -4,7 +4,7 @@ title: Live buying assistance and native client boundaries
 status: accepted
 date: 2026-09-27
 deciders: [Suqpage]
-related: [FE-019, BE-018, FE_BASE, BE_BASE, DEP_BASE, ADR-0009]
+related: [FE-053, BE-044, DEP-042, FE-019, BE-018, FE_BASE, BE_BASE, DEP_BASE, ADR-0009]
 ---
 
 # ADR-0023 — Live buying assistance and native client boundaries
@@ -32,8 +32,9 @@ must precede subscriptions. Never expose support tables through public channels.
 If concurrent chat traffic warrants push, use private change notifications and
 refetch authorized persisted history so disconnects never lose messages.
 
-Prepare npm workspaces with apps/web (Next.js), apps/mobile (Expo/React Native),
-and small shared contracts/domain/localization packages. Keep web SEO and server
+Use npm workspaces with apps/mobile (Expo/React Native) and shared contracts.
+The first implementation keeps Next.js at the repository root; moving it to
+apps/web is a separate migration. Extract additional pure packages only when used. Keep web SEO and server
 code in Next.js. Share pure behavior and DTOs, not DOM components or database code.
 Retain npm; no task-runner dependency until measurable build needs justify one.
 Do not move files while the current release has unreviewed changes. The mobile
@@ -53,7 +54,10 @@ claimed in this increment.
 ## Verification
 
 FE-019/BE-018 map real PostgreSQL and browser evidence. Native preparation and
-migration gates live in docs/MOBILE-MONOREPO-PREP.md. No mobile build is claimed.
+migration gates live in docs/MOBILE-MONOREPO-PREP.md. FE-053/BE-044/DEP-042 now
+record a local Expo preview, isolated PostgreSQL API tests, real local OTP browser
+checks and Android/iOS JavaScript exports. See docs/MOBILE-TESTING.md for native
+device evidence and limits. No signed binary, store release or API rollout is claimed.
 
 ## Sources
 
@@ -61,3 +65,32 @@ migration gates live in docs/MOBILE-MONOREPO-PREP.md. No mobile build is claimed
 - https://docs.expo.dev/guides/monorepos/
 - https://docs.expo.dev/versions/latest/sdk/securestore/
 - https://docs.expo.dev/versions/latest/sdk/maps/
+
+## Native video adapter (S49.2)
+
+Use the Expo-compatible react-native-webview for the official YouTube iframe
+player; app navigation, forms and catalogs remain native. Browser preview uses an
+iframe with the same controlled HTML. Existing URL normalization and staff approval
+remain authoritative. No extraction, autoplay feed or application secret/cookie
+bridge. Supply app identity/referrer, bound load failures, unmount inactive players
+and block outbound native navigation. The owner excludes external handoff, including
+error fallback. Native playback/fullscreen remains a separate device release gate.
+
+Sources: https://docs.expo.dev/versions/latest/sdk/webview/ and
+https://developers.google.com/youtube/terms/required-minimum-functionality#embedded-player-api-client-identity
+
+## Open-source mobile map correction (S50)
+
+Use native MapLibre React Native 11.4.0 with OSM raster tiles on Android/iOS,
+retaining Leaflet for browser preview. This supersedes the unshipped map-only
+WebView candidate and the initial Google SDK adapter. Map is a core interaction;
+native rendering supports gestures and layered React Native UI without a web bridge.
+Keep the existing MapProps/MapControls port and share display-coordinate rules.
+
+Owner explicitly clarified that the SQLite ban concerns application persistence,
+not an SDK's internal tile cache. Permit that cache; no accounts, messages or
+catalog records are stored in it. No Google key/account is needed. Expo Go no
+longer supports this adapter, so rebuild native clients. Respect OSM attribution,
+client identification and caching; no bulk/offline downloads. Public tile hosting
+is best-effort, not an unlimited production SLA. Native compilation/device checks
+remain release requirements. See docs/MOBILE-MAP-RESEARCH.md, FE-053 and DEP-042.

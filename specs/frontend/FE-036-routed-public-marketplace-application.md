@@ -2,9 +2,9 @@
 id: FE-036
 title: Routed public marketplace application
 status: in_progress
-related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025]
+related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053]
 owners: [product, frontend, design]
-last_updated: 2026-08-29
+last_updated: 2026-10-05
 change_level: L2
 ---
 
@@ -94,8 +94,8 @@ client-side and preserve URL-backed market state.
 - Daily featured retains the fixed weekday selector, authoritative schedule,
   broadcast state, future-day redaction, responsive image-led cards, and
   page inspector. Its disclosed sponsor panel sits beside the gallery on
-  desktop; phones show two cards at a time and rotate through the complete pool
-  without scroll, pause, or manual carousel controls. Sponsorship does not imply
+  desktop; all screen sizes show one sponsor at a time with equal six-second
+  automatic turns, Previous/Next and Pause/Resume controls. Sponsorship does not imply
   verification or editorial endorsement.
 - Daily featured is a bounded application workspace, not a document assembled
   from stacked promotional sections. One compact program header owns the H1,
@@ -103,7 +103,7 @@ client-side and preserve URL-backed market state.
   second route-level introduction above the gallery. The weekday ribbon remains
   visible and the cards use ordinary vertical page scrolling.
 - Expanding today’s schedule uses a bounded disclosure. On phones, the compact
-  two-sponsor strip, weekday ribbon, and first image-led cards remain reachable
+  single-sponsor strip, weekday ribbon, and first image-led cards remain reachable
   without a long promotional introduction.
 - The weekday selector is a compact segmented ribbon with icon, weekday, and
   date only; its accessible name retains the complete industry and today state.
@@ -298,3 +298,32 @@ form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
 Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## S51 — equal sponsor rotation (ready, L1)
+
+- GIVEN at least two eligible sponsors WHEN Featured is visible and active THEN
+  one complete card is shown and advances every six seconds, visits each sponsor
+  once per cycle in server order and wraps without weighting a broadcast spotlight.
+  The broadcast agenda/status still names the sponsor assigned to that segment.
+- WHEN a visitor navigates manually THEN the chosen sponsor gets a fresh interval;
+  Pause/Resume and Previous/Next remain labeled, keyboard reachable and touch-sized.
+  Hidden cards cannot receive focus. Browser hover/focus pauses updates; reduced
+  motion starts paused and removes animation, with explicit resume available.
+- WHEN the browser is hidden, native app backgrounds, Featured loses focus or
+  the carousel leaves the viewport THEN timers stop. Returning starts a fresh
+  interval without skipping unseen sponsors. Changing the sponsor pool resets
+  safely; zero/single sponsor shows no useless rotation controls or timer.
+- GIVEN any supported locale or 320px screen WHEN rendered THEN sponsor names
+  remain verbatim, paid placement is clear and controls cannot cover the card.
+
+Readiness: existing FE-033 schedule and sponsor API authority retained; no BE or
+DEP contract changes. FE-053 uses the same timing and behavior in native.
+Focused verification: scripts/capture-sponsor-rotation.mjs, mobile/web typechecks,
+localization, narrative and homepage tests. Screenshots/visual approval precede
+full gates. Rollback is a UI revert with no persisted-data mutation.
+
+S51 local evidence: web/mobile typechecks, narrative/homepage, eight localization
+checks (1,228 messages), sponsor rotation browser fixtures and 69 final viewport/
+language captures pass. Evidence in specs/TRACEABILITY.md and checklist S51.
+Native-device checks, owner visual approval, full release gates, commit and
+rollout remain pending. Earlier copy drafts are superseded.

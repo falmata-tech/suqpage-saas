@@ -13,7 +13,7 @@ async function main(){
   const old=await createPublicSupportConversation({category:'general',email:'old@example.test',phone:'+447700900999',message:'Historical guest chat',idempotencyKey:crypto.randomUUID()},'legacy-fixture');
   const counts=async()=>JSON.stringify(await db.prepare('SELECT (SELECT COUNT(*) FROM support_conversations) cases,(SELECT COUNT(*) FROM support_messages) messages,(SELECT COUNT(*) FROM support_assignments) assignments').get());
   const before=await counts();
-  for(const channel of [null,'help','transport','wrong'])for(const method of ['GET','POST','DELETE']){
+  for(const channel of [null,'help','wrong'])for(const method of ['GET','POST','DELETE']){
    const request=new NextRequest(base+'/api/public-support'+(channel===null?'':'?channel='+channel),{method,headers:{origin:base,'content-type':'application/json',cookie:`suqpage_public_support=${old.token}; suqpage_public_help=${old.token}`},...(method==='POST'?{body:JSON.stringify({action:'start',category:'general',email:'guest@example.test',phone:'+447700900999',message:'Disallowed',idempotencyKey:crypto.randomUUID()})}:{})});
    const response=await(method==='GET'?GET(request):method==='POST'?POST(request):DELETE(request));
    assert.equal(response.status,410);assert.equal(response.headers.get('set-cookie'),null);assert.equal((await response.json()).code,'public_chat_retired');

@@ -4,8 +4,9 @@ import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import { Eye, Pencil, Save, LoaderCircle, Check, Upload, Globe, Undo2, ExternalLink } from "lucide-react";
+import { Eye, Pencil, Save, LoaderCircle, Check, Upload, Globe, Undo2, ExternalLink, Palette } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import ShowroomApp from "./showroom/ShowroomApp";
 import { businessProfileDescription, initialBusinessProfile } from "@/lib/business-profile";
 import type { Catalog } from "@/lib/types";
@@ -23,6 +24,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const [content, setContent] = useState<ShopPageContent>(initialDraft?.content || initialBusinessProfile(catalog));
   const checks = publicationReadiness(content, catalog.products, locationConfirmed);
+  const [colorOpen, setColorOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "preview">(initialPreview ? "preview" : "edit");
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -174,6 +176,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
               {content.heroImage === image ? <Check size={17} aria-hidden="true" /> : null}
             </button>)}
           </div>
+        <button type="button" className={styles.upload} onClick={() => { setMode("preview"); setColorOpen(true); }}><Palette size={18} />{t("Page color")}</button>
         <fieldset disabled={!ready || busy || uploading}>
           <legend className="sr-only">{t("Public contact details")}</legend>
           <details className={styles.contactFields}>
@@ -193,7 +196,8 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         </div> : draft ? <p className={styles.note}>{t("Team editing is enabled by the owner.")}</p> : null}
       </div>
       <div className={styles.preview} aria-label={t("Page preview")}>
-        <div className={styles.previewLabel}><Eye size={16} />{t("Private preview")}</div>
+        <div className={styles.previewLabel}><Eye size={16} />{t("Private preview")}<button type="button" aria-expanded={colorOpen} onClick={() => setColorOpen(!colorOpen)}><Palette size={16} />{t("Page color")}</button></div>
+        {colorOpen ? <div className={styles.colorControls}><StorefrontAccentPicker value={content.accentColor || ""} onChange={accentColor => setContent({ ...content, accentColor })} disabled={!ready || busy || uploading} /></div> : null}
         {renderedProfile ? <ShowroomApp catalog={catalog} businessProfile={renderedProfile} previewMode embedded /> : <p role="status" className={styles.error}>{t("Complete the profile fields to preview.")}</p>}
       </div>
     </div>

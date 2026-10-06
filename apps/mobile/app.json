@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Suqpage",
+    "slug": "suqpage",
+    "owner": "falmatad",
+    "scheme": "suqpage",
+    "version": "0.1.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.suqpage.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.suqpage.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose photos for your business and offerings.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing",
+      "@maplibre/maplibre-react-native"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bfc289fb-238e-44a3-9e0f-fec6a7c857d1"
+      }
+    }
+  }
+}

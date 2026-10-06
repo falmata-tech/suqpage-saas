@@ -147,8 +147,8 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       if (command.kind === "update" && !existing) throw new ProductUpkeepError("Product not found.", 404, "not_found");
       if (command.preserveMetadata) {
         // Resolve under the tenant/version lock; never trust a hidden browser snapshot.
-        command = { ...command, optionGroups: undefined, isPublished: undefined,
-          availability: existing?.availability ?? "available",
+        command = { ...command, optionGroups: undefined, isPublished: command.updateListingState ? command.isPublished : undefined,
+          availability: command.updateListingState ? command.availability : existing?.availability ?? "available",
           offeringKind: command.offeringKind,
           quantityMode: existing?.quantity_mode ?? "optional",
           categoryId: existing?.category_id ?? null,

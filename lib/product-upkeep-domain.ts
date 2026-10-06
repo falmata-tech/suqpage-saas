@@ -21,6 +21,7 @@ export type ProductOptionInput = { name: string; values: string[] };
 export type BasicProductCommand = {
   media?: ProductMedia[];
   preserveMetadata?: boolean;
+  updateListingState?: boolean;
   optionGroups?: ProductOptionInput[];
   isPublished?: boolean;
   kind: ProductUpkeepKind;
@@ -58,6 +59,7 @@ export class ProductUpkeepError extends Error {
 const commandKeys = new Set([
   "media",
   "preserveMetadata",
+  "updateListingState",
   "optionGroups",
   "isPublished",
   "kind",
@@ -196,9 +198,11 @@ export function parseBasicProductCommand(
     );
   }
   if (raw.isPublished !== undefined && typeof raw.isPublished !== "boolean") throw new ProductUpkeepError("Choose listed or hidden visibility.");
+  if (raw.updateListingState !== undefined && typeof raw.updateListingState !== "boolean") throw new ProductUpkeepError("Invalid listing update.");
   return {
     ...(raw.media !== undefined ? {media: (() => {try {return parseProductMedia(raw.media);} catch(error) {throw new ProductUpkeepError(error instanceof Error ? error.message : "Invalid product media.");}})()} : {}),
     ...(raw.preserveMetadata !== undefined ? { preserveMetadata: raw.preserveMetadata as boolean } : {}),
+    ...(raw.updateListingState !== undefined ? { updateListingState: raw.updateListingState as boolean } : {}),
     ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
     ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
     kind,

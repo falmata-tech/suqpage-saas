@@ -1,13 +1,13 @@
 "use client";
 import { useUiText } from "@/lib/i18n/ui";
 import styles from "./TransportSupport.module.css";
-import { MessageCircle, ShoppingBag, X } from "lucide-react";
+import { MessageCircle, Truck, X, MapPin, UserRound, Phone } from "lucide-react";
 import { createPortal } from "react-dom";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 import BuyingConversation from "./BuyingConversation";
 import type { BuyingConversation as Receipt } from "@/lib/buying-conversation-contract";
-const endpoint = "/api/public-support?channel=buying";
+const endpoint = "/api/public-support?channel=transport";
 
 export default function PublicSupportChat() {
   const t = useUiText();
@@ -22,6 +22,8 @@ export default function PublicSupportChat() {
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -45,17 +47,17 @@ export default function PublicSupportChat() {
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
     if (open) void loadReceipt();
-  }, [open]);
+  }, [open, mounted]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || !sessionReady || receipt || !name.trim() || !phone.trim() || !message.trim()) return;
+    if (busy || !sessionReady || receipt || !name.trim() || !phone.trim() || !origin.trim() || !destination.trim()) return;
     setBusy(true); setError("");
     try {
-      const draft = JSON.stringify([name, phone, message]);
+      const draft = JSON.stringify([name, phone, origin, destination, message]);
       if (!attempt.current || attempt.current.draft !== draft) attempt.current = {draft,key:crypto.randomUUID().replaceAll("-", "")};
       const response = await fetch(endpoint, { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify({
-        action:"start", category:"buying_assistance", name, phone, message, idempotencyKey:attempt.current.key, website:"",
+        action:"start", category:"shipment_observation", name, phone, origin, destination, message, idempotencyKey:attempt.current.key, website:"",
       }) });
       const payload = await response.json() as { conversation?: Receipt; error?: string };
       if (!response.ok || !payload.conversation) throw new Error(payload.error || "Message could not be sent.");
@@ -78,29 +80,34 @@ export default function PublicSupportChat() {
 
   return <>
     <div className={`public-support-launcher ${styles.launchers}`}>
-      <button ref={launcherRef} className={styles.launcher} data-channel="buying" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}>
-        <MessageCircle aria-hidden="true" /><span className={styles.launcherLabel}><strong>{t("Buying assistance")}</strong><small>{t("Live chat")}</small></span>
+      <button ref={launcherRef} className={styles.launcher} data-channel="buying" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} disabled={!mounted}>
+        <MessageCircle aria-hidden="true" /><span className={styles.launcherLabel}><strong>{t("Transport & delivery")}</strong><small>{t("Live chat")}</small></span>
       </button>
     </div>
     {mounted ? createPortal(<dialog ref={dialogRef} className={`public-support-dialog ${styles.dialog}`} aria-labelledby="public-buying-title" onClose={() => setOpen(false)} onCancel={event => {event.preventDefault();close();}} onClick={event => {if(event.target === dialogRef.current)close();}}>
       <section className={receipt ? styles.receivedSection : "new-conversation"}>
-        <header><div><span className={styles.chatEyebrow}><MessageCircle aria-hidden="true" />{t("Live chat")}</span><h2 id="public-buying-title">{t("Buying assistance")}</h2></div><button type="button" onClick={close} aria-label={t("Close")}><X aria-hidden="true" /></button></header>
+        <header><div><span className={styles.chatEyebrow}><MessageCircle aria-hidden="true" />{t("Live chat")}</span><h2 id="public-buying-title">{t("Transport & delivery")}</h2></div><button type="button" onClick={close} aria-label={t("Close")}><X aria-hidden="true" /></button></header>
         {!sessionReady && loaded ? <button type="button" onClick={() => void loadReceipt()}>{t("Retry")}</button> : null}
-        {!loaded ? <p className="public-support-loading" role="status">{t("Loading…")}</p> : receipt ? <><BuyingConversation initial={receipt} active={open} onAnother={() => void anotherRequest()} />{error ? <p role="alert">{t(error)}</p> : null}</> : <>
+        {!loaded ? <p className="public-support-loading" role="status">{t("Loading…")}</p> : receipt ? <><BuyingConversation endpoint={endpoint} initial={receipt} active={open} onAnother={() => void anotherRequest()} />{error ? <p role="alert">{t(error)}</p> : null}</> : <>
           <div className={styles.welcome}>
-            <div className={styles.welcomeIcon}><ShoppingBag aria-hidden="true" /></div>
-            <h3>{t("What can we help you with?")}</h3>
-            <p>{t("Talk with our team about a purchase, a seller or product quality.")}</p>
+            <div className={styles.welcomeIcon}><Truck aria-hidden="true" /></div>
+            <h3>{t("Let us arrange your delivery")}</h3>
+            <p>{t("Tell us where your goods need to go. Our team will help find a carrier and arrange the details.")}</p>
           </div>
           <form className={styles.intake} onSubmit={submit}>
-            <label htmlFor="public-buying-message">{t("Your message")}</label>
-            <textarea id="public-buying-message" value={message} onChange={event=>setMessage(event.target.value)} maxLength={4000} rows={3} required placeholder={t("Tell us what you need. You can include a product or shop link.")} />
-            <div className="public-support-contact-fields">
-              <label htmlFor="public-buying-name">{t("Name")}<input id="public-buying-name" autoComplete="name" value={name} onChange={event=>setName(event.target.value)} maxLength={80} required placeholder={t("Your name")} /></label>
-              <label htmlFor="public-buying-phone">{t("Phone")}<input id="public-buying-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={event=>setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
+            <div className={`public-support-contact-fields ${styles.routePair}`}>
+              <label htmlFor="transport-origin"><span className={styles.fieldLabel}><MapPin size={16} aria-hidden="true" />{t("From")}</span><input id="transport-origin" value={origin} onChange={event=>setOrigin(event.target.value)} maxLength={120} required placeholder={t("City or area")} /></label>
+              <label htmlFor="transport-destination"><span className={styles.fieldLabel}><MapPin size={16} aria-hidden="true" />{t("To")}</span><input id="transport-destination" value={destination} onChange={event=>setDestination(event.target.value)} maxLength={120} required placeholder={t("City or area")} /></label>
             </div>
+            <div className="public-support-contact-fields">
+              <label htmlFor="public-buying-name"><span className={styles.fieldLabel}><UserRound size={16} aria-hidden="true" />{t("Name")}</span><input id="public-buying-name" autoComplete="name" value={name} onChange={event=>setName(event.target.value)} maxLength={80} required placeholder={t("Your name")} /></label>
+              <label htmlFor="public-buying-phone"><span className={styles.fieldLabel}><Phone size={16} aria-hidden="true" />{t("Phone")}</span><input id="public-buying-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={event=>setPhone(event.target.value)} maxLength={40} required placeholder="+251…" /></label>
+            </div>
+            <label htmlFor="public-buying-message">{t("Goods or delivery details (optional)")}</label>
+            <textarea id="public-buying-message" value={message} onChange={event=>setMessage(event.target.value)} maxLength={3700} rows={2} placeholder={t("What are you sending? You can add a product link.")} />
+            <p>{t("We’ll reply here or call if you leave the chat.")}</p>
             {error ? <p className="public-support-error" role="alert">{t(error)}</p> : null}
-            <button type="submit" className={styles.submit} disabled={busy || !sessionReady || !name.trim() || !phone.trim() || !message.trim()}><MessageCircle aria-hidden="true" /><span>{busy ? t("Sending…") : t("Start chat")}</span></button>
+            <button type="submit" className={styles.submit} disabled={busy || !sessionReady || !name.trim() || !phone.trim() || !origin.trim() || !destination.trim()}><MessageCircle aria-hidden="true" /><span>{busy ? t("Sending…") : t("Start chat")}</span></button>
           </form>
         </>}
       </section>

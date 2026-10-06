@@ -1,0 +1,10 @@
+.picker { min-width: 0; border: 0; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+.picker legend { font-weight: 650; margin-bottom: 10px; }
+.picker button, .picker input { min-height: 44px; font: inherit; }
+.picker button { cursor: pointer; border: 1px solid #9ea8aa; background: #fff; color: #252a2d; border-radius: 8px; padding: 8px 12px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px; }
+.choices .swatch { width: 44px; padding: 0; border-radius: 50%; }
+.choices [aria-pressed=true] { outline: 2px solid #252a2d; outline-offset: 2px; }
+.picker :is(button,input):focus-visible { outline: 3px solid #2459cc; outline-offset: 4px; }
+.custom { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; font-size: 14px; }
+.custom input[type=color] { width: 44px; height: 44px; min-width: 44px; padding: 3px; border: 1px solid #9ea8aa; border-radius: 8px; cursor: pointer; background: #fff; }

@@ -3,7 +3,8 @@ import launchStyles from "../LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import type { ReactNode } from "react";
+import { storefrontAccentVariables } from "@/lib/storefront-accent";
+import type { CSSProperties, ReactNode } from "react";
 import { catalogOfferingLabel } from "@/lib/offerings";
 import { productHref } from "@/lib/product-inquiry";
 
@@ -38,7 +39,7 @@ function CoverMedia({ image, video, name }: { image: string; video: string; name
     {playing && video ? <iframe src={`${privacyEnhancedYouTubeEmbedUrl(normalizeControlledYouTubeUrl(video).managedRef)}?autoplay=1`}
       title={t("Video about {value1}", { value1: name })} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {image ? <img src={image} alt="" fetchPriority="high" /> : null}
+      {image ? <><img src={image} alt="" fetchPriority="high" /><span className={styles.coverTint} aria-hidden="true" /></> : null}
       {video ? <button type="button" className={styles.playCover} aria-label={t("Play business video about {value1}", { value1: name })} onClick={() => setPlaying(true)}>
         <span><Play size={25} fill="currentColor" aria-hidden="true" /></span><span className={styles.playCaption}>{t("Meet the business")}</span>
       </button> : null}
@@ -57,7 +58,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const productsId = `${id}-products`;
   const BusinessHeading = p.embedded ? "h2" : "h1";
   const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business));
-  return <div className={styles.profile} data-business-profile>
+  return <div className={styles.profile} data-business-profile data-store-accent={profile.accentColor || undefined} style={storefrontAccentVariables(profile.accentColor) as CSSProperties}>
     {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Demo business — products and contact details are examples.")}</div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />

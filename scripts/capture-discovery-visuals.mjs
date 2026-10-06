@@ -47,7 +47,7 @@ async function capture(name, viewport, action) {
       featuredHalls: document.querySelectorAll(".featured-hall-controls button").length,
       featuredOutlines: document.querySelectorAll(".featured-booth-outline").length,
       featuredRevealed: document.querySelectorAll(".featured-booth[data-business-id]").length,
-      sponsored: document.querySelectorAll(".discovery-sponsored-rail > a").length,
+      sponsored: document.querySelectorAll("#featured-sponsors [data-sponsor-id]").length,
       listRows: document.querySelectorAll(".discovery-list article").length,
       industryTargets: [...document.querySelectorAll(".discovery-industry-picker > summary, .discovery-mobile-filter-trigger")].filter((node) => node.getClientRects().length).map((node) => Math.round(node.getBoundingClientRect().height)),
       mapTargets: [...document.querySelectorAll(".discovery-zoom button, .discovery-mobile-map-controls button")].filter((node) => node.getClientRects().length).map((node) => Math.round(node.getBoundingClientRect().height)),
@@ -102,7 +102,7 @@ async function capture(name, viewport, action) {
     assert.ok(metrics.weekTargets.every((height) => height >= 40), `${name} weekly controls remain touchable in the compact venue ribbon`);
     assert.equal(metrics.visibleFeatured, true, `${name} renders the scheduled Daily Featured program`);
     assert.ok(metrics.featuredBooths > 0, `${name} keeps every Daily Featured slot on the continuous floor`);
-    assert.ok(metrics.sponsored >= 5, `${name} renders the complete paid sponsor pool beside Daily Featured`);
+    assert.equal(metrics.sponsored, 1, `${name} shows one complete rotating sponsor card beside Daily Featured`);
   } else {
     assert.ok(metrics.industryTargets.every((height) => height >= 44), `${name} industry controls are touch sized`);
     assert.ok(metrics.mapTargets.every((height) => height >= 44), `${name} map controls are touch sized`);

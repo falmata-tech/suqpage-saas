@@ -2,7 +2,7 @@
 id: FE-049
 title: Five-language interface
 status: done
-related: [FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
+related: [FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
 owners: [product, frontend]
 last_updated: 2026-09-23
 change_level: L2

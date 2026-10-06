@@ -2,7 +2,7 @@
 id: FE_BASE
 title: Frontend base architecture
 status: done
-related: [BE_BASE, DEP_BASE]
+related: [FE-053, BE_BASE, DEP_BASE]
 owners: [product, frontend]
 last_updated: 2026-07-20
 ---

@@ -53,7 +53,7 @@ test('FE-049: every explicit UI message is translated or has a reviewed fallback
   const ts=await import('typescript');
   const fallbacks=JSON.parse(fs.readFileSync('locales/english-fallbacks.json','utf8')) as Record<string,string>;
   const missing:string[]=[];
-  for(const root of ['app','components'])for(const name of fs.readdirSync(root,{recursive:true}) as string[]){
+  for(const root of ['app','components','apps/mobile/app','apps/mobile/src'])for(const name of fs.readdirSync(root,{recursive:true}) as string[]){
     if(!name.endsWith('.tsx'))continue;
     const file=`${root}/${name}`,source=fs.readFileSync(file,'utf8');
     const ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
@@ -88,5 +88,19 @@ test('FE-052: shared starter and publication-checklist messages reach every clie
   for (const locale of locales.filter(value => value !== 'en')) {
     const selected = clientMessages(catalogs[locale]);
     for (const message of messages) assert.ok(selected[messageKey(message)], `${locale}: ${message}`);
+  }
+});
+
+test('FE-052: both storefront audiences and Market use complete client-safe catalogs', async () => {
+  const { MARKET_STOREFRONT_COPY, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } = await import('../lib/storefront-copy');
+  const { clientMessages } = await import('../lib/i18n/client-messages');
+  const values: string[] = [...Object.values(MARKET_STOREFRONT_COPY), ...Object.values(CUSTOMER_MAP_COPY)];
+  for (const section of ABOUT_STOREFRONT_SECTIONS) {
+    values.push(section.label, section.title, section.description, section.action);
+    for (const benefit of section.benefits) values.push(benefit.title, benefit.description);
+  }
+  for (const locale of locales.filter(value => value !== 'en')) {
+    const client = clientMessages(catalogs[locale]);
+    for (const value of values) assert.ok(client[messageKey(value)], `${locale}: ${value}`);
   }
 });

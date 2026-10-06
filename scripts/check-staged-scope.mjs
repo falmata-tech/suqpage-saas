@@ -35,7 +35,21 @@ if (outsideScope.length) {
 }
 
 const sensitivePath = /(^|\/)(?:data|backups|\.local|test-results|playwright-report|public\/uploads\/runtime)(?:\/|$)|(^|\/)\.env(?:$|\.)|\.(?:db|sqlite|sqlite3)$/i;
-const forbidden = staged.filter((file) => file !== ".env.example" && sensitivePath.test(file));
+const mobileTemplate = "apps/mobile/.env.example";
+if (staged.includes(mobileTemplate)) {
+  const lines = git(["show", `:${mobileTemplate}`]).split("\n")
+    .map((line) => line.trim()).filter((line) => line && !line.startsWith("#"));
+  const expected = [
+    "EXPO_PUBLIC_API_ORIGIN=http://127.0.0.1:3102",
+    "EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321",
+    "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=",
+  ];
+  if (lines.length !== expected.length || lines.some((line, i) => line !== expected[i])) {
+    console.error("Mobile example must contain only the reviewed local public placeholders.");
+    process.exit(1);
+  }
+}
+const forbidden = staged.filter((file) => file !== ".env.example" && file !== mobileTemplate && sensitivePath.test(file));
 if (forbidden.length) {
   console.error(`Sensitive or generated paths must not be committed:\n${forbidden.map((file) => `- ${file}`).join("\n")}`);
   process.exit(1);

@@ -2,7 +2,7 @@
 id: DEP-027
 title: Local Supabase development runtime
 status: done
-related: [DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
+related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
 owners: [development, backend, operations]
 last_updated: 2026-09-21
 change_level: L3
@@ -216,3 +216,15 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## Explicit mobile-device development exception (DEP-042)
+
+The default web launcher remains loopback-only. The owner authorized phone testing:
+`npm run dev:mobile` supplies both `--allow-lan` and `--hostname 0.0.0.0` to bind
+only the local development application to the LAN. Without that flag, the same
+hostname remains rejected. PostgreSQL and server-side Supabase destinations must
+still be the approved loopback ports; canonical browser URLs stay loopback. This
+exception never authorizes hosted data, provider configuration or production binds.
+GIVEN no explicit opt-in WHEN a non-loopback bind is supplied THEN reject it.
+GIVEN the mobile command WHEN launched THEN the app is reachable from the same
+network while existing database/provider target assertions stay enforced.

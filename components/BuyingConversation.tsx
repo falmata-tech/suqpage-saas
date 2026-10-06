@@ -6,8 +6,7 @@ import { useUiText } from "@/lib/i18n/ui";
 import { buyingRefreshDelay, type BuyingConversation as Conversation } from "@/lib/buying-conversation-contract";
 import styles from "./BuyingConversation.module.css";
 
-const endpoint = "/api/public-support?channel=buying";
-export default function BuyingConversation({ initial, active, onAnother }: { initial: Conversation; active: boolean; onAnother: () => void }) {
+export default function BuyingConversation({ initial, active, onAnother, endpoint = "/api/public-support?channel=buying" }: { endpoint?: string; initial: Conversation; active: boolean; onAnother: () => void }) {
   const t = useUiText();
   const [conversation, setConversation] = useState(initial);
   const [message, setMessage] = useState("");
@@ -56,7 +55,7 @@ export default function BuyingConversation({ initial, active, onAnother }: { ini
     document.addEventListener("visibilitychange", resume);
     window.addEventListener("online", resume);
     return () => { stopped = true; clearTimeout(timer); controller?.abort(); document.removeEventListener("visibilitychange", resume); window.removeEventListener("online", resume); };
-  }, [active, initial.publicRef]);
+  }, [active, initial.publicRef, endpoint]);
 
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,7 +85,7 @@ export default function BuyingConversation({ initial, active, onAnother }: { ini
   }
   return <div className={styles.conversation}>
     <div className={styles.status} data-waiting={awaitingReply} role="status">
-      <strong>{awaitingReply ? <><Clock3 aria-hidden="true" />{t("Waiting for our team")}</> : conversation.status === "closed" ? t("Closed") : conversation.assignedUserName ? t("Assigned to {value1}", {value1: conversation.assignedUserName}) : t("Waiting for a team member")}</strong>
+      <strong>{awaitingReply ? <><Clock3 aria-hidden="true" />{t(conversation.category === "shipment_observation" ? "Waiting for our transport team" : "Waiting for our team")}</> : conversation.status === "closed" ? t("Closed") : conversation.assignedUserName ? t("Assigned to {value1}", {value1: conversation.assignedUserName}) : t("Waiting for a team member")}</strong>
       {connected && conversation.status !== "closed" ? <span className={styles.connection}><Wifi aria-hidden="true" />{t("Chat connected")}</span> : null}
       {conversation.status !== "closed" ? <button type="button" className={styles.endChat} onClick={() => void endChat()} disabled={busy} aria-busy={ending}>{t("End chat")}</button> : null}
       {!connected ? <span>{t("Connection interrupted. Retrying…")}</span> : null}

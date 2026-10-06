@@ -646,3 +646,164 @@ evidence: `.local/publish-s48-20260927/`. Hosted schema 58 and Netlify deploymen
 39-layout/language, buying intake and map/drawer preview checks pass; monitored
 health remains good. The initial edge-502 and successful read-only recovery checks
 are recorded in the release document. No Auth/configuration recovery write occurred.
+
+## S49 — mobile implementation in progress
+
+FE-053 / BE-044 / DEP-042 define Expo visitor and owner screens, versioned API
+authority and staged npm workspaces. ADR-0023 applies. Admin/staff management stays
+on web. Focused bearer/role/tenant/body/projection contract tests and isolated local
+PostgreSQL signup/page/offering/inquiry/support/video/buying tests pass through
+`npm run test:mobile`. Web/mobile TypeScript and seven localization checks pass.
+Android/iOS JavaScript exports and 13 browser workflow checks (including real
+local Supabase OTP verification) pass. Screenshots: `.local/mobile-review/`.
+These exports are not signed binaries. Android also compiled/rendered in Expo Go,
+but repeated emulator System UI/Expo Go ANRs prevented a clean workflow pass;
+physical device execution is unverified. Device checks, visual approval, full gates,
+remaining native parity and API rollout remain pending in S49; see
+`docs/MOBILE-TESTING.md` for environment commands and dependency limits.
+
+### S49.1/S49.2 — phone-web alignment and embedded video (2026-09-28)
+
+FE-053 remains in progress. `apps/mobile/src/chrome.tsx`, tab screens, native/web
+map adapters and showroom now follow the approved phone web structure. Separate
+YouTubeVideo/YouTubeFrame adapters embed approved cover/gallery videos without
+external handoff; provider-reference authority reuses `lib/youtube-provider.ts`.
+ADR-0023 records the isolated Expo-compatible WebView decision; DEP-042 retains
+actual native playback/build gates.
+
+Focused evidence: mobile typecheck; seven localization tests; 165-spec validation;
+nine grouped `capture-mobile-alignment.mjs` checks and 13 existing
+`capture-mobile.mjs` browser workflow checks pass. Three `test:mobile:video` cases
+prove reference/HTML validation, outbound navigation denial and bounded bridge
+messages. `capture-mobile-video.mjs` passes provider-fixture cover/gallery mounting,
+error/retry, media/navigation cleanup and no external windows. The real YouTube
+embed rendered in the local browser; automated playback attempts were inconclusive
+(frame/button readiness timeout), so actual playback is not marked verified.
+
+Review evidence: `.local/mobile-alignment/` and `.local/mobile-review/`; findings and
+native adaptations in `docs/MOBILE-WEB-ALIGNMENT.md`. These replace the rejected
+initial visuals. Visual approval, native device/fullscreen checks, full gates,
+scoped commit and deployment remain pending. No hosted changes; deno.lock untouched.
+
+S50 continuation: owner authorizes audit/build preparation. Mobile typecheck,
+seven localization checks, `test:mobile` (real isolated PostgreSQL logo conflict/
+removal and support attachment retry/cross-tenant tests included), and
+`test:mobile:build` pass. Clean locked install and production dependency audit pass
+with zero advisories; version-checked query-string import adapter preserves the
+fixed ESM decoder. Full `check` passed before the native map replacement; release/acceptance/native playback/APK
+and API rollout remain pending. Expo project ownership and preview signing were
+independently verified under `falmatad`; native MapLibre build/device verification remains pending. See MOBILE-RELEASE-AUDIT and MOBILE-DISTRIBUTION. No production rollout.
+
+
+S50 MapLibre continuation (2026-09-28): the owner clarified that SDK-internal
+SQLite caching is allowed; application data remains PostgreSQL. FE-053/BE-044/
+DEP-042 and ADR-0023 were updated before replacing the unshipped map WebView.
+MapLibre 11.4.0 is installed with its Expo plugin and Expo-compatible development
+client. `test:mobile:map` (run through Node's tsx loader), mobile typecheck,
+`test:mobile:build`, spec validation, Expo Android prebuild and Android JS export
+pass. Tests cover public-only GeoJSON, invalid coordinates, stable city offsets,
+exact/zero coordinates, current-result selection and zoom bounds. The web map
+remains Leaflet. Native compilation and installed-device review are pending;
+no signed tester artifact or rollout is claimed by these checks. Research/source
+links and constraints: docs/MOBILE-MAP-RESEARCH.md.
+
+Native MapLibre Android Kotlin/Java and complete debug APK compilation passed
+for arm64-v8a and x86_64 on 2026-09-28 (Gradle 9.3.1, NDK 27.1.12297006,
+CMake 3.22.1). This is a local development client, not a standalone tester release.
+Nine alignment groups, including unobscured attribution, and 13 local browser
+workflow groups pass. Final packaged manifest and API 35 emulator install/render/drawer verification
+pass on 2026-09-29. Evidence: `.local/mobile-maplibre-review/`; development APK
+checksum and remaining device/release limits: MOBILE-MAP-RESEARCH.md. Actual
+phone gestures/offline recovery, owner native visual approval and tester rollout
+remain open.
+
+
+### S50 owner workflow and marker parity (2026-10-05)
+
+FE-053 / BE-044 / BE-040 / DEP-042 remain in progress. Fixed reserved Expo route
+parameter (`owner/[section]`), separate read/write budgets, authenticated browser
+photo loading and native listing-state updates with advanced metadata preserved.
+Private preview reuses ShowroomContent; Featured refreshes on tab return. MapMarker,
+map-markers and native/browser adapters reproduce storefront labels, clusters,
+nearby lists, selected/presence states and non-zooming-out focus.
+
+Passing evidence: strengthened `capture-mobile.mjs` (13 groups),
+`capture-mobile-owner.mjs` (real local photo/save/hide/location/publication),
+`capture-mobile-markers.mjs` (fixture clusters/nearby/preview), nine alignment groups,
+mobile typecheck, marker/provider unit tests, `test:mobile`, existing product-upkeep
+and gallery regressions, 165-spec validation. Earlier screenshot-only owner
+navigation evidence was insufficient and is superseded. Android renders the new
+markers and opens Prairie Meadows on tap; captures under `.local/mobile-owner-review/`.
+Map visual review, physical-device flows, final release and API/APK rollout remain
+open. Next patched locally to 16.3.6; Expo tooling advisories remain an unresolved
+release gate (MOBILE-RELEASE-AUDIT.md). No commit, hosted mutation or distribution.
+
+Final focused checkpoint: web/mobile typechecks, seven localization tests,
+mobile build-config/dependency checks and runtime validation also pass. Native map
+model no longer imports the SDK's React Native ambient globals into the web test
+compilation. Current sources still await full release gates and scoped commit.
+
+### S51 local sponsor rotation and storefront narrative — 2026-10-05
+
+FE-036/FE-033: components/SponsorCarousel.tsx and its CSS replace the old
+mobile-only rail timer; lib/use-sponsor-rotation.ts shares six-second turns with
+apps/mobile/src/SponsorCarousel.tsx. Broadcast agendas retain their scheduled
+sponsor mapping. FE-052/FE-049/FE-053: lib/storefront-copy.ts shares Market and
+separate customer/business About sections across both clients. Customers often
+already know/follow the seller and want its organized offerings; no map/search
+features or tenant/API authority changed.
+
+scripts/capture-sponsor-rotation.mjs verifies equal cycles, interaction/pause,
+manual wrap, document visibility/offscreen, zero/one/pool changes and reduced
+motion with controlled sponsor fixtures, plus actual Expo browser rendering.
+scripts/capture-storefront-copy.mjs records 69 final local desktop/phone/language
+states, touch-sized controls, audience actions/jump navigation and overflow;
+OSM tiles are stubbed, local catalog images are real and no data is written.
+Screenshots: .local/sponsor-storefront-review/; copy-verification-all.json is the
+latest version after the owner's audience clarification, superseding 64 draft
+captures. Web/mobile typecheck, narrative/homepage, eight localization tests
+(1,228 messages per locale), and 165-spec validation pass. Independent human
+language review is not claimed. Native device/owner visual approval/full gates,
+commit and rollout remain pending; preserve S49/S50 work. Emulator closed at
+owner request; web/API previews remain on ports 8082/3102.
+
+| FE-054 | approved prototype and local implementation: showroom-projects/accent-personalization-preview/ | check-preview.mjs: seven presets, 4,096 contrast samples, 1440/390/320; reviews/REVIEW.md and verification.json; scripts/test-storefront-accent.ts + capture-storefront-accent.mjs: signup/save/publication/native and 12 captures pass; full check/build/security and two production acceptance scenarios pass; S53 Page-only visual picker: test-visual-color.ts, both typechecks, eight localization tests and 13 updated captures in .local/storefront-color-refinement/ pass; corrected visual approval pending before repeat full gates; release blocked by existing Expo dependency audit; device/commit/rollout pending |
+
+| S54 offering-only Market results | FE-030 / FE-042 / FE-053 | BE-044 | — | public-discovery-cache.ts and mobile/router.ts select product SQL pagination before public counts; DiscoveryWorkspace and native Market remove business cards/type controls; filtered map unchanged | Both typechecks; test:discovery-pagination (category/rank/spelling/human queries and 7 pagination scenarios); capture-offering-results.mjs: real HTTP legacy-type/count/map/last-page/search, web pagination/empty states and 5 reviewed 1440/390/320 captures in .local/offering-results/. Controlled OSM tiles; actual data/markers. Visual approval/full-release/device/commit/deploy pending. | in_progress |
+
+| S55 floating discovery controls | FE-030 / FE-053 | — | — | DiscoveryWorkspace and native Market share active controls between map-only and open product list; existing backend filters unchanged | Both typechecks, homepage composition; capture-floating-discovery-controls.mjs: closed/open search, filter clearing/retention, one control set, persistent map DOM and immediate closed-view reload; 10 stable desktop/390/320 screenshots in .local/floating-discovery-controls/. Native browser only, controlled tiles. Visual/full-release/device/commit/deploy pending. | in_progress |
+
+| S56 compact discovery toolbar | FE-030 / FE-053 | — | — | Shared horizontal header: result toggle, search, compact category and place triggers; menus retain selection and clear; map tools and results below | Both typechecks, homepage composition; capture-compact-discovery-toolbar.mjs --web/--native: six web and four native-browser captures, alignment, panel modes, filtering/clearing and closed-view reload; .local/compact-discovery-toolbar/. Controlled tile imagery, real local catalog. Device/visual approval/full-release/commit/deploy pending. | in_progress |
+
+| S57 multiple locations + transport dispatch | FE-030 / FE-019 / FE-053 | BE-019 / BE-018 / BE-044 | — | discovery-contract/discovery/spelling-search/cache, compact web/native pickers; transport public/mobile API, support lifecycle, migration 59, dispatcher UI and authored five-language copy | test-multiple-locations + focused discovery suites; support suites + test-live-transport; capture-multiple-locations --web/--native, capture-live-transport, capture-transport-dispatch-staff and capture-mobile-transport. Local screenshot evidence in .local/multiple-location-review/ and .local/live-transport-review/. Both typechecks/localization pass; visual/language/device/build/release/commit/deploy pending. | in_progress |
+
+| S58 paired transport intake | FE-019 / FE-053 | — | — | Highlighted route pair, contact pair, compact optional details; Suqpage styling retained | Both typechecks; eight localization tests; capture-transport-intake-layout + --short: 15 desktop/phone/language/short-height captures in .local/transport-intake-layout/; web/native real-handler chat submission/reply/end checks pass. Visual approval/device/native-speaker/full-release/commit/deploy pending. | in_progress |
+
+| S59 coordinated release checks | FE-019 / FE-030 / FE-053 | BE-044 | DEP-042 / DEP_BASE | Source-map security patch; corrected obsolete narrative/discovery assertions; verified Expo public runtime settings | Clean install, complete check-chain with documented continuations/one isolated fixture retry, mobile API/type/build/map/video, production build/trace/provider smoke and release steps preceding audit pass. Full workspace audit remains blocked on two upstream mobile-tool advisories; root-only audit is diagnostic and clean. Browser coverage: nine isolated workflows plus corrected category/search captures at 1440/390/320 against production build/existing local providers; isolated retry failed at temporary Storage startup. No app rollout. | in_progress |
+
+## FE-055 / S60 — account deletion request entry (in progress)
+
+Dedicated web/native entries and public request instructions reuse the existing
+privacy contact. Both typechecks, localization and spec checks pass.
+`scripts/capture-account-deletion.mjs` passes 13 web/native-browser layouts across
+five languages, anonymous access, privacy navigation and incomplete-setup native
+account navigation. Captures: `.local/account-deletion-review/`. Visual approval,
+physical email handoff and manual fulfilment verification remain pending; no
+automatic deletion or public-store readiness claim. See the S60 checklist.
+
+## S61 — isolated web release boundary (DEP-026 / DEP-042)
+
+Clean root/shared lifecycle installation, zero selected full-audit findings,
+`test-web-install.cjs`, Netlify readiness and mobile adapter regression pass.
+`npm run check` and all 11 browser acceptance scenarios pass in one isolated run.
+Web release prefix through provider smoke plus its unchanged local-URL continuation
+passes all stages. Operations restore tests and production-backup migration 59
+rehearsal pass with existing data preserved. Final packaged Linux Sharp transform,
+128 trace privacy checks and archive native-tool exclusion pass. FE-055 focused
+13-state evidence is accepted for inclusion by the owner's latest release request.
+Publication is pending; native audit remains failed, with no implicit exception.
+See docs/SUQPAGE-RELEASE-2026-10-06.md and S61 checklist.
+
+S61 scoped-template regression: `node scripts/test-staged-template.mjs` permits
+only the exact mobile localhost/blank-key example, rejects populated keys, extra
+secret fields, undeclared paths and real nested environment files.

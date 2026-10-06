@@ -56,9 +56,13 @@ async function main() {
     assert.equal((await db.prepare("SELECT actor_user_id FROM support_events WHERE id=?").get(saved.id)).actor_user_id,admin.id);
     await postSupportMessage(admin,first.id,{message:'Private callback note',idempotencyKey:crypto.randomUUID()});
     const receipt = await getPublicSupportConversation(token);
-    assert.deepEqual(receipt.messages,[]);assert.equal(receipt.assignedUserName,null);
-    await assert.rejects(()=>postPublicSupportMessage(token,{message:'No chat',idempotencyKey:crypto.randomUUID()},'no-chat'),error=>error instanceof Error && 'code' in error && error.code==='request_only');
-    await assert.rejects(()=>closePublicSupportConversation(token),error=>error instanceof Error && 'code' in error && error.code==='request_only');
+    assert.deepEqual(receipt.messages.map(m=>m.body),["From: Addis Ababa\nTo: Adama"]);assert.equal(receipt.assignedUserName,null);
+    await postSupportMessage(admin,first.id,{message:'Which day?',audience:'reply',idempotencyKey:crypto.randomUUID()});
+    await postPublicSupportMessage(token,{message:'Tomorrow',idempotencyKey:crypto.randomUUID()},'live-transport');
+    assert.deepEqual((await getPublicSupportConversation(token)).messages.map(m=>m.body),['From: Addis Ababa\nTo: Adama','Which day?','Tomorrow']);
+    await closePublicSupportConversation(token);
+    assert.equal((await getSupportConversation(admin,first.id)).conversation.resolvedAt,null);
+    await postSupportMessage(admin,first.id,{message:'Call tomorrow',audience:'note',idempotencyKey:crypto.randomUUID()});
     const note=(await getSupportConversation(admin,first.id)).messages.at(-1)!;
     const attachment=await db.prepare("INSERT INTO support_attachments(message_id,storage_key,original_name,mime_type,byte_size,created_at) VALUES(?,?,'private.png','image/png',42,?)").run(note.id,`support-${crypto.randomUUID()}.png`,Date.now());
     await assert.rejects(()=>getPublicSupportAttachment(token,attachment.insertedId));

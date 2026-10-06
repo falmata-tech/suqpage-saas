@@ -2,7 +2,7 @@
 id: FE-040
 title: Simple owner-controlled business profiles
 status: in_progress
-related: [FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
+related: [FE-054, FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
 owners: [product, frontend]
 last_updated: 2026-09-21
 change_level: L2
@@ -359,3 +359,13 @@ No real external email was sent and no authenticated hosted account was used
 for testing; those admission checks remain separate from local provider evidence.
 Demo contact destinations are examples, not verified delivery channels.
 See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## FE-054 local accent addition
+
+The optional Page color picker is available only in Page editing, alongside the
+full live storefront preview. Signup retains the default color. Custom colors
+use visual selection without requiring a code or separate Apply action.
+Bounded accents personalize the fixed profile; no new layout/tint controls or
+product-photo tint. Validated business-profile JSON, atomic owner publication,
+legacy defaults and consented staff privacy retain the existing contracts.
+See FE-054 for focused tests/captures and pending rollout.

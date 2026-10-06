@@ -66,7 +66,7 @@
     "test:rich-offering-migration": "tsx scripts/test-rich-offering-migration.ts",
     "test:discovery": "tsx scripts/test-discovery.ts",
     "test:market-performance": "node scripts/test-market-performance.mjs",
-    "test:netlify-readiness": "node scripts/test-netlify-readiness.mjs",
+    "test:netlify-readiness": "node scripts/test-web-install.cjs && node scripts/test-netlify-readiness.mjs",
     "test:local-supabase-readiness": "node scripts/test-local-dev-launcher.mjs && node scripts/test-local-dev-services.mjs && node scripts/test-local-supabase-readiness.mjs",
     "test:auth-callback-origin": "node --import tsx scripts/test-auth-callback-origin.ts",
     "test:local-provider-smoke": "node scripts/test-local-provider-smoke.mjs",
@@ -82,7 +82,7 @@
     "test:pagination": "tsx scripts/test-pagination.ts",
     "test:scalable-queries": "tsx scripts/test-scalable-queries.ts",
     "test:account-health": "tsx scripts/test-account-health.ts",
-    "test:support": "tsx scripts/test-support.ts && node --import tsx scripts/test-support-retries.ts && node --import tsx scripts/test-transport-support.ts && node --import tsx scripts/test-support-channels.ts && node --import tsx scripts/test-buying-assistance.ts && node --import tsx scripts/test-video-requests.ts",
+    "test:support": "tsx scripts/test-support.ts && node --import tsx scripts/test-support-retries.ts && node --import tsx scripts/test-transport-support.ts && node --import tsx scripts/test-support-channels.ts && node --import tsx scripts/test-buying-assistance.ts && node --import tsx scripts/test-live-transport.ts && node --import tsx scripts/test-video-requests.ts",
     "test:showroom-renderer": "tsx scripts/test-showroom-renderer.ts",
     "test:blueprint": "tsx scripts/test-showroom-blueprint.ts",
     "test:fitness": "tsx scripts/test-showroom-fitness.ts",
@@ -103,12 +103,12 @@
     "validate:specs": "node scripts/validate-specs.mjs",
     "specs:list": "node scripts/list-specs.mjs",
     "precheck": "npm run test:homepage",
-    "check": "npm run test:localization && npm run test:wiring-audit && npm run test:self-service && npm run test:simple-demo-seed && npm run test:place-selection && npm run test:service-offerings && npm run test:platform-naming && npm run test:native-postgres && npm run test:launch-wiring && npm run test:discovery-pagination && npm run test:page-review && npm run test:product-inquiry && npm run test:account-contacts && npm run test:owner-page && npm run test:production-auth-config && npm run test:email-branding && npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:auth-entry-proxy && npm run test:auth-runtime && npm run test:netlify-readiness && npm run test:local-supabase-readiness && npm run test:auth-callback-origin && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:signup && npm run test:standard-invitations",
+    "check": "npm run test:source-map-security && npm run test:storefront-accent && npm run test:localization && npm run test:wiring-audit && npm run test:self-service && npm run test:simple-demo-seed && npm run test:place-selection && npm run test:service-offerings && npm run test:platform-naming && npm run test:native-postgres && npm run test:launch-wiring && npm run test:discovery-pagination && npm run test:page-review && npm run test:product-inquiry && npm run test:account-contacts && npm run test:owner-page && npm run test:production-auth-config && npm run test:email-branding && npm run validate:specs && npm run check:runtime && npm run check:database-boundaries && npm run test:auth-entry-proxy && npm run test:auth-runtime && npm run test:netlify-readiness && npm run test:local-supabase-readiness && npm run test:auth-callback-origin && npm run test:workflow && npm run test:identity && npm run test:narrative && npm run typecheck && npm run validate:designs && npm run test:compositions && npm run test:composition-v2 && npm run test:revision-v4 && npm run test:youtube-provider && npm run test:live-showroom && npm run test:rich-offering-migration && npm run test:discovery && npm run test:discovery-geography && npm run test:pagination && npm run test:scalable-queries && npm run test:account-health && npm run test:support && npm run test:bank && npm run test:experience && npm run test:showroom-renderer && npm run test:blueprint && npm run test:fitness && npm run test:benchmarks && npm run test:demo-portfolio && npm run test:stockless && npm run test:product-upkeep && npm run test:recipe && npm run test:content-blocks && npm test && npm run test:adapters && npm run test:media-storage && npm run test:media-reconciliation && npm run test:signup && npm run test:standard-invitations",
     "release": "bash scripts/release.sh",
     "test:self-service": "node --import tsx scripts/test-self-service-publication.ts",
     "test:simple-demo-seed": "node --import tsx scripts/test-simple-demo-seed.ts",
     "test:search-performance": "node --import tsx scripts/test-search-performance.ts",
-    "test:discovery-pagination": "node --import tsx scripts/test-discovery-multicategory.ts && node --import tsx scripts/test-search-ranking.ts && node --import tsx scripts/test-spelling-search.ts && node --import tsx scripts/test-human-search.ts && node --import tsx scripts/test-discovery-pagination.ts",
+    "test:discovery-pagination": "node --import tsx scripts/test-discovery-multicategory.ts && node --import tsx scripts/test-search-ranking.ts && node --import tsx scripts/test-spelling-search.ts && node --import tsx scripts/test-human-search.ts && node --import tsx scripts/test-discovery-pagination.ts && node --import tsx scripts/test-multiple-locations.ts",
     "test:page-review": "node --import tsx scripts/test-page-review.ts",
     "test:standard-pages:postgres": "node --env-file=.local/supabase-runtime.env --import tsx scripts/test-standard-page-postgres.ts",
     "test:standard-pages:visual": "node --env-file=.local/supabase-runtime.env scripts/capture-standard-pages.mjs",
@@ -128,7 +128,22 @@
     "test:auth-entry-proxy": "node --import tsx scripts/test-auth-entry-proxy.ts",
     "test:support-retries:visual": "node --import tsx scripts/capture-support-retries.ts",
     "test:clock:visual": "node --env-file=.local/supabase-runtime.env --import tsx scripts/capture-clock-display.mjs",
-    "test:localization": "node scripts/build-ui-messages.mjs --check && node --import tsx scripts/test-localization.ts"
+    "test:localization": "node scripts/build-ui-messages.mjs --check && node --import tsx scripts/test-localization.ts",
+    "mobile": "node scripts/start-mobile.mjs phone",
+    "mobile:web": "node scripts/start-mobile.mjs web",
+    "mobile:typecheck": "npm run typecheck --workspace=@suqpage/mobile",
+    "test:mobile": "tsx scripts/test-mobile-contracts.ts && tsx scripts/test-mobile-api.ts",
+    "mobile:android": "node scripts/start-mobile.mjs android",
+    "mobile:phone": "node scripts/start-mobile.mjs phone",
+    "dev:mobile": "node scripts/start-local-dev.mjs --hostname 0.0.0.0 --port 3102 --allow-lan",
+    "mobile:emulator": "node scripts/start-mobile-emulator.mjs",
+    "test:mobile:video": "tsx scripts/test-mobile-video.ts",
+    "postinstall": "node scripts/patch-mobile-dependencies.cjs",
+    "test:mobile:build": "node scripts/test-mobile-build-config.cjs && node scripts/test-mobile-dependencies.cjs",
+    "test:mobile:map": "tsx scripts/test-mobile-map.ts",
+    "test:storefront-accent": "node --import tsx scripts/test-storefront-accent.ts && node --import tsx scripts/test-visual-color.ts",
+    "test:source-map-security": "node scripts/test-source-map-security.cjs",
+    "release:web": "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -136,7 +151,7 @@
     "bcryptjs": "^3.0.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.28.0",
-    "next": "^16.3.4",
+    "next": "16.3.6",
     "next-intl": "4.14.6",
     "pg": "^8.22.0",
     "react": "^19.2.8",
@@ -164,6 +179,12 @@
     "next": {
       "postcss": "8.5.25",
       "sharp": "0.35.4"
-    }
-  }
+    },
+    "decode-uri-component": "0.5.0",
+    "uuid": "11.1.1"
+  },
+  "workspaces": [
+    "apps/mobile",
+    "packages/*"
+  ]
 }

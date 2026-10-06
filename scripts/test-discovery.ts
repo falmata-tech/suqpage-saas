@@ -21,7 +21,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
     assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
     assert.match(discoveryUiSource, /Filter by region or city/);
-    assert.match(discoveryMapSource, /<CategoryChooser categories=\{discovery\.industries\} value=\{discovery\.industry\.key\}/);
+    assert.match(discoveryMapSource, /<CategoryChooser compact categories=\{discovery\.industries\} value=\{discovery\.industry\.key\}/);
     assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label=\{t\("Filter by category"\)\}/);
     assert.match(discoveryUiSource, /discovery-search-panel/);
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
@@ -89,7 +89,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
     assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
-    assert.match(publicDiscoveryCacheSource, /public-marketplace-v8-category-sets/, "the marketplace cache identity includes canonical category-set filtering");
+    assert.match(publicDiscoveryCacheSource, /public-marketplace-v10-multiple-locations/, "the marketplace cache identity separates the multi-location projection from older cached results");
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));
     const db = await getDb();
     function distanceKm(left: {

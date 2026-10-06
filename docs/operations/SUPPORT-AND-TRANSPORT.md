@@ -1,61 +1,48 @@
-# Help and Buying assistance staff workflow
+# Business support and transport dispatch
 
-FE-019 / BE-018 · S31–S47 approved for release; S48 video-request visual review
-and refreshed release gates pending.
+S57 is local pending visual review and release. Use the existing Suqpage staff
+workspace; carriers and logistics companies operate outside this platform.
 
 ## Prepare the team
 
-Open **Support → Manage agents**. Enable each team member, select **Business support**,
-**Buying assistance**, or **All requests**, and set their shared open
-case limit. Existing transport-scoped staff now handle Buying assistance as well
-as historical transport cases. Change assignments before narrowing a busy agent's
-scope. The internal `transport` scope and queue URL remain compatibility keys.
+In Support → Manage agents, enable dispatchers/brokers with **Transport dispatch**
+(or **All requests**) and set their open-case limit. Business-support-only agents
+cannot access transport work. Managers can change assignment; a scope change is
+blocked until incompatible active cases are reassigned.
 
-## Handle buying requests
+## Handle transport and delivery requests
 
-1. Visitors choose **Buying assistance → Live chat**, enter their message, name and phone,
-   and choose **Start chat**. Buying assistance is one service; there is no service selector.
-   The request opens a text conversation showing **Waiting for our team** until
-   a public staff reply appears. Auto-assignment alone does not imply a reply or
-   staff presence. Replies appear automatically while the chat is open. There is no payment step.
-2. The system assigns requests to an enabled Buying assistance agent with capacity.
-   Otherwise the request waits in **Support → Buying assistance**. Staff can claim
-   eligible waiting work. They cannot take someone else's assigned case.
-3. Open the case to see the request details and phone. Choose **Reply** to
-   message the customer, or **Internal note** to record private work, then Send.
-   Existing notes remain private. Buying replies are text-only. Phone follow-up
-   remains available when the visitor leaves the browser.
-4. Buying assistance has **Active**, **Chat history**, and **Resolved** lists.
-   Search by name, phone or reference. The original request appears in the list;
-   open it for the contact number, request summary and conversation. Managers see
-   all cases; team members retain their assigned cases and eligible waiting work.
-5. Visitor **End chat** moves the case to **Chat history**, releases live-chat
-   capacity and preserves contacts/messages/notes. The dismiss X only hides the
-   chat. Staff can use the phone link and **Add note** to record a call without
-   reopening public messaging. Record outcomes such as “No longer interested” in
-   a private note, then choose **Mark resolved** when follow-up is finished.
-6. **Mark resolved** moves the case to **Resolved**, closes any active chat and
-   records the decision once. It does not delete history. **Reopen** clears the
-   resolution and follows existing assignment/capacity checks. Managers can
-   reassign open cases. Closed requests offer visitors **Send another request**;
-   starting one preserves the previous case.
+1. Visitors choose **Transport & delivery → Live chat**, enter pickup, destination,
+   name and phone, and optionally describe their goods. No account or email is
+   needed. The conversation waits for a staff reply; automatic assignment does
+   not mean an agent is online or a booking has been confirmed.
+2. Enabled dispatchers with capacity receive requests automatically; otherwise
+   they wait in Support → Transport & delivery. Claim eligible waiting work or
+   ask a manager to assign/reassign it. Review the route, goods and callback number.
+3. Send **Reply** to the customer. **Internal note** stays private. Find a carrier
+   externally, agree arrangements with the customer, and save **Transport company**
+   and its contact. Carrier details and commission discussions are not automatically
+   shared. Record commercial agreements in internal notes; there is no commission
+   accounting, payment, booking integration or automatic provider notification.
+4. **Active**, **Chat history**, and **Resolved** separate live requests, ended chats,
+   and finished follow-up. Search by name, phone, route or reference. A visitor's
+   End chat frees capacity but keeps their route, number and messages. Staff may
+   call and add notes without reopening. Mark resolved when no further work remains.
+5. Reopen restores the assignment/capacity workflow. Starting another request
+   preserves the earlier history. X dismisses the window without ending the chat.
 
-General support is available only to signed-in business owners through Dashboard →
-Support. Buying assistance alone accepts guest messages. Owners can start conversations, read/reply and attach files. Public pages
-have only Buying assistance; the old guest chat endpoints and public files are
-retired. Business-support-only agents do not receive buying work. Historical guest
-records remain available to authorized staff; further messages remain private notes unless explicitly sent as buying replies. Managers see both queues; team members see eligible waiting
-work and their own assigned history. Keep the inbox open to monitor new requests;
-there is no automatic phone/SMS notification or promised response time.
+Business owners retain Dashboard → Support with private attachments. General guest
+support stays closed. Historical buying requests retain their original labels,
+messages and private notes, and can still be handled in the transport-scoped queue.
+Only explicitly visitor-visible replies are returned by either live channel.
+Keep the inbox open for updates; do not promise instant availability.
 
-## Historical transport cases
+## S57 rollout
 
-These remain correctly labeled **Transport** in the Buying assistance queue, with
-original routes and private company-handoff history. Assigned staff can still
-manage them. They are not converted to purchase or quality-check requests.
-The legacy public transport and Help APIs are retired, including old cookie-based
-chat recovery. Buying conversation recovery uses its own HttpOnly cookie. No historical
-requests are automatically closed or deleted.
+Apply migration 59 before updated web/mobile code: it extends the resolution
+constraint to closed transport requests. No messages are backfilled or deleted.
+Rollback may retain the additive schema and all history. Hosted migration and
+release remain pending. No external messages were sent during local verification.
 
 ## Release and rollback
 

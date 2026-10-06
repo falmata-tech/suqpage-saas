@@ -34,7 +34,9 @@ assertLoopback(process.env.NEXT_PUBLIC_SUPABASE_URL, "54321", "Local browser pro
 
 let port = process.env.PORT || "3000";
 let hostname = '127.0.0.1';
-const args = process.argv.slice(2);
+const rawArgs = process.argv.slice(2);
+const allowLan = rawArgs.includes('--allow-lan');
+const args = rawArgs.filter(arg => arg !== '--allow-lan');
 for (let i = 0; i < args.length; i++) {
   const [flag, inline] = args[i].split('=', 2);
   if (!['--port', '-p', '--hostname', '-H'].includes(flag)) throw new Error('Supported development options: --hostname and --port.');
@@ -43,11 +45,11 @@ for (let i = 0; i < args.length; i++) {
   if (flag === '--port' || flag === '-p') port = value;
   else hostname = value;
 }
-if (!['127.0.0.1', 'localhost', '::1'].includes(hostname)) throw new Error('Development hostname must be a loopback address.');
+if (!['127.0.0.1', 'localhost', '::1'].includes(hostname) && !(allowLan && hostname === '0.0.0.0')) throw new Error('Development hostname must be a loopback address.');
 if (!/^\d{4,5}$/.test(port) || Number(port) < 1024 || Number(port) > 65535) {
   throw new Error("PORT must be an available local TCP port from 1024 to 65535.");
 }
-const origin = `http://${hostname === '::1' ? '[::1]' : hostname}:${port}`;
+const origin = `http://${hostname === '::1' ? '[::1]' : hostname === '0.0.0.0' ? '127.0.0.1' : hostname}:${port}`;
 process.env.PORT = port;
 process.env.NEXT_PUBLIC_APP_URL = origin;
 process.env.SUQPAGE_CANONICAL_URL = origin;

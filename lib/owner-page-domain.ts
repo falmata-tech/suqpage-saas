@@ -1,3 +1,4 @@
+import { parseAccentColor } from "./storefront-accent";
 import { parsePublicContacts, type PublicContacts } from "./business-profile-contacts";
 import type { SessionUser } from "./types";
 import { controlledYouTubeWatchUrl, normalizeControlledYouTubeUrl } from "./youtube-provider";
@@ -10,6 +11,7 @@ export type ShopPageContent = {
   heroImage: string;
   videoUrl: string;
   contacts?: PublicContacts;
+  accentColor?: string;
 };
 export type OwnerPageDraft = {
   businessId: number;
@@ -44,7 +46,7 @@ export function ownerPageVersion(input: unknown): number {
   return input;
 }
 export function parseShopPageContent(input: unknown): ShopPageContent {
-  const value = ownerPageRecord(input, ["template", "coverStyle", "introduction", "about", "heroImage", "videoUrl", "contacts"]);
+  const value = ownerPageRecord(input, ["template", "coverStyle", "introduction", "about", "heroImage", "videoUrl", "contacts", "accentColor"]);
   if (value.template !== "profile-v1" || (value.coverStyle !== "blended" && value.coverStyle !== "overlay")) {
     throw new OwnerPageError("Choose an available cover style.");
   }
@@ -65,7 +67,12 @@ export function parseShopPageContent(input: unknown): ShopPageContent {
     try { contacts = parsePublicContacts(value.contacts); }
     catch (error) { throw new OwnerPageError(error instanceof Error ? error.message : "Check public contacts."); }
   }
-  return { template: value.template, coverStyle: value.coverStyle, videoUrl, ...(contacts ? { contacts } : {}),
+  let accentColor: string | undefined;
+  if (value.accentColor !== undefined) {
+    try { accentColor = parseAccentColor(value.accentColor); }
+    catch (error) { throw new OwnerPageError((error as Error).message); }
+  }
+  return { ...(accentColor !== undefined ? { accentColor } : {}), template: value.template, coverStyle: value.coverStyle, videoUrl, ...(contacts ? { contacts } : {}),
     introduction: text("introduction", 600), about: text("about", 3000), heroImage: text("heroImage", 240) };
 }
 

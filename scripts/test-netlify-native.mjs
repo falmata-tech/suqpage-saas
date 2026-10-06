@@ -22,7 +22,17 @@ with zipfile.ZipFile(sys.argv[1]) as z:
   execFileSync('docker',['run','--rm','--platform','linux/amd64','--network','none','--read-only','--tmpfs','/tmp','--mount',`type=bind,source=${root},target=/artifact,readonly`,'--workdir','/artifact','node:24.18.1-bookworm-slim','node','--input-type=module','-e',`
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-const require=createRequire('/artifact/package.json');
+import fs from 'node:fs';
+import path from 'node:path';
+const entry='/artifact/___netlify-entry-point.mjs';
+let anchor='/artifact/package.json';
+if(fs.existsSync(entry)) {
+  const target=fs.readFileSync(entry,'utf8').match(/getLambdaHandler\\(['"]([^'"]+)['"]\\)/)?.[1];
+  assert.ok(target,'Expected an explicit packaged handler entry');
+  anchor=path.resolve('/artifact',target);
+  assert.ok(anchor.startsWith('/artifact/') && fs.existsSync(anchor),'Packaged handler must exist inside the archive');
+}
+const require=createRequire(anchor);
 const sharp=require('sharp');
 const image=await sharp({create:{width:4,height:4,channels:3,background:'#fff'}}).resize(2,2).png().toBuffer();
 const info=await sharp(image).metadata();

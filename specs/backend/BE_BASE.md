@@ -2,7 +2,7 @@
 id: BE_BASE
 title: Backend and domain base architecture
 status: done
-related: [FE_BASE, DEP_BASE, ADR-0001, ADR-0002]
+related: [BE-044, FE_BASE, DEP_BASE, ADR-0001, ADR-0002]
 owners: [backend, security]
 last_updated: 2026-07-20
 ---

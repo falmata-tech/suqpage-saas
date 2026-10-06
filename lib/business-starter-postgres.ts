@@ -1,3 +1,4 @@
+import { parseAccentColor } from "./storefront-accent";
 import type { PostgresTransactionRunner } from './postgres-runtime';
 import { findPlaceSuggestions } from './place-catalog';
 import { isBusinessCategoryKey, type BusinessCategoryKey } from './business-categories';
@@ -5,10 +6,11 @@ import { STARTER_ABOUT, STARTER_IMAGE_ROOT, STARTER_VIDEO_REF, STARTER_VIDEO_URL
 
 /** Runs in the creation transaction; safe to retry, never backfills existing content. */
 export async function initializeBusinessStarter(runner: PostgresTransactionRunner, input: {
-  businessId: number; actorUserId: number; category: BusinessCategoryKey; notificationEmail: string;
+  businessId: number; actorUserId: number; category: BusinessCategoryKey; notificationEmail: string; accentColor?: string;
 }): Promise<boolean> {
   if (!Number.isSafeInteger(input.businessId) || input.businessId < 1 || !Number.isSafeInteger(input.actorUserId)
     || !isBusinessCategoryKey(input.category)) throw new Error('Invalid starter workspace.');
+  const accentColor = parseAccentColor(input.accentColor);
   return runner.transaction(async () => {
     const actor = await runner.query(`SELECT 1 FROM users u JOIN user_access_profiles p ON p.user_id=u.id
       WHERE u.id=? AND ((p.access_role='client' AND u.business_id=?) OR p.access_role IN ('platform_admin','operations_manager'))`, [input.actorUserId, input.businessId]);
@@ -60,7 +62,7 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
       }
     }
     await runner.query(`INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)`,
-      [input.businessId, JSON.stringify(starterPage), input.actorUserId, now]);
+      [input.businessId, JSON.stringify({ ...starterPage, ...(accentColor ? { accentColor } : {}) }), input.actorUserId, now]);
     await runner.query("INSERT INTO owner_page_events(business_id,version,actor_user_id,kind,created_at) VALUES(?,1,?,'created',?)", [input.businessId, input.actorUserId, now]);
     await runner.query(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
       VALUES(?,1,?,?,?,'area',NULL,NULL,?,?,?,0,?)`, [input.businessId, input.category, place.name, place.region, place.id, place.latitude, place.longitude, now]);

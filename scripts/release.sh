@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+release_target="${SUQPAGE_RELEASE_TARGET:-all}"
+if [[ "$release_target" == "web" ]]; then
+  node scripts/check-web-install.cjs
+  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+elif [[ "$release_target" != "all" ]]; then
+  printf 'Unknown release target.\n' >&2
+  exit 1
+fi
+
 scale_fixture_root=""
 cleanup_release_fixtures() {
   if [[ -n "$scale_fixture_root" && -d "$scale_fixture_root" ]]; then
@@ -11,6 +20,8 @@ trap cleanup_release_fixtures EXIT
 
 printf '\n=== Specification and traceability validation ===\n'
 node scripts/validate-specs.mjs
+
+node scripts/test-source-map-security.cjs
 
 printf '\n=== Production build ===\n'
 NEXT_TELEMETRY_DISABLED=1 node node_modules/next/dist/bin/next build
@@ -80,6 +91,10 @@ node --import tsx scripts/test-launch-wiring.ts
 node --import tsx scripts/test-media-reconciliation.ts
 
 printf '\n=== Production dependency audit ===\n'
-npm audit --omit=dev --audit-level=moderate
+if [[ "$release_target" == "web" ]]; then
+  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+else
+  npm audit --omit=dev --audit-level=moderate
+fi
 
 printf '\nAll Suqpage release checks passed.\n'

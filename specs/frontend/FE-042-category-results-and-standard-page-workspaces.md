@@ -214,3 +214,34 @@ S25 readiness: GIVEN a newly loaded market WHEN the search input becomes editabl
 THEN its input handlers are ready and the first typed query updates results.
 The search field and submit/clear actions remain disabled until hydration;
 capture-human-search.mjs types immediately without an arbitrary readiness delay.
+
+## S54 — offering-only public results (local verified, 2026-10-05)
+
+Supersedes mixed result lists and result-type controls. Definition of Ready:
+web/native public entry points reuse the existing products projection and SQL
+pagination; no migration, provider, ranking or eligibility change. Master sections
+5.2, 10 and 15 are affected. FE-030/FE-042 govern map/filter/pagination behavior;
+FE-053 and BE-044 cover the native public adapter.
+
+- GIVEN Market WHEN opening results THEN one visible Products & services heading
+  identifies the list; no Businesses checkbox/tab/card or redundant type toggle.
+- GIVEN a business search/category/location WHEN applied THEN eligible businesses
+  remain on the map with existing marker/nearby previews; listings contain only
+  matching products/services and retain direct product links.
+- GIVEN old type=businesses/all URLs or API calls THEN public boundaries normalize
+  to product/service results BEFORE counting/paginating, with full pages and no
+  business-only trailing pages. Internal reusable discovery projections may
+  retain legacy type support; no public client depends on it.
+- GIVEN Next/Previous or clearing filters THEN query/category/place remain scoped;
+  map membership is independent of result page. Empty lists keep the map intact.
+
+Focused evidence: public API and desktop/390/320 browser capture, typechecks,
+existing discovery pagination/multicategory tests. Existing localized Products &
+services label is reused. Visual approval precedes full/release gates.
+
+S54 focused evidence passes: both typechecks; test:discovery-pagination (including
+public legacy-type normalization and map/count regression); five actual web/native
+browser captures in .local/offering-results/ with capture-offering-results.mjs.
+Desktop/390/320 screenshots reviewed. Tile imagery is a controlled fixture;
+marker data/handlers are real. Physical native-device evidence, owner visual
+approval, full/release gates, commit and deployment are not claimed.

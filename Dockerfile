@@ -1,6 +1,9 @@
 FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY apps/mobile/package.json ./apps/mobile/package.json
+COPY packages/contracts/package.json ./packages/contracts/package.json
+COPY scripts/patch-mobile-dependencies.cjs ./scripts/patch-mobile-dependencies.cjs
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --fetch-retries=2 --fetch-timeout=60000 --loglevel=info
 
 FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS builder

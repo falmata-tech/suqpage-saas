@@ -2,9 +2,9 @@
 id: FE-033
 title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
-related: [FE-052, FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
+related: [FE-036, FE-052, FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-09-24
+last_updated: 2026-10-05
 change_level: L3
 ---
 
@@ -129,8 +129,9 @@ no new provider integration or production configuration mutation.
   resolves against the current ordered sponsor-placement pool, repeating only
   when a day contains more sponsor breaks than active placements. The admin
   agenda names the assigned sponsor and exact time. During that live segment,
-  the public status and sponsor rail bring the assigned placement forward and
-  label it **Sponsor spotlight** without changing showroom order or airtime.
+  the public status labels the assigned placement **Sponsor spotlight**, without
+  changing showroom order or airtime. FE-036 S51 keeps the sponsor carousel
+  rotating equally rather than pinning the broadcast sponsor.
 - Every participating booth receives one non-overlapping presentation window.
   A transition or sponsor break separates consecutive booths.
 - Each non-empty session is at least 60 minutes and targets no more than 30
@@ -211,7 +212,7 @@ Scenario: Sponsor segment reaches the live screen
   GIVEN today's agenda contains sponsor breaks and active sponsor placements
   WHEN the agenda and public Daily Featured workspace render
   THEN each sponsor break names its assigned placement and exact time
-  AND the currently active sponsor segment moves that placement to the front of the sponsor rail
+  AND the currently active sponsor segment identifies that placement without interrupting equal carousel rotation
   AND the live status identifies it as a paid sponsor spotlight
 
 Scenario: Administrator adjusts one day's lineup

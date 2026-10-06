@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const {spawnSync}=require('node:child_process');
+const{mobileBuildSettings}=require('../apps/mobile/build-config.cjs');
+const env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',EXPO_PUBLIC_API_ORIGIN:'https://suqpage.com',EXPO_PUBLIC_SUPABASE_URL:'https://example.supabase.co',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',EXPO_PUBLIC_EAS_PROJECT_ID:'fixture-project'};
+assert.equal(mobileBuildSettings(env).packageName,'com.suqpage.app.preview');
+for(const key of ['EXPO_PUBLIC_API_ORIGIN','EXPO_PUBLIC_SUPABASE_URL','EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY','EXPO_PUBLIC_EAS_PROJECT_ID'])assert.throws(()=>mobileBuildSettings({...env,[key]:''}));
+for(const value of ['http://127.0.0.1:3102','https://192.168.1.20','https://user:pass@suqpage.com','https://suqpage.com/path','https://suqpage.com?token=x'])assert.throws(()=>mobileBuildSettings({...env,EXPO_PUBLIC_API_ORIGIN:value}));
+for(const role of ['service_role','authenticated'])assert.throws(()=>mobileBuildSettings({...env,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'eyJ.'+Buffer.from(JSON.stringify({role})).toString('base64url')+'.sig'}));
+assert.throws(()=>mobileBuildSettings({...env,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_secret_private'}));
+assert.equal(mobileBuildSettings({}).hosted,false);
+assert.equal(mobileBuildSettings({SUQPAGE_MOBILE_BUILD_PROFILE:'preview'},{validateHosted:false}).packageName,'com.suqpage.app.preview');
+const missing=spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{env:{PATH:process.env.PATH,SUQPAGE_MOBILE_BUILD_PROFILE:'preview'},encoding:'utf8'});
+assert.notEqual(missing.status,0);assert.match(missing.stderr,/API origin is required/);
+console.log('Mobile build config checks passed: explicit hosted targets, public keys, EAS prerequisites and separate preview identity.');

@@ -1,0 +1,517 @@
+import { normalizeDiscoveryPlaces, discoveryPlaceKey } from "../../../../lib/discovery-contract";
+import { MARKET_STOREFRONT_COPY } from "../../../../lib/storefront-copy";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Animated,
+  Platform,
+  Keyboard,
+  BackHandler,
+  AccessibilityInfo,
+  useWindowDimensions,
+  StyleSheet,
+} from "react-native";
+import { router } from "expo-router";
+import type { Market, MapShop } from "@suqpage/contracts";
+import { request, useApp, useLoad } from "../../src/runtime";
+import {
+  Screen,
+  Copy,
+  Photo,
+  Status,
+  Icon,
+  colors,
+  Button,
+  openLink,
+} from "../../src/ui";
+import {
+  BuyingLauncher,
+  CategoryArt,
+  IconButton,
+  Sheet,
+} from "../../src/chrome";
+import MarketMap from "../../src/MarketMap";
+import type { MapControls } from "../../src/map-contract";
+export default function MarketScreen() {
+  const { t } = useApp();
+  const { width } = useWindowDimensions();
+  const [stageHeight, setStageHeight] = useState(500),
+    [panel, setPanel] = useState(false),
+    [drawerVisible, setDrawerVisible] = useState(false),
+    [query, setQuery] = useState(""),
+    [text, setText] = useState(""),
+    [categories, setCategories] = useState<string[]>([]),
+    [place, setPlace] = useState(""),
+    [page, setPage] = useState(1),
+    [picker, setPicker] = useState(""),
+    [selected, setSelected] = useState<MapShop | null>(null),
+    [nearby, setNearby] = useState<MapShop[]>([]),
+    [reduced, setReduced] = useState(false);
+  const map = useRef<MapControls>(null),
+    opener = useRef<React.ElementRef<typeof Pressable>>(null),
+    search = useRef<TextInput>(null),
+    results = useRef<ScrollView>(null),
+    progress = useRef(new Animated.Value(0)).current;
+  const focusPanelControl = useRef(false);
+  useEffect(() => {
+    if (Platform.OS !== "web" || !focusPanelControl.current) return;
+    focusPanelControl.current = false;
+    const frame = requestAnimationFrame(() => {
+      if (panel) search.current?.focus();
+      else (opener.current as unknown as { focus?: () => void })?.focus?.();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [panel]);
+  const drawerWidth = Math.min(440, width - 58);
+  const params = new URLSearchParams({
+    q: query,
+    place,
+    page: String(page),
+  });
+  categories.forEach((c) => params.append("category", c));
+  const key = params.toString();
+  const load = useLoad(() => request<Market>("market?" + key), [key]);
+  const data = load.data;
+  const [filterOptions, setFilterOptions] = useState<Pick<Market, "categories" | "places"> | null>(null);
+  useEffect(()=>{if(data)setFilterOptions({categories:data.categories,places:data.places});},[data]);
+  useEffect(() => {
+    setSelected(null);
+    setNearby([]);
+  }, [key]);
+  useEffect(() => {
+    void AccessibilityInfo.isReduceMotionEnabled().then(setReduced);
+    const sub = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduced,
+    );
+    return () => sub.remove();
+  }, []);
+  useEffect(() => {
+    if (panel) setDrawerVisible(true);
+    const animation = Animated.timing(progress, {
+      toValue: panel ? 1 : 0,
+      duration: reduced ? 0 : 220,
+      useNativeDriver: Platform.OS !== "web",
+    });
+    animation.start(({ finished }) => {
+      if (finished && !panel) setDrawerVisible(false);
+    });
+    return () => animation.stop();
+  }, [panel, reduced, progress]);
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (panel) {
+        hide();
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [panel]);
+  function hide() {
+    focusPanelControl.current = true;
+    setPanel(false);
+    Keyboard.dismiss();
+  }
+  function choose(change: () => void) {
+    change();
+    setPage(1);
+    results.current?.scrollTo({ y: 0, animated: false });
+  }
+  function submit() {
+    choose(() => setQuery(text.trim()));
+    Keyboard.dismiss();
+  }
+  function chooseBusiness(shop: MapShop) {
+    map.current?.focus(shop);
+    setSelected(shop);
+  }
+  const selectedPlaces = normalizeDiscoveryPlaces(place);
+  const chosenPlace = data?.places.filter(p => selectedPlaces.includes(p.key)).map(p=>p.label).join(", ") || place;
+  const controls = <View style={m.compactToolbar}>
+    <Pressable ref={opener} accessibilityRole="button" accessibilityLabel={t(panel ? "Hide search and filters" : "Search & results")} accessibilityState={{expanded:panel}} onPress={()=>{focusPanelControl.current=true; panel ? hide() : setPanel(true);}} style={[m.compactButton,panel && m.activeFilter]}><Icon name={panel ? "back" : "panel"} size={22}/></Pressable>
+    <View style={m.searchInput}>
+      <TextInput ref={search} accessibilityLabel={t("Search")} placeholder={t("Search")} placeholderTextColor={colors.muted} value={text} onChangeText={setText} onSubmitEditing={submit} returnKeyType="search" style={{flex:1,minWidth:0,height:42,padding:8,fontSize:14,color:colors.ink}}/>
+      {text.length>0 && <Pressable accessibilityRole="button" accessibilityLabel={t("Clear search")} onPress={()=>choose(()=>{setText("");setQuery("");})} style={{width:44,minHeight:44,alignItems:"center",justifyContent:"center"}}><Icon name="close" size={16}/></Pressable>}
+    </View>
+    <Pressable accessibilityRole="button" accessibilityLabel={t("Search")} onPress={submit} style={m.searchButton}><Icon name="search" size={20} color="white"/></Pressable>
+    {[{scope:"category",label:"Category",value:categories.length ? t("Categories")+` (${categories.length})` : t("All categories"),icon:"grid",active:categories.length>0},{scope:"place",label:"Region or city",value:chosenPlace||t("All Ethiopia"),icon:"pin",active:!!place}].map(filter=><Pressable key={filter.scope} accessibilityRole="button" accessibilityLabel={t(filter.label)+": "+filter.value} accessibilityState={{selected:filter.active}} onPress={()=>setPicker(filter.scope)} style={[m.compactButton,filter.active && m.activeFilter]}><Icon name={filter.icon} size={21}/>{filter.active && <View style={m.activeDot}/>}</Pressable>)}
+  </View>;
+  return (
+    <Screen scroll={false}>
+      <View style={m.intro}>
+        <Text style={m.eyebrow}>{t("Suqpage Market").toUpperCase()}</Text>
+        <Text style={m.headline}>
+          {t(MARKET_STOREFRONT_COPY.title)}
+        </Text>
+        <Text style={m.description}>
+          {t(
+            MARKET_STOREFRONT_COPY.description,
+          )}
+        </Text>
+      </View>
+      <View
+        style={m.stage}
+        onLayout={(e) => setStageHeight(e.nativeEvent.layout.height)}
+      >
+        <MarketMap
+          ref={map}
+          height={stageHeight}
+          shops={data?.showrooms || []}
+          onSelect={chooseBusiness}
+          groups={data?.nearbyGroups}
+          selectedId={selected?.id}
+          onGroup={setNearby}
+        />
+        <View style={m.mapTools}>
+          <IconButton
+            label={t("Zoom in")}
+            icon="plus"
+            onPress={() => map.current?.zoom(1)}
+          />
+          <IconButton
+            label={t("Zoom out")}
+            icon="minus"
+            onPress={() => map.current?.zoom(-1)}
+          />
+          <IconButton
+            label={t("Center Ethiopia")}
+            icon="target"
+            onPress={() => map.current?.reset()}
+          />
+        </View>
+        {controls}
+        <Animated.View
+          testID="search-drawer"
+          pointerEvents={panel ? "auto" : "none"}
+          accessibilityElementsHidden={!panel}
+          importantForAccessibility={panel ? "auto" : "no-hide-descendants"}
+          style={[
+            m.drawer,
+            {
+              width: drawerWidth,
+              visibility: drawerVisible ? "visible" : "hidden",
+              transform: [
+                {
+                  translateX: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-drawerWidth, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+          {...(Platform.OS === "web"
+            ? {
+                onKeyDown: (e: { key: string; preventDefault: () => void }) => {
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    hide();
+                  }
+                },
+              }
+            : {})}
+        >
+          <ScrollView
+            ref={results}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ padding: 12, gap: 12, paddingBottom: 18 }}
+          >
+            <Text accessibilityRole="header" style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>{t("Products & services")}</Text>
+            <Status {...load} retry={load.reload} />
+            {data && (
+              <>
+                <Text accessibilityLiveRegion="polite" style={m.count}>
+                  {t("{count} results", { count: data.total })}
+                </Text>
+                {data.items.filter(item => item.kind === "product").map((item) => (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={item.name}
+                    key={item.kind + "-" + item.id}
+                    onPress={() => router.push({ pathname: "/product", params: { handle: item.handle, id: item.id } })}
+                    style={m.result}
+                  >
+                    <View style={{ width: 78 }}>
+                      <Photo refPath={item.image} height={92} />
+                    </View>
+                    <View style={{ flex: 1, gap: 6, paddingVertical: 7 }}>
+                      <Text numberOfLines={2} style={m.resultName}>
+                        {item.name}
+                      </Text>
+                      <Text numberOfLines={2} style={m.small}>
+                        {item.businessName}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+                {data.items.length === 0 && (
+                  <Copy>{t("No matches found")}</Copy>
+                )}
+                <View style={m.pagination}>
+                  <IconButton
+                    label={t("Previous")}
+                    icon="back"
+                    disabled={page <= 1}
+                    onPress={() => {
+                      setPage((p) => p - 1);
+                      results.current?.scrollTo({ y: 0 });
+                    }}
+                  />
+                  <Text style={m.small}>
+                    {data.page} / {Math.max(1, data.pages)}
+                  </Text>
+                  <IconButton
+                    label={t("Next")}
+                    icon="arrow"
+                    disabled={data.page >= data.pages}
+                    onPress={() => {
+                      setPage((p) => p + 1);
+                      results.current?.scrollTo({ y: 0 });
+                    }}
+                  />
+                </View>
+              </>
+            )}
+          </ScrollView>
+        </Animated.View>
+        <View style={[m.buying, { right: panel ? 7 : 12, bottom: 24 }]}>
+          <BuyingLauncher compact={panel} />
+        </View>
+      </View>
+      <Pressable accessibilityRole="link"
+        onPress={() => void openLink("https://www.openstreetmap.org/copyright").catch(() => {})}
+        style={{backgroundColor: "white", padding: 5}}>
+        <Text style={{textAlign: "right", fontSize: 11, color: colors.ink}}>© OpenStreetMap contributors</Text>
+      </Pressable>
+      <Sheet
+        visible={!!picker}
+        title={t(picker === "category" ? "Categories" : "Region or city")}
+        onClose={() => setPicker("")}
+      >
+        <Button
+          secondary
+          label={t("Clear")}
+          onPress={() =>
+            choose(() =>
+              picker === "category" ? setCategories([]) : setPlace(""),
+            )
+          }
+        />
+        {(picker === "category" ? filterOptions?.categories : filterOptions?.places)
+          ?.filter((c) => c.key !== "all")
+          .map((c) => {
+            const checked =
+              picker === "category"
+                ? categories.includes(c.key)
+                : selectedPlaces.includes(c.key);
+            return (
+              <Pressable
+                key={c.key}
+                accessibilityRole="checkbox"
+                disabled={picker === "place" && !checked && selectedPlaces.length >= 16}
+                accessibilityState={{ checked }}
+                {...(Platform.OS === "web" ? { "aria-checked": checked } : {})}
+                onPress={() =>
+                  choose(() =>
+                    picker === "category"
+                      ? setCategories((old) =>
+                          old.includes(c.key)
+                            ? old.filter((v) => v !== c.key)
+                            : [...old, c.key],
+                        )
+                      : setPlace(old => discoveryPlaceKey(normalizeDiscoveryPlaces(old).includes(c.key) ? normalizeDiscoveryPlaces(old).filter(key=>key!==c.key) : [...normalizeDiscoveryPlaces(old),c.key])),
+                  )
+                }
+                style={m.choice}
+              >
+                {picker === "category" && <CategoryArt name={c.key} />}
+                <Text style={{ flex: 1, fontSize: 15, color: colors.ink }}>
+                  {picker === "category" ? t(c.label) : c.label}
+                </Text>
+                {checked && <Icon name="check" color={colors.brand} />}
+              </Pressable>
+            );
+          })}
+        {(picker === "category" ? categories.length > 0 : !!place) && <Button secondary label={t(picker === "category" ? "Clear categories" : "Clear location")} onPress={()=>choose(()=>picker === "category" ? setCategories([]) : setPlace(""))}/>}
+        <Button label={t("Done")} onPress={() => setPicker("")} />
+      </Sheet>
+      <Sheet visible={nearby.length > 0} title={t('Nearby')} onClose={() => setNearby([])}>
+        {nearby.map(shop => <Button key={shop.id} secondary label={shop.name} onPress={() => {setNearby([]); chooseBusiness(shop);}}/>)}
+      </Sheet>
+      <Sheet
+        visible={!!selected}
+        title={t("Business")}
+        onClose={() => setSelected(null)}
+      >
+        {selected && (
+          <>
+            <Photo refPath={selected.heroImagePath} height={180} />
+            <Copy big>{selected.name}</Copy>
+            <Copy muted>
+              {selected.city} · {selected.region}
+            </Copy>
+            <Copy>{selected.description}</Copy>
+            <Button
+              label={t("Explore this business")}
+              onPress={() => {
+                const handle = selected.handle;
+                setSelected(null);
+                router.push({ pathname: "/shop/[handle]", params: { handle } });
+              }}
+            />
+          </>
+        )}
+      </Sheet>
+    </Screen>
+  );
+}
+const m = StyleSheet.create({
+  intro: {
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    backgroundColor: "#fbfcfc",
+    gap: 4,
+    borderBottomWidth: 1,
+    borderColor: colors.line,
+  },
+  eyebrow: {
+    fontSize: 10,
+    letterSpacing: 0.5,
+    fontWeight: "800",
+    color: colors.brand,
+  },
+  headline: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "800",
+    color: colors.ink,
+  },
+  description: { fontSize: 12, lineHeight: 17, color: "#47606b" },
+  stage: {
+    flex: 1,
+    minHeight: 180,
+    backgroundColor: "#dfe9e8",
+    overflow: "hidden",
+  },
+  mapTools: { position: "absolute", right: 9, top: 66, gap: 7 },
+  compactToolbar:{position:"absolute",left:10,right:10,top:10,zIndex:10,maxWidth:680,flexDirection:"row",alignItems:"center",gap:6},
+  compactButton:{width:44,height:44,flexShrink:0,alignItems:"center",justifyContent:"center",borderWidth:1,borderColor:colors.line,borderRadius:7,backgroundColor:"white"},
+  activeFilter:{borderColor:colors.brand,backgroundColor:colors.soft},
+  activeDot:{position:"absolute",top:4,right:4,width:7,height:7,borderRadius:4,backgroundColor:colors.brand},
+  floatingControls: { position:"absolute",left:10,top:12,gap:8 },
+  opener: {
+    alignSelf:"flex-start",
+    maxWidth:"100%",
+    minHeight:44,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 9,
+    boxShadow: "0 4px 12px #0001",
+  },
+  openerText: { fontSize: 14, fontWeight: "800", color: colors.ink, flexShrink:1 },
+  small: { fontSize: 12, lineHeight: 17, color: colors.muted },
+  openerArrow: { backgroundColor: colors.brand, padding: 9, borderRadius: 6 },
+  drawer: {
+    position: "absolute",
+    left: 0,
+    top: 64,
+    bottom: 0,
+    backgroundColor: "white",
+    borderRightWidth: 1,
+    borderColor: colors.line,
+    boxShadow: "4px 0 14px #0002",
+  },
+  searchRow: { flexDirection: "row", gap: 6, alignItems: "center", backgroundColor:"white", borderRadius:8 },
+  searchInput: {
+    flex: 1,
+    minWidth: 0,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 6,
+    minHeight: 44,
+    backgroundColor:"white",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.brand,
+    borderRadius: 6,
+  },
+  filterRow: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  filterLabel: { fontSize: 12, color: colors.ink, fontWeight: "600" },
+  select: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+  },
+  clear: { fontSize: 12, color: colors.brand },
+  checkbox: {
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+    minHeight: 30,
+    flexShrink: 1,
+  },
+  check: {
+    width: 17,
+    height: 17,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 3,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  count: { fontSize: 12, color: colors.muted, paddingTop: 4 },
+  result: {
+    flexDirection: "row",
+    gap: 10,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 8,
+    overflow: "hidden",
+    paddingRight: 8,
+    minHeight: 94,
+  },
+  resultName: {
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: "700",
+    color: colors.ink,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+  buying: { position: "absolute" },
+  choice: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: colors.line,
+  },
+});

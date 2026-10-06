@@ -28,7 +28,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         <div className="platform-task-context">
           <span className="platform-task-eyebrow">{t("Account access")}</span>
           <h1 id="login-title">{t("Sign in to Suqpage.")}</h1>
-          <p>{t("Manage your showroom, products, services and customer inquiries.")}</p>
+          <p>{t("Manage your business page, products, services and customer inquiries.")}</p>
           <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("New business? Enter your email to create your account.")}</span></div>
         </div>
         <div className="platform-form-panel">

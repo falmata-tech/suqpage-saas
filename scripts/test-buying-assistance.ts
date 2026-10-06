@@ -32,11 +32,11 @@ async function main(){
   assert.equal(response.status,400);assert.match(response.headers.get('cache-control')||'',/private, no-store/);
  }
  await request('help');await request('buying');await request('transport');
- assert.equal(new Set(jar.values()).size,1);
+ assert.equal(new Set(jar.values()).size,2);
  const draft={action:'start',category:'buying_assistance',name:'Example buyer',phone:'+447700900999',message:'Please buy the listed table. Seller in Addis Ababa.',idempotencyKey:crypto.randomUUID()};
  for(const invalid of [{service:'wrong'},{service:''},{name:' '},{phone:'12'},{message:' '},{message:'x'.repeat(4001)}])assert.equal((await request('buying','POST',{...draft,...invalid})).status,400);
  assert.equal((await request('help','POST',draft)).status,410);
- assert.equal((await request('transport','POST',draft)).status,410);
+ assert.equal((await request('transport','POST',draft)).status,400);
  const first=await request('buying','POST',draft);assert.equal(first.status,201,JSON.stringify(first.body));
  const id=(await db.prepare('SELECT id FROM support_conversations WHERE public_ref=?').get(first.body.conversation.publicRef)).id as number;
  const stored=(await support.getSupportConversation(admin,id)).conversation;

@@ -462,7 +462,10 @@ export async function createPublicSupportConversation(
   const email = callback ? null : visitorEmail(input.email);
   const phone = visitorPhone(input.phone);
   if (category === "buying_assistance" && (typeof input.message !== "string" || input.message.trim().length > 4000)) throw new SupportError("Describe what you need in 4,000 characters or fewer.", "invalid_request");
-  const message = transport ? `From: ${origin}\nTo: ${destination}` : cleanText(input.message, 4000);
+  if (transport && input.message != null && (typeof input.message !== "string" || input.message.length > 4000)) throw new SupportError("Describe what you need in 4,000 characters or fewer.", "invalid_request");
+  const goods = transport ? cleanText(input.message, 4000) : "";
+  const message = transport ? `From: ${origin}\nTo: ${destination}${goods ? `\n${goods}` : ""}` : cleanText(input.message, 4000);
+  if (message.length > 4000) throw new SupportError("Describe what you need in 4,000 characters or fewer.", "invalid_request");
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
   if (callback && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
@@ -546,11 +549,7 @@ async function requirePublicConversation(token: unknown, now = Date.now()) {
 
 export async function getPublicSupportConversation(token: unknown, now = Date.now()) {
   const { row } = await requirePublicConversation(token, now);
-  // Historical transport keeps receipts; buying exposes only explicit replies.
-  if (row.assistance_category === "shipment_observation") return {
-    id: row.id, publicRef: row.public_ref, category: row.assistance_category,
-    status: row.status, assignedUserName: null, messages: [],
-  };
+  // Retained notes and carrier handoffs stay private; only explicit replies are public.
   const messages = (await runtimeAll<{
     id: number;
     sender_kind: "user" | "visitor";
@@ -564,7 +563,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
     FROM support_messages m
     LEFT JOIN users u ON u.id=m.sender_user_id
     LEFT JOIN support_attachments a ON a.message_id=m.id
-    WHERE m.conversation_id=? AND (? <> 'buying_assistance' OR m.sender_kind='visitor' OR m.visitor_visible=TRUE)
+    WHERE m.conversation_id=? AND (? NOT IN ('buying_assistance','shipment_observation') OR m.sender_kind='visitor' OR m.visitor_visible=TRUE)
     ORDER BY m.id DESC LIMIT 100
   `, [row.id, row.assistance_category])).reverse();
   const lastId = messages.at(-1)?.id || 0;
@@ -585,7 +584,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
       senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "Suqpage support",
       body: message.body,
       createdAt: message.created_at,
-      attachment: row.assistance_category === "buying_assistance" ? null : attachmentView(message),
+      attachment: isCallbackRequest(row.assistance_category) ? null : attachmentView(message),
     })),
   };
 }
@@ -621,8 +620,7 @@ export async function postPublicSupportMessage(
   const attachment = supportAttachment(input.attachment);
   if (!body) throw new SupportError("Write a message for the Suqpage team.", "message_required");
   const { row, tokenHash } = await requirePublicConversation(token, now);
-  if (row.assistance_category === "shipment_observation") throw new SupportError("Our team will call you about your request.", "request_only");
-  if (row.assistance_category === "buying_assistance" && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
+  if (isCallbackRequest(row.assistance_category) && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
   if (row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
   const rate = await consumeRuntimeRateLimit(`public-support:message:${ipHash}:${tokenHash}`, 30, 10 * 60 * 1000, 30 * 60 * 1000);
   if (!rate.allowed) throw new SupportError("Too many messages were sent. Please try again later.", "rate_limited");
@@ -662,7 +660,6 @@ export async function closePublicSupportConversation(token: unknown, now = Date.
   return runtimeTransaction(async () => {
     await lockSupportWork();
     const { row } = await requirePublicConversation(token, now);
-    if (row.assistance_category === "shipment_observation") throw new SupportError("Our team will call you about your request.", "request_only");
     if (row.status === "closed") return { duplicate: true };
     await runtimeRun(`
       UPDATE support_conversations SET status='closed',closed_at=?,updated_at=? WHERE id=?
@@ -811,13 +808,13 @@ export async function postSupportMessage(
   return runtimeTransaction(async () => {
     await lockSupportWork();
     const row = await requireConversation(user, conversationId);
-    const closedNote = row.assistance_category === "buying_assistance" && user.access_role !== "client" && input.audience === "note";
+    const closedNote = isCallbackRequest(row.assistance_category) && user.access_role !== "client" && input.audience === "note";
     if (row.status === "closed" && !closedNote) throw new SupportError("Reopen this conversation before replying.", "closed");
     if (user.access_role !== "client" && row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Claim this conversation before replying.", "unassigned");
     }
     if (input.audience != null && input.audience !== "reply" && input.audience !== "note") throw new SupportError("Request could not be accepted.", "invalid_audience");
-    const visible = row.assistance_category === "buying_assistance" && input.audience === "reply";
+    const visible = isCallbackRequest(row.assistance_category) && input.audience === "reply";
     if (visible && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
     const existing = await runtimeGet<{ id: number; conversation_id: number; body: string; visitor_visible: boolean }>(`
       SELECT id,conversation_id,body,visitor_visible FROM support_messages WHERE sender_key=? AND idempotency_key=?
@@ -894,7 +891,7 @@ export async function closeSupportConversation(user: SessionUser, conversationId
     ) {
       throw new SupportError("Only the assigned team member can close this conversation.", "forbidden");
     }
-    const resolving = row.assistance_category === "buying_assistance";
+    const resolving = isCallbackRequest(row.assistance_category);
     if (row.status === "closed" && (!resolving || row.resolved_at !== null)) return;
     await runtimeRun(`
       UPDATE support_conversations SET status='closed',closed_at=COALESCE(closed_at,?),resolved_at=?,updated_at=? WHERE id=?

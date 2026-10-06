@@ -1,4 +1,5 @@
 "use client";
+import SponsorCarousel from "./SponsorCarousel";
 import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
@@ -20,7 +21,6 @@ import {
   type FeaturedBoothWalkthrough,
   type FeaturedBroadcastPhase,
   type FeaturedProgramAgendaEntry,
-  type FeaturedProgramBreak,
 } from "@/lib/featured-program";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
@@ -145,21 +145,6 @@ function TodayProgramSchedule({ featured, agenda, sponsorPlacements }: { feature
   return <details className="featured-agenda"><summary><CalendarClock aria-hidden="true" /><span><small>{t("Today's schedule")}</small><strong>{sessionSummary || t("No presentations scheduled")}</strong></span><em>{featured.boothCount} {featured.boothCount === 1 ? t("business") : t("businesses")}</em><ChevronDown className="featured-agenda-chevron" aria-hidden="true" /></summary><div className="featured-agenda-body">{sessionSection("evening", "Evening session")}<p>{t("Five-minute changeovers are included between listed presentations unless a sponsor break is shown.")}</p></div></details>;
 }
 
-function SponsoredRail({ placements, activeSponsorSlot }: { placements: SponsorPlacement[]; activeSponsorSlot?: number }) {
-  const t = useUiText();
-  const baseSponsors = placements.slice(0, 5);
-  const activeSponsor = sponsorForSlot(baseSponsors, activeSponsorSlot);
-  const sponsors = activeSponsor ? [activeSponsor, ...baseSponsors.filter((placement) => placement.id !== activeSponsor.id)] : baseSponsors;
-  const [mobileStart, setMobileStart] = useState(0);
-  useEffect(() => {
-    if (sponsors.length <= 2 || activeSponsor) return;
-    const timer = window.setInterval(() => setMobileStart((current) => (current + 2) % sponsors.length), 7_000);
-    return () => window.clearInterval(timer);
-  }, [activeSponsor, sponsors.length]);
-  const mobileVisible = activeSponsor ? new Set([0, Math.min(1, sponsors.length - 1)]) : new Set([mobileStart, (mobileStart + 1) % Math.max(1, sponsors.length)]);
-  if (!sponsors.length) return null;
-  return <aside className="discovery-sponsored" id="featured-sponsors" aria-labelledby="featured-sponsors-title"><header className="discovery-sponsored-heading"><div><span>{t("Paid placement")}</span><h2 id="featured-sponsors-title">{t("Sponsors")}</h2><p>{t("Paid placements on Suqpage.")}</p></div><small>{sponsors.length} {" "}{t("sponsors")}</small></header><div className="discovery-sponsored-rail">{sponsors.map((sponsor, index) => <a key={sponsor.id} className={sponsor.id === activeSponsor?.id ? "sponsor-spotlight" : undefined} href={sponsor.href} target={sponsor.kind === "external" && sponsor.href.startsWith("https://") ? "_blank" : undefined} rel={sponsor.kind === "external" && sponsor.href.startsWith("https://") ? "noreferrer" : undefined} onClick={sponsor.kind === "showroom" ? rememberCurrentPublicWorkspace : undefined} data-mobile-visible={mobileVisible.has(index) ? "true" : undefined}>{sponsor.imagePath ? <img src={sponsor.imagePath} alt="" loading="lazy" /> : <span className="discovery-image-fallback" aria-hidden="true">{sponsor.name.slice(0, 1)}</span>}<span><small>{sponsor.id === activeSponsor?.id ? t("Sponsor spotlight") : t("Sponsored")}</small><b>{sponsor.name}</b><span className="sponsor-placement-details">{sponsor.details}</span><em>{t(sponsor.actionLabel)} <strong aria-hidden="true">→</strong></em></span></a>)}</div></aside>;
-}
 
 function FeaturedBroadcastStatus({ featured, selectedDay, now, agenda, sponsorPlacements }: { featured: WeeklyFeaturedProgram; selectedDay: WeeklyFeaturedProgram["schedule"][number] | undefined; now: number | null; agenda: FeaturedProgramAgendaEntry[]; sponsorPlacements: SponsorPlacement[] }) {
   const t = useUiText();
@@ -206,13 +191,12 @@ function WeeklyFeatured({ featured, sponsorPlacements, featuredNowBusinessId }: 
     const date = new Date(broadcastNow + 3 * 60 * 60 * 1000).toISOString().slice(0,10);
     if (date !== today.dateIso) router.refresh();
   }, [broadcastNow, today, router]);
-  const activeSponsorEntry = agenda.find((entry): entry is FeaturedProgramBreak => entry.kind === "sponsor_break" && entry.current);
   useEffect(() => {
     if (featured.isToday || !today) return;
     const timer = window.setTimeout(() => router.replace(featuredHref(today.weekday), { scroll: false }), 6_000);
     return () => window.clearTimeout(timer);
   }, [featured.isToday, featured.selectedWeekday, router, today]);
-  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title"><div className="featured-program-header"><header className="daily-featured-head"><div><span className="discovery-kicker">{t(featured.industryLabel)} · {t(featured.dayLabel)} · {featured.dateLabel} {" "}{t("· Ethiopia")}</span><h1 id="daily-featured-title">{t(featured.title)}</h1><p>{featured.isToday ? t("Explore today’s {value1} businesses. See their products and services, then get in touch.", { value1: t(featured.industryLabel).toLowerCase() }) : t("See what’s coming on {value1}. Businesses appear here on their featured day.", { value1: t(featured.dayLabel) })}</p></div><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} agenda={agenda} sponsorPlacements={sponsorPlacements} /></header><TodayProgramSchedule featured={featured} agenda={agenda} sponsorPlacements={sponsorPlacements} /></div><div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={currentBusinessId} now={broadcastNow} /><SponsoredRail placements={sponsorPlacements} activeSponsorSlot={activeSponsorEntry?.sponsorSlot} /></div></section>;
+  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title"><div className="featured-program-header"><header className="daily-featured-head"><div><span className="discovery-kicker">{t(featured.industryLabel)} · {t(featured.dayLabel)} · {featured.dateLabel} {" "}{t("· Ethiopia")}</span><h1 id="daily-featured-title">{t(featured.title)}</h1><p>{featured.isToday ? t("Explore today’s {value1} businesses. See their products and services, then get in touch.", { value1: t(featured.industryLabel).toLowerCase() }) : t("See what’s coming on {value1}. Businesses appear here on their featured day.", { value1: t(featured.dayLabel) })}</p></div><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} agenda={agenda} sponsorPlacements={sponsorPlacements} /></header><TodayProgramSchedule featured={featured} agenda={agenda} sponsorPlacements={sponsorPlacements} /></div><div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={currentBusinessId} now={broadcastNow} /><SponsorCarousel placements={sponsorPlacements} onOpenShowroom={rememberCurrentPublicWorkspace} /></div></section>;
 }
 
 export default function FeaturedShowroomsWorkspace({ discovery, sponsoredShowrooms }: { discovery: FeaturedShowroomsView; sponsoredShowrooms: SponsorPlacement[] }) {

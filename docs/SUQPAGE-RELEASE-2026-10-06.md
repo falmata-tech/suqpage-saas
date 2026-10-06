@@ -1,0 +1,57 @@
+# Suqpage web and Expo release — 2026-10-06
+
+Owner target: publish the approved web/API work and provide an Expo internal
+Android APK. Google Play and AAB submission are deferred. Source includes S49–S60
+visitor/owner mobile work, map/search controls and multi-location filters,
+transport live chat and dispatcher workflow, storefront accents, sponsor rotation,
+localized copy and account-deletion request entry. No Loadgistic changes.
+
+## Verified web candidate
+
+- Normal lifecycle, clean root/shared npm install; native toolchain absent.
+- Web/build dependency audit: zero findings at the unchanged moderate threshold.
+- Complete check command and 11/11 isolated browser acceptance workflows pass.
+- Release: production build, provider HTTP smoke, database/scale, security and
+  remaining release stages pass. Initial scale stage had no local test URL; the
+  exact remaining commands passed with the local-only URL. Original logs retained.
+- Operations backup and restore tests pass. Private production schema-58 backup
+  restored 58 tables/3,890 rows; migration 59 preserves existing data, supports
+  resolved transport chats and is repeat-safe. Auth/Storage are outside this
+  constraint-only migration and remain unchanged.
+- Final Netlify archive SHA-256:
+  `9c91275b1adba57d111452241eb772e7c379db9384a1fdae64a7ad3471c596ed`.
+  Exact Linux Sharp transform passes; 128 output traces exclude private paths.
+  The 1,645-entry function archive excludes Expo/React Native and the affected
+  native tools. Initial packaging failures are recorded, not hidden.
+
+## Repeatable packaging
+
+Use a clean root/shared install with `SUQPAGE_INSTALL_TARGET=web npm ci
+--workspace=@suqpage/contracts --include-workspace-root`, then `npm run release:web`.
+On a Mac, run `node scripts/prepare-netlify-native.mjs` before the Netlify artifact
+build: it verifies and installs only Linux Sharp optional packages already pinned
+in the lockfile. Use the canonical filesystem path and Netlify CLI `--cwd` from
+outside the monorepo so the root Next app is selected. The explicit unversioned
+Next adapter uses `.next` as its publish directory. Always test the final archive
+with `scripts/test-netlify-native.mjs`; local Next compilation is insufficient.
+
+## Android boundary and remaining gates
+
+Expo target is `@falmatad/suqpage`, preview/internal APK, production API. The current
+full native audit remains failed: braces 3.0.3 and node-forge 1.4.0 produce 20 graph
+findings. No compatible upstream fix is offered. The fresh Android export maps
+1,561 sources and excludes both packages; Expo's standard Metro runtime loader is
+expected. This is not final APK/device evidence. A narrow one-artifact exception
+is pending owner decision; it is not inferred from deployment approval. No build,
+paid service, Play submission or invitation has been initiated.
+
+## Rollout and rollback
+
+Prepublication state: source commit, migration and deployment pending. Verify
+Netlify site/account/domain and Supabase project independently, apply only migration
+59, run hosted preflight and deploy the verified archive. Monitor health, discovery,
+transport session boundaries and the new native API before any mobile distribution.
+Retain the additive schema and all chat history if reverting the web artifact.
+Do not restore customer data or broad Auth configuration as an automatic rollback.
+Private gate receipts, target metadata, backup and artifact manifests are under
+`.local/release-s61/`, excluded from Git and deployment.

@@ -2,7 +2,7 @@
 id: BE-040
 title: Simple offering upkeep and word search
 status: in_progress
-related: [BE-041, BE-009, FE-047, DEP-037, FE-019, BE-018, DEP-039]
+related: [BE-044, BE-041, BE-009, FE-047, DEP-037, FE-019, BE-018, DEP-039]
 owners: [product, backend, operations]
 last_updated: 2026-09-27
 change_level: L2
@@ -20,6 +20,13 @@ standard-product storage kind, available status and optional quantity without
 asking owners to classify their work. This internal default does not infer a
 service type. Existing service IDs, inquiries and published/private status survive.
 Image replacement and removal remain controls within the image field.
+
+BE-044 native listing-state exception: the native form explicitly exposes
+availability and visibility. Its server adapter may opt into updating those two
+validated fields while preserving all advanced metadata under the existing
+tenant/version lock. Web simplified content saves retain their existing metadata
+preservation contract. A hidden native item must disappear from public catalogs
+and remain visible/editable to its owner; API and browser regressions prove it.
 
 Search matches case-insensitive words across title, description, business name,
 handle and reviewed location. All terms must match the same offering and its

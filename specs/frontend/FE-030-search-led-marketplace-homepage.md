@@ -562,3 +562,130 @@ See TRACEABILITY S41 for real PostgreSQL filtering/privacy/pagination tests and
 Type/localization/spec checks pass. Broader discovery assertions pass, but its
 fixture-cleanup timeout remains an unresolved test-infrastructure gate. Current
 changes await visual approval, full/build/release checks, commit and deployment.
+
+## S54 — offering-only public results (local verified, 2026-10-05)
+
+Supersedes mixed result lists and result-type controls. Definition of Ready:
+web/native public entry points reuse the existing products projection and SQL
+pagination; no migration, provider, ranking or eligibility change. Master sections
+5.2, 10 and 15 are affected. FE-030/FE-042 govern map/filter/pagination behavior;
+FE-053 and BE-044 cover the native public adapter.
+
+- GIVEN Market WHEN opening results THEN one visible Products & services heading
+  identifies the list; no Businesses checkbox/tab/card or redundant type toggle.
+- GIVEN a business search/category/location WHEN applied THEN eligible businesses
+  remain on the map with existing marker/nearby previews; listings contain only
+  matching products/services and retain direct product links.
+- GIVEN old type=businesses/all URLs or API calls THEN public boundaries normalize
+  to product/service results BEFORE counting/paginating, with full pages and no
+  business-only trailing pages. Internal reusable discovery projections may
+  retain legacy type support; no public client depends on it.
+- GIVEN Next/Previous or clearing filters THEN query/category/place remain scoped;
+  map membership is independent of result page. Empty lists keep the map intact.
+
+Focused evidence: public API and desktop/390/320 browser capture, typechecks,
+existing discovery pagination/multicategory tests. Existing localized Products &
+services label is reused. Visual approval precedes full/release gates.
+
+S54 focused evidence passes: both typechecks; test:discovery-pagination (including
+public legacy-type normalization and map/count regression); five actual web/native
+browser captures in .local/offering-results/ with capture-offering-results.mjs.
+Desktop/390/320 screenshots reviewed. Tile imagery is a controlled fixture;
+marker data/handlers are real. Physical native-device evidence, owner visual
+approval, full/release gates, commit and deployment are not claimed.
+
+## S55 — shared floating search and filters (local verified, 2026-10-05)
+
+Applies to desktop/mobile web and native. Reuse existing search/filter state and
+backend projection. No new package/schema/auth contract. Master §5.2, §10, §19
+affected. Definition of Ready: clear panel state independent from filter values.
+
+- GIVEN closed results WHEN typing/submitting search or selecting/clearing category
+  or region/city THEN controls remain visible on the map and only map results are
+  visible; panel stays closed. No duplicate focusable controls.
+- GIVEN open results THEN the same labeled/styled controls appear in the panel;
+  both map and product/service results reflect the same inputs.
+- WHEN opening/hiding results THEN values remain, map stays mounted, and controls
+  move with recognizable shapes/styles. An explicit results action opens the list.
+- GIVEN a closed-view web URL with filters WHEN reloaded THEN keep results closed;
+  Back and product-return retain query, location/categories and view choice.
+- GIVEN desktop/390/320 layouts THEN controls fit beside map tools without overlap;
+  menus and map previews remain usable above the controls, with existing keyboard/
+  reduced-motion behavior and localized labels.
+
+Focused browser checks/captures plus both typechecks precede visual approval.
+Native browser evidence does not replace physical-device testing.
+
+S55 evidence: both typechecks and homepage composition contract pass. Ten stable
+web/native-browser screenshots plus flow checks are recorded by
+scripts/capture-floating-discovery-controls.mjs in .local/floating-discovery-controls/.
+Closed search/filtering, reopening, clear actions, one active control set, map DOM
+persistence and immediate reload pass. Panel-only changes use native history
+integration without fetching data; this fixes the observed close/reload race.
+Controlled tile imagery; physical native-device tests remain separate. Visual
+approval and full/release/commit/deployment gates remain pending.
+
+## S56 — compact toolbar correction (in progress, 2026-10-05)
+
+Supersedes S55's stacked floating controls: one compact horizontal toolbar remains
+at the top in both modes, serving as the open drawer's shared header. Results toggle
+at far left, search, then category/location icon buttons. No inline filter labels
+or full selects consuming map height. Existing labels/titles expose purpose and
+selection; active indicators and menu clear actions preserve usability. At least
+44px touch areas; all fit at 320px, map zoom controls start below the toolbar.
+Category multiselect and location selection open existing pickers/popovers.
+Search/filter/view persistence and offering-only results remain as S54/S55.
+No backend/schema/provider change. Master §5.2/§10/§19 affected.
+Focused typechecks and desktop/phone/native-browser checks of layout, filtering,
+clearing and both panel states precede visual approval/full gates.
+
+S56 evidence: both typechecks and homepage composition pass. The focused
+scripts/capture-compact-discovery-toolbar.mjs checks pass in separate --web and
+--native runs: six desktop/phone web and four native-browser captures, horizontal
+alignment, far-left toggle, one search input, panel states, search, category/place
+selection and clearing; web closed-view reload retained. Reports and screenshots
+are in .local/compact-discovery-toolbar/. Tile images are controlled; catalog and
+markers are real local data. Native drawer captures wait for its final transform.
+Native-device testing, owner visual approval and full/release gates remain pending.
+Nothing committed or deployed by S56.
+
+## S57 multiple locations — in progress, 2026-10-05
+
+Master §5.2/§5.5/§10/§19 affected. GIVEN selected cities and/or regions WHEN
+searching THEN the map and paginated offerings match any selected location, AND
+the category/query scope. Overlapping region/city selections never duplicate
+results. Empty selection means all locations. Existing single-place URLs remain
+valid; repeated or pipe-separated place values normalize to a stable bounded
+set (at most 16). SQL values stay parameterized and spelling matches use the
+same union before ranking/pagination. Cache identity includes the normalized set.
+GIVEN either client WHEN opening the compact location button THEN regions/cities
+are checkable, selected values remain available during filtering, and individual
+unselect and clear-all work without opening results. Changing scope resets page.
+No database schema change is required. Test discovery pagination/spelling plus
+web/native filter flows at desktop/phone; retain existing S56 visual style.
+
+S57 focused evidence (local): search suites and test-multiple-locations.ts pass
+multi-region/city union, overlap deduplication, exact/fuzzy pagination, category/
+query intersections, legacy and repeated URL parameters. Support suites plus
+test-live-transport.ts pass both APIs, token/queue/tenant isolation, assignment
+capacity, retry, private notes/carrier data, chat ending/resolution/reopen, and
+bounds. Migration 59 is applied locally only. capture-multiple-locations.mjs
+records seven web and six native-browser states; capture-live-transport.ts,
+capture-transport-dispatch-staff.ts and capture-mobile-transport.ts exercise real
+handlers and staff server actions at desktop/phone sizes. Temporary staff fixtures
+are removed; controlled map tiles and isolated API fixtures are documented in
+scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
+Both typechecks and localization checks pass. Owner visual/native-speaker review,
+physical device tests, build/full release gates and deployment remain pending.
+
+S59 release regression correction: the narrative test must assert the S54
+Products & services heading and absence of Businesses tabs, rather than requiring
+the superseded tabs. Existing result/map API and browser tests remain required.
+The legacy discovery source assertion also now requires the S56 compact chooser;
+it continues checking its category binding, accessible label and real SQL results.
+
+S59 browser regression alignment: category/search capture scripts explicitly open
+`view=search`, matching S55's map-only default. They retain real pagination, map
+DOM identity, typing races, detail/back and empty-result checks, reject the removed
+business result selector, and verify legacy type=businesses URLs still render
+offerings. No product behavior is changed to satisfy a retired test contract.

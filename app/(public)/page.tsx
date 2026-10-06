@@ -1,4 +1,5 @@
 
+import { MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
 import { useUiText } from "@/lib/i18n/ui";
 import { getUiText } from "@/lib/i18n/server";
 import { Suspense } from "react";
@@ -9,10 +10,10 @@ import { getPublicMarketplaceView } from "@/lib/public-discovery-cache";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Market",
-  description: "Find local businesses on Suqpage. Explore products, services, photos and videos in one organized showroom, and inquire directly.",
+  description: "Explore organized storefronts from the businesses you follow. Browse products, services and options, then inquire directly on Suqpage.",
 };
 
-type MarketSearchParams = Promise<{ industry?: string | string[]; q?: string; place?: string; showroom?: string; view?: string; type?: string; page?: string }>;
+type MarketSearchParams = Promise<{ industry?: string | string[]; q?: string; place?: string | string[]; showroom?: string; view?: string; type?: string; page?: string }>;
 
 async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchParams }) {
   const t = await getUiText();
@@ -30,8 +31,7 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
     <DiscoveryWorkspace
       discovery={discovery}
       hideIntro
-      view={query.view === "search" ? "search" : "map"}
-      resultType={query.type === "products" || query.type === "businesses" ? query.type : "all"}
+      view={query.view === "search" ? "search" : query.view === "map" ? "map" : undefined}
     />
   </>;
 }
@@ -43,8 +43,8 @@ export default function MarketPage({ searchParams }: {
   return <div className="public-experience public-market-experience">
       <header className="public-experience-head">
         <span>{t("Suqpage Market")}</span>
-        <h1>{t("Everything a business offers, in one place.")}</h1>
-        <p>{t("Discover businesses near you. Explore their story, products, services and capabilities—then find their location and get in touch directly.")}</p>
+        <h1>{t(MARKET_STOREFRONT_COPY.title)}</h1>
+        <p>{t(MARKET_STOREFRONT_COPY.description)}</p>
       </header>
       <Suspense fallback={<MarketWorkspaceLoading />}><MarketWorkspace searchParams={searchParams} /></Suspense>
     </div>;

@@ -1,4 +1,4 @@
-import { discoveryCategoryKey } from "./discovery-contract";
+import { discoveryCategoryKey, discoveryPlaceKey } from "./discovery-contract";
 import { getFeaturedProgramCacheVersion } from "./featured-program-settings";
 import { unstable_cache } from "next/cache";
 import { ownerPageEditorEnabled } from "./owner-page-runtime";
@@ -16,7 +16,7 @@ const PUBLIC_DISCOVERY_REVALIDATE_SECONDS = 20;
 
 const cachedMarketplace = unstable_cache(
   async (industry: string, place: string, page: string, type: string, _scheduleVersion: string): Promise<MarketplaceDiscoveryView> => getMarketplaceDiscoveryView({ industry, place, page, type }),
-  ["public-marketplace-v8-category-sets", String(ownerPageEditorEnabled())],
+  ["public-marketplace-v10-multiple-locations", String(ownerPageEditorEnabled())],
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-marketplace"] },
 );
 
@@ -32,10 +32,12 @@ const cachedSponsors = unstable_cache(
   { revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS, tags: ["public-sponsors"] },
 );
 
-export async function getPublicMarketplaceView(input: { industry?: string | readonly string[]; q?: string; place?: string; page?: string; type?: string }) {
+export async function getPublicMarketplaceView(input: { industry?: string | readonly string[]; q?: string; place?: string | readonly string[]; page?: string; type?: string }) {
   const query = (input.q || "").trim();
-  input = { ...input, industry: discoveryCategoryKey(input.industry) };
-  const view = await (query ? getMarketplaceDiscoveryView(input) : cachedMarketplace(discoveryCategoryKey(input.industry), input.place || "", input.page || "1", input.type || "all", await getFeaturedProgramCacheVersion()));
+  // Public results are offerings; businesses remain in the map projection.
+  // Normalize legacy type URLs before SQL counting and pagination.
+  input = { ...input, industry: discoveryCategoryKey(input.industry), type: "products", place: discoveryPlaceKey(input.place) };
+  const view = await (query ? getMarketplaceDiscoveryView(input) : cachedMarketplace(discoveryCategoryKey(input.industry), discoveryPlaceKey(input.place), input.page || "1", input.type || "all", await getFeaturedProgramCacheVersion()));
   if (query || !ownerPageEditorEnabled()) return view;
   const covers = await runtimeCurrentPageCovers(view.showrooms.map((showroom) => showroom.id));
   return { ...view, showrooms: view.showrooms.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })), searchBusinesses: view.searchBusinesses.map((showroom) => ({ ...showroom, heroImagePath: covers.get(showroom.id) || "" })) };

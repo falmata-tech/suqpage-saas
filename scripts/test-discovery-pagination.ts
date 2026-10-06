@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { getDb, closeDbForTests } from "./testing/postgres-fixture";
 import { test, after } from 'node:test';
 import { getMarketplaceDiscoveryView } from '../lib/discovery';
+import { handleMobileRequest } from '../lib/mobile/router';
+import type { Market } from '../packages/contracts/src';
 async function runPostgresFixture() {
     const db = await getDb();
     await db.prepare("INSERT INTO discovery_industries(key,label,icon,position,active) VALUES('electronics','Electronics','cpu',1,1) ON CONFLICT(key) DO NOTHING").run();
@@ -40,6 +42,25 @@ async function runPostgresFixture() {
             assert.deepEqual(v.showrooms.map(b => b.id), first.showrooms.map(b => b.id));
         }
         assert.equal(seen.size, 16);
+    });
+    test('public mobile results normalize legacy types before pagination and retain the map', async () => {
+        const expected = await getMarketplaceDiscoveryView({industry:'electronics',type:'products'});
+        for (const type of ['', 'all', 'businesses', 'products']) {
+            const response = await handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/market?category=electronics&type=${type}`), ['market']);
+            assert.equal(response.status,200);
+            const market: Market = await response.json();
+            assert.equal(market.total,14);
+            assert.equal(market.pages,3);
+            assert.equal(market.items.length,5);
+            assert.ok(market.items.every(item=>item.kind==='product'));
+            assert.deepEqual(market.items.map(item=>item.id),expected.searchProducts.map(item=>item.id));
+            assert.deepEqual(market.showrooms.map(shop=>shop.id),expected.showrooms.map(shop=>shop.id));
+        }
+        const last = await handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/market?category=electronics&type=businesses&page=999'), ['market']);
+        const page: Market = await last.json();
+        assert.equal(page.page,3);
+        assert.equal(page.items.length,4);
+        assert.ok(page.items.every(item=>item.kind==='product'));
     });
     test('type tabs, filters and invalid/out-of-range pages have accurate backend windows', async () => {
         const businesses = await getMarketplaceDiscoveryView({ industry: 'electronics', type: 'businesses', page: '99999' });

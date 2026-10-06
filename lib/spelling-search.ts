@@ -6,7 +6,7 @@ export type SpellingMatch = { kind: 'product' | 'business'; id: number; business
 export interface SpellingSearchPort {
   all<T extends Record<string, unknown>>(sql: string, values?: Array<string | number>): Promise<T[]>;
 }
-export type SpellingScope = { query: string; industry: string; city: string; region: string; scale: string; exactBusinessIds: readonly number[] };
+export type SpellingScope = { query: string; industry: string; city: string; region: string; locations?: readonly { city: string; region: string }[]; scale: string; exactBusinessIds: readonly number[] };
 const CANDIDATES_PER_FIELD = 32;
 export const MAX_SPELLING_MATCHES = 100;
 const MIN_SIMILARITY = 0.25;
@@ -20,7 +20,7 @@ export function spellingTerms(query: string) {
 }
 const eligible = `b.status='active' AND p.is_excluded=0 AND p.approved_at>0
   AND (scope.industry='all' OR EXISTS(SELECT 1 FROM business_industries i WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(scope.industry,','))))
-  AND (scope.city='' OR lower(p.city)=lower(scope.city)) AND (scope.region='' OR lower(p.region)=lower(scope.region))
+  AND (jsonb_array_length(scope.locations)=0 OR EXISTS(SELECT 1 FROM jsonb_to_recordset(scope.locations) AS location(city text,region text) WHERE (location.city='' OR lower(p.city)=lower(location.city)) AND (location.region='' OR lower(p.region)=lower(location.region))))
   AND (scope.scale='' OR p.production_scale=scope.scale)
   AND EXISTS(SELECT 1 FROM products listed WHERE listed.business_id=b.id AND listed.is_published=1)`;
 const businessJoin = `JOIN business_discovery_profiles p ON p.business_id=b.id CROSS JOIN scope`;
@@ -36,7 +36,7 @@ const seedSources = [
 
 // KNN probes are bounded before scoring; no full catalog is transferred to JS.
 export const SPELLING_SEARCH_SQL = `WITH scope AS MATERIALIZED (
-  SELECT ?::text industry,?::text city,?::text region,?::text scale,ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint) exact_businesses
+  SELECT ?::text industry,?::jsonb locations,?::text scale,ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint) exact_businesses
 ), terms AS MATERIALIZED (
   SELECT term->>'word' word,ARRAY(SELECT jsonb_array_elements_text(term->'variants')) variants,
     ARRAY(SELECT jsonb_array_elements_text(term->'patterns')) patterns,(term->>'fuzzy')::boolean fuzzy
@@ -93,5 +93,5 @@ ORDER BY score DESC,lower(name),kind,id`;
 export async function findSpellingMatches(scope: SpellingScope, port: SpellingSearchPort): Promise<SpellingMatch[]> {
   const terms = spellingTerms(scope.query);
   if (!normalizeSearchText(scope.query) || !terms.some(term => term.fuzzy)) return [];
-  return port.all<SpellingMatch>(SPELLING_SEARCH_SQL,[discoveryCategoryKey(scope.industry),scope.city,scope.region,scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
+  return port.all<SpellingMatch>(SPELLING_SEARCH_SQL,[discoveryCategoryKey(scope.industry),JSON.stringify(scope.locations ?? (scope.city || scope.region ? [{city:scope.city,region:scope.region}] : [])),scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
 }

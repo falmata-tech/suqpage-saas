@@ -1936,6 +1936,494 @@ evidence with their test-fixture/timing corrections.
 
 The release record is `docs/SUQPAGE-RELEASE-2026-09-27.md`. Earlier S31–S48 pending
 visual/release entries are satisfied by the explicit S43 approval and these gates.
-Mobile remains preparation only; no unrelated mobile work began. No Git push or
+At the S48 release, mobile was preparation only. S49 below tracks the subsequently
+authorized implementation. No Git push or
 remote CI was run. Staff must monitor Support; third-party playback and live inbox
 mail delivery are not claimed by local-provider tests.
+
+### S49 — Expo visitor and business-owner app
+
+Feature/architecture, L3; FE-053 / BE-044 / DEP-042 / ADR-0023. Web baseline:
+source d2ebacd, evidence 89a7a9d, Netlify 6ab98e309c70ac17fe871293, schema 58.
+Preserve unrelated deno.lock. No admin/staff management in native; no hosted write.
+- [x] Inspect web baseline, mobile boundary inventory and current SDK documentation.
+- [x] Record scope/contracts and readiness; review master section 3 (narrative
+  unchanged), update current architecture/testing in sections 15 and 22.
+- [x] npm mobile/contracts workspaces and boundary tests; native SDK versions pinned.
+  Expo doctor duplicate-version warning remains documented, not suppressed.
+- [x] Versioned public and bearer-authenticated owner APIs; focused real PostgreSQL
+  scope/security regressions pass in `npm run test:mobile`.
+- [x] Native Market/Featured/catalog/inquiry/About/buying and email/owner dashboard
+  preview screens implemented. Attachment/logo and device parity limits are recorded;
+  this checkbox does not represent store readiness.
+- [x] Focused types/API/provider tests, Android/iOS JavaScript exports, boundary scans
+  and 13 browser workflow checks pass. Phone/tablet captures: `.local/mobile-review/`.
+- [ ] Owner visual approval under AGENTS step 8 before full release gates.
+- [ ] Actual Android/iOS device/build evidence, remaining platform setup and scoped commit.
+- [ ] Separate approved web API rollout and native beta/store publication.
+
+S49 additional owner request — local Mac testing environment (DEP-042):
+- [x] Visitor/owner browser preview exercises real local API/Auth; focused mobile API tests pass.
+- [x] Audit Mac tools/OS/CPU/disk; install Android Studio/SDK/API 35 image and
+  emulator; configure SDK paths while preserving Java 17 and existing settings.
+- [x] Install Expo Go; Android boot and development bundle/shell render observed.
+- [ ] **Current:** clean native workflow verification. API 35 emulator produced
+  system/Expo Go ANRs with software and hardware graphics, so it was stopped.
+  Browser and LAN API/catalog/Metro checks pass; physical phone remains unverified.
+  iPhone simulator requires a compatible full Xcode installation.
+- [x] Browser URL works; launch commands and explicit phone LAN configuration
+  documented in `docs/MOBILE-TESTING.md`. Physical phone still needs user verification.
+- [ ] Preserve the pending visual-review gate before full release gates or publication.
+
+S49 handoff: local Next API is LAN-bound on port 3102; Expo phone/browser preview
+runs on 8082. Current phone URI `exp://192.168.1.20:8082`, private local QR
+`.local/mobile-review/phone-qr.png`. Full gates, visual approval, native parity,
+API rollout and scoped commit remain pending. No files staged/committed; unrelated
+`deno.lock` is untouched. Native logout failure regression also passes. No hosted
+configuration or production data changes were made.
+
+### S49.1 — restore phone-web structure in the native preview (2026-09-28)
+
+Owner rejected initial native visuals. FE-053 controls this L1 refinement;
+BE-044 authority stays unchanged. Related web references: FE-030, FE-042, FE-032.
+Master sections 5.2, 15 and 22 reviewed; web behavior unchanged, native preview
+status/evidence must be updated. Continue S49; preserve unrelated deno.lock.
+
+- [x] Inspect prior native changes and capture phone web Market/Featured/showroom.
+- [x] Compare owner/dashboard and record findings/adaptations in `docs/MOBILE-WEB-ALIGNMENT.md`.
+- [x] Implement shared compact header/More, full-map/sliding-drawer Market with
+  retained state and reachable filters/results/preview/buying controls.
+- [x] Align Featured, showroom and owner task hierarchy with phone web references.
+- [x] Focused mobile type/localization/interaction regression and 320/390/tablet captures.
+- [ ] CURRENT: owner review of replacement visuals, then S49 full/native/release gates.
+
+No staging/commit of prior unfinished S49 changes yet; current work is the user's
+explicit correction to that same task, not adoption of unrelated dirty files.
+
+S49.2 — inline YouTube playback added during S49.1 (FE-053 / DEP-042):
+- [x] Inspect existing approval/provider normalization and official Expo/YouTube docs.
+- [x] Isolated native/browser player; cover and gallery integration.
+- [x] Validated refs, outbound navigation denial, lifecycle/error/retry browser fixture tests.
+- [ ] Include player in replacement visual review; actual phone playback is a device gate.
+Owner explicitly excludes external browser/YouTube-app handoff. No API/schema or
+video-approval changes. Finish S49.1 checks in the same preview.
+
+### S50 — mobile workflow audit and installable tester build (2026-09-28)
+
+Owner accepts proceeding from S49 review and explicitly requests full workflow
+verification, fixes, an installable Android artifact and tester/store distribution
+preparation. FE-053/BE-044/DEP-042 control this L3/L4 continuation. Existing S49
+changes belong to the task; unrelated deno.lock remains untouched. Master sections
+15/22 and mobile operational docs will reflect verified outcomes. No paid service,
+store membership purchase or invitation messages without explicit authorization.
+
+- [ ] CURRENT: audit screen → API → application/domain → PostgreSQL/storage flows;
+  record defects and test/build/provider gaps in MOBILE-RELEASE-AUDIT.md.
+- [ ] Fix identified workflow/data/privacy gaps with focused regressions; preserve
+  existing UI structure and canonical domain authority. No unrelated redesign.
+- [ ] Prepare explicit local/internal/store build profiles, validated runtime
+  targets and tester distribution workflow; inspect Expo/account/tool availability.
+- [ ] Run mobile/security/browser mutations, npm run check, release and acceptance
+  gates against disposable local data/isolated build outputs. Capture failures.
+- [ ] Build and inspect signed Android APK, prove embedded JS and correct backend;
+  device smoke tests or explicitly unresolved device/provider requirements.
+- [ ] Publish API only after required gates/backup/rollback; distribute test build
+  only after verified target and working core flows. No silent partial release.
+- [ ] Update evidence/spec/master, review scoped commit, deliver artifact/checksum
+  and invitation instructions. Google Play submission/fees require account setup.
+
+S50 current map dependency — researched MapLibre native adapter (FE-053/DEP-042):
+- [x] Verify upstream Expo/RN requirements and OSM tile-use policy. Owner explicitly
+  permits SDK-internal SQLite caching; application persistence stays PostgreSQL.
+- [x] Replace unshipped Leaflet WebView draft with native MapLibre and
+  preserve existing map contract, coordinates, controls and overlays.
+- [x] Test projection/privacy/selection, typecheck/export/prebuild.
+- [x] Native compile (arm64-v8a/x86_64), packaged permission check, emulator
+  installation, rendered tiles/pins and drawer layering. Evidence and development
+  APK checksum: MOBILE-MAP-RESEARCH.md. Expo Go is no longer a native test path.
+- [ ] CURRENT: owner visual review of native captures; physical phone gestures,
+  offline recovery and remaining S50 release workflow checks.
+- [ ] Record native evidence/limits before resuming remaining S50 release gates.
+Google Cloud setup is cancelled; preserve the valid Expo project/signing setup.
+Full npm run check passed before this map replacement; it is not native map evidence.
+
+S50 continuation — owner workflow verification (2026-10-05):
+- [x] Inspect owner forms, preview, Featured freshness and existing API evidence.
+- [x] Complete private native page preview and Featured return refresh
+  (FE-053); preserve edited input, authenticated media and server publication rules.
+- [x] Exercise local owner photo create/update/hide, page save/preview/publication
+  through browser UI; record persistence and negative-path evidence (BE-044).
+- [ ] Capture affected phone states; run focused type/API/spec checks, then resume
+  native playback/device checks and S50 release/distribution gates above.
+
+S50 additional owner request — native markers match web (2026-10-05):
+- [x] Compare MarketplaceMap and discovery.css with native circle markers.
+- [x] Port storefront/name/selected badges, clusters and nearby lists;
+  expose only canonical public presence/group data through BE-044 DTOs.
+- [x] Verify projection/privacy, clustering/selection and fixture-tile interactions;
+  capture native/browser map before returning to remaining S50 release gates.
+
+S50 dependency recheck (2026-10-05):
+- [x] Install Next 16.3.6; lock, runtime and web/mobile type checks pass.
+- [ ] Production build/release verification of the Next patch; deployment remains gated.
+- [ ] Resolve/review unpatched Expo tooling advisories in braces/node-forge before
+  release; no forced SDK downgrade or weakened audit gate.
+
+Current handoff: requested map visual approval after focused captures/checks.
+Owner browser mutation/publication checks pass; original navigation-only evidence
+was corrected with form assertions. Native storefront tap/render verified. Finish
+physical video/picker/offline coverage and resolve dependency gate before rollout.
+
+### S51 — sponsor rotation and storefront narrative (2026-10-05)
+
+L1 feature/defect refinement; FE-036, FE-033, FE-052, FE-049, FE-053.
+Definition of Ready met: existing sponsor/catalog ports, no data/API changes or
+new providers; merchant content, eligibility and billing remain unchanged.
+Master sections 3–5, 15, 18–19 and 22 are affected. Preserve incomplete S49/S50
+native/release work, existing owner/map edits and unrelated deno.lock.
+
+- [x] Inspect current rotation, web/native copy and five-language catalogs;
+  record contracts and this plan before implementation.
+- [x] One sponsor per view, equal six-second automatic rotation, manual
+  navigation/pause, foreground and reduced-motion safeguards on both clients.
+- [x] Refine visitor/owner narrative and metadata; write contextual copy for
+  Amharic, Afaan Oromo, Somali and Tigrinya without translating merchant content.
+- [x] Focused carousel/browser, web/mobile type, localization, narrative and spec
+  checks; capture desktop/phone browser states and record device limitations.
+- [ ] Native AppState/accessibility/gesture check on device remains in S50;
+  emulator stays closed to save resources at the owner’s request.
+- [ ] Owner visual approval of sponsor/narrative changes (separate from pending
+  S50 map approval); then full checks/release/acceptance and task-scoped commit.
+- [ ] Resume remaining S50 device, security and distribution gates; no new
+  deployment, standalone APK or store-readiness claim without their evidence.
+
+S51 final evidence: web/mobile typechecks, eight localization checks (1,228
+messages per locale), narrative/homepage contracts, 165-spec validation and
+carousel interaction checks pass. The final audience-separated About and Market
+copy passed 69 desktop/phone/web/mobile-browser states across all five languages.
+Screenshots and copy-verification-all.json are in .local/sponsor-storefront-review/.
+Local catalog images are real; automated OSM tiles and carousel edge-case data
+are explicitly stubbed. Native AppState/gesture evidence remains pending.
+No hosted mutation, new APK, commit or publication occurred.
+
+S51 owner correction (2026-10-05): initial narrative is not visually approved.
+- [x] Replace Market text with the customer’s known-seller/catalog friction and
+  item-specific inquiry payoff; adapt all five languages without changing features.
+- [x] Redesign About as distinct customer and business sections on web/native,
+  each with relevant benefits/CTA. Preserve sponsor work and previous S50 gates.
+- [x] Re-run focused narrative/localization/layout checks and capture this version;
+  earlier 64 captures validate the superseded draft, not approval of new copy.
+
+S51 final narrative scope clarification: customers often know the seller already;
+Suqpage organizes that seller’s offerings. Map/search functionality and prominence
+are unchanged. Market/About copy is shared through lib/storefront-copy.ts across
+both clients; About has separate customer/business benefits and actions. Earlier
+copy screenshots are superseded and do not constitute owner approval.
+
+CURRENT: await visual review of this revised copy/About/sponsor presentation,
+then resume the existing release gates; no further feature-priority changes.
+Web/API remains on 127.0.0.1:3102 and Expo browser preview on localhost:8082.
+
+### S52 — accent personalization visual proposal (2026-10-05)
+
+FE-054 draft, design-only prototype first; FE-040/FE-053/BE-041 implementation
+remains future work. No account writes or production theme changes. Keep S51
+visual/release gates and S50 device/distribution work pending.
+
+- [x] Inspect current storefront and approved Selam demo assets; record brief,
+  scope and draft persistence implications before prototype work.
+- [x] Create interactive restrained-accent samples, including extreme
+  pink/lime/violet/yellow/white/black, while preserving platform and product media.
+- [x] Capture/inspect desktop and phone; check contrast, controls and overflow.
+- [x] User approved all sample treatments; finalize backend,
+  native, signup, page editor and migration contracts before production work.
+
+S52 evidence: showroom-projects/accent-personalization-preview/reviews/REVIEW.md
+and verification.json. Seven presets, 4,096 sampled palette contrasts,
+1440/390/320 viewport checks pass; 166 specs validate. Corrected hot-pink CTA
+contrast before final capture. Interactive sample: http://127.0.0.1:8765.
+No account persistence, native app theme, commit or publication claimed.
+
+S52 implementation plan — FE-054 A1–A4, owner approval 2026-10-05:
+- [x] Shared validated accent/palette; existing JSON persistence/signup,
+  legacy omission preservation and native DTO (A1/A2/A3; no migration).
+- [x] Web/native setup and Page picker, storefront cover/details/actions (A3/A4).
+- [x] Localization, invalid/foreign/stale/private/public persistence regressions,
+  focused browser captures and native typecheck (A1–A4).
+- [ ] CURRENT: implementation captures reviewed; applicable full checks/release/acceptance;
+  document verified scope/limits and isolate commit from prior S49–S51 changes.
+Production deployment and native-device evidence remain separate gates.
+
+S52 focused evidence: scripts/test-storefront-accent.ts and
+.local/storefront-accent-implementation/verification.json (12 captures).
+Actual web signup, save/reload, publication and native editor save reflected in
+web all pass. Palette/tenant/stale/staff/rollback/legacy/reset tests pass; 22
+owner-page, eight localization tests and both typechecks pass. Native evidence
+is Expo browser; emulator remains closed. Full check is running.
+
+S52 gate progress: full npm run check passed, including the new accent regression;
+standalone native API suite and both typechecks pass. Production build and all 65
+output trace privacy checks pass. Release provider smoke is running in the
+isolated local acceptance Supabase stack. Added accent signup/save/reset assertions
+to the existing passwordless acceptance scenario; its dedicated run follows the
+release runner's cleanup. No hosted changes or scoped commit yet: shared native,
+localization/package/docs files still overlap prior S49–S51 uncommitted work.
+
+S52 final local evidence (2026-10-05):
+- Full npm run check: PASS. Both TypeScript targets and native API suite: PASS.
+- npm run release: production build, 65 trace privacy checks, isolated provider
+  security smoke and all subsequent behavioral/security/data gates PASS. Final
+  dependency audit FAILS with 20 high findings through existing Expo tooling
+  dependencies (braces/node-forge), as already tracked in S50. No forced downgrade
+  or audit exception applied; release command exits 1.
+- npm run test:acceptance -- --grep 'passwordless signup|business video': 2 PASS,
+  exit 0. Signup selection, saved reload, explicit Default reset, untinted playing
+  video and existing auth/account/sign-out workflow are verified in production mode.
+- 166 specs validate; whitespace clean. Implementation/prototype are local only.
+- CURRENT remaining gates: resolve the separate dependency release blocker,
+  physical-device evidence/native build and coordinated task-isolated commit with
+  existing S49–S51 changes. No commit or hosted deployment in S52; unrelated
+  untracked deno.lock and all prior work remain intact. Do not claim release-ready.
+
+Testing URLs: web http://127.0.0.1:3102/dashboard/page-editor, native browser
+http://localhost:8082 (owner Page), design comparison http://127.0.0.1:8765.
+The emulator remains closed. Disposable browser test businesses were returned to
+private draft status. No existing demo or customer colors were backfilled.
+
+S53 — simplify accent selection (FE-054 A5/A6; owner correction)
+- [x] Remove color controls from signup; place color controls in the full
+  Page preview, retaining Save and defaults on web/native.
+- [x] Replace code entry/Apply/mini sample with visual pickers; localize labels;
+  test color conversion and actual UI selection/save at desktop/390/320.
+- [ ] CURRENT: owner review of corrected visuals; only then full/release gates.
+S52 persistence/security evidence remains applicable; do not repeat schema work.
+
+S53 evidence: both typechecks, eight localization tests and 4,096 HSV round trips
+pass. Thirteen focused captures pass in .local/storefront-color-refinement/,
+including actual signup absence, web custom selection/save/reload, native visual
+adjustment/save and publication reflected across clients. Inspected desktop,
+390px and 320px screenshots. A stale Metro module map required one preview-server
+restart; final capture has no browser errors. Emulator stays closed. No physical
+device verification, commit or deployment claimed. S52 release dependency blocker
+and preserved prior dirty work remain separate. Review on 3102 Page editor or
+8082 owner Page; the 8765 prototype is historical and not the corrected flow.
+
+S54 — offering-only Market results (FE-030, FE-042, FE-053; L2)
+- [x] Force product/service pagination at public web/mobile boundaries;
+  keep query/category/place filtering and business markers/nearby previews intact.
+- [x] Remove result-type choices and business cards in both clients; label the
+  single list Products & services, reuse localized copy and bounded pagination.
+- [x] Focused API/browser checks: old type URLs, all categories, search, category/
+  location, page counts/map stability; desktop/390/320 captures and typechecks.
+- [ ] CURRENT: owner visual review before expensive full/release gates; no deployment yet.
+S53 visual review and previous release blockers remain pending, not superseded.
+
+S54 evidence: both typechecks pass; test:discovery-pagination passes category sets,
+ranking, English/Amharic spelling, 21 human-query variants and seven pagination
+scenarios, including the new public mobile API legacy-type/count/map regression.
+capture-offering-results.mjs passes real public HTTP counts, last page, map parity,
+business-name query, old web URL, Next page/empty state and web/native UI. Five
+reviewed captures at 1440/390/320 are in .local/offering-results/. OSM tiles were
+controlled blank fixtures; actual markers/data were used. Native evidence is Expo
+browser, not a device. Development API retained stale compiled code until a single
+server restart; the final capture passes with no browser errors. Preview3102 and
+8082 stay running, emulator stays closed. No new package/schema, commit or deploy.
+
+S54 final focused checks: homepage composition passes after replacing obsolete
+result-checkbox assertions with the new offering heading/no-business-list contract.
+All 166 specs validate and whitespace checks pass. Prior modifications (including
+the unrelated untracked deno.lock) are preserved; no staging/commit performed.
+
+S55 — shared floating discovery controls, web and native (FE-030/FE-053, L1)
+- [x] Keep one active set of search/category/place controls, floated on
+  closed map and moved into open results; shared values/style, no automatic opening.
+- [x] Preserve map filtering, offering-only counts/results, clearing, URLs and focus;
+  check desktop/phone/native browser controls, visibility and navigation.
+- [x] Capture affected states at desktop/390/320 and inspect stable screenshots.
+- [ ] CURRENT: owner visual review before full/release gates.
+S53/S54 review and existing release blockers remain pending. No backend change.
+
+S55 focused evidence: both typechecks and homepage composition contract pass.
+capture-floating-discovery-controls.mjs passes one active control set, closed-view
+search/map updates, open-view product results, category/location clear/retention,
+map DOM persistence and immediate closed-view reload. Ten screenshots are in
+.local/floating-discovery-controls/ with verification.json. An immediate reload
+exposed a URL timing race; panel-only changes now use Next-supported native history
+updates, avoiding server requests. Final capture waits for finite animations.
+Tile imagery is controlled; native evidence is Expo browser, not a physical device.
+Existing S53/S54/earlier files and deno.lock are preserved. No migration, new
+dependency, commit or deployment. Web3102/native8082 running; emulator closed.
+
+S56 — compact single-row discovery toolbar (FE-030/FE-053; owner correction)
+- [x] Results toggle at far left, search flexes, category/location are
+  small 44px icon buttons alongside it; one row on desktop/phone/native.
+- [x] Filter choices/clear actions open on demand; active states remain visible.
+  Keep map tools below the toolbar and product panel below its shared header.
+- [x] Check both modes/filtering at desktop/390/320; capture affected states.
+  S55 large floating filter blocks are superseded, behavior retained.
+- [ ] CURRENT: owner visual review before full/release gates; no deployment.
+
+S56 focused evidence: web and mobile typechecks, homepage composition, six web
+and four native-browser captures/interaction checks pass. Evidence and separate
+web/native verification reports: .local/compact-discovery-toolbar/. Tests cover
+horizontal alignment, one input set, far-left toggle, open/closed panels, search,
+category/location selection and clearing, plus web closed-view reload. Real local
+catalog/markers; OSM tile imagery is controlled. Slow development navigation
+interrupted an earlier run; isolated final web checks pass with a bounded 60s
+navigation timeout. Native screenshots wait for the React Native drawer transform
+to finish. Device testing and owner visual approval remain pending. No backend,
+schema, dependency, commit or deployment change; prior work/deno.lock preserved.
+
+S57 — multiple locations and transport/delivery live assistance (L2)
+- [x] FE-030/FE-053/BE-019: bounded multi-location scope with OR between
+  selected cities/regions and AND with category/query; preserve old single URLs,
+  SQL pagination, spelling matches, cache identity and compact web/native pickers.
+- [x] FE-019/BE-018/BE-044: open the existing transport channel for token-scoped
+  live text chat, route intake, phone follow-up, dispatch assignment and private
+  carrier handoff. Preserve existing buying histories and private staff notes.
+- [x] Update visitor/native/admin/team entry points and five-language UI copy;
+  retain Suqpage colors/components. No carrier/driver portal, automatic booking,
+  payment or commission accounting; staff arrange providers outside Suqpage.
+- [x] Focused PostgreSQL/API authorization, privacy, filtering and browser tests;
+  desktop/phone captures, typechecks and locale/spec validation.
+- [ ] CURRENT: Owner visual review before full/build/release gates; no rollout requested.
+Existing S53–S56 changes remain local; no staging or deployment in this step.
+
+S57 evidence: new multi-location PostgreSQL/API tests and all focused search
+suites pass. Seven support suites (run in two parts after updating retired-channel
+expectations) pass, including new live-transport web/native isolation, dispatch,
+private handoff, resolution and retry checks. Local migration 59 expands only the
+closed-state resolution constraint; hosted schema/config remain untouched.
+Browser captures and checks pass in .local/multiple-location-review/ (7 web,
+6 Expo-browser) and .local/live-transport-review/ (web intake/chat at 1440/390/320,
+all locale chat states, authenticated dispatcher carrier save/reply/note/history/
+resolve/reopen and mobile-browser chat at 390/320). Test staff/cases removed.
+Fixed missing aria-checked in mobile-browser filters and bounded composed route
+plus goods text before database insertion. Both typechecks and localization pass.
+Style remains Suqpage orange/white and existing components. No human language
+approval, physical-device claim, full gates, commit or deployment. Existing dirty
+worktree changes and deno.lock preserved; previews remain on 3102 and 8082.
+
+S58 — compact, paired transport intake (FE-019/FE-053, L1)
+- [x] Group pickup/destination in a two-column route card and name/phone
+  in a second two-column row on web/native, including 320px phones. Retain Suqpage
+  colors and typography; shorten visual height and place optional goods after
+  required fields. Preserve labels, 44px targets, keyboard and existing payload.
+- [x] Verify paired geometry, overflow, required/optional validation and actual
+  chat submission; capture desktop/390/320 and all locales; both typechecks.
+- [x] Owner visual review approved in S59; full release/commit/deploy remain pending.
+
+S58 evidence: both typechecks, eight localization tests and focused web/native
+chat submissions pass. capture-transport-intake-layout.mjs checks paired fields,
+44px inputs, required-field clearing/enabling, localized headings/placeholders,
+no overflow and reachable submission in 13 desktop/phone/language states;
+--short checks two additional 390x480 states. Screenshots and verification JSON:
+.local/transport-intake-layout/. Fixed native wrapped-label alignment and web
+launcher-before-portal timing. Browser tests now wait for the language sheet to
+finish closing before focusing intake fields. Restarted Expo on 8082 to refresh
+shared translation catalogs. No physical-device/keyboard or native-speaker
+approval claimed. Web preview 3102, mobile-browser preview 8082; local only.
+
+S59 — approved web/native production rollout (L4, DEP_BASE/DEP-042)
+Owner approved the S58 intake and requested release of the accumulated web and
+mobile work on 2026-10-05. This authorizes production deployment work and release
+checks; it does not claim those checks or store onboarding are already complete.
+- [x] Visual approval received; record dirty-tree baseline and release dependencies.
+- [ ] CURRENT: run check/release/acceptance and mobile security/build/native gates;
+  resolve concrete failures without suppressing audit or degrading SDK versions.
+- [ ] Verify Netlify/Supabase/Expo targets, public native configuration and signing;
+  review exact release scope, protected backup, migration 59 rehearsal and rollback.
+- [ ] Commit only reviewed release paths, excluding unrelated deno.lock; deploy
+  compatible web/native APIs and verify live health, discovery and auth boundaries.
+- [ ] Build signed standalone Android APK and production AAB after prerequisites;
+  verify install/runtime and record checksums/versions and managed download links.
+- [ ] Complete supported distribution or identify exact external store requirements;
+  record evidence, limits and rollout status. No invitations without recipients.
+
+S59 verification checkpoint: clean npm ci passes with source-map-js 1.2.2.
+Source-map malformed/nested offset regression and corrected narrative tests pass.
+The complete check command is covered by its original successful prefix plus
+continuations: stale S54/S56/S57 tab/compact-control/cache/transport source
+assertions were aligned to accepted specs; one seeded blueprint fixture timed
+out under concurrent build load and passed an isolated retry with the same bound.
+All remaining check steps and mobile API/type/build/map/video tests pass.
+The release command passes its production build, 65 trace privacy checks, isolated
+provider-backed HTTP smoke, database/scale and security gates, then fails its
+unchanged dependency audit. Two unpatched mobile tool dependencies produce 20
+high findings; a diagnostic root-only audit is clean, but it does not replace the
+required full workspace gate. Full production browser workflows are in progress.
+Expo project and Netlify target are verified; three public native runtime settings
+are created/read back in preview and production. No app, DB migration, signed APK,
+store submission, Git commit or push has occurred.
+
+S59 final checkpoint: browser coverage is complete across nine isolated production
+workflows plus two corrected public read-only production-build captures at
+1440/390/320. The focused isolated retry failed during temporary Storage startup;
+using existing localhost providers avoided weakening startup checks or modifying
+production. This is explicitly not claimed as eleven tests passing in one isolated
+run. Source/type/spec/whitespace checks pass. Both local previews still return 200.
+
+BLOCKED before publication: unchanged full workspace audit (20 findings from two
+unpatched Expo tool packages). Public store also lacks its dedicated deletion
+entry/workflow, confirmed Play account setup and signed-device evidence. No
+release-policy exception was inferred from deployment approval. Next work must
+resolve that gate before backup/migration/commit/artifact publication; details in
+docs/SUQPAGE-S59-RELEASE-READINESS.md. Expo public settings are the only hosted
+configuration change in S59 and have verified readback.
+
+S60 — release-blocker continuation (DEP-042 / FE-055)
+- [x] Recheck upstream dependency advisories; 2026-10-06 audit still has the same
+  20 high findings from braces/node-forge. No patched SDK-compatible version is
+  offered. No release gate is bypassed.
+- [x] Add the discoverable email deletion-request entry to web/native
+  accounts and a public page, using the existing privacy contact (FE-055).
+- [x] Verify anonymous access, localization, narrow-screen layout and native/web
+  type checks; capture the changed UI for review before expensive release gates.
+- [x] Owner approved proceeding with the reviewed deletion-request screen in S61.
+- [x] S61 validates an isolated web dependency/build boundary; no Android
+  release-policy exception is assumed.
+- [ ] Resume S59 from its unresolved release gate, then backup/migration/artifact
+  checks. Play account setup, deletion fulfilment and physical-device checks remain
+  explicit prerequisites; do not treat the new request link as store approval.
+
+S60 evidence: 167 specs/ADRs, web/mobile typechecks, localization and whitespace
+pass. Thirteen focused screenshots and incomplete-setup native navigation pass
+in `scripts/capture-account-deletion.mjs`. A stale mobile catalog was refreshed by
+restarting only Suqpage's 8082 server; unchanged assertions then passed. No real
+email request was sent; the disposable local Auth identity was removed. The
+web-only diagnostic install/audit is clean, but lifecycle scripts and deployment
+packaging still need a proper isolated workflow if the owner chooses that split.
+New deletion-screen visual approval and web/mobile release-split questions are
+pending. No full-suite rerun, release-gate exception, production write or commit.
+
+S61 — publish web and Expo Android APK (DEP-042 / DEP_BASE, L4)
+Newest owner instruction approves proceeding with web and Expo Android; Google
+Play can wait. Treat this as approval to include the reviewed FE-055 screen.
+- [x] Record the target as Netlify web/API plus Expo preview/internal APK; defer
+  Play/AAB/setup. Rechecked audit: same two unpatched mobile tool roots.
+- [x] Enforce an isolated root/shared dependency installation for web,
+  guarded lifecycle handling, unchanged-severity audit and native-tool exclusion.
+- [x] Run clean-install/boundary tests, web check/release/browser gates and exact
+  Netlify artifact privacy/native verification. Keep Android audit effective.
+- [ ] CURRENT: targets/backup/schema 59 rehearsal verified;
+  scope/review/commit eligible release files, deploy web and verify live APIs.
+- [ ] Resolve mobile dependency blockers, build signed Expo internal APK, verify
+  install/device workflows and provide its managed download link. No Play upload.
+- [ ] Record each delivered artifact and any remaining blocker accurately.
+
+S61 prepublication evidence (2026-10-06): clean root/shared npm ci with lifecycle
+scripts enabled; selected full audit including build dependencies has zero
+findings. Complete npm run check passes. The web release passes its build,
+provider HTTP smoke and every remaining stage; its first scale stage lacked the
+isolated local test URL, so the unchanged remainder passed with that URL supplied.
+All 11 browser acceptance scenarios pass in one isolated run. Operations backup/
+restore tests pass. Production backup restored 58 tables/3,890 rows; migration 59
+preserved existing values and passed repeat/no-op checks. Final Netlify artifact
+passes Linux Sharp transform, 128 trace privacy checks and native-tool exclusion.
+Original packaging failures (publish directory, canonical path and locked Linux
+optional dependencies) are retained in private logs. No production write yet.
+
+Android's unchanged audit still fails on two Expo build-tool advisories (20 graph
+entries). Fresh Android export excludes both affected packages; it does not prove
+a signed APK or remove build-tool risk. A one-artifact internal-testing exception
+is awaiting an explicit owner decision. Google Play remains deferred.

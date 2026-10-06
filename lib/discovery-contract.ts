@@ -26,3 +26,14 @@ export function normalizeDiscoveryCategories(value?: string | readonly string[])
 export function discoveryCategoryKey(value?: string | readonly string[]): string {
   return normalizeDiscoveryCategories(value).join(",") || "all";
 }
+
+/** Canonical URL/cache scope; selected options are resolved against public geography. */
+export function normalizeDiscoveryPlaces(value?: string | readonly string[]): string[] {
+  return [...new Set((typeof value === "string" ? [value] : value || []).slice(0, 32)
+    .flatMap(item => item.slice(0, 3000).split("|"))
+    .map(key => key.trim()).filter(key => /^(city|region):/.test(key) && key.length <= 180))]
+    .sort().slice(0, 16);
+}
+export function discoveryPlaceKey(value?: string | readonly string[]): string {
+  return normalizeDiscoveryPlaces(value).join("|");
+}

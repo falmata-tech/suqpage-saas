@@ -132,10 +132,18 @@ The Suqpage page is designed to turn passive browsing into a structured product 
 
 ## 3. The problem Suqpage solves
 
-Suqpage helps buyers discover shops and products beyond the streets and social
-accounts they already know. Shops need a clear presence for their products;
-buyers need to find what is available and reach the seller. The initial market
-is Ethiopia, with wider African discovery as a future direction.
+Suqpage gives businesses promoting or selling through social media a professional
+digital storefront. Products, services, photos, videos, the business story and
+contact details have one organized destination alongside social channels. Owners
+share that page from their profiles. The primary narrative addresses customers
+who already know or follow a seller and want an organized view of its offerings,
+without piecing together old posts. Visitors browse names/styles/media/details
+and inquire about the specific items they want. Map, category and search remain
+full discovery features with unchanged prominence and behavior. Physical shops, makers, growers,
+service businesses and home sellers remain included; social accounts are not a
+prerequisite. The initial market is Ethiopia, with wider African discovery as a
+future direction. Local S51 copy implements this positioning on web/native; its
+release is authorized under S59; required gates remain pending (FE-052/FE-053).
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -152,32 +160,32 @@ Suqpage gives each shop a consistent public page. It organizes each
 participant's story, process, products, capabilities, reviewed location, and
 contact options; supports map, region, category, product, and capability search;
 and lets buyers contact the participant directly for small purchases, custom
-work, repeat orders, or larger trade inquiries. Business owners can contact Suqpage support from their authenticated dashboard. Buying assistance accepts
-requests to purchase on a customer's behalf, check a business, or check product
-quality. Staff discuss the work in the buying conversation or by phone; submitting a request does
-not complete a purchase or certify or guarantee a listed participant.
+work, repeat orders, or larger trade inquiries. Business owners can contact Suqpage support from their authenticated dashboard.
+The local S57 transport/delivery service connects customers to staff who arrange
+carriers or logistics providers outside Suqpage. Intake collects pickup,
+destination, name and phone, with optional goods details. The local S58 intake
+pairs pickup/destination in a highlighted route card and name/phone in a second
+row, including phones; a compact optional-details box follows. It is a conversation,
+not a confirmed booking, payment or delivery guarantee.
 
 ---
 
-S42 (FE-019/BE-018, ADR-0023) adds live text replies and status to Buying
-assistance locally. Public pages show Buying assistance with a chat icon and Live chat beneath the name. The Live chat dialog
-asks for a message first, then name and phone; Start chat opens the token-scoped
-conversation. Saved messages show Sent, and Chat connected reflects the server
-connection rather than staff presence. Customers see Waiting for our team until a public staff reply, even after
-auto-assignment; guidance explains automatic replies and returning in the same
-browser. Thereafter they see assignment or closed state; assignment is not online presence. Open visible dialogs refresh
-every five seconds with bounded failure backoff and same-browser session recovery.
-Public Help, Transport and unqualified legacy entry points stay retired.
-Only explicit staff replies are visible; historical messages and Internal notes
-remain private. Buying attachments remain unavailable. End chat closes the visitor’s own case,
-releases assignment once and preserves history; the dismiss X only hides the dialog.
-Ended buying chats remain in staff Chat history with name, phone and original
-request. Authorized staff can call and add private notes without reopening. Mark
-resolved is a separate staff decision, moves the case to Resolved and is safe to
-retry; reopening clears resolution and restores the existing assignment workflow.
-Staff inboxes refresh while visible and retain queue scope, capacity, claim,
-reassign, close/reopen and history. Owner dashboard support remains unchanged.
-Production schema 58 includes default-private message visibility and separate buying resolution.
+S57 (FE-019/BE-018/BE-044, local rollout pending) replaces the public Buying
+assistance entry with Transport & delivery, retaining the Live chat sublabel and
+Suqpage design. Start chat opens a token-scoped transport conversation. Customers
+see Waiting for our transport team until an explicit staff reply; assignment is
+not a claim of online presence. Visible dialogs refresh every five seconds with
+bounded backoff and same-browser recovery. General guest Help stays retired;
+old buying APIs/history remain compatible without a new public buying entry.
+Only visitor messages and explicit staff replies are public. Historical notes,
+carrier contacts, commission discussions and attachments remain private. End chat
+releases live capacity and preserves contacts and history; X only hides the chat.
+Staff can call and add private notes to ended cases, mark them resolved separately,
+or reopen them. The dedicated transport queue retains capacity, claim, assignment,
+reassignment, Active/Chat history/Resolved filters and private carrier handoff.
+Business-owner dashboard support remains separate. Local migration 59 extends
+closed-only resolution to transport; deployed schema remains 58 until rollout.
+
 Existing records were preserved during the verified 2026-09-27 rollout.
 No hosted Realtime configuration or native app has been deployed.
 
@@ -193,9 +201,9 @@ No hosted Realtime configuration or native app has been deployed.
   and SMS handoffs, copy, and phone-required submission into the business’s inbox;
 - an inquiry management dashboard;
 - a first-party customer support workspace;
-- anonymous, token-scoped Buying assistance conversations with live text replies,
-  status, private staff notes and retry-safe persistence. Name, phone and details
-  are required. No email field or attachments. Closed cases can start another
+- anonymous, token-scoped transport/delivery conversations (local S57) with live text replies,
+  status, private staff notes and retry-safe persistence. Pickup, destination, name and phone
+  are required; goods details are optional. No email field or attachments. Closed cases can start another
   request without deleting staff history;
 - authenticated owner-dashboard support with live replies, tenant isolation and
   private sanitized image/PDF attachments up to 5 MB. Support staff assignment,
@@ -234,6 +242,10 @@ Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not ca
 ## 5. Non-negotiable design philosophy
 
 ### 5.1 One profile, each business's content
+
+FE-054 adds locally verified optional tenant accents: an 8% cover-poster tint,
+small edges, logo surround, catalog selection and inquiry/contact accents. Platform
+branding, product images and playing video retain their original appearance.
 
 Every public page and ordinary preview uses BusinessProfile (FE-040/FE-041).
 The structure is image/video poster, name/logo, one About description, product/service
@@ -275,28 +287,37 @@ Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
 branding. The combined marketplace map loads immediately with **All categories**
-and no orientation chooser. Search & results opens a left drawer over the full
-map. The same drawer contains search, always-visible optional category/place selectors and
-two result-type checkboxes above one five-row paginated list. Products & services
-and Businesses are both selected by default; at least one remains selected.
-Type changes keep query/category/place and reset paging, while pagination keeps
-the chosen types. There are no result tabs. It starts closed on a
+and no orientation chooser. The local S56 candidate uses one compact horizontal
+map toolbar: results toggle at far left, search, category and location icon buttons.
+Filter menus open on demand and show active selections; the toolbar is the shared
+header for map-only and open-results views. The product list and zoom tools start
+below it, preserving map space at 320px. Only one active control set is mounted.
+Closed-view searches/filters update the map without opening results; open-view
+changes update both map and list. The drawer contains
+one five-row paginated list labeled Products & services. The local S54 candidate
+removes business cards and result-type controls; businesses remain on the filtered
+map with their existing previews. Public web/mobile boundaries normalize old
+type parameters before SQL counts/pagination. There are no result tabs. It starts closed on a
 fresh visit and opens for query/category/place deep links. Hiding and reopening
-retains the query, filters, result page, map center and zoom. Map controls remain
+retains the query, filters, result page, map center and zoom. Explicit web view=map
+URLs stay closed on reload even with filters; query changes preserve view choice.
+Map controls remain
 on the right; attribution and fixed phone navigation stay visible. Selecting a
-result business opens its preview above the drawer. The map stays mounted.
+map business opens its preview above the drawer. The map stays mounted.
 The local FE-030/FE-042 implementation places Category and Region or city side
-by side above result types; there is no Filters disclosure. No selected category
+by side above the product/service results; there is no Filters disclosure. No selected category
 means all categories, shown only as the control's empty-state label, not a menu
 option. Visitors may select several categories and remove individual selections
 or clear them together. Category sets match any selected membership; location
 and query further narrow that set. Each scope has its own clear action, changes
-reset paging and preserve the other scope, and a selected valid location remains
+reset paging and preserve the other scope, and selected valid locations remain
 even when its new category scope returns no matches. Parameterized PostgreSQL
 exact/fuzzy queries, map rows, counts and pagination use the same canonical
-category set; cross-listed records are returned once. No schema change is needed.
-Buying help uses a compact accessible icon alongside an open drawer on narrow
-screens so it cannot cover pagination. These controls are deployed and verified on phones and desktop.
+category set and location union; overlapping city/region selections return records once.
+Locations accept up to 16 selections, with OR within locations and AND with search
+and categories; single-location URLs remain valid. S57 is local, not deployed. No schema change is needed.
+Transport/delivery help uses a compact accessible icon alongside an open drawer on narrow
+screens so it cannot cover pagination. S56/S57 control changes are local and authorized for the gated S59 release.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -315,10 +336,9 @@ white and cool-gray remain the dominant content surfaces, and visible industry t
 color is never the only identifier. After two typed characters, search exposes no more than six
 server-authoritative eligible page, published offering, and reviewed-place
 suggestions. The combobox supports pointer, touch and keyboard interaction.
-Category and place selection refine the drawer and map together. All, Products
-and Businesses show accurate scoped totals. Five results
+Category and place selection refine the drawer and map together. The product/service result list shows accurate scoped totals; businesses remain on the map. Five results
 are selected by SQL COUNT/LIMIT/OFFSET with deterministic unpaid ordering and
-Previous/Next controls. All traverses products then businesses; category, query,
+Previous/Next controls. Public lists contain products/services; category, query,
 place or type changes reset the result page. Direct product links and business
 inspectors remain distinct actions. The map stays mounted across result pages and
 query/type changes, preserving its center and zoom. The public program name is always **Daily Featured** across
@@ -330,8 +350,12 @@ an eligible Suqpage showroom or a validated external ad with approved local
 media and an HTTPS website or telephone action; external ads never become fake
 showrooms or map records. Staff selection and
 ordering do not change with industry, search, place, or selected program day.
-Desktop shows all five beside the gallery. Phones show two at a time in a compact
-automatically rotating strip without scroll, pause, or carousel controls. Every
+The local S51 carousel shows one sponsor at a time on desktop and phones,
+advancing every six seconds through the ordered pool with equal turns. Previous,
+Next and Pause/Resume controls remain available. It pauses offscreen, during
+interaction and in the background; reduced motion starts paused. Broadcast
+spotlights do not interrupt the cycle. The owner authorized proceeding with the S59 release gates
+under FE-036/FE-053. Every
 day has one stable assigned industry, including Agriculture on Sunday. The
 The verified local S36 Daily Featured window is 8:30 PM–12:00 AM Ethiopia time
 (EAT, UTC+3). Six businesses receive 30 minutes each, four sponsor mentions receive
@@ -364,8 +388,8 @@ and the next card leads only when its presentation starts. References, airtime,
 and stored lineup order remain stable. Non-today previews do not rotate.
 Sponsor breaks receive sequential placements from the active five-placement
 pool. Internal schedule previews name each assigned sponsor and exact time;
-during the live segment, public status names the paid sponsor and its rail card
-moves first with a **Sponsor spotlight** treatment.
+during the live segment, public status names the paid sponsor as **Sponsor
+spotlight**. The local S51 carousel keeps rotating independently of that segment.
 On phones, Daily Featured avoids a vertical wall of controls: its long
 description is omitted, broadcast status is compact, and all seven fixed weekdays
 fit in one compact segmented row above the gallery. Daily Featured uses an
@@ -389,9 +413,10 @@ Each screen has one communication job. Market helps visitors find businesses, pr
 an accessible digital presence for African businesses, the Ethiopia-first catalog,
 and discovery through location, search, result lists and Daily Featured. Login explains passwordless account access. Setup
 collects private account details. Business owners use Dashboard → Support for
-platform questions. There is no public Ask for help entry. Buying assistance, with a Live chat sublabel, opens message-first intake with name and phone,
-followed by a text conversation and request status.
-General visitor support remains closed; buying assistance is the only guest chat.
+platform questions. There is no public Ask for help entry. Transport & delivery, with a Live chat sublabel, opens route/name/phone intake and
+then live text chat. Staff arrange carriers outside Suqpage. General visitor
+support stays closed; business owners use their authenticated support dashboard.
+S57 is implemented locally; S59 release is authorized but not deployed.
 No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
 the complete platform narrative. **Custom work**, **ready products**, and
 **wholesale supply** remain optional capability labels, not a slogan or a
@@ -645,7 +670,7 @@ and present them but must not invent or silently translate them.
 
 ## 7. Dynamic catalog model
 
-Suqpage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products.
+Suqpage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products. FE-054 stores the optional accentColor in existing versioned PostgreSQL page draft/publication JSON, with no migration or backfill.
 
 Core hierarchy:
 
@@ -916,19 +941,20 @@ Default behavior:
 - de-duplicate businesses with more than one industry membership and keep the
   Daily Featured weekday industry independent from that map filter;
 - provide live search plus simple Industry controls;
-- show five-row category- or query-driven Products/Businesses result pages in the optional
+- show five-row category- or query-driven product/service result pages in the optional
   left drawer over the persistent map on desktop and phones. Product results link
-  directly to the selected product; query/type changes retain map center/zoom;
+  directly to the selected product; query changes retain map center/zoom;
 - after two characters, provide at most six de-duplicated, public-eligible
   Suqpage page, published-offering, and reviewed-place suggestions scoped to the
   active industry and place. Hide duplicate autocomplete once full results appear;
-- keep search, category and location controls together in the result drawer;
-  the compact result panel keeps category/location visible side by
-  side, supports multiple clearable categories and a clearable location, places
-  Products & services / Businesses checkboxes above one list, and fixes page controls
-  below the scrollable rows. The deployed interface passes phone/desktop checks;
-- hide the drawer without clearing filters; its hidden controls are inert, Escape
-  returns focus to the opener, and reduced-motion preferences disable sliding;
+- keep search and compact category/location icon buttons in one shared top row,
+  with the results toggle at far left, on web and native. Filter menus support
+  multiple clearable categories and multiple clearable cities/regions. The results panel places
+  a Products & services heading above one offering-only list, and fixes page controls
+  below the scrollable rows. S54 is local and authorized for the gated S59 release;
+- hide product results without clearing filters; search/filter controls stay
+  available over the map, hidden list content is inert, Escape returns focus to
+  the results opener, and reduced-motion preferences disable sliding;
 - support business name, handle, product, industry, and relevant description search;
 - search matches all meaningful query terms, in any order,
   across one offering and its business name/handle/published About/public location.
@@ -979,6 +1005,13 @@ continues to code sign-in and grants no session itself. Managed password actions
 are unavailable.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
+FE-055 adds a local, release-pending Delete account entry in web/native account
+settings and a public `/account-deletion` page. It exposes the existing email
+request channel with identity-verification instructions; opening the composer
+does not submit a request or delete data. Native Account includes it before
+business setup. Administrative fulfilment remains manual; no automatic account
+purge or completed store-compliance verification is claimed.
+
 The Suqpage namespace preserves existing account emails and Auth links. DEP-041's
 explicitly authorized demo-email correction is separate: only admitted fictional
 accounts change email, existing provider UUIDs stay intact, and previously unlinked
@@ -987,7 +1020,9 @@ local session cookies remain readable through the same authorization checks; new
 cookies use Suqpage names and logout revokes both local token names (BE-036).
 
 Business setup collects owner name, verified-email display, private phone,
-organization name, category and consent. A safe provider display name may be
+organization name, category and consent. New pages start with the default color;
+FE-054 color selection lives only in the Page editor with the actual storefront
+preview. A safe provider display name may be
 prefilled. FE-051/BE-043 automatically assign an unused generated handle with
 bounded database-authoritative collision retries, then open
 `/dashboard/page-editor?view=preview`. Compatible callers can still request an
@@ -1078,17 +1113,17 @@ products with a service note, assist with consented page drafts, operate inquiri
 manage support assignments and record manual renewals. Business staff assignment
 remains an administrator action. Team members only see actively assigned businesses;
 page editing also requires current owner consent. Staff Save never publishes on
-behalf of the owner. Support-agent settings enable Business support, Buying assistance or All requests
+behalf of the owner. Support-agent settings enable Business support, Transport dispatch or All requests
 and set a shared open-case limit. Team members see eligible waiting requests and
 their own assigned history; managers see both queues. Assignment and capacity checks
 are transactional across concurrent workers. Staff can claim, reply, close and
 reopen authorized cases; managers can reassign open cases and inspect assignment
-history. Assigned buying-assistance staff and managers choose Reply for a
+history. Assigned transport dispatchers and managers choose Reply for a
 visitor-facing message or Internal note for private work. Existing staff messages
-remain private; only explicit new replies are shared. Buying assistance has Active,
+remain private; only explicit new replies are shared. The transport queue has Active,
 Chat history (ended but unresolved), and Resolved lists with server pagination and
 search by requester/name, phone or reference. Intake summaries appear in the list
-and full original intake/contact in the case. Ended and resolved buying cases
+and full original intake/contact in the case. Ended and resolved transport and historical buying cases
 accept private follow-up notes, but public replies require reopening. Mark resolved
 closes any active chat, releases capacity, and records the staff decision; visitor
 End chat never marks a request resolved. Historical transport cases
@@ -1149,11 +1184,58 @@ operational disable switch, not a route back to the retired workflow.
 
 ## 15. Current technical architecture
 
-ADR-0023 and `docs/MOBILE-MONOREPO-PREP.md` prepare an Expo React Native app beside
-Next.js using npm workspaces. This is a migration plan, not a current monorepo or
-native build. Pure contracts/domain/localization can be shared; native screens,
-map/media adapters and authenticated mobile APIs still require implementation.
-The current root layout and web deployment paths remain unchanged.
+S54 public Market adapters select the existing product/service projection before
+counting and paging; legacy result-type URLs are accepted but no longer control
+public result kinds. Internal discovery type support remains compatible. Business
+map data and filters remain independent of the product page number. No schema change.
+
+The repository now has npm workspaces for `apps/mobile` (Expo/React Native) and
+`packages/contracts`, while Next.js remains at the root with unchanged deployment
+paths. FE-053 / BE-044 / DEP-042 govern this local preview under ADR-0023. Native
+visitor pages and business-owner screens use versioned `/api/mobile/v1` adapters;
+private calls verify Supabase bearer identity and reload tenant/role authority.
+Admin/staff management stays on the web. Device sessions use SecureStore; the
+browser preview keeps sessions in memory. PostgreSQL remains server-only. FE-054
+shares a pure validated accent/palette between clients and server; optional native
+profile/shop DTO fields carry the business choice through existing save contracts.
+
+The S49.1 local preview follows the phone web hierarchy: compact brand/locale
+header, Market/Featured/About/More, full map with a sliding filter/result drawer,
+Featured and showroom grids, and grouped owner tasks. S49.2 embeds approved
+YouTube cover/product videos inside isolated native WebView/browser iframe
+adapters, with bounded failure/retry and no external video handoff. Video approval
+is unchanged. The owner has authorized the workflow audit and tester-build gates;
+actual native playback verification remains pending.
+
+The S51 preview shares a small React sponsor-timing hook between web/native;
+visibility, motion preferences and rendering remain client adapters. The preview
+also shares typed DTOs and pure rules/catalogs, with separate native and
+web map/rendering adapters. Custom web showrooms remain authoritative and linked
+from native catalog views. Focused API, browser and JavaScript export evidence is
+recorded in S49 and `docs/MOBILE-TESTING.md`. Native device coverage,
+remaining parity, full release gates and a separate API rollout are still required;
+this is not a published native release. No production behavior changed with this
+local implementation. Moving Next.js to apps/web remains a separate migration.
+
+S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
+option snapshots and corrected phone/email contact actions to the local candidate.
+Those API paths have real isolated PostgreSQL regression evidence. Expo project
+`@falmatad/suqpage` and preview signing are configured; APK distribution, full release gates and live API rollout remain incomplete.
+The FE-053/DEP-042 local candidate uses native MapLibre with OSM raster tiles;
+focused type/projection/export checks, Android native compilation and emulator
+first-render/drawer checks pass. Physical-phone and release checks remain open.
+The native candidate now uses storefront/name markers, numbered clusters, nearby
+lists and public live/featured badges matching the web map. Native marker selection
+opens the existing preview; scope changes clear stale selection. The authenticated
+page preview includes the edited cover/story/contacts and offering galleries.
+Owner route navigation, photo-backed offering save/hide, location confirmation and
+first publication have local browser persistence evidence. Read and write rate
+budgets are separate, and explicit native listing state saves preserve advanced
+metadata. Browser preview retains Leaflet. No Google Maps key or Google Cloud setup is
+required. The owner permits SDK-internal tile caching (including SQLite); all
+application persistence stays in PostgreSQL. Native testing needs a rebuilt app. Preview and
+production builds have distinct package names and require explicit hosted public
+configuration. See `docs/MOBILE-RELEASE-AUDIT.md` and `docs/MOBILE-DISTRIBUTION.md`.
 
 Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
 platform environment adapter accepts the earlier namespace only as a read fallback;
@@ -1351,7 +1433,7 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 S42/schema 56 adds `support_messages.visitor_visible` with a false default.
 No historical note is exposed. Apply this additive migration before deploying
 live buying replies and retain the column on rollback. S47/schema 57 adds nullable
-`support_conversations.resolved_at`, constrained to closed buying requests. Existing
+`support_conversations.resolved_at`, constrained to closed buying requests in deployed schema 58. Local S57 migration 59 extends the same invariant to transport requests. Existing
 closed records remain unresolved; staff resolution is explicit and audited. Preflight
 requires schema 58 after S48: `support_video_requests` stores private target/source
 and review records with server-only access and RLS. Retain these additive columns
@@ -1457,6 +1539,8 @@ configuration, and preflight checks.
 
 The Suqpage wordmark remains Latin with a fixed font, weight and spacing in all
 five languages. Surrounding interface typography may follow the selected script.
+FE-054 picker labels, validation and preview text use these same catalogs; owner
+hex values remain literal and business content is not translated.
 
 FE-049 provides shared public and dashboard interface localization for English,
 Amharic, Afaan Oromo, Somali and Tigrinya. A validated one-year cookie remembers
@@ -1473,6 +1557,8 @@ Rules:
   actual action: add to an inquiry list, view it, or send an inquiry. Use products,
   services and businesses rather than platform jargon. Do not add filler,
   repeated button explanations, internal notes or implementation terminology.
+  S51 storefront copy uses local phrasing in each language rather than English
+  sentence structure; brands and appropriate technical terms retain English.
   Preserve meaningful privacy/security guidance and merchant-authored content.
 - translate interface labels, buttons, help text, status labels, and platform copy;
 - do not translate product names;
@@ -1490,7 +1576,15 @@ Rules:
 
 ## 19. UX and accessibility requirements
 
-All public pages and dashboards must work on mobile and desktop.
+Local S58 transport intake keeps route and contact field pairs side by side at
+320px and above, with wrapping labels, touch-sized inputs and scroll access to
+Start chat in short viewports. Suqpage styling is retained. The owner approved
+the S58 layout for release; physical-keyboard/device verification remains separate.
+Payload and chat lifecycle remain the S57 contract.
+
+All public pages and dashboards must work on mobile and desktop. FE-054 derives
+readable foreground/border roles from custom accents (including white, black and
+neon), uses 44px picker controls and preserves platform focus/status semantics.
 
 Minimum expectations:
 
@@ -1579,6 +1673,41 @@ structured inquiry, not online checkout.
 ---
 
 ## 22. Testing and definition of done
+
+Web releases use a clean root/shared-contract installation guarded against Expo
+and native tooling; the selected full audit includes build dependencies at the
+existing severity. Normal monorepo/mobile installs retain the guarded compatibility
+adapter and unchanged full native audit. S61 verifies the web check chain, all 11
+isolated acceptance workflows, release stages, private backup/migration rehearsal
+and exact Linux artifact. Android's Expo internal APK is pending its tooling-risk
+decision and native-device gates; Google Play is deferred. Rollout evidence and
+current publication state: `docs/SUQPAGE-RELEASE-2026-10-06.md`.
+
+FE-054 adds `test:storefront-accent` to the full check: validation, 4,096 palette
+samples, PostgreSQL signup/save/publication, native projection and tenant/stale/
+staff/rollback/legacy/reset regressions. `capture-storefront-accent.mjs` covers
+actual web/native-browser mutations; the passwordless acceptance scenario covers
+Page-only color selection, save/reload/reset and untinted playing video. The S53
+focused capture covers the corrected UI; its revised production acceptance test
+is included in the authorized S59 release checks. `test-visual-color.ts` checks 4,096 HSV round trips and
+signup-control absence. Native-browser evidence
+is not physical-device evidence.
+
+The S49 native preview uses `test:mobile`, `mobile:typecheck`, the web TypeScript
+check, `capture-mobile.mjs` and `capture-mobile-alignment.mjs` with local Supabase/PostgreSQL only. `test:mobile:video` and the explicitly provider-mocked `capture-mobile-video.mjs` cover player validation, navigation limits, failure/retry and lifecycle; they do not substitute for actual native playback. Tests cover
+bearer verification, tenant/role denial, private-data projection, conflict/retry
+handling and visitor/owner workflows. Browser screenshots and JavaScript exports
+do not replace actual Android/iPhone checks, visual approval, full gates or an API
+rollout. Current evidence and remaining limits are in `docs/MOBILE-TESTING.md`.
+`capture-mobile-owner.mjs` proves local owner mutations/publication; the older
+navigation capture now asserts actual forms instead of screenshots alone.
+`capture-mobile-markers.mjs` uses fixture tiles to verify clusters/nearby selection.
+The 2026-10-05 dependency audit is not clean: Next is patched to 16.3.6, while
+unpatched Expo tooling advisories remain tracked in DEP-042 and the release audit.
+S59 also patches source-map-js to 1.2.2; invalid/nested source-map offset and normal
+mapping regressions pass. The owner approved coordinated web/mobile release and
+Expo preview/production public runtime settings are verified. Application rollout
+remains gated; no native API or mobile artifact publication is implied.
 
 The deployed S26/S27/S28 workflows use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
 `test:business-starters`,
@@ -1781,3 +1910,44 @@ Production schema 58 includes seeded demo identity, scoped support queues and
 buying requests with retained live messages and resolution. Buying assistance is a manual staff
 service. Historical transport requests remain accessible; provider accounts,
 dispatch, checkout and booking integrations are out of scope.
+
+## Local S51 candidate — sponsor visibility and storefront positioning
+
+FE-036/FE-052/FE-053 S51 implement equal six-second sponsor rotation on web/native,
+independent of broadcast spotlights, with pause/navigation and accessibility
+safeguards. Visitor/owner copy positions Suqpage as a professional digital
+storefront alongside social-media selling, including shop or area map location.
+Focused carousel tests and 69 final web/mobile-browser language/viewport states
+pass. About separates customer browsing from the business-owner offer. The
+narrative centers customers who know/follow the seller and want its organized
+offerings; map/search features remain unchanged.
+agent-authored translations have not received native-speaker approval. Native
+AppState/device checks and release gates remain pending; the owner authorized
+proceeding with the S59 release.
+The emulator is closed at the owner's request to save resources; web/API previews
+remain available. No deployment, new APK or native release is claimed.
+
+## Local storefront accents — FE-054 (rollout pending)
+
+Owners choose an optional accent in the Page editor while viewing their actual
+storefront, on web and native. Signup has no color controls. Presets and a visual
+custom picker update the full preview immediately; no color-code entry or Apply
+step is required. Web uses the browser color picker; native uses visual color,
+strength and brightness controls in a compact sheet. Save persists the selection.
+The stored six-digit value feeds one contrast-safe palette; Default resets it.
+A chosen accent applies an 8% cover-poster wash, cover edge, logo surround,
+catalog selection/detail rules, contact surface and business inquiry actions.
+Product photos, playing videos, body copy, platform navigation/logo/map markers
+and semantic status colors remain unchanged. There is no extra tint/layout field.
+
+The value belongs to the business profile in existing PostgreSQL draft/publication
+JSON, not the user account's platform theme. Signup is transactional; owner live
+Save updates publication atomically, consented staff only edit the draft. Existing
+versions/tenant checks apply. Legacy clients omitting the additive field preserve
+the stored value; explicit empty resets it. Native private/public DTOs carry the
+same saved value. No schema migration or demo/customer backfill is needed.
+
+Owner approved the prototype on 2026-10-05. Focused actual signup, reload, web/native
+save and publication checks plus desktop/phone captures pass locally. Hosted
+release, standalone native build and full release gates remain separate. These
+additions qualify sections 5, 7, 11, 15, 18, 19 and 22 without changing other flows.

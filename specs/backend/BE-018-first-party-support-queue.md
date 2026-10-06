@@ -2,7 +2,7 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [ADR-0023, FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039]
+related: [BE-044, ADR-0023, FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039]
 owners: [backend, security, customer-support]
 last_updated: 2026-09-27
 change_level: L3
@@ -648,3 +648,42 @@ S48 local evidence: `scripts/test-video-requests.ts`,
 cover submission, invalid-link recovery, assignment, approval without channel configuration,
 decline/reply and preserved default at phone/desktop widths. Schema 58 is local
 only. Visual approval and refreshed release/acceptance/operations gates are pending.
+
+## S57 transport and delivery assistance — in progress, 2026-10-05
+
+Master §3/§4/§5/§19 support and mobile statements affected. This supersedes the
+receipt-only transport entry and public buying-assistance entry. Suqpage retains
+its own visual design. GIVEN a visitor WHEN providing pickup, destination, name
+and phone THEN create a transport conversation and show live messages/status.
+Optional goods details aid dispatch. Staff arrange carriers externally; there is
+no driver/provider account, booking guarantee, payment or commission ledger.
+GIVEN the transport queue WHEN staffed THEN existing least-loaded capacity and
+scope rules assign only eligible agents; managers can assign/reassign and staff
+can claim, explicitly reply, save private carrier contact and add internal notes.
+GIVEN historical notes or handoffs THEN never expose them to visitors; only
+visitor messages and explicitly visitor-visible staff replies are public.
+GIVEN ended chats THEN preserve contact/history for phone follow-up; distinguish
+ended from staff-resolved, retain reopen and private notes. Token/category scope,
+expiry, rate limits, idempotency, text bounds and attachment denial remain enforced.
+Old buying conversations and their API remain compatible, with no new public
+buying entry. Reuse shipment_observation records/transport queue and existing
+origin/destination/resolution/visibility columns. Migration 59 extends the existing
+closed-only resolution constraint to transport as well as buying, without touching
+history. Apply before rolling out this code; rollback retains the additive schema.
+English, Amharic, Afaan Oromo, Somali and Tigrinya copy is authored for the actual
+UI purpose; user content remains unchanged. Focused support/transport/channel
+security tests, mobile API tests and phone/desktop UI review are required.
+
+S57 focused evidence (local): search suites and test-multiple-locations.ts pass
+multi-region/city union, overlap deduplication, exact/fuzzy pagination, category/
+query intersections, legacy and repeated URL parameters. Support suites plus
+test-live-transport.ts pass both APIs, token/queue/tenant isolation, assignment
+capacity, retry, private notes/carrier data, chat ending/resolution/reopen, and
+bounds. Migration 59 is applied locally only. capture-multiple-locations.mjs
+records seven web and six native-browser states; capture-live-transport.ts,
+capture-transport-dispatch-staff.ts and capture-mobile-transport.ts exercise real
+handlers and staff server actions at desktop/phone sizes. Temporary staff fixtures
+are removed; controlled map tiles and isolated API fixtures are documented in
+scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
+Both typechecks and localization checks pass. Owner visual/native-speaker review,
+physical device tests, build/full release gates and deployment remain pending.

@@ -44,7 +44,7 @@ export default async function SupportAgents({ searchParams }: {
         <div className="support-agent-identity"><strong>{agent.name}</strong><small>{agent.email}</small></div>
         <div className="support-agent-load"><span>{agent.openConversations} {" "}{t("of")}{" "}{agent.maxOpenConversations} {" "}{t("open")}</span><progress max={agent.maxOpenConversations} value={agent.openConversations}>{agent.openConversations}</progress></div>
         <label className="support-agent-toggle"><input type="checkbox" name="enabled" defaultChecked={agent.enabled}/><span>{t("Receives support")}</span></label>
-        <label className="support-agent-limit"><span>{t("Queue")}</span><select name="queueScope" defaultValue={agent.queueScope}><option value="all">{t("All requests")}</option><option value="support">{t("Business support")}</option><option value="transport">{t("Buying assistance")}</option></select></label>
+        <label className="support-agent-limit"><span>{t("Queue")}</span><select name="queueScope" defaultValue={agent.queueScope}><option value="all">{t("All requests")}</option><option value="support">{t("Business support")}</option><option value="transport">{t("Transport dispatch")}</option></select></label>
         <label className="support-agent-limit"><span>{t("Conversation limit")}</span><input type="number" name="maxOpenConversations" min="1" max="20" defaultValue={agent.maxOpenConversations}/></label>
         <button className="small-btn">{t("Save")}</button>
       </form>)}

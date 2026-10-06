@@ -9,6 +9,15 @@
 
 # Dependencies and framework/test output are rebuilt inside the image
 node_modules
+**/node_modules
+**/.expo
+apps/mobile/android
+apps/mobile/ios
+**/*.keystore
+**/*.jks
+**/credentials.json
+**/.env*
+deno.lock
 .next
 .next-acceptance
 .acceptance-tsconfig-*.json

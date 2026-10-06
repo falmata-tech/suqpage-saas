@@ -14,3 +14,8 @@
 .clear { flex:none; display:grid; place-items:center; width:30px; min-height:44px; padding:0; border:0; border-left:1px solid #e5eae7; border-radius:0 7px 7px 0; background:#fff; color:#52645a; cursor:pointer; }
 .clear:hover { background:#fff3ed; }
 .chooser summary:focus-visible,.options button:focus-visible,.clear:focus-visible { outline:3px solid #c23806; outline-offset:-3px; }
+
+.compact { width:44px; height:44px; flex:none; box-shadow:0 2px 6px #0001; }
+.compact summary { position:relative; width:42px; min-height:42px; justify-content:center; padding:0; color:#283a33; }
+.compact[data-active=true] { border-color:#c43a00; background:#fff1e9; }
+.badge { position:absolute; top:1px; right:2px; border-radius:8px; min-width:14px; padding:0 2px; background:#c43a00; color:white; font-size:10px; line-height:14px; text-align:center; }

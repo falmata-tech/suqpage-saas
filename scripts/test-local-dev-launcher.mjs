@@ -27,6 +27,11 @@ try {
   assert.equal(JSON.parse(run([],base,{PORT:'3101'}).stdout).origin,'http://127.0.0.1:3101');
   assert.equal(JSON.parse(run().stdout).origin,'http://127.0.0.1:3000');
   assert.equal(JSON.parse(run(['--port=3102','--hostname=localhost']).stdout).origin,'http://localhost:3102');
+  const mobile=run(['--port','3102','--hostname','0.0.0.0','--allow-lan']);
+  assert.equal(mobile.status,0,mobile.stderr);
+  assert.equal(JSON.parse(mobile.stdout).origin,'http://127.0.0.1:3102');
+  assert.ok(JSON.parse(mobile.stdout).args.includes('0.0.0.0'));
+
   for (const [args,settings,message] of [
     [['--port','abc'],base,/PORT must/], [['--port','70000'],base,/PORT must/],
     [['--hostname','0.0.0.0'],base,/loopback/], [['--port'],base,/value is required/],

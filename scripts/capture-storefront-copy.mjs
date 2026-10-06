@@ -1,0 +1,67 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { chromium, expect } from '@playwright/test';
+import { MARKET_STOREFRONT_COPY, ABOUT_STOREFRONT_SECTIONS } from '../lib/storefront-copy.ts';
+import { createUiText, languageNames } from '../lib/i18n/core.ts';
+const out='.local/sponsor-storefront-review'; fs.mkdirSync(out,{recursive:true});
+const browser=await chromium.launch();
+const records=[];
+const blank=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC0lEQVR42mP8/x8AAwMCAO+aZwoAAAAASUVORK5CYII=','base64');
+async function capture(page,name){
+ await page.evaluate(()=>document.fonts.ready);
+ await page.waitForFunction(()=>Array.from(document.images).filter(i=>i.loading!=='lazy').every(i=>i.complete),{},{timeout:15000});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' no horizontal overflow');
+ await page.screenshot({path:out+'/'+name+'.png'});records.push(name);
+}
+try{
+ for(const locale of (process.env.SUQPAGE_CAPTURE_LOCALES || 'en,am,om,so,ti').split(',')){
+  const t=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync('lib/i18n/messages/'+locale+'.json','utf8')));
+  for(const width of (locale==='en'?[1440,390,320]:[390,320])){
+   const context=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});
+   await context.addCookies([{name:'suqpage-language',value:locale,url:'http://127.0.0.1:3102'}]);
+   await context.route('https://tile.openstreetmap.org/**',r=>r.fulfill({contentType:'image/png',body:blank}));
+   const page=await context.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   await page.goto('http://127.0.0.1:3102/');
+   await expect(page.getByRole('heading',{name:t(MARKET_STOREFRONT_COPY.title),exact:true})).toBeVisible();
+   await expect(page.locator('.discovery-panel-opener')).toBeVisible();
+   await capture(page,`web-market-${locale}-${width}`);
+   await page.goto('http://127.0.0.1:3102/about');
+   await expect(page.getByRole('heading',{name:t(ABOUT_STOREFRONT_SECTIONS[0].title),exact:true})).toBeVisible();
+   await capture(page,`web-about-${locale}-${width}`);
+   await page.getByRole('heading',{name:t(ABOUT_STOREFRONT_SECTIONS[1].title),exact:true}).scrollIntoViewIfNeeded();
+   await capture(page,`web-businesses-${locale}-${width}`);
+   await expect(page.locator('#for-customers').getByRole('link',{name:t(ABOUT_STOREFRONT_SECTIONS[0].action),exact:true})).toHaveAttribute('href','/');
+   await expect(page.locator('#for-businesses').getByRole('link',{name:t(ABOUT_STOREFRONT_SECTIONS[1].action),exact:true})).toHaveAttribute('href','/login');
+   await page.goto('http://127.0.0.1:3102/featured');
+   const sponsor=page.locator('#featured-sponsors');await expect(sponsor).toBeVisible();await expect(sponsor.locator('[data-sponsor-id]')).toHaveCount(1);
+   for(const btn of await sponsor.getByRole('button').all()){const bounds=await btn.boundingBox();assert.ok(bounds.height>=44&&bounds.width>=44);await expect(btn).toBeInViewport();}
+   await capture(page,`web-sponsors-${locale}-${width}`);assert.deepEqual(errors,[]);await context.close();
+  }
+  const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  await context.route('https://tile.openstreetmap.org/**',r=>r.fulfill({contentType:'image/png',body:blank}));
+  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://localhost:8082');
+  await expect(page.getByRole('button',{name:'Language',exact:true})).toBeVisible({timeout:30000});
+  if(locale!=='en'){
+   await page.getByRole('button',{name:'Language',exact:true}).click();
+   await page.getByRole('radio',{name:languageNames[locale],exact:true}).click();
+   await page.getByRole('button',{name:t('Close'),exact:true}).last().click();
+  }
+  await expect(page.getByText(t(MARKET_STOREFRONT_COPY.title),{exact:true})).toBeVisible();
+  await capture(page,`mobile-market-${locale}`);
+  await page.getByRole('tab',{name:t('About'),exact:true}).click();
+  await expect(page.getByText(t(ABOUT_STOREFRONT_SECTIONS[0].title),{exact:true})).toBeVisible();
+  await capture(page,`mobile-about-${locale}`);
+  await page.getByRole('button',{name:t('For businesses'),exact:true}).click();
+  await expect(page.getByTestId('about-businesses').getByRole('button',{name:t('Create your business page'),exact:true})).toBeInViewport();
+  await capture(page,`mobile-businesses-${locale}`);
+  await page.getByRole('tab',{name:t('Featured'),exact:true}).click();
+  const sponsor=page.getByTestId('sponsor-carousel');await expect(sponsor).toBeVisible();
+  await expect(sponsor.getByRole('button',{name:t('Resume sponsors'),exact:true})).toBeVisible();
+  await capture(page,`mobile-sponsors-${locale}`);
+  await page.setViewportSize({width:320,height:700});await capture(page,`mobile-sponsors-small-${locale}`);
+  assert.deepEqual(errors,[]);await context.close();
+ }
+ fs.writeFileSync(out+'/copy-verification-'+(process.env.SUQPAGE_CAPTURE_LOCALES || 'all')+'.json',JSON.stringify({states:records,tiles:'stubbed to avoid automated traffic to OSM',data:'actual local catalog; no writes',native:'Expo browser preview, not device evidence'},null,2));
+ console.log(`PASS ${records.length} web/mobile viewport and language states.`);
+}finally{await browser.close();}

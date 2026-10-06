@@ -119,3 +119,18 @@
 .productCopy h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .add { display: inline-flex; align-items: center; justify-content: center; gap: 5px; width: auto; padding: 8px 10px; }
 .add span { font-size: 12px; }
+
+/* Optional tenant accents stay inside the profile; media bytes and host chrome do not change. */
+.coverTint { position: absolute; inset: 0; background: var(--store-accent,transparent); opacity: .08; pointer-events: none; }
+.profile[data-store-accent] .coverMedia { border-bottom: 4px solid var(--store-accent); }
+.profile[data-store-accent] .logo { background: var(--store-soft); box-shadow: 0 0 0 2px var(--store-edge); }
+.profile[data-store-accent] :is(.handle,.description button,.navigation a[aria-current]) { color: var(--store-ink); }
+.profile[data-store-accent] .navigation a[aria-current]::after { background: var(--store-edge); }
+.profile[data-store-accent] :is(.cart,.contactInquiry,.add:not(:disabled):hover) { background: var(--store-accent); color: var(--store-on); border-color: var(--store-edge); }
+.profile[data-store-accent] .count { color: inherit; border-color: currentColor; }
+.profile[data-store-accent] .add { color: var(--store-ink); border-color: var(--store-edge); }
+.profile[data-store-accent] .contacts { background: var(--store-soft); color: #252a2d; border-top: 2px solid var(--store-edge); }
+.profile[data-store-accent] .contactHeading p { color: #515b61; }
+.profile[data-store-accent] :is(.contactHeading h2 svg,.contactLinks a,.contactPreview) { color: var(--store-ink); }
+.profile[data-store-accent] :is(.contactLinks a,.contactPreview) { border-color: var(--store-edge); }
+.profile[data-store-accent] :is(button,a,input,select):focus-visible { outline-color: #2459cc; }

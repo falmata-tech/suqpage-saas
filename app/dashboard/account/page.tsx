@@ -7,6 +7,7 @@ import { changePasswordAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { authDriver } from "@/lib/config";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -40,5 +41,9 @@ export default async function Account({ searchParams }: { searchParams: Promise<
         <div className="field full"><button className="btn brand">{t("Change password")}</button></div>
       </form>
     </>}
+    <section className="panel">
+      <h2>{t("Delete account")}</h2>
+      <Link className="btn" href="/account-deletion">{t("Request account deletion")}</Link>
+    </section>
   </DashboardShell>;
 }

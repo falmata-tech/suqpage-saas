@@ -8,9 +8,9 @@ const browser=await chromium.launch();const evidence=[];
 try {
  for(const width of [1440,390,320]){
   const context=await browser.newContext({viewport:{width,height:1000}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/?q=lotion',{waitUntil:'domcontentloaded'});
+  await page.goto(base+'/?view=search&q=lotion',{waitUntil:'domcontentloaded'});
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
-  await page.goto(base+'/?industry=beauty-wellness',{waitUntil:'domcontentloaded'});
+  await page.goto(base+'/?view=search&industry=beauty-wellness',{waitUntil:'domcontentloaded'});
   const input=page.locator('#discovery-search');
   for(const query of ['lotion','LOTION','body-lotion','lotions','find lotions in Addis Ababa']){
    await input.fill(query);
@@ -32,8 +32,9 @@ try {
   for(const query of ['unknownbrand','body soap','lotion']){await input.fill(query);await page.waitForTimeout(60);}
   await expect(page).toHaveURL(url=>url.searchParams.get('q')==='lotion',{timeout:15000});
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
-  await page.getByRole('checkbox',{name:'Businesses',exact:true}).click();
-  await expect(page).toHaveURL(url=>url.searchParams.get('type')==='products');
+  await expect(page.getByRole('checkbox',{name:'Businesses',exact:true})).toHaveCount(0);
+  await expect(page.locator('.discovery-business-results')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Products & services',exact:true})).toBeVisible();
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
   await page.screenshot({path:`${out}/lotion-${width}.png`,fullPage:true});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No horizontal overflow');
@@ -47,6 +48,6 @@ try {
   await expect(page.locator('.discovery-product-results a').filter({hasText:'Aloe Body Lotion'})).toBeVisible();
   assert.deepEqual(errors,[]);evidence.push({width,passed:true});await context.close();
  }
- fs.writeFileSync(`${out}/evidence.json`,JSON.stringify({base,evidence,typing:true,categoryPreserved:true,typeTab:true,detailBack:true,literalNoMatch:true}));
- console.log('PASS desktop/390/320 human searches, fast typing, category/type preservation, product navigation/back, literal no-match and overflow.');
+ fs.writeFileSync(`${out}/evidence.json`,JSON.stringify({base,evidence,typing:true,categoryPreserved:true,offeringOnly:true,detailBack:true,literalNoMatch:true}));
+ console.log('PASS desktop/390/320 human searches, fast typing, category preservation and offering-only results, product navigation/back, literal no-match and overflow.');
 }finally{await browser.close();}

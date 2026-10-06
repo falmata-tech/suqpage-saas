@@ -44,6 +44,8 @@ export async function saveOwnerPage(port: OwnerPagePort, actor: SessionUser, bus
   if (content.heroImage && !(await port.hasImage(businessId, content.heroImage))) {
     throw new OwnerPageError("Choose an image belonging to this shop.");
   }
+  // Older clients do not send the additive field. Only an explicit empty value resets it.
+  if (content.accentColor === undefined && current.content.accentColor !== undefined) content.accentColor = current.content.accentColor;
   const saved = await port.commit(actor, current, { kind: "content", content });
   if (!saved) throw new OwnerPageError("The page or editing permission changed. Reload before saving.", 409);
   return saved;

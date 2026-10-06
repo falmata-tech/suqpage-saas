@@ -28,9 +28,8 @@ assert.match(market, /getPublicMarketplaceView/);
 assert.match(publicDiscoveryCache, /getMarketplaceDiscoveryView/);
 assert.match(publicLayout, /<PublicAppShell>/);
 assert.match(market, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
-assert.match(market, /Everything a business offers, in one place\./);
-assert.match(market, /Discover businesses near you\. Explore their story, products, services and capabilities/);
-assert.match(market, /get in touch directly/);
+assert.match(market, /t\(MARKET_STOREFRONT_COPY.title\)/);
+assert.match(market, /t\(MARKET_STOREFRONT_COPY.description\)/);
 assert.doesNotMatch(market, /public-lobby|landing-hero|FeaturedShowroomsWorkspace|SponsoredShowroomsWorkspace/);
 assert.doesNotMatch(market, /verified|rating|rated|buyers served|#1|newsletter|checkout/i);
 
@@ -64,7 +63,7 @@ assert.doesNotMatch(landingCss, /\.public-lobby/);
 
 assert.match(discoveryUi, /const action = "\/"/);
 assert.match(discoveryUi, /discovery-workbench/);
-assert.match(discoveryUi, /discovery-panel-filters/);
+assert.match(discoveryUi, /discovery-compact-toolbar/);
 assert.match(discoveryUi, /<CategoryChooser/);
 assert.doesNotMatch(discoveryMapUi, /filtersOpen|discovery-filter-toolbar/);
 assert.match(discoveryMapUi, /Clear location/);
@@ -82,8 +81,7 @@ assert.doesNotMatch(discoveryUi, /function IndustryStartChooser/);
 assert.match(discoveryUi, /inert=\{!panelOpen\}/);
 assert.doesNotMatch(discoveryUi, /discovery-mobile-view-tabs|aria-label="List view"/);
 assert.match(featuredUi, /export default function FeaturedShowroomsWorkspace/);
-assert.match(discoveryUi, /function SponsoredRail/);
-assert.match(discoveryUi, /data-mobile-visible/);
+assert.match(featuredUi, /<SponsorCarousel placements=\{sponsorPlacements\}/);
 assert.doesNotMatch(discoveryUi, /randomSponsorPair/);
 assert.match(discoveryUi, /Daily Featured schedule/);
 assert.match(discoveryUi, /Today’s broadcast/);
@@ -103,14 +101,12 @@ assert.match(discoveryRuntime, /\.slice\(0, 6\)/);
 assert.match(discoveryRuntime, /product\.is_published=1/);
 assert.match(discoveryCss, /\.discovery-search-suggestions\s*\{[^}]*position:\s*absolute/);
 assert.match(discoveryUi, /function MarketplaceSearchResults/);
-assert.match(discoveryMapUi, /<legend className="sr-only">\{t\("Search result type"\)\}/);
-assert.doesNotMatch(discoveryMapUi, /discovery-search-result-types/);
-assert.match(discoveryMapUi, /type="checkbox"/);
-assert.match(discoveryUi, /label: t\("Products & services"\)/);
-assert.match(discoveryUi, /label: t\("Businesses"\)/);
+// S54: map businesses stay discoverable; the list is offerings only.
+assert.match(discoveryMapUi, /className="discovery-results-heading">\{t\("Products & services"\)\}/);
+assert.doesNotMatch(discoveryMapUi, /discovery-search-result-types|discovery-result-filters|renderBusiness|toggleResultType/);
 assert.match(discoveryUi, /view: "search"/);
 // S22/S24: the drawer hide control replaces the former separate map action.
-assert.match(discoveryUi, /aria-label=\{t\("Hide search and filters"\)\}/);
+assert.match(discoveryUi, /aria-label=\{t\(panelOpen \? "Hide search and filters" : "Search & results"\)\}/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
 // FE-042 replaces the former fixed result cap with a bounded database page.
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);
@@ -152,7 +148,7 @@ for (const [file, maximum] of images) {
   assert.ok(fs.statSync(target).size <= maximum, `${file} remains within its image budget`);
 }
 
-assert.match(about, /suqpage-about-production-v1\.webp/);
+assert.match(about, /ABOUT_STOREFRONT_SECTIONS.map/);
 assert.match(landingCss, /suqpage-workspace-context-v1\.webp/);
 assert.doesNotMatch(market + about + landingCss, /https?:\/\/[^"')]+\.(?:png|jpe?g|webp)/i);
 

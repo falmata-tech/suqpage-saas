@@ -1,7 +1,7 @@
 import { findSpellingMatches, type SpellingMatch } from './spelling-search';
 import { platformEnvironment } from "./platform-environment.mjs";
 import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
-import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, discoveryCategoryKey, type ProductionScale } from "./discovery-contract";
+import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, discoveryCategoryKey, normalizeDiscoveryPlaces, type ProductionScale } from "./discovery-contract";
 import { automaticFeaturedLineup, featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
 import { getFeaturedProgramDaySelection, getFeaturedProgramPolicy, type FeaturedProgramDayMode } from "./featured-program-settings";
 import { validateLiveSettings, type LivePlatform } from "./live-showroom";
@@ -731,7 +731,7 @@ type DiscoveryOptions = {
   type?: string;
   industry?: string | readonly string[];
   q?: string;
-  place?: string;
+  place?: string | readonly string[];
   featuredDay?: string | number;
   scale?: string;
   now?: Date;
@@ -759,27 +759,22 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const where = discoveryWhere(productionScale);
   const params = discoveryParameters(projectionIndustryKey, query, productionScale);
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
-  const requestedPlace = (options.place || "").trim().slice(0, 180);
-  // Retain eligible locations even when new categories/query have no matches.
-  // Resolve a missing selection against public places without category/query scope.
+  const requestedPlaces = normalizeDiscoveryPlaces(options.place);
+  // Keep the selected geography available even when query/category has no matches.
   let places = placeOptions(locationRows);
-  if (requestedPlace && !places.some(place => place.key === requestedPlace)) {
+  if (requestedPlaces.some(key => !places.some(place => place.key === key))) {
     places = placeOptions(await all<DiscoveryRow>(selectSql(where), discoveryParameters("all", "", productionScale)));
   }
-  const selectedPlace = places.find((place) => place.key === requestedPlace);
-  const placeWhere = selectedPlace?.kind === "city"
-    ? " AND lower(p.city)=lower(?) AND lower(p.region)=lower(?)"
-    : selectedPlace?.kind === "region"
-      ? " AND lower(p.region)=lower(?)"
-      : "";
-  const placeParams = selectedPlace?.kind === "city"
-    ? [selectedPlace.city, selectedPlace.region]
-    : selectedPlace?.kind === "region"
-      ? [selectedPlace.region]
-      : [];
+  const selectedPlaces = places.filter(place => requestedPlaces.includes(place.key));
+  const locationScope = selectedPlaces.map(place => ({ city: place.kind === "city" ? place.city : "", region: place.region }));
+  const placeWhere = selectedPlaces.length ? ` AND EXISTS (
+    SELECT 1 FROM jsonb_to_recordset(?::jsonb) AS location(city text,region text)
+    WHERE lower(p.region)=lower(location.region)
+      AND (location.city='' OR lower(p.city)=lower(location.city)))` : "";
+  const placeParams = selectedPlaces.length ? [JSON.stringify(locationScope)] : [];
   const filteredWhere = `${where}${placeWhere}`;
   const filteredParams = [...params, ...placeParams];
-  const rows = selectedPlace
+  const rows = selectedPlaces.length
     ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
@@ -797,8 +792,7 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   // Reuse that server-side count instead of sorting/hydrating it a second time.
   const businessCount = rows.length;
   const spelling = await findSpellingMatches({query,industry:projectionIndustryKey,
-    city:selectedPlace?.kind === "city" ? selectedPlace.city : "",
-    region:selectedPlace?.region || "",scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id)},port);
+    city:"", region:"", locations:locationScope,scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id)},port);
   const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
   const approximate = spelling.filter(match=>type === "all" || (type === "products" ? match.kind === "product" : match.kind === "business"));
   const normalTotal = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
@@ -837,7 +831,7 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   productResultRows.push(...approximateProductRows);
   businessResultRows.push(...approximateMapRows.filter(row=>approximateBusinessIds.has(row.id)));
   rows.push(...approximateMapRows);
-  if (!selectedPlace) places=placeOptions(rows);
+  if (!selectedPlaces.length) places=placeOptions(rows);
   const { items: _items, ...resultPage } = pageResult(Array.from({ length: searchOrder.length }), total, request);
   const showrooms = rows.map(toShowroom);
   const nearbyGroups = groupNearbyShowrooms(showrooms);
@@ -853,7 +847,7 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     searchOrder,
     resultCounts: { products: productCount + spelling.filter(match=>match.kind === "product").length, businesses: businessCount + spelling.filter(match=>match.kind === "business").length },
     resultPage,
-    place: selectedPlace?.key || "",
+    place: selectedPlaces.map(place => place.key).sort().join("|"),
     places,
     productionScale,
     total: showrooms.length,

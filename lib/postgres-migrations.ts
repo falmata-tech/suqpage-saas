@@ -634,6 +634,14 @@ export async function migratePostgresDatabase(
       await runner.query("INSERT INTO schema_migrations(version) VALUES(58)");
       applied.push(58);
     }
+    const migration59 = await runner.query("SELECT version FROM schema_migrations WHERE version=59");
+    if (!migration59.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations DROP CONSTRAINT support_resolution_check;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_resolution_check CHECK
+          (resolved_at IS NULL OR (status='closed' AND assistance_category IN ('buying_assistance','shipment_observation')));`);
+      await runner.query("INSERT INTO schema_migrations(version) VALUES(59)");
+      applied.push(59);
+    }
     return { applied };
   });
 }

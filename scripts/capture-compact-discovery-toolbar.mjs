@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {chromium,expect as baseExpect} from '@playwright/test';
+const expect=baseExpect.configure({timeout:15000});
+const nativeOnly=process.argv.includes('--native');
+const webOnly=process.argv.includes('--web');
+const out='.local/compact-discovery-toolbar',base='http://127.0.0.1:3102';fs.mkdirSync(out,{recursive:true});
+const browser=await chromium.launch(),shots=[],errors=[];
+try {
+ const context=await browser.newContext();context.setDefaultTimeout(20000);context.setDefaultNavigationTimeout(60000);
+ await context.route('https://tile.openstreetmap.org/**',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZwoAAAAASUVORK5CYII=','base64')}));
+ const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));const button=name=>p.getByRole('button',{name,exact:true});
+ async function shot(name){await p.evaluate(()=>document.fonts.ready);await p.evaluate(()=>Promise.all(document.getAnimations().filter(a=>a.effect?.getComputedTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{}))));assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');await p.screenshot({path:out+'/'+name+'.png'});shots.push(name);}
+ async function row(locators){const boxes=await Promise.all(locators.map(l=>l.boundingBox()));assert.ok(boxes.every(Boolean));for(let i=1;i<boxes.length;i++){assert.ok(Math.abs(boxes[i].y-boxes[0].y)<4,'one horizontal row');assert.ok(boxes[i].x>=boxes[i-1].x+boxes[i-1].width-1,'no overlapping controls');}return boxes;}
+ if(!nativeOnly) {
+ for(const width of [1440,390,320]) {
+  await p.setViewportSize({width,height:width===1440?1000:844});await p.goto(base+'/?view=map',{waitUntil:'domcontentloaded'});await expect(p.locator('#discovery-search')).toBeVisible();await expect(p.locator('.leaflet-container')).toBeVisible();
+  const inputs=[button('Search & results'),p.locator('#discovery-search'),p.getByLabel('Filter by category',{exact:true}),p.getByLabel('Filter by region or city',{exact:true})];const boxes=await row(inputs);const tools=await p.locator('.discovery-floating-tools').boundingBox();assert.ok(tools.y>=boxes[0].y+boxes[0].height,'zoom below toolbar');
+  await shot('web-closed-'+width);await button('Search & results').click();await expect(p.getByRole('heading',{name:'Products & services',exact:true})).toBeVisible();await expect(p.locator('#discovery-search')).toHaveCount(1);await shot('web-open-'+width);await button('Hide search and filters').click();await p.reload({waitUntil:"domcontentloaded"});await expect(button('Search & results')).toBeVisible();
+ }
+ await p.locator('#discovery-search').fill('Aloe Field Care');await button('Show search results').click();await expect(p).toHaveURL(/q=Aloe/,{timeout:20000});await expect(button('Search & results')).toBeVisible();await expect(p.locator('.mp-map-showroom')).toHaveCount(1,{timeout:30000});await button('Search & results').click();await expect(p.locator('.discovery-product-results a').first()).toBeVisible();await button('Hide search and filters').click();await button('Clear marketplace search').click();await expect(p).not.toHaveURL(/q=/);
+ await p.getByLabel('Filter by category',{exact:true}).click();await p.getByRole('group',{name:'Categories',exact:true}).getByRole('button').first().click();await expect(button('Clear categories')).toBeVisible();await expect(button('Search & results')).toBeVisible();await button('Clear categories').click();
+ await p.getByLabel('Filter by region or city',{exact:true}).click();const select=p.locator('#discovery-place');await expect(select).toBeVisible();const option=await select.locator('optgroup option').first().getAttribute('value');await select.selectOption(option);await expect(select).toBeHidden();await p.getByLabel('Filter by region or city',{exact:true}).click();await expect(select).toHaveValue(option);await button('Clear location').click();await expect(select).toBeHidden();
+ }
+ for(const width of webOnly ? [] : [390,320]) {
+  await p.setViewportSize({width,height:844});await p.goto('http://localhost:8082',{waitUntil:'domcontentloaded'});const input=p.getByRole('textbox',{name:'Search',exact:true});await expect(input).toBeVisible();await expect(p.locator('.suqpage-map-marker').first()).toBeAttached();
+  await row([button('Search & results'),input,button('Category: All categories'),button('Region or city: All Ethiopia')]);await shot('native-closed-'+width);await button('Search & results').click();await expect(p.getByRole('heading',{name:'Products & services',exact:true})).toBeVisible();await expect(input).toHaveCount(1);await expect.poll(()=>p.getByTestId('search-drawer').evaluate(el=>Math.abs(new DOMMatrix(getComputedStyle(el).transform).m41))).toBeLessThan(0.5);await shot('native-open-'+width);await button('Hide search and filters').click();
+  await button('Category: All categories').click();await p.getByRole('checkbox').first().click();await button('Clear categories').click();await button('Done').click();await expect(button('Category: All categories')).toBeVisible();
+  await button('Region or city: All Ethiopia').click();await p.getByRole('radio').first().click();await button('Clear location').click();await button('Done').click();await expect(button('Region or city: All Ethiopia')).toBeVisible();
+  await input.fill('Aloe Field Care');await button('Search').click();await expect(button('Search & results')).toBeVisible();await button('Search & results').click();await expect(button('Aloe Body Lotion')).toBeVisible();await expect(input).toHaveValue('Aloe Field Care');
+ }
+ assert.deepEqual(errors,[]);fs.writeFileSync(out+(nativeOnly?'/native-verification.json':webOnly?'/web-verification.json':'/verification.json'),JSON.stringify({shots,checks:['single horizontal row no control overlaps','map tools below toolbar','results toggle far left','web/native open and closed','one active control set','search filter clear and persistence'],tiles:'controlled fixtures; actual data/markers',native:'Expo browser, no device claim'},null,2));console.log('PASS compact toolbar: '+shots.length+' captures and interaction checks');
+}finally{await browser.close();}

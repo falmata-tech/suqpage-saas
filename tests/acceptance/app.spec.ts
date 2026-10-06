@@ -52,8 +52,28 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
   await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByText('Page color',{exact:true})).toHaveCount(0);
   await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();
   await expect(page).toHaveURL(/\/dashboard\/page-editor\?view=preview$/);await expect(page.getByLabel('Page preview',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Page color',exact:true}).click();
+  await page.getByLabel('Custom color',{exact:true}).fill('#ff00b8');
+  await expect(page.locator('[data-business-profile]')).toHaveAttribute('data-store-accent','#FF00B8');
+  await expect(page.locator('[data-business-profile] [class*=coverTint]')).toHaveCSS('opacity','0.08');
+  await page.route('https://www.youtube-nocookie.com/embed/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Video fixture</title>'}));
+  await page.getByRole('button',{name:/Play business video about/}).click();
+  await expect(page.locator('[data-business-profile] iframe')).toBeVisible();
+  await expect(page.locator('[data-business-profile] [class*=coverTint]')).toHaveCount(0);
+  await page.getByRole('button',{name:'Choose color #B6FF00',exact:true}).click();
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(page.getByText('Private draft saved',{exact:true})).toBeVisible();
+  await page.reload();
+  await page.getByRole('button',{name:'Page color',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Choose color #B6FF00',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Default',exact:true}).click();
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(page.getByText('Private draft saved',{exact:true})).toBeVisible();
+  await page.reload();
+  await expect(page.locator('[data-business-profile]')).not.toHaveAttribute('data-store-accent');
   await page.goto('/dashboard/business');await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
   await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
   await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save account phone',exact:true}).click();
@@ -160,7 +180,7 @@ test('human searches preserve latest typing, filters and product navigation',asy
 
 // FE-019/BE-018: real production-mode staff actions, not canned API successes.
 for (const [name, script] of [
-  ['buying replies, private notes and ended/resolved history', 'capture-live-buying-staff.ts'],
+  ['transport replies, private notes and ended/resolved history', 'capture-live-buying-staff.ts'],
   ['video request approval and public gallery update', 'capture-video-requests.ts'],
 ]) test(name, async ({}, testInfo) => {
   test.setTimeout(180_000);

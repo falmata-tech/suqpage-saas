@@ -50,7 +50,7 @@ export default async function SupportThread({
   const business = user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
   const client = user.access_role === "client";
   const operations = user.access_role === "operations_manager" || user.access_role === "platform_admin";
-  const buying = data.conversation.assistanceCategory === "buying_assistance";
+  const buying = isCallbackRequest(data.conversation.assistanceCategory);
   const privateNotes = data.conversation.participantKind === "visitor" && !buying;
   const callback = isCallbackRequest(data.conversation.assistanceCategory);
   const transport = data.conversation.assistanceCategory === "shipment_observation";
@@ -120,9 +120,7 @@ export default async function SupportThread({
       </section> : null}
       {canManage && transport ? <TransportHandoffForm key={handoff?.id || 0} conversationId={id} handoff={handoff} closed={data.conversation.status === "closed"} saved={Boolean(query.routed)} summary={[
         data.conversation.publicRef, data.conversation.requesterLabel, data.conversation.visitorPhone,
-        data.conversation.transportOrigin ? `From: ${data.conversation.transportOrigin}` : "",
-        data.conversation.transportDestination ? `To: ${data.conversation.transportDestination}` : "",
-        !data.conversation.transportOrigin ? data.messages[0]?.body : "",
+        data.conversation.requestSummary || data.messages[0]?.body,
       ].filter(Boolean).join("\n")} /> : null}
       {!client && history.length ? <details className="panel support-assignment-history"><summary>{t("Assignment history")}</summary><ol>
         {history.map(item => <li key={item.id}><strong>{item.agent_name}</strong> · <time dateTime={new Date(item.assigned_at).toISOString()}>{dateTime(item.assigned_at)}</time><small>{item.assigned_by ? t("Assigned by {name}", {name:item.assigned_by}) : t("Automatic assignment")}{item.released_at ? ` · ${t("Released")} ${dateTime(item.released_at)}` : ""}</small></li>)}

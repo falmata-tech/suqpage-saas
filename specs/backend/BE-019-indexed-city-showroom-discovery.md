@@ -126,3 +126,32 @@ Evidence: implemented and verified on 2026-08-01:
   currently entitled discovery participants, four payment-lifecycle exclusions,
   exactly ten featured profiles, and bounded City Showroom halls.
 - Security integration, `npm run check`, and `npm run release` passed.
+
+## S57 multiple locations — in progress, 2026-10-05
+
+Master §5.2/§5.5/§10/§19 affected. GIVEN selected cities and/or regions WHEN
+searching THEN the map and paginated offerings match any selected location, AND
+the category/query scope. Overlapping region/city selections never duplicate
+results. Empty selection means all locations. Existing single-place URLs remain
+valid; repeated or pipe-separated place values normalize to a stable bounded
+set (at most 16). SQL values stay parameterized and spelling matches use the
+same union before ranking/pagination. Cache identity includes the normalized set.
+GIVEN either client WHEN opening the compact location button THEN regions/cities
+are checkable, selected values remain available during filtering, and individual
+unselect and clear-all work without opening results. Changing scope resets page.
+No database schema change is required. Test discovery pagination/spelling plus
+web/native filter flows at desktop/phone; retain existing S56 visual style.
+
+S57 focused evidence (local): search suites and test-multiple-locations.ts pass
+multi-region/city union, overlap deduplication, exact/fuzzy pagination, category/
+query intersections, legacy and repeated URL parameters. Support suites plus
+test-live-transport.ts pass both APIs, token/queue/tenant isolation, assignment
+capacity, retry, private notes/carrier data, chat ending/resolution/reopen, and
+bounds. Migration 59 is applied locally only. capture-multiple-locations.mjs
+records seven web and six native-browser states; capture-live-transport.ts,
+capture-transport-dispatch-staff.ts and capture-mobile-transport.ts exercise real
+handlers and staff server actions at desktop/phone sizes. Temporary staff fixtures
+are removed; controlled map tiles and isolated API fixtures are documented in
+scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
+Both typechecks and localization checks pass. Owner visual/native-speaker review,
+physical device tests, build/full release gates and deployment remain pending.

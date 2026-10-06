@@ -22,18 +22,20 @@ async function main(){
  try{
   const email=`buying-staff-${crypto.randomUUID()}@example.test`;
   const created=await auth.auth.admin.createUser({email,email_confirm:true});assert.ok(!created.error&&created.data.user);providerId=created.data.user.id;
-  userId=Number((await pool.query("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES($1,'unused','Buying review staff','admin',0) RETURNING id",[email])).rows[0].id);
+  userId=Number((await pool.query("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES($1,'unused','Transport review staff','admin',0) RETURNING id",[email])).rows[0].id);
   await pool.query("INSERT INTO user_access_profiles(user_id,access_role) VALUES($1,'operations_manager')",[userId]);
   await pool.query("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES($1,'supabase',$2,$3,$4)",[userId,providerId,email,Date.now()]);
-  const staff:SessionUser={id:userId,email,name:'Buying review staff',role:'admin',access_role:'operations_manager',business_id:null,must_change_password:0};
+  const staff:SessionUser={id:userId,email,name:'Transport review staff',role:'admin',access_role:'operations_manager',business_id:null,must_change_password:0};
   await support.updateSupportAgentSetting(staff,{userId,enabled:true,maxOpenConversations:1,queueScope:'transport'});
   const visitor=await browser.newPage({viewport:{width:390,height:900}});
   await visitor.goto(base);await visitor.locator('button[data-channel=buying]').click();
-  await visitor.locator('#public-buying-message').fill('Please check this product before purchase.');
+  await visitor.locator('#transport-origin').fill('Addis Ababa');
+  await visitor.locator('#transport-destination').fill('Adama');
+  await visitor.locator('#public-buying-message').fill('Two cartons to deliver.');
   await visitor.locator('#public-buying-name').fill('Review visitor');await visitor.locator('#public-buying-phone').fill('+447700900999');
   await visitor.getByRole('button',{name:'Start chat',exact:true}).click();
-  await expect(visitor.getByText('Waiting for our team',{exact:true})).toBeVisible();
-  const token=(await visitor.context().cookies()).find(cookie=>cookie.name==='suqpage_public_buying')?.value;assert.ok(token);
+  await expect(visitor.getByText('Waiting for our transport team',{exact:true})).toBeVisible();
+  const token=(await visitor.context().cookies()).find(cookie=>cookie.name==='suqpage_public_transport')?.value;assert.ok(token);
   const publicCase=await support.getPublicSupportConversation(token);
   caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);
   const request={id:caseId,token};
@@ -48,11 +50,11 @@ async function main(){
   await page.locator('select[name=audience]').selectOption('note');await page.locator('#support-reply').fill('Private staff-only review note');await page.locator('.support-reply button').click();
   await expect(page.getByText('Note saved',{exact:true})).toBeVisible();
   assert.ok(!(await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('staff-only')));
-  await page.locator('select[name=audience]').selectOption('reply');await page.locator('#support-reply').fill('We can help. Please send the product link.');await page.locator('.support-reply button').click();
+  await page.locator('select[name=audience]').selectOption('reply');await page.locator('#support-reply').fill('We can help. Please send the pickup details.');await page.locator('.support-reply button').click();
   await expect(page.getByText('Reply sent.',{exact:true})).toBeVisible();
-  assert.ok((await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('product link')));
+  assert.ok((await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('pickup details')));
   await visitor.bringToFront();
-  await expect(visitor.getByRole('log')).toContainText('We can help. Please send the product link.',{timeout:15000});
+  await expect(visitor.getByRole('log')).toContainText('We can help. Please send the pickup details.',{timeout:15000});
   await expect(visitor.getByRole('log')).not.toContainText('Private staff-only review note');
   for(const width of [1440,390]){await page.setViewportSize({width,height:900});await page.locator('.support-reply button').scrollIntoViewIfNeeded();if(width<600){const send=await page.locator('.support-reply button').boundingBox();const nav=await page.locator('.workspace-mobile-tabs').boundingBox();assert.ok(send&&nav&&send.y+send.height<=nav.y,'Send is reachable above mobile navigation');}assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-${width}.png`});}
   await visitor.getByRole('button',{name:'End chat',exact:true}).click();
@@ -61,7 +63,7 @@ async function main(){
   await expect(page.getByText('Chat ended',{exact:true})).toBeVisible();
   await expect(page.getByRole('link',{name:'Back to support inbox'})).toHaveAttribute('href','/dashboard/support?queue=transport&status=history');
   await expect(page.locator('a[href="tel:+447700900999"]')).toBeVisible();
-  await expect(page.locator('.support-visitor-contact')).toContainText('Please check this product before purchase.');
+  await expect(page.locator('.support-visitor-contact')).toContainText('Two cartons to deliver.');
   await expect(page.locator('select[name=audience]')).toHaveCount(0);
   await page.locator('#support-reply').fill('Called customer. No longer interested.');
   await page.locator('.support-reply button').click();
@@ -75,7 +77,7 @@ async function main(){
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-ended-${width}.png`});
     await page.goto(`${base}/dashboard/support?queue=transport&status=history&q=${reference}`);
-    await expect(page.locator(`.support-row[href="/dashboard/support/${caseId}"]`)).toContainText('Please check this product before purchase.');
+    await expect(page.locator(`.support-row[href="/dashboard/support/${caseId}"]`)).toContainText('Two cartons to deliver.');
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-history-${width}.png`});
   }

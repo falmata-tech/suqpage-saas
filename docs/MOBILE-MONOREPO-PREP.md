@@ -1,7 +1,9 @@
 # Expo mobile and monorepo preparation
 
-Status: architecture preparation, September 27, 2026. No native app, workspace
-move, native build or app-store release has been performed. ADR-0023 applies.
+Status: local Expo implementation, September 27, 2026. FE-053 / BE-044 / DEP-042
+are in progress under ADR-0023. Browser/API tests and native JavaScript exports
+pass; device/review/release gates remain open. No app-store release or production
+API rollout has occurred. See [testing instructions](MOBILE-TESTING.md).
 
 Choose Expo **with React Native**, not Expo instead of React Native. Keep Next.js
 for the public website, SEO and server APIs. Start with npm workspaces to preserve
@@ -9,14 +11,12 @@ the existing lockfile/tooling. Expo supports this layout and automatic Metro
 monorepo configuration. Pin a compatible Expo/React/React Native set when creating
 the native app; do not copy the web React version into it blindly.
 
-## Target layout and dependency direction
+## Current layout and dependency direction
 
 ```
-apps/web/                 existing Next.js app and server adapters
-apps/mobile/              Expo Router, native screens and device adapters
-packages/contracts/       request/response types, errors and pagination
-packages/domain/          pure validation, inquiry and discovery rules
-packages/localization/    message catalogs and formatting contracts
+app/, components/, lib/   existing Next.js web/server app, unchanged root
+apps/mobile/              Expo Router native screens and device adapters
+packages/contracts/       typed DTOs, public links and API-origin validation
 ```
 
 Apps depend on shared packages. Shared packages never import an app, Next.js,
@@ -24,25 +24,25 @@ PostgreSQL, filesystem, cookies, browser DOM or privileged provider credentials.
 Keep web CSS/DOM components and native UI separate initially. Do not create empty
 abstractions or a shared UI package merely to make the diagram symmetrical.
 
-## Audit of current boundaries
+## Boundary plan and current implementation
 
-| Surface | Reuse | Required native/server work |
+| Surface | Current preview | Remaining release work |
 | --- | --- | --- |
-| Discovery | `lib/discovery-contract.ts`, category keys/filter semantics | Discovery is loaded in server components; add bounded, public paginated HTTP query API using the same visibility and ranking projection. |
-| Map | Location values, selected shop, approximate/exact meaning | Leaflet depends on DOM. Evaluate Expo Maps or react-native-maps in a development build with clustering, attribution and map-provider costs. Preserve approximate markers and preview behavior. |
-| Showrooms/media | Typed product/catalog DTOs and media validation | Native galleries/image rendering; YouTube through supported embeds or external links. Custom web showroom renderers do not translate automatically. |
-| Inquiries | Pure validation and grouped inquiry rules | Reuse `/api/inquiries` contract after auditing cookie/origin dependencies. Native external-link/clipboard adapters and failure fallback. |
-| Email sign-in | Supabase identity and owner mapping | Current `/api/auth/email/start`, `/verify` establish browser state. Native OTP verification and server-validated bearer tokens need an explicit adapter; secure device token storage, refresh, sign-out and deleted-user handling. |
-| Owner editing | Domain validation and tenant authorization | Many operations are Next server actions, not mobile APIs. Add versioned HTTP adapters for profile, products, handles, publication, media and settings; retain identical permission checks. |
-| Buying assistance | `lib/buying-conversation-contract.ts`, statuses and refresh policy | HttpOnly guest cookies need a native scoped-session adapter and secure storage. No cross-device identity implied by phone entry. |
-| Staff inbox | Assignment/capacity domain rules | Keep operations on web in the initial mobile milestone; native staff scope requires explicit product approval. |
-| Localization | Five message catalogs | Native text provider, font coverage, formatters and accessibility labels; preserve merchant content verbatim. |
-| Uploads | Existing validation/storage server ports | Expo ImagePicker/FileSystem adapters, permissions, size limits, upload retries and actual device tests. |
-| Notifications | Persisted message history is authoritative | Separate opt-in push-token registry, revocation, minimal payload and delivery handling. Background live delivery is not provided by foreground polling. |
+| Discovery | Public bounded API uses canonical search ranking, multiple categories, area, type and backend pagination. Native map and browser Leaflet share exact/approximate location rules. | Actual-device interaction coverage of the native MapLibre map. |
+| Showrooms/media | Native catalog, images, thumbnails, external YouTube and web-showroom link. | Custom web layouts remain web-only; review native media on both device platforms. |
+| Inquiries | Single/group lists, external contact/copy and canonical persisted Suqpage submission. | Physical-device handoff/cancellation coverage. |
+| Email sign-in | Local Supabase OTP, provider-verified bearer API, current database role/tenant, SecureStore and sign-out. | Physical-device persistence/expiry checks and release Auth configuration review. |
+| Owner editing | Setup, page/cover, business/location/handle, offerings/photos, video support requests, inquiries and account phone. | Native parity review, including logo editing; no staff UI. |
+| Buying assistance | Separate opaque guest token and persisted foreground polling/messages/end/history. | Push/background delivery is not implemented or implied. |
+| Owner support | Scoped text threads, messages, close/reopen. | Attachment upload/viewing is pending native parity work. |
+| Localization | Existing five-language catalogs reused by native text provider; merchant content preserved. | Actual-device script/font review and native-speaker review. |
+| Packaging | npm workspaces and explicit native React resolution preserve the web's patched React. | Expo doctor duplicate-version warning and moderate transitive dependency audit require release review. |
 
-The installed web app currently uses Next 16, React 19, Leaflet, pg and Supabase JS.
-No mobile project is installed. Server credentials and pg must never enter native
-bundles. Shared catalogs must not contain customer data or private contacts.
+The web app uses Next 16, React 19, Leaflet, pg and Supabase JS. Expo SDK 57,
+React Native 0.86 and Expo Router live in apps/mobile. No pg/server/credential
+module belongs in native bundles. Pure helpers/catalogs are reused directly until
+extracting them creates a real shared package; do not create empty packages.
+Next.js remains at the root. Moving it to apps/web is deliberately separate.
 
 ## Ordered migration gates
 
@@ -66,9 +66,9 @@ bundles. Shared catalogs must not contain customer data or private contacts.
 7. Release the unchanged web behavior first with rollback available. Native
    beta/store publication is a separate signed-build and device-review milestone.
 
-No Turborepo/Nx, new map provider, Realtime configuration or native dependency is
-needed just to prepare this plan. Map-provider licensing/API keys and push delivery
-are decisions to validate in the native spike, not pre-approved production changes.
+No Turborepo/Nx or hosted Realtime change was added. Map-provider licensing/API
+keys and push delivery remain explicit release decisions, not automatic production
+changes. The ordered gates distinguish implemented preview work from a release.
 
 ## Technology references
 

@@ -2,7 +2,7 @@
 id: BE-041
 title: Owner publication and immediate location
 status: done
-related: [FE-048, DEP-038, BE-033, BE-038, BE-040]
+related: [FE-054, FE-048, DEP-038, BE-033, BE-038, BE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L3
@@ -162,3 +162,11 @@ release, operations, nine isolated provider browser scenarios and Netlify artifa
 privacy checks pass. Earlier S22–S24 pending-review notes are superseded.
 Deployment evidence and remaining hosted-email limits:
 `docs/SUQPAGE-S22-S24-RELEASE-2026-09-21.md`.
+
+## FE-054 local accent addition
+
+Optional validated accentColor travels in existing profile JSON under the same
+owner/staff/version/publication transaction. Missing values from older clients
+preserve the current selection; explicit empty resets it. No schema migration.
+The local focused regression is scripts/test-storefront-accent.ts; hosted rollout
+is pending and this addition does not alter location/publication eligibility.

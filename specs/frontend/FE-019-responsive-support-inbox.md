@@ -2,7 +2,7 @@
 id: FE-019
 title: Responsive client and staff support inbox
 status: in_progress
-related: [ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039]
+related: [FE-053, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039]
 owners: [frontend, customer-support]
 last_updated: 2026-09-27
 change_level: L3
@@ -630,3 +630,80 @@ S48 local evidence: `scripts/test-video-requests.ts`,
 cover submission, invalid-link recovery, assignment, approval without channel configuration,
 decline/reply and preserved default at phone/desktop widths. Schema 58 is local
 only. Visual approval and refreshed release/acceptance/operations gates are pending.
+
+## S57 transport and delivery assistance — in progress, 2026-10-05
+
+Master §3/§4/§5/§19 support and mobile statements affected. This supersedes the
+receipt-only transport entry and public buying-assistance entry. Suqpage retains
+its own visual design. GIVEN a visitor WHEN providing pickup, destination, name
+and phone THEN create a transport conversation and show live messages/status.
+Optional goods details aid dispatch. Staff arrange carriers externally; there is
+no driver/provider account, booking guarantee, payment or commission ledger.
+GIVEN the transport queue WHEN staffed THEN existing least-loaded capacity and
+scope rules assign only eligible agents; managers can assign/reassign and staff
+can claim, explicitly reply, save private carrier contact and add internal notes.
+GIVEN historical notes or handoffs THEN never expose them to visitors; only
+visitor messages and explicitly visitor-visible staff replies are public.
+GIVEN ended chats THEN preserve contact/history for phone follow-up; distinguish
+ended from staff-resolved, retain reopen and private notes. Token/category scope,
+expiry, rate limits, idempotency, text bounds and attachment denial remain enforced.
+Old buying conversations and their API remain compatible, with no new public
+buying entry. Reuse shipment_observation records/transport queue and existing
+origin/destination/resolution/visibility columns. Migration 59 extends the existing
+closed-only resolution constraint to transport as well as buying, without touching
+history. Apply before rolling out this code; rollback retains the additive schema.
+English, Amharic, Afaan Oromo, Somali and Tigrinya copy is authored for the actual
+UI purpose; user content remains unchanged. Focused support/transport/channel
+security tests, mobile API tests and phone/desktop UI review are required.
+
+S57 focused evidence (local): search suites and test-multiple-locations.ts pass
+multi-region/city union, overlap deduplication, exact/fuzzy pagination, category/
+query intersections, legacy and repeated URL parameters. Support suites plus
+test-live-transport.ts pass both APIs, token/queue/tenant isolation, assignment
+capacity, retry, private notes/carrier data, chat ending/resolution/reopen, and
+bounds. Migration 59 is applied locally only. capture-multiple-locations.mjs
+records seven web and six native-browser states; capture-live-transport.ts,
+capture-transport-dispatch-staff.ts and capture-mobile-transport.ts exercise real
+handlers and staff server actions at desktop/phone sizes. Temporary staff fixtures
+are removed; controlled map tiles and isolated API fixtures are documented in
+scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
+Both typechecks and localization checks pass. Owner visual/native-speaker review,
+physical device tests, build/full release gates and deployment remain pending.
+
+## S58 paired transport intake — locally verified and visually approved; rollout pending, 2026-10-05
+
+Owner correction to S57: the intake must not become a tall single-column list.
+GIVEN desktop or phone (including 320px) WHEN opening transport intake THEN pickup
+and destination share a highlighted route card with two columns; name and phone
+share the next row. Optional goods details follow the required fields. Suqpage
+orange/white, existing buttons, live-chat name and API contract remain unchanged.
+Every field retains a programmatic label, 44px minimum input height and logical
+keyboard order. Long localized labels wrap; input values scroll instead of forcing
+horizontal overflow. Short/keyboard viewports remain scrollable to Start chat.
+Master §3 support intake description and §19 responsive behavior are affected.
+Verify desktop/phone geometry and actual submission; capture five locales before
+owner visual approval. No persistence, dispatcher or permission changes.
+
+S58 local evidence: both typechecks and eight localization tests pass.
+`capture-transport-intake-layout.mjs` verifies 13 web/Expo-browser states across
+five languages at 1440/390/320px, including paired input geometry, 44px targets,
+required-field clearing/enabling, translated headings/placeholders, overflow and
+reachable submission. `--short` adds two 390x480 viewport checks.
+`capture-live-transport.ts --phone-only` and `capture-mobile-transport.ts` pass
+real-handler chat submission/reply/end scenarios with isolated PostgreSQL data.
+Screenshots: `.local/transport-intake-layout/`; lifecycle: `.local/live-transport-review/`.
+Wrapped native labels align to the input baseline; the web launcher waits for its
+portal to mount. Owner visual review, physical-device keyboard checks, human
+language approval and full/release gates remain pending. No deployment or commit.
+
+S59 release narrative regression uses the S57 Transport & delivery label and
+rejects the retired Buying assistance visitor label. It retains Live chat/Start
+chat assertions and does not change historical staff records or APIs.
+
+S59: owner approved the S58 layout and authorized coordinated web/mobile release
+on 2026-10-05. Release checks are now authorized; deployment/device evidence
+remains separate from that approval.
+The existing staff browser regression (historical script name
+`capture-live-buying-staff.ts`) now enters the public transport route/name/phone
+form and uses its transport cookie. The same real staff reply/private-note, End
+chat, retained contact/history, resolved and reopen checks remain required.

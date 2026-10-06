@@ -56,8 +56,8 @@ async function main(){
   const duplicate=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...command,media:command.media.map(item=>({...item,ref:item.ref===first.imageRef?dupeA.imageRef:item.ref===second.imageRef?dupeB.imageRef:item.ref}))},null,[dupeA,dupeB]);assert.equal(duplicate.duplicate,true);assert.equal(await readTenantProductImage(dupeA.imageRef.slice(7),user),null);
   const manifest=await buildRuntimeMediaReferenceManifest();assert.ok(manifest.references.some(ref=>ref.key===second.imageRef.slice(7)&&ref.sources.some(source=>source.includes('media_json'))));
   const cleared=await executeBasicProductUpkeep(postgresProductUpkeepPort,user,{...update,expectedContentVersion:saved.contentVersion,idempotencyKey:crypto.randomUUID(),media:[]},null);assert.ok(cleared.contentVersion>saved.contentVersion);const empty=(await getCatalogByBusinessId(a,true))!.products[0];assert.deepEqual(productMedia(empty),[]);assert.equal(empty.image_path,'');assert.equal(empty.video_ref,'');assert.equal(await readTenantProductImage(first.imageRef.slice(7),null),null,'Removed gallery image no longer publicly readable');const retained=await buildRuntimeMediaReferenceManifest();assert.ok(retained.references.some(ref=>ref.key===first.imageRef.slice(7)&&ref.sources.some(source=>source.includes('snapshot'))),'Retained snapshots protect removed photos');
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,58);
-  console.log('PASS gallery validation, save/reorder/reload, legacy compatibility, snapshot retention, private access, tenant/stale/foreign denial, duplicate cleanup and schema 58.');
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,59);
+  console.log('PASS gallery validation, save/reorder/reload, legacy compatibility, snapshot retention, private access, tenant/stale/foreign denial, duplicate cleanup and schema 59.');
  }finally{await closeDbForTests();fs.rmSync(root,{recursive:true,force:true});}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

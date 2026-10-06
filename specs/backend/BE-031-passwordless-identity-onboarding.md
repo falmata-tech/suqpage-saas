@@ -2,7 +2,7 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-09-21
 change_level: L3
@@ -257,3 +257,11 @@ New examples reuse admitted fictional ceramics imagery and include two photos
 and two YouTube links per offering. Account identity/consent stays real; existing
 content is untouched. The Suqpage wordmark has fixed Latin typography in every
 locale. Local focused tests/captures are separate from visual/release approval.
+
+## FE-054 optional setup accent (local)
+
+Verified setup accepts an optional six-digit accentColor, validated before the
+creation transaction. It becomes part of the private starter profile JSON in the
+same atomic workspace creation, with no provider configuration or identity change.
+Existing callers retain Default. See FE-054 and test-storefront-accent.ts for
+invalid-without-write and saved-choice regressions; hosted rollout is pending.
