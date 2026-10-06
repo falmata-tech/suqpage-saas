@@ -195,3 +195,8 @@ staged values are the two documented localhost origins and an empty public key;
 keep other nested environment paths and populated keys blocked. Verify in an
 isolated Git fixture, including an injected secret, real .env.local and undeclared
 files. The existing root-template policy is unchanged.
+
+S61 web/API is deployed and independently verified at https://suqpage.com, deploy
+`6ac519154e7f2c72e452f5be`. Production schema59, protected routes, transport
+sessions and native market/featured/shop endpoints pass live checks. Expo APK
+publication still awaits its explicit risk decision/remediation and device gates.

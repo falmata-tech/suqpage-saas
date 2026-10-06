@@ -813,3 +813,10 @@ schema 59 retained and previous health verified. `test-netlify-function-cache.mj
 checks immutable ZIP bytes and rejects digest/path/bundler/runtime drift. Enhanced
 `test-netlify-native.mjs` passes complete handler initialization and Sharp transform
 on the existing reviewed archive. Draft verification precedes the next promotion.
+
+S61 web publication verified: deploy `6ac519154e7f2c72e452f5be`, source `71d88a1`
+plus packaging fix `8361f13`, schema59; 28 live API/page/boundary checks and
+1440/390/320 browser rendering checks pass. Full handler extraction preserves
+relative ZIP symlinks. The first rollout was restored before correction; draft
+configuration isolation and explicit local cache fixture limits are recorded in
+docs/SUQPAGE-RELEASE-2026-10-06.md. Android distribution remains pending.

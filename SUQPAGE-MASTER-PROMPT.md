@@ -142,8 +142,8 @@ and inquire about the specific items they want. Map, category and search remain
 full discovery features with unchanged prominence and behavior. Physical shops, makers, growers,
 service businesses and home sellers remain included; social accounts are not a
 prerequisite. The initial market is Ethiopia, with wider African discovery as a
-future direction. Local S51 copy implements this positioning on web/native; its
-release is authorized under S59; required gates remain pending (FE-052/FE-053).
+future direction. S51 copy implements this positioning on web/native. The web version is deployed
+in S61; the Expo artifact remains pending its separate gates (FE-052/FE-053).
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -315,9 +315,9 @@ even when its new category scope returns no matches. Parameterized PostgreSQL
 exact/fuzzy queries, map rows, counts and pagination use the same canonical
 category set and location union; overlapping city/region selections return records once.
 Locations accept up to 16 selections, with OR within locations and AND with search
-and categories; single-location URLs remain valid. S57 is local, not deployed. No schema change is needed.
+and categories; single-location URLs remain valid. S57 is deployed on the web and native API in S61. No search schema change is needed.
 Transport/delivery help uses a compact accessible icon alongside an open drawer on narrow
-screens so it cannot cover pagination. S56/S57 control changes are local and authorized for the gated S59 release.
+screens so it cannot cover pagination. S56/S57 web controls are deployed in S61; the native build remains pending.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -350,11 +350,11 @@ an eligible Suqpage showroom or a validated external ad with approved local
 media and an HTTPS website or telephone action; external ads never become fake
 showrooms or map records. Staff selection and
 ordering do not change with industry, search, place, or selected program day.
-The local S51 carousel shows one sponsor at a time on desktop and phones,
+The S51 carousel shows one sponsor at a time on desktop and phones,
 advancing every six seconds through the ordered pool with equal turns. Previous,
 Next and Pause/Resume controls remain available. It pauses offscreen, during
 interaction and in the background; reduced motion starts paused. Broadcast
-spotlights do not interrupt the cycle. The owner authorized proceeding with the S59 release gates
+spotlights do not interrupt the cycle. The web carousel is deployed in S61; native artifact gates remain open
 under FE-036/FE-053. Every
 day has one stable assigned industry, including Agriculture on Sunday. The
 The verified local S36 Daily Featured window is 8:30 PM–12:00 AM Ethiopia time
@@ -389,7 +389,7 @@ and stored lineup order remain stable. Non-today previews do not rotate.
 Sponsor breaks receive sequential placements from the active five-placement
 pool. Internal schedule previews name each assigned sponsor and exact time;
 during the live segment, public status names the paid sponsor as **Sponsor
-spotlight**. The local S51 carousel keeps rotating independently of that segment.
+spotlight**. The S51 carousel keeps rotating independently of that segment.
 On phones, Daily Featured avoids a vertical wall of controls: its long
 description is omitted, broadcast status is compact, and all seven fixed weekdays
 fit in one compact segmented row above the gallery. Daily Featured uses an
@@ -416,7 +416,8 @@ collects private account details. Business owners use Dashboard → Support for
 platform questions. There is no public Ask for help entry. Transport & delivery, with a Live chat sublabel, opens route/name/phone intake and
 then live text chat. Staff arrange carriers outside Suqpage. General visitor
 support stays closed; business owners use their authenticated support dashboard.
-S57 is implemented locally; S59 release is authorized but not deployed.
+S57 web intake, staff queue and native API are deployed in S61; the native
+application artifact remains pending.
 No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
 the complete platform narrative. **Custom work**, **ready products**, and
 **wholesale supply** remain optional capability labels, not a slogan or a
@@ -951,7 +952,7 @@ Default behavior:
   with the results toggle at far left, on web and native. Filter menus support
   multiple clearable categories and multiple clearable cities/regions. The results panel places
   a Products & services heading above one offering-only list, and fixes page controls
-  below the scrollable rows. S54 is local and authorized for the gated S59 release;
+  below the scrollable rows. S54 web behavior is deployed in S61; native release is pending;
 - hide product results without clearing filters; search/filter controls stay
   available over the map, hidden list content is inert, Escape returns focus to
   the results opener, and reduced-motion preferences disable sliding;
@@ -1005,7 +1006,7 @@ continues to code sign-in and grants no session itself. Managed password actions
 are unavailable.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
-FE-055 adds a local, release-pending Delete account entry in web/native account
+FE-055 provides a deployed web Delete account entry and a release-pending native entry in account
 settings and a public `/account-deletion` page. It exposes the existing email
 request channel with identity-verification instructions; opening the composer
 does not submit a request or delete data. Native Account includes it before
@@ -1191,7 +1192,8 @@ map data and filters remain independent of the product page number. No schema ch
 
 The repository now has npm workspaces for `apps/mobile` (Expo/React Native) and
 `packages/contracts`, while Next.js remains at the root with unchanged deployment
-paths. FE-053 / BE-044 / DEP-042 govern this local preview under ADR-0023. Native
+paths. FE-053 / BE-044 / DEP-042 govern the native candidate under ADR-0023.
+The versioned web API is deployed and verified in S61. Native
 visitor pages and business-owner screens use versioned `/api/mobile/v1` adapters;
 private calls verify Supabase bearer identity and reload tenant/role authority.
 Admin/staff management stays on the web. Device sessions use SecureStore; the
@@ -1706,8 +1708,9 @@ The 2026-10-05 dependency audit is not clean: Next is patched to 16.3.6, while
 unpatched Expo tooling advisories remain tracked in DEP-042 and the release audit.
 S59 also patches source-map-js to 1.2.2; invalid/nested source-map offset and normal
 mapping regressions pass. The owner approved coordinated web/mobile release and
-Expo preview/production public runtime settings are verified. Application rollout
-remains gated; no native API or mobile artifact publication is implied.
+Expo preview/production public runtime settings are verified. Web/API rollout
+completed in S61 with 28 live checks and three responsive browser checks; Expo
+artifact distribution remains blocked by its unchanged audit and device gates.
 
 The deployed S26/S27/S28 workflows use `test:signup` (including handle lifecycle/concurrency), `capture-handle-setup.mjs`,
 `test:business-starters`,
@@ -1899,19 +1902,20 @@ preparation never uses CASCADE; populated data is never replaced by this tool.
 Local and hosted schema 47 restore/preservation evidence is recorded in
 `docs/SUQPAGE-LOCAL-SCHEMA-47.md` and `docs/SUQPAGE-RELEASE-2026-09-21.md`.
 
-## Local launch-clarity candidate — FE-052
+## Launch clarity — FE-052
 
 S33 adds owner-managed inquiries, a labeled search/results drawer opener, clear examples,
 a first-publication review and contextual locale copy. Public copy does not
 mention pricing. Focused database/browser and full release gates pass; the approved
 experience is deployed. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md` and
 `docs/SUQPAGE-RELEASE-2026-09-27.md`.
-Production schema 58 includes seeded demo identity, scoped support queues and
-buying requests with retained live messages and resolution. Buying assistance is a manual staff
-service. Historical transport requests remain accessible; provider accounts,
-dispatch, checkout and booking integrations are out of scope.
+Production schema 59 preserves demo identity, scoped support queues and historical
+buying requests. The current public service is transport/delivery live chat with
+route intake, staff assignment, retained history and resolution. Staff arrange
+carriers outside Suqpage; carrier accounts, checkout and booking integrations
+remain out of scope.
 
-## Local S51 candidate — sponsor visibility and storefront positioning
+## Sponsor visibility and storefront positioning — S51
 
 FE-036/FE-052/FE-053 S51 implement equal six-second sponsor rotation on web/native,
 independent of broadcast spotlights, with pause/navigation and accessibility
@@ -1922,12 +1926,12 @@ pass. About separates customer browsing from the business-owner offer. The
 narrative centers customers who know/follow the seller and want its organized
 offerings; map/search features remain unchanged.
 agent-authored translations have not received native-speaker approval. Native
-AppState/device checks and release gates remain pending; the owner authorized
-proceeding with the S59 release.
+AppState/device checks and Android release gates remain pending. Web deployment
+and live verification completed in S61.
 The emulator is closed at the owner's request to save resources; web/API previews
-remain available. No deployment, new APK or native release is claimed.
+remain available. No new APK or native release is claimed.
 
-## Local storefront accents — FE-054 (rollout pending)
+## Storefront accents — FE-054
 
 Owners choose an optional accent in the Page editor while viewing their actual
 storefront, on web and native. Signup has no color controls. Presets and a visual
@@ -1948,6 +1952,6 @@ the stored value; explicit empty resets it. Native private/public DTOs carry the
 same saved value. No schema migration or demo/customer backfill is needed.
 
 Owner approved the prototype on 2026-10-05. Focused actual signup, reload, web/native
-save and publication checks plus desktop/phone captures pass locally. Hosted
-release, standalone native build and full release gates remain separate. These
+save and publication checks plus desktop/phone captures pass. Web deployment
+and its full gates completed in S61; standalone native release remains pending. These
 additions qualify sections 5, 7, 11, 15, 18, 19 and 22 without changing other flows.

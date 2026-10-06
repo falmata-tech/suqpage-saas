@@ -2405,9 +2405,9 @@ Play can wait. Treat this as approval to include the reviewed FE-055 screen.
   guarded lifecycle handling, unchanged-severity audit and native-tool exclusion.
 - [x] Run clean-install/boundary tests, web check/release/browser gates and exact
   Netlify artifact privacy/native verification. Keep Android audit effective.
-- [ ] CURRENT: targets/backup/schema 59 rehearsal verified;
+- [x] Targets/backup/schema 59 rehearsal verified;
   scope/review/commit eligible release files, deploy web and verify live APIs.
-- [ ] Resolve mobile dependency blockers, build signed Expo internal APK, verify
+- [ ] CURRENT: resolve mobile dependency blockers or explicit reviewed exception; build signed Expo internal APK, verify
   install/device workflows and provide its managed download link. No Play upload.
 - [ ] Record each delivered artifact and any remaining blocker accurately.
 
@@ -2432,3 +2432,14 @@ S61 rollout checkpoint: commit 71d88a1; schema 59 and production preflight pass.
 First web publish returned 502 because Netlify CLI re-bundled an expired function
 cache. Previous web artifact restored and health verified; retain schema59.
 Current: verify draft using the exact tested archive, then promote and monitor.
+
+S61 web delivered: deploy `6ac519154e7f2c72e452f5be` at https://suqpage.com,
+source `71d88a1` plus packaging fix `8361f13`. All 28 live checks pass, including
+search, multiple places, transport sessions, protected routes and mobile API.
+1440/390/320 live captures have no overflow or page errors. The draft exposed no
+production credentials and therefore could not pass application health; corrected
+archive health/login passed in Linux with production runtime settings in memory
+and an explicitly dummy unused Blobs context. Actual production checks then pass.
+Initial rollback and test-harness extraction/context limitations remain recorded.
+Android: explicit two-advisory internal-testing exception still pending; no APK
+build/upload or Play submission. Unrelated `deno.lock` remains untouched.

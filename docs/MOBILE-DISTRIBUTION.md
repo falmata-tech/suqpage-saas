@@ -111,3 +111,7 @@ roots; an explicit limited exception is pending. The fresh Android export exclud
 the affected packages, but signing, final APK inspection and native device tests
 remain required. No managed build/download link exists yet. See
 `SUQPAGE-RELEASE-2026-10-06.md`.
+
+S61 web prerequisite is complete: production mobile market/featured/showroom
+endpoints and unauthenticated owner/session denial are verified on suqpage.com.
+The internal APK audit decision and signed-device gates remain open.

@@ -11,13 +11,22 @@ assert.ok(fs.statSync(archive).isFile(),'A generated Netlify function archive is
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'suqpage-netlify-native-'));
 fs.chmodSync(root,0o700);
 try {
-  execFileSync('python3',['-c',`import pathlib,sys,zipfile
+  execFileSync('python3',['-c',`import pathlib,sys,zipfile,stat,os
 root=pathlib.Path(sys.argv[2]).resolve()
 with zipfile.ZipFile(sys.argv[1]) as z:
  for name in z.namelist():
   target=(root/name).resolve()
   if not target.is_relative_to(root): raise ValueError('Unsafe archive path')
- z.extractall(root)
+ for item in z.infolist():
+  if stat.S_ISLNK(item.external_attr >> 16): continue
+  z.extract(item,root)
+ for item in z.infolist():
+  if not stat.S_ISLNK(item.external_attr >> 16): continue
+  target=root/item.filename
+  link=z.read(item).decode()
+  if pathlib.Path(link).is_absolute() or not (target.parent/link).resolve().is_relative_to(root): raise ValueError('Unsafe archive symlink')
+  target.parent.mkdir(parents=True,exist_ok=True)
+  os.symlink(link,target)
 `,archive,root]);
   execFileSync('docker',['run','--rm','--platform','linux/amd64','--network','none','--read-only','--tmpfs','/tmp','--mount',`type=bind,source=${root},target=/artifact,readonly`,'--workdir','/artifact','node:24.18.1-bookworm-slim','node','--input-type=module','-e',`
 import assert from 'node:assert/strict';

@@ -109,3 +109,8 @@ This is export evidence only. Full native audit still fails on the same two tool
 roots; a narrow internal-APK exception awaits owner decision. No signed APK,
 native-device pass or Play readiness is claimed. Web's isolated build is clean and
 verified independently; see `SUQPAGE-RELEASE-2026-10-06.md`.
+
+S61 live API evidence: deployed with web `6ac519154e7f2c72e452f5be`; market,
+products-only results, typo search, multi-place queries, featured, showroom,
+empty transport session and unauthenticated owner/session denial pass. This
+does not replace standalone map/video/auth/device checks.

@@ -47,7 +47,7 @@ paid service, Play submission or invitation has been initiated.
 
 ## Rollout and rollback
 
-Prepublication state: source commit, migration and deployment pending. Verify
+Initial prepublication plan: source commit, migration and deployment pending. Verify
 Netlify site/account/domain and Supabase project independently, apply only migration
 59, run hosted preflight and deploy the verified archive. Monitor health, discovery,
 transport session boundaries and the new native API before any mobile distribution.
@@ -68,3 +68,27 @@ its digest/identity and refreshes the CLI cache receipt immediately before uploa
 `test-netlify-function-cache.mjs` rejects digest/path/runtime/bundler drift; the
 stronger native test now initializes the complete handler as well as Sharp.
 Next step: upload a draft, verify it, then promote that exact deployment.
+
+## Verified web publication
+
+- Live URL: https://suqpage.com
+- Deploy: `6ac519154e7f2c72e452f5be`
+- Application source: `71d88a1`; packaging correction: `8361f13`.
+- Schema 59 and production preflight pass; all existing data preserved.
+- 28 read-only live checks pass: public routes, typo search, mobile market/featured/
+  showroom APIs, multiple-place filtering, protected-route denial, transport
+  session privacy and www redirect. Responsive browser checks pass at
+  1440/390/320 with no overflow or JavaScript page errors.
+
+The corrected unpublished draft initializes the handler but has no production
+database settings, so it cannot pass application health. No production credentials
+were copied into preview. A Linux check with existing production runtime settings
+held only in process memory passes packaged health/login; its Netlify Blobs
+context is explicitly a dummy localhost fixture (no real cache access). The first
+local extraction lost ZIP symlinks; the harness now preserves safe relative links.
+Original harness failures and the rollback are retained in private evidence.
+Final live checks above verify the real hosted runtime.
+
+The Expo testing APK remains blocked by the pending explicit two-advisory
+exception or upstream remediation. No build/download link, native device pass,
+Google Play upload or Git push is claimed. `deno.lock` is unrelated and untouched.

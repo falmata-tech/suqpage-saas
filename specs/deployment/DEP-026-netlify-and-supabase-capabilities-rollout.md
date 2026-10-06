@@ -248,3 +248,12 @@ Before upload, verify the exact archive SHA-256, expected handler identity, path
 and runtime, then refresh only the cache manifest timestamp. Reject drift. Test
 complete handler import as well as Sharp in the exact Linux archive. Upload a
 draft and verify it before promotion; no implicit live retry after a failed deploy.
+
+S61 verification note: preserve safe relative ZIP symlinks during Linux extraction.
+Drafts intentionally lack production runtime values; when draft application
+health is unavailable for that reason, do not copy secrets into preview. Verify
+packaged health/login with existing production settings in process memory, label
+any local provider context fixture explicitly, then monitor real production
+responses. S61's final live deploy `6ac519154e7f2c72e452f5be` passes 28 checks;
+1440/390/320 browser checks pass. See the dated release record for first-rollout
+recovery and fixture limitations.
