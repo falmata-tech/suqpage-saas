@@ -111,3 +111,17 @@ Primary references checked against installed Expo 57.0.3 APIs:
 - https://docs.expo.dev/versions/latest/sdk/webbrowser/
 - https://core.telegram.org/api/links
 - https://faq.whatsapp.com/5913398998672934
+
+## S66 verified incoming links — 2026-10-06
+
+Use Android App Links with an exact canonical HTTPS host and bounded public path
+filters. The public Digital Asset Links file trusts only the verified existing
+Expo preview certificate/package; production Play and Apple signing identities
+must be verified separately. Expo Router's +native-intent maps web store/product
+URLs to native routes. A pure mapper validates scheme/host/handle and canonical
+Market scopes. URL input never supplies session, role or tenant authority.
+Publishing association and rebuilding/installing the app are separate rollout
+steps; legacy APKs and embedded browsers may continue to use the website.
+
+References: https://docs.expo.dev/linking/android-app-links/ and
+https://docs.expo.dev/router/advanced/native-intent/.

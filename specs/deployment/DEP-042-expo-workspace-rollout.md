@@ -233,3 +233,32 @@ its temporary shallow clone. A directory-only `.git/` rule does not satisfy that
 check. Exclude both the literal path and its descendants; verify with the same
 ignore semantics and a fresh `eas build:inspect --stage archive`. No Git objects,
 local configuration, backups or signing files may enter the uploaded archive.
+
+## S66 — public domain association and rebuilt Android client
+
+Owner authorizes verified suqpage.com link implementation. Associate only the
+existing verified com.suqpage.app.preview public SHA-256 certificate; do not infer
+production/Google Play signing or Apple Team identifiers. Register exact canonical
+HTTPS public route filters with autoVerify and validate incoming paths in Expo
+Router. Serve /.well-known/assetlinks.json as public application/json over HTTPS,
+without an Auth redirect or private config. Deploy against a verified live-site
+identity with rollback evidence; this is additive static metadata, no DB/Auth write.
+
+Required evidence: signed APK certificate verification, config/route security tests,
+association HTTP checks, web release/build/privacy gates, exact deployed readback,
+rebuilt signed native artifact and cold/warm link verification on Android. Use the
+existing owner Expo account/free internal distribution; no paid build, store
+submission, credential replacement or invitations. Review the current audit and
+its exact artifact-scoped exception before admitting a new managed build. iOS
+configuration/public association remains pending verified Apple identifiers.
+
+S66 focused evidence: five app-link routing/config/security tests and six outbound
+link tests pass. Existing mobile contract/PostgreSQL API/build/dependency/map/video
+gates pass; mobile typecheck and spec validation pass. Expo introspection verifies
+actual generated Android autoVerify manifest filters. Android JS/Hermes export
+passes. Six browser checks verify public local association JSON, cold/warm Market
+scope restoration, repeated-link restoration, retained interactive edits and a
+real product destination.
+Private evidence: .local/app-links/. Browser/port tests are not Android OS-domain
+verification. Native audit still fails on exactly braces/node-forge (20 high, zero
+critical), requiring review before the next artifact. Domain/native rollout pending.

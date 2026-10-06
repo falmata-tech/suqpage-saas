@@ -454,3 +454,44 @@ messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initial
 waited for a click before dismissing its alert; the corrected concurrent handler
 passes. No new dependency, database migration, hosted mutation or deployment.
 Native browser sheet, installed social apps, iOS and release checks remain open.
+
+## S66 — verified Suqpage links (2026-10-06)
+
+Ready, L3, under DEP-042 and ADR-0023. Owner requested implementation. Canonical
+host is suqpage.com. Current delivery targets the existing Expo internal Android
+preview package and its verified signing certificate; production/iOS association
+must not be invented without their signing identities. Master §15 is affected.
+
+- GIVEN a verified installed Android preview WHEN opening an HTTPS suqpage.com
+  /@handle link THEN open its native showroom. A valid product query opens that
+  handle's product details; catalog authority still rejects unrelated/hidden items.
+- GIVEN Market, Featured, About or account/sign-in links THEN open the matching
+  native route. Market restores canonical query/category/place/page/view inputs
+  for cold and warm opens, including opening the same link after manual edits;
+  ordinary interactive edits remain intact until another incoming link.
+- GIVEN malformed, credential-bearing, lookalike-domain, executable or unsupported
+  incoming paths THEN do not execute them or grant authority; safely open Market.
+  Admin/API/Auth callbacks remain web routes and are not claimed by Android.
+- GIVEN no installed verified app THEN existing website routing remains available.
+  Only exact canonical HTTPS routes are claimed; no wildcard subdomain takeover.
+- GIVEN a signing/association mismatch THEN verification must fail, not install a
+  fabricated certificate. Website association exposes only public package and
+  SHA-256 certificate data. No private signing keys or app secrets enter Git.
+
+Verify pure inbound-route security/routing, native-intent adapter and config,
+Market parameter restoration, local HTTP association content, Android export,
+selected web release gates and native cold/warm/device domain verification.
+No new UI, database, checkout, permission bypass or app-store submission. Website
+rollout adds the association to the live release; native installation needs a new
+APK. iOS Universal Links await Apple Team/app identity and device evidence.
+
+S66 focused evidence: five app-link routing/config/security tests and six outbound
+link tests pass. Existing mobile contract/PostgreSQL API/build/dependency/map/video
+gates pass; mobile typecheck and spec validation pass. Expo introspection verifies
+actual generated Android autoVerify manifest filters. Android JS/Hermes export
+passes. Six browser checks verify public local association JSON, cold/warm Market
+scope restoration, repeated-link restoration, retained interactive edits and a
+real product destination.
+Private evidence: .local/app-links/. Browser/port tests are not Android OS-domain
+verification. Native audit still fails on exactly braces/node-forge (20 high, zero
+critical), requiring review before the next artifact. Domain/native rollout pending.

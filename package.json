@@ -137,6 +137,7 @@
     "mobile:phone": "node scripts/start-mobile.mjs phone",
     "dev:mobile": "node scripts/start-local-dev.mjs --hostname 0.0.0.0 --port 3102 --allow-lan",
     "mobile:emulator": "node scripts/start-mobile-emulator.mjs",
+    "test:mobile:app-links": "node --import tsx scripts/test-mobile-app-links.ts",
     "test:mobile:links": "node --import tsx scripts/test-mobile-links.ts",
     "test:mobile:video": "tsx scripts/test-mobile-video.ts",
     "postinstall": "node scripts/patch-mobile-dependencies.cjs",

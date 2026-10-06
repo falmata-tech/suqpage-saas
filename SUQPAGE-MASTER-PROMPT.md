@@ -1244,6 +1244,13 @@ The native candidate now uses storefront/name markers, numbered clusters, nearby
 lists and public live/featured badges matching the web map. Native marker selection
 opens the existing preview; scope changes clear stale selection. The authenticated
 page preview includes the edited cover/story/contacts and offering galleries.
+The S66 native candidate maps canonical suqpage.com public store/product,
+Market, Featured, About and account links into Expo Router. Market URL scopes
+restore on initial and subsequent opens; admin/API/Auth callbacks are not claimed.
+Only the verified Expo preview signing identity has Android HTTPS autoVerify
+filters and public /.well-known/assetlinks.json metadata. Domain publication and
+rebuilt-device verification remain required; older APKs do not gain new manifest
+filters from a website update. iOS association awaits verified Apple Team identity.
 External browsing uses the installed Expo WebBrowser adapter (Custom Tabs on
 Android, Safari sheet on iOS); it sends no Suqpage bearer tokens and injects no
 JavaScript into third-party sites. The validated URL policy rejects executable

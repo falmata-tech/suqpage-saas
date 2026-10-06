@@ -113,5 +113,19 @@ Android JS export proves bundling only. Before releasing a rebuilt app, verify:
 - SMS/email/phone remain system actions; no app tokens reach third-party pages.
 - Description links preserve text; invalid schemes remain inert.
 
-Outside `suqpage.com` links opening the app require separate Android App Links/iOS
-Universal Links setup. Only the custom `suqpage://` scheme exists currently.
+S66 adds the Android App Links candidate alongside `suqpage://`. Domain
+publication, a rebuilt APK and OS verification are required before claiming
+outside `suqpage.com` links work. iOS Universal Links await Apple identity.
+
+## Verified public links — S66
+
+`npm run test:mobile:app-links` checks route/security and registered signing scope;
+`node scripts/capture-mobile-app-links.mjs` checks local association JSON and
+Market cold/warm/repeated link inputs using real catalog reads. These do not prove
+Android OS verification. After publishing the association and installing a rebuilt
+preview APK, use `adb shell pm verify-app-links --re-verify com.suqpage.app.preview`
+and `adb shell pm get-app-links com.suqpage.app.preview`; suqpage.com must verify.
+Launch public HTTPS showroom/product/Market/Featured links without forcing a
+package, then check cold and warm navigation. Unsupported admin/Auth links remain
+web-only. Existing APK build 2018cc70 lacks the new link manifest; do not reuse it
+as evidence of App Links. Production Play and iOS identities are not registered.

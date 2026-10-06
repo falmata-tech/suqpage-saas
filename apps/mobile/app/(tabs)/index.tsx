@@ -15,7 +15,8 @@ import {
   useWindowDimensions,
   StyleSheet,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { marketLinkState, type MarketLinkInput } from "../../src/incoming-link";
 import type { Market, MapShop } from "@suqpage/contracts";
 import { request, useApp, useLoad } from "../../src/runtime";
 import {
@@ -40,14 +41,17 @@ export default function MarketScreen() {
   const { t } = useApp();
   const openLink = useOpenLink();
   const { width } = useWindowDimensions();
+  const incomingParams = useLocalSearchParams<MarketLinkInput>();
+  const incoming = marketLinkState(incomingParams);
+  const incomingKey = JSON.stringify({ ...incoming, intent: incomingParams._intent });
   const [stageHeight, setStageHeight] = useState(500),
-    [panel, setPanel] = useState(false),
-    [drawerVisible, setDrawerVisible] = useState(false),
-    [query, setQuery] = useState(""),
-    [text, setText] = useState(""),
-    [categories, setCategories] = useState<string[]>([]),
-    [place, setPlace] = useState(""),
-    [page, setPage] = useState(1),
+    [panel, setPanel] = useState(incoming.open),
+    [drawerVisible, setDrawerVisible] = useState(incoming.open),
+    [query, setQuery] = useState(incoming.query),
+    [text, setText] = useState(incoming.query),
+    [categories, setCategories] = useState<string[]>(incoming.categories),
+    [place, setPlace] = useState(incoming.place),
+    [page, setPage] = useState(incoming.page),
     [picker, setPicker] = useState(""),
     [selected, setSelected] = useState<MapShop | null>(null),
     [nearby, setNearby] = useState<MapShop[]>([]),
@@ -58,6 +62,11 @@ export default function MarketScreen() {
     results = useRef<ScrollView>(null),
     progress = useRef(new Animated.Value(0)).current;
   const focusPanelControl = useRef(false);
+  useEffect(() => {
+    const target: ReturnType<typeof marketLinkState> = JSON.parse(incomingKey);
+    setText(target.query); setQuery(target.query); setCategories(target.categories);
+    setPlace(target.place); setPage(target.page); setPanel(target.open);
+  }, [incomingKey]);
   useEffect(() => {
     if (Platform.OS !== "web" || !focusPanelControl.current) return;
     focusPanelControl.current = false;

@@ -2565,3 +2565,37 @@ messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initial
 waited for a click before dismissing its alert; the corrected concurrent handler
 passes. No new dependency, database migration, hosted mutation or deployment.
 Native browser sheet, installed social apps, iOS and release checks remain open.
+
+
+S66 implementation — verified public links (FE-053 / DEP-042 / ADR-0023, L3)
+- [x] Ready: owner said “lets do that”; Android preview first, canonical apex host.
+  Existing S62 APK finished; public certificate verified against known SHA-1.
+  No private signing material read/exported. Unrelated deno.lock preserved.
+- [x] Add domain association, exact manifest filters and safe native route
+  mapping; restore Market deep-link filters without bypassing API authority.
+- [x] Focused security/config/HTTP/navigation tests and native JS build evidence.
+- [ ] CURRENT: verify release gates and review the next APK's admission; audit
+  still has the two earlier tooling roots (20 high, zero critical).
+- [ ] Publish association against current live web source; verify HTTPS/rollback.
+- [ ] Rebuild/sign/install and test Android cold/warm links; record evidence.
+- [ ] iOS: Apple Team identity and device/release setup needed before association.
+Master §15 and native link portions of ADR-0023 are affected. No visual redesign.
+
+S66 focused evidence: five app-link routing/config/security tests and six outbound
+link tests pass. Existing mobile contract/PostgreSQL API/build/dependency/map/video
+gates pass; mobile typecheck and spec validation pass. Expo introspection verifies
+actual generated Android autoVerify manifest filters. Android JS/Hermes export
+passes. Six browser checks verify public local association JSON, cold/warm Market
+scope restoration, repeated-link restoration, retained interactive edits and a
+real product destination.
+Private evidence: .local/app-links/. Browser/port tests are not Android OS-domain
+verification. Native audit still fails on exactly braces/node-forge (20 high, zero
+critical), requiring review before the next artifact. Domain/native rollout pending.
+
+S66 web artifact gates: isolated live-source checkout (7a88aa8 plus association
+metadata) completes the full selected `release:web` gate with zero web audit
+findings. Its provider-backed production HTTP smoke, traces, pagination/scale,
+security/adapter and owner wiring checks pass. Native source is verified separately;
+root UI changes are not part of this additive web artifact. Final Android JS export
+passes with repeated Market intent handling. APK admission/domain upload and native
+OS verification remain pending; .local/app-links retains private gate receipts.

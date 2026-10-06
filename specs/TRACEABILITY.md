@@ -910,3 +910,22 @@ messages. Screenshot evidence is `.local/mobile-links/`. The dialog test initial
 waited for a click before dismissing its alert; the corrected concurrent handler
 passes. No new dependency, database migration, hosted mutation or deployment.
 Native browser sheet, installed social apps, iOS and release checks remain open.
+
+## S66 — verified incoming Suqpage links (FE-053 / DEP-042 / ADR-0023)
+
+`public/.well-known/assetlinks.json` contains the verified public preview package
+and signing fingerprint. `link-config.cjs` enables HTTPS autoVerify only for
+registered identities. `incoming-link.ts` and `+native-intent.tsx` validate/map
+public URLs; mobile Market restores bounded link scopes without replacing normal
+interactive state. Authority remains in existing catalog/session adapters.
+
+S66 focused evidence: five app-link routing/config/security tests and six outbound
+link tests pass. Existing mobile contract/PostgreSQL API/build/dependency/map/video
+gates pass; mobile typecheck and spec validation pass. Expo introspection verifies
+actual generated Android autoVerify manifest filters. Android JS/Hermes export
+passes. Six browser checks verify public local association JSON, cold/warm Market
+scope restoration, repeated-link restoration, retained interactive edits and a
+real product destination.
+Private evidence: .local/app-links/. Browser/port tests are not Android OS-domain
+verification. Native audit still fails on exactly braces/node-forge (20 high, zero
+critical), requiring review before the next artifact. Domain/native rollout pending.
