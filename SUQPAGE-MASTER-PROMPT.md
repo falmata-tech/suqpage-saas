@@ -1248,9 +1248,10 @@ The S66 native candidate maps canonical suqpage.com public store/product,
 Market, Featured, About and account links into Expo Router. Market URL scopes
 restore on initial and subsequent opens; admin/API/Auth callbacks are not claimed.
 Only the verified Expo preview signing identity has Android HTTPS autoVerify
-filters and public /.well-known/assetlinks.json metadata. Domain publication and
-rebuilt-device verification remain required; older APKs do not gain new manifest
-filters from a website update. iOS association awaits verified Apple Team identity.
+filters. Public /.well-known/assetlinks.json metadata is published and verified
+on suqpage.com. A rebuilt APK and Android OS verification remain required; older
+APKs do not gain new manifest filters from a website update. iOS association
+awaits verified Apple Team identity.
 External browsing uses the installed Expo WebBrowser adapter (Custom Tabs on
 Android, Safari sheet on iOS); it sends no Suqpage bearer tokens and injects no
 JavaScript into third-party sites. The validated URL policy rejects executable

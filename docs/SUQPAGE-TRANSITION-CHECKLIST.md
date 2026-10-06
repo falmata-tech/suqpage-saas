@@ -2574,9 +2574,9 @@ S66 implementation — verified public links (FE-053 / DEP-042 / ADR-0023, L3)
 - [x] Add domain association, exact manifest filters and safe native route
   mapping; restore Market deep-link filters without bypassing API authority.
 - [x] Focused security/config/HTTP/navigation tests and native JS build evidence.
-- [ ] CURRENT: verify release gates and review the next APK's admission; audit
-  still has the two earlier tooling roots (20 high, zero critical).
-- [ ] Publish association against current live web source; verify HTTPS/rollback.
+- [ ] CURRENT: next APK admission awaits owner renewal. Release gates pass;
+  native audit still has two earlier tooling roots (20 high, zero critical).
+- [x] Publish association against current live web source; verify HTTPS/rollback.
 - [ ] Rebuild/sign/install and test Android cold/warm links; record evidence.
 - [ ] iOS: Apple Team identity and device/release setup needed before association.
 Master §15 and native link portions of ADR-0023 are affected. No visual redesign.
@@ -2599,3 +2599,15 @@ security/adapter and owner wiring checks pass. Native source is verified separat
 root UI changes are not part of this additive web artifact. Final Android JS export
 passes with repeated Market intent handling. APK admission/domain upload and native
 OS verification remain pending; .local/app-links retains private gate receipts.
+
+S66 domain rollout verified: deploy 6ac576417f18a89035f75274, isolated web source
+70fb961d9f11dba9465b5f6bacfe6c57b8bf7735 (current live source plus association metadata).
+The exact JSON is served at https://suqpage.com/.well-known/assetlinks.json with
+HTTP 200 with application/json and no redirect. Seven live association, site, health and
+mobile-API checks pass. Linux handler/image and packaged production health/login
+checks pass; full selected web release has zero audit findings. Code rollback is
+6ac52555a812ad5c89621401; schema/Auth unchanged. Mobile source 87fa05e and its
+clean 1,493-file archive are ready; the original one-artifact exception expired
+with finished build 2018cc70. Owner renewal for the next exact source is pending
+in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
+verification or iOS association is claimed. Private receipts: .local/app-links/.

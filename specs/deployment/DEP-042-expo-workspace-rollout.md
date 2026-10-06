@@ -262,3 +262,15 @@ real product destination.
 Private evidence: .local/app-links/. Browser/port tests are not Android OS-domain
 verification. Native audit still fails on exactly braces/node-forge (20 high, zero
 critical), requiring review before the next artifact. Domain/native rollout pending.
+
+S66 domain rollout verified: deploy 6ac576417f18a89035f75274, isolated web source
+70fb961d9f11dba9465b5f6bacfe6c57b8bf7735 (current live source plus association metadata).
+The exact JSON is served at https://suqpage.com/.well-known/assetlinks.json with
+HTTP 200 with application/json and no redirect. Seven live association, site, health and
+mobile-API checks pass. Linux handler/image and packaged production health/login
+checks pass; full selected web release has zero audit findings. Code rollback is
+6ac52555a812ad5c89621401; schema/Auth unchanged. Mobile source 87fa05e and its
+clean 1,493-file archive are ready; the original one-artifact exception expired
+with finished build 2018cc70. Owner renewal for the next exact source is pending
+in .local/app-links/android-rebuild-review.md. No new APK, Android OS-link/device
+verification or iOS association is claimed. Private receipts: .local/app-links/.
