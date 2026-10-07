@@ -18,6 +18,7 @@ fs.mkdirSync(out, { recursive: true, mode: 0o700 });
 const admin = createClient(provider.origin, process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY,
   { auth: { persistSession: false, autoRefreshToken: false } });
 const email = `mobile-audit-${crypto.randomUUID()}@example.test`;
+let chosenHandle = `mobile-review-${crypto.randomUUID().slice(0, 8)}`;
 const created = await admin.auth.admin.createUser({ email, email_confirm: true });
 assert.equal(created.error, null);
 const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
@@ -77,6 +78,7 @@ try {
     await expect(page.getByLabel(t("Your name"), { exact: true })).toBeVisible();
     await expect(page.getByLabel(t("Account phone"), { exact: true })).toBeVisible();
     await expect(page.getByLabel(t("Business name"), { exact: true })).toBeVisible();
+    await expect(page.getByLabel(t("Page handle"), { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: t("Create your business page"), exact: true })).toBeDisabled();
     await localizedCapture("essential-setup");
   }
@@ -86,11 +88,36 @@ try {
   await page.getByLabel("Business name", { exact: true }).fill("Mobile Workflow Audit");
   await page.getByRole("button", { name: "Farms, livestock & feed", exact: true }).click();
   await page.getByRole("button", { name: "I agree to the Terms and Privacy Policy", exact: true }).click();
-  await page.getByRole("button", { name: "Create your business page", exact: true }).click();
+  const address = page.getByLabel("Page handle", {exact: true});
+  const create = page.getByRole("button", {name: "Create your business page", exact: true});
+  await address.fill("a/b"); await expect(page.getByText("Use 3–60 English letters, numbers or hyphens.", {exact:true})).toBeVisible(); await expect(create).toBeDisabled();
+  await address.fill("demo-nile-sensor-studio"); await expect(page.getByText("This handle is already taken. Choose another.", {exact:true})).toBeVisible(); await expect(create).toBeDisabled();
+  const handlePattern = "**/api/mobile/v1/handles?*";
+  await page.route(handlePattern, route => route.fulfill({status:503,json:{error:"Unavailable"}}));
+  await address.fill(chosenHandle); await expect(page.getByText("Could not check this handle. Try again.", {exact:true})).toBeVisible(); await expect(create).toBeDisabled();
+  await page.unroute(handlePattern); await page.getByRole("button", {name:"Retry",exact:true}).click(); await expect(page.getByText("Available", {exact:true})).toBeVisible();
+  let release; const held = new Promise(resolve => {release=resolve;});
+  await page.route(handlePattern, async route => { if (new URL(route.request().url()).searchParams.get("handle") === "delayed-mobile-check") {await held; try {await route.fulfill({json:{handle:"delayed-mobile-check",available:true}});} catch {}} else await route.continue(); });
+  const delayed = page.waitForRequest(r => r.url().includes("handle=delayed-mobile-check"));
+  await address.fill("delayed-mobile-check"); await delayed;
+  await address.fill("demo-nile-sensor-studio"); await expect(page.getByText("This handle is already taken. Choose another.", {exact:true})).toBeVisible(); release(); await expect(create).toBeDisabled();
+  await page.unroute(handlePattern); await address.fill(chosenHandle); await expect(page.getByText("Available", {exact:true})).toBeVisible();
+  let conflict = false;
+  await page.route(handlePattern, route => conflict && new URL(route.request().url()).searchParams.get("handle") === chosenHandle ? route.fulfill({json:{handle:chosenHandle,available:false}}) : route.continue());
+  await page.route("**/api/mobile/v1/signup", route => {conflict=true; return route.fulfill({status:409,json:{error:"This handle is already taken. Choose another."}});});
+  await create.click(); await expect(page.getByText("This handle is already taken. Choose another.", {exact:true}).first()).toBeVisible(); await expect(create).toBeDisabled();
+  await expect(page.getByLabel("Business name", {exact:true})).toHaveValue("Mobile Workflow Audit");
+  await page.unroute("**/api/mobile/v1/signup"); await page.unroute(handlePattern);
+  chosenHandle += "-store"; await address.fill(chosenHandle); await expect(page.getByText("Available", {exact:true})).toBeVisible();
+  await page.screenshot({path:out+"/chosen-handle-phone.png"});
+  await create.click();
   await expect(page.getByRole("button", { name: "Edit", exact: true })).toBeVisible({ timeout: 30000 });
   home = await call("owner/home");
   handle = home.shop.handle;
   assert.equal(home.shop.status, "draft");
+  assert.equal(home.shop.handle, chosenHandle);
+  await expect(page.getByRole("button", {name:"Save changes",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("button", {name:"Page color",exact:true})).toHaveCount(0);
   assert.equal(home.shop.products.length, 3);
   assert.ok(home.shop.cover && home.shop.videoUrl && home.shop.contacts.website);
   await expect(page.getByLabel("About the business", { exact: true })).toHaveCount(0);
@@ -102,7 +129,7 @@ try {
   for (const next of ["en", "am", "om", "so", "ti"]) {
     if (next !== locale) await selectLanguage(next);
     await expect(page.getByRole("button", { name: t("Edit"), exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: t("Page color"), exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: t("Page color"), exact: true })).toHaveCount(0);
     await expect(page.getByText(home.shop.name, { exact: true })).toBeVisible();
     for (const item of home.shop.products)
       await expect(page.getByRole("button", { name: item.name, exact: true })).toBeVisible();
@@ -111,6 +138,16 @@ try {
   await selectLanguage("en");
   await page.getByRole("button", { name: "Edit", exact: true }).click();
   await expect(page.getByLabel("About the business", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Page handle", {exact:true})).toHaveValue(chosenHandle);
+  const renamedHandle = chosenHandle + "-shop";
+  await page.getByLabel("Page handle", {exact:true}).fill(renamedHandle);
+  await expect(page.getByText("Available", {exact:true})).toBeVisible();
+  await page.getByRole("button", {name:"Save handle",exact:true}).click();
+  await expect(page.getByRole("button", {name:"Contact support",exact:true})).toBeVisible();
+  assert.equal((await call("owner/home")).shop.handle, renamedHandle); handle = renamedHandle;
+  await expect(page.getByLabel("Page handle", {exact:true})).toHaveCount(0);
+  await page.screenshot({path:out+"/page-handle-cooldown-phone.png"});
+  checks.push("chosen handle checks invalid/taken/failure/stale paths; Page rename persists and exposes cooldown/support");
   checks.push("real first signup opens complete styled private sample before editing; setup and preview work in all five languages with merchant values unchanged");
   // Navigation preserves the browser-preview's intentionally memory-only session.
   async function owner(label) {
@@ -195,9 +232,13 @@ try {
   await expect(page.getByText("Saved", { exact: true }).filter({visible:true})).toBeVisible({ timeout: 30000 });
   assert.equal((await call("owner/business")).proposal.city, "Hawassa");
   await owner("Your page");
-  await expect(page.getByLabel("Phone", { exact: true })).toHaveValue("+251911000123");
+  await expect(page.getByRole("button", {name:"Edit",exact:true})).toBeVisible();
+  await page.screenshot({path:out+"/reentry-private-preview-phone.png"});
+  await expect(page.getByLabel("About the business",{exact:true})).not.toBeVisible();
+  await page.getByRole("button", {name:"Edit",exact:true}).click();
+  await expect(page.getByLabel("Phone", { exact: true }).filter({visible:true})).toHaveValue("+251911000123");
   for (const label of ["Email", "WhatsApp", "Telegram", "TikTok", "Instagram", "Facebook", "Website"])
-    await expect(page.getByLabel(label, { exact: true })).toHaveValue("");
+    await expect(page.getByLabel(label, { exact: true }).filter({visible:true})).toHaveValue("");
   await page.getByRole("button", { name: "Publish page", exact: true }).click();
   await expect(page.getByRole("button", { name: "Publish page", exact: true })).toHaveCount(0, { timeout: 30000 });
   const published = await fetch(api + "shops/" + handle);

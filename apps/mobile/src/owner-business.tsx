@@ -172,90 +172,15 @@ function Form({ data }: { data: Details }) {
   );
 }
 export function Settings({ home }: { home: OwnerHome }) {
-  const { t, ownerRequest, signOut } = useApp(),
-    action = useAction();
-  const [phone, setPhone] = useState(home.user.phone),
-    [handle, setHandle] = useState(home.shop.handle);
-  const settings = useLoad(() =>
-    ownerRequest<{
-      handle: string;
-      contentVersion: number;
-      nextChangeAt: number;
-    }>("owner/handle"),
-  );
-  const [available, setAvailable] = useState<boolean | null>(null);
-  return (
-    <>
-      <Copy big>{t("Account security")}</Copy>
-      <Copy>{home.user.email}</Copy>
-      <Field
-        label={t("Account phone")}
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-      <Button
-        disabled={action.busy}
-        label={t("Save account phone")}
-        onPress={() =>
-          void action.run(async () => {
-            await ownerRequest("owner/account", { phone });
-          })
-        }
-      />
-      <Card>
-        <Field
-          label={t("Page handle")}
-          value={handle}
-          onChangeText={(v) => {
-            setHandle(v);
-            setAvailable(null);
-          }}
-          autoCapitalize="none"
-        />
-        <Copy muted>
-          {t(
-            "You can change your handle once every 30 days. Contact support for help.",
-          )}
-        </Copy>
-        <Status {...settings} retry={settings.reload} />
-        <Button
-          secondary
-          disabled={action.busy}
-          label={t("Check availability")}
-          onPress={() =>
-            void action.run(async () => {
-              const r = await request<{ available: boolean }>(
-                "handles?handle=" + encodeURIComponent(handle),
-              );
-              setAvailable(r.available);
-            }, "")
-          }
-        />
-        {available !== null && (
-          <Copy>
-            {t(available ? "Available" : "This handle is already taken.")}
-          </Copy>
-        )}
-        <Button
-          disabled={
-            action.busy || !settings.data || handle === home.shop.handle
-          }
-          label={t("Save handle")}
-          onPress={() =>
-            void action.run(async () => {
-              await ownerRequest("owner/handle", {
-                handle,
-                expectedVersion: settings.data?.contentVersion,
-              });
-              settings.reload();
-            })
-          }
-        />
-      </Card>
-      <ActionStatus state={action} />
-      <Button secondary label={t("Sign out")} onPress={() => void signOut()} />
-      <Button secondary label={t("Delete account")} onPress={() => router.push("/account-deletion")} />
-    </>
-  );
+  const { t, ownerRequest, signOut } = useApp(), action = useAction();
+  const [phone, setPhone] = useState(home.user.phone);
+  return <>
+    <Copy big>{t("Account security")}</Copy>
+    <Copy>{home.user.email}</Copy>
+    <Field label={t("Account phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+    <Button disabled={action.busy} label={t("Save account phone")} onPress={() => void action.run(async () => { await ownerRequest("owner/account", {phone}); })} />
+    <ActionStatus state={action} />
+    <Button secondary label={t("Sign out")} onPress={() => void signOut()} />
+    <Button secondary label={t("Delete account")} onPress={() => router.push("/account-deletion")} />
+  </>;
 }

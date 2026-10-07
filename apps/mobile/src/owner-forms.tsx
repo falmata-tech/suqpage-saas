@@ -1,3 +1,4 @@
+import { HandleInput, HandleEditor } from "./owner-handle";
 import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import { ShowroomContent } from "./ShowroomContent";
 import React, { useState } from "react";
@@ -81,11 +82,14 @@ export async function pickImages(multiple = false) {
 }
 export function Setup() {
   const openLink = useOpenLink();
-  const { t, ownerRequest } = useApp(),
+  const { t, ownerRequest, session } = useApp(),
     action = useAction();
   const [name, setName] = useState(""),
     [phone, setPhone] = useState(""),
     [business, setBusiness] = useState(""),
+    [handle, setHandle] = useState(""),
+    [handleReady, setHandleReady] = useState(false),
+    [handleRevision, setHandleRevision] = useState(0),
     [category, setCategory] = useState(""),
     [consent, setConsent] = useState(false),
     [key] = useState(() => Crypto.randomUUID());
@@ -95,6 +99,8 @@ export function Setup() {
   return (
     <>
       <Copy big>{t("Account setup")}</Copy>
+      <Copy muted>{t("Verified email")}</Copy>
+      <Copy>{session?.user.email || ""}</Copy>
       <Field label={t("Your name")} value={name} onChangeText={setName} />
       <Field
         label={t("Account phone")}
@@ -107,6 +113,7 @@ export function Setup() {
         value={business}
         onChangeText={setBusiness}
       />
+      <HandleInput value={handle} onChange={setHandle} onReady={setHandleReady} refreshKey={handleRevision} />
       <Copy>{t("Category")}</Copy>
       <Status {...categories} retry={categories.reload} />
       <View style={s.wrap}>
@@ -139,19 +146,20 @@ export function Setup() {
       <ActionStatus state={action} />
       <Button
         disabled={
-          action.busy || !consent || !category || !name || !phone || !business
+          action.busy || !consent || !category || !name || !phone || !business || !handleReady
         }
         label={t("Create your business page")}
         onPress={() =>
           void action.run(async () => {
-            await ownerRequest("signup", {
+            try { await ownerRequest("signup", {
               name,
               phone,
               businessName: business,
+              handle,
               businessCategory: category,
               consent,
               idempotencyKey: key,
-            });
+            }); } catch (error) { setHandleReady(false); setHandleRevision(v => v + 1); throw error; }
             router.replace({
               pathname: "/owner/[section]",
               params: { section: "page", view: "preview" },
@@ -198,7 +206,9 @@ export function PageEditor({
       <Copy big>{t("Your page")}</Copy>
       {preview ? (
         <>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Copy muted>{t(home.shop.status === "active" ? "Your page is live" : "Private until you publish")}</Copy>
+          <Button secondary label={t("Edit")} onPress={() => {router.setParams({view:"edit"}); setPreview(false);}} />
+          {colorOpen || JSON.stringify(content) !== JSON.stringify(home.draft?.content || fallback) ? <View style={{ flexDirection: 'row', gap: 8 }}>
           <View style={{ flex: 1 }}><Button secondary label={t("Page color")} onPress={() => setColorOpen(!colorOpen)} /></View>
           {colorOpen && <StorefrontAccentPicker value={content.accentColor || ""} onChange={v => update("accentColor", v)} disabled={action.busy} onClose={() => setColorOpen(false)} />}
           <View style={{ flex: 1 }}><Button
@@ -214,7 +224,7 @@ export function PageEditor({
               })
             }
           /></View>
-          </View>
+          </View> : null}
           <ShowroomContent preview shop={{
             ...home.shop,
             about: content.about || content.introduction,
@@ -224,14 +234,10 @@ export function PageEditor({
             contacts: content.contacts || home.shop.contacts,
             products: home.shop.products.filter(p => p.published),
           }} />
-          <Button
-            secondary
-            label={t("Edit")}
-            onPress={() => setPreview(false)}
-          />
         </>
       ) : (
         <>
+          <HandleEditor initialHandle={home.shop.handle} onSaved={reload} />
           <Photo refPath={content.heroImage} height={210} privateImage />
           <Button
             secondary

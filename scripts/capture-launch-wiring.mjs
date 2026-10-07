@@ -52,6 +52,8 @@ try{
   await expect(owner.getByText('Item saved.',{exact:true})).toBeVisible();
  }
  await owner.goto(`${base}/dashboard/page-editor`);
+ await expect(owner.getByLabel("Page preview",{exact:true})).toBeVisible();
+ await owner.getByRole("button",{name:"Edit",exact:true}).click();
  await owner.locator('summary').filter({hasText:'Public contact details'}).click();
  for(const key of ['phone','email','website','whatsapp','tiktok','instagram','telegram','facebook'])await owner.locator(`#public-${key}`).fill('');
  await owner.locator('#public-phone').fill('+447700900998');

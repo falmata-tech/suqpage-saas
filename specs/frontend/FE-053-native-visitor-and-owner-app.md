@@ -529,3 +529,39 @@ editing/publication regression passes; full check, production build/trace, provi
 smoke and 11 acceptance workflows pass. Release audit remains failed solely on
 the approved two-root internal-APK exception; final native artifact checks pending.
 See S67 in TRACEABILITY for evidence boundaries and protected capture paths.
+
+
+## S69 — trusted static SVG media defect
+
+GIVEN an existing owned /uploads/seed/...svg illustration or logo WHEN native
+Photo renders it THEN the installed SVG renderer displays the actual approved
+asset within the same slot. Only the strict owned seed path gets this branch;
+remote/encoded/traversal/private SVG inputs never enter it and no Auth header is
+sent to it. Web, raster and authenticated private-image paths keep their existing
+adapter. GIVEN a missing/unreadable seed SVG THEN a shop-icon fallback occupies
+the slot, never a blank failed image or an unbounded retry.
+
+Reuse installed react-native-svg; no new dependency/schema/media change. Focused
+path-safety and actual component-branch regressions plus installed native
+store/Featured captures are required. The first S67 finished APK exposed this
+issue; a second managed artifact requires renewed bounded tooling admission.
+
+S69 focused evidence: test-mobile-static-svg.ts bundles the actual Photo component
+with controlled React/native ports and verifies Android/iOS owned-SVG rendering,
+contained size, stable error callback/fallback, no Auth on the public SVG request,
+web/raster behavior and authenticated private-image paths. Strict path tests deny
+remote, private, query, fragment, encoded and literal traversal inputs. Both
+focused tests, native typecheck and existing build/dependency/link/video checks
+pass. Installed development-client honey logo and Featured imagery display in
+the unchanged slots; screenshots .local/rebuild-s67/native-corrected-*.png.
+Owner explicitly approves this rendering and one replacement free internal APK.
+No new library, API, schema, media, credential or hosted configuration change.
+Full/release/artifact evidence remains pending; DEP-042 exception is renewed only
+for this correction plus the approved latest source, not a future artifact.
+
+
+S70 native setup/owner flow follows FE-051: Page handle selected with essential
+identity fields, debounced available/taken/invalid/failure feedback, atomic signup,
+and rich private preview before Edit. Reuse existing handles/signup/owner-handle
+ports. Move address editing into Page, preserving monthly/version/alias authority.
+Account security retains phone/session/delete controls; no staff screens added.

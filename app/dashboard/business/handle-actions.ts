@@ -6,7 +6,7 @@ import {redirect} from 'next/navigation';
 export async function saveBusinessHandleAction(form:FormData) {
   const actor=await requireUser();
   const businessId=actor.access_role==='platform_admin'?Number(form.get('businessId')):actor.business_id||0;
-  const path=actor.access_role==='platform_admin'?`/dashboard/settings?business=${businessId}`:'/dashboard/business';
+  const path=actor.access_role==='platform_admin'?`/dashboard/settings?business=${businessId}`:form.get('returnTo')==='page'?'/dashboard/page-editor?view=edit':'/dashboard/business';
   let result;
   try {
     result=await changeBusinessHandle(actor,businessId,{handle:form.get('handle'),expectedVersion:form.get('expectedVersion'),reason:form.get('reason')});

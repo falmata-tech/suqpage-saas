@@ -27,6 +27,8 @@ try{
  await page.goto(base+'/request');
  await page.getByLabel('Your name',{exact:true}).fill('Accent Review Owner');
  await page.getByLabel('Name buyers will see',{exact:true}).fill('Accent Review Studio');
+ await page.getByLabel('Page handle',{exact:true}).fill('accent-'+crypto.randomUUID().slice(0,8));
+ await expect(page.locator('#signup-handle-status')).toHaveText('Available');
  await page.locator('[name="businessCategory"]').selectOption('home-living');
  await page.getByLabel('Account phone (private)',{exact:true}).fill('+251911000123');
  await expect(page.getByText('Page color',{exact:true})).toHaveCount(0);

@@ -131,3 +131,33 @@ verified download. Use this build's completed Install link only after artifact
 and native-device checks. No invitations were sent. Local development codes still
 appear in the local inbox; this production-connected APK sends sign-in codes to
 the user's actual email.
+
+
+## S67 finished APK — native review found a release defect
+
+[Expo build 4d6df1a5](https://expo.dev/accounts/falmatad/projects/suqpage/builds/4d6df1a5-795a-4f80-999d-feaa0b679f22)
+is finished from c1872d5a2c328eb56164bd610ca889af5c68c9cd, using the existing free
+preview profile/signing and production API. APK SHA-256:
+02ecc8582202ca7009480a6b592541b15f75681c654c327dae9cf7b322224e37 (152,461,065 bytes).
+Certificate and manifest/runtime/archive inspection pass. Android independently
+reports suqpage.com verified; cold filtered Market and warm product/store/Featured
+HTTPS intents open the actual app without a forced package or verification override.
+Five native locale switches preserve the wordmark and merchant name/price. Gallery
+navigation, stored demo accent, Custom Tab opening/closing and available honey
+video playback inside the app pass. Local signup/owner workflows retain their
+separate real PostgreSQL/browser and 11 acceptance-workflow evidence.
+
+Installed-device review exposed blank owned SVG logos/illustrations: the original
+Photo adapter used React Native Image for SVGs. S69 fixes this with the already
+installed SVG renderer; the corrected development-client logo is visible. Do not
+present S67 as the final corrected artifact. A replacement APK needs fresh visual
+approval and renewal of the bounded one-artifact tooling exception, already used
+by this finished build. No paid build, Play/iOS publication or invitation was sent.
+
+Aloe's existing example youtube:wJV9EDe_sFc has a 404 thumbnail and its embed
+fails gracefully; available honey demo video plays. No media was replaced under
+the separately approved color-only correction. Independent native-speaker review,
+physical-phone/real inbox delivery and installed WhatsApp/Telegram handoffs remain
+manual checks. The full native toolchain audit still has the same braces/node-forge
+roots (20 high, zero critical), outside the verified JS runtime. It is not a clean
+audit or a Google Play readiness claim. Protected evidence: .local/rebuild-s67/.

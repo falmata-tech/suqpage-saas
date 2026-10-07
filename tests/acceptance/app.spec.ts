@@ -48,7 +48,8 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.reload(); await expect(page).toHaveURL(/\/request$/);
   await page.getByLabel('Your name',{exact:true}).fill('Acceptance owner');
   await page.getByLabel('Name buyers will see',{exact:true}).fill('Acceptance signup shop');
-  await expect(page.getByLabel('Page handle',{exact:true})).toHaveCount(0);
+  await page.getByLabel('Page handle',{exact:true}).fill('acceptance-chosen-shop');
+  await expect(page.locator('#signup-handle-status')).toHaveText('Available');
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
   await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
   await expect(page.locator('input[type=file]')).toHaveCount(0);

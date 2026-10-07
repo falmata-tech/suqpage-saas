@@ -2625,11 +2625,12 @@ S67 — approved Android rebuild, contextual language review and preview-first s
   and product editing. Focused/type/spec, full check and 11 acceptance workflows
   pass. All release stages before the unchanged two-root audit pass; approved
   single-artifact exception remains bounded (20 high, zero critical).
-- [ ] CURRENT: commit exact source, inspect clean EAS archive/public settings and rebind the
+- [x] Commit exact source, inspect clean EAS archive/public settings and rebind the
   renewed one-artifact exception to latest approved source. No advisory expansion.
-- [ ] Build one free Expo internal APK; verify final certificate/runtime/manifest,
+- [x] Build one free Expo internal APK; verify final certificate/runtime/manifest,
   install and check native links/maps/media/locales and user workflows.
-- [ ] Record artifact/download/evidence/limits. Google Play and iOS remain deferred.
+- [x] Record artifact/download/evidence/limits. Google Play and iOS remain deferred.
+  Native SVG defect blocks a final corrected-artifact claim; follow S69.
 Master §§11, 15, 18 and 19 affected. No hosted Auth/schema change, paid build,
 invitation sending, signing-key replacement or automatic starter publication.
 
@@ -2661,3 +2662,74 @@ unrelated table preservation are verified. Two local-only handles have no curren
 hosted business/registry row. No recreation/seed/schema/Auth/config/account/media
 change. Owner approvals and rollback/before-state stay in .local/demo-accent-review;
 public operation record is docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md.
+
+
+S69 — native static SVG media correction (FE-053 / DEP-042, L1 defect)
+- [x] Ready: S67 signed-device review finds public SVG logos/sponsor images blank
+  although their owned static endpoints return 200. React Native Image cannot
+  render them; reuse installed react-native-svg only for trusted seed SVG paths.
+  No new dependency, remote SVG parsing, account/media/data or design change.
+- [x] Implement narrow SVG renderer with fallback; test path isolation,
+  bundled component branch and existing JPG/private-media preservation.
+- [x] Capture actual corrected native store/Featured states; owner explicitly
+  approves the correction and one replacement APK.
+- [x] Complete full check, both types, all release behavioral/security stages and
+  all 11 acceptance workflows (10 full + corrected owner-entry focused rerun).
+  Native audit remains admitted only through the explicit bounded exception.
+- [ ] CURRENT: scoped source commit, exact archive/admission and managed build.
+- [x] Rebuild admission: owner explicitly approves one replacement free internal
+  APK for the reviewed correction under the same two-advisory exception. Rebind
+  the approved source digest to the final tested commit before submission.
+- [ ] Sign/install/verify the corrected artifact and report its install link.
+Dependencies: approved existing visual assets; S67 artifacts/evidence retained.
+Master §15 affected. Google Play/iOS remain deferred; no credentials/config write.
+
+S67 artifact finished: 4d6df1a5 from c1872d5; APK/certificate/runtime/archive pass,
+Android OS domain verification and cold/warm navigation pass. Native map/gallery,
+all five locales, stored accent, website sheet/return and available honey video
+playback pass. Owned SVG images are blank in this artifact; S69 is required.
+Aloe example video is unavailable; no color-only operation changes its media.
+No physical-phone/real inbox/social-app/native-speaker signoff. See
+MOBILE-DISTRIBUTION.md; private evidence .local/rebuild-s67/.
+
+
+S70 — chosen signup handle and simple private-preview flow (FE-051 / FE-053)
+- [x] Ready: owner wants handle selection with essential signup details, visible
+  handle editing in Page, and a private sample preview before any edit form.
+  Existing signup/availability/rename ports and uniqueness/cooldown suffice;
+  preserve generated-handle compatibility for older callers. No schema change.
+- [x] Reuse web HandleField and existing rename form; add shared native
+  handle input/editor with bounded debounce/availability checks, stale-response
+  protection and server-authoritative save. Keep account security focused.
+- [x] Ensure draft owners initially see their filled page with clear Edit; no
+  initial Save/color form competing with the sample. Keep deliberate editing and
+  publication checks, unchanged names/content/media and all five locales.
+- [x] Verify real chosen signup, taken/invalid/stale/failure/collision paths,
+  Page rename/cooldown and private sample/edit transitions on web/native-browser.
+  Desktop/phone captures are reviewed. Owner confirms account/business details
+  belong together on the first setup screen; later editing lives in its proper
+  account/Page areas. The shown flow follows that clarified direction.
+- [ ] CURRENT: run gates, reconcile docs and commit; include approved final flow in the
+  authorized replacement APK. S69 correction/exception remains authorized.
+Master §§11/13/15/18/19/22 affected. Local fixture-only verification; no production
+accounts/data/Auth/configuration changes or automatic sample publication.
+
+S70 focused final verification passes on both clients, including simulated signup
+409 recovery with retained inputs/fresh availability and real chosen signup/Page
+rename/cooldown. Actual PostgreSQL concurrent-name atomicity/tenant/alias tests and
+native API suites pass. Five-language combined setup/private preview and web
+1440/390/320 captures pass. First native sample now displays its saved default
+logo as well as cover/media/contacts/three offerings. Owner confirms this one-screen
+setup and later detail separation. No DB/Auth/provider change; live API compatibility
+and final native bundle boundary are verified. Full/release/source freeze next.
+
+S69/S70 final full check passes. Android/Hermes export includes the new modules
+and excludes both tooling roots (1,571 runtime sources). Every release behavioral,
+production build/trace, provider smoke, scale, security and adapter stage passes;
+the final native audit still fails solely on the approved two-root exception.
+Full acceptance and source/archive/certificate/device gates remain current.
+
+S70 all eleven production-mode acceptance scenarios have passing evidence: ten
+full-run passes, then focused owner-entry pass after adapting the harness to click
+Edit from the approved private preview. Initial failed logs remain preserved;
+no product/security gate is weakened. Source/archive/build is the next dependency.

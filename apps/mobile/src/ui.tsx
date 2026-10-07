@@ -18,7 +18,8 @@ import {
 import { openLink } from "./open-link";
 import { descriptionLinks } from "./link-policy";
 export { openLink } from "./open-link";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, SvgUri } from "react-native-svg";
+import { isStaticSeedSvg } from "./static-svg";
 import { useApp, mediaUrl, API } from "./runtime";
 export const colors = {
   ink: "#22282b",
@@ -261,6 +262,7 @@ export function Status({
     </Card>
   ) : null;
 }
+const ignoreStaticSvgError = () => {};
 export function Photo({
   refPath,
   height = 180,
@@ -297,6 +299,20 @@ export function Photo({
       if (blob) URL.revokeObjectURL(blob);
     };
   }, [refPath, privateRef, session?.access_token]);
+  if (Platform.OS !== "web" && isStaticSeedSvg(refPath))
+    return (
+      <View style={{ height, width: "100%", borderRadius: 6, overflow: "hidden", backgroundColor: colors.line }}>
+        <SvgUri
+          key={refPath}
+          uri={mediaUrl(refPath)}
+          width="100%"
+          height={height}
+          preserveAspectRatio="xMidYMid meet"
+          onError={ignoreStaticSvgError}
+          fallback={<View style={{ height, alignItems: "center", justifyContent: "center" }}><Icon name="shop" size={40} /></View>}
+        />
+      </View>
+    );
   if (!refPath || (privateRef && Platform.OS === "web" && !source))
     return (
       <View

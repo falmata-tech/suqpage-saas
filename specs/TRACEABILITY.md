@@ -967,7 +967,7 @@ and all 11 production-mode acceptance workflows pass. The unchanged release audi
 fails only on the two approved tooling roots (20 high, zero critical); final Hermes
 export excludes both from 1,569 runtime sources. Acceptance server emits canceled
 stream messages only after the passing suite and shutdown. Rebuilt APK/signature/
-OS verification remain pending under the renewed one-artifact exception.
+OS verification are recorded below; the finished artifact exposed the S69 SVG defect.
 
 
 ## S68 — saved logo-led demo accents (FE-054)
@@ -984,3 +984,93 @@ local-only handles have no current hosted business or registry rows and remain
 absent. No seed/schema/config/Auth/media/account change. Per-demo reviews and
 operational evidence: docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md; protected plans,
 before-state, rollback and verified receipts: .local/demo-accent-review/.
+
+
+### S67 installed artifact evidence
+
+Expo build 4d6df1a5-795a-4f80-999d-feaa0b679f22 finished from c1872d5. Clean archive
+has 1,493 files with no private paths; 1,569 Hermes runtime sources exclude both
+audit roots. APK signature matches the registered preview identity; decoded
+bytecode contains only SDK secret-prefix validation markers, no secret values.
+Android reports suqpage.com verified; cold filtered Market and warm product/store/
+Featured HTTPS intents land in the actual preview app without forcing its package.
+Gallery selection/back, saved accent, all five locale switches and native Custom
+Tab return pass. Available honey video plays within the app. Aloe's existing
+example video is unavailable (thumbnail 404), with a visible bounded retry state.
+Native review caught owned SVG logos/illustrations blank: S69 correction and a
+replacement artifact remain required. No physical-phone/email/social-handler or
+independent native-speaker signoff. docs/MOBILE-DISTRIBUTION.md records build/
+checksum/limits; private source/signature/screenshots: .local/rebuild-s67/.
+
+
+## S69 — native owned SVG rendering (FE-053 / DEP-042)
+
+Photo routes strict owned seed SVG paths to the installed react-native-svg adapter;
+all other web/raster/private paths remain in Image. test-mobile-static-svg.ts proves
+actual bundled branch behavior on Android/iOS/web, public no-Auth, preserved private
+Auth, stable callback, contained size and failure fallback, plus adversarial path
+isolation. Both tests/native typecheck and existing build/dependency/link/video
+checks pass. Native development-client store/Featured screenshots are inspected;
+owner explicitly approves the correction and one replacement internal APK.
+No dependency/data/schema/provider change. Full gates/source commit/artifact pending.
+Private correction review/digest: .local/rebuild-s69/; native captures:
+.local/rebuild-s67/native-corrected-*.png. A focused test harness initially needed
+its existing PNG loader configured; corrected harness passes. Earlier video script
+hit sandbox IPC denial; node --import tsx passes without changing the product test.
+
+
+## S70 — chosen signup handle and Page editing (FE-051 / FE-053)
+
+Web SignupForm reuses HandleField; native Setup reuses HandleInput. Both debounce
+availability, reject invalid/taken/failed checks and disregard stale responses;
+server signup still atomically claims the name and creates its private starter.
+Failed signup refreshes availability instead of treating a prior check as a
+reservation. Legacy callers retain generated-name compatibility. Page editing
+exposes the existing rename/version/cooldown/retained-alias contracts. Web server
+action permits only its fixed Page return path; actor/tenant authority is unchanged.
+Native Edit intent persists through the home reload after handle save; account
+security keeps its own phone/session/deletion controls.
+
+capture-mobile-owner.mjs passes five-language essential setup/private-preview,
+invalid/taken/failure/stale checks, actual chosen signup, Page rename/cooldown,
+contact removal/save/re-entry, private media/gallery, service create/update/hide,
+GPS/city confirmation and first publication. capture-handle-setup.mjs passes web
+chosen signup, rich private preview/Edit, actual Page return after rename, stale/
+failure/retry/invalid/taken handling, cooldown, audited administrator override,
+retained private address denial, request limits and 1440/390/320 captures. Merchant
+content stays literal; no new catalog key/provider/schema/API contract.
+
+A stale capture expected four gallery entries; current starters provide two
+photos and one video, now asserted by media kinds. PostgreSQL fixture IDs are
+normalized before comparisons. Expo retains offscreen routes; re-entry checks
+assert absence of visible edit fields rather than absence of offscreen DOM. The
+actual native handle-save reload defect was fixed by persisting explicit Edit
+intent. Both typechecks/spec validation pass. Owner confirms the combined first-setup/detail separation shown in the review;
+full gates and replacement APK remain pending. Evidence: .local/rebuild-s69/,
+.local/mobile-owner-review/ and .local/starter-handle-review/.
+
+S70 final focused passes include controlled signup-409 recovery on both clients:
+previous availability is refreshed, a now-taken name disables submit, other inputs
+remain intact and a new chosen name completes a real local signup. PostgreSQL
+signup tests separately prove actual concurrent uniqueness and no partial starter.
+Both typechecks, eight locale tests and mobile contract/API suites pass; the live
+handles API returns the expected public boolean/canonical name. Final Hermes
+export includes the native SVG/handle modules and excludes both tooling roots.
+Owner confirms one first-setup screen, followed by separate account/Page areas.
+
+S69/S70 source gates: final npm run check passes on the clarified flow. Android
+export passes with 1,571 runtime sources and zero braces/node-forge runtime paths.
+Release production build, 66 private-trace checks, isolated provider-backed HTTP
+smoke, scale/pagination, typing/design/media/security/adapter/owner wiring stages
+all pass. Release exits only at the unchanged two-root native audit (20 high,
+zero critical); the owner-approved replacement-artifact exception remains bounded.
+Full production-mode user acceptance and final clean-source artifact checks follow.
+
+Final production-mode acceptance: ten scenarios pass in the full run; the owner
+capture initially tried the hidden edit fields without clicking Edit after S70.
+Updating it to assert preview and enter Edit makes the remaining workflow pass in
+its focused rerun. All eleven distinct scenarios have passing evidence; the first
+full invocation is retained as failed, not rewritten as green. Next's canceled
+stream messages occur during passing-suite cleanup. No product readiness,
+permission or fixture assertion was weakened. Protected logs:
+.local/rebuild-s69/acceptance.log and acceptance-owner-retry.log.

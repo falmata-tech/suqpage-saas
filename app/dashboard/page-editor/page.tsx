@@ -9,10 +9,14 @@ import { OwnerPageError, isPageOwner } from "@/lib/owner-page-domain";
 import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
 import { readOwnerPage } from "@/lib/owner-page-service";
 import { pagePublicationPort } from "@/lib/owner-page-publication-runtime";
+import HandleSettingsForm from "@/components/HandleSettingsForm";
+import { readHandleSettings } from "@/lib/business-handle-runtime";
+import { saveBusinessHandleAction } from "@/app/dashboard/business/handle-actions";
+import { getUiText } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string; view?: string }> }) {
+export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string; view?: string; error?: string; saved?: string }> }) {
   if (!ownerPageEditorEnabled()) notFound();
   const user = await requireUser();
   const query = await searchParams;
@@ -24,7 +28,11 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
   const catalog = await runtimeCatalogByBusinessId(business.id, true);
   if (!catalog) notFound();
   const publication = await pagePublicationPort.latest(business.id);
+  const owner = isPageOwner(user, business.id);
+  const t = await getUiText();
   return <DashboardShell user={user} business={business}>
-    <OwnerPageEditor locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.view === "preview"} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={isPageOwner(user, business.id)} />
+    {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
+    {query.saved === 'handle' ? <p className="notice" role="status">{t('Business details saved.')}</p> : null}
+    <OwnerPageEditor handleEditor={owner ? <HandleSettingsForm key={business.content_version} settings={await readHandleSettings(user,business.id)} businessId={business.id} action={saveBusinessHandleAction} returnTo="page"/> : null} locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.view === "preview" || (owner && business.status === 'draft' && query.view !== 'edit')} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={owner} />
   </DashboardShell>;
 }

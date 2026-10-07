@@ -46,7 +46,7 @@ export default function OwnerScreen() {
         {load.data && (
           <>
             {screen === "page" ? (
-              <PageEditor home={load.data} reload={load.reload} initialPreview={view === "preview"} />
+              <PageEditor home={load.data} reload={load.reload} initialPreview={view === "preview" || (view !== "edit" && load.data.shop.status === "draft")} />
             ) : screen === "business" ? (
               <BusinessForm />
             ) : screen === "settings" ? (

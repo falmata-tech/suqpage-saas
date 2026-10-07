@@ -1,7 +1,7 @@
 ---
 id: FE-051
 title: Automatic starter and editable address
-status: done
+status: in_progress
 related: [FE-053, FE-038, FE-046, FE-049, BE-043, DEP-040]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-10-06
@@ -12,7 +12,8 @@ change_level: L3
 
 ## Problem and scope
 
-Signup should open a complete private example without requiring handle selection.
+Current S70 setup combines essential account/business details and chosen handle,
+then opens the complete private example. Older API callers may omit the handle.
 Keep the Suqpage wordmark identical in every locale. Reuse atomic starter creation,
 add persisted example gallery entries and concise editable copy. Keep real account
 identity and consent real; do not publish sample content automatically or overwrite
@@ -102,3 +103,57 @@ editing/publication regression passes; full check, production build/trace, provi
 smoke and 11 acceptance workflows pass. Release audit remains failed solely on
 the approved two-root internal-APK exception; final native artifact checks pending.
 See S67 in TRACEABILITY for evidence boundaries and protected capture paths.
+
+
+## S70 — owner-selected address and preview-first drafts
+
+Supersedes signup-UI omission and normal draft-editor entry in S67. Web/native
+essential setup asks for Page handle with availability feedback before submit.
+Server signup remains authoritative and retains generated fallback for compatible
+older callers. Existing reserved-address uniqueness, atomic starter rollback,
+monthly rename/alias and tenant/staff invariants do not change.
+
+GIVEN verified setup WHEN choosing an invalid/taken address or a failed/in-flight
+check THEN show concise localized status and do not submit. Old availability
+responses cannot enable a newer value. WHEN a checked available address is chosen
+THEN signup atomically claims that address and opens the complete unpublished
+sample preview with Edit available. An availability check never reserves a name;
+server conflicts remain visible without partial account/starter creation.
+GIVEN an unpublished owner page WHEN entering Page without an explicit edit intent
+THEN show the saved rich preview, not the edit fields; Edit opens them. Initial
+preview has no editing form or request to save an unchanged sample. Color-edit
+fields stay closed until requested; intentional color changes remain savable. GIVEN Page editing WHEN changing the address THEN reuse existing
+server rename/version/cooldown rules, refresh the displayed address and retain old
+links. Web returns to Page editing after its handle save; native mirrors it.
+GIVEN normal active-owner or consented staff editing THEN preserve prior behavior.
+
+Reuse existing HandleField/HandleSettingsForm and API contracts. No new schema,
+provider, required business metadata or user-content translation. All labels reuse
+reviewed five-language catalog entries. Focused actual web/native-browser signup,
+invalid/taken/availability failure/stale response, rename/cooldown and preview/Edit
+checks precede visual approval/full/release. Master §§11/13/15/18/19/22 affected.
+
+S70 focused local evidence: actual web/native-browser chosen signup and private
+starter/Edit pass; names/contacts/product kinds/media persist. Page rename returns
+to editing, then enforces cooldown with support access. Five-language setup/preview,
+invalid/taken/stale/failure/retry states, private address retention and operator
+request limits pass. Web 1440/390/320 and native-browser 390 captures plus both
+typechecks/spec validation pass. No required metadata or domain/DB change was
+added. Visual/full/release/artifact stages remain pending; see TRACEABILITY S70.
+
+Owner review clarification: initial setup must combine the owner's real account
+identity/contact details and business identity/handle on one screen; afterward
+keep each setting in its account or Page area. The shown combined setup/private
+preview/Edit journey follows this direction. Native now also displays the verified
+account email, never a public sample email. A saved business logo appears in the
+Default preview as well as with custom accents; no extra setup field is required.
+Existing chosen-handle/collision/cooldown and native API regression suites pass.
+
+Final S69/S70 gates: full check and both typechecks pass. All release build/privacy,
+provider HTTP smoke, scale, security, media/adapter and owner stages pass; the
+unchanged two-root native audit is separately admitted only for the approved
+replacement internal APK. All 11 production-mode workflow scenarios now pass
+across the full run (10) and focused corrected owner-entry rerun (1). The old
+capture assumed drafts opened in edit mode; it now asserts preview and clicks
+Edit before editing. No readiness or security check was weakened. Source commit,
+managed artifact and web rollout remain separately recorded stages.

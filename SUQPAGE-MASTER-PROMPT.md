@@ -567,11 +567,12 @@ horizontal overflow at 320 and 390 CSS pixels.
 
 The merchant CTA links to passwordless account entry. A six-digit
 email code verifies identity before any business details are requested. An
-authenticated unlinked identity then submits bounded owner name, business name,
-phone or WhatsApp, and a short description of what the business makes or
-supplies. Signup assigns an available generated page handle and opens the
-complete private sample page in preview. The owner can edit the address later
-under Business details. The server derives identity from the Supabase session and atomically creates the private draft business, owner,
+authenticated unlinked identity completes one account/business setup screen.
+Current production generates an unused address; the S70 verified local candidate
+collects a chosen available handle alongside owner name, private phone, business
+name/category and consent. Both create the complete private sample preview.
+S70 exposes address changes in Page editing; existing production owners retain
+Business details until the separate web rollout. The server derives identity from the Supabase session and atomically creates the private draft business, owner,
 client access profile, identity link, and business onboarding record.
 FE-046/BE-039 also creates a private saved profile, example location and
 three editable example offerings with names, descriptions, media and prices.
@@ -1035,19 +1036,18 @@ demo accounts gain one identity link. Real account emails remain unchanged. Lega
 local session cookies remain readable through the same authorization checks; new
 cookies use Suqpage names and logout revokes both local token names (BE-036).
 
-Business setup collects owner name, verified-email display, private phone,
-organization name, category and consent. New pages start with the default color;
-FE-054 color selection lives only in the Page editor with the actual storefront
-preview. A safe provider display name may be
-prefilled. FE-051/BE-043 automatically assign an unused generated handle with
-bounded database-authoritative collision retries, then open
-`/dashboard/page-editor?view=preview` on web and `/owner/page?view=preview` in
-the native app. Both open the styled private sample before the editing form;
-Edit and owner navigation expose its page, business/location, handle and offering
-settings. Later normal editor visits keep their existing editing flow. Compatible callers can still request an
-explicit valid handle. No media upload or separate starter action is needed.
+The S70 locally verified setup combines owner name, verified-email display,
+private phone, business name, chosen handle, category and consent on one screen.
+Availability is debounced/bounded with stale-response and failure protection;
+server signup atomically claims the address and creates the complete private
+starter. Legacy callers without a handle retain bounded automatic generation.
+New pages start at Default; color selection belongs in Page with its full preview.
+Signup opens `/dashboard/page-editor?view=preview` or `/owner/page?view=preview`.
+Unpublished owner pages show the rich sample first, with Edit available; no media
+upload or separate initializer is needed. Actual first publication remains guarded.
+The replacement native artifact and web rollout for S70 are pending DEP-042.
 
-Owners edit their handle in Business details (3–60 English letters, digits and
+Owners edit their handle in Page editing (3–60 English letters, digits and
 internal hyphens). Authenticated bounded availability checks expose no account
 details. The first change is immediate, then changes are limited to one every
 30 days under a database row lock. Unchanged saves consume no allowance. A
@@ -1110,8 +1110,9 @@ counts, and status guidance distinguishes staff drafts from owner live Save.
 ### Owner (client)
 
 Verified signup or an invitation creates a complete private sample workspace.
-New signup opens the filled page preview automatically. Owners can change their
-generated address in Business details; its first change is immediate and later
+New signup opens the filled page preview automatically. The S70 local journey
+collects account/business details and the chosen handle together, then exposes
+address edits in Page. Its first address change is immediate and later
 changes have a 30-day interval (support exceptions require an audited administrator).
 Owners replace examples, save business details/location, edit their page and
 products/services, then Publish directly when at least one offering is listed.
@@ -1243,11 +1244,17 @@ S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
 Those API paths have real isolated PostgreSQL regression evidence. Expo project
 `@falmatad/suqpage` and preview signing are configured. The versioned live API
-rollout is verified in S61; the latest APK artifact and native-device gates remain
-pending under S67.
+rollout is verified in S61. S67 build 4d6df1a5 from c1872d5 is finished, signed and
+installed for review. Its native map/media/locale/browser/link checks pass with
+explicit limits; blank owned SVG media requires S69 before final artifact handoff.
 The FE-053/DEP-042 local candidate uses native MapLibre with OSM raster tiles;
 focused type/projection/export checks, Android native compilation and emulator
 first-render/drawer checks pass. Physical-phone and release checks remain open.
+The S69 local Photo correction uses the installed SVG renderer only for strict
+repository-owned static seed SVG paths, with a shop-icon failure fallback. Public
+SVG fetches carry no Auth header; web/raster/private-image adapters stay unchanged.
+The corrected development-client logo is verified and owner-approved; replacement
+APK gates remain pending under DEP-042.
 The native candidate now uses storefront/name markers, numbered clusters, nearby
 lists and public live/featured badges matching the web map. Native marker selection
 opens the existing preview; scope changes clear stale selection. The authenticated
@@ -1257,8 +1264,9 @@ Market, Featured, About and account links into Expo Router. Market URL scopes
 restore on initial and subsequent opens; admin/API/Auth callbacks are not claimed.
 Only the verified Expo preview signing identity has Android HTTPS autoVerify
 filters. Public /.well-known/assetlinks.json metadata is published and verified
-on suqpage.com. A rebuilt APK and Android OS verification remain required; older
-APKs do not gain new manifest filters from a website update. iOS association
+on suqpage.com. S67 APK installation independently verifies Android OS App Links;
+cold Market and warm product/store/Featured HTTPS navigation pass. Older APKs
+do not gain new manifest filters from a website update. iOS association
 awaits verified Apple Team identity.
 External browsing uses the installed Expo WebBrowser adapter (Custom Tabs on
 Android, Safari sheet on iOS); it sends no Suqpage bearer tokens and injects no

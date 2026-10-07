@@ -141,11 +141,12 @@
     "test:mobile:links": "node --import tsx scripts/test-mobile-links.ts",
     "test:mobile:video": "tsx scripts/test-mobile-video.ts",
     "postinstall": "node scripts/patch-mobile-dependencies.cjs",
-    "test:mobile:build": "node scripts/test-mobile-build-config.cjs && node scripts/test-mobile-dependencies.cjs",
+    "test:mobile:build": "node scripts/test-mobile-build-config.cjs && node scripts/test-mobile-dependencies.cjs && npm run test:mobile:media",
     "test:mobile:map": "tsx scripts/test-mobile-map.ts",
     "test:storefront-accent": "node --import tsx scripts/test-storefront-accent.ts && node --import tsx scripts/test-visual-color.ts",
     "test:source-map-security": "node scripts/test-source-map-security.cjs",
-    "release:web": "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh"
+    "release:web": "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh",
+    "test:mobile:media": "node --import tsx scripts/test-mobile-static-svg.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

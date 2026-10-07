@@ -5,7 +5,7 @@ import { useUiText } from "@/lib/i18n/ui";
 
 
 import { Eye, Pencil, Save, LoaderCircle, Check, Upload, Globe, Undo2, ExternalLink, Palette } from "lucide-react";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import ShowroomApp from "./showroom/ShowroomApp";
 import { businessProfileDescription, initialBusinessProfile } from "@/lib/business-profile";
@@ -16,7 +16,7 @@ import { legacyPublicContacts, publicContactFields } from "@/lib/business-profil
 import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean }) {
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, handleEditor }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; handleEditor?: ReactNode }) {
   const t = useUiText();
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
@@ -119,10 +119,10 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         <button type="button" aria-pressed={mode === "edit"} onClick={() => setMode("edit")}><Pencil size={17} />{t("Edit")}</button>
         <button type="button" aria-pressed={mode === "preview"} onClick={() => setMode("preview")}><Eye size={17} />{t("Preview")}</button>
       </div>
-      <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !dirty && (!activePage || matchesPublication))}
+      {mode === 'edit' || dirty ? <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !dirty && (!activePage || matchesPublication))}
         onClick={() => command("save")}>
         {busy ? <LoaderCircle size={18} /> : <Save size={18} />}
-        {t("Save")}</button>
+        {t("Save")}</button> : null}
     </header>
     {owner ? <div className={styles.publication} aria-label={t("Page publication")}>
       <p role="status">{activePage ? t("Your page is live") : catalog.business.status === "suspended" ? t("Page suspended — contact support") : t("Private until you publish")}</p>
@@ -145,6 +145,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         </button></div>
     </dialog>
     {error ? <p role="alert" className={styles.error}>{t(error)}</p> : null}
+    {mode === 'edit' ? handleEditor : null}
     <div className={styles.workspace} data-mode={mode}>
       <div className={styles.fields}>
         <fieldset disabled={!ready || busy || uploading}>

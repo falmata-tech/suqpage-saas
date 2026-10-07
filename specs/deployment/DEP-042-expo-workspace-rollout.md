@@ -285,3 +285,19 @@ braces/node-forge roots. No new advisory or dependency is accepted. Preserve the
 free queue, existing signing identity, production public configuration and all
 other source/archive/runtime/signature/device gates. Play and iOS remain deferred;
 no invitations or credentials/configuration mutations are authorized by this build.
+
+
+S67 artifact finished from c1872d5 as build 4d6df1a5-795a-4f80-999d-feaa0b679f22.
+Source/archive/signature/runtime/device App Links checks pass. Native inspection
+found blank trusted static SVG media in the original Photo adapter, requiring
+S69 correction. The one-artifact exception is consumed; a second managed APK
+needs renewed exact-scope admission. See MOBILE-DISTRIBUTION.md and TRACEABILITY.
+
+S69 owner approval: the owner explicitly approved the corrected native logo preview
+and one replacement free Expo Android APK under the same two-advisory tooling
+exception. The reviewed four-file source digest is
+0518cf608fd26f2410a4eaa065ce3bac86ae296c89b59d8a707111761e3c317e.
+Bind that reviewed correction to the final tested commit; retain clean archive,
+public config, existing signing, certificate/runtime and installed-device checks.
+No additional artifact/advisory, dependency, paid build, Play/iOS rollout or
+invitation is admitted. Private review: .local/rebuild-s69/.
