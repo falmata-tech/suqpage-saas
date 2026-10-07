@@ -1996,7 +1996,11 @@ JSON, not the user account's platform theme. Signup is transactional; owner live
 Save updates publication atomically, consented staff only edit the draft. Existing
 versions/tenant checks apply. Legacy clients omitting the additive field preserve
 the stored value; explicit empty resets it. Native private/public DTOs carry the
-same saved value. No schema migration or demo/customer backfill is needed.
+same saved value. No schema migration is needed. The owner-approved S68 one-time
+correction saves logo-led accents for all 66 local and 64 existing live marked
+demos. New starters retain Default; real businesses and account/content/media
+fields stay unchanged. Two local-only handles were not recreated in production.
+See docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md.
 
 Owner approved the prototype on 2026-10-05. Focused actual signup, reload, web/native
 save and publication checks plus desktop/phone captures pass. Web deployment

@@ -968,3 +968,19 @@ fails only on the two approved tooling roots (20 high, zero critical); final Her
 export excludes both from 1,569 runtime sources. Acceptance server emits canceled
 stream messages only after the passing suite and shutdown. Rebuilt APK/signature/
 OS verification remain pending under the renewed one-artifact exception.
+
+
+## S68 — saved logo-led demo accents (FE-054)
+
+Owner-approved one-time data correction applies only to existing active marked
+demos: 66 local / 64 production. All existing illustrative logos/briefs were
+inventoried before choosing their lead accent. Non-demo denial, stale second-row
+atomic rollback, full positive rollback and preserved unrelated table fingerprints
+pass in the local rehearsal. Guarded apply appends draft versions/events and
+publication/audit history without rewriting earlier records. All 132 local
+1440/390px saved states pass color/overflow/browser checks; all 66 native API
+values match. All 64 live HTML/native API projections match, health 200. Two
+local-only handles have no current hosted business or registry rows and remain
+absent. No seed/schema/config/Auth/media/account change. Per-demo reviews and
+operational evidence: docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md; protected plans,
+before-state, rollback and verified receipts: .local/demo-accent-review/.

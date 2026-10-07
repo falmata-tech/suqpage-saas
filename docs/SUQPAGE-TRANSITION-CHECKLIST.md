@@ -2647,9 +2647,17 @@ S68 — logo-led demo accents (FE-054, one-time demo data correction)
   web/native previews using the existing shared palette; record asset authority
   and review evidence in the showroom project folders.
 - [x] Owner explicitly approves the linked logo-matched accents for all 66 demos.
-- [ ] CURRENT: apply approved accents through scoped/versioned saved profiles with protected
+- [x] Apply approved accents through scoped/versioned saved profiles with protected
   before-state and rollback evidence, verify public/native projection and all demo
   coverage. Refresh seed defaults only if a concrete repeatability requirement is
   confirmed. No new colors-per-owner setting, schema, media or dependencies.
 Dependency: the current S67 Android source freeze/rebuild continues independently;
 these are server-stored accents consumed by the same app, not new APK functionality.
+
+S68 saved verification: 66 local and 64 live demos match the approved accent in
+saved profiles, publication and native API. Local 132 desktop/phone states pass;
+all 64 live HTML/API values and health pass. Non-demo/stale atomic rollback and
+unrelated table preservation are verified. Two local-only handles have no current
+hosted business/registry row. No recreation/seed/schema/Auth/config/account/media
+change. Owner approvals and rollback/before-state stay in .local/demo-accent-review;
+public operation record is docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md.

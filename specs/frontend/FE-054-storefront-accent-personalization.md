@@ -4,7 +4,7 @@ title: Restrained business storefront accents
 status: in_progress
 related: [FE-040, FE-053, BE-031, BE-041, BE-044]
 owners: [product, frontend]
-last_updated: 2026-10-05
+last_updated: 2026-10-06
 change_level: L2
 ---
 
@@ -12,9 +12,12 @@ change_level: L2
 
 ## Problem and readiness
 
-Owner requests a visual sample before choosing the final treatment. The local
-prototype is ready for visual review; production implementation is now authorized by owner approval below. The local implementation below is under verification; hosted behavior is unchanged.
-Master sections 5, 7, 11, 15, 18, 19 and 22 would be affected after approval.
+Owner-approved personalization is implemented on web/native and deployed in the
+web/API under S61. One accent feeds a shared contrast-safe palette; selection lives
+in Page editing with the whole storefront preview. S68 additionally applies
+reviewed logo-led accents to existing marked demos. Master sections 5, 7, 11, 15,
+18, 19 and 22 describe this behavior. Earlier prototype/gate paragraphs below
+retain historical evidence; the latest rollout evidence appears in S68 and DEP-042.
 
 ## Scenarios — current observable contracts
 
@@ -161,3 +164,46 @@ Corrected visual approval is pending. Updated production acceptance assertions
 have not been rerun; full/release gates are not repeated before that review.
 Physical-device gesture/OS-color-dialog evidence remains pending. No new package,
 migration, production data change, commit or deployment was performed in S53.
+
+## S68 — existing demo branding as personalization examples
+
+Owner requests restrained saved accents matching each demo's existing logo. This
+is a one-time correction to explicitly marked disposable demos, using the already
+accepted single accent and derived shared palette; not a new layout/color system.
+Read every affected brand brief and approved logo before selecting its lead color.
+Preserve names, accounts, contacts, photos, videos, platform chrome and all real
+businesses. No industry-based palette guessing or new media/dependency/schema.
+
+GIVEN the existing demo portfolio WHEN prepared for review THEN every marked demo
+has a logo-led color candidate, representative private web/native phone/desktop
+previews and manifest evidence. GIVEN visual approval WHEN saved THEN only the
+reviewed demo profiles change, version guards reject drift, protected before-state
+and append-only publication/rollback evidence preserve existing content/history.
+Both public web and native projection must carry the selected saved accent. No
+production data write before concrete visual review; do not imply screenshots alone
+prove saving. New account starters retain Default and owner choice in Page editing.
+
+S68 environment reconciliation: local has all 66 reviewed demos; production has
+64 marked demos. The two remaining handles have no business rows in production,
+confirmed by a scoped read without the demo predicate. Preserve that current production state;
+do not recreate accounts/businesses merely to force equal counts. Operate on all
+existing reviewed marked demos per environment and reject any unknown target or
+changed profile/visibility. Record environment-specific counts and before-state.
+
+
+### S68 completed evidence
+
+Owner explicitly approved all 66 logo-led candidates. The one-time guarded
+operation applied 66 local and 64 existing hosted marked demos. Protected
+before-state and exact plans bind targets/content/approval; local rehearsal
+proves non-demo denial, stale-row atomic rollback and full positive rollback.
+Only accentColor changes; history is appended and unrelated tables match their
+before-state fingerprints. All 132 saved local desktop/phone states pass overflow,
+color and browser-error checks; all 66 native API values match. Live HTML and
+native API match all 64 hosted colors, with health 200. The two local-only handles
+are absent from both hosted business and handle registries; do not recreate them.
+No seed, schema, configuration, Auth, media or account change.
+See docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md and the per-demo ACCENT-REVIEW.md files.
+Private receipts: .local/demo-accent-review/. Representative previews were visually
+reviewed/approved; physical-device coverage is bounded to the release record.
+Earlier S52/S53 paragraphs are historical evidence, not current pending approval.
