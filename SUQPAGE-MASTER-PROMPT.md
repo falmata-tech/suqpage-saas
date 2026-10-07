@@ -173,7 +173,7 @@ not a confirmed booking, payment or delivery guarantee.
 
 ---
 
-S57 (FE-019/BE-018/BE-044, local rollout pending) replaces the public Buying
+S57 (FE-019/BE-018/BE-044, deployed web/API and internal Android) replaces the public Buying
 assistance entry with Transport & delivery, retaining the Live chat sublabel and
 Suqpage design. Start chat opens a token-scoped transport conversation. Customers
 see Waiting for our transport team until an explicit staff reply; assignment is
@@ -324,7 +324,7 @@ category set and location union; overlapping city/region selections return recor
 Locations accept up to 16 selections, with OR within locations and AND with search
 and categories; single-location URLs remain valid. S57 is deployed on the web and native API in S61. No search schema change is needed.
 Transport/delivery help uses a compact accessible icon alongside an open drawer on narrow
-screens so it cannot cover pagination. S56/S57 web controls are deployed in S61; the native build remains pending.
+screens so it cannot cover pagination. S56/S57 controls are deployed on web and included in the finished internal Android APK.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -423,8 +423,8 @@ collects private account details. Business owners use Dashboard → Support for
 platform questions. There is no public Ask for help entry. Transport & delivery, with a Live chat sublabel, opens route/name/phone intake and
 then live text chat. Staff arrange carriers outside Suqpage. General visitor
 support stays closed; business owners use their authenticated support dashboard.
-S57 web intake, staff queue and native API are deployed in S61; the native
-application artifact remains pending.
+Transport intake, staff queue and native API are deployed; the same service is
+included in the finished internal Android APK. Staff management remains web-only.
 No eyebrow, heading, paragraph, or button piles up audience synonyms or repeats
 the complete platform narrative. **Custom work**, **ready products**, and
 **wholesale supply** remain optional capability labels, not a slogan or a
@@ -568,11 +568,9 @@ horizontal overflow at 320 and 390 CSS pixels.
 The merchant CTA links to passwordless account entry. A six-digit
 email code verifies identity before any business details are requested. An
 authenticated unlinked identity completes one account/business setup screen.
-Current production generates an unused address; the S70 verified local candidate
-collects a chosen available handle alongside owner name, private phone, business
-name/category and consent. Both create the complete private sample preview.
-S70 exposes address changes in Page editing; existing production owners retain
-Business details until the separate web rollout. The server derives identity from the Supabase session and atomically creates the private draft business, owner,
+Web and native setup collect a chosen available handle alongside owner name,
+verified email display, private phone, business name/category and consent. Both
+create the complete private sample preview. Handle changes belong in Page editing. The server derives identity from the Supabase session and atomically creates the private draft business, owner,
 client access profile, identity link, and business onboarding record.
 FE-046/BE-039 also creates a private saved profile, example location and
 three editable example offerings with names, descriptions, media and prices.
@@ -968,7 +966,7 @@ Default behavior:
   with the results toggle at far left, on web and native. Filter menus support
   multiple clearable categories and multiple clearable cities/regions. The results panel places
   a Products & services heading above one offering-only list, and fixes page controls
-  below the scrollable rows. S54 web behavior is deployed in S61; native release is pending;
+  below the scrollable rows. Offering-only results are deployed on web and included in the internal Android APK;
 - hide product results without clearing filters; search/filter controls stay
   available over the map, hidden list content is inert, Escape returns focus to
   the results opener, and reduced-motion preferences disable sliding;
@@ -1022,8 +1020,8 @@ continues to code sign-in and grants no session itself. Managed password actions
 are unavailable.
 No local OAuth or SMTP credentials are copied to Production for this release.
 
-FE-055 provides a deployed web Delete account entry and a release-pending native entry in account
-settings and a public `/account-deletion` page. It exposes the existing email
+FE-055 provides a deployed web Delete account entry and a native entry in the internal APK
+account settings and a public `/account-deletion` page. It exposes the existing email
 request channel with identity-verification instructions; opening the composer
 does not submit a request or delete data. Native Account includes it before
 business setup. Administrative fulfilment remains manual; no automatic account
@@ -1036,7 +1034,7 @@ demo accounts gain one identity link. Real account emails remain unchanged. Lega
 local session cookies remain readable through the same authorization checks; new
 cookies use Suqpage names and logout revokes both local token names (BE-036).
 
-The S70 locally verified setup combines owner name, verified-email display,
+The deployed web and internal Android setup combines owner name, verified-email display,
 private phone, business name, chosen handle, category and consent on one screen.
 Availability is debounced/bounded with stale-response and failure protection;
 server signup atomically claims the address and creates the complete private
@@ -1045,7 +1043,8 @@ New pages start at Default; color selection belongs in Page with its full previe
 Signup opens `/dashboard/page-editor?view=preview` or `/owner/page?view=preview`.
 Unpublished owner pages show the rich sample first, with Edit available; no media
 upload or separate initializer is needed. Actual first publication remains guarded.
-The replacement native artifact and web rollout for S70 are pending DEP-042.
+Web source 6c27025 and replacement internal Android build 9bcabbdb are published
+and verified within the limits recorded in DEP-042 and the S69/S70 release record.
 
 Owners edit their handle in Page editing (3–60 English letters, digits and
 internal hyphens). Authenticated bounded availability checks expose no account
@@ -1110,8 +1109,8 @@ counts, and status guidance distinguishes staff drafts from owner live Save.
 ### Owner (client)
 
 Verified signup or an invitation creates a complete private sample workspace.
-New signup opens the filled page preview automatically. The S70 local journey
-collects account/business details and the chosen handle together, then exposes
+New signup opens the filled page preview automatically. Both web and native first setup
+collect account/business details and the chosen handle together, then expose
 address edits in Page. Its first address change is immediate and later
 changes have a 30-day interval (support exceptions require an audited administrator).
 Owners replace examples, save business details/location, edit their page and
@@ -1222,49 +1221,52 @@ initializer or client-side signup authority exists. PostgreSQL remains server-on
 shares a pure validated accent/palette between clients and server; optional native
 profile/shop DTO fields carry the business choice through existing save contracts.
 
-The S49.1 local preview follows the phone web hierarchy: compact brand/locale
+The native app follows the phone web hierarchy: compact brand/locale
 header, Market/Featured/About/More, full map with a sliding filter/result drawer,
 Featured and showroom grids, and grouped owner tasks. S49.2 embeds approved
 YouTube cover/product videos inside isolated native WebView/browser iframe
 adapters, with bounded failure/retry and no external video handoff. Video approval
 is unchanged. The owner has authorized the workflow audit and tester-build gates;
-actual native playback verification remains pending.
+available honey-demo playback has installed native evidence; unavailable external
+videos retain bounded retry and physical-phone/fullscreen checks remain explicit.
 
 The S51 preview shares a small React sponsor-timing hook between web/native;
 visibility, motion preferences and rendering remain client adapters. The preview
 also shares typed DTOs and pure rules/catalogs, with separate native and
 web map/rendering adapters. Custom web showrooms remain authoritative and linked
 from native catalog views. Focused API, browser and JavaScript export evidence is
-recorded in S49 and `docs/MOBILE-TESTING.md`. Native device coverage,
-remaining parity, full release gates and a separate API rollout are still required;
-this is not a published native release. No production behavior changed with this
-local implementation. Moving Next.js to apps/web remains a separate migration.
+recorded in S49 and `docs/MOBILE-TESTING.md`. The compatible API and internal Android APK are now published. Local owner
+workflows and signed-emulator checks have evidence; physical-phone signoff and
+iOS/Google Play remain separate. The native-toolchain audit still fails under
+the owner-approved, consumed single-artifact exception. Moving Next.js to apps/web remains a separate migration.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
 Those API paths have real isolated PostgreSQL regression evidence. Expo project
 `@falmatad/suqpage` and preview signing are configured. The versioned live API
-rollout is verified in S61. S67 build 4d6df1a5 from c1872d5 is finished, signed and
-installed for review. Its native map/media/locale/browser/link checks pass with
-explicit limits; blank owned SVG media requires S69 before final artifact handoff.
-The FE-053/DEP-042 local candidate uses native MapLibre with OSM raster tiles;
+rollout and the latest web source 6c27025 are verified. Replacement internal APK
+9bcabbdb from that source is finished, signed and installed; it supersedes S67
+and fixes its blank owned SVG media. See docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md.
+The FE-053/DEP-042 Android app uses native MapLibre with OSM raster tiles;
 focused type/projection/export checks, Android native compilation and emulator
-first-render/drawer checks pass. Physical-phone and release checks remain open.
-The S69 local Photo correction uses the installed SVG renderer only for strict
+first-render/drawer checks pass. Release behavior/security checks pass; physical
+phone checks remain open and the native audit exception is recorded explicitly.
+The released S69 Photo correction uses the installed SVG renderer only for strict
 repository-owned static seed SVG paths, with a shop-icon failure fallback. Public
 SVG fetches carry no Auth header; web/raster/private-image adapters stay unchanged.
-The corrected development-client logo is verified and owner-approved; replacement
-APK gates remain pending under DEP-042.
-The native candidate now uses storefront/name markers, numbered clusters, nearby
+The corrected development-client logo was owner-approved; the final signed APK
+also renders it. Source/archive/signature/runtime/OS-domain checks are verified.
+DEP-042 records the consumed exception and remaining manual device/store limits.
+The internal Android app uses storefront/name markers, numbered clusters, nearby
 lists and public live/featured badges matching the web map. Native marker selection
 opens the existing preview; scope changes clear stale selection. The authenticated
 page preview includes the edited cover/story/contacts and offering galleries.
-The S66 native candidate maps canonical suqpage.com public store/product,
+The Android app maps canonical suqpage.com public store/product,
 Market, Featured, About and account links into Expo Router. Market URL scopes
 restore on initial and subsequent opens; admin/API/Auth callbacks are not claimed.
 Only the verified Expo preview signing identity has Android HTTPS autoVerify
 filters. Public /.well-known/assetlinks.json metadata is published and verified
-on suqpage.com. S67 APK installation independently verifies Android OS App Links;
+on suqpage.com. The latest APK independently verifies Android OS App Links;
 cold Market and warm product/store/Featured HTTPS navigation pass. Older APKs
 do not gain new manifest filters from a website update. iOS association
 awaits verified Apple Team identity.
@@ -1273,8 +1275,8 @@ Android, Safari sheet on iOS); it sends no Suqpage bearer tokens and injects no
 JavaScript into third-party sites. The validated URL policy rejects executable
 schemes, credential-bearing URLs and control characters. Only the configured
 local development API origin may use HTTP; merchant links require HTTPS.
-Expo browser preview opens separate isolated windows/tabs. Native browser-sheet
-and installed-social-app testing remain required before a release-ready claim.
+Expo browser preview opens separate isolated windows/tabs. Android Custom Tab opening/return has installed emulator evidence. Physical
+phone and installed-social-app handoff checks remain required; iOS is unverified.
 Owner route navigation, photo-backed offering save/hide, location confirmation and
 first publication have local browser persistence evidence. Read and write rate
 budgets are separate, and explicit native listing state saves preserve advanced
@@ -1978,13 +1980,13 @@ independent of broadcast spotlights, with pause/navigation and accessibility
 safeguards. Visitor/owner copy positions Suqpage as a professional digital
 storefront alongside social-media selling, including shop or area map location.
 Focused carousel tests and 69 final web/mobile-browser language/viewport states
-pass. About separates customer browsing from the business-owner offer. The S63 local copy revision addresses nearby social-media businesses and their
+pass. About separates customer browsing from the business-owner offer. The deployed copy revision addresses nearby social-media businesses and their
 organized offerings, while keeping existing map/search features unchanged.
-agent-authored translations have not received native-speaker approval. Native
-AppState/device checks and Android release gates remain pending. Web deployment
-and live verification completed in S61.
-The emulator is closed at the owner's request to save resources; web/API previews
-remain available. No new APK or native release is claimed.
+Agent-authored translations have not received independent native-speaker approval.
+Five-locale signed Android switches and public web layout checks pass. Web and
+internal Android are released; see the S69/S70 record for exact gates, artifacts
+and physical-phone limits. The Suqpage emulator is closed after verification to
+save resources; web/API previews remain available.
 
 ## Storefront accents — FE-054
 
@@ -2012,5 +2014,6 @@ See docs/DEMO-ACCENT-ROLLOUT-2026-10-06.md.
 
 Owner approved the prototype on 2026-10-05. Focused actual signup, reload, web/native
 save and publication checks plus desktop/phone captures pass. Web deployment
-and its full gates completed in S61; standalone native release remains pending. These
+and the internal Android APK are published; full gates and limits are recorded in
+the S69/S70 release record. These
 additions qualify sections 5, 7, 11, 15, 18, 19 and 22 without changing other flows.

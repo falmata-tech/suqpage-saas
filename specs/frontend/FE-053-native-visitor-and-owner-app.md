@@ -556,8 +556,9 @@ pass. Installed development-client honey logo and Featured imagery display in
 the unchanged slots; screenshots .local/rebuild-s67/native-corrected-*.png.
 Owner explicitly approves this rendering and one replacement free internal APK.
 No new library, API, schema, media, credential or hosted configuration change.
-Full/release/artifact evidence remains pending; DEP-042 exception is renewed only
-for this correction plus the approved latest source, not a future artifact.
+Full behavioral/security gates and final artifact evidence pass as recorded in
+docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md. DEP-042's renewed exception is consumed
+by finished replacement build 9bcabbdb, not available for a future artifact.
 
 
 S70 native setup/owner flow follows FE-051: Page handle selected with essential
@@ -565,3 +566,13 @@ identity fields, debounced available/taken/invalid/failure feedback, atomic sign
 and rich private preview before Edit. Reuse existing handles/signup/owner-handle
 ports. Move address editing into Page, preserving monthly/version/alias authority.
 Account security retains phone/session/delete controls; no staff screens added.
+
+S69/S70 rollout: source 6c27025 is live as Netlify deploy 6ac5c9940ee5deb5294319ef
+and finished internal APK 9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75. The signed APK
+installs, renders the corrected owned SVG logo, verifies Android OS App Links,
+and passes five native locale switches, public Market/About/email-entry and
+gallery navigation. Real local signup/owner flows and API isolation have separate
+passing evidence. Full native audit remains failed under the explicitly consumed
+two-advisory artifact exception. Physical-phone/email/social-app, independent
+native-speaker and iOS/store verification remain open; this broad spec stays
+in_progress. Earlier pending-stage notes are historical to the named stages.

@@ -301,3 +301,20 @@ Bind that reviewed correction to the final tested commit; retain clean archive,
 public config, existing signing, certificate/runtime and installed-device checks.
 No additional artifact/advisory, dependency, paid build, Play/iOS rollout or
 invitation is admitted. Private review: .local/rebuild-s69/.
+
+S69/S70 rollout completed: exact source 6c27025 is published in web deploy
+6ac5c9940ee5deb5294319ef and finished Expo internal Android build
+9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75. The prior web deploy 6ac576417f18a89035f75274
+is the code rollback. Protected target/artifact/source/archive/runtime/signature
+and live readbacks pass; schema/Auth/SMTP/DNS are unchanged. Signed emulator
+installation, OS-domain verification, corrected SVG logo, five locales and public
+navigation/gallery pass. One Android System UI/launcher ANR interrupted the first
+screen checks; restarting that process allows the bounded retry to pass. It is
+recorded as infrastructure failure, not a clean initial device run.
+The full native-toolchain audit remains failed (20 high, zero critical, exactly
+the admitted braces/node-forge roots). The single-artifact exception is consumed.
+No additional build, paid plan, Play/iOS release or invitation is authorized by it.
+This spec remains in_progress for explicit physical-phone/real-email/social-app
+and store limits. Exact downloads, hashes, gates and limits are in
+docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md; private evidence .local/rebuild-s69/
+and .local/web-s70/.

@@ -2676,11 +2676,14 @@ S69 — native static SVG media correction (FE-053 / DEP-042, L1 defect)
 - [x] Complete full check, both types, all release behavioral/security stages and
   all 11 acceptance workflows (10 full + corrected owner-entry focused rerun).
   Native audit remains admitted only through the explicit bounded exception.
-- [ ] CURRENT: scoped source commit, exact archive/admission and managed build.
+- [x] Scoped source 6c27025 committed; exact clean archive/admission and managed
+  build verified. Finished replacement APK 9bcabbdb uses that source.
 - [x] Rebuild admission: owner explicitly approves one replacement free internal
   APK for the reviewed correction under the same two-advisory exception. Rebind
   the approved source digest to the final tested commit before submission.
-- [ ] Sign/install/verify the corrected artifact and report its install link.
+- [x] Final signature/runtime/manifest match; installation, OS-domain routing,
+  corrected logo, five locales, public entry and gallery pass. The install link
+  and explicit physical-phone/store limits are in the S69/S70 release record.
 Dependencies: approved existing visual assets; S67 artifacts/evidence retained.
 Master §15 affected. Google Play/iOS remain deferred; no credentials/config write.
 
@@ -2709,8 +2712,9 @@ S70 — chosen signup handle and simple private-preview flow (FE-051 / FE-053)
   Desktop/phone captures are reviewed. Owner confirms account/business details
   belong together on the first setup screen; later editing lives in its proper
   account/Page areas. The shown flow follows that clarified direction.
-- [ ] CURRENT: run gates, reconcile docs and commit; include approved final flow in the
-  authorized replacement APK. S69 correction/exception remains authorized.
+- [x] Gates and scoped source commit complete; clarified flow is deployed on web
+  and included in finished replacement APK 9bcabbdb. Reconcile final receipts
+  in the S69/S70 release record; the one-artifact exception is now consumed.
 Master §§11/13/15/18/19/22 affected. Local fixture-only verification; no production
 accounts/data/Auth/configuration changes or automatic sample publication.
 
@@ -2733,3 +2737,15 @@ S70 all eleven production-mode acceptance scenarios have passing evidence: ten
 full-run passes, then focused owner-entry pass after adapting the harness to click
 Edit from the approved private preview. Initial failed logs remain preserved;
 no product/security gate is weakened. Source/archive/build is the next dependency.
+
+S69/S70 final rollout: exact source 6c27025 is live as Netlify
+6ac5c9940ee5deb5294319ef and Expo internal APK 9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75.
+Clean source/archive/signature/runtime/OS-domain and live web/API checks pass;
+44 live locale/layout captures and all 64 saved live demo accents verify.
+Corrected signed native logo, five locales, Market/About/email entry and gallery
+pass. Initial device screen checks were interrupted by an Android System UI
+launcher/gesture ANR; one process restart and bounded retry passed. Preserve those
+failed attempts rather than claiming an uninterrupted run. The native audit
+remains failed under the consumed one-artifact exception; physical-phone/inbox/
+social-app/native-speaker/iOS/Play limits remain explicit. No Git push or
+invitations. See docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md.

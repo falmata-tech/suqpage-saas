@@ -1,9 +1,10 @@
 # Test the Suqpage mobile app
 
-Local development uses PostgreSQL/Supabase and real API workflows. The S62 Expo
-preview APK uses the live Suqpage API and production accounts; see
-[MOBILE-DISTRIBUTION.md](MOBILE-DISTRIBUTION.md) for build status. FE-053 / BE-044 /
-DEP-042 remain in progress until signed-device checks are complete.
+Local development uses PostgreSQL/Supabase and real API workflows. The latest
+standalone [Android APK](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75)
+is finished and uses the live Suqpage API and production accounts. See
+[the release record](SUQPAGE-S69-S70-RELEASE-2026-10-06.md) for signed-emulator
+checks and physical-phone/store limits. Earlier preview notes below are historical.
 
 ## Browser
 
@@ -42,8 +43,10 @@ the QR/development URL with the Suqpage development client. For an emulator,
 `npm run mobile:android` forwards local API/Auth/Metro ports. Do not expose these
 ports on a public router. A standalone preview APK will not need Metro.
 
-`npm run mobile:emulator` starts the existing Intel API 35 device. Earlier testing
-showed System UI ANRs; no clean device interaction pass is claimed. Installed tools:
+`npm run mobile:emulator` starts the existing Intel API 35 device. Android System
+UI/launcher ANRs have interrupted initial checks; scoped process recovery and
+subsequent signed-app screen checks pass. Physical phones remain unverified.
+Installed tools:
 Android Studio, SDK/platform-tools, API 35/36 build tools, Temurin Java 17,
 Gradle 9.3.1 and NDK 27.1.12297006. First native build downloads remaining dependencies. Full Xcode is unavailable on
 this Mac; an iPhone needs a separately signed development/internal build, not Expo Go.
@@ -80,12 +83,14 @@ MOBILE-MAP-RESEARCH.md. Physical-phone gestures, preview interaction, YouTube
 playback/fullscreen and offline recovery remain explicit checks. Support attachments now have scoped API regression evidence; browser/device
 interaction verification remains part of the release audit.
 
-Current release status: the web/API is deployed with a clean isolated web audit.
-The full mobile toolchain audit retains two upstream advisory roots under the
-owner-approved S62 one-artifact testing exception. Focused map checks and prior
-native evidence are recorded in MOBILE-MAP-RESEARCH.md and TRACEABILITY. The S62
-managed APK is submitted; completion, signature and native-device checks remain
-required. No store submission is claimed.
+Current release status: web/API source 6c27025 is deployed with a clean isolated
+web audit; replacement internal APK 9bcabbdb is finished, signed and installed.
+The full native-toolchain audit retains two upstream advisory roots under the
+owner-approved single replacement-artifact exception, now consumed. Native
+map/logo/gallery/locale/link checks and local owner/API tests have separate
+evidence; physical-phone inbox/social-app checks remain. No store submission is
+claimed. Local browser codes are in the local inbox; the standalone APK sends
+codes through production email delivery.
 
 Setup references: [Expo device testing](https://docs.expo.dev/get-started/start-developing/),
 [Android acceleration](https://developer.android.com/studio/run/emulator-acceleration),

@@ -1,7 +1,7 @@
 ---
 id: FE-051
 title: Automatic starter and editable address
-status: in_progress
+status: done
 related: [FE-053, FE-038, FE-046, FE-049, BE-043, DEP-040]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-10-06
@@ -80,7 +80,7 @@ owner/handle/five-language wordmark checks and health monitoring pass. Existing
 merchant content and demo account aliases are preserved; mail delivery and
 external video playback are not asserted by the no-delivery live smoke.
 
-## S67 — native first-setup preview parity (2026-10-06)
+## Historical S67 — superseded by S70 (2026-10-06)
 
 Owner reiterates: essential setup creates the complete styled private example
 before any page/media/product work. Web already returns the preview destination.
@@ -139,7 +139,8 @@ to editing, then enforces cooldown with support access. Five-language setup/prev
 invalid/taken/stale/failure/retry states, private address retention and operator
 request limits pass. Web 1440/390/320 and native-browser 390 captures plus both
 typechecks/spec validation pass. No required metadata or domain/DB change was
-added. Visual/full/release/artifact stages remain pending; see TRACEABILITY S70.
+added. Subsequent visual/full/release/artifact evidence is recorded below and in
+TRACEABILITY S70; these captures precede that rollout.
 
 Owner review clarification: initial setup must combine the owner's real account
 identity/contact details and business identity/handle on one screen; afterward
@@ -156,4 +157,11 @@ replacement internal APK. All 11 production-mode workflow scenarios now pass
 across the full run (10) and focused corrected owner-entry rerun (1). The old
 capture assumed drafts opened in edit mode; it now asserts preview and clicks
 Edit before editing. No readiness or security check was weakened. Source commit,
-managed artifact and web rollout remain separately recorded stages.
+managed artifact and web rollout are verified: exact source 6c27025, Netlify
+6ac5c9940ee5deb5294319ef and finished internal APK
+9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75. Live public checks and 44 locale/layout states
+pass; signed APK source/archive/signature/runtime and OS-domain checks pass.
+Final native logo, five locales, public entry and gallery checks have evidence.
+The source and database acceptance criteria are complete; physical-phone/email/
+social handoffs and broader native/store limits remain in FE-053/DEP-042, not
+silently claimed by this spec. See docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md.

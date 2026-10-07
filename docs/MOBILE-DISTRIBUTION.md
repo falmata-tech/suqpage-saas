@@ -1,8 +1,13 @@
 # Android tester distribution
 
-DEP-042 / FE-053 / S50. Standalone tester setup remains in progress. A local development APK now builds
-and runs in the emulator; it requires Metro and is not the tester release. See
-MOBILE-MAP-RESEARCH.md for its path/checksum and verified scope.
+DEP-042 / FE-053. The replacement standalone Android tester APK is finished and
+installed for verification. [Download it from Expo](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75).
+It uses live Suqpage accounts/API and needs neither Metro nor Expo Go. The combined
+first setup collects account/business details and the handle, then opens the
+unpublished sample preview with Edit. See
+[the S69/S70 release record](SUQPAGE-S69-S70-RELEASE-2026-10-06.md) for the exact
+source, checksum, signing, web deployment, gates and remaining limits. Earlier
+build/preparation sections below are historical, not current blockers.
 
 The owner selected the Expo account **falmatad**. The linked project is
 [Suqpage on Expo](https://expo.dev/accounts/falmatad/projects/suqpage), ID
@@ -133,7 +138,7 @@ appear in the local inbox; this production-connected APK sends sign-in codes to
 the user's actual email.
 
 
-## S67 finished APK — native review found a release defect
+## Historical S67 APK — superseded by S69/S70
 
 [Expo build 4d6df1a5](https://expo.dev/accounts/falmatad/projects/suqpage/builds/4d6df1a5-795a-4f80-999d-feaa0b679f22)
 is finished from c1872d5a2c328eb56164bd610ca889af5c68c9cd, using the existing free
@@ -150,9 +155,10 @@ separate real PostgreSQL/browser and 11 acceptance-workflow evidence.
 Installed-device review exposed blank owned SVG logos/illustrations: the original
 Photo adapter used React Native Image for SVGs. S69 fixes this with the already
 installed SVG renderer; the corrected development-client logo is visible. Do not
-present S67 as the final corrected artifact. A replacement APK needs fresh visual
-approval and renewal of the bounded one-artifact tooling exception, already used
-by this finished build. No paid build, Play/iOS publication or invitation was sent.
+present S67 as the final corrected artifact. The owner approved its correction
+and a replacement APK, now finished as build 9bcabbdb. Both single-artifact
+exceptions have been consumed. No paid build, Play/iOS publication or invitation
+was sent.
 
 Aloe's existing example youtube:wJV9EDe_sFc has a 404 thumbnail and its embed
 fails gracefully; available honey demo video plays. No media was replaced under

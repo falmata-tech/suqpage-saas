@@ -1074,3 +1074,36 @@ full invocation is retained as failed, not rewritten as green. Next's canceled
 stream messages occur during passing-suite cleanup. No product readiness,
 permission or fixture assertion was weakened. Protected logs:
 .local/rebuild-s69/acceptance.log and acceptance-owner-retry.log.
+
+
+### S69/S70 published artifact evidence
+
+Source 6c27025db6d84cecda43c952597926955aecb71d contains the approved combined
+account/business setup, chosen handle, private sample preview/Edit, Page rename
+and narrow owned-SVG correction. FE-051 is complete; FE-053/DEP-042 retain their
+broader physical-phone/store limits. Full check, focused security/API/local
+owner workflows and eleven distinct acceptance workflows have passing evidence
+(with the initial 10/11 full run and separate corrected owner rerun retained).
+
+Netlify 6ac5c9940ee5deb5294319ef is ready with the exact source; clean isolated
+web release/audit, operations, Linux handler/image, archive privacy and exact
+upload-cache checks pass. One wrong-cwd/order packaging attempt is retained and
+its controlled rebuild passes before upload. Seven live readbacks and 44 public
+language/layout states pass. Read-only post-deploy checks verify all 64 existing
+live demo accents on both HTML and native API. Protected: .local/web-s70/.
+
+Expo 9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75 is FINISHED from the same source. Clean
+archive has 1,496 files, zero private paths and 19 matching code/config files.
+Android export has 1,571 runtime sources excluding braces/node-forge; final APK
+signature/manifest/MapLibre/runtime secret inspection pass. Installed APK reports
+suqpage.com verified; cold filtered search and warm public store/product intents
+reach the actual preview app. Corrected SVG logo, five locale switches, public
+Market/About/email entry and gallery next/thumbnail checks pass. Available honey
+video plays inside the final APK with Suqpage still foreground. The first screen
+checks hit Android System UI/launcher ANR; process restart and bounded retry pass,
+with failed-attempt evidence preserved. No physical-phone or real inbox/social
+handler assertion. Full native audit remains failed on exactly the approved two
+roots (20 high, zero critical); this single replacement exception is consumed.
+Protected: .local/rebuild-s69/. Downloads/signature/checksum/rollback and remaining
+limits: docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md. No schema/Auth/SMTP/DNS write,
+Play/iOS submission, paid build, Git push or invitation.
