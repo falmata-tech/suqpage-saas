@@ -5,8 +5,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { KnownPlace } from '@/lib/place-search';
 import styles from './PlaceSearch.module.css';
 
-export default function PlaceSearch({ value, selected, onChange, onSelect }: {
-  value: string; selected: KnownPlace | null; onChange: (value: string) => void; onSelect: (place: KnownPlace) => void;
+export default function PlaceSearch({ value, selected, onChange, onSelect, inputId="owner-city", selectionRequired=false }: {
+  inputId?:string; selectionRequired?:boolean; value: string; selected: KnownPlace | null; onChange: (value: string) => void; onSelect: (place: KnownPlace) => void;
 }) {
   const t = useUiText();
   const id = useId();
@@ -25,20 +25,20 @@ export default function PlaceSearch({ value, selected, onChange, onSelect }: {
         if (!response.ok) throw new Error('Search unavailable');
         const body = await response.json() as { places: KnownPlace[] };
         if (controller.signal.aborted) return;
-        setResults(body.places); setStatus(body.places.length ? `${body.places.length} places found.` : 'No matching place. You can enter your city and region manually.');
+        setResults(body.places); setStatus(body.places.length ? `${body.places.length} places found.` : selectionRequired?'No matching city. Try another name.':'No matching place. You can enter your city and region manually.');
       } catch {
-        if (!controller.signal.aborted) setStatus('Place search is unavailable. Try typing again, or enter your city and region manually.');
+        if (!controller.signal.aborted) setStatus(selectionRequired?'City search is unavailable. Try again.':'Place search is unavailable. Try typing again, or enter your city and region manually.');
       }
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [value, open, selected]);
+  }, [value, open, selected, selectionRequired]);
   function choose(place: KnownPlace) { onSelect(place); setOpen(false); setActive(-1); }
   const expanded = open && results.length > 0;
   useEffect(() => {
     if (expanded && document.activeElement === input.current && window.matchMedia("(max-width: 700px)").matches) input.current?.scrollIntoView({block:"center",behavior:"instant"});
   }, [expanded]);
   return <div className={styles.search}>
-    <input ref={input} id="owner-city" name="city" value={value} maxLength={80} autoComplete="off" role="combobox"
+    <input ref={input} id={inputId} name={selectionRequired?undefined:"city"} value={value} maxLength={80} autoComplete="off" role="combobox"
       aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? `${id}-results` : undefined}
       aria-activedescendant={expanded && active >= 0 ? `${id}-${active}` : undefined} aria-describedby={`${id}-status`}
       placeholder={t("Search a city or town")} onFocus={event => { setOpen(true); if (window.matchMedia("(max-width: 700px)").matches) event.currentTarget.scrollIntoView({block:"center",behavior:"instant"}); }} onBlur={() => setOpen(false)}
@@ -54,10 +54,10 @@ export default function PlaceSearch({ value, selected, onChange, onSelect }: {
       {results.map((place,index) => <li id={`${id}-${index}`} key={place.id} role="option" aria-selected={active === index}
         onPointerDown={event => event.preventDefault()} onClick={() => choose(place)}>
         <strong>{place.name}{place.localName && place.localName !== place.name ? <span> · {place.localName}</span> : null}</strong>
-        <small>{place.region} · {place.kind} · {place.latitude.toFixed(3)}, {place.longitude.toFixed(3)}</small>
+        <small>{place.region}{!selectionRequired?` · ${place.kind} · ${place.latitude.toFixed(3)}, ${place.longitude.toFixed(3)}`:null}</small>
       </li>)}
     </ul> : null}
-    <small id={`${id}-status`} role="status">{selected ? t("Selected: {value1}, {value2}. Area coordinates filled.", { value1: selected.name, value2: selected.region }) : t(status) || t("Search by city or town name, including local names.")}</small>
+    <small id={`${id}-status`} role="status">{selected ? selectionRequired ? `${selected.name}, ${selected.region}` : t("Selected: {value1}, {value2}. Area coordinates filled.", { value1: selected.name, value2: selected.region }) : t(status) || t("Search by city or town name, including local names.")}</small>
     <small className={styles.attribution}>{t("Place data ©")}{" "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{t("OpenStreetMap contributors")}<span className="sr-only"> {" "}{t("(new tab)")}</span></a>.</small>
   </div>;
 }

@@ -38,7 +38,7 @@ try {
     page.getByText(/results$/, { exact: false }).first(),
   ).toBeVisible({ timeout: 60000 });
   await page.screenshot({ path: out + "/market-phone.png" });
-  await page.getByRole("button", { name: "Search & results", exact: true }).click();
+  await page.getByRole("button", { name: "View products", exact: true }).click();
   await page.getByRole("textbox", { name: "Search", exact: true }).fill("gras");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(

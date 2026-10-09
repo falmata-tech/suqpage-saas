@@ -1,3 +1,6 @@
+import {TRANSPORT_COPY} from "../../../lib/i18n/transport-copy";
+import {View} from "react-native";
+import MainNavigation from "../src/main-navigation";
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -5,10 +8,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RuntimeProvider, useApp } from "../src/runtime";
 import { AppHeader } from "../src/chrome";
 import { colors } from "../src/ui";
+import {OwnerAttentionProvider} from '../src/AttentionAlerts';
 function Routes() {
   const { t, session } = useApp();
   return (
-    <>
+    <View style={{flex:1}}>
       <StatusBar style="dark" />
       <Stack
         key={session?.user.id || "visitor"}
@@ -30,21 +34,22 @@ function Routes() {
         <Stack.Screen name="inquiry" options={{ title: t("Inquiry") }} />
         <Stack.Screen
           name="buying"
-          options={{ title: t("Transport & delivery") }}
+          options={{ title: t(TRANSPORT_COPY.title) }}
         />
         <Stack.Screen
           name="owner/[section]"
           options={{ title: t("Your business") }}
         />
       </Stack>
-    </>
+      <MainNavigation/>
+    </View>
   );
 }
 export default function Layout() {
   return (
     <SafeAreaProvider>
       <RuntimeProvider>
-        <Routes />
+        <OwnerAttentionProvider><Routes /></OwnerAttentionProvider>
       </RuntimeProvider>
     </SafeAreaProvider>
   );

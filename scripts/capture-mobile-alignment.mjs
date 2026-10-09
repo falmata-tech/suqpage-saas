@@ -30,13 +30,13 @@ try {
     );
   }
   await page.goto("http://localhost:8082");
-  await expect(button("Search & results")).toBeVisible({ timeout: 60000 });
+  await expect(button("View products")).toBeVisible({ timeout: 60000 });
   await expect(page.locator(".suqpage-map-marker").first()).toBeVisible({
     timeout: 30000,
   });
   await expect(page.getByRole("link", {name: "© OpenStreetMap contributors"})).toBeInViewport();
   await capture("native-market");
-  await button("Search & results").click();
+  await button("View products").click();
   await expect(
     page.getByRole("textbox", { name: "Search", exact: true }),
   ).toBeVisible();
@@ -54,9 +54,9 @@ try {
   await page.getByRole("textbox", { name: "Search", exact: true }).fill("gras");
   await button("Search").click();
   await expect(button("Farm Grass with Dirt")).toBeVisible({ timeout: 15000 });
-  await button("Hide search and filters").click();
-  await expect(button("Search & results")).toBeVisible();
-  await button("Search & results").click();
+  await button("Hide products").click();
+  await expect(button("View products")).toBeVisible();
+  await button("View products").click();
   await expect(
     page.getByRole("textbox", { name: "Search", exact: true }),
   ).toHaveValue("gras");
@@ -98,8 +98,8 @@ try {
   await button("Next").scrollIntoViewIfNeeded();
   await button("Next").click();
   await expect(page.getByText(/^2 \/ \d+$/, { exact: true })).toBeVisible();
-  await button("Hide search and filters").click();
-  await button("Search & results").click();
+  await button("Hide products").click();
+  await button("View products").click();
   await expect(page.getByText(/^2 \/ \d+$/, { exact: true })).toBeVisible();
   checks.push("Backend pagination survives panel toggle");
   // Open a map preview with the search drawer still open: it must sit above it.
@@ -113,7 +113,7 @@ try {
   await capture("native-map-preview");
   await button("Close").last().click();
   checks.push("Map preview appears above open drawer");
-  await button("Hide search and filters").click();
+  await button("Hide products").click();
   await page.getByRole("tab", { name: "More", exact: true }).click();
   await expect(button("Sign in")).toBeVisible();
   await page.getByRole("radio", { name: "አማርኛ", exact: true }).click();
@@ -130,14 +130,14 @@ try {
     [1024, 900],
   ]) {
     await page.setViewportSize({ width, height });
-    await button("Search & results").click();
+    await button("View products").click();
     await expect(
       page.getByRole("textbox", { name: "Search", exact: true }),
     ).toBeVisible();
     await button("Next").scrollIntoViewIfNeeded();
     await noOverflow();
     await capture(`native-market-${width}`);
-    await button("Hide search and filters").click();
+    await button("Hide products").click();
   }
   checks.push("320px, landscape and tablet panel scrolling");
   await page.setViewportSize({ width: 390, height: 844 });

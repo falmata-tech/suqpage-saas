@@ -2,13 +2,39 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [BE-044, ADR-0023, FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039]
+related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050]
 owners: [backend, security, customer-support]
-last_updated: 2026-09-27
+last_updated: 2026-10-07
 change_level: L3
 ---
 
 # BE-018 - First-party customer support queue
+
+## S87/S88 — real workflow audit and scoped agent creation
+
+The owner requests actual local HTTP/browser conversations on web and mobile,
+not mocked/route-fulfilled replies. Use labelled disposable owner/guest/staff
+records; do not modify customer cases or send external notifications. Cover both
+owner support and guest transport: intake, queue, assignment/claim/reassignment,
+capacity, both-way replies, visibility, retries, close/reopen, history/resolution,
+retained contacts/intake, private notes/handoff and permission negatives. Existing
+isolated PostgreSQL/domain suites supplement but do not replace real UI evidence.
+
+GIVEN reassignment removes an agent's case access WHEN its open case refreshes
+THEN return to its authorized inbox with a generic unavailable notice; do not
+render a server error or disclose case data. The same response covers absent and
+unauthorized case IDs. Capacity rejection keeps the waiting case unassigned.
+
+FE-026 S88 creates only Support/Transport agent functions using existing scoped
+team-member settings and fresh principal projection. Successful assignment changes
+display confirmation after server completion; rejected capacity/queue changes
+preserve the saved assignment. New agents start enabled
+with capacity three and exactly their selected queue. Operator/all-scope forgery
+is rejected at creation. Scope changes cannot strand incompatible active cases
+or silently grant business/product access. Existing assignments and history stay
+authoritative. Main admin/account setup applies to both local and hosted; the
+owner limits the real chat audit itself to local previews. Provider/Auth config
+and hosted conversation testing are outside this audit.
 
 ## S48 — staff-reviewed showroom and product videos (in progress)
 
@@ -565,6 +591,12 @@ can leave the tables unused without deleting support history.
 - [x] Rollout/rollback decided
 
 ## Completion evidence
+
+S98 browser transport intake asserts the persisted initial state: an automatically
+assigned case shows its named agent, otherwise it shows the waiting state. Neither
+state claims the agent joined before explicit acknowledgement. The disposable
+fixture may contain available transport staff; do not force production behavior
+back to waiting solely to satisfy an outdated browser assertion.
 
 Evidence: verified locally on 2026-07-30.
 

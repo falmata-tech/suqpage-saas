@@ -4,14 +4,15 @@
     "preview": {
       "distribution": "internal",
       "environment": "preview",
+      "autoIncrement": true,
       "android": { "buildType": "apk" },
-      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "preview" }
+      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "preview", "SUQPAGE_MOBILE_DATA_TARGET": "production" }
     },
     "production": {
       "environment": "production",
       "autoIncrement": true,
       "android": { "buildType": "app-bundle" },
-      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "production" }
+      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "production", "SUQPAGE_MOBILE_DATA_TARGET": "production" }
     }
   },
   "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft" } } }

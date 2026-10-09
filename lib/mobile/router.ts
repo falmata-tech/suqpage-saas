@@ -1,3 +1,4 @@
+import {resolveProductVideoUrl} from '../tiktok-short-link';
 import { saveNativeBusiness } from "./business";
 import { nativeSupportAttachment, nativeSupportReply } from "./support-attachments";
 import { revalidatePath } from "next/cache";
@@ -27,7 +28,7 @@ import {
 import { findPlaceSuggestions } from "../place-catalog";
 import { BUSINESS_CATEGORY_OPTIONS } from "../business-categories";
 import { parseBusinessHandle } from "../business-handle";
-import { parseAccountPhone } from "../account-contacts";
+import { parseAccountPhone, parseAccountName, saveAccountProfile } from "../account-contacts";
 import { getHandleAvailability } from "../handle-availability";
 import { createPublicInquiry, InquiryError } from "../inquiries";
 import { hashPrivateValue, requestIpFromHeaders } from "../security";
@@ -52,6 +53,8 @@ import { listInquiriesPage } from "../scalable-queries";
 import { updateInquiryStatus } from "../inquiry-status-runtime";
 import { createVideoRequest } from "../support-video-requests";
 import { channelConversation } from "../public-support-channel";
+import {scheduleAttentionDelivery} from '../attention-after';
+import { AttentionError, userAttentionFeed, visitorAttentionFeed, readUserAttention, readVisitorAttention, readAllUserAttention, readAllVisitorAttention, userAttentionPreferences, visitorAttentionPreferences, subscribeUserAttention,subscribeVisitorAttention,revokeUserAttention,revokeVisitorAttention,pushCapabilities,assertVisitorAttentionChannel } from '../attention-postgres';
 import {
   createPublicSupportConversation,
   postPublicSupportMessage,
@@ -63,6 +66,8 @@ import {
   closeSupportConversation,
   reopenSupportConversation,
   SupportError,
+  acknowledgePublicRead,
+  acknowledgeSupportRead,
 } from "../support";
 import {
   readCoverUpload,
@@ -174,6 +179,21 @@ async function dispatch(
     );
   if (method === "POST" && key === "inquiries")
     return createPublicInquiry(await jsonBody(request), ip);
+  if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {
+    const token=request.headers.get('X-Suqpage-Buying-Session')||'';
+    await assertVisitorAttentionChannel(token,path[0]==='transport'?'transport':'buying');
+    if(method==='GET')return {...await visitorAttentionFeed(token),push:pushCapabilities()};
+    if(method==='POST'){
+      const b=await jsonBody(request);allowFields(b,['action','id','soundEnabled','language','device']);
+      if(b.action==='read')await readVisitorAttention(token,b.id);
+      else if(b.action==='read_all')await readAllVisitorAttention(token,b.id);
+      else if(b.action==='preferences')await visitorAttentionPreferences(token,b);
+      else if(b.action==='subscribe')await subscribeVisitorAttention(token,b.device);
+      else if(b.action==='unsubscribe')await revokeVisitorAttention(token);
+      else throw new MobileError('Choose an alert action.');
+      return {...await visitorAttentionFeed(token),push:pushCapabilities()};
+    }
+  }
   if ((path[0] === "buying" || path[0] === "transport") && path.length === 1) {
     const channel = path[0] === "transport" ? "transport" : "buying";
     const token = request.headers.get("X-Suqpage-Buying-Session") || "";
@@ -194,6 +214,7 @@ async function dispatch(
         "message",
         "idempotencyKey",
         "publicRef",
+        "messageId",
       ]);
       if (b.action === "start") {
         const created = await createPublicSupportConversation(
@@ -218,7 +239,8 @@ async function dispatch(
       const current = await channelConversation(token, channel);
       if (b.publicRef !== current.publicRef)
         throw new MobileError("This chat changed. Please refresh.", 409);
-      if (b.action === "close") await closePublicSupportConversation(token);
+      if (b.action === 'read') await acknowledgePublicRead(token, { messageId: b.messageId, publicRef: b.publicRef });
+      else if (b.action === "close") await closePublicSupportConversation(token);
       else if (b.action === "message")
         await postPublicSupportMessage(
           token,
@@ -248,6 +270,7 @@ async function dispatch(
       "phone",
       "businessName",
       "businessCategory",
+      "placeId",
       "accentColor",
       "handle",
       "consent",
@@ -278,6 +301,7 @@ async function dispatch(
       page: q.get("page"),
       status: q.get("status"),
       q: q.get("q"),
+      inquiryId:q.get('inquiry'),
     });
     return {
       items: p.items.map((i) => ({
@@ -298,6 +322,7 @@ async function dispatch(
       total: p.totalItems,
     };
   }
+  if(method==='GET' && route==='attention')return {...await userAttentionFeed(actor),push:pushCapabilities()};
   if (method === "GET" && route === "support") {
     const p = await listSupportConversations(actor, {
       page: q.get("page"),
@@ -323,6 +348,9 @@ async function dispatch(
         id: c.conversation.id,
         subject: c.conversation.subject,
         status: c.conversation.status,
+        agentJoined: c.conversation.agentJoined,
+        assignedUserName: c.conversation.assignedUserName,
+        publicRef: c.conversation.publicRef,
       },
       messages: c.messages.map((m) => ({
         id: m.id,
@@ -330,6 +358,8 @@ async function dispatch(
         createdAt: m.createdAt,
         senderName: m.senderName,
         attachment: m.attachment,
+        sender: m.senderRole === 'client' ? 'owner' : 'staff',
+        read: m.read,
       })),
     };
   }
@@ -361,6 +391,10 @@ async function dispatch(
     });
   }
   if (method !== "POST") throw new MobileError("Method not allowed.", 405);
+  if(route==='video-link'){
+    const body=await jsonBody(request);allowFields(body,['url']);
+    try{return {ref:await resolveProductVideoUrl(body.url)};}catch{throw new MobileError('Use a supported video link.',400);}
+  }
   if (route === "cover") {
     const file = await readCoverUpload(request);
     return {
@@ -429,7 +463,11 @@ async function dispatch(
     );
   }
   if (route === "account") {
-    allowFields(b, ["phone"]);
+    allowFields(b, ["phone", "name"]);
+    if (Object.hasOwn(b, 'name')) {
+      await saveAccountProfile(accountContactPort, actor, {name: mobileParse(()=>parseAccountName(b.name)), phone: mobileParse(()=>parseAccountPhone(b.phone))});
+      return {saved: true};
+    }
     await saveAccountPhone(
       accountContactPort,
       actor,
@@ -469,9 +507,20 @@ async function dispatch(
       idempotencyKey: b.idempotencyKey,
     });
   }
+  if(route==='attention'){
+    allowFields(b,['action','id','soundEnabled','language','device']);
+    if(b.action==='read')await readUserAttention(actor,b.id);
+    else if(b.action==='read_all')await readAllUserAttention(actor,b.id);
+    else if(b.action==='preferences')await userAttentionPreferences(actor,b);
+    else if(b.action==='subscribe')await subscribeUserAttention(actor,b.device);
+    else if(b.action==='unsubscribe')await revokeUserAttention(actor);
+    else throw new MobileError('Choose an alert action.');
+    return {...await userAttentionFeed(actor),push:pushCapabilities()};
+  }
   if (path[1] === "support" && path.length === 3) {
-    allowFields(b, ["action", "message", "idempotencyKey"]);
+    allowFields(b, ["action", "message", "idempotencyKey", 'messageId', 'publicRef']);
     const id = numericId(path[2]);
+    if (b.action === 'read') return acknowledgeSupportRead(actor, id, { messageId: b.messageId, publicRef: b.publicRef });
     if (b.action === "close") return closeSupportConversation(actor, id);
     if (b.action === "reopen") return reopenSupportConversation(actor, id);
     if (b.action === "message")
@@ -501,6 +550,9 @@ export async function handleMobileRequest(
       const value = await dispatch(request, path, dependencies?.identity);
       response =
         value instanceof Response ? value : json(value ?? { saved: true });
+      if(request.method==='POST' && (path[0]==='inquiries'||path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&path[1]==='support')){
+        try{scheduleAttentionDelivery();}catch{/* Direct adapter tests have no Next request lifecycle; scheduled delivery remains durable. */}
+      }
       if (
         request.method === "POST" &&
         path[0] === "owner" &&
@@ -517,7 +569,7 @@ export async function handleMobileRequest(
       e instanceof SignupError;
     const status = known
       ? e.status
-      : e instanceof SupportError
+      : e instanceof AttentionError ? e.code==='not_found'?404:e.code==='forbidden'?403:400 : e instanceof SupportError
         ? e.code === "forbidden"
           ? 403
           : e.code === "not_found"
@@ -529,7 +581,7 @@ export async function handleMobileRequest(
     response = json(
       {
         error:
-          known || e instanceof SupportError
+          known || e instanceof SupportError || e instanceof AttentionError
             ? e.message
             : "Could not complete this request. Please try again.",
         code: e instanceof MobileError ? e.code : undefined,

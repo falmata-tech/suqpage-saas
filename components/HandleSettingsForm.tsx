@@ -1,14 +1,16 @@
 'use client';
+import type {OwnerEditResult} from '@/lib/owner-edit-contract';
 import {useState} from 'react';
 import Link from 'next/link';
 import HandleField from './HandleField';
 import {useUiText} from '@/lib/i18n/ui';
 import type {HandleSettings} from '@/lib/business-handle-runtime';
 
-export default function HandleSettingsForm({settings,businessId,admin=false,action,returnTo}:{settings:HandleSettings;businessId:number;admin?:boolean;action:(form:FormData)=>Promise<void>;returnTo?:'page'}) {
-  const t=useUiText();const [ready,setReady]=useState(false);const [saving,setSaving]=useState(false);
+export default function HandleSettingsForm({settings,businessId,admin=false,action,returnTo}:{settings:HandleSettings;businessId:number;admin?:boolean;action:(form:FormData)=>Promise<OwnerEditResult>;returnTo?:'page'|'profile'}) {
+  const t=useUiText();const [ready,setReady]=useState(false);const [saving,setSaving]=useState(false);const [error,setError]=useState('');
   const locked=!admin&&settings.nextChangeAt>Date.now();
-  return <form className="panel form-grid" action={async form=>{setSaving(true);try{await action(form);}finally{setSaving(false);}}}>
+  return <form className="panel form-grid" action={async form=>{setSaving(true);try{const result=await action(form);if(result)setError(result.error);}finally{setSaving(false);}}}>
+    {error?<p className="field full error" role="alert">{t(error)}</p>:null}
     <input type="hidden" name="businessId" value={businessId}/><input type="hidden" name="expectedVersion" value={settings.contentVersion}/>
     {returnTo ? <input type="hidden" name="returnTo" value={returnTo}/> : null}
     <div className="field full"><h2>{t('Page address')}</h2><p className="handle-address" dir="ltr">suqpage.com/@{settings.handle}</p></div>

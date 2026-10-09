@@ -2,13 +2,23 @@
 id: BE-032
 title: Tenant-owned page drafts and revocable staff assistance
 status: in_progress
-related: [FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039]
+related: [FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039]
 owners: [backend, security]
-last_updated: 2026-09-27
+last_updated: 2026-10-07
 change_level: L2
 ---
 
 # BE-032 - Tenant-owned page drafts and revocable staff assistance
+
+## S88 — scoped queue staff have no page authority
+
+GIVEN Support/Transport agents with retained legacy business assignments and owner
+assistance consent THEN deny private page/media read and write authority. Queue
+scope is part of the current principal. GIVEN a role/scope change after an earlier
+principal was read WHEN a PostgreSQL page commit executes THEN the current access
+profile and queue setting fence the write; preserve draft/version/events on denial.
+Legacy generic staff and consented operations behavior remain compatible. Focused
+regression: scripts/test-staff-boundaries.ts plus owner-page domain/PostgreSQL suites.
 
 ## Current release evidence — 2026-09-14
 

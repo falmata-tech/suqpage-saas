@@ -2749,3 +2749,1025 @@ failed attempts rather than claiming an uninterrupted run. The native audit
 remains failed under the consumed one-artifact exception; physical-phone/inbox/
 social-app/native-speaker/iOS/Play limits remain explicit. No Git push or
 invitations. See docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md.
+
+
+S71 — purchased-goods transport chat invitation (FE-019 / FE-049 / FE-053, L1 UI)
+- [x] Ready: clarify the existing transport service, not add booking/delivery
+  guarantees. Both launchers name help transporting purchases. Intake connects
+  finding/agreeing on a product to chatting with our team for transport help.
+  Keep paired route/contact fields, service/API/staff/history semantics and colors.
+- [x] Author concise contextual copy for all five languages; keep native
+  chat wording plus literal (Live Chat) for non-English visitors. Reuse shared
+  catalogs; bound long launcher text on narrow web/native screens.
+- [x] Verify catalog coverage, both typechecks and focused narrative/UI tests;
+  capture web desktop/390/320 and Expo phone in all locales, plus compact map
+  launcher/short-height intake. No production messages or sign-ins.
+- [ ] CURRENT: owner visual review of local URL/screenshots before full/release gates.
+- [ ] After approval, run applicable gates, update evidence/master, scoped commit.
+  No deployment/new APK inferred; the last artifact exception is consumed.
+Master §§3/5/11/15 service invitation wording affected. Translation is authored
+contextually; do not claim independent native-speaker review. Existing untracked
+deno.lock stays untouched.
+
+
+S72 — clear product-results opener (FE-030 / FE-049 / FE-053, L1 UI)
+- [x] Ready: user adds this to the active UI review. Compare Product view, Results
+  and View products; choose the concrete View products action. Preserve a single
+  compact horizontal toolbar, icon/arrow, filters/map state and offering-only list.
+- [x] Show View products beside/below its panel icon; open state says
+  Hide products. Both web/native use contextual shared translations and retain
+  expanded state, panel controls, focus/Escape and existing search behavior.
+- [x] Focused type/locale and actual toggle/input/filter-scope captures on
+  desktop/390/320, including long localized toolbar labels and unchanged map.
+- [ ] CURRENT: owner visual approval before full/release/commit gates alongside S71.
+Master §§5/7/11/15 current button wording affected; existing artifact/deployment
+are unchanged. No backend query/API/DB change or new package.
+
+S71/S72 focused terminal evidence: web/native types, nine localization tests,
+narrative/category/homepage/composition and 167-spec validation pass. Product
+entry capture passes seven web and six Expo states (26 screenshots); paired
+chat intake passes seven web, six Expo and two short-height states (15 captures).
+Initial cache/cold-build/ambiguous-locator failures are preserved and diagnosed
+in TRACEABILITY. Native-browser expanded-state regression is corrected and
+verified. Current visual-approval request links 3102/8082; full gates/commit/
+rollout wait for that approval. Existing live web/APK remain on 6c27025.
+
+S71 owner review correction — 2026-10-07: the long launcher name is rejected.
+Use a short Delivery help title and one compact sublabel incorporating Live Chat
+and purchased-goods context. Author local equivalents; preserve (Live Chat)
+next to native chat wording. This supersedes only the initial launcher copy,
+not the already-reviewed intake or S72 product-results controls.
+- [x] Record corrected acceptance before code; preserve all current task edits.
+- [x] Shorten both launchers and author contextual sublabels.
+- [x] Capture corrected web/Expo launcher states across five languages/phone sizes;
+  verify locale/types and existing compact panel behavior.
+- [ ] Visual approval/full gates/commit/rollout remain pending.
+
+S71 localization refinement: owner explicitly prioritizes clear native wording
+over equal English length. Local sublabels name purchased goods, retain native
+live-chat words plus (Live Chat), and may wrap cleanly. Preserve the short title.
+
+S71 corrected short-title evidence: Delivery help plus Live Chat · For your
+purchases on both launchers; authored local equivalents explicitly describe
+purchased goods and live conversation, allowing extra words/clean wrapping.
+Nine locale tests, both types, narrative/category and spec validation pass.
+The combined entry capture passes 13 web/Expo locale/viewport states with 26
+new screenshots under .local/transport-purchase-review/short-title/. Prior
+intake/S72 evidence remains valid; title correction changes neither. Visual
+approval/full gates/task commit/rollout remain pending.
+
+
+S73/S74 — Android cover save and unified owner Profile (FE-056 / BE-045)
+- [x] Inspect current owner/upload/save routes. Android @alhayabrand reported;
+  public projection returns 404, so do not infer a failed private save or alter
+  that customer. Current picker stages a cover with a remote Save button and
+  bottom-only notice. Reproduce using disposable local accounts first.
+- [x] Ready specs for a unified private Profile, focused edit/save/return
+  screens, cover persistence/failure retention and private name/phone updates.
+  Preserve S71/S72 pending review and unrelated deno.lock.
+- [x] Fix and test actual cover upload → saved draft → re-entry/public projection;
+  keep tenant isolation, version conflicts and unconfirmed uploads safe.
+- [x] Build web/native Profile hub with store preview, handle, page/business/account
+  edit destinations. Save returns to Profile only on success; failures stay put.
+- [x] Verify local owner workflows/failure/tenant regressions, types/locales and
+  desktop/phone captures; actual Android picker/cover review where feasible.
+- [ ] Owner visual approval before full/release/commit; no hosted customer writes,
+  provider/schema changes or new APK admission implied by this local feature.
+Master §§5/11/13/15/18/19/22 affected. Essential signup still opens the saved
+private sample; subsequent account/owner home becomes Profile. Staff stays web
+and its workspace is unchanged.
+
+S73/S74 environment finding: Expo watches the app/contracts/node_modules but
+not root lib/i18n. Add that bounded public UI folder to Metro's watch list to
+prevent repeated stale locale bundles during local editing; no runtime/provider
+change. Native invalid account input now maps to 400 via existing mobileParse;
+the unchanged security regression passes.
+
+S75 — stable navigation and basic Profile activity (FE-056/FE-053/FE-034)
+- [x] Owner requests research and a concrete simple visitor/business menu. Choose
+  Market/Featured/Account for guests and adds Inquiries for signed-in owners; Account becomes the linked owner's Profile. Inquiries remain
+  the business inbox; no new customer account/inquiry-history capability implied.
+  Profile groups editor/products/support/settings and bounded real activity counts.
+- [x] Add authoritative own-business visits/30-day visits/new inquiries/
+  products metrics; unify native bottom menu and mobile web owner/public menus.
+  Desktop adapts these destinations without adding duplicate bottom menus.
+- [x] Verify exactly one menu, guest/account gates and owner edit/inquiry navigation
+  across web/Expo, including copy/locales/keyboard/bottom safe areas.
+Primary research: developer.android.com/develop/ui/compose/components/navigation-bar
+(3–5 stable top-level destinations); Apple tab-bar guidance also favors stable
+items. Profile/Inbox organization follows the user's TikTok analogy without
+introducing social feeds or unrelated roles. Master §§5/7/11/13/15 affected.
+
+S76 — themed loading feedback (FE-056/FE-053/FE-034, L1 UI)
+- [x] Owner adds horizontal looping theme-matched loading bars for real data/auth/
+  map/page waits. Reuse one web/native component; no fake progress or success.
+- [x] Apply to existing pending boundaries and save/auth/loading states,
+  with accessible text and reduced-motion/static fallback. Preserve map/results
+  and form state while refreshing; don't hide errors or settled content.
+- [x] Focused pending/settled/error, reduce-motion and phone captures/types;
+  fold review into the active Profile/menu task before full/release gates.
+
+S75 owner correction: Inquiries must be absent for guests and appear only after
+sign-in. This explicitly supersedes the earlier always-visible/gated-inbox proposal.
+Guest menu: Market/Featured/Account. Signed-in menu: Market/Featured/Inquiries/Account.
+Keep one bar and Account as the final destination. No guest inbox/sign-in detour.
+
+
+S77 — TikTok product video embeds (FE-057 / BE-046 / ADR-0024, L3)
+- [x] Research official player and in-app WebView viability; keep covers YouTube.
+  Preserve existing video review and earlier S71–S76 work; no new dependency.
+- [x] Implement canonical provider contracts (extended by S80) and bounded
+  short-link approval adapter, then persistence/snapshot/review regression tests.
+- [x] Add official inline web/native player with explicit Play, one-active lifecycle,
+  unavailable/retry/loading states and blocked outbound navigation.
+- [x] Verify types/locales, real local review persistence and focused desktop/phone
+  gallery captures; mark provider fixtures separately from real playback.
+- [ ] Owner visual approval before full/release/commit; native binary and hosted
+  publication remain separate approved rollout steps.
+Master §§8/9/13/15/18/19 affected. No schema/Auth change; no customer/demo mutation.
+
+
+S78 — free world-map exploration (FE-058, L1)
+- [x] Owner requests removing Ethiopia viewport lock on web/mobile. Inspect maps:
+  web Leaflet has national maxBounds; native/browser zoom floors differ.
+- [x] Remove national pan restrictions, align zoom 1–19, preserve initial/
+  reset Ethiopia viewport, filters, map marker policy and authoritative catalog.
+- [x] Verify Africa/Middle East/distant view/reset and filter preservation on
+  desktop/phone/Expo; focused map tests and captures before owner visual review.
+- [ ] Visual approval, full gates and web/native rollout separately. No DB or
+  international location-data expansion; prior S71–S77 remain active.
+Master §§7/15/18/19 affected.
+
+
+S79 — chosen city required in initial setup (FE-059 / BE-047, L2)
+- [x] Inspect signup: web/native omit city; starter currently assumes Addis Ababa.
+  Both map adapters already use deterministic area placement; fix national display
+  clamps in S78 without altering exact GPS or persisted coordinates.
+- [x] Require canonical city selection with name/handle/category/phone,
+  validate server-side and save business/area anchor atomically at signup.
+- [x] Add clear bounded city search/selection/invalidation/loading on both forms;
+  keep rich private preview, no immediate publication or GPS complexity.
+- [x] Test web/native parser/API/DB/tenant/rollback, missing/forged city, same-city
+  offsets and real desktop/phone initial setup→saved preview captures.
+- [ ] Visual approval before full/release/commit. New-account old-APK compatibility
+  needs coordinated updated app/API release; existing accounts are not relocated.
+Master §§5/11/15/18/19 affected. Existing city catalog remains Ethiopia; global
+map pan does not invent international city coordinates. Prior work stays active.
+
+
+S80 — direct cover/product videos and portrait fill (FE-060 / BE-048, L3)
+- [x] Newest owner removes approval and cover restriction; accept self-service
+  supported video URLs on both cover/products. Public Facebook official embed
+  smoke exposes an inline video, YouTube/TikTok already have controlled adapters.
+  Instagram public Reel research exposes an inline video; admit Reels, not photos/
+  profiles/stories. Actual native playback remains a device check.
+- [x] Broaden validated refs/cover saves, remove owner approval UI/gate,
+  preserve old private tickets/tenant/version rules; no schema/secret change.
+- [x] Center one TikTok player over softly blurred static cover fill; live-frame
+  mirroring is unavailable from the cross-origin embed and duplicate players fail
+  audio/sync quality. Keep platform colors and playing media untinted.
+- [x] Focused save/tenant/version/legacy/security tests, web/Expo/Android captures,
+  provider fixtures separate from real playback; review all new native copy.
+- [ ] Explicit visual approval before full/release/commit; coordinated rebuilt
+  app/web rollout and new artifact admission remain separate.
+Master §§8/9/13/15/18/19 affected. This overrides S77's YouTube-only cover/review
+requirement but keeps historical request data and the earlier active tasks.
+
+S73 actual native defect reproduced: SDK 57 rejects legacy {uri,name,type} FormData
+parts before any HTTP request (Unsupported FormDataPart implementation). Use
+already-installed FileSystem File/standard Blob multipart for all shared image
+uploads; add binary/MIME/size regression and retest native selected-photo save.
+No customer data, dependency or storage/schema change.
+
+S73–S80 focused evidence (2026-10-07): Profile browser captures pass five languages,
+cover/account/handle save/error/re-entry and one-menu guest/owner states. Actual
+Android selected cover saves at draft version 2, returns to Profile and renders
+after editor re-entry; SDK binary File uploads and authenticated private-image
+fetch/cache fix both reproduced failures. Bounded image tests include unauthorized/
+MIME/size rejection and obsolete-resource cleanup. World-map capture passes six
+web/Expo viewports with global pan/zoom/reset/filter retention. Signup capture
+passes canonical city selection/invalidation and direct initial setup→private preview.
+Four-provider direct video capture passes actual web/Expo saves/reloads/no tickets.
+Public Facebook/Instagram media time advances in Chromium and Android; TikTok
+Android player loads and reports media progress. Provider fixtures and real smoke
+are separate. Types/locales/specs and focused API/gallery/video/starter regressions
+pass. Evidence is private under .local/owner-profile-review/, direct-video-review/,
+signup-city-review/, world-map-review/ and tiktok-product-review/.
+
+CURRENT: focused verification/desktop-phone captures pass; obtain visual
+approval before complete check/release/acceptance gates and task commit. S76 delayed/error/retry/settled/reduced-motion phone captures pass through
+capture-loading-states.mjs; physical-phone/fullscreen checks remain explicit. No production write, publication, customer backfill or new APK occurred.
+
+Final device cleanup evidence: the test owner signs out to the three-tab guest
+menu; temporary Suqpage private-image cache count becomes zero. The two exact
+native-review fixture stores/Auth identities and one generated cover object are
+removed locally. All four provider samples render in Android; Facebook/Instagram/
+YouTube report advancing unpaused media, TikTok reports 10.63 seconds of media
+progress. Only the Suqpage emulator is closed; web 3102 and Expo browser 8082
+remain running. Source/UI locally verified; visual approval is requested with
+focused screenshots. No complete release gate, commit or deployment is claimed.
+
+S79 follow-up — missing city picker reported on mobile /owner/setup (2026-10-07).
+- [x] Inspect screenshot/source/route: the screenshot enables setup with no visible
+  city while the current shared form requires placeId. Preserve entered/customer
+  data; diagnose a stale browser view separately from product behavior.
+- [x] Reproduce both current native entry routes with disposable accounts,
+  place Business city beside Business name before categories, add a clear search
+  prompt and retain canonical selection/invalidation.
+- [x] Run focused route/city-save capture, types/locales/spec validation; provide
+  current URL/screens and refresh guidance without changing the customer's account.
+- [ ] Visual approval/full release and prior S71–S80 gates remain pending.
+Master §11 affected. No schema, default city, account rewrite or hosted write.
+
+S79 exact-route capture finds an additional S75 dependency: signup from
+/owner/setup saves the city and opens preview, but the global menu retains its
+unlinked setup response because it observes only the /owner/ prefix. Refresh
+authority on actual route changes; assert Inquiries appears after successful
+setup on both paths. This is a client refresh defect, not missing database data.
+
+S79 reported browser refresh restores the current city picker. New confirmed
+defect: Unexpected text node warning during native setup/preview. Empty string
+conditional children are rejected by native View. Inspect shared status/search
+renderers, use explicit booleans/null, and require a clean browser console through
+setup/search/save/private preview while retaining real error/retry UI. This remains
+a focused UI defect; no account/DB change and previous release gates stay pending.
+
+S79/S75 follow-up verified: capture-signup-city passes /account and exact
+/owner/setup, city placement/prompt, selection invalidation, actual search retry,
+saved canonical city/private preview and refreshed Inquiries. Console/page error
+collection is attached directly to both browser pages; renderErrors is empty.
+Empty native text conditions are corrected across optional notices/errors/contacts/
+logos/video retry/inquiry notes; test:mobile:rendering statically checks typed JSX
+for this runtime boundary. Native types, nine locale tests and spec validation
+pass. No customer or hosted mutation; temporary test identities are cleaned.
+
+S81 — reliable playback and category/provider examples (FE-060/FE-061/BE-049).
+- [x] Identify Al Haya's exact M7lc1UVf-VE cover; metadata/buffering alone did not
+  reliably reproduce unavailable. Add focused readiness/error/timeout regression;
+  do not claim the precise external failure was proven.
+- [x] Admit eight category sample packs and deterministic starter/new-offering
+  defaults in existing transactions; preserve edited owner content.
+- [x] Eight-category persistence/privacy/retry/foreign/rollback and player tests;
+  web/Expo phone/desktop captures use controlled frames. Separate actual public
+  playback smoke reports all eight videos advancing at readyState 4.
+- [x] Apply narrow local marked-demo/unchanged Al Haya sample correction under
+  protected backup and expected versions; verify photos/copy/contacts/accents/IDs,
+  gallery agreement and private/live state. No hosted writes or general backfill.
+- [ ] CURRENT: visual approval before full release gates/commit/deployment/new
+  APK; exact hosted data plan remains separate. Static cover fills; no Loadgistic.
+
+S82 — visible native Publish from private preview (FE-056 / BE-041 / FE-052).
+- [x] Publish beside Edit above the cover opens current server readiness and
+  actionable missing sections, preserving sample checks and suspension.
+- [x] capture-preview-publish passes unfinished/ready, actual stale conflict and
+  refreshed review, network/forbidden retention, actual retry/publication/public
+  offerings; 1440/390/320 captures and no runtime render errors.
+- [ ] Visual approval/full gates/native device/new APK/commit/rollout pending.
+  No schema or approval gate redesign; earlier S81 and release gates stay active.
+Master §§11/13/19 affected. User reports not finding the existing editor-only action.
+
+S81 category regression: eight-category PostgreSQL tests exposed a real foreign
+key failure for Other products & services (not a public industry). Before final
+evidence, preserve its declared category/city, omit nonexistent discovery tags in
+signup/owner-save/publication and show neutral All-category map/search labels.
+Verify actual signup, new-offering defaults, owner location save, publication and
+All-category inclusion/specific-category exclusion. No taxonomy/schema expansion.
+
+S81/S82 evidence folders: .local/category-video-review/ and
+.local/preview-publish-review/. test-business-starters and test-self-service pass
+the Other-category regression and preserved privacy/version guards. Earlier
+S71–S80 work and untracked user-owned deno.lock remain uncommitted; no remote
+rollout/new APK or full gate is claimed before the visual checkpoint.
+
+Final focused S82 check passes the 320px private-preview/unfinished-review layouts
+in English, Amharic, Afaan Oromo, Somali and Tigrinya, with actual stale/error/retry
+publication and clean runtime errors. Types, nine locales, 180 specs, native JSX,
+product/gallery and category/publication tests pass. Actual replacement clothing
+video remains playing beyond 20 seconds. Visual review is requested and pending.
+
+Local restart operation (user request 2026-10-07): both web/API 3102 and Expo 8082
+had stopped after the interrupted session; PostgreSQL remained available. Existing
+launchers now run detached with protected logs under .local/dev-runtime/; API,
+mobile preview and Mailpit 54324 return HTTP 200. Mobile account preview is opened.
+No new service/dependency, emulator or hosted change. Restart does not replace the
+pending visual/release checkpoint or any prior task.
+
+S83 — handle already identifies demo (FE-052 / FE-053, L1).
+- [x] Classify as presentation-only: suppress the quoted business-example notice
+  for a marked demo whose visible handle contains demo, ignoring case. Retain it
+  on marked examples without that handle text; unmarked businesses stay unmarked.
+- [x] Apply the same condition in web/native showroom renderers; preserve
+  backend flags, starter publication checks and all prior work. New user steering:
+  also remove demo-inquiry disclaimer text, including on demos without demo in
+  their handle; preserve normal inquiry controls and safe private-preview state.
+- [x] Focused 1440/390/320 web/Expo captures cover hidden/retained/ordinary cases;
+  both types/spec validation and changed existing capture expectations.
+- [ ] Visual/full/release/commit/rollout checkpoints remain with S71–S82; no new
+  data/schema/dependency/native artifact. Master §§5/19/22 affected.
+
+S83 focused evidence: capture-demo-notice passes six web/Expo cases, including
+case-insensitive handles, retained notice on marked demos without demo in the
+handle, ordinary-business absence and clean inquiry views with normal send
+controls. Zero inquiries sent/content mutations. Both types, nine locale tests
+and 180-spec validation pass; unused demo-inquiry translations are removed and
+catalogs regenerated. Desktop/phone evidence: .local/demo-notice-review/.
+Visual/full-release/commit/rollout stay pending with the earlier work.
+
+S84 — transport from Suqpage businesses (FE-019 / FE-053 / FE-049, L1).
+- [x] Ready: customer bought from a business on Suqpage; invite them to let the
+  team arrange transport to them. Short button and clear chat intake, no internal
+  brokerage/mode/commission language or new checkout/booking/availability claims.
+- [x] Shared web/native customer copy and five authored native-context
+  locale entries; retain styling, paired form and existing transport workflows.
+- [x] Focused copy/locale/types and desktop/phone/compact-map/intake/short-height
+  captures; record actual UI evidence and no submitted requests.
+- [ ] Visual/full gates/commit/coordinated rollout remain with prior S71–S83.
+  No backend/schema/dependency/role change; master §§3/5/19/22 reconciled after checks.
+
+S84 latest terminology: use transport, not delivery, in the customer button/chat
+and its optional-details label. Keep the Suqpage purchase context, without adding
+  distance thresholds or mode/brokerage explanations. This supersedes the initial
+delivery-copy draft; shared copy/locales/captures must reflect this before review.
+
+S84 local evidence: both types, nine locale tests, narrative/category and 180-spec
+validation pass. Seven web entry and seven paired-intake states pass at desktop/
+phone widths in five languages; six mobile entry/intake states and one short web
+intake pass. Native copy is in the existing watched lib/i18n folder, correcting
+the initial Metro file-resolution failure; an actual browser probe renders with
+no page errors. Screens are in .local/transport-service-copy-review/. Requests
+are not submitted; full/visual/commit/rollout gates remain pending.
+
+The explicit --web capture runs now also retain web-verified.json and
+web-verification.json for all seven entry/intake states, alongside the six-state
+Expo records; the earlier mixed-run failure remains in its original log.
+
+S85 — solid shop markers and readable names (FE-021 / FE-053, L1).
+- [x] Ready: solid colored outer edges, white interior detail only, high-contrast
+  nameplates on web and mobile; preserve palette, geometry, counts and behavior.
+- [x] Capture existing light-map shop states; update the two map
+  renderers' styles without changing anchors, clustering or coordinates.
+- [x] Focused computed contrast/label/selection/preview/cluster and native-map/type
+  checks; desktop/390/320 before/after and actual-tile visual review.
+- [ ] CURRENT: visual approval/full gates/commit/coordinated rollout with S71–S84.
+  Physical native/new APK separate; no schema/provider/dependency/data change.
+
+S85 local evidence: normal/selected name contrast 15.62/6.79:1; solid outline vs
+cream 8.42:1. Actual public shop selection/preview/no zoom-out and counted cluster
+keyboard expansion pass. Controlled nearby/featured fixtures pass their solid
+edge/count/preview/remount checks. Both types, native map behavior, homepage
+composition and 180-spec validation pass. Before/after 1440/390/320 and actual OSM
+1440/390 web/Expo screens are in .local/map-marker-contrast-review/. Homepage and
+remount tests now reflect FE-056's existing Account/guest-inquiry navigation;
+no prior More/About menu was restored to satisfy a stale test.
+
+S85 owner correction: the charcoal nameplates/dark border are rejected; numbered
+clusters were not requested for change. Current candidate must use warm orange
+shop edges and cream/orange labels while restoring clusters, nearby groups and
+badges to their previous styling. Earlier capture evidence remains historical
+and is not visual approval.
+- [x] Ready: focused appearance correction, same geometry/data/callbacks;
+  FE-021/FE-053 updated before code. No unrelated map or cluster redesign.
+- [x] Apply warm shop/name styling and restore group/badge styles.
+- [x] Verify contrast/selection on desktop/390/320 web/Expo and original group
+  styles/counts/expansion; inspect actual-tile phone/desktop previews.
+- [ ] CURRENT: owner visual review, full gates/commit/rollout/new APK remain separate.
+
+Warm correction: Suqpage-orange fill/outline, orange text on cream, selected
+white-on-orange. Contrast is 4.83/5.24:1 for names and 4.67:1 for shop outlines
+against cream. Both types and map behavior pass. Six web/Expo viewport checks,
+four actual-tile views and the group fixture pass; full web/native cluster/nearby/
+badge declarations match their original HEAD reference. Evidence:
+.local/map-marker-warm-review/. The earlier group redesign is fully reverted.
+An early capture read unresolved colors before styles applied; the controlled
+retry waits for the intended CSS colors and passes. Product styles were not
+changed to accommodate that test timing issue. Visual approval remains pending.
+
+S85 latest visual trial: thin white outline around each individual orange shop,
+including its roof; keep cream/orange names and original cluster/nearby/badge
+styles. This supersedes the previous orange-edge trial, without map/data changes.
+- [x] Ready: FE-021/FE-053 updated; white rim is a deliberate visual choice;
+  orange fill and name text retain contrast. Master §§4/10/19/22 affected.
+- [x] Change individual-shop contours to thin white on web/native. Web reuses the
+  established native SVG shape in its 25px layout slot; anchors remain unchanged.
+- [x] Focused fill/text contrast and normal/selected desktop/phone captures;
+  group styling remains original. Keep this evidence separate from earlier trials.
+- [ ] CURRENT: visual approval/full gates/commit/web rollout/new APK remain pending.
+
+White-edge evidence: six normal/selected web/Expo states at 1440/390/320 and four
+actual-tile views pass, with real shop preview/no zoom-out and original cluster
+white rim/keyboard expansion. Names contrast 4.83/5.24:1; orange fill against
+cream 3.09:1. Both types, homepage composition and spec validation pass. The
+normal orange is slightly deeper to retain fill contrast behind the white rim.
+.local/map-marker-white-edge-review/ retains this trial separately; earlier
+dark/orange-border trials remain historical, without implying owner approval.
+
+### S86 — spread Addis demos across the city (BE-020 / FE-021)
+
+One-time local operations/data correction; not a new app/seed/offset algorithm.
+Ready: 21 marked Addis area demos currently share (9.0,38.8); exclude unmarked,
+exact-location and other-city records. Master §§6/10/17/22 affected. Preserve all
+pending S71–S85 work and original cluster behavior.
+- [x] Inspect target DB independently, modes/flags and the existing public/display
+  pipeline; read bounded OSM neighborhood centers and city administrative boundary.
+- [x] Construct checkable neighborhood assignment and capture the current
+  desktop/phone map. Validate final display points after existing offsets.
+- [x] Protected affected-row backup, drift/flag/mode checks and one atomic apply;
+  verify unchanged unrelated profiles/proposals/pages/products/contacts/versions.
+- [x] Verify web/mobile projection/count/filter/selection parity; capture city
+  before/after and record evidence/master/traceability. Visual review separate.
+- [ ] Hosted application/rollout, full gates/scoped commit remain with pending work;
+  no production coordinates or new APK changed by this local operation.
+
+S86 data apply: the backed-up 21-demos-only update and DTO/integrity/restore
+rehearsal pass. All 21 target display points are inside Addis at OSM neighborhood
+centers, minimum pair spacing 2.23km. Before maps show one group at zoom 11.
+After web views disperse correctly; native pointer capture exposes 96px invisible
+shop wrappers intercepting neighbors, including an actual-glyph retry. This is a
+product hitbox defect, not another coordinate/schema issue. FE-021/FE-053 updated
+before a shop-only fix; preserve 44px touch, current pixels and counted markers.
+- [x] Fix isolated-shop transparent hit interception, then rerun city selection
+  and focused normal/selected marker checks; no group or offset-algorithm change.
+
+### S87 — end-to-end support and transport team workflow audit
+
+Owner requested real back-and-forth chats and every staff workflow. Retain S86's
+in-progress demo correction; do not replace earlier work. The owner confirmed local previews only. FE-019/BE-018/BE-044
+control conversation authority; use labelled disposable test participants and
+never alter customer conversations or provider configuration.
+- [x] Inspect queue/channel roles, actual lifecycle endpoints and existing QA
+  fixtures; define the test matrix and confirm environment targets.
+- [x] Real owner-support and guest-transport messages with team
+  claims/assignment/reassignment/capacity, replies, statuses and return recovery.
+- [x] End/hide/reopen/resolve/history/private notes, unauthorized/other-tenant
+  denial, refresh/disconnection and retry/duplicate behavior; evidence per layer.
+- [x] Fix proven issues against controlling specs, rerun focused workflows and
+  report remaining hosted/native limits. Any visual/release change stays gated.
+
+S87 target confirmed: local web and mobile previews only. The owner will request
+web/mobile deployment after local completion; no hosted chat test or customer
+conversation is authorized by this audit. Focused support/domain/security suites
+pass; actual concurrent browser/team workflows remain to be completed.
+
+### S88 — main admin and web-only staff roles
+
+Owner designates falmata.dawano@gmail.com as main admin on BOTH live and local,
+able to create Support agents and Transport agents. These staff and admin accounts
+must not sign into mobile. Existing conflicting account association must be
+inspected before removal; do not infer permission to delete unrelated businesses,
+content or another application's account. Retain S86/S87 and earlier local work.
+- [x] Inspect existing identity/role/association and staff/queue/mobile
+  authority; resolve an existing conflicting association if found.
+- [x] Update controlling specs/Ready/checkable acceptance criteria before code;
+  prefer existing queue scopes and authorization contracts where sufficient.
+- [x] Implement/tests for admin creation and both agent roles, queue isolation,
+  mobile sign-in/session/API denial and normal owner/guest operation.
+- [x] Protected, independently targeted account backup/plan/application/verification
+  for local and live identity records. No broad Auth configuration push.
+- [ ] Complete S87 using the resulting real staff roles; desktop/phone preview,
+  full/release/scoped commit and coordinated mobile/web rollout remain distinct.
+
+S88 Ready decision: reuse team_member + exact support/transport queue scopes as
+the two agent functions; project scope into the verified principal and deny
+business/product/design authority for scoped agents. No schema/role-enum change.
+New staff default enabled/capacity three; active incompatible cases block role
+switching. Mobile validates application authority before admitting/restoring a
+session and denies all staff at every authenticated boundary. Existing local
+owner identity/Metal Door draft is converted/detached, not destructively erased.
+Main-account role change is local AND hosted, with separate target/backups; mobile
+and web code rollout will follow the owner's deferred deployment phase. Master
+§§11/13/15/16/19/22 affected; FE-026/BE-018/BE-044 updated before implementation.
+
+### S89 — retire business plans and subscriptions
+
+Newest instruction: transport arrangement is the only Suqpage revenue service.
+Remove business subscription/plan/renewal/payment workflows from web and mobile;
+preserve product prices, transport arrangements and visitor analytics. L3,
+FE-018/BE-017/DEP-015; master §§13/17/19/22 affected.
+- [x] Ready: specify retired routes/actions/creation trigger, retained historical
+  ledger data and unaffected publication/analytics before implementation.
+- [x] Remove navigation and payment/renewal UI and application ports; old URLs
+  redirect to the appropriate workspace without rendering billing.
+- [x] Stop automatic subscription creation with a forward PostgreSQL migration;
+  preserve historical financial rows and prove new shops receive no plan.
+- [ ] Focused migration/security/analytics and web/mobile UI evidence, then the
+  same visual/full/release/deployment gates as S88. No destructive ledger erase.
+
+S86 verification: shop-only 44px hit geometry and transparent outer Leaflet wrapper
+fix pass on actual city maps (21 demos/84 offerings) on desktop/phone web and Expo,
+with no zoom-out, missing counts, errors or overflow. Normal/selected shop and
+original cluster/nearby/badge regression captures pass again after the fix.
+Protected local assignment/rollback evidence is retained outside Git; production
+GPS, visual approval and APK rollout are still pending.
+
+S88 identity operation: both targets now use the designated confirmed Auth identity
+as platform_admin with no owner association. Local conversion preserves Metal Door
+content by hash; hosted account was unprovisioned in the application and now links
+the existing confirmed provider identity. Protected exact-target permission backups,
+drift checks and role/link readback pass; no provider/configuration changes or
+customer-business deletion. Actual new staff UI and chat verification continues.
+
+S89 local evidence: payment/renewal navigation, overview and actions/ports removed;
+old bookmark requires auth and redirects. Migration 60 stops the creation trigger,
+preserves every historical ledger/payment row and passes an atomic rollback-only
+new-shop rehearsal. New seed fixtures have no plans. Retirement/naming/tenant visit
+tests pass; hosted migration, browser review and full release gates remain pending.
+
+S87 actual verification: capture-staff-chat-workflows.mjs passes real local HTTP,
+Supabase email-code sessions and PostgreSQL persistence, with staff created through
+the designated admin's UI. Web owner intake/support claim/replies, native owner
+reply/upload/download, alternate assignment, closed/reopened chat and tenant/file
+negatives pass. Both guest web/native transport flows pass waiting/claim, private
+handoff/notes, explicit replies both ways, lost-ack exactly-once retry, end/history/
+phone follow-up/private closed notes/resolve/reopen/recovery. Actual capacity
+rejection keeps the case waiting; resolving the old case releases capacity.
+Success responses are not mocked. Labelled fixture cases/accounts/uploads are
+cleaned up; no production chat or external staff notification is touched. Expo
+browser evidence is not an installed-Android/device claim. Protected screenshots
+and sanitized verified.json are in .local/chat-workflow-review/actual/.
+
+S87 defect fixed: reassigned agents/absent or malformed case URLs previously hit
+an unhandled server error. They now return to their authorized inbox with a
+localized generic notice. Assignment also shows an explicit saved confirmation;
+function-action multipart forms rely on React's encoding to avoid the old warning.
+
+S88 final focused evidence: staff-boundaries (admin/two functions/legacy operator,
+actor forgery, missing-profile fail-closed, scope/old-assignment/stale page-write
+fences and all private native routes), managed provider failure, native API tenant
+checks, auth adapters, 22 owner-page domain cases, rolled-back local PostgreSQL
+page/publication scope, adapter/runtime and scalable collections all pass. Both
+web/mobile typechecks, 180-spec validation, localization and marker regressions
+pass. Final staff-only capture proves role names fit phone inputs, correct legacy
+Queue labels, created staff immediately visible, three staff OTP denials and old
+renewal URL returning to a workspace without billing. The broad adapter fixture
+needed a current location version; a retry under browser/seed CPU contention timed
+out, then passed once that work finished. No check was weakened.
+
+CURRENT: S85/S82/S88/S89 visual review before one full check/release/acceptance gate,
+reviewed task-scoped commit and coordinated hosted migration/web/Expo Android
+rollout. Main-admin identity itself is already applied locally and live. Production
+schema is still 59; local schema 60. Latest installed APK and production UI do not
+contain this local candidate. No new release, commit or native-device result claimed.
+
+### S90 — clearer transport invitation on web and mobile
+
+Newest approved scope, awaiting visual approval: Need help with transport? as
+heading, with smaller Let us handle it. Chat with our transport agents live
+supporting text. The intake invites customers who purchased from a Suqpage
+business to chat with the team for help getting the goods to them. All five
+languages prioritize everyday comprehension and natural wording, with (Live Chat)
+in non-English labels. Preserve S82/S85/S88/S89 and earlier authorized work.
+L1 FE-019/FE-030/FE-049/FE-053; master §§3/18/19/22. The owner chose Adjust visuals
+first; no release approval is inferred from the copy corrections.
+- [x] Ready: question/supporting sentence/intake intent, five authored locales,
+  unchanged form/backend/roles/palette, accessible compact mode and rollback.
+- [x] Shared copy/catalogs and web/native compact typography updated; existing
+  focused assertions and chat-audit selectors match the current copy.
+- [x] Both typechecks, localization/narrative/homepage/spec checks and read-only
+  desktop/phone/all-language/short-height captures; current docs/trace reconciled.
+- [ ] CURRENT: explicit visual approval of corrected entry and pending release
+  visuals before full/release/acceptance gates, scoped commit/coordinated rollout.
+
+Final S90 evidence: both types, nine locale tests, narrative/category/homepage
+and 180-spec validation pass. Thirteen actual-map web/Expo states verify readable
+heading/smaller supporting text, complete compact accessibility, 44px targets,
+no overflow/page errors, updated introduction, preserved routing/query and reachable
+Start chat in every language. Two 390×480 paired-intake captures pass. Screenshots
+wait for map pins/tiles; no request or account/data mutation is submitted. Current
+evidence: .local/transport-invitation-review/final/ and final/intake/. Earlier
+wording captures remain historical. This is local candidate UI, not hosted or a
+new APK. The intake-copy refinement changes no conversation or staff workflow.
+
+Play Console readiness — owner reports the Google developer account is ready
+(2026-10-07). Account type, Suqpage app entry, release permissions and submission
+credentials are not independently verified. Existing production EAS configuration
+targets an AAB under com.suqpage.app and an internal draft submission; the Expo
+preview APK uses com.suqpage.app.preview. This update does not approve the pending
+visual review, authorize public Play rollout or imply a completed store release.
+- [x] Inspect existing AAB/internal-draft configuration and current official
+  Expo/Play first-submission and account-testing requirements.
+- [ ] Confirm account type and whether the Suqpage app entry exists; provide
+  owner steps for manual upload or an explicitly chosen Expo credential setup.
+- [ ] Play internal testing is a separate rollout after current release gates,
+  signing/device checks and verified account/app access. No invitation sent.
+
+Current primary guidance: https://docs.expo.dev/submit/android/ and
+https://docs.expo.dev/submit/android-manual/ allow either manual first upload or
+EAS Submit with a Google service-account key uploaded directly to EAS. No first
+manual-upload requirement is assumed. Google personal accounts created after
+2023-11-13 require a closed test with 12 continuously opted-in testers for 14 days
+before applying for production access; internal testing remains a distinct track:
+https://support.google.com/googleplay/android-developer/answer/14151465?hl=en.
+
+### S91 — owner, staff and visitor alerts with real read receipts
+
+Feature L3, FE-062/BE-050/DEP-043/ADR-0026. Preserve all pending S71–S90 release
+work and the owner's Play Console setup. The optional background-scope question
+is pending; after the reasonable reply opportunity, closed-app coverage is the
+stated default. This is not permission to change provider credentials. Master
+§§8/13/15/16/17/18/19/22 affected. Native staff remains prohibited.
+- [x] Inspect inquiry/chat attention, existing read side effects and client APIs;
+  define scopes, failure/visibility/privacy contracts and provider prerequisites.
+- [x] Explicit confirmed-message reads/first join and additive persistence;
+  regression tests prove GET/hidden/stale/foreign/private cases cannot mark Read.
+- [x] Transactional owner/staff/visitor attention events, unread feed/preferences,
+  dedup/revocation and bounded delivery ports/outbox; tests for retries and scope.
+- [x] Wire web staff/owner/visitor and native owner/visitor alerts, permission/sound,
+  receipts, join/unread badges and safe navigation in all five languages.
+- [x] Actual local back-and-forth/visibility/failure and viewport captures with
+  labelled fixtures; no customer conversation or real external push sent.
+- [ ] CURRENT: explicit visual approval before full release/acceptance/build gates; current
+  prior visual approval remains pending. Reviewed commit and coordinated rollout.
+- [ ] Separately approved, exact-target Web Push/Android FCM setup and real OS
+  foreground/background/closed/tap/signout tests before push-readiness claims.
+
+Ready: ordinary-language UI, preserved paired intake and Suqpage palette; owner
+inquiries and support replies; matching staff waiting/assignment/reassignment/
+messages/end/reopen; visitor assignment versus actual join, public replies and
+explicit visible-message read receipts. Internal notes/carrier details stay private.
+Alert acknowledgement is separate from transcript read. No hosted Realtime change,
+new general guest chat or provider/key mutation inferred. Additive rollback only.
+
+### S92 — smallest current Next.js security patch
+
+Non-visual L2 dependency fix discovered by the S91 audit; BE-002 controls it.
+Preserve S91 as the active feature. Registry reports six Next advisory paths fixed
+by 16.3.8; current installed version is 16.3.6. No automatic audit fix/minor upgrade.
+- [x] Classify actual dependency findings and verify official publisher advisories.
+- [x] Verify exact patch availability, update only Next pin/lock, then
+  focused types/auth-proxy/private-response/source-map checks and fresh audit.
+- [ ] Full release/deployment gates remain coupled to the pending visual work;
+  no hosted change or new dependency exception inferred.
+
+S91 focused evidence (2026-10-07): local additive 61/62 backups and full before/after
+existing-record hashes pass; no hosted/schema/provider configuration was written.
+Real isolated PostgreSQL receipts/events/privacy/dedup/backlog/provider retry/
+revocation/exhausted lease tests pass. Mock provider/worker/Firebase project-package
+checks are labelled and sent no external push. Both typechecks, 9 locale tests,
+184-spec validation, local attention HTTP negatives and focused native API checks
+pass. Actual web/Expo owner inquiry/support and both visitor UIs pass hidden/covered
+versus visible receipts, assignment before actual join, both message directions,
+exact inquiry links and nested-alert close preserving the chat. All 5 locales at
+1440/390/320 fit; browser AudioContext fires once after explicit opt-in, repeated
+polling stays quiet, mute persists. Labelled cases/accounts/preferences cleaned up.
+Private evidence is .local/notification-review/actual/verified.json plus screenshots.
+This is browser/native-preview evidence, not installed Android/background delivery.
+Native notification availability waits for FCM/Expo configuration; no native sound
+or OS permission/delivery result is claimed. Full visual/release/commit/deploy/APK
+and actual OS tests remain pending, along with the owner's Firebase response.
+
+S91 defects found/fixed: Expo-web keyboard metrics crash; closing a nested alert
+list also closed its underlying web chat. Read visibility also excludes modal
+coverage and fixed navigation/keyboard areas; unread counts use the partial unread
+index instead of scanning historical read rows. All notifications retain generic
+payloads; alert read and transcript Read stay separate.
+
+S92 focused evidence: Next is pinned 16.3.8 and refreshed advisory report no longer
+contains Next. Auth proxy/runtime/source-map regressions and both types pass. The
+20 inherited high paths are the two Expo/Metro tooling roots (braces/node-forge),
+not 20 separate runtime vulnerabilities; no clean audit or current build exception
+is claimed. Full release/admission remains pending visual approval.
+
+### S93 — real system push setup and keyboard receipt regression
+
+Newest instruction: configure real browser permission/system notifications for
+staff, guide Android Firebase setup, and fix the reported mobile-localhost
+`Keyboard.metrics` crash on agent reply. Defect L1 + operations L3,
+FE-062/BE-050/DEP-043/ADR-0026; preserve all earlier pending release work.
+- [x] Inspect actual RN Web/native keyboard adapters, running Suqpage previews,
+  existing push ports/configuration and controlled scopes; update acceptance first.
+- [x] Remove the metrics dependency, preserve keyboard/visible-read
+  bounds; focused browser/native-fallback tests and actual reply/read workflows.
+- [ ] CURRENT: local VAPID configured; verify real browser permission/subscription,
+  permission/subscription, real provider delivery and safe notification taps.
+  No production key write before exact target/backup/fields are reviewable.
+- [ ] Guide owner through Firebase Spark project, Android package registration,
+  matching client config and private FCM V1 key directly in EAS Credentials.
+- [ ] Review actual system notifications, permission denial/mute/closed-tab and
+  revocation; retain honest OS evidence separate from Playwright handler fixtures.
+- [ ] Prior visual/full release/scoped commit/hosted rollout/rebuild gates remain.
+
+Android step 1 is pending: owner creates/selects the Suqpage Firebase Spark project
+and supplies its public project ID. Browser setup can progress independently.
+No pricing/subscription UI or changes to the map/service palette are involved.
+
+S93 focused evidence: metrics is entirely absent from ChatReadSentinel. Browser
+visual-viewport bounds and native keyboard show/hide listeners pass new pure-bound
+regressions, listener cleanup/no-metrics contract and mobile typecheck. Fresh actual
+web/Expo owner and visitor agent replies/hidden/covered reads, all five languages
+and browser sound/mute/dedup pass again with no page errors; no installed Android
+result is claimed. Suqpage-only 3102/8082 restart clears retained dev code; Loadgistic
+processes are untouched. Existing report copied to keyboard-fix-verified.json.
+
+S93 local browser push: generated distinct local VAPID pair and verified contact,
+protected credential source and complete prior local-runtime backup retained;
+all three fields configured only in local runtime. Chrome staff dashboard opened.
+Owner must grant actual browser permission; current main-admin active web
+subscription count is zero, so no real OS test has been sent. New production-only
+source and exact empty-field backup/review are protected and unapplied. Read-only
+Netlify target/account/domain/deploy verification passes; the three production
+fields do not exist. No production credential, deploy, Supabase configuration or
+Firebase project changed. The real labelled local queue-event test is prepared but
+will not run until a browser subscription exists. Android Firebase Spark/project ID
+step is pending owner input. Visual/full rollout gates remain distinct.
+
+### S94 — simpler admin/staff support navigation
+
+Newest request: admin/staff breadcrumbs, menu and back flow are confusing. Feature
+and defect L2, FE-026/FE-019/FE-062/BE-018; master §§13/19/22. Preserve notification
+setup waiting on browser Allow/Firebase project and all prior pending releases.
+Ready: two clear queue destinations; current queue active on case; stable admin
+menu with any selected-business context; Staff owns workload/availability;
+validated queue/status/q/page carried through list→case→actions→list; no raw
+return URLs, new permissions, native/owner menu redesign, migration or new provider.
+- [x] Inspect current scopes, menu matching, inbox filters/forms/redirects and
+  existing contracts; update accepted specs and plan before implementation.
+- [x] Pure bounded navigation-state/matching contracts; desktop/phone staff
+  menus and breadcrumbs; preserve exact origin through every case action.
+- [x] Focused URL/role/security/domain/type/locale tests; actual local admin,
+  Support/Transport agent actions and filtered return/alert/direct-link proof.
+- [x] 71 desktop/320/390 and all-language captures; zero browser exceptions,
+  no clipped tabs/overflow and drawer focus restored. Fixtures cleaned afterward.
+- [ ] CURRENT: explicit visual approval before full check/release/acceptance,
+  scoped commit and coordinated rollout. Production remains unchanged.
+
+Ordered implementation: (1) URL/query contract and tests, (2) stable role menus,
+(3) inbox/case/settings wayfinding and action roundtrip, (4) focused/current-role
+negative checks, (5) actual viewport/role flows and review evidence. No new SQL
+filter or access scope is needed for this request.
+
+S94 evidence: `npm run test:staff-navigation`, typecheck, catalog/spec validation,
+`test:staff-boundaries`, focused support tenant suite, and
+`test:staff-navigation:visual` pass locally. The initial browser sweep and one
+controlled retry reproduced Next development profiler errors on RSC redirects.
+The stack/classification matched the upstream framework issue; safe browser
+replacement now preserves server authorization and an inbox fallback. The final
+real-action/locale sweep passes without suppressing browser errors. Protected
+evidence: `.local/staff-navigation-review/actual/verified.json` and 71 captures;
+no production writes, customer-chat changes or mocked action success responses.
+
+### S95 — connect Firebase to Expo Android notifications
+
+Newest owner instruction: connect Firebase, keeping notifications simple. One-time
+operations L3 under FE-062/BE-050/DEP-043/ADR-0026, not a new chat/database provider.
+No new notification UI, Firebase database/Auth, paid service, signing change or
+Google Play submission. Preserve S93 browser-push setup and S94 visual review.
+Master §§13/19/22 and deployment readiness remain unchanged until verified setup.
+- [x] Inspect current Android notification adapter/build guards and controlling
+  specs; confirm installed app/preview identifiers and official FCM V1 workflow.
+- [x] Select the owner's Firebase project (public Project ID), verify
+  account/project and Android registrations independently; no credential write
+  while target/recoverable source is unknown. Firebase Console opened for owner.
+- [x] Retain protected client configuration for com.suqpage.app (S96 supersedes
+  the earlier Preview registration). Prepare exact EAS environment plan and backup
+  existing configuration. Private FCM keys are created/uploaded in provider
+  dashboards with explicit target-specific owner authorization.
+- [x] Verify Expo project/account, matching package/project, existing credential
+  metadata and
+  enhanced-security status; do not put EAS account-management tokens in runtime.
+- [x] Apply only authorized additive build-client configuration; focused package/privacy tests.
+  Existing visual/full/release/build admission gates remain separate.
+- [x] Obtain and bind the separately authorized private FCM sending key
+  through provider dashboards; protected recoverable source and exact-target review.
+- [ ] Rebuild admitted APK, test actual Android inquiry/chat foreground/background/
+  closed-app notifications, taps, mute and sign-out; record truthful evidence.
+
+Independent work: prepare local protected configuration destination, verify Expo
+identity read-only, and check existing Firebase package/project guards while the
+owner selects the Firebase project. No new permanent setup utility is necessary.
+
+S95 preflight: cached EAS CLI confirms falmatad is the selected owner account.
+Existing Firebase package/project/missing-file and notification privacy/navigation
+guards pass; no provider requests from the tests. Firebase Console is open, and
+the protected .local/notification-review/firebase directory is prepared. Owner
+confirmed no Firebase project exists yet; first action is create the free Spark
+project and provide its public Project ID. No EAS/Firebase/server configuration
+has been changed, and no key/build/signing operation has run.
+
+S95 owner-selected Firebase target: project ID suqpage, number 588262779708.
+Expo read-only project info independently confirms @falmatad/suqpage and
+bfc289fb-238e-44a3-9e0f-fec6a7c857d1. Current step: register
+com.suqpage.app.preview in that Firebase project and obtain its client JSON for
+ID/number/package verification; then register com.suqpage.app separately.
+Registration/client download is distinct from private FCM key setup and EAS
+credential/environment writes. Neither Firebase config nor runtime capability
+is enabled yet; source target metadata is protected outside Git.
+
+S95 Expo push preflight: exact app/owner and owner actor verified read-only.
+Project/account enhanced push security are false; preview credentials exist for
+com.suqpage.app.preview and have no FCM V1 key. No production app-credential
+identifier exists yet. Protected metadata backup is expo-push-preflight.json.
+The API exposes granular CUSTOM viewer permissions, not a coarse OWNER label;
+ownership is checked through ownerUserActor, and read-only evidence never admits
+credential writes. Initial assumption was diagnosed without a provider mutation.
+Current owner step: register the preview Android package, download client JSON,
+and save Downloads/suqpage-preview-google-services.json for exact project-ID,
+number and package verification. Private-key setup remains a later provider step.
+
+### S96 — one Suqpage app name/package for test and release
+
+Newest owner correction supersedes S95's two-app/preview registration instructions:
+use Suqpage and com.suqpage.app throughout; internal APK distribution stays in the
+preview build profile. One-time operations/architecture L3, DEP-042/DEP-043/FE-053.
+Master §§15/17/22. No additional UI, provider, backend, map or translation change.
+- [x] Inspect name/package switching, build/Firebase guards, signing and public
+  link metadata; record scenarios/dependencies in specs before source edits.
+- [x] Remove profile-based name/package suffix; one remote version counter with
+  increments for both APK/AAB profiles; focused identity/Firebase tests pass.
+- [x] Actual Expo metadata in both profiles resolves Suqpage / com.suqpage.app;
+  legacy association remains intact and canonical signing/link evidence is pending.
+- [x] Continue S95 with only the canonical Firebase Android registration/config.
+  Provider/signing/environment writes require exact-target backup/review; no new
+  key, APK, store submission or production rollout is inferred from this change.
+
+The old installed Preview package needs one canonical replacement installation;
+future releases retain com.suqpage.app. Keep prior signing material and legacy
+association records; do not copy a certificate to the new package without proof.
+
+S96 evidence: all-profile build guards/name/package resolution, both hosted
+Firebase config admission/rejection cases, five App Links/security tests and
+actual Expo public metadata pass. Private canonical identity report records
+zero remote writes/new binaries and explicitly pending canonical certificate
+association. Update mobile-testing instructions to use com.suqpage.app after
+verification; preserve older artifact/association history. Source changes need
+full admission gates before a new signed APK; no fresh binary is claimed.
+
+### S97 — safe single-app build and release workflow
+
+Owner confirms one app and asks for safety controls/workflow. Security/operations
+L3, DEP-042/DEP-043/BE-044/FE-053; master §§15/16/17/22. Recurring checks rather
+than one-time data repair: preserve all pending Firebase/UI/release work.
+- [x] Inspect current worker hook, build profiles, approved public target source,
+  Firebase guards, SDK tools and artifact history; update specs before code.
+- [x] Explicit target/profile/realm checks, archive credential exclusions
+  and strict Firebase client validation; focused regressions.
+- [x] Typed APK/signature/version/debug validation and bounded SDK adapter/CLI;
+  pure/mocked-port tests plus real existing-APK rejection, no installation.
+- [x] Document constrained tester → device checks → Play internal draft → public
+  workflow and signing continuity/rollback limits; reconcile spec/master/evidence.
+- [x] Continue Firebase client-file step. Canonical signer remains unconfigured;
+  provider/signing setup, existing visual/full gates and new binary checks remain.
+
+Existing verified EAS public target metadata is read without exposing keys. Both
+profiles are production-connected; do not mistake the profile name for isolated
+data. No role restriction or existing visitor/owner capability is removed.
+
+S97 focused evidence: both typechecks, build/Firebase configuration regressions
+and three artifact-domain/SDK tests pass. Actual historical-APK inspection reports
+legacy package, version 1, nondebug and its public certificate; canonical admission
+fails on the absent reviewed pin. No installation or signing/binary change occurred.
+Protected APK-inspection evidence is separate from SDK mocks. Full visual/release/
+commit/device and canonical signing gates remain pending.
+
+S97 final security review passes: malformed client JSON returns a generic error
+without quoting accidental credential fragments. Focused rejection/output-privacy
+regression passes; protected release-safety-evidence.json records actual legacy
+APK inspection separately from SDK mocks. Source/backup/plan/creation/readback/
+evidence files are verified owner-only. Full gates/scoped commit remain pending.
+
+S95 current client-file step (supersedes the earlier Preview registration guidance):
+- [x] Owner file matches suqpage / 588262779708 / com.suqpage.app; protected copy
+  and checksum retained. Exact Expo project/owner and selected-variable conflicts
+  checked read-only: no selected project/account variables exist.
+- [x] Retain exact additive build-client plan/before-state, apply only
+  the three selected project-scoped variables in preview/production and verify.
+  No existing variable, account-wide setting, signer or server capability changes.
+- [x] Obtain separately authorized FCM V1 sending credential through the provider
+  dashboard, bind only the canonical Android app, and verify project metadata.
+- [ ] Coordinate API/schema rollout, release gates and canonical APK/device tests;
+  no working Android OS alerts claimed from a client file alone.
+
+S95 operation evidence: exact absent-state backup and client source retained;
+plan 5204a0c17d43b4d092f2ed3c3ca45ab75005a3a166a7cd136f5b9d801af2ee12
+adds only SUQPAGE_GOOGLE_SERVICES_FILE (secret file), SUQPAGE_FIREBASE_PROJECT_ID
+(suqpage) and SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED (1, build prerequisite) to
+@falmatad/suqpage, both preview/production. Public target check and protected
+creation/readback pass. Secret-file content is not remotely readable; retained
+source hash/exact create payload and worker validation provide bounded evidence.
+No existing variables/private keys/signing/runtime flags/API/binary changed.
+Owner is guided to Firebase's suqpage Service accounts dashboard for the separate
+sending-key step. All deployment/device and pending visual gates remain open.
+
+S95 sending-key continuation, 2026-10-08: owner supplies the downloaded Firebase
+service-account source in response to the exact sending-key setup request.
+One-time credential operation; preserve all prior release/UI dependencies.
+- [x] Validate only selected project/type/key structure without exposing
+  contents; retain an owner-only recoverable copy outside Git/build archives.
+- [x] Independently reverify Expo owner/project, canonical Android FCM slot and
+  enhanced-security state; retain protected exact before-state and additive plan.
+- [x] Bind the verified key through the owner-authorized official CLI exception for canonical
+  com.suqpage.app; no signing, legacy package, Play submission or runtime secret.
+- [x] Read back selected key/project association metadata. Keep actual phone
+  delivery, compatible API/schema rollout and signed rebuild as separate evidence.
+
+S95 source/plan evidence: supplied service-account JSON passes project/type/token
+endpoint and RSA structure checks; no private source bytes were printed. An
+owner-only recoverable copy and selected public metadata are retained outside Git.
+Independent Expo readback confirms falmatad/@falmatad/suqpage, canonical slot
+absent, legacy FCM slot empty and enhanced security disabled. Protected exact
+before-state and additive FCM-only plan are ready; no provider credential mutation
+has run. AGENTS.md requires dashboard secret writes, so the exact provider page
+is opened and a narrow official-CLI method exception is pending owner response.
+This is not proof of service-account IAM permissions, key activation or OS delivery.
+
+S95 exact method exception approved: the owner explicitly answered yes to using
+Expo's official credentials CLI for the supplied verified FCM key, bound only to
+@falmatad/suqpage / com.suqpage.app. This supersedes the dashboard-only method
+for this one operation; all target/backup/secret/signing safeguards remain.
+CURRENT: reverify source/before-state, use only the official interactive FCM
+credential workflow, then inspect selected key/project association. No raw REST/
+GraphQL credential mutation fallback, signing setup or production runtime enablement.
+
+S95 FCM connection verified: official interactive EAS CLI selects production →
+Google Service Account → Push Notifications (FCM V1), uploads the protected source
+and confirms assignment to com.suqpage.app. A local text-prompt control-character
+entry was rejected before upload; corrected path entry succeeds without source
+or provider changes. After explicit upload/assignment success the CLI exits; no
+ambiguous mutation timeout or retry occurred. Independent readback verifies exact
+project/key-ID/client association, canonical signing remains empty, Play credential
+is empty, legacy FCM and enhanced-security state are unchanged. Protected
+fcm-credential-after.json records actual provider evidence. All source/backup/
+plan/authorization/readback files are owner-only and excluded from Git/archives.
+CURRENT dependency: compatible API/schema and web rollout, pending UI approval/
+full release gates, reviewed canonical signer, admitted APK and actual Android
+foreground/background/closed-app delivery/tap/logout tests. No live server flag,
+signing source, Play submission, rebuilt binary or working phone alert is claimed.
+
+### S98 — finish coordinated notification web/Android rollout
+
+Operations L4: DEP-042/DEP-043/FE-062/BE-050 and retained S71–S97 release
+work. Master §§15/16/17/22. Preserve user-owned deno.lock. Web/API precedes the
+Android build; no mobile admin, Play submission, paid build, invitation or Git push.
+
+- [x] Verify independent Netlify/Supabase/Expo targets and protected sources;
+  obtain owner approval for the exact rollout and shown visuals.
+- [x] Back up schema 59, restore the actual archive in an isolated clone, rehearse
+  migrations 60–62 and prove original records, private permissions and idempotency.
+- [x] Recover and independently verify only the approved existing signing source;
+  verify canonical FCM/client configuration and the Expo free-build allowance.
+- [x] Finish complete check/release/acceptance and focused native admission gates;
+  retained security/workflow assertions pass, with saved-photo byte verification.
+- [x] Bind existing signing material through the official CLI, verify key bytes,
+  certificate and preserved legacy/FCM/Play/security settings, then pin public links.
+  Owner accepts verified completion after the CLI confirmation timeout.
+- [ ] CURRENT: review and task-scope commit tested source; build and inspect clean artifacts.
+- [ ] Apply only approved migrations and five production/function settings, verify
+  readback, deploy compatible web/API and monitor before starting the APK build.
+- [ ] Build one free canonical internal APK, inspect its actual signature/package/
+  version/bundle and install it for native workflow checks.
+- [ ] Record actual browser/phone permission, foreground/background/tap/mute/logout
+  and expiry evidence; distinguish provider acceptance from real OS display/Read.
+- [ ] Reconcile master/specs/traceability and release record with exact source,
+  deployment/build IDs, monitoring and remaining physical-device limitations.
+
+Owner approval: “go ahead”, exact plan digest
+c34fad9fbd191bdba0878835f10add929dc15905981ac03541963c54804f48d3.
+It authorizes memory-only MIRTPAGE_POSTGRES_URL target verification, protected
+backup/rehearsal and migrations 60–62, five additive production/function notification
+fields, exact existing-key reuse and one free internal APK under the unchanged
+braces/node-forge tooling exception. No new dependency/advisory or key generation.
+Protected sources, backups and operation receipts remain outside Git. Earlier
+automatic-review credential-file/source-binding stops were resolved by removing
+credential persistence and obtaining this explicit source authorization.
+
+Verified evidence before rollout:
+- Production still schema 59 / Netlify 6ac5c9940ee5deb5294319ef; no S98 remote write.
+- Consistent public archive: 58 tables; restoration and migrations preserve all
+  original-column hashes, new attention-table RLS and runtime privacy. Clone cleaned.
+- Existing recovered signer matches the actual historical APK; canonical binding
+  remains empty. Canonical Firebase FCM is configured; no rebuilt APK yet.
+- Complete check, eight mobile groups, operations and isolated web release passed
+  before the final product-form correction. Clean web dependency audit is zero;
+  full tooling audit retains the approved 20 high paths from two advisory roots.
+- Linux cold handler/Sharp and actual packaged scheduled worker invocation passed
+  with an empty isolated queue; this does not prove hosted or OS notification delivery.
+- Nine unchanged browser workflows pass. Staff transport replies/private-note
+  exclusion/end/history/resolution/reopen now pass with the actual current navigation.
+  Remaining focused owner workflow verifies actual media upload/persistence.
+- Security correction restores owner Profile Sign out; actual signup/sign-out and
+  subsequent protected-route denial pass. FE-050 disables media controls before
+  hydration and while save is pending, using the existing LoadingBar; ready layout
+  is unchanged. This data-integrity correction uses AGENTS step 8's exception.
+
+Infrastructure recovery: local Docker stopped during the final checks and the
+isolated /private/tmp checkout disappeared. Failures were connection/setup failures,
+not successful application test runs. Docker/local PostgreSQL/Auth are restored;
+the isolated web checkout was recreated from declared source with a locked clean
+install. Resume database-heavy gates sequentially; do not reuse the interrupted
+runs as passing evidence. Actual device/browser subscription and OS display remain
+unverified; never claim provider acceptance is delivery or human Read.
+
+S98 signing readback: the official CLI stopped at assignment before confirmation.
+Independent reads prove the canonical default binding uses the exact recovered
+existing key bytes and certificate; legacy signing, FCM, Play and enhanced-security
+settings are unchanged. No new key or rollback. Public pins/association are prepared
+locally, with focused checks pending. AGENTS.md's ambiguous-timeout gate stops all
+further remote writes pending the owner's direction on the concrete protected
+review; local checks/preparation continue. Production remains schema 59 and old web.
+
+Owner timeout direction received: “Accept verified result and continue”, digest
+fbdaa48da6ad3ca8b350643d17a20954230d245af9a9c6257705e2f5bc5c33b9.
+The signing operation is accepted as independently verified complete, with no
+retry/rollback/further signing write. Continue only the original approved rollout.
+Fresh full check and all eleven production-mode browser workflows pass, including
+actual saved extra-photo bytes. Canonical build/link/type/spec checks and Android
+runtime export pass; fresh web release/artifact/commit/rollout remain current.

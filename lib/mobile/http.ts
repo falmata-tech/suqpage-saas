@@ -59,6 +59,8 @@ export async function nativeIdentity(
   const id = await port.linked(identity.id);
   const user = id ? await port.user(id) : null;
   if (id && !user) throw new MobileError("Account unavailable.", 401);
+  if (user && user.access_role !== "client")
+    throw new MobileError("Staff accounts sign in on the website.",403,"staff_web_only");
   return { identity, user };
 }
 export async function nativeOwner(

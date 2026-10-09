@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {registerOverlay} from './overlay-visibility';
+import {useTransportUnread} from './use-transport-unread';
+import {TRANSPORT_COPY} from "../../../lib/i18n/transport-copy";
 import {
   View,
   Text,
@@ -65,6 +68,7 @@ export function Sheet({
   const insets = useSafeAreaInsets();
   const { t } = useApp();
   // A hidden sheet must release its portal/focus boundary, including on web.
+  useEffect(()=>{if(visible)return registerOverlay();},[visible]);
   if (!visible) return null;
   return (
     <Modal
@@ -211,18 +215,20 @@ export function MoreSheet({
 }
 export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
   const { t } = useApp();
+  const unread=useTransportUnread();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("Transport & delivery")}
+      accessibilityLabel={`${t(TRANSPORT_COPY.launcherTitle)} ${t(TRANSPORT_COPY.launcherSubtitle)}`}
       onPress={() => router.push("/buying")}
       style={[c.buying, compact && { padding: 12 }]}
     >
       <Icon name="chat" color="white" size={22} />
+      {unread>0&&<Text accessibilityElementsHidden style={{position:'absolute',right:4,top:3,backgroundColor:'white',color:colors.brand,borderRadius:12,minWidth:20,paddingHorizontal:5,fontSize:12,fontWeight:'700',textAlign:'center'}}>{unread>99?'99+':unread}</Text>}
       {!compact && (
-        <View>
-          <Text style={c.buyingText}>{t("Transport & delivery")}</Text>
-          <Text style={c.buyingSmall}>{t("Live chat")}</Text>
+        <View style={{ flexShrink: 1, minWidth: 0, gap: 2 }}>
+          <Text style={c.buyingText}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
+          <Text style={c.buyingSmall}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>
         </View>
       )}
     </Pressable>
@@ -300,6 +306,7 @@ export const c = StyleSheet.create({
     marginTop: 12,
   },
   buying: {
+    maxWidth: 280,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -308,8 +315,8 @@ export const c = StyleSheet.create({
     padding: 11,
     boxShadow: "0 3px 12px #0002",
   },
-  buyingText: { fontSize: 12, fontWeight: "700", color: "white" },
-  buyingSmall: { fontSize: 11, fontWeight: "600", color: "white" },
+  buyingText: { fontSize: 13, fontWeight: "700", color: "white" },
+  buyingSmall: { fontSize: 11, fontWeight: "500", color: "white" },
 });
 
 export function OwnerNavigation({ active = "overview" }: { active?: string }) {
@@ -333,9 +340,9 @@ export function OwnerNavigation({ active = "overview" }: { active?: string }) {
         }}
       >
         {[
-          ["overview", "Overview", "shop"],
+          ["overview", "Profile", "user"],
           ["products", "Items", "menu"],
-          ["page", "Page", "info"],
+          ["support", "Support", "chat"],
           ["inquiries", "Inquiries", "chat"],
           ["more", "More", "user"],
         ].map(([screen, label, icon]) => (
@@ -374,9 +381,9 @@ export function OwnerNavigation({ active = "overview" }: { active?: string }) {
       </View>
       <Sheet visible={more} title={t("More")} onClose={() => setMore(false)}>
         {[
-          ["business", "Business details"],
+          ["overview", "Profile"],
           ["support", "Support"],
-          ["settings", "Account security"],
+
         ].map(([screen, label]) => (
           <Pressable
             key={screen}

@@ -3,6 +3,7 @@ import { runtimeGet, runtimeRun, runtimeTransaction } from './runtime-sql';
 import { OwnerPageError } from './owner-page-domain';
 import { parseOwnerBusinessChange, type OwnerLocation } from './owner-business-domain';
 import type { SessionUser } from './types';
+import {normalizeDiscoveryCategories} from './discovery-contract';
 export type LocationProposal = { business_id:number; version:number; category_key:string; city:string; region:string; location_mode:OwnerLocation['mode']; latitude:number|null; longitude:number|null; place_id:string|null; place_latitude:number|null; place_longitude:number|null; reviewed_version:number };
 export async function readLocationProposal(businessId:number):Promise<LocationProposal|null>{return await runtimeGet<LocationProposal>('SELECT * FROM owner_location_proposals WHERE business_id=?',[businessId])||null;}
 async function assertOwner(actor:SessionUser,businessId:number){
@@ -45,7 +46,8 @@ async function applyLocation(businessId:number,loc:OwnerLocation):Promise<void>{
    const latitude = loc.mode === 'storefront' ? loc.latitude : place ? Math.round(place.latitude * 10) / 10 : null;
    const longitude = loc.mode === 'storefront' ? loc.longitude : place ? Math.round(place.longitude * 10) / 10 : null;
    await runtimeRun('DELETE FROM business_industries WHERE business_id=?',[businessId]);
-   await runtimeRun('INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)',[businessId,loc.category]);
+   for(const category of normalizeDiscoveryCategories(loc.category))
+    await runtimeRun('INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)',[businessId,category]);
    if (latitude !== null && longitude !== null) {
     await runtimeRun(`INSERT INTO business_discovery_profiles(business_id,city,zone,region,latitude,longitude,approved_at,updated_at)
      VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(business_id) DO UPDATE SET city=excluded.city,zone=excluded.zone,

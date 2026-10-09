@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import {TRANSPORT_COPY} from "../lib/i18n/transport-copy.ts";
 
 function read(file) {
   return fs.readFileSync(file, "utf8");
@@ -82,9 +83,17 @@ assert.match(login, /New business\? Enter your email to create your account/);
 assert.match(metadata, /t\(MARKET_STOREFRONT_COPY.title\)/);
 assert.match(metadata, /t\(MARKET_STOREFRONT_COPY.description\)/);
 assert.doesNotMatch(support, /Ask for help/);
-assert.match(support, /Transport & delivery/);
+assert.match(support, /t\(TRANSPORT_COPY.launcherTitle\)/);
+assert.match(support, /t\(TRANSPORT_COPY.launcherSubtitle\)/);
+assert.equal(TRANSPORT_COPY.launcherTitle, 'Need help with transport?');
+assert.equal(TRANSPORT_COPY.launcherSubtitle, 'Let us handle it. Chat with our transport agents live');
+assert.match(support, /t\(TRANSPORT_COPY.invitation\)/);
+assert.match(TRANSPORT_COPY.description, /business on Suqpage/);
+assert.match(TRANSPORT_COPY.description, /Chat with our transport team/);
+assert.match(TRANSPORT_COPY.description, /help get your purchase to you/);
+assert.doesNotMatch(Object.values(TRANSPORT_COPY).join(' '), /delivery|commission|brokerage|40\s*km|multiple modes/i);
 assert.doesNotMatch(support, /Buying assistance/);
-assert.match(support, /Live chat/);
+assert.match(support, /Live Chat/);
 assert.match(support, /Start chat/);
 assert.doesNotMatch(support, /visit a site|observe production|check a specific order/i);
 // FE-041 replaces the repeated page footer with a direct link per selected product.

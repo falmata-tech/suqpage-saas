@@ -8,7 +8,7 @@
 
 
 Current released product (FE-044–FE-051, BE-037–BE-043, DEP-034–DEP-040):
-Suqpage runs at https://suqpage.com on PostgreSQL schema 50. Standard owner pages,
+Suqpage runs at https://suqpage.com on PostgreSQL schema 59. Standard owner pages,
 complete private starters, Product/Service posting, owner first Publish and live
 Save, immediate public location saves and five-row search results are deployed.
 Custom-page request/design/revision features are retired; historical data remains.
@@ -33,7 +33,9 @@ business featured or claiming prerecorded video is live.
 
 The current release and its verified gates, backup, deployment and remaining
 real-email/hosted-session admission limits are recorded in
-`docs/SUQPAGE-S28-RELEASE-2026-09-23.md`.
+`docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`.
+The S98 notification/canonical Android rollout remains pending under
+DEP-042/DEP-043; its backed schema 60–62 rehearsal is not a production migration.
 
 ## 1. Your role
 
@@ -85,12 +87,12 @@ do not enable a custom-request application feature.
 
 Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
 The generated Netlify origin remains an infrastructure compatibility address.
-Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` and deployment `6ab0d349f099639821fa0f9a` use schema 47. Full check, release,
-operations, nine isolated provider browser scenarios and private-artifact checks
-pass. Live desktop/phone search, all 64 demo routes, linked offerings, email-only
-entry, private-route denial, HTTPS redirects and health are verified.
-Real hosted email delivery and authenticated hosted owner/admin sessions remain
-separate from passing local workflows. See `docs/SUQPAGE-RELEASE-2026-09-21.md`.
+Released source `6c27025db6d84cecda43c952597926955aecb71d` and Netlify deployment
+`6ac5c9940ee5deb5294319ef` use schema 59. Web release, operations, exact packaged
+Linux handler/image and private-artifact checks pass. Live public routes, native
+catalog, saved demo accents and the historical Android link association are
+verified in `docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`. Real hosted email and
+authenticated hosted sessions remain separate from passing local workflow tests.
 
 The official product name is:
 
@@ -164,12 +166,27 @@ participant's story, process, products, capabilities, reviewed location, and
 contact options; supports map, region, category, product, and capability search;
 and lets buyers contact the participant directly for small purchases, custom
 work, repeat orders, or larger trade inquiries. Business owners can contact Suqpage support from their authenticated dashboard.
-The local S57 transport/delivery service connects customers to staff who arrange
+The local S57 transport service connects customers to staff who arrange
 carriers or logistics providers outside Suqpage. Intake collects pickup,
 destination, name and phone, with optional goods details. The local S58 intake
 pairs pickup/destination in a highlighted route card and name/phone in a second
 row, including phones; a compact optional-details box follows. It is a conversation,
 not a confirmed booking, payment or delivery guarantee.
+
+S71/S72/S84/S90 are locally implemented UI revisions, pending owner visual review and
+release gates (FE-019/FE-030/FE-049/FE-053). The transport entry says Need help with
+transport?, followed in smaller print by Let us handle it. Chat with our transport
+agents live. Its intake invites customers who bought from a business on Suqpage
+to chat with the transport team for help getting the purchase to them.
+Customer copy avoids last-mile delivery wording, distances,
+brokerage and mode details. Local wording explicitly names purchased goods and includes
+native live-chat wording plus (Live Chat), allowing more words when clarity
+requires it. They invite
+visitors who found a product to chat with the transport team. The results opener
+says View products/Hide products alongside its panel icon, keeping map/search/
+filters unchanged. All five languages use authored contextual wording. The live
+web and finished Android APK remain on source 6c27025 until separate rollout;
+these local labels do not rename the service/API or promise confirmed delivery.
 
 ---
 
@@ -223,6 +240,13 @@ No hosted Realtime configuration or native app has been deployed.
   The offering contract also admits repair and other service offerings. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
+
+The local FE-021/FE-053 map refinement uses bright orange shops with thin white
+outlines around the shop and roof and white interior details. Business names sit on cream plates with
+orange borders/text; selected names use white text on orange. Counted clusters,
+nearby-group markers and status badges keep their original styling. Web, phone
+web and the shared native/Expo renderer retain their existing interactions. This
+appearance is focused-tested locally and awaits visual approval and rollout.
 
 ### Suqpage is not
 
@@ -606,6 +630,12 @@ only where they help someone make a decision. Sample-content warnings remain whe
 needed to avoid publishing an unedited starter as genuine business information.
 Apply this standard to all future Suqpage work, not just the current cleanup.
 
+The local FE-052/FE-053 showroom candidate omits the business-example notice when
+a marked demo's visible handle contains `demo` (case-insensitive). It retains the
+notice on marked demos without that handle text. Inquiry screens omit demo-inquiry
+disclaimer sentences. These display choices do not assign or change demo flags,
+owner/publication authority, contacts or normal inquiry behavior.
+
 
 Do not place public-facing words such as these on production pages:
 
@@ -677,6 +707,11 @@ and present them but must not invent or silently translate them.
 
 ## 7. Dynamic catalog model
 
+FE-058 is locally implemented: web/native maps pan worldwide at zoom 1–19,
+while initial/reset views remain Ethiopia and filters remain selected. Approximate
+city offsets wrap worldwide coordinates; exact GPS is unchanged. This does not
+expand the current Ethiopia city catalog or relocate existing businesses.
+
 Suqpage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products. FE-054 stores the optional accentColor in existing versioned PostgreSQL page draft/publication JSON, with no migration or backfill.
 
 Core hierarchy:
@@ -745,9 +780,13 @@ Rules:
     merchant-defined offered-by unit (including hours, sessions and projects), and up to six concise highlights. These
     fields support inquiry context only and never create checkout, payment, tax,
     inventory, or price-verification behavior.
-13. Each offering may carry up to four reviewed YouTube references; a showroom
-    header has one. New items/headers use the platform example, and owners request
-    replacements through support. Existing admitted videos remain usable.
+13. The deployed gallery accepts four reviewed YouTube videos and one header video.
+    The FE-060/BE-048 local candidate accepts direct owner TikTok, YouTube, public
+    Facebook video and Instagram Reel links for both, without staff approval.
+    The FE-061/BE-049 local candidate gives new private headers/sample offerings
+    and newly added items a category-specific admitted example until replaced.
+    Example footage is not presented as the owner's own work. Legacy reviews
+    remain private history; owner saves keep tenant/version and visibility rules.
     Public rendering derives a privacy-enhanced embed or normal watch link from
     the canonical provider ID; recipes and users cannot supply iframe markup.
     The showroom-level process video appears inside the canonical combined
@@ -770,7 +809,18 @@ recovery input and are discarded when upgraded to revision schema v3.
 
 ---
 
+Planned S98 media-save protection (FE-050) disables the product form before
+client readiness and while its save is pending, using the existing loading bar.
+Actual browser coverage checks new photo bytes and gallery retention; rollout is
+still pending. No additional product fields or approval step is introduced.
+
 ## 8. Product and inquiry workflow
+
+The local S91 candidate records one owner alert with each canonical in-app inquiry
+transaction. Its link opens that exact permitted inquiry; reading an alert does
+not change inquiry status. External social handoffs create no platform alert.
+Inquiries without a client owner alert platform/operations managers (FE-062/BE-050).
+
 
 Product cards open a shareable `/@handle?product=<id>` view inside the business’s
 product section (FE-041). The route reloads directly, supports browser back/forward,
@@ -907,25 +957,24 @@ Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 ---
 
 The owner editor asks for Product or Service, name, optional ETB price and one
-description (FE-048/BE-041). FE-050/BE-042 extends media to eight photos and four
-reviewed YouTube links, with photo upload and media remove/reorder controls and
-a combined 5 MiB photo-upload budget per save. New items include the starter video.
-Owners use Request a video for a saved product or showroom header and submit an
-HTTPS source link plus an optional note. This creates a tenant-bound owner support
-ticket; it never replaces public media before approval. Assigned agents or
-managers review the submitted source and enter a supported
-YouTube URL from any channel, then approve or decline with a reply. Approval
-updates only the target video and preserves other draft/public fields, photos
-and visibility. No official Suqpage channel, channel setting or channel ownership
-confirmation is required. Staff upload any source files outside Suqpage if needed;
-there is no integrated YouTube upload or ownership API.
+description (FE-048/BE-041). The FE-060/BE-048 local candidate extends the existing
+eight-photo/four-video gallery to direct TikTok, YouTube, public Facebook videos
+and Instagram Reels. Owners enter links in the cover/product editor and Save;
+there is no approval ticket or wait. HTTPS exact-host validation and bounded
+TikTok share resolution run before the existing atomic owner save. Private,
+deleted or embedding-disabled videos cannot be guaranteed to play. Instagram
+photos/stories/profiles and Facebook share-token URLs are not admitted.
+Historical staff video requests and their restricted review workflows remain
+available; there is no integrated provider upload or ownership API.
 The public gallery has thumbnails, arrows, keyboard navigation
 and horizontal touch scrolling. Video playback requires an explicit play action
 and stops when the selected media changes. The first photo stays the cover for
 search/cards; legacy single-photo/video products need no backfill. Extra photos
 follow existing tenant/public access and snapshot-retention rules. This gallery
-was deployed on schema 50. The S48 support-review extension is deployed on schema 58;
-owner/staff approval, decline, public embed selection and preservation tests pass.
+was deployed on schema 50. Historical support reviews were deployed on schema 58.
+The new direct-video candidate has passing focused persistence/security and inline
+web/Expo captures, plus actual Android TikTok/Facebook/Instagram player checks.
+Visual approval, full gates and coordinated web/Android publication remain pending.
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
@@ -995,9 +1044,31 @@ Default behavior:
 - ignore legacy public `scale` query state so no invisible filter narrows results;
 - ensure mobile usability and keyboard accessibility.
 
+Local FE-021/FE-053 shop markers have orange bodies, thin continuous white rims and 11px bold
+orange business names on cream plates. Selection changes the nameplate to orange
+with white text. Cluster/nearby/badge styling remains unchanged. Counts and
+live/featured authority, coordinate anchors, clustering,
+selection/zoom and page previews remain unchanged. Full business names stay in
+accessible labels while visible names wrap within the compact marker width.
+
 ---
 
 ## 11. Passwordless account entry and business onboarding
+
+The FE-059/BE-047 local candidate requires a canonical Business city on the same
+initial account/business/handle screen. Native places the city/town search beside
+Business name before category choices on both setup routes. Missing/forged cities fail before writes;
+chosen-city area anchors and classification are prepared atomically, but the rich
+sample page remains private until Publish. Web/native selection invalidates when
+the search text changes. Existing businesses and invitation defaults are preserved.
+
+FE-061/BE-049 locally chooses a complete editable example pack from each of the
+eight setup categories in the same transaction: category photos/copy and one
+admitted example video for cover and offerings, using the chosen city in sample
+copy. Existing edited pages are never generally backfilled. Other products &
+services keeps its declared category/city without a nonexistent public-industry
+tag; after publication it participates in All-category map and text search with
+neutral category presentation, rather than being relabeled Electronics.
 
 Suqpage uses one identity-first entry surface for sign-in and account creation.
 The visitor enters an email and six-digit one-time code. Passwords are not requested in the launch
@@ -1091,13 +1162,29 @@ window, but application code must not read or mutate them.
 
 ## 13. User roles and standard page workspaces
 
+Local S91 attention covers owner inquiries/support replies, matching staff waiting
+work, assignment/reassignment, public replies and ended/reopened cases. Visitors
+receive assignment and a separate first-join event, then unread public replies.
+Opening/refreshing a chat never establishes Read: only explicit acknowledgement of
+an incoming visible message does. Managers inspecting an agent's case do not
+establish that agent's read/join. Private transport notes remain private.
+
+
 The access-profile layer distinguishes platform administrator, operations manager,
 team member and client. Session identity and tenant scope remain server-authoritative.
 
 ### Administrator
 
+The local FE-026 staff workspace keeps Business support, Transport and Staff as
+stable destinations. The admin menu remains available when a business workspace
+is selected, and its logo returns to Overview. Scoped agents see their own queue
+and account utilities. Staff owns workload/availability settings; the current
+queue or Staff area stays highlighted on its detail screens. Inbox search, status
+and pagination survive conversation actions and back links. Navigation hints
+never grant queue or tenant access.
+
 Administrators manage business moderation, staff assignments, marketplace
-visibility, sponsorship, Daily Featured schedules, support and renewals. They can
+visibility, sponsorship, Daily Featured schedules and support. They can
 invite a private business and suspend or restore established visibility. Page and
 location approval queues/actions are retired; historical records remain. Private
 page editing and draft media access still require current owner assistance consent.
@@ -1111,25 +1198,50 @@ counts, and status guidance distinguishes staff drafts from owner live Save.
 Verified signup or an invitation creates a complete private sample workspace.
 New signup opens the filled page preview automatically. Both web and native first setup
 collect account/business details and the chosen handle together, then expose
-address edits in Page. Its first address change is immediate and later
+address edits in Page on the deployed version. The FE-056 local candidate groups
+page/account/business/handle editors under Profile, with separate edit/save/return
+screens and authoritative visits/inquiry/offering counts. Its first address change is immediate and later
 changes have a 30-day interval (support exceptions require an audited administrator).
 Owners replace examples, save business details/location, edit their page and
 products/services, then Publish directly when at least one offering is listed.
+FE-056 locally exposes Publish beside Edit above the private preview's cover.
+It opens current server readiness with links to missing details and blocks
+confirmation until ready. A changed draft is refreshed for another review;
+publication conflicts/errors preserve the preview and confirmation for recovery.
 Subsequent page Save updates the live publication atomically; stale/foreign writes
 and self-reactivation of suspended businesses are rejected. Private account
 contacts remain separate from public page contacts. Owners can restore a retained
 publication, revoke assistance, read inquiries, use support, manage account security
-and view aggregate visits. Categories and renewal operations remain available to
-staff without cluttering owner navigation. Existing catalog IDs, options, inquiry
+and view aggregate visits. Categories remain available to authorized staff without cluttering owner navigation. Existing catalog IDs, options, inquiry
 snapshots and tenant boundaries remain compatible. The S27 local editor adds
 ordered photos/video links and resets uploaded-file state to saved references
 after a successful save; later description edits reuse those saved images.
+
+The designated main-admin identity is verified and linked in local and production,
+with no business-owner association; existing business content and Auth identity
+are preserved. Local S88 staff creation offers Support agent and Transport agent,
+stored as team_member plus the corresponding queue scope. New agents are enabled
+with capacity three; incompatible open cases block role changes. Scoped agents
+have their queue as the workspace and no business/product/design authority.
+Legacy generic staff/operator identities are retained with Queue controls matching
+their actual access profile. New role controls show full names on phones and
+creation filters immediately to the created identity. Queue agents cannot inherit
+private-page/media authority from old business assignments; page writes fence the
+current profile and scope even after an earlier principal was read. Missing access
+profiles fail closed instead of falling back to legacy admin authority. These UI changes are local
+until coordinated rollout (FE-026/BE-018).
+
+Business plans, subscriptions, renewals and payment recording are retired in the
+local S89 candidate (FE-018/BE-017). Transport arrangement is Suqpage's only revenue
+service. Product prices and aggregate visit statistics remain. Old renewal URLs
+redirect to the authorized workspace; historical private financial rows are kept.
+Hosted retirement still requires the web and migration rollout.
 
 ### Operations managers and team members
 
 Operations managers can open business workspaces, create invitations, maintain
 products with a service note, assist with consented page drafts, operate inquiries,
-manage support assignments and record manual renewals. Business staff assignment
+manage support assignments. Business staff assignment
 remains an administrator action. Team members only see actively assigned businesses;
 page editing also requires current owner consent. Staff Save never publishes on
 behalf of the owner. Support-agent settings enable Business support, Transport dispatch or All requests
@@ -1203,6 +1315,25 @@ operational disable switch, not a route back to the retired workflow.
 
 ## 15. Current technical architecture
 
+The local native build configuration uses one permanent application name Suqpage
+and Android package com.suqpage.app for development, internal APK and store builds.
+Preview is a distribution/environment profile, not a separately named application.
+The canonical Firebase Android registration is shared by hosted profiles; account
+and chat data remain PostgreSQL/Supabase-owned.
+Hosted workers require an explicit reviewed data target and pin its API/Auth
+origins plus the Expo project. Both current hosted profiles target production;
+an internal distribution profile does not isolate live customer data. Canonical
+Firebase client validation pins the project ID/number/package and rejects private
+credential material. Private sending credentials remain provider-managed.
+
+S91 adds typed notification/read contracts, transactional private PostgreSQL events,
+indexed unread counts, bounded feeds and leased provider delivery. Existing live
+chat still polls; it does not require a hosted Supabase Realtime change. Optional
+Web Push and Expo Push/FCM adapters have bounded failures; a minute Netlify worker
+handles retries and provider handoff receipts. Those receipts never mean human
+Read. Background delivery is pending approved configuration and device evidence.
+
+
 S54 public Market adapters select the existing product/service projection before
 counting and paging; legacy result-type URLs are accepted but no longer control
 public result kinds. Internal discovery type support remains compatible. Business
@@ -1217,16 +1348,26 @@ private calls verify Supabase bearer identity and reload tenant/role authority.
 Admin/staff management stays on the web. Device sessions use SecureStore; the
 browser preview keeps sessions in memory. Native first signup opens the saved
 private starter preview using the existing owner-home projection; no second
-initializer or client-side signup authority exists. PostgreSQL remains server-only. FE-054
+initializer or client-side signup authority exists. PostgreSQL remains server-only.
+FE-061/BE-049 use a pure category example catalog and a server-only persisted
+category lookup for new-offering defaults. OwnerHome carries the admitted default
+to the native editor; both editors and persistence use existing media contracts.
+No provider request occurs in account creation, and no schema is added.
+
+FE-056 locally fixes Android image uploads using
+SDK File multipart, and private-image display using current authenticated fetch
+and ephemeral cache files removed on view/account change; bearer tokens never
+enter image URLs or the native Image loader. FE-054
 shares a pure validated accent/palette between clients and server; optional native
 profile/shop DTO fields carry the business choice through existing save contracts.
 
 The native app follows the phone web hierarchy: compact brand/locale
-header, Market/Featured/About/More, full map with a sliding filter/result drawer,
-Featured and showroom grids, and grouped owner tasks. S49.2 embeds approved
-YouTube cover/product videos inside isolated native WebView/browser iframe
-adapters, with bounded failure/retry and no external video handoff. Video approval
-is unchanged. The owner has authorized the workflow audit and tester-build gates;
+header, a full map with a sliding filter/result drawer, Featured and showroom
+grids. The FE-056 local candidate uses Market/Featured/Account for guests and adds
+Inquiries only for signed-in linked owners, with one bottom bar and a Profile hub.
+FE-060 embeds four public video providers inside isolated native WebView/browser
+iframe adapters, with bounded failure/retry and no external video handoff. Owners
+save these links directly; historical reviews remain separate. The owner has authorized the workflow audit and tester-build gates;
 available honey-demo playback has installed native evidence; unavailable external
 videos retain bounded retry and physical-phone/fullscreen checks remain explicit.
 
@@ -1283,7 +1424,7 @@ budgets are separate, and explicit native listing state saves preserve advanced
 metadata. Browser preview retains Leaflet. No Google Maps key or Google Cloud setup is
 required. The owner permits SDK-internal tile caching (including SQLite); all
 application persistence stays in PostgreSQL. Native testing needs a rebuilt app. Preview and
-production builds have distinct package names and require explicit hosted public
+production builds share com.suqpage.app and require explicit hosted public
 configuration. See `docs/MOBILE-RELEASE-AUDIT.md` and `docs/MOBILE-DISTRIBUTION.md`.
 
 Canonical configuration keys use `SUQPAGE_*` and `NEXT_PUBLIC_SUQPAGE_*`. The
@@ -1356,9 +1497,32 @@ Do not claim launch readiness when that command or equivalent individual checks 
 
 ---
 
+Local S88 mobile session admission verifies current server role before admitting
+owner screens, outside the provider Auth callback. All authenticated native
+boundaries reject staff from fresh authority; staff denial clears mobile owner
+session/private UI only, leaving separate web sign-in intact. Validation outages
+allow retry without a second OTP and do not admit an unverified session. The
+updated APK/API deployment is pending (BE-044/FE-053).
+
 ## 16. Security requirements
 
+S91 feeds, subscription changes, deliveries and confirmed-message reads recheck
+current tenant/queue/visitor-token authority. Native staff stays denied. Safe OS
+payloads carry generic localized event text and internal destinations, never
+contacts, transcript or carrier details. Connected sign-out revokes recipient
+subscriptions; offline native logout clears local access immediately but cannot
+synchronously revoke server push. Turning notifications off currently affects all
+bindings for that recipient. No immediate offline revocation is promised.
+
+
 Security requirements are product requirements, not optional cleanup.
+
+Native release admission uses actual SDK signature/manifest inspection with
+bounded argument-array commands. Unknown certificate pins, wrong identity,
+debuggable APKs, extra signers and non-increasing versions fail closed. Credential
+sources are excluded from app archives; no private FCM, account or signing key
+belongs in client/runtime configuration. Provider administrators and arbitrary
+shell commands remain outside repository enforcement.
 
 ### Authentication and sessions
 
@@ -1477,7 +1641,57 @@ Read `SECURITY.md` before handling a suspected vulnerability.
 
 ---
 
+The S86 local one-time map correction separates 21 marked Addis area demos across
+real city neighborhoods, with minimum display spacing 2.23km after the existing
+offset projection. Exact/unmarked/other-city data and content are unchanged. Both
+web and Expo actual maps retain 21 shops/84 offerings and selectable previews.
+Individual 44px shop hitboxes do not intercept neighboring shops; counted marker
+styles and behavior stay original. Production demo coordinates remain unchanged.
+
 ## 17. Data, migrations, and deployment boundary
+
+Internal APK and store AAB profiles use the same permanent native identity and
+remote version counter, incrementing version codes for both. Existing released
+Preview APKs retain their historical package/signature; the next admitted APK
+requires one canonical installation. Before building/publishing it, verify the
+canonical signing binding and certificate/domain association independently. Do
+not relabel the verified legacy certificate or silently create/replace credentials.
+One Firebase Android app is sufficient; no later rename/second registration is
+planned. No canonical APK or new association publication is claimed yet.
+The S98 existing-key reuse is independently verified for the canonical package,
+with legacy signing, FCM and other settings preserved; the owner accepts the
+readback after the CLI confirmation timeout. Its verified public certificate is
+pinned locally; no new APK or hosted association publication is claimed yet.
+`mobile:verify-apk` admits only a
+nondebug signed canonical artifact, newer than the selected latest admitted APK,
+or an explicitly selected first canonical release. It stores a protected checksum
+receipt; inspection-only mode never grants admission. EAS requires committed
+source and preserves internal APK versus store AAB; store submission remains
+internal draft. A Play-distributed APK requires independent signing/device checks.
+Older-version reinstall is not a promised rollback; use a reviewed higher-version
+correction and preserve compatibility with installed clients.
+
+Local S91 migrations 61/62 add confirmed read/join columns and private attention,
+preferences, subscriptions and delivery tables. Protected local backups and
+content-hash readback preserve existing accounts, inquiries, chats and ledgers.
+Hosted schema remains 59 until separately backed coordinated rollout. Background
+push requires reviewed provider credentials and an Android rebuild; no such
+configuration or new APK is claimed by local browser proof (DEP-043).
+The owner-supplied canonical Firebase client file is verified and stored in the
+selected Expo project's preview/production build environments with the matching
+project ID and client-file requirement flag. Protected before-state/source and
+metadata/string readback are retained. This build setup does not install the
+private FCM sending key or enable server push. The separately supplied sending
+key is now uploaded and bound only to the canonical Android FCM slot using the
+owner-authorized official CLI method exception; independent public metadata
+readback matches exact project/key/client identity. Server capability, coordinated
+rollout, admitted rebuild and actual Android delivery remain pending.
+The owner has supplied the sending-key source; selected structural checks and
+protected recoverable backup pass. Its Expo association is verified without
+printing private bytes; its IAM permissions or actual delivery are not claimed
+independently verified. Signing, Play, legacy FCM and enhanced-security state
+remain unchanged by this credential operation.
+
 
 S42/schema 56 adds `support_messages.visitor_visible` with a false default.
 No historical note is exposed. Apply this additive migration before deploying
@@ -1499,6 +1713,11 @@ The first photo/video remain in legacy columns; old records need no backfill.
 Retained publication/revision snapshots and reconciliation include every gallery
 photo. Hosted schema and publication are verified. Rollback retains additive data
 and must preserve private notes, buying cases and staff video review.
+
+Local migration 60 retires automatic business subscription creation by removing
+its trigger/function. Historical ledger/payment data is preserved and verified;
+fresh shops and demo fixtures receive no plans. Hosted schema remains 59 pending
+backed rollout; restoring the retired trigger is a separately reviewed mutation.
 
 Schema 48 adds pg_trgm/fuzzystrmatch in the reviewed `extensions` namespace and
 four expression GiST indexes. Existing extensions are never relocated implicitly.
@@ -1586,6 +1805,12 @@ configuration, and preflight checks.
 
 ## 18. Language and localization rules
 
+S91 alert events, sound/notification controls, first-join and Sent/Read labels use
+all five supported interface catalogs. Business names and message bodies remain
+literal. Notification payload text uses the saved interface preference and never
+contains a translated/rephrased customer message.
+
+
 The Suqpage wordmark remains Latin with a fixed font, weight and spacing in all
 five languages. Surrounding interface typography may follow the selected script.
 FE-054 picker labels, validation and preview text use these same catalogs; owner
@@ -1599,6 +1824,12 @@ from client messages. Technical terms, legacy/custom-design copy and unknown
 provider errors may retain English. Translations have not had native-speaker
 review. Arabic/RTL and Afar remain future work. Publication evidence is recorded
 in the S25 release document; implemented behavior alone is not a rollout claim.
+
+The local S90 transport launcher and intake use contextual wording in all five
+languages, inviting customers to chat with the team for help transporting their
+purchase. Non-English chat labels include (Live Chat). Merchant content, intake
+fields and conversation behavior remain unchanged;
+catalog/layout evidence does not substitute for native-speaker review.
 
 Rules:
 
@@ -1626,11 +1857,44 @@ Rules:
 
 ## 19. UX and accessibility requirements
 
+The local staff workspace uses short queue labels, matching support/transport
+icons, wrapping phone tabs and 44px breadcrumb/back targets. Conversation actions
+replace the current browser history entry; Back returns to the originating list.
+Canonical/denied support links use safe browser replacement with authorized
+server-rendered data or a generic unavailable state and inbox fallback, avoiding
+the development RSC redirect/profiler failure. No foreign transcript renders
+before navigation.
+
+Local S91 uses compact bell counts and a bounded alert list, plus unread activity
+on the transport launcher. Mark all read clears authorized alerts through the
+returned cursor; it does not read transcripts or future events. Sound/OS permission
+is explicit and optional. Closing the nested alert list preserves the chat. Polls
+back off and suspend while hidden; in-app attention remains independent of push.
+
+
+Local FE-056 loading feedback uses compact orange horizontal loops at real
+data/auth/map/route/save waits, with static reduced-motion treatment. Native
+optional notices/errors/contacts render no raw empty-string children under View;
+setup and private-preview captures check actual runtime errors. Owner-menu
+authority refreshes on each route change, including initial setup→private preview. FE-060
+portrait TikTok/Instagram playback centers one official player over a softly
+blurred static cover photo; live video frames are not copied or duplicated.
+The local YouTube wrapper sets its sandbox before iframe navigation and accepts
+document/playback readiness rather than relying on the control API alone. Loading
+timeouts cannot remove a loaded player, while terminal provider errors retain
+unavailable/retry behavior. TikTok autoplay-denied is not treated as an unavailable
+video. Actual playback is checked separately from deterministic frame fixtures.
+
 Local S58 transport intake keeps route and contact field pairs side by side at
 320px and above, with wrapping labels, touch-sized inputs and scroll access to
 Start chat in short viewports. Suqpage styling is retained. The owner approved
 the S58 layout for release; physical-keyboard/device verification remains separate.
 Payload and chat lifecycle remain the S57 contract.
+
+The local S90 launcher uses a prominent question and smaller supporting sentence
+that wraps naturally beneath it. The open phone Market drawer retains a compact chat icon with
+the complete accessible name; the expanded entry fits 320px screens without
+covering search/result controls. Existing palette and focus behavior are retained.
 
 All public pages and dashboards must work on mobile and desktop. FE-054 derives
 readable foreground/border roles from custom accents (including white, black and
@@ -1652,6 +1916,9 @@ Minimum expectations:
   from assistive technology, with accessible category names retained;
 - descriptive image alt text;
 - readable availability states;
+- high-contrast map names and orange shop bodies: normal/selected text meets
+  4.5:1 and the fill meets 3:1 against a representative light map background.
+  Individual shops use the owner's thin-white-outline trial; groups keep their original style;
 - clear loading, success, empty, and failure states;
 - no silent network failures;
 - no unhandled native-share cancellation errors;
@@ -1723,7 +1990,76 @@ structured inquiry, not online checkout.
 
 ---
 
+The S87 local actual workflow audit passes administrator-created staff and real
+HTTP/Supabase/PostgreSQL web/native-preview chats: both-way replies, attachments,
+reassignment, capacity, tenant/privacy denial, ended history/contact/follow-up,
+resolution, reopening and lost-ack idempotent retry. Case access removed by
+reassignment returns to the authorized inbox with a localized generic notice.
+
+All success replies are real; fixtures are removed and production chats untouched.
+Physical Android/rebuilt APK and hosted rollout remain separate gates.
+
 ## 22. Testing and definition of done
+
+DEP-042/DEP-043 identity checks cover all build profiles, APK/AAB version settings,
+actual Expo public-config resolution and canonical Firebase acceptance with
+legacy/foreign/missing-config rejection. The verified canonical association is
+prepared locally alongside the preserved legacy HTTPS association. These focused checks do not admit
+a new binary, credential write or OS notification claim.
+Focused single-app safety tests additionally cover pinned target/profile/realm,
+nested Firebase-secret rejection, archive exclusions, signature/version/debug
+failure cases and bounded SDK parsing. Real inspection of the historical APK
+confirms its legacy package/signature separately from mocked SDK tests; canonical
+canonical admission rejects that historical artifact because its package is the
+legacy preview identity; the new canonical artifact requires actual inspection.
+
+FE-026/FE-019 staff navigation has passing focused type, catalog/spec, safe URL,
+isolated PostgreSQL staff/tenant and real local HTTP/browser evidence. The browser
+suite covers both agents and admin, page-two search retention through successful
+and failed replies, claim/assignment/close/reopen/handoff, direct/denied links,
+staff settings, stable business context, drawer focus and all five languages at
+1440/390/320. The corrected safe redirect flow has zero browser exceptions;
+fixtures are removed afterward. Visual approval, full gates, scoped commit and
+web rollout remain pending; this does not claim a new production deployment.
+
+S91 focused gates include `npm run test:attention` (real isolated PostgreSQL
+receipt/event/privacy/retry tests and mocked provider/worker contracts) and local
+HTTP/browser workflow evidence. `test:attention:visual` requires a selected local
+admin and uses disposable labelled accounts. Expo browser evidence is distinct
+from installed Android and real foreground/background/closed OS delivery. Specs
+remain in progress until visual approval, full gates and coordinated rollout.
+
+
+S90's focused type/catalog/narrative checks and 13 read-only web/Expo states
+pass, including five languages, desktop/phone widths, actual loaded map tiles,
+ordered typography, the new transport-team introduction, unchanged intake routing
+and compact result-panel mode.
+Two short phone intake checks retain paired fields and reachable Start chat.
+No request is submitted. Visual approval, full gates and coordinated web/Android
+rollout remain separate; no new installed APK is claimed.
+
+FE-056–FE-061 and BE-045–BE-049 are local candidates awaiting visual approval,
+complete gates and coordinated rollout. Focused browser fixtures establish
+persistence/lifecycle, not provider availability. Actual Android selected-cover
+save/re-entry/render, public Facebook/Instagram advancing playback and TikTok
+player/media progress have separate private evidence. Physical-phone/fullscreen
+checks and a newly admitted APK remain release steps; production is unchanged.
+
+S81/S82 focused local evidence covers category-specific starter/new-offering
+persistence, all eight actual example playbacks, preserved selected-demo media,
+and visible private-preview Publish with readiness, stale/denied/failed recovery
+and actual local publication. Demo/provider fixtures are distinguished from live
+playback. The named Al Haya correction replaces only unchanged developer example
+video refs; other edited content stays intact. Review precedes full gates and
+coordinated web/API/native rollout; no hosted example correction is implied.
+
+S85 focused evidence covers white-rimmed orange shops, warm labels and normal/selected contrast at
+desktop, 390px and 320px on web/Expo, real map selection/preview with no zoom-out,
+counted cluster keyboard expansion and restored original group/badge styles.
+Cluster/nearby/badge declarations match the original web/native styles. Actual OSM desktop/
+phone views were captured separately from controlled cream tiles. Map behavior
+and both type checks pass; full gates, visual approval, physical native/new APK,
+task commit and rollout remain pending. No application data or provider changes.
 
 S63 copy uses shared web/native constants and all five locale catalogs. Focused
 narrative, localization/content-boundary and type checks precede viewport review;
@@ -2017,3 +2353,11 @@ save and publication checks plus desktop/phone captures pass. Web deployment
 and the internal Android APK are published; full gates and limits are recorded in
 the S69/S70 release record. These
 additions qualify sections 5, 7, 11, 15, 18, 19 and 22 without changing other flows.
+
+## Local attention and read receipts — S91
+
+FE-062/BE-050/DEP-043/ADR-0026 are implemented locally with focused database,
+privacy, provider-failure and HTTP checks. Actual browser/Expo owner and visitor workflows, five-language layouts and browser
+sound/mute checks also pass. This candidate is uncommitted and not deployed. Visual approval/full
+release gates, reviewed Firebase/Web Push configuration, rebuilt Android and
+actual OS delivery remain separate outstanding checks.

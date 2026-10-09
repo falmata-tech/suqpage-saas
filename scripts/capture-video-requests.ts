@@ -17,6 +17,9 @@ async function main(){
  const auth=createClient(provider.origin,process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false}});
  const browser=await chromium.launch(),ids:number[]=[],providerIds:string[]=[],dir=process.env.SUQPAGE_TEST_SCREENSHOT_DIR||'.local/video-request-review';fs.mkdirSync(dir,{recursive:true});let businessId:number|undefined;
  const handle=`video-review-${crypto.randomBytes(5).toString('hex')}`;
+ const tikTok=process.env.SUQPAGE_TEST_PRODUCT_VIDEO_PROVIDER==='tiktok';
+ const approvedUrl=tikTok?'https://www.tiktok.com/@scout2015/video/6718335390845095173':'https://www.youtube.com/watch?v=aqz-KE-bpKQ';
+ const approvedRef=tikTok?'tiktok:6718335390845095173':'youtube:aqz-KE-bpKQ';
  let phase='fixture';
  const mark=(value:string)=>{phase=value;fs.writeFileSync(`${dir}/phase.json`,JSON.stringify({phase,at:new Date().toISOString()}),{mode:0o600});};
  async function login(role:'client'|'operations_manager'){
@@ -36,8 +39,8 @@ async function main(){
   mark('agent setup');await updateSupportAgentSetting(staffUser,{userId:staff.id,enabled:true,maxOpenConversations:1,queueScope:'support'});
   for(const width of [1440,390]){
    mark(`owner editor ${width}`);await owner.page.setViewportSize({width,height:900});await owner.page.goto(`${base}/dashboard/products/${productId}`);
-   await expect(owner.page.locator('.product-media-video input')).toHaveAttribute('readonly','');
-   await expect(owner.page.getByRole('link',{name:'Request a video',exact:true})).toHaveAttribute('href',`/dashboard/support?video=product&product=${productId}`);
+   await expect(owner.page.locator('.product-media-video input')).toBeEditable();
+   await expect(owner.page.getByRole('button',{name:'Add video',exact:true})).toBeVisible();
    await owner.page.locator('.product-media-editor').scrollIntoViewIfNeeded();await owner.page.screenshot({path:`${dir}/product-${width}.png`,style:'nextjs-portal {visibility:hidden}'});
    await owner.page.goto(`${base}/dashboard/support?video=product&product=${productId}`);
    await expect(owner.page.getByLabel('Video link',{exact:true})).toBeVisible();await owner.page.getByLabel('Video link',{exact:true}).fill('https://example.com/our-product-video');
@@ -55,26 +58,50 @@ async function main(){
    mark(`staff review ${width}`);await staff.page.setViewportSize({width,height:900});await staff.page.goto(`${base}/dashboard/support/${id}`);
    await expect(staff.page.getByRole('button',{name:'Approve video',exact:true})).toBeEnabled();
    await expect(staff.page.locator('input[name=confirmed]')).toHaveCount(0);
-   await staff.page.getByLabel('YouTube link',{exact:true}).fill('https://www.youtube.com/watch?v=aqz-KE-bpKQ');
+   await staff.page.getByLabel('Video link',{exact:true}).fill(approvedUrl);
    await staff.page.getByLabel('Reply to owner').scrollIntoViewIfNeeded();assert.ok(await staff.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await staff.page.screenshot({path:`${dir}/staff-${width}.png`,style:'nextjs-portal {visibility:hidden}'});
    await staff.page.getByRole('button',{name:'Decline',exact:true}).scrollIntoViewIfNeeded();
    await staff.page.screenshot({path:`${dir}/staff-actions-${width}.png`,style:'nextjs-portal {visibility:hidden}'});
   }
   mark('approval');await staff.page.getByLabel('Reply to owner').fill('Your product video is ready.');
   await staff.page.getByRole('button',{name:'Approve video',exact:true}).click();
-  await expect(staff.page.getByLabel('YouTube link',{exact:true})).toHaveCount(0);
+  await expect(staff.page.getByLabel('Video link',{exact:true})).toHaveCount(0);
   await owner.page.reload();await expect(owner.page.getByText(/Your product video is ready\./)).toBeVisible();
-  assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,'youtube:aqz-KE-bpKQ');
+  assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,approvedRef);
   mark('public gallery');const visitor=await browser.newPage({viewport:{width:390,height:900}});
   // Verify Suqpage selects the approved embed; do not depend on external playback.
   visitor.setDefaultNavigationTimeout(30000);visitor.setDefaultTimeout(15000);
   await visitor.route('https://www.youtube-nocookie.com/**',route=>route.fulfill({status:200,body:''}));
+  const providerFixture=`<!doctype html><html><body style="background:#202428;color:white;display:grid;place-content:center;height:90vh;font-family:sans-serif"><p>TikTok player fixture</p><button id="provider-error">Simulate unavailable</button><script>window.parent.postMessage({'x-tiktok-player':true,type:'onPlayerReady'},'*');document.querySelector('button').onclick=()=>window.parent.postMessage({'x-tiktok-player':true,type:'onPlayerError',value:{errorCode:1001}},'*');</script></body></html>`;
+  if(tikTok)await visitor.route('https://www.tiktok.com/player/v1/**',route=>route.fulfill({contentType:'text/html',body:providerFixture}));
   await visitor.goto(`${base}/@${handle}?product=${productId}`);
   const gallery=visitor.getByRole('region',{name:'Photos and videos',exact:true});
   await gallery.getByRole('button',{name:'Video 2',exact:true}).click();
   await gallery.getByRole('button',{name:'Play video 2',exact:true}).click();
-  await expect(gallery.locator('iframe')).toHaveAttribute('src',/youtube-nocookie\.com\/embed\/aqz-KE-bpKQ/);
+  await expect(gallery.locator('iframe')).toHaveAttribute('src',tikTok?/www\.tiktok\.com\/player\/v1\/6718335390845095173/:/youtube-nocookie\.com\/embed\/aqz-KE-bpKQ/);
   await gallery.scrollIntoViewIfNeeded();await visitor.screenshot({path:`${dir}/approved-public-390.png`,style:'nextjs-portal {visibility:hidden}'});
+  if(tikTok){
+   mark('web provider failure/lifecycle');await gallery.locator('iframe').contentFrame().getByRole('button',{name:'Simulate unavailable'}).click();
+   await expect(gallery.getByText('Video unavailable',{exact:true})).toBeVisible();await expect(gallery.locator('iframe')).toHaveCount(0);
+   await visitor.screenshot({path:`${dir}/web-unavailable-390.png`,style:'nextjs-portal {visibility:hidden}'});
+   await gallery.getByRole('button',{name:'Try again',exact:true}).click();await expect(gallery.locator('iframe')).toBeVisible();
+   await gallery.getByRole('button',{name:'Photo 1',exact:true}).click();await expect(gallery.locator('iframe')).toHaveCount(0);
+   for(const width of [1440,390,320]){
+    await visitor.setViewportSize({width,height:900});await gallery.getByRole('button',{name:'Video 2',exact:true}).click();await gallery.getByRole('button',{name:'Play video 2',exact:true}).click();
+    assert.ok(await visitor.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await gallery.scrollIntoViewIfNeeded();await visitor.screenshot({path:`${dir}/web-inline-${width}.png`,style:'nextjs-portal {visibility:hidden}'});await gallery.getByRole('button',{name:'Photo 1',exact:true}).click();
+   }
+   mark('retained product editor');await owner.page.goto(`${base}/dashboard/products/${productId}`);await expect(owner.page.getByRole('textbox',{name:'Video link 2',exact:true})).toHaveValue('https://www.tiktok.com/player/v1/6718335390845095173');
+   mark('Expo inline provider fixture');const context=await browser.newContext({viewport:{width:390,height:844}}),mobile=await context.newPage();mobile.setDefaultTimeout(30000);mobile.setDefaultNavigationTimeout(60000);
+   await context.route('https://www.tiktok.com/player/v1/**',route=>route.fulfill({contentType:'text/html',body:providerFixture}));
+   await mobile.goto(`http://localhost:8082/product?handle=${handle}&id=${productId}`);await expect(mobile.getByRole('button',{name:'Inquire about this item only',exact:true})).toBeVisible({timeout:30000});
+   await expect(mobile.getByRole('tab',{name:'Inquiries',exact:true})).toHaveCount(0);await expect(mobile.getByRole('tablist')).toHaveCount(1);
+   const thumb=mobile.getByRole('button',{name:'Video 2',exact:true});await thumb.click();await mobile.getByRole('button',{name:'Watch video',exact:true}).click();
+   const frame=mobile.locator('iframe[title="TikTok video"]');await expect(frame).toBeVisible();await expect(mobile.getByText('Loading video…',{exact:true})).toHaveCount(0);
+   assert.equal(context.pages().length,1);await mobile.screenshot({path:`${dir}/expo-inline-390.png`});
+   await frame.contentFrame().locator('#player').contentFrame().getByRole('button',{name:'Simulate unavailable'}).click();await expect(mobile.getByText('Video unavailable',{exact:true})).toBeVisible();await expect(frame).toHaveCount(0);await mobile.screenshot({path:`${dir}/expo-unavailable-390.png`});
+   await mobile.getByRole('button',{name:'Try again',exact:true}).click();await expect(frame).toBeVisible();await mobile.getByRole('button',{name:'Photo 1',exact:true}).click();await expect(frame).toHaveCount(0);
+   assert.equal(context.pages().length,1);await context.close();
+  }
   await owner.page.goto(`${base}/dashboard/support?video=product&product=${productId}`);
   await owner.page.getByLabel('Video link',{exact:true}).fill('https://example.com/another-video');
   await owner.page.getByRole('button',{name:'Send video request',exact:true}).click();await owner.page.waitForURL(/\/dashboard\/support\/\d+/);
@@ -86,9 +113,9 @@ async function main(){
   await expect(staff.page.getByLabel('Reply to owner')).toHaveCount(0);
   await expect(staff.page.getByText('Please share a downloadable copy of the video.',{exact:true})).toBeVisible();
   await owner.page.reload();await expect(owner.page.getByText('Please share a downloadable copy of the video.',{exact:true})).toBeVisible();
-  assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,'youtube:aqz-KE-bpKQ');
-  await owner.page.goto(`${base}/dashboard/page-editor`);await expect(owner.page.locator('#shop-video')).toHaveAttribute('readonly','');await expect(owner.page.getByRole('link',{name:'Request a video',exact:true})).toHaveAttribute('href','/dashboard/support?video=header');
-  console.log('PASS owner video request submission, readonly media controls, staff approval without channel setup, public approved embed, reply/decline, retained media and 390/1440 layouts. Local fixtures removed.');
+  assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,approvedRef);
+  await owner.page.goto(`${base}/dashboard/page-editor`);await expect(owner.page.locator('#shop-video')).toBeEditable();await expect(owner.page.getByRole('link',{name:'Request a video',exact:true})).toHaveCount(0);
+  console.log('PASS owner video request submission, direct editable video controls and retained historical request routes, staff approval without channel setup, public approved embed, reply/decline, retained media and 390/1440 layouts. Local fixtures removed.');
  }catch(error){console.error('Video workflow failed at',phase,error instanceof Error?error.message:'Unknown failure');throw error;}finally{
   mark('cleanup');
   if(businessId){await pool.query('DELETE FROM audit_logs WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM support_conversations WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM businesses WHERE id=$1',[businessId]);}

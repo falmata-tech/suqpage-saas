@@ -39,7 +39,7 @@ try {
  await page.goto(base+'/?view=search&q=zzzzzzzzunmatched');await expect(page.getByRole('heading',{name:'No matches found'})).toBeVisible();await expect(page.locator('.leaflet-container')).toBeVisible();
  for(const width of [390,320]) {
   await page.setViewportSize({width,height:844});await page.goto(mobile);
-  await page.getByRole('button',{name:'Search & results',exact:true}).click();
+  await page.getByRole('button',{name:'View products',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Products & services',exact:true})).toBeVisible();
   await expect(page.getByRole('checkbox',{name:'Businesses',exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:first.items[0].name,exact:true})).toBeVisible();

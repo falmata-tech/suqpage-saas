@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { getDb, closeDbForTests } from "./testing/postgres-fixture";
@@ -12,7 +13,7 @@ async function main() {
       {
         name: "Native Owner",
         businessName: "Native Studio",
-        businessCategory: "home-living",
+        businessCategory: "home-living", placeId: findPlaceSuggestions("Addis Ababa")[0].id,
         phone: "+251911222333",
         consent: true,
         idempotencyKey: crypto.randomUUID(),
@@ -23,7 +24,7 @@ async function main() {
       {
         name: "Other Owner",
         businessName: "Other Studio",
-        businessCategory: "home-living",
+        businessCategory: "home-living", placeId: findPlaceSuggestions("Addis Ababa")[0].id,
         phone: "+251911222334",
         consent: true,
         idempotencyKey: crypto.randomUUID(),
@@ -63,6 +64,17 @@ async function main() {
     assert.equal(home.shop.id, a.businessId);
     assert.ok(home.shop.products.length > 0);
     assert.equal(home.shop.status, "draft");
+    r=await call('owner/video-link',{url:'https://youtu.be/aqz-KE-bpKQ'},false);assert.equal(r.status,401);
+    for(const [url,ref] of [
+      ['https://youtu.be/aqz-KE-bpKQ','youtube:aqz-KE-bpKQ'],
+      ['https://www.tiktok.com/@scout2015/video/6718335390845095173','tiktok:6718335390845095173'],
+      ['https://www.facebook.com/FacebookDevelopers/videos/10152454700553553/','facebook:10152454700553553'],
+      ['https://www.instagram.com/reel/Dbaz44lEjdH/','instagram:Dbaz44lEjdH'],
+    ]){r=await call('owner/video-link',{url});assert.equal(r.status,200);assert.equal((await r.json()).ref,ref);}
+    for(const url of ['https://www.tiktok.com.evil.test/@owner/video/6718335390845095173','https://www.instagram.com/p/Dbaz44lEjdH/','http://127.0.0.1/internal']){r=await call('owner/video-link',{url});assert.equal(r.status,400);}
+    r=await call('owner/video-link',{url:'https://youtu.be/aqz-KE-bpKQ',businessId:b.businessId});assert.equal(r.status,400);
+    r=await call('owner/video-link');assert.equal(r.status,405);
+    assert.equal(home.activity.visitsTotal,0);assert.equal(home.activity.visits30Days,0);assert.equal(home.activity.newInquiries,0);assert.equal(home.activity.products,home.shop.products.filter((p:{published:boolean})=>p.published).length);
     // Opening screens/images must not consume the separate save allowance.
     for (let i = 0; i < 52; i++) {
       assert.equal((await call("owner/home")).status, 200);
@@ -116,6 +128,16 @@ async function main() {
       content: home.draft.content,
     });
     assert.equal(r.status, 409);
+    const beforeProfile=await db.prepare('SELECT name,email,business_id FROM users WHERE id=?').get(actor.id);
+    r=await call('owner/account',{name:'Native updated',phone:'+251911222335'});assert.equal(r.status,200);
+    r=await call('owner/account',{name:'Invalid change',phone:'bad'});assert.equal(r.status,400);
+    assert.equal((await db.prepare('SELECT name FROM users WHERE id=?').get(actor.id))?.name,'Native updated');
+    r=await call('owner/account',{name:'Foreign',phone:'',userId:b.userId});assert.equal(r.status,400);
+    r=await call('owner/account',{phone:''});assert.equal(r.status,200);
+    const afterProfile=await db.prepare('SELECT name,email,business_id FROM users WHERE id=?').get(actor.id);
+    assert.equal(afterProfile?.email,beforeProfile?.email);assert.equal(afterProfile?.business_id,beforeProfile?.business_id);
+    assert.equal((await db.prepare('SELECT name FROM users WHERE id=?').get(b.userId))?.name,'Other Owner');
+    r=await call('owner/home');assert.equal((await r.json()).user.name,'Native updated');
     r = await call("owner/support", {
       subject: "Mobile test",
       message: "Owner message",

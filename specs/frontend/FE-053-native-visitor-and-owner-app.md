@@ -2,9 +2,9 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052]
+related: [FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 change_level: L3
 ---
 
@@ -44,6 +44,25 @@ GIVEN staff credentials WHEN native owner access is attempted THEN no management
 UI or protected data is returned; web management remains available separately.
 GIVEN an offline/expired session WHEN an action fails THEN input is retained and
 retry/sign-in is explicit. Sign-out removes private screen/query state and tokens.
+
+FE-052 demo notice: a marked demo's showroom hides the business-example banner
+when its visible handle contains `demo` (case-insensitive), otherwise retains it.
+Unmarked businesses show no banner regardless of handle. Apply the same rule as
+web without changing authoritative demo flags or inquiry/publication contracts.
+Focused evidence maps to `scripts/capture-demo-notice.mjs`.
+
+FE-019 S84: the transport launcher and intake use shared customer-facing copy for
+arranging transport for a purchase from a Suqpage business. Keep the Live Chat mode
+visible/accessible and the same native transport form/session/queue contracts.
+Five authored locales and compact-map/phone/short-height checks precede release.
+
+FE-019 S90 supersedes only the launcher wording with Need help with transport?
+and smaller Let us handle it. Chat with our transport agents live text. Use the shared copy
+and local catalogs in that order; compact mode retains the complete copy in its accessible
+name. Align the intake introduction with the live transport-team invitation;
+preserve its fields, native routing and existing chat/session contracts. Verify
+read-only Expo phone/local-language captures and mobile typecheck; installed
+Android verification remains a separate build/device gate.
 
 ## Test plan
 
@@ -550,6 +569,10 @@ S69 focused evidence: test-mobile-static-svg.ts bundles the actual Photo compone
 with controlled React/native ports and verifies Android/iOS owned-SVG rendering,
 contained size, stable error callback/fallback, no Auth on the public SVG request,
 web/raster behavior and authenticated private-image paths. Strict path tests deny
+The private-image renderer test exercises the current-session authenticated fetch,
+then verifies a local file/blob URI with no bearer headers on the Image component
+and resource cleanup. SDK/loading ports are controlled in this renderer test;
+the actual bundle and device checks remain separate gates.
 remote, private, query, fragment, encoded and literal traversal inputs. Both
 focused tests, native typecheck and existing build/dependency/link/video checks
 pass. Installed development-client honey logo and Featured imagery display in
@@ -576,3 +599,40 @@ passing evidence. Full native audit remains failed under the explicitly consumed
 two-advisory artifact exception. Physical-phone/email/social-app, independent
 native-speaker and iOS/store verification remain open; this broad spec stays
 in_progress. Earlier pending-stage notes are historical to the named stages.
+
+
+S71 follows FE-019's clarified purchased-goods transport launcher/intake copy in
+the native app and browser preview. Share the same contextual locale catalog;
+keep literal Live Chat next to non-English native wording. Bound the expanded
+launcher to the phone width and preserve compact accessible label, paired intake
+and existing conversation authority. No native dependency or API change. This
+revision requires local visual approval and remains absent from the current
+finished APK until a separately admitted rebuild.
+
+S72 follows FE-030's View products/Hide products label on the existing results
+panel toggle; shared contextual labels, compact layout and current map/search/
+filters remain. Browser/phone captures precede owner approval; no backend change.
+
+FE-021 S85 applies the warm orange shop with a thin white outline and cream/orange nameplate
+refinement to the shared native/Expo MapMarker renderer as well as desktop/phone
+web. Keep exact geometry/coordinates/counts, accessible names, selection, bounded
+labels and existing camera/group/preview callbacks. Cluster, nearby and badge
+styles are restored to their prior appearance. Focused browser/native-map
+checks and physical-device/release evidence remain separate.
+
+S85 local shared-renderer evidence: white shop/roof rims, orange-fill and normal/
+selected label contrast pass at 1440/390/320 in Expo browser, with real public shop selection/preview;
+fixture two-shop original grouped/badge styles, nearby preview and remount pass. Both
+types and native map behavior pass; actual OSM phone/desktop views were reviewed.
+Physical native/new APK, visual approval/full gates/commit/rollout remain pending.
+
+The owner rejects the earlier charcoal plates/dark outlines and unrequested
+cluster changes. Current thin-white-edge evidence is in
+.local/map-marker-white-edge-review/. Group/nearby/badge styling remains original;
+visual approval, physical native/full gates/commit/rollout remain pending.
+
+S86 applies FE-021's isolated-shop hitbox correction: transparent parts of the
+96px label layout frame cannot intercept other shop glyphs. Keep a real 44px
+glyph touch frame, visible-name interaction and unchanged glyph/name/anchor
+positions. Counted markers are untouched. Capture actual local city icon taps,
+normal/selected states and browser pointer errors; native-device evidence separate.

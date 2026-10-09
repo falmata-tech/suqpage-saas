@@ -43,11 +43,18 @@ test('FE-053 repeated Market intents still restore the requested state after man
 });
 test('DEP-042 Android claims only registered signing identities and exact public HTTPS routes',()=>{
  const registry=JSON.parse(fs.readFileSync('public/.well-known/assetlinks.json','utf8'));
- assert.equal(registry.length,1);assert.deepEqual(registry[0].relation,['delegate_permission/common.handle_all_urls']);
+ assert.equal(registry.length,2);assert.deepEqual(registry[0].relation,['delegate_permission/common.handle_all_urls']);
  assert.equal(registry[0].target.package_name,'com.suqpage.app.preview');
  assert.deepEqual(registry[0].target.sha256_cert_fingerprints,['06:30:C5:6F:88:DF:87:4F:D2:72:96:D1:AA:08:48:A6:8F:C8:34:5F:70:2F:E6:80:2E:DD:82:55:B7:21:11:83']);
- const [filter]=androidAppLinks('com.suqpage.app.preview');assert.equal(filter.autoVerify,true);
- for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'suqpage.com');assert.ok(item.pathPrefix==='/@'||['/','/market','/featured','/about','/login','/account'].includes(item.path));}
- assert.deepEqual(androidAppLinks('com.suqpage.app'),[]);assert.deepEqual(androidAppLinks('evil.package'),[]);
+ const policy=JSON.parse(fs.readFileSync('apps/mobile/release-policy.json','utf8'));
+ assert.equal(registry[1].target.package_name,policy.packageName);
+ assert.deepEqual(registry[1].relation,['delegate_permission/common.handle_all_urls']);
+ assert.deepEqual(registry[1].target.sha256_cert_fingerprints,registry[0].target.sha256_cert_fingerprints);
+ assert.equal(policy.certificateSha256,registry[1].target.sha256_cert_fingerprints[0].replaceAll(':',''));
+ for(const packageName of ['com.suqpage.app.preview','com.suqpage.app']){
+  const [filter]=androidAppLinks(packageName);assert.equal(filter.autoVerify,true);
+  for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'suqpage.com');assert.ok(item.pathPrefix==='/@'||['/','/market','/featured','/about','/login','/account'].includes(item.path));}
+ }
+ assert.deepEqual(androidAppLinks('evil.package'),[]);
  assert.doesNotMatch(JSON.stringify(registry),/password|privateKey|access_token|secret/i);
 });

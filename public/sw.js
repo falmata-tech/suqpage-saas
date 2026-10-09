@@ -1,4 +1,5 @@
 const VERSION = "v1";
+importScripts('/attention-push.js');
 const CACHE_PREFIX = "suqpage-pwa-";
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${VERSION}`;
 const PAGE_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;

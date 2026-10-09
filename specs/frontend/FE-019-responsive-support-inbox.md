@@ -2,9 +2,9 @@
 id: FE-019
 title: Responsive client and staff support inbox
 status: in_progress
-related: [FE-053, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039]
+related: [FE-060, BE-048, FE-049, FE-053, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039, FE-057, FE-062]
 owners: [frontend, customer-support]
-last_updated: 2026-09-27
+last_updated: 2026-10-08
 change_level: L3
 ---
 
@@ -707,3 +707,119 @@ The existing staff browser regression (historical script name
 `capture-live-buying-staff.ts`) now enters the public transport route/name/phone
 form and uses its transport cookie. The same real staff reply/private-note, End
 chat, retained contact/history, resolved and reopen checks remain required.
+
+
+## S71 — purchased-goods transport invitation
+
+Ready, L1 display-only change. Visitors need to recognize that the existing
+service helps arrange transport after finding a product or agreeing with a
+seller, through live messages. No booking promise, pricing, service/backend
+rename, account requirement or staff-workflow change. Master §§3/5/11/15 affected.
+
+GIVEN the public web/native launcher WHEN displayed THEN it names help
+transporting purchases and shows a separate Live Chat sublabel. In non-English
+locales show natural local chat wording with literal (Live Chat). Compact map
+mode preserves the same accessible service/chat label without blocking results.
+GIVEN a visitor opens the intake THEN a concise heading acknowledges finding
+a desired product and needing delivery; supporting copy invites chatting with
+our team to find transport and arrange details. Route/contact pairs, validation,
+restored conversation, End chat and staff assignment/history remain unchanged.
+GIVEN a narrow viewport or long localized text THEN the launcher wraps within
+the screen, the intake scrolls and Start chat remains reachable. No other app
+colors or transport status/availability claims change.
+
+Tests: shared catalog/localization and narrative regressions; existing paired
+transport intake capture updated for the new copy; focused launcher/accessibility
+and 320/390/1440 screenshots in all five locales, plus Expo phone and short-height
+states. Real existing handlers stay wired; this copy-only change sends no
+production requests. Owner visual approval precedes full/release gates.
+
+S71 focused local evidence: both typechecks, nine locale regressions, narrative
+and paired-intake desktop/phone/five-language/short-height captures pass. Shared
+Live Chat labels and purchased-goods invitation are present in actual web/Expo
+screens. No request/OTP sent; staff/backend unchanged. New entry/toggle capture:
+scripts/capture-purchase-chat-and-products.mjs. Evidence in TRACEABILITY S71/S72;
+owner visual/full/release/commit/rollout remain pending.
+
+S71 owner review correction (2026-10-07): replace the long primary launcher copy
+with short Delivery help and a compact descriptive sublabel, Live Chat · For your
+purchases. Native wording can order those ideas naturally; retain local live-chat
+wording plus (Live Chat). The two lines must remain inside narrow screens and
+compact map mode keeps the complete accessible label. Only the launcher changes;
+intake and conversation behavior are preserved. Focused entry captures/types/
+locale tests precede renewed visual review; no new release is implied.
+
+## S84 — transport for purchases from Suqpage businesses
+
+Ready, L1 customer-facing copy refinement. The owner's newest service narrative
+is: buy from a business on Suqpage and let our team arrange getting the purchase
+to you. Use transport in the button/chat rather than delivery (which suggests
+last-mile service); do not discuss distances or a route/mode breakdown. Sell that
+outcome in the launcher/intake, not commissions, brokerage,
+transport modes or internal coordination. Supersedes S71's current launcher copy.
+
+GIVEN the web/native entry WHEN displayed THEN a short transport action title and
+separate Live Chat sublabel explain the service. GIVEN the chat intake WHEN opened
+THEN the headline and supporting copy connect a purchase from a Suqpage business
+to arranging transport to the customer. Natural authored wording in English,
+Amharic, Afaan Oromo, Somali and Tigrinya; preserve (Live Chat) where helpful.
+Do not imply platform checkout, confirmed booking, coverage/time guarantees or
+online staff presence. Existing colors, paired intake, endpoints, roles,
+assignment, waiting/End chat/history and validation stay unchanged.
+
+Tests: shared-copy/locale/narrative checks, both typechecks and existing focused
+entry/paired-intake phone/desktop/five-locale/short-height captures. Compact map
+mode retains the full accessible label; controls wrap and Start chat is reachable.
+No request is submitted by visual checks. Visual approval before full/release
+gates; preserve prior task and rollout boundaries. Master §§3/5/19/22 affected.
+
+## S90 — clear transport invitation
+
+Ready, L1. The owner corrected the requested primary label to Need help with
+transport? Follow it, in smaller print, with Let us handle it. Chat with our
+transport agents live. The intake introduction also invites the customer to chat
+with the transport team about getting their purchase to them. This supersedes
+the earlier three-line proposal and refines S84's purchase-focused copy; every
+intake field and BE-018 conversation/permission contract remains unchanged.
+
+GIVEN the expanded web or native launcher WHEN displayed THEN show the question,
+reassurance and invitation to live transport-agent chat in that order, with a
+primary heading and a smaller supporting sentence that wraps naturally.
+All five languages use contextual local wording; non-English chat
+labels retain (Live Chat). GIVEN narrow screens or an open Market drawer THEN
+the entry stays inside the viewport, preserves a 44px tap target and an accessible
+name containing the complete copy; the compact icon does not cover result controls.
+WHEN pressed THEN open the existing transport intake, without creating a request
+until the visitor submits it. No online-presence or immediate-reply promise.
+GIVEN the intake introduction THEN identify purchases from businesses on Suqpage,
+invite conversation with the transport team and explain help getting the goods
+to the customer. Local wording must communicate this intent plainly, with natural
+sentence structure and readable wrapping rather than literal English word order.
+
+Use shared transport copy and existing components/styles; no dependency, backend,
+schema, palette or staff-role change. Verify both typechecks, catalog/narrative
+checks and read-only web/Expo captures at 1440/390/320px in all five languages.
+Capture launcher and updated intake copy, including a short phone viewport; no chat
+is submitted. Rollback is the previous launcher copy/styles. Master §§3/18/19/22
+and FE-030/FE-049/FE-053 are affected. Renewed explicit visual approval precedes
+the pending full/release/commit/web-and-Android rollout gates.
+
+S90 final focused evidence: both typechecks, nine localization tests, narrative/
+homepage and 180-spec validation pass. capture-purchase-chat-and-products.mjs
+passes 13 web/Expo states (all five languages, 1440/390/320px) with loaded actual
+maps, prominent heading/smaller supporting copy, complete compact labels and the
+new team-chat introduction. Start chat remains reachable in every locale;
+intake routing, query/filter scope and form contracts remain unchanged.
+capture-transport-intake-layout.mjs --short passes both clients at 390×480.
+No request submitted; current screenshots/verification are protected under
+.local/transport-invitation-review/final/. Owner visual/full gates/rollout pending.
+
+S94 / FE-026: queue navigation uses separate Business support/Transport entries
+and actual-case context, with safe browser replacement for canonical/denied links. Canonicalize the query
+from the current principal before listing data; denied cases render no private
+content and include a permitted inbox fallback link before browser replacement.
+Inbox-origin queue/status/q/page is canonical, bounded
+and carried through every case form/action; breadcrumb/back preserve that list.
+A direct case/alert chooses its actual queue and sensible status fallback. Scoped
+agents are pinned to their permitted queue; URLs are navigation state, never
+permission authority. No support domain/assignment/history semantics change.

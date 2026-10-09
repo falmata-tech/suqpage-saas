@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPublicInquiry, InquiryError } from "@/lib/inquiries";
 import { requestIpFromHeaders, hashPrivateValue } from "@/lib/security";
+import {scheduleAttentionDelivery} from '@/lib/attention-after';
 
 export const runtime = "nodejs";
 const MAX_BODY = 32 * 1024;
@@ -16,6 +17,7 @@ export async function POST(request: Request) {
     if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
     const result = await createPublicInquiry(body, ipHash);
+    if(!result.trapped)scheduleAttentionDelivery();
     return NextResponse.json(result, { status: result.duplicate ? 200 : 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof InquiryError) {

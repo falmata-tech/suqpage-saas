@@ -1,3 +1,4 @@
+import {pointInMapViewport} from '../../../lib/map/map-display-location';
 import Supercluster from "supercluster";
 import type { MapShop, NearbyGroup } from "@suqpage/contracts";
 import { shopCoordinate } from "./native-map-model";
@@ -35,7 +36,7 @@ function presence(shops: MapShop[]): MarkerItem["presence"] {
 }
 export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: MapShop[], groups: NearbyGroup[], bounds: MapBounds, zoom: number): MarkerItem[] {
   const byId = new Map(shops.filter(s => shopCoordinate(s)).map(s => [s.id, s]));
-  const inside = ([x, y]: [number, number]) => x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3];
+  const inside = ([x, y]: [number, number]) => pointInMapViewport(x,y,bounds);
   const item = (shop: MapShop): MarkerItem => ({ key: `shop-${shop.id}`, kind: "shop", center: shopCoordinate(shop)!, count: 1, shop, presence: presence([shop]) });
   if (zoom < 14) return index.getClusters(bounds, Math.floor(zoom)).flatMap(feature => {
     const p = feature.properties;

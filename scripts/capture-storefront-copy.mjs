@@ -24,7 +24,7 @@ try{
    const page=await context.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto('http://127.0.0.1:3102/');
    await expect(page.getByRole('heading',{name:t(MARKET_STOREFRONT_COPY.title),exact:true})).toBeVisible();
-   await expect(page.getByRole('button',{name:t('Search & results'),exact:true})).toBeVisible();
+   await expect(page.getByRole('button',{name:t('View products'),exact:true})).toBeVisible();
    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content',`${t(MARKET_STOREFRONT_COPY.title)} ${t(MARKET_STOREFRONT_COPY.description)}`);
    await capture(page,`web-market-${locale}-${width}`);
    await page.goto('http://127.0.0.1:3102/about');

@@ -1,4 +1,6 @@
 "use client";
+import LoadingBar from "./LoadingBar";
+import {useRouter} from "next/navigation";
 import { publicationReadiness } from "@/lib/publication-readiness";
 import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
@@ -16,8 +18,8 @@ import { legacyPublicContacts, publicContactFields } from "@/lib/business-profil
 import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, handleEditor }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; handleEditor?: ReactNode }) {
-  const t = useUiText();
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, handleEditor, returnToProfile = false }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; handleEditor?: ReactNode; returnToProfile?: boolean }) {
+  const t = useUiText(), router=useRouter();
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
   const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
@@ -73,6 +75,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
       setDraft(result);
       if (result.publication) setPublication(result.publication);
       if (action !== "assistance") setContent(result.content);
+      if(action === "save" && returnToProfile){router.push("/dashboard/profile?saved=page");router.refresh();}
     } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not connect. Your edits are still here."); }
     finally { setBusy(false); }
   }
@@ -112,6 +115,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   }
 
   return <section className={styles.editor} aria-label={t("Business profile editor")} aria-busy={!ready || busy || uploading}>
+    {(busy||uploading)&&<LoadingBar/>}
     {catalog.business.description.startsWith('Sample page:') && catalog.business.status === 'draft' ? <p className="notice">{t(STARTER_NOTICE)}</p> : null}
     <header className={styles.toolbar}>
       <div><h1>{t("Business profile")}</h1><p role="status">{dirty ? t("Unsaved changes") : draft ? activePage && matchesPublication ? t("Changes saved to your live page") : t("Private draft saved") : t("Private preview")}</p></div>
@@ -154,9 +158,9 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
           <textarea id="shop-about" rows={5} maxLength={3000} value={businessProfileDescription(content)} onChange={(e) => setContent({ ...content, introduction: "", about: e.target.value })} />
           <span className={styles.uploadStatus}>{t("Tell visitors what makes your shop and products worth exploring.")}</span>
           <label htmlFor="shop-video">{t("Business video")}{" "}<span className={styles.optional}>{t("(optional)")}</span></label>
-          <input id="shop-video" type="url" placeholder={t("YouTube link")} maxLength={500} value={content.videoUrl} readOnly />
-          <a className="btn secondary" href={owner ? "/dashboard/support?video=header" : "/dashboard/support?queue=support"} target="_blank" rel="noreferrer">{t(owner ? "Request a video" : "Video requests")}</a>
-          <small>{t("Send us a video link. Our team will review it for your page.")}</small>
+          <input id="shop-video" type="url" placeholder={t("Video link")} aria-describedby="shop-video-providers" maxLength={500} value={content.videoUrl} onChange={event=>setContent({...content,videoUrl:event.target.value})} />
+          <small id="shop-video-providers">{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</small>
+
           <span id="shop-cover-label" className={styles.label}>{t("Cover image")}</span>
           <input ref={fileInput} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label={t("Choose cover image file")} onChange={(event) => {
             const file = event.currentTarget.files?.[0]; event.currentTarget.value = "";

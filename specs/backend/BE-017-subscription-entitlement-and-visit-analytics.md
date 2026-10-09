@@ -1,138 +1,64 @@
 ---
 id: BE-017
-title: Manual subscription records and visit analytics
-status: done
+title: Showroom visit analytics and retired subscription records
+status: in_progress
 related: [FE-018, FE-032, FE-037, BE-001, BE-011, BE-015, BE-019, BE-020, DEP-015, ADR-0010, ADR-0011]
 owners: [backend, security, operations]
-last_updated: 2026-08-01
-change_level: L2
+last_updated: 2026-10-07
+change_level: L3
 ---
 
-# BE-017 - Manual subscription records and visit analytics
+# BE-017 — showroom analytics; business subscriptions retired
 
-## Problem and outcome
+## Problem and scope
 
-Suqpage needs a monthly account lifecycle and useful showroom traffic evidence
-before pricing is decided, while collecting useful traffic evidence without
-invasive visitor data.
+Transport arrangement is Suqpage's only revenue service. Business subscriptions,
+plans, monthly renewal and payment recording are retired. Preserve useful visit
+insights, product prices, publication authority and historical private records.
+No gateway, checkout, billing fee or financial-history deletion is introduced.
 
-## Scope
+## Contracts and scenarios
 
-### In scope
+GIVEN a new business after migration 60 WHEN it is created THEN no subscription
+record is generated. The forward migration drops only the business subscription
+creation trigger/function; historical ledger and payment rows remain intact.
+GIVEN an old payment submission THEN there is no current server action/domain
+payment port capable of renewing or recording it. GIVEN an old renewal URL THEN
+return to the authorized workspace; no financial UI is rendered.
 
-- One monthly subscription ledger per business with start, period end,
-  four-day grace deadline, and manually confirmed renewal records. Amount is
-  nullable in storage and is not collected by the current UI.
-- Active, grace, and inactive account-record evaluation for client and
-  operations visibility without automatic public enforcement.
-- Operations payment recording and period renewal.
-- Privacy-conscious showroom visit recording and Daily Featured attribution.
-- Tenant-scoped and platform aggregate traffic summaries.
+GIVEN an active published business with expired historical ledger dates THEN it
+remains discoverable; only explicit publication/business visibility governs it.
+GIVEN a suspended business THEN its public showroom remains unavailable.
 
-### Non-goals
+GIVEN the first daily showroom visit WHEN a bounded handle/source is submitted
+THEN record a privacy-salted daily visitor hash, business/source/time and deduplicate
+retries. Raw IP and visitor contact values are never stored. Daily Featured links
+retain attribution. GIVEN owner A WHEN requesting tenant B's aggregates THEN deny;
+staff queue roles also cannot read business analytics. Managers/admins retain
+platform-authorized access. Retained SQL source `expo` is adapter-local history.
 
-- Card storage, accounting, taxes, pricing policy, checkout, gateways, or
-  automatic recurring debit.
-- Exact person identification, cross-site tracking, ad attribution, or billing
-  based on analytics.
+## Quality and readiness
 
-## Domain language and invariants
+No new external provider or native data boundary. Tenant analytics remain scoped;
+aggregates and indexes bound work, while detailed visits retain their existing
+retention policy. The newest owner instruction resolves commercial scope. Ready
+before code under checklist S89; local migration and verification are separate from
+backed hosted rollout, visual approval, full gates and the task-scoped commit.
 
-- A subscription is active through `current_period_end`, in grace for the next
-  four days, and inactive after `grace_ends_at` until renewed.
-- Entitlement is computed from trusted server time; stale stored labels do not
-  override dates.
-- A renewal record is immutable evidence. A manually accepted renewal advances
-  the period from the later of now or the previous period end.
-- Subscription state is advisory. Active published showrooms remain public
-  until an administrator explicitly suspends them.
-- A visit contains an opaque daily visitor hash, business, source, optional Daily Featured
-  occurrence/hub, and timestamp. Raw IP addresses are never persisted.
+## Test plan and evidence
 
-## Contracts
-
-- Migration 21 adds `business_subscriptions`, `subscription_payments`, and
-  `showroom_visits` with tenant/time/source indexes.
-- Public `/api/analytics/visit` accepts a bounded business handle and an
-  allowlisted source (`direct`, `expo`, `directory`) and deduplicates one visitor
-  per business/source/day.
-- Daily Featured showroom links carry `ref=featured`, occurrence, and hub identifiers.
-- Only authorized operations staff can record that a renewal was received.
-- Renewal amount is nullable and not collected by the current UI. The account
-  lifecycle works without a configured price and the client is directed to
-  contact Suqpage.
-
-## Scenarios
-
-```gherkin
-Scenario: Grace expiry remains advisory
-  GIVEN a business whose monthly period ended more than four days ago
-  AND no confirmed renewal
-  WHEN a visitor opens its active published showroom
-  THEN the showroom remains public and discoverable
-  AND an explicit administrator suspension is still enforced
-
-Scenario: Daily Featured visit is attributed without personal data
-  GIVEN a visitor follows a booth link
-  WHEN the showroom records its first visit for that day
-  THEN the business receives one Daily Featured-attributed unique visit
-  AND no raw IP address or contact value is stored
-
-Scenario: Client cannot read another tenant's analytics
-  GIVEN clients for tenants A and B
-  WHEN tenant A requests traffic information
-  THEN only tenant A aggregates are returned
-```
-
-## Quality impact
-
-- Security and tenant isolation: subscription mutation is operations-only;
-  analytics reads derive tenant scope from the session.
-- Privacy and data retention: opaque salted hashes and aggregate UI only;
-  detailed events have a bounded retention target of ninety days.
-- Accessibility and responsive behavior: owned by FE-018.
-- Performance and limits: deduplicating unique index, bounded aggregates, and no
-  event list in public responses.
-- Failure recovery and idempotency: repeated visits or repeated manual renewal
-  submissions do not duplicate records or advance a subscription twice.
-
-## Test plan
-
-| Criterion | Level | Test path or planned ID |
-|---|---|---|
-| Active/grace/inactive boundaries | unit/integration | `scripts/test-account-health.ts` |
-| Payment renewal idempotency | integration | `scripts/test-account-health.ts` |
-| Visit deduplication and Daily Featured attribution | security/integration | `scripts/test-account-health.ts` |
-| Tenant analytics denial | security | `scripts/test-security.ts`, `scripts/test-account-health.ts` |
+`scripts/test-account-health.ts` passes migration idempotence, a real pre-upgrade
+trigger rehearsal, historical ledger/payment preservation, new-shop plan absence,
+publication/suspension, visit deduplication/attribution and tenant analytics denial.
+`scripts/test-platform-naming.ts` verifies historical naming compatibility without
+resuming the retired trigger. Fresh seed/runtime fixtures receive no ledger.
+The scoped UI scan finds no active billing/renewal controls; browser admin/owner
+verification and full release gates remain pending. No hosted migration claimed.
 
 ## Rollout and rollback
 
-Migration 21 is additive. Reset fixtures receive active subscriptions. Existing
-databases are backfilled with an active pilot period for account reporting.
-Application rollback may leave additive tables unused. Payment
-checkout is not part of this feature.
-
-## Readiness checklist
-
-- [x] Scope and non-goals agreed
-- [x] Related specs linked reciprocally
-- [x] Contracts and invariants explicit
-- [x] Positive and negative scenarios present
-- [x] Quality impacts evaluated
-- [x] Test plan maps every acceptance criterion
-- [x] Rollout/rollback decided
-
-## Completion evidence
-
-Evidence: verified locally on 2026-08-01.
-
-Migration 21, `lib/account-health.ts`, the same-origin visit endpoint, advisory
-renewal records, and explicit active/suspended publication controls are implemented.
-`scripts/test-account-health.ts` proves active/grace/inactive boundaries,
-amount-free idempotent renewal, tenant denial, daily visit deduplication, and
-Daily Featured attribution without raw IP storage. `scripts/test-scale-fixtures.ts`
-proves 398 subscription rows and 3,184 aggregate demo visits. Ordered browser
-acceptance proves client insights, operations pagination, and explicit suspended
-public redirect. Renewal-date public filters were removed from canonical
-showroom and discovery queries. `npm run check`, 10/10 ordered browser
-acceptance, and `npm run release` passed on 2026-08-01.
+Local public schema is 60 after a protected affected-ledger/trigger backup and
+readback, including a rolled-back new-shop rehearsal. Hosted schema remains 59
+until DEP-015 rollout. Never delete historical financial rows. Returning the
+retired trigger requires an independently reviewed rollback; a code rollback must
+not silently resume subscriptions. Prior behavior is preserved in Git history.

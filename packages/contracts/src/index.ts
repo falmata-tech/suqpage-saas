@@ -102,6 +102,8 @@ export type Profile = {
   contacts?: Contacts;
 };
 export type OwnerHome = {
+  exampleVideoRef?: string;
+  activity?: {visitsTotal:number;visits30Days:number;newInquiries:number;products:number};
   user: { name: string; email: string; phone: string };
   shop: Shop;
   draft: { version: number; content: Profile } | null;
@@ -137,11 +139,14 @@ export type Message = {
   createdAt: number;
   senderName: string;
   attachment?: SupportAttachment | null;
+  read?: boolean;
+  sender?: 'owner' | 'staff' | 'visitor';
 };
 export type Buying = {
   publicRef: string;
   status: string;
   assignedUserName: string | null;
+  agentJoined?: boolean;
   messages: Array<Message & { sender: "visitor" | "staff" }>;
 };
 export type ApiError = { error: string; code?: string };

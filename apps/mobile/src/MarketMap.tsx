@@ -1,9 +1,10 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, View} from 'react-native';
+import {View} from 'react-native';
 import {Map, Camera, Marker, TransformRequestManager, type CameraRef} from '@maplibre/maplibre-react-native';
 import type {MapProps, MapControls} from './map-contract';
 import {initialMapView, osmStyle, shopCoordinate, nextMapZoom} from './native-map-model';
 import {Button} from './ui';
+import LoadingBar from './LoadingBar';
 import {useApp} from './runtime';
 import {markerIndex, visibleMarkers, type MapBounds, type MarkerItem} from './map-markers';
 import {MapMarker} from './MapMarker';
@@ -47,7 +48,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap({shops, grou
       accessibilityLabel={t('Business map')} attribution={false} compass={false} touchRotate={false} touchPitch={false}
       onRegionDidChange={event => {const {center, zoom} = event.nativeEvent; viewport.current = {center, zoom}; setView({bounds: event.nativeEvent.bounds, zoom});}}
       onDidFinishRenderingMapFully={() => setReady(true)} onDidFailLoadingMap={() => setError(true)}>
-      <Camera ref={camera} initialViewState={viewport.current} minZoom={3} maxZoom={19}/>
+      <Camera ref={camera} initialViewState={viewport.current} minZoom={1} maxZoom={19}/>
       {markers.map(item => <Marker key={item.key} id={item.key} lngLat={item.center} anchor="top" offset={[0, -31]} onPress={event => {event.stopPropagation(); select(item);}}>
         <MapMarker item={item} selected={item.shop?.id === selectedId}
           label={item.shop ? `${item.shop.name}. ${t('Open page preview')}` : t('{count} nearby businesses', {count: item.count})}
@@ -55,7 +56,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap({shops, grou
           nearby={t('Nearby')} onPress={() => select(item)}/>
       </Marker>)}
     </Map>}
-    {!ready && !error && <ActivityIndicator accessibilityLabel={t('Loading')} style={{position: 'absolute', top: '50%', alignSelf: 'center'}}/>}
+    {!ready && !error && <View pointerEvents="none" style={{position:'absolute',top:60,left:12,right:70}}><LoadingBar/></View>}
     {error && <View style={{flex: 1, justifyContent: 'center', padding: 24}}><Button label={t('Try again')} onPress={() => {setReady(false); setError(false); setRevision(v => v + 1);}}/></View>}
   </View>;
 });

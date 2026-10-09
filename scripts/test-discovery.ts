@@ -7,6 +7,7 @@ import { ALL_DISCOVERY_INDUSTRIES, DISCOVERY_INDUSTRIES, getDiscoveryView, getFe
 import { updateDiscoveryProfile } from "../lib/discovery-admin";
 import { buildFeaturedProgramAgenda, featuredBoothWalkthroughs, featuredBroadcastPhase } from "../lib/featured-program";
 import { createExternalSponsorAd, SponsorAdminError } from "../lib/sponsor-admin";
+import {pointInMapViewport,wrappedMapLongitude} from '../lib/map-display-location';
 async function runPostgresFixture() {
     const discoveryMapSource = fs.readFileSync(path.join(process.cwd(), "components/DiscoveryWorkspace.tsx"), "utf8");
     const marketplaceMapSource = fs.readFileSync(path.join(process.cwd(), "components/MarketplaceMap.tsx"), "utf8");
@@ -46,7 +47,15 @@ async function runPostgresFixture() {
     assert.doesNotMatch(marketplaceMapSource, /point-halo|cluster-halo/);
     assert.match(marketplaceMapSource, /SHOWROOM_DETAIL_ZOOM/);
     assert.match(marketplaceMapSource, /getClusters\(viewport, zoom\)/, "cluster projection is bounded to the visible Leaflet viewport");
-    assert.match(marketplaceMapSource, /bounds\.contains/, "terminal nearby and showroom markers remain viewport bounded");
+    assert.match(marketplaceMapSource, /pointInMapViewport\(group\.longitude,group\.latitude,viewport\)/, "terminal nearby markers remain viewport bounded");
+    assert.match(marketplaceMapSource, /pointInMapViewport\(showroom\.longitude,showroom\.latitude,viewport\)/, "showroom markers remain viewport bounded");
+    assert.match(marketplaceMapSource, /wrappedMapLongitude/, 'Markers use the visible world copy');
+    assert.equal(wrappedMapLongitude(-175,179),185);
+    assert.equal(pointInMapViewport(-175,0,[170,-10,190,10]),true);
+    assert.equal(pointInMapViewport(175,0,[170,-10,-170,10]),true);
+    assert.equal(pointInMapViewport(0,0,[170,-10,-170,10]),false);
+    assert.equal(pointInMapViewport(-175,20,[170,-10,190,10]),false);
+    assert.equal(pointInMapViewport(NaN,0,[-180,-90,180,90]),false);
     assert.match(marketplaceMapSource, /keepBuffer: 0/, "the browser retains no speculative off-screen tile buffer");
     assert.match(marketplaceMapSource, /updateWhenIdle: true/, "tiles update after a gesture settles on lower-end devices");
     assert.match(marketplaceMapSource, /updateWhenZooming: false/, "zoom gestures do not continuously request intermediate tile layers");

@@ -1,3 +1,4 @@
+import {categoryExampleVideo} from "../lib/category-starter";
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {getDb,getUserById,closeDbForTests} from './testing/postgres-fixture';
@@ -6,6 +7,9 @@ import {updateSupportAgentSetting,getSupportConversation} from '../lib/support';
 import {executeBasicProductUpkeep} from '../lib/product-upkeep';
 import {postgresProductUpkeepPort} from '../lib/product-upkeep-postgres';
 import {ownerPagePort} from '../lib/owner-page-runtime';
+import {catalogToRevisionSnapshotV4} from '../lib/revision-v4-defaults';
+import {parseRevisionContent} from '../lib/revision-domain';
+import {runtimeCatalogByBusinessId} from '../lib/catalog-runtime';
 import {starterPage,STARTER_VIDEO_REF,STARTER_VIDEO_URL} from '../lib/business-starter';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
 import type {SessionUser} from '../lib/types';
@@ -19,8 +23,9 @@ async function main(){
  await updateSupportAgentSetting(staff,{userId:staff.id,enabled:true,maxOpenConversations:10,queueScope:'support'});
  const command={kind:'create',businessId:a,productId:null,expectedContentVersion:1,idempotencyKey:crypto.randomUUID(),name:'Example item',description:'Original description',availability:'available',offeringKind:'standard_product',quantityMode:'optional',categoryId:null,imageAction:'keep',videoRef:''};
  const created=await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,command,null);
- let product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,STARTER_VIDEO_REF);
- await assert.rejects(()=>executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:created.contentVersion,idempotencyKey:crypto.randomUUID(),videoRef:'youtube:aqz-KE-bpKQ'},null),/Request a video/);
+ let product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,categoryExampleVideo("other-manufacturing"));
+ await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:created.contentVersion,idempotencyKey:crypto.randomUUID(),videoRef:'youtube:aqz-KE-bpKQ'},null);
+ assert.equal((await db.prepare('SELECT video_ref FROM products WHERE id=?').get(created.productId)).video_ref,'youtube:aqz-KE-bpKQ','Own valid video saves directly');
  const input={target:'product',productId:created.productId,sourceUrl:'https://example.com/video',note:'Please use this product demonstration.',idempotencyKey:crypto.randomUUID()};
  await assert.rejects(()=>createVideoRequest(foreign,input));await assert.rejects(()=>createVideoRequest(owner,{...input,sourceUrl:'javascript:alert(1)'}));
  const request=await createVideoRequest(owner,input);assert.equal((await createVideoRequest(owner,input)).id,request.id);
@@ -38,15 +43,34 @@ async function main(){
  await reviewVideoRequest(staff,second.id,{decision:'declined',reply:'Please send the correct product video.'});assert.equal((await getVideoRequest(owner,second.id))?.status,'declined');
  const draft=await ownerPagePort.create(a,owner.id,{...starterPage,about:'Unpublished owner text'});
  await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(a,JSON.stringify({...starterPage,about:'Existing public text'}),owner.id,Date.now());
- await assert.rejects(()=>ownerPagePort.commit(owner,draft,{kind:'content',content:{...draft.content,videoUrl:approve.youtubeUrl}}),/Request a video/);
+ await ownerPagePort.commit(owner,draft,{kind:'content',content:{...draft.content,videoUrl:approve.youtubeUrl}});
  const header=await createVideoRequest(owner,{target:'header',sourceUrl:'https://example.com/header',idempotencyKey:crypto.randomUUID()});
  await reviewVideoRequest(staff,header.id,approve);
  const saved=await ownerPagePort.read(a);assert.equal(saved?.content.about,'Unpublished owner text');assert.equal(saved?.content.videoUrl,approve.youtubeUrl);
  const pub=JSON.parse(String((await db.prepare('SELECT content_json FROM owner_page_publications WHERE business_id=? ORDER BY revision DESC LIMIT 1').get(a)).content_json));assert.equal(pub.about,'Existing public text');assert.equal(pub.videoUrl,approve.youtubeUrl);
  assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(a)).status,'draft');
- assert.equal(Number((await db.prepare('SELECT count(*) n FROM support_video_requests').get()).n),3);
+ const tikTokUrl='https://www.tiktok.com/@scout2015/video/6718335390845095173',tikTokRef='tiktok:6718335390845095173';
+ const headerOnly=await createVideoRequest(owner,{target:'header',sourceUrl:tikTokUrl,idempotencyKey:crypto.randomUUID()});
+ await assert.rejects(()=>reviewVideoRequest(staff,headerOnly.id,{decision:'approved',videoUrl:tikTokUrl,reply:'Ready'}),/YouTube/);
+ assert.equal((await getVideoRequest(owner,headerOnly.id))?.status,'pending');
+ assert.equal((await ownerPagePort.read(a))?.content.videoUrl,approve.youtubeUrl);
+ const tikTokRequest=await createVideoRequest(owner,{...input,sourceUrl:tikTokUrl,idempotencyKey:crypto.randomUUID()});
+ const tikTokApprove={decision:'approved',videoUrl:tikTokUrl,reply:'Your TikTok product video is ready.'};
+ await assert.rejects(()=>reviewVideoRequest(foreign,tikTokRequest.id,tikTokApprove));await assert.rejects(()=>reviewVideoRequest(other,tikTokRequest.id,tikTokApprove));
+ await reviewVideoRequest(staff,tikTokRequest.id,tikTokApprove);assert.equal((await reviewVideoRequest(staff,tikTokRequest.id,tikTokApprove)).duplicate,true);
+ product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,tikTokRef);assert.equal(product.description,'Original description');
+ const catalog=(await runtimeCatalogByBusinessId(a,true))!,snapshot=catalogToRevisionSnapshotV4(catalog);
+ assert.equal(parseRevisionContent(snapshot,4).products[0].videoRef,tikTokRef);assert.equal(parseRevisionContent(snapshot,4).products[0].media?.[0].ref,tikTokRef);
+ const version=(await db.prepare('SELECT content_version FROM businesses WHERE id=?').get(a)).content_version;
+ const retained=await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:Number(version),idempotencyKey:crypto.randomUUID(),description:'Edited without losing TikTok',videoRef:tikTokRef},null);
+ assert.equal((await db.prepare('SELECT video_ref FROM products WHERE id=?').get(created.productId)).video_ref,tikTokRef);
+ await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:retained.contentVersion,idempotencyKey:crypto.randomUUID(),videoRef:'facebook:10152454700553553'},null);
+ assert.equal((await db.prepare('SELECT video_ref FROM products WHERE id=?').get(created.productId)).video_ref,'facebook:10152454700553553');
+ assert.equal((await getSupportConversation(owner,tikTokRequest.id)).messages.filter(m=>m.body.includes('Your TikTok product video is ready.')).length,1);
+ assert.equal(Number((await db.prepare('SELECT count(*) n FROM support_video_requests').get()).n),5);
+
  assert.equal((await db.prepare("SELECT relrowsecurity enabled FROM pg_class WHERE oid='support_video_requests'::regclass").get()).enabled,true);
- console.log('PASS default videos, normal-save bypass denial, target/tenant/staff isolation, approval without a configured channel, invalid provider denial, idempotent review, stale video denial, owner reply, private request records and exact draft/public field preservation.');
+ console.log('PASS direct owner video saves, preserved defaults/history, target/tenant/staff isolation, approval without a configured channel, invalid provider denial, idempotent review, stale video denial, owner reply, private request records and exact draft/public field preservation.');
  }finally{delete process.env.SUQPAGE_YOUTUBE_CHANNEL_URL;await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

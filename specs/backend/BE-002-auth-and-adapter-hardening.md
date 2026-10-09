@@ -1,7 +1,7 @@
 ---
 id: BE-002
 title: Authentication and external adapter failure boundaries
-status: done
+status: in_progress
 related: [BE-018, BE-020, BE-025, BE-026, BE-030, BE-031, ADR-0013, ADR-0014]
 owners: [backend, security]
 last_updated: 2026-08-02
@@ -66,3 +66,16 @@ bodies, customer contact, or inquiry notes.
 
 No schema migration. Deploy normally after L2 gates; rollback is code-only and
 does not affect committed inquiries or sessions.
+
+
+## S92 — current Next.js security patch
+
+Ready L2 dependency security correction discovered during S91's dependency audit.
+Six current Next advisories affect 16.3.6 and identify 16.3.8 as the minimum patched
+16.3 version. Prefer that patch over an unrelated minor migration; no UI or product
+contract changes. Verify official publisher/registry advisory ranges and package
+availability, preserve pinned version/lockfile, then run types and existing proxy,
+auth/private-cache/source-map security tests. Confirm Next is absent from a fresh
+advisory report. Existing Expo/native tooling advisories stay independently tracked;
+never apply npm audit fix or waive gates to obtain a clean report. Production
+remains unchanged until backed rollout. Existing release security gates remain.

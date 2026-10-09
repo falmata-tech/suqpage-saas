@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
+import {isQueueAgent} from "@/lib/capabilities";
+import {supportFormState,supportThreadHref,workloadViewState,workloadHref} from "@/lib/support-navigation";
+import {scheduleAttentionDelivery} from "@/lib/attention-after";
 import { requireUser } from "@/lib/auth";
 import { createVideoRequest, reviewVideoRequest } from "@/lib/support-video-requests";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
@@ -43,21 +46,23 @@ export async function createVideoRequestAction(formData: FormData) {
 export async function reviewVideoRequestAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   try {
-    const result = await reviewVideoRequest(user,id,{decision:formData.get("decision"),youtubeUrl:formData.get("youtubeUrl"),reply:formData.get("reply")});
+    const result = await reviewVideoRequest(user,id,{decision:formData.get("decision"),youtubeUrl:formData.get("youtubeUrl"),videoUrl:formData.get("videoUrl"),reply:formData.get("reply")});
     const business = await runtimeBusinessById(result.businessId);
     if(business) { revalidatePath(`/@${business.handle}`,"layout"); revalidatePath(`/preview/@${business.handle}`,"layout"); }
     revalidatePath("/dashboard/page-editor"); revalidatePath("/dashboard/products","layout"); revalidatePath("/");
-  } catch(error) { failure(`/dashboard/support/${id}`,error); }
+  } catch(error) { failure(returnPath,error); }
   revalidatePath(`/dashboard/support/${id}`);
-  redirect(`/dashboard/support/${id}`);
+  redirect(returnPath,RedirectType.replace);
 }
 
 function failure(path: string, error: unknown): never {
   const message = error instanceof SupportError || error instanceof SupportAttachmentError
     ? error.message
     : "Support could not be updated.";
-  redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
+  redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`,RedirectType.replace);
 }
 
 export async function createSupportConversationAction(formData: FormData) {
@@ -79,6 +84,7 @@ export async function createSupportConversationAction(formData: FormData) {
     await staged?.discard().catch(() => undefined);
     failure("/dashboard/support", error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support");
   redirect(`/dashboard/support/${created!.id}`);
 }
@@ -86,6 +92,8 @@ export async function createSupportConversationAction(formData: FormData) {
 export async function postSupportMessageAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   let staged: StagedSupportAttachment | null = null;
   try {
     staged = await stageSupportAttachment(formData.get("attachment"));
@@ -100,53 +108,64 @@ export async function postSupportMessageAction(formData: FormData) {
     await audit("support.message_posted", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
     await staged?.discard().catch(() => undefined);
-    failure(`/dashboard/support/${id}`, error);
+    failure(returnPath, error);
   }
+  scheduleAttentionDelivery();
   revalidatePath(`/dashboard/support/${id}`);
-  redirect(`/dashboard/support/${id}?sent=${formData.get("audience") === "note" ? "note" : "1"}`);
+  redirect(supportThreadHref(id,origin,{sent:formData.get("audience") === "note" ? "note" : "1"}),RedirectType.replace);
 }
 
 export async function claimSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   try {
     await claimSupportConversation(user, id);
     await audit("support.conversation_claimed", { userId: user.id, detail: { conversationId: id } });
   } catch (error) {
-    failure(`/dashboard/support/${id}`, error);
+    failure(returnPath, error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support");
-  redirect(`/dashboard/support/${id}?claimed=1`);
+  redirect(supportThreadHref(id,origin,{claimed:"1"}),RedirectType.replace);
 }
 
 export async function closeSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   try {
     await closeSupportConversation(user, id);
     await audit("support.conversation_closed", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
-    failure(`/dashboard/support/${id}`, error);
+    failure(returnPath, error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support");
-  redirect(`/dashboard/support/${id}?closed=1`);
+  redirect(supportThreadHref(id,origin,{closed:"1"}),RedirectType.replace);
 }
 
 export async function reopenSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   try {
     await reopenSupportConversation(user, id);
     await audit("support.conversation_reopened", { userId: user.id, businessId: user.business_id, detail: { conversationId: id } });
   } catch (error) {
-    failure(`/dashboard/support/${id}`, error);
+    failure(returnPath, error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support");
-  redirect(`/dashboard/support/${id}?reopened=1`);
+  redirect(supportThreadHref(id,origin,{reopened:"1"}),RedirectType.replace);
 }
 
 export async function updateSupportAgentSettingAction(formData: FormData) {
   const user = await requireUser();
+  const view=workloadViewState({q:formData.get('view_q'),page:formData.get('view_page'),status:formData.get('view_status')});
   try {
     await updateSupportAgentSetting(user, {
       userId: formData.get("userId"),
@@ -156,37 +175,42 @@ export async function updateSupportAgentSettingAction(formData: FormData) {
     });
     await audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
   } catch (error) {
-    failure("/dashboard/support/agents", error);
+    failure(workloadHref(view), error);
   }
   revalidatePath("/dashboard/support/agents");
   revalidatePath("/dashboard/support");
-  redirect("/dashboard/support/agents?saved=agent");
+  redirect(workloadHref(view,true),RedirectType.replace);
 }
 
 export async function reassignSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   const raw = String(formData.get("assignedUserId") || "");
   const assignedUserId = raw ? Number.parseInt(raw, 10) : null;
   try {
     await reassignSupportConversation(user, id, assignedUserId);
     await audit("support.conversation_reassigned", { userId: user.id, detail: { conversationId: id, assignedUserId } });
   } catch (error) {
-    failure(`/dashboard/support/${id}`, error);
+    failure(returnPath, error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support");
-  redirect(`/dashboard/support/${id}?assigned=1`);
+  redirect(supportThreadHref(id,origin,{assigned:"1"}),RedirectType.replace);
 }
 
 export async function saveTransportHandoffAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
   try {
     await saveTransportHandoff(user, id, {
       company: formData.get("company"), contact: formData.get("contact"), previousId: formData.get("previousId"),
     });
-  } catch (error) { failure(`/dashboard/support/${id}`, error); }
+  } catch (error) { failure(returnPath, error); }
   revalidatePath("/dashboard/support");
   revalidatePath(`/dashboard/support/${id}`);
-  redirect(`/dashboard/support/${id}?routed=1`);
+  redirect(supportThreadHref(id,origin,{routed:"1"}),RedirectType.replace);
 }

@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
+import {TRANSPORT_COPY} from "../../../lib/i18n/transport-copy";
 import { useFocusEffect } from "expo-router";
 import { AppState, View, StyleSheet } from "react-native";
 import * as Crypto from "expo-crypto";
 import type { Buying } from "@suqpage/contracts";
 import { useApp, request, secure, ApiFailure } from "../src/runtime";
 import { Screen, Copy, Card, Field, Button, Status, colors } from "../src/ui";
+import ChatReadSentinel from '../src/ChatReadSentinel';
+import {TransportAlerts} from '../src/AttentionAlerts';
 export default function BuyingScreen() {
   const { t, locale } = useApp();
   const [conversation, setConversation] = useState<Buying | null>(null),
@@ -114,22 +117,23 @@ export default function BuyingScreen() {
   }
   return (
     <Screen>
-      <Copy muted>{t("Live chat")}</Copy>
+      <Copy muted>{t("Live Chat")}</Copy>
       <Status loading={!ready || restoring} error={error} />
       {conversation ? (
         <>
+          <TransportAlerts token={token}/>
           <Card>
             <Copy big>
               {t(
                 conversation.status === "closed"
                   ? "Chat ended"
-                  : conversation.messages.some(message => message.sender === "staff")
+                  : conversation.agentJoined ? 'An agent joined your chat' : conversation.messages.some(message => message.sender === "staff")
                     ? "Chat connected"
                     : "Waiting for our transport team",
               )}
             </Copy>
-            {conversation.assignedUserName && (
-              <Copy>{conversation.assignedUserName}</Copy>
+            {Boolean(conversation.assignedUserName) && (
+              <Copy>{t('Assigned to {value1}',{value1:conversation.assignedUserName||''})}</Copy>
             )}
             <Copy muted>{conversation.publicRef}</Copy>
           </Card>
@@ -155,6 +159,8 @@ export default function BuyingScreen() {
                   hour12: true,
                 })}
               </Copy>
+              {m.sender==='visitor'?<Copy muted>{t(m.read?'Read':'Sent')}</Copy>:null}
+              {m.sender==='staff'&&m.id===conversation.messages.filter(item=>item.sender==='staff').at(-1)?.id ? <ChatReadSentinel messageId={m.id} onRead={async messageId=>{await request('transport',{buyingToken:token,body:{action:'read',messageId,publicRef:conversation.publicRef}});}}/>:null}
             </View>
           ))}
           {conversation.status === "closed" ? (
@@ -163,6 +169,7 @@ export default function BuyingScreen() {
               <Button
                 label={t("Start another chat")}
                 onPress={async () => {
+                  try{await request('transport/attention',{buyingToken:token,body:{action:'unsubscribe'}});}catch{/* Retained history stays private; expiry also fences delivery. */}
                   await secure.removeItem("suqpage-transport");
                   setToken("");
                   setConversation(null);
@@ -197,12 +204,8 @@ export default function BuyingScreen() {
         ready &&
         !restoring && (
           <>
-            <Copy big>{t("Let us arrange your delivery")}</Copy>
-            <Copy muted>
-              {t(
-                "Tell us where your goods need to go. Our team will help find a carrier and arrange the details.",
-              )}
-            </Copy>
+            <Copy big>{t(TRANSPORT_COPY.invitation)}</Copy>
+            <Copy muted>{t(TRANSPORT_COPY.description)}</Copy>
             <View style={[intake.row, intake.route]}>
               <View style={intake.cell}><Field label={t("From")} value={origin} maxLength={120} onChangeText={setOrigin} placeholder={t("City or area")} /></View>
               <View style={intake.cell}><Field label={t("To")} value={destination} maxLength={120} onChangeText={setDestination} placeholder={t("City or area")} /></View>
@@ -212,7 +215,7 @@ export default function BuyingScreen() {
               <View style={intake.cell}><Field label={t("Phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" maxLength={40} placeholder="+251…" /></View>
             </View>
             <Field
-              label={t("Goods or delivery details (optional)")}
+              label={t("Goods or transport details (optional)")}
               value={message}
               maxLength={3700}
               style={intake.details}

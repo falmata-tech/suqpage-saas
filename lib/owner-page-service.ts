@@ -1,6 +1,7 @@
 import { canEditOwnerPage, isPageOwner, OwnerPageError, ownerPageVersion, parseShopPageContent,
   type OwnerPageDraft, type ShopPageContent } from "./owner-page-domain";
 import type { SessionUser } from "./types";
+import { isQueueAgent } from "./capabilities";
 
 export interface OwnerPagePort {
   read(businessId: number): Promise<OwnerPageDraft | null>;
@@ -15,6 +16,7 @@ export interface OwnerPagePort {
 
 export async function readOwnerPage(port: OwnerPagePort, actor: SessionUser, businessId: number): Promise<OwnerPageDraft | null> {
   if (!Number.isSafeInteger(businessId) || businessId < 1) throw new OwnerPageError("Page not found.", 404);
+  if (isQueueAgent(actor)) throw new OwnerPageError("Page access is not available for this account.", 403);
   if (actor.access_role === "client" && !isPageOwner(actor, businessId)) throw new OwnerPageError("Page access is not available for this account.", 403);
   const assigned = actor.access_role === "team_member" && await port.assigned(actor.id, businessId);
   if (actor.access_role === "team_member" && !assigned) throw new OwnerPageError("Page access is not available for this account.", 403);

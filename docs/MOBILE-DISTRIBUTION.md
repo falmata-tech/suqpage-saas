@@ -1,13 +1,15 @@
 # Android tester distribution
 
-DEP-042 / FE-053. The replacement standalone Android tester APK is finished and
-installed for verification. [Download it from Expo](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75).
+DEP-042 / DEP-043 / FE-053. The last released tester APK is the historical
+Preview application. [Existing build on Expo](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75).
 It uses live Suqpage accounts/API and needs neither Metro nor Expo Go. The combined
 first setup collects account/business details and the handle, then opens the
 unpublished sample preview with Edit. See
 [the S69/S70 release record](SUQPAGE-S69-S70-RELEASE-2026-10-06.md) for the exact
 source, checksum, signing, web deployment, gates and remaining limits. Earlier
-build/preparation sections below are historical, not current blockers.
+build/preparation sections below retain their historical evidence. The next
+admitted build uses **Suqpage / com.suqpage.app** for both testing and release;
+its signing, notification configuration and release gates are still pending.
 
 The owner selected the Expo account **falmatad**. The linked project is
 [Suqpage on Expo](https://expo.dev/accounts/falmatad/projects/suqpage), ID
@@ -21,9 +23,17 @@ Leaflet. Expo Go cannot run the native SDK; use a rebuilt development client or 
 No Google Cloud project, billing setup or Google Maps key is required. The earlier
 Google setup instructions are withdrawn.
 
-The EAS-managed preview signing certificate belongs to `com.suqpage.app.preview`.
+The historical EAS-managed preview signing certificate belongs to `com.suqpage.app.preview`.
 Its public SHA-1 is `D2:5C:49:53:9C:98:E8:33:F8:B9:4C:E1:E3:66:6F:A3:9C:16:62:C4`.
-Private signing material remains in EAS and has not been downloaded.
+Under the owner's exact S98 authorization, the existing signing source was backed
+up privately and reused for `com.suqpage.app`. Independent provider readback verifies
+identical key bytes/certificate and preserves the legacy binding, FCM and other
+settings. The verified public pin is recorded in `apps/mobile/release-policy.json`;
+no private material enters Git or builds. The CLI stopped before its confirmation,
+and the owner explicitly accepted the independently verified result under
+AGENTS.md's timeout gate. No retry, rollback or further signing change. The new
+actual APK and installed-device
+checks remain pending; the old preview certificate alone is never artifact proof.
 
 ## Release prerequisites
 
@@ -38,7 +48,7 @@ Private signing material remains in EAS and has not been downloaded.
 
 | Profile | Package | Artifact | Use |
 | --- | --- | --- | --- |
-| preview | com.suqpage.app.preview | APK | Install directly on invited testers' Android phones |
+| preview | com.suqpage.app | APK | Install directly on invited testers' Android phones |
 | production | com.suqpage.app | AAB | Upload to Google Play internal testing after account setup |
 
 From `apps/mobile`, once prerequisites pass:
@@ -57,11 +67,122 @@ The `production` profile creates an AAB, which cannot be installed directly.
 The submission profile targets Google Play's **internal** track with **draft**
 release status. No Play developer membership, service-account credential,
 tester list, store listing or submission is configured or claimed complete.
-Confirm the owner's existing Play Console account before proceeding. Review
+The owner reports that the Play Console account is ready; independently verify
+its app/signing/permissions before proceeding. Review
 privacy disclosures and account-deletion requirements before store submission.
 
 References: [Expo internal distribution](https://docs.expo.dev/build/internal-distribution/),
 [Google Play testing tracks](https://support.google.com/googleplay/android-developer/answer/9845334).
+
+## Single-app release workflow — S97
+
+Both hosted profiles explicitly select the verified production API/Auth target.
+The internal profile does not create a separate test database. Use local previews
+for routine QA and labelled demo/test records for production-connected checks.
+Hosted workers reject unreviewed targets, API/Auth or Expo-project mismatches,
+conflicting profile names and privileged public keys. The notification build
+requires a client file for Firebase `suqpage` / `588262779708` / `com.suqpage.app`;
+private FCM credentials stay in EAS Credentials and out of upload archives/runtime.
+
+1. Review source and visuals, run the applicable check/release/acceptance and
+   native gates, and commit only that reviewed task. EAS requires committed source.
+   Independently verify the Expo owner/project, selected environment and API
+   compatibility; retain protected before-state evidence for any configuration write.
+2. Establish the canonical signing binding using a separately authorized,
+   recoverable source. Verify its public certificate independently and record the
+   reviewed pin in the release policy. Preserve prior keys and legacy associations.
+   Do not generate, replace or borrow a signer as an incidental build fix.
+3. Build an internal APK with the `preview` profile. Both profiles share the same
+   remote version counter and auto-increment; no second Firebase app or later rename
+   is needed. The old Preview package requires one new canonical installation.
+4. Inspect the downloaded artifact before sharing. For the first canonical APK:
+
+   ```sh
+   npm run mobile:verify-apk -- --apk /path/to/suqpage.apk --first-canonical-release
+   ```
+
+   For updates, select the actual latest admitted canonical APK:
+
+   ```sh
+   npm run mobile:verify-apk -- --apk /path/to/new.apk --previous-apk /path/to/previous.apk
+   ```
+
+   The verifier checks the actual signature/package/version/debug flag, rejects
+   extra/wrong signers and non-increasing versions, and retains a protected checksum
+   receipt. `--inspect` only reads metadata and never admits a release. Missing SDK
+   tools or an unconfigured certificate stop admission. Unit SDK fixtures are mocks;
+   inspection of an actual APK supplies separate signature evidence.
+5. Test the APK on a phone: map/filters, sign-in, private starter preview, media,
+   owner edits/publication, inquiries, transport chat, read receipts and notification
+   permission, foreground/background/closed-app delivery, tap destinations and logout.
+   SDK/browser checks alone cannot establish these results. Share only with approved
+   recipients after the artifact/device evidence passes; review build-link access.
+6. When Play testing is requested, complete the listing/privacy/deletion workflow
+   and verified credentials, then submit the AAB to **internal draft**. Verify an
+   APK distributed by Play against the same signing policy and prior APK; upload-key
+   AAB inspection does not prove Play's installed signer. Public rollout is a separate
+   approved, monitored step. No OTA update channel is configured.
+
+Build checks and this workflow constrain normal release paths; they do not sandbox
+provider administrators or arbitrary shell commands. An older-version reinstall is
+not a guaranteed rollback: prefer a reviewed higher-version corrective build.
+Changing signer or uninstalling may prevent updates or remove local session data.
+Keep the server compatible with installed app versions during coordinated rollout.
+
+References: [Android update requirements](https://developer.android.com/google/play/app-updates),
+[apksigner](https://developer.android.com/tools/apksigner),
+[APK Analyzer](https://developer.android.com/tools/apkanalyzer).
+
+## Android notification setup — S95
+
+The owner's Android client file is verified for Firebase `suqpage` (number
+`588262779708`) and package `com.suqpage.app`. Its protected source is outside Git.
+On 2026-10-08, the verified Expo project `@falmatad/suqpage` received three additive
+project-scoped build settings for **preview and production**:
+
+| Setting | Value/source | Visibility |
+| --- | --- | --- |
+| SUQPAGE_GOOGLE_SERVICES_FILE | Verified Android client file | Secret file |
+| SUQPAGE_FIREBASE_PROJECT_ID | suqpage | Public |
+| SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED | 1 (require client file at build time) | Public |
+
+The public API/Auth targets were independently checked first. Selected project
+and account-wide notification variables were absent; protected before-state,
+source hash, exact plan and creation/readback evidence are retained under
+`.local/notification-review/firebase/`. Both string values and file metadata
+are verified. EAS does not expose secret file content for readback; the exact
+uploaded source is retained and the worker validates its project/package before
+building. No existing environment variable, signing key, private sending key,
+runtime server capability, Google Play record or app binary changed.
+
+The Android client file is not a sending credential. Provider setup sequence:
+
+1. Open [Firebase service accounts for suqpage](https://console.firebase.google.com/project/suqpage/settings/serviceaccounts/adminsdk).
+   Generate a new private key through the owner-controlled dashboard and retain
+   the downloaded JSON in a protected local location. Do not paste its contents
+   in chat or commit it. Credential creation is a separate deliberate owner action.
+2. Verify its project and exact key identity, then review a protected additive
+   credential plan for `@falmatad/suqpage` / `com.suqpage.app`. Upload through
+   **EAS Credentials → Android → com.suqpage.app → Service credentials → FCM V1**.
+   The owner granted a narrow exception to use Expo's official interactive
+   credentials CLI for this exact upload/binding; it has completed and the exact
+   selected association is independently verified. This is a push credential,
+   not a Play submission or Android signing key.
+   Stop on any existing/masked key that lacks a recoverable backup or unexpected
+   provider response; do not replace credentials or retry writes blindly.
+3. Verify only selected project/key metadata, then complete compatible server
+   rollout, signer/release gates, Android rebuild and real phone delivery checks
+   before enabling/claiming notifications. Preserve server enablement controls.
+
+Current state: build-client setup is complete. The owner supplied the FCM sending
+key; selected project/type/token endpoint and RSA structure pass, and a protected
+recoverable copy is retained. Official CLI upload/assignment completed under the
+owner's exact method exception; independent metadata readback matches project,
+key ID and client association for com.suqpage.app. Protected before/plan/approval/
+after evidence is retained. The canonical signing slot is empty; Play, legacy
+FCM and enhanced-security settings are unchanged. Canonical signing, coordinated
+web/API rollout, admitted rebuild and actual OS notification delivery remain pending.
+See [Expo's FCM V1 guide](https://docs.expo.dev/push-notifications/fcm-credentials/).
 
 ## S59 release preparation — 2026-10-05
 

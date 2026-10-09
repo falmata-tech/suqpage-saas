@@ -56,7 +56,7 @@ export async function POST(request: Request, context: { params: Promise<{ busine
       const saved = await saveOwnerPageAndPublication(user, businessId, {action: body.action, version: body.version, content: body.content});
       revalidateTag("public-marketplace", { expire: 0 });
       revalidateTag("public-featured", { expire: 0 });
-      revalidatePath("/"); revalidatePath("/dashboard");
+      revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/dashboard/profile");
       return json(saved);
     }
     if (body.action === "assistance") {

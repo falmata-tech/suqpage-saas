@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog.ts';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
@@ -35,7 +36,7 @@ async function capture(page,name){
 }
 try {
   const created=await auth.auth.admin.createUser({email,email_confirm:true});assert.ok(!created.error);providerId=created.data.user.id;
-  const workspace=await createPostgresPublicClientWorkspace(new PostgresTransactionRunner(pool),{name:'Wiring audit owner',businessName:'Wiring audit shop',businessCategory:'electronics',phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:providerId,email});
+  const workspace=await createPostgresPublicClientWorkspace(new PostgresTransactionRunner(pool),{name:'Wiring audit owner',businessName:'Wiring audit shop',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:providerId,email});
   businessId=(await pool.query('SELECT business_id FROM users WHERE id=$1',[workspace.userId])).rows[0].business_id;
   const owner=await (await session(email)).newPage();
   const adminEmail=(await pool.query("SELECT u.email FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='platform_admin' ORDER BY u.id LIMIT 1")).rows[0].email;

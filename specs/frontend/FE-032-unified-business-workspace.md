@@ -2,7 +2,7 @@
 id: FE-032
 title: Unified business directory and task-oriented workspace
 status: in_progress
-related: [FE-003, FE-017, FE-018, FE-026, FE-031, FE-035, BE-015, BE-017, BE-023, DEP-023, FE-042]
+related: [FE-056, FE-003, FE-017, FE-018, FE-026, FE-031, FE-035, BE-015, BE-017, BE-023, DEP-023, FE-042]
 owners: [product, frontend, operations, design]
 last_updated: 2026-09-23
 change_level: L2

@@ -36,7 +36,10 @@ async function loginWithEmailCode(page: Page, email: string, destination: RegExp
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page).toHaveURL(destination);
 }
-async function signOut(page: Page) { await page.getByRole("button", { name: "Sign out" }).click(); await expect(page).toHaveURL(/\/login$/); }
+async function signOut(page: Page) {
+  if (!await page.getByRole('button',{name:'Sign out',exact:true}).isVisible()) await page.goto('/dashboard/profile');
+  await page.getByRole("button", { name: "Sign out",exact:true }).click(); await expect(page).toHaveURL(/\/login$/);
+}
 
 // FE-040–043/BE-032–034: current standard-page acceptance replaces retired studios.
 test('passwordless signup, private account contacts and sign-out',async({page})=>{
@@ -52,6 +55,10 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await expect(page.locator('#signup-handle-status')).toHaveText('Available');
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
   await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
+  await expect(page.getByRole('button',{name:'Finish setup',exact:true})).toBeDisabled();
+  await page.getByRole('combobox',{name:'Business city',exact:true}).fill('Addis Ababa');
+  await page.getByRole('option').filter({hasText:'Addis Ababa'}).first().click();
+  await expect(page.locator('input[name=placeId]')).not.toHaveValue('');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
   await expect(page.getByText('Page color',{exact:true})).toHaveCount(0);
   await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();
@@ -77,10 +84,10 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await expect(page.locator('[data-business-profile]')).not.toHaveAttribute('data-store-accent');
   await page.goto('/dashboard/business');await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
   await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
-  await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save account phone',exact:true}).click();
+  await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save changes',exact:true}).click();
   await expect(page.getByText('Account phone saved.',{exact:true})).toBeVisible();
   await page.reload();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
-  await page.goto('/request');await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto('/request');await expect(page).toHaveURL(/\/dashboard\/profile$/);
   await signOut(page);await page.goto('/dashboard');await expect(page).toHaveURL(/\/login/);
 });
 
@@ -146,7 +153,8 @@ test('business video loads a privacy-enhanced frame only after activation',async
   await page.route('https://www.youtube-nocookie.com/embed/**',async route=>{requested++;await route.fulfill({contentType:'text/html',body:'<!doctype html><title>Video fixture</title><p>Controlled video fixture</p>'});});
   await page.goto('/@selam-weave');await expect(page.locator('iframe')).toHaveCount(0);expect(requested).toBe(0);
   await page.getByRole('button',{name:/Play business video about/}).click();
-  await expect(page.locator('iframe')).toHaveAttribute('src',/^https:\/\/www\.youtube-nocookie\.com\/embed\/wJV9EDe_sFc\?autoplay=1$/);
+  const embed=new URL(await page.locator('iframe').getAttribute('src')||'');
+  expect(embed.origin).toBe('https://www.youtube-nocookie.com');expect(embed.pathname).toBe('/embed/wJV9EDe_sFc');expect(embed.searchParams.get('autoplay')).toBe('1');
   await expect(page.frameLocator('iframe').getByText('Controlled video fixture',{exact:true})).toBeVisible();expect(requested).toBe(1);
 });
 

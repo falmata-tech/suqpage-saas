@@ -64,18 +64,19 @@ try {
   const schema=(await db.prepare("SELECT current_schema() name").get()).name as string;
   await db.prepare("INSERT INTO businesses(name,handle,design_key) VALUES(?,?,?)").run("AfricMade tenant-owned label","retained-naming-fixture","composition");
   await db.prepare("UPDATE business_subscriptions SET plan_name='MirtPage monthly'").run();
+  await db.prepare("INSERT INTO business_subscriptions(business_id,plan_name,currency,starts_at,current_period_start,current_period_end,grace_ends_at,updated_at) SELECT id,'MirtPage monthly','ETB',1,1,2,3,1 FROM businesses").run();
   const custom = await db.prepare("INSERT INTO businesses(name,handle,design_key) VALUES('Custom plan shop','custom-plan-fixture','composition')").run();
-  await db.prepare("UPDATE business_subscriptions SET plan_name='My negotiated plan',amount_minor=12345 WHERE business_id=?").run(custom.insertedId);
+  await db.prepare("INSERT INTO business_subscriptions(business_id,plan_name,amount_minor,currency,starts_at,current_period_start,current_period_end,grace_ends_at,updated_at) VALUES(?,'My negotiated plan',12345,'ETB',1,1,2,3,1)").run(custom.insertedId);
   const subscriptions = await db.prepare("SELECT * FROM business_subscriptions ORDER BY business_id").all();
   const before=await db.prepare("SELECT * FROM businesses ORDER BY id").all();
-  await db.runner.query("DELETE FROM schema_migrations WHERE version IN (44,45)");
+  await db.runner.query("DELETE FROM schema_migrations WHERE version IN (44,45,60)");
   await db.runner.query("ALTER TABLE support_conversations ALTER COLUMN requester_label SET DEFAULT 'AfricMade client'");
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[44,45]);
+  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[44,45,60]);
   assert.match(String((await db.prepare("SELECT column_default FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='support_conversations' AND column_name='requester_label'").get()).column_default),/Suqpage client/);
   assert.deepEqual(await db.prepare("SELECT * FROM businesses ORDER BY id").all(),before);
   assert.deepEqual(await db.prepare("SELECT * FROM business_subscriptions ORDER BY business_id").all(), subscriptions.map(row => ({...row, plan_name:row.plan_name==='MirtPage monthly'?'Suqpage monthly':row.plan_name})));
   const inserted=await db.prepare("INSERT INTO businesses(name,handle,design_key) VALUES('New shop','new-naming-fixture','composition')").run();
-  assert.equal((await db.prepare("SELECT plan_name FROM business_subscriptions WHERE business_id=?").get(inserted.insertedId)).plan_name,'Suqpage monthly');
+  assert.equal(await db.prepare("SELECT 1 FROM business_subscriptions WHERE business_id=?").get(inserted.insertedId),undefined,'renaming historical plans never resumes retired subscriptions');
   assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
 } finally { await closeDbForTests(); }
 console.log("PASS canonical/legacy environment precedence, cookie continuity/logout, tenant cart/navigation migration, asset compatibility and PostgreSQL 44–45 data preservation.");

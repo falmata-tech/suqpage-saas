@@ -10,9 +10,12 @@ import DashboardShell from "@/components/DashboardShell";
 import PaginationNav from "@/components/PaginationNav";
 import { createSupportConversationAction, createVideoRequestAction } from "@/app/support-actions";
 import { requireUser } from "@/lib/auth";
+import { isQueueAgent } from "@/lib/capabilities";
 import { supportWhatsAppUrl } from "@/lib/config";
 import { runtimeBusinessById, runtimeCatalogByBusinessId } from "@/lib/catalog-runtime";
 import { listSupportConversations } from "@/lib/support";
+import { supportInboxHref, supportThreadHref, supportViewState } from "@/lib/support-navigation";
+import SupportInboxRedirect from '@/components/SupportInboxRedirect';
 
 export const dynamic = "force-dynamic";
 
@@ -24,34 +27,32 @@ export default async function SupportInbox({
   const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
+  const scopedAgent = isQueueAgent(user);
   const business = user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
-  const transport = query.queue === "transport";
-  const help = query.queue === "support";
   const client = user.access_role === "client";
-  const status = transport && !client ? (["active", "history", "resolved"].includes(query.status || "") ? query.status! : query.status === "closed" ? "history" : "active") : query.status;
-  const result = await listSupportConversations(user, { ...query, status });
+  const queue = client ? undefined : scopedAgent ? user.staff_queue_scope==='transport'?'transport':'support' : query.queue === "transport" ? "transport" : "support";
+  const transport = queue === "transport";
+  const status = client ? query.status : transport ? (["active", "history", "resolved"].includes(query.status || "") ? query.status! : query.status === "closed" ? "history" : "active") : (["active","waiting","open","closed"].includes(query.status||"") ? query.status! : "active");
+  const result = await listSupportConversations(user, { ...query, queue, status });
+  const view = supportViewState({...query, queue, status, page:String(result.page)});
   const videoTarget = client && (query.video === "header" || query.video === "product") ? query.video : null;
   const videoProduct = videoTarget === "product" ? (await runtimeCatalogByBusinessId(user.business_id!,true))?.products.find(item=>item.id===Number(query.product)) : null;
   const emergencyWhatsApp = supportWhatsAppUrl();
   const operations = user.access_role === "operations_manager" || user.access_role === "platform_admin";
   return (
-    <DashboardShell user={user} business={business}>
+    <DashboardShell user={user} business={business} supportQueue={queue}>
+      {scopedAgent && query.queue !== queue ? <SupportInboxRedirect state={view} error={query.error}/> : null}
       <SupportThreadRefresh active />
       <div className="dashboard-head">
         <div>
-          <span className="eyebrow">{client ? t("Suqpage support") : t("Customer support")}</span>
-          <h1>{client ? t("How can we help?") : (transport ? t("Transport & delivery") : t("Support inbox"))}</h1>
+          <span className="eyebrow">{client ? t("Suqpage support") : t("Chats")}</span>
+          <h1>{client ? t("How can we help?") : t(transport ? "Transport" : "Business support")}</h1>
           {client ? <p>{t("Keep questions and replies together with your Suqpage account.")}</p> : null}
         </div>
-        {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">{t("Emergency WhatsApp")}</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">{t("Manage support agents")}</Link> : null}
+        {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">{t("Emergency WhatsApp")}</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">{t("Workload & availability")}</Link> : null}
       </div>
-      {!client ? <nav className={styles.tabs} aria-label={t("Support queues")}>
-        <Link href="/dashboard/support" aria-current={!transport && !help ? "page" : undefined}>{t("All support")}</Link>
-        <Link href="/dashboard/support?queue=support" aria-current={help ? "page" : undefined}>{t("Business support")}</Link>
-        <Link href="/dashboard/support?queue=transport" aria-current={transport ? "page" : undefined}>{t("Transport & delivery")}</Link>
-      </nav> : null}
-      {transport && !client ? <nav className={styles.tabs} aria-label={t("Request status")}>
-        {(["active", "history", "resolved"] as const).map(value => <Link key={value} href={`/dashboard/support?${new URLSearchParams({queue:"transport", status:value, ...(query.q ? {q:query.q} : {})})}`} aria-current={status === value ? "page" : undefined}>{t(value === "active" ? "Active" : value === "history" ? "Chat history" : "Resolved")}</Link>)}
+      {!client ? <nav className={styles.tabs} aria-label={t("Request status")}>
+        {(transport ? ["active", "history", "resolved"] : ["active", "waiting", "closed"]).map(value => <Link key={value} href={supportInboxHref({...view,status:value,page:undefined})} aria-current={status === value ? "page" : undefined}>{t(value === "active" ? "Active" : value === "history" ? "Chat history" : value === "resolved" ? "Resolved" : value === "waiting" ? "Waiting" : "Closed")}</Link>)}
       </nav> : null}
       {query.error ? <p className="error">{t(query.error)}</p> : null}
       {query.saved ? <p className="notice">{t("Support conversation updated.")}</p> : null}
@@ -65,7 +66,7 @@ export default async function SupportInbox({
         <div className="field full"><label htmlFor="video-note">{t("Message")}{" "}{t("(optional)")}</label><textarea id="video-note" name="note" maxLength={1500} rows={3} /></div>
         <div className="field full"><button className="btn brand">{t("Send video request")}</button></div>
       </form> : client ? (
-        <form className="panel form-grid support-new" action={createSupportConversationAction} encType="multipart/form-data">
+        <form className="panel form-grid support-new" action={createSupportConversationAction}>
           <h2 className="full">{t("Start a conversation")}</h2>
           <input type="hidden" name="idempotencyKey" value={crypto.randomBytes(16).toString("hex")} />
           <div className="field full">
@@ -84,13 +85,11 @@ export default async function SupportInbox({
           <div className="field full"><button className="btn brand">{t("Send to Suqpage support")}</button></div>
         </form>
       ) : (
-        <CollectionToolbar action="/dashboard/support" hidden={{queue: transport ? "transport" : help ? "support" : undefined, status: transport ? status : undefined}} search={query.q || ""} placeholder={t("Conversation, business, or reference")}>
-          {!transport ? <label><span>{t("Status")}</span><select name="status" defaultValue={query.status || ""}><option value="">{t("All statuses")}</option><option value="waiting">{t("Waiting")}</option><option value="open">{t("Open")}</option><option value="closed">{t("Closed")}</option></select></label> : null}
-        </CollectionToolbar>
+        <CollectionToolbar action="/dashboard/support" hidden={{queue, status}} search={view.q || ""} placeholder={t("Conversation, business, or reference")} activeFilters={Boolean(view.q)} />
       )}
       <section className="support-list" aria-label={t("Support conversations")}>
         {result.items.map((conversation) => (
-          <Link className="support-row" href={`/dashboard/support/${conversation.id}`} key={conversation.id}>
+          <Link className="support-row" href={supportThreadHref(conversation.id, client ? {} : view)} key={conversation.id}>
             <span>
               <small>{conversation.publicRef} · {conversation.businessName}{conversation.participantKind === "visitor" ? t(" · {value1}", { value1: conversation.assistanceCategory === "buying_assistance" ? t("Buying assistance") : conversation.assistanceCategory === "shipment_observation" ? t("Transport") : t("Get help") }) : ""}</small>
               <strong>{conversation.assistanceCategory === "buying_assistance" ? t(conversation.subject) : conversation.subject}</strong>
@@ -106,7 +105,7 @@ export default async function SupportInbox({
         ))}
         {!result.items.length ? <div className="empty-state">{client ? t("No support conversations yet.") : t("No conversations match this queue.")}</div> : null}
       </section>
-      <PaginationNav result={result} pathname="/dashboard/support" params={{ q: query.q, status, queue: query.queue }} />
+      <PaginationNav result={result} pathname="/dashboard/support" params={{ q: view.q, status, queue }} />
     </DashboardShell>
   );
 }

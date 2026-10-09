@@ -1,3 +1,4 @@
+import {redirect} from "next/navigation";
 
 import { useUiText } from "@/lib/i18n/ui";
 import { getUiText } from "@/lib/i18n/server";
@@ -8,7 +9,7 @@ import CollectionToolbar from '@/components/CollectionToolbar';
 import PaginationNav from '@/components/PaginationNav';
 import { requireUser } from '@/lib/auth';
 import { resolveBusiness } from '@/lib/dashboard';
-import { hasCapability } from '@/lib/capabilities';
+import { hasCapability, isQueueAgent } from '@/lib/capabilities';
 import { listBusinessesPage,listAssignedBusinessesPage,getBusinessActivityCounts } from '@/lib/scalable-queries';
 import { getDashboardAttention } from '@/lib/dashboard-attention';
 import { readOwnerBusiness } from '@/lib/owner-business-runtime';
@@ -31,7 +32,7 @@ function ShowroomVisitSummary({ insights, businessName }: { insights: ShowroomIn
 
 export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string;page?:string;q?:string;saved?:string;error?:string}>}){
   const t = await getUiText();
- const user=await requireUser();const params=await searchParams;const business=await resolveBusiness(user,params.business);
+ const user=await requireUser();if(isQueueAgent(user))redirect(`/dashboard/support?queue=${user.staff_queue_scope}`);if(user.access_role==="client" && user.business_id)redirect("/dashboard/profile");const params=await searchParams;const business=await resolveBusiness(user,params.business);
  const admin=hasCapability(user,'platform:admin');const operations=hasCapability(user,'operations:manage');
  if(!business){
   const businesses=user.access_role==='team_member'?await listAssignedBusinessesPage(user.id,params):operations?await listBusinessesPage(params):null;

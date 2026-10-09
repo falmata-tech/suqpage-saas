@@ -1,4 +1,5 @@
 "use client";
+import LoadingBar from "./LoadingBar";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -64,6 +65,7 @@ export default function PasswordlessLoginForm({ emailEnabled, initialError = "" 
   if (!emailEnabled) return null;
 
   if (stage === "code") return <form className="platform-login-form" onSubmit={verifyEmail}>
+    {requestState==='sending'&&<LoadingBar/>}
     <div className="platform-code-heading"><span>{t("Code sent to")}</span><strong>{email}</strong><button type="button" onClick={() => { setStage("email"); setCode(""); setMessage(""); setRequestState("idle"); }}>{t("Change email")}</button></div>
     <div className="field"><label htmlFor="login-code">{t("Six-digit code")}</label><input id="login-code" name="code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus /></div>
     {message ? <p className={requestState === "error" ? "error" : "platform-form-note"} role={requestState === "error" ? "alert" : "status"}>{t(message)}</p> : null}
@@ -72,6 +74,7 @@ export default function PasswordlessLoginForm({ emailEnabled, initialError = "" 
   </form>;
 
   return <form className="platform-login-form" onSubmit={startEmail}>
+    {requestState==='sending'&&<LoadingBar/>}
     <div className="field"><label htmlFor="login-email">{t("Email")}</label><input id="login-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={160} /></div>
     {message ? <p className="error" role="alert">{t(message)}</p> : null}
     <button type="submit" disabled={requestState === "sending"}>{requestState === "sending" ? t("Sending code...") : t("Continue with email")}</button>

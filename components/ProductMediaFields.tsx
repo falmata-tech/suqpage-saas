@@ -3,15 +3,16 @@ import {useEffect, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, Trash2, Play} from 'lucide-react';
 import type {Product} from '@/lib/types';
 import {productMedia, MAX_PRODUCT_IMAGES, MAX_PRODUCT_UPLOAD_BYTES} from '@/lib/product-media';
-import {STARTER_VIDEO_URL} from '@/lib/business-starter';
-import {controlledYouTubeWatchUrl} from '@/lib/youtube-provider';
+
+import {productVideoWatchUrl} from '@/lib/video/product-video';
 import {useUiText} from '@/lib/i18n/ui';
 
 type Entry = {id: string; kind:'image'; ref:string} | {id:string; kind:'upload'; file:File; preview:string} | {id:string; kind:'video'; url:string};
-export default function ProductMediaFields({product,staffMode=false,onFiles,onCover}:{product?:Product;staffMode?:boolean;onFiles:(files:File[])=>void;onCover:(value:string)=>void}) {
+export default function ProductMediaFields({product,exampleVideoRef,staffMode=false,onFiles,onCover}:{product?:Product;exampleVideoRef?:string;staffMode?:boolean;onFiles:(files:File[])=>void;onCover:(value:string)=>void}) {
   const t=useUiText();
-  const [entries,setEntries]=useState<Entry[]>(()=>product?productMedia(product).map((item,index)=>item.kind==='image'?{kind:"image",ref:item.ref,id:String(index)}:{kind:'video',url:controlledYouTubeWatchUrl(item.ref),id:String(index)}):[{id:'example',kind:'video',url:STARTER_VIDEO_URL}]);
+  const [entries,setEntries]=useState<Entry[]>(()=>product?productMedia(product).map((item,index)=>item.kind==='image'?{kind:"image",ref:item.ref,id:String(index)}:{kind:'video',url:productVideoWatchUrl(item.ref),id:String(index)}):exampleVideoRef?[{id:'example',kind:'video',url:productVideoWatchUrl(exampleVideoRef)}]:[]);
   const [error,setError]=useState('');
+  const [videoInput,setVideoInput]=useState('');
   const live=useRef(entries);live.current=entries;
   useEffect(()=>()=>{for(const item of live.current)if(item.kind==='upload')URL.revokeObjectURL(item.preview);},[]);
   function update(next:Entry[]) {
@@ -27,7 +28,7 @@ export default function ProductMediaFields({product,staffMode=false,onFiles,onCo
     <input type="hidden" name="mediaOrder" value={JSON.stringify(order)} />
     <div className="product-media-entries">
       {entries.map((item,index)=><div className="product-media-entry" key={item.id}>
-        {item.kind==='video'?<label className="product-media-video"><span><Play size={16} aria-hidden="true" />{t('YouTube video')}</span><input type="url" required maxLength={500} value={item.url} aria-label={t('Video link {number}',{number:index+1})} readOnly /></label>
+        {item.kind==='video'?<label className="product-media-video"><span><Play size={16} aria-hidden="true" />{t('Video')}</span><input type="url" required maxLength={500} value={item.url} aria-label={t('Video link {number}',{number:index+1})} onChange={event=>update(entries.map(entry=>entry.id===item.id?{...item,url:event.target.value}:entry))} /></label>
           : <img src={item.kind==='image'?item.ref:item.preview} alt={t('Photo {number}',{number:index+1})} />}
         <div className="product-media-entry-actions">
           <button type="button" disabled={index===0} onClick={()=>move(index,-1)} aria-label={t('Move media left')}><ArrowLeft size={18} aria-hidden="true" /></button>
@@ -45,8 +46,9 @@ export default function ProductMediaFields({product,staffMode=false,onFiles,onCo
       update([...entries,...files.map(file=>({id:crypto.randomUUID(),kind:'upload' as const,file,preview:URL.createObjectURL(file)}))]);
     }} />
     <small>{t('Up to 8 photos and 4 videos. Photos: 5 MB total per save.')}</small>
-    <div>{staffMode ? <a className="btn secondary" href="/dashboard/support?queue=support">{t('Video requests')}</a> : product ? <a className="btn secondary" href={`/dashboard/support?video=product&product=${product.id}`} target="_blank" rel="noreferrer">{t('Request a video')}</a> : <small>{t('Save this item before requesting a video.')}</small>}</div>
-    <small>{t('Send us a video link. Our team will review it for your page.')}</small>
+    <p>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</p>
+    <label htmlFor="product-video-link">{t('Video link')}</label><input id="product-video-link" type="url" maxLength={500} value={videoInput} onChange={event=>setVideoInput(event.target.value)}/>
+    <button type="button" className="btn secondary" disabled={!videoInput.trim()||entries.filter(item=>item.kind==='video').length>=4} onClick={()=>{update([...entries,{id:crypto.randomUUID(),kind:'video',url:videoInput.trim()}]);setVideoInput('');}}><Play size={16} aria-hidden="true"/>{t('Add video')}</button>
     {error?<p role="alert" className="error">{t(error)}</p>:null}
   </div>;
 }

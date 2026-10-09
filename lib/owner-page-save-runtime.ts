@@ -1,3 +1,7 @@
+import {resolveProductVideoUrl} from './tiktok-short-link';
+import {productVideoWatchUrl} from './video/product-video';
+import {OwnerPageError,ownerPageRecord} from './owner-page-domain';
+import {readOwnerPage} from './owner-page-service';
 import { isPageOwner, type OwnerPageDraft } from './owner-page-domain';
 import { ownerPagePort } from './owner-page-runtime';
 import { saveOwnerPage, startOwnerPage } from './owner-page-service';
@@ -11,6 +15,9 @@ import type { SessionUser } from './types';
 export async function saveOwnerPageAndPublication(actor: SessionUser, businessId: number,
   input: { action: 'start' | 'save'; version?: unknown; content: unknown },
 ): Promise<OwnerPageDraft & { publication: PagePublication | null }> {
+  await readOwnerPage(ownerPagePort,actor,businessId);
+  const content=ownerPageRecord(input.content,['template','coverStyle','introduction','about','heroImage','videoUrl','contacts','accentColor']);
+  if(content.videoUrl){try{input={...input,content:{...content,videoUrl:productVideoWatchUrl(await resolveProductVideoUrl(content.videoUrl))}};}catch{throw new OwnerPageError('Use a supported video link.');}}
   return runtimeTransaction(async () => {
     const saved = input.action === 'start'
       ? await startOwnerPage(ownerPagePort, actor, businessId, input.content)

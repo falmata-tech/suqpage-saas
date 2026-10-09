@@ -3,6 +3,18 @@ export interface AccountContactPort {
   read(userId: number): Promise<AccountContacts | undefined>;
   savePhone(userId: number, phone: string): Promise<boolean>;
 }
+export interface AccountProfilePort extends AccountContactPort {
+  saveProfile(userId: number, name: string, phone: string): Promise<boolean>;
+}
+export function parseAccountName(input: unknown): string {
+  if (typeof input !== 'string' || !input.trim() || input.length > 80 || /[\u0000-\u001f\u007f]/.test(input)) throw new Error('Enter your name, up to 80 characters.');
+  return input.trim();
+}
+export async function saveAccountProfile(port: AccountProfilePort, actor: {id: number} | null, input: {name: unknown; phone: unknown}) {
+  if (!actor || !Number.isSafeInteger(actor.id) || actor.id <= 0) throw new Error('Sign in to update your account contacts.');
+  const name = parseAccountName(input.name), phone = parseAccountPhone(input.phone);
+  if (!await port.saveProfile(actor.id, name, phone)) throw new Error('Your account was not found.');
+}
 
 export function parseAccountPhone(input: unknown): string {
   if (typeof input !== "string" || input.length > 40 || /[\u0000-\u001f\u007f]/.test(input)) throw new Error("Enter a valid account phone with its country code.");

@@ -401,25 +401,7 @@ async function runPostgresFixture() {
         catalog.business.content_blocks_json = JSON.stringify(snapshot.contentBlocks);
         await retainBaseline.run(businessId, JSON.stringify(snapshot));
     }
-    const subscriptionNow = Date.now();
-    const subscriptionAccountStart = subscriptionNow - 90 * 24 * 60 * 60 * 1000;
-    const subscriptionPeriodStart = subscriptionNow - 10 * 24 * 60 * 60 * 1000;
-    const subscriptionEnd = subscriptionNow + 20 * 24 * 60 * 60 * 1000;
-    const seedSubscription = db.prepare(`
-  INSERT INTO business_subscriptions(
-    business_id,plan_name,amount_minor,currency,starts_at,current_period_start,
-    current_period_end,grace_ends_at,updated_at
-  ) VALUES(?,'Suqpage monthly',NULL,'ETB',?,?,?,?,?)
-  ON CONFLICT(business_id) DO UPDATE SET
-    starts_at=excluded.starts_at,
-    current_period_start=excluded.current_period_start,
-    current_period_end=excluded.current_period_end,
-    grace_ends_at=excluded.grace_ends_at,
-    updated_at=excluded.updated_at
-`);
-    for (const businessId of seeded.values()) {
-        await seedSubscription.run(businessId, subscriptionAccountStart, subscriptionPeriodStart, subscriptionEnd, subscriptionEnd + 4 * 24 * 60 * 60 * 1000, subscriptionNow);
-    }
+    const seededAt = Date.now();
     const seedIndustry = db.prepare(`
   INSERT INTO discovery_industries(key,label,icon,position,active)
   VALUES(?,?,?,?,1)
@@ -464,9 +446,9 @@ async function runPostgresFixture() {
         const industryKey = industryKeys[0];
         const productionScale = SCALE_DEMO_BUSINESSES.find((business) => business.handle === handle)?.productionScale ?? "workshop";
         const place = findKnownPlaceByName(profile.city, profile.region);
-        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, place ? Math.round(place.latitude*10)/10 : profile.latitude, place ? Math.round(place.longitude*10)/10 : profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, subscriptionNow, subscriptionNow);
+        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, place ? Math.round(place.latitude*10)/10 : profile.latitude, place ? Math.round(place.longitude*10)/10 : profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, seededAt, seededAt);
         await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
-          VALUES(?,1,?,?,?,'area',?,?,?,1,?)`).run(businessId,industryKey,profile.city,profile.region,place?.id||null,place?.latitude??null,place?.longitude??null,subscriptionNow);
+          VALUES(?,1,?,?,?,'area',?,?,?,1,?)`).run(businessId,industryKey,profile.city,profile.region,place?.id||null,place?.latitude??null,place?.longitude??null,seededAt);
         for (const key of industryKeys)
             await seedBusinessIndustry.run(businessId, key);
     }
@@ -489,7 +471,7 @@ async function runPostgresFixture() {
     const sponsored = await eligibleDiscoveryBusinesses.all() as Array<{
         id: number;
     }>;
-    await sequentialEach(sponsored, async (business, index) => await seedSponsorship.run(business.id, index + 1, subscriptionNow));
+    await sequentialEach(sponsored, async (business, index) => await seedSponsorship.run(business.id, index + 1, seededAt));
     const generatedCredentials: Array<{
         role: string;
         business: string;
@@ -516,46 +498,6 @@ async function runPostgresFixture() {
         .map(async (name, index) => await seedUser("admin", "operations_manager", "Suqpage", `operations-${index + 1}@demo.mirtpage.local`, name, null)));
     const teamStaff = await Promise.all(["Hana Design", "Yonas Content", "Mimi Intake", "Abel Media", "Liya Review", "Sami Catalog", "Bethel Studio", "Nahom Support"]
         .map(async (name, index) => await seedUser("admin", "team_member", "Suqpage", `team-${index + 1}@demo.mirtpage.local`, name, null)));
-    const subscriptionStateHandles = [
-        SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "fashion-textiles"),
-        SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "beauty-wellness"),
-        SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "home-living"),
-        SCALE_DEMO_BUSINESSES.find((business) => business.industryKey === "machinery-tools"),
-        ...SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "food-farming").slice(0, 3),
-        SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "home-living")[1],
-    ].map((business) => {
-        if (!business)
-            throw new Error("Subscription lifecycle fixture is missing.");
-        return business.handle;
-    });
-    await sequentialEach(subscriptionStateHandles.slice(0, 4), async (handle, index) => {
-        const end = subscriptionNow - (index + 1) * 12 * 60 * 60 * 1000;
-        await db.prepare(`
-    UPDATE business_subscriptions
-    SET current_period_start=?,current_period_end=?,grace_ends_at=?,updated_at=?
-    WHERE business_id=?
-  `).run(end - 30 * 24 * 60 * 60 * 1000, end, end + 4 * 24 * 60 * 60 * 1000, subscriptionNow, seeded.get(handle)!);
-    });
-    await sequentialEach(subscriptionStateHandles.slice(4), async (handle, index) => {
-        const end = subscriptionNow - (8 + index) * 24 * 60 * 60 * 1000;
-        await db.prepare(`
-    UPDATE business_subscriptions
-    SET current_period_start=?,current_period_end=?,grace_ends_at=?,updated_at=?
-    WHERE business_id=?
-  `).run(end - 30 * 24 * 60 * 60 * 1000, end, end + 4 * 24 * 60 * 60 * 1000, subscriptionNow, seeded.get(handle)!);
-    });
-    const seedPayment = db.prepare(`
-  INSERT INTO subscription_payments(
-    public_ref,business_id,amount_minor,currency,idempotency_key,paid_at,
-    recorded_by_user_id,created_at
-  ) VALUES(?,?,NULL,'ETB',?,?,?,?)
-`);
-    let paymentOrdinal = 0;
-    for (const handle of clientUsersByHandle.keys()) {
-        paymentOrdinal += 1;
-        const paidAt = subscriptionPeriodStart - paymentOrdinal * 60000;
-        await seedPayment.run(`DEMO-PAY-${String(paymentOrdinal).padStart(5, "0")}`, seeded.get(handle)!, `demo-payment-${paymentOrdinal}`, paidAt, adminUserId, paidAt);
-    }
     const seedVisit = db.prepare(`
   INSERT INTO showroom_visits(
     business_id,visitor_hash,visit_date,source,expo_occurrence_id,expo_hub_key,created_at
@@ -565,7 +507,7 @@ async function runPostgresFixture() {
     for (const [handle, businessId] of seeded) {
         for (let index = 0; index < 8; index += 1) {
             visitOrdinal += 1;
-            const createdAt = subscriptionNow - (index % 6) * 24 * 60 * 60 * 1000 - visitOrdinal;
+            const createdAt = seededAt - (index % 6) * 24 * 60 * 60 * 1000 - visitOrdinal;
             const source = index % 3 === 0 ? "expo" : index % 3 === 1 ? "directory" : "direct";
             await seedVisit.run(businessId, crypto.createHash("sha256").update(`fictional-visitor-${handle}-${index}`).digest("hex"), new Date(createdAt).toISOString().slice(0, 10), source, source === "expo" ? "demo-host" : "", createdAt);
         }
@@ -576,7 +518,7 @@ async function runPostgresFixture() {
   ) VALUES(?,?,?,?,?)
 `);
     await sequentialEach(teamStaff, async (userId, index) => {
-        await seedSupportAgent.run(userId, index >= 2 ? 1 : 0, 3, adminUserId, subscriptionNow);
+        await seedSupportAgent.run(userId, index >= 2 ? 1 : 0, 3, adminUserId, seededAt);
     });
     const addSupportConversation = db.prepare(`
   INSERT INTO support_conversations(
@@ -605,7 +547,7 @@ async function runPostgresFixture() {
     await sequentialEach(supportHandles, async (handle, index) => {
         const status = index < waitingSupportCount ? "waiting" : index < waitingSupportCount + openSupportCount ? "open" : "closed";
         const assigned = status === "waiting" ? null : teamStaff[4 + ((index - waitingSupportCount) % 4)];
-        const createdAt = subscriptionNow - (supportHandles.length - index) * 45 * 60 * 1000;
+        const createdAt = seededAt - (supportHandles.length - index) * 45 * 60 * 1000;
         const closedAt = status === "closed" ? createdAt + 30 * 60 * 1000 : null;
         const conversationId = Number((await addSupportConversation.run(`DEMO-SUP-${String(index + 1).padStart(5, "0")}`, seeded.get(handle)!, clientUsersByHandle.get(handle)!, [
             "Help updating showroom information",
@@ -761,8 +703,8 @@ async function runPostgresFixture() {
         const content = JSON.stringify(parseShopPageContent({...initialBusinessProfile(catalog), introduction:'', contacts}));
         const ownerId = clientUsersByHandle.get(handle)!;
         await db.prepare("UPDATE businesses SET whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);
-        await db.prepare("INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)").run(businessId,content,ownerId,subscriptionNow);
-        await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(businessId,content,ownerId,subscriptionNow);
+        await db.prepare("INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)").run(businessId,content,ownerId,seededAt);
+        await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(businessId,content,ownerId,seededAt);
     }
     const credentialPath = path.resolve(process.env.SUQPAGE_CREDENTIAL_PATH || path.join(process.cwd(), ".local", "seed-credentials.txt"));
     fs.mkdirSync(path.dirname(credentialPath), { recursive: true });

@@ -2,6 +2,7 @@
 import { normalizeDiscoveryPlaces, discoveryPlaceKey } from "@/lib/discovery-contract";
 import launchStyles from "./LaunchClarity.module.css";
 import previewStyles from "./MapPreviewDialog.module.css";
+import LoadingBar from "./LoadingBar";
 import { useUiText } from "@/lib/i18n/ui";
 
 import { mapDisplayLocation } from "@/lib/map-display-location";
@@ -354,9 +355,10 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
   }
 
   const selectedPlaces = normalizeDiscoveryPlaces(discovery.place);
-  const controls = <div className="discovery-compact-toolbar" onKeyDown={event=>{if(event.key === "Escape" && !event.defaultPrevented && panelOpen) {event.preventDefault();hidePanel();}}}>
-    <button ref={panelOpen ? panelCloser : panelOpener} type="button" className="discovery-results-toggle" aria-label={t(panelOpen ? "Hide search and filters" : "Search & results")} title={t("Products & services")} aria-controls="discovery-search-panel" aria-expanded={panelOpen} onClick={panelOpen ? hidePanel : showPanel}>
-      {panelOpen ? <PanelLeftClose size={22} aria-hidden="true"/> : <PanelLeftOpen size={22} aria-hidden="true"/>}
+  const controls = <div className="discovery-compact-toolbar" aria-busy={filtersPending} onKeyDown={event=>{if(event.key === "Escape" && !event.defaultPrevented && panelOpen) {event.preventDefault();hidePanel();}}}>
+    <button ref={panelOpen ? panelCloser : panelOpener} type="button" className="discovery-results-toggle" aria-label={t(panelOpen ? "Hide products" : "View products")} title={t("Products & services")} aria-controls="discovery-search-panel" aria-expanded={panelOpen} onClick={panelOpen ? hidePanel : showPanel}>
+      {panelOpen ? <PanelLeftClose size={16} aria-hidden="true"/> : <PanelLeftOpen size={16} aria-hidden="true"/>}
+      <span>{t(panelOpen ? "Hide products" : "View products")}</span>
     </button>
     <div className="discovery-command-search"><DiscoverySearch id="discovery-search" value={searchInput} suggestions={[]} onChange={editSearch} onSelect={applySearch} onSubmit={applySearch} onClear={() => applySearch("")} /></div>
     <CategoryChooser compact categories={discovery.industries} value={discovery.industry.key} disabled={filtersPending} onChange={key => changeFilters(key, discovery.place)} />
@@ -386,6 +388,7 @@ export default function DiscoveryWorkspace({ discovery, hideIntro = false, view 
 
     <div className="discovery-workbench discovery-workbench-map discovery-drawer-workbench" data-panel-open={panelOpen}>
       {controls}
+      {filtersPending && <div className="discovery-loading-feedback"><LoadingBar/></div>}
       <aside id="discovery-search-panel" className="discovery-summary discovery-search-panel" aria-labelledby="discovery-panel-title" aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); hidePanel(); }}}>
         <h2 id="discovery-panel-title" className="sr-only">{t("Search & filters")}</h2>
         <MarketplaceSearchResults action={action} discovery={discovery} />

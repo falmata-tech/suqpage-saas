@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -13,7 +14,7 @@ async function main() {
             name: "Aster Bekele",
             phone: "+251911234567",
             businessName: "Aster Food Studio",
-            businessCategory: "food-farming",
+            businessCategory: "food-farming", placeId: findPlaceSuggestions("Hawassa")[0].id,
             idempotencyKey: "signup-test-key-0001",
             consent: true,
         };
@@ -59,8 +60,13 @@ async function main() {
         }).count, 0, "account setup does not create a page project");
         assert.equal((await db.prepare("SELECT COUNT(*) count FROM business_industries WHERE business_id=?").get(created.businessId) as {
             count: number;
-        }).count, 0, "private category does not publish discovery classification");
+        }).count, 1, "chosen city prepares owner-declared discovery classification while the business stays private");
         assert.equal((await getDiscoveryView({ industry: "food-farming" })).total, 0, "a self-created draft is never public");
+        const selected=findPlaceSuggestions('Hawassa')[0];
+        const location=await db.prepare('SELECT * FROM owner_location_proposals WHERE business_id=?').get(created.businessId);
+        assert.equal(location.city,selected.name);assert.equal(location.region,selected.region);assert.equal(location.place_id,selected.id);assert.equal(location.reviewed_version,1);
+        const anchor=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(created.businessId);assert.equal(anchor.city,selected.name);assert.equal(anchor.latitude,Math.round(selected.latitude*10)/10);assert.equal(anchor.longitude,Math.round(selected.longitude*10)/10);
+        for(const placeId of [undefined,'','forged-place',500,'x'.repeat(81)])assert.throws(()=>parseSignupInput({...valid,placeId},identity),error=>error instanceof SignupError&&error.code==='city_required');
         const counts = async () => ({
             businesses: Number((await db.prepare("SELECT COUNT(*) count FROM businesses").get() as {
                 count: number;

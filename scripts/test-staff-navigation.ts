@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {supportViewState,supportFormState,supportInboxHref,supportThreadHref,workspaceActiveHref,workloadViewState,workloadHref} from '../lib/support-navigation';
+const source={queue:'transport',status:'history',q:' chairs & fabric ',page:'2'};
+const state=supportViewState(source);assert.equal(supportInboxHref(state),'/dashboard/support?queue=transport&status=history&q=chairs+%26+fabric&page=2');
+assert.equal(supportThreadHref(42,state,{sent:'1'}),'/dashboard/support/42?queue=transport&status=history&q=chairs+%26+fabric&page=2&sent=1');
+const f=new FormData();for(const[k,v]of Object.entries(source))f.set('nav_'+k,v);assert.deepEqual(supportFormState(f),state);assert.equal(supportFormState(f,'support').queue,'support');
+assert.deepEqual(supportViewState({queue:'https://evil.test',status:'delete',page:'-1',q:['bad'],returnTo:'https://evil.test'},{fallbackQueue:'support',fallbackStatus:'active'}),{queue:'support',status:'active'});
+assert.equal(supportViewState({q:'x'.repeat(200),page:'1x'}).q!.length,120);assert.equal(supportViewState({page:'1000000000000'}).page,undefined);assert.throws(()=>supportThreadHref(-1));
+const items=[{href:'/dashboard/admin'},{href:'/dashboard/support?queue=support'},{href:'/dashboard/support?queue=transport'},{href:'/dashboard/admin/staff',activePaths:['/dashboard/support/agents']},{href:'/dashboard/admin/businesses'}];
+assert.equal(workspaceActiveHref(items,'/dashboard/support',new URLSearchParams('queue=transport')),items[2].href);
+assert.equal(workspaceActiveHref(items,'/dashboard/support/42',new URLSearchParams('queue=support'),'transport'),items[2].href,'Case authority supplies actual queue context');
+assert.equal(workspaceActiveHref(items,'/dashboard/support/agents',new URLSearchParams()),items[3].href);
+assert.equal(workspaceActiveHref(items,'/dashboard/admin/businesses/8/team',new URLSearchParams()),items[4].href);
+assert.equal(workspaceActiveHref([{href:'/dashboard?business=1'},{href:'/dashboard?business=2'}],'/dashboard',new URLSearchParams('business=2')),'/dashboard?business=2');
+assert.equal(workspaceActiveHref([{href:'/dashboard/support?queue=support'}],'/dashboard/support',new URLSearchParams('queue=transport')),undefined,'Nav cannot invent other queue membership');
+console.log('PASS safe inbox origin/action roundtrip, scoped queue pinning, case/menu matching, workload parent and unchanged business context.');
+
+assert.deepEqual(supportViewState({queue:["transport"]},{fallbackQueue:"support"}),{queue:"support"});
+assert.equal(workloadHref(workloadViewState({q:"name & email",page:"2",status:"available"}),true),"/dashboard/support/agents?q=name+%26+email&page=2&status=available&saved=agent");
+assert.equal(workloadHref(workloadViewState({q:["bad"],page:"1e9",status:"delete",returnTo:"https://evil.test"})),"/dashboard/support/agents");

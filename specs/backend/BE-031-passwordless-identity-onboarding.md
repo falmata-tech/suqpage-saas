@@ -2,7 +2,7 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [BE-049, FE-059, BE-047, BE-045, FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
 owners: [backend, security, operations]
 last_updated: 2026-09-21
 change_level: L3
@@ -55,8 +55,9 @@ command. Creating a public business-page project is a later deliberate action.
   business onboarding.
 - Application role, access profile, business ownership, suspension, and
   publication authority remain PostgreSQL-owned.
-- A declared onboarding category is private intake context. It never writes or
-  implies a reviewed `business_industries` classification.
+- BE-047 now prepares the owner-declared discovery category and canonical city
+  when signup chooses a city; the business remains private until publication.
+  This is not a staff endorsement or review of the business.
 - One provider UUID and one normalized email may bootstrap at most one
   application user. Races fail safely or return the already-created result.
 
@@ -83,9 +84,10 @@ command. Creating a public business-page project is a later deliberate action.
   managed-identity password sentinel; no human password is collected or
   recoverable.
 - The onboarding command does not create a service request, design revision,
-  public category, map point, featured placement or publication. The local BE-039
-  candidate adds a saved private profile and three complete sample offerings,
-  contacts and a private example location in the same transaction.
+  featured placement or publication. BE-039 supplies a saved private profile and
+  complete sample offerings/contacts. The BE-047 local candidate prepares the
+  chosen canonical city area anchor and declared classification in the same
+  transaction; draft businesses remain absent from all public discovery surfaces.
 - If the database transaction fails, the provider identity remains unlinked so
   the authenticated user can retry. No compensating deletion is attempted.
 - Linked suspended or inactive users fail closed according to the existing

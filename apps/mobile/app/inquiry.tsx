@@ -126,7 +126,7 @@ export default function Inquiry() {
             multiline
           />
           <Copy>{t("Send inquiry")}</Copy>
-          {shop.contacts.whatsapp && (
+          {Boolean(shop.contacts.whatsapp) && (
             <Button
               label="WhatsApp"
               disabled={busy}
@@ -140,7 +140,7 @@ export default function Inquiry() {
             />
           )}
           <View style={s.wrap}>
-            {shop.contacts.telegram && (
+            {Boolean(shop.contacts.telegram) && (
               <Button
                 secondary
                 label="Telegram"
@@ -163,7 +163,7 @@ export default function Inquiry() {
                 })
               }
             />
-            {shop.contacts.phone && (
+            {Boolean(shop.contacts.phone) && (
               <Button
                 secondary
                 label="SMS"

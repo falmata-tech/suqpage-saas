@@ -25,6 +25,8 @@ test-results/
 **/*.keystore
 **/*.jks
 **/credentials.json
+**/*-firebase-adminsdk-*.json
+**/*service-account*.json
 **/.expo/
 apps/mobile/android/
 apps/mobile/ios/

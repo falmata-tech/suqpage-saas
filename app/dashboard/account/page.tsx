@@ -1,6 +1,7 @@
 
 import { getUiText } from "@/lib/i18n/server";
-import { saveAccountPhoneAction } from "./actions";
+import AccountProfileForm from "@/components/AccountProfileForm";
+import { saveProfileAccountAction, saveAccountPhoneAction } from "./actions";
 import { accountContactPort } from "@/lib/account-contact-runtime";
 import DashboardShell from "@/components/DashboardShell";
 import { changePasswordAction } from "@/app/actions";
@@ -11,7 +12,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function Account({ searchParams }: { searchParams: Promise<{ required?: string; error?: string; saved?: string; contact?: string }> }) {
+export default async function Account({ searchParams }: { searchParams: Promise<{ required?: string; error?: string; saved?: string; contact?: string; returnTo?: string }> }) {
   const t = await getUiText();
   const user = await requireUser({ allowTemporaryPassword: true });
   const params = await searchParams;
@@ -21,14 +22,17 @@ export default async function Account({ searchParams }: { searchParams: Promise<
 
   return <DashboardShell user={user} business={business}>
     <div className="dashboard-head"><div><h1>{t("Your account")}</h1></div></div>
-    <form className="panel form-grid" action={saveAccountPhoneAction}>
+    {params.returnTo==='profile' && <Link className="btn secondary" href="/dashboard/profile">{t("Back to profile")}</Link>}
+    {params.returnTo==='profile'?<AccountProfileForm name={user.name} email={user.email} phone={contacts?.account_phone||''} action={saveProfileAccountAction}/>:<form className="panel form-grid" action={saveAccountPhoneAction}>
+      {params.returnTo==='profile' && <input type="hidden" name="returnTo" value="profile"/>}
+      <div className="field"><label htmlFor="account-name">{t("Name")}</label><input id="account-name" name="name" maxLength={80} required defaultValue={user.name}/></div>
       <div className="field full"><span className="eyebrow">{t("Private contact details")}</span><h2>{t("Account email & phone")}</h2><p>{t("These details belong to your account. Public business contacts are managed separately in your page editor.")}</p></div>
       {params.contact === "saved" ? <p className="notice field full" role="status">{t("Account phone saved.")}</p> : null}
-      {params.contact === "invalid" ? <p className="error field full" role="alert">{t("Enter your account phone with + and its country code.")}</p> : null}
+      {params.contact === "invalid" ? <p className="error field full" role="alert">{t("Check your name and account phone.")}</p> : null}
       <div className="field"><label htmlFor="account-email">{t("Account email")}</label><input id="account-email" type="email" value={user.email} readOnly /><small>{t("Your sign-in email.")}</small></div>
       <div className="field"><label htmlFor="account-phone">{t("Account phone")}</label><input id="account-phone" name="accountPhone" type="tel" autoComplete="tel" maxLength={40} defaultValue={contacts?.account_phone || ""} placeholder="+251…" aria-describedby="account-phone-help" /><small id="account-phone-help">{t("Private and unverified. Include the country code. This number is not used to sign in.")}</small></div>
-      <div className="field full"><button className="btn brand">{t("Save account phone")}</button></div>
-    </form>
+      <div className="field full"><button className="btn brand">{t("Save changes")}</button></div>
+    </form>}
     {managed ? <section className="panel"><h2>{t("Email sign-in")}</h2><p className="muted">{t("Use a one-time code sent to your account email.")}</p></section> : <>
       {params.required ? <p className="notice">{t("Change the temporary password before using the dashboard.")}</p> : null}
       {params.error ? <p className="error">{params.error}</p> : null}

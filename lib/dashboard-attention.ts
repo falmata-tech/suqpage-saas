@@ -40,7 +40,7 @@ export async function getDashboardAttention(
             LEFT JOIN users u ON u.id=m.sender_user_id
             LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
-              AND m.id>c.staff_last_read_message_id
+              AND m.id>c.staff_confirmed_read_message_id
               AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
       `),
@@ -58,7 +58,7 @@ export async function getDashboardAttention(
             LEFT JOIN users u ON u.id=m.sender_user_id
             LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
-              AND m.id>c.staff_last_read_message_id
+              AND m.id>c.staff_confirmed_read_message_id
               AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
       `, user.id, user.id),
@@ -80,7 +80,7 @@ export async function getDashboardAttention(
         AND EXISTS(
           SELECT 1 FROM support_messages m
           WHERE m.conversation_id=c.id
-            AND m.id>c.${client ? "client_last_read_message_id" : "staff_last_read_message_id"}
+            AND m.id>c.${client ? "client_confirmed_read_message_id" : "staff_confirmed_read_message_id"}
             AND ${client
               ? "m.sender_user_id<>?"
               : "EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=m.sender_user_id AND (m.sender_kind='visitor' OR p.access_role='client'))"}

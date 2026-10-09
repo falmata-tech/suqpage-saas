@@ -6,12 +6,13 @@ import {changeBusinessHandle,readHandleSettings} from '../lib/business-handle-ru
 import {getHandleAvailability} from '../lib/handle-availability';
 import {runtimeBusinessByHandle,runtimeBusinessByHandleAny} from '../lib/catalog-runtime';
 import {HANDLE_CHANGE_INTERVAL_MS,nextHandleChangeAt,parseBusinessHandle} from '../lib/business-handle';
+import {findPlaceSuggestions} from '../lib/place-catalog';
 
 async function main(){
  const db=await getDb();
  try{
   const identity={providerUserId:crypto.randomUUID(),email:'handle-lifecycle@example.test'};
-  const raw={name:'Example Owner',phone:'+447700900999',businessName:'Example shop',businessCategory:'home-living',consent:true,idempotencyKey:crypto.randomUUID()};
+  const raw={name:'Example Owner',phone:'+447700900999',businessName:'Example shop',businessCategory:'home-living',placeId:findPlaceSuggestions('Addis Ababa')[0].id,consent:true,idempotencyKey:crypto.randomUUID()};
   const taken=generatedHandle(raw.businessName,identity.providerUserId);
   await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES(?,'Taken generated address','composition','draft')").run(taken);
   const created=await createPublicClientWorkspace(raw,identity);const owner=(await getUserById(created.userId))!;

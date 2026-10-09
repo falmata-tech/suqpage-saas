@@ -41,8 +41,13 @@ async function main() {
     };
     try {
       const {createStaffAccount}=await import('../lib/staff-operations');
-      const staff=await createStaffAccount({name:'Email staff',email:'email-staff@example.test',password:'ignored',accessRole:'team_member'});
+      const staff=await createStaffAccount({name:'Email staff',email:'email-staff@example.test',password:'ignored',accessRole:'support_agent'},actor);
       const record=await db.prepare('SELECT must_change_password,password_hash FROM users WHERE id=?').get(staff.userId);
+      assert.equal((await db.prepare('SELECT queue_scope,enabled,max_open_conversations FROM support_agent_settings WHERE user_id=?').get(staff.userId)).queue_scope,'support');
+      const callsBeforeDenied=providerBodies.length;
+      await assert.rejects(()=>createStaffAccount({name:'Denied',email:'denied@example.test',password:'',accessRole:'transport_agent'},{...actor,access_role:'operations_manager'}),/administrator access/);
+      await assert.rejects(()=>createStaffAccount({name:'Denied',email:'denied@example.test',password:'',accessRole:'operations_manager'},actor),/staff role/);
+      assert.equal(providerBodies.length,callsBeforeDenied,'Denied staff changes never contact the provider');
       assert.equal(record.must_change_password,0);assert.ok(record.password_hash.startsWith('!'));
       assert.ok(await db.prepare('SELECT 1 FROM auth_identity_links WHERE user_id=?').get(staff.userId));
       const {createClientInvitation,redeemClientInvitation}=await import('../lib/invitations');
@@ -54,7 +59,7 @@ async function main() {
       await assert.rejects(()=>redeemClientInvitation({token:invitation.token,name:'Replay',password:''}),/already used/);
       assert.equal(providerBodies.length,calls,'Replay makes no provider write');
       globalThis.fetch=async()=>Response.json({msg:'unavailable'},{status:503});
-      await assert.rejects(()=>createStaffAccount({name:'Failed staff',email:'failed-staff@example.test',password:'',accessRole:'team_member'}),/unavailable/);
+      await assert.rejects(()=>createStaffAccount({name:'Failed staff',email:'failed-staff@example.test',password:'',accessRole:'transport_agent'},actor),/unavailable/);
       assert.equal(await db.prepare("SELECT id FROM users WHERE email='failed-staff@example.test'").get(),undefined);
     } finally {
       globalThis.fetch=previousFetch;

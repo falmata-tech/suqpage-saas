@@ -342,3 +342,16 @@ html:lang(am) .eyebrow,html:lang(ti) .eyebrow{letter-spacing:normal}
   .support-thread-actions .support-reassign { grid-column:1 / -1; }
   .support-reassign select { width:0; min-height:44px; }
 }
+
+.suqpage-loading { display:grid; gap:8px; padding:12px 0; width:100%; }
+.suqpage-loading > span { color:#63737a; font-size:13px; }
+.suqpage-loading-track { height:6px; overflow:hidden; border-radius:6px; background:#fff1e9; }
+.suqpage-loading-track > i { display:block; width:35%; height:100%; border-radius:6px; background:#c43a00; animation:suqpage-loading-slide 1.5s linear infinite; }
+@keyframes suqpage-loading-slide { from {transform:translateX(-100%);} to {transform:translateX(286%);} }
+@media(prefers-reduced-motion:reduce) { .suqpage-loading-track > i {animation:none;transform:translateX(90%);} }
+
+/* Staff navigation retains inbox context and provides clear touch targets. */
+.workspace-breadcrumbs{flex-wrap:wrap;row-gap:4px;overflow-wrap:anywhere}
+.workspace-breadcrumbs a{display:inline-flex;align-items:center;min-height:44px}
+.support-back-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:900px){.workspace-breadcrumbs a{min-height:44px}.workspace-mobile-tabs a>span{white-space:normal;line-height:1.15;min-height:14px}}

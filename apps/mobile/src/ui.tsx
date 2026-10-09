@@ -1,3 +1,7 @@
+import LoadingBar from "./LoadingBar";
+import {File,Paths} from 'expo-file-system';
+import {randomUUID} from 'expo-crypto';
+import {preparePrivateImage,type PrivateImageResource} from './private-image';
 import { storefrontAccent } from "../../../lib/storefront-accent";
 import React from "react";
 import {
@@ -20,7 +24,7 @@ import { descriptionLinks } from "./link-policy";
 export { openLink } from "./open-link";
 import Svg, { Path, SvgUri } from "react-native-svg";
 import { isStaticSeedSvg } from "./static-svg";
-import { useApp, mediaUrl, API } from "./runtime";
+import { useApp, mediaUrl, API, auth } from "./runtime";
 export const colors = {
   ink: "#22282b",
   muted: "#63737a",
@@ -57,6 +61,7 @@ export function Icon({
     user: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M4 22v-3a8 8 0 0 1 16 0v3",
     info: "M12 11v6 M12 7v1 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
     chat: "M21 11a9 9 0 0 1-9 9H3l2-4a9 9 0 1 1 16-5",
+    bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
     arrow: "m8 4 8 8-8 8",
     check: "m4 12 5 5L20 5",
     plus: "M12 4v16 M4 12h16",
@@ -104,13 +109,16 @@ export function Copy({
   children,
   muted = false,
   big = false,
+  heading = false,
 }: {
   children: React.ReactNode;
   muted?: boolean;
   big?: boolean;
+  heading?: boolean;
 }) {
   return (
     <Text
+      accessibilityRole={heading ? "header" : undefined}
       style={{
         color: muted ? colors.muted : colors.ink,
         fontSize: big ? 24 : 16,
@@ -152,7 +160,7 @@ export function Button({
         { opacity: disabled ? 0.45 : pressed ? 0.8 : 1 },
       ]}
     >
-      {icon && <Icon name={icon} color={textColor} />}
+      {icon ? <Icon name={icon} color={textColor} /> : null}
       <Text style={[s.buttonText, { color: textColor }]}>
         {label}
       </Text>
@@ -245,14 +253,7 @@ export function Status({
   retry?: () => void;
 }) {
   const { t } = useApp();
-  if (loading)
-    return (
-      <ActivityIndicator
-        accessibilityLabel={t("Loading")}
-        color={colors.brand}
-        style={{ padding: 30 }}
-      />
-    );
+  if (loading) return <LoadingBar color={colors.brand} track={colors.soft}/>;
   return error ? (
     <Card>
       <Text accessibilityRole="alert" style={{ color: "#992d11" }}>
@@ -267,10 +268,12 @@ export function Photo({
   refPath,
   height = 180,
   privateImage = false,
+  blurRadius = 0,
 }: {
   refPath: string;
   height?: number;
   privateImage?: boolean;
+  blurRadius?: number;
 }) {
   const { session } = useApp();
   const privateRef =
@@ -280,23 +283,30 @@ export function Photo({
   const [source, setSource] = React.useState<string | null>(null);
   React.useEffect(() => {
     let active = true;
-    let blob: string | undefined;
+    let resource:PrivateImageResource|null=null;
+    const controller=new AbortController();
+    const timeout=privateRef&&session?setTimeout(()=>controller.abort(),20000):undefined;
     setSource(null);
-    if (privateRef && Platform.OS === "web" && session)
-      fetch(
-        `${API}/api/mobile/v1/owner/media?ref=${encodeURIComponent(refPath)}`,
-        { headers: { Authorization: `Bearer ${session.access_token}` } },
-      )
-        .then((r) => (r.ok ? r.blob() : Promise.reject()))
-        .then((b) => {
-          blob = URL.createObjectURL(b);
-          if (active) setSource(blob);
-          else URL.revokeObjectURL(blob);
-        })
-        .catch(() => {});
+    if (privateRef && session)void(async()=>{
+      const current=await auth?.auth.getSession();
+      if(!active||!current?.data.session)return;
+      const response=await fetch(`${API}/api/mobile/v1/owner/media?ref=${encodeURIComponent(refPath)}`,{headers:{Authorization:`Bearer ${current.data.session.access_token}`},signal:controller.signal});
+      resource=await preparePrivateImage(response,image=>{
+        if(Platform.OS==='web'){
+          const uri=URL.createObjectURL(new Blob([new Uint8Array(image.bytes)],{type:response.headers.get('content-type')||'image/png'}));
+          return {uri,dispose:()=>URL.revokeObjectURL(uri)};
+        }
+        const local=new File(Paths.cache,`suqpage-private-${randomUUID()}.${image.extension}`);
+        try{local.write(image.bytes);}catch(error){if(local.exists)local.delete();throw error;}
+        return {uri:local.uri,dispose:()=>{if(local.exists)local.delete();}};
+      },()=>active);
+      if(resource&&active)setSource(resource.uri);
+      else if(resource){resource.dispose();resource=null;}
+    })().catch(()=>{if(active)console.warn('Private image unavailable');}).finally(()=>clearTimeout(timeout));
     return () => {
       active = false;
-      if (blob) URL.revokeObjectURL(blob);
+      controller.abort();clearTimeout(timeout);
+      try{resource?.dispose();}catch{console.warn('Private image cleanup failed');}
     };
   }, [refPath, privateRef, session?.access_token]);
   if (Platform.OS !== "web" && isStaticSeedSvg(refPath))
@@ -313,7 +323,7 @@ export function Photo({
         />
       </View>
     );
-  if (!refPath || (privateRef && Platform.OS === "web" && !source))
+  if (!refPath || (privateRef && !source))
     return (
       <View
         style={{
@@ -328,16 +338,11 @@ export function Photo({
     );
   return (
     <Image
+      key={source || refPath}
+      blurRadius={blurRadius}
       accessibilityIgnoresInvertColors
       source={{
-        uri:
-          source ||
-          (privateRef
-            ? `${API}/api/mobile/v1/owner/media?ref=${encodeURIComponent(refPath)}`
-            : mediaUrl(refPath)),
-        ...(privateRef && session
-          ? { headers: { Authorization: `Bearer ${session.access_token}` } }
-          : {}),
+        uri: source || mediaUrl(refPath),
       }}
       style={{
         height,

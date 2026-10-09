@@ -45,15 +45,18 @@ assert.doesNotMatch(featured, /DiscoveryWorkspace discovery/);
 assert.match(publicShell, /currentUser\(\)/);
 assert.match(publicFrame, /href: "\/", label: "Market"/);
 assert.match(publicFrame, /href: "\/featured", label: "Featured", icon: Star/);
-assert.match(mobileNavigation, /href: "\/featured", label: "Featured", icon: Star/);
+assert.match(mobileNavigation, /href:\s*"\/featured",\s*label:\s*"Featured",\s*icon:\s*Star/);
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /CalendarClock/);
-assert.match(publicFrame, /href="\/about"/);
+assert.match(publicFrame, /href="\/dashboard\/profile"/);
+assert.match(read("app/dashboard/profile/page.tsx"), /href="\/about"/);
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
 assert.match(publicFrame, /aria-label=\{t\("Explore Suqpage"\)\}/);
-assert.match(mobileNavigation, /href: "\/", label: "Market"/);
-assert.match(mobileNavigation, /href: "\/about", label: "About"/);
-assert.match(mobileNavigation, /aria-haspopup="dialog"/);
-assert.match(mobileNavigation, /<span>\{t\("More"\)\}<\/span>/);
+assert.match(mobileNavigation, /href:\s*"\/",\s*label:\s*"Market"/);
+// FE-056: guests see Market/Featured/Account; signed-in owners also see Inquiries.
+assert.match(mobileNavigation, /items\.filter\(item=>item\.label!==['"]Inquiries['"]\|\|signedIn\)/);
+assert.match(mobileNavigation, /href:signedIn\?"\/dashboard\/inquiries":"\/login\?next=inquiries",label:"Inquiries"/);
+assert.match(mobileNavigation, /href:onboarding\?"\/request":signedIn\?"\/dashboard\/profile":"\/login",label:"Account"/);
+assert.doesNotMatch(mobileNavigation, /label:\s*"About"|t\("More"\)|aria-haspopup="dialog"/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);
 
 assert.match(landingCss, /suqpage-public-app-canvas-v1\.webp/);
@@ -106,7 +109,7 @@ assert.match(discoveryMapUi, /className="discovery-results-heading">\{t\("Produc
 assert.doesNotMatch(discoveryMapUi, /discovery-search-result-types|discovery-result-filters|renderBusiness|toggleResultType/);
 assert.match(discoveryUi, /view: "search"/);
 // S22/S24: the drawer hide control replaces the former separate map action.
-assert.match(discoveryUi, /aria-label=\{t\(panelOpen \? "Hide search and filters" : "Search & results"\)\}/);
+assert.match(discoveryUi, /aria-label=\{t\(panelOpen \? "Hide products" : "View products"\)\}/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
 // FE-042 replaces the former fixed result cap with a bounded database page.
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);

@@ -1,3 +1,5 @@
+import {findKnownPlace} from './place-catalog';
+import type {KnownPlace} from './place-search';
 import { parseAccentColor } from "./storefront-accent";
 import { parseBusinessHandle } from "./business-handle";
 import { parseAccountPhone } from "./account-contacts";
@@ -22,6 +24,7 @@ export type SignupInput = {
   businessName: string;
   handle: string;
   businessCategory: BusinessCategoryKey;
+  place: KnownPlace;
   accentColor?: string;
   idempotencyKey: string;
 };
@@ -45,6 +48,7 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   const businessName = text(raw.businessName);
   const businessCategory = text(raw.businessCategory);
   const idempotencyKey = text(raw.idempotencyKey);
+  const place = typeof raw.placeId === 'string' && raw.placeId.length <= 80 ? findKnownPlace(raw.placeId) : null;
   const providerUserId = text(identity.providerUserId);
   const consent = raw.consent === true || raw.consent === "true" || raw.consent === "on" || raw.consent === "1";
 
@@ -55,6 +59,7 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   if (businessName.length < 2 || businessName.length > 120) throw new SignupError("Enter your business name using 2-120 characters.");
   if (!isBusinessCategoryKey(businessCategory)) throw new SignupError("Choose the category that best describes your work.");
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new SignupError("The setup session is invalid. Refresh and try again.");
+  if (!place) throw new SignupError("Choose your business city from the results.", 400, "city_required");
   if (!consent) throw new SignupError("Agree to the Terms and Privacy Policy to continue.");
   let handle = generatedHandle(businessName, providerUserId);
   if (Object.hasOwn(raw, "handle")) {
@@ -64,7 +69,7 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   let accentColor: string;
   try { accentColor = parseAccentColor(raw.accentColor); }
   catch (error) { throw new SignupError((error as Error).message); }
-  return { name, email, phone, businessName, handle, businessCategory, idempotencyKey, ...(accentColor ? { accentColor } : {}) };
+  return { name, email, phone, businessName, handle, businessCategory, place, idempotencyKey, ...(accentColor ? { accentColor } : {}) };
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>, identity: SignupIdentity) {

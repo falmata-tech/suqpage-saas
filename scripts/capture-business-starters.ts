@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -21,7 +22,7 @@ async function main() {
  const db=await getDb();let app:ChildProcess|undefined;
  const browser=await chromium.launch({headless:!serve});
  try {
-  const workspace=await createPublicClientWorkspace({name:'Review owner',phone:'+251911234567',businessName:'Your business',businessCategory:'electronics',idempotencyKey:'starter-browser-0001',consent:true},{providerUserId:'33333333-3333-4333-8333-333333333339',email:'starter-review@example.test'});
+  const workspace=await createPublicClientWorkspace({name:'Review owner',phone:'+251911234567',businessName:'Your business',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,idempotencyKey:'starter-browser-0001',consent:true},{providerUserId:'33333333-3333-4333-8333-333333333339',email:'starter-review@example.test'});
   const business=await db.prepare('SELECT handle FROM businesses WHERE id=?').get(workspace.businessId);
   const products=await db.prepare('SELECT id FROM products WHERE business_id=? ORDER BY sort_order').all(workspace.businessId);
   const token=crypto.randomBytes(32).toString('base64url');

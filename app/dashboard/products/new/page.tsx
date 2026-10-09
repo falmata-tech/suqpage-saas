@@ -1,3 +1,4 @@
+import {runtimeCategoryExampleVideo} from "@/lib/category-starter-runtime";
 
 import { getUiText } from "@/lib/i18n/server";
 import crypto from "node:crypto";
@@ -40,7 +41,7 @@ export default async function NewProduct({
         </div>
       </div>
       {query.error ? <p className="error">{t(query.error)}</p> : null}
-      <ProductForm
+      <ProductForm exampleVideoRef={await runtimeCategoryExampleVideo(business.id)}
         catalog={catalog}
         action={basicProductUpkeepAction}
         businessId={business.id}

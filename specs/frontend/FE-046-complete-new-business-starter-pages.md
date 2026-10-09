@@ -2,7 +2,7 @@
 id: FE-046
 title: Complete new business starter pages
 status: done
-related: [FE-052, FE-051, FE-038, BE-039, DEP-036, FE-040]
+related: [FE-061, BE-049, FE-052, FE-051, FE-038, BE-039, DEP-036, FE-040]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L2

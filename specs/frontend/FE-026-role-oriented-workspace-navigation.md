@@ -2,13 +2,45 @@
 id: FE-026
 title: Role-oriented workspace navigation
 status: in_progress
-related: [FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, BE-018, BE-026, BE-028, DEP-021, DEP-022, ADR-0013]
+related: [BE-032, FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, FE-053, BE-018, BE-026, BE-028, BE-044, DEP-021, DEP-022, ADR-0013, FE-062]
 owners: [product, frontend, operations, design]
-last_updated: 2026-08-11
+last_updated: 2026-10-08
 change_level: L2
 ---
 
 # FE-026 - Role-oriented workspace navigation
+
+## S88 — main admin and two web-only agent functions
+
+Ready L2. The owner's designated identity is platform_admin with no business-owner
+association; preserve its Auth identity and existing business content. This account
+change targets local and hosted environments independently with a protected
+permission-field backup, drift checks and verified role/identity linkage.
+
+GIVEN an authorized platform admin WHEN creating staff THEN offer only Support
+agent and Transport agent, with email-code sign-in. Persist these functions using
+the existing team_member profile plus support/transport queue scope, enabled with
+the existing default capacity of three. No new role enum, migration or provider.
+The admin may change the function/capacity/availability through the role controls;
+incompatible open cases must be reassigned first. Keep legacy operator/general
+staff records rather than deleting unrelated identities.
+
+GIVEN a scoped queue agent THEN its main workspace is its permitted support queue;
+it cannot inherit product/design/business-management authority through the legacy
+team_member profile. Principal scope comes from current server-side records.
+GIVEN an unauthorized caller or forged operator/all-scope creation THEN reject
+before provider/account writes. Role choices and labels work at desktop/phone
+widths and in all five languages. Browser evidence precedes visual/release gates.
+
+New agent roles are fully readable in phone controls. Legacy operator/general
+settings are labelled Queue, preserving their actual broader profile rather than
+pretending a queue change downgrades their role. New scoped rows use Role. After
+staff creation, the result is filtered to the created identity so it is visible
+immediately; capacity/queue invariants remain server-enforced.
+
+Tests: actor/role validation, atomic account/settings creation, provider failure,
+duplicate identity, pagination/function display/filter, queue isolation and actual
+admin-created staff sign-in. BE-018/BE-044/FE-053 cover chat and mobile exclusion.
 
 ## Problem and outcome
 
@@ -171,3 +203,54 @@ server-paginated staff/client search, direct authorization denial, client review
 publication, and 320/390-pixel drawer behavior. Reviewed captures at 1440, 390,
 and 320 CSS pixels showed no horizontal overflow and a focus-contained mobile
 drawer.
+
+S88 focused local evidence: scripts/test-staff-boundaries.ts, managed wiring test,
+scalable-query tests and real admin-created staff capture pass; role/queue controls
+and three staff OTP rejections captured at phone widths in all five languages.
+Root role/link conversion is verified locally and hosted, without deleting business
+content or replacing the provider identity. New UI/API/APK deployment and full gates
+remain pending. Private evidence is retained outside Git under main-admin-review
+and chat-workflow-review; no secrets or customer messages are copied here.
+
+## S94 — predictable admin and queue staff navigation
+
+Ready L2, FE-019/FE-062/BE-018. Scope: web staff/admin sidebar, phone menu,
+inbox/thread and staff/settings wayfinding. Preserve owner/native navigation,
+current role/queue/tenant permissions and all pending release work; no schema.
+
+GIVEN a manager WHEN navigating chats THEN Business support and Transport are
+separate stable menu destinations; the matching item remains active on its
+conversations. Management pages remain reachable without changing the whole menu
+when a business workspace opens. Support/Transport agents see only their queue,
+account security and existing permitted utilities; navigation grants no access.
+GIVEN the staff screen WHEN opening workload/availability THEN show Staff as its
+parent and keep Staff active, rather than returning to an unrelated inbox.
+GIVEN an inbox with queue/status/search/page WHEN opening a conversation and
+posting/claiming/assigning/closing/reopening/saving a handoff THEN retain the safe
+origin fields; mutation redirects replace the current conversation entry instead
+of adding another history step; Back and breadcrumb return to that exact permitted list. Direct
+links/alerts use the actual case queue as fallback. Invalid/foreign case links
+return safely to the permitted inbox. Never accept arbitrary return URLs.
+Queue canonicalization is computed from the current principal before loading
+the list; a browser replacement changes the address without exposing another
+queue. Missing/foreign cases render only a generic unavailable state with an
+inbox fallback link, then replace the address with that permitted inbox. This
+avoids the reproducible Next development RSC redirect/profiler error while
+retaining server-side case/queue authorization and safe no-JavaScript fallback.
+GIVEN desktop/phone/all locales THEN menu labels are clear, active state singular,
+icons match support/transport, no fixed five-column gaps or clipped labels, and
+breadcrumbs/back controls have 44px targets with no horizontal overflow.
+
+Tests: scripts/test-staff-navigation.ts (URL/query selection, safe state and
+role cases); scripts/capture-staff-navigation.mjs (real admin/support/transport
+lists/actions/return, alert/direct case context, desktop/phone and locale review).
+Existing support/tenant/staff tests prove no new access. Visual approval precedes
+full/release gates. Master §§13/19/22 reflect the verified local candidate.
+Focused URL/type/catalog/spec, isolated PostgreSQL staff/support and actual local
+browser checks pass (2026-10-08). The real adapters cover page-two origin through
+claim, successful/failed reply, assignment, close/reopen and transport handoff;
+staff settings/selected-business stability, actual-case/foreign-link scope and
+71 desktop/phone/all-locale captures pass with zero browser exceptions after
+replacing the unsafe development RSC redirect path. Evidence is protected under
+.local/staff-navigation-review/actual/verified.json. Visual approval/full gates,
+scoped commit and rollout remain pending; status remains in_progress.

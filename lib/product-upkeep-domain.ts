@@ -1,3 +1,4 @@
+import { productVideo } from './video/product-video';
 import { parseProductMedia, type ProductMedia } from "./product-media";
 import type { Product } from "./types";
 import {
@@ -226,9 +227,7 @@ export function parseBasicProductCommand(
     highlights,
     videoRef: (() => {
       const value = text(raw.videoRef, 40);
-      if (value && !/^youtube:[A-Za-z0-9_-]{11}$/.test(value)) {
-        throw new ProductUpkeepError("Use a supported YouTube video.");
-      }
+      if (value) { try { productVideo(value); } catch { throw new ProductUpkeepError("Use a supported video link."); } }
       return value;
     })(),
     categoryId: optionalInteger(raw.categoryId, "Category"),

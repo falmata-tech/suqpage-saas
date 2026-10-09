@@ -12,7 +12,8 @@ import { ArrowUpRight, Globe, Mail, MessageCircle, Music2, PackageOpen, Phone, P
 import { useId, useState } from "react";
 import type { ShopPageContent } from "@/lib/owner-page-domain";
 import { formatEtbPrice } from "@/lib/offering-presentation";
-import { normalizeControlledYouTubeUrl, privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
+import {normalizeProductVideoUrl,productVideoEmbedUrl} from "@/lib/video/product-video";
+import SocialVideoFrame from "../SocialVideoFrame";
 import type { DesignProps } from "./designs";
 import { businessProfileDescription } from "@/lib/business-profile";
 import { legacyPublicContacts, publicContactLinks, type PublicContactKind } from "@/lib/business-profile-contacts";
@@ -35,8 +36,8 @@ function CoverMedia({ image, video, name }: { image: string; video: string; name
   const t = useUiText();
   const [playing, setPlaying] = useState(false);
   if (!image && !video) return null;
-  return <div className={styles.coverMedia}>
-    {playing && video ? <iframe src={`${privacyEnhancedYouTubeEmbedUrl(normalizeControlledYouTubeUrl(video).managedRef)}?autoplay=1`}
+  return <div className={styles.coverMedia} style={playing&&video&&['tiktok','instagram'].includes(normalizeProductVideoUrl(video).provider)?{height:'min(70vh,560px)',minHeight:320}:undefined}>
+    {playing && video ? normalizeProductVideoUrl(video).provider !== "youtube" ? <SocialVideoFrame video={normalizeProductVideoUrl(video).managedRef} poster={image} title={t("Video about {value1}",{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(normalizeProductVideoUrl(video).managedRef)}?autoplay=1`}
       title={t("Video about {value1}", { value1: name })} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {image ? <><img src={image} alt="" fetchPriority="high" /><span className={styles.coverTint} aria-hidden="true" /></> : null}
@@ -59,7 +60,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const BusinessHeading = p.embedded ? "h2" : "h1";
   const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business));
   return <div className={styles.profile} data-business-profile data-store-accent={profile.accentColor || undefined} style={storefrontAccentVariables(profile.accentColor) as CSSProperties}>
-    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Demo business — products and contact details are examples.")}</div> : null}
+    {Boolean(business.is_demo) && !business.handle.toLowerCase().includes("demo") ? <div className={launchStyles.notice}>{t("Demo business — products and contact details are examples.")}</div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />
       <div className={styles.identity}>

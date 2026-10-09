@@ -2,7 +2,7 @@
 id: BE-039
 title: Atomic business starter content
 status: done
-related: [BE-043, BE-031, FE-046, DEP-036, BE-034]
+related: [FE-061, BE-049, BE-043, BE-031, FE-046, DEP-036, BE-034]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L2

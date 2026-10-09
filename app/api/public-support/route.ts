@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+import { revokeVisitorAttention,AttentionError } from '@/lib/attention-postgres';
+import {scheduleAttentionDelivery} from '@/lib/attention-after';
 import { channelConversation, publicSupportSession } from "@/lib/public-support-channel";
 import { platformCookie, platformCookies } from "@/lib/platform-state";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,6 +14,7 @@ import {
   PUBLIC_SUPPORT_COOKIE,
   PUBLIC_SUPPORT_SESSION_MS,
   SupportError,
+  acknowledgePublicRead,
 } from "@/lib/support";
 // Buying conversations are text-only; private attachments remain in authenticated support.
 const MAX_BODY_BYTES = 32_000;
@@ -97,11 +100,13 @@ export async function POST(request: NextRequest) {
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
     const { token, cookieName, channel } = await publicSupportSession(request.cookies, request.nextUrl.searchParams.get("channel"));
     if (body.attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
-    if (body.action === "message" || body.action === "close") {
+    if (body.action === "message" || body.action === "close" || body.action === 'read') {
       const current = await channelConversation(token, channel);
       if (body.publicRef !== current.publicRef) throw new SupportError("Request could not be accepted.", "conversation_changed");
-      if (body.action === "close") await closePublicSupportConversation(token);
+      if (body.action === 'read') await acknowledgePublicRead(token, { messageId: body.messageId, publicRef: body.publicRef });
+      else if (body.action === "close") await closePublicSupportConversation(token);
       else await postPublicSupportMessage(token, { message: body.message, idempotencyKey: body.idempotencyKey }, ipHash);
+      if(body.action!=='read')scheduleAttentionDelivery();
       return privateJson({ conversation: await channelConversation(token, channel) });
     }
     if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how Suqpage can help.", "invalid_channel");
@@ -117,6 +122,7 @@ export async function POST(request: NextRequest) {
       idempotencyKey: body.idempotencyKey,
     }, ipHash, Date.now(), token || undefined);
     const response = privateJson({ conversation: await getPublicSupportConversation(created.token) }, { status: 201 });
+    scheduleAttentionDelivery();
     response.cookies.set(cookieName, created.token, {
       httpOnly: true,
       sameSite: "lax",
@@ -136,6 +142,7 @@ export async function DELETE(request: NextRequest) {
     assertSameOrigin(request);
     const response = privateJson({ conversation: null });
     const {cookieName, token, channel} = await publicSupportSession(request.cookies, request.nextUrl.searchParams.get("channel"));
+    if(token)try{await channelConversation(token,channel);await revokeVisitorAttention(token);}catch(error){if(!((error instanceof SupportError||error instanceof AttentionError)&&error.code==='not_found'))throw error;}
     response.cookies.delete(cookieName);
     // Consume a matching legacy token on reset; the other channel is untouched.
     if (!channel || (token && token === platformCookie(request.cookies, "support"))) {

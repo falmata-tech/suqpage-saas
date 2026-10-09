@@ -13,7 +13,7 @@ import { listInquiriesPage } from "@/lib/scalable-queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string;error?:string;page?:string;q?:string;status?:string}> }) {
+export default async function InquiriesPage({ searchParams }: { searchParams:Promise<{business?:string;saved?:string;error?:string;page?:string;q?:string;status?:string;inquiry?:string}> }) {
   const t = await getUiText();
   const user = await requireUser();
   if (user.access_role === "team_member") redirect("/dashboard");
@@ -21,16 +21,17 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   const business = await resolveBusiness(user, query.business);
   if (!business) return null;
   const client = isClient(user);
-  const inquiries = await listInquiriesPage(business.id, query);
+  const inquiries = await listInquiriesPage(business.id, {...query,inquiryId:query.inquiry});
   return <DashboardShell user={user} business={business}>
     <div className="dashboard-head"><div><h1>{t("Customer inquiries")}</h1><p>{client ? t("Review inquiries sent from your Suqpage page.") : t("See what customers asked about and how to reach them.")}</p></div></div>
     {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
     {!query.error && query.saved ? <p className="notice">{t("Inquiry status updated.")}</p> : null}
+    {query.inquiry?<a className="small-btn" href="/dashboard/inquiries">{t('All inquiries')}</a>:null}
     <CollectionToolbar
       action="/dashboard/inquiries"
       search={query.q || ""}
       placeholder={t("Customer, contact, product or service")}
-      hidden={{ business: business.id }}
+      hidden={{ business: business.id, inquiry:query.inquiry }}
       activeFilters={Boolean(query.q || query.status)}
     >
       <label><span>{t("Status")}</span><select name="status" defaultValue={query.status || ""}><option value="">{t("All statuses")}</option><option value="new">{t("new")}</option><option value="contacted">{t("contacted")}</option><option value="confirmed">{t("confirmed")}</option><option value="closed">{t("closed")}</option><option value="cancelled">{t("cancelled")}</option></select></label>

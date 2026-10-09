@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { View, ScrollView, Pressable, useWindowDimensions } from "react-native";
 import type { Media } from "@suqpage/contracts";
 import YouTubeVideo from "./YouTubeVideo";
-import { Photo, Button, Copy, s } from "./ui";
+import { Photo, Button, Copy, Icon, colors, s } from "./ui";
 import { useApp } from "./runtime";
 export default function Gallery({
   media,
@@ -36,7 +36,7 @@ export default function Gallery({
             {m.kind === "image" ? (
               <Photo refPath={m.ref} height={270} privateImage={privateImage} />
             ) : (
-              <YouTubeVideo video={m.ref} active={index === i} height={270} />
+              <YouTubeVideo video={m.ref} allowSocial poster={media.find(item=>item.kind === "image")?.ref} privateImage={privateImage} active={index === i} height={270} />
             )}
           </View>
         ))}
@@ -82,7 +82,7 @@ export default function Gallery({
                   borderRadius: 15,
                 }}
               >
-                <Photo
+                {m.kind === "video" && !m.ref.startsWith("youtube:") ? <View style={{height:55,alignItems:"center",justifyContent:"center",backgroundColor:colors.background}}><Icon name="play" size={23}/></View> : <Photo
                   privateImage={privateImage}
                   refPath={
                     m.kind === "image"
@@ -90,7 +90,7 @@ export default function Gallery({
                       : `https://i.ytimg.com/vi/${m.ref.replace("youtube:", "")}/default.jpg`
                   }
                   height={55}
-                />
+                />}
               </Pressable>
             ))}
           </ScrollView>

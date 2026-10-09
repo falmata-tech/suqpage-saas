@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {MapShop} from '../packages/contracts/src';
-import {mapDisplayLocation} from '../lib/map-display-location';
+import {mapDisplayLocation,pointInMapViewport,wrappedMapLongitude} from '../lib/map-display-location';
 import {shopCoordinate, shopFeatures, selectedMapShop, nextMapZoom, osmStyle} from '../apps/mobile/src/native-map-model';
 import {markerIndex, visibleMarkers, markerNameLines} from '../apps/mobile/src/map-markers';
 const shop: MapShop = {id: 7, latitude: 9.03, longitude: 39.7, locationMode: 'area', handle: 'fixture', name: 'Fixture', description: 'not for tile provider', heroImagePath: '/image', city: 'City', region: 'Region'};
@@ -16,7 +16,8 @@ assert.equal(selectedMapShop(7, [shop]), shop);
 for (const id of [8, '7', null, {id: 7}]) assert.equal(selectedMapShop(id, [shop]), undefined);
 assert.equal(selectedMapShop(7, []), undefined);
 assert.equal(nextMapZoom(19, 1), 19);
-assert.equal(nextMapZoom(3, -1), 3);
+assert.equal(nextMapZoom(3, -1), 2);
+assert.equal(nextMapZoom(1, -1), 1);
 assert.equal(nextMapZoom(6, 1), 7);
 assert.equal(nextMapZoom(NaN, 1), 7);
 assert.deepEqual(osmStyle.sources.osm, {type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors'});
@@ -44,3 +45,17 @@ assert.equal(visibleMarkers(markerIndex([shop,shop]), [shop], [], bounds, 6).len
 assert.equal(markerNameLines('A very long business name with many extra words').split('\n').length, 3);
 assert.ok(markerNameLines('A very long business name with many extra words').endsWith('…'));
 console.log('Marker parity: viewport clustering/expansion, nearby selection, filtered membership, presence and bounded labels pass.');
+
+for(const [latitude,longitude] of [[25.2,55.27],[-1.29,36.82],[51.5,-.12],[40.7,-74]]){
+ const displayed=mapDisplayLocation({...shop,latitude,longitude});
+ assert.ok(Math.abs(displayed.latitude-latitude)<.02);assert.ok(Math.abs(displayed.longitude-longitude)<.05);
+}
+assert.equal(wrappedMapLongitude(-175,179),185);
+assert.equal(wrappedMapLongitude(175,-179),-185);
+assert.ok(pointInMapViewport(-175,0,[170,-10,190,10]));
+assert.ok(pointInMapViewport(175,0,[170,-10,-170,10]));
+assert.ok(pointInMapViewport(50,0,[-400,-10,400,10]));
+assert.equal(pointInMapViewport(0,0,[170,-10,-170,10]),false);
+const dateLine=[{...shop,id:11,latitude:0,longitude:175,locationMode:'storefront' as const},{...shop,id:12,latitude:0,longitude:-175,locationMode:'storefront' as const}];
+for(const zoom of [3,15])assert.equal(visibleMarkers(markerIndex(dateLine),dateLine,[],[170,-10,-170,10],zoom).length,2);
+console.log('World exploration: global area offsets, zoom 1 floor, wrapped and antimeridian marker membership pass.');

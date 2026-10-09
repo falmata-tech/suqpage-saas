@@ -1,4 +1,5 @@
 "use client";
+import type {OwnerEditResult} from '@/lib/owner-edit-contract';
 import { useUiText } from "@/lib/i18n/ui";
 
 import PlaceSearch from './PlaceSearch';
@@ -7,8 +8,9 @@ import { useState } from 'react';
 import CategorySelect from './CategorySelect';
 import type { readOwnerBusiness } from '@/lib/owner-business-runtime';
 type Setup = Awaited<ReturnType<typeof readOwnerBusiness>>;
-export default function OwnerBusinessForm({setup,action}:{setup:Setup;action:(form:FormData)=>Promise<void>}){
+export default function OwnerBusinessForm({setup,action,returnTo}:{returnTo?:"profile";setup:Setup;action:(form:FormData)=>Promise<OwnerEditResult>}){
   const t = useUiText();
+ const [error,setError]=useState('');
  const [gpsMessage,setGpsMessage]=useState('');
  const [latitude,setLatitude]=useState(String(setup.proposal?.latitude??''));
  const [longitude,setLongitude]=useState(String(setup.proposal?.longitude??''));
@@ -16,7 +18,9 @@ export default function OwnerBusinessForm({setup,action}:{setup:Setup;action:(fo
  const [city,setCity]=useState(setup.proposal?.city||setup.existing?.city||'');
  const [region,setRegion]=useState(setup.proposal?.region||setup.existing?.region||'');
  const [place,setPlace]=useState<KnownPlace|null>(setup.proposal?.place_id && setup.proposal.place_latitude !== null && setup.proposal.place_longitude !== null ? {id:setup.proposal.place_id,name:setup.proposal.city,localName:'',region:setup.proposal.region,kind:'place',latitude:setup.proposal.place_latitude,longitude:setup.proposal.place_longitude}:null);
- return <form action={action} className="panel form-grid">
+ return <form onSubmit={async event=>{event.preventDefault();const form=new FormData(event.currentTarget);const result=await action(form);if(result)setError(result.error);}} className="panel form-grid">
+  {error&&<p className="error field full" role="alert">{t(error)}</p>}
+  {returnTo && <input type="hidden" name="returnTo" value={returnTo}/>}
   <input type="hidden" name="expectedVersion" value={setup.business.content_version}/><input type="hidden" name="locationVersion" value={setup.proposal?.version||0}/>
   <div className="field full"><label htmlFor="owner-business-name">{t("Business name")}</label><input id="owner-business-name" name="name" required maxLength={100} defaultValue={setup.business.name}/></div>
   <div className="field full"><label htmlFor="owner-business-logo">{t("Business logo")}</label>{setup.business.logo_path?<img src={setup.business.logo_path} alt={t("Current logo")} width={80} height={80} style={{objectFit:'contain',marginBottom:12}}/>:null}<input id="owner-business-logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp"/><small>{t("JPEG, PNG or WebP, up to 5 MB. Leave empty to keep your logo.")}</small></div>

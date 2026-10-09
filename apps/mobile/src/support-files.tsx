@@ -15,7 +15,7 @@ export async function pickSupportFile():Promise<PickedSupportFile|null>{
 export async function supportReplyForm(file:PickedSupportFile,message:string,key:string){
  const form=new FormData();form.set('message',message);form.set('idempotencyKey',key);
  if(Platform.OS==='web')form.set('attachment',await(await fetch(file.uri)).blob(),file.name);
- else form.append('attachment',{uri:file.uri,name:file.name,type:file.mimeType||'application/octet-stream'} as unknown as Blob);
+ else form.append('attachment',new File(file.uri),file.name);
  return form;
 }
 export function Attachment({conversationId,file}:{conversationId:string;file:SupportAttachment}){

@@ -1,6 +1,6 @@
 import { Attachment, pickSupportFile, supportReplyForm, type PickedSupportFile } from "./support-files";
 import { inquiryContactLinks } from "../../../lib/inquiry-contact-links";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, AppState } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
@@ -8,21 +8,24 @@ import type { Page, Inquiry, Conversation, Message } from "@suqpage/contracts";
 import { useApp, useLoad } from "./runtime";
 import { Copy, Card, Field, Button, Chip, Status, s, openLink } from "./ui";
 import { useAction, ActionStatus } from "./owner-forms";
-export function Inquiries() {
+import ChatReadSentinel from './ChatReadSentinel';
+export function Inquiries({focusId}:{focusId?:string}={}) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
   const [page, setPage] = useState(1),
     [status, setStatus] = useState("");
+  const [focus,setFocus]=useState(focusId||'');useEffect(()=>{setFocus(focusId||'');setPage(1);},[focusId]);
   const load = useLoad(
     () =>
       ownerRequest<Page<Inquiry>>(
-        `owner/inquiries?page=${page}&status=${status}`,
+        `owner/inquiries?page=${page}&status=${status}&inquiry=${encodeURIComponent(focus)}`,
       ),
-    [page, status],
+    [page, status,focus],
   );
   return (
     <>
       <Copy big>{t("Customer inquiries")}</Copy>
+      {Boolean(focus)&&<Button secondary label={t('All inquiries')} onPress={()=>setFocus('')}/>}
       <View style={s.wrap}>
         {["", "new", "contacted", "confirmed", "closed", "cancelled"].map(
           (v) => (
@@ -51,7 +54,7 @@ export function Inquiries() {
             </Copy>
           ))}
           {i.items.map((item,j)=>Object.keys(item.options||{}).length>0&&<Copy key={`options-${j}`}>{Object.entries(item.options).map(([k,v])=>`${k}: ${v}`).join(" · ")}</Copy>)}
-          {i.note && <Copy>{i.note}</Copy>}
+          {Boolean(i.note) && <Copy>{i.note}</Copy>}
           {inquiryContactLinks(i.contactMethod,i.contact).map(link=><Button key={link.label} secondary label={t(link.label)} onPress={()=>void action.run(()=>openLink(link.href))}/>)}
           <View style={s.wrap}>
             {["new", "contacted", "confirmed", "closed", "cancelled"].map(
@@ -190,7 +193,7 @@ export function OwnerChat({ id }: { id: string }) {
   const [message, setMessage] = useState(""),
     [key, setKey] = useState(() => Crypto.randomUUID());
   type Thread = {
-    conversation: { subject: string; status: string };
+    conversation: { subject: string; status: string; agentJoined?:boolean; assignedUserName?:string|null; publicRef?:string };
     messages: Message[];
   };
   const load = useLoad(() => ownerRequest<Thread>("owner/support/" + id), [id]);
@@ -233,7 +236,7 @@ export function OwnerChat({ id }: { id: string }) {
             {t(
               load.data.conversation.status === "closed"
                 ? "Chat ended"
-                : load.data.conversation.status === "waiting"
+                : load.data.conversation.agentJoined ? 'An agent joined your chat' : load.data.conversation.status === "waiting"
                   ? "Waiting for our team"
                   : "Live chat",
             )}
@@ -250,6 +253,8 @@ export function OwnerChat({ id }: { id: string }) {
               </Copy>
               <Copy>{m.body}</Copy>
               {m.attachment&&<Attachment conversationId={id} file={m.attachment}/>}
+              {m.sender==='owner'?<Copy muted>{t(m.read?'Read':'Sent')}</Copy>:null}
+              {m.sender==='staff'&&m.id===load.data?.messages.filter(item=>item.sender==='staff').at(-1)?.id?<ChatReadSentinel messageId={m.id} onRead={async messageId=>{await ownerRequest('owner/support/'+id,{action:'read',messageId,publicRef:load.data?.conversation.publicRef});}}/>:null}
             </Card>
           ))}
           <ActionStatus state={action} />

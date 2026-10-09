@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { chromium, expect } from "@playwright/test";
-const out = ".local/mobile-marker-review";
+const out = process.env.SUQPAGE_CAPTURE_DIR || ".local/mobile-marker-review";
 fs.mkdirSync(out, { recursive: true });
 const browser = await chromium.launch();
 try {
@@ -20,10 +20,17 @@ try {
   const cluster = page.getByRole("button", {name:"2 nearby businesses",exact:true});
   await expect(cluster).toBeVisible({timeout:30000});
   await expect(cluster.getByText("Featured",{exact:true})).toBeVisible();
+  const clusteredStyles = await cluster.evaluate(el => [...el.querySelectorAll('div')]
+    .map(node => getComputedStyle(node)).filter(style => style.borderTopWidth === '3px')
+    .map(style => ({ edge: style.borderTopColor, background: style.backgroundColor })));
+  assert.deepEqual(clusteredStyles, [{ edge: 'rgb(255, 255, 255)', background: 'rgb(201, 54, 0)' }], 'Original cluster style retained');
+  const badgeEdge = await cluster.getByText("Featured",{exact:true}).evaluate(el => getComputedStyle(el).borderTopColor);
+  assert.equal(badgeEdge, 'rgb(255, 255, 255)', 'Original badge style retained');
   await page.screenshot({path:out+"/cluster-phone.png"});
   await cluster.click();
   await expect(page.locator('[aria-label="Business map"]')).toHaveAttribute("data-map-zoom","14");
   await expect(cluster.getByText("Nearby",{exact:true})).toBeVisible();
+  assert.equal(await cluster.getByText("Nearby",{exact:true}).evaluate(el => getComputedStyle(el.parentElement).borderTopColor), 'rgb(255, 255, 255)', 'Original nearby-group style retained');
   await cluster.click();
   await page.getByRole("button",{name:"Fixture Shop 1",exact:true}).click();
   await expect(page.getByRole("button",{name:"Explore this business",exact:true})).toBeVisible();
@@ -31,8 +38,8 @@ try {
   await expect(page.locator('[aria-label="Business map"]')).toHaveAttribute("data-map-zoom","14");
   await page.screenshot({path:out+"/nearby-preview-phone.png"});
   await page.getByRole("button",{name:"Close",exact:true}).last().click();
-  await page.getByRole("tab",{name:"About",exact:true}).click();
+  await page.getByRole("tab",{name:"Account",exact:true}).click();
   await page.getByRole("tab",{name:"Market",exact:true}).click();
   assert.deepEqual(errors,[]);
-  console.log("Marker browser checks pass: counted featured cluster, expansion, nearby list, preview, no zoom-out and clean remount.");
+  console.log("Marker browser checks pass: original cluster/nearby/badge appearance, counts, expansion, nearby list, preview, no zoom-out and clean remount.");
 } finally { await browser.close(); }

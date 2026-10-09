@@ -1,10 +1,10 @@
 ---
 id: BE-041
 title: Owner publication and immediate location
-status: done
-related: [FE-054, FE-048, DEP-038, BE-033, BE-038, BE-040]
+status: in_progress
+related: [BE-049, BE-048, FE-059, BE-047, FE-058, FE-056, FE-054, FE-048, DEP-038, BE-033, BE-038, BE-040]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-07
 change_level: L3
 ---
 
@@ -170,3 +170,11 @@ owner/staff/version/publication transaction. Missing values from older clients
 preserve the current selection; explicit empty resets it. No schema migration.
 The local focused regression is scripts/test-storefront-accent.ts; hosted rollout
 is pending and this addition does not alter location/publication eligibility.
+
+Local category-integrity correction (BE-047/S81): Other products & services keeps
+its declared category/city but has no foreign public-industry association. Owner
+save and pending first publication must succeed atomically; active businesses are
+visible in All-category map/search with neutral category presentation, and are
+excluded by specific public categories. Do not relabel them Electronics. Existing
+seven public categories, permissions, exclusion and suspension rules stay intact.
+Tests: `test-business-starters.ts` and `test-self-service-publication.ts`.

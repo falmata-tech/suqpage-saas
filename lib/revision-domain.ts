@@ -1,3 +1,4 @@
+import { productVideo } from './video/product-video';
 import { parseProductMedia, productMedia, type ProductMedia } from "./product-media";
 import {
   isLegacyShowroomDesignKey,
@@ -482,7 +483,7 @@ export function parseRevisionContent(
       description: clean(value.description, 3000),
       ...(value.media !== undefined ? {media: parseProductMedia(value.media)} : {}),
       imageRef: image(value.imageRef),
-      videoRef: youtubeRef(value.videoRef),
+      videoRef: (() => { const ref = clean(value.videoRef, 40); if (ref) { try { productVideo(ref); } catch { throw new RevisionError("A managed product video reference is invalid."); } } return ref; })(),
       priceMinor,
       currency: "ETB" as const,
       quantityUnit,

@@ -28,7 +28,7 @@ try {
  }
  if(!process.argv.includes('--web') && !process.argv.includes('--locales'))for(const width of [390,320]) {
   await p.setViewportSize({width,height:844});await p.goto('http://localhost:8082',{waitUntil:'domcontentloaded'});
-  await p.getByRole('textbox',{name:'Search',exact:true}).fill('Aloe Field Care');await p.getByRole('button',{name:'Search',exact:true}).click();await p.getByRole('button',{name:'Search & results',exact:true}).click();
+  await p.getByRole('textbox',{name:'Search',exact:true}).fill('Aloe Field Care');await p.getByRole('button',{name:'Search',exact:true}).click();await p.getByRole('button',{name:'View products',exact:true}).click();
   const product=p.getByRole('button',{name:'Aloe Body Lotion',exact:true}),store=p.getByRole('link',{name:'From Aloe Field Care',exact:true}).first();
   await expect(product).toBeVisible();await expect(store).toBeVisible();assert.ok((await store.boundingBox()).height>=44);
   await shot('native-browser-'+width);
@@ -48,7 +48,7 @@ try {
   await p.getByRole('button',{name:t('Close'),exact:true}).last().click();
   await p.getByRole('textbox',{name:t('Search'),exact:true}).fill('Aloe Field Care');
   await p.getByRole('button',{name:t('Search'),exact:true}).click();
-  await p.getByRole('button',{name:t('Search & results'),exact:true}).click();
+  await p.getByRole('button',{name:t('View products'),exact:true}).click();
   await expect(p.getByRole('link',{name:t('From {business}',{business:'Aloe Field Care'}),exact:true}).first()).toBeVisible();
   await shot('native-'+locale+'-320');
  }

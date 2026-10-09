@@ -1,7 +1,8 @@
 import { parseAccentColor } from "./storefront-accent";
 import { parsePublicContacts, type PublicContacts } from "./business-profile-contacts";
 import type { SessionUser } from "./types";
-import { controlledYouTubeWatchUrl, normalizeControlledYouTubeUrl } from "./youtube-provider";
+import { isQueueAgent } from "./capabilities";
+import { productVideoWatchUrl, normalizeProductVideoUrl } from "./video/product-video";
 
 export type ShopPageContent = {
   template: "profile-v1";
@@ -59,8 +60,8 @@ export function parseShopPageContent(input: unknown): ShopPageContent {
   };
   let videoUrl = "";
   if (value.videoUrl !== "") {
-    try { videoUrl = controlledYouTubeWatchUrl(normalizeControlledYouTubeUrl(value.videoUrl).managedRef); }
-    catch { throw new OwnerPageError("Enter a YouTube watch or share link for the business video."); }
+    try { videoUrl = productVideoWatchUrl(normalizeProductVideoUrl(value.videoUrl).managedRef); }
+    catch { throw new OwnerPageError("Use a supported video link."); }
   }
   let contacts: PublicContacts | undefined;
   if (value.contacts !== undefined) {
@@ -92,6 +93,7 @@ export function isPageOwner(actor: SessionUser, businessId: number): boolean {
   return actor.access_role === "client" && actor.business_id === businessId;
 }
 export function canEditOwnerPage(actor: SessionUser, businessId: number, consent: boolean, assigned: boolean): boolean {
+  if (isQueueAgent(actor)) return false;
   if (isPageOwner(actor, businessId)) return true;
   return consent && (actor.access_role === "platform_admin" || actor.access_role === "operations_manager"
     || (actor.access_role === "team_member" && assigned));

@@ -41,7 +41,8 @@ import {
 } from "@/lib/offerings";
 import { formatEtbPrice } from "@/lib/offering-presentation";
 import { normalizeProductDetailPattern } from "@/lib/product-detail-patterns";
-import { privacyEnhancedYouTubeEmbedUrl } from "@/lib/youtube-provider";
+import { productVideoEmbedUrl } from "@/lib/video/product-video";
+import SocialVideoFrame from "../SocialVideoFrame";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import BusinessProfile from "./BusinessProfile";
@@ -540,10 +541,11 @@ function ProductVideo({ product }: { product: Product }) {
   const t = useUiText();
   let src = "";
   try {
-    src = privacyEnhancedYouTubeEmbedUrl(product.video_ref);
+    src = productVideoEmbedUrl(product.video_ref);
   } catch {
     return null;
   }
+  if (!product.video_ref.startsWith("youtube:")) return <div className="product-dialog-video"><SocialVideoFrame poster={product.image_path} video={product.video_ref} title={t("{value1} video", {value1:product.name})}/></div>;
   return (
     <div className="product-dialog-video">
       <iframe
@@ -721,7 +723,6 @@ function InquiryDrawer({
     <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label={t("Business inquiry")} tabIndex={-1}>
       <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? t("Inquire about {value1} items", { value1: cart.length }) : t("Inquire about this {value1}", { value1: cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item" })}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label={t("Close inquiry")} onClick={close}><X size={20} aria-hidden="true" /></button></header>
       <div className={inquiryStyles.scroll}>
-        {Boolean(catalog.business.is_demo) ? <p className={inquiryStyles.note}>{t("Demo inquiry — contact details are examples.")}</p> : null}
         {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>{t("Choose a product or service to start an inquiry.")}</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>{t("Browse products & services")}</button></div> : <>
           {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label={t("Inquiry items")}>{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
           {previewOnly ? <p className={inquiryStyles.note}>{t("Preview only. No inquiry will be sent.")}</p> : platformStep ? <form className={inquiryStyles.platform} onSubmit={sendInquiry}>

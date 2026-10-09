@@ -22,7 +22,6 @@ import {
   LogOut,
   MapPinned,
   Menu,
-  MessageSquareText,
   Package,
   Palette,
   RefreshCw,
@@ -30,6 +29,7 @@ import {
   Settings2,
   ShieldCheck,
   Store,
+  Truck,
   UserCog,
   Users,
   X,
@@ -38,12 +38,14 @@ import {
 import { logoutAction } from "@/app/actions";
 import SuqpageBrand from "@/components/SuqpageBrand";
 import NavigationPendingIndicator from "@/components/NavigationPendingIndicator";
+import { workspaceActiveHref, type SupportQueue } from "@/lib/support-navigation";
 
 export type WorkspaceNavItem = {
   href: string;
   label: string;
   icon?: WorkspaceNavIcon;
   external?: boolean;
+  activePaths?: string[];
 };
 
 export type WorkspaceNavIcon =
@@ -66,7 +68,7 @@ export type WorkspaceNavIcon =
   | "staff"
   | "support"
   | "supportAgents"
-  | "renewal"
+  | "transport"
   | "schedule"
   | "switch"
   | "workspace";
@@ -89,9 +91,9 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   security: LockKeyhole,
   settings: Settings2,
   staff: UserCog,
-  support: MessageSquareText,
+  support: Headphones,
   supportAgents: Headphones,
-  renewal: CalendarClock,
+  transport: Truck,
   schedule: CalendarClock,
   switch: RefreshCw,
   workspace: Store,
@@ -113,38 +115,26 @@ const mobileLabels: Record<string, string> = {
   "Page draft": "Draft",
   "Page requests": "Requests",
   "Support inbox": "Support",
+  "Business support": "Support",
+  "Workload & availability": "Staff",
 };
-
-function activeNavigationHref(groups: WorkspaceNavGroup[], pathname: string, businessId: string | null) {
-  return groups
-    .flatMap((group) => group.items)
-    .filter((item) => {
-      const [path, query = ""] = item.href.split("?");
-      if (path === "/dashboard" && pathname === path) {
-        return new URLSearchParams(query).get("business") === businessId;
-      }
-      return pathname === path || pathname.startsWith(`${path}/`);
-    })
-    .sort((left, right) => right.href.split("?")[0].length - left.href.split("?")[0].length)[0]?.href;
-}
 
 export type WorkspaceNavGroup = {
   label: string;
   items: WorkspaceNavItem[];
 };
 
-function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[]; onNavigate?: () => void }) {
+function NavigationGroups({ groups, onNavigate, clientNavigation=false, supportQueue }: { groups: WorkspaceNavGroup[]; onNavigate?: () => void; clientNavigation?:boolean; supportQueue?:SupportQueue }) {
   const t = useUiText();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
+  const activeHref = workspaceActiveHref(groups.flatMap(group=>group.items), pathname, searchParams, supportQueue);
   return (
     <nav className="workspace-nav" aria-label={t("Workspace")}>
       {groups.map((group) => (
         <div className="workspace-nav-group" key={t(group.label)}>
           <span className="workspace-nav-label">{t(group.label)}</span>
           {group.items.map((item) => {
-            const path = item.href.split("?")[0];
             const active = item.href === activeHref;
             return (
               <Link
@@ -164,12 +154,12 @@ function NavigationGroups({ groups, onNavigate }: { groups: WorkspaceNavGroup[];
           })}
         </div>
       ))}
-      <div className="workspace-nav-group workspace-nav-utility">
+      {!clientNavigation && <div className="workspace-nav-group workspace-nav-utility">
         <span className="workspace-nav-label">{t("Account")}</span>
         <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>
         <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>{t("Public site")}</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
         <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>{t("Sign out")}</span></button></form>
-      </div>
+      </div>}
     </nav>
   );
 }
@@ -179,11 +169,17 @@ export default function WorkspaceNavigation({
   identity,
   context,
   groups,
+  clientNavigation=false,
+  supportQueue,
+  staffNavigation=false,
 }: {
   dashboardHref: string;
   identity: string;
   context: string;
   groups: WorkspaceNavGroup[];
+  clientNavigation?:boolean;
+  supportQueue?:SupportQueue;
+  staffNavigation?:boolean;
 }) {
   const t = useUiText();
   const pathname = usePathname();
@@ -193,20 +189,20 @@ export default function WorkspaceNavigation({
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
   const previousRoute = useRef(routeKey);
-  const activeHref = activeNavigationHref(groups, pathname, searchParams.get("business"));
   const allItems = groups.flatMap((group) => group.items);
-  const hasPageEditor = groups.some((entry) => entry.items.some((item) => item.icon === "pageEditor"));
-  const priority: WorkspaceNavIcon[] = ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
+  const priority: WorkspaceNavIcon[] = staffNavigation ? ["support", "transport", "staff", "overview"] : ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
   const primaryItems = priority
     .map((icon) => allItems.find((item) => item.icon === icon && !item.external))
     .filter((item): item is WorkspaceNavItem => Boolean(item))
     .filter((item, index, items) => items.findIndex((candidate) => candidate.href === item.href) === index)
     .slice(0, 4);
-  for (const item of allItems) {
+  for (const item of staffNavigation ? [] : allItems) {
     if (primaryItems.length >= 4) break;
     if (!item.external && !primaryItems.some((candidate) => candidate.href === item.href)) primaryItems.push(item);
   }
-  const primaryContainsActive = primaryItems.some((item) => item.href === activeHref);
+  if (staffNavigation && primaryItems.length < 4) primaryItems.push({href:"/dashboard/account",label:"Account",icon:"account"});
+  const primaryActiveHref = workspaceActiveHref(primaryItems, pathname, searchParams, supportQueue);
+  const primaryContainsActive = Boolean(primaryActiveHref);
 
   useEffect(() => {
     if (previousRoute.current !== routeKey) setOpen(false);
@@ -253,15 +249,15 @@ export default function WorkspaceNavigation({
         <SuqpageBrand href={dashboardHref} className="workspace-brand" />
       <LanguageSelector />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
-        <NavigationGroups groups={groups} />
+        <NavigationGroups groups={groups} clientNavigation={clientNavigation} supportQueue={supportQueue}/>
       </aside>
       <header className="workspace-mobile-header">
         <SuqpageBrand href={dashboardHref} className="workspace-brand" />
         <LanguageSelector />
       </header>
-      <nav className="workspace-mobile-tabs" aria-label={t("Workspace application navigation")}>
+      {!clientNavigation && <nav className="workspace-mobile-tabs" style={{gridTemplateColumns:`repeat(${primaryItems.length+1}, minmax(0, 1fr))`}} aria-label={t("Workspace application navigation")}>
         {primaryItems.map((item) => {
-          const active = item.href === activeHref;
+          const active = item.href === primaryActiveHref;
           return <Link key={`mobile-${item.href}-${t(item.label)}`} href={item.href} aria-current={active ? "page" : undefined} aria-label={t(item.label)}>
             <NavIcon name={item.icon} />
             <span>{t(mobileLabels[item.label] || item.label)}</span>
@@ -281,7 +277,7 @@ export default function WorkspaceNavigation({
           <Menu aria-hidden="true" size={22}/>
           <span>{t("More")}</span>
         </button>
-      </nav>
+      </nav>}
       {open ? (
         <div className="workspace-drawer-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
           <div className="workspace-drawer" id="workspace-mobile-menu" role="dialog" aria-modal="true" aria-label={t("Workspace menu")} ref={dialogRef}>
@@ -289,7 +285,7 @@ export default function WorkspaceNavigation({
               <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
               <button className="workspace-menu-close" type="button" aria-label={t("Close workspace menu")} onClick={() => setOpen(false)}><X aria-hidden="true" size={22}/></button>
             </div>
-            <LanguageSelector /><NavigationGroups groups={groups} onNavigate={() => setOpen(false)} />
+            <LanguageSelector /><NavigationGroups groups={groups} onNavigate={() => setOpen(false)} supportQueue={supportQueue} />
           </div>
         </div>
       ) : null}

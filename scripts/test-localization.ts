@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { test } from 'node:test';
+import {TRANSPORT_COPY} from '../lib/i18n/transport-copy';
 import { createUiText, languageNames, locales, messageKey, parseLocale, type UiMessages } from '../lib/i18n/core';
 
 const catalogs = Object.fromEntries(locales.map(locale => [locale, locale === 'en' ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`, 'utf8')) as UiMessages]));
@@ -102,5 +103,23 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
   for (const locale of locales.filter(value => value !== 'en')) {
     const client = clientMessages(catalogs[locale]);
     for (const value of values) assert.ok(client[messageKey(value)], `${locale}: ${value}`);
+  }
+});
+
+
+test('FE-019/FE-049 S71: transport invitation keeps a recognizable Live Chat label', () => {
+  for (const locale of locales) {
+    const t = createUiText(catalogs[locale]);
+    const label = t('Live Chat');
+    if (locale === 'en') assert.equal(label, 'Live Chat');
+    else {
+      assert.ok(label.endsWith(' (Live Chat)'), locale);
+      assert.ok(label.length > ' (Live Chat)'.length, 'Native chat wording stays visible');
+    }
+    assert.ok(t(TRANSPORT_COPY.launcherSubtitle).includes(locale === 'en' ? 'live' : '(Live Chat)'));
+    for (const source of [...Object.values(TRANSPORT_COPY), 'Goods or transport details (optional)', 'View products', 'Hide products']) {
+      assert.ok(t(source).trim());
+      if (locale !== 'en') assert.notEqual(t(source), source, locale + ': contextual wording');
+    }
   }
 });

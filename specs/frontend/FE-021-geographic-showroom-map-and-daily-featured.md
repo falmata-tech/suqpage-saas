@@ -2,9 +2,9 @@
 id: FE-021
 title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
-related: [FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016]
+related: [FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016]
 owners: [product, frontend, design]
-last_updated: 2026-09-12
+last_updated: 2026-10-07
 change_level: L3
 ---
 
@@ -543,3 +543,66 @@ The 2026-08-10 search follow-up adds the bounded public autocomplete defined by
 FE-030 and BE-023. Focused integration and Chromium evidence prove suggestion
 eligibility, keyboard/touch selection, URL-backed map updates, and no
 effect on Daily Featured Showrooms selection.
+
+## S85 — orange shop markers and readable business names
+
+Ready, L1 appearance refinement on desktop/phone web and native/Expo maps.
+GIVEN a shop marker on the normal light/cream basemap THEN its body is solid
+Suqpage orange with a thin continuous white outline around the shop and roof,
+following the owner's latest visual trial. White shop details remain inside.
+Business names use a solid high-contrast nameplate and readable text,
+with bounded wrapping and the full accessible name retained. Selected markers
+remain distinct. Latest owner correction: use a warm orange shop treatment and
+cream/orange nameplate, without black/charcoal or near-black outlines. Keep
+counted clusters, nearby-group markers and status badges to their prior styling;
+they were not requested for redesign. Preserve counts and authoritative presence.
+
+GIVEN normal/selected labels THEN text/background contrast is at least 4.5:1;
+the orange shop fill contrasts at least 3:1 against a representative cream tile.
+The white rim itself has lower contrast on cream; keep it thin and retain the
+existing compact glyph and web shadow rather than introducing a second outline.
+Reuse the established native shop/roof SVG contours on web for a continuous
+white edge; retain its compact 25px layout slot and existing marker anchors.
+Retain the established Suqpage orange palette, glyph geometry, map anchors,
+clustering, saved/display coordinates, viewport limits, selection/preview and
+keyboard/touch behavior. No new basemap/provider/data/role or geographic change.
+
+Focused tests: existing native map/group/offset cases, both types and browser
+computed-color/label/click/zoom checks. Capture before/after desktop/phone states
+on web/Expo using a clearly recorded light tile fixture and real public catalog,
+then review on actual OSM tiles. Native device/new APK and full/release/commit/
+rollout gates stay distinct and follow visual approval. Master §§4/10/19/22 affected.
+
+Local evidence (2026-10-07): both types, homepage composition and spec validation
+pass. capture-map-marker-contrast.mjs covers thin white shop/roof contours,
+orange-fill and normal/selected label contrast, real selection/preview/no zoom-out
+and cluster keyboard expansion. Current white-edge 1440/390/320 web/Expo and
+actual OSM desktop/phone views are in .local/map-marker-white-edge-review/.
+Normal/selected name contrast is 4.83/5.24:1 and orange-fill-to-cream is 3.09:1;
+the white outline is not claimed to contrast 3:1 against cream. Original cluster/
+nearby/badge styling and native behavior were separately verified in the warm
+iteration and remain unchanged; group rims are also asserted by the current capture.
+Visual approval, full gates, task commit and rollout remain pending; no new APK
+or physical-native claim. No coordinate/catalog/provider/dependency change.
+
+The earlier charcoal/dark-border capture is rejected and the orange-edge trial
+is superseded. The thin-white-edge trial is the current focused-tested candidate;
+owner visual approval remains pending. Earlier capture folders retain trial evidence.
+
+## S86 — dispersed Addis demo map
+
+BE-020's one-time local demo correction updates the shared authoritative public
+profile coordinates. GIVEN the Addis city filter on desktop/phone web or native
+browser THEN the same eligible demos appear across the city, with existing
+approximate-area labels, original cluster styling, normal zoom grouping and
+selection/page previews. Exact-coordinate or unmarked shops are not relocated.
+Counts, filters, pagination and other-city placements are preserved. Capture
+actual local public map before/after; record counts and matching web/mobile DTO
+coordinates. This is demo data correction, not a new map/global-offset behavior.
+
+The city capture exposed an independent native/Expo shop-hitbox defect: the
+96px transparent wrapper can intercept another visible shop. GIVEN adjacent
+shops THEN empty wrapper space passes through while each shop retains a 44px
+glyph hit area, clickable visible name and full keyboard/accessibility label.
+Preserve visual glyph/name positions, marker anchors, colors and all counted-group
+styling/behavior. Test real icon pointer selection in the dispersed-city capture.

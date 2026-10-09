@@ -5,6 +5,9 @@ import { useUiText } from "@/lib/i18n/ui";
 import { useRef, useState } from "react";
 
 import CategorySelect from "./CategorySelect";
+import PlaceSearch from './PlaceSearch';
+import type {KnownPlace} from '@/lib/place-search';
+import LoadingBar from './LoadingBar';
 import HandleField from "./HandleField";
 
 type State = { kind: "idle" } | { kind: "sending" } | { kind: "error"; message: string };
@@ -13,12 +16,13 @@ export default function SignupForm({ email, initialName }: { email: string; init
   const t = useUiText();
   const [state, setState] = useState<State>({ kind: "idle" });
   const idempotencyKey = useRef(crypto.randomUUID());
+  const [city,setCity]=useState(""),[place,setPlace]=useState<KnownPlace|null>(null);
   const [handleReady, setHandleReady] = useState(false);
   const [handleRevision, setHandleRevision] = useState(0);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (state.kind === "sending" || !handleReady) return;
+    if (state.kind === "sending" || !handleReady || !place) return;
     const form = event.currentTarget;
     const body = Object.fromEntries(new FormData(form));
     body.idempotencyKey = idempotencyKey.current;
@@ -42,8 +46,10 @@ export default function SignupForm({ email, initialName }: { email: string; init
     <HandleField onReady={setHandleReady} refreshKey={handleRevision} />
     <div className="field"><label htmlFor="signup-category">{t("Category")}</label><CategorySelect id="signup-category" name="businessCategory" required/></div>
     <div className="field"><label htmlFor="signup-phone">{t("Account phone (private)")}</label><input id="signup-phone" name="phone" type="tel" autoComplete="tel" required minLength={9} maxLength={40} placeholder="+251…" /></div>
+    <div className="field full"><label htmlFor="signup-city">{t("Business city")}</label><PlaceSearch inputId="signup-city" selectionRequired value={city} selected={place} onChange={value=>{setCity(value);setPlace(null);}} onSelect={value=>{setPlace(value);setCity(value.name);}}/></div>
+    {state.kind === "sending" && <div className="full"><LoadingBar/></div>}
     <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> {" "}{t("I agree to the Suqpage Terms and Privacy Policy.")}</label></div>
     {state.kind === "error" ? <div className="field full error" role="alert">{t(state.message)}</div> : null}
-    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending" || !handleReady}>{state.kind === "sending" ? t("Finishing setup...") : t("Finish setup")}</button></div>
+    <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending" || !handleReady || !place}>{state.kind === "sending" ? t("Finishing setup...") : t("Finish setup")}</button></div>
   </div></form>;
 }

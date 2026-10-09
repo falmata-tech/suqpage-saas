@@ -362,24 +362,29 @@ export type StaffRow = {
   must_change_password: number;
   active_assignments: number;
   pending_pages: number;
+  queue_scope: "support"|"transport"|"all"|null;
+  open_conversations: number;
 };
 
 export async function listStaffPage(input: PageInput & { role?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
-  const role = ["team_member", "operations_manager"].includes(String(input.role))
+  const role = ["support_agent","transport_agent","team_member", "operations_manager"].includes(String(input.role))
     ? String(input.role)
     : "";
   const params: QueryValue[] = [];
   let where = " WHERE p.access_role IN ('team_member','operations_manager')";
   if (role) {
-    where += " AND p.access_role=?";
-    params.push(role);
+    if(role === "support_agent" || role === "transport_agent") {
+      where += " AND p.access_role='team_member' AND s.queue_scope=?";
+      params.push(role === "support_agent" ? "support" : "transport");
+    } else { where += " AND p.access_role=?"; params.push(role); }
   }
   where += searchClause(request.search, ["u.name", "u.email"], params);
-  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id${where}`;
+  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id LEFT JOIN support_agent_settings s ON s.user_id=u.id${where}`;
   return pageRows<StaffRow>(
     `SELECT COUNT(*) total ${from}`,
-    `SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,
+    `SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,s.queue_scope,
+      (SELECT COUNT(*) FROM support_conversations c WHERE c.assigned_user_id=u.id AND c.status='open') open_conversations,
       (
         SELECT COUNT(*) FROM staff_business_assignments a
         WHERE a.user_id=u.id AND a.active=1
@@ -410,7 +415,8 @@ export async function listTeamMemberChoices(search: unknown, selectedId?: number
     choices.push("u.id=?");
     params.push(selectedId);
   }
-  const where = `WHERE p.access_role='team_member'${
+  const where = `WHERE p.access_role='team_member' AND NOT EXISTS (
+    SELECT 1 FROM support_agent_settings s WHERE s.user_id=u.id AND s.queue_scope IN ('support','transport'))${
     choices.length ? ` AND (${choices.join(" OR ")})` : ""
   }`;
   return runtimeAll<{
@@ -504,13 +510,17 @@ export type InquiryListRow = {
 
 export async function listInquiriesPage(
   businessId: number,
-  input: PageInput & { status?: unknown },
+  input: PageInput & { status?: unknown; inquiryId?:unknown },
 ) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const statuses = ["new", "contacted", "confirmed", "closed", "cancelled"];
   const status = statuses.includes(String(input.status)) ? String(input.status) : "";
   const params: QueryValue[] = [businessId];
   let where = " WHERE i.business_id=?";
+  if(input.inquiryId!==undefined&&input.inquiryId!==null&&input.inquiryId!==''){
+    const id=Number(input.inquiryId);
+    if(Number.isSafeInteger(id)&&id>0){where+=' AND i.id=?';params.push(id);}else where+=' AND FALSE';
+  }
   if (status) {
     where += " AND i.status=?";
     params.push(status);

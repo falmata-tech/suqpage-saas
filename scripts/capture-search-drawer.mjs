@@ -26,7 +26,7 @@ try {
   await page.screenshot({path:`${out}/map-${width}.png`});
   await opener.click();await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
   await expect(page.getByLabel('Filter by category')).toContainText('All categories');
-  await expect(page.getByRole('button',{name:'Hide search and filters'})).toBeFocused();
+  await expect(page.getByRole('button',{name:'Hide products'})).toBeFocused();
   assert.deepEqual(await map.boundingBox(),bounds,'Drawer overlays rather than resizes the map');
   const filters=panel.locator('.discovery-filter-toolbar button');
   await expect(filters).toHaveAttribute('aria-expanded','false');
@@ -55,11 +55,11 @@ try {
   await expect.poll(()=>panel.locator('.discovery-search-results').evaluate(el=>el.scrollTop)).toBe(0);
   const rows=await panel.locator('.discovery-product-results strong,.discovery-business-results strong').allTextContents();
   const url=page.url();
-  await page.getByRole('button',{name:'Hide search and filters'}).click();await expect(panel).toBeHidden();await expect(opener).toBeFocused();
+  await page.getByRole('button',{name:'Hide products'}).click();await expect(panel).toBeHidden();await expect(opener).toBeFocused();
   assert.equal(await map.getAttribute('data-map-zoom'),zoom,'Drawer toggling retains zoom');
   assert.equal(page.url(),url);assert.equal(await panel.getAttribute('inert'),'');
   await opener.click();await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
-  await expect(page.getByRole('button',{name:'Hide search and filters'})).toBeFocused();
+  await expect(page.getByRole('button',{name:'Hide products'})).toBeFocused();
   assert.deepEqual(await panel.locator('.discovery-product-results strong,.discovery-business-results strong').allTextContents(),rows);
   await page.keyboard.press('Escape');await expect(panel).toBeHidden();await expect(opener).toBeFocused();await opener.click();
   await filters.click();await page.getByLabel('Filter by category').click();await page.getByRole('group',{name:'Categories',exact:true}).getByRole('button',{name:'Personal & home care',exact:true}).click();
@@ -72,7 +72,7 @@ try {
   await expect(page).toHaveURL(url=>url.searchParams.get('place')===city,navigationWait);
   await filters.click();await expect(filters).toHaveAttribute('aria-expanded','false');
   await expect(panel.locator('.discovery-active-filters')).toContainText('Addis Ababa');
-  await page.getByRole('button',{name:'Hide search and filters'}).click();await expect(panel).toBeHidden();await opener.click();
+  await page.getByRole('button',{name:'Hide products'}).click();await expect(panel).toBeHidden();await opener.click();
   await expect(page.getByLabel('Filter by region or city')).toHaveValue(city);
   await expect(page.locator('#discovery-search')).toHaveValue('lotoin');await expect(page.getByLabel('Filter by category')).toContainText('Personal & home care');
   await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');

@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { ACCENT_PRESETS, parseAccentColor, storefrontAccent, accentContrast } from '../lib/storefront-accent';
@@ -23,7 +24,7 @@ for(let r=0;r<=255;r+=17)for(let g=0;g<=255;g+=17)for(let b=0;b<=255;b+=17){
 }
 for(const color of ACCENT_PRESETS)assert.equal(storefrontAccent(color)?.accent,color);
 async function main(){const db=await getDb();try{
- const base={name:'Accent Owner',phone:'+251911000123',businessName:'Accent Fixture',businessCategory:'home-living',consent:true,idempotencyKey:crypto.randomUUID()};
+ const base={name:'Accent Owner',phone:'+251911000123',businessName:'Accent Fixture',businessCategory:'home-living', placeId:findPlaceSuggestions("Addis Ababa")[0].id,consent:true,idempotencyKey:crypto.randomUUID()};
  const before=await db.prepare('SELECT COUNT(*) n FROM businesses').get();
  await assert.rejects(()=>createPublicClientWorkspace({...base,accentColor:'red'},{providerUserId:crypto.randomUUID(),email:'invalid-accent@example.test'}),/color/);
  assert.deepEqual(await db.prepare('SELECT COUNT(*) n FROM businesses').get(),before);

@@ -26,17 +26,17 @@ type Place = {
   latitude: number;
   longitude: number;
 };
-export function BusinessForm() {
+export function BusinessForm({onSaved}: {onSaved?: () => void} = {}) {
   const { ownerRequest } = useApp();
   const load = useLoad(() => ownerRequest<Details>("owner/business"));
   return (
     <>
       <Status {...load} retry={load.reload} />
-      {load.data && <Form data={load.data} />}
+      {load.data && <Form data={load.data} onSaved={onSaved} />}
     </>
   );
 }
-function Form({ data }: { data: Details }) {
+function Form({ data, onSaved }: { data: Details; onSaved?: () => void }) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
   const [name, setName] = useState(data.business.name),
@@ -75,7 +75,7 @@ function Form({ data }: { data: Details }) {
     <>
       <Copy big>{t("Business details")}</Copy>
       <Field label={t("Business name")} value={name} onChangeText={setName} />
-      {!removeLogo&&(logo?.uri||data.business.logo_path)&&<Photo refPath={logo?.uri||data.business.logo_path} privateImage height={100}/>}
+      {!removeLogo&&Boolean(logo?.uri||data.business.logo_path)&&<Photo refPath={logo?.uri||data.business.logo_path} privateImage height={100}/>}
       <Button secondary disabled={action.busy} label={t("Logo")} onPress={()=>void action.run(async()=>{const picked=await pickImages();if(picked.length){setLogo(picked[0]);setRemoveLogo(false);}},"")}/>
       <Button secondary disabled={action.busy} label={t("Remove logo")} onPress={()=>{setLogo(null);setRemoveLogo(true);}}/>
       <Copy>{t("Category")}</Copy>
@@ -165,20 +165,22 @@ function Form({ data }: { data: Details }) {
             const saved = await ownerRequest<Details>("owner/business");
             setVersion(saved.business.content_version);
             setLocVersion(saved.proposal?.version || 0);
+            onSaved?.();
           })
         }
       />
     </>
   );
 }
-export function Settings({ home }: { home: OwnerHome }) {
+export function Settings({ home, onSaved }: { home: OwnerHome; onSaved?: () => void }) {
   const { t, ownerRequest, signOut } = useApp(), action = useAction();
-  const [phone, setPhone] = useState(home.user.phone);
+  const [phone, setPhone] = useState(home.user.phone), [name, setName] = useState(home.user.name);
   return <>
     <Copy big>{t("Account security")}</Copy>
     <Copy>{home.user.email}</Copy>
+    <Field label={t("Name")} value={name} onChangeText={setName} maxLength={80} />
     <Field label={t("Account phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-    <Button disabled={action.busy} label={t("Save account phone")} onPress={() => void action.run(async () => { await ownerRequest("owner/account", {phone}); })} />
+    <Button disabled={action.busy} label={t("Save changes")} onPress={() => void action.run(async () => { await ownerRequest("owner/account", {phone, name}); onSaved?.(); })} />
     <ActionStatus state={action} />
     <Button secondary label={t("Sign out")} onPress={() => void signOut()} />
     <Button secondary label={t("Delete account")} onPress={() => router.push("/account-deletion")} />

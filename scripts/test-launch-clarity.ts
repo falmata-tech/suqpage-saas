@@ -18,7 +18,7 @@ async function main() {
   const db = await getDb();
   try {
     const create = async (email:string) => {
-      const workspace = await createPublicClientWorkspace({name:'Fixture owner',businessName:'Demo named real business',businessCategory:'electronics',phone:'+251911234567',consent:true,idempotencyKey:randomUUID()}, {providerUserId:randomUUID(),email});
+      const workspace = await createPublicClientWorkspace({name:'Fixture owner',businessName:'Demo named real business',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+251911234567',consent:true,idempotencyKey:randomUUID()}, {providerUserId:randomUUID(),email});
       return (await getUserById(workspace.userId))!;
     };
     const owner = await create('launch-owner@example.test');
@@ -27,9 +27,14 @@ async function main() {
     assert.equal((await db.prepare('SELECT is_demo FROM businesses WHERE id=?').get(businessId)).is_demo,0,'A real signup is never classified from its name');
     let draft = (await ownerPagePort.read(businessId))!;
     const publish = () => changePagePublication(ownerPagePort,pagePublicationPort,owner,businessId,{action:'publish',version:draft.version,revision:0});
-    assert.deepEqual((await firstPublicationIssues(businessId,draft.content)).map(x=>x.key),['about','contacts','location','offerings']);
+    assert.deepEqual((await firstPublicationIssues(businessId,draft.content)).map(x=>x.key),['about','contacts','offerings'],'The explicitly chosen signup city is already confirmed');
     await assert.rejects(publish,/Describe your business/);
     assert.equal((await db.prepare('SELECT COUNT(*) n FROM owner_page_publications WHERE business_id=?').get(businessId)).n,0);
+    // A retained legacy/default location is a separate negative case. Do not
+    // misclassify the canonical city explicitly chosen during current signup.
+    await db.prepare('UPDATE business_discovery_profiles SET approved_at=0 WHERE business_id=?').run(businessId);
+    await db.prepare('UPDATE owner_location_proposals SET version=1,reviewed_version=0 WHERE business_id=?').run(businessId);
+    assert.ok((await firstPublicationIssues(businessId,draft.content)).some(x=>x.key==='location'));
     draft = await saveOwnerPageAndPublication(owner,businessId,{action:'save',version:draft.version,content:{...draft.content,heroImage:'',about:'We repair household electronics.',contacts:{phone:'+251911234567'}}});
     await assert.rejects(publish,/Choose your business location/);
     const place = findPlaceSuggestions('Addis Ababa')[0];

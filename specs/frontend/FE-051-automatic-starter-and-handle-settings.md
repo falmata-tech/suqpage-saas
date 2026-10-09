@@ -2,7 +2,7 @@
 id: FE-051
 title: Automatic starter and editable address
 status: done
-related: [FE-053, FE-038, FE-046, FE-049, BE-043, DEP-040]
+related: [FE-059, BE-047, FE-056, FE-053, FE-038, FE-046, FE-049, BE-043, DEP-040]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-10-06
 change_level: L3

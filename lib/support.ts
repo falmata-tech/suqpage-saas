@@ -13,6 +13,8 @@ import {
 import { cleanText } from "./security";
 import { hashPrivateValue } from "./security";
 import { notifySupportQueue } from "./support-notifications";
+import { confirmedMessageId, type ChatReadCommand } from './chat-read-contract';
+import { enqueueChatAttention } from './attention-postgres';
 import { consumeRuntimeRateLimit } from "./rate-limit-runtime";
 import { assertMediaObjectKey } from "./media-storage";
 import type { SessionUser } from "./types";
@@ -61,6 +63,7 @@ export type SupportConversation = {
   resolvedAt: number | null;
   requestSummary: string;
   unread: boolean;
+  agentJoined: boolean;
 };
 
 export type SupportMessage = {
@@ -73,6 +76,7 @@ export type SupportMessage = {
   body: string;
   createdAt: number;
   attachment: SupportAttachment | null;
+  read: boolean;
 };
 
 export type SupportAttachment = {
@@ -88,6 +92,7 @@ export type SupportAttachmentWrite = Omit<SupportAttachment, "id"> & {
 
 export type SupportAgentWorkload = {
   userId: number;
+  accessRole: SessionUser["access_role"];
   name: string;
   email: string;
   enabled: boolean;
@@ -134,7 +139,14 @@ type ConversationRow = {
   assigned_user_name: string | null;
   client_last_read_message_id: number;
   staff_last_read_message_id: number;
+  client_confirmed_read_message_id: number;
+  staff_confirmed_read_message_id: number;
+  visitor_confirmed_read_message_id: number;
+  staff_joined_user_id: number | null;
+  staff_joined_at: number | null;
   last_message_id: number;
+  participant_last_message_id: number;
+  reply_last_message_id: number;
   created_at: number;
   last_message_at: number;
   closed_at: number | null;
@@ -161,8 +173,9 @@ function attachmentView(row: AttachmentColumns): SupportAttachment | null {
 
 function conversationView(row: ConversationRow, user: SessionUser): SupportConversation {
   const lastRead = user.access_role === "client"
-    ? row.client_last_read_message_id
-    : row.staff_last_read_message_id;
+    ? row.client_confirmed_read_message_id
+    : row.staff_confirmed_read_message_id;
+  const lastIncoming = user.access_role === 'client' ? row.reply_last_message_id : row.participant_last_message_id;
   return {
     id: row.id,
     publicRef: row.public_ref,
@@ -187,7 +200,8 @@ function conversationView(row: ConversationRow, user: SessionUser): SupportConve
     closedAt: row.closed_at,
     resolvedAt: row.resolved_at,
     requestSummary: row.request_summary || "",
-    unread: row.last_message_id > lastRead,
+    unread: lastIncoming > lastRead,
+    agentJoined: row.staff_joined_at !== null && row.staff_joined_user_id === row.assigned_user_id,
   };
 }
 
@@ -197,7 +211,12 @@ function baseSelect(includeTransportCompany = false) {
       WHERE e.conversation_id=c.id AND e.event_type='transport_handoff' ORDER BY e.id DESC LIMIT 1) transport_company,` : ""}
       COALESCE(b.name,c.requester_label) business_name,assignee.name assigned_user_name,
       (SELECT m.body FROM support_messages m WHERE m.conversation_id=c.id ORDER BY m.id LIMIT 1) request_summary,
-      COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id),0) last_message_id
+      COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id),0) last_message_id,
+      COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id
+        AND (m.sender_kind='visitor' OR m.sender_user_id=c.opened_by_user_id)),0) participant_last_message_id,
+      COALESCE((SELECT MAX(m.id) FROM support_messages m WHERE m.conversation_id=c.id
+        AND m.sender_kind='user' AND m.sender_user_id IS DISTINCT FROM c.opened_by_user_id
+        AND (c.assistance_category NOT IN ('buying_assistance','shipment_observation') OR m.visitor_visible=TRUE)),0) reply_last_message_id
     FROM support_conversations c
     LEFT JOIN businesses b ON b.id=c.business_id
     LEFT JOIN users assignee ON assignee.id=c.assigned_user_id
@@ -363,13 +382,17 @@ async function assignConversation(
   `, [conversationId, assignedUserId, assignedByUserId, reason, now]);
   await runtimeRun(`
     UPDATE support_conversations
-    SET status='open',assigned_user_id=?,updated_at=?,closed_at=NULL,resolved_at=NULL
+    SET status='open',assigned_user_id=?,updated_at=?,closed_at=NULL,resolved_at=NULL,
+      staff_joined_user_id=NULL,staff_joined_at=NULL
     WHERE id=?
   `, [assignedUserId, now, conversationId]);
-  await runtimeRun(`
+  const event = await runtimeGet<{id:number}>(`
     INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-    VALUES(?,?,'assigned',?,?)
+    VALUES(?,?,'assigned',?,?) RETURNING id
   `, [conversationId, assignedByUserId, `agent:${assignedUserId};reason:${reason}`, now]);
+  const source='support-assignment:'+event!.id;
+  await enqueueChatAttention({conversationId,source,kind:'assigned',direction:'staff',now});
+  await enqueueChatAttention({conversationId,source,kind:'assigned',direction:'participant',now});
 }
 
 export async function createSupportConversation(
@@ -421,6 +444,7 @@ export async function createSupportConversation(
     `, [conversationId, user.id, now]);
     const agent = await leastLoadedAgent();
     if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
+    else await enqueueChatAttention({conversationId,source:'support-created:'+conversationId,kind:'waiting_chat',direction:'staff',now});
     const business = (await runtimeGet<{ name: string }>("SELECT name FROM businesses WHERE id=?", [user.business_id]))!;
     return {
       id: conversationId,
@@ -518,6 +542,7 @@ export async function createPublicSupportConversation(
     `, [conversationId, `public visitor request:${category}`, now]);
     const agent = await leastLoadedAgent(category);
     if (agent) await assignConversation(conversationId, agent.id, null, "automatic", now);
+    else await enqueueChatAttention({conversationId,source:'support-created:'+conversationId,kind:'waiting_chat',direction:'staff',now});
     return { id: conversationId, publicRef, assignedUserName: agent?.name || null, expiresAt, duplicate: false };
   });
   if (!created.duplicate) void notifySupportQueue({
@@ -566,18 +591,13 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
     WHERE m.conversation_id=? AND (? NOT IN ('buying_assistance','shipment_observation') OR m.sender_kind='visitor' OR m.visitor_visible=TRUE)
     ORDER BY m.id DESC LIMIT 100
   `, [row.id, row.assistance_category])).reverse();
-  const lastId = messages.at(-1)?.id || 0;
-  await runtimeRun(`
-    UPDATE support_conversations
-    SET visitor_last_read_message_id=CASE WHEN visitor_last_read_message_id<? THEN ? ELSE visitor_last_read_message_id END
-    WHERE id=? AND visitor_last_read_message_id<?
-  `, [lastId, lastId, row.id, lastId]);
   return {
     id: row.id,
     publicRef: row.public_ref,
     category: row.assistance_category,
     status: row.status,
     assignedUserName: row.assigned_user_name,
+    agentJoined: row.staff_joined_at !== null && row.staff_joined_user_id === row.assigned_user_id,
     messages: messages.map((message) => ({
       id: message.id,
       sender: message.sender_kind === "visitor" ? "visitor" as const : "staff" as const,
@@ -585,6 +605,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
       body: message.body,
       createdAt: message.created_at,
       attachment: isCallbackRequest(row.assistance_category) ? null : attachmentView(message),
+      read: message.sender_kind === 'visitor' && message.id <= row.staff_confirmed_read_message_id,
     })),
   };
 }
@@ -606,6 +627,74 @@ export async function getPublicSupportAttachment(token: unknown, attachmentId: n
   `, [attachmentId, row.id]);
   if (!attachment) throw new SupportError("Attachment was not found.", "not_found");
   return attachment;
+}
+
+type ReceiptSide = 'client' | 'staff' | 'visitor';
+const receiptColumns = {
+  client: ['client_confirmed_read_message_id', 'client_confirmed_read_at', 'client_last_read_message_id'],
+  staff: ['staff_confirmed_read_message_id', 'staff_confirmed_read_at', 'staff_last_read_message_id'],
+  visitor: ['visitor_confirmed_read_message_id', 'visitor_confirmed_read_at', 'visitor_last_read_message_id'],
+} as const;
+
+async function confirmVisibleRead(row: ConversationRow, side: ReceiptSide, rawId: unknown, now: number, userId?: number) {
+  let id: number;
+  try { id = confirmedMessageId(rawId); }
+  catch { throw new SupportError('Choose a visible message.', 'invalid_read'); }
+  // An acknowledgement must target an incoming visible message, not a sender's
+  // own post or a private note whose higher ID would skip unseen replies.
+  const predicate = side === 'staff'
+    ? "(m.sender_kind='visitor' OR m.sender_user_id=c.opened_by_user_id)"
+    : `m.sender_kind='user' AND m.sender_user_id IS DISTINCT FROM c.opened_by_user_id
+      AND (c.assistance_category NOT IN ('buying_assistance','shipment_observation') OR m.visitor_visible=TRUE)`;
+  const message = await runtimeGet<{ id: number }>(`
+    SELECT m.id FROM support_messages m JOIN support_conversations c ON c.id=m.conversation_id
+    WHERE m.id=? AND c.id=? AND ${predicate}
+  `, [id, row.id]);
+  if (!message) throw new SupportError('Choose a visible message.', 'invalid_read');
+  const [cursor, at, legacy] = receiptColumns[side];
+  const previous = Number(row[cursor]);
+  await runtimeRun(`UPDATE support_conversations SET
+    ${at}=CASE WHEN ${cursor}<? THEN GREATEST(COALESCE(${at},0),?) ELSE ${at} END,
+    ${cursor}=GREATEST(${cursor},?),${legacy}=GREATEST(${legacy},?) WHERE id=?`, [id, now, id, id, row.id]);
+  const recipientKey=side==='visitor'?'visitor:'+row.id:'user:'+userId;
+  await runtimeRun(`UPDATE attention_notifications SET read_at=COALESCE(read_at,?)
+    WHERE recipient_key=? AND conversation_id=? AND kind='message'
+      AND CASE WHEN source_key ~ '^support-message:[0-9]+$' THEN substring(source_key FROM 17)::bigint<=? ELSE FALSE END`,[now,recipientKey,row.id,id]);
+  const joined = side === 'staff' && row.status === 'open' && row.staff_joined_user_id !== userId;
+  if (joined) {
+    await runtimeRun('UPDATE support_conversations SET staff_joined_user_id=?,staff_joined_at=? WHERE id=?', [userId!, now, row.id]);
+    const event=await runtimeGet<{id:number}>(`INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+      VALUES(?,?,'joined','assigned agent opened the visible conversation',?) RETURNING id`, [row.id, userId!, now]);
+    await enqueueChatAttention({conversationId:row.id,source:'support-joined:'+event!.id,kind:'joined',direction:'participant',now});
+  }
+  return { readMessageId: Math.max(id, previous), duplicate: id <= previous, joined };
+}
+
+export async function acknowledgeSupportRead(user: SessionUser, conversationId: number, command: ChatReadCommand, now = Date.now()) {
+  return runtimeTransaction(async () => {
+    await lockSupportWork();
+    const current = await runtimeGet<{ access_role: string; business_id: number | null }>(`
+      SELECT p.access_role,u.business_id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?
+    `, [user.id]);
+    if (!current || current.access_role !== user.access_role || (user.access_role === 'client' && current.business_id !== user.business_id)) {
+      throw new SupportError('Support conversation was not found.', 'not_found');
+    }
+    const row = await requireConversation(user, conversationId);
+    if (command.publicRef !== undefined && command.publicRef !== row.public_ref) throw new SupportError('This chat changed. Please refresh.', 'conversation_changed');
+    if (user.access_role !== 'client' && row.assigned_user_id !== user.id) {
+      throw new SupportError('Only the assigned agent can acknowledge this conversation.', 'unassigned');
+    }
+    return confirmVisibleRead(row, user.access_role === 'client' ? 'client' : 'staff', command.messageId, now, user.id);
+  });
+}
+
+export async function acknowledgePublicRead(token: unknown, command: ChatReadCommand, now = Date.now()) {
+  return runtimeTransaction(async () => {
+    await lockSupportWork();
+    const { row } = await requirePublicConversation(token, now);
+    if (command.publicRef !== row.public_ref) throw new SupportError('This chat changed. Please refresh.', 'conversation_changed');
+    return confirmVisibleRead(row, 'visitor', command.messageId, now);
+  });
 }
 
 export async function postPublicSupportMessage(
@@ -652,6 +741,7 @@ export async function postPublicSupportMessage(
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,NULL,'message','public visitor message',?)
     `, [row.id, now]);
+    await enqueueChatAttention({conversationId:row.id,source:'support-message:'+messageId,kind:'message',direction:'staff',now});
     return { id: messageId, duplicate: false };
   });
 }
@@ -668,10 +758,11 @@ export async function closePublicSupportConversation(token: unknown, now = Date.
       UPDATE support_assignments SET released_at=?
       WHERE conversation_id=? AND released_at IS NULL
     `, [now, row.id]);
-    await runtimeRun(`
+    const event=await runtimeGet<{id:number}>(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-      VALUES(?,NULL,'closed','visitor ended conversation',?)
+      VALUES(?,NULL,'closed','visitor ended conversation',?) RETURNING id
     `, [row.id, now]);
+    await enqueueChatAttention({conversationId:row.id,source:'support-closed:'+event!.id,kind:'closed',direction:'staff',now});
     return { duplicate: false };
   });
 }
@@ -755,12 +846,6 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
     ORDER BY m.id DESC LIMIT 100
   `, [conversationId])).reverse();
   const lastId = messages.at(-1)?.id || 0;
-  const readColumn = user.access_role === "client" ? "client_last_read_message_id" : "staff_last_read_message_id";
-  await runtimeRun(`
-    UPDATE support_conversations
-    SET ${readColumn}=CASE WHEN ${readColumn}<? THEN ? ELSE ${readColumn} END
-    WHERE id=?
-  `, [lastId, lastId, conversationId]);
   return {
     conversation: conversationView({ ...row, last_message_id: lastId }, user),
     messages: messages.map((message): SupportMessage => ({
@@ -773,6 +858,10 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
       body: message.body,
       createdAt: message.created_at,
       attachment: attachmentView(message),
+      read: message.sender_kind === 'visitor' || message.sender_user_id === row.opened_by_user_id
+        ? message.id <= row.staff_confirmed_read_message_id
+        : (!isCallbackRequest(row.assistance_category) || message.visitor_visible)
+          && message.id <= (row.participant_kind === 'visitor' ? row.visitor_confirmed_read_message_id : row.client_confirmed_read_message_id),
     })),
   };
 }
@@ -842,6 +931,7 @@ export async function postSupportMessage(
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
       VALUES(?,?,'message','message posted',?)
     `, [conversationId, user.id, now]);
+    if(user.access_role==='client' || !isCallbackRequest(row.assistance_category) || visible) await enqueueChatAttention({conversationId,source:'support-message:'+messageId,kind:'message',direction:user.access_role==='client'?'staff':'participant',now});
     return { id: messageId, duplicate: false };
   });
 }
@@ -900,10 +990,11 @@ export async function closeSupportConversation(user: SessionUser, conversationId
       UPDATE support_assignments SET released_at=?
       WHERE conversation_id=? AND released_at IS NULL
     `, [now, conversationId]);
-    await runtimeRun(`
+    const event=await runtimeGet<{id:number}>(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-      VALUES(?,?,'closed',?,?)
+      VALUES(?,?,'closed',?,?) RETURNING id
     `, [conversationId, user.id, resolving ? "request resolved" : "conversation closed", now]);
+    if(row.status!=='closed') await enqueueChatAttention({conversationId,source:'support-closed:'+event!.id,kind:'closed',direction:user.access_role==='client'?'staff':'participant',now});
   });
 }
 
@@ -923,10 +1014,12 @@ export async function reopenSupportConversation(user: SessionUser, conversationI
           WHERE id=?
         `, [now, conversationId]);
       }
-      await runtimeRun(`
+      const event=await runtimeGet<{id:number}>(`
         INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-        VALUES(?,?,'reopened','conversation reopened',?)
+        VALUES(?,?,'reopened','conversation reopened',?) RETURNING id
       `, [conversationId, user.id, now]);
+      await enqueueChatAttention({conversationId,source:'support-reopened:'+event!.id,kind:'reopened',direction:'staff',now});
+      if(user.access_role!=='client') await enqueueChatAttention({conversationId,source:'support-reopened:'+event!.id,kind:'reopened',direction:'participant',now});
       return;
     }
     if (row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
@@ -938,10 +1031,11 @@ export async function reopenSupportConversation(user: SessionUser, conversationI
     }
     if (!row.assigned_user_id) throw new SupportError("Assign an agent before reopening.", "unassigned");
     await assignConversation(conversationId, row.assigned_user_id, user.id, "reopened", now);
-    await runtimeRun(`
+    const event=await runtimeGet<{id:number}>(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-      VALUES(?,?,'reopened','staff reopened',?)
+      VALUES(?,?,'reopened','staff reopened',?) RETURNING id
     `, [conversationId, user.id, now]);
+    await enqueueChatAttention({conversationId,source:'support-reopened:'+event!.id,kind:'reopened',direction:'participant',now});
   });
 }
 
@@ -951,6 +1045,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
   }
   return (await runtimeAll<{
     user_id: number;
+    access_role: SessionUser["access_role"];
     name: string;
     email: string;
     enabled: number;
@@ -958,7 +1053,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
     max_open_conversations: number;
     open_count: number;
   }>(`
-    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
+    SELECT u.id user_id,u.name,u.email,p.access_role,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COALESCE(s.max_open_conversations,3) max_open_conversations,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
@@ -966,11 +1061,12 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE p.access_role IN ('team_member','operations_manager')
-    GROUP BY u.id,u.name,u.email,s.enabled,s.queue_scope,s.max_open_conversations
+    GROUP BY u.id,u.name,u.email,p.access_role,s.enabled,s.queue_scope,s.max_open_conversations
     ORDER BY COALESCE(s.enabled,0) DESC,COUNT(c.id),lower(u.name)
   `)).map((value) => {
     return {
       userId: value.user_id,
+      accessRole: value.access_role,
       name: value.name,
       email: value.email,
       enabled: Boolean(value.enabled),
@@ -983,7 +1079,7 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
 
 function supportAgentRows() {
   return `
-    SELECT u.id user_id,u.name,u.email,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
+    SELECT u.id user_id,u.name,u.email,p.access_role,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COALESCE(s.max_open_conversations,3) max_open_conversations,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
@@ -991,12 +1087,13 @@ function supportAgentRows() {
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE p.access_role IN ('team_member','operations_manager')
-    GROUP BY u.id,u.name,u.email,s.enabled,s.queue_scope,s.max_open_conversations
+    GROUP BY u.id,u.name,u.email,p.access_role,s.enabled,s.queue_scope,s.max_open_conversations
   `;
 }
 
 function workloadView(row: {
   user_id: number;
+  access_role: SessionUser["access_role"];
   name: string;
   email: string;
   enabled: number;
@@ -1006,6 +1103,7 @@ function workloadView(row: {
 }): SupportAgentWorkload {
   return {
     userId: row.user_id,
+    accessRole: row.access_role,
     name: row.name,
     email: row.email,
     enabled: Boolean(row.enabled),
@@ -1043,6 +1141,7 @@ export async function listSupportAgentWorkloadsPage(
   const window = pageWindow(total, request);
   const rows = await runtimeAll<{
     user_id: number;
+    access_role: SessionUser["access_role"];
     name: string;
     email: string;
     enabled: number;
@@ -1111,8 +1210,13 @@ export async function updateSupportAgentSetting(
       WHERE user_id=? AND access_role IN ('team_member','operations_manager')
     `, [userId]);
     if (!staff) throw new SupportError("Support agent was not found.", "invalid_agent");
-    const scope = input.queueScope === undefined ? (await supportAgentWorkload(userId))?.queue_scope || "all" : input.queueScope;
+    const currentWorkload = await supportAgentWorkload(userId);
+    const scope = input.queueScope === undefined ? currentWorkload?.queue_scope || "all" : input.queueScope;
     if (scope !== "all" && scope !== "support" && scope !== "transport") throw new SupportError("Choose a support queue.", "invalid_setting");
+    const targetRole = await runtimeGet<{access_role:string}>("SELECT access_role FROM user_access_profiles WHERE user_id=?",[userId]);
+    if(targetRole?.access_role === "team_member" && scope === "all" &&
+      (currentWorkload?.queue_scope === "support" || currentWorkload?.queue_scope === "transport"))
+      throw new SupportError("Choose Support agent or Transport agent.","invalid_setting");
     const incompatible = await runtimeGet<{count:number}>(`SELECT COUNT(*) count FROM support_conversations
       WHERE assigned_user_id=? AND status='open' AND ?<>'all' AND
       (CASE WHEN assistance_category IN ('shipment_observation','buying_assistance') THEN 'transport' ELSE 'support' END)<>?`, [userId,scope,scope]);
@@ -1175,10 +1279,12 @@ export async function reassignSupportConversation(
       }
       await assignConversation(conversationId, assignedUserId, user.id, "reassigned", now);
     }
-    await runtimeRun(`
+    const event=await runtimeGet<{id:number}>(`
       INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
-      VALUES(?,?,'reassigned',?,?)
+      VALUES(?,?,'reassigned',?,?) RETURNING id
     `, [conversationId, user.id, assignedUserId === null ? "waiting" : `agent:${assignedUserId}`, now]);
+    if(row.assigned_user_id!==null) await enqueueChatAttention({conversationId,source:'support-reassigned:'+event!.id,kind:'reassigned',direction:'staff',oldAgentId:row.assigned_user_id,now});
+    if(assignedUserId===null) await enqueueChatAttention({conversationId,source:'support-waiting:'+event!.id,kind:'waiting_chat',direction:'staff',now});
   });
 }
 

@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog.ts';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
@@ -18,8 +19,8 @@ try{
  const created=await adminAuth.auth.admin.createUser({email,email_confirm:true});assert.ok(!created.error&&created.data.user);providerId=created.data.user.id;
  const ownerContext=await cookieContext(email);const owner=await ownerContext.newPage();await owner.setViewportSize({width:1440,height:1000});
  const { createPostgresPublicClientWorkspace }=await import('../lib/signup-postgres.ts');const { PostgresTransactionRunner }=await import('../lib/postgres-runtime.ts');
- await createPostgresPublicClientWorkspace(new PostgresTransactionRunner(pool),{name:'Page Review Test',businessName:'Review Fixture Shop',businessCategory:'electronics',phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:providerId,email});
- await owner.goto(`${base}/dashboard`);
+ await createPostgresPublicClientWorkspace(new PostgresTransactionRunner(pool),{name:'Page Review Test',businessName:'Review Fixture Shop',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:providerId,email});
+ await owner.goto(`${base}/dashboard`);await expect(owner).toHaveURL(/\/dashboard\/profile$/);await expect(owner.getByRole('heading',{name:'Profile',exact:true})).toBeVisible();
  const record=(await pool.query('SELECT b.id,b.handle FROM businesses b JOIN users u ON u.business_id=b.id WHERE u.email=$1',[email])).rows[0];assert.ok(record);businessId=record.id;
  assert.equal(Number((await pool.query('SELECT COUNT(*) n FROM service_requests')).rows[0].n),beforeRequests);
  await expect(owner.locator('a[href*="/dashboard/requests"]')).toHaveCount(0);await capture(owner,'new-owner-dashboard');
@@ -27,17 +28,51 @@ try{
  await owner.goto(`${base}/dashboard/products/new`);await owner.getByLabel('Name',{exact:true}).fill('Review fixture sensor');await owner.getByLabel('Description',{exact:true}).fill('A simple product for reviewing the standard page workflow.');await expect(owner.locator('#product-unit,#product-highlights,#product-visibility')).toHaveCount(0);await owner.getByLabel('What do you offer?',{exact:true}).selectOption('standard_product');
  const png=await sharp({create:{width:360,height:260,channels:3,background:'#78919a'}}).png().toBuffer();await owner.locator('input[type=file]').setInputFiles([{name:'fixture.png',mimeType:'image/png',buffer:png},{name:'second.png',mimeType:'image/png',buffer:await sharp({create:{width:360,height:260,channels:3,background:'#bd885a'}}).png().toBuffer()}]);
  await expect(owner.getByRole('button',{name:'Add video link',exact:true})).toHaveCount(0);
- await expect(owner.locator('.product-media-video input')).toHaveAttribute('readonly','');
+ await expect(owner.locator('.product-media-video input')).toBeEditable();
+ await owner.locator('.product-media-video input').fill('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+ for(let move=0;move<2;move++)await owner.locator('.product-media-entry').filter({has:owner.locator('.product-media-video input')}).getByRole('button',{name:'Move media right',exact:true}).click();
+ await owner.getByLabel('Video link',{exact:true}).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw');
+ await owner.getByRole('button',{name:'Add video',exact:true}).click();
  await owner.getByRole('button',{name:'Add item',exact:true}).click();await expect(owner).toHaveURL(/\/dashboard\/products\/\d+.*saved=1/,{timeout:30000});
- // Gallery compatibility fixture: retained, previously admitted videos. New video
- // submission and staff decisions are tested through real forms by capture-video-requests.ts.
+ // Self-service video links are saved through the real owner form, without review.
  const stored=(await pool.query('SELECT id,media_json FROM products WHERE business_id=$1 AND name=$2',[businessId,'Review fixture sensor'])).rows[0];
  const starterMedia=JSON.parse(stored.media_json);
- assert.deepEqual(starterMedia.filter(item=>item.kind==='video'),[{kind:'video',ref:'youtube:M7lc1UVf-VE'}]);
- const admittedMedia=[...starterMedia.filter(item=>item.kind==='image'),{kind:'video',ref:'youtube:dQw4w9WgXcQ'},{kind:'video',ref:'youtube:jNQXAC9IVRw'}];
- await pool.query('UPDATE products SET media_json=$1,video_ref=$2 WHERE id=$3 AND business_id=$4',[JSON.stringify(admittedMedia),'youtube:dQw4w9WgXcQ',stored.id,businessId]);
+ assert.deepEqual(starterMedia.filter(item=>item.kind==='video'),[{kind:'video',ref:'youtube:dQw4w9WgXcQ'},{kind:'video',ref:'youtube:jNQXAC9IVRw'}]);
  const product=(await pool.query('SELECT id,image_path,media_json FROM products WHERE business_id=$1 AND name=$2',[businessId,'Review fixture sensor'])).rows[0];assert.ok(product?.image_path);const gallery=JSON.parse(product.media_json);assert.equal(gallery.length,4);mediaKeys.push(...gallery.filter(item=>item.kind==='image').map(item=>item.ref.split('/').at(-1)));for(const item of gallery.filter(item=>item.kind==='image'))assert.equal((await ownerContext.request.get(`${base}${item.ref}`)).status(),200);fs.writeFileSync(`${out}/fixture-cleanup.json`,JSON.stringify({businessId,providerId,mediaKeys}),{mode:0o600});const anonymous=await browser.newContext(process.env.SUQPAGE_RECORD_REVIEW_VIDEO==='1'?{recordVideo:{dir:`${out}/videos`}}:{});assert.equal((await anonymous.request.get(`${base}${product.image_path}`)).status(),404);assert.equal((await ownerContext.request.get(`${base}${product.image_path}`)).status(),200);const hidden=await anonymous.request.get(`${base}/@${record.handle}`);const hiddenBody=await hidden.text();assert.ok([200,404].includes(hidden.status()) && hiddenBody.includes('404') && !hiddenBody.includes('Review fixture sensor'),'Next streaming not-found reveals no draft catalog');
- await owner.reload();await expect(owner.locator('.product-media-entry')).toHaveCount(4);await owner.getByRole('button',{name:'Move media right',exact:true}).first().click();const reordered=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await reordered).ok());await expect(owner.locator('.product-media-entry img').first()).toHaveAttribute('src',gallery[1].ref);await owner.reload();assert.equal((await pool.query('SELECT image_path FROM products WHERE id=$1',[product.id])).rows[0].image_path,gallery[1].ref);await owner.locator('input[type=file]').setInputFiles({name:'extra.png',mimeType:'image/png',buffer:png});const uploaded=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await uploaded).ok());await expect(owner.locator('.product-media-entry img').last()).toHaveAttribute('src',/^\/media\//);const savedMedia=(await pool.query('SELECT media_json FROM products WHERE id=$1',[product.id])).rows[0].media_json;const extra=JSON.parse(savedMedia).at(-1).ref;mediaKeys.push(extra.split('/').at(-1));await owner.getByLabel('Description',{exact:true}).fill('A simple product with multiple photos and videos.');const again=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await again).ok());assert.equal((await pool.query('SELECT media_json FROM products WHERE id=$1',[product.id])).rows[0].media_json,savedMedia,'Later edits reuse saved uploads');await owner.getByRole('button',{name:'Remove media 5',exact:true}).click();const removed=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await removed).ok());await expect(owner.locator('.product-media-entry')).toHaveCount(4);await capture(owner,'simple-product');
+ await owner.reload();await expect(owner.locator('.product-media-entry')).toHaveCount(4);
+ await owner.getByRole('button',{name:'Move media right',exact:true}).first().click();
+ const reordered=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);
+ await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await reordered).ok());
+ await expect(owner.locator('.product-media-entry img').first()).toHaveAttribute('src',gallery[1].ref);
+ await owner.reload();assert.equal((await pool.query('SELECT image_path FROM products WHERE id=$1',[product.id])).rows[0].image_path,gallery[1].ref);
+ const extraPng=await sharp({create:{width:360,height:260,channels:3,background:'#326f80'}}).png().toBuffer();
+ await expect(owner.locator('input[type=file]')).toBeEnabled();
+ await owner.locator('input[type=file]').setInputFiles({name:'extra.png',mimeType:'image/png',buffer:extraPng});
+ await expect(owner.locator('.product-media-entry')).toHaveCount(5);
+ assert.equal(JSON.parse(await owner.locator('input[name=mediaOrder]').inputValue()).filter(item=>item.kind==='upload').length,1);
+ const uploaded=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);
+ await owner.getByRole('button',{name:'Save changes',exact:true}).click();const uploadResponse=await uploaded;assert.ok(uploadResponse.ok());
+ await expect(owner.locator('.product-media-entry')).toHaveCount(5);
+ await expect(owner.locator('.product-media-entry img').last()).toHaveAttribute('src',/^\/media\//);
+ const savedMedia=(await pool.query('SELECT media_json FROM products WHERE id=$1',[product.id])).rows[0].media_json;
+ assert.equal(JSON.parse(savedMedia).length,5,'The new distinct photo was actually saved');
+ const extra=JSON.parse(savedMedia).at(-1).ref;mediaKeys.push(extra.split('/').at(-1));
+ assert.ok(!gallery.some(item=>item.ref===extra),'The added photo has its own stored object');
+ const savedPhoto=await ownerContext.request.get(`${base}${extra}`);assert.equal(savedPhoto.status(),200);
+ const pixels=await sharp(await savedPhoto.body()).removeAlpha().raw().toBuffer();
+ for(const [index,expected]of [50,111,128].entries())assert.ok(Math.abs(pixels[index]-expected)<=3,'Saved photo bytes match the distinct upload');
+ const description='A simple product with multiple photos and videos.';
+ await owner.getByLabel('Description',{exact:true}).fill(description);
+ const again=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);
+ await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await again).ok());
+ const updated=(await pool.query('SELECT media_json,description FROM products WHERE id=$1',[product.id])).rows[0];
+ assert.equal(updated.description,description);assert.equal(updated.media_json,savedMedia,'Later edits reuse saved uploads');
+ await expect(owner.locator('.product-media-entry')).toHaveCount(5);
+ await owner.getByRole('button',{name:'Remove media 5',exact:true}).click();
+ const removed=owner.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/dashboard/products/${product.id}`);
+ await owner.getByRole('button',{name:'Save changes',exact:true}).click();assert.ok((await removed).ok());
+ await expect(owner.locator('.product-media-entry')).toHaveCount(4);await capture(owner,'simple-product');
+
  await owner.goto(`${base}/dashboard/business`);await owner.getByLabel('Business logo',{exact:true}).setInputFiles({name:'logo.png',mimeType:'image/png',buffer:png});await owner.getByLabel('City or town',{exact:true}).fill('Addis');await owner.getByRole('option').filter({hasText:'Addis Ababa'}).first().click();await expect(owner.getByLabel('Region',{exact:true})).toHaveValue('Addis Ababa');await owner.getByRole('button',{name:'Save business details',exact:true}).click();await expect(owner.getByText('Business details saved.',{exact:true})).toBeVisible();
  const logo=(await pool.query('SELECT logo_path FROM businesses WHERE id=$1',[businessId])).rows[0].logo_path;mediaKeys.push(logo.split('/').at(-1));fs.writeFileSync(`${out}/fixture-cleanup.json`,JSON.stringify({businessId,providerId,mediaKeys}),{mode:0o600});assert.equal((await anonymous.request.get(`${base}${logo}`)).status(),404);assert.equal((await ownerContext.request.get(`${base}${logo}`)).status(),200);
  assert.ok((await pool.query('SELECT approved_at FROM business_discovery_profiles WHERE business_id=$1',[businessId])).rows[0].approved_at>0);await capture(owner,'owner-business');await capture(owner,'owner-location');await owner.getByLabel('Public location',{exact:true}).selectOption('storefront');await expect(owner.getByLabel('Storefront latitude',{exact:true})).toBeVisible();await capture(owner,'owner-storefront');await owner.getByLabel('Public location',{exact:true}).selectOption('area');await expect(owner.getByLabel('Storefront latitude',{exact:true})).toHaveCount(0);
@@ -69,7 +104,7 @@ try{
  for(const route of ['/dashboard/admin/page-reviews',`/dashboard/admin/page-reviews/${businessId}`]){await admin.goto(base+route);await expect(admin).toHaveURL(/\/dashboard\/admin\/businesses$/);}
  // Detailed options/visibility remain staff controls; owners retain the simple form.
  await admin.goto(`${base}/dashboard/products/${product.id}?business=${businessId}`);await admin.getByRole('button',{name:'Add option',exact:true}).click();await admin.getByLabel('Option 1 name',{exact:true}).fill('Color');await admin.getByLabel('Option 1 choices',{exact:true}).fill('Blue\nBlack');await admin.getByLabel('Customer-service note',{exact:true}).fill('Fictional acceptance test: verify staff options and visibility.');await admin.getByRole('button',{name:'Save changes',exact:true}).click();await expect(admin.getByText('Item saved.',{exact:true})).toBeVisible();await admin.reload();await expect(admin.getByLabel('Option 1 name',{exact:true})).toHaveValue('Color');await capture(admin,'staff-product-options');
- await owner.goto(`${base}/dashboard`);await expect(owner.getByText('Live',{exact:true})).toBeVisible();await capture(owner,'published-owner-dashboard');
+ await owner.goto(`${base}/dashboard`);await expect(owner).toHaveURL(/\/dashboard\/profile$/);await expect(owner.getByText('Your page is live',{exact:true})).toBeVisible();await capture(owner,'published-owner-dashboard');
  for(const path of ['/dashboard/requests','/dashboard/requests/new','/dashboard/requests/1/revisions/1/studio','/dashboard/design-bank','/dashboard/design-sdk','/api/requests','/api/client/requests','/api/operations/requests','/api/requests/1/attachments/1']){
   assert.equal((await adminContext.request.get(`${base}${path}`)).status(),404,path);assert.equal((await anonymous.request.post(`${base}${path}`,{data:{},headers:{Origin:base}})).status(),404,path);
  }

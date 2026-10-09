@@ -2,9 +2,9 @@
 id: FE-030
 title: Search-led marketplace homepage
 status: in_progress
-related: [FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
+related: [FE-058, FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
 owners: [product, frontend, design]
-last_updated: 2026-09-25
+last_updated: 2026-10-07
 change_level: L2
 ---
 
@@ -726,3 +726,40 @@ restarted to refresh shared catalogs. Expo browser history navigation can reset
 Market state; the mobile app Back was verified instead. No physical-device or
 native-speaker signoff is claimed. Visual approval and full release gates remain
 pending; this change is not deployed or included in the existing S62 APK build.
+
+
+## S72 — visible product-results action
+
+Ready, L1. The existing panel icon is too ambiguous. Choose View products over
+Product view (ambiguous noun) or Results (missing subject); show Hide products
+when open. Keep the panel/arrow icon and a compact readable label on web/native.
+This changes no search/filter/pagination/backend behavior or list composition.
+
+GIVEN closed Market results WHEN viewing the toolbar THEN View products is visible
+and opens the offering-only Products & services panel without issuing a search
+or resetting filters/map. WHEN open THEN Hide products closes it while keeping
+search/category/location controls and state. Expanded/controls semantics, Escape
+and focus return remain. GIVEN 320/390/desktop screens in any of five locales THEN
+all toolbar controls stay aligned, labels are readable and no page overflows.
+
+Verify updated compact discovery browser capture plus focused localized label/
+toggle checks, types/catalogs and before/after screenshots; owner review precedes
+full/release gates. FE-049/FE-053 share authored labels. Master §§5/7/11/15 affected.
+
+Focused S72 review found React Native Web did not project expanded from the
+existing accessibilityState. Set its explicit web aria-expanded while retaining
+native accessibilityState; the UI capture must prove true/false rather than
+weakening that assertion. No search/panel behavior changes.
+
+S72 focused local evidence: types/locale/homepage tests and actual compact
+entry/toggle captures pass in web/Expo at desktop/phone widths across five
+languages. Visible actions retain input, query/filter scope, compact chat and
+expanded state; web focus returns on close. Test:
+scripts/capture-purchase-chat-and-products.mjs. TRACEABILITY S71/S72 records
+resolved cache/harness failures and pending owner visual/full/release rollout.
+
+S90 follows FE-019's heading and supporting transport-chat invitation on the same map launcher.
+The compact open-drawer control keeps the complete accessible question,
+reassurance and Live Chat label; expanded entries must not overlap the toolbar,
+attribution or product results. Search/filter/pagination behavior is unchanged.
+Verify using scripts/capture-purchase-chat-and-products.mjs before visual review.

@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import { getDb, seedFixture, closeDbForTests } from "./testing/postgres-fixture";
 import assert from "node:assert/strict";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "../lib/postgres-runtime";
@@ -10,9 +11,9 @@ import { PostgresRequestRepository } from "../lib/postgres-request-repository";
 
 async function main() {
   const db = await getDb();
-  await seedFixture();
   const runner = db.runner;
   try {
+    await seedFixture();
     const evidence = await runner.transaction(async () => {
       const businesses = await runner.query<{ count: number }>(
         "SELECT COUNT(*)::int AS count FROM businesses WHERE status=?",
@@ -129,7 +130,7 @@ async function main() {
         name: "PostgreSQL Signup",
         phone: "+251911123456",
         businessName: `PostgreSQL Works ${unique}`,
-        businessCategory: "machinery-tools",
+        businessCategory: "machinery-tools", placeId:findPlaceSuggestions("Addis Ababa")[0].id,
         idempotencyKey: `postgres-signup-${unique}`,
         consent: true,
       };
@@ -224,6 +225,7 @@ async function main() {
       assert.ok(editableProfile, "Expected a complete PostgreSQL discovery profile.");
       const updatedProfile = await updateDiscoveryProfile({
         businessId: editableProfile.businessId,
+        proposalVersion:(await runner.query<{version:number}>("SELECT version FROM owner_location_proposals WHERE business_id=?",[editableProfile.businessId])).rows[0]?.version,
         industryKeys: editableProfile.industryKeys,
         boothImagePath: editableProfile.boothImagePath,
         city: editableProfile.city,
@@ -340,9 +342,7 @@ async function main() {
 
       process.env.PRIVACY_SALT = "postgres-runtime-privacy-salt-long-enough";
       const {
-        getBusinessSubscription,
         getShowroomInsights,
-        recordManualPayment,
         recordShowroomVisit,
       } = await import("../lib/account-health");
       const accountTarget = await runner.transaction(async () => {
@@ -368,20 +368,7 @@ async function main() {
         access_role: "operations_manager" as const,
         business_id: null,
       };
-      const subscription = await getBusinessSubscription(accountTarget.business.id);
-      assert.equal(subscription?.businessId, accountTarget.business.id);
-      const paymentKey = `postgres-payment-${Date.now()}`;
-      const payment = await recordManualPayment(operationsUser, {
-        businessId: accountTarget.business.id,
-        amount: "",
-        idempotencyKey: paymentKey,
-      });
-      assert.equal(payment.duplicate, false);
-      assert.equal((await recordManualPayment(operationsUser, {
-        businessId: accountTarget.business.id,
-        amount: "",
-        idempotencyKey: paymentKey,
-      })).duplicate, true);
+      assert.equal(Number((await runner.query<{total:number}>("SELECT COUNT(*) total FROM business_subscriptions")).rows[0].total),0,"fresh runtime has no business plans");
       const visitToken = `postgres-visitor-${Date.now()}`;
       assert.equal((await recordShowroomVisit({
         handle: accountTarget.business.handle,
@@ -400,17 +387,21 @@ async function main() {
         name: "PostgreSQL Runtime Team Member",
         email: `postgres-staff-${staffUnique}@example.test`,
         password: "PostgresStaff123",
-        accessRole: "team_member",
-      });
+        accessRole: "support_agent",
+      }, runtimeAdminUser);
       const assignableRequest = await runner.transaction(async () => {
           return (await runner.query<{ id: number; business_id: number }>(
           "SELECT id,business_id FROM service_requests WHERE business_id IS NOT NULL ORDER BY id LIMIT 1",
         )).rows[0];
       });
       assert.ok(assignableRequest, "Expected a business-scoped request for assignment rehearsal.");
-      const assignment = await assignRequestToTeamMember(assignableRequest.id, staff.userId, operationsUser.id);
-      assert.equal(assignment.assignedUserId, staff.userId);
-      assert.ok((await listAssignedBusinesses(staff.userId)).some((business) => business.id === assignableRequest.business_id));
+      await assert.rejects(()=>assignRequestToTeamMember(assignableRequest.id,staff.userId,operationsUser.id), /valid team member/);
+      // Retained generic staff assignments are a separate legacy permission.
+      const legacyStaff=(await runner.query<{id:number}>("INSERT INTO users(email,password_hash,name,role) VALUES(?,'unused','Legacy generic staff','admin') RETURNING id",[`legacy-staff-${staffUnique}@example.test`])).rows[0];
+      await runner.query("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'team_member')",[legacyStaff.id]);
+      const assignment = await assignRequestToTeamMember(assignableRequest.id, legacyStaff.id, operationsUser.id);
+      assert.equal(assignment.assignedUserId, legacyStaff.id);
+      assert.ok((await listAssignedBusinesses(legacyStaff.id)).some((business) => business.id === assignableRequest.business_id));
 
       const {
         createClientInvitation,

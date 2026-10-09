@@ -1,4 +1,5 @@
 "use client";
+import LoadingBar from "./LoadingBar";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -29,7 +30,7 @@ export function NavigationPendingMain({ children, className }: { children: React
   const state = useContext(PendingNavigationContext);
   return <main className={`${className} navigation-pending-main`} aria-busy={state?.pending ? "true" : undefined} data-navigation-pending={state?.pending ? "true" : undefined}>
     {children}
-    {state?.pending ? <div className="navigation-workspace-status" role="status"><i aria-hidden="true" /><span>{t("Opening {value1}", { value1: state.pending.label })}</span></div> : null}
+    {state?.pending ? <div className="navigation-workspace-status" role="status"><LoadingBar/><span>{t("Opening {value1}", { value1: state.pending.label })}</span></div> : null}
   </main>;
 }
 

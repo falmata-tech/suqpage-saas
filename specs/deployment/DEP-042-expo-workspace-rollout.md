@@ -2,9 +2,9 @@
 id: DEP-042
 title: Expo workspace rollout
 status: in_progress
-related: [DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023]
+related: [FE-061, BE-049, ADR-0025, FE-060, BE-048, FE-059, BE-047, FE-058, FE-056, DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023, FE-057, BE-046, ADR-0024, DEP-043]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-06
+last_updated: 2026-10-08
 change_level: L3
 ---
 
@@ -318,3 +318,112 @@ This spec remains in_progress for explicit physical-phone/real-email/social-app
 and store limits. Exact downloads, hashes, gates and limits are in
 docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md; private evidence .local/rebuild-s69/
 and .local/web-s70/.
+
+## S96 — one permanent Suqpage application identity
+
+Ready L3, DEP-043/FE-053. The owner rejects a separately named/registered test app.
+GIVEN development, internal APK or production store builds WHEN configuration
+resolves THEN display Suqpage and use com.suqpage.app on Android (and the same
+existing iOS identifier), independent of build profile. Preview remains an
+internal distribution profile only; it never changes name/package. One canonical
+Firebase Android registration/client source can serve both hosted profiles.
+GIVEN successive internal/store builds THEN use the same remote version source
+and automatic version-code increments, preserving APK versus AAB distribution.
+GIVEN legacy installed preview APK/certificate metadata THEN retain its association
+and private signing source; never relabel its certificate as canonical without
+signed-artifact verification. The old package cannot be updated in-place into the
+new one; the next admitted canonical APK is installed once. Future builds use the
+same identity and reviewed signing continuity. No credential generation/replacement,
+store submission, paid build or association publication occurs in this source change.
+GIVEN Firebase selection THEN register only com.suqpage.app in the selected project
+suqpage (588262779708). Do not ask the owner to register two apps or rename later.
+GIVEN build admission THEN preserve all target/public-key/provider, upload/privacy,
+signing, app-link association and device gates; new package requires its exact
+credential binding and verified certificate before claiming HTTPS App Links.
+
+Tests: scripts/test-mobile-build-config.cjs (all profiles, stable identity and
+version/distribution); scripts/test-attention-platform.cjs (both profiles accept
+canonical Firebase config and reject legacy/foreign packages);
+scripts/test-mobile-app-links.ts (legacy association preserved, no fabricated
+canonical certificate); actual Expo public-config identity resolution.
+Master §§15/17/22 reflect the local candidate. All-profile build/Firebase tests,
+five route/association security tests and actual Expo public-config resolution
+pass. Both hosted profiles resolve Suqpage / com.suqpage.app with one remote
+version source and automatic increments. Protected identity evidence:
+.local/notification-review/firebase/canonical-app-identity.json. No remote
+credential, signing, certificate association or binary change has run. Full
+release/signing/device gates and the canonical Firebase source remain pending.
+
+## S97 — guardrails for one-app testing and distribution
+
+Ready L3/security operations, DEP-043/BE-044/FE-053. Owner confirms one permanent
+app and requests safeguards/workflows. Recurring release checks justify a small
+SDK artifact verifier; no generic release platform, new provider, UI or data mutation.
+GIVEN hosted APK/AAB configuration THEN require an explicit approved data target;
+pin API/Auth/Expo project and reject unknown targets, private/local/unreviewed
+origins, public secret keys or conflicting EAS/requested profiles before building.
+The currently approved production target is the existing verified Suqpage API/Auth
+realm. Preview is internal distribution against that explicitly selected target,
+not an isolated staging backend; test only labelled demo accounts/records there.
+Local QA remains on local previews. Staging cannot be selected until independently
+verified and added through review.
+GIVEN either profile THEN preserve internal APK versus store AAB and remote
+auto-increment settings, require a reviewed committed source and keep store
+submission on internal draft. EAS build workers validate profile/environment
+configuration in the post-install hook. Repository checks detect profile-policy
+drift; direct privileged provider commands are outside these controls.
+GIVEN notification client JSON THEN pin Firebase ID/number/canonical package, reject
+private credential material at any depth, and exclude FCM service-account files
+from archive uploads. No private FCM/Expo account/signing key enters app/runtime.
+GIVEN a malformed client file WHEN validation fails THEN return a generic JSON
+error without quoting source bytes, including accidental credential fragments.
+GIVEN a downloaded APK THEN inspect its actual signed certificate, package,
+version and debug flag using bounded SDK commands with argument arrays. Reject
+unconfigured/mismatched certificate pins, extra signers, wrong package, debug
+builds, malformed metadata and version codes not newer than the selected prior
+canonical APK. A first canonical release requires explicit operator selection.
+Generate a checksum and metadata receipt only after admission, outside Git; do
+not edit/install the APK or change signing credentials. No claimed signer/version
+snapshot substitutes for inspecting an actual artifact. Missing tools fail clearly.
+GIVEN signing initialization THEN leave the canonical certificate unconfigured
+until independently verified/reviewed; never borrow the legacy preview certificate.
+GIVEN Google Play rollout THEN test Play-distributed APK signing against the same
+policy and prior APK before public release; an upload-key AAB is not such proof.
+
+Tests: build target/profile/key failures in test-mobile-build-config.cjs; Firebase
+client/secret rejection in test-attention-platform.cjs; typed artifact/SDK parsing,
+wrong certificate/debug/package/rollback and real legacy-APK negative inspection
+in test-android-release-safety.ts. SDK mocks are labelled; actual signature
+inspection is separate. Master §§15/16/17/22 and MOBILE-DISTRIBUTION workflow
+are affected. No remote configuration, build or publication is authorized by a
+passing local guard. Existing backup/visual/full-release/device gates persist.
+
+S97 local evidence, 2026-10-08: web/native typechecks, build/Firebase guards and
+three typed release/SDK tests pass. Actual bounded SDK inspection of the historical
+APK reports com.suqpage.app.preview, version 1, nondebug and its verified legacy
+certificate; canonical admission rejects the unconfigured signing pin. This is
+separate from mocked SDK tests. MOBILE-DISTRIBUTION and master §§15/16/17/22 now
+describe the constrained workflow and limits. No signing key, binary, device
+installation or public association has changed. Full release/visual/commit and
+canonical signer/device gates remain open; the specification stays in progress.
+The focused malformed-JSON regression additionally confirms failure output does
+not include source excerpts or accidental credential fragments.
+
+S98 exact rollout review is explicitly approved by the owner: securely back up
+only the reviewed existing EAS signing source and reuse it for com.suqpage.app,
+preserving legacy credentials; one free internal APK may proceed under the same
+braces/node-forge tooling findings if every other gate passes and fresh archive/
+export/APK/device evidence is verified. The exception expires after that artifact,
+admits no new advisory/dependency and does not claim a clean full audit or authorize
+Play submission. Existing certificate, source, backup and actual-signature checks
+remain mandatory; no new signing key is generated as a convenient fallback.
+
+S98 signing acceptance: GIVEN the owner-approved existing source WHEN official CLI
+binding and independent readback confirm the same key bytes/certificate and
+canonical default THEN pin that verified public certificate for com.suqpage.app
+and retain the historical preview association unchanged. Until that readback, the
+canonical pin stays empty. GIVEN either admitted identity WHEN creating intents
+THEN only the exact public HTTPS Suqpage routes are claimed; unknown packages,
+untrusted/private URLs and malformed fingerprints remain denied.
+Test: scripts/test-mobile-app-links.ts plus protected independent binding and
+actual APK inspection; a configuration match is not installed-device evidence.

@@ -7,6 +7,8 @@ import { saveTransportHandoffAction } from "@/app/support-actions";
 import { useUiText } from "@/lib/i18n/ui";
 import type { TransportHandoff } from "@/lib/support";
 import styles from "./TransportSupport.module.css";
+import SupportNavigationFields from './SupportNavigationFields';
+import type {SupportViewState} from '@/lib/support-navigation';
 
 function SaveButton() {
   const { pending } = useFormStatus();
@@ -14,8 +16,9 @@ function SaveButton() {
   return <button className="btn brand" disabled={pending}><Save size={18} aria-hidden="true" />{pending ? t("Saving…") : t("Save company")}</button>;
 }
 
-export default function TransportHandoffForm({ conversationId, handoff, closed, summary, saved }: {
+export default function TransportHandoffForm({ conversationId, handoff, closed, summary, saved, navigation={} }: {
   conversationId:number; handoff:TransportHandoff|null; closed:boolean; summary:string; saved:boolean;
+  navigation?:SupportViewState;
 }) {
   const t = useUiText();
   const [copyStatus, setCopyStatus] = useState("");
@@ -23,6 +26,7 @@ export default function TransportHandoffForm({ conversationId, handoff, closed, 
     <h2>{t("Transport company")}</h2>
     {handoff ? <p>{t("Company saved")}: <strong>{handoff.company}</strong> · {handoff.contact}</p> : <p>{t("No company selected")}</p>}
     {!closed ? <form action={saveTransportHandoffAction} className={styles.handoff}>
+      <SupportNavigationFields state={navigation}/>
       <input type="hidden" name="conversationId" value={conversationId} />
       <input type="hidden" name="previousId" value={handoff?.id || 0} />
       <label>{t("Company name")}<input name="company" required maxLength={120} defaultValue={handoff?.company || ""} /></label>

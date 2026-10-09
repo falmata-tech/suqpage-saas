@@ -4,7 +4,7 @@ title: Policy-compliant browser OpenStreetMap basemap
 status: accepted
 date: 2026-08-24
 deciders: [Suqpage]
-related: [FE-021, BE-023, DEP-026, ADR-0014]
+related: [FE-058, FE-021, BE-023, DEP-026, ADR-0014]
 ---
 
 # ADR-0016 - Policy-compliant browser OpenStreetMap basemap

@@ -1,6 +1,7 @@
 import { PostgresCatalogRepository } from "./postgres-catalog-repository";
 import { InquiryError, type InquiryInput } from "./inquiries";
 import { notifyNewInquiry } from "./notifications";
+import { enqueueInquiryAttention } from './attention-postgres';
 import { normalizeOfferingKind, normalizeQuantityMode } from "./offerings";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
 import { consumePostgresRateLimit } from "./rate-limit-postgres";
@@ -91,6 +92,7 @@ export async function createPostgresPublicInquiry(
       "INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,offering_kind_snapshot,quantity_mode_snapshot,options_json) VALUES(?,?,?,?,?,?,?,?)",
       [inquiryId, item.productId, item.name, null, item.quantityIntent, item.offeringKind, item.quantityMode, JSON.stringify(item.options)],
     );
+    await enqueueInquiryAttention(runner,businessId,inquiryId);
     return { inquiryId, duplicate: false };
   });
   if (!created.duplicate) await notify(business, created.inquiryId, customerName);

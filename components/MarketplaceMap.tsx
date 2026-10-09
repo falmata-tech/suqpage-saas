@@ -1,4 +1,5 @@
 "use client";
+import {pointInMapViewport,wrappedMapLongitude} from '@/lib/map-display-location';
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -16,6 +17,7 @@ const DEFAULT_ZOOM = 5;
 const NEARBY_GROUP_ZOOM = 14;
 const SHOWROOM_DETAIL_ZOOM = 12;
 const CLUSTER_MAX_ZOOM = NEARBY_GROUP_ZOOM - 1;
+const STOREFRONT_GLYPH = `<svg class="mp-map-storefront" viewBox="0 7 36 25" aria-hidden="true"><rect x="5" y="9" width="26" height="23" rx="2" fill="currentColor" stroke="white" stroke-width="1.5"/><path d="M5 3H31L34 11H2Z" fill="currentColor" stroke="white" stroke-width="1.5"/><path d="M9 16H27M9 19H27M11 30V23H25V30" fill="none" stroke="white" stroke-width="1.4"/></svg>`;
 
 type MapView = {
   center: [number, number];
@@ -187,10 +189,9 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
         attributionControl: true,
         center: ETHIOPIA_CENTER,
         zoom: DEFAULT_ZOOM,
-        minZoom: 5,
+        minZoom: 1,
+        worldCopyJump: true,
         maxZoom: provider.maxZoom,
-        maxBounds: ETHIOPIA_BOUNDS,
-        maxBoundsViscosity: 0.65,
         zoomControl: false,
         preferCanvas: true,
         wheelDebounceTime: 80,
@@ -232,6 +233,8 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
         let mountedMarkerCount = 0;
 
         const addMarker = (marker: Marker, accessibleName: string) => {
+          const coordinate=marker.getLatLng();
+          marker.setLatLng([coordinate.lat,wrappedMapLongitude(coordinate.lng,map!.getCenter().lng)]);
           marker.addTo(markerLayerRef.current!);
           const element = marker.getElement();
           element?.setAttribute("role", "button");
@@ -248,7 +251,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
 
         if (zoom >= NEARBY_GROUP_ZOOM) {
           for (const group of data.nearbyGroups) {
-            if (!bounds.contains([group.latitude, group.longitude])) continue;
+            if (!pointInMapViewport(group.longitude,group.latitude,viewport)) continue;
             const groupShowrooms = group.showroomIds.map((id) => showroomById.get(id)).filter((item): item is DiscoveryShowroom => Boolean(item));
             const featured = group.showroomIds.includes(data.featuredNowBusinessId || -1);
             const liveCount = groupShowrooms.filter((showroom) => showroom.isLive && showroom.id !== data.featuredNowBusinessId).length;
@@ -269,13 +272,13 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             addMarker(marker, t("{count} nearby businesses in {city}. Open nearby businesses.", { count: group.count, city: group.city }));
           }
           for (const showroom of data.showrooms) {
-            if (groupedShowroomIds.has(showroom.id) || !bounds.contains([showroom.latitude, showroom.longitude])) continue;
+            if (groupedShowroomIds.has(showroom.id) || !pointInMapViewport(showroom.longitude,showroom.latitude,viewport)) continue;
             const presence = presenceFor(showroom, data.featuredNowBusinessId);
             const lines = markerLabelLines(showroom.name).map((line) => `<span>${escapeHtml(line)}</span>`).join("");
             const status = presence.kind ? `<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind === "featured" ? "Featured" : "Live"))}</em>` : "";
             const icon = L.divIcon({
               className: "mp-map-div-icon",
-              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}><i class="mp-map-storefront" aria-hidden="true"><i></i></i><b>${lines}</b>${status}</span>`,
+              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,
               iconSize: [44, 44],
               iconAnchor: [22, 25],
             });
@@ -322,7 +325,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             const status = presence.kind ? `<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind === "featured" ? "Featured" : "Live"))}</em>` : "";
             const icon = L.divIcon({
               className: "mp-map-div-icon",
-              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}><i class="mp-map-storefront" aria-hidden="true"><i></i></i><b>${lines}</b>${status}</span>`,
+              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,
               iconSize: [44, 44],
               iconAnchor: [22, 25],
             });

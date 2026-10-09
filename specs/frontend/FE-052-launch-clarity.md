@@ -4,7 +4,7 @@ title: Clear launch journeys and natural interface language
 status: in_progress
 related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053]
 owners: [product, frontend, backend]
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 change_level: L3
 ---
 
@@ -30,14 +30,22 @@ No invented deadline, permanent free plan, paid booking or provider integration.
    the status is saved and audited; another tenant or team member is denied.
    Phone inquiries offer Call and SMS; external handoffs never claim delivery.
    Display translations never become machine status values.
-3. GIVEN a seeded example WHEN it appears in search, Featured or its public page
-   THEN a concise Demo label distinguishes it from a real offer; inquiry/contact
-   areas explain that details are examples without deleting demonstration flows.
-   Unknown real businesses are not labeled from their name alone.
+3. GIVEN a seeded example WHEN it appears in search or Featured THEN a concise
+   Demo label distinguishes it from a real offer. On its showroom, omit the
+   "Demo business — products and contact details are examples." notice when the
+   visible handle contains `demo` (case-insensitive); retain it for explicitly
+   marked demos whose handles do not. Inquiry views omit demo-explanation text,
+   including "Demo inquiry — contact details are examples."
+   This display rule never assigns/removes is_demo or changes permissions, sample
+   publication checks, contacts or inquiry behavior. Real businesses are never
+   labeled as demos from their names or handles alone. Apply on web and native.
 4. GIVEN first publication WHEN known starter contact values, unreviewed example
    location, starter About or sample offerings remain THEN publication is denied
    with useful field-specific guidance. The owner sees a short review checklist;
    subsequent live Save and staff consent boundaries remain unchanged.
+   The city explicitly selected during BE-047 signup already satisfies location
+   confirmation. A legacy/default location without confirmed profile/proposal
+   evidence still fails that check; tests cover both cases independently.
 5. GIVEN Featured without a configured broadcast WHEN rendered THEN the business
    gallery is primary; schedule details remain available but do not imply a live
    show. Demo live flags do not imply an actual live stream. Preview buttons
@@ -88,6 +96,9 @@ Focused inquiry authorization/persistence, first-publication checks including
 negative and legacy cases, localization coverage/interpolation, demo projection,
 search submit/collapse and desktop/320/390 captures across supported languages.
 Map to scripts/test-launch-clarity.ts and focused existing workflow scripts.
+`scripts/capture-demo-notice.mjs` covers handle-based notice suppression,
+marked-demo retention and ordinary-business absence on web/Expo, with phone/
+desktop captures. No database mutation is needed for this presentation change.
 Map preview overlap: `scripts/capture-map-preview.mjs` exercises the local app
 and real Leaflet markers; `scripts/capture-nearby-preview.mjs` exercises the real
 nearby viewer/modal with six component-fixture businesses and stubbed navigation,

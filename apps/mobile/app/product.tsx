@@ -102,7 +102,7 @@ export default function Product() {
             icon="plus"
             onPress={() => inquire(false)}
           />
-          {notice && <Copy>{notice}</Copy>}
+          {Boolean(notice) && <Copy>{notice}</Copy>}
           {basket && basket.items.length > 0 && (
             <Button
             accentColor={shop.accentColor}

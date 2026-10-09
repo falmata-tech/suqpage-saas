@@ -50,7 +50,7 @@ try {
     await expect(page.locator('.discovery-preview')).toHaveCount(0);
    } else await expect(page.locator('main h1').first()).toBeVisible();
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Overflow ${route} ${width} ${locale}`);
-   if(route.startsWith('/@')) await expect(page.locator('[class*="LaunchClarity"][class*="notice"]')).toBeVisible();
+   if(route.startsWith('/@')) await expect(page.locator('[class*="LaunchClarity"][class*="notice"]')).toHaveCount(0);
    await page.screenshot({path:`${dir}/${route.startsWith('/@')?'shop':route.slice(1)}-${width}-${locale}.png`});
   }
   assert.deepEqual(errors,[]);records.push({width,locale,resultsHeight:space});await context.close();

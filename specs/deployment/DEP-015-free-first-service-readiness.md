@@ -111,3 +111,14 @@ phone/desktop review, then release gates. Before production: protected backup,
 restore evidence and exact target verification. Roll back the application only
 to a compatible release; retain schema/data and disable new transport intake
 if needed rather than deleting requests or reversing the additive migration.
+
+## S89 — subscription retirement rollout
+
+BE-017/FE-018 retire business plans and payment/renewal workflows. Before rollout,
+back up the independently verified PostgreSQL target. The forward migration
+removes only the automatic business subscription trigger; preserve existing
+ledger rows. Verify new business creation has no subscription, historical rows
+are unchanged and public visibility/analytics still work. Application rollback
+may restore old code only together with reviewed trigger restoration; never
+silently resume billing or destructively erase the ledger. Local UI approval,
+focused security/migration checks and release gates precede production rollout.

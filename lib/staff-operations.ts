@@ -1,13 +1,15 @@
 import bcrypt from "bcryptjs";
 import { isStrongPassword } from "./passwords";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
-import type { AccessRole, Business } from "./types";
+import type { AccessRole, Business, SessionUser } from "./types";
+import {hasCapability} from "./capabilities";
 import { authDriver } from "./config";
 import { finalizeSupabaseIdentity, provisionSupabaseEmailIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
 
 export type StaffRole = Extract<AccessRole, "team_member" | "operations_manager">;
 export type StaffAccount = {
   id:number; email:string; name:string; access_role:StaffRole; must_change_password:number;
+  queue_scope?: "support"|"transport"|"all"|null;
 };
 export type ManagedClient = { id:number; email:string; name:string; business_id:number; business_name:string; request_type:"onboarding"|"change" };
 
@@ -17,15 +19,16 @@ const clean = (value: unknown, max: number) => String(value ?? "").trim().replac
 
 export async function listStaffAccounts(): Promise<StaffAccount[]> {
   return runtimeAll<StaffAccount>(`
-    SELECT u.id,u.email,u.name,u.must_change_password,p.access_role
+    SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,s.queue_scope
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+    LEFT JOIN support_agent_settings s ON s.user_id=u.id
     WHERE p.access_role IN ('team_member','operations_manager')
     ORDER BY p.access_role,u.name
   `);
 }
 
 export async function listTeamMembers(): Promise<StaffAccount[]> {
-  return (await listStaffAccounts()).filter((staff) => staff.access_role === "team_member");
+  return (await listStaffAccounts()).filter((staff) => staff.access_role === "team_member" && staff.queue_scope !== "support" && staff.queue_scope !== "transport");
 }
 
 export async function listManagedClients(): Promise<ManagedClient[]> {
@@ -49,15 +52,20 @@ export async function listManagedClients(): Promise<ManagedClient[]> {
   }));
 }
 
-export async function createStaffAccount(raw: { name:unknown; email:unknown; password:unknown; accessRole:unknown }) {
+export async function createStaffAccount(raw: { name:unknown; email:unknown; password:unknown; accessRole:unknown }, actor: SessionUser) {
+  if (!hasCapability(actor,"platform:admin") || !Number.isSafeInteger(actor.id) ||
+    !await runtimeGet("SELECT 1 FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND p.access_role='platform_admin'",[actor.id]))
+    throw new StaffOperationError("Platform administrator access required.");
   const name = clean(raw.name, 100);
   const email = clean(raw.email, 160).toLowerCase();
   const managed = authDriver() === "supabase";
   const password = managed ? "" : String(raw.password ?? "");
-  const accessRole = clean(raw.accessRole, 40) as StaffRole;
-  if (!name || !/^\S+@\S+\.\S+$/.test(email) || !["team_member", "operations_manager"].includes(accessRole) || (!managed && !isStrongPassword(password))) {
+  const functionRole = clean(raw.accessRole, 40);
+  if (!name || !/^\S+@\S+\.\S+$/.test(email) || !["support_agent", "transport_agent"].includes(functionRole) || (!managed && !isStrongPassword(password))) {
     throw new StaffOperationError(managed ? "Enter a name, valid email and staff role." : "Complete every staff field and use a 12+ character temporary password with upper-case, lower-case, and a number.");
   }
+  const accessRole = "team_member" as const;
+  const queueScope = functionRole === "support_agent" ? "support" as const : "transport" as const;
   const passwordHash = managed ? "!supabase-managed-identity" : await bcrypt.hash(password, 12);
   let providerUserId = "";
   if (managed) {
@@ -72,8 +80,9 @@ export async function createStaffAccount(raw: { name:unknown; email:unknown; pas
       `, [email, passwordHash, name, managed ? 0 : 1]);
       const userId = Number(inserted!.id);
       await runtimeRun("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)", [userId, accessRole]);
+      await runtimeRun("INSERT INTO support_agent_settings(user_id,enabled,max_open_conversations,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,3,?,?,?)",[userId,actor.id,Date.now(),queueScope]);
       if (providerUserId) await runtimeRun("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, providerUserId, email, Date.now()]);
-      return { userId, accessRole };
+      return { userId, accessRole, queueScope };
     });
     if (providerUserId) await finalizeSupabaseIdentity(providerUserId, result.userId).catch(() => undefined);
     return result;
@@ -100,7 +109,8 @@ export async function assignRequestToTeamMember(requestId: number, teamMemberId:
     if (teamMemberId !== null) {
       const teamMember = await runtimeGet(`
         SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
-        WHERE u.id=? AND p.access_role='team_member'
+        WHERE u.id=? AND p.access_role='team_member' AND NOT EXISTS(
+          SELECT 1 FROM support_agent_settings s WHERE s.user_id=u.id AND s.queue_scope IN ('support','transport'))
       `, [teamMemberId]);
       if (!teamMember) throw new StaffOperationError("Choose a valid team member.");
     }

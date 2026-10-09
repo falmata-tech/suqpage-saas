@@ -4,7 +4,7 @@ title: Public client bootstrap and unified discovery projection
 status: in_progress
 related: [BE-002, BE-003, BE-015, BE-017, BE-019, BE-023, BE-029, BE-031, FE-021, DEP-017, ADR-0011, ADR-0017]
 owners: [backend, security, operations]
-last_updated: 2026-08-09
+last_updated: 2026-10-07
 change_level: L3
 ---
 
@@ -246,3 +246,22 @@ that retained booth configuration cannot override the page hero. Focused
 Chromium captures prove decoded pixels resolve to the exact projected hero path
 at desktop and phone widths. User visual approval remains pending before the
 complete release gate.
+
+## S86 — one-time Addis demo placement correction
+
+Ready operations/data correction, limited to the local PostgreSQL example
+catalog. GIVEN an explicitly marked demo in Addis Ababa with area location and
+no precise coordinates WHEN applying the reviewed plan THEN only its public
+discovery latitude/longitude and update timestamp change, distributing the demos
+across verified urban neighborhoods inside the Addis administrative boundary.
+Account/profile/page/product/contact/branding/publication state, canonical city
+anchor and owner location versions remain unchanged. Exact storefront positions,
+unmarked businesses and other cities are excluded.
+
+Back up affected rows privately before one atomic, drift-checked update. Validate
+the final display points after existing city jitter, retain approximate-area
+semantics, and verify the web/native public projection and counts. Rollback is a
+drift-checked restoration of the recorded rows, not a general seed reset. This is
+a one-time reviewed demo operation, not a new placement algorithm or permanent
+sync utility. No hosted write, migration, provider or owner-save change; future
+production application is a separately targeted rollout step.

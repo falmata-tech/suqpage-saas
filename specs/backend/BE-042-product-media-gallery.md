@@ -2,7 +2,7 @@
 id: BE-042
 title: Ordered tenant product media
 status: in_progress
-related: [FE-050, BE-009, BE-010, BE-024, DEP-039, FE-019, BE-018]
+related: [BE-049, FE-060, BE-048, FE-050, BE-009, BE-010, BE-024, DEP-039, FE-019, BE-018, BE-046, ADR-0024]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-09-27
 change_level: L3

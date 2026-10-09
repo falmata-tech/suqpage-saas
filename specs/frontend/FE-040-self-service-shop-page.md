@@ -2,7 +2,7 @@
 id: FE-040
 title: Simple owner-controlled business profiles
 status: in_progress
-related: [FE-054, FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
+related: [FE-060, BE-045, FE-056, FE-054, FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
 owners: [product, frontend]
 last_updated: 2026-09-21
 change_level: L2

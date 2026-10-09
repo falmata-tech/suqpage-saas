@@ -4,9 +4,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   Building2,
-  ClipboardList,
+  Truck,
+  ArrowRight,
   Headphones,
-  Palette,
   UserCog,
   CalendarClock,
 } from "lucide-react";
@@ -47,15 +47,22 @@ export default async function AdminOverview({
       icon: Building2,
     },
     {
-      href: "/dashboard/support",
-      label: t("Support inbox"),
-      value: attention.supportReplies,
-      detail: "Waiting or unread conversations",
+      href: "/dashboard/support?queue=support",
+      label: t("Business support"),
+      value: null,
+      detail: t("Questions from business owners"),
       icon: Headphones,
     },
     {
+      href: "/dashboard/support?queue=transport",
+      label: t("Transport"),
+      value: null,
+      detail: t("Transport requests from customers"),
+      icon: Truck,
+    },
+    {
       href: "/dashboard/admin/staff",
-      label: t("Staff & access"),
+      label: t("Staff"),
       value: counts.staff,
       detail: "Individual roles and sign-in readiness",
       icon: UserCog,
@@ -67,13 +74,7 @@ export default async function AdminOverview({
       detail: "Automatic timing and date-specific lineups",
       icon: CalendarClock,
     },
-    {
-      href: "/dashboard/account-health",
-      label: t("Renewals"),
-      value: "Open",
-      detail: "Manual service periods and renewal records",
-      icon: CalendarClock,
-    },
+
   ];
 
   return (
@@ -90,7 +91,7 @@ export default async function AdminOverview({
           <Link className="admin-command" href={destination.href} key={destination.href}>
             <Icon aria-hidden="true" size={20}/>
             <span><strong>{destination.label}</strong><small>{destination.detail}</small></span>
-            <b>{destination.value}</b>
+            <b>{destination.value===null?<ArrowRight aria-hidden="true" size={19}/>:destination.value}</b>
           </Link>
         ))}
       </section>
@@ -98,8 +99,7 @@ export default async function AdminOverview({
         <div><span className="eyebrow">{t("Common actions")}</span><h2 id="admin-quick-title">{t("Keep work moving")}</h2></div>
         <div>
           <Link className="small-btn" href="/dashboard/admin/businesses">{t("Manage businesses")}</Link>
-          <Link className="small-btn" href="/dashboard/support/agents">{t("Manage support capacity")}</Link>
-          <Link className="small-btn" href="/dashboard/account-health">{t("Review monthly accounts")}</Link>
+          <Link className="small-btn" href="/dashboard/support/agents">{t("Workload & availability")}</Link>
         </div>
       </section>
     </DashboardShell>

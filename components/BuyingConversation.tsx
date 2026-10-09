@@ -5,6 +5,8 @@ import { Check, Clock3, Send, Wifi } from "lucide-react";
 import { useUiText } from "@/lib/i18n/ui";
 import { buyingRefreshDelay, type BuyingConversation as Conversation } from "@/lib/buying-conversation-contract";
 import styles from "./BuyingConversation.module.css";
+import { useVisibleChatRead } from './ChatReadObserver';
+import AttentionAlerts from './AttentionAlerts';
 
 export default function BuyingConversation({ initial, active, onAnother, endpoint = "/api/public-support?channel=buying" }: { endpoint?: string; initial: Conversation; active: boolean; onAnother: () => void }) {
   const t = useUiText();
@@ -20,7 +22,11 @@ export default function BuyingConversation({ initial, active, onAnother, endpoin
   const history = useRef<HTMLDivElement>(null);
   const firstScroll = useRef(true);
   const lastId = conversation.messages.at(-1)?.id;
-  const awaitingReply = conversation.status !== "closed" && !conversation.messages.some(item => item.sender === "staff");
+  const awaitingReply = conversation.status !== "closed" && !conversation.agentJoined && !conversation.messages.some(item => item.sender === "staff");
+  useVisibleChatRead(history,active,async messageId=>{
+    const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'read',messageId,publicRef:initial.publicRef}),signal:AbortSignal.timeout(8000)});
+    if(!response.ok)throw new Error('read');
+  },initial.publicRef);
   useEffect(() => { setConversation(initial); }, [initial]);
   useEffect(() => {
     const node = history.current;
@@ -84,8 +90,9 @@ export default function BuyingConversation({ initial, active, onAnother, endpoin
     finally { busyRef.current = false; setBusy(false); setEnding(false); version.current++; }
   }
   return <div className={styles.conversation}>
+    <AttentionAlerts identity={initial.publicRef} endpoint={endpoint.includes('transport')?'/api/attention?channel=transport':'/api/attention?channel=buying'} onOpen={()=>{if(history.current)history.current.scrollTop=history.current.scrollHeight;}}/>
     <div className={styles.status} data-waiting={awaitingReply} role="status">
-      <strong>{awaitingReply ? <><Clock3 aria-hidden="true" />{t(conversation.category === "shipment_observation" ? "Waiting for our transport team" : "Waiting for our team")}</> : conversation.status === "closed" ? t("Closed") : conversation.assignedUserName ? t("Assigned to {value1}", {value1: conversation.assignedUserName}) : t("Waiting for a team member")}</strong>
+      <strong>{conversation.status === 'closed' ? t('Closed') : conversation.agentJoined ? t('{value1} joined your chat',{value1:conversation.assignedUserName||t('An agent')}) : conversation.assignedUserName ? t('Assigned to {value1}',{value1:conversation.assignedUserName}) : <><Clock3 aria-hidden="true" />{t(conversation.category === "shipment_observation" ? "Waiting for our transport team" : "Waiting for our team")}</>}</strong>
       {connected && conversation.status !== "closed" ? <span className={styles.connection}><Wifi aria-hidden="true" />{t("Chat connected")}</span> : null}
       {conversation.status !== "closed" ? <button type="button" className={styles.endChat} onClick={() => void endChat()} disabled={busy} aria-busy={ending}>{t("End chat")}</button> : null}
       {!connected ? <span>{t("Connection interrupted. Retrying…")}</span> : null}
@@ -94,7 +101,8 @@ export default function BuyingConversation({ initial, active, onAnother, endpoin
     <div ref={history} className={styles.history} role="log" aria-live="polite" aria-relevant="additions" aria-label={t("Support message history")} tabIndex={0}>
       {conversation.messages.map(item => <article key={item.id} data-sender={item.sender}>
         <strong>{item.sender === "visitor" ? t("You") : item.senderName}</strong>
-        <p>{item.body}</p><div className={styles.messageMeta}><time dateTime={new Date(item.createdAt).toISOString()}>{new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(item.createdAt)}</time>{item.sender === "visitor" ? <span><Check aria-hidden="true" />{t("Sent")}</span> : null}</div>
+        <p>{item.body}</p><div className={styles.messageMeta}><time dateTime={new Date(item.createdAt).toISOString()}>{new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(item.createdAt)}</time>{item.sender === "visitor" ? <span data-receipt={item.read?'read':'sent'}><Check aria-hidden="true" />{t(item.read?'Read':'Sent')}</span> : null}</div>
+        {item.sender==='staff'?<span data-read-message-id={item.id} aria-hidden="true" style={{display:'block',height:1}}/>:null}
       </article>)}
     </div>
     {conversation.status === "closed" ? <p className={styles.waitingHint}>{t("Our team can still follow up by phone.")}</p> : null}

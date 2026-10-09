@@ -33,10 +33,12 @@ async function main(){
   await visitor.locator('#transport-destination').fill('Adama');
   await visitor.locator('#public-buying-message').fill('Two cartons to deliver.');
   await visitor.locator('#public-buying-name').fill('Review visitor');await visitor.locator('#public-buying-phone').fill('+447700900999');
-  await visitor.getByRole('button',{name:'Start chat',exact:true}).click();
-  await expect(visitor.getByText('Waiting for our transport team',{exact:true})).toBeVisible();
+  const started=visitor.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname==='/api/public-support');
+  await visitor.getByRole('button',{name:'Start chat',exact:true}).click();assert.ok((await started).ok());
   const token=(await visitor.context().cookies()).find(cookie=>cookie.name==='suqpage_public_transport')?.value;assert.ok(token);
   const publicCase=await support.getPublicSupportConversation(token);
+  assert.equal(publicCase.agentJoined,false,'Assignment does not claim the agent joined');
+  await expect(visitor.getByText(publicCase.assignedUserName?'Assigned to '+publicCase.assignedUserName:publicCase.category==='shipment_observation'?'Waiting for our transport team':'Waiting for our team',{exact:true})).toBeVisible();
   caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);
   const request={id:caseId,token};
   await support.reassignSupportConversation(staff,caseId,userId);
@@ -61,7 +63,7 @@ async function main(){
   await expect(visitor.getByRole('button',{name:'Send another request',exact:true})).toBeVisible();
   await page.reload();
   await expect(page.getByText('Chat ended',{exact:true})).toBeVisible();
-  await expect(page.getByRole('link',{name:'Back to support inbox'})).toHaveAttribute('href','/dashboard/support?queue=transport&status=history');
+  await expect(page.getByRole('link',{name:'Back to inbox',exact:true})).toHaveAttribute('href','/dashboard/support?queue=transport&status=active');
   await expect(page.locator('a[href="tel:+447700900999"]')).toBeVisible();
   await expect(page.locator('.support-visitor-contact')).toContainText('Two cartons to deliver.');
   await expect(page.locator('select[name=audience]')).toHaveCount(0);
@@ -77,15 +79,15 @@ async function main(){
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-ended-${width}.png`});
     await page.goto(`${base}/dashboard/support?queue=transport&status=history&q=${reference}`);
-    await expect(page.locator(`.support-row[href="/dashboard/support/${caseId}"]`)).toContainText('Two cartons to deliver.');
+    await expect(page.locator(`.support-row[href^="/dashboard/support/${caseId}?"]`)).toContainText('Two cartons to deliver.');
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-history-${width}.png`});
   }
-  await page.locator(`.support-row[href="/dashboard/support/${caseId}"]`).click();
+  await page.locator(`.support-row[href^="/dashboard/support/${caseId}?"]`).click();
   await page.getByRole('button',{name:'Mark resolved',exact:true}).click();
   await expect(page.locator('.support-thread-head .badge')).toHaveText('Resolved');
   await page.goto(`${base}/dashboard/support?queue=transport&status=resolved&q=${reference}`);
-  await expect(page.locator(`.support-row[href="/dashboard/support/${caseId}"]`)).toBeVisible();
+  await expect(page.locator(`.support-row[href^="/dashboard/support/${caseId}?"]`)).toBeVisible();
   await page.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/staff-resolved-390.png`});
   await page.goto(`${base}/dashboard/support?queue=transport&status=history&q=${reference}`);
   await expect(page.locator('.support-row')).toHaveCount(0);

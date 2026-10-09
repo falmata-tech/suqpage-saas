@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import { launchWiringCases } from "./launch-wiring-cases";
 import assert from 'node:assert/strict';
 import { createClientInvitation } from '../lib/invitations';
@@ -32,7 +33,7 @@ async function main(){
   const requestsBefore=(await runner.query<{n:string}>('SELECT COUNT(*) n FROM service_requests')).rows[0].n;
   const userQuery='SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id';
   const admin=(await runner.query<SessionUser>(`${userQuery} WHERE p.access_role='platform_admin' ORDER BY u.id LIMIT 1`)).rows[0];assert.ok(admin);
-  const create=async()=>{const created=await createPostgresPublicClientWorkspace(runner,{name:'Page review fixture',businessName:'Page review fixture',businessCategory:'electronics',phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:randomUUID(),email:`review-${randomUUID()}@example.test`});return (await runner.query<SessionUser>(`${userQuery} WHERE u.id=?`,[created.userId])).rows[0];};
+  const create=async()=>{const created=await createPostgresPublicClientWorkspace(runner,{name:'Page review fixture',businessName:'Page review fixture',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:randomUUID(),email:`review-${randomUUID()}@example.test`});return (await runner.query<SessionUser>(`${userQuery} WHERE u.id=?`,[created.userId])).rows[0];};
   const invitation={requestId:null,clientName:'Invitation fixture',email:`invite-${randomUUID()}@example.test`,businessName:'Invitation fixture',handle:`invite-${randomUUID()}`,designKey:'novatech',actorUserId:admin.id};
   await assert.rejects(()=>createClientInvitation({...invitation,requestId:1}),/no longer available/);
   assert.ok((await createClientInvitation(invitation)).businessId);

@@ -4,7 +4,7 @@ title: Live buying assistance and native client boundaries
 status: accepted
 date: 2026-09-27
 deciders: [Suqpage]
-related: [FE-053, BE-044, DEP-042, FE-019, BE-018, FE_BASE, BE_BASE, DEP_BASE, ADR-0009]
+related: [FE-058, FE-053, BE-044, DEP-042, FE-019, BE-018, FE_BASE, BE_BASE, DEP_BASE, ADR-0009, ADR-0026]
 ---
 
 # ADR-0023 — Live buying assistance and native client boundaries

@@ -21,14 +21,14 @@ export async function createStaffAccountAction(formData: FormData) {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   try {
-    const created = await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
-    await audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
+    const created = await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") },user);
+    await audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole, queueScope:created.queueScope } });
   } catch (error) {
     redirect(`/dashboard/admin/staff?error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
   }
   revalidatePath("/dashboard/admin");
   revalidatePath("/dashboard/admin/staff");
-  redirect("/dashboard/admin/staff?saved=staff");
+  redirect(`/dashboard/admin/staff?saved=staff&q=${encodeURIComponent(String(formData.get("email") || "").trim().toLowerCase())}`);
 }
 
 export async function updateDiscoveryProfileAction(formData: FormData) {

@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { postgresRuntimeServices, closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
@@ -25,7 +26,7 @@ async function main() {
       assert.deepEqual((await runner.query("SELECT id,email FROM users ORDER BY id")).rows, before);
       assert.deepEqual((await runner.query("SELECT * FROM auth_identity_links ORDER BY user_id")).rows, links);
       const created = await createPostgresPublicClientWorkspace(runner, {
-        name: "Contact test", businessName: "Contact separation test", businessCategory: "other-manufacturing",
+        name: "Contact test", businessName: "Contact separation test", businessCategory: "other-manufacturing", placeId:findPlaceSuggestions("Addis Ababa")[0].id,
         phone: "+44 7700 900001", consent: true, idempotencyKey: randomUUID(),
       }, { providerUserId: randomUUID(), email: `contact-${randomUUID()}@example.test` });
       const business = (await catalog.getBusinessById(created.businessId))!;

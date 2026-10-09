@@ -69,8 +69,14 @@ async function main() {
     assert.equal(profile.latitude,location.latitude);
     assert.ok(profile.approved_at>0);
     assert.equal((await getMarketplaceDiscoveryView({q:'Immediate public'})).resultCounts.businesses,1,'Search uses public About, not private draft');
+    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:2,locationVersion:3,category:'other-manufacturing',mode:'area'});
+    assert.equal((await db.prepare('SELECT category_key FROM owner_location_proposals WHERE business_id=?').get(bid)).category_key,'other-manufacturing');
+    assert.equal((await db.prepare('SELECT COUNT(*) n FROM business_industries WHERE business_id=?').get(bid)).n,0);
+    const neutral=await getMarketplaceDiscoveryView({industry:'all',q:'Visit Addis',type:'products'});
+    assert.equal(neutral.resultCounts.products,1);assert.equal(neutral.showrooms[0].primaryIndustryKey,'all');assert.equal(neutral.searchProducts[0].primaryIndustryKey,'all');
+    assert.equal((await getMarketplaceDiscoveryView({industry:'electronics',q:'Visit Addis'})).resultCounts.products,0);
     await db.prepare('UPDATE business_discovery_profiles SET is_excluded=1 WHERE business_id=?').run(bid);
-    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:2,locationVersion:3,mode:'area'});
+    await saveOwnerBusiness(owner,bid,{...location,expectedVersion:3,locationVersion:4,category:'other-manufacturing',mode:'area'});
     profile=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(bid);
     assert.equal(profile.is_excluded,1);
     assert.equal(profile.latitude,Math.round(place.latitude*10)/10);
@@ -88,7 +94,18 @@ async function main() {
     const exact={id:1,latitude:9.02345,longitude:38.76543,locationMode:'storefront' as const};
     assert.deepEqual(mapDisplayLocation(exact),exact);
     assert.deepEqual(points[0],{id:1,latitude:9,longitude:38,locationMode:'area'});
-    console.log('PASS direct publish, live-save atomicity, staff privacy, stale/foreign/suspended denial, immediate GPS/area privacy, public About search and 1,000 stable bounded city offsets.');
+    const otherId=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('other-category-fixture','Other category fixture','composition','draft')").run()).insertedId);
+    const otherUserId=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES('other-category@example.test','unused','Owner','owner',?)").run(otherId)).insertedId);
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'client')").run(otherUserId);
+    const otherOwner=(await getUserById(otherUserId))!,otherDraft=await saveOwnerPageAndPublication(otherOwner,otherId,{action:'start',content});
+    await db.prepare("INSERT INTO products(business_id,name,slug,description,is_published) VALUES(?,'Other item','other-item','A real custom offering',1)").run(otherId);
+    await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
+      VALUES(?,2,'other-manufacturing',?,?,'area',?,?,?,0,1)`).run(otherId,savedPlace.name,savedPlace.region,savedPlace.id,savedPlace.latitude,savedPlace.longitude);
+    await changePagePublication(ownerPagePort,pagePublicationPort,otherOwner,otherId,{action:'publish',version:otherDraft.version,revision:0});
+    assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(otherId)).status,'active');
+    assert.equal((await getMarketplaceDiscoveryView({industry:'all',q:'Other item'})).resultCounts.products,1);
+    assert.equal((await db.prepare('SELECT COUNT(*) n FROM business_industries WHERE business_id=?').get(otherId)).n,0);
+    console.log('PASS direct publish, live-save atomicity, staff privacy, stale/foreign/suspended denial, Other-category signup/save/publication/discovery, immediate GPS/area privacy, public About search and 1,000 stable bounded city offsets.');
   } finally {await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

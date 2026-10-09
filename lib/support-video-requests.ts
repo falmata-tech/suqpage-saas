@@ -1,6 +1,8 @@
 import { runtimeGet, runtimeRun, runtimeTransaction } from './runtime-sql';
 import { createSupportConversation, getSupportConversation, postSupportMessage, SupportError } from './support';
 import { normalizeControlledYouTubeUrl, controlledYouTubeWatchUrl } from './youtube-provider';
+import { resolveProductVideoUrl } from './tiktok-short-link';
+import { productVideoWatchUrl } from './video/product-video';
 import { videoSourceUrl } from './video-request-policy';
 import { STARTER_VIDEO_REF, STARTER_VIDEO_URL } from './business-starter';
 import { productMedia, parseProductMedia } from './product-media';
@@ -49,7 +51,18 @@ export async function getVideoRequest(user:SessionUser,conversationId:number):Pr
   await getSupportConversation(user,conversationId);
   return await runtimeGet<VideoRequest>('SELECT * FROM support_video_requests WHERE conversation_id=?',[conversationId])||null;
 }
-export async function reviewVideoRequest(user:SessionUser,conversationId:number,input:{decision:unknown;youtubeUrl?:unknown;reply:unknown}) {
+export async function reviewVideoRequest(user:SessionUser,conversationId:number,input:{decision:unknown;youtubeUrl?:unknown;videoUrl?:unknown;reply:unknown}) {
+  // Authenticate target/reviewer before provider work; never hold a database lock while resolving a share URL.
+  let approvedRef:string|null=null;
+  if(input.decision==='approved') {
+    const {conversation}=await getSupportConversation(user,conversationId);
+    if(user.access_role==='client'||(user.access_role!=='platform_admin'&&user.access_role!=='operations_manager'&&conversation.assignedUserId!==user.id))return fail('Only the assigned team member can review this video.','forbidden');
+    const request=await runtimeGet<VideoRequest>('SELECT * FROM support_video_requests WHERE conversation_id=?',[conversationId]);
+    if(!request)return fail('Video request not found.');
+    const url=input.videoUrl??input.youtubeUrl;
+    try { approvedRef=request.target_kind==='product'?await resolveProductVideoUrl(url):normalizeControlledYouTubeUrl(url).managedRef; }
+    catch { return fail(request.target_kind==='product'?'Use a supported video link.':'Use a supported YouTube video.'); }
+  }
   return runtimeTransaction(async()=>{
     await runtimeGet("SELECT pg_advisory_xact_lock(hashtextextended(current_schema() || ':support-work',0))");
     const {conversation}=await getSupportConversation(user,conversationId);
@@ -60,7 +73,7 @@ export async function reviewVideoRequest(user:SessionUser,conversationId:number,
     const reply=String(input.reply||'').trim();if(!reply||reply.length>1500)return fail('Write a reply to the business owner.');
     let ref:string|null=null;
     if(input.decision==='approved') {
-      try{ref=normalizeControlledYouTubeUrl(input.youtubeUrl).managedRef;}catch{return fail('Use a supported YouTube video.');}
+      ref=approvedRef;
       if(ref===STARTER_VIDEO_REF)return fail('Choose the business video, not the example.');
     }
     if(request.status!=='pending') {
@@ -100,7 +113,7 @@ export async function reviewVideoRequest(user:SessionUser,conversationId:number,
     }
     const now=Date.now();
     await runtimeRun('UPDATE support_video_requests SET status=?,approved_ref=?,reviewed_by=?,reviewed_at=? WHERE conversation_id=?',[input.decision,ref,user.id,now,conversationId]);
-    await postSupportMessage(user,conversationId,{message:`${reply}${ref?`\n${controlledYouTubeWatchUrl(ref)}`:''}`,idempotencyKey:`video-review-reply-${conversationId}`});
+    await postSupportMessage(user,conversationId,{message:`${reply}${ref?`\n${productVideoWatchUrl(ref)}`:''}`,idempotencyKey:`video-review-reply-${conversationId}`});
     await runtimeRun('INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,?,?,?)',[user.id,request.business_id,'support.video_reviewed',JSON.stringify({conversationId,decision:input.decision,target:request.target_kind,productId:request.product_id}), '']);
     return {businessId:request.business_id,duplicate:false};
   });

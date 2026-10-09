@@ -58,15 +58,18 @@ export function playerHtml(id: string, origin: string): string {
     throw new Error("Invalid player origin");
   // Neither merchant HTML nor app credentials cross this boundary.
   const config = JSON.stringify({ id, origin }).replace(/</g, "\\u003c");
-  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin"><style>html,body,#player{margin:0;width:100%;height:100%;background:#000;overflow:hidden}iframe{border:0}</style></head><body><div id="player"></div><script>
-  const config=${config};
+  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin"><style>html,body,#player{margin:0;width:100%;height:100%;background:#000;overflow:hidden}iframe{border:0}</style></head><body><iframe id="player" title="YouTube video" sandbox="allow-scripts allow-same-origin allow-presentation" allow="fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe><script>
+  const config=${config},frame=document.getElementById('player');
   function send(event){const data=JSON.stringify({source:'suqpage-youtube',event});if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(data);}else{window.parent.postMessage(data,config.origin);}}
-  window.onYouTubeIframeAPIReady=function(){new YT.Player('player',{host:'https://www.youtube-nocookie.com',videoId:config.id,width:'100%',height:'100%',playerVars:{playsinline:1,autoplay:0,controls:1,origin:config.origin,rel:0},events:{onReady:function(event){const frame=event.target.getIframe();frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation');send('ready');},onError:function(){send('error');}}});};
-  const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=function(){send('error');};document.head.appendChild(script);
+  frame.onload=function(){send('ready');};frame.onerror=function(){send('error');};
+  frame.src='https://www.youtube-nocookie.com/embed/'+config.id+'?enablejsapi=1&playsinline=1&autoplay=0&controls=1&rel=0&origin='+encodeURIComponent(config.origin);
+  window.onYouTubeIframeAPIReady=function(){new YT.Player('player',{host:'https://www.youtube-nocookie.com',videoId:config.id,width:'100%',height:'100%',playerVars:{playsinline:1,autoplay:0,controls:1,origin:config.origin,rel:0},events:{onReady:function(){send('ready');},onStateChange:function(event){if([0,1,2,5].includes(event.data))send('ready');},onError:function(event){if([2,5,100,101,150,153].includes(event.data))send('error');}}});};
+  const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=function(){console.warn('YouTube controls API unavailable');};document.head.appendChild(script);
   </script></body></html>`;
 }
 export type PlayerProps = {
   id: string;
   height: number;
+  videoRef?: string;
   onEvent: (event: PlayerEvent) => void;
 };

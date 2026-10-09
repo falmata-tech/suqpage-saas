@@ -9,6 +9,7 @@ import DashboardShell from "@/components/DashboardShell";
 import PaginationNav from "@/components/PaginationNav";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
+import {workloadViewState} from '@/lib/support-navigation';
 import {
   getSupportAgentSummary,
   listSupportAgentWorkloadsPage,
@@ -25,9 +26,12 @@ export default async function SupportAgents({ searchParams }: {
   const query = await searchParams;
   const result = await listSupportAgentWorkloadsPage(user,query);
   const summary = await getSupportAgentSummary(user);
+  const view=workloadViewState({...query,page:String(result.page)});
+  const admin=hasCapability(user,'platform:admin');
+  const parentHref=admin?'/dashboard/admin/staff':'/dashboard/support?queue=support';
   return <DashboardShell user={user} business={null}>
-    <nav className="workspace-breadcrumbs" aria-label={t("Breadcrumb")}><Link href="/dashboard/support">{t("Support inbox")}</Link><span>/</span><strong>{t("Agents")}</strong></nav>
-    <div className="dashboard-head"><div><span className="eyebrow">{t("Support operations")}</span><h1>{t("Support agents")}</h1><p>{t("Set who receives new conversations and keep workload within a clear limit.")}</p></div><Link className="small-btn" href="/dashboard/support">{t("Open inbox")}</Link></div>
+    <nav className="workspace-breadcrumbs" aria-label={t("Breadcrumb")}><Link href={parentHref}>{t(admin?"Staff":"Business support")}</Link><span aria-hidden="true">/</span><strong aria-current="page">{t("Workload & availability")}</strong></nav>
+    <div className="dashboard-head"><div><span className="eyebrow">{t("Staff")}</span><h1>{t("Workload & availability")}</h1><p>{t("Set who receives new conversations and keep workload within a clear limit.")}</p></div><Link className="small-btn" href={parentHref}>{t(admin?"Back to staff":"Back to inbox")}</Link></div>
     {query.error ? <p className="error">{t(query.error)}</p> : null}{query.saved ? <p className="notice">{t("Support agent settings saved.")}</p> : null}
     <section className="support-capacity-summary" aria-label={t("Support capacity summary")}>
       <span><small>{t("Waiting")}</small><strong>{summary.waitingConversations}</strong></span>
@@ -40,11 +44,12 @@ export default async function SupportAgents({ searchParams }: {
     </CollectionToolbar>
     <section className={`support-agent-list ${styles.agentList}`} aria-label={t("Support agent settings")}>
       {result.items.map((agent)=><form action={updateSupportAgentSettingAction} key={agent.userId}>
+        {Object.entries(view).map(([key,value])=><input key={key} type="hidden" name={'view_'+key} value={value}/>)}
         <input type="hidden" name="userId" value={agent.userId}/>
         <div className="support-agent-identity"><strong>{agent.name}</strong><small>{agent.email}</small></div>
         <div className="support-agent-load"><span>{agent.openConversations} {" "}{t("of")}{" "}{agent.maxOpenConversations} {" "}{t("open")}</span><progress max={agent.maxOpenConversations} value={agent.openConversations}>{agent.openConversations}</progress></div>
-        <label className="support-agent-toggle"><input type="checkbox" name="enabled" defaultChecked={agent.enabled}/><span>{t("Receives support")}</span></label>
-        <label className="support-agent-limit"><span>{t("Queue")}</span><select name="queueScope" defaultValue={agent.queueScope}><option value="all">{t("All requests")}</option><option value="support">{t("Business support")}</option><option value="transport">{t("Transport dispatch")}</option></select></label>
+        <label className="support-agent-toggle"><input type="checkbox" name="enabled" defaultChecked={agent.enabled}/><span>{t("Receives new chats")}</span></label>
+        <label className="support-agent-limit"><span>{t(agent.accessRole === "team_member" && agent.queueScope !== "all" ? "Role" : "Queue")}</span><select name="queueScope" defaultValue={agent.queueScope}>{(agent.queueScope === "all" || agent.accessRole === "operations_manager") && <option value="all">{t("All requests")}</option>}<option value="support">{t(agent.accessRole === "operations_manager" ? "Business support" : "Support agent")}</option><option value="transport">{t(agent.accessRole === "operations_manager" ? "Transport dispatch" : "Transport agent")}</option></select></label>
         <label className="support-agent-limit"><span>{t("Conversation limit")}</span><input type="number" name="maxOpenConversations" min="1" max="20" defaultValue={agent.maxOpenConversations}/></label>
         <button className="small-btn">{t("Save")}</button>
       </form>)}

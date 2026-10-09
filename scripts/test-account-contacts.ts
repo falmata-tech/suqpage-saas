@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { parseAccountPhone, saveAccountPhone } from "../lib/account-contacts";
+import { parseAccountPhone, saveAccountPhone, parseAccountName, saveAccountProfile } from "../lib/account-contacts";
 import { publicBusinessCatalog } from "../lib/business-profile";
 import { legacyPublicContacts, publicContactLinks } from "../lib/business-profile-contacts";
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-contacts-"));
@@ -15,6 +15,9 @@ async function main() {
         const businessId = Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,contact_email) VALUES('contact-test','Contact test','composition','private@example.test')").run()).insertedId);
         const first = Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES('account@example.test','disabled','First','owner',?)").run(businessId)).insertedId);
         const second = Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('other@example.test','disabled','Second','admin')").run()).insertedId);
+        assert.equal(await getUserById(first), undefined, 'A missing access profile cannot produce an authenticated user');
+        await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(first, 'client');
+        await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(second, 'platform_admin');
         assert.equal((await accountContactPort.read(first))?.account_phone, "");
         const before = (await getBusinessById(businessId))!;
         assert.equal(publicBusinessCatalog({ business: before, products: [], categories: [], collections: [] }).business.contact_email, "");
@@ -40,6 +43,18 @@ async function main() {
         await saveAccountPhone(accountContactPort, { id: first }, "");
         assert.equal((await accountContactPort.read(first))?.account_phone, "");
         await assert.rejects(saveAccountPhone(accountContactPort, { id: 999999 }, "+447700900001"));
+        for(const name of ['', ' '.repeat(3), 'x'.repeat(81), 'bad\nname', null]) assert.throws(()=>parseAccountName(name));
+        assert.equal(parseAccountName('  ሰላም  '),'ሰላም');
+        const publicBefore=await getBusinessById(businessId);
+        await saveAccountProfile(accountContactPort,{id:first},{name:'Owner revised',phone:'+447700900003'});
+        assert.equal((await getUserById(first))?.name,'Owner revised');
+        assert.equal((await accountContactPort.read(first))?.email,'account@example.test');
+        await assert.rejects(saveAccountProfile(accountContactPort,{id:first},{name:'Should not persist',phone:'bad'}));
+        assert.equal((await getUserById(first))?.name,'Owner revised','Invalid phone cannot partly save name');
+        await assert.rejects(saveAccountProfile(accountContactPort,null,{name:'Other',phone:''}));
+        await assert.rejects(saveAccountProfile(accountContactPort,{id:999999},{name:'Other',phone:''}));
+        assert.equal((await getUserById(second))?.name,'Second');
+        assert.deepEqual(await getBusinessById(businessId),publicBefore,'Private account edit never changes public business');
         console.log("PASS PostgreSQL account phone validation, self scope, identity preservation, clearing and public/private separation");
     }
     finally {

@@ -15,13 +15,19 @@ const grants: Record<AccessRole, ReadonlySet<Capability>> = {
   client: new Set(["basic-product:maintain", "client:workspace"]),
 };
 
+export function isQueueAgent(user: SessionUser) {
+  return user.access_role === "team_member" &&
+    (user.staff_queue_scope === "support" || user.staff_queue_scope === "transport");
+}
+
 export function hasCapability(user: SessionUser, capability: Capability) {
+  if (isQueueAgent(user)) return false;
   return grants[user.access_role].has(capability);
 }
 
 export function canViewBusiness(user: SessionUser, businessId: number, assigned = false) {
   if (hasCapability(user, "operations:manage") || hasCapability(user, "platform:admin")) return true;
-  if (user.access_role === "team_member") return assigned;
+  if (user.access_role === "team_member") return assigned && !isQueueAgent(user);
   return user.business_id === businessId;
 }
 

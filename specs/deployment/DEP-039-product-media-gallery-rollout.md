@@ -2,7 +2,7 @@
 id: DEP-039
 title: Product gallery compatibility rollout
 status: in_progress
-related: [DEP-040, FE-050, BE-042, DEP-026, FE-019, BE-018, BE-032, BE-040]
+related: [FE-061, BE-049, ADR-0025, FE-060, BE-048, DEP-040, FE-050, BE-042, DEP-026, FE-019, BE-018, BE-032, BE-040, FE-057, BE-046, ADR-0024]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-09-27
 change_level: L3

@@ -144,7 +144,7 @@ export default function MarketScreen() {
   const selectedPlaces = normalizeDiscoveryPlaces(place);
   const chosenPlace = data?.places.filter(p => selectedPlaces.includes(p.key)).map(p=>p.label).join(", ") || place;
   const controls = <View style={m.compactToolbar}>
-    <Pressable ref={opener} accessibilityRole="button" accessibilityLabel={t(panel ? "Hide search and filters" : "Search & results")} accessibilityState={{expanded:panel}} onPress={()=>{focusPanelControl.current=true; panel ? hide() : setPanel(true);}} style={[m.compactButton,panel && m.activeFilter]}><Icon name={panel ? "back" : "panel"} size={22}/></Pressable>
+    <Pressable ref={opener} accessibilityRole="button" accessibilityLabel={t(panel ? "Hide products" : "View products")} accessibilityState={{expanded:panel}} {...(Platform.OS === "web" ? { "aria-expanded": panel } : {})} onPress={()=>{focusPanelControl.current=true; panel ? hide() : setPanel(true);}} style={[m.compactButton,m.resultsToggle,panel && m.activeFilter]}><Icon name={panel ? "back" : "panel"} size={16}/><Text style={m.resultsToggleText}>{t(panel ? "Hide products" : "View products")}</Text></Pressable>
     <View style={m.searchInput}>
       <TextInput ref={search} accessibilityLabel={t("Search")} placeholder={t("Search")} placeholderTextColor={colors.muted} value={text} onChangeText={setText} onSubmitEditing={submit} returnKeyType="search" style={{flex:1,minWidth:0,height:42,padding:8,fontSize:14,color:colors.ink}}/>
       {text.length>0 && <Pressable accessibilityRole="button" accessibilityLabel={t("Clear search")} onPress={()=>choose(()=>{setText("");setQuery("");})} style={{width:44,minHeight:44,alignItems:"center",justifyContent:"center"}}><Icon name="close" size={16}/></Pressable>}
@@ -412,6 +412,8 @@ const m = StyleSheet.create({
   },
   mapTools: { position: "absolute", right: 9, top: 66, gap: 7 },
   compactToolbar:{position:"absolute",left:10,right:10,top:10,zIndex:10,maxWidth:680,flexDirection:"row",alignItems:"center",gap:6},
+  resultsToggle: { width: 68, flexDirection: "column", gap: 1, padding: 2 },
+  resultsToggleText: { fontSize: 11, lineHeight: 11, fontWeight: "700", textAlign: "center", color: colors.ink },
   compactButton:{width:44,height:44,flexShrink:0,alignItems:"center",justifyContent:"center",borderWidth:1,borderColor:colors.line,borderRadius:7,backgroundColor:"white"},
   activeFilter:{borderColor:colors.brand,backgroundColor:colors.soft},
   filterCount:{position:"absolute",top:1,right:2,minWidth:14,paddingHorizontal:2,borderRadius:8,backgroundColor:colors.brand,color:"#fff",fontSize:10,lineHeight:14,fontWeight:"700",textAlign:"center"},

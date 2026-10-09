@@ -1,3 +1,4 @@
+import { productVideo } from './video/product-video';
 export type ProductMedia = {kind: 'image' | 'video'; ref: string};
 export const MAX_PRODUCT_IMAGES = 8;
 export const MAX_PRODUCT_VIDEOS = 4;
@@ -11,8 +12,8 @@ export function parseProductMedia(value: unknown): ProductMedia[] {
     const item = entry as Record<string, unknown>;
     if (Object.keys(item).some(key => key !== 'kind' && key !== 'ref') || (typeof item.ref !== 'string' || item.ref.length > 300)) throw new Error('Invalid product media.');
     if (item.kind === 'image' && /^(?:\/uploads\/seed\/[A-Za-z0-9._/-]+|\/media\/[A-Za-z0-9.-]+|request-attachment:\d+)$/.test(item.ref) && !item.ref.includes('..')) return {kind: 'image', ref: item.ref};
-    if (item.kind === 'video' && /^youtube:[A-Za-z0-9_-]{11}$/.test(item.ref)) return {kind: 'video', ref: item.ref};
-    throw new Error('Use a valid photo or YouTube link.');
+    if (item.kind === 'video') { productVideo(item.ref); return {kind: 'video', ref: item.ref}; }
+    throw new Error('Use a valid photo or video link.');
   });
   if (items.filter(item=>item.kind==='image').length > MAX_PRODUCT_IMAGES || items.filter(item=>item.kind==='video').length > MAX_PRODUCT_VIDEOS) throw new Error('Use up to 8 photos and 4 videos.');
   if (new Set(items.map(item=>`${item.kind}:${item.ref}`)).size !== items.length) throw new Error('Remove duplicate photos or video links.');

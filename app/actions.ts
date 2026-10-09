@@ -1,4 +1,5 @@
 "use server";
+import {revokeUserAttention} from "@/lib/attention-postgres";
 import { MAX_PRODUCT_UPLOAD_BYTES, parseProductMedia } from "@/lib/product-media";
 
 import bcrypt from "bcryptjs";
@@ -19,7 +20,8 @@ import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
 import { runtimeProductUpkeepPort } from "@/lib/product-upkeep-runtime";
 import { consumeRuntimeRateLimit, resetRuntimeRateLimit } from "@/lib/rate-limit-runtime";
 import { audit, cleanText, currentRequestIdentity } from "@/lib/security";
-import { normalizeControlledYouTubeUrl } from "@/lib/youtube-provider";
+import {resolveProductVideoUrl} from "@/lib/tiktok-short-link";
+import { normalizeProductVideoUrl } from "@/lib/video/product-video";
 import { validateLiveSettings } from "@/lib/live-showroom";
 import { beginGoogleSignIn } from "@/lib/supabase-auth";
 
@@ -68,7 +70,7 @@ export async function googleLoginAction(){
   redirect(destination);
 }
 
-export async function logoutAction(){const user=await currentUser();if(user)await audit("auth.logout",{userId:user.id,businessId:user.business_id});await clearSession();redirect("/login");}
+export async function logoutAction(){try{const user=await currentUser();if(user){await revokeUserAttention(user);await audit("auth.logout",{userId:user.id,businessId:user.business_id});}}catch{console.error('Sign-out notification cleanup unavailable.');}finally{await clearSession();}redirect("/login");}
 
 export async function changePasswordAction(formData:FormData){
   const user=await requireUser({allowTemporaryPassword:true});
@@ -206,8 +208,8 @@ export async function basicProductUpkeepAction(formData:FormData){
           if(!image){image=await stageTenantProductImage(user,businessId,files[index])||undefined;if(!image)throw new ProductUpkeepError("Choose a valid photo.");uploaded.set(index,image);galleryUploads.push(image);}
           entries.push({kind:"image",ref:image.imageRef});
         }else if(entry.kind==="video"){
-          if(typeof entry.url!=="string"||entry.url.length>500)throw new ProductUpkeepError("Use a supported YouTube video.");
-          entries.push({kind:"video",ref:normalizeControlledYouTubeUrl(entry.url).managedRef});
+          if(typeof entry.url!=="string"||entry.url.length>500)throw new ProductUpkeepError("Use a supported video link.");
+          entries.push({kind:"video",ref:await resolveProductVideoUrl(entry.url)});
         }else entries.push(entry);
       }
       if(uploaded.size!==files.length)throw new ProductUpkeepError("An uploaded photo is missing from the gallery.");
@@ -241,7 +243,7 @@ export async function basicProductUpkeepAction(formData:FormData){
       priceMinor:priceValue===null?null:Math.round(priceValue*100),
       quantityUnit:text(formData,"quantityUnit",40),
       highlights:text(formData,"highlights",485).split(/\r?\n/),
-      videoRef:videoInput?normalizeControlledYouTubeUrl(videoInput).managedRef:"",
+      videoRef:videoInput?await resolveProductVideoUrl(videoInput):"",
       categoryId:int(formData,"categoryId")||null,
       imageAction:hasFile?"replace":removeImage?"remove":"keep",
       serviceNote:text(formData,"serviceNote",300),

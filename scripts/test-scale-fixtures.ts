@@ -104,9 +104,7 @@ async function main() {
     assert.equal(searchedMonday.total, 1, "map search narrows geographic results");
     assert.equal(searchedMonday.featured.booths.length, Math.min(industryCounts[0], MAX_FEATURED_SHOWROOMS), "map search does not shrink the selected Daily Featured program");
     assert.ok(industryCounts.reduce((total, count) => total + count, 0) >= 66, "the seven industry projections retain the complete scale baseline");
-    assert.ok(Number((await db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get() as {
-        total: number;
-    }).total) >= 66, "the retained database includes renewal ledgers for the scale baseline");
+    assert.equal(Number((await db.prepare("SELECT COUNT(*) total FROM business_subscriptions").get()).total),0,"fresh demo fixtures have no business subscriptions");
     assert.ok(Number((await db.prepare("SELECT COUNT(*) total FROM showroom_visits").get() as {
         total: number;
     }).total) >= 464, "runtime showroom visits may grow beyond the seeded scale baseline");

@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { Map as LeafletMap, LayerGroup } from "leaflet";
+import {wrappedMapLongitude} from '../../../lib/map/map-display-location';
 import { shopCoordinate, initialMapView, nextMapZoom } from "./native-map-model";
 import { markerIndex, visibleMarkers } from "./map-markers";
 import { MapMarker } from "./MapMarker";
@@ -25,7 +26,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap(props, ref) 
     const cleanupMarkers = () => { const removed = roots; roots = []; group?.clearLayers(); queueMicrotask(() => removed.forEach(root => root.unmount())); };
     void import("leaflet").then(L => {
       if (!live || !container.current) return;
-      const m = L.map(container.current, { zoomControl: false, attributionControl: false, minZoom: 3, maxZoom: 19 })
+      const m = L.map(container.current, { zoomControl: false, attributionControl: false, minZoom: 1, maxZoom: 19, worldCopyJump: true })
         .setView([initialMapView.center[1], initialMapView.center[0]], initialMapView.zoom);
       map.current = m;
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, keepBuffer: 0, updateWhenIdle: true }).addTo(m);
@@ -38,7 +39,13 @@ export default forwardRef<MapControls, MapProps>(function MarketMap(props, ref) 
         for (const item of items) {
           const el = document.createElement("div");
           const icon = L.divIcon({ className: "suqpage-map-marker", html: el, iconSize: [96, 86], iconAnchor: [48, 31] });
-          L.marker([item.center[1], item.center[0]], { icon, keyboard: false }).addTo(group!);
+          const marker = L.marker([item.center[1], wrappedMapLongitude(item.center[0],m.getCenter().lng)], { icon, keyboard: false }).addTo(group!);
+          if (item.kind === "shop") {
+            // Only the glyph/name children are interactive, not the 96px layout frame.
+            el.style.pointerEvents = "none";
+            const container = marker.getElement();
+            if (container) container.style.pointerEvents = "none";
+          }
           const root = createRoot(el); roots.push(root);
           root.render(<MapMarker item={item} selected={item.shop?.id === selectedId}
             label={item.shop ? `${item.shop.name}. ${t("Open page preview")}` : t("{count} nearby businesses", { count: item.count })}
@@ -49,7 +56,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap(props, ref) 
               else if (item.shop) onSelect(item.shop);
             }}/>);
         }
-        if (container.current) { container.current.dataset.mapZoom = String(m.getZoom()); container.current.dataset.mapMarkerCount = String(items.length); }
+        if (container.current) { container.current.dataset.mapZoom = String(m.getZoom()); container.current.dataset.mapCenter = `${m.getCenter().lat.toFixed(5)},${m.getCenter().lng.toFixed(5)}`; container.current.dataset.mapMarkerCount = String(items.length); }
       };
       m.on("moveend", render); render();
     });

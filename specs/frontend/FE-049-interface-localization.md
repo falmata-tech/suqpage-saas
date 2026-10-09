@@ -1,10 +1,10 @@
 ---
 id: FE-049
 title: Five-language interface
-status: done
-related: [FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041]
+status: in_progress
+related: [FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062]
 owners: [product, frontend]
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 change_level: L2
 ---
 
@@ -140,3 +140,34 @@ editing/publication regression passes; full check, production build/trace, provi
 smoke and 11 acceptance workflows pass. Release audit remains failed solely on
 the approved two-root internal-APK exception; final native artifact checks pending.
 See S67 in TRACEABILITY for evidence boundaries and protected capture paths.
+
+
+S71 (FE-019/FE-053): contextual purchased-goods transport invitation is authored
+separately in Amharic, Afaan Oromo, Somali and Tigrinya. Keep English Live Chat
+in parentheses alongside each local label; do not change unrelated owner/staff
+chat wording, merchant content or backend values. Verify shared catalog coverage,
+narrow launchers/intake and preserved paired fields in web/Expo captures. This
+revision is in progress pending focused evidence and owner visual review.
+
+S72: author concise local View products/Hide products actions for the existing
+Market panel on both clients; preserve compact fit and literal merchant content.
+Focused five-language toolbar captures precede owner review.
+
+S71 reviewed launcher revision: shorten the native primary service names as
+Delivery help, then describe purchases and live chat in a compact second line.
+Keep native live-chat wording with English (Live Chat), allowing natural local
+ordering instead of English word order. Intake copy is unchanged.
+
+Owner clarifies: native-speaker comprehension takes priority over matching the
+English length. The localized sublabel explicitly names purchased goods and live
+conversation, allowing extra descriptive words and clean wrapping. Do not abbreviate
+the local meaning just to match English's character count. Authored translations
+remain distinct from independent native-speaker approval.
+
+S90 (FE-019/FE-053): author Need help with transport? and the smaller supporting
+sentence Let us handle it. Chat with our transport agents live in each language.
+Retain native chat wording plus (Live Chat); do not translate merchant content.
+The intake invitation also names the transport team and help getting the purchase
+to the customer, written naturally in each language. Verify shared-catalog coverage and
+legible ordered typography at 320px on web and Expo. Independent native-speaker
+approval is separate from automated coverage/layout evidence.

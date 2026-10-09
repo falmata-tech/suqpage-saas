@@ -1,3 +1,7 @@
+import {Sheet} from "./chrome";
+import {File as PickedFile} from 'expo-file-system';
+import {appendPickedImage} from './image-upload';
+import CitySelector from './CitySelector';
 import { HandleInput, HandleEditor } from "./owner-handle";
 import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import { ShowroomContent } from "./ShowroomContent";
@@ -50,8 +54,8 @@ export function ActionStatus({
   const { t } = useApp();
   return (
     <>
-      <Status error={state.error} />
-      {state.notice && <Copy>{t(state.notice)}</Copy>}
+      <Status loading={state.busy} error={state.error} />
+      {Boolean(state.notice) && <Copy>{t(state.notice)}</Copy>}
     </>
   );
 }
@@ -60,15 +64,11 @@ export async function addAsset(
   field: string,
   asset: ImagePicker.ImagePickerAsset,
 ) {
-  if (Platform.OS === "web") {
-    const blob = await (await fetch(asset.uri)).blob();
-    form.append(field, blob, asset.fileName || "photo.jpg");
-  } else
-    form.append(field, {
-      uri: asset.uri,
-      name: asset.fileName || "photo.jpg",
-      type: asset.mimeType || "image/jpeg",
-    } as unknown as Blob);
+  await appendPickedImage(form,field,asset,async uri=>{
+    if(Platform.OS==='web')return (await fetch(uri)).blob();
+    if(!/^(?:file|content):\/\//.test(uri))throw new Error('Choose a JPG, PNG or WebP photo under 5 MB.');
+    return new PickedFile(uri);
+  });
 }
 export async function pickImages(multiple = false) {
   // The system picker grants access only to the selected photos.
@@ -84,6 +84,7 @@ export function Setup() {
   const openLink = useOpenLink();
   const { t, ownerRequest, session } = useApp(),
     action = useAction();
+  const [placeId,setPlaceId]=useState("");
   const [name, setName] = useState(""),
     [phone, setPhone] = useState(""),
     [business, setBusiness] = useState(""),
@@ -113,6 +114,7 @@ export function Setup() {
         value={business}
         onChangeText={setBusiness}
       />
+      <CitySelector onSelect={place=>setPlaceId(place?.id || "")}/>
       <HandleInput value={handle} onChange={setHandle} onReady={setHandleReady} refreshKey={handleRevision} />
       <Copy>{t("Category")}</Copy>
       <Status {...categories} retry={categories.reload} />
@@ -146,7 +148,7 @@ export function Setup() {
       <ActionStatus state={action} />
       <Button
         disabled={
-          action.busy || !consent || !category || !name || !phone || !business || !handleReady
+          action.busy || !consent || !category || !name || !phone || !business || !handleReady || !placeId
         }
         label={t("Create your business page")}
         onPress={() =>
@@ -157,6 +159,7 @@ export function Setup() {
               businessName: business,
               handle,
               businessCategory: category,
+              placeId,
               consent,
               idempotencyKey: key,
             }); } catch (error) { setHandleReady(false); setHandleRevision(v => v + 1); throw error; }
@@ -174,10 +177,12 @@ export function PageEditor({
   home,
   reload,
   initialPreview = false,
+  onSaved,
 }: {
   home: OwnerHome;
   reload: () => void;
   initialPreview?: boolean;
+  onSaved?: () => void;
 }) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
@@ -199,15 +204,54 @@ export function PageEditor({
   const [version, setVersion] = useState(home.draft?.version),
     [preview, setPreview] = useState(initialPreview),
     [colorOpen, setColorOpen] = useState(false);
+  const [publicationReview, setPublicationReview] = useState<{
+    version: number;
+    revision: number;
+    issues: OwnerHome["issues"];
+  } | null>(null);
   const update = (key: keyof Profile, value: unknown) =>
     setContent((p) => ({ ...p, [key]: value }));
+  async function reviewPublication() {
+    let reviewVersion = version;
+    if (JSON.stringify(content) !== JSON.stringify(home.draft?.content || fallback) || !version) {
+      const saved = await ownerRequest<{ version: number }>("owner/page", {
+        action: version ? "save" : "start", version, content,
+      });
+      reviewVersion = saved.version;
+      setVersion(saved.version);
+    }
+    const current = await ownerRequest<OwnerHome>("owner/home");
+    if (current.shop.status !== "draft" || !current.draft) { reload(); return; }
+    if (reviewVersion && current.draft.version !== reviewVersion) {
+      setContent(current.draft.content);
+      setVersion(current.draft.version);
+      throw new Error("The draft has changed. Reload and review it before publishing.");
+    }
+    setVersion(current.draft.version);
+    setPublicationReview({
+      version: current.draft.version,
+      revision: current.publicationRevision,
+      issues: current.issues,
+    });
+  }
+  function openMissing(label: string) {
+    setPublicationReview(null);
+    if(label==='Replace or remove sample offerings')router.push({pathname:'/owner/[section]',params:{section:'products'}});
+    else if(label==='Choose your business location')router.push({pathname:'/owner/[section]',params:{section:'business'}});
+    else {setPreview(false);router.setParams({view:'edit'});}
+  }
   return (
     <>
       <Copy big>{t("Your page")}</Copy>
+      <ActionStatus state={action}/>
+
       {preview ? (
         <>
           <Copy muted>{t(home.shop.status === "active" ? "Your page is live" : "Private until you publish")}</Copy>
-          <Button secondary label={t("Edit")} onPress={() => {router.setParams({view:"edit"}); setPreview(false);}} />
+          <View style={s.row}>
+            <View style={{ flex: 1 }}><Button secondary label={t("Edit")} onPress={() => {router.setParams({view:"edit"}); setPreview(false);}} /></View>
+            {home.shop.status === "draft" && <View style={{ flex: 1 }}><Button label={t("Publish")} disabled={action.busy} onPress={() => void action.run(reviewPublication, "")} /></View>}
+          </View>
           {colorOpen || JSON.stringify(content) !== JSON.stringify(home.draft?.content || fallback) ? <View style={{ flexDirection: 'row', gap: 8 }}>
           <View style={{ flex: 1 }}><Button secondary label={t("Page color")} onPress={() => setColorOpen(!colorOpen)} /></View>
           {colorOpen && <StorefrontAccentPicker value={content.accentColor || ""} onChange={v => update("accentColor", v)} disabled={action.busy} onClose={() => setColorOpen(false)} />}
@@ -221,6 +265,7 @@ export function PageEditor({
                   { action: version ? "save" : "start", version, content },
                 );
                 setVersion(result.version);
+                onSaved?.();
               })
             }
           /></View>
@@ -237,7 +282,7 @@ export function PageEditor({
         </>
       ) : (
         <>
-          <HandleEditor initialHandle={home.shop.handle} onSaved={reload} />
+          {!onSaved && <HandleEditor initialHandle={home.shop.handle} onSaved={reload} />}
           <Photo refPath={content.heroImage} height={210} privateImage />
           <Button
             secondary
@@ -258,6 +303,8 @@ export function PageEditor({
               }, "Photo ready. Save your page to apply it.")
             }
           />
+          <Copy muted>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</Copy>
+          <Field label={t("Business video")} value={content.videoUrl} onChangeText={value=>update("videoUrl",value)} autoCapitalize="none"/>
           <Field
             label={t("About the business")}
             multiline
@@ -327,81 +374,20 @@ export function PageEditor({
                   { action: version ? "save" : "start", version, content },
                 );
                 setVersion(result.version);
+                onSaved?.();
               })
             }
           />
-          {home.shop.status !== "active" && (
-            <>
-              <Copy muted>
-                {t("Set up your page and items, then publish when ready.")}
-              </Copy>
-              {home.issues.map((i, j) => (
-                <Copy key={j}>{t(i.label)}</Copy>
-              ))}
-              <Button
-                disabled={action.busy}
-                label={t("Publish page")}
-                onPress={() =>
-                  void action.run(async () => {
-                    const saved = await ownerRequest<{
-                      version: number;
-                      publication: { revision: number } | null;
-                    }>("owner/page", {
-                      action: version ? "save" : "start",
-                      version,
-                      content,
-                    });
-                    setVersion(saved.version);
-                    await ownerRequest("owner/publish", {
-                      version: saved.version,
-                      revision:
-                        saved.publication?.revision || home.publicationRevision,
-                    });
-                    reload();
-                  }, "Your page is live")
-                }
-              />
-            </>
-          )}
-          <Card>
-            <Copy>{t("Business video")}</Copy>
-            <Field
-              label={t("Video link")}
-              value={video}
-              onChangeText={setVideo}
-              autoCapitalize="none"
-            />
-            <Copy muted>
-              {t(
-                "Send us a video link. Our team will review it for your page.",
-              )}
-            </Copy>
-            <Button
-              secondary
-              disabled={action.busy || !video}
-              label={t("Send video request")}
-              onPress={() =>
-                void action.run(async () => {
-                  const result = await ownerRequest<{ id: number }>(
-                    "owner/video",
-                    {
-                      target: "header",
-                      sourceUrl: video,
-                      idempotencyKey: videoKey,
-                    },
-                  );
-                  setVideoKey(Crypto.randomUUID());
-                  setVideo("");
-                  router.push({
-                    pathname: "/owner/[section]",
-                    params: { section: "chat", id: result.id },
-                  });
-                }, "Request sent")
-              }
-            />
-          </Card>
+          {home.shop.status === "draft" && <Button label={t("Publish page")} disabled={action.busy} onPress={()=>void action.run(reviewPublication,'')}/>}
+
         </>
       )}
+      {publicationReview&&<Sheet visible title={t('Publish page')} onClose={()=>{if(!action.busy)setPublicationReview(null);}}><ActionStatus state={action}/>
+        <Copy muted>{t('Your page and listed products or services will be visible to customers. You can update them any time.')}</Copy>
+        {publicationReview.issues.map(issue=><Button key={issue.label} secondary label={t(issue.label)} onPress={()=>openMissing(issue.label)}/>)}
+        <Button label={t('Publish page')} disabled={action.busy||publicationReview.issues.length>0} onPress={()=>void action.run(async()=>{await ownerRequest('owner/publish',{version:publicationReview.version,revision:publicationReview.revision});setPublicationReview(null);if(onSaved)onSaved();else reload();},'Your page is live')}/>
+        <Button secondary label={t('Cancel')} disabled={action.busy} onPress={()=>setPublicationReview(null)}/>
+      </Sheet>}
       <ActionStatus state={action} />
     </>
   );
@@ -430,7 +416,7 @@ export function ProductEditor({
       product?.availability || "available",
     ),
     [published, setPublished] = useState(product?.published ?? true),
-    [media, setMedia] = useState<Media[]>(product?.media || []),
+    [media, setMedia] = useState<Media[]>(product?.media || (home.exampleVideoRef?[{kind:"video",ref:home.exampleVideoRef}]:[])),
     [assets, setAssets] = useState<ImagePicker.ImagePickerAsset[]>([]),
     [video, setVideo] = useState(""),
     [key] = useState(() => Crypto.randomUUID()),
@@ -538,6 +524,7 @@ export function ProductEditor({
           />
         ))}
       </View>
+      <Card><Copy muted>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</Copy><Field label={t("Video link")} value={video} onChangeText={setVideo} autoCapitalize="none"/><Button secondary disabled={action.busy||!video.trim()||media.filter(item=>item.kind==='video').length>=4} label={t('Add video')} onPress={()=>void action.run(async()=>{const result=await ownerRequest<{ref:string}>('owner/video-link',{url:video});setMedia(current=>[...current,{kind:'video',ref:result.ref}]);setVideo('');return false;})}/></Card>
       <Chip
         label={t("Show on my page")}
         selected={published}
@@ -577,43 +564,8 @@ export function ProductEditor({
           })
         }
       />
-      {product && (
-        <Card>
-          <Field
-            label={t("Video link")}
-            value={video}
-            onChangeText={setVideo}
-            autoCapitalize="none"
-          />
-          <Copy muted>
-            {t("Send us a video link. Our team will review it for your page.")}
-          </Copy>
-          <Button
-            secondary
-            disabled={action.busy || !video}
-            label={t("Send video request")}
-            onPress={() =>
-              void action.run(async () => {
-                const result = await ownerRequest<{ id: number }>(
-                  "owner/video",
-                  {
-                    target: "product",
-                    productId: product.id,
-                    sourceUrl: video,
-                    idempotencyKey: videoKey,
-                  },
-                );
-                setVideoKey(Crypto.randomUUID());
-                setVideo("");
-                router.push({
-                  pathname: "/owner/[section]",
-                  params: { section: "chat", id: result.id },
-                });
-              }, "Request sent")
-            }
-          />
-        </Card>
-      )}
+
+
     </>
   );
 }

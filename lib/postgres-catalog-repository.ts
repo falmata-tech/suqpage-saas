@@ -132,8 +132,10 @@ export class PostgresCatalogRepository {
   ): Promise<(SessionUser & { password_hash: string }) | undefined> {
     const found = await this.runner.query<SessionUser & { password_hash: string }>(`
       SELECT u.id,u.email,u.name,u.role,u.business_id,u.password_hash,u.must_change_password,
-        COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
-      FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id
+        agent.queue_scope staff_queue_scope,
+        p.access_role
+      FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+      LEFT JOIN support_agent_settings agent ON agent.user_id=u.id
       WHERE lower(u.email)=lower(?)
     `, [email]);
     return found.rows[0];
@@ -142,8 +144,10 @@ export class PostgresCatalogRepository {
   async getUserById(id: number): Promise<SessionUser | undefined> {
     const found = await this.runner.query<SessionUser>(`
       SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,
-        COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
-      FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?
+        agent.queue_scope staff_queue_scope,
+        p.access_role
+      FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+      LEFT JOIN support_agent_settings agent ON agent.user_id=u.id WHERE u.id=?
     `, [id]);
     return found.rows[0];
   }

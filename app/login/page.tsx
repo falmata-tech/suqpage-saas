@@ -1,3 +1,4 @@
+import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import LanguageSelector from "@/components/LanguageSelector";
 
 import { getUiText } from "@/lib/i18n/server";
@@ -9,7 +10,7 @@ import PasswordlessLoginForm from "@/components/PasswordlessLoginForm";
 import { supabaseAuthConfig, supabaseAuthEnabled } from "@/lib/config";
 import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 
-export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
+export default async function Login({searchParams}:{searchParams:Promise<{error?:string;next?:string}>}){
   const t = await getUiText();
   await connection();
   const managedAuth = supabaseAuthEnabled();
@@ -28,6 +29,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         <div className="platform-task-context">
           <span className="platform-task-eyebrow">{t("Account access")}</span>
           <h1 id="login-title">{t("Sign in to Suqpage.")}</h1>
+          {p.next==='inquiries' && <p>{t("Sign in to view your business inquiries.")}</p>}
           <p>{t("Create a professional store for your products and services, or sign in to manage your page and customer inquiries.")}</p>
           <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("New business? Enter your email to create your account.")}</span></div>
         </div>
@@ -39,5 +41,6 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
         </div>
       </section>
     </main>
+    <PublicMobileNavigation/>
   </div>;
 }

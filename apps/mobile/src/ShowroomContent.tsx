@@ -53,7 +53,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
       >
         {shop && (
           <>
-            {shop.isDemo && (
+            {shop.isDemo && !shop.handle.toLowerCase().includes("demo") && (
               <Text style={v.demo}>
                 {t(
                   "Demo business — products and contact details are examples.",
@@ -64,10 +64,11 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
             {shop.videoUrl ? (
               <YouTubeVideo
                 video={shop.videoUrl}
+                allowSocial
+                height={/tiktok.com|instagram.com/.test(shop.videoUrl)?420:210}
                 poster={shop.cover}
                 posterTint={accent?.accent}
                 privateImage={preview}
-                height={210}
               />
             ) : (
               <View><Photo refPath={shop.cover} height={210} privateImage={preview} />{accent && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: accent.accent, opacity: .08 }]} />}</View>

@@ -127,9 +127,13 @@ outside `suqpage.com` links work. iOS Universal Links await Apple identity.
 `npm run test:mobile:app-links` checks route/security and registered signing scope;
 `node scripts/capture-mobile-app-links.mjs` checks local association JSON and
 Market cold/warm/repeated link inputs using real catalog reads. These do not prove
-Android OS verification. After publishing the association and installing a rebuilt
-preview APK, use `adb shell pm verify-app-links --re-verify com.suqpage.app.preview`
-and `adb shell pm get-app-links com.suqpage.app.preview`; suqpage.com must verify.
+Android OS verification. The current build configuration uses Suqpage / com.suqpage.app for both internal
+APK and store builds. After independently verifying its signing certificate,
+publishing the canonical association and installing that rebuilt APK, use
+`adb shell pm verify-app-links --re-verify com.suqpage.app` and
+`adb shell pm get-app-links com.suqpage.app`; suqpage.com must verify. The retained
+legacy com.suqpage.app.preview association belongs only to older released APKs;
+it is not proof of canonical App Links.
 Launch public HTTPS showroom/product/Market/Featured links without forcing a
 package, then check cold and warm navigation. Unsupported admin/Auth links remain
 web-only. Existing APK build 2018cc70 lacks the new link manifest; do not reuse it

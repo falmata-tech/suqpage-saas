@@ -2,13 +2,37 @@
 id: BE-044
 title: Native API and session boundaries
 status: in_progress
-related: [FE-054, FE-053, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023]
+related: [BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050]
 owners: [product, frontend, backend, security]
-last_updated: 2026-09-27
+last_updated: 2026-10-07
 change_level: L3
 ---
 
 # BE-044 — Native API and session boundaries
+
+## S88 — staff identity denial throughout mobile
+
+Ready security/identity refinement. GIVEN a verified admin/operator/team-member
+bearer WHEN accessing session, signup or any private native route THEN reject
+with 403 before side effects. Load current role from the server for every call,
+including an identity promoted from owner to admin; stale JWT/client role claims
+cannot bypass this. Public guest discovery/transport remains available anonymously.
+GIVEN a linked identity without a current access profile THEN deny authentication;
+legacy user.role must not promote a missing staff profile into administrator access.
+
+GIVEN mobile email-code or restored-session authentication THEN validate the
+application session before admitting owner screens. Staff rejection signs out
+only that local mobile session, removes persisted owner credentials/private
+cache and shows clear website guidance; it does not revoke the separate web
+session. Verification runs outside the Supabase Auth callback to avoid deadlock.
+GIVEN a transient validation outage THEN retain retry authority without admitting
+an unverified new session; a retry needs no second OTP. Existing owners and new
+unlinked verified identities retain their signup/owner flows. No Auth config push.
+
+Test all staff kinds/current-role changes, normal owner/setup, malformed/expired
+tokens and private denial; browser code/restored-session rejection and cleanup,
+validation retry/failure, and uninterrupted web staff access. Physical native,
+hosted API/mobile rebuild and full gates remain separate release evidence.
 
 ## Problem
 

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import Constants from "expo-constants";
 import { WebView } from "react-native-webview";
 import {
@@ -21,9 +21,9 @@ export default function YouTubeFrame({ id, height, onEvent }: PlayerProps) {
     [id, origin],
   );
   return (
-    <WebView
+    <View style={{height,width:"100%"}}><WebView
       source={source}
-      style={{ height, backgroundColor: "#000" }}
+      style={{ flex:1, backgroundColor: "#000" }}
       scrollEnabled={false}
       javaScriptEnabled
       allowsInlineMediaPlayback
@@ -45,6 +45,6 @@ export default function YouTubeFrame({ id, height, onEvent }: PlayerProps) {
       onHttpError={() => onEvent("error")}
       onRenderProcessGone={() => onEvent("error")}
       onContentProcessDidTerminate={() => onEvent("error")}
-    />
+    /></View>
   );
 }

@@ -1,10 +1,10 @@
 ---
 id: FE-050
 title: Product media gallery
-status: done
-related: [FE-041, FE-047, BE-042, DEP-039]
+status: in_progress
+related: [FE-061, BE-049, FE-060, BE-048, FE-041, FE-047, BE-042, DEP-039, FE-057, BE-046]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-10-08
 change_level: L3
 ---
 
@@ -32,6 +32,14 @@ Zero/one-item and broken-image states remain usable. Localize platform labels;
 preserve product content. Respect reduced motion and phone widths.
 
 ## Scenarios and invariants
+
+GIVEN a product form is starting or its save is still pending WHEN an owner tries
+to choose/edit media THEN those controls remain disabled with the existing loading
+feedback until the client form is ready. A pending response must not replace a new
+selection made against the departing form. GIVEN an enabled picker WHEN a distinct
+photo is selected and saved THEN its preview, persisted gallery and later edits
+retain it; browser acceptance verifies the saved photo bytes, private object and
+five-entry gallery count.
 
 - GIVEN existing content WHEN upgraded THEN IDs, inquiries, covers and visibility
   remain; omitted legacy media commands preserve extra gallery entries.

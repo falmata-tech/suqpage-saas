@@ -1,3 +1,5 @@
+import {CoverEditor} from "../../src/owner-profile";
+import {HandleEditor} from "../../src/owner-handle";
 import React from "react";
 import { View } from "react-native";
 import { OwnerNavigation } from "../../src/chrome";
@@ -9,10 +11,11 @@ import { Setup, PageEditor, ProductEditor } from "../../src/owner-forms";
 import { BusinessForm, Settings } from "../../src/owner-business";
 import { Inquiries, SupportList, OwnerChat } from "../../src/owner-inbox";
 export default function OwnerScreen() {
-  const { section: screen, id, view } = useLocalSearchParams<{
+  const { section: screen, id, view, returnTo } = useLocalSearchParams<{
       section: string;
       id?: string;
       view?: string;
+      returnTo?: string;
     }>(),
     { session, t, ownerRequest } = useApp();
   const load = useLoad(
@@ -39,18 +42,21 @@ export default function OwnerScreen() {
         <Setup />
       </Screen>
     );
+  const backToProfile=()=>router.replace("/account");
+  const done=returnTo === "profile" ? backToProfile : undefined;
   return (
     <View style={{ flex: 1 }}>
       <Screen>
         <Status {...load} retry={load.reload} />
+        {returnTo === "profile" && <Button secondary label={t("Back to profile")} onPress={backToProfile}/>}
         {load.data && (
           <>
-            {screen === "page" ? (
-              <PageEditor home={load.data} reload={load.reload} initialPreview={view === "preview" || (view !== "edit" && load.data.shop.status === "draft")} />
+            {screen === "cover" ? <CoverEditor home={load.data} onSaved={backToProfile}/> : screen === "handle" ? <HandleEditor initialHandle={load.data.shop.handle} onSaved={backToProfile}/> : screen === "page" ? (
+              <PageEditor home={load.data} reload={load.reload} onSaved={done} initialPreview={view === "preview" || (view !== "edit" && load.data.shop.status === "draft")} />
             ) : screen === "business" ? (
-              <BusinessForm />
+              <BusinessForm onSaved={done}/>
             ) : screen === "settings" ? (
-              <Settings home={load.data} />
+              <Settings home={load.data} onSaved={done}/>
             ) : screen === "product" ? (
               <ProductEditor
                 home={load.data}
@@ -63,7 +69,7 @@ export default function OwnerScreen() {
                 }
               />
             ) : screen === "inquiries" ? (
-              <Inquiries />
+              <Inquiries focusId={id}/>
             ) : screen === "support" ? (
               <SupportList />
             ) : screen === "chat" && id ? (
@@ -111,15 +117,7 @@ export default function OwnerScreen() {
           </>
         )}
       </Screen>
-      <OwnerNavigation
-        active={
-          ["products", "product"].includes(screen)
-            ? "products"
-            : ["page", "inquiries"].includes(screen)
-              ? screen
-              : "more"
-        }
-      />
+
     </View>
   );
 }

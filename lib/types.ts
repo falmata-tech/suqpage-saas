@@ -20,6 +20,7 @@ export type AccessRole = "platform_admin" | "client" | "team_member" | "operatio
 export type SessionUser = {
   id:number; email:string; name:string; role:"admin"|"owner"; access_role:AccessRole;
   business_id:number|null; must_change_password:number;
+  staff_queue_scope?: "support"|"transport"|"all"|null;
 };
 export type ServiceRequestType = "onboarding" | "change";
 export type ServiceRequestStatus =

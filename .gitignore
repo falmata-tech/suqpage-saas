@@ -35,3 +35,6 @@ apps/mobile/.expo/
 *.keystore
 *.jks
 credentials.json
+# S91 provider configuration is supplied through reviewed EAS file variables.
+google-services.json
+*-firebase-adminsdk-*.json

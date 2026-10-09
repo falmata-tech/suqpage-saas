@@ -1,3 +1,6 @@
+import {runtimeCategoryExampleVideo} from "../category-starter-runtime";
+import {getShowroomInsights} from "../account-health";
+import {getDashboardAttention} from "../dashboard-attention";
 import type { SessionUser } from "../types";
 import { runtimeCatalogByBusinessId } from "../catalog-runtime";
 import { initialBusinessProfile } from "../business-profile";
@@ -26,6 +29,7 @@ export async function ownerHome(actor: SessionUser & { business_id: number }) {
   ]);
   if (!catalog) throw new MobileError("Business not found.", 404);
   const content = draft?.content || initialBusinessProfile(catalog);
+  const [insights,attention]=await Promise.all([getShowroomInsights(actor,actor.business_id),getDashboardAttention(actor,actor.business_id)]);
   return {
     user: {
       name: actor.name,
@@ -33,6 +37,8 @@ export async function ownerHome(actor: SessionUser & { business_id: number }) {
       phone: contacts?.account_phone || "",
     },
     shop: shopDto(catalog, content),
+    exampleVideoRef: await runtimeCategoryExampleVideo(actor.business_id),
+    activity:{visitsTotal:insights.totalVisitors,visits30Days:insights.last30Days,newInquiries:Number(attention.customerInquiries||0),products:catalog.products.filter(p=>Boolean(p.is_published)).length},
     draft: draft ? { version: draft.version, content } : null,
     publicationRevision: publication?.revision || 0,
     issues:

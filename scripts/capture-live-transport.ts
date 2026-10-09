@@ -44,17 +44,17 @@ async function main() {
       await page.locator('.public-support-launcher button[data-channel="buying"]').click();
       const dialog=page.getByRole("dialog");
       assert.equal(await dialog.locator('[aria-pressed]').count(),0,"No channel switch inside chat");
-      await expect(dialog.getByText("Live chat",{exact:true})).toBeVisible();
-      await expect(dialog.getByRole("heading",{name:"Let us arrange your delivery"})).toBeVisible();
+      await expect(dialog.getByText("Live Chat",{exact:true})).toBeVisible();
+      await expect(dialog.getByRole("heading",{name:"From the business to you"})).toBeVisible();
       await expect(dialog.getByLabel("Name",{exact:true})).toBeVisible();
       assert.equal(await dialog.locator("input[type=radio], select").count(),0);
       await expect(dialog.getByLabel("Email",{exact:true})).toHaveCount(0);
-      await expect(dialog.getByLabel("Goods or delivery details (optional)",{exact:true})).toBeVisible();
+      await expect(dialog.getByLabel("Goods or transport details (optional)",{exact:true})).toBeVisible();
       await dialog.getByLabel("From",{exact:true}).fill("Addis Ababa");
       await dialog.getByLabel("To",{exact:true}).fill("Adama");
       await dialog.getByLabel("Name",{exact:true}).fill("Demo customer");
       await dialog.getByLabel("Phone",{exact:true}).fill("+447700900999");
-      await dialog.getByLabel("Goods or delivery details (optional)",{exact:true}).fill("Please deliver two chairs.");
+      await dialog.getByLabel("Goods or transport details (optional)",{exact:true}).fill("Please deliver two chairs.");
       const submit=dialog.getByRole("button",{name:"Start chat",exact:true});
       if(width===390){await expect(submit).toBeDisabled();await dialog.getByRole("button",{name:"Retry",exact:true}).click();}
       await expect(submit).toBeEnabled();
@@ -122,13 +122,13 @@ async function main() {
       await dialog.getByRole('button',{name:'End chat',exact:true}).click();
       await expect(dialog.getByRole('button',{name:'Send another request',exact:true})).toBeVisible({timeout:15000});
       await dialog.getByRole('button',{name:'Send another request',exact:true}).click();
-      await expect(dialog.getByLabel('Goods or delivery details (optional)',{exact:true})).toHaveValue('');
+      await expect(dialog.getByLabel('Goods or transport details (optional)',{exact:true})).toHaveValue('');
       // Locale reloads recover the conversation, not unsaved contact form state.
       await dialog.getByLabel('From',{exact:true}).fill('Addis Ababa');
       await dialog.getByLabel('To',{exact:true}).fill('Adama');
       await dialog.getByLabel('Name',{exact:true}).fill('Demo customer');
       await dialog.getByLabel('Phone',{exact:true}).fill('+447700900999');
-      await dialog.getByLabel('Goods or delivery details (optional)',{exact:true}).fill('Please collect the table tomorrow.');
+      await dialog.getByLabel('Goods or transport details (optional)',{exact:true}).fill('Please collect the table tomorrow.');
       await dialog.getByRole('button',{name:'Start chat',exact:true}).click();
       await expect(dialog.getByRole('log')).toContainText('Please collect the table tomorrow.');
       await page.reload();await page.locator('button[data-channel=buying]').click();await expect(page.getByRole('dialog').getByRole('log')).toContainText('Please collect the table tomorrow.');

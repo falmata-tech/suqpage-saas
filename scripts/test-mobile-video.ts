@@ -29,6 +29,10 @@ test("FE-053: only controlled YouTube references enter player HTML", () => {
   assert.match(html, /strict-origin-when-cross-origin/);
   assert.match(html, /playsinline:1,autoplay:0/);
   assert.doesNotMatch(html, /allow-popups|allow-top-navigation/);
+  assert.match(html,/frame.onload=function\(\)\{send\('ready'\)/);
+  assert.match(html,/onStateChange/);
+  assert.doesNotMatch(html,/setAttribute\('sandbox'/);
+  assert.match(html,/\[2,5,100,101,150,153\]/);
 });
 test("FE-053: WebView cannot navigate to apps, external sites or YouTube watch pages", () => {
   const origin = "https://com.suqpage.app";

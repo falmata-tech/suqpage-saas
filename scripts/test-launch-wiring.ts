@@ -1,3 +1,4 @@
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -10,7 +11,7 @@ async function main() {
     const { getUserById, getDb, closeDbForTests } = await import('./testing/postgres-fixture');
     await getDb();
     try {
-        const create = async () => { const result = await createPublicClientWorkspace({ name: 'Fixture owner', businessName: 'Fixture shop', businessCategory: 'electronics', phone: '+447700900999', consent: true, idempotencyKey: randomUUID() }, { providerUserId: randomUUID(), email: `launch-${randomUUID()}@example.test` }); return (await getUserById(result.userId))!; };
+        const create = async () => { const result = await createPublicClientWorkspace({ name: 'Fixture owner', businessName: 'Fixture shop', businessCategory: 'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id, phone: '+447700900999', consent: true, idempotencyKey: randomUUID() }, { providerUserId: randomUUID(), email: `launch-${randomUUID()}@example.test` }); return (await getUserById(result.userId))!; };
         const owner = await create(), foreign = await create();
         const { postgresProductUpkeepPort } = await import('../lib/product-upkeep-postgres');
         const { executeBasicProductUpkeep } = await import('../lib/product-upkeep');

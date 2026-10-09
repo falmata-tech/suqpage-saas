@@ -2,7 +2,9 @@
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useFormStatus } from "react-dom";
+import LoadingBar from "@/components/LoadingBar";
 import ProductMediaFields from "@/components/ProductMediaFields";
 import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
@@ -13,6 +15,23 @@ import {
   offeringKinds,
   type OfferingKind,
 } from "@/lib/offerings";
+function ProductFormControls({ children }: { children: ReactNode }) {
+  const { pending } = useFormStatus();
+  const [ready, setReady] = useState(false);
+  const t = useUiText();
+  useEffect(() => setReady(true), []);
+  const busy = !ready || pending;
+  return (
+    <>
+      <div className="field full" hidden={!busy}>
+        {busy && <LoadingBar label={pending ? t("Saving...") : undefined} />}
+      </div>
+      <fieldset style={{ display: "contents" }} aria-label={t("Products & services")} aria-busy={busy} disabled={busy}>
+        {children}
+      </fieldset>
+    </>
+  );
+}
 export default function ProductForm({
   catalog,
   product,
@@ -21,6 +40,7 @@ export default function ProductForm({
   contentVersion,
   idempotencyKey,
   staffMode,
+  exampleVideoRef,
 }: {
   catalog: Catalog;
   product?: Product;
@@ -29,6 +49,7 @@ export default function ProductForm({
   contentVersion: number;
   idempotencyKey: string;
   staffMode: boolean;
+  exampleVideoRef?:string;
 }) {
   const t = useUiText();
   const [name, setName] = useState(product?.name || "");
@@ -48,6 +69,7 @@ export default function ProductForm({
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   return (
     <form action={async formData => {for (const file of galleryFiles) formData.append("mediaImages",file); await action(formData);}} className="panel form-grid product-upkeep-form">
+      <ProductFormControls>
       <input type="hidden" name="businessId" value={businessId} />
       <input
         type="hidden"
@@ -197,7 +219,7 @@ export default function ProductForm({
 
       </> : null}
 
-      <ProductMediaFields staffMode={staffMode} product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
+      <ProductMediaFields exampleVideoRef={exampleVideoRef} staffMode={staffMode} product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
 
       {staffMode ? (
         <div className="field full">
@@ -238,6 +260,7 @@ export default function ProductForm({
           {product ? t("Save changes") : t("Add item")}
         </button>
       </div>
+      </ProductFormControls>
     </form>
   );
 }

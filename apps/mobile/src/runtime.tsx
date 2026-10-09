@@ -100,6 +100,9 @@ export async function request<T>(
         value.code,
       );
     return value as T;
+  } catch(error) {
+    if(error instanceof ApiFailure)throw error;
+    throw new ApiFailure('Unable to connect. Please try again.',0);
   } finally {
     clearTimeout(timer);
     options.signal?.removeEventListener("abort", abort);
@@ -113,6 +116,10 @@ export type BasketItem = {
 type Runtime = {
   session: Session | null;
   ready: boolean;
+  authIssue: string;
+  authRetryAvailable: boolean;
+  retryAuth: () => void;
+  clearAuthIssue: () => void;
   locale: Locale;
   setLocale: (v: Locale) => void;
   t: ReturnType<typeof createUiText>;
@@ -128,6 +135,9 @@ type Runtime = {
 const Context = createContext<Runtime | null>(null);
 export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null),
+    [candidate, setCandidate] = useState<Session | null>(null),
+    [authIssue, setAuthIssue] = useState(""),
+    [validationRevision, setValidationRevision] = useState(0),
     [ready, setReady] = useState(!auth),
     [locale, setLanguage] = useState<Locale>("en"),
     [basket, setBasket] = useState<Runtime["basket"]>(null);
@@ -138,16 +148,21 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     }).catch(() => {});
     auth?.auth.getSession().then(({ data }) => {
       if (active) {
-        setSession(data.session);
-        setReady(true);
+        setCandidate(data.session);
+        setReady(!data.session);
       }
     }).catch(() => { if(active){setSession(null);setReady(true);} });
     const sub = auth?.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setReady(true);
+      // Never await Auth or API work inside this callback: Supabase holds its lock.
+      setCandidate(s);
+      if (!s) setSession(null);
+      setReady(!s);
     });
     const app = AppState.addEventListener("change", (s) => {
-      if (s === "active") auth?.auth.startAutoRefresh();
+      if (s === "active") {
+        auth?.auth.startAutoRefresh();
+        setValidationRevision(v => v + 1);
+      }
       else auth?.auth.stopAutoRefresh();
     });
     return () => {
@@ -156,30 +171,69 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
       app.remove();
     };
   }, []);
+  const signOut = useCallback(() =>
+    endLocalSession({
+      signOut: async () => {
+        const current=await auth?.auth.getSession();
+        if(current?.data.session)try{await request('owner/attention',{token:current.data.session.access_token,body:{action:'unsubscribe'}});}catch{/* Local sign-out still clears private state if offline. Generic push may await revocation. */}
+        return auth?.auth.signOut({scope:'local'});
+      },
+      clearPrivateState: () => {
+        setSession(null);
+        setCandidate(null);
+        setBasket(null);
+      },
+      removeStoredSession: () => secure.removeItem("suqpage-owner-session"),
+    }), []);
+  useEffect(() => {
+    if (!candidate) return;
+    let current = true;
+    const controller = new AbortController();
+    setReady(false);
+    request("session", {token: candidate.access_token, signal: controller.signal})
+      .then(() => {
+        if (current) {setSession(candidate);setAuthIssue("");}
+      })
+      .catch(async error => {
+        if (!current) return;
+        setSession(null);
+        const denied = error instanceof ApiFailure && (error.status === 401 ||
+          error.code === "staff_web_only" || error.code === "owner_only");
+        setAuthIssue(error instanceof ApiFailure && error.status === 403
+          ? "Staff accounts sign in on the website."
+          : denied ? "Sign in to Suqpage." : "Unable to connect. Please try again.");
+        if (denied) await signOut().catch(() => {});
+      })
+      .finally(() => {if (current) setReady(true);});
+    return () => {current = false;controller.abort();};
+  }, [candidate, validationRevision, signOut]);
   const ownerRequest = useCallback(
     async <T,>(path: string, body?: unknown, form?: FormData) => {
       if (!auth) throw new ApiFailure("Sign-in is not configured.", 503);
       const { data } = await auth.auth.getSession();
       if (!data.session) throw new ApiFailure("Sign in to Suqpage.", 401);
-      return request<T>(path, { body, form, token: data.session.access_token });
+      try {
+        return await request<T>(path, { body, form, token: data.session.access_token });
+      } catch (error) {
+        if (error instanceof ApiFailure && (error.code === "staff_web_only" || error.code === "owner_only")) {
+          setAuthIssue("Staff accounts sign in on the website.");
+          await signOut().catch(() => {});
+        }
+        throw error;
+      }
     },
-    [],
+    [signOut],
   );
-  const signOut = () =>
-    endLocalSession({
-      signOut: async () => auth?.auth.signOut({ scope: "local" }),
-      clearPrivateState: () => {
-        setSession(null);
-        setBasket(null);
-      },
-      removeStoredSession: () => secure.removeItem("suqpage-owner-session"),
-    });
 
   return (
     <Context.Provider
       value={{
         session,
         ready,
+        authIssue,
+        authRetryAvailable: Boolean(candidate && authIssue),
+        retryAuth: () => setValidationRevision(v => v + 1),
+        clearAuthIssue: () => setAuthIssue(""),
         locale,
         setLocale: (v) => {
           setLanguage(v);

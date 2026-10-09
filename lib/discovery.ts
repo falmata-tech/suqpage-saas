@@ -272,7 +272,7 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     }
   }
   const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
-    || DISCOVERY_INDUSTRIES[0];
+    || ALL_DISCOVERY_INDUSTRIES;
   return {
     id: row.id,
     handle: row.handle,
@@ -322,7 +322,7 @@ function toSponsorPlacement(row: SponsorPlacementRow): SponsorPlacement {
 
 function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult {
   const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
-    || DISCOVERY_INDUSTRIES[0];
+    || ALL_DISCOVERY_INDUSTRIES;
   return {
     id: row.id,
     name: row.name,

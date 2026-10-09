@@ -11,6 +11,9 @@ import { useFocusEffect } from "expo-router";
 import { useApp } from "./runtime";
 import { Photo, Icon, Button, Copy, colors } from "./ui";
 import YouTubeFrame from "./YouTubeFrame";
+import SocialVideoFrame from "./SocialVideoFrame";
+import { productVideo,normalizeProductVideoUrl } from "../../../lib/video/product-video";
+import LoadingBar from "./LoadingBar";
 import { youtubeId, type PlayerEvent } from "./youtube-player";
 export default function YouTubeVideo({
   video,
@@ -19,6 +22,7 @@ export default function YouTubeVideo({
   height = 270,
   active = true,
   privateImage = false,
+  allowSocial = false,
 }: {
   video: string;
   posterTint?: string;
@@ -26,9 +30,14 @@ export default function YouTubeVideo({
   height?: number;
   active?: boolean;
   privateImage?: boolean;
+  allowSocial?: boolean;
 }) {
   const { t } = useApp(),
-    id = youtubeId(video);
+    parsed = (()=>{try{return allowSocial ? video.includes(":")&&!video.startsWith("https:") ? productVideo(video) : normalizeProductVideoUrl(video) : null;}catch{return null;}})(),
+    tikTok = parsed?.provider === "tiktok" || parsed?.provider === "instagram",
+    social = parsed && parsed.provider !== "youtube",
+    id = social ? parsed.providerId : youtubeId(video),
+    Frame = social ? SocialVideoFrame : YouTubeFrame;
   const [focused, setFocused] = useState(true);
   const [playing, setPlaying] = useState(false),
     [state, setState] = useState<"loading" | "ready" | "error">("loading"),
@@ -65,7 +74,7 @@ export default function YouTubeVideo({
     return () => clearTimeout(timeout);
   }, [playing, state, attempt]);
   function event(value: PlayerEvent) {
-    setState(value);
+    setState(current=>value === "ready" && current === "error" ? current : value);
   }
   function start() {
     setState("loading");
@@ -84,25 +93,23 @@ export default function YouTubeVideo({
         }}
       >
         <Copy>{t("Video unavailable")}</Copy>
-        {id && <Button secondary label={t("Try again")} onPress={start} />}
+        {Boolean(id) && <Button secondary label={t("Try again")} onPress={start} />}
       </View>
     );
   if (playing && active && focused)
     return (
       <View style={{ gap: 5 }}>
-        <YouTubeFrame
+        <View style={{height:Math.max(200,height),backgroundColor:'#202428',overflow:'hidden'}}>
+          {tikTok&&poster?<View pointerEvents="none" style={[StyleSheet.absoluteFill,{opacity:.45}]}><Photo refPath={poster} height={Math.max(200,height)} privateImage={privateImage} blurRadius={12}/></View>:null}
+          <View style={{height:Math.max(200,height),width:tikTok?Math.max(200,height)*9/16:'100%',maxWidth:'100%',alignSelf:'center'}}><Frame
           key={video + attempt}
           id={id}
+          videoRef={parsed?.managedRef}
           height={Math.max(200, height)}
           onEvent={event}
-        />
+        /></View></View>
         {state === "loading" && (
-          <Text
-            accessibilityLiveRegion="polite"
-            style={{ fontSize: 12, color: colors.muted }}
-          >
-            {t("Loading video…")}
-          </Text>
+          <LoadingBar label={t("Loading video…")} />
         )}
       </View>
     );
@@ -113,11 +120,11 @@ export default function YouTubeVideo({
       disabled={!active}
       onPress={start}
     >
-      <Photo
+      {social && !poster ? <View style={{height,backgroundColor:colors.background,alignItems:"center",justifyContent:"center"}}><Copy>{parsed.provider === 'instagram' ? 'Instagram' : parsed.provider === 'facebook' ? 'Facebook' : 'TikTok'}</Copy></View> : <Photo
         privateImage={privateImage}
         refPath={poster || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
         height={height}
-      />
+      />}
       {posterTint ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: posterTint, opacity: .08 }]} /> : null}
       <View style={p.overlay}>
         <View style={p.circle}>

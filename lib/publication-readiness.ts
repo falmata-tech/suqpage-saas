@@ -1,4 +1,5 @@
-import { STARTER_ABOUT, starterContacts, starterOfferings } from "./business-starter";
+import {isStarterOffering} from "./category-starter";
+import { STARTER_ABOUT, starterContacts } from "./business-starter";
 import type { ShopPageContent } from "./owner-page-domain";
 import type { Product } from "./types";
 
@@ -7,7 +8,7 @@ export function publicationReadiness(content: ShopPageContent, products: Pick<Pr
   const contacts = content.contacts || {};
   const listed = products.filter(product=>product.is_published);
   const sampleContacts = Object.entries(contacts).some(([key,value])=>value && value === starterContacts[key as keyof typeof starterContacts]);
-  const sampleOffering = listed.some(product=>starterOfferings.some(sample=>product.name===sample.name || product.description===sample.description));
+  const sampleOffering = listed.some(product=>isStarterOffering(product.name,product.description));
   return [
     {key:"about",label:"Describe your business",ready:Boolean(content.about.trim()) && content.about!==STARTER_ABOUT && !content.about.startsWith("Sample page:"),href:"#shop-about"},
     {key:"contacts",label:"Add your real contact details",ready:Object.values(contacts).some(Boolean) && !sampleContacts,href:"#public-phone"},
