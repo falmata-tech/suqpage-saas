@@ -8,7 +8,7 @@
 
 
 Current released product (FE-044–FE-051, BE-037–BE-043, DEP-034–DEP-040):
-Suqpage runs at https://suqpage.com on PostgreSQL schema 59. Standard owner pages,
+Suqpage runs at https://suqpage.com on PostgreSQL schema 62. Standard owner pages,
 complete private starters, Product/Service posting, owner first Publish and live
 Save, immediate public location saves and five-row search results are deployed.
 Custom-page request/design/revision features are retired; historical data remains.
@@ -31,11 +31,17 @@ content is separate from the one-time correction of existing demos. Demos retain
 optional-price, scheduled Featured and sponsor examples rather than marking every
 business featured or claiming prerecorded video is live.
 
-The current release and its verified gates, backup, deployment and remaining
-real-email/hosted-session admission limits are recorded in
-`docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`.
-The S98 notification/canonical Android rollout remains pending under
-DEP-042/DEP-043; its backed schema 60–62 rehearsal is not a production migration.
+The preceding release is recorded in
+`docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`. Current release gates, backup,
+artifacts and remaining real-email/hosted-session/OS limits follow below.
+The S98 web/API release uses source a81c93f and production deploy
+6ac839e949737af3112e0764. Backed migrations 60–62 preserve existing records and
+private permissions. Production notification configuration and the scheduled
+worker are verified; real OS display/read evidence is separate. The canonical
+Android internal APK is built, signature/config/privacy inspected and checked on an
+isolated emulator; physical-phone alerts and authenticated hosted flows remain
+separate under DEP-042/DEP-043. Current evidence is in
+`docs/SUQPAGE-S98-RELEASE-2026-10-08.md`.
 
 ## 1. Your role
 
@@ -87,11 +93,12 @@ do not enable a custom-request application feature.
 
 Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
 The generated Netlify origin remains an infrastructure compatibility address.
-Released source `6c27025db6d84cecda43c952597926955aecb71d` and Netlify deployment
-`6ac5c9940ee5deb5294319ef` use schema 59. Web release, operations, exact packaged
-Linux handler/image and private-artifact checks pass. Live public routes, native
-catalog, saved demo accents and the historical Android link association are
-verified in `docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`. Real hosted email and
+Released web source `a81c93f0fdbea8ce674df120bb8491c3a4ebf132` and Netlify deployment
+`6ac839e949737af3112e0764` use schema 62. Complete check, web release, operations,
+eleven local production-mode workflows, packaged Linux handler/image/worker and
+artifact privacy gates pass. Live public routes, native catalog, protected-route
+denial, www redirect and canonical plus historical Android association bytes are
+verified in `docs/SUQPAGE-S98-RELEASE-2026-10-08.md`. Real hosted email and
 authenticated hosted sessions remain separate from passing local workflow tests.
 
 The official product name is:
@@ -173,13 +180,14 @@ pairs pickup/destination in a highlighted route card and name/phone in a second
 row, including phones; a compact optional-details box follows. It is a conversation,
 not a confirmed booking, payment or delivery guarantee.
 
-S71/S72/S84/S90 are locally implemented UI revisions, pending owner visual review and
-release gates (FE-019/FE-030/FE-049/FE-053). The transport entry says Need help with
+S71/S72/S84/S90 UI revisions are visually approved and released on web
+after full gates (FE-019/FE-030/FE-049/FE-053); the canonical APK is built and its
+public flows checked. The transport entry says Need help with
 transport?, followed in smaller print by Let us handle it. Chat with our transport
 agents live. Its intake invites customers who bought from a business on Suqpage
 to chat with the transport team for help getting the purchase to them.
 Customer copy avoids last-mile delivery wording, distances,
-brokerage and mode details. Local wording explicitly names purchased goods and includes
+brokerage and mode details. Shared wording explicitly names purchased goods and includes
 native live-chat wording plus (Live Chat), allowing more words when clarity
 requires it. They invite
 visitors who found a product to chat with the transport team. The results opener
@@ -809,14 +817,14 @@ recovery input and are discarded when upgraded to revision schema v3.
 
 ---
 
-Planned S98 media-save protection (FE-050) disables the product form before
+S98 media-save protection (FE-050) disables the product form before
 client readiness and while its save is pending, using the existing loading bar.
-Actual browser coverage checks new photo bytes and gallery retention; rollout is
-still pending. No additional product fields or approval step is introduced.
+Actual browser coverage verifies new photo bytes and gallery retention; web
+publication is verified. No additional product fields or approval step is introduced.
 
 ## 8. Product and inquiry workflow
 
-The local S91 candidate records one owner alert with each canonical in-app inquiry
+The S91 implementation records one owner alert with each canonical in-app inquiry
 transaction. Its link opens that exact permitted inquiry; reading an alert does
 not change inquiry status. External social handoffs create no platform alert.
 Inquiries without a client owner alert platform/operations managers (FE-062/BE-050).
@@ -972,9 +980,10 @@ and stops when the selected media changes. The first photo stays the cover for
 search/cards; legacy single-photo/video products need no backfill. Extra photos
 follow existing tenant/public access and snapshot-retention rules. This gallery
 was deployed on schema 50. Historical support reviews were deployed on schema 58.
-The new direct-video candidate has passing focused persistence/security and inline
+The direct-video implementation has passing persistence/security and inline
 web/Expo captures, plus actual Android TikTok/Facebook/Instagram player checks.
-Visual approval, full gates and coordinated web/Android publication remain pending.
+Approved web publication and full gates pass. The canonical APK and physical-phone
+checks remain separate.
 Omitted category, availability, units, highlights, options, visibility and legacy
 collection association are preserved under the tenant/version lock. An explicit
 type choice is saved; new items default to Product. Staff retain detailed controls.
@@ -1331,7 +1340,8 @@ indexed unread counts, bounded feeds and leased provider delivery. Existing live
 chat still polls; it does not require a hosted Supabase Realtime change. Optional
 Web Push and Expo Push/FCM adapters have bounded failures; a minute Netlify worker
 handles retries and provider handoff receipts. Those receipts never mean human
-Read. Background delivery is pending approved configuration and device evidence.
+Read. Production Web Push/Expo capability configuration and scheduled execution
+are verified; actual browser/phone permission and OS delivery still need evidence.
 
 
 S54 public Market adapters select the existing product/service projection before
@@ -1497,12 +1507,13 @@ Do not claim launch readiness when that command or equivalent individual checks 
 
 ---
 
-Local S88 mobile session admission verifies current server role before admitting
+S88 mobile session admission verifies current server role before admitting
 owner screens, outside the provider Auth callback. All authenticated native
 boundaries reject staff from fresh authority; staff denial clears mobile owner
 session/private UI only, leaving separate web sign-in intact. Validation outages
 allow retry without a second OTP and do not admit an unverified session. The
-updated APK/API deployment is pending (BE-044/FE-053).
+updated API and canonical APK are released; installed public checks pass and
+physical/authenticated phone checks remain (BE-044/FE-053).
 
 ## 16. Security requirements
 
@@ -1657,11 +1668,15 @@ requires one canonical installation. Before building/publishing it, verify the
 canonical signing binding and certificate/domain association independently. Do
 not relabel the verified legacy certificate or silently create/replace credentials.
 One Firebase Android app is sufficient; no later rename/second registration is
-planned. No canonical APK or new association publication is claimed yet.
+planned. The canonical and preserved legacy association are published. The new
+canonical internal APK is built and independently signature/package/version/debug/
+privacy inspected; installed public navigation and five-language checks pass.
 The S98 existing-key reuse is independently verified for the canonical package,
 with legacy signing, FCM and other settings preserved; the owner accepts the
 readback after the CLI confirmation timeout. Its verified public certificate is
-pinned locally; no new APK or hosted association publication is claimed yet.
+pinned and published in the verified hosted association. The actual APK matches
+that signer, package and version policy; actual Android verifies the canonical
+domain. Physical-phone notifications/authenticated workflows remain separate.
 `mobile:verify-apk` admits only a
 nondebug signed canonical artifact, newer than the selected latest admitted APK,
 or an explicitly selected first canonical release. It stores a protected checksum
@@ -1674,9 +1689,11 @@ correction and preserve compatibility with installed clients.
 Local S91 migrations 61/62 add confirmed read/join columns and private attention,
 preferences, subscriptions and delivery tables. Protected local backups and
 content-hash readback preserve existing accounts, inquiries, chats and ledgers.
-Hosted schema remains 59 until separately backed coordinated rollout. Background
-push requires reviewed provider credentials and an Android rebuild; no such
-configuration or new APK is claimed by local browser proof (DEP-043).
+Hosted schema is 62 after protected backup/rehearsal, original-column hash
+preservation, private-table permission and runtime-access verification. Reviewed
+Web Push/Expo settings are production-only; provider credentials remain protected
+and the actual canonical APK is inspected and public emulator flows pass.
+Physical-device/authenticated notification checks remain separate (DEP-043).
 The owner-supplied canonical Firebase client file is verified and stored in the
 selected Expo project's preview/production build environments with the matching
 project ID and client-file requirement flag. Protected before-state/source and
@@ -1684,8 +1701,9 @@ metadata/string readback are retained. This build setup does not install the
 private FCM sending key or enable server push. The separately supplied sending
 key is now uploaded and bound only to the canonical Android FCM slot using the
 owner-authorized official CLI method exception; independent public metadata
-readback matches exact project/key/client identity. Server capability, coordinated
-rollout, admitted rebuild and actual Android delivery remain pending.
+readback matches exact project/key/client identity. Server capability and web/API
+rollout and actual APK admission are verified; real Android notification delivery
+remains pending.
 The owner has supplied the sending-key source; selected structural checks and
 protected recoverable backup pass. Its Expo association is verified without
 printing private bytes; its IAM permissions or actual delivery are not claimed
@@ -1714,10 +1732,10 @@ Retained publication/revision snapshots and reconciliation include every gallery
 photo. Hosted schema and publication are verified. Rollback retains additive data
 and must preserve private notes, buying cases and staff video review.
 
-Local migration 60 retires automatic business subscription creation by removing
+Migration 60 retires automatic business subscription creation by removing
 its trigger/function. Historical ledger/payment data is preserved and verified;
-fresh shops and demo fixtures receive no plans. Hosted schema remains 59 pending
-backed rollout; restoring the retired trigger is a separately reviewed mutation.
+fresh shops and demo fixtures receive no plans. Hosted migration is verified;
+restoring the retired trigger is a separately reviewed mutation.
 
 Schema 48 adds pg_trgm/fuzzystrmatch in the reviewed `extensions` namespace and
 four expression GiST indexes. Existing extensions are never relocated implicitly.
@@ -2004,7 +2022,7 @@ Physical Android/rebuilt APK and hosted rollout remain separate gates.
 DEP-042/DEP-043 identity checks cover all build profiles, APK/AAB version settings,
 actual Expo public-config resolution and canonical Firebase acceptance with
 legacy/foreign/missing-config rejection. The verified canonical association is
-prepared locally alongside the preserved legacy HTTPS association. These focused checks do not admit
+published alongside the preserved legacy HTTPS association. These focused checks do not admit
 a new binary, credential write or OS notification claim.
 Focused single-app safety tests additionally cover pinned target/profile/realm,
 nested Firebase-secret rejection, archive exclusions, signature/version/debug
@@ -2020,7 +2038,7 @@ and failed replies, claim/assignment/close/reopen/handoff, direct/denied links,
 staff settings, stable business context, drawer focus and all five languages at
 1440/390/320. The corrected safe redirect flow has zero browser exceptions;
 fixtures are removed afterward. Visual approval, full gates, scoped commit and
-web rollout remain pending; this does not claim a new production deployment.
+web rollout are verified in S98; authenticated hosted-session checks remain separate.
 
 S91 focused gates include `npm run test:attention` (real isolated PostgreSQL
 receipt/event/privacy/retry tests and mocked provider/worker contracts) and local
@@ -2035,15 +2053,17 @@ pass, including five languages, desktop/phone widths, actual loaded map tiles,
 ordered typography, the new transport-team introduction, unchanged intake routing
 and compact result-panel mode.
 Two short phone intake checks retain paired fields and reachable Start chat.
-No request is submitted. Visual approval, full gates and coordinated web/Android
-rollout remain separate; no new installed APK is claimed.
+No request is submitted by those captures. S98 visual approval, full gates and
+web/canonical APK rollout are verified; real-phone notification checks remain.
 
-FE-056–FE-061 and BE-045–BE-049 are local candidates awaiting visual approval,
-complete gates and coordinated rollout. Focused browser fixtures establish
+FE-056–FE-061 and BE-045–BE-049 are approved and published on web after
+complete gates. Actual canonical APK artifact and public emulator checks pass.
+Focused browser fixtures establish
 persistence/lifecycle, not provider availability. Actual Android selected-cover
 save/re-entry/render, public Facebook/Instagram advancing playback and TikTok
 player/media progress have separate private evidence. Physical-phone/fullscreen
-checks and a newly admitted APK remain release steps; production is unchanged.
+checks remain physical-phone steps; web/API and inspected canonical APK
+publication are verified in S98.
 
 S81/S82 focused local evidence covers category-specific starter/new-offering
 persistence, all eight actual example playbacks, preserved selected-demo media,
@@ -2058,8 +2078,9 @@ desktop, 390px and 320px on web/Expo, real map selection/preview with no zoom-ou
 counted cluster keyboard expansion and restored original group/badge styles.
 Cluster/nearby/badge declarations match the original web/native styles. Actual OSM desktop/
 phone views were captured separately from controlled cream tiles. Map behavior
-and both type checks pass; full gates, visual approval, physical native/new APK,
-task commit and rollout remain pending. No application data or provider changes.
+and both type checks pass. S98 approved full gates, source commit, web/actual APK
+rollout and native map/cluster/shop-preview checks are verified. Physical-phone
+checks remain separate; local demo-coordinate corrections are not applied live.
 
 S63 copy uses shared web/native constants and all five locale catalogs. Focused
 narrative, localization/content-boundary and type checks precede viewport review;
@@ -2303,8 +2324,8 @@ a first-publication review and contextual locale copy. Public copy does not
 mention pricing. Focused database/browser and full release gates pass; the approved
 experience is deployed. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md` and
 `docs/SUQPAGE-RELEASE-2026-09-27.md`.
-Production schema 59 preserves demo identity, scoped support queues and historical
-buying requests. The current public service is transport/delivery live chat with
+Production schema 62 preserves demo identity, scoped support queues and historical
+buying requests. The current public service is transport live chat with
 route intake, staff assignment, retained history and resolution. Staff arrange
 carriers outside Suqpage; carrier accounts, checkout and booking integrations
 remain out of scope.

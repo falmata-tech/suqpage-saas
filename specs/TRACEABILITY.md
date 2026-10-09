@@ -1461,3 +1461,33 @@ bytes, gallery retention and later edits are verified. Canonical public signing/
 configuration, mobile typecheck and spec validation pass. Android runtime export
 passes; source-map/tooling exclusion and exact packaged artifacts remain required
 before the explicitly authorized production rollout and one APK.
+
+
+S98 source a81c93f is committed after complete check, isolated release:web,
+operations and all eleven production-mode local browser workflows pass. Actual
+Android runtime export and EAS archive exclude private data and both approved
+tooling advisory roots. Actual Linux handler/Sharp and packaged worker checks pass.
+Netlify production deploy 6ac839e949737af3112e0764 uses those identical archives;
+backed/rehearsed schema 62 preserves existing hashes and private permissions. Five
+approved production notification fields have exact Free default-scope readback.
+Live public/native health/catalog/denial/redirect/association checks pass, as do five
+phone locale renders and non-submitted paired transport intake. An actual scheduled
+empty-queue worker cycle succeeds. The preview's unavailable production-only runtime
+is recorded as a failed/blocked draft dynamic smoke, not as passing hosted evidence.
+Canonical internal build 565b9614-428d-47b4-8780-2b0f9c96d68b is complete, with
+actual APK/installed evidence below. Real OS delivery/read tests remain. DEP-042/DEP-043/FE-062 stay
+in_progress. Evidence: docs/SUQPAGE-S98-RELEASE-2026-10-08.md. Deno lock preserved.
+
+
+S98 Android artifact/installed evidence: build 565b9614-428d-47b4-8780-2b0f9c96d68b
+finishes on Free (6/30, zero cost), source a81c93f. Actual nondebug package
+com.suqpage.app/version 2 and pinned existing signer pass SDK inspection. APK
+SHA-256 a7acae61994fbd6ed5440dd46fa3cdf8fecb50681e91db210fb5a523a158bea7.
+Actual Firebase client resources, notification permission and canonical HTTPS intents
+match; artifact/export/archive exclude private data/credentials and admitted tooling.
+The APK installs/launches on isolated API 35. Android verifies suqpage.com. Twelve
+public/locale states, real map tiles, cluster expansion, labelled shop selection and
+preview-to-store navigation pass, with no app crash/keyboard-metrics/text-node error.
+No account sign-in or customer inquiry/chat is created by native smoke. Emulator is
+closed. Physical-phone/browser OS alert and authenticated hosted workflow evidence
+remain outstanding; DEP-042/DEP-043/FE-062 stay in_progress. See the S98 release record.

@@ -427,3 +427,26 @@ THEN only the exact public HTTPS Suqpage routes are claimed; unknown packages,
 untrusted/private URLs and malformed fingerprints remain denied.
 Test: scripts/test-mobile-app-links.ts plus protected independent binding and
 actual APK inspection; a configuration match is not installed-device evidence.
+
+
+S98 canonical build started, 2026-10-08: exact committed source a81c93f,
+clean archive/export privacy, unchanged one-artifact tooling exception, independently
+verified existing signer, Free quota and successful production web/API checks admit
+one internal build 565b9614-428d-47b4-8780-2b0f9c96d68b. Permanent package
+com.suqpage.app and remote version code 2; no new signer, paid build or Play submission.
+Actual artifact/signature/installed checks pass below. Production now serves
+the exact canonical plus preserved legacy association. See the S98 release record.
+
+
+S98 Android artifact/installed evidence: build 565b9614-428d-47b4-8780-2b0f9c96d68b
+finishes on Free (6/30, zero cost), source a81c93f. Actual nondebug package
+com.suqpage.app/version 2 and pinned existing signer pass SDK inspection. APK
+SHA-256 a7acae61994fbd6ed5440dd46fa3cdf8fecb50681e91db210fb5a523a158bea7.
+Actual Firebase client resources, notification permission and canonical HTTPS intents
+match; artifact/export/archive exclude private data/credentials and admitted tooling.
+The APK installs/launches on isolated API 35. Android verifies suqpage.com. Twelve
+public/locale states, real map tiles, cluster expansion, labelled shop selection and
+preview-to-store navigation pass, with no app crash/keyboard-metrics/text-node error.
+No account sign-in or customer inquiry/chat is created by native smoke. Emulator is
+closed. Physical-phone/browser OS alert and authenticated hosted workflow evidence
+remain outstanding; DEP-042/DEP-043/FE-062 stay in_progress. See the S98 release record.

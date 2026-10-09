@@ -3694,80 +3694,60 @@ signing source, Play submission, rebuilt binary or working phone alert is claime
 
 ### S98 — finish coordinated notification web/Android rollout
 
-Operations L4: DEP-042/DEP-043/FE-062/BE-050 and retained S71–S97 release
-work. Master §§15/16/17/22. Preserve user-owned deno.lock. Web/API precedes the
-Android build; no mobile admin, Play submission, paid build, invitation or Git push.
+Operations L4: DEP-042/DEP-043/FE-062/BE-050 and retained S71–S97 work.
+Master §§15/16/17/22. Preserve user-owned deno.lock. Web/API precedes Android;
+no mobile admin, Play submission, paid build, invitation or Git push.
 
-- [x] Verify independent Netlify/Supabase/Expo targets and protected sources;
-  obtain owner approval for the exact rollout and shown visuals.
-- [x] Back up schema 59, restore the actual archive in an isolated clone, rehearse
-  migrations 60–62 and prove original records, private permissions and idempotency.
-- [x] Recover and independently verify only the approved existing signing source;
-  verify canonical FCM/client configuration and the Expo free-build allowance.
-- [x] Finish complete check/release/acceptance and focused native admission gates;
-  retained security/workflow assertions pass, with saved-photo byte verification.
-- [x] Bind existing signing material through the official CLI, verify key bytes,
-  certificate and preserved legacy/FCM/Play/security settings, then pin public links.
-  Owner accepts verified completion after the CLI confirmation timeout.
-- [ ] CURRENT: review and task-scope commit tested source; build and inspect clean artifacts.
-- [ ] Apply only approved migrations and five production/function settings, verify
-  readback, deploy compatible web/API and monitor before starting the APK build.
-- [ ] Build one free canonical internal APK, inspect its actual signature/package/
-  version/bundle and install it for native workflow checks.
-- [ ] Record actual browser/phone permission, foreground/background/tap/mute/logout
-  and expiry evidence; distinguish provider acceptance from real OS display/Read.
-- [ ] Reconcile master/specs/traceability and release record with exact source,
-  deployment/build IDs, monitoring and remaining physical-device limitations.
+- [x] Independently verify targets, protected sources and exact owner approval.
+- [x] Back up schema 59, restore its actual archive, rehearse migrations 60–62,
+  and prove original records, private permissions and idempotency.
+- [x] Reuse the exact existing signer through the official CLI; independently
+  verify key bytes/certificate and preserved legacy/FCM/Play/security settings.
+  Owner accepts the verified result after the CLI confirmation timeout.
+- [x] Pass complete check, isolated release:web, operations, eleven production-mode
+  browser workflows, native/type/link/build gates and Android runtime export.
+- [x] Commit declared source a81c93f and inspect clean web/Android archives.
+  Linux handler/Sharp and actual packaged scheduled worker pass. Web audit is zero;
+  Android tooling retains only the explicitly approved two-advisory exception.
+- [x] Apply protected, rehearsed migrations 60–62 to the verified production target;
+  original-column hashes, private-table permissions and runtime access pass.
+- [x] Apply the same five approved production notification fields using Netlify
+  Free default scopes; exact values/scopes/context readback passes. No upgrade.
+- [x] Upload the tested web artifact, inspect its draft, verify production
+  runtime settings, publish identical archives in the production context and monitor before starting the APK build.
+- [x] Build one free canonical internal APK, inspect actual signature/package/
+  version/bundle and verify installed public navigation/map/five-locale checks.
+  Build 565b9614-428d-47b4-8780-2b0f9c96d68b, version 2; emulator closed.
+- [ ] OWNER PHONE/BROWSER STEP: record real permission, foreground/background/tap/mute/logout
+  and expiry evidence; provider acceptance does not mean OS display or human Read.
+- [x] Reconcile master/specs/traceability and release record with actual deployment/
+  build IDs, monitoring and remaining physical-device limitations.
 
-Owner approval: “go ahead”, exact plan digest
+Original approval: “go ahead”, exact digest
 c34fad9fbd191bdba0878835f10add929dc15905981ac03541963c54804f48d3.
-It authorizes memory-only MIRTPAGE_POSTGRES_URL target verification, protected
-backup/rehearsal and migrations 60–62, five additive production/function notification
-fields, exact existing-key reuse and one free internal APK under the unchanged
-braces/node-forge tooling exception. No new dependency/advisory or key generation.
-Protected sources, backups and operation receipts remain outside Git. Earlier
-automatic-review credential-file/source-binding stops were resolved by removing
-credential persistence and obtaining this explicit source authorization.
-
-Verified evidence before rollout:
-- Production still schema 59 / Netlify 6ac5c9940ee5deb5294319ef; no S98 remote write.
-- Consistent public archive: 58 tables; restoration and migrations preserve all
-  original-column hashes, new attention-table RLS and runtime privacy. Clone cleaned.
-- Existing recovered signer matches the actual historical APK; canonical binding
-  remains empty. Canonical Firebase FCM is configured; no rebuilt APK yet.
-- Complete check, eight mobile groups, operations and isolated web release passed
-  before the final product-form correction. Clean web dependency audit is zero;
-  full tooling audit retains the approved 20 high paths from two advisory roots.
-- Linux cold handler/Sharp and actual packaged scheduled worker invocation passed
-  with an empty isolated queue; this does not prove hosted or OS notification delivery.
-- Nine unchanged browser workflows pass. Staff transport replies/private-note
-  exclusion/end/history/resolution/reopen now pass with the actual current navigation.
-  Remaining focused owner workflow verifies actual media upload/persistence.
-- Security correction restores owner Profile Sign out; actual signup/sign-out and
-  subsequent protected-route denial pass. FE-050 disables media controls before
-  hydration and while save is pending, using the existing LoadingBar; ready layout
-  is unchanged. This data-integrity correction uses AGENTS step 8's exception.
-
-Infrastructure recovery: local Docker stopped during the final checks and the
-isolated /private/tmp checkout disappeared. Failures were connection/setup failures,
-not successful application test runs. Docker/local PostgreSQL/Auth are restored;
-the isolated web checkout was recreated from declared source with a locked clean
-install. Resume database-heavy gates sequentially; do not reuse the interrupted
-runs as passing evidence. Actual device/browser subscription and OS display remain
-unverified; never claim provider acceptance is delivery or human Read.
-
-S98 signing readback: the official CLI stopped at assignment before confirmation.
-Independent reads prove the canonical default binding uses the exact recovered
-existing key bytes and certificate; legacy signing, FCM, Play and enhanced-security
-settings are unchanged. No new key or rollback. Public pins/association are prepared
-locally, with focused checks pending. AGENTS.md's ambiguous-timeout gate stops all
-further remote writes pending the owner's direction on the concrete protected
-review; local checks/preparation continue. Production remains schema 59 and old web.
-
-Owner timeout direction received: “Accept verified result and continue”, digest
+It authorizes memory-only legacy DB source verification, protected backup/rehearsal,
+migrations 60–62, five additive production notification fields, exact existing-key
+reuse and one free internal APK under unchanged braces/node-forge tooling findings.
+No new dependency/advisory or signing-key generation. Signing timeout acceptance:
 fbdaa48da6ad3ca8b350643d17a20954230d245af9a9c6257705e2f5bc5c33b9.
-The signing operation is accepted as independently verified complete, with no
-retry/rollback/further signing write. Continue only the original approved rollout.
-Fresh full check and all eleven production-mode browser workflows pass, including
-actual saved extra-photo bytes. Canonical build/link/type/spec checks and Android
-runtime export pass; fresh web release/artifact/commit/rollout remain current.
+Owner approves Netlify Free standard scopes, digest
+f62dc019baafee9bc05656e5a43a0a64107244326547f763c489011bc8d0dcf0.
+Functions-only and explicit all-scope requests returned 403 with no mutation;
+the supported default-scope request succeeds and independently matches the plan.
+The first upload command rejected incompatible build/context flags before upload;
+the supported prebuilt-upload command retains exact artifact checks. Provider
+readback confirms deploy-preview context; the existing database/runtime fields are
+production-only and handler logs confirm the expected missing-driver failure. Static
+association bytes pass, while hosted draft dynamic smoke does not. Preserve that
+configuration: full local runtime/workflow gates and selected production runtime
+preflight precede an identical-archive production upload and immediate live smoke.
+No ambiguous remote retry or broad configuration sync.
+
+Protected source/backup/operation receipts remain outside Git. Local Docker/setup
+interruptions are not passing evidence; fresh complete gates supersede them.
+Actual uploaded-photo bytes and retained gallery edits pass, as do signup/sign-out,
+private-route denial, staff transport replies, private-note exclusion, end/history,
+resolve/reopen and owner publish/live Save/inquiries. Actual APK inspection and
+installed public/map/five-locale checks pass. Real physical OS delivery remains a
+separate gate. Earlier local-only demo-coordinate changes
+are not copied to production by this hash-preserving migration.

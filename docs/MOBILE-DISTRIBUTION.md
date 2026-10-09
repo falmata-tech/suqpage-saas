@@ -1,15 +1,20 @@
 # Android tester distribution
 
-DEP-042 / DEP-043 / FE-053. The last released tester APK is the historical
-Preview application. [Existing build on Expo](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75).
-It uses live Suqpage accounts/API and needs neither Metro nor Expo Go. The combined
-first setup collects account/business details and the handle, then opens the
-unpublished sample preview with Edit. See
-[the S69/S70 release record](SUQPAGE-S69-S70-RELEASE-2026-10-06.md) for the exact
-source, checksum, signing, web deployment, gates and remaining limits. Earlier
-build/preparation sections below retain their historical evidence. The next
-admitted build uses **Suqpage / com.suqpage.app** for both testing and release;
-its signing, notification configuration and release gates are still pending.
+The current tester app is **Suqpage / com.suqpage.app**. Open
+[the completed Expo build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/565b9614-428d-47b4-8780-2b0f9c96d68b)
+on Android to download and install it. It uses live Suqpage accounts/API and needs
+neither Metro nor Expo Go. This first canonical installation needs sign-in; earlier
+Preview APKs use a different historical package. Staff/admin remain web-only.
+
+Source a81c93f, version code 2, nondebug and the exact existing signer pass actual
+APK inspection. Firebase resources, notification permission, archive/bundle privacy,
+Android canonical-domain verification and installed public navigation/map/five-locale
+checks pass. Web/API is deployed on schema 62. Physical-phone alerts and authenticated
+hosted workflows remain separate. See
+[the S98 release record](SUQPAGE-S98-RELEASE-2026-10-08.md) for exact gates, checksum,
+limits and tester steps. The old
+[Preview build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75)
+is retained as historical evidence; sections below retain earlier preparation details.
 
 The owner selected the Expo account **falmatad**. The linked project is
 [Suqpage on Expo](https://expo.dev/accounts/falmatad/projects/suqpage), ID

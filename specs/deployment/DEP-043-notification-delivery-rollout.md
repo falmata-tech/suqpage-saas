@@ -183,3 +183,35 @@ uses an explicitly approved API/Auth target. Private FCM credentials remain
 provider-managed only. Same application identity does not isolate customer data;
 review target and use labelled test records for production-connected QA. Signing,
 version and actual OS delivery remain independent admission evidence.
+
+
+S98 production rollout evidence, 2026-10-08: source a81c93f is published in
+Netlify production deploy 6ac839e949737af3112e0764 on schema 62. Backed/rehearsed
+migrations preserve existing records' original-column hashes and private-table
+permissions. The owner separately approves Free default scopes for the exact five
+production-only fields; additive creation and exact readback pass without upgrade.
+Explicit scope-list requests were denied with no mutation. Existing runtime/DB
+fields remain production-only: the draft static association passes, while draft
+dynamic smoke fails for missing driver configuration and is not counted as passing.
+Full local runtime/workflow gates and selected production runtime preflight precede
+identical-archive production upload. Live web/native catalogs, health, protected-route
+denial, www redirect and canonical association pass; actual scheduled empty-queue
+execution succeeds. No customer chat or provider notification is created by smoke.
+The canonical APK is complete with artifact/installed evidence below. Actual
+browser/physical-phone permission, display,
+tap/mute/logout/expiry and confirmed Read remain separate; keep in_progress.
+Evidence: docs/SUQPAGE-S98-RELEASE-2026-10-08.md and protected operation receipts.
+
+
+S98 Android artifact/installed evidence: build 565b9614-428d-47b4-8780-2b0f9c96d68b
+finishes on Free (6/30, zero cost), source a81c93f. Actual nondebug package
+com.suqpage.app/version 2 and pinned existing signer pass SDK inspection. APK
+SHA-256 a7acae61994fbd6ed5440dd46fa3cdf8fecb50681e91db210fb5a523a158bea7.
+Actual Firebase client resources, notification permission and canonical HTTPS intents
+match; artifact/export/archive exclude private data/credentials and admitted tooling.
+The APK installs/launches on isolated API 35. Android verifies suqpage.com. Twelve
+public/locale states, real map tiles, cluster expansion, labelled shop selection and
+preview-to-store navigation pass, with no app crash/keyboard-metrics/text-node error.
+No account sign-in or customer inquiry/chat is created by native smoke. Emulator is
+closed. Physical-phone/browser OS alert and authenticated hosted workflow evidence
+remain outstanding; DEP-042/DEP-043/FE-062 stay in_progress. See the S98 release record.
