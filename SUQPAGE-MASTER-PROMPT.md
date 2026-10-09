@@ -1391,6 +1391,15 @@ workflows and signed-emulator checks have evidence; physical-phone signoff and
 iOS/Google Play remain separate. The native-toolchain audit still fails under
 the owner-approved, consumed single-artifact exception. Moving Next.js to apps/web remains a separate migration.
 
+Planned Google Play distribution is tracked in draft DEP-044 / checklist S99.
+The owner reports a personal account created after 2023-11-13 and no app entry.
+Current production AAB/internal-draft profiles are preparation, not a store release.
+Console identity/signing, reusable restricted reviewer access, content reporting/
+blocking and privacy/deletion operations, artifact admission and actual Play/phone
+checks precede reviewed distribution. The required 12-testers/14-day closed test
+and production-access application remain external rollout steps. Existing product
+authentication, catalog, staff permissions and public deployment are unchanged.
+
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
 Those API paths have real isolated PostgreSQL regression evidence. Expo project

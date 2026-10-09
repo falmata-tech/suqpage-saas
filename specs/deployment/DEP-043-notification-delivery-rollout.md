@@ -2,9 +2,9 @@
 id: DEP-043
 title: Verified notification delivery rollout
 status: in_progress
-related: [BE-050, FE-062, ADR-0026, DEP-042]
+related: [BE-050, FE-062, ADR-0026, DEP-042, DEP-044]
 owners: [operations, security]
-last_updated: 2026-10-08
+last_updated: 2026-10-09
 change_level: L3
 ---
 

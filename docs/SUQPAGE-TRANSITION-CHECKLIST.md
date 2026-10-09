@@ -3751,3 +3751,49 @@ resolve/reopen and owner publish/live Save/inquiries. Actual APK inspection and
 installed public/map/five-locale checks pass. Real physical OS delivery remains a
 separate gate. Earlier local-only demo-coordinate changes
 are not copied to production by this hash-preserving migration.
+
+### S99 — Google Play preparation and required closed testing
+
+Operations L4, DEP-044 (draft) / DEP-042 / DEP-043 / FE-055. New request adds
+Google Play distribution after S98, preserving its pending owner-phone evidence.
+Owner confirms personal developer account created after 2023-11-13 and no app
+entry. Scope is Suqpage only; preserve unrelated untracked deno.lock. Master
+§§15/16/17/22 affected by later rollout/auth changes. Preparation is one-time;
+reuse current build/admission contracts rather than adding a second release system.
+
+- [x] Inspect baseline/source and research current Google/Expo requirements.
+  Same com.suqpage.app; AAB required; at least 12 closed-test opt-ins continuously
+  for 14 days before production-access application. Internal tests do not count.
+- [x] Recheck locked audit and existing actual APK compatibility: 20 high / zero
+  critical, two unpatched tooling roots; 50 native ELF libraries and ZIP pass
+  16-KB static alignment checks. Future AAB/device checks remain separate.
+- [x] Prepare draft listing/assets, truthful data-safety worksheet, reviewer
+  access/signing proposals, tester instructions and artifact admission requirements.
+  185-spec validation, both listing lengths, seven asset formats/checksums,
+  mobile build/signature/upload/privacy/media and app-link contract checks pass.
+  Public health/privacy/deletion resources return 200 on canonical origin;
+  selected Expo identity is verified and Free build quota read back. These are
+  preparation checks, not policy approval, a new artifact or phone OS proof.
+- [ ] CURRENT OWNER CONSOLE: create Suqpage app (English US, App, Free), verify developer/
+  app identity, required account/device verification and selected signing policy.
+  Do not enroll a new signer or upload any private key incidentally.
+- [ ] Resolve secure reusable reviewer access, UGC report/block workflow and
+  privacy/deletion fulfilment. Create ready FE/BE specs before behavior changes;
+  use real isolation/regression evidence and focused visual approval, then gates.
+- [ ] Admit a reviewed AAB: unchanged audit gate or exact renewed exception;
+  clean committed source, verified production target/signer, free quota and archive
+  privacy. Inspect actual AAB/API/version/signature/16-KB configuration after build.
+- [ ] Upload internal draft only to the verified app; keep credentials private,
+  inspect actual Play-delivered APK and phone login/media/inquiry/chat/push/update/
+  domain association before sharing. Owner may perform first manual Console upload.
+- [ ] Complete store declarations and required setup; use the admitted version
+  for closed testing, record 12 continuous opt-ins/14 days and actual feedback.
+  Tester list stays protected; do not send invitations without recipient approval.
+- [ ] Apply for production access with true feedback, then approved monitored
+  public rollout. Record terminal Console status/artifact/evidence; no public
+  publication or policy-compliance claim from preparation alone.
+
+S99 preparation evidence is retained in .local/play-s99/. Store/readiness runbook
+is docs/GOOGLE-PLAY-RELEASE.md. S98's single-APK tooling exception is consumed;
+it does not cover this new AAB. No Console write, new build, invitation or provider
+configuration change has occurred in S99.

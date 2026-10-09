@@ -2,9 +2,9 @@
 id: DEP-042
 title: Expo workspace rollout
 status: in_progress
-related: [FE-061, BE-049, ADR-0025, FE-060, BE-048, FE-059, BE-047, FE-058, FE-056, DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023, FE-057, BE-046, ADR-0024, DEP-043]
+related: [FE-061, BE-049, ADR-0025, FE-060, BE-048, FE-059, BE-047, FE-058, FE-056, DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023, FE-057, BE-046, ADR-0024, DEP-043, DEP-044]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-08
+last_updated: 2026-10-09
 change_level: L3
 ---
 
