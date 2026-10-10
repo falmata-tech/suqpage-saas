@@ -8,13 +8,13 @@ or Submit. No form answer is inferred from a screenshot or a missing ad SDK.
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Title SuqPage/en-US, English/Amharic store text, support contact and seven image hashes are saved/read back; finish Console setup, actual Play signing and new artifact admission. Tracks/binary lists stay empty |
-| SDK compatibility | Released APK targets API 36; 50 ELF libraries and ZIP pass static 16-KB alignment | Actual future AAB/bundle configuration, Play processing and delivered APK |
-| App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows | Hosted provisioning/binding and actual web/native API sessions pass; new Android binary and Console App access fields remain |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Title SuqPage/en-US, English/Amharic text/contact/images and exact version-3 internal draft are saved/read back; existing Google signer and official native test splits verified. Finish Console setup, protected-phone testing and closed/public rollout |
+| SDK compatibility | Actual version-3 AAB and Google universal APK target API 36; bundle config, all 50 ELF libraries and APK ZIP pass 16-KB checks | Protected Play-installed physical-phone workflows and notification proof |
+| App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows | Hosted provisioning/binding and actual web/native API sessions pass; version-3 internal draft and native guest entry verified; finish Console App access fields and authenticated protected-phone workflows |
 | Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Per-request verified mailbox/identity, backup/approval and real fulfilment remain manual; final disclosure/rollout |
 | Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 locally implement real report/block controls and a private support/admin Reports queue | Delegated visual acceptance and full local gates pass; production schema/API/web now passes; native binary/Play checks remain, with objectionable-content terms evaluated against actual moderation rules |
 | Live chat | Public transport chat; business-owner support; assigned staff, messages, receipts and history | Actual hosted phone end-to-end and permission/background/closed-app/tap/logout evidence |
-| Privacy | Updated local five-language notice covers account/catalog/inquiry, push, controlled embeds, native tile cache and deletion/backups | Verified notice is deployed on web/API; new Android binary and accurate Console data-safety declarations remain |
+| Privacy | Updated local five-language notice covers account/catalog/inquiry, push, controlled embeds, native tile cache and deletion/backups | Verified notice is deployed on web/API and included in inspected native version 3; accurate Console data-safety declarations/protected-phone SDK review remain |
 | Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Declare sponsored promotional content accurately; absence of a network ad SDK is not enough to choose No |
 | Payments | No app checkout, digital subscriptions or business payment plans | Do not claim payment collection or in-app purchases; transport is arranged by agents outside platform checkout |
 | Content rating/target ages | Public merchant catalog and live team conversations | Owner completes truthful questionnaire and intended age groups; do not fabricate a rating or claim child-directed design |
@@ -35,11 +35,34 @@ for a dedicated ordinary marked demo-business owner. FE-064/BE-052 now pass real
 local Supabase/PostgreSQL password/JWT, fresh identity/role/tenant/security checks,
 actual web/native-browser login and ordinary OTP preservation, plus five-language
 screen captures. No credential is compiled into the app. Hosted provisioning/
-binding and real web/native API sessions pass. New Android delivery and Play
-App access fields remain pending. General password/staff mobile access is
+binding and real web/native API sessions pass. Version-3 internal draft and native
+public test splits are verified; protected-phone access and Play App access fields
+remain pending. General password/staff mobile access is
 not enabled. BE-053's actual local erasure rehearsal verifies app/Auth/media,
 orphans and shared-upload preservation; real deletions still require a separately
 verified request, backup and reviewed exact plan.
+
+## Current protected APK and test-device distinction
+
+Version 3 is saved in internal draft, not publicly released. Google's protected
+universal APK requires Play Store; the API 35 Google-APIs emulator lacks it.
+Production protection stays unchanged. Four official Google-signed test splits
+pass isolated update/data retention, 12 public states/five languages and HTTPS
+links. Physical protected Play install, authenticated owner flows and actual OS
+notifications still require real-device evidence. The test emulator is closed.
+
+Inspect the actual APK/SDK behavior when completing declarations. The inspected
+AAB contains POST_NOTIFICATIONS and SDK legacy storage, overlay, biometric and
+launcher-badge declarations, while fine/coarse GPS, microphone and broad modern
+READ_MEDIA permissions are blocked. Manifest capability alone does not prove data
+collection or that a permission is requested; do not invent a flow from its name.
+Include Google's protection layer in the final SDK review rather than treating
+local compiled-source inspection as the entire Play-delivered app.
+
+Target audience remains an owner question (adults only or also teenage shoppers),
+not a saved declaration. App content and account/device verification still need
+Console completion. Private reviewer instructions and a six-address tester import
+CSV are ready outside Git; no invitation or closed-test opt-in is claimed.
 
 ## Data-safety inventory to validate
 

@@ -14,8 +14,9 @@ change_level: L4
 
 The owner has a verified-by-owner personal Play developer account created after
 2023-11-13 and has provided a newly created Suqpage app dashboard. The selected
-developer/canonical-package Admin grant is now independently verified; Console
-setup and actual Play signing remain pending. Prepare a truthful store listing and a
+developer/canonical-package Admin grant and existing Play signing identity are
+independently verified. Version 3 is saved in internal draft; Console setup,
+protected-phone testing and reviewed closed/public rollout remain. Prepare a truthful store listing and a
 verified Android App Bundle, then use internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
 not a Google Play release and does not start the closed-test clock.
@@ -98,10 +99,13 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 
 Current phase: committed/tested content safety, reviewer access and deletion
 operations, approved Expo upload-key connection, and verified hosted schema-63
-web/API/reviewer rollout. Google reads the actual SuqPage title/en-US and empty
-tracks/binary lists; store English/Amharic text, support contact and seven image
-hashes are saved/read back using standard metadata review. No new signed AAB,
-Play binary upload or store publication. Store packet/runbook:
+web/API/reviewer rollout. Google verifies SuqPage/en-US, English/Amharic text,
+support contact and seven image hashes saved using standard metadata review. One
+free version-3 AAB is built, inspected and independently read back with its exact
+hash in internal draft; other tracks stay empty and metadata unchanged. Google-
+generated APKs retain the existing certificate. Native official test splits pass
+public/update/locale/link checks; protected Play-installed phone, policy and
+closed/public gates remain. No public store publication. Store packet/runbook:
 docs/GOOGLE-PLAY-RELEASE.md, docs/GOOGLE-PLAY-CONNECTION.md and docs/play-store/. Verified historical runtime
 baseline: docs/SUQPAGE-S98-RELEASE-2026-10-08.md.
 
@@ -115,8 +119,10 @@ the affected track; do not assume a downgrade or uninstall preserves sessions.
 ## Readiness
 
 Preparation and the hosted web/API phase are verified. The complete Play rollout
-remains draft: actual Play signing, final Console declarations, new artifact admission and
-installed-device evidence remain unresolved. Hosted reviewer/content-safety web/API
+remains draft: final Console declarations, protected Play-installed physical-device
+workflows/notifications and reviewed closed/public distribution remain unresolved.
+The exact one-AAB exception is approved and consumed; no further artifact is
+admitted by it. Hosted reviewer/content-safety web/API
 rollout is now verified, with production original-record preservation. Local
 implementation, delegated visual acceptance and full gates pass. Master §§15/16/17/22
 would be affected by completed rollout or authentication changes. Do not mark this
@@ -191,3 +197,37 @@ ZIP SHA-256 82d3ff08974ceced09e55a965c650bcd5232a5b4f3d3bc1160ffaaaf4d2b4dfb.
 No key generation, provider write, enrollment or new AAB is performed. Exact
 owner Console upload, independent Google certificate and delivered-device proof
 remain distinct gates. Existing signing invariants and draft status remain.
+
+## Verified internal draft and native test evidence — October 10, 2026
+
+Owner approval binds one free AAB to digest
+b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38.
+Fresh exact lock/source/archive/target/quota gates pass with the same 20 high
+unpatched build-tool findings, absent from compiled runtime. Build
+641cb96a-3296-409b-b7ae-eabb28bc11fa is FINISHED, source ea1b452, version 3,
+cost zero. The exception is consumed; later artifacts need fresh admission.
+
+AAB SHA-256 7192acc4b921a1b972a1a18608a376039694b5d27456a75a2174e7bfb524be91:
+actual nondebug/API-36/pinned signature, private-byte exclusion, bundletool validity,
+16-KB bundle config and all 50 native ELF libraries pass. EAS submission
+1c29e427-ef90-4119-bca1-1756607fc9a2 is FINISHED. Independent Google readback
+confirms exact version/hash in internal draft, other tracks empty and store text/
+contact unchanged; owned read edits are deleted. Actual Google universal APK
+signature/package/version/debug and 16-KB ZIP alignment match the retained signer
+and previous canonical version 2.
+
+The protected APK requires Play Store, absent in our Google-APIs emulator. Four
+Google-signed official test splits, selected from its unprotected test metadata,
+pass per-file hashes/signatures and isolated update/data retention. Twelve public
+states, five languages, canonical HTTPS links and no native crash/metrics/text
+errors pass. No account/chat/inquiry is submitted. Only temporary emulator 5576
+closes; original AVD data/5580 are preserved. Production protection is unchanged.
+This is genuine native test-split evidence, not protected physical-phone/alerts
+or full authenticated phone workflow proof.
+
+Receipts: .local/play-s99/aab-inspection.json, aab-exception-consumed.json,
+play-upload-verification/, google-test-splits/, native-public-verified.json and
+android-device/. Six tester addresses/import CSV stay private; no actual opt-ins
+or invitations. Console forms, protected-phone tests, reviewed closed distribution,
+12 real testers continuously for 14 days and production access remain. Status
+stays draft; do not reuse completed signing/upload steps or claim public approval.

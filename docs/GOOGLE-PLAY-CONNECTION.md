@@ -18,10 +18,11 @@ testers or make the app publicly available. Keep the existing name/package.
 Google's API independently verifies the selected developer, **com.suqpage.app**
 grant, actual store title **SuqPage**, default **en-US**, saved English/Amharic
 store descriptions, selected support email/website and all seven uploaded images.
-Four release tracks and APK/bundle lists remain empty. Metadata is saved under
-Google's required automatic-review behavior; no app publication or Google approval
-is claimed. The separate read-only edit was deleted. Actual Play signing,
-Console-only setup and account/device verification remain. The `/u/2/` part
+Version 3 is now independently verified in internal draft, with the exact AAB hash,
+existing Google signing certificate and other tracks empty. Metadata remains saved
+under Google's required automatic-review behavior; no public app publication or
+policy approval is claimed. Owned read edits are deleted. Console-only setup,
+protected-phone testing and any remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
 login does not select a new Suqpage administrator. The owner separately confirms
@@ -148,6 +149,11 @@ The selected decision is to retain our existing app signing key. The current
 Suqpage APK certificate is pinned in apps/mobile/release-policy.json. A new
 Google-generated signer is a separate change and cannot silently replace it.
 
+**Completed October 10, 2026.** The owner supplies the matching Console fingerprint;
+independent Google-generated APK metadata and the actual signed universal APK
+verify the existing certificate. The instructions below are a reference, not a
+step to repeat. Protected receipts: .local/play-s99/play-upload-verification/.
+
 1. Open the SuqPage app in Play Console.
 2. Open **Protected with Play → Play Store protection → Manage Play app signing**.
    The owner confirms the SuqPage **App signing** screen with its **Change key**
@@ -166,7 +172,8 @@ Google-generated signer is a separate change and cannot silently replace it.
 6. Independently verify Google's app-signing SHA-256 before testing distribution.
    The expected existing certificate is
    `06:30:C5:6F:88:DF:87:4F:D2:72:96:D1:AA:08:48:A6:8F:C8:34:5F:70:2F:E6:80:2E:DD:82:55:B7:21:11:83`.
-   Local ZIP preparation does not prove Google enrollment or actual APK signing.
+   Local ZIP preparation alone does not prove Google enrollment or actual APK signing.
+   Both Google metadata and its actual version-3 APK now independently match.
 
 If the page is unavailable until the first upload, report that message rather than
 accepting a different signer. Google's current instructions allow changing the
@@ -179,6 +186,13 @@ checked October 10, 2026.
 
 ## 6. Bind the submission credential and upload
 
+**First upload completed October 10, 2026.** Build
+641cb96a-3296-409b-b7ae-eabb28bc11fa and submission
+1c29e427-ef90-4119-bca1-1756607fc9a2 are FINISHED. Google independently confirms
+the inspected version-3 AAB/hash on internal draft; other tracks and listing/contact
+remain unchanged. No public rollout or closed-test clock. Do not repeat the credential
+setup or upload this version again. Console setup and protected-phone testing remain.
+
 The existing official Expo CLI login/project readback confirms **falmatad** and
 **@falmatad/suqpage**, ID **bfc289fb-238e-44a3-9e0f-fec6a7c857d1**. The canonical
 **com.suqpage.app** EAS Submit slot now holds the exact owner-provided
@@ -186,8 +200,9 @@ The existing official Expo CLI login/project readback confirms **falmatad** and
 one-operation official-CLI exception; CLI 24.10.0 exits 0. Independent readback
 matches its key identifier/project/email and confirms unchanged FCM and canonical/
 legacy signing metadata. Protected source and before-state remain recoverable.
-Review/digest and completion receipt are under .local/play-s99/. No build or app
-submission ran. The credential setup below is a reference, not a step to repeat.
+Review/digest and completion receipt are under .local/play-s99/. At credential
+connection no build/submission ran; the separately admitted version-3 upload is
+recorded above. The credential setup below is a reference, not a step to repeat.
 
 Once the selected account/app/key/signing target is verified and the owner has
 authorized the exact credential association, use the Expo dashboard:

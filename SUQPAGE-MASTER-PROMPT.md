@@ -1432,26 +1432,28 @@ The owner reports a personal account created after 2023-11-13 and has supplied
 the created app's Console dashboard. Google now independently verifies selected
 developer/package and app-only Admin access; Expo project/current signer match.
 The owner-approved official CLI connects the exact supplied EAS Submit key and
-independent readback confirms preserved FCM and canonical/legacy signing. Console
-setup/actual Play signing and release readiness remain pending; see
-docs/GOOGLE-PLAY-CONNECTION.md. The existing-key encrypted upload ZIP is prepared
-and verified locally; owner Console upload and Google certificate readback remain
-pending. Credential connection or encrypted export does not publish/build an app.
-Current production AAB/internal-draft profiles are preparation, not a store release.
-Google's API verifies the Console title SuqPage/en-US, saved English/Amharic
-store text, selected public support contact and seven uploaded images. Every
-release track and APK/bundle list remains empty; metadata review is not app
-publication or Google approval. Existing-key Play signing,
-new AAB admission/build and actual Play/phone checks precede reviewed distribution.
+independent readback confirms preserved FCM and canonical/legacy signing. Existing-key
+Play enrollment and the actual Google-signed APK certificate are independently
+verified. One free version-3 AAB from ea1b452 passes artifact/privacy/API-36/16-KB
+checks under its exact approved, now-consumed tooling exception; the tooling audit
+remains failed, not clean. Google independently verifies its hash in internal draft,
+with other tracks empty and SuqPage/en-US, English/Amharic store text, selected
+support contact and seven images preserved. Google's signed official test splits
+pass an isolated native update, 12 public states, five languages and HTTPS links.
+The protected universal APK requires Play Store, absent in that emulator; actual
+protected Play-installed phone/alerts, Console declarations and closed rollout
+remain pending. Production Play protection is unchanged. Internal draft is not
+public publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
-a private PostgreSQL report port and web/native adapters; the new native binary
-is still pending. Discovery exclusions run before counts, fuzzy candidate
+a private PostgreSQL report port and web/native adapters; native version 3 is in
+internal draft, with actual protected-phone/distribution checks pending. Discovery
+exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
 focused evidence, delegated visual acceptance and complete gates pass; committed
-web/schema/API rollout is verified. New Android/Play rollout remains pending.
+web/schema/API rollout is verified. Reviewed closed/public Play rollout remains pending.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
@@ -1740,7 +1742,9 @@ recorded in docs/GOOGLE-PLAY-RELEASE.md. The compatible source ea1b452
 web/API is published before the new native build containing report actions.
 Rollback preserves reports and privacy rather than dropping records. Exact
 production reviewer provisioning/binding and live web/native API sessions pass;
-S99 Android admission, Play signing/distribution and phone checks remain pending.
+S99 version-3 admission, existing Play signer, internal draft and native public test
+splits are verified; actual protected-phone, declarations and closed/public rollout
+remain pending. No additional artifact is admitted by the consumed exception.
 
 Internal APK and store AAB profiles use the same permanent native identity and
 remote version counter, incrementing version codes for both. Existing released

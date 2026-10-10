@@ -3942,14 +3942,43 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
   the ZIP contains only ciphertext and the pinned public certificate. Original
   keystore hash is unchanged; no new key, provider write or plaintext private-key
   file. Evidence: .local/play-s99/signing/export-verified.json.
-- [ ] CURRENT: owner uploads the verified ZIP to the selected SuqPage signing page;
-  independently verify Google's resulting signing certificate before distribution.
-- [ ] Resolve pending exact one-AAB admission after existing-key enrollment.
+- [x] Owner supplies the resulting Google App signing SHA-256 after the requested
+  ZIP upload; it matches the pinned certificate and verified encrypted export.
+  Receipt: .local/play-s99/signing/owner-certificate-confirmation.json. This is
+  owner Console evidence; independently inspect the Play-delivered signer before
+  distribution rather than treating a future AAB upload signature as that proof.
+- [x] Owner approves the exact one-free-AAB tooling exception, digest
+  b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38.
+  Fresh locked audit still fails with the same 20 high/two unpatched tooling roots;
+  no new advisory or runtime exposure. Free quota remains 11/30, zero cost.
+  Public API/Auth/Firebase configuration and existing signing/FCM/Submit binding
+  are independently rechecked. Approval: .local/play-s99/aab-admission-approval.json.
   Official EAS archive inspection passes: all 1,621 files match ea1b452, private
   credentials/runtime files absent. Receipt: .local/play-s99/eas-archive-inspection.json.
-  This is preparation only; no cloud build or upload yet.
-- [ ] Build/inspect one admitted signed AAB, retain existing app signer in Play,
-  upload exact internal draft and inspect actual Play-delivered install.
-- [ ] Complete Console setup and closed-track rollout, add initial approved
+- [x] Run one free production AAB build from immutable source ea1b452 with
+  existing credentials frozen, no automatic submission and no public release.
+  Build 641cb96a-3296-409b-b7ae-eabb28bc11fa is FINISHED, version 3, cost zero;
+  free usage is now 12/30. Exact AAB hash 7192acc4b921a1b972a1a18608a376039694b5d27456a75a2174e7bfb524be91,
+  API 36, nondebug, pinned signature, private-byte exclusion, 16-KB bundle config
+  and all 50 native ELF libraries pass. The one-artifact exception is consumed.
+  Existing signing/FCM/Submit metadata remain unchanged. Receipt: aab-inspection.json.
+- [x] Upload only that AAB to internal draft. EAS submission
+  1c29e427-ef90-4119-bca1-1756607fc9a2 is FINISHED; independent Google readback
+  matches version/hash, draft status and unchanged listings/contact/other empty tracks.
+  Google-generated universal APK cryptographic signature/package/version/debug and
+  16-KB ZIP alignment pass. Evidence: .local/play-s99/play-upload-verification/.
+- [x] Install/update and test Google's official signed test splits on a fresh
+  isolated API 35 emulator: 12 public states, five languages, retained Somali
+  preference, canonical HTTPS app links and absence of native crash/metrics/text
+  errors pass. Google's protected universal APK requires Play Store, absent in
+  this emulator; actual protected Play-installed phone testing remains separate.
+  Production protection is unchanged. Only task emulator 5576 is closed afterward;
+  emulator 5580 and original AVD data are preserved. Native-public-verified.json
+  and android-device/ receipts retain the distinction; no account/chat/inquiry submitted.
+- [ ] CURRENT: complete Console-only policy/setup forms and test the protected
+  version on an actual Google Play-enabled phone before the reviewed closed rollout.
+  Restricted App access instructions and six supplied tester addresses/import CSV
+  are prepared privately; target-audience preference is requested, not guessed.
+- [ ] Complete closed-track rollout, add initial approved
   tester list and provide actual opt-in link. Obtain at least 12 continuous
   opt-ins for 14 days and record genuine feedback before production access.

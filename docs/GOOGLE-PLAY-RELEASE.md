@@ -1,7 +1,8 @@
 # Suqpage on Google Play
 
 Controlling spec: [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md).
-Current stage: preparation, not a submitted or publicly released app. Owner
+Current stage: version 3 is uploaded and independently verified in internal draft;
+no reviewed closed/public release or protected-phone signoff. Owner
 confirmed a personal account created after November 13, 2023, and has now provided
 the new app dashboard on October 9, 2026. Developer **5256539403314542898**, app
 **4972244998230912603**, reported Play Console login and approved public store
@@ -10,9 +11,11 @@ The dashboard link is owner-provided. Google API readback now verifies the devel
 canonical package and complete app-only Admin grant, and Expo project/current
 signer match. The exact EAS Submit key is connected and independently verified.
 Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
-support email/website and all seven uploaded images; every track/binary list is
-empty. Console-only setup, actual Play signer and new AAB admission remain pending.
-The existing Expo APK remains available separately.
+support email/website and all seven uploaded images. The exact version-3 AAB is
+saved in internal draft, with other tracks empty and the existing Google signer
+verified from its actual APK. The one-free-AAB exception is consumed. Console-only
+setup, protected Play-installed phone/notification checks and closed/public rollout
+remain. The existing Expo APK remains available separately.
 
 The owner requests remote Expo uploads. Follow
 [the beginner connection steps](GOOGLE-PLAY-CONNECTION.md) for app creation,
@@ -288,29 +291,76 @@ The recoverable original keystore remains unchanged. No plaintext private-key
 file, new app/upload key, provider write, AAB or enrollment is created/claimed.
 Private receipts and the one-time helper remain outside Git/app archives under
 .local/play-s99/signing/. Owner Console upload and independent Google certificate
-readback remain required; preserve the currently published domain associations.
+verification are now complete, as recorded below; published domain associations
+remain unchanged.
+
+## Verified version-3 internal draft — October 10, 2026
+
+The owner approves one free AAB under exact digest
+`b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38`.
+Fresh locked audit still fails with the same 20 high/two unpatched tooling roots,
+absent from the compiled application. All existing gates and exact source/archive
+checks pass. This exception is now consumed; it does not admit another build.
+
+- Source: `ea1b4526598cff4fb6058265b8e21a68efab1148`.
+- [Finished Expo build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/641cb96a-3296-409b-b7ae-eabb28bc11fa): production AAB, version 3, credentials frozen,
+  no automatic submission. Free use moves from 11/30 to 12/30; total cost zero.
+- AAB SHA-256: `7192acc4b921a1b972a1a18608a376039694b5d27456a75a2174e7bfb524be91`.
+  Actual API 36/nondebug/pinned signature, bundletool validity, 16-KB bundle config,
+  all 50 native ELF libraries and private-byte/runtime binding checks pass.
+- [Finished EAS submission](https://expo.dev/accounts/falmatad/projects/suqpage/submissions/1c29e427-ef90-4119-bca1-1756607fc9a2): exact build ID, internal draft only.
+  Protected Google before-state and independent new-read-edit proof confirm the
+  exact version/hash in draft, other tracks empty and listing/contact unchanged.
+- Google's generated universal APK SHA-256:
+  `4e3e78d9614a62a4152660b5ae6e2c5eba9da4624e5ea90015d9d62f85d65c2b`.
+  Actual apksigner/package/version/debug checks match the pinned existing key and
+  permit updating the previous canonical version 2; ZIP integrity/16-KB alignment pass.
+  Google-generated metadata independently confirms only the existing signing key.
+
+The protected universal APK requires an enabled Play Store and cannot launch in
+our API 35 Google-APIs emulator, which lacks it. Production protection stays
+unchanged. Four official Google-signed test splits are selected for API 29+, x86_64,
+420-DPI and English; every signature/hash is verified. An isolated update retains
+its Somali preference and passes 12 public states, five UI languages, canonical
+HTTPS app links and no app crash/keyboard-metrics/unexpected-text error. No account,
+chat, inquiry or notification is submitted. Only temporary emulator 5576 closes;
+5580/original AVD data remain untouched. This is actual native test-split evidence,
+not a protected Play-installed physical-phone or notification signoff.
+
+The local CLI-result parser's `project` field assumption is corrected to the
+actual SDK `app` field after exit 0; independent accepted-job readback proves
+exact target/source with no second build. Automatic permission review times out
+before one Google read command starts; absence of process/output is verified,
+and its explicitly permitted one same-command retry succeeds. These are not
+ambiguous remote writes or a restore. The APK download uses Google's discovery-
+specified media service; previous read failures/receipts remain preserved.
+
+Protected receipts: .local/play-s99/aab-inspection.json, aab-exception-consumed.json,
+play-upload-verification/, google-test-splits/, native-public-verified.json and
+android-device/. Credentials/runtime data, raw logs and screenshots stay outside Git.
 
 ## Next owner actions
 
-1. Finish the already requested existing-key Play signing step in
-   [connection step 5](GOOGLE-PLAY-CONNECTION.md#5-select-play-signing-before-first-submission).
-   Upload the already verified **suqpage-play-signing.zip** using the Mac file-picker
-   instructions there, then confirm Google's resulting certificate. The command,
-   public key and local encryption are complete. Do not select a different key
-   or share passwords.
-2. Decide the pending one-free-AAB tooling exception in the protected exact review
-   .local/play-s99/aab-tooling-review.md, digest
-   `b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38`.
-   S98's earlier APK approval is consumed; DEP-044 requires fresh admission.
-   The prepared source/archive and public runtime are distinct from a signed AAB.
-3. Complete the Console-only policy/setup screens using
-   [the readiness worksheet](play-store/READINESS.md). The private dedicated
-   App access instructions are prepared outside Git; ordinary users still use codes.
-   Do not declare policy completion or invite testers before the admitted version,
-   signing and actual phone evidence are verified.
+1. In SuqPage's Play Console dashboard, finish **Set up your app → App access**.
+   Select **All or some functionality is restricted**. Add the dedicated reviewer
+   email/password and instructions from the private
+   `.local/play-s99/production/reviewer/play-app-access.txt`. Normal users still use
+   email codes; the reviewer is an ordinary demo-business owner, not staff/admin.
+2. Finish the remaining App content/setup cards: privacy policy, ads, content rating,
+   target audience, data safety, and any account/device verification Google requests.
+   Use [the readiness worksheet](play-store/READINESS.md) against actual version 3.
+   Target audience is requested from the owner; do not fabricate that declaration.
+3. Test the protected version through Google Play on a real Android phone, including
+   sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
+   read receipts and real OS notifications. The native public test splits do not
+   replace these checks.
+4. Prepare the reviewed closed-test track and import the six supplied addresses from
+   private `.local/play-s99/testers/tester-emails.csv`; its one-email-per-line format
+   has no header. Add the remaining genuine testers before relying on the count.
+   Capture the real available opt-in link and actual joins; no invitation is sent yet.
 
-No S99 Expo build, Play binary upload or tester invitation has run. Six tester
-addresses are stored privately, with no verified opt-ins. The 12-testers/14-day
-closed-test clock has not started. EAS Submit can upload the exact admitted bundle
-remotely to internal draft after the remaining gates; that does not enroll testers
-or complete Google's manual declarations.
+Internal draft is saved, not public publication or policy approval. Six addresses
+are prepared privately, with no verified opt-ins. The **12 real testers / 14 continuous
+days** closed-test clock has not started. Review genuine feedback before applying
+for production access; do not count internal testing, aliases or sideloads as that
+closed-test requirement.

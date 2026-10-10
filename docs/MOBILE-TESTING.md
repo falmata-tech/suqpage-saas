@@ -1,10 +1,20 @@
 # Test the Suqpage mobile app
 
 Local development uses PostgreSQL/Supabase and real API workflows. The latest
-standalone [Android APK](https://expo.dev/accounts/falmatad/projects/suqpage/builds/9bcabbdb-14eb-420d-a2cf-8d84e0ec8c75)
-is finished and uses the live Suqpage API and production accounts. See
-[the release record](SUQPAGE-S69-S70-RELEASE-2026-10-06.md) for signed-emulator
-checks and physical-phone/store limits. Earlier preview notes below are historical.
+released standalone [Android APK, version 2](https://expo.dev/accounts/falmatad/projects/suqpage/builds/565b9614-428d-47b4-8780-2b0f9c96d68b)
+uses the live Suqpage API and production accounts. See
+[the S98 release record](SUQPAGE-S98-RELEASE-2026-10-08.md) for its evidence.
+
+[Version 3](https://expo.dev/accounts/falmatad/projects/suqpage/builds/641cb96a-3296-409b-b7ae-eabb28bc11fa)
+is now built, inspected and independently verified in Google Play **internal draft**.
+Its protected Google APK requires Play Store; it is not a promised sideload preview
+for devices/emulators without it. Google's official signed test splits pass an
+isolated update, retained language preference, 12 public states/five languages and
+HTTPS links, with production protection unchanged. The temporary test emulator is
+closed. Actual protected Play-installed phone/authenticated/notification checks,
+Console forms and closed/public distribution remain. Follow
+[the Play release steps](GOOGLE-PLAY-RELEASE.md#next-owner-actions); no closed-test
+clock or invitation is claimed. Earlier preview notes below are historical.
 
 ## Browser
 
