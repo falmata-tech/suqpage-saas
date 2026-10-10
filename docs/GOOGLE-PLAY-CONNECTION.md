@@ -18,18 +18,21 @@ testers or make the app publicly available. Keep the existing name/package.
 Google's API independently verifies the selected developer, **com.suqpage.app**
 grant, actual store title **SuqPage**, default **en-US**, saved English/Amharic
 store descriptions, selected support email/website and all seven uploaded images.
-Version 3 is now independently verified in internal draft, with the exact AAB hash,
+Version 3 is now independently verified on active internal testing, with the exact AAB hash,
 existing Google signing certificate and other tracks empty. Metadata remains saved
 under Google's required automatic-review behavior; no public app publication or
-policy approval is claimed. Owned read edits are deleted. Console-only setup,
-protected-phone testing and any remaining account/device verification remain. The `/u/2/` part
+policy approval is claimed. Owned read edits are deleted. Ten of eleven setup tasks
+are saved/read back; manual IARC content rating, protected-phone testing and any
+remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
 login does not select a new Suqpage administrator. The owner separately confirms
 the same email for the public Play listing, now independently saved/read back.
 Existing website privacy/deletion contacts are separate. App creation, API, service
 account access, Expo submission-key association and store metadata are complete;
-continue with **step 5 (Play signing)**, not those completed setup steps.
+signing and version-3 upload are also complete. Continue with
+[the actual test link and remaining owner steps](GOOGLE-PLAY-RELEASE.md#next-owner-actions),
+not those completed setup steps.
 
 Creation reference, if needed:
 
@@ -139,9 +142,11 @@ global Admin or change a signer automatically.
 EAS Submit uploads binaries. Google Play's API can also manage supported listing
 text/images, tracks and reviews, but greater permission does not make every Console
 screen automatable. EAS Metadata currently supports Apple App Store metadata;
-Google Play metadata is not supported by that tool. Owner-only verification and
-Console-only declarations still need guided manual completion. Preserve truthful
-policy answers, real testing evidence and the existing signing choice gate.
+Google Play metadata is not supported by that tool. Most Console declarations
+are now saved and independently verified through the
+owner-authorized browser. IARC's terms restrict automated questionnaire access,
+so that rating remains manual; account verification also remains owner-operated.
+Preserve truthful policy answers, real testing evidence and the existing signer.
 
 ## 5. Select Play signing before first submission
 
@@ -190,8 +195,11 @@ checked October 10, 2026.
 641cb96a-3296-409b-b7ae-eabb28bc11fa and submission
 1c29e427-ef90-4119-bca1-1756607fc9a2 are FINISHED. Google independently confirms
 the inspected version-3 AAB/hash on internal draft; other tracks and listing/contact
-remain unchanged. No public rollout or closed-test clock. Do not repeat the credential
-setup or upload this version again. Console setup and protected-phone testing remain.
+remain unchanged. The existing draft is subsequently activated internally and
+independently verified, with the six-address SuqPage list selected and other tracks
+unchanged. [Join internal testing](https://play.google.com/apps/internaltest/4701297357173307496).
+No public rollout or closed-test clock. Do not repeat credential setup, signing or
+upload. Manual IARC and protected-phone testing remain; see the release runbook.
 
 The existing official Expo CLI login/project readback confirms **falmatad** and
 **@falmatad/suqpage**, ID **bfc289fb-238e-44a3-9e0f-fec6a7c857d1**. The canonical

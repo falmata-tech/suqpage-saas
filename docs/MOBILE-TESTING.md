@@ -6,15 +6,24 @@ uses the live Suqpage API and production accounts. See
 [the S98 release record](SUQPAGE-S98-RELEASE-2026-10-08.md) for its evidence.
 
 [Version 3](https://expo.dev/accounts/falmatad/projects/suqpage/builds/641cb96a-3296-409b-b7ae-eabb28bc11fa)
-is now built, inspected and independently verified in Google Play **internal draft**.
+is now built, inspected and independently verified on Google Play **active internal testing**.
 Its protected Google APK requires Play Store; it is not a promised sideload preview
 for devices/emulators without it. Google's official signed test splits pass an
 isolated update, retained language preference, 12 public states/five languages and
 HTTPS links, with production protection unchanged. The temporary test emulator is
 closed. Actual protected Play-installed phone/authenticated/notification checks,
-Console forms and closed/public distribution remain. Follow
-[the Play release steps](GOOGLE-PLAY-RELEASE.md#next-owner-actions); no closed-test
-clock or invitation is claimed. Earlier preview notes below are historical.
+manual IARC content rating and closed/public distribution remain. Ten of eleven
+setup tasks are saved and verified. On a real Android phone, use one of the six
+supplied tester Google accounts and open
+[Join SuqPage testing](https://play.google.com/apps/internaltest/4701297357173307496),
+join, then install from Google Play. Google temporarily shows
+**com.suqpage.app (unreviewed)** until setup/review completes. Availability can take
+several hours. App sign-in is separate from the Play tester Google account;
+normal business users use email codes and staff/admin cannot sign into native.
+Follow [the Play release steps](GOOGLE-PLAY-RELEASE.md#next-owner-actions).
+No real enrollment, phone result, invitation or closed-test clock is claimed.
+Internal testers must leave internal testing before joining the later closed test.
+Earlier preview notes below are historical.
 
 ## Browser
 

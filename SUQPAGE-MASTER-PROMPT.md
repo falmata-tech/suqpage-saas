@@ -1436,19 +1436,23 @@ independent readback confirms preserved FCM and canonical/legacy signing. Existi
 Play enrollment and the actual Google-signed APK certificate are independently
 verified. One free version-3 AAB from ea1b452 passes artifact/privacy/API-36/16-KB
 checks under its exact approved, now-consumed tooling exception; the tooling audit
-remains failed, not clean. Google independently verifies its hash in internal draft,
+remains failed, not clean. Google independently verifies its hash on completed internal testing,
 with other tracks empty and SuqPage/en-US, English/Amharic store text, selected
 support contact and seven images preserved. Google's signed official test splits
 pass an isolated native update, 12 public states, five languages and HTTPS links.
 The protected universal APK requires Play Store, absent in that emulator; actual
-protected Play-installed phone/alerts, Console declarations and closed rollout
-remain pending. Production Play protection is unchanged. Internal draft is not
-public publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
+protected Play-installed phone/alerts and closed rollout remain pending. Ten of
+eleven Console setup tasks are saved and verified, including reviewer access,
+owner-selected audiences 13–17/adults and data safety. IARC content rating remains
+manual because its terms restrict automation. A separate six-address SuqPage
+internal list and actual join link are verified; no enrollment is claimed.
+Production Play protection is unchanged. Internal testing is not public
+publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
 a private PostgreSQL report port and web/native adapters; native version 3 is in
-internal draft, with actual protected-phone/distribution checks pending. Discovery
+active internal testing, with actual protected-phone/closed distribution checks pending. Discovery
 exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
@@ -1742,9 +1746,12 @@ recorded in docs/GOOGLE-PLAY-RELEASE.md. The compatible source ea1b452
 web/API is published before the new native build containing report actions.
 Rollback preserves reports and privacy rather than dropping records. Exact
 production reviewer provisioning/binding and live web/native API sessions pass;
-S99 version-3 admission, existing Play signer, internal draft and native public test
-splits are verified; actual protected-phone, declarations and closed/public rollout
-remain pending. No additional artifact is admitted by the consumed exception.
+S99 version-3 admission, existing Play signer, active internal testing and native
+public test splits are verified. Ten of eleven setup declarations and the exact
+six-address internal access list pass saved Google readback. IARC rating,
+protected-phone and closed/public rollout remain pending. Data safety retains the
+full-account deletion request URL but does not claim separate partial-data deletion
+or unimplemented certification. No additional artifact is admitted by the consumed exception.
 
 Internal APK and store AAB profiles use the same permanent native identity and
 remote version counter, incrementing version codes for both. Existing released

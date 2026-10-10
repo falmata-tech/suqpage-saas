@@ -15,14 +15,29 @@ change_level: L4
 The owner has a verified-by-owner personal Play developer account created after
 2023-11-13 and has provided a newly created Suqpage app dashboard. The selected
 developer/canonical-package Admin grant and existing Play signing identity are
-independently verified. Version 3 is saved in internal draft; Console setup,
-protected-phone testing and reviewed closed/public rollout remain. Prepare a truthful store listing and a
-verified Android App Bundle, then use internal testing followed by the required
+independently verified. Version 3 is active on internal testing; 10/11 Console
+setup tasks are saved and verified. IARC rating remains owner-operated;
+protected-phone testing and reviewed closed/public rollout are pending. Use the
+verified store listing and Android App Bundle for internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
 not a Google Play release and does not start the closed-test clock.
 
 ## Scope and invariants
 
+- The owner requests agent completion of the Console forms and enables Chrome
+  Apple Events on October 10. Bind browser actions to the exact SuqPage developer
+  5256539403314542898 / app 4972244998230912603 and verify the signed-in Google
+  account independently. Never act on Loadgistic or another app. Retain protected
+  before-state and verify each saved form. Owner-selected audiences 13–15,
+  16–17 and 18+ are now independently verified after Google reload.
+  Current form constraints, actual app/SDK behavior and existing publication gates
+  remain controlling; no declaration or Google-assigned rating may be fabricated.
+- The owner-authorized initial tester list may be attached only to SuqPage's
+  internal track. Retain its previous state, use only the six supplied addresses
+  and the existing inspected version-3 AAB, and verify the resulting track/link.
+  An internal rollout may precede IARC completion so a real Play-enabled phone
+  can be tested; it is not closed testing or public publication. Do not send
+  invitations, invent opt-ins, rebuild, alter signing, or change other tracks/apps.
 - Keep Suqpage / com.suqpage.app, @falmatad/suqpage and the existing live API/Auth
   target. The production build profile produces an AAB; submission defaults to
   internal draft. A profile named production does not authorize public rollout.
@@ -67,6 +82,18 @@ GIVEN provider timeout, wrong target, unapproved signer, unexpected advisory or
 missing artifact evidence WHEN a write/distribution is attempted THEN stop it,
 retain safe evidence and do not retry with broader privileges.
 
+GIVEN the inspected version-3 internal draft and owner-supplied tester addresses
+WHEN preparing initial Play phone tests THEN preserve the exact artifact and
+signer, save a SuqPage-specific tester list, preserve the approved store support
+contact, and inspect the internal release preview before its bounded rollout. Verify
+persisted tester access, version/hash and unchanged other tracks afterward.
+Do not report a test enrollment, installed phone or closed-test day without
+that separate evidence.
+
+GIVEN IARC terms restrict automated access WHEN completing content rating THEN
+leave its terms and questionnaire for the owner to operate manually, help explain
+answers from actual features, and continue independent authorized setup work.
+
 ## Quality impact
 
 Security/privacy: all reviewer/submission/signing credentials remain outside Git,
@@ -94,6 +121,7 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | Owner/visitor/staff workflows | Existing local acceptance evidence plus actual hosted phone login/media/inquiry/chat/push checks |
 | Review access and UGC controls | FE-063/BE-051 and FE-064/BE-052 real local persistence/provider, negative and browser evidence; hosted and installed checks remain separate |
 | Closed-test requirement | Console track, opt-ins, real tester feedback and production-access decision |
+| Console setup/internal distribution | Exact bound browser/account, protected before-state and saved UI readback; actual release preview, tester-list/link and independent track/artifact checks; IARC operated manually |
 
 ## Rollout and rollback
 
@@ -102,9 +130,10 @@ operations, approved Expo upload-key connection, and verified hosted schema-63
 web/API/reviewer rollout. Google verifies SuqPage/en-US, English/Amharic text,
 support contact and seven image hashes saved using standard metadata review. One
 free version-3 AAB is built, inspected and independently read back with its exact
-hash in internal draft; other tracks stay empty and metadata unchanged. Google-
+hash on the completed internal track; other tracks stay empty and metadata unchanged. Google-
 generated APKs retain the existing certificate. Native official test splits pass
-public/update/locale/link checks; protected Play-installed phone, policy and
+public/update/locale/link checks; 10/11 setup tasks and six-address internal access
+are saved and verified. Protected Play-installed phone, IARC rating and
 closed/public gates remain. No public store publication. Store packet/runbook:
 docs/GOOGLE-PLAY-RELEASE.md, docs/GOOGLE-PLAY-CONNECTION.md and docs/play-store/. Verified historical runtime
 baseline: docs/SUQPAGE-S98-RELEASE-2026-10-08.md.
@@ -231,3 +260,50 @@ android-device/. Six tester addresses/import CSV stay private; no actual opt-ins
 or invitations. Console forms, protected-phone tests, reviewed closed distribution,
 12 real testers continuously for 14 days and production access remain. Status
 stays draft; do not reuse completed signing/upload steps or claim public approval.
+
+## Verified Console setup and internal rollout — October 10, 2026
+
+Owner-enabled Chrome actions verify the exact SuqPage app and signed-in
+marketvision.tech@gmail.com before each action. Protected before-state and fresh
+Google readback prove restricted reviewer access with separate credentials and
+443-character notes; Ads Yes; government No; no financial/health features;
+Shopping and unchanged contact/type/marketing settings; and audiences 13–15,
+16–17 and 18+, with no younger group. Privacy/listing tasks remain saved.
+
+Data safety uses Google's current 782-row export. All 15 selected data types,
+collection/sharing purposes and optionality match a fresh, expanded saved-form
+readback. Account creation is email/other authentication, data travels over HTTPS,
+and the full-account deletion URL is retained. No separate partial-data deletion,
+automatic 90-day deletion or unavailable Families/security certification is
+claimed. Firebase automatic installation IDs, support PDFs, controlled video
+players and necessary transport-contact sharing are included. Raw CSV readback
+is not claimed; official expanded UI verification is retained. This is a saved
+declaration, not Google's policy approval or a new application data flow.
+
+Dashboard independently verifies 10 of 11 setup tasks complete. IARC's terms
+restrict automated access, so its terms/questionnaire remain for the owner;
+no automated answers, agreement or rating is submitted. Readiness for the completed
+form/internal operations is satisfied; the complete rollout spec stays draft.
+
+Only the new SuqPage initial testers list is attached to the internal track.
+Provider reload and dialog comparison verify all six supplied addresses; the
+existing other-app list is neither edited nor selected. No separate feedback field
+is offered on this screen; the approved store support contact stays unchanged.
+The reviewed preview contains only version 3 and a nonblocking missing
+crash-deobfuscation-file warning. One confirmed internal rollout produces Active /
+Available to internal testers. Independent Google API readback proves completed
+version 3, exact unchanged AAB hash, unchanged listings/contact and other tracks;
+only owned read edits are deleted. No rebuild, signer or protection change.
+
+Actual join link: https://play.google.com/apps/internaltest/4701297357173307496.
+Google shows the temporary unreviewed package name until setup/review completes.
+No invitation, enrollment or physical-phone result is invented. Closed opt-ins
+remain zero; internal testers must leave internal testing before joining the later
+closed test. Protected-phone workflows/alerts, manual IARC, reviewed closed rollout,
+12 real testers for 14 continuous days and production access remain separate.
+
+Protected receipts: .local/play-s99/console-setup/ per-form verified JSON,
+data-safety-verified.json, internal-testers-membership-verified.json,
+internal-api-after/verified.json, internal-distribution-link.json and
+console-setup-final-verified.json. No private credentials, tester addresses,
+raw CSVs or browser snapshots belong in Git.

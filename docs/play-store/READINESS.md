@@ -1,23 +1,24 @@
 # Store declarations and remaining readiness work
 
-This is an engineering worksheet for DEP-044, not a completed Google declaration.
-Evaluate the actual submitted version and provider behavior before clicking Save
-or Submit. No form answer is inferred from a screenshot or a missing ad SDK.
+This is the current DEP-044 declaration/evidence record, not a claim of Google's
+policy approval. Ten of eleven setup tasks are saved and verified for version 3;
+only IARC content rating remains manual. Internal testing is active, with six
+approved addresses selected and no invented enrollment or phone result.
 
 ## Existing behavior and policy gaps
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Title SuqPage/en-US, English/Amharic text/contact/images and exact version-3 internal draft are saved/read back; existing Google signer and official native test splits verified. Finish Console setup, protected-phone testing and closed/public rollout |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and six-address list match saved readback. Manual IARC, protected-phone and closed/public rollout remain |
 | SDK compatibility | Actual version-3 AAB and Google universal APK target API 36; bundle config, all 50 ELF libraries and APK ZIP pass 16-KB checks | Protected Play-installed physical-phone workflows and notification proof |
-| App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows | Hosted provisioning/binding and actual web/native API sessions pass; version-3 internal draft and native guest entry verified; finish Console App access fields and authenticated protected-phone workflows |
+| App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows. Hosted provisioning/binding and real API sessions pass | Restricted Sign in details with separate credentials and 443-character notes pass provider reload/edit-dialog comparison; authenticated protected-phone workflows remain |
 | Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Per-request verified mailbox/identity, backup/approval and real fulfilment remain manual; final disclosure/rollout |
 | Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 locally implement real report/block controls and a private support/admin Reports queue | Delegated visual acceptance and full local gates pass; production schema/API/web now passes; native binary/Play checks remain, with objectionable-content terms evaluated against actual moderation rules |
 | Live chat | Public transport chat; business-owner support; assigned staff, messages, receipts and history | Actual hosted phone end-to-end and permission/background/closed-app/tap/logout evidence |
-| Privacy | Updated local five-language notice covers account/catalog/inquiry, push, controlled embeds, native tile cache and deletion/backups | Verified notice is deployed on web/API and included in inspected native version 3; accurate Console data-safety declarations/protected-phone SDK review remain |
-| Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Declare sponsored promotional content accurately; absence of a network ad SDK is not enough to choose No |
+| Privacy | Five-language notice is deployed and included in version 3; data/SDK inventory and saved Data safety pass expanded Google UI readback | Protected-phone SDK/notification proof remains; full-account deletion is offered, separate partial-data deletion is not claimed |
+| Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Ads Yes is saved/reloaded; no network ad SDK or badge claim invented |
 | Payments | No app checkout, digital subscriptions or business payment plans | Do not claim payment collection or in-app purchases; transport is arranged by agents outside platform checkout |
-| Content rating/target ages | Public merchant catalog and live team conversations | Owner completes truthful questionnaire and intended age groups; do not fabricate a rating or claim child-directed design |
+| Content rating/target ages | Owner-selected ages 13–15, 16–17 and 18+ are saved/read back, no under-13 group | IARC terms restrict automated access; owner operates its questionnaire manually. No rating or child-directed certification claimed |
 
 Policy application: public merchant catalogs appear to meet Google's UGC
 definition. This is an inference from the app and policy, not a Google review
@@ -36,15 +37,16 @@ local Supabase/PostgreSQL password/JWT, fresh identity/role/tenant/security chec
 actual web/native-browser login and ordinary OTP preservation, plus five-language
 screen captures. No credential is compiled into the app. Hosted provisioning/
 binding and real web/native API sessions pass. Version-3 internal draft and native
-public test splits are verified; protected-phone access and Play App access fields
-remain pending. General password/staff mobile access is
+public test splits are verified and the exact build is active internally. Saved
+restricted Sign in details match the private source after actual Google reload;
+protected-phone access remains pending. General password/staff mobile access is
 not enabled. BE-053's actual local erasure rehearsal verifies app/Auth/media,
 orphans and shared-upload preservation; real deletions still require a separately
 verified request, backup and reviewed exact plan.
 
 ## Current protected APK and test-device distinction
 
-Version 3 is saved in internal draft, not publicly released. Google's protected
+Version 3 is active on internal testing, not publicly released. Google's protected
 universal APK requires Play Store; the API 35 Google-APIs emulator lacks it.
 Production protection stays unchanged. Four official Google-signed test splits
 pass isolated update/data retention, 12 public states/five languages and HTTPS
@@ -59,12 +61,12 @@ collection or that a permission is requested; do not invent a flow from its name
 Include Google's protection layer in the final SDK review rather than treating
 local compiled-source inspection as the entire Play-delivered app.
 
-Target audience remains an owner question (adults only or also teenage shoppers),
-not a saved declaration. App content and account/device verification still need
-Console completion. Private reviewer instructions and a six-address tester import
-CSV are ready outside Git; no invitation or closed-test opt-in is claimed.
+Owner-selected teen/adult audience is saved. Dashboard verifies 10/11 setup tasks;
+only manual content rating remains, along with any Google-requested account/device
+verification. A separate six-address SuqPage list is saved, selected and individually
+verified. No invitation, real phone result or closed-test opt-in is claimed.
 
-## Data-safety inventory to validate
+## Saved Data safety — October 10, 2026
 
 Data safety includes application SDKs and controlled embeds, not just Suqpage's
 PostgreSQL tables. Account email and phone are private; separate owner-chosen
@@ -72,18 +74,30 @@ public contacts are displayed only when published. Guest browsing needs no
 account. Submitted messages are not end-to-end encrypted: authorized business
 owners/staff can read them.
 
-| Data / candidate Play category | Application flow | Purpose / optionality to verify |
+Google's current 782-row official export is the protected before-state. The saved
+15-type declaration is verified after actual provider reload, including every
+collection/sharing purpose and optionality in the expanded preview. All selected
+types are collected and non-ephemeral; no blanket immediate-deletion claim.
+Raw CSV readback is not claimed. Receipt:
+`.local/play-s99/console-setup/data-safety-verified.json`.
+
+| Selected data | Actual flow | Saved collection purposes / optionality / sharing |
 | --- | --- | --- |
-| Name, email, phone, user IDs | Supabase Auth, setup/account, inquiry reply details, transport/support intake | Account management, communication and app functionality; guest browsing is available, requested flows have required fields |
-| Approximate location/address | Owner-selected city/region; pickup/destination area | Show/store location and arrange transport; user-entered, not a requirement for anonymous browsing |
-| Precise location | Optional owner-chosen exact shop coordinates | Public storefront location; native release blocks fine/coarse GPS permission, but manually supplied coordinates can still be data |
-| Photos | Owner logo/cover/product uploads; support attachments | Catalog/support functionality; publication is an owner action; system picker does not grant unrestricted photo-library access |
-| Video references / other user content | Stored public YouTube/TikTok/Facebook/Instagram URLs, descriptions, bios and social links | Catalog presentation; video bytes hosted/processed by third parties, not a Suqpage native video upload |
-| In-app messages | Customer inquiries, owner support and transport conversation history | App functionality and customer follow-up; conversations/read receipts retained server-side |
-| Files/documents | Support attachment contract, if reachable in the submitted app | Verify accepted actual types and whether documents are uploaded; disclose rather than assuming photos cover every attachment |
-| Device or other IDs | Expo push token, installation ID and recipient subscription association | Optional notifications, delivery/revocation; token is bound to current account/visitor session, never public |
-| App interactions | Page-visit counts, chat read/join watermarks and alert state | App functionality/analytics; review salted visit implementation and operational logs for actual retention |
-| Search/network/diagnostics | API requests, host logs, map tiles and controlled video embeds | Review whether retained or ephemeral, provider SDK collection and any location inference; do not blanket-declare no search/diagnostic data |
+| Name | Setup, inquiry and transport intake | Functionality/account management; optional; necessary transport contact shared for functionality |
+| Email | Auth/account and reply contact | Functionality/security/account management; optional; not marked shared |
+| User IDs | Auth/application identity | Functionality/security/account management; optional; not marked shared |
+| Phone | Account, inquiry and transport contact | Functionality/account management; optional; necessary transport contact shared for functionality |
+| Approximate location | Owner city/region and route areas | Functionality; optional; necessary route areas shared for functionality |
+| Precise location | Optional owner-entered exact shop coordinates | Functionality; optional; deliberate public-store publication exception, not marked shared. Native GPS permissions blocked |
+| Other in-app messages | Inquiry, owner support and transport history | Functionality; optional; necessary transport details shared for functionality, not blanket sharing of private history |
+| Photos | Logo, cover, product and support uploads | Functionality; optional; owner-directed publication/service-provider exceptions, not marked shared |
+| Videos | Public merchant-selected video references and controlled players | Functionality; optional; no native video-file upload or microphone recording, not marked shared |
+| Files/documents | Native support JPEG/PNG/WebP/PDF attachments, up to 5 MB | Functionality; optional; not marked shared |
+| App interactions | Visit counters, read/join state and controlled player interaction | Functionality/analytics; required; controlled-player sharing for functionality/analytics/advertising |
+| In-app search history | Search queries sent to Suqpage APIs | Functionality; optional; no search text sent to tile/player providers, not marked shared; no ephemeral guarantee |
+| Other user-generated content | Bios, descriptions, public references and reports | Functionality; optional; intentional publication exception, not marked shared |
+| Device or other IDs | Automatic Firebase installation ID, push association and controlled-player context | Functionality/security; required because Firebase installation is automatic, despite optional notification permission. Sharing for functionality/analytics/security/advertising |
+| Diagnostics | SDK/app-device versions, operational/media-integrity requests | Functionality/security; required; sharing for functionality/security. No Crashlytics or independent security certification claimed |
 
 Relevant processors/services: Supabase Auth/PostgreSQL/private Storage; Netlify
 hosting/functions; Expo Push and Google FCM; OSM map tiles; embedded public video
@@ -93,15 +107,21 @@ they do not justify a blanket claim that no third party receives data. Controlle
 WebView video embeds require SDK/provider review, while open-web browsing is a
 different case. No developer management/signing/FCM private key belongs in builds.
 
-Verify HTTPS paths, notification opt-in and token revocation. Provider acceptance
-is not actual notification display. Do not claim an independent security review,
-Families-policy certification, automatic deletion, fixed retention duration or
-offline operation that has not been established.
+Saved security/account answers: collected data travels over HTTPS; account creation
+uses username/email and other authentication (codes), not general password or
+Google OAuth signup. The dedicated reviewer is a restricted operator-provisioned
+exception. The full-account deletion URL is https://suqpage.com/account-deletion.
+Separate partial-data deletion without removing the account is **No**: the public
+entry/runbook verify full-account erasure, not a separately tested partial request.
+Google's preview therefore distinguishes the full-account link from its unprovided
+separate data-deletion option. No automatic 90-day deletion or unavailable
+Families/MASA/UPI badge is claimed.
 
-Before reviewed closed distribution, update the public privacy policy to match
-verified application and SDK flows in all UI languages. Establish real deletion
-handling with the owner; an email link alone is not a deletion implementation.
-Keep this inventory marked draft until the final Console answers are reviewed.
+Provider acceptance is not actual notification display. Physical-phone notification
+and hosted authenticated flows remain pending. Future SDK/data-flow changes require
+revisiting the declaration and five-language privacy notice; an email link alone
+is not a new deletion implementation. No app/source/SDK collection change is made
+by saving this declaration.
 
 ## Test checklist for actual phones
 
@@ -122,7 +142,7 @@ Current local workflow evidence is recorded in the S98 release. It does not
 substitute for missing hosted-authenticated phone or physical notification evidence.
 Record test versions/results and actual issues, never synthetic feedback.
 
-## Sources checked October 9, 2026
+## Sources checked October 9–10, 2026
 
 - [Reusable review access](https://support.google.com/googleplay/android-developer/answer/15748846)
 - [User-generated content](https://support.google.com/googleplay/android-developer/answer/9876937)
@@ -130,3 +150,8 @@ Record test versions/results and actual issues, never synthetic feedback.
 - [Data safety definitions](https://support.google.com/googleplay/android-developer/answer/10787469)
 - [Account deletion](https://support.google.com/googleplay/android-developer/answer/13327111)
 - [New personal-account testing](https://support.google.com/googleplay/android-developer/answer/14151465)
+- [Internal testing and switching tracks](https://support.google.com/googleplay/android-developer/answer/9845334)
+- [Firebase Android data disclosure](https://firebase.google.com/docs/android/play-data-disclosure)
+- [YouTube controlled-player API and media integrity](https://developers.google.com/youtube/iframe_api_reference)
+- [Play Integrity terms](https://developer.android.com/google/play/integrity/terms)
+- [IARC terms, including automated-access restriction](https://web.iarcservices.com/terms)

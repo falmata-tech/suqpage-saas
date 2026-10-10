@@ -1,7 +1,7 @@
 # Suqpage on Google Play
 
 Controlling spec: [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md).
-Current stage: version 3 is uploaded and independently verified in internal draft;
+Current stage: version 3 is active and independently verified on internal testing;
 no reviewed closed/public release or protected-phone signoff. Owner
 confirmed a personal account created after November 13, 2023, and has now provided
 the new app dashboard on October 9, 2026. Developer **5256539403314542898**, app
@@ -12,15 +12,18 @@ canonical package and complete app-only Admin grant, and Expo project/current
 signer match. The exact EAS Submit key is connected and independently verified.
 Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
 support email/website and all seven uploaded images. The exact version-3 AAB is
-saved in internal draft, with other tracks empty and the existing Google signer
-verified from its actual APK. The one-free-AAB exception is consumed. Console-only
-setup, protected Play-installed phone/notification checks and closed/public rollout
-remain. The existing Expo APK remains available separately.
+active internally, with other tracks empty and the existing Google signer
+verified from its actual APK. The one-free-AAB exception is consumed. Ten of eleven
+setup tasks are saved and verified; only manual IARC content rating remains.
+Protected Play-installed phone/notification checks and closed/public rollout remain.
+The existing Expo APK remains available separately.
 
 The owner requests remote Expo uploads. Follow
 [the beginner connection steps](GOOGLE-PLAY-CONNECTION.md) for app creation,
-app-scoped submission credentials and exact internal-draft upload. Console-only signing/declarations still require the owner's Google account screens;
-the submission credential connection is already independently verified.
+app-scoped submission credentials and exact internal upload. Signing/submission
+are complete; do not repeat them. Most declarations are completed through the
+owner-authorized, identity-bound browser. IARC rating and any account verification
+requested by Google require the owner's manual steps.
 
 ## Create the app
 
@@ -46,7 +49,7 @@ Source: [create and set up an app](https://support.google.com/googleplay/android
 
 Use [the listing file](play-store/listing.json) for copy/paste text, and
 [the readiness worksheet](play-store/READINESS.md) for app-content declarations.
-Suggested category: Shopping. Website: https://suqpage.com. Existing public
+Saved category: Shopping. Website: https://suqpage.com. Existing public
 privacy and deletion resources: https://suqpage.com/privacy and
 https://suqpage.com/account-deletion. Their presence is not a claim that the policy
 and deletion operations are complete; the worksheet identifies remaining work.
@@ -158,30 +161,31 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 
 ## Current external and product dependencies
 
-- Owner supplied the created Console app dashboard; Google's selected developer/
-  package/app-only Admin grant and Expo target/current signer are verified. Console
-  title SuqPage, saved store text/contact/images and empty tracks/binary lists are
-  independently read back. Play signing, Console-only setup and account/device
-  verification remain. The EAS Submit credential association now matches the exact owner-provided key after approved
-  CLI setup and unchanged notification/signing readback.
+- Google verifies the selected developer/package/app-only Admin, Expo target,
+  retained signer and exact version-3 internal release. Ten of eleven setup tasks,
+  store text/contact/images and the separate internal list are saved/read back.
+  IARC rating and any Google-requested account/device verification remain. The
+  EAS Submit association is complete; no credential/signing repeat is needed.
 - FE-064/BE-052 reusable owner-demo reviewer access is verified locally and on the
   deployed web/API; exact production provisioning/binding and real web/native
-  sessions pass. Private instructions are prepared; the new Android binary and
-  Console App access fields remain. Google reviewers cannot
+  sessions pass. Version 3 and saved restricted Sign in details are verified;
+  protected-phone workflows remain. Google reviewers cannot
   fetch codes from the owner's personal inbox; no universal OTP or admin access.
 - Merchant content is inferred to be public user-generated content. FE-063/BE-051
   implement and verify reporting/blocking and private moderation. Delegated visual
   acceptance, complete local gates and production schema/API/web rollout pass;
-  the new native binary and actual Play/device checks remain before store claims.
+  version 3 is active internally; authenticated protected-phone checks remain.
   General visitor live support stays closed.
 - BE-053 deletion fulfilment is rehearsed against real local Auth/PostgreSQL/media,
   including exact-target/shared-tenant/drift/FK rollback and other-tenant preservation.
   Updated native notification/map/embed/deletion privacy text passes five-language
-  phone captures; the verified web/API notice is deployed and final store disclosures
-  remain. Real deletion retention/fulfilment follows the verified-request runbook.
+  phone captures; the verified web/API notice is deployed and Data safety is saved
+  with official UI readback. Separate partial-data deletion is not claimed.
+  Real deletion retention/fulfilment follows the verified-request runbook.
   Existing request links do not delete data by themselves.
-- New artifact audit admission, selected Play signing, AAB/Play APK inspection and
-  authenticated physical-phone/OS notification checks remain pending.
+- This exact artifact's admission, Play signing and AAB/Google APK inspection pass.
+  The consumed exception admits no additional build. Authenticated physical-phone
+  and actual OS-notification checks remain pending.
 
 These dependencies do not prevent connecting the reported app or preparing materials.
 They do prevent claiming that a public store release is ready or completed.
@@ -341,26 +345,63 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
 
 ## Next owner actions
 
-1. In SuqPage's Play Console dashboard, finish **Set up your app → App access**.
-   Select **All or some functionality is restricted**. Add the dedicated reviewer
-   email/password and instructions from the private
-   `.local/play-s99/production/reviewer/play-app-access.txt`. Normal users still use
-   email codes; the reviewer is an ordinary demo-business owner, not staff/admin.
-2. Finish the remaining App content/setup cards: privacy policy, ads, content rating,
-   target audience, data safety, and any account/device verification Google requests.
-   Use [the readiness worksheet](play-store/READINESS.md) against actual version 3.
-   Target audience is requested from the owner; do not fabricate that declaration.
-3. Test the protected version through Google Play on a real Android phone, including
+1. On an Android phone, sign into Google Play with one of the six supplied tester
+   accounts and open [the verified internal-test join link](https://play.google.com/apps/internaltest/4701297357173307496).
+   Join the test, then install from Google Play. Initial availability can take
+   several hours. Google temporarily displays **com.suqpage.app (unreviewed)** until
+   app setup/review completes; the permanent app/package has not been renamed.
+2. In the [SuqPage dashboard](https://play.google.com/console/u/2/developers/5256539403314542898/app/4972244998230912603/app-dashboard),
+   open **Content rating → Start questionnaire**. Enter **marketvision.tech@gmail.com**,
+   choose **All Other App Types**, read/accept IARC's terms, and click **Next**.
+   Operate the questionnaire manually and use actual app features for its answers;
+   paste the questions for help. IARC's terms restrict automated tool access.
+   Do not repeat completed reviewer, signing, upload or other declaration steps.
+3. Test this Play-installed version on the real Android phone, including
    sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
    read receipts and real OS notifications. The native public test splits do not
    replace these checks.
-4. Prepare the reviewed closed-test track and import the six supplied addresses from
-   private `.local/play-s99/testers/tester-emails.csv`; its one-email-per-line format
-   has no header. Add the remaining genuine testers before relying on the count.
-   Capture the real available opt-in link and actual joins; no invitation is sent yet.
+4. After rating/setup and phone checks, prepare the reviewed closed track using the
+   existing SuqPage tester list; add further genuine testers privately. Each internal
+   tester must leave the internal test before joining the closed test. Capture that
+   separate link and actual joins; no email invitation has been sent by the agent.
 
-Internal draft is saved, not public publication or policy approval. Six addresses
-are prepared privately, with no verified opt-ins. The **12 real testers / 14 continuous
-days** closed-test clock has not started. Review genuine feedback before applying
-for production access; do not count internal testing, aliases or sideloads as that
-closed-test requirement.
+Internal version 3 is available, not public publication or policy approval. The
+six supplied addresses are saved/selected and individually verified; no actual
+enrollment or phone result is invented. The **12 real testers / 14 continuous days**
+closed-test clock has not started. Review genuine feedback before production access;
+internal testing, aliases and sideloads do not meet that requirement.
+
+## Saved setup and internal activation — October 10, 2026
+
+The identity-bound owner-authorized Chrome workflow verifies SuqPage only. Actual
+Google reloads prove separate reviewer credentials/443-character notes; Ads Yes;
+government No; no financial/health features; Shopping with existing contacts and
+marketing preference preserved; and ages 13–15, 16–17, 18+, with no under-13 group.
+
+Data safety is saved using Google's current export and verified in its expanded
+saved UI for all 15 types, purposes, sharing and optionality. Account creation is
+email/other authentication; HTTPS and the full-account deletion URL are retained.
+No separate partial-data deletion, automatic 90-day deletion or unavailable badge
+is claimed. The source/SDK inventory and limitation are in
+[READINESS.md](play-store/READINESS.md). Raw CSV readback is not claimed.
+
+Dashboard verifies **10/11** tasks; only IARC remains manual under
+[its terms](https://web.iarcservices.com/terms). The original questionnaire tab is
+preserved; no agreement, rating or automated answers are submitted.
+
+The separate **SuqPage initial testers** list is created and selected only for this
+app's internal track. Provider reload/dialog comparison proves the six exact
+addresses; the pre-existing other-app list is untouched and unselected. This
+screen offers no separate feedback field; the approved store contact is preserved.
+The internal preview's single nonblocking warning is missing crash-deobfuscation
+metadata. One confirmed rollout shows **Active / Available to internal testers**.
+Independent Google API readback confirms internal status **completed**, exact
+version-3 hash, unchanged listings/contact and other empty tracks; owned read edits
+are deleted. No new build, signer, protection, closed or public track change.
+
+Protected evidence: `.local/play-s99/console-setup/` per-form verified receipts,
+`data-safety-verified.json`, `internal-testers-membership-verified.json`,
+`internal-api-after/verified.json`, `internal-distribution-link.json` and
+`console-setup-final-verified.json`. Private snapshots, CSVs and credentials stay
+outside Git. Future rollback can pause only the internal track after exact review;
+it does not downgrade installed phones or automatically restore provider settings.

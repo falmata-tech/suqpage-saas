@@ -3978,7 +3978,58 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
 - [ ] CURRENT: complete Console-only policy/setup forms and test the protected
   version on an actual Google Play-enabled phone before the reviewed closed rollout.
   Restricted App access instructions and six supplied tester addresses/import CSV
-  are prepared privately; target-audience preference is requested, not guessed.
+  are prepared privately. The owner now requests agent completion through the
+  signed-in Chrome UI and enables Apple Events; only developer 5256539403314542898,
+  Console app 4972244998230912603 / SuqPage / com.suqpage.app is authorized.
+  The owner selects teens and adults (13–15, 16–17, 18+); no younger age group.
+  Ordered DEP-044 steps, retaining protected before-state and readback per form:
+  - [x] Verify browser/account/app identity and retain the current draft
+    before changing its fields; never operate on Loadgistic or another app.
+    Evidence: .local/play-s99/console-setup/browser-identity-verified.json and
+    protected current-form before-state; marketvision.tech@gmail.com / SuqPage.
+  - [x] Save reviewer access using the verified dedicated account and instructions
+    within Google's actual 500-character limit; verify persisted restricted access.
+    Actual provider reload and saved edit-dialog compare prove exact credentials,
+    restricted access and 443-character instructions. Evidence:
+    .local/play-s99/console-setup/sign-in-persisted-credential-verified.json.
+  - [x] Save and verify privacy, ads, government/financial/health declarations and
+    Shopping category/contact fields against actual features and current forms.
+    Saved UI reloads verify Ads Yes, government No, no financial/health features,
+    Shopping and unchanged contact/type/marketing settings. Protected receipts:
+    .local/play-s99/console-setup/*-verified.json; privacy URL is unchanged.
+  - [x] Save and verify owner-selected audiences 13–15, 16–17 and 18+;
+    no younger age group or invented Google rating. Receipt: audience-verified.json.
+  - [ ] MANUAL OWNER STEP: complete IARC content-rating terms/questionnaire.
+    Its terms restrict automated access; no terms, answers or rating submitted.
+    Original SuqPage tab is preserved; rating-manual-handoff.json records the boundary.
+  - [x] Review application and SDK data against the current Data safety form/export,
+    prepare exact answers, retain recoverable before-state and verify saved results.
+    All 15 selected types, purposes, sharing and optionality match fresh expanded
+    Google UI readback. Full-account deletion URL retained; no separate partial
+    deletion or unavailable certification claimed. Receipt: data-safety-verified.json.
+    Official blank export and imported CSV remain private; raw CSV readback is
+    not claimed. Dashboard now verifies 10 of 11 setup tasks complete.
+  - [x] Retain internal tester/release before-state and confirm the exact
+    admitted version 3. Create a SuqPage-specific list from the six supplied
+    addresses and select it only on this app's internal track. Fresh Google reload
+    and list-dialog compare verify all six addresses. Approved store support email
+    is preserved; this screen offers no separate feedback field. No invitations or
+    opt-ins invented. Receipts: internal-testers-verified.json and
+    internal-testers-membership-verified.json; other existing list untouched.
+  - [x] Inspect the existing internal-release preview and roll out only version 3
+    to that internal list; verify Google's resulting status/version/hash/link and
+    unchanged other tracks. Google shows Active / Available to internal testers;
+    independent API verifies completed version 3, the same bundle hash, unchanged
+    listings/contact and other tracks. Owned read edits are deleted. No rebuild,
+    signing change or public/closed rollout. The sole preview warning is absent
+    crash-deobfuscation metadata, not a blocking error. Receipts:
+    internal-api-after/verified.json and internal-distribution-link.json.
+  - [x] Record completed/pending Console cards and actual internal distribution:
+    console-setup-final-verified.json confirms 10/11, IARC manual, zero closed opt-ins.
+  - [ ] CURRENT: test the protected Play-installed build on an actual phone;
+    authenticated owner/chat/notification evidence remains separate. Internal
+    join link: https://play.google.com/apps/internaltest/4701297357173307496.
+    Testers must leave internal testing before later joining the closed track.
 - [ ] Complete closed-track rollout, add initial approved
   tester list and provide actual opt-in link. Obtain at least 12 continuous
   opt-ins for 14 days and record genuine feedback before production access.
