@@ -69,6 +69,12 @@ Submit needs an independently authorized, app-scoped Play credential; existing
 - Customer/owner screens stay native; staff/admin remain web-only. Existing
   tenant authorization and normal email-code login remain unchanged. FE-064/BE-052
   add only the explicitly bound ordinary demo-owner reviewer exception.
+- S99.4 resolves the catalog-policy question: the owner prohibits violent/sexual
+  content and age-restricted goods, explicitly including alcohol/tobacco, removed
+  when found. Publish the five-language Terms and staff moderation guidance, verify
+  the existing report/removal workflow and inspect current public catalog text
+  before completing remaining rating answers. No automatic video/image screening,
+  universal chat moderation or guarantee of zero undiscovered violations is claimed.
 
 ## Scenarios
 

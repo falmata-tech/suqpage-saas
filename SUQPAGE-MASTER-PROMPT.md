@@ -1207,6 +1207,14 @@ reported content to be removed/unpublished/suspended using existing authorized
 catalog controls; Dismiss records a no-violation decision. Transport staff and
 business owners cannot read this queue. It does not open a guest support chat.
 
+The S99.4 locally verified policy prohibits violent imagery, nudity/sexually
+explicit content and age-restricted goods/services, including alcohol, tobacco,
+vaping, weapons, recreational drugs, gambling and adult goods/services. Support
+reviews Prohibited goods and Abusive content reports; authorized administrators
+remove/unpublish violations before support marks them resolved. Ordinary tools
+are not weapons merely because they have sharp edges. Public policy publication
+is pending the required web release gates; no automatic screening is claimed.
+
 Local S91 attention covers owner inquiries/support replies, matching staff waiting
 work, assignment/reassignment, public replies and ended/reopened cases. Visitors
 receive assignment and a separate first-join event, then unread public replies.
@@ -1445,7 +1453,8 @@ protected Play-installed phone/alerts and closed rollout remain pending. Ten of
 eleven Console setup tasks are saved and verified, including reviewer access,
 owner-selected audiences 13–17/adults and data safety. Under the owner’s later
 explicit delegation, the incomplete IARC draft is prepared, saved and verified;
-final rating awaits an established seller-content policy. No rating is submitted.
+final rating awaits publication of the owner-approved S99.4 seller-content policy
+and truthful completion of the remaining questions. No rating is submitted.
 The SuqPage internal list now has ten verified addresses and an actual join link.
 Alpha closed-test access and feedback email are saved, but releases/countries
 remain empty/unselected and no enrollment is claimed.
@@ -1594,6 +1603,12 @@ IP hashes enforce a rate limit without storing raw IPs. Responses expose only a
 receipt/duplicate flag. Fresh server role/assignment/version checks protect staff
 decisions, and anon/authenticated roles cannot read the table or use its sequence.
 Blocking is a browsing preference and does not make public content confidential.
+
+The owner-approved catalog prohibition is enforced when violations are found or
+reported. S99.4 verifies both report reasons, scoped assignment and denial of
+resolution while content remains visible. Publishing does not imply prior staff
+review, and neither policy text nor keyword checks establish the absence of
+violations in unreviewed images, videos or future seller content.
 
 S91 feeds, subscription changes, deliveries and confirmed-message reads recheck
 current tenant/queue/visitor-token authority. Native staff stays denied. Safe OS
@@ -1752,7 +1767,11 @@ production reviewer provisioning/binding and live web/native API sessions pass;
 S99 version-3 admission, existing Play signer, active internal testing and native
 public test splits are verified. Ten of eleven setup declarations and the exact
 ten-address tester list and Alpha access/feedback pass saved Google readback.
-The incomplete IARC draft is retained pending catalog policy. Final rating,
+The incomplete IARC draft is retained pending publication of the S99.4 policy.
+This five-language Terms/staff-guidance update needs only a compatible web
+release: the existing Android account link opens the hosted Terms. It changes
+neither the database/schema nor Android artifact/signing/provider configuration.
+Final rating,
 protected-phone and closed/public rollout remain pending. Data safety retains the
 full-account deletion request URL but does not claim separate partial-data deletion
 or unimplemented certification. No additional artifact is admitted by the consumed exception.

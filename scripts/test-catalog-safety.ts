@@ -50,6 +50,18 @@ async function main(){
     await listingReportPort.update(support,{id:row.id,version:row.version,action:'resolve'});
     assert.equal((await listingReportPort.list(support,{status:'resolved'})).items[0].status,'resolved');
     await db.prepare('UPDATE products SET is_published=1 WHERE id=?').run(target.product_id);
+    for(const reason of ['Prohibited goods','Abusive content']){
+      const details='LOCAL QA catalog policy '+reason;
+      await submitListingReport(listingReportPort,{...command,reason,details,idempotencyKey:crypto.randomUUID()},hashPrivateValue('qa-policy-'+reason));
+      let reported=(await listingReportPort.list(support,{status:'open'})).items.find(item=>item.reason===reason&&item.details===details);assert.ok(reported);
+      await listingReportPort.update(support,{id:reported.id,version:reported.version,action:'claim'});
+      reported=(await listingReportPort.list(support,{})).items.find(item=>item.id===reported!.id);assert.ok(reported);
+      await assert.rejects(()=>listingReportPort.update(support,{id:reported!.id,version:reported!.version,action:'resolve'}),e=>e instanceof CatalogSafetyError&&e.status===409,'A policy report cannot be resolved while the listing remains public');
+      await db.prepare('UPDATE products SET is_published=0 WHERE id=?').run(target.product_id);
+      await listingReportPort.update(support,{id:reported.id,version:reported.version,action:'resolve'});
+      assert.ok((await listingReportPort.list(support,{status:'resolved'})).items.some(item=>item.id===reported!.id&&item.reason===reason));
+      await db.prepare('UPDATE products SET is_published=1 WHERE id=?').run(target.product_id);
+    }
     for(let i=0;i<5;i++)await submitListingReport(listingReportPort,{...command,idempotencyKey:crypto.randomUUID()},hashPrivateValue('qa-rate'));
     await assert.rejects(()=>submitListingReport(listingReportPort,{...command,idempotencyKey:crypto.randomUUID()},hashPrivateValue('qa-rate')),e=>e instanceof CatalogSafetyError&&e.status===429);
     const all=await getMarketplaceDiscoveryView({industry:'all',type:'products'});

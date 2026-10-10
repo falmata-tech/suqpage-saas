@@ -4077,3 +4077,41 @@ Master §§15/17 and current distribution docs will reflect only verified result
   checks pass; current master/runbooks/traceability distinguish verified preparation
   from pending rating/phone/closed rollout. Commit only the eight reviewed docs
   after staged-scope verification; preserve unrelated deno.lock and private artifacts.
+
+S99.4 — publish catalog policy and finish truthful rating (FE-063 / BE-051 / DEP-044)
+
+The owner confirms the ban, then clarifies alcohol/tobacco are prohibited and
+removed when found. This resolves policy intent without claiming actual seller
+content is automatically checked. No new dependency, migration, Android build,
+signer or other application change. Master §§13/15/16/17 will be reconciled with
+verified policy/publication and the final rating outcome.
+
+- [x] Inspect the current public catalog and retain a protected bounded
+  text review; distinguish candidate matches from confirmed violations and from
+  unreviewed images/videos. Do not mutate customer listings based on keywords.
+  Evidence: 53 public API pages / 264 offerings / zero keyword candidates;
+  text-only review, not media review or a zero-violation guarantee. No listing writes.
+- [x] Add concise five-language public Terms rules and staff guidance using the
+  existing report reasons, authorized removal and actual-removal resolution check.
+  No blanket automatic content scan or broader support/staff permissions.
+- [x] Focused localization/type/report workflow checks and actual Terms captures;
+  use the owner's existing delegated design acceptance for this policy-text update.
+  Evidence: typecheck, localization and real local report workflow checks pass;
+  15 actual five-language desktop/390/320 Terms states plus focused phone captures.
+  All 11 browser acceptance workflows pass. Protected receipts under
+  .local/play-s99/catalog-policy/. Android's canonical hosted Terms link verified.
+- [ ] CURRENT: run required check/web-release/workflow gates on clean isolated source;
+  inspect artifact, independently verify SuqPage target and retain current deploy
+  for rollback. Publish compatible web policy only; no DB/provider-config write.
+  Original check hit a local fixture query timeout; unchanged focused seed retry
+  passes. Original isolated build omitted tracked mobile helper sources imported
+  by tests; restore tracked sources only. Preserve both failures, use one bounded
+  retry per gate, and do not weaken timeouts/checks or add native dependencies.
+  Full check retry and corrected clean web release now pass; preserve the missing
+  local fixture URL diagnosis. Provider packaging initially selected no workspace;
+  use the previously verified temporary-CWD/explicit-web-root CLI invocation.
+- [ ] Verify live policy in all languages and Android's existing hosted Terms link;
+  resume rating from its saved draft with owner decision/source evidence, retain
+  final answer preview and verify Google's saved rating/setup outcome.
+- [ ] Record remaining phone/country/closed/public gates, validate and commit only
+  task-owned files, preserving deno.lock and all private evidence outside Git.

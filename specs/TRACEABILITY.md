@@ -3,6 +3,17 @@
 Update this table in the same change that completes or materially changes a spec.
 Evidence must be reproducible; avoid transient chat claims.
 
+S99.4 / FE-063 / BE-051 / DEP-044 (2026-10-10): owner-approved catalog prohibition
+is implemented locally in five-language Terms and staff report guidance.
+Typecheck, localization, real Prohibited goods / Abusive content report
+claim/removal-before-resolution regressions, 15 desktop/phone Terms states and
+all 11 browser acceptance workflows pass. Protected evidence is under
+.local/play-s99/catalog-policy/. A bounded live text review covers 264 offerings
+over 53 pages with zero keyword candidates; media absence is not claimed and no
+customer content is mutated. Full repository check and clean isolated web release
+pass, including the provider-backed HTTP smoke and zero-vulnerability web audit.
+Live policy and final rating remain pending until their own receipts exist.
+
 | Capability | FE | BE | DEP | Primary code | Automated evidence | Status |
 |---|---|---|---|---|---|---|
 | Restricted reusable store-review access | FE-064, FE-053 | BE-052, BE-044 | DEP-044 | lib/reviewer-access.ts, reviewer-access-runtime/http, web/native mode/login adapters | 2026-10-09: test:reviewer-access passes pure authority-race/revocation plus real local PostgreSQL/Supabase password/JWT/owner/cross-tenant/staff/body/origin/rate/no-store checks; actual web cookies/native-browser, ordinary OTP and 25 five-language captures pass (.local/play-s99/reviewer-ui/). Ordinary reviewer page/product edits, publish and public catalog readback also pass. Full check, clean web release, 11 acceptance tests, operations and mobile contracts pass; source ea1b452, production schema 63/deploy 6ac98a227b9a61a7dad27116, exact hosted provisioning/binding and real web/native API sessions pass (docs/GOOGLE-PLAY-RELEASE.md); version-3 AAB/internal draft and official Google native public test splits now verified; saved restricted Console fields now pass fresh provider reload and credential/443-character-note comparison; authenticated protected-phone workflows remain. | in_progress |

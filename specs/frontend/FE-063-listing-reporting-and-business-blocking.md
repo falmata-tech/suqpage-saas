@@ -4,7 +4,7 @@ title: Listing reports and business blocking
 status: in_progress
 related: [BE-051, DEP-044, FE-053]
 owners: [product, frontend, security]
-last_updated: 2026-10-09
+last_updated: 2026-10-10
 change_level: L2
 ---
 
@@ -19,6 +19,22 @@ queue for support staff/admin. Reports are asynchronous; no guest help chat,
 automatic suspension, pricing or carrier marketplace is introduced.
 
 ## Contracts and readiness
+
+Owner-approved catalog policy prohibits violent imagery, nudity and sexually
+explicit content, and age-restricted goods/services including alcohol, tobacco,
+nicotine/vaping products, weapons, recreational drugs, gambling and adult goods
+or services. Ordinary tools and lawful everyday goods are not classified as
+weapons merely because they have sharp edges. Public Terms state the rule in all
+five languages; existing native Terms links open that same hosted page.
+
+This is a prohibition enforced when violations are found, not a claim that all
+uploads are automatically scanned or reviewed before publication. Existing
+Prohibited goods / Abusive content reports reach support; administrators use
+authorized catalog controls to unpublish/remove content. Support resolves only
+after actual removal. Existing permission/assignment/version checks stay intact.
+The owner confirms alcohol/tobacco are prohibited and removed when found after
+noting that actual seller listings may otherwise be unknown. Do not declare their
+absence from the current catalog without a bounded actual-content review.
 
 Report reason choices: Misleading listing, Prohibited goods, Abusive content,
 Other. Details are optional, limited to 1500 characters. No email/account is
@@ -61,6 +77,12 @@ cannot change the draft or prevent private editing.
 GIVEN support staff/admin WHEN opening Reports THEN review, claim/assign and
 resolve/dismiss work with server permissions/stale checks; transport staff and
 business owners cannot read reports or reporter details.
+GIVEN a visitor or owner in any supported language WHEN opening Terms from web
+or the existing Android link THEN see the prohibited-content/goods policy and
+report/removal process without a promise of automatic screening.
+GIVEN a prohibited-goods or abusive-content report WHEN staff handles it THEN
+preserve the existing scoped claim/assignment and actual-removal-before-resolution
+rules; a policy update does not grant broader business-edit or transport access.
 
 ## Test plan
 
@@ -69,6 +91,9 @@ rate/idempotency and search/pagination/fuzzy exclusions. Web/mobile typechecks,
 localization and native rendering checks. Focused actual browser/mobile-preview
 report/block/unblock/staff captures at desktop/390/320, then visual approval
 before full check/release/acceptance gates. Physical/Play-delivered checks separate.
+S99.4 additionally verifies actual Terms rendering in five languages, Android's
+existing canonical Terms link, public catalog review limitations and real
+Prohibited goods / Abusive content report persistence under existing authorization.
 
 ## Rollout
 
@@ -114,3 +139,24 @@ reload/unblock/staff workflows retain local evidence above. No customer conversa
 or report is submitted in the live smoke. See docs/GOOGLE-PLAY-RELEASE.md and
 .local/play-s99/production-live-verified.json. New native binary/device checks
 remain separate; older APKs do not gain these UI controls from the web release.
+
+## S99.4 policy evidence — October 10, 2026
+
+The owner confirms the prohibition and removal of alcohol/tobacco when found.
+Public Terms and staff guidance now express the policy in the local candidate.
+Typecheck and all localization checks pass. Real PostgreSQL tests for Prohibited
+goods and Abusive content prove report persistence, scoped claim/readback and
+denial of resolution while the reported product remains public. All 11 browser
+acceptance workflows pass. Fifteen actual Terms captures cover five languages at
+1440/390/320 pixels; focused phone captures show both policy paragraphs above
+navigation with no overflow or page errors. Android's existing hosted Terms link
+is verified. Protected receipts are under .local/play-s99/catalog-policy/.
+
+A bounded read-only review of 53 live public API pages covers 264 offering texts
+and finds no keyword candidates. It does not review all image/video content or
+establish a zero-violation guarantee. No customer listing is changed. Full
+repository check and clean isolated web release now pass, including the
+provider-backed production HTTP smoke and clean web dependency audit. Original
+local infrastructure failures and diagnosed corrections remain protected; no
+test or timeout is weakened. Provider packaging/live policy and final rating
+remain pending.

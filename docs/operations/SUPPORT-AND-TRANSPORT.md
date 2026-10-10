@@ -1,5 +1,30 @@
 # Business support and transport dispatch
 
+## Catalog policy and reports
+
+The owner prohibits violent imagery, nudity/sexually explicit content and
+age-restricted goods/services, including alcohol, tobacco/nicotine/vaping,
+weapons, recreational drugs, gambling and adult products/services. The public
+rule is at https://suqpage.com/terms. Ordinary cooking/industrial tools are not
+weapons solely because they are sharp; review their actual intended use/listing.
+
+Use Dashboard → Reports (/dashboard/reports). A support agent can claim a report;
+managers can assign it. Review the actual product/page and media, not just a
+keyword or a seller's unrelated business name. Prohibited goods and Abusive
+content are the existing report reasons. Keep reporter details private.
+
+For a confirmed violation, an administrator uses the existing authorized product
+unpublish or business suspension controls. Support agents do not gain general
+business-edit rights. Verify that the reported public content is actually gone
+before marking the report Resolved; the backend rejects resolution while it is
+still visible. Dismiss only after reviewing a report and finding no violation.
+
+The policy is enforced when violations are found. Do not promise that every
+upload or linked video is automatically checked, that publication means approval,
+or that catalog reporting is a universal chat-moderation feature. Transport-only
+agents and business owners cannot access the private Reports queue. No new carrier,
+commission or staff permissions are introduced by this policy.
+
 S57 is local pending visual review and release. Use the existing Suqpage staff
 workspace; carriers and logistics companies operate outside this platform.
 
