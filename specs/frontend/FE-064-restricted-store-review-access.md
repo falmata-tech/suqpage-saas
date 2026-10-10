@@ -64,9 +64,21 @@ or accounts are changed. All secrets remain in protected provider/Play storage.
 2026-10-09: full repository check, isolated clean-install web release, all 11 browser
 acceptance workflows, operations and mobile build contracts pass. Protected
 receipts: .local/play-s99/gates/. Final privacy-only copy passes five-language
-390/320 captures and localization/narrative/geography checks. No production
-provisioning, actual customer erasure or Play-delivered install is inferred.
+390/320 captures and localization/narrative/geography checks. This local evidence
+does not infer actual customer erasure or a Play-delivered install; verified
+hosted evidence is recorded separately below.
 
 The real isolated reviewer regression additionally edits its page and every sample
 product, publishes using normal owner APIs and verifies the public shops projection.
 Publication prerequisites are fulfilled with the fixture's own contacts; no bypass.
+
+## Verified hosted web/API phase — October 9, 2026
+
+Source ea1b452 / Netlify 6ac98a227b9a61a7dad27116 deploys web reviewer entry and
+the compatible native API. Exact ordinary-demo provisioning/server binding and
+real web cookie/dashboard plus native JWT/private-starter sessions pass. Normal
+email-code mode and wrong-password denial remain verified; no email is sent.
+No account reset, elevated role or password in runtime/build/Git is introduced.
+See docs/GOOGLE-PLAY-RELEASE.md and protected .local/play-s99/production/reviewer/.
+The Android reviewer screen still requires the new admitted binary and Play/device
+verification; the older APK is not represented as having the new entry flow.

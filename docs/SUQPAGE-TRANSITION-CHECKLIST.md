@@ -3784,11 +3784,16 @@ reuse current build/admission contracts rather than adding a second release syst
   required account/device verification and selected signing policy.
   Do not enroll a new signer or upload any private key incidentally.
   Owner's current creation form also asks for Package name: com.suqpage.app.
-  SuqPage capitalization is being considered for the display title only; installed
-  app label/configuration has not been renamed by this explanation.
-- [ ] Resolve secure reusable reviewer access, UGC report/block workflow and
-  privacy/deletion fulfilment. Create ready FE/BE specs before behavior changes;
-  use real isolation/regression evidence and focused visual approval, then gates.
+  Google API reads title SuqPage/en-US, saved English/Amharic descriptions, selected
+  contact and seven image hashes; four tracks and APK/bundle lists stay empty.
+  The independent temporary read edit is deleted; Google approval is not claimed.
+  Installed app label
+  remains Suqpage; signing/account/device verification remain separate.
+- [x] Implement and verify reusable reviewer access, UGC report/block workflow and
+  the deletion runbook under ready FE/BE specs. Full local gates, source ea1b452,
+  protected schema-63 migration/rehearsal and web/API deploy 6ac98a227b9a61a7dad27116
+  pass. Exact reviewer provisioning/binding and real web/native API sessions pass;
+  real erasure requests, Console declarations and new native delivery stay separate.
 - [ ] Admit a reviewed AAB: unchanged audit gate or exact renewed exception;
   clean committed source, verified production target/signer, free quota and archive
   privacy. Inspect actual AAB/API/version/signature/16-KB configuration after build.
@@ -3868,8 +3873,9 @@ work proceeds independently; no provider secret/signing write is inferred.
   design, choose restricted reusable reviewer access and preserve the existing
   signing key. Continue safety/verification gates rather than asking the same
   choices again. This does not claim policy compliance or testing enrollment.
-- [ ] CURRENT RELEASE READINESS: implement/test restricted reviewer access and
-  privacy/deletion fulfilment; prepare existing-key Play signing enrollment.
+- [x] Implement/test restricted reviewer access and privacy/deletion fulfilment;
+  verify committed compatible hosted schema/API/web and dedicated reviewer binding.
+  Existing-key Play enrollment remains in the next release step.
 - [ ] Pass complete gates and new artifact admission, then signed AAB inspection
   and exact internal-draft EAS Submit; no automatic public track promotion.
 
@@ -3879,7 +3885,8 @@ and protected .local/play-s99/safety-ui/ receipts. The native captures are brows
 previews, not an installed Android release. docs/GOOGLE-PLAY-CONNECTION.md provides
 the owner's click-by-click steps. Google developer/package/app-only access and Expo
 target/signer and exact EAS Submit key association are independently verified;
-actual Console title/setup/Play signing, AAB, upload and publication remain pending.
+actual Console title SuqPage/en-US/empty tracks now verifies. Console-only setup,
+Play signing, AAB and store publication remain pending; web/API is published.
 Reviewer/signing/visual decisions are delegated by the owner's newest instruction;
 implementation, policy verification and all release gates remain required.
 
@@ -3911,8 +3918,23 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
 - [x] Verify a protected production public-schema backup and actual isolated restore;
   rehearse 62→63 preserving every original table fingerprint, idempotency and
   private report table/sequence grants. Production is unchanged by rehearsal.
-- [ ] CURRENT: review/scoped commit and refresh final copy artifacts, then compatible
-  hosted migration/API/web rollout and exact recoverable reviewer provisioning/binding.
+- [x] Review/scoped commit ea1b452 and refresh final copy artifacts. Protected
+  backup/actual restore and the exact owner-approved recovery retry prove schema 63,
+  original records and private permissions. Compatible web/API deploy
+  6ac98a227b9a61a7dad27116 and dedicated reviewer provisioning/binding pass with
+  21 live checks; no customer chat/email/notification is sent. Protected receipts:
+  .local/play-s99/production/, production-live-verified.json and artifact.json.
+- [x] Save app-scoped Google store text/contact/images with protected exact empty
+  before-state. Google validates then rejects the no-review parameter definitively;
+  independent uncommitted readback/revalidation precede its supported standard
+  metadata-review save with ERROR_IF_IN_REVIEW. Fresh readback proves English/
+  Amharic text, support email/website and all seven images; tracks/binary lists remain
+  empty. No app release, signer, policy declaration or invitation is changed.
+  Evidence: .local/play-s99/store-metadata/verified.json; read edit deleted.
+- [ ] CURRENT: resolve pending exact one-AAB admission and existing-key Play enrollment.
+  Official EAS archive inspection passes: all 1,621 files match ea1b452, private
+  credentials/runtime files absent. Receipt: .local/play-s99/eas-archive-inspection.json.
+  This is preparation only; no cloud build or upload yet.
 - [ ] Build/inspect one admitted signed AAB, retain existing app signer in Play,
   upload exact internal draft and inspect actual Play-delivered install.
 - [ ] Complete Console setup and closed-track rollout, add initial approved

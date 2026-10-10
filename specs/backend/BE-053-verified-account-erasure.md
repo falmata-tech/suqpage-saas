@@ -81,5 +81,17 @@ restoration, reference reassignment or a broader erase.
 2026-10-09: full repository check, isolated clean-install web release, all 11 browser
 acceptance workflows, operations and mobile build contracts pass. Protected
 receipts: .local/play-s99/gates/. Final privacy-only copy passes five-language
-390/320 captures and localization/narrative/geography checks. No production
-provisioning, actual customer erasure or Play-delivered install is inferred.
+390/320 captures and localization/narrative/geography checks. This local evidence
+does not infer actual customer erasure or a Play-delivered install; verified
+hosted evidence is recorded separately below.
+
+## Verified hosted web phase — October 9, 2026
+
+Source ea1b452 / Netlify 6ac98a227b9a61a7dad27116 publishes the verified privacy
+and deletion request wording. The live request entry returns 200; the operator
+recipe/runbook and real local erasure/old-session/shared-media regression evidence
+remain the fulfilment contract. No real customer deletion is performed by this
+rollout. A real request still requires independent identity/target verification,
+protected backup, exact approval and app/Auth/storage readback. See
+docs/GOOGLE-PLAY-RELEASE.md and docs/ACCOUNT-DELETION-OPERATIONS.md.
+Final Console disclosures and new native delivery remain separate.

@@ -92,13 +92,25 @@ Desktop plus 390/320 web/native-preview/staff states cover all five languages wi
 no browser errors or document overflow. Native evidence is a browser preview, not
 an installed APK. The owner delegates visual acceptance. Full check, clean isolated web release,
 11 browser acceptance workflows, operations and mobile build contracts pass.
-Source commit, hosted migration/deployment and installed native rollout remain
-separate gates; no new binary is claimed.
+Source commit and hosted migration/deployment now pass as recorded below.
+Installed native rollout remains a separate gate; no new binary is claimed.
 
 ## Complete local gate evidence
 
 2026-10-09: full repository check, isolated clean-install web release, all 11 browser
 acceptance workflows, operations and mobile build contracts pass. Protected
 receipts: .local/play-s99/gates/. Final privacy-only copy passes five-language
-390/320 captures and localization/narrative/geography checks. No production
-provisioning, actual customer erasure or Play-delivered install is inferred.
+390/320 captures and localization/narrative/geography checks. This local evidence
+does not infer actual customer erasure or a Play-delivered install; verified
+hosted evidence is recorded separately below.
+
+## Verified hosted web/API phase — October 9, 2026
+
+Source ea1b452 / Netlify 6ac98a227b9a61a7dad27116 deploys web report/block controls
+and the compatible native API. Private schema 63 and original-record preservation
+pass protected backup/rehearsal and the owner's exact retry. Live map/product/count
+exclusions and invalid report/origin denial pass; actual multilingual report/block/
+reload/unblock/staff workflows retain local evidence above. No customer conversation
+or report is submitted in the live smoke. See docs/GOOGLE-PLAY-RELEASE.md and
+.local/play-s99/production-live-verified.json. New native binary/device checks
+remain separate; older APKs do not gain these UI controls from the web release.

@@ -93,16 +93,29 @@ cookies, blocked map/count/page/fuzzy/sponsor/Featured projections and migration
 idempotency/RLS/table/sequence grants. Existing discovery-pagination, mobile API
 and staff-boundaries suites pass. HTTP/browser workflows map to FE-063.
 
-Migration 63 is applied only to the selected local database after a protected
+Migration 63 initially passed on the selected local database after a protected
 custom-format backup; original business/product/user counts are unchanged and
-anon/authenticated table/sequence privileges are denied. Production remains schema
-62. Protected backup/receipts are under .local/play-s99/local-before63/. Full check, clean isolated web release, 11 browser acceptance workflows, operations
-and mobile build contracts pass. Commit and hosted rollout remain pending.
+anon/authenticated table/sequence privileges are denied. Local backup/receipts are
+under .local/play-s99/local-before63/. Full check, clean isolated web release,
+11 browser acceptance workflows, operations and mobile build contracts pass.
+The separately verified hosted phase below supersedes the earlier schema-62 baseline.
 
 ## Complete local gate evidence
 
 2026-10-09: full repository check, isolated clean-install web release, all 11 browser
 acceptance workflows, operations and mobile build contracts pass. Protected
 receipts: .local/play-s99/gates/. Final privacy-only copy passes five-language
-390/320 captures and localization/narrative/geography checks. No production
-provisioning, actual customer erasure or Play-delivered install is inferred.
+390/320 captures and localization/narrative/geography checks. This local evidence
+does not infer actual customer erasure or a Play-delivered install; verified
+hosted evidence is recorded separately below.
+
+## Verified hosted web/API phase — October 9, 2026
+
+Source ea1b452 / Netlify 6ac98a227b9a61a7dad27116 deploys the private report API
+and staff queue. Protected backup/restore rehearsal and the owner's one approved
+retry verify schema 63, every original table fingerprint, private report table/
+sequence grants and actual runtime access. Live invalid-body/origin rejection and
+map/product exclusions pass; full staff/persistence workflows retain real local
+evidence above. No customer report/chat/notification was created by live checks.
+Details: docs/GOOGLE-PLAY-RELEASE.md and protected .local/play-s99/production/.
+Native binary/Play verification remains a separate DEP-044 gate.

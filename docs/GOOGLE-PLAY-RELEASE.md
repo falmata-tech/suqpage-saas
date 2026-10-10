@@ -9,7 +9,9 @@ support email **marketvision.tech@gmail.com**.
 The dashboard link is owner-provided. Google API readback now verifies the developer,
 canonical package and complete app-only Admin grant, and Expo project/current
 signer match. The exact EAS Submit key is connected and independently verified.
-Console title/setup/actual Play signer and release readiness remain pending.
+Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
+support email/website and all seven uploaded images; every track/binary list is
+empty. Console-only setup, actual Play signer and new AAB admission remain pending.
 The existing Expo APK remains available separately.
 
 The owner requests remote Expo uploads. Follow
@@ -23,7 +25,7 @@ In [Play Console](https://play.google.com/console/), choose **Home → Create ap
 
 | Field | Value |
 | --- | --- |
-| App name | Suqpage; SuqPage is also a valid owner-selected display capitalization |
+| App name | SuqPage, independently read from the created Console listing |
 | Default language | English (United States), en-US |
 | App or game | App |
 | Free or paid download | Free |
@@ -155,21 +157,26 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 
 - Owner supplied the created Console app dashboard; Google's selected developer/
   package/app-only Admin grant and Expo target/current signer are verified. Console
-  title/setup/Play signing and account/device verification remain. The EAS Submit
-  credential association now matches the exact owner-provided key after approved
+  title SuqPage, saved store text/contact/images and empty tracks/binary lists are
+  independently read back. Play signing, Console-only setup and account/device
+  verification remain. The EAS Submit credential association now matches the exact owner-provided key after approved
   CLI setup and unchanged notification/signing readback.
-- FE-064/BE-052 reusable owner-demo reviewer access is verified locally; hosted
-  provisioning/binding and the Play App access instructions remain. Google reviewers cannot
+- FE-064/BE-052 reusable owner-demo reviewer access is verified locally and on the
+  deployed web/API; exact production provisioning/binding and real web/native
+  sessions pass. Private instructions are prepared; the new Android binary and
+  Console App access fields remain. Google reviewers cannot
   fetch codes from the owner's personal inbox; no universal OTP or admin access.
 - Merchant content is inferred to be public user-generated content. FE-063/BE-051
-  now implement and verify reporting/blocking and private moderation locally.
-  Delegated visual acceptance and complete local gates pass. Coordinated
-  schema/API/web/native release remains before any production/policy claim. General visitor live support stays closed.
+  implement and verify reporting/blocking and private moderation. Delegated visual
+  acceptance, complete local gates and production schema/API/web rollout pass;
+  the new native binary and actual Play/device checks remain before store claims.
+  General visitor live support stays closed.
 - BE-053 deletion fulfilment is rehearsed against real local Auth/PostgreSQL/media,
   including exact-target/shared-tenant/drift/FK rollback and other-tenant preservation.
   Updated native notification/map/embed/deletion privacy text passes five-language
-  phone captures; deployment and final store disclosures remain. Deletion retention needs
-  operational review. Existing request links do not delete data by themselves.
+  phone captures; the verified web/API notice is deployed and final store disclosures
+  remain. Real deletion retention/fulfilment follows the verified-request runbook.
+  Existing request links do not delete data by themselves.
 - New artifact audit admission, selected Play signing, AAB/Play APK inspection and
   authenticated physical-phone/OS notification checks remain pending.
 
@@ -185,11 +192,103 @@ passes all five languages at 390/320 without overflow/errors. Protected evidence
 is under .local/play-s99/; no private tester list or credentials belongs in Git.
 
 These results admit the source workflow, not a future AAB, Play approval or physical
-notification delivery. Hosted schema/API/reviewer rollout, renewed artifact admission,
-existing-key Play enrollment and actual installed verification remain pending.
+notification delivery. Hosted schema/API/reviewer rollout is verified; renewed
+artifact admission, existing-key Play enrollment and actual installed verification
+remain pending.
 
 The selected production public-schema backup is verified and its actual restore
 passes migration 62→63, old-table fingerprints, idempotency and private report
 table/sequence grants in a disposable local database. Backup/rehearsal and exact
-migration plan are protected under .local/play-s99/production/database/. Production
-has not changed merely because the rehearsal passes.
+migration plan are protected under .local/play-s99/production/database/.
+The approved production migration and monitored web rollout now pass as recorded below.
+
+## Verified production web/API release — October 9, 2026
+
+- Source: `ea1b4526598cff4fb6058265b8e21a68efab1148`; Netlify production
+  `6ac98a227b9a61a7dad27116`, ready on https://suqpage.com. Exact draft
+  `6ac989c691cc77be1a2bce03` used the identical tested function archives.
+- Schema 63, protected production archive and actual restore/migration rehearsal
+  are verified. Migration preserves every original table fingerprint and denies
+  anonymous/authenticated report table/sequence access. The first command failed
+  before schema code began; writes stopped and independent checks proved schema
+  62/no report objects/same app. The owner approved one bounded retry, digest
+  `da2afa38b0ee6bc0f6a8c3203fead342ea1313314048d9064851f875e0fd3c3e`.
+  That retry and independent runtime readback passed. No restore or second retry.
+- One new ordinary, marked demo reviewer has a private populated starter.
+  Only its exact production-only email/immutable UUID server fields were added;
+  its password stays in protected reviewer instructions/Auth, outside runtime,
+  Git and artifacts. Existing accounts were not reset or published. Global Auth,
+  SMTP, notification and signing configuration were not changed by this rollout.
+- 21 live checks verify public pages/privacy/deletion, health, native catalog and
+  Featured, transport return state, anonymous private-route denial, exact Android
+  association bytes, blocked map/product/count results, invalid report/origin
+  rejection and normal email-code mode. Actual reviewer wrong-password denial,
+  native session/private starter and web cookie/dashboard sessions also pass.
+  No customer chat, email or notification was created/sent. The initial live test
+  incorrectly supplied a browser Origin to the native-only production API;
+  focused diagnostics proved rejection, then the harness was corrected to native
+  request shape without changing the origin guard or republishing the app.
+- Public demo aggregate readback remains 64 active demo stores, 256 published demo
+  offerings and 42 services. Existing content is preserved; the new reviewer stays
+  private and is not added to discovery.
+- The draft context is deploy-preview; existing runtime settings are production-only.
+  Its static association passes, but dynamic preview pages are unavailable.
+  Complete local runtime/workflow gates and exact production runtime preflight
+  preceded publication, followed by the live checks above; no preview pass is invented.
+- Actual Linux handler/Sharp cold import and packaged scheduled worker pass.
+  Handler SHA-256: `d9dbf74ddb129a4c725642b58908ee1116eb89bee1b02ed75e76a5d66b5b33c6`.
+  Previous deploy `6ac839e949737af3112e0764` is retained. Recovery remains an exact
+  separately reviewed operation; do not drop private reports or replay a timeout.
+
+Protected receipts are under .local/play-s99/production/, artifact.json,
+production-live-verified.json and the gate/UI directories. Durable docs contain
+no passwords, provider UUID binding values, tester lists, databases or raw logs.
+
+The official EAS archive-only inspection also passes: 1,621 files match source
+ea1b452 exactly, with zero untracked/private credential/runtime files. Archive
+manifest SHA-256: `cfb76cafe578ea0046d9288b43852974ef4abd0ac6003b3d15fa54d7fe4349a6`.
+Protected receipt: .local/play-s99/eas-archive-inspection.json. This preparation
+starts no cloud build and does not admit a future signed bundle. Immutable source
+ea1b452 remains the build candidate even when this operations handoff is committed.
+
+## Verified Google store metadata — October 9, 2026
+
+App-scoped Google API independently saves and reads back title SuqPage/en-US,
+English and Amharic descriptions, marketvision.tech@gmail.com, https://suqpage.com,
+the 512px icon, 1024×500 feature graphic and five actual native screenshots.
+All seven uploaded image hashes and exact text/contact fields match the prepared
+source. Empty before-state and exact plan/readback are protected under
+.local/play-s99/store-metadata/. Read-only verification used a new uncommitted
+edit and deleted only that edit after success.
+
+Google validated the complete metadata edit, then definitively rejected the
+changesNotSentForReview parameter because this app uses automatic review. The
+original attempt remains recorded. Exact uncommitted readback and revalidation
+preceded one supported metadata-only save, with ERROR_IF_IN_REVIEW to prevent
+cancelling another review. No wider permission or signing change was used.
+Standard metadata-review behavior is recorded; Google's approval status is not
+inferred. Every release track and APK/bundle list remains empty. No binary,
+policy declaration, tester invitation or public app publication was performed.
+
+## Next owner actions
+
+1. Finish the already requested existing-key Play signing step in
+   [connection step 5](GOOGLE-PLAY-CONNECTION.md#5-select-play-signing-before-first-submission).
+   Send Google's public PEPK command/encryption key, or the message requiring a
+   first bundle upload. Do not select a different key or share passwords.
+2. Decide the pending one-free-AAB tooling exception in the protected exact review
+   .local/play-s99/aab-tooling-review.md, digest
+   `b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38`.
+   S98's earlier APK approval is consumed; DEP-044 requires fresh admission.
+   The prepared source/archive and public runtime are distinct from a signed AAB.
+3. Complete the Console-only policy/setup screens using
+   [the readiness worksheet](play-store/READINESS.md). The private dedicated
+   App access instructions are prepared outside Git; ordinary users still use codes.
+   Do not declare policy completion or invite testers before the admitted version,
+   signing and actual phone evidence are verified.
+
+No S99 Expo build, Play binary upload or tester invitation has run. Six tester
+addresses are stored privately, with no verified opt-ins. The 12-testers/14-day
+closed-test clock has not started. EAS Submit can upload the exact admitted bundle
+remotely to internal draft after the remaining gates; that does not enroll testers
+or complete Google's manual declarations.

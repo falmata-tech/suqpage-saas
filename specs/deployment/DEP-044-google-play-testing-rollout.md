@@ -96,9 +96,12 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 
 ## Rollout and rollback
 
-Current phase: verified local content safety, reviewer access, deletion operations
-and the approved Expo upload-key connection. No Console app upload or store
-publication. Store packet/runbook:
+Current phase: committed/tested content safety, reviewer access and deletion
+operations, approved Expo upload-key connection, and verified hosted schema-63
+web/API/reviewer rollout. Google reads the actual SuqPage title/en-US and empty
+tracks/binary lists; store English/Amharic text, support contact and seven image
+hashes are saved/read back using standard metadata review. No new signed AAB,
+Play binary upload or store publication. Store packet/runbook:
 docs/GOOGLE-PLAY-RELEASE.md, docs/GOOGLE-PLAY-CONNECTION.md and docs/play-store/. Verified historical runtime
 baseline: docs/SUQPAGE-S98-RELEASE-2026-10-08.md.
 
@@ -111,9 +114,10 @@ the affected track; do not assume a downgrade or uninstall preserves sessions.
 
 ## Readiness
 
-Preparation is authorized. The complete rollout remains draft: Console target verification,
-actual Play signing, hosted reviewer/content-safety rollout, final Console declarations,
-new artifact admission and installed-device evidence remain unresolved. Local
+Preparation and the hosted web/API phase are verified. The complete Play rollout
+remains draft: actual Play signing, final Console declarations, new artifact admission and
+installed-device evidence remain unresolved. Hosted reviewer/content-safety web/API
+rollout is now verified, with production original-record preservation. Local
 implementation, delegated visual acceptance and full gates pass. Master §§15/16/17/22
 would be affected by completed rollout or authentication changes. Do not mark this
 spec done until those contracts and all mapped evidence exist.
@@ -123,7 +127,9 @@ spec done until those contracts and all mapped evidence exist.
 - Google API verifies developer 5256539403314542898 and complete app-only Admin
   for com.suqpage.app. No global Admin or other app grant. Owner provides Console
   app 4972244998230912603 and selects marketvision.tech@gmail.com for login and
-  public listing support; actual Console title/signing/setup readback remains.
+  public listing support. Google reads title SuqPage/en-US, saved English/Amharic
+  text, support contact and all seven image hashes; four tracks and APK/bundle
+  lists remain empty. Signing/Console-only setup remain; Google approval is not claimed.
 - Expo verifies falmatad / @falmatad/suqpage, project
   bfc289fb-238e-44a3-9e0f-fec6a7c857d1. The exact owner-provided EAS Submit key is
   connected by the approved official CLI operation, digest
@@ -151,6 +157,8 @@ spec done until those contracts and all mapped evidence exist.
 - Android production JS inspection proves canonical public runtime bindings,
   absence of private reviewer/provider credentials and no braces/node-forge
   modules among 1651 compiled sources. This is not a signed AAB or phone proof.
+  Official archive-only inspection verifies all 1,621 files match source ea1b452,
+  with no untracked/private runtime or credential bytes and no cloud build.
   Fresh locked audit still has 20 high / zero critical findings rooted in the
   two unpatched tooling advisories. S98's single-APK exception is consumed; a
   fresh exact AAB admission remains required. Web-only audit is clean.
@@ -161,7 +169,13 @@ spec done until those contracts and all mapped evidence exist.
   verified opt-ins; the 12-testers/14-day clock has not started. The owner will
   recruit more testers while preparation continues.
 
-The compatible hosted API/web rollout, new reviewer provisioning/binding, exact
-AAB admission/build, Play signing/upload, Console policy forms and actual closed
-track remain pending. Existing released APK/API are not replaced by these local
-checks. Never mark DEP-044 done merely because the local feature specs pass.
+The compatible hosted API/web rollout and new reviewer provisioning/binding pass:
+source ea1b452, schema 63 and production deploy 6ac98a227b9a61a7dad27116. Protected
+backup/rehearsal and one owner-approved bounded retry preserve old-table hashes and
+private report grants; 21 live checks include real ordinary reviewer web/native API
+sessions and private starter, without customer chats, emails or notifications.
+See docs/GOOGLE-PLAY-RELEASE.md for the incident/readback and exact release evidence.
+Exact AAB admission/build, existing-key Play enrollment/upload, Console policy forms
+and the actual closed track remain pending. The existing APK remains S98;
+local/native archive checks do not replace it. The hosted API has been updated as
+recorded above. Never mark DEP-044 done merely because the local feature specs pass.

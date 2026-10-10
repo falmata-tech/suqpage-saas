@@ -7,8 +7,9 @@
 ---
 
 
-Current released product (FE-044–FE-051, BE-037–BE-043, DEP-034–DEP-040):
-Suqpage runs at https://suqpage.com on PostgreSQL schema 62. Standard owner pages,
+Current released product (FE-044–FE-051, BE-037–BE-043, DEP-034–DEP-040;
+web/API additions FE-063–FE-064 / BE-051–BE-053, with DEP-044 Play rollout pending):
+Suqpage runs at https://suqpage.com on PostgreSQL schema 63. Standard owner pages,
 complete private starters, Product/Service posting, owner first Publish and live
 Save, immediate public location saves and five-row search results are deployed.
 Custom-page request/design/revision features are retired; historical data remains.
@@ -34,11 +35,16 @@ business featured or claiming prerecorded video is live.
 The preceding release is recorded in
 `docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`. Current release gates, backup,
 artifacts and remaining real-email/hosted-session/OS limits follow below.
-The S98 web/API release uses source a81c93f and production deploy
-6ac839e949737af3112e0764. Backed migrations 60–62 preserve existing records and
-private permissions. Production notification configuration and the scheduled
-worker are verified; real OS display/read evidence is separate. The canonical
-Android internal APK is built, signature/config/privacy inspected and checked on an
+The current web/API release uses source ea1b452 and production deploy
+6ac98a227b9a61a7dad27116. Protected backup/restore rehearsal, the owner-approved
+controlled retry of migration 63, original-record fingerprints and private report
+permissions are verified. Reporting/blocking, updated privacy and one server-bound
+ordinary demo reviewer are deployed. Live public routes and real reviewer web/native
+API sessions pass; no customer chat, email or notification was sent by these checks.
+Production notification configuration and the scheduled worker remain verified;
+real OS display/read evidence is separate. See docs/GOOGLE-PLAY-RELEASE.md.
+The current Android APK remains the S98 a81c93f release: built, signature/config/
+privacy inspected and checked on an
 isolated emulator; physical-phone alerts and authenticated hosted flows remain
 separate under DEP-042/DEP-043. Current evidence is in
 `docs/SUQPAGE-S98-RELEASE-2026-10-08.md`.
@@ -93,13 +99,15 @@ do not enable a custom-request application feature.
 
 Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
 The generated Netlify origin remains an infrastructure compatibility address.
-Released web source `a81c93f0fdbea8ce674df120bb8491c3a4ebf132` and Netlify deployment
-`6ac839e949737af3112e0764` use schema 62. Complete check, web release, operations,
+Released web source `ea1b4526598cff4fb6058265b8e21a68efab1148` and Netlify deployment
+`6ac98a227b9a61a7dad27116` use schema 63. Complete check, web release, operations,
 eleven local production-mode workflows, packaged Linux handler/image/worker and
 artifact privacy gates pass. Live public routes, native catalog, protected-route
 denial, www redirect and canonical plus historical Android association bytes are
-verified in `docs/SUQPAGE-S98-RELEASE-2026-10-08.md`. Real hosted email and
-authenticated hosted sessions remain separate from passing local workflow tests.
+verified in `docs/GOOGLE-PLAY-RELEASE.md`, with the S98 Android baseline retained
+in `docs/SUQPAGE-S98-RELEASE-2026-10-08.md`. Real hosted reviewer web/native API
+sessions also pass. Regular hosted email and authenticated physical-phone checks
+remain separate from the local workflows and restricted reviewer verification.
 
 The official product name is:
 
@@ -1064,18 +1072,20 @@ accessible labels while visible names wrap within the compact marker width.
 
 ## 11. Passwordless account entry and business onboarding
 
-FE-064/BE-052 locally implements an owner-authorized, server-bound password
+FE-064/BE-052 deploys an owner-authorized, server-bound password
 exception for one ordinary marked demo owner used by store reviewers. Normal users
 retain email codes. Exact immutable UUID/email, current client/demo/tenant authority
 and real provider authentication are checked before returning a session. Role or
 identity changes during authentication revoke/refuse it. Local Supabase/PostgreSQL,
-web-cookie/native-browser and five-language focused checks pass; hosted binding
-and Play-delivered verification remain pending.
+web-cookie/native-browser and five-language focused checks pass. Production
+provisioning, exact server-only binding and real web/native API sessions pass;
+the new Android binary and Play-delivered verification remain pending.
 
-The FE-063/BE-051 local candidate lets guests report or block a public business
+The FE-063/BE-051 deployed web/API lets guests report or block a public business
 without signing in. Its browser/installation preference does not change account
 authority or private owner previews. Normal email-code onboarding is unchanged;
-the restricted Google Play reviewer exception is verified locally and not yet deployed.
+the restricted Google Play reviewer exception is deployed on the web/API. Native UI
+changes require the next admitted binary; older APKs do not gain them automatically.
 
 The FE-059/BE-047 local candidate requires a canonical Business city on the same
 initial account/business/handle screen. Native places the city/town search beside
@@ -1190,7 +1200,7 @@ window, but application code must not read or mutate them.
 
 ## 13. User roles and standard page workspaces
 
-The local FE-063/BE-051 Reports queue is web-only for support-scoped staff and
+The deployed FE-063/BE-051 Reports queue is web-only for support-scoped staff and
 administrators/operations. Staff can claim work, managers can assign it, and
 version checks prevent overwriting another decision. Mark resolved requires the
 reported content to be removed/unpublished/suspended using existing authorized
@@ -1426,16 +1436,20 @@ independent readback confirms preserved FCM and canonical/legacy signing. Consol
 setup/actual Play signing and release readiness remain pending; see
 docs/GOOGLE-PLAY-CONNECTION.md. Credential connection does not publish/build an app.
 Current production AAB/internal-draft profiles are preparation, not a store release.
-Console identity/signing, reusable restricted reviewer access, content reporting/
-blocking and privacy/deletion operations, artifact admission and actual Play/phone
-checks precede reviewed distribution. The required 12-testers/14-day closed test
-and production-access application remain external rollout steps. Existing product
-authentication and public deployment are unchanged. FE-063/BE-051 now implement
-local reporting/blocking through pure commands, a private PostgreSQL report port
-and web/native adapters. Discovery exclusions run before counts, fuzzy candidate
+Google's API verifies the Console title SuqPage/en-US, saved English/Amharic
+store text, selected public support contact and seven uploaded images. Every
+release track and APK/bundle list remains empty; metadata review is not app
+publication or Google approval. Existing-key Play signing,
+new AAB admission/build and actual Play/phone checks precede reviewed distribution.
+The required 12-testers/14-day closed test and production-access application remain
+external rollout steps. Regular product authentication remains email-code based.
+FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
+a private PostgreSQL report port and web/native adapters; the new native binary
+is still pending. Discovery exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
-focused evidence passes; visual approval, full gates and rollout remain pending.
+focused evidence, delegated visual acceptance and complete gates pass; committed
+web/schema/API rollout is verified. New Android/Play rollout remains pending.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
@@ -1563,7 +1577,7 @@ physical/authenticated phone checks remain (BE-044/FE-053).
 
 ## 16. Security requirements
 
-Local BE-051 reports accept only canonical public targets and bounded details.
+Deployed BE-051 reports accept only canonical public targets and bounded details.
 Concurrent/retried submission is idempotent, changed replay conflicts, and salted
 IP hashes enforce a rate limit without storing raw IPs. Responses expose only a
 receipt/duplicate flag. Fresh server role/assignment/version checks protect staff
@@ -1592,7 +1606,7 @@ shell commands remain outside repository enforcement.
 
 - Never expose seeded credentials in public UI.
 - Never expose, collect, or transmit a password in normal launch account-entry or
-  business onboarding. The owner-authorized FE-064/BE-052 local exception binds
+  business onboarding. The owner-authorized FE-064/BE-052 deployed server exception binds
   one store-review demo identity; its password/session never belongs in public
   builds, static UI constants or logs, and it never grants staff/other-tenant access.
 - Supabase Auth owns managed email-OTP/OAuth session validity in normal local,
@@ -1716,11 +1730,15 @@ styles and behavior stay original. Production demo coordinates remain unchanged.
 
 ## 17. Data, migrations, and deployment boundary
 
-Local migration 63 adds the private listing-report table after a protected,
-verified backup. Original business/product/user counts and private table/sequence
-permissions are verified. Hosted schema remains 62; web/schema/API deployment
-must precede a native build containing report actions. Rollback preserves reports
-and privacy rather than dropping records. S99.1 remains undeployed.
+Local and hosted migration 63 add the private listing-report table after protected
+backups and an actual isolated restore rehearsal. The original production-table
+fingerprints and private table/sequence permissions are verified. Uncertain hosted outcomes require a pause, independent
+readback and exact owner-approved recovery; the migration's verified recovery is
+recorded in docs/GOOGLE-PLAY-RELEASE.md. The compatible source ea1b452
+web/API is published before the new native build containing report actions.
+Rollback preserves reports and privacy rather than dropping records. Exact
+production reviewer provisioning/binding and live web/native API sessions pass;
+S99 Android admission, Play signing/distribution and phone checks remain pending.
 
 Internal APK and store AAB profiles use the same permanent native identity and
 remote version counter, incrementing version codes for both. Existing released
@@ -2089,7 +2107,8 @@ other-tenant preservation, plan drift/backup/approval and foreign-key rollback.
 Full repository check, clean isolated web release, all 11 browser acceptance
 workflows, operations and mobile build contracts pass. Reviewer tests also prove
 ordinary page/product editing, publication and public catalog readback. Production
-provisioning, actual deletion requests and an installed Play binary remain separate.
+reviewer provisioning/binding and real web/native API sessions now pass. Actual
+deletion requests and an installed Play binary remain separate.
 
 FE-063/BE-051 focused tests cover real PostgreSQL/HTTP replay, rate/target/role/
 assignment/stale/removal boundaries, discovery/map/count/page/fuzzy/Featured/
@@ -2097,8 +2116,9 @@ sponsor exclusions and private migration grants. Actual local web/native-preview
 report/block/reload/unblock/inquiry and staff-removal workflows pass. Desktop and
 390/320 captures cover five languages without browser errors or document overflow.
 The owner delegates visual acceptance, and the complete local/release gates pass.
-Committed source, production rollout and installed Android checks remain separate;
-browser previews do not admit an APK.
+Source ea1b452 and production web/schema/API rollout are verified with protected
+backup/readback evidence and 21 live checks. Installed Android checks remain
+separate; browser previews and an inspected upload archive do not admit an APK.
 
 DEP-042/DEP-043 identity checks cover all build profiles, APK/AAB version settings,
 actual Expo public-config resolution and canonical Firebase acceptance with
@@ -2405,7 +2425,7 @@ a first-publication review and contextual locale copy. Public copy does not
 mention pricing. Focused database/browser and full release gates pass; the approved
 experience is deployed. Evidence: `docs/SUQPAGE-LAUNCH-CLARITY-REVIEW.md` and
 `docs/SUQPAGE-RELEASE-2026-09-27.md`.
-Production schema 62 preserves demo identity, scoped support queues and historical
+Production schema 63 preserves demo identity, scoped support queues and historical
 buying requests. The current public service is transport live chat with
 route intake, staff assignment, retained history and resolution. Staff arrange
 carriers outside Suqpage; carrier accounts, checkout and booking integrations

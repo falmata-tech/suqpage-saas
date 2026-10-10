@@ -15,15 +15,20 @@ testers or make the app publicly available. Keep the existing name/package.
 - App ID: **4972244998230912603**.
 - [Owner-provided app dashboard](https://play.google.com/console/u/2/developers/5256539403314542898/app/4972244998230912603/app-dashboard).
 
-The signed-in dashboard has not been read here. Google's API now independently
-verifies the selected developer and **com.suqpage.app** grant. Console display
-title, actual Play signing and release/setup state still need readback before
-upload. The `/u/2/` part selects a browser Google-account slot; check the account
+Google's API independently verifies the selected developer, **com.suqpage.app**
+grant, actual store title **SuqPage**, default **en-US**, saved English/Amharic
+store descriptions, selected support email/website and all seven uploaded images.
+Four release tracks and APK/bundle lists remain empty. Metadata is saved under
+Google's required automatic-review behavior; no app publication or Google approval
+is claimed. The separate read-only edit was deleted. Actual Play signing,
+Console-only setup and account/device verification remain. The `/u/2/` part
+selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
 login does not select a new Suqpage administrator. The owner separately confirms
-the same email for the public Play listing; its actual Console setting still needs
-readback. Existing website privacy/deletion contacts are separate. Continue with
-step 2, not app creation.
+the same email for the public Play listing, now independently saved/read back.
+Existing website privacy/deletion contacts are separate. App creation, API, service
+account access, Expo submission-key association and store metadata are complete;
+continue with **step 5 (Play signing)**, not those completed setup steps.
 
 Creation reference, if needed:
 

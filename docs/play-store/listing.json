@@ -1,5 +1,5 @@
 {
-  "status": "draft",
+  "status": "metadata_saved",
   "packageName": "com.suqpage.app",
   "defaultLanguage": "en-US",
   "categorySuggestion": "Shopping",
@@ -9,15 +9,15 @@
   "accountDeletionUrl": "https://suqpage.com/account-deletion",
   "listings": {
     "en-US": {
-      "title": "Suqpage",
+      "title": "SuqPage",
       "shortDescription": "Find social media businesses on the map and browse their products and services",
       "fullDescription": "The businesses you follow on social media, with everything they offer in one organized store.\n\nSuqpage helps you see where businesses are located and browse their products and services without digging through old posts. Explore photos, videos and item details, then contact the business about what you want.\n\nFor customers\n• Explore businesses on the map and search their products and services.\n• Filter by category and city or region.\n• Open a business store to browse its catalog and contact details.\n• Ask about one item or send several together in an inquiry list.\n• Contact businesses on Suqpage or through their social channels.\n• Bought something? Chat with our transport agents to help arrange transport to you.\n\nFor businesses\n• Create a professional digital storefront with your own name, handle and accent color.\n• Start with a private sample page, replace the examples and publish when ready.\n• Add product and service photos, video links, descriptions and optional prices.\n• Choose your business area or exact shop location.\n• Share your store link on your social profiles and manage customer inquiries in the app.\n\nSuqpage connects you directly with businesses. Availability, purchases and transport arrangements are agreed with the business or transport team. The app does not provide an online checkout.\n\nThe app is available in English, Amharic, Afaan Oromo, Somali and Tigrinya."
     },
     "am": {
-      "title": "Suqpage",
+      "title": "SuqPage",
       "shortDescription": "በማኅበራዊ ሚዲያ የሚሸጡ ንግዶችን በካርታ ያግኙ፤ ምርቶቻቸውንና አገልግሎቶቻቸውን ይመልከቱ",
       "fullDescription": "በማኅበራዊ ሚዲያ የሚከታተሏቸው ንግዶች ምን እንደሚያቀርቡ ለማየት የቆዩ ልጥፎችን መፈለግ አያስፈልግም። Suqpage ምርቶቻቸውን፣ አገልግሎቶቻቸውን፣ ፎቶዎቻቸውንና ቪዲዮዎቻቸውን በተደራጀ የኦንላይን ሱቅ ያቀርባል።\n\nለደንበኞች\nበካርታ ላይ ንግዶችን ያግኙ፤ በከተማ፣ በክልል ወይም በምድብ ፈልገው የሚፈልጉትን ምርት ወይም አገልግሎት ይመልከቱ። ስለ አንድ ምርት ይጠይቁ፣ ወይም ብዙ ምርቶችን አንድ ላይ መርጠው ጥያቄዎን ለንግዱ ይላኩ። በSuqpage ወይም ንግዱ በሰጠው የማኅበራዊ ሚዲያ አድራሻ በቀጥታ መገናኘት ይችላሉ።\n\nየገዙት እቃ ወደ እርስዎ እንዲደርስ ማጓጓዣ ይፈልጋሉ? ከማጓጓዣ ቡድናችን ጋር በቀጥታ ይወያዩ።\n\nለንግድ ባለቤቶች\nለንግድዎ በስምዎ፣ በራስዎ የገጽ መለያ እና በመረጡት ቀለም የኦንላይን ሱቅ ይፍጠሩ። በምሳሌ የተሞላ የግል ገጽ ይዘው ይጀምሩ፤ ምሳሌዎቹን በራስዎ መረጃ ተክተው ሲዘጋጁ ለሕዝብ ያሳዩ። የምርትና የአገልግሎት ፎቶዎችን፣ የቪዲዮ ሊንኮችን፣ መግለጫዎችን እና ከፈለጉ ዋጋ ያክሉ። አካባቢዎን ወይም የሱቅዎን ትክክለኛ ቦታ ይምረጡ፤ የገጽዎን ሊንክ ያጋሩ፤ የደንበኞችን ጥያቄዎች በመተግበሪያው ይከታተሉ።\n\nግዢን ከንግዱ፣ ማጓጓዣን ከቡድናችን ጋር በመነጋገር ያመቻቹ። መተግበሪያው በውስጡ የኦንላይን ክፍያ መፈጸሚያ የለውም።\n\nSuqpage በእንግሊዝኛ፣ በአማርኛ፣ በአፋን ኦሮሞ፣ በሶማሊኛ እና በትግርኛ ይጠቀሙበታል።"
     }
   },
-  "reviewNotes": "Draft copy. English and Amharic are documented Play listing locales; confirm available locales in Console. Other in-app languages remain available regardless of store locale. Obtain owner/language review before submitting text or assets. Do not claim policy compliance from this file."
+  "reviewNotes": "English and Amharic store text and seven verified assets are saved and independently read back on October 9, 2026, under owner-delegated remaining launch design decisions. Google requires standard metadata-review behavior; approval is not claimed. Other in-app languages remain available independently of store locale. No Play binary, declaration, tester opt-in or public app release is inferred."
 }

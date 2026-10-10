@@ -73,5 +73,17 @@ sessions and content remain unchanged; preserve evidence on provider failure.
 2026-10-09: full repository check, isolated clean-install web release, all 11 browser
 acceptance workflows, operations and mobile build contracts pass. Protected
 receipts: .local/play-s99/gates/. Final privacy-only copy passes five-language
-390/320 captures and localization/narrative/geography checks. No production
-provisioning, actual customer erasure or Play-delivered install is inferred.
+390/320 captures and localization/narrative/geography checks. This local evidence
+does not infer actual customer erasure or a Play-delivered install; verified
+hosted evidence is recorded separately below.
+
+## Verified hosted web/API phase — October 9, 2026
+
+Source ea1b452 / Netlify 6ac98a227b9a61a7dad27116 deploys the reviewer adapters.
+One new ordinary marked demo owner is provisioned with a private populated starter;
+only its exact production-only server email/UUID binding is configured. Real
+provider wrong-password denial, native JWT/session/owner-home and managed web
+cookie/dashboard readback pass, alongside ordinary OTP mode. Existing accounts
+are not reset/published; no code email, global Auth or signing change is made.
+Protected credentials stay outside runtime/build/Git; see docs/GOOGLE-PLAY-RELEASE.md
+and .local/play-s99/production/reviewer/. New Android/Play delivery is pending.
