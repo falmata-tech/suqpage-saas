@@ -2,23 +2,24 @@
 
 This is the current DEP-044 declaration/evidence record, not a claim of Google's
 policy approval. Ten of eleven setup tasks are saved and verified for version 3;
-only IARC content rating remains manual. Internal testing is active, with six
+final content rating awaits actual catalog-content rules. Its incomplete draft is
+saved/read back under the owner’s latest delegation. Internal testing is active, with ten
 approved addresses selected and no invented enrollment or phone result.
 
 ## Existing behavior and policy gaps
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and six-address list match saved readback. Manual IARC, protected-phone and closed/public rollout remain |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and ten-address list match saved readback. Alpha access/feedback are prepared with no release. Final rating, protected-phone and closed/public rollout remain |
 | SDK compatibility | Actual version-3 AAB and Google universal APK target API 36; bundle config, all 50 ELF libraries and APK ZIP pass 16-KB checks | Protected Play-installed physical-phone workflows and notification proof |
 | App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows. Hosted provisioning/binding and real API sessions pass | Restricted Sign in details with separate credentials and 443-character notes pass provider reload/edit-dialog comparison; authenticated protected-phone workflows remain |
-| Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Per-request verified mailbox/identity, backup/approval and real fulfilment remain manual; final disclosure/rollout |
+| Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Full-account deletion URL is saved in Data safety; per-request identity/backup/approval and real fulfilment remain manual. Separate partial-data deletion is not claimed |
 | Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 locally implement real report/block controls and a private support/admin Reports queue | Delegated visual acceptance and full local gates pass; production schema/API/web now passes; native binary/Play checks remain, with objectionable-content terms evaluated against actual moderation rules |
 | Live chat | Public transport chat; business-owner support; assigned staff, messages, receipts and history | Actual hosted phone end-to-end and permission/background/closed-app/tap/logout evidence |
 | Privacy | Five-language notice is deployed and included in version 3; data/SDK inventory and saved Data safety pass expanded Google UI readback | Protected-phone SDK/notification proof remains; full-account deletion is offered, separate partial-data deletion is not claimed |
 | Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Ads Yes is saved/reloaded; no network ad SDK or badge claim invented |
 | Payments | No app checkout, digital subscriptions or business payment plans | Do not claim payment collection or in-app purchases; transport is arranged by agents outside platform checkout |
-| Content rating/target ages | Owner-selected ages 13–15, 16–17 and 18+ are saved/read back, no under-13 group | IARC terms restrict automated access; owner operates its questionnaire manually. No rating or child-directed certification claimed |
+| Content rating/target ages | Owner-selected ages 13–15, 16–17 and 18+ are saved/read back, no under-13 group | Incomplete questionnaire is saved under the later owner delegation; final answers need actual catalog policy. No rating or child-directed certification claimed |
 
 Policy application: public merchant catalogs appear to meet Google's UGC
 definition. This is an inference from the app and policy, not a Google review
@@ -62,9 +63,24 @@ Include Google's protection layer in the final SDK review rather than treating
 local compiled-source inspection as the entire Play-delivered app.
 
 Owner-selected teen/adult audience is saved. Dashboard verifies 10/11 setup tasks;
-only manual content rating remains, along with any Google-requested account/device
-verification. A separate six-address SuqPage list is saved, selected and individually
-verified. No invitation, real phone result or closed-test opt-in is claimed.
+final content rating awaits catalog-policy clarification, along with any Google-
+requested account/device verification. Ten supplied SuqPage addresses are saved,
+selected and individually verified; Alpha access/feedback are saved, but its release
+and countries remain empty/unselected. No invitation, phone result or opt-in claimed.
+
+## Pending content-rating policy
+
+The owner later delegates remaining form preparation. Normal authorized Console
+controls save an incomplete consumer-store questionnaire; eight factual feature
+answers pass provider reload. No final rating is generated or submitted. Existing
+report/block controls are declared; universal chat moderation is absent.
+
+Automatic approval review rejects a proposed online-violence No before execution:
+current sample listings cannot establish all content the catalog permits. That
+answer stays blank and Next disabled. Resolve the actual rules for violent/sexual
+seller content and age-restricted goods, including moderation scope, before final
+answers. Other policy-sensitive draft answers remain provisional; neither owner
+permission nor a normal sample catalog proves a final declaration.
 
 ## Saved Data safety — October 10, 2026
 

@@ -22,7 +22,7 @@ Version 3 is now independently verified on active internal testing, with the exa
 existing Google signing certificate and other tracks empty. Metadata remains saved
 under Google's required automatic-review behavior; no public app publication or
 policy approval is claimed. Owned read edits are deleted. Ten of eleven setup tasks
-are saved/read back; manual IARC content rating, protected-phone testing and any
+are saved/read back; final rating pending catalog policy, protected-phone testing and any
 remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
@@ -144,8 +144,10 @@ text/images, tracks and reviews, but greater permission does not make every Cons
 screen automatable. EAS Metadata currently supports Apple App Store metadata;
 Google Play metadata is not supported by that tool. Most Console declarations
 are now saved and independently verified through the
-owner-authorized browser. IARC's terms restrict automated questionnaire access,
-so that rating remains manual; account verification also remains owner-operated.
+owner-authorized browser. The owner later delegates the rating draft despite the
+disclosed IARC restriction. That incomplete draft is saved/read back, but the final
+rating awaits established catalog-content rules; no unsupported answer or rating
+is submitted. Account verification remains owner-operated.
 Preserve truthful policy answers, real testing evidence and the existing signer.
 
 ## 5. Select Play signing before first submission
@@ -196,10 +198,12 @@ checked October 10, 2026.
 1c29e427-ef90-4119-bca1-1756607fc9a2 are FINISHED. Google independently confirms
 the inspected version-3 AAB/hash on internal draft; other tracks and listing/contact
 remain unchanged. The existing draft is subsequently activated internally and
-independently verified, with the six-address SuqPage list selected and other tracks
-unchanged. [Join internal testing](https://play.google.com/apps/internaltest/4701297357173307496).
+independently verified. The SuqPage list is subsequently extended to ten supplied
+addresses, with all original members preserved and every saved member verified.
+Alpha closed-test access/feedback are prepared; its release remains absent/inactive. [Join internal testing](https://play.google.com/apps/internaltest/4701297357173307496).
 No public rollout or closed-test clock. Do not repeat credential setup, signing or
-upload. Manual IARC and protected-phone testing remain; see the release runbook.
+upload. Final rating, closed countries/release and protected-phone testing remain;
+see the release runbook. No closed opt-in or clock is claimed.
 
 The existing official Expo CLI login/project readback confirms **falmatad** and
 **@falmatad/suqpage**, ID **bfc289fb-238e-44a3-9e0f-fec6a7c857d1**. The canonical

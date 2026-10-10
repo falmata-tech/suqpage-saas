@@ -12,8 +12,8 @@ for devices/emulators without it. Google's official signed test splits pass an
 isolated update, retained language preference, 12 public states/five languages and
 HTTPS links, with production protection unchanged. The temporary test emulator is
 closed. Actual protected Play-installed phone/authenticated/notification checks,
-manual IARC content rating and closed/public distribution remain. Ten of eleven
-setup tasks are saved and verified. On a real Android phone, use one of the six
+final content rating pending catalog policy and closed/public distribution remain. Ten of eleven
+setup tasks are saved and verified. On a real Android phone, use one of the ten
 supplied tester Google accounts and open
 [Join SuqPage testing](https://play.google.com/apps/internaltest/4701297357173307496),
 join, then install from Google Play. Google temporarily shows

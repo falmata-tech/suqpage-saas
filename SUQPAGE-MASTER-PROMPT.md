@@ -1443,9 +1443,12 @@ pass an isolated native update, 12 public states, five languages and HTTPS links
 The protected universal APK requires Play Store, absent in that emulator; actual
 protected Play-installed phone/alerts and closed rollout remain pending. Ten of
 eleven Console setup tasks are saved and verified, including reviewer access,
-owner-selected audiences 13–17/adults and data safety. IARC content rating remains
-manual because its terms restrict automation. A separate six-address SuqPage
-internal list and actual join link are verified; no enrollment is claimed.
+owner-selected audiences 13–17/adults and data safety. Under the owner’s later
+explicit delegation, the incomplete IARC draft is prepared, saved and verified;
+final rating awaits an established seller-content policy. No rating is submitted.
+The SuqPage internal list now has ten verified addresses and an actual join link.
+Alpha closed-test access and feedback email are saved, but releases/countries
+remain empty/unselected and no enrollment is claimed.
 Production Play protection is unchanged. Internal testing is not public
 publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
 The required 12-testers/14-day closed test and production-access application remain
@@ -1748,7 +1751,8 @@ Rollback preserves reports and privacy rather than dropping records. Exact
 production reviewer provisioning/binding and live web/native API sessions pass;
 S99 version-3 admission, existing Play signer, active internal testing and native
 public test splits are verified. Ten of eleven setup declarations and the exact
-six-address internal access list pass saved Google readback. IARC rating,
+ten-address tester list and Alpha access/feedback pass saved Google readback.
+The incomplete IARC draft is retained pending catalog policy. Final rating,
 protected-phone and closed/public rollout remain pending. Data safety retains the
 full-account deletion request URL but does not claim separate partial-data deletion
 or unimplemented certification. No additional artifact is admitted by the consumed exception.

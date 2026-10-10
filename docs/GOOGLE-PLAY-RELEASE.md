@@ -14,7 +14,8 @@ Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
 support email/website and all seven uploaded images. The exact version-3 AAB is
 active internally, with other tracks empty and the existing Google signer
 verified from its actual APK. The one-free-AAB exception is consumed. Ten of eleven
-setup tasks are saved and verified; only manual IARC content rating remains.
+setup tasks are saved and verified; final content rating awaits catalog-policy
+answers. Its incomplete draft is saved and verified, not submitted.
 Protected Play-installed phone/notification checks and closed/public rollout remain.
 The existing Expo APK remains available separately.
 
@@ -22,8 +23,9 @@ The owner requests remote Expo uploads. Follow
 [the beginner connection steps](GOOGLE-PLAY-CONNECTION.md) for app creation,
 app-scoped submission credentials and exact internal upload. Signing/submission
 are complete; do not repeat them. Most declarations are completed through the
-owner-authorized, identity-bound browser. IARC rating and any account verification
-requested by Google require the owner's manual steps.
+owner-authorized, identity-bound browser. The latest owner delegation also covers
+the rating draft; its pending catalog-policy answers and any Google-requested
+account verification remain separate from technical completion.
 
 ## Create the app
 
@@ -164,8 +166,9 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 - Google verifies the selected developer/package/app-only Admin, Expo target,
   retained signer and exact version-3 internal release. Ten of eleven setup tasks,
   store text/contact/images and the separate internal list are saved/read back.
-  IARC rating and any Google-requested account/device verification remain. The
-  EAS Submit association is complete; no credential/signing repeat is needed.
+  Final rating pending catalog policy and any Google-requested account/device
+  verification remain. The EAS Submit association is complete; no
+  credential/signing repeat is needed.
 - FE-064/BE-052 reusable owner-demo reviewer access is verified locally and on the
   deployed web/API; exact production provisioning/binding and real web/native
   sessions pass. Version 3 and saved restricted Sign in details are verified;
@@ -345,28 +348,31 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
 
 ## Next owner actions
 
-1. On an Android phone, sign into Google Play with one of the six supplied tester
+1. On an Android phone, sign into Google Play with one of the ten supplied tester
    accounts and open [the verified internal-test join link](https://play.google.com/apps/internaltest/4701297357173307496).
    Join the test, then install from Google Play. Initial availability can take
    several hours. Google temporarily displays **com.suqpage.app (unreviewed)** until
    app setup/review completes; the permanent app/package has not been renamed.
-2. In the [SuqPage dashboard](https://play.google.com/console/u/2/developers/5256539403314542898/app/4972244998230912603/app-dashboard),
-   open **Content rating → Start questionnaire**. Enter **marketvision.tech@gmail.com**,
-   choose **All Other App Types**, read/accept IARC's terms, and click **Next**.
-   Operate the questionnaire manually and use actual app features for its answers;
-   paste the questions for help. IARC's terms restrict automated tool access.
-   Do not repeat completed reviewer, signing, upload or other declaration steps.
+2. Resolve the pending catalog-policy question: whether SuqPage prohibits or
+   permits violent/sexual seller content and age-restricted goods. Existing generic
+   abusive/unlawful-content terms and a normal sample catalog do not establish
+   every rating answer. The **All Other App Types** draft/contact and eight factual
+   feature answers are saved/read back; the unsupported violence answer remains
+   blank, and no rating is submitted. Resume that draft after the actual rules
+   and moderation scope are established; do not restart completed setup/signing.
 3. Test this Play-installed version on the real Android phone, including
    sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
    read receipts and real OS notifications. The native public test splits do not
    replace these checks.
-4. After rating/setup and phone checks, prepare the reviewed closed track using the
-   existing SuqPage tester list; add further genuine testers privately. Each internal
-   tester must leave the internal test before joining the closed test. Capture that
+4. Alpha closed-test access already selects the ten-address SuqPage list, with
+   **marketvision.tech@gmail.com** saved for feedback. After rating/setup and phone
+   checks, select actual closed-test countries and prepare the reviewed release;
+   add further genuine testers privately. Each internal tester must leave the
+   internal test before joining the closed test. Capture that
    separate link and actual joins; no email invitation has been sent by the agent.
 
 Internal version 3 is available, not public publication or policy approval. The
-six supplied addresses are saved/selected and individually verified; no actual
+ten supplied addresses are saved/selected and individually verified; no actual
 enrollment or phone result is invented. The **12 real testers / 14 continuous days**
 closed-test clock has not started. Review genuine feedback before production access;
 internal testing, aliases and sideloads do not meet that requirement.
@@ -405,3 +411,29 @@ Protected evidence: `.local/play-s99/console-setup/` per-form verified receipts,
 `console-setup-final-verified.json`. Private snapshots, CSVs and credentials stay
 outside Git. Future rollback can pause only the internal track after exact review;
 it does not downgrade installed phones or automatically restore provider settings.
+
+## Ten-address access and rating preparation — October 10, 2026
+
+Four more owner-supplied addresses extend the existing SuqPage list to ten. Protected
+before-state and six-member source backups remain; every saved union member is
+verified after provider reload. Only this app's Alpha list selection and approved
+feedback email are also prepared. Alpha remains inactive, releases absent, countries
+unselected and links unavailable; this has not begun closed testing or its clock.
+
+The owner's later delegation replaces the earlier manual-only repository workflow.
+Normal authorized Console controls prepare and save the incomplete IARC draft.
+Eight factual feature answers survive Google reload. Dedicated chat moderation
+is not invented. Policy-sensitive answers remain provisional: automatic approval
+review rejects online-violence No because sample listings do not establish what
+the platform permits. That command never executes and no workaround is used.
+The rejected question remains unanswered, Next disabled, no rating submitted and
+Dashboard still 10/11. Resolve the pending actual catalog-policy question before
+continuing dependent answers; owner authorization does not replace factual evidence.
+
+Private tester instructions and the closed-test handoff are in
+`.local/play-s99/testers-oct10/`. Proof:
+`.local/play-s99/console-setup/tester-expansion-membership-verified.json`,
+`closed-alpha-access-verified.json`, `rating-incomplete-draft-verified.json` and
+`ten-testers-final-verified.json`. No raw questionnaire, addresses or credentials
+are committed. Protected-phone proof, closed countries/release, genuine 12/14 test
+and production-access review remain separate.

@@ -3999,9 +3999,9 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
     .local/play-s99/console-setup/*-verified.json; privacy URL is unchanged.
   - [x] Save and verify owner-selected audiences 13–15, 16–17 and 18+;
     no younger age group or invented Google rating. Receipt: audience-verified.json.
-  - [ ] MANUAL OWNER STEP: complete IARC content-rating terms/questionnaire.
-    Its terms restrict automated access; no terms, answers or rating submitted.
-    Original SuqPage tab is preserved; rating-manual-handoff.json records the boundary.
+  - [ ] Complete final IARC content rating. The later owner delegation supersedes
+    this step's original manual-only workflow; the incomplete draft is prepared,
+    saved and verified under S99.3. Final answers await actual catalog policy.
   - [x] Review application and SDK data against the current Data safety form/export,
     prepare exact answers, retain recoverable before-state and verify saved results.
     All 15 selected types, purposes, sharing and optionality match fresh expanded
@@ -4033,3 +4033,47 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
 - [ ] Complete closed-track rollout, add initial approved
   tester list and provide actual opt-in link. Obtain at least 12 continuous
   opt-ins for 14 days and record genuine feedback before production access.
+
+S99.3 — extend tester access while the owner is unavailable (one-time DEP-044 operations)
+
+The owner supplies four additional addresses on October 10 and asks to finish
+available setup. Addresses stay private; aliases do not substitute for genuine
+test participation. No new binary, signer, role, other app or public rollout.
+Master §§15/17 and current distribution docs will reflect only verified results.
+
+- [x] Back up the six-address private source and exact saved SuqPage
+  list; verify account/app/list/active internal version before any write.
+- [x] Extend only that list to the supplied ten-address union, preserving all six
+  members and track selections. Fresh provider reload and list-dialog comparison
+  prove all ten exact addresses. Receipts:
+  .local/play-s99/console-setup/tester-expansion-membership-verified.json and
+  tester-expansion-reloaded-track-verified.json; protected six-address backups
+  remain in .local/play-s99/testers-oct10/. No invitations, aliases or opt-ins created.
+- [x] Inspect SuqPage's closed-track before-state. Where Google offers
+  tester setup, select only this verified list and approved feedback contact,
+  then verify persisted settings. Leave releases/countries/signing unchanged;
+  no closed rollout until rating/setup and phone gates pass. Alpha access and
+  marketvision.tech@gmail.com feedback match actual provider reload; releases
+  remain empty/inactive and countries unselected. Receipt: closed-alpha-access-verified.json.
+- [x] Prepare the closed-test handoff and real-phone feedback instructions; keep
+  rating/catalog policy, phone evidence and closed enrollment/14-day gates explicit.
+  Private files: .local/play-s99/testers-oct10/tester-instructions.txt and
+  closed-test-handoff.json. No invitation sent or test result invented.
+- [x] Inspect the rating setup under the owner's latest explicit delegation,
+  superseding the repository's earlier manual-only workflow. Retain exact
+  before-state and proposed answers against actual capabilities. Use normal
+  authorized Console controls; stop at access/anti-bot blocks or missing facts.
+  Submit no fabricated rating or false declaration; record provider outcome and
+  any remaining required owner action. External terms remain unchanged.
+  Consumer-store/contact and terms step are completed with normal Console controls;
+  Google saves an incomplete draft, and reload verifies eight feature answers.
+  Receipt: rating-incomplete-draft-verified.json; no rating submitted.
+- [ ] CURRENT: establish the actual catalog-content rules/moderation scope before
+  final rating answers. Automatic approval review rejects unsupported online-
+  violence No before execution; no bypass/retry supplies it. The question remains
+  unanswered and Next disabled; a single owner policy question is pending.
+  Dashboard remains 10/11, closed opt-ins zero. Receipt: ten-testers-final-verified.json.
+- [x] Validate scoped operational docs: all 190 spec/ADR links and whitespace
+  checks pass; current master/runbooks/traceability distinguish verified preparation
+  from pending rating/phone/closed rollout. Commit only the eight reviewed docs
+  after staged-scope verification; preserve unrelated deno.lock and private artifacts.
