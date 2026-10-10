@@ -4100,7 +4100,7 @@ verified policy/publication and the final rating outcome.
   15 actual five-language desktop/390/320 Terms states plus focused phone captures.
   All 11 browser acceptance workflows pass. Protected receipts under
   .local/play-s99/catalog-policy/. Android's canonical hosted Terms link verified.
-- [ ] CURRENT: run required check/web-release/workflow gates on clean isolated source;
+- [x] Run required check/web-release/workflow gates on clean isolated source;
   inspect artifact, independently verify SuqPage target and retain current deploy
   for rollback. Publish compatible web policy only; no DB/provider-config write.
   Original check hit a local fixture query timeout; unchanged focused seed retry
@@ -4110,8 +4110,27 @@ verified policy/publication and the final rating outcome.
   Full check retry and corrected clean web release now pass; preserve the missing
   local fixture URL diagnosis. Provider packaging initially selected no workspace;
   use the previously verified temporary-CWD/explicit-web-root CLI invocation.
-- [ ] Verify live policy in all languages and Android's existing hosted Terms link;
+  Actual packaged Linux handler/Sharp/worker and private-path/key exclusion pass.
+  Reviewed source commit de68832 is published as Netlify 6aca91cb2f49de22d3839199;
+  exact target/account/runtime and retained old deploy/archives are verified.
+- [x] Verify live policy in all languages and Android's existing hosted Terms link;
   resume rating from its saved draft with owner decision/source evidence, retain
   final answer preview and verify Google's saved rating/setup outcome.
-- [ ] Record remaining phone/country/closed/public gates, validate and commit only
-  task-owned files, preserving deno.lock and all private evidence outside Git.
+  Five live language/phone states and 12 read-only compatibility checks pass.
+  All 25 reviewed answers and regional summary are saved; reloaded IARC says
+  Completed/Submitted, certificate ID unassigned. Dashboard unlocks closed setup.
+  ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, PEGI parental guidance.
+  Possible minor/moderate seller language is disclosed; current-user location
+  broadcasts and dedicated chat moderation are not invented. Two rejected
+  proposals are replaced with safer accurate choices, without a bypass.
+- [x] Validate and commit the separate rollout-evidence documentation,
+  preserving deno.lock and all private evidence outside Git. No new application
+  source, build/signing, countries, release, invitation or enrollment changes.
+  Phone check has been requested. Country/release/Google review and genuine 12/14
+  closed testing remain. Send app for review is currently disabled by Google;
+  no review submission or public release is claimed.
+
+- [ ] NEXT DEPENDENCY: actual protected Play-installed Android phone workflows
+  and system notifications. After that evidence, prepare countries/the reviewed
+  closed release and its real opt-in link; do not claim a 12/14 clock before real
+  Google enrollment. Continue the already authorized Play rollout from this gate.

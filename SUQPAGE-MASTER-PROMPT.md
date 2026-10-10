@@ -1207,13 +1207,13 @@ reported content to be removed/unpublished/suspended using existing authorized
 catalog controls; Dismiss records a no-violation decision. Transport staff and
 business owners cannot read this queue. It does not open a guest support chat.
 
-The S99.4 locally verified policy prohibits violent imagery, nudity/sexually
+The deployed S99.4 policy prohibits violent imagery, nudity/sexually
 explicit content and age-restricted goods/services, including alcohol, tobacco,
 vaping, weapons, recreational drugs, gambling and adult goods/services. Support
 reviews Prohibited goods and Abusive content reports; authorized administrators
 remove/unpublish violations before support marks them resolved. Ordinary tools
-are not weapons merely because they have sharp edges. Public policy publication
-is pending the required web release gates; no automatic screening is claimed.
+are not weapons merely because they have sharp edges. Public Terms are verified
+in all five languages; no automatic screening is claimed.
 
 Local S91 attention covers owner inquiries/support replies, matching staff waiting
 work, assignment/reassignment, public replies and ended/reopened cases. Visitors
@@ -1449,12 +1449,16 @@ with other tracks empty and SuqPage/en-US, English/Amharic store text, selected
 support contact and seven images preserved. Google's signed official test splits
 pass an isolated native update, 12 public states, five languages and HTTPS links.
 The protected universal APK requires Play Store, absent in that emulator; actual
-protected Play-installed phone/alerts and closed rollout remain pending. Ten of
-eleven Console setup tasks are saved and verified, including reviewer access,
-owner-selected audiences 13–17/adults and data safety. Under the owner’s later
-explicit delegation, the incomplete IARC draft is prepared, saved and verified;
-final rating awaits publication of the owner-approved S99.4 seller-content policy
-and truthful completion of the remaining questions. No rating is submitted.
+protected Play-installed phone/alerts and closed rollout remain pending. All
+required Console setup forms are saved and verified, including reviewer access,
+owner-selected audiences 13–17/adults, data safety and completed IARC. Under the
+owner's delegation, 25 answers and the actual regional rating summary are saved
+and reloaded: ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, PEGI parental
+guidance. Possible minor/moderate seller language is disclosed; dedicated chat
+moderation and current-user-location broadcasting are not claimed. Saved shop
+coordinates remain separately disclosed. Google marks IARC Completed but its
+certificate ID is still unassigned. Dashboard unlocks closed-track setup;
+Send app for review remains disabled until the remaining track steps are complete.
 The SuqPage internal list now has ten verified addresses and an actual join link.
 Alpha closed-test access and feedback email are saved, but releases/countries
 remain empty/unselected and no enrollment is claimed.
@@ -1765,13 +1769,17 @@ web/API is published before the new native build containing report actions.
 Rollback preserves reports and privacy rather than dropping records. Exact
 production reviewer provisioning/binding and live web/native API sessions pass;
 S99 version-3 admission, existing Play signer, active internal testing and native
-public test splits are verified. Ten of eleven setup declarations and the exact
+public test splits are verified. Completed Console declarations and the exact
 ten-address tester list and Alpha access/feedback pass saved Google readback.
-The incomplete IARC draft is retained pending publication of the S99.4 policy.
-This five-language Terms/staff-guidance update needs only a compatible web
-release: the existing Android account link opens the hosted Terms. It changes
-neither the database/schema nor Android artifact/signing/provider configuration.
-Final rating,
+Source de68832 / Netlify 6aca91cb2f49de22d3839199 publishes the S99.4 five-language
+Terms and verified staff report/removal policy. Full check, clean isolated web
+release, all 11 acceptance workflows, actual packaged handler/Sharp/worker and
+12 live read-only checks pass. Android's existing hosted Terms link gains the
+policy without a new build. Database/schema, Android artifact/signing and provider
+configuration are unchanged; no customer listing/chat/email/notification is
+created. IARC is saved and verified as Completed, with Google review still pending.
+The previous deploy/archives are retained as a recovery source, not automatically
+restored. Country selection,
 protected-phone and closed/public rollout remain pending. Data safety retains the
 full-account deletion request URL but does not claim separate partial-data deletion
 or unimplemented certification. No additional artifact is admitted by the consumed exception.

@@ -158,5 +158,10 @@ establish a zero-violation guarantee. No customer listing is changed. Full
 repository check and clean isolated web release now pass, including the
 provider-backed production HTTP smoke and clean web dependency audit. Original
 local infrastructure failures and diagnosed corrections remain protected; no
-test or timeout is weakened. Provider packaging/live policy and final rating
-remain pending.
+test or timeout is weakened. Actual provider handler/Sharp and scheduled worker
+archives pass on Linux; private/runtime/tooling exclusions and signer association
+pass. Source de68832 / Netlify 6aca91cb2f49de22d3839199 is published. Five live
+phone-width Terms states and 12 read-only API/compatibility checks pass. No customer
+listing, chat, email or push is created; no DB/config/Android-build change occurs.
+Google saves/reloads completed IARC (25 answers, Teen/12+, PEGI parental guidance).
+Actual protected-phone, Google review and closed/public rollout remain separate.

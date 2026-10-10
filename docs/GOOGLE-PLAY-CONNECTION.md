@@ -21,8 +21,11 @@ store descriptions, selected support email/website and all seven uploaded images
 Version 3 is now independently verified on active internal testing, with the exact AAB hash,
 existing Google signing certificate and other tracks empty. Metadata remains saved
 under Google's required automatic-review behavior; no public app publication or
-policy approval is claimed. Owned read edits are deleted. Ten of eleven setup tasks
-are saved/read back; final rating pending catalog policy, protected-phone testing and any
+policy approval is claimed. Owned read edits are deleted. All required setup forms
+are saved/read back; IARC is marked Completed after its 25-answer summary is saved.
+The policy is live in five languages, and Google unlocks closed-track setup.
+Publishing-review submission remains disabled until remaining track steps are complete.
+Protected-phone testing, country/release selection and any
 remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
@@ -145,9 +148,10 @@ screen automatable. EAS Metadata currently supports Apple App Store metadata;
 Google Play metadata is not supported by that tool. Most Console declarations
 are now saved and independently verified through the
 owner-authorized browser. The owner later delegates the rating draft despite the
-disclosed IARC restriction. That incomplete draft is saved/read back, but the final
-rating awaits established catalog-content rules; no unsupported answer or rating
-is submitted. Account verification remains owner-operated.
+disclosed IARC restriction. The completed rating is now saved/reloaded after the
+owner-approved policy is deployed. Actual ratings are Teen/12+ (PEGI parental
+guidance); no certificate issuance or Google review approval is invented. Account
+verification and phone checks remain owner-operated.
 Preserve truthful policy answers, real testing evidence and the existing signer.
 
 ## 5. Select Play signing before first submission

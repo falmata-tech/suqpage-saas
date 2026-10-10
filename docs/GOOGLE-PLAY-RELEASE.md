@@ -13,9 +13,11 @@ signer match. The exact EAS Submit key is connected and independently verified.
 Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
 support email/website and all seven uploaded images. The exact version-3 AAB is
 active internally, with other tracks empty and the existing Google signer
-verified from its actual APK. The one-free-AAB exception is consumed. Ten of eleven
-setup tasks are saved and verified; final content rating awaits catalog-policy
-answers. Its incomplete draft is saved and verified, not submitted.
+verified from its actual APK. The one-free-AAB exception is consumed. All required
+setup forms are saved and verified. IARC is marked Completed after the reviewed
+25-answer questionnaire and regional ratings are saved/reloaded. North America
+is Teen, most regions are 12+, and PEGI shows parental guidance. Google review is
+not yet submitted: Publishing overview requires the remaining closed-track steps.
 Protected Play-installed phone/notification checks and closed/public rollout remain.
 The existing Expo APK remains available separately.
 
@@ -24,8 +26,9 @@ The owner requests remote Expo uploads. Follow
 app-scoped submission credentials and exact internal upload. Signing/submission
 are complete; do not repeat them. Most declarations are completed through the
 owner-authorized, identity-bound browser. The latest owner delegation also covers
-the rating draft; its pending catalog-policy answers and any Google-requested
-account verification remain separate from technical completion.
+the completed rating. The prohibited-content policy is live in all five languages
+at https://suqpage.com/terms. Phone evidence, countries, closed release and any
+Google-requested account verification remain separate from technical completion.
 
 ## Create the app
 
@@ -353,19 +356,15 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
    Join the test, then install from Google Play. Initial availability can take
    several hours. Google temporarily displays **com.suqpage.app (unreviewed)** until
    app setup/review completes; the permanent app/package has not been renamed.
-2. Resolve the pending catalog-policy question: whether SuqPage prohibits or
-   permits violent/sexual seller content and age-restricted goods. Existing generic
-   abusive/unlawful-content terms and a normal sample catalog do not establish
-   every rating answer. The **All Other App Types** draft/contact and eight factual
-   feature answers are saved/read back; the unsupported violence answer remains
-   blank, and no rating is submitted. Resume that draft after the actual rules
-   and moderation scope are established; do not restart completed setup/signing.
-3. Test this Play-installed version on the real Android phone, including
+2. Test this Play-installed version on the real Android phone, including
    sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
    read receipts and real OS notifications. The native public test splits do not
    replace these checks.
-4. Alpha closed-test access already selects the ten-address SuqPage list, with
-   **marketvision.tech@gmail.com** saved for feedback. After rating/setup and phone
+   Use an ordinary business-owner email for app login. The Google Play tester
+   account and Suqpage login are separate; admin/staff accounts intentionally
+   cannot log into Android. Keep any new sample page private during the check.
+3. Alpha closed-test access already selects the ten-address SuqPage list, with
+   **marketvision.tech@gmail.com** saved for feedback. Rating/setup is complete; after phone
    checks, select actual closed-test countries and prepare the reviewed release;
    add further genuine testers privately. Each internal tester must leave the
    internal test before joining the closed test. Capture that
@@ -377,7 +376,50 @@ enrollment or phone result is invented. The **12 real testers / 14 continuous da
 closed-test clock has not started. Review genuine feedback before production access;
 internal testing, aliases and sideloads do not meet that requirement.
 
+## Catalog policy and completed rating — October 10, 2026
+
+The owner prohibits violent/sexual content and age-restricted goods, including
+alcohol and tobacco, removed when found. Source **de68832** / Netlify
+**6aca91cb2f49de22d3839199** publishes the five-language Terms. Staff guidance uses
+the existing private Reports queue and authorized removal; resolution is denied
+while the reported content remains visible. No automatic image/video screening
+or universal chat moderation is claimed.
+
+Full check, clean isolated web release, all 11 browser acceptance workflows,
+actual packaged Linux handler/Sharp/worker, 15 local multilingual Terms states
+and five live phone-width Terms states pass. Twelve live read-only compatibility
+checks pass; customer listings, chats, email and notification sends stay untouched.
+The earlier local timeout/build-folder/fixture/CLI/receipt failures are preserved
+with diagnosed corrections; no checks or timeouts are weakened. Existing schema,
+Android version 3, signer, provider settings and old rollback archives are preserved.
+
+The exact identity-bound Google form saves 25 reviewed answers. It discloses user
+content, online catalog content, report/block controls and possible minor/moderate
+seller language. It does not invent dedicated chat moderation, friends-only access,
+digital checkout/rewards, a general browser, news/education or broadcasts of current
+user location. Optional saved business coordinates remain separately disclosed.
+Automatic approval review rejected an unsupported language No and a location Yes
+before execution; safer accurate choices replace them, without a bypass.
+
+Google's reloaded rating overview says **IARC Completed / Submitted October 10**;
+the certificate ID is still a dash, so no certificate issuance is claimed. The
+saved summary gives ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, and PEGI
+parental guidance. Dashboard no longer shows incomplete app setup and unlocks
+closed-track countries/release creation. Publishing overview retains the saved
+listing/declarations and Alpha access, but **Send app for review is disabled**
+until remaining track steps are complete. No Google approval, review submission,
+closed/public release, actual phone or enrollment is invented.
+
+Protected evidence: .local/play-s99/catalog-policy/ and
+.local/play-s99/console-setup/s994-*.json. All credentials, raw logs, tester lists
+and screenshots remain outside Git. Continue with the real-phone check and
+closed countries/release, not another build/signing or a repeated questionnaire.
+
 ## Saved setup and internal activation — October 10, 2026
+
+This and the following dated sections record earlier checkpoints. The current
+policy/rating result and next owner actions above supersede their pending-rating
+instructions; do not repeat completed signing, uploads or declarations.
 
 The identity-bound owner-authorized Chrome workflow verifies SuqPage only. Actual
 Google reloads prove separate reviewer credentials/443-character notes; Ads Yes;

@@ -11,9 +11,11 @@ Its protected Google APK requires Play Store; it is not a promised sideload prev
 for devices/emulators without it. Google's official signed test splits pass an
 isolated update, retained language preference, 12 public states/five languages and
 HTTPS links, with production protection unchanged. The temporary test emulator is
-closed. Actual protected Play-installed phone/authenticated/notification checks,
-final content rating pending catalog policy and closed/public distribution remain. Ten of eleven
-setup tasks are saved and verified. On a real Android phone, use one of the ten
+closed. Actual protected Play-installed phone/authenticated/notification checks
+and closed/public distribution remain. All required setup forms and the completed
+Teen/12+ rating are saved and verified; Google review submission still awaits
+remaining track setup. The five-language catalog policy is live, accessible from
+Android's existing Terms link without another APK. On a real Android phone, use one of the ten
 supplied tester Google accounts and open
 [Join SuqPage testing](https://play.google.com/apps/internaltest/4701297357173307496),
 join, then install from Google Play. Google temporarily shows

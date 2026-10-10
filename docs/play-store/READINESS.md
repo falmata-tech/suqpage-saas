@@ -1,25 +1,28 @@
 # Store declarations and remaining readiness work
 
 This is the current DEP-044 declaration/evidence record, not a claim of Google's
-policy approval. Ten of eleven setup tasks are saved and verified for version 3;
-final content rating awaits actual catalog-content rules. Its incomplete draft is
-saved/read back under the owner’s latest delegation. Internal testing is active, with ten
+policy approval. All required setup forms are saved and verified for version 3;
+the completed 25-answer rating is saved/read back under the owner's delegation.
+Published five-language policy and actual report/removal evidence support the
+catalog answers; possible minor/moderate seller language remains disclosed.
+Google marks IARC Completed and unlocks closed-track setup, while review
+submission is disabled until remaining track steps are complete. Internal testing is active, with ten
 approved addresses selected and no invented enrollment or phone result.
 
 ## Existing behavior and policy gaps
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and ten-address list match saved readback. Alpha access/feedback are prepared with no release. Final rating, protected-phone and closed/public rollout remain |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and ten-address list match saved readback. Alpha access/feedback are prepared with no release. Protected-phone, countries and closed/public rollout remain |
 | SDK compatibility | Actual version-3 AAB and Google universal APK target API 36; bundle config, all 50 ELF libraries and APK ZIP pass 16-KB checks | Protected Play-installed physical-phone workflows and notification proof |
 | App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows. Hosted provisioning/binding and real API sessions pass | Restricted Sign in details with separate credentials and 443-character notes pass provider reload/edit-dialog comparison; authenticated protected-phone workflows remain |
 | Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Full-account deletion URL is saved in Data safety; per-request identity/backup/approval and real fulfilment remain manual. Separate partial-data deletion is not claimed |
-| Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 locally implement real report/block controls and a private support/admin Reports queue | Delegated visual acceptance and full local gates pass; production schema/API/web now passes; native binary/Play checks remain, with objectionable-content terms evaluated against actual moderation rules |
+| Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 deploy real report/block controls and a private support/admin Reports queue. S99.4 publishes five-language violent/sexual/age-restricted-goods prohibition and manual report/removal guidance | Full local/release/artifact and live Terms/API checks pass; no automatic media screening or zero-violation guarantee. Protected-phone and Google's policy review remain |
 | Live chat | Public transport chat; business-owner support; assigned staff, messages, receipts and history | Actual hosted phone end-to-end and permission/background/closed-app/tap/logout evidence |
 | Privacy | Five-language notice is deployed and included in version 3; data/SDK inventory and saved Data safety pass expanded Google UI readback | Protected-phone SDK/notification proof remains; full-account deletion is offered, separate partial-data deletion is not claimed |
 | Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Ads Yes is saved/reloaded; no network ad SDK or badge claim invented |
 | Payments | No app checkout, digital subscriptions or business payment plans | Do not claim payment collection or in-app purchases; transport is arranged by agents outside platform checkout |
-| Content rating/target ages | Owner-selected ages 13–15, 16–17 and 18+ are saved/read back, no under-13 group | Incomplete questionnaire is saved under the later owner delegation; final answers need actual catalog policy. No rating or child-directed certification claimed |
+| Content rating/target ages | Owner-selected ages 13–15, 16–17 and 18+ are saved/read back, no under-13 group. Completed 25-answer IARC/rating summary is saved/reloaded: ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, PEGI parental guidance | Certificate ID is still unassigned and review submission awaits remaining track steps. No Google policy approval or child-directed certification claimed |
 
 Policy application: public merchant catalogs appear to meet Google's UGC
 definition. This is an inference from the app and policy, not a Google review

@@ -4,7 +4,7 @@ Update this table in the same change that completes or materially changes a spec
 Evidence must be reproducible; avoid transient chat claims.
 
 S99.4 / FE-063 / BE-051 / DEP-044 (2026-10-10): owner-approved catalog prohibition
-is implemented locally in five-language Terms and staff report guidance.
+is published in five-language Terms and staff report guidance.
 Typecheck, localization, real Prohibited goods / Abusive content report
 claim/removal-before-resolution regressions, 15 desktop/phone Terms states and
 all 11 browser acceptance workflows pass. Protected evidence is under
@@ -12,7 +12,14 @@ all 11 browser acceptance workflows pass. Protected evidence is under
 over 53 pages with zero keyword candidates; media absence is not claimed and no
 customer content is mutated. Full repository check and clean isolated web release
 pass, including the provider-backed HTTP smoke and zero-vulnerability web audit.
-Live policy and final rating remain pending until their own receipts exist.
+Actual packaged handler/Sharp/worker/privacy checks pass. Source de68832 / Netlify
+6aca91cb2f49de22d3839199, five live Terms states and 12 read-only compatibility
+checks pass, without DB/config/Android-build or customer writes. Google saves and
+reloads 25 answers and IARC Completed (Teen/12+, PEGI parental guidance). Its
+certificate ID is unassigned; Send app for review remains disabled pending track
+steps. Dashboard unlocks closed setup but still reports zero closed opt-ins.
+Protected-phone, countries, reviewed closed/public rollout and genuine 12/14 test
+remain. No other app/list, invitation, fake enrollment or automatic screening.
 
 | Capability | FE | BE | DEP | Primary code | Automated evidence | Status |
 |---|---|---|---|---|---|---|

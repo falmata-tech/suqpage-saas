@@ -15,9 +15,11 @@ change_level: L4
 The owner has a verified-by-owner personal Play developer account created after
 2023-11-13 and has provided a newly created Suqpage app dashboard. The selected
 developer/canonical-package Admin grant and existing Play signing identity are
-independently verified. Version 3 is active on internal testing; 10/11 Console
-setup tasks are saved and verified. The incomplete rating draft is saved and
-verified under the owner's later delegation; final rating awaits catalog policy.
+independently verified. Version 3 is active on internal testing; required Console
+setup forms, including the completed 25-answer IARC summary, are saved/reloaded.
+Actual ratings are Teen/12+ (PEGI parental guidance). S99.4 catalog policy is live
+in five languages. Google unlocks closed-track setup; Send app for review is
+disabled until the remaining track steps are complete. No Google approval is claimed.
 Protected-phone testing and reviewed closed/public rollout are pending. Use the
 verified store listing and Android App Bundle for internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
@@ -142,7 +144,7 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | Owner/visitor/staff workflows | Existing local acceptance evidence plus actual hosted phone login/media/inquiry/chat/push checks |
 | Review access and UGC controls | FE-063/BE-051 and FE-064/BE-052 real local persistence/provider, negative and browser evidence; hosted and installed checks remain separate |
 | Closed-test requirement | Console track, opt-ins, real tester feedback and production-access decision |
-| Console setup/internal distribution | Exact bound browser/account, protected before-state and saved UI readback; actual release preview, tester-list/link and independent track/artifact checks; IARC operated manually |
+| Console setup/internal distribution | Exact bound browser/account, protected before-state and saved UI readback; actual release preview, tester-list/link and independent track/artifact checks; completed IARC under later owner delegation with exact answer/rating/readback evidence |
 
 ## Rollout and rollback
 
@@ -367,3 +369,33 @@ ten-testers-final-verified.json. Instructions, the exact ten-address source/back
 and closed-test handoff stay private under .local/play-s99/testers-oct10/.
 Final rating, actual test countries, protected-phone results, reviewed closed release,
 12 genuine testers continuously for 14 days and production access remain pending.
+
+## S99.4 verified policy and rating — October 10, 2026
+
+Owner-approved violent/sexual/age-restricted-goods prohibition (including alcohol
+and tobacco, removed when found) is live in five-language Terms. Source de68832 /
+Netlify 6aca91cb2f49de22d3839199 passes full check, clean isolated web release, all
+11 acceptance workflows, actual packaged Linux handler/Sharp/worker, privacy
+exclusion and 12 live read-only compatibility checks. Five live phone Terms states
+pass; existing Android's hosted link works without another build. Schema, signer,
+Android version 3 and provider configuration are unchanged; no customer listing,
+chat, email or notification is created. Previous deploy/archives remain recoverable.
+
+Identity-bound Console retains the full 25-answer preview and calculated regional
+summary, saves it and independently reloads IARC Completed/Submitted. ESRB is Teen;
+generic, USK, Brazil, Russia and South Korea are 12+; PEGI is parental guidance.
+Possible minor/moderate seller language is disclosed. No universal chat moderation
+or current-user-location broadcasting is invented; public saved storefront
+coordinates are separately disclosed. The certificate ID is unassigned. The owner
+approved the policy, not a guarantee against undiscovered/future rule violations.
+
+Dashboard removes incomplete app setup and unlocks closed-track countries/release
+creation, with zero closed opt-ins. Publishing overview retains saved declarations,
+listing and Alpha access, but Send app for review is disabled until remaining track
+steps are complete. No review submission/approval, closed/public release or real
+phone is claimed. Actual phone workflows/system notifications, countries/release
+and real 12-testers/14-day closed test remain required. Existing tooling exception
+is consumed; no new artifact is admitted. Protected final-verified.json and
+production-live-verified.json under .local/play-s99/catalog-policy/ plus
+console-setup/s994-*.json record evidence and resolved rejected proposals without
+a bypass. Tester identities, raw screenshots/logs and credentials stay outside Git.
