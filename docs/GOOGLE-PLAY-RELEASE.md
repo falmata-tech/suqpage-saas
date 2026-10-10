@@ -270,12 +270,34 @@ Standard metadata-review behavior is recorded; Google's approval status is not
 inferred. Every release track and APK/bundle list remains empty. No binary,
 policy declaration, tester invitation or public app publication was performed.
 
+## Verified local signing export — October 10, 2026
+
+The owner selected **Export and upload a key from Java keystore** and supplied
+Google's encryption public key. Its RSA-3072 public-key format and digest are
+verified. Google's official HTTPS PEPK executable/source archives pass bounded
+download and ZIP integrity checks; source inspection confirms direct in-memory
+RSA/AES wrapping and the public-certificate export. PEPK exits 0 with a bounded
+private terminal; password echo is disabled and passwords never enter argv/logs.
+
+The protected file `.local/play-s99/signing/suqpage-play-signing.zip` contains only
+`encryptedPrivateKey` and `certificate.pem`; ZIP integrity, permissions and the
+included certificate pass. Certificate SHA-256 is the existing pinned
+`0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183`.
+ZIP SHA-256 is `82d3ff08974ceced09e55a965c650bcd5232a5b4f3d3bc1160ffaaaf4d2b4dfb`.
+The recoverable original keystore remains unchanged. No plaintext private-key
+file, new app/upload key, provider write, AAB or enrollment is created/claimed.
+Private receipts and the one-time helper remain outside Git/app archives under
+.local/play-s99/signing/. Owner Console upload and independent Google certificate
+readback remain required; preserve the currently published domain associations.
+
 ## Next owner actions
 
 1. Finish the already requested existing-key Play signing step in
    [connection step 5](GOOGLE-PLAY-CONNECTION.md#5-select-play-signing-before-first-submission).
-   Send Google's public PEPK command/encryption key, or the message requiring a
-   first bundle upload. Do not select a different key or share passwords.
+   Upload the already verified **suqpage-play-signing.zip** using the Mac file-picker
+   instructions there, then confirm Google's resulting certificate. The command,
+   public key and local encryption are complete. Do not select a different key
+   or share passwords.
 2. Decide the pending one-free-AAB tooling exception in the protected exact review
    .local/play-s99/aab-tooling-review.md, digest
    `b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38`.

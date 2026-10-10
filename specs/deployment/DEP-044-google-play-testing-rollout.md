@@ -4,7 +4,7 @@ title: Google Play testing and store rollout
 status: draft
 related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053]
 owners: [product, operations, security]
-last_updated: 2026-10-09
+last_updated: 2026-10-10
 change_level: L4
 ---
 
@@ -179,3 +179,15 @@ Exact AAB admission/build, existing-key Play enrollment/upload, Console policy f
 and the actual closed track remain pending. The existing APK remains S98;
 local/native archive checks do not replace it. The hosted API has been updated as
 recorded above. Never mark DEP-044 done merely because the local feature specs pass.
+
+On October 10, the owner selects existing Java-keystore export and supplies
+Google's public encryption key. Its RSA-3072 format, recoverable existing keystore
+hash and pinned certificate are verified. Official Google PEPK exits 0 using
+bounded private-terminal input with password echo disabled; passwords never enter
+argv/logs. The protected ZIP contains only encrypted key bytes and the matching
+public certificate, passes integrity/permissions/privacy checks, and leaves the
+original source unchanged. Receipt: .local/play-s99/signing/export-verified.json;
+ZIP SHA-256 82d3ff08974ceced09e55a965c650bcd5232a5b4f3d3bc1160ffaaaf4d2b4dfb.
+No key generation, provider write, enrollment or new AAB is performed. Exact
+owner Console upload, independent Google certificate and delivered-device proof
+remain distinct gates. Existing signing invariants and draft status remain.

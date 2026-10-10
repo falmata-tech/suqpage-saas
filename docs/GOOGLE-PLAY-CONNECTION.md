@@ -149,15 +149,24 @@ Suqpage APK certificate is pinned in apps/mobile/release-policy.json. A new
 Google-generated signer is a separate change and cannot silently replace it.
 
 1. Open the SuqPage app in Play Console.
-2. Open **Protected with Play → Play Store distribution → Go to Play app signing**.
-   Some Console layouts still place this under **Test and release → Setup**.
-3. If shown, choose **Change the app signing key → Provide a copy of your app
-   signing key**. Google may first require a bundle draft before showing this.
-4. Copy the **PEPK command or public encryption key** shown in Google's instructions
-   and give that public text to Codex. Do not paste keystore passwords or private keys.
-5. Codex prepares a protected encrypted file from the already-backed-up existing
-   key. Upload that file only to this exact app's signing page when instructed.
+2. Open **Protected with Play → Play Store protection → Manage Play app signing**.
+   The owner confirms the SuqPage **App signing** screen with its **Change key**
+   button. Other Console layouts may call the section Play Store distribution.
+3. Choose **Change key → Export and upload a key from Java keystore**.
+4. The owner supplied Google's PEPK command and downloaded encryption public key.
+   Codex verifies that key, the protected existing keystore and its pinned public
+   certificate, then prepares the encrypted export with Google's official tool.
+   This local step is verified on October 10, 2026; do not repeat the export or
+   share keystore passwords/private keys.
+5. On that exact app's signing page, choose **Upload encrypted private key** (or
+   its file-selection control). In the Mac file picker, press **Command + Shift + G**
+   and paste `/Users/falmata/Desktop/Dev/suqpage-saas/.local/play-s99/signing/`.
+   Select **suqpage-play-signing.zip**. Complete Google's upload/save confirmation.
+   Leave the optional new upload-key step unchecked; no replacement key is planned.
 6. Independently verify Google's app-signing SHA-256 before testing distribution.
+   The expected existing certificate is
+   `06:30:C5:6F:88:DF:87:4F:D2:72:96:D1:AA:08:48:A6:8F:C8:34:5F:70:2F:E6:80:2E:DD:82:55:B7:21:11:83`.
+   Local ZIP preparation does not prove Google enrollment or actual APK signing.
 
 If the page is unavailable until the first upload, report that message rather than
 accepting a different signer. Google's current instructions allow changing the
@@ -166,7 +175,7 @@ actual signing enrollment remain separate verified operations. App-link certific
 and installed update compatibility must match the signer Google actually uses.
 
 Source: [Google Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756),
-checked October 9, 2026.
+checked October 10, 2026.
 
 ## 6. Bind the submission credential and upload
 

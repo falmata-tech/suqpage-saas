@@ -3931,7 +3931,20 @@ users, web-only staff and independent real tests. Master §§11/15/16/17/22 affe
   Amharic text, support email/website and all seven images; tracks/binary lists remain
   empty. No app release, signer, policy declaration or invitation is changed.
   Evidence: .local/play-s99/store-metadata/verified.json; read edit deleted.
-- [ ] CURRENT: resolve pending exact one-AAB admission and existing-key Play enrollment.
+- [x] Verify the owner-supplied Google encryption public key and protected existing
+  keystore against the released app certificate. Local export planning is bound
+  to developer 5256539403314542898, Console app 4972244998230912603 and
+  com.suqpage.app; no provider or signing-key change has occurred.
+  Evidence: .local/play-s99/signing/export-plan.json.
+- [x] Prepare the encrypted existing-key PEPK ZIP, verify its included
+  certificate and protect it for owner upload to the selected SuqPage signing page.
+  Official Google PEPK exits 0 with bounded execution and password echo disabled;
+  the ZIP contains only ciphertext and the pinned public certificate. Original
+  keystore hash is unchanged; no new key, provider write or plaintext private-key
+  file. Evidence: .local/play-s99/signing/export-verified.json.
+- [ ] CURRENT: owner uploads the verified ZIP to the selected SuqPage signing page;
+  independently verify Google's resulting signing certificate before distribution.
+- [ ] Resolve pending exact one-AAB admission after existing-key enrollment.
   Official EAS archive inspection passes: all 1,621 files match ea1b452, private
   credentials/runtime files absent. Receipt: .local/play-s99/eas-archive-inspection.json.
   This is preparation only; no cloud build or upload yet.

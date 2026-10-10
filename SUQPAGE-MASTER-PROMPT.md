@@ -1434,7 +1434,9 @@ developer/package and app-only Admin access; Expo project/current signer match.
 The owner-approved official CLI connects the exact supplied EAS Submit key and
 independent readback confirms preserved FCM and canonical/legacy signing. Console
 setup/actual Play signing and release readiness remain pending; see
-docs/GOOGLE-PLAY-CONNECTION.md. Credential connection does not publish/build an app.
+docs/GOOGLE-PLAY-CONNECTION.md. The existing-key encrypted upload ZIP is prepared
+and verified locally; owner Console upload and Google certificate readback remain
+pending. Credential connection or encrypted export does not publish/build an app.
 Current production AAB/internal-draft profiles are preparation, not a store release.
 Google's API verifies the Console title SuqPage/en-US, saved English/Amharic
 store text, selected public support contact and seven uploaded images. Every
