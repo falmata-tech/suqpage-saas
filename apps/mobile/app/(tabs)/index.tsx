@@ -36,8 +36,10 @@ import {
   Sheet,
 } from "../../src/chrome";
 import MarketMap from "../../src/MarketMap";
+import {useBlockedBusinesses} from '../../src/blocked-businesses';
 import type { MapControls } from "../../src/map-contract";
 export default function MarketScreen() {
+  const blocked=useBlockedBusinesses();
   const { t } = useApp();
   const openLink = useOpenLink();
   const { width } = useWindowDimensions();
@@ -83,9 +85,10 @@ export default function MarketScreen() {
     page: String(page),
   });
   categories.forEach((c) => params.append("category", c));
+  if(blocked.list.length)params.set('exclude',blocked.list.map(v=>v.id).join(','));
   const key = params.toString();
   const load = useLoad(() => request<Market>("market?" + key), [key]);
-  const data = load.data;
+  const data = blocked.ready&&!load.data?.showrooms.some(shop=>blocked.list.some(b=>b.id===shop.id))?load.data:undefined;
   const [filterOptions, setFilterOptions] = useState<Pick<Market, "categories" | "places"> | null>(null);
   useEffect(()=>{if(data)setFilterOptions({categories:data.categories,places:data.places});},[data]);
   useEffect(() => {

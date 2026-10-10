@@ -48,6 +48,7 @@ export default async function DashboardShell({ user, business, children, support
   const globalGroups = platformAdmin ? [
     group("Chats", [
       { href: "/dashboard/support?queue=support", label: "Business support", icon: "support" },
+      { href: "/dashboard/reports", label: "Listing reports", icon: "reports" },
       { href: "/dashboard/support?queue=transport", label: "Transport", icon: "transport" },
       { href: "/dashboard/admin/staff", label: "Staff", icon: "staff", activePaths:["/dashboard/support/agents"] },
     ]),
@@ -112,9 +113,10 @@ export default async function DashboardShell({ user, business, children, support
     {href:"/dashboard/profile",label:"Account",icon:"account"},
 
   ])].filter((item): item is WorkspaceNavGroup => Boolean(item));
-  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"}])].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])])].filter((item): item is WorkspaceNavGroup => Boolean(item));
   const operationsGroups = operations && !platformAdmin ? [group("Chats",[
     {href:"/dashboard/support?queue=support",label:"Business support",icon:"support"},
+    {href:'/dashboard/reports',label:'Listing reports',icon:'reports'},
     {href:"/dashboard/support?queue=transport",label:"Transport",icon:"transport"},
     {href:"/dashboard/support/agents",label:"Workload & availability",icon:"staff"},
   ])].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [];

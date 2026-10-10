@@ -35,7 +35,10 @@ const retiredIdentifierPrefix = new RegExp(`(?:${retiredEventTerms})(?:Day|[-_][
 const retiredGeneratedUrl = new RegExp(`(?:href|action)=?[^\\n]*(?:/(?:${retiredEventTerms})|ref=${["ex", "po"].join("")}|${["ex", "po", "Day"].join("")})`, "i");
 
 for (const file of activeApplicationFiles) {
-  assert.doesNotMatch(read(file), retiredProductLanguage, `${file} contains retired product language`);
+  // BE-053 names the notification processor, not the retired Expo product.
+  const source = file === 'app/privacy/page.tsx'
+    ? read(file).replaceAll('Expo and Firebase Cloud Messaging', 'notification providers') : read(file);
+  assert.doesNotMatch(source, retiredProductLanguage, `${file} contains retired product language`);
 }
 for (const file of ["components/DiscoveryWorkspace.tsx", "lib/discovery.ts", "lib/featured-program.ts", "app/discovery.css"]) {
   assert.doesNotMatch(read(file), retiredIdentifierPrefix, `${file} contains a retired active identifier`);
@@ -77,7 +80,7 @@ assert.match(signup, /Next, make the example page your own/);
 assert.match(signupForm, />\{t\("Category"\)\}</);
 assert.match(signupForm, /Finish setup/);
 assert.doesNotMatch(signupForm, /requestText/);
-assert.match(login, /Use a one-time email code\./);
+assert.match(login, /Continue with email/);
 assert.doesNotMatch(login, /Continue with Google|Use your Google account/);
 assert.match(login, /New business\? Enter your email to create your account/);
 assert.match(metadata, /t\(MARKET_STOREFRONT_COPY.title\)/);

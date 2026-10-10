@@ -13,6 +13,7 @@ import {
   CircleUserRound,
   ClipboardList,
   ExternalLink,
+  Flag,
   Headphones,
   House,
   Inbox,
@@ -68,6 +69,7 @@ export type WorkspaceNavIcon =
   | "staff"
   | "support"
   | "supportAgents"
+  | "reports"
   | "transport"
   | "schedule"
   | "switch"
@@ -93,6 +95,7 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   staff: UserCog,
   support: Headphones,
   supportAgents: Headphones,
+  reports: Flag,
   transport: Truck,
   schedule: CalendarClock,
   switch: RefreshCw,
@@ -116,6 +119,7 @@ const mobileLabels: Record<string, string> = {
   "Page requests": "Requests",
   "Support inbox": "Support",
   "Business support": "Support",
+  "Listing reports": "Reports",
   "Workload & availability": "Staff",
 };
 
@@ -190,7 +194,7 @@ export default function WorkspaceNavigation({
   const openerRef = useRef<HTMLButtonElement>(null);
   const previousRoute = useRef(routeKey);
   const allItems = groups.flatMap((group) => group.items);
-  const priority: WorkspaceNavIcon[] = staffNavigation ? ["support", "transport", "staff", "overview"] : ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
+  const priority: WorkspaceNavIcon[] = staffNavigation ? ["support", "transport", "reports", "staff", "overview"] : ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
   const primaryItems = priority
     .map((icon) => allItems.find((item) => item.icon === icon && !item.external))
     .filter((item): item is WorkspaceNavItem => Boolean(item))

@@ -1,4 +1,5 @@
 import { findSpellingMatches, type SpellingMatch } from './spelling-search';
+import {excludedBusinessIds} from './catalog-safety';
 import { platformEnvironment } from "./platform-environment.mjs";
 import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
 import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, discoveryCategoryKey, normalizeDiscoveryPlaces, type ProductionScale } from "./discovery-contract";
@@ -727,6 +728,7 @@ export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryN
 }
 
 type DiscoveryOptions = {
+  excludedBusinessIds?:readonly number[];
   page?: string | number;
   type?: string;
   industry?: string | readonly string[];
@@ -756,14 +758,17 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const industry = normalizeIndustrySelection(options.industry || (query ? "all" : ""));
   const productionScale = normalizeProductionScale(options.scale);
   const projectionIndustryKey = industry.key || ALL_DISCOVERY_INDUSTRIES.key;
-  const where = discoveryWhere(productionScale);
-  const params = discoveryParameters(projectionIndustryKey, query, productionScale);
+  const excluded=excludedBusinessIds(options.excludedBusinessIds);
+  const excludeWhere=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
+  const excludeParams=excluded.length?[JSON.stringify(excluded)]:[];
+  const where = discoveryWhere(productionScale)+excludeWhere;
+  const params = [...discoveryParameters(projectionIndustryKey, query, productionScale),...excludeParams];
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
   const requestedPlaces = normalizeDiscoveryPlaces(options.place);
   // Keep the selected geography available even when query/category has no matches.
   let places = placeOptions(locationRows);
   if (requestedPlaces.some(key => !places.some(place => place.key === key))) {
-    places = placeOptions(await all<DiscoveryRow>(selectSql(where), discoveryParameters("all", "", productionScale)));
+    places = placeOptions(await all<DiscoveryRow>(selectSql(where), [...discoveryParameters("all", "", productionScale),...excludeParams]));
   }
   const selectedPlaces = places.filter(place => requestedPlaces.includes(place.key));
   const locationScope = selectedPlaces.map(place => ({ city: place.kind === "city" ? place.city : "", region: place.region }));
@@ -782,17 +787,19 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   // Title words need not occur at the beginning of a multiword product name.
   const originalTerms = searchTerms(query, true);
   const productRankParams = [query, `${escapedQuery}%`, originalTerms, query, originalTerms];
+  const productScopeWhere=placeWhere+excludeWhere;
+  const productScopeParams=[...placeParams,...excludeParams];
   const productParams = [projectionIndustryKey, projectionIndustryKey,
-    searchTerms(query), ...placeParams];
+    searchTerms(query), ...productScopeParams];
   const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
   const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
-  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(placeWhere, "", true), productParams) : undefined;
+  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(productScopeWhere, "", true), productParams) : undefined;
   const productCount = Number(productCountRow?.total || 0);
   // The map already loaded every eligible business using the same predicate.
   // Reuse that server-side count instead of sorting/hydrating it a second time.
   const businessCount = rows.length;
   const spelling = await findSpellingMatches({query,industry:projectionIndustryKey,
-    city:"", region:"", locations:locationScope,scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id)},port);
+    city:"", region:"", locations:locationScope,scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id),excludedBusinessIds:excluded},port);
   const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
   const approximate = spelling.filter(match=>type === "all" || (type === "products" ? match.kind === "product" : match.kind === "business"));
   const normalTotal = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
@@ -809,16 +816,16 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
   const normalBusinessIds = new Set(rows.map(row=>row.id));
   const mapIds = [...new Set(spelling.map(match=>match.businessId))].filter(id=>!normalBusinessIds.has(id));
   const [productSuggestionRows, productResultRows, businessResultRows, approximateProductRows, approximateMapRows] = await Promise.all([
-    query.length >= 2 && productCount > 0 ? all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
+    query.length >= 2 && productCount > 0 ? all<{ label: string; detail: string }>(productSuggestionSql(productScopeWhere), [
       projectionIndustryKey, projectionIndustryKey, searchTerms(query),
-      ...placeParams, query, `${escapedQuery}%`, originalTerms,
+      ...productScopeParams, query, `${escapedQuery}%`, originalTerms,
     ]) : Promise.resolve([]),
-    productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere, "LIMIT ? OFFSET ?"),
+    productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(productScopeWhere, "LIMIT ? OFFSET ?"),
       [...productParams, ...productRankParams, productLimit, window.offset]) : Promise.resolve([]),
     businessLimit ? all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?", businessOrder),
       [...businessResultParams, businessLimit, businessOffset]) : Promise.resolve([]),
-    approximateProducts.length ? all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere,"",false,true),
-      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...placeParams,...productRankParams]) : Promise.resolve([]),
+    approximateProducts.length ? all<DiscoveryProductResultRow>(productSearchResultSql(productScopeWhere,"",false,true),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...productScopeParams,...productRankParams]) : Promise.resolve([]),
     mapIds.length ? all<DiscoveryRow>(selectSql("AND b.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)"),
       [projectionIndustryKey,projectionIndustryKey,JSON.stringify(mapIds)]) : Promise.resolve([]),
   ]);
@@ -867,7 +874,9 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const featuredIndustry = normalizeIndustry(selectedDay.industryKey);
   const programPolicy = await getFeaturedProgramPolicy();
   const featuredRowsForDay = async (day: WeeklyFeaturedDay) => {
-    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
+    const excluded=excludedBusinessIds(options.excludedBusinessIds);
+    const extra=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
+    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "+extra), [day.industryKey, day.industryKey,...(excluded.length?[JSON.stringify(excluded)]:[])]);
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
     if (selection.mode !== "manual") return { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };
@@ -932,12 +941,14 @@ export async function getMarketplaceDiscoveryView(options: DiscoveryOptions = {}
   return { ...marketplace, featuredNowBusinessId: featured.featuredNowBusinessId };
 }
 
-export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "readPort"> = {}): Promise<FeaturedShowroomsView> {
+export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "readPort" | "excludedBusinessIds"> = {}): Promise<FeaturedShowroomsView> {
   return buildFeaturedProjection(options, discoveryReadPort(options.readPort));
 }
 
-export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "readPort"> = {}): Promise<SponsorPlacement[]> {
-  return (await discoveryReadPort(options.readPort).all<SponsorPlacementRow>(selectSponsoredSql())).map(toSponsorPlacement);
+export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "readPort" | "excludedBusinessIds"> = {}): Promise<SponsorPlacement[]> {
+  const excluded=excludedBusinessIds(options.excludedBusinessIds);
+  const sql=excluded.length?selectSponsoredSql().replace('WHERE s.active=1','WHERE s.active=1 AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))'):selectSponsoredSql();
+  return (await discoveryReadPort(options.readPort).all<SponsorPlacementRow>(sql,excluded.length?[JSON.stringify(excluded)]:[])).map(toSponsorPlacement);
 }
 
 export async function getDiscoveryView(options: DiscoveryOptions = {}): Promise<DiscoveryView> {

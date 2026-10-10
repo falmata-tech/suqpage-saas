@@ -1064,6 +1064,19 @@ accessible labels while visible names wrap within the compact marker width.
 
 ## 11. Passwordless account entry and business onboarding
 
+FE-064/BE-052 locally implements an owner-authorized, server-bound password
+exception for one ordinary marked demo owner used by store reviewers. Normal users
+retain email codes. Exact immutable UUID/email, current client/demo/tenant authority
+and real provider authentication are checked before returning a session. Role or
+identity changes during authentication revoke/refuse it. Local Supabase/PostgreSQL,
+web-cookie/native-browser and five-language focused checks pass; hosted binding
+and Play-delivered verification remain pending.
+
+The FE-063/BE-051 local candidate lets guests report or block a public business
+without signing in. Its browser/installation preference does not change account
+authority or private owner previews. Normal email-code onboarding is unchanged;
+the restricted Google Play reviewer exception is verified locally and not yet deployed.
+
 The FE-059/BE-047 local candidate requires a canonical Business city on the same
 initial account/business/handle screen. Native places the city/town search beside
 Business name before category choices on both setup routes. Missing/forged cities fail before writes;
@@ -1104,8 +1117,14 @@ FE-055 provides a deployed web Delete account entry and a native entry in the in
 account settings and a public `/account-deletion` page. It exposes the existing email
 request channel with identity-verification instructions; opening the composer
 does not submit a request or delete data. Native Account includes it before
-business setup. Administrative fulfilment remains manual; no automatic account
-purge or completed store-compliance verification is claimed.
+business setup. BE-053 supplies a locally rehearsed operator recipe and runbook for verified
+ordinary owners. Each real deletion requires a separate verified request, exact
+UUID/email/tenant plan, recoverable backup and approval. Auth is removed and
+verified before its application binding, preventing an old token from restarting
+setup; app data, alert devices and associated uploads are then erased and verified.
+Shared uploads/other tenants are preserved. Staff/shared tenants/unexpected
+references and provider failures require separate review. This is manual
+fulfilment, not automatic deletion or completed store-policy approval.
 
 The Suqpage namespace preserves existing account emails and Auth links. DEP-041's
 explicitly authorized demo-email correction is separate: only admitted fictional
@@ -1170,6 +1189,13 @@ window, but application code must not read or mutate them.
 ---
 
 ## 13. User roles and standard page workspaces
+
+The local FE-063/BE-051 Reports queue is web-only for support-scoped staff and
+administrators/operations. Staff can claim work, managers can assign it, and
+version checks prevent overwriting another decision. Mark resolved requires the
+reported content to be removed/unpublished/suspended using existing authorized
+catalog controls; Dismiss records a no-violation decision. Transport staff and
+business owners cannot read this queue. It does not open a guest support chat.
 
 Local S91 attention covers owner inquiries/support replies, matching staff waiting
 work, assignment/reassignment, public replies and ended/reopened cases. Visitors
@@ -1392,13 +1418,24 @@ iOS/Google Play remain separate. The native-toolchain audit still fails under
 the owner-approved, consumed single-artifact exception. Moving Next.js to apps/web remains a separate migration.
 
 Planned Google Play distribution is tracked in draft DEP-044 / checklist S99.
-The owner reports a personal account created after 2023-11-13 and no app entry.
+The owner reports a personal account created after 2023-11-13 and has supplied
+the created app's Console dashboard. Google now independently verifies selected
+developer/package and app-only Admin access; Expo project/current signer match.
+The owner-approved official CLI connects the exact supplied EAS Submit key and
+independent readback confirms preserved FCM and canonical/legacy signing. Console
+setup/actual Play signing and release readiness remain pending; see
+docs/GOOGLE-PLAY-CONNECTION.md. Credential connection does not publish/build an app.
 Current production AAB/internal-draft profiles are preparation, not a store release.
 Console identity/signing, reusable restricted reviewer access, content reporting/
 blocking and privacy/deletion operations, artifact admission and actual Play/phone
 checks precede reviewed distribution. The required 12-testers/14-day closed test
 and production-access application remain external rollout steps. Existing product
-authentication, catalog, staff permissions and public deployment are unchanged.
+authentication and public deployment are unchanged. FE-063/BE-051 now implement
+local reporting/blocking through pure commands, a private PostgreSQL report port
+and web/native adapters. Discovery exclusions run before counts, fuzzy candidate
+limits and pagination and vary the public cache. Native preferences use bounded
+per-business device storage; no new SDK or managed provider is added. Local
+focused evidence passes; visual approval, full gates and rollout remain pending.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
@@ -1526,6 +1563,13 @@ physical/authenticated phone checks remain (BE-044/FE-053).
 
 ## 16. Security requirements
 
+Local BE-051 reports accept only canonical public targets and bounded details.
+Concurrent/retried submission is idempotent, changed replay conflicts, and salted
+IP hashes enforce a rate limit without storing raw IPs. Responses expose only a
+receipt/duplicate flag. Fresh server role/assignment/version checks protect staff
+decisions, and anon/authenticated roles cannot read the table or use its sequence.
+Blocking is a browsing preference and does not make public content confidential.
+
 S91 feeds, subscription changes, deliveries and confirmed-message reads recheck
 current tenant/queue/visitor-token authority. Native staff stays denied. Safe OS
 payloads carry generic localized event text and internal destinations, never
@@ -1547,8 +1591,10 @@ shell commands remain outside repository enforcement.
 ### Authentication and sessions
 
 - Never expose seeded credentials in public UI.
-- Never expose, collect, or transmit a password in the launch account-entry or
-  business-onboarding flow.
+- Never expose, collect, or transmit a password in normal launch account-entry or
+  business onboarding. The owner-authorized FE-064/BE-052 local exception binds
+  one store-review demo identity; its password/session never belongs in public
+  builds, static UI constants or logs, and it never grants staff/other-tenant access.
 - Supabase Auth owns managed email-OTP/OAuth session validity in normal local,
   browser-acceptance, Preview, and Production runtimes; application-owned opaque
   sessions remain compatibility and bounded rollback infrastructure only.
@@ -1669,6 +1715,12 @@ Individual 44px shop hitboxes do not intercept neighboring shops; counted marker
 styles and behavior stay original. Production demo coordinates remain unchanged.
 
 ## 17. Data, migrations, and deployment boundary
+
+Local migration 63 adds the private listing-report table after a protected,
+verified backup. Original business/product/user counts and private table/sequence
+permissions are verified. Hosted schema remains 62; web/schema/API deployment
+must precede a native build containing report actions. Rollback preserves reports
+and privacy rather than dropping records. S99.1 remains undeployed.
 
 Internal APK and store AAB profiles use the same permanent native identity and
 remote version counter, incrementing version codes for both. Existing released
@@ -2027,6 +2079,26 @@ All success replies are real; fixtures are removed and production chats untouche
 Physical Android/rebuilt APK and hosted rollout remain separate gates.
 
 ## 22. Testing and definition of done
+
+FE-064/BE-052 focused tests prove real local provider password/JWT login, fresh
+PostgreSQL owner/demo/role/UUID boundaries, revocation on authority races, bounded
+HTTP/origin/rate/no-store behavior, actual web cookies/native-preview sessions,
+ordinary email-code entry and five-language 1440/390/320 states. BE-053 rehearses
+real local app/Auth/storage erasure, identity-before-binding order, shared media,
+other-tenant preservation, plan drift/backup/approval and foreign-key rollback.
+Full repository check, clean isolated web release, all 11 browser acceptance
+workflows, operations and mobile build contracts pass. Reviewer tests also prove
+ordinary page/product editing, publication and public catalog readback. Production
+provisioning, actual deletion requests and an installed Play binary remain separate.
+
+FE-063/BE-051 focused tests cover real PostgreSQL/HTTP replay, rate/target/role/
+assignment/stale/removal boundaries, discovery/map/count/page/fuzzy/Featured/
+sponsor exclusions and private migration grants. Actual local web/native-preview
+report/block/reload/unblock/inquiry and staff-removal workflows pass. Desktop and
+390/320 captures cover five languages without browser errors or document overflow.
+The owner delegates visual acceptance, and the complete local/release gates pass.
+Committed source, production rollout and installed Android checks remain separate;
+browser previews do not admit an APK.
 
 DEP-042/DEP-043 identity checks cover all build profiles, APK/AAB version settings,
 actual Expo public-config resolution and canonical Firebase acceptance with

@@ -20,6 +20,7 @@ import {
 } from "../../src/ui";
 import { SponsorCarousel } from "../../src/SponsorCarousel";
 import { CategoryArt } from "../../src/chrome";
+import {useBlockedBusinesses} from '../../src/blocked-businesses';
 type Program = Featured & {
   schedule: {
     weekday: number;
@@ -31,6 +32,7 @@ type Program = Featured & {
   }[];
 };
 export default function FeaturedScreen() {
+  const blocked=useBlockedBusinesses();
   const { t } = useApp(),
     { fontScale } = useWindowDimensions();
   const [day, setDay] = useState("");
@@ -38,8 +40,9 @@ export default function FeaturedScreen() {
   const [viewportHeight, setViewportHeight] = useState(0);
   const [sponsorBounds, setSponsorBounds] = useState({ y: 0, height: 0 });
   const sponsorVisible = sponsorBounds.height > 0 && Math.min(sponsorBounds.y + sponsorBounds.height, scrollY + viewportHeight) - Math.max(sponsorBounds.y, scrollY) >= sponsorBounds.height / 2;
-  const load = useLoad(() => request<Program>("featured?day=" + day), [day], true);
-  const program = load.data,
+  const exclude=blocked.list.map(v=>v.id).join(',');
+  const load = useLoad(async () => ({exclude, program: await request<Program>("featured?day=" + day+'&exclude='+exclude)}), [day,exclude], true);
+  const program = blocked.ready && load.data?.exclude === exclude ? load.data.program : null,
     current = program?.schedule.find((d) =>
       day ? String(d.weekday) === day : d.isToday,
     );

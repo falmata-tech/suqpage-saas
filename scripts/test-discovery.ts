@@ -96,7 +96,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
     assert.match(featuredPageSource, /components\/FeaturedShowroomsWorkspace/);
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
-    assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(input\)/, "free-form searches bypass the public result cache");
+    assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(\{\.\.\.input,excludedBusinessIds:excluded\}\)/, "free-form searches bypass the public result cache and retain current browser exclusions");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
     assert.match(publicDiscoveryCacheSource, /public-marketplace-v10-multiple-locations/, "the marketplace cache identity separates the multi-location projection from older cached results");
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));

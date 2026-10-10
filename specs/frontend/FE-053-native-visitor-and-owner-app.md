@@ -2,7 +2,7 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062]
+related: [FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-07
 change_level: L3

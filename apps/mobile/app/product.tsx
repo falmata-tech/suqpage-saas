@@ -9,6 +9,7 @@ import type { Shop } from "@suqpage/contracts";
 import { useApp, useLoad, request } from "../src/runtime";
 import { Screen, Copy, LinkedText, Card, Button, Chip, Status, s } from "../src/ui";
 import Gallery from "../src/Gallery";
+import {CatalogSafety} from '../src/CatalogSafety';
 export default function Product() {
   const { handle, id } = useLocalSearchParams<{ handle: string; id: string }>(),
     { t, basket, setBasket } = useApp();
@@ -65,7 +66,7 @@ export default function Product() {
     <Screen>
       <Status {...load} retry={load.reload} />
       {shop && product ? (
-        <>
+        <CatalogSafety business={shop} productId={product.id}>
           <Gallery media={product.media} />
           <Copy big>{product.name}</Copy>
           <Copy muted>{shop.name}</Copy>
@@ -111,7 +112,7 @@ export default function Product() {
               onPress={() => router.push("/inquiry")}
             />
           )}
-        </>
+        </CatalogSafety>
       ) : (
         shop && <Copy>{t("Currently unavailable")}</Copy>
       )}

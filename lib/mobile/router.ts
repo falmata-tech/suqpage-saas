@@ -1,4 +1,9 @@
 import {resolveProductVideoUrl} from '../tiktok-short-link';
+import {CatalogSafetyError,excludedBusinessIds} from '../catalog-safety';
+import {submitListingReport} from '../listing-reports';
+import {listingReportPort} from '../listing-reports-postgres';
+import { reviewMode, reviewPassword } from '../reviewer-access-http';
+import { ReviewerAccessError } from '../reviewer-access';
 import { saveNativeBusiness } from "./business";
 import { nativeSupportAttachment, nativeSupportReply } from "./support-attachments";
 import { revalidatePath } from "next/cache";
@@ -123,12 +128,23 @@ async function dispatch(
         place: q.getAll("place"),
         page: q.get("page") || "1",
         type: "products", // Businesses are discovered on the map, not in result pages.
+        excludedBusinessIds:excludedBusinessIds(q.get('exclude')),
       }),
     );
+  }
+  if (method === 'POST' && key === 'auth/mode') {
+    const body = await jsonBody(request);
+    allowFields(body, ['email']);
+    return {mode: await reviewMode(request, body.email)};
+  }
+  if (method === 'POST' && key === 'auth/review') {
+    const session = await reviewPassword(request, await jsonBody(request));
+    return {access_token:session.accessToken, refresh_token:session.refreshToken};
   }
   if (method === "GET" && key === "featured") {
     const v = await getFeaturedShowroomsView({
       featuredDay: q.get("day") || undefined,
+      excludedBusinessIds:excludedBusinessIds(q.get('exclude')),
     });
     return {
       title: v.featured.title,
@@ -137,7 +153,7 @@ async function dispatch(
           v.featured.programPolicy.startMinute,
           v.featured.programPolicy.endMinute,
         ) + " EAT",
-      sponsors: (await getSponsoredShowrooms()).map((s) => ({
+      sponsors: (await getSponsoredShowrooms({excludedBusinessIds:excludedBusinessIds(q.get('exclude'))})).map((s) => ({
         id: s.id,
         name: s.name,
         details: s.details,
@@ -179,6 +195,7 @@ async function dispatch(
     );
   if (method === "POST" && key === "inquiries")
     return createPublicInquiry(await jsonBody(request), ip);
+  if(method==='POST'&&key==='reports')return submitListingReport(listingReportPort,await jsonBody(request),ip);
   if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {
     const token=request.headers.get('X-Suqpage-Buying-Session')||'';
     await assertVisitorAttentionChannel(token,path[0]==='transport'?'transport':'buying');
@@ -562,7 +579,7 @@ export async function handleMobileRequest(
     }
   } catch (e) {
     const known =
-      e instanceof MobileError ||
+      e instanceof ReviewerAccessError || e instanceof CatalogSafetyError || e instanceof MobileError ||
       e instanceof OwnerPageError ||
       e instanceof ProductUpkeepError ||
       e instanceof InquiryError ||

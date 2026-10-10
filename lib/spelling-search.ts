@@ -1,4 +1,5 @@
 import { discoveryCategoryKey } from "./discovery-contract";
+import {excludedBusinessIds} from './catalog-safety';
 import { indexedSearchText } from './search-index';
 import { normalizeSearchText, searchTermGroups } from './search-terms';
 
@@ -6,7 +7,7 @@ export type SpellingMatch = { kind: 'product' | 'business'; id: number; business
 export interface SpellingSearchPort {
   all<T extends Record<string, unknown>>(sql: string, values?: Array<string | number>): Promise<T[]>;
 }
-export type SpellingScope = { query: string; industry: string; city: string; region: string; locations?: readonly { city: string; region: string }[]; scale: string; exactBusinessIds: readonly number[] };
+export type SpellingScope = { query: string; industry: string; city: string; region: string; locations?: readonly { city: string; region: string }[]; scale: string; exactBusinessIds: readonly number[];excludedBusinessIds?:readonly number[] };
 const CANDIDATES_PER_FIELD = 32;
 export const MAX_SPELLING_MATCHES = 100;
 const MIN_SIMILARITY = 0.25;
@@ -93,5 +94,7 @@ ORDER BY score DESC,lower(name),kind,id`;
 export async function findSpellingMatches(scope: SpellingScope, port: SpellingSearchPort): Promise<SpellingMatch[]> {
   const terms = spellingTerms(scope.query);
   if (!normalizeSearchText(scope.query) || !terms.some(term => term.fuzzy)) return [];
-  return port.all<SpellingMatch>(SPELLING_SEARCH_SQL,[discoveryCategoryKey(scope.industry),JSON.stringify(scope.locations ?? (scope.city || scope.region ? [{city:scope.city,region:scope.region}] : [])),scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
+  const excluded=excludedBusinessIds(scope.excludedBusinessIds);
+  const sql=excluded.length?SPELLING_SEARCH_SQL.replace('SELECT ?::text industry','SELECT ?::jsonb excluded,?::text industry').replaceAll("b.status='active'","NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(scope.excluded)::bigint)) AND b.status='active'"):SPELLING_SEARCH_SQL;
+  return port.all<SpellingMatch>(sql,[...(excluded.length?[JSON.stringify(excluded)]:[]),discoveryCategoryKey(scope.industry),JSON.stringify(scope.locations ?? (scope.city || scope.region ? [{city:scope.city,region:scope.region}] : [])),scope.scale,JSON.stringify(scope.exactBusinessIds),JSON.stringify(terms)]);
 }

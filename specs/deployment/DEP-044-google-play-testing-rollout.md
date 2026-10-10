@@ -2,7 +2,7 @@
 id: DEP-044
 title: Google Play testing and store rollout
 status: draft
-related: [DEP-042, DEP-043, FE-055]
+related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053]
 owners: [product, operations, security]
 last_updated: 2026-10-09
 change_level: L4
@@ -13,7 +13,9 @@ change_level: L4
 ## Problem and outcome
 
 The owner has a verified-by-owner personal Play developer account created after
-2023-11-13, but no Suqpage app entry. Prepare a truthful store listing and a
+2023-11-13 and has provided a newly created Suqpage app dashboard. The selected
+developer/canonical-package Admin grant is now independently verified; Console
+setup and actual Play signing remain pending. Prepare a truthful store listing and a
 verified Android App Bundle, then use internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
 not a Google Play release and does not start the closed-test clock.
@@ -26,7 +28,7 @@ not a Google Play release and does not start the closed-test clock.
 - No new paid build, app name/package change, key generation, provider secret,
   invitation or Google declaration is inferred from preparing local materials.
 - First upload may be manual without a submission service account. Optional EAS
-  Submit needs an independently authorized, app-scoped Play credential; existing
+Submit needs an independently authorized, app-scoped Play credential; existing
   Firebase sending credentials are not reused for submission.
 - Before enrolling Play App Signing, resolve whether the existing signer is
   retained or Google generates another one. An AAB upload signature is not proof
@@ -38,7 +40,8 @@ not a Google Play release and does not start the closed-test clock.
   platform checkout, universal video availability, fake customer reviews, native
   notification success or completed policy compliance is claimed.
 - Customer/owner screens stay native; staff/admin remain web-only. Existing
-  tenant authorization and email-code login remain unchanged during preparation.
+  tenant authorization and normal email-code login remain unchanged. FE-064/BE-052
+  add only the explicitly bound ordinary demo-owner reviewer exception.
 
 ## Scenarios
 
@@ -53,7 +56,7 @@ sideloads do not substitute for this requirement.
 GIVEN a reviewer without access to the owner's inbox WHEN testing owner workflows
 THEN a reusable restricted login must reach normal demo-owner functionality;
 never introduce a universal OTP, privileged role or unvalidated tenant authority.
-The exact authentication mechanism remains a readiness decision, not implemented.
+FE-064/BE-052 implement this through server-selected, restricted password login.
 
 GIVEN merchant content visible to visitors WHEN preparing reviewed distribution
 THEN evaluate public UGC reporting/blocking and moderation requirements, privacy
@@ -88,13 +91,15 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | Actual AAB compatibility | Package/version/API/upload signature, bundle configuration and native 16-KB alignment |
 | Play-delivered application | Actual APK signer/version, verified HTTPS links and installed update |
 | Owner/visitor/staff workflows | Existing local acceptance evidence plus actual hosted phone login/media/inquiry/chat/push checks |
-| Review access and UGC controls | Future ready FE/BE specs and isolation/negative/acceptance evidence before implementation |
+| Review access and UGC controls | FE-063/BE-051 and FE-064/BE-052 real local persistence/provider, negative and browser evidence; hosted and installed checks remain separate |
 | Closed-test requirement | Console track, opt-ins, real tester feedback and production-access decision |
 
 ## Rollout and rollback
 
-Current phase: one-time preparation only. Store packet/runbook:
-docs/GOOGLE-PLAY-RELEASE.md and docs/play-store/. Verified historical runtime
+Current phase: verified local content safety, reviewer access, deletion operations
+and the approved Expo upload-key connection. No Console app upload or store
+publication. Store packet/runbook:
+docs/GOOGLE-PLAY-RELEASE.md, docs/GOOGLE-PLAY-CONNECTION.md and docs/play-store/. Verified historical runtime
 baseline: docs/SUQPAGE-S98-RELEASE-2026-10-08.md.
 
 Resolve admission, review access, signing and app entry before their dependent
@@ -106,25 +111,57 @@ the affected track; do not assume a downgrade or uninstall preserves sessions.
 
 ## Readiness
 
-Preparation is authorized. The complete rollout remains draft: Console app entry,
-exact Play signing choice, reviewer access, reporting/blocking behavior, privacy/
-deletion operations and new artifact admission are unresolved. Master §§15/16/17/22
+Preparation is authorized. The complete rollout remains draft: Console target verification,
+actual Play signing, hosted reviewer/content-safety rollout, final Console declarations,
+new artifact admission and installed-device evidence remain unresolved. Local
+implementation, delegated visual acceptance and full gates pass. Master §§15/16/17/22
 would be affected by completed rollout or authentication changes. Do not mark this
 spec done until those contracts and all mapped evidence exist.
 
-## Preparation evidence
+## Verified preparation evidence — October 9, 2026
 
-2026-10-09: owner confirms personal account after 2023-11-13, no app entry.
-Current released APK targets API 36. Its 50 arm64/x86_64 ELF libraries have PT_LOAD
-alignment at least 16 KB; SDK zipalign -c -P16 4 succeeds. These checks do not prove
-the future AAB's alignment or operation on a 16-KB device. Fresh locked audit still
-reports 20 high / 0 critical findings rooted in braces and node-forge, with no
-patched release listed in the primary advisories. Protected preparation evidence:
-.local/play-s99/. Spec validation (185 specs), listing character limits, seven asset
-formats/dimensions/checksums, focused mobile build/media/release safety and app-link
-checks pass. The selected Expo project is independently verified; Free quota is
-read back without a build. Public health/privacy/deletion URLs return 200 on the
-canonical origin. The owner has been asked to choose restricted reviewer access
-and Play signing; dependent writes remain pending. Store kit includes five actual
-native screen compositions and existing branding, with source checksums. No build,
-Console mutation, submission or invitation has occurred.
+- Google API verifies developer 5256539403314542898 and complete app-only Admin
+  for com.suqpage.app. No global Admin or other app grant. Owner provides Console
+  app 4972244998230912603 and selects marketvision.tech@gmail.com for login and
+  public listing support; actual Console title/signing/setup readback remains.
+- Expo verifies falmatad / @falmatad/suqpage, project
+  bfc289fb-238e-44a3-9e0f-fec6a7c857d1. The exact owner-provided EAS Submit key is
+  connected by the approved official CLI operation, digest
+  353fdd27c1dc4020a5748c8f2add7f400db3d470cef16d86c59fa53522295ca2.
+  Independent readback preserves FCM, canonical/legacy signers and defaults.
+- FE-063/BE-051 reporting/blocking and FE-064/BE-052 reviewer login pass real local
+  PostgreSQL/HTTP/Supabase tests, current-role/tenant/private-grant/stale/rate/body
+  negatives and actual web/native-browser workflows. Reviewer page/product edits,
+  publication and public catalog readback pass through ordinary owner APIs.
+  Five-language desktop/390/320 captures pass; design decisions are delegated.
+- BE-053 rehearses actual local managed Auth, application and storage erasure,
+  including old-session denial, exact binding, shared media, orphan uploads,
+  other-tenant preservation, plan/backup approval and atomic FK rollback. No real
+  customer deletion is authorized or performed.
+- Full npm run check, isolated clean-install release:web, all 11 browser acceptance
+  tests, operations and mobile build contracts pass. Final privacy-only additions
+  pass localization/narrative/geography and all five languages at 390/320 without
+  overflow or browser errors; refreshed production artifacts remain separately
+  inspected. Evidence is protected under .local/play-s99/gates/ and UI directories.
+- Local schema 63 follows a protected backup and old-record preservation checks.
+  Read-only hosted target checks verify suqpage.com / Netlify
+  26c795eb-5560-4a88-b38d-3cc922c2a5e6 / Supabase sjeiiqxgscuqajpgddcc, schema 62,
+  unused proposed reviewer email and absent server reviewer binding. No production
+  DB/provider credential is persisted by these read-only checks.
+- Android production JS inspection proves canonical public runtime bindings,
+  absence of private reviewer/provider credentials and no braces/node-forge
+  modules among 1651 compiled sources. This is not a signed AAB or phone proof.
+  Fresh locked audit still has 20 high / zero critical findings rooted in the
+  two unpatched tooling advisories. S98's single-APK exception is consumed; a
+  fresh exact AAB admission remains required. Web-only audit is clean.
+- Existing released APK targets API 36; all 50 native ELF libraries and ZIP pass
+  static 16-KB alignment checks. Future AAB and Play-delivered device checks are
+  required independently. Free Expo quota is read without starting a build.
+- Six owner-supplied tester addresses are stored privately. No invitations or
+  verified opt-ins; the 12-testers/14-day clock has not started. The owner will
+  recruit more testers while preparation continues.
+
+The compatible hosted API/web rollout, new reviewer provisioning/binding, exact
+AAB admission/build, Play signing/upload, Console policy forms and actual closed
+track remain pending. Existing released APK/API are not replaced by these local
+checks. Never mark DEP-044 done merely because the local feature specs pass.

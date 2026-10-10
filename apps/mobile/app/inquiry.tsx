@@ -6,6 +6,8 @@ import * as Crypto from "expo-crypto";
 import type { Shop } from "@suqpage/contracts";
 import { inquiryOptions } from "../src/inquiry-options";
 import { useApp, useLoad, request, API, type BasketItem } from "../src/runtime";
+import {useBlockedBusinesses} from '../src/blocked-businesses';
+import {CatalogSafety} from '../src/CatalogSafety';
 import {
   Screen,
   Copy,
@@ -17,6 +19,7 @@ import {
   openLink,
 } from "../src/ui";
 export default function Inquiry() {
+  const blocked=useBlockedBusinesses();
   const { handle, id, options } = useLocalSearchParams<{
       handle?: string;
       id?: string;
@@ -74,6 +77,7 @@ export default function Inquiry() {
       setBusy(false);
     }
   }
+  if(shop&&blocked.list.some(b=>b.id===shop.id))return <Screen><CatalogSafety business={shop}><View/></CatalogSafety></Screen>;
   return (
     <Screen>
       <Status {...load} retry={load.reload} />

@@ -2,8 +2,20 @@
 
 Controlling spec: [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md).
 Current stage: preparation, not a submitted or publicly released app. Owner
-confirmed a personal account created after November 13, 2023, and no app entry on
-October 9, 2026. The existing Expo APK remains available separately.
+confirmed a personal account created after November 13, 2023, and has now provided
+the new app dashboard on October 9, 2026. Developer **5256539403314542898**, app
+**4972244998230912603**, reported Play Console login and approved public store
+support email **marketvision.tech@gmail.com**.
+The dashboard link is owner-provided. Google API readback now verifies the developer,
+canonical package and complete app-only Admin grant, and Expo project/current
+signer match. The exact EAS Submit key is connected and independently verified.
+Console title/setup/actual Play signer and release readiness remain pending.
+The existing Expo APK remains available separately.
+
+The owner requests remote Expo uploads. Follow
+[the beginner connection steps](GOOGLE-PLAY-CONNECTION.md) for app creation,
+app-scoped submission credentials and exact internal-draft upload. Console-only signing/declarations still require the owner's Google account screens;
+the submission credential connection is already independently verified.
 
 ## Create the app
 
@@ -11,12 +23,12 @@ In [Play Console](https://play.google.com/console/), choose **Home → Create ap
 
 | Field | Value |
 | --- | --- |
-| App name | Suqpage |
+| App name | Suqpage; SuqPage is also a valid owner-selected display capitalization |
 | Default language | English (United States), en-US |
 | App or game | App |
 | Free or paid download | Free |
-| Support email | falmata.dawano@gmail.com |
-| Permanent Android package | com.suqpage.app, set by the uploaded bundle |
+| Public Play Store support email | marketvision.tech@gmail.com |
+| Package name, when requested during creation | com.suqpage.app, exactly matching the existing app and future bundle |
 
 The account owner completes Google's policy/export/signing declarations and any
 developer/device verification requested by Console. Retain the app dashboard URL
@@ -83,6 +95,10 @@ Sources: [EAS Android submission](https://docs.expo.dev/submit/android/),
 [Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756),
 [16-KB page sizes](https://developer.android.com/guide/practices/page-sizes).
 
+The delegated choice is to retain the existing key. Follow step 5 of the
+connection guide for Google's current signing navigation and the public PEPK
+instructions. Do not accept a generated replacement as an upload workaround.
+
 ## First upload
 
 A first manual upload is available through **Test and release → Testing → Internal
@@ -124,7 +140,7 @@ Suggested invitation text, sent only after the track is ready:
 > link]. Please stay enrolled for at least 14 days. Try browsing stores, searching
 > products and contacting a business. If you run a business, also try setting up
 > and editing your page. Send feedback through Google Play's testing feedback or
-> falmata.dawano@gmail.com. This version connects to the live site; use test
+> marketvision.tech@gmail.com. This version connects to the live site; use test
 > details and do not place a real transport request just to test it.
 
 Retain actual bug reports, fixes and tester feedback outside Git when they contain
@@ -137,18 +153,43 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 
 ## Current external and product dependencies
 
-- Owner creates and verifies the Console app and completes requested account/device
-  verification; no authenticated Play connection has been configured here.
-- Secure reusable owner-demo reviewer access is undecided. Google reviewers cannot
+- Owner supplied the created Console app dashboard; Google's selected developer/
+  package/app-only Admin grant and Expo target/current signer are verified. Console
+  title/setup/Play signing and account/device verification remain. The EAS Submit
+  credential association now matches the exact owner-provided key after approved
+  CLI setup and unchanged notification/signing readback.
+- FE-064/BE-052 reusable owner-demo reviewer access is verified locally; hosted
+  provisioning/binding and the Play App access instructions remain. Google reviewers cannot
   fetch codes from the owner's personal inbox; no universal OTP or admin access.
-- Merchant content is inferred to be public user-generated content. In-app
-  reporting/blocking and an actual private moderation workflow need verification/
-  implementation before a policy-compliance declaration. This does not reopen
-  general visitor live support.
-- Native notification/SDK data disclosures and deletion fulfilment/retention need
+- Merchant content is inferred to be public user-generated content. FE-063/BE-051
+  now implement and verify reporting/blocking and private moderation locally.
+  Delegated visual acceptance and complete local gates pass. Coordinated
+  schema/API/web/native release remains before any production/policy claim. General visitor live support stays closed.
+- BE-053 deletion fulfilment is rehearsed against real local Auth/PostgreSQL/media,
+  including exact-target/shared-tenant/drift/FK rollback and other-tenant preservation.
+  Updated native notification/map/embed/deletion privacy text passes five-language
+  phone captures; deployment and final store disclosures remain. Deletion retention needs
   operational review. Existing request links do not delete data by themselves.
 - New artifact audit admission, selected Play signing, AAB/Play APK inspection and
   authenticated physical-phone/OS notification checks remain pending.
 
-These dependencies do not prevent creating an app entry or preparing materials.
+These dependencies do not prevent connecting the reported app or preparing materials.
 They do prevent claiming that a public store release is ready or completed.
+
+## Verified local release candidate
+
+Full repository check, clean isolated web release, all 11 browser acceptance tests,
+operations and mobile build contracts pass. Reviewer access also proves normal
+page/product edits, publication and public catalog readback. Final privacy copy
+passes all five languages at 390/320 without overflow/errors. Protected evidence
+is under .local/play-s99/; no private tester list or credentials belongs in Git.
+
+These results admit the source workflow, not a future AAB, Play approval or physical
+notification delivery. Hosted schema/API/reviewer rollout, renewed artifact admission,
+existing-key Play enrollment and actual installed verification remain pending.
+
+The selected production public-schema backup is verified and its actual restore
+passes migration 62→63, old-table fingerprints, idempotency and private report
+table/sequence grants in a disposable local database. Backup/rehearsal and exact
+migration plan are protected under .local/play-s99/production/database/. Production
+has not changed merely because the rehearsal passes.

@@ -20,7 +20,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
   const config=supabaseAuthConfig();
   const emailEnabled=managedAuth&&config.emailOtpEnabled;
   const accessMessage=emailEnabled
-    ? "Use a one-time email code."
+    ? "Continue with email"
     : "Account access is temporarily unavailable.";
   return <div className="landing-home platform-task-page">
     <header className="landing-header"><div className="landing-container landing-nav"><SuqpageBrand className="landing-brand" /><LanguageSelector /><nav className="landing-desktop-nav" aria-label={t("Public navigation")}><Link href="/">{t("Market")}</Link><Link href="/about">{t("About")}</Link></nav><details className="landing-mobile-menu"><summary aria-label={t("Open public navigation")}><span /><span /><span /></summary><nav aria-label={t("Mobile public navigation")}><Link href="/">{t("Market")}</Link><Link href="/about">{t("About")}</Link></nav></details></div></header>

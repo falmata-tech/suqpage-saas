@@ -47,6 +47,7 @@ import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type Desig
 import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowroom";
 import BusinessProfile from "./BusinessProfile";
 import ProductPage from "./ProductPage";
+import PublicBusinessSafety from '../PublicBusinessSafety';
 import inquiryStyles from "./InquiryComposer.module.css";
 import { legacyPublicContacts, type PublicContacts } from "@/lib/business-profile-contacts";
 import { buildInquiryMessage, inquiryHandoffs, inquiryEligible, linkedProduct, MAX_INQUIRY_SELECTIONS, restoreInquiry, selectionKey, selectionOptions, type InquirySelection } from "@/lib/product-inquiry";
@@ -344,7 +345,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   const ShowroomRoot = embedded || withinPublicApp ? "div" : "main";
 
   return (
-    <>
+    <PublicBusinessSafety business={catalog.business} productId={selected?.id} disabled={previewMode}>
       {!(previewMode && businessProfile) ? <nav
         className={`showroom-host-bar${withinPublicApp ? " showroom-host-bar-shell" : ""}`}
         aria-label={t("Page return navigation")}
@@ -533,7 +534,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         </div>
       )}
       </ShowroomRoot>
-    </>
+    </PublicBusinessSafety>
   );
 }
 

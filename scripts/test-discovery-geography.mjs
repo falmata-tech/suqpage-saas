@@ -32,6 +32,8 @@ assert.doesNotMatch(renderer, /fetch\(|prefetch|\/api\//i);
 assert.doesNotMatch(workspace, /\/geo\/|d3-(?:geo|selection|transition|zoom)/);
 assert.match(config, /img-src 'self' data: blob: https:\/\/tile\.openstreetmap\.org/);
 assert.match(serviceWorker, /if \(url\.origin !== self\.location\.origin \|\| url\.pathname\.startsWith\("\/api"\)\) return;/);
-assert.match(privacy, /does not proxy, prefetch, or retain third-party map tiles/);
+assert.match(privacy, /The web and Android maps request map tiles from OpenStreetMap/);
+assert.match(privacy, /Android uses MapLibre and caches map tiles on your device/);
+assert.match(privacy, /Tile requests do not include your account details or search text/);
 
 console.log("OSM basemap contract passed: one direct provider, visible attribution, bounded viewport rendering, and no proxy/prefetch/PWA tile cache.");

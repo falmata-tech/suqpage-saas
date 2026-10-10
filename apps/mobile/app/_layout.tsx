@@ -9,6 +9,7 @@ import { RuntimeProvider, useApp } from "../src/runtime";
 import { AppHeader } from "../src/chrome";
 import { colors } from "../src/ui";
 import {OwnerAttentionProvider} from '../src/AttentionAlerts';
+import {BlockedBusinessProvider} from '../src/blocked-businesses';
 function Routes() {
   const { t, session } = useApp();
   return (
@@ -49,7 +50,7 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <RuntimeProvider>
-        <OwnerAttentionProvider><Routes /></OwnerAttentionProvider>
+        <BlockedBusinessProvider><OwnerAttentionProvider><Routes /></OwnerAttentionProvider></BlockedBusinessProvider>
       </RuntimeProvider>
     </SafeAreaProvider>
   );

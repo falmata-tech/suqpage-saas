@@ -2,9 +2,19 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { test } from 'node:test';
 import {TRANSPORT_COPY} from '../lib/i18n/transport-copy';
+import {REPORT_REASONS} from '../lib/catalog-safety';
 import { createUiText, languageNames, locales, messageKey, parseLocale, type UiMessages } from '../lib/i18n/core';
 
 const catalogs = Object.fromEntries(locales.map(locale => [locale, locale === 'en' ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`, 'utf8')) as UiMessages]));
+test('FE-063: dynamic report reasons have native labels in every non-English catalog', () => {
+  for (const locale of locales.filter(value => value !== 'en')) {
+    const t = createUiText(catalogs[locale]);
+    for (const reason of REPORT_REASONS) {
+      assert.ok(catalogs[locale][messageKey(reason)], `${locale}: ${reason}`);
+      assert.notEqual(t(reason), reason, `${locale}: reason must not silently fall back to English`);
+    }
+  }
+});
 test('FE-049: only supported cookie values select a catalog', () => {
   for (const locale of locales) assert.equal(parseLocale(locale), locale);
   for (const input of [null, undefined, {}, 'AM', 'ar', '../secrets', 'am; Path=/', '', '<script>']) assert.equal(parseLocale(input), 'en');

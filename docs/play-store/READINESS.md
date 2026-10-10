@@ -8,13 +8,13 @@ or Submit. No form answer is inferred from a screenshot or a missing ad SDK.
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Suqpage, com.suqpage.app, Expo falmatad | Independently verify owner Console app and signing selection |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Verify Console title/setup/support setting and actual Play signing; complete policy/workflow/artifact admission before submission |
 | SDK compatibility | Released APK targets API 36; 50 ELF libraries and ZIP pass static 16-KB alignment | Actual future AAB/bundle configuration, Play processing and delivered APK |
-| App access | Visitors browse anonymously; business owners use email codes | Reusable reviewer login that reaches ordinary demo-owner features without the owner's inbox |
-| Account deletion | Native entry and public https://suqpage.com/account-deletion mail request exist | Verify mailbox/identity checking and actual Auth/app/storage/token deletion; disclose legitimate retention and backup handling |
-| Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup | In-app report content/business and block business controls, actual private staff moderation and objectionable-content terms |
+| App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows | Hosted reviewer provisioning/binding and Play App access fields |
+| Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Per-request verified mailbox/identity, backup/approval and real fulfilment remain manual; final disclosure/rollout |
+| Public merchant content | Owners publish names/descriptions/photos/video links; Terms accepted during setup. FE-063/BE-051 locally implement real report/block controls and a private support/admin Reports queue | Delegated visual acceptance and full local gates pass; production schema/API/web and native rollout; check objectionable-content terms against actual moderation rules |
 | Live chat | Public transport chat; business-owner support; assigned staff, messages, receipts and history | Actual hosted phone end-to-end and permission/background/closed-app/tap/logout evidence |
-| Privacy | https://suqpage.com/privacy exists and explains core account/catalog/inquiry data | Include native push/SDK/embed processors, native tile cache, purposes, retention/deletion and complete data flows |
+| Privacy | Updated local five-language notice covers account/catalog/inquiry, push, controlled embeds, native tile cache and deletion/backups | Deploy the verified notice and complete accurate Console data-safety declarations |
 | Ads | Sponsor cards are rendered by native SponsorCarousel and web SponsorCarousel | Declare sponsored promotional content accurately; absence of a network ad SDK is not enough to choose No |
 | Payments | No app checkout, digital subscriptions or business payment plans | Do not claim payment collection or in-app purchases; transport is arranged by agents outside platform checkout |
 | Content rating/target ages | Public merchant catalog and live team conversations | Owner completes truthful questionnaire and intended age groups; do not fabricate a rating or claim child-directed design |
@@ -23,16 +23,21 @@ Policy application: public merchant catalogs appear to meet Google's UGC
 definition. This is an inference from the app and policy, not a Google review
 decision. General public live support stays closed. Quiet report submission and
 a private support-staff moderation queue can meet the operational need without
-opening a new live support channel. Reporters/contact details must never become
+opening a new live support channel. The local workflow now has actual report,
+blocking/reload/unblock and staff claim/admin removal/support resolution evidence;
+this is not a production deployment or Play policy approval. Reporters/contact details must never become
 readable by the business being reported. Tenant suspension is an operator action,
 not an automatic consequence of any submitted report.
 
-Reviewer proposal: a dedicated ordinary demo-business owner, restricted reusable
-password sign-in, normal post-login functionality and fresh server-side role/
-tenant checks. No universal code, credentials in APK/Git, admin role or real customer
-data. The mechanism and credential provisioning require explicit owner direction
-under AGENTS.md before implementation. Use English instructions in Play App access;
-credentials are stored only in private provider storage and Play Console.
+Reviewer access: the owner delegates the restricted reusable password exception
+for a dedicated ordinary marked demo-business owner. FE-064/BE-052 now pass real
+local Supabase/PostgreSQL password/JWT, fresh identity/role/tenant/security checks,
+actual web/native-browser login and ordinary OTP preservation, plus five-language
+screen captures. No credential is compiled into the app. Hosted provisioning and
+Play App access fields remain pending. General password/staff mobile access is
+not enabled. BE-053's actual local erasure rehearsal verifies app/Auth/media,
+orphans and shared-upload preservation; real deletions still require a separately
+verified request, backup and reviewed exact plan.
 
 ## Data-safety inventory to validate
 

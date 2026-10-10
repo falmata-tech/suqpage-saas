@@ -13,8 +13,8 @@ export async function preflight() {
   assertProductionConfiguration();
 
   const driver = databaseDriver();
-  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=62");
-  if (!migration) throw new Error("PostgreSQL migration 62 is required before this release can serve traffic.");
+  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=63");
+  if (!migration) throw new Error("PostgreSQL migration 63 is required before this release can serve traffic.");
 
   if (authDriver() === "supabase") {
     const identityMigration = await runtimeGet<{ version: number }>(

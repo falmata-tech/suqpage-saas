@@ -1,4 +1,8 @@
 Language	ቋንቋ	Afaan	Luqad	ቋንቋ
+The web and Android maps request map tiles from OpenStreetMap. The provider receives network information such as your IP address. Android uses MapLibre and caches map tiles on your device. Tile requests do not include your account details or search text.	የድረ-ገጹና የAndroid ካርታዎች ከOpenStreetMap ይጫናሉ። ይህ አገልግሎት እንደ IP አድራሻዎ ያለ የኔትወርክ መረጃ ይቀበላል። በAndroid ላይ MapLibre የካርታ ክፍሎችን በስልክዎ ላይ ለጊዜው ያስቀምጣል። የመለያዎ መረጃና የፍለጋ ቃላት ለካርታው አገልግሎት አይላኩም።	Kaartaan weebii fi Android OpenStreetMap irraa feʼama. Tajaajilli kun odeeffannoo neetworkii, kan akka teessoo IP kee, argata. Android irratti MapLibre kutaa kaartaa bilbila kee irratti yeroo muraasaaf kuusa. Odeeffannoon herrega kee fi jechoonni ati barbaadde tajaajila kaartaa sanaaf hin ergaman.	Khariidadaha webka iyo Android waxay ka yimaadaan OpenStreetMap. Adeeggaas wuxuu helaa xogta shabakadda, sida cinwaankaaga IP. Android wuxuu adeegsadaa MapLibre oo qaybo khariidadda ka mid ah ku kaydiya qalabkaaga. Xogta akoonkaaga iyo erayada aad raadisay looma diro adeegga khariidadda.	ናይ ድረ-ገጽን Androidን ካርታታት ካብ OpenStreetMap ይጽዓኑ። እዚ ኣገልግሎት ከም ኣድራሻ IP ዝኣመሰለ ሓበሬታ መርበብ ይቕበል። ኣብ Android፣ MapLibre ክፋላት ካርታ ንግዚኡ ኣብ ስልክኻ የቐምጥ። ሓበሬታ መለያኻን ዝደለኻሉ ቃላትን ናብ ኣገልግሎት ካርታ ኣይለኣኹን።
+Notifications are optional. Expo and Firebase Cloud Messaging help send account and chat alerts. We store your push token and notification choices. You can turn notifications off in the app or your device settings.	ማሳወቂያዎችን መቀበል የእርስዎ ምርጫ ነው። የመለያና የውይይት ማሳወቂያዎችን ለመላክ Expo እና Firebase Cloud Messaging እንጠቀማለን። ለዚህ የስልክዎን push token እና የማሳወቂያ ምርጫዎች እናስቀምጣለን። ማሳወቂያዎችን ከአፑ ወይም ከስልክዎ ቅንብሮች ማጥፋት ይችላሉ።	Beeksisa fudhachuun filannoo keeti. Beeksisa herregaa fi ergaa haaraa erguuf Expo fi Firebase Cloud Messaging fayyadamna. Kanaaf push token bilbila keetii fi filannoo beeksisaa kee kuusna. Beeksisa appii keessaa ykn qindaaʼina bilbila keetii irraa dhaamsuu dandeessa.	Adiga ayaa dooranaya inaad ogeysiisyo hesho. Waxaan Expo iyo Firebase Cloud Messaging u adeegsannaa ogeysiisyada akoonka iyo wada sheekaysiga. Waxaan kaydinnaa push token-ka qalabkaaga iyo doorashooyinka ogeysiisyada. Waxaad ka damin kartaa appka ama dejimaha qalabkaaga.	ምልክታታት ምቕባል ናትካ ምርጫ እዩ። ናይ መለያን ዝርርብን ምልክታታት ንምልኣኽ Expoን Firebase Cloud Messagingን ንጥቀም። ነዚ ናይ ስልክኻ push tokenን ምርጫታት ምልክታን ንዕቅብ። ካብ ኣፕ ወይ ካብ ቅጥዕታት ስልክኻ ምልክታታት ክተጥፍእ ትኽእል።
+Videos use YouTube, TikTok, Facebook or Instagram players. These providers may receive network information and use their own cookies or storage when a video loads. Opening a social link or business website shares information with that service under its own privacy policy.	ቪዲዮዎች በYouTube፣ TikTok፣ Facebook ወይም Instagram ማጫወቻዎች ይከፈታሉ። ቪዲዮ ሲጫን እነዚህ አገልግሎቶች የኔትወርክ መረጃ ሊቀበሉና የራሳቸውን cookies ወይም ማከማቻ ሊጠቀሙ ይችላሉ። የማኅበራዊ ሚዲያ ሊንክ ወይም የንግድ ድረ-ገጽ ሲከፍቱ የዚያ አገልግሎት የግላዊነት ፖሊሲ ይተገበራል።	Viidiyoon taphachiiftuu YouTube, TikTok, Facebook ykn Instagram keessatti banama. Yeroo viidiyoon feʼamu tajaajiloonni kun odeeffannoo neetworkii argachuu fi cookies ykn kuusaa isaanii fayyadamuu dandaʼu. Linkii miidiyaa hawaasaa ykn weebsaayitii daldalaa banuun odeeffannoo tajaajila sanaaf qooda; seerri iccitii isaanii hojii irra oola.	Fiidyowyadu waxay ku ciyaaraan YouTube, TikTok, Facebook ama Instagram. Marka fiidyo la furo, adeegyadaas waxay heli karaan xogta shabakadda, waxayna adeegsan karaan cookies ama kaydkooda. Marka aad furto xiriir baraha bulshada ama mareeg ganacsi, adeeggaas ayaa xog helaya, waxaana khuseeya siyaasaddiisa asturnaanta.	ቪድዮታት ብYouTube፣ TikTok፣ Facebook ወይ Instagram ይጻወቱ። ቪድዮ ክጽዓን ከሎ እዞም ኣገልግሎታት ሓበሬታ መርበብ ክቕበሉን cookies ወይ ናይ ባዕሎም መኽዘን ክጥቀሙን ይኽእሉ። ናይ ማሕበራዊ ሚድያ ሊንክ ወይ ናይ ንግዲ ድረ-ገጽ ምኽፋት ሓበሬታ ንእቲ ኣገልግሎት የካፍል፤ ናይ ባዕሉ ፖሊሲ ብሕታውነት ድማ ይትግበር።
+After verifying a deletion request, we remove the account, showroom, associated inquiries, support history and uploads. Include the reference for any guest chat you also want removed. Restricted backups may remain for recovery; recorded deletions are reapplied before restored data goes live. Any necessary security or legal retention is explained when handling your request.	የመሰረዝ ጥያቄዎን ካረጋገጥን በኋላ መለያዎን፣ የንግድ ገጽዎን፣ የተያያዙ የደንበኛ ጥያቄዎችን፣ የድጋፍ ውይይቶችንና የጫኗቸውን ፋይሎች እናስወግዳለን። ያለ መለያ ያደረጉትን ውይይትም ማስወገድ ከፈለጉ የውይይቱን ማጣቀሻ ይላኩ። ለመልሶ ማቋቋም ብቻ የተገደቡ የመጠባበቂያ ቅጂዎች ሊቆዩ ይችላሉ፤ ቅጂ ሲመለስ የተሰረዘው መረጃ በድጋሚ አይታይም። ለደኅንነት ወይም በሕግ የሚያስፈልግ መረጃ መቆየት ካለበት ጥያቄዎን ስናስተናግድ እናብራራለን።	Gaaffii haqamuu kee erga mirkaneessinee booda herrega, fuula daldalaa, gaaffilee maamilaa, seenaa deeggarsaa fi faayiloota ati ol feete ni haqna. Marii herrega malee goote akka haqamu yoo barbaadde lakkoofsa wabii isaa dabali. Koppiin deebiʼanii sirreessuuf oolu kan namoota muraasa qofaan banamu turuu dandaʼa; yeroo koppii deebisnu odeeffannoon haqame tajaajila irratti deebiʼee hin mulʼatu. Sababa nageenyaa ykn seeraaf odeeffannoo tursiisuun yoo barbaachise gaaffii kee yeroo keessummeessinu siif ibsina.	Markaan xaqiijinno codsiga tirtirista, waxaan ka saarnaa akoonka, bogga ganacsiga, weydiimaha la xiriira, taariikhda taageerada iyo faylasha la soo geliyay. Ku dar tixraaca wada sheekaysi marti ah haddii aad rabto in kaasna la tirtiro. Nuqullo kayd ah oo gelitaankoodu xaddidan yahay ayaa u jiri kara soo kabashada; xogta la tirtiray lama soo celiyo marka adeegga dib loo hawlgelinayo. Haddii xog loo hayo arrin amni ama sharci, waan kuu sharxi doonaa inta codsigaaga la qabanayo.	ናይ ምድምሳስ ሕቶኻ ምስ ኣረጋገጽና፣ መለያ፣ ናይ ንግዲ ገጽ፣ ዝተኣሳሰሩ ሕቶታት ዓማዊል፣ ታሪኽ ደገፍን ዝጸዓኑ ፋይላትን ነወግድ። ብዘይ መለያ ዝገበርካዮ ዝርርብ እውን ክድምሰስ እንተደሊኻ መወከሲኡ ስደድ። ንመልሶ ምትካል ጥራይ ዝውዕሉ ውሱን ፍቓድ ዘለዎም ቅጂታት ክተርፉ ይኽእሉ፤ ቅጂ ክምለስ ከሎ ዝተደምሰሰ ሓበሬታ ቅድሚ ኣገልግሎት ምኽፋት ዳግማይ ይድምሰስ። ንደሕንነት ወይ ብሕጊ ክዕቀብ ዘለዎ ሓበሬታ እንተሎ ሕቶኻ ክንሰርሕ ከለና ነብርሃልካ።
 Delete account	መለያ ይሰርዙ	Herrega haqi	Tirtir akoonka	መለያ ደምስስ
 Delete your Suqpage account	የSuqpage መለያዎን ይሰርዙ	Herrega Suqpage kee haqi	Tirtir akoonkaaga Suqpage	ናይ Suqpage መለያኻ ደምስስ
 Request account deletion	መለያ እንዲሰረዝ ይጠይቁ	Herregni akka haqamu gaafadhu	Codso tirtiridda akoonka	መለያኻ ክድምሰስ ሕተት
@@ -508,6 +512,10 @@ Client invitation	የደንበኛ ግብዣ	Affeerraa maamilaa	Martiqaadka macmi
 Position	ቦታ	Iddoo	Boos	ቦታ
 Leave empty to keep the current image.	ያለውን ምስል ለማቆየት ባዶ ይተዉት።	Suuraa ammaa tursiisuuf duwwaa dhiisi.	Ka tag isagoo madhan si sawirka hadda loo hayo.	እቲ ዘሎ ስእሊ ንምዕቃብ ባዶ ግደፎ።
 Password	የይለፍ ቃል	Jecha iccitii	Furaha sirta	ቃል ምስጢር
+Signing in…	በመግባት ላይ…	Seenaa jira…	Waa lagu gelinayaa…	ንኣቱ ኣለና…
+Email or password is incorrect.	ኢሜይሉ ወይም የይለፍ ቃሉ ትክክል አይደለም።	Imeeliin ykn jechi iccitii sirrii miti.	Iimaylka ama furaha sirta ayaa khaldan.	ኢሜይል ወይ ቃል ምስጢር ቅኑዕ ኣይኮነን።
+Too many attempts. Try again later.	ብዙ ጊዜ ሞክረዋል። ቆይተው እንደገና ይሞክሩ።	Yeroo baayʼee yaalteetta. Booda irra deebiʼii yaali.	Marar badan ayaad isku dayday. Mar dambe isku day.	ብዙሕ ግዜ ፈቲንካ። ጸኒሕካ እንደገና ፈትን።
+Sign-in is temporarily unavailable.	ለጊዜው መግባት አይቻልም። ቆይተው እንደገና ይሞክሩ።	Amma seenuun hin dandaʼamu. Booda irra deebiʼii yaali.	Hadda lama geli karo. Mar dambe isku day.	ኣብዚ ሕጂ ክትኣቱ ኣይትኽእልን። ጸኒሕካ እንደገና ፈትን።
 Current password	ያለው የይለፍ ቃል	Jecha iccitii ammaa	Furaha sirta ee hadda	ናይ ሕጂ ቃል ምስጢር
 New password	አዲስ የይለፍ ቃል	Jecha iccitii haaraa	Furaha sirta cusub	ሓድሽ ቃል ምስጢር
 Confirm password	የይለፍ ቃል ያረጋግጡ	Jecha iccitii mirkaneessi	Xaqiiji furaha sirta	ቃል ምስጢር ኣረጋግጽ
@@ -1155,3 +1163,56 @@ Back to inbox	ወደ ውይይቶች ተመለስ	Gara marii deebi'i	Ku noqo wad
 Back to staff	ወደ ሠራተኞች ተመለስ	Gara hojjettootaa deebi'i	Ku noqo shaqaalaha	ናብ ሰራሕተኛታት ተመለስ
 Questions from business owners	ከንግድ ባለቤቶች የመጡ ጥያቄዎች	Gaaffii abbootii daldalaa	Su’aalaha milkiilayaasha ganacsiga	ሕቶታት ዋናታት ንግዲ
 Transport requests from customers	የደንበኞች የመጓጓዣ ጥያቄዎች	Gaaffii geejjibaa maamiltootaa	Codsiyada gaadiidka ee macaamiisha	ሕቶታት መጓዓዝያ ዓማዊል
+Report product	ምርቱን ሪፖርት አድርግ	Waaʼee meeshaa kanaa komii dhiyeessi	Ka cabasho alaabtan	ብዛዕባ እዚ ፍርያት ሓብር
+Report business	ንግዱን ሪፖርት አድርግ	Waaʼee daldala kanaa komii dhiyeessi	Ka cabasho ganacsigan	ብዛዕባ እዚ ንግዲ ሓብር
+Block business	ንግዱን አግድ	Daldala kana ugguri	Xannib ganacsigan	ነዚ ንግዲ ዓግቶ
+Unblock business	እገዳውን አንሳ	Uggura irraa kaasi	Ka qaad xannibaadda	ነቲ ዕገት ኣልዕሎ
+Blocked businesses	ያገዷቸው ንግዶች	Daldaloota uggurte	Ganacsiyada aad xannibtay	ዝዓገትካዮም ንግድታት
+Business blocked.	ንግዱ ታግዷል።	Daldalli kun uggurameera.	Ganacsigan waa la xannibay.	እዚ ንግዲ ተዓጊቱ።
+No blocked businesses.	ያገዷቸው ንግዶች የሉም።	Daldalli uggurame hin jiru.	Ma jiro ganacsi aad xannibtay.	ዝዓገትካዮ ንግዲ የለን።
+Listing options	የዝርዝሩ አማራጮች	Filannoowwan tarreeffamaa	Doorashooyinka bandhigga	ምርጫታት ዝርዝር
+Reason	ምክንያት	Sababa	Sababta	ምኽንያት
+Misleading listing	የሚያሳስት መረጃ	Odeeffannoo dogoggorsaa	Macluumaad marin habaabin ah	ዘደናግር ሓበሬታ
+Prohibited goods	የተከለከሉ እቃዎች	Meeshaalee dhorkaman	Alaab mamnuuc ah	ክልኩላት ኣቑሑ
+Abusive content	ስድብ ወይም ጥቃት ያለበት ይዘት	Qabiyyee arrabsoo ykn miidhaa	Waxyaabo aflagaaddo ama xadgudub ah	ጸርፊ ወይ በደል ዘለዎ ትሕዝቶ
+Details (optional)	ተጨማሪ መረጃ (ከፈለጉ)	Ibsa dabalataa (yoo barbaadde)	Faahfaahin (ikhtiyaari)	ተወሳኺ ሓበሬታ (እንተደሊኻ)
+Send report	ሪፖርት ላክ	Komii ergi	Dir cabashada	ጸብጻብ ስደድ
+Report received.	ሪፖርቱ ደርሶናል።	Komii kee fudhanneerra.	Cabashada waa la helay.	ጸብጻብካ በጺሑና።
+Could not save blocked businesses. Try again.	እገዳው አልተቀመጠም። እንደገና ይሞክሩ።	Uggurri hin kuufamne. Irra deebiʼii yaali.	Xannibaadda lama kaydin. Mar kale isku day.	እቲ ዕገት ኣይተቐመጠን። ደጊምካ ፈትን።
+Listing reports	በምርትና በንግድ ላይ የቀረቡ ሪፖርቶች	Komiiwwan meeshaalee fi daldalaa	Cabashooyinka alaabta iyo ganacsiyada	ጸብጻባት ፍርያትን ንግድታትን
+Claim report	ሪፖርቱን ተረከብ	Komii kana fudhadhu	La wareeg cabashada	ነቲ ጸብጻብ ተረከብ
+Resolve after removal	ይዘቱ ሲወገድ ጨርስ	Qabiyyeen erga haqamee booda cufi	Xir marka laga saaro waxa laga cabanayo	እቲ ትሕዝቶ ምስ ተኣልየ ዕጸዎ
+Dismiss report	ሪፖርቱን ውድቅ አድርግ	Komii kana kufaa godhi	Diid cabashada	ነቲ ጸብጻብ ኣይትቀበሎ
+Dismissed	ውድቅ ተደርጓል	Kufaa taʼeera	La diiday	ኣይተቐበለን
+Report updated.	ሪፖርቱ ተዘምኗል።	Komii haaromfameera.	Cabashada waa la cusboonaysiiyey.	እቲ ጸብጻብ ተመሓይሹ።
+No reports in this view.	እዚህ የሚታዩ ሪፖርቶች የሉም።	Komii asitti mulʼatu hin jiru.	Halkan wax cabasho ah ma yaallaan.	ኣብዚ ዝርአ ጸብጻብ የለን።
+Choose a support agent	የድጋፍ ሰራተኛ ይምረጡ	Hojjetaa deeggarsaa filadhu	Dooro shaqaalaha taageerada	ሰራሕተኛ ደገፍ ምረጽ
+Use up to 100 blocked businesses.	እስከ 100 ንግዶች ማገድ ይችላሉ።	Daldaloota hanga 100 ugguruu dandeessa.	Waxaad xannibi kartaa ilaa 100 ganacsi.	ክሳብ 100 ንግድታት ክትዓግት ትኽእል።
+Choose a report reason.	የሪፖርቱን ምክንያት ይምረጡ።	Sababa komii filadhu.	Dooro sababta cabashada.	ምኽንያት ጸብጻብካ ምረጽ።
+Report could not be saved.	ሪፖርቱ አልተቀመጠም።	Komii hin kuufamne.	Cabashada lama kaydin.	እቲ ጸብጻብ ኣይተቐመጠን።
+Please wait before sending another report.	ሌላ ሪፖርት ከመላክዎ በፊት ትንሽ ይጠብቁ።	Komii biraa erguu dura xiqqoo eegi.	Wax yar sug ka hor intaadan cabasho kale dirin.	ካልእ ጸብጻብ ቅድሚ ምልኣኽካ ቁሩብ ጽናሕ።
+This report changed. Reload and try again.	ሪፖርቱ ተቀይሯል። ገጹን አድሰው እንደገና ይሞክሩ።	Komii kun jijjiirameera. Haaromsiitii irra deebiʼii yaali.	Cabashadan waa la beddelay. Bogga dib u fur oo isku day.	እቲ ጸብጻብ ተቐይሩ። ገጹ ኣሐድስካ ደጊምካ ፈትን።
+Remove the reported content before resolving this report.	ሪፖርቱን ከመዝጋትዎ በፊት የተጠቆመውን ይዘት ያስወግዱ።	Komii cufuu dura qabiyyee irratti komiin dhiyaate haqi.	Ka saar waxa laga cabanayo ka hor intaadan cabashada xirin.	እቲ ጸብጻብ ቅድሚ ምዕጻውካ ዝተጠቐሰ ትሕዝቶ ኣልዕሎ።
+Manage business	ንግዱን አስተዳድር	Daldala bulchi	Maamul ganacsiga	ነቲ ንግዲ ኣመሓድር
+Assign to	ለሰራተኛ መድብ	Hojjetaaf ramadi	U xilsaar	ንሰራሕተኛ መድቦ
+Pagination	የውጤት ገጾች	Fuulota buʼaa	Bogagga natiijooyinka	ገጻት ውጽኢት
+Page {value1} of {value2}	ከ{value2} ገጾች ገጽ {value1}	Fuula {value1} kan {value2}	Bogga {value1} ee {value2}	ገጽ {value1} ካብ {value2}
+Clear all	ሁሉንም አጽዳ	Hunda haqi	Ka saar dhammaan	ኩሉ ኣጽሪ
+Reports	ሪፖርቶች	Komiiwwan	Cabashooyin	ጸብጻባት
+Invalid blocked business.	የንግድ መለያው ትክክል አይደለም።	Eenyummeessaan daldalaa sirrii miti.	Aqoonsiga ganacsigu sax ma aha.	መለለዪ ንግዲ ትኽክል ኣይኮነን።
+Check the report details.	የሪፖርቱን መረጃ ያረጋግጡ።	Odeeffannoo komii sirreessi.	Hubi faahfaahinta cabashada.	ሓበሬታ ጸብጻብካ ኣረጋግጽ።
+Use up to 1500 characters.	እስከ 1500 ፊደላት ብቻ ይጠቀሙ።	Qubee hanga 1500 qofa fayyadami.	Isticmaal ugu badnaan 1500 xaraf.	ክሳብ 1500 ፊደላት ጥራይ ተጠቐም።
+Refresh and try again.	ገጹን አድሰው እንደገና ይሞክሩ።	Fuula haaromsiitii irra deebiʼii yaali.	Bogga dib u fur oo mar kale isku day.	ገጹ ኣሐድስካ ደጊምካ ፈትን።
+This report changed. Start a new report.	ሪፖርቱ ተቀይሯል። አዲስ ሪፖርት ይጀምሩ።	Komii kun jijjiirameera. Komii haaraa jalqabi.	Cabashadan waa la beddelay. Bilow cabasho cusub.	እቲ ጸብጻብ ተቐይሩ። ሓድሽ ጸብጻብ ጀምር።
+Listing not found.	ምርቱ ወይም ንግዱ አልተገኘም።	Meeshaa ykn daldala kana hin argine.	Alaabtan ama ganacsigan lama helin.	እቲ ፍርያት ወይ ንግዲ ኣይተረኽበን።
+Report access denied.	ይህን ሪፖርት የማየት ፈቃድ የለዎትም።	Komii kana ilaaluuf hayyama hin qabdu.	Uma lihid oggolaansho aad cabashadan ku aragto.	ነዚ ጸብጻብ ክትርኢ ፍቓድ የብልካን።
+Report not found.	ሪፖርቱ አልተገኘም።	Komii kana hin argine.	Cabashada lama helin.	እቲ ጸብጻብ ኣይተረኽበን።
+This report is already closed.	ይህ ሪፖርት አስቀድሞ ተዘግቷል።	Komii kun duraan cufameera.	Cabashadan hore ayaa loo xiray.	እዚ ጸብጻብ ድሮ ተዓጽዩ።
+This report is already assigned.	ይህ ሪፖርት ለሌላ ሰራተኛ ተመድቧል።	Komii kun hojjetaa biraaf ramadameera.	Cabashadan qof kale ayaa loo xilsaaray.	እዚ ጸብጻብ ንኻልእ ሰራሕተኛ ተመዲቡ።
+Report assignment denied.	ሪፖርት የመመደብ ፈቃድ የለዎትም።	Komii ramaduuf hayyama hin qabdu.	Uma lihid oggolaansho aad cabasho ku xilsaarto.	ጸብጻብ ክትመድብ ፍቓድ የብልካን።
+Choose a support agent.	የድጋፍ ሰራተኛ ይምረጡ።	Hojjetaa deeggarsaa filadhu.	Dooro shaqaalaha taageerada.	ሰራሕተኛ ደገፍ ምረጽ።
+Claim this report first.	መጀመሪያ ሪፖርቱን ይረከቡ።	Jalqaba komii kana fudhadhu.	Marka hore la wareeg cabashadan.	መጀመርታ ነዚ ጸብጻብ ተረከብ።
+Report could not be updated.	ሪፖርቱን ማዘመን አልተቻለም።	Komii haaromsuu hin dandeenye.	Cabashada lama cusboonaysiin karin.	ነቲ ጸብጻብ ከነመሓይሾ ኣይከኣልናን።
+Other	ሌላ	Kan biraa	Sabab kale	ካልእ
+We count showroom visits and record when chat messages are read to show business activity and conversation status.	የንግድ ገጽዎን የጎበኙ ሰዎች ብዛትና በውይይት ውስጥ የታዩ መልእክቶች ይመዘገባሉ። ይህ የገጽዎን እንቅስቃሴና የመልእክቶችን ሁኔታ ለማሳየት ይረዳል።	Baayʼina namoota fuula daldalaa daawwatan fi yeroo ergaan marii dubbifame galmeessina. Kun sochii daldalaa fi haala marii agarsiisuuf oola.	Waxaan tirinnaa booqashooyinka bogga ganacsiga oo diiwaangelinnaa marka fariimaha la akhriyo. Tani waxay muujisaa dhaqdhaqaaqa ganacsiga iyo xaaladda wada sheekaysiga.	ብዝሒ ናይ ንግዲ ገጽ ዝጎብኡ ሰባትን መልእኽቲ ምስ ተነበበን ንምዝግብ። እዚ ንናይ ንግዲ ንጥፈትን ኩነታት ዝርርብን ንምርኣይ ይጠቅም።
+When you ask us to arrange transport, our team may share the route, goods and necessary contact details with the transport company handling your request.	ትራንስፖርት እንድናመቻችልዎ ሲጠይቁ፣ ቡድናችን ዕቃዎን ለሚያጓጉዘው ድርጅት የመነሻና የመድረሻ ቦታ፣ የዕቃውን መረጃና ለሥራው የሚያስፈልጉ የመገናኛ ዝርዝሮች ሊሰጥ ይችላል።	Geejjiba akka siif qindeessinu yeroo gaafattu, gareen keenya odeeffannoo bakka kaʼumsaa fi gaʼumsaa, meeshaa fi quunnamtii hojii kanaaf barbaachisu dhaabbata geejjiba siif kennuuf dabarsuu dandaʼa.	Markaad naga codsato inaan gaadiid kuu diyaarino, kooxdeennu waxay shirkadda qabanaysa codsigaaga la wadaagi kartaa goobaha laga qaadayo iyo loo wado, xogta alaabta iyo faahfaahinta xiriirka ee loo baahan yahay.	መጓዓዝያ ክነዳልወልካ ምስ እትሓትት፣ ጉጅለና ነቲ ዕቓኻ ዘጓዕዝ ትካል ናይ መበገሲን መዕረፊን ቦታ፣ ሓበሬታ ዕቓን ንስራሕ ዘድሊ ዝርዝር መራኸቢን ከካፍል ይኽእል።

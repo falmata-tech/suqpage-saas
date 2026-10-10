@@ -3756,8 +3756,9 @@ are not copied to production by this hash-preserving migration.
 
 Operations L4, DEP-044 (draft) / DEP-042 / DEP-043 / FE-055. New request adds
 Google Play distribution after S98, preserving its pending owner-phone evidence.
-Owner confirms personal developer account created after 2023-11-13 and no app
-entry. Scope is Suqpage only; preserve unrelated untracked deno.lock. Master
+Owner confirms personal developer account created after 2023-11-13 and has now
+provided its created app dashboard. Scope is Suqpage only; preserve unrelated
+untracked deno.lock. Master
 §§15/16/17/22 affected by later rollout/auth changes. Preparation is one-time;
 reuse current build/admission contracts rather than adding a second release system.
 
@@ -3774,9 +3775,17 @@ reuse current build/admission contracts rather than adding a second release syst
   Public health/privacy/deletion resources return 200 on canonical origin;
   selected Expo identity is verified and Free build quota read back. These are
   preparation checks, not policy approval, a new artifact or phone OS proof.
-- [ ] CURRENT OWNER CONSOLE: create Suqpage app (English US, App, Free), verify developer/
-  app identity, required account/device verification and selected signing policy.
+- [x] OWNER CONSOLE: receive the created app dashboard and reported login.
+  Developer 5256539403314542898, app 4972244998230912603,
+  marketvision.tech@gmail.com for login and explicitly selected public store support;
+  owner-provided evidence, not authenticated readback. App/admin/privacy identities
+  are separate and unchanged by this store contact choice.
+- [ ] CURRENT OWNER CONNECTION: independently verify developer/app/package,
+  required account/device verification and selected signing policy.
   Do not enroll a new signer or upload any private key incidentally.
+  Owner's current creation form also asks for Package name: com.suqpage.app.
+  SuqPage capitalization is being considered for the display title only; installed
+  app label/configuration has not been renamed by this explanation.
 - [ ] Resolve secure reusable reviewer access, UGC report/block workflow and
   privacy/deletion fulfilment. Create ready FE/BE specs before behavior changes;
   use real isolation/regression evidence and focused visual approval, then gates.
@@ -3795,5 +3804,117 @@ reuse current build/admission contracts rather than adding a second release syst
 
 S99 preparation evidence is retained in .local/play-s99/. Store/readiness runbook
 is docs/GOOGLE-PLAY-RELEASE.md. S98's single-APK tooling exception is consumed;
-it does not cover this new AAB. No Console write, new build, invitation or provider
-configuration change has occurred in S99.
+it does not cover this new AAB. No app upload, new build or tester invitation has occurred in S99; the exact
+approved Expo submission credential association is independently verified.
+
+S99.1 — finish Play-required application behavior and remote-upload preparation
+(FE-063 / BE-051 / DEP-044). Owner asks to finish requirements and use remote
+Expo upload where possible; owner supplied the Console app dashboard, but the
+submission account/permission/key binding is not configured. Preserve
+S98 phone evidence and S99 signing/reviewer decisions. Local reversible feature
+work proceeds independently; no provider secret/signing write is inferred.
+
+- [x] Specify bounded asynchronous reports, private staff role/version/target
+  contracts and per-install/browser blocking; no general guest help chat.
+- [x] Implement domain, private migration 63, report delivery/queue,
+  parameterized discovery/fuzzy exclusions, public web/native controls and five
+  languages; verify real local persistence, negative/security and focused UI flows.
+  Real isolated PostgreSQL and web/native HTTP report/replay/rate/role/assignment/
+  stale/removal tests pass. Actual local browser delivery, preference persistence,
+  native inquiry blocking and admin removal/support resolution pass. Schema 63
+  is local only after protected backup; original record counts and private table/
+  sequence grants are verified. No provider or production mutation.
+- [x] Capture actual desktop/phone report/block/unblock/staff states, including
+  390/320 in all five languages; no browser errors or horizontal overflow.
+- [x] Owner delegates release design choices; retain the tested report/block/staff
+  visuals. Actual local five-language desktop/phone captures are reviewed in
+  .local/play-s99/safety-ui/. Proceed to required gates without repeating permission.
+- [x] Complete delegated restricted reusable reviewer access locally; real provider
+  sessions and ordinary owner page/product edits, publish and public readback pass.
+  Hosted provisioning/binding and installed Play access remain separate.
+- [ ] Finish verified privacy/deletion operations and store declarations; do not
+  claim actual deletion from a mail link or invent retention/privacy promises.
+- [x] Receive owner confirmation that Android Publisher API is enabled in the
+  existing suqpage Cloud/Firebase project under falmata.dawano@gmail.com.
+  This is owner evidence; independently verify API/key/access before upload.
+- [x] Receive/validate the owner's dedicated suqpage-play-submit service-account
+  key for project suqpage; exact email, bounded JSON and RSA signature checks pass.
+  Protected identical backup is 0600 in an ignored 0700 directory. No credential
+  bytes are printed or packaged; provider permission/association remains unverified.
+- [x] Verify the exact service account's
+  app-only permissions under Play developer 5256539403314542898/app
+  4972244998230912603, canonical package com.suqpage.app: Google API HTTP 200,
+  ACCESS_GRANTED, app Admin, no global Admin/other apps/partial grant. A request-
+  format 400 is resolved by one documented pageSize=-1 retry; no writes or role
+  changes. Later downgrade/removal remains available. Supported listing/track/
+  review operations are separate from EAS binary upload; Console-only owner tasks
+  and every release/signing/approval gate remain required.
+- [x] Verify official Expo login, selected project and canonical credential target:
+  @falmatad/suqpage, bfc289fb-238e-44a3-9e0f-fec6a7c857d1, com.suqpage.app.
+  Submission binding is empty, current FCM and signer match; protected before
+  metadata and exact source key exist. No existing submit key will be overwritten.
+- [x] OWNER CLI EXCEPTION: accept the exact one-operation official EAS CLI
+  plan (.local/play-s99/expo-submit-review.md), or perform the dashboard addition.
+  Owner explicitly approves the reviewed official-CLI connection. Digest
+  353fdd27c1dc4020a5748c8f2add7f400db3d470cef16d86c59fa53522295ca2;
+  protected source and unchanged plan are verified. No raw fallback/new build.
+- [x] Bind selected submission key through the approved CLI,
+  independently verify target/backup/key association, preserve FCM/signing.
+  Official EAS CLI 24.10.0 exits 0; exact provided key ID/project/account matches
+  the canonical com.suqpage.app EAS Submit binding. FCM and canonical/legacy
+  signing metadata match the protected before-state. No build/submission ran.
+  Private terminal operation receipt: .local/play-s99/expo-submit-complete.json.
+- [x] Receive owner's delegated release decisions: proceed with the tested visual
+  design, choose restricted reusable reviewer access and preserve the existing
+  signing key. Continue safety/verification gates rather than asking the same
+  choices again. This does not claim policy compliance or testing enrollment.
+- [ ] CURRENT RELEASE READINESS: implement/test restricted reviewer access and
+  privacy/deletion fulfilment; prepare existing-key Play signing enrollment.
+- [ ] Pass complete gates and new artifact admission, then signed AAB inspection
+  and exact internal-draft EAS Submit; no automatic public track promotion.
+
+Focused S99.1 evidence: scripts/test-catalog-safety.ts, existing discovery/mobile/
+staff suites, both typechecks, localization/native rendering/build/link contracts,
+and protected .local/play-s99/safety-ui/ receipts. The native captures are browser
+previews, not an installed Android release. docs/GOOGLE-PLAY-CONNECTION.md provides
+the owner's click-by-click steps. Google developer/package/app-only access and Expo
+target/signer and exact EAS Submit key association are independently verified;
+actual Console title/setup/Play signing, AAB, upload and publication remain pending.
+Reviewer/signing/visual decisions are delegated by the owner's newest instruction;
+implementation, policy verification and all release gates remain required.
+
+### S99.2 — finish delegated closed-test readiness
+
+FE-064/BE-052/DEP-044. Retain existing signing identity, email codes for regular
+users, web-only staff and independent real tests. Master §§11/15/16/17/22 affected.
+
+- [x] Specify the bounded server-bound reviewer exception and record ready contracts
+  before code. Store the owner's six initial tester addresses privately; do not
+  claim opt-ins, invent testers or send before an admitted closed test is ready.
+- [x] Implement pure reviewer policy, fresh PostgreSQL eligibility, bounded provider
+  password verification and web/native adapters. test:reviewer-access passes real
+  local PostgreSQL/Supabase JWT, tenant/staff/role races, origin/body/rate/no-store
+  negatives. Actual managed web cookies/native-browser sessions, ordinary OTP,
+  wrong password/secret clearing and 25 five-language viewport captures pass in
+  .local/play-s99/reviewer-ui/. This is local only, not a Play-delivered install.
+- [x] Finish verified local privacy/deletion operations and focused validation.
+  Final Console declarations remain a separate rollout gate. test:account-erasure passes exact identity/shared-tenant/staff/drift/backup
+  guards, FK rollback and real local Auth/media erasure with other-tenant/shared
+  uploads preserved. No real customer account is erased. Public privacy copy now
+  covers map caching, push, controlled embeds and the verified deletion procedure.
+  BE-053 adds a narrow verified-owner erasure recipe and rehearsal/runbook;
+  real customer deletion always requires a separate verified request and exact
+  backup/target approval. Test app/Auth/media erasure and other-tenant preservation.
+- [x] Pass full check, clean isolated web release, 11 acceptance workflows, operations
+  and mobile build contracts. Final privacy-only copy passes all-language 390/320
+  capture and localization/narrative/geography checks.
+- [x] Verify a protected production public-schema backup and actual isolated restore;
+  rehearse 62→63 preserving every original table fingerprint, idempotency and
+  private report table/sequence grants. Production is unchanged by rehearsal.
+- [ ] CURRENT: review/scoped commit and refresh final copy artifacts, then compatible
+  hosted migration/API/web rollout and exact recoverable reviewer provisioning/binding.
+- [ ] Build/inspect one admitted signed AAB, retain existing app signer in Play,
+  upload exact internal draft and inspect actual Play-delivered install.
+- [ ] Complete Console setup and closed-track rollout, add initial approved
+  tester list and provide actual opt-in link. Obtain at least 12 continuous
+  opt-ins for 14 days and record genuine feedback before production access.

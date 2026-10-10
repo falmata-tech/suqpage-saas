@@ -2,7 +2,7 @@
 id: BE-044
 title: Native API and session boundaries
 status: in_progress
-related: [BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050]
+related: [BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-07
 change_level: L3

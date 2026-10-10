@@ -85,7 +85,7 @@ async function main() {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id),stable);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,62);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,63);
     console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, owner/guest privacy, stale/foreign/self/private/expired denial, reassignment/reopen, monotonic and migration preservation.');
   } finally { await closeDbForTests(); }
 }

@@ -23,12 +23,14 @@ export default function Account() {
   const openLink = useOpenLink();
   const [email, setEmail] = useState(""),
     [code, setCode] = useState(""),
+    [password, setPassword] = useState(''),
+    [passwordMode, setPasswordMode] = useState(false),
     [sent, setSent] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   useEffect(() => {
     if (authIssue === "Staff accounts sign in on the website.") {
-      setSent(false);setCode("");setError("");
+      setSent(false);setCode("");setPassword('');setPasswordMode(false);setError("");
     }
   }, [authIssue]);
   const load = useLoad(async () => {
@@ -44,6 +46,17 @@ export default function Account() {
     clearAuthIssue();
     try {
       if (!auth) throw Error("Sign-in is not configured.");
+      if (!sent) {
+        const mode = await request<{mode:'otp'|'password'}>('auth/mode',{body:{email:email.trim()}});
+        if (mode.mode === 'password') {setPasswordMode(true);setSent(true);return;}
+      }
+      if (passwordMode) {
+        const session = await request<{access_token:string;refresh_token:string}>('auth/review',{body:{email:email.trim(),password}});
+        const result = await auth.auth.setSession(session);
+        if (result.error) throw result.error;
+        setPassword('');
+        return;
+      }
       const result = sent
         ? await auth.auth.verifyOtp({
             email: email.trim(),
@@ -83,7 +96,7 @@ export default function Account() {
           {authIssue === "Staff accounts sign in on the website." && <Button secondary label={t("Open website")} onPress={()=>void openLink(API+"/dashboard/admin")}/>}
           {authRetryAvailable ? <Card>
             <Button label={t("Retry")} onPress={retryAuth}/>
-            <Button secondary label={t("Change email")} onPress={()=>{clearAuthIssue();setSent(false);setCode("");void signOut();}}/>
+            <Button secondary label={t("Change email")} onPress={()=>{clearAuthIssue();setSent(false);setCode("");setPassword('');setPasswordMode(false);void signOut();}}/>
           </Card> : <Card>
             <Copy big>{t("Continue with email")}</Copy>
             <Field
@@ -97,29 +110,34 @@ export default function Account() {
             />
             {sent && (
               <>
-                <Copy muted>{t("Check your email for a six-digit code.")}</Copy>
+                {!passwordMode && <Copy muted>{t("Check your email for a six-digit code.")}</Copy>}
                 <Field
-                  label={t("Verification code")}
-                  value={code}
-                  onChangeText={setCode}
-                  keyboardType="number-pad"
-                  autoComplete="one-time-code"
+                  label={t(passwordMode ? 'Password' : "Verification code")}
+                  value={passwordMode ? password : code}
+                  onChangeText={passwordMode ? setPassword : setCode}
+                  secureTextEntry={passwordMode}
+                  autoCapitalize="none"
+                  keyboardType={passwordMode ? 'default' : "number-pad"}
+                  autoComplete={passwordMode ? 'current-password' : "one-time-code"}
+                  maxLength={passwordMode ? 128 : 6}
                 />
               </>
             )}
             <Status loading={busy} error={error} />
             <Button
-              disabled={busy || !email.trim() || (sent && !code.trim())}
-              label={t(sent ? "Verify code" : "Send code")}
+              disabled={busy || !email.trim() || (sent && !(passwordMode ? password : code.trim()))}
+              label={t(sent ? passwordMode ? 'Sign in' : "Verify code" : 'Continue with email')}
               onPress={() => void login()}
             />
             {sent && (
               <Button
                 secondary
                 label={t("Change email")}
+                disabled={busy}
                 onPress={() => {
                   setSent(false);
                   setCode("");
+                  setPassword('');setPasswordMode(false);
                 }}
               />
             )}
@@ -151,11 +169,12 @@ export default function Account() {
           <Button
             secondary
             label={t("Sign out")}
-            onPress={() => void signOut()}
+            onPress={() => {setPassword('');setPasswordMode(false);setSent(false);setCode('');setEmail('');void signOut();}}
           />
         </>
       )}
       <Button secondary label={t("About Suqpage")} onPress={()=>router.navigate("/about")}/>
+      <Button secondary label={t('Blocked businesses')} onPress={()=>router.push('/blocked-businesses')}/>
       <Button secondary label={t("Privacy")} onPress={()=>void openLink(API+"/privacy")}/>
       <Button secondary label={t("Terms")} onPress={()=>void openLink(API+"/terms")}/>
     </Screen>
