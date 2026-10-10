@@ -4131,6 +4131,55 @@ verified policy/publication and the final rating outcome.
   no review submission or public release is claimed.
 
 - [ ] NEXT DEPENDENCY: actual protected Play-installed Android phone workflows
-  and system notifications. After that evidence, prepare countries/the reviewed
-  closed release and its real opt-in link; do not claim a 12/14 clock before real
+  and system notifications. S99.5 may prepare countries/an unsubmitted draft while
+  this evidence is pending; actual closed rollout and its real opt-in link remain
+  gated. Do not claim a 12/14 clock before real
   Google enrollment. Continue the already authorized Play rollout from this gate.
+
+S99.5 — autonomous closed-track preparation (one-time DEP-044 operations)
+
+Owner requests continuing all independent work while recruiting further testers.
+This permits preparation using the existing admitted AAB, not another build,
+signing change, enrollment or public release. Definition of Ready: exact app,
+artifact, tester-list boundary, country scope, protected before-state, normal UI
+confirmation, independent readback and rollback-by-stopping are specified in
+DEP-044. Master §15's distribution state and related runbooks will be reconciled.
+
+- [x] Inspect fresh exact SuqPage/account/Alpha controls and current Google
+  country-targeting documentation. Setup/rating complete; Alpha inactive with
+  no release or countries. Country controls apply to this selected test track.
+- [x] Retain protected API/UI before-state and verified exact bundle,
+  signer, metadata and other tracks. Record the concrete Alpha-only country/draft
+  plan; preserve user-owned deno.lock and all credentials/tester details outside Git.
+  Exact 178 selectable rows and existing version-3 file hash verified. Original
+  API reads/owned-edit cleanup succeeded; its local receipt formatter mishandled
+  an empty production-country response. Retain that failure and its read-only
+  Google confirmation of deleted edit; no provider operation was repeated.
+- [x] Save all currently selectable country/region rows on Alpha only through
+  normal confirmation; preserve other-track availability. Reload and independently
+  compare the exact 178 names/statuses against the retained UI set. Publishing
+  overview records 177 countries plus Rest of World, Alpha-only/unsynced from
+  production. Final API/other-track comparison remains separately pending below.
+- [x] Create/save one unsubmitted Alpha draft with existing version 3 and concise
+  accurate test release notes. Inspect the final saved preview; no new upload,
+  key, paid build, review submission or activation. Stop on unexpected outcomes.
+  English/Amharic notes pass field comparison; Save as draft and fresh reload
+  verify Inactive/Draft and 3 of 4 track steps. Preview has only the known
+  nonblocking deobfuscation warning. Internal remains Active/Available; only
+  SuqPage's ten-member list selected, other app lists untouched. Review disabled.
+- [ ] CURRENT VERIFICATION GATE: one fresh independent API read of the saved
+  Alpha draft/countries and unchanged other-track metadata/artifact. Automatic
+  approval review rejects the command twice before execution due to the earlier
+  recorded stop, despite Google's deleted-edit confirmation and local formatter
+  proof. No workaround; request exact owner direction in the protected
+  closed-preparation/readback-review.md. Console readback is verified, final
+  API comparison is not. No provider retry or restore has occurred.
+- [x] Reconcile runbooks, current spec/master/traceability state and concise owner
+  install/feedback instructions. All 190 specs/ADR links and whitespace checks
+  pass. Protected aggregate Console assertions pass and a blank private feedback
+  CSV is prepared without invented results. Commit only these operations records
+  after staged-scope review; unchanged application gates are reused. This records
+  verified preparation, not completion of the pending API or rollout gates.
+- [ ] REMAINING ROLLOUT GATE: protected Play-installed physical-phone workflows
+  and system notifications, then reviewed closed rollout and actual opt-in link.
+  Recruit genuine testers; no invented identities, feedback or 12/14 clock.

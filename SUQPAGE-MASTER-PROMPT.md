@@ -1460,8 +1460,14 @@ coordinates remain separately disclosed. Google marks IARC Completed but its
 certificate ID is still unassigned. Dashboard unlocks closed-track setup;
 Send app for review remains disabled until the remaining track steps are complete.
 The SuqPage internal list now has ten verified addresses and an actual join link.
-Alpha closed-test access and feedback email are saved, but releases/countries
-remain empty/unselected and no enrollment is claimed.
+Alpha closed-test access and feedback email are saved. Under the owner's later
+autonomous-preparation instruction, all 177 offered countries/regions plus Rest
+of World are saved on Alpha, unsynced from production, and version 3 is saved as
+an inactive draft with English/Amharic notes. Fresh Console reload and its release
+preview verify those states; independent final API verification awaits owner
+direction after automatic approval review blocked a fresh temporary read edit.
+No new build, signer, Google review submission or enrollment is claimed. Protected
+phone workflows/system notifications still gate actual closed rollout.
 Production Play protection is unchanged. Internal testing is not public
 publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
 The required 12-testers/14-day closed test and production-access application remain

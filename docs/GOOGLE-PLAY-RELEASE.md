@@ -364,9 +364,13 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
    account and Suqpage login are separate; admin/staff accounts intentionally
    cannot log into Android. Keep any new sample page private during the check.
 3. Alpha closed-test access already selects the ten-address SuqPage list, with
-   **marketvision.tech@gmail.com** saved for feedback. Rating/setup is complete; after phone
-   checks, select actual closed-test countries and prepare the reviewed release;
-   add further genuine testers privately. Each internal tester must leave the
+   **marketvision.tech@gmail.com** saved for feedback. Rating/setup is complete.
+   All 177 offered countries/regions plus Rest of World and an inactive version-3
+   draft are now saved and reloaded. Alpha is explicitly unsynced from production;
+   English/Amharic release notes are saved. Final independent API verification
+   awaits the owner's direction under the protected readback plan, then actual
+   phone checks gate confirmation/review and closed rollout. Add further genuine
+   testers privately. Each internal tester must leave the
    internal test before joining the closed test. Capture that
    separate link and actual joins; no email invitation has been sent by the agent.
 
@@ -375,6 +379,45 @@ ten supplied addresses are saved/selected and individually verified; no actual
 enrollment or phone result is invented. The **12 real testers / 14 continuous days**
 closed-test clock has not started. Review genuine feedback before production access;
 internal testing, aliases and sideloads do not meet that requirement.
+
+## Autonomous Alpha preparation — October 10, 2026
+
+S99.5 is one-time operational preparation using the existing admitted build.
+The exact SuqPage developer/app/account and current metadata/artifact are checked;
+protected UI/API before-state is retained. Normal Alpha controls save all 178
+offered rows (177 named countries/regions plus Rest of World). Reload verifies
+each exact row is Targeted. Publishing overview records these changes only under
+**Closed testing - Alpha**, including **Unsync from production**; no public
+availability or app rollout is inferred. Google's targeting is based on the
+tester's registered Play country, so this avoids excluding approved testers who
+live or registered their accounts abroad. See [Google's country-targeting guide](https://support.google.com/googleplay/android-developer/answer/7550024?hl=en).
+
+The library's sole existing version **3 / 0.1.0 / target SDK 36** is attached to
+one draft, named **0.1.0 - closed test**, with concise English/Amharic notes.
+Save as draft succeeds, and a fresh track reload says **Inactive / Draft** and
+**3 of 4 complete**. The preview shows no blocking errors and one nonblocking
+warning about the already-known absent crash-deobfuscation file. The preview's
+final Save/confirmation and Send app for review are not performed. Internal
+testing remains Active/Available; only the ten-address SuqPage list is selected.
+Other-app lists are inspected only for nonselection, never changed. Production
+remains access-locked. Publishing overview still says changes are not submitted
+and disables Send app for review until required steps are complete.
+
+The original API metadata reads/comparisons and temporary-edit cleanup succeed,
+but a local receipt formatter dereferences the legitimate empty production-country
+response. Failure evidence is preserved. A separate read-only Google GET confirms
+**This Edit has been deleted**; the formatter correction changes no provider data.
+Automatic approval review nevertheless blocks the proposed fresh final API read
+because a prior operation was recorded as stopped, requiring explicit recovery
+direction. Both rejected calls do not execute; no workaround, write retry or
+restore is attempted. The owner is offered the exact protected readback review.
+Final independent API comparison remains pending and is not represented as passed.
+
+Evidence: .local/play-s99/closed-preparation/ and
+.local/play-s99/console-setup/s995-*.json. No new build, upload, signing, credentials,
+invitation, opt-in, real phone result or review submission. The real Android phone
+workflow/notification gate and Google's closed review remain; no 12/14-day clock
+has started. Further tester addresses can be added to the private list when supplied.
 
 ## Catalog policy and completed rating — October 10, 2026
 

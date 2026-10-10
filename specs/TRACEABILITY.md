@@ -18,8 +18,24 @@ checks pass, without DB/config/Android-build or customer writes. Google saves an
 reloads 25 answers and IARC Completed (Teen/12+, PEGI parental guidance). Its
 certificate ID is unassigned; Send app for review remains disabled pending track
 steps. Dashboard unlocks closed setup but still reports zero closed opt-ins.
-Protected-phone, countries, reviewed closed/public rollout and genuine 12/14 test
+Protected-phone, reviewed closed/public rollout and genuine 12/14 test
 remain. No other app/list, invitation, fake enrollment or automatic screening.
+
+S99.5 / DEP-044 (2026-10-10): fresh exact app/account/track and protected API/UI
+before-state pass; the existing version-3 AAB file hash matches admission. Normal
+Alpha controls save all 178 offered rows (177 named countries/regions plus Rest
+of World), and reload verifies every exact row is Targeted. Publishing overview
+records Alpha-only availability unsynced from production. One existing version-3
+draft with English/Amharic notes passes Save as draft and reload: Inactive/Draft,
+3 of 4 track steps. Preview has only the known nonblocking deobfuscation warning.
+Internal remains Active/Available, only the ten-member SuqPage list selected;
+production access stays locked. Before-read cleanup is confirmed by Google's
+read-only deleted-edit response after a reproduced local null formatter error.
+Automatic approval review blocks a fresh final API edit/read twice before execution;
+exact owner direction is requested, with no workaround. That final independent
+comparison remains pending. Protected .local/play-s99/closed-preparation/ and
+console-setup/s995-*.json; no app code/build, signer, credential, invitation,
+enrollment, review submission or closed-test clock change. DEP-044 remains draft.
 
 | Capability | FE | BE | DEP | Primary code | Automated evidence | Status |
 |---|---|---|---|---|---|---|

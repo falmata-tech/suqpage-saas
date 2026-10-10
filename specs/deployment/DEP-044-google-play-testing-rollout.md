@@ -20,6 +20,10 @@ setup forms, including the completed 25-answer IARC summary, are saved/reloaded.
 Actual ratings are Teen/12+ (PEGI parental guidance). S99.4 catalog policy is live
 in five languages. Google unlocks closed-track setup; Send app for review is
 disabled until the remaining track steps are complete. No Google approval is claimed.
+S99.5 subsequently saves Alpha's 178 offered country/region rows and one inactive
+version-3 draft, verified by Console reload/preview. Final independent API
+comparison awaits explicit owner direction after automatic approval review blocks
+a fresh read edit; no Google review submission or closed activation is claimed.
 Protected-phone testing and reviewed closed/public rollout are pending. Use the
 verified store listing and Android App Bundle for internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
@@ -48,9 +52,16 @@ not a Google Play release and does not start the closed-test clock.
   never manufacture enrollment or feedback to satisfy the closed-test requirement.
 - Closed-test access may be prepared on this same app using its verified tester
   list and approved feedback contact. Retain the exact closed-track before-state
-  and read back its settings; keep the release empty until rating/setup and phone
-  gates pass. Access preparation does not start a test, enroll users, promote the
-  internal artifact, choose distribution countries or authorize public release.
+  and read back its settings. The owner's subsequent autonomous-preparation
+  instruction permits Alpha-only country selection and an unsubmitted release
+  draft containing the already admitted version 3. Use all currently offered
+  country/region rows so approved testers' Play-account countries do not exclude
+  them; keep production/open availability unchanged and do not sync Alpha with
+  production. Retain the exact previous availability, artifact and other-track
+  state, inspect normal Console confirmation, and independently verify readback.
+  The draft must not be rolled out or sent for review until rating/setup and the
+  protected-phone workflow/notification gate pass. Preparation does not start a
+  test, enroll users, claim phone evidence or authorize public release.
 - Keep Suqpage / com.suqpage.app, @falmatad/suqpage and the existing live API/Auth
   target. The production build profile produces an AAB; submission defaults to
   internal draft. A profile named production does not authorize public rollout.
@@ -109,6 +120,19 @@ persisted tester access, version/hash and unchanged other tracks afterward.
 Do not report a test enrollment, installed phone or closed-test day without
 that separate evidence.
 
+GIVEN completed setup, the owner's autonomous-preparation instruction and the
+verified internal version 3 WHEN preparing Alpha availability and a saved draft
+THEN target only Alpha using normal enabled Console controls, preserve the exact
+existing bundle/signing identity and private tester list, and verify the saved
+countries, draft status and unchanged internal/production/open tracks. Do not
+send for review, activate the closed release or invent a physical-phone result.
+
+GIVEN a saved Alpha draft without protected-phone evidence WHEN preparing the
+remaining handoff THEN distinguish draft preparation from Google review and
+active distribution, and retain the real-phone gate before rollout. Missing
+testers do not prevent draft preparation; they do prevent claiming the minimum
+12 genuine continuous opt-ins or the 14-day requirement is satisfied.
+
 GIVEN the owner's later explicit delegation of the remaining rating setup WHEN
 preparing the questionnaire THEN inspect the exact SuqPage form and answer only
 from implemented content and interaction capabilities. Retain before-state,
@@ -145,6 +169,7 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | Review access and UGC controls | FE-063/BE-051 and FE-064/BE-052 real local persistence/provider, negative and browser evidence; hosted and installed checks remain separate |
 | Closed-test requirement | Console track, opt-ins, real tester feedback and production-access decision |
 | Console setup/internal distribution | Exact bound browser/account, protected before-state and saved UI readback; actual release preview, tester-list/link and independent track/artifact checks; completed IARC under later owner delegation with exact answer/rating/readback evidence |
+| Alpha country/draft preparation | Protected UI/API before-state, exact selectable-country set and normal confirmation; reload and independent API country/draft/hash comparison; other-track/metadata preservation and no review/enrollment claims |
 
 ## Rollout and rollback
 
@@ -153,13 +178,15 @@ operations, approved Expo upload-key connection, and verified hosted schema-63
 web/API/reviewer rollout. Google verifies SuqPage/en-US, English/Amharic text,
 support contact and seven image hashes saved using standard metadata review. One
 free version-3 AAB is built, inspected and independently read back with its exact
-hash on the completed internal track; other tracks stay empty and metadata unchanged. Google-
-generated APKs retain the existing certificate. Native official test splits pass
-public/update/locale/link checks; 10/11 setup tasks and six-address internal access
-are saved and verified. The list is subsequently extended to ten exact supplied
-addresses and Alpha access/feedback are saved without a release. Protected
-Play-installed phone, final rating pending catalog policy and
-closed/public gates remain. No public store publication. Store packet/runbook:
+hash on the completed internal track; production/open tracks remain undistributed.
+Google-generated APKs retain the existing certificate. Native official test splits pass
+public/update/locale/link checks. All required setup forms, including completed
+IARC, and ten-address internal access are saved and verified. Alpha access/feedback
+are saved. Alpha's 178 offered rows and one unsubmitted version-3 draft pass
+Console reload/preview; final independent API comparison awaits exact owner
+direction after automatic approval review blocks a fresh read edit. Protected
+Play-installed phone, reviewed closed rollout and public gates remain.
+No public store publication. Store packet/runbook:
 docs/GOOGLE-PLAY-RELEASE.md, docs/GOOGLE-PLAY-CONNECTION.md and docs/play-store/. Verified historical runtime
 baseline: docs/SUQPAGE-S98-RELEASE-2026-10-08.md.
 
@@ -172,15 +199,42 @@ the affected track; do not assume a downgrade or uninstall preserves sessions.
 
 ## Readiness
 
-Preparation and the hosted web/API phase are verified. The complete Play rollout
-remains draft: final Console declarations, protected Play-installed physical-device
-workflows/notifications and reviewed closed/public distribution remain unresolved.
+The hosted web/API phase and Console preparation are verified; S99.5's final
+independent API comparison remains pending. The complete Play rollout
+remains draft: protected Play-installed physical-device workflows/notifications
+and reviewed closed/public distribution remain unresolved. Console declarations
+are saved and verified; this does not constitute Google's policy approval.
 The exact one-AAB exception is approved and consumed; no further artifact is
 admitted by it. Hosted reviewer/content-safety web/API
 rollout is now verified, with production original-record preservation. Local
 implementation, delegated visual acceptance and full gates pass. Master §§15/16/17/22
 would be affected by completed rollout or authentication changes. Do not mark this
 spec done until those contracts and all mapped evidence exist.
+
+## S99.5 saved Alpha preparation — October 10, 2026
+
+The owner's autonomous instruction permits prep while tester recruitment continues.
+Protected before-state confirms the exact app/account, existing bundle/hash,
+completed internal version 3 and empty Alpha/open/production tracks. Normal Alpha
+controls save 177 offered countries/regions plus
+Rest of World; reload compares every exact row with the retained set. Publishing
+overview records only Alpha's changes and Unsync from production. The library's
+sole version 3 is saved in one inactive draft with English/Amharic notes; fresh
+reload verifies Draft and 3 of 4 track steps. Preview has no blocking errors and
+only the previously known nonblocking deobfuscation-file warning. Internal stays
+Active/Available and only the SuqPage list is selected. Production is access-locked;
+review submission remains disabled. Final preview confirmation/review is not done.
+
+The initial read-only API edit is deleted successfully, then its receipt formatter
+fails locally on the empty production-country response. Google's separate GET
+confirms the edit is deleted; evidence and the offline reproduction are retained.
+Automatic approval review nonetheless rejects a fresh final API read twice before
+execution because the earlier stop requires explicit recovery direction. The
+owner receives the protected exact readback plan; no workaround, provider retry
+or restore is attempted. Final independent comparison remains pending, alongside
+the actual protected-phone gate and reviewed closed/public rollout. Evidence:
+.local/play-s99/closed-preparation/ and console-setup/s995-*.json. No new application
+code, build, signing, credential, enrollment, invitation or 12/14-clock claim.
 
 ## Verified preparation evidence — October 9, 2026
 

@@ -7,13 +7,17 @@ Published five-language policy and actual report/removal evidence support the
 catalog answers; possible minor/moderate seller language remains disclosed.
 Google marks IARC Completed and unlocks closed-track setup, while review
 submission is disabled until remaining track steps are complete. Internal testing is active, with ten
-approved addresses selected and no invented enrollment or phone result.
+approved addresses selected and no invented enrollment or phone result. S99.5
+saves all offered Alpha countries plus an inactive version-3 draft; Console
+reload/preview pass. Final independent API comparison awaits explicit direction
+after automatic approval review blocks a fresh temporary read edit. Protected
+Play-installed phone workflows/notifications still gate actual closed rollout.
 
 ## Existing behavior and policy gaps
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
-| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and ten-address list match saved readback. Alpha access/feedback are prepared with no release. Protected-phone, countries and closed/public rollout remain |
+| App identity | Google API verifies developer 5256539403314542898, com.suqpage.app and app-only Admin; Expo falmatad/project/current signer and exact EAS Submit key verified. Owner-supplied Console app 4972244998230912603 and marketvision.tech@gmail.com login/public support | Exact version 3 is active internally; title/text/contact/images and ten-address list match saved readback. Alpha access/feedback, all offered countries unsynced from production and an inactive version-3 draft pass Console reload/preview. Final independent API comparison, protected-phone and reviewed closed/public rollout remain |
 | SDK compatibility | Actual version-3 AAB and Google universal APK target API 36; bundle config, all 50 ELF libraries and APK ZIP pass 16-KB checks | Protected Play-installed physical-phone workflows and notification proof |
 | App access | Normal users retain codes; restricted reviewer password login passes real local web/native workflows. Hosted provisioning/binding and real API sessions pass | Restricted Sign in details with separate credentials and 443-character notes pass provider reload/edit-dialog comparison; authenticated protected-phone workflows remain |
 | Account deletion | Existing request entry; BE-053 local rehearsal proves exact owner app/Auth/storage/device erasure, orphan/shared-media handling and rollback guards | Full-account deletion URL is saved in Data safety; per-request identity/backup/approval and real fulfilment remain manual. Separate partial-data deletion is not claimed |
@@ -65,13 +69,15 @@ collection or that a permission is requested; do not invent a flow from its name
 Include Google's protection layer in the final SDK review rather than treating
 local compiled-source inspection as the entire Play-delivered app.
 
-Owner-selected teen/adult audience is saved. Dashboard verifies 10/11 setup tasks;
-final content rating awaits catalog-policy clarification, along with any Google-
-requested account/device verification. Ten supplied SuqPage addresses are saved,
-selected and individually verified; Alpha access/feedback are saved, but its release
-and countries remain empty/unselected. No invitation, phone result or opt-in claimed.
+Owner-selected teen/adult audience and all required setup forms, including the
+completed IARC, are saved/reloaded. Ten supplied SuqPage addresses are saved,
+selected and individually verified. Alpha access/feedback, all offered countries
+unsynced from production and one inactive version-3 draft are saved/reloaded;
+draft preview has only the known nonblocking crash-deobfuscation-file warning.
+Final independent API comparison and protected-phone checks remain. No review
+submission, invitation, phone result or opt-in is claimed.
 
-## Pending content-rating policy
+## Earlier incomplete content-rating draft — superseded by S99.4
 
 The owner later delegates remaining form preparation. Normal authorized Console
 controls save an incomplete consumer-store questionnaire; eight factual feature
