@@ -4,7 +4,7 @@ import { chromium, expect } from '@playwright/test';
 import { MARKET_STOREFRONT_COPY, ABOUT_STOREFRONT_SECTIONS } from '../lib/storefront-copy.ts';
 import { createUiText, languageNames } from '../lib/i18n/core.ts';
 const copyOnly=process.argv.includes('--copy-only');
-const out=copyOnly?'.local/copy-s63/screens':'.local/sponsor-storefront-review'; fs.mkdirSync(out,{recursive:true});
+const out=process.env.SUQPAGE_COPY_CAPTURE_DIR || (copyOnly?'.local/copy-s63/screens':'.local/sponsor-storefront-review'); fs.mkdirSync(out,{recursive:true});
 const browser=await chromium.launch();
 const records=[];
 const blank=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC0lEQVR42mP8/x8AAwMCAO+aZwoAAAAASUVORK5CYII=','base64');
@@ -41,7 +41,7 @@ try{
    await capture(page,`web-sponsors-${locale}-${width}`);
    }else{
     await page.goto('http://127.0.0.1:3102/login');
-    await expect(page.getByText(t("Create a professional store for your products and services, or sign in to manage your page and customer inquiries."),{exact:true})).toBeVisible();
+    await expect(page.getByText(t("Give your social media customers an organized store to browse, find on the map and contact directly. Sign in to create your page or manage inquiries."),{exact:true})).toBeVisible();
     await capture(page,`web-account-${locale}-${width}`);
    }
    assert.deepEqual(errors,[]);await context.close();
@@ -58,7 +58,10 @@ try{
   }
   await expect(page.getByText(t(MARKET_STOREFRONT_COPY.title),{exact:true})).toBeVisible();
   await capture(page,`mobile-market-${locale}`);
-  await page.getByRole('tab',{name:t('About'),exact:true}).click();
+  // About lives in Account; use the app's navigation so the browser preview's
+  // memory-only language preference is retained, as it is during normal use.
+  await page.getByRole('tab',{name:t('Account'),exact:true}).click();
+  await page.getByRole('button',{name:t('About Suqpage'),exact:true}).click();
   await expect(page.getByText(t(ABOUT_STOREFRONT_SECTIONS[0].title),{exact:true})).toBeVisible();
   await capture(page,`mobile-about-${locale}`);
   await page.getByRole('button',{name:t('For businesses'),exact:true}).click();
@@ -72,7 +75,7 @@ try{
   await page.setViewportSize({width:320,height:700});await capture(page,`mobile-sponsors-small-${locale}`);
   }else{
    await page.getByTestId('about-businesses').getByRole('button',{name:t('Create your business page'),exact:true}).click();
-   await expect(page.getByText(t("Create a professional store for your products and services, or sign in to manage your page and customer inquiries."),{exact:true})).toBeVisible();
+   await expect(page.getByText(t("Give your social media customers an organized store to browse, find on the map and contact directly. Sign in to create your page or manage inquiries."),{exact:true})).toBeVisible();
    await capture(page,`mobile-account-${locale}`);
    await page.setViewportSize({width:320,height:700});await capture(page,`mobile-account-small-${locale}`);
   }

@@ -35,15 +35,15 @@ business featured or claiming prerecorded video is live.
 The preceding release is recorded in
 `docs/SUQPAGE-S69-S70-RELEASE-2026-10-06.md`. Current release gates, backup,
 artifacts and remaining real-email/hosted-session/OS limits follow below.
-The current web/API release uses source ea1b452 and production deploy
-6ac98a227b9a61a7dad27116. Protected backup/restore rehearsal, the owner-approved
+The current web/API release uses source de68832 and production deploy
+6aca91cb2f49de22d3839199. Protected backup/restore rehearsal, the owner-approved
 controlled retry of migration 63, original-record fingerprints and private report
 permissions are verified. Reporting/blocking, updated privacy and one server-bound
 ordinary demo reviewer are deployed. Live public routes and real reviewer web/native
 API sessions pass; no customer chat, email or notification was sent by these checks.
 Production notification configuration and the scheduled worker remain verified;
 real OS display/read evidence is separate. See docs/GOOGLE-PLAY-RELEASE.md.
-The current Android APK remains the S98 a81c93f release: built, signature/config/
+The current Expo-distributed Android APK remains the S98 a81c93f release: built, signature/config/
 privacy inspected and checked on an
 isolated emulator; physical-phone alerts and authenticated hosted flows remain
 separate under DEP-042/DEP-043. Current evidence is in
@@ -52,7 +52,11 @@ separate under DEP-042/DEP-043. Current evidence is in
 ## 1. Your role
 
 You are working on **Suqpage**, a multi-tenant platform giving African businesses
-an accessible digital presence and a direct inquiry channel. People discover
+an organized storefront for their offerings and a direct inquiry channel. People
+can find where businesses selling products they loved on social media are located,
+browse their products/styles/services in organized stores and contact them without
+searching old posts. Owners organize their offerings and share a store customers
+can find on the map. People discover
 businesses, products, services and custom work through geography, search results
 and featured visibility. Growers, makers, traders, retailers, home businesses and
 service providers retain their own identity. Suqpage is an online showroom for
@@ -99,8 +103,8 @@ do not enable a custom-request application feature.
 
 Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
 The generated Netlify origin remains an infrastructure compatibility address.
-Released web source `ea1b4526598cff4fb6058265b8e21a68efab1148` and Netlify deployment
-`6ac98a227b9a61a7dad27116` use schema 63. Complete check, web release, operations,
+Released web source `de688325e3c061e5d5031976b5b2de62e480ae00` and Netlify deployment
+`6aca91cb2f49de22d3839199` use schema 63. Complete check, web release, operations,
 eleven local production-mode workflows, packaged Linux handler/image/worker and
 artifact privacy gates pass. Live public routes, native catalog, protected-route
 denial, www redirect and canonical plus historical Android association bytes are
@@ -149,21 +153,30 @@ The Suqpage page is designed to turn passive browsing into a structured product 
 
 ## 3. The problem Suqpage solves
 
-Suqpage helps customers see where the social-media sellers they follow are and
-browse their products and services in organized, professional online stores.
-Customers can explore nearby businesses or open a store they already follow,
-see the offering details without searching through scattered posts, and inquire
-directly to discuss an order. No automatic social-account matching or distance
-calculation is promised. Owners bring their catalog, photos, videos, story and contacts together,
-share their Suqpage link through social channels, and show their shop or area on
-the map. Map, category and search retain their existing prominence and behavior.
-Physical shops, makers, growers, service businesses and home sellers remain
-included; a social account or physical shop is not a prerequisite. The initial
-market is Ethiopia, with wider African discovery as a future direction.
-S63 applies this clearer positioning to desktop web, mobile web and the mobile
-app in all five languages (FE-052/FE-053). Its local viewport checks pass and the
-owner approved inclusion in the next Android testing build. Updated web copy
-rollout remains separate; the older S62 APK does not include it.
+Suqpage gives social-media businesses an organized storefront for their collection.
+Customers can browse named products and services, understand the models, colors,
+styles or types the business has described, see photos/videos and ask about the
+right item. Business owners organize their offerings and share one link alongside
+their social posts. Inquiries go directly to the business on Suqpage or its chosen
+social channels; checkout, automatic imports, structured variant selectors and
+confirmed stock are not implied.
+
+The current S99.10 local copy uses the owner-accepted narrative: "See how close
+the businesses selling products you’ve loved on social media are to you. Browse
+their products, styles and services in organized online stores, then contact them
+directly without digging through old posts." The first sentence is the heading;
+the second is its supporting paragraph. Customer and business About sections explain browsing the collection
+and creating/sharing a storefront respectively. The five languages use contextual
+phrasing rather than literal English idioms. Existing map/search/filter prominence
+and behavior remain unchanged; no social account or physical shop is required.
+Focused narrative/catalog/type checks and 69 actual web/Expo-browser states pass.
+The owner explicitly approves the new phone layouts and full release checks on
+October 12. Complete gates and new web/Android delivery remain separate; released
+Play version 3 does not contain this latest copy. Map proximity is visual discovery,
+not a new numeric-distance or social-account-matching feature. Aligned five-language
+campaign materials and English/Amharic listing artwork are prepared and verified
+locally under DEP-044; previous assets/readbacks stay preserved. Scoped Console
+draft alignment is in progress and does not submit Google review or activate a track.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -1445,8 +1458,10 @@ Play enrollment and the actual Google-signed APK certificate are independently
 verified. One free version-3 AAB from ea1b452 passes artifact/privacy/API-36/16-KB
 checks under its exact approved, now-consumed tooling exception; the tooling audit
 remains failed, not clean. Google independently verifies its hash on completed internal testing,
-with other tracks empty and SuqPage/en-US, English/Amharic store text, selected
-support contact and seven images preserved. Google's signed official test splits
+with SuqPage/en-US and the selected support contact preserved. The latest saved
+English/Amharic descriptions using the owner-accepted nearby-business narrative, eleven authentic phone screenshots,
+two feature graphics and unchanged icon have independent normal Console/CDN
+readback. Google's signed official test splits
 pass an isolated native update, 12 public states, five languages and HTTPS links.
 The protected universal APK requires Play Store, absent in that emulator; actual
 protected Play-installed phone/alerts and closed rollout remain pending. All
@@ -1470,6 +1485,22 @@ No new build, signer, Google review submission or enrollment is claimed. Protect
 phone workflows/system notifications still gate actual closed rollout.
 Production Play protection is unchanged. Internal testing is not public
 publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
+S99.10 prepares five-language social posters, short silent videos, captions,
+bios and a portable owner launch kit. The official social accounts and eligible
+YouTube preview URL do not yet exist; no campaign or preview video is published.
+Current S99.10 app copy has explicit owner layout approval, 69 browser states,
+1,414-message localization coverage, full check, isolated web release, eleven
+acceptance workflows, operations/mobile contracts and Hermes export evidence.
+Exact packaged Linux handler/Sharp and scheduled worker checks pass. Source commit,
+artifact/privacy and production backup precede web delivery; a new Android build
+requires renewed exact tooling admission.
+The aligned local pack has 54 CRC-verified files and seven fully decoded silent
+H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
+ordered graphics and accurate AI labels; six new CDN transforms match source and
+previous image references remain. No Google review or campaign is submitted. The installed Play
+version remains 3. Native screen crops
+retain authentic UI; localized marketing captions do not imply every pictured
+device screen has that language. Protected-phone and closed-test gates remain.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
@@ -1785,8 +1816,8 @@ policy without a new build. Database/schema, Android artifact/signing and provid
 configuration are unchanged; no customer listing/chat/email/notification is
 created. IARC is saved and verified as Completed, with Google review still pending.
 The previous deploy/archives are retained as a recovery source, not automatically
-restored. Country selection,
-protected-phone and closed/public rollout remain pending. Data safety retains the
+restored. Alpha countries and its inactive version-3 draft have saved Console evidence.
+Protected-phone and closed/public rollout remain pending. Data safety retains the
 full-account deletion request URL but does not claim separate partial-data deletion
 or unimplemented certification. No additional artifact is admitted by the consumed exception.
 
@@ -1984,7 +2015,8 @@ Rules:
   actual action: add to an inquiry list, view it, or send an inquiry. Use products,
   services and businesses rather than platform jargon. Do not add filler,
   repeated button explanations, internal notes or implementation terminology.
-  S63 storefront copy uses local phrasing in each language rather than English
+  S99.10 copy retains nearby-business/social-product context, organized stores
+  and direct contact, with local phrasing rather than English
   sentence structure; brands and appropriate technical terms retain English.
   The S67 copy pass clarifies inquiry-list actions, transport labels, video loading
   and retry wording in context. Preserve meaningful privacy/security guidance and merchant-authored content.
@@ -2003,6 +2035,21 @@ Rules:
 ---
 
 ## 19. UX and accessibility requirements
+
+Entry-page copy must identify the offer and business context at a glance. Use
+ordinary product, service, business and store words instead of making a slogan
+or metaphor explain the platform. The paragraph adds the customer benefit and
+next action; it does not repeat the heading or list internal features. Buttons
+name their action/outcome. Preserve enough words for meaning rather than choosing
+the shortest possible text. Apply this standard contextually in every language,
+and check narrow-phone layout without sacrificing map access. FE-052 records the
+primary homepage/app content guidance; these are writing principles, not evidence
+of an unperformed customer comprehension or conversion study.
+
+The S99.10 local Market introduction uses the owner-accepted nearby-business/social-product narrative above
+the unchanged map/search controls. About retains distinct customer and business
+sections with browsing and setup actions. Actual phone layouts are explicitly
+accepted; full release checks and web/native rollout remain separate (FE-052).
 
 The local staff workspace uses short queue labels, matching support/transport
 icons, wrapping phone tabs and 44px breadcrumb/back targets. Conversation actions
@@ -2233,11 +2280,15 @@ and both type checks pass. S98 approved full gates, source commit, web/actual AP
 rollout and native map/cluster/shop-preview checks are verified. Physical-phone
 checks remain separate; local demo-coordinate corrections are not applied live.
 
-S63 copy uses shared web/native constants and all five locale catalogs. Focused
+S99.10 copy uses shared web/native constants and all five locale catalogs. Metro
+watches the shared lib directory so copy edits invalidate the local native
+preview; private runtime-data directories are not included. Focused
 narrative, localization/content-boundary and type checks precede viewport review;
 `capture-storefront-copy.mjs --copy-only` checks customer/owner copy, account entry
 and localized metadata. Browser-mobile evidence does not prove a new native APK.
-Full release gates and publication follow visual approval.
+The owner approves the actual layouts; full source/release/acceptance and packaged
+Linux artifact gates pass. Web publication and fresh Android admission remain
+separate from that evidence.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the

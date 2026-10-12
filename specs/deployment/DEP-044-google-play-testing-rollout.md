@@ -2,9 +2,9 @@
 id: DEP-044
 title: Google Play testing and store rollout
 status: draft
-related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053]
+related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049]
 owners: [product, operations, security]
-last_updated: 2026-10-10
+last_updated: 2026-10-12
 change_level: L4
 ---
 
@@ -79,6 +79,40 @@ Submit needs an independently authorized, app-scoped Play credential; existing
 - Store descriptions and screenshots describe implemented capabilities; no
   platform checkout, universal video availability, fake customer reviews, native
   notification success or completed policy compliance is claimed.
+- The owner's store-presentation request permits a refreshed branded feature
+  graphic, ordered phone screenshots, concise accurate captions/alt text and a
+  local preview-video asset. Use the existing logo and actual version-3 native
+  captures. The owner's refinement is a bold visual presentation with minimal
+  promotional text: a short headline per image, no extra paragraphs or badges.
+  Include supported English/Amharic listing graphics. Captions occupy
+  at most 20 percent of screenshots. Focused crops may highlight actual app views
+  without rearranging/replacing UI, hiding a failure or inventing a feature;
+  retain original captures, exact crop coordinates and visible map attribution.
+  Verify dimensions, opacity, size, provenance and absence of private data.
+  Retain the currently saved seven images as the recoverable before-state.
+  Saving listing media does not authorize app rollout, Google review, a new build
+  or the still-blocked fresh API read. Native design acceptance remains delegated;
+  inspect the actual composed previews before any normal Console save. Do not
+  invent tablet/watch/TV capabilities, ratings, testimonials or checkout. A store
+  preview video requires an eligible real YouTube URL; prepare the local video
+  without creating a channel, uploading elsewhere or substituting a sample URL.
+- The owner also requests a TikTok/Instagram coming-soon kit. Accounts do not yet
+  exist, so prepare brand-consistent media, native five-language captions, bios
+  and a relative posting plan without account creation or publication. Distinguish
+  the live web platform from the upcoming Android app. Do not promise a date,
+  public Play availability/pre-registration, unimplemented checkout, testimonials
+  or transport guarantees. Follow current promotional-content disclosure/music
+  rules; no ad spend, new tracking/data collection or unsolicited messages.
+- S99.8 supersedes location-led promotion with organized business collections:
+  customers browse named offerings/models/colors/styles or services and inquire
+  about the right item; owners create and share their storefront. FE-052/FE-049
+  define the shared web/native candidate and five contextual languages. Update
+  Play copy/art and campaign materials without changing discovery, data or checkout
+  behavior. Inspect Google's current asset-specific AI declaration and disclose
+  the newly AI-composed artwork accurately. Keep declared provenance, original
+  native crops and prior saved media; no claim that screenshots are fabricated or
+  that a new native build/Google review is complete. Author alt descriptions, but
+  claim provider application only when a supported field/readback verifies it.
 - Customer/owner screens stay native; staff/admin remain web-only. Existing
   tenant authorization and normal email-code login remain unchanged. FE-064/BE-052
   add only the explicitly bound ordinary demo-owner reviewer exception.
@@ -170,13 +204,16 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | Closed-test requirement | Console track, opt-ins, real tester feedback and production-access decision |
 | Console setup/internal distribution | Exact bound browser/account, protected before-state and saved UI readback; actual release preview, tester-list/link and independent track/artifact checks; completed IARC under later owner delegation with exact answer/rating/readback evidence |
 | Alpha country/draft preparation | Protected UI/API before-state, exact selectable-country set and normal confirmation; reload and independent API country/draft/hash comparison; other-track/metadata preservation and no review/enrollment claims |
+| Store presentation | Actual native screenshot/locale provenance; existing brand; dimensions/alpha/byte limits, caption occupancy and alt-text checks; inspected preview; protected current-image backup and normal Console reload for saved assets; honest optional-video/device-support gaps |
 
 ## Rollout and rollback
 
 Current phase: committed/tested content safety, reviewer access and deletion
 operations, approved Expo upload-key connection, and verified hosted schema-63
-web/API/reviewer rollout. Google verifies SuqPage/en-US, English/Amharic text,
-support contact and seven image hashes saved using standard metadata review. One
+web/API/reviewer rollout. Google verifies SuqPage/en-US and the selected support
+contact. Normal Console reload now verifies revised English/Amharic text, eleven
+phone screenshots, two banners and the unchanged icon; source hashes and matching
+transformed Google CDN thumbnails are retained. One
 free version-3 AAB is built, inspected and independently read back with its exact
 hash on the completed internal track; production/open tracks remain undistributed.
 Google-generated APKs retain the existing certificate. Native official test splits pass
@@ -453,3 +490,61 @@ is consumed; no new artifact is admitted. Protected final-verified.json and
 production-live-verified.json under .local/play-s99/catalog-policy/ plus
 console-setup/s994-*.json record evidence and resolved rejected proposals without
 a bypass. Tester identities, raw screenshots/logs and credentials stay outside Git.
+
+## S99.6–S99.8 verified presentation — October 11, 2026
+
+The collection-led English/Amharic listing drafts are saved using normal
+identity-bound controls. Independent locale reload matches exact descriptions and
+image names; thirteen new compositions match Google's served thumbnails after
+resize/transcode. The icon and empty video URL remain unchanged. Actual v3 source
+captures and one unchanged visible v2 showroom fold, hashes, RGB dimensions and
+15.625% caption area are recorded. New compositions carry accurate AI-content
+declarations. Authored alt descriptions are retained locally; no supported
+Console alt-entry control was exposed. No provider-alt application is claimed.
+Final Publishing overview read verifies SuqPage, disabled Send app for review and
+no review action. It does not establish review approval or closed availability.
+
+Five-language campaign copy, twenty posters, five social videos, two optional
+Google videos and a profile icon are prepared. All seven H.264 videos pass full
+decode. The curated 54-file launch ZIP passes CRC and excludes private records.
+Actual source UI stays intact; some localized posters use English device UI.
+The owner will create official social accounts; no eligible YouTube URL exists.
+Use original/commercially cleared audio and separate appropriate own-brand/AI
+disclosures. No campaign is published or scheduled, no ad spend or tracking added.
+
+Evidence: .local/play-s99/console-setup/s998-final-two-locale-console-read.json,
+s998-final-publishing-state.json, store-presentation/collection-v2/provider-readback/
+and launch-kit-v3/. Durable claim contracts: docs/play-store/{listing,presentation}.json,
+docs/marketing/{coming-soon-copy,campaign-plan}.json; automated checks:
+scripts/test-launch-materials.mjs. App copy follows FE-052/FE-049 and remains local
+pending visual/full/release gates. Preserve S99.5's exact pending API-read direction,
+protected-phone/system alerts, reviewed closed activation and genuine tester gates.
+DEP-044 remains draft; no new artifact exception, Google review or opt-in is inferred.
+
+S99.10 supersedes the earlier collection slogans with the owner-accepted nearby
+business/social-product, organized-store and direct-contact narrative. Rebuild
+local store/social artwork from retained authentic screens and new native captions;
+preserve old manifests and saved Console state. New English/Amharic listing drafts
+may be saved under existing scoped store-presentation delegation after focused
+asset validation; verify normal reload/CDN transformations and accurate provenance
+declarations. App layout acceptance/full gates, new Android admission, protected
+phone/alerts, final API direction and reviewed rollout remain separate.
+
+S99.10 verified source/store evidence, October 12: owner visual approval precedes
+the complete passing check, clean isolated release:web, 11/11 production-mode
+local acceptance workflows, operations, mobile build contracts and Android Hermes
+export. Actual packaged Linux handler/Sharp and scheduled worker pass; the worker
+uses an empty isolated PostgreSQL fixture and sends no provider requests. The
+web audit is clean. Native audit remains failed (20 high, two tooling roots, zero
+critical); both roots are absent from all 1,651 compiled runtime modules. The
+previous one-AAB waiver is consumed; another build needs exact renewed admission.
+
+Fresh independent normal Console reload verifies exact English/Amharic listing
+drafts, ordered assets and seven unchanged phone-image references plus shared
+icon. Only six graphics change; all six transformed Google CDN images visually
+match source. Thirteen composite AI labels persist, the original icon remains
+unlabelled, and Publishing overview still has a disabled Send app for review.
+No Google review, closed activation, opt-in, physical-device or campaign publication
+is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
+console-setup/s9910-final-two-locale-console-read.json and
+store-presentation/proximity-v1/provider-readback/verification.json.

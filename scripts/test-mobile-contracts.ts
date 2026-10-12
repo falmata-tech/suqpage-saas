@@ -2,6 +2,7 @@ import { endLocalSession } from "../apps/mobile/src/session-lifecycle";
 import { inquiryOptions } from "../apps/mobile/src/inquiry-options";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import path from "node:path";
 import { createRequire } from "node:module";
 import { apiOrigin, publicLink } from "../packages/contracts/src";
 import {
@@ -161,6 +162,12 @@ async function main() {
     );
   const require = createRequire(import.meta.url);
   const metro = require("../apps/mobile/metro.config.js");
+  const sharedCopy = path.resolve("lib/storefront-copy.ts");
+  assert.ok(metro.watchFolders.some((folder: string) => sharedCopy.startsWith(folder + path.sep)),
+    "Shared storefront edits invalidate Metro's module cache");
+  assert.ok(!metro.watchFolders.some((folder: string) =>
+    path.resolve(".local").startsWith(folder + path.sep)),
+    "Shared-copy watching does not include the private runtime directory");
   for (const moduleName of [
     "react",
     "react/jsx-runtime",

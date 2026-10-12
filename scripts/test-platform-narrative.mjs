@@ -47,8 +47,9 @@ assert.doesNotMatch(discovery, retiredGeneratedUrl);
 
 assert.match(home, /t\(MARKET_STOREFRONT_COPY.title\)/);
 assert.match(home, /t\(MARKET_STOREFRONT_COPY.description\)/);
-assert.match(storefrontCopy, /Find the businesses you follow on social media/);
-assert.match(storefrontCopy, /without getting lost in the clutter of social media posts/);
+assert.match(storefrontCopy, /See how close the businesses selling products you’ve loved on social media are to you\./);
+assert.match(storefrontCopy, /organized online stores/);
+assert.doesNotMatch(storefrontCopy, /See the collection\. Skip the scrolling\.|collections behind the social media posts/);
 assert.match(home, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
 assert.match(discovery, /Find businesses, products and services/);
 assert.match(discovery, /Open page/);
@@ -61,12 +62,16 @@ assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:com
 assert.match(about, /ABOUT_STOREFRONT_SECTIONS/);
 assert.match(storefrontCopy, /For customers/);
 assert.match(storefrontCopy, /For businesses/);
-assert.match(storefrontCopy, /Discover businesses on the map or open a store you already follow/);
-assert.match(storefrontCopy, /TikTok, Telegram or WhatsApp/);
+assert.match(storefrontCopy, /products, styles and services in one organized store/);
+assert.match(storefrontCopy, /Explore models, colors and styles/);
+assert.match(storefrontCopy, /See where businesses are located/);
+assert.match(storefrontCopy, /share one link for direct inquiries/);
 assert.match(storefrontCopy, /No physical shop required/);
 assert.match(storefrontCopy, /on Suqpage or through its social channels/);
 assert.doesNotMatch(storefrontCopy, /verified businesses|guaranteed sales|public home address|free during|launch offer/i);
-assert.match(storefrontCopy, /professional online store/);
+assert.match(storefrontCopy, /organized store/);
+assert.match(storefrontCopy, /An organized store for your social media customers\./);
+assert.doesNotMatch(storefrontCopy, /automatically import|guaranteed stock|checkout|TikTok Shop/i);
 for (const file of ['apps/mobile/app/(tabs)/index.tsx', 'apps/mobile/app/(tabs)/about.tsx']) {
   assert.match(read(file), file.includes('index') ? /MARKET_STOREFRONT_COPY/ : /ABOUT_STOREFRONT_SECTIONS/);
 }

@@ -10,10 +10,12 @@ support email **marketvision.tech@gmail.com**.
 The dashboard link is owner-provided. Google API readback now verifies the developer,
 canonical package and complete app-only Admin grant, and Expo project/current
 signer match. The exact EAS Submit key is connected and independently verified.
-Google API verifies title SuqPage/en-US, saved English/Amharic text, selected
-support email/website and all seven uploaded images. The exact version-3 AAB is
-active internally, with other tracks empty and the existing Google signer
-verified from its actual APK. The one-free-AAB exception is consumed. All required
+Google API verifies title SuqPage/en-US, selected support email/website and the
+admitted version-3 AAB. Normal Console reload now verifies revised English/Amharic
+descriptions, eleven phone screenshots, two feature graphics and the unchanged
+icon. The exact AAB is active internally; Alpha has a saved inactive draft and
+country selection. The existing Google signer is verified from its actual APK.
+The one-free-AAB exception is consumed. All required
 setup forms are saved and verified. IARC is marked Completed after the reviewed
 25-answer questionnaire and regional ratings are saved/reloaded. North America
 is Teen, most regions are 12+, and PEGI shows parental guidance. Google review is
@@ -27,7 +29,7 @@ app-scoped submission credentials and exact internal upload. Signing/submission
 are complete; do not repeat them. Most declarations are completed through the
 owner-authorized, identity-bound browser. The latest owner delegation also covers
 the completed rating. The prohibited-content policy is live in all five languages
-at https://suqpage.com/terms. Phone evidence, countries, closed release and any
+at https://suqpage.com/terms. Phone evidence, closed activation and any
 Google-requested account verification remain separate from technical completion.
 
 ## Create the app
@@ -59,11 +61,14 @@ privacy and deletion resources: https://suqpage.com/privacy and
 https://suqpage.com/account-deletion. Their presence is not a claim that the policy
 and deletion operations are complete; the worksheet identifies remaining work.
 
-Generated local upload assets are in `.local/play-s99/store-assets/`. The asset
-manifest records actual source APK/screenshots, checksums, dimensions and labels.
-Screenshots depict the actual released native app and public example content,
-not hypothetical screens or real customer conversations. Review assets before
-uploading. A later application change requires checking their continued accuracy.
+Current saved upload assets are in
+`.local/play-s99/store-presentation/collection-v2/assets/`; the original
+`.local/play-s99/store-assets/` remains preserved. The manifest records actual
+source APK/screenshots, checksums, dimensions and labels. Screenshots depict
+authentic native screens and public example content, not hypothetical UI or
+customer conversations. A later application change requires checking their
+continued accuracy. The revised app introduction is still a local candidate;
+these native crops do not present it as already installed.
 
 Google currently lists English and Amharic among supported listing languages;
 its published list does not list Afaan Oromo, Somali or Tigrinya. The native app
@@ -522,3 +527,108 @@ Private tester instructions and the closed-test handoff are in
 `ten-testers-final-verified.json`. No raw questionnaire, addresses or credentials
 are committed. Protected-phone proof, closed countries/release, genuine 12/14 test
 and production-access review remain separate.
+
+## Collection narrative and launch materials — October 11, 2026
+
+The local FE-052/FE-049 candidate leads with **“See the collection. Skip the
+scrolling.”** Market, separate customer/business About sections and account entry
+explain browsing organized products, models, colors, styles and services, then
+inquiring directly. Both clients use shared copy; four locale catalogs are
+authored contextually. Map behavior, merchant text, accounts and data are unchanged.
+Focused narrative/launch-material, localization (1,401 messages), homepage, web/
+mobile type and mobile-contract checks pass. All 69 local browser states pass
+layout/action checks. Explicit app visual approval precedes full checks, commit,
+web deployment and fresh Android admission. The installed version 3 is unchanged.
+
+The English/Amharic listing descriptions and graphics are saved through normal
+identity-bound Console controls. Fresh independent reload verifies exact copy
+and image names; thirteen visible CDN images match the retained originals after
+Google's resizing/transcoding. Six English and five Amharic phone screenshots use
+1080×1920 opaque PNGs, two banners use 1024×500, and the icon stays unchanged.
+Native v3 sources and one unchanged visible v2 showroom fold are recorded; no new
+physical-device capture is claimed. Caption area is 15.625%. All thirteen new
+compositions have accurate AI-content declarations. Authored descriptive alt text
+is retained in presentation.json; no supported Console alt-entry control was
+exposed. The final Publishing overview read verifies SuqPage and a disabled Send
+app for review button. No review action or policy approval is claimed.
+
+The portable review gallery is `.local/play-s99/launch-kit-v3/index.html`; the
+owner download is `.local/play-s99/suqpage-launch-kit-final.zip` (54 files, CRC
+verified). It includes store graphics, two Google preview videos, twenty social
+posters, five portrait social videos, profile icon and five-language captions,
+bios and a relative posting plan. All seven H.264 videos pass full decode;
+social videos are 14.3 seconds at 1080×1920/30 fps. They are silent: use original
+voice or commercially cleared audio. Portrait text avoids conservative platform
+overlay areas. Some localized posters retain authentic English app UI. The pack
+contains no reviewer credentials, tester addresses, private records or raw logs.
+
+The owner still needs to:
+
+1. Review the local web/mobile copy candidate before its release checks.
+2. Complete the protected Play-installed phone login, media, inquiry, chat and
+   actual system-notification checks using the existing internal-test link.
+3. Supply the remaining genuine testers; twelve people must actually opt into
+   the closed test for fourteen continuous days. A saved email list is not proof.
+4. Create the official TikTok/Instagram accounts. Open the gallery, select a
+   language and follow START-HERE.txt and the supplied posting plan. Use the
+   own-brand promotional and appropriate AI-content disclosures separately.
+
+An eligible YouTube URL is optional for Google's preview video; no official
+channel exists and no URL has been invented. Campaigns remain prepared, not
+published or scheduled. Closed review/activation and public production access
+remain separate. S99.5's blocked final API verification retains its exact pending
+owner direction; no helper retry, configuration restore or alternate API was used.
+
+Protected evidence: console-setup/s998-final-two-locale-console-read.json,
+s998-final-publishing-state.json, store-presentation/collection-v2/provider-readback/,
+narrative/screens/ and launch-kit-v3/video-verification.json under .local/play-s99/.
+Durable source and claim checks: docs/play-store/presentation.json,
+docs/marketing/{coming-soon-copy,campaign-plan}.json and
+scripts/test-launch-materials.mjs.
+
+## First-glance copy correction — October 11, 2026
+
+S99.9 supersedes the local S99.8 app slogan after owner feedback that business
+context was unclear. The new Market heading is "Browse products from businesses
+on social media." Its paragraph explains organized online stores, product/service
+details and direct business contact without searching old posts. About headings
+identify browsing those businesses and providing a store for their customers.
+All five app languages use contextual wording. Focused narrative/homepage,
+localization (1,406 messages), both typechecks and 69 browser states pass; no new
+phone proof, artifact, commit or deployment is claimed. Visual acceptance/full
+gates remain. Preserve the prior saved Play drafts and launch ZIP as earlier
+materials; align them after accepting this correction, with new image/video and
+provider verification rather than reusing their old receipts.
+
+## Accepted nearby-business narrative — October 12, 2026
+
+S99.10 supersedes the earlier slogans throughout Market, About, account entry,
+shared web/native copy and five contextual locale catalogs. The accepted first
+sentence is the heading and the remaining sentence supports it. Merchant content,
+map prominence, search, account and data contracts are unchanged; no distance
+calculation, social import, stock guarantee or checkout is added. The owner
+approves actual phone layouts. All 69 local browser states and 1,414-message
+localization coverage pass, followed by full check, isolated release:web, all
+eleven acceptance workflows, operations, mobile contracts and Hermes export.
+Packaged Linux handler/image processing and scheduled worker pass independently.
+
+English/Amharic Play drafts are saved and independently reloaded; only the two
+banners and first two screenshots in each language are replaced. Six public CDN
+transforms match source; ordered remaining images/icon/video and accurate AI
+labels are preserved. Publishing overview verifies unsubmitted changes with
+Send app for review disabled. This does not publish a closed test.
+
+Use the new owner pack: `.local/play-s99/suqpage-launch-kit-proximity.zip`, or open
+`.local/play-s99/launch-kit-proximity-v1/index.html`. Its 54 files pass CRC; fourteen
+store images, twenty social posters, profile icon, five portrait social videos,
+two optional Play videos and contextual copy are verified. All seven videos pass
+full decode. Earlier packs are preserved but use superseded copy. Official social
+accounts and eligible YouTube URL are still absent; nothing is posted or scheduled.
+
+Web upload follows source commit, exact artifact/privacy/rollback verification
+and production backup. The compiled Android runtime contains neither admitted
+tooling root, but the native tooling audit still fails with 20 high findings and
+zero critical. The previous one-free-AAB waiver is consumed: a fresh build needs
+a new exact review. Version 3 remains the current Play-installed build. Protected
+Play phone login/media/inquiries/chat/OS alerts, S99.5 final API direction, the two
+remaining genuine testers and reviewed closed/public gates stay outstanding.

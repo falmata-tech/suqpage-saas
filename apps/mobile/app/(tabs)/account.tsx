@@ -85,11 +85,11 @@ export default function Account() {
     <Screen>
       {!session ? (
         <>
-          <Copy big>{t("Your digital storefront")}</Copy>
+          <Copy big>{t("Your business. Easy to find and browse.")}</Copy>
           {next==='inquiries' && <Copy muted>{t("Sign in to view your business inquiries.")}</Copy>}
           <Copy muted>
             {t(
-              "Create a professional store for your products and services, or sign in to manage your page and customer inquiries.",
+              "Give your social media customers an organized store to browse, find on the map and contact directly. Sign in to create your page or manage inquiries.",
             )}
           </Copy>
           <Status error={authIssue} />

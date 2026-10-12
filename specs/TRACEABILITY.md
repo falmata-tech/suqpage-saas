@@ -37,6 +37,49 @@ comparison remains pending. Protected .local/play-s99/closed-preparation/ and
 console-setup/s995-*.json; no app code/build, signer, credential, invitation,
 enrollment, review submission or closed-test clock change. DEP-044 remains draft.
 
+S99.6–S99.8 / FE-052 / FE-049 / DEP-044 (2026-10-11): shared Market/About/account
+copy leads with organized business collections on web and Expo, with independently
+authored Amharic, Afaan Oromo, Somali and Tigrinya catalogs. Narrative/launch-material,
+homepage, ten localization tests (1,401 messages), both typechecks, mobile contracts
+and 190-spec validation pass. Sixty-nine actual local browser states verify copy,
+metadata, action destinations, layout and no page errors. Metro watches shared lib
+without private runtime directories; regression coverage passes. Protected evidence:
+.local/play-s99/narrative/. No merchant/data/map behavior change or new phone proof.
+
+Normal SuqPage-only Console controls save revised English/Amharic descriptions,
+six/five phone screenshots and two banners; original icon/video stay unchanged.
+Independent reload proves exact descriptions and image names. All thirteen new
+Google CDN thumbnails match after resize/transcode, not byte identity. Accurate
+AI-composition labels are recorded. Alt descriptions are authored but no supported
+provider field was exposed. Authentic native-source hashes/crops, dimensions,
+opacity, caption occupancy and inspected phone layouts are retained under
+.local/play-s99/store-presentation/collection-v2/. Final Publishing overview read
+verifies SuqPage, disabled review and no review action; approval is not claimed.
+
+The five-language organic campaign contains twenty posters, five portrait videos,
+profile icon, bios/captions and ordered posting instructions. Five social plus two
+Google preview H.264 videos pass metadata and full decode; a curated 54-file ZIP
+passes CRC, without private data. Source: docs/marketing/, docs/play-store/
+presentation.json and scripts/test-launch-materials.mjs. Evidence:
+.local/play-s99/launch-kit-v3/. Official social accounts/YouTube URL do not exist;
+nothing is posted. App visual approval, full gates, scoped commit and fresh web/
+Android delivery remain pending. Preserve S99.5 API direction, protected-phone,
+reviewed closed/public rollout and genuine 12/14 gates. Specs are not marked done.
+
+S99.9 / FE-052 / FE-049 (2026-10-11): owner rejects the abstract collection/post
+slogan. Primary NN/g homepage, Apple app-writing and Intuit content guidance
+inform explicit business/product context, sufficient familiar words, a useful
+supporting paragraph and descriptive actions. Shared Market and separate About
+headings are corrected; four catalogs are written contextually. Narrative/launch-
+material and homepage checks, ten localization tests (1,406 messages), both client
+typechecks and 69 actual local browser states pass. English/Amharic phone states
+are visually inspected. Evidence: .local/play-s99/copy-clarity-s999/screens/
+copy-verification-all.json; tile requests are test-stubbed, no provider/data writes.
+This is layout/contract evidence, not native-phone or customer-comprehension proof.
+Explicit app-copy visual approval/full gates/commit/rollout remain pending. The
+previous saved Play/social materials are preserved and must be aligned after
+acceptance; their earlier verification does not establish current-copy approval.
+
 | Capability | FE | BE | DEP | Primary code | Automated evidence | Status |
 |---|---|---|---|---|---|---|
 | Restricted reusable store-review access | FE-064, FE-053 | BE-052, BE-044 | DEP-044 | lib/reviewer-access.ts, reviewer-access-runtime/http, web/native mode/login adapters | 2026-10-09: test:reviewer-access passes pure authority-race/revocation plus real local PostgreSQL/Supabase password/JWT/owner/cross-tenant/staff/body/origin/rate/no-store checks; actual web cookies/native-browser, ordinary OTP and 25 five-language captures pass (.local/play-s99/reviewer-ui/). Ordinary reviewer page/product edits, publish and public catalog readback also pass. Full check, clean web release, 11 acceptance tests, operations and mobile contracts pass; source ea1b452, production schema 63/deploy 6ac98a227b9a61a7dad27116, exact hosted provisioning/binding and real web/native API sessions pass (docs/GOOGLE-PLAY-RELEASE.md); version-3 AAB/internal draft and official Google native public test splits now verified; saved restricted Console fields now pass fresh provider reload and credential/443-character-note comparison; authenticated protected-phone workflows remain. | in_progress |
@@ -1529,3 +1572,22 @@ preview-to-store navigation pass, with no app crash/keyboard-metrics/text-node e
 No account sign-in or customer inquiry/chat is created by native smoke. Emulator is
 closed. Physical-phone/browser OS alert and authenticated hosted workflow evidence
 remain outstanding; DEP-042/DEP-043/FE-062 stay in_progress. See the S98 release record.
+
+S99.10 verified source/store evidence, October 12: owner visual approval precedes
+the complete passing check, clean isolated release:web, 11/11 production-mode
+local acceptance workflows, operations, mobile build contracts and Android Hermes
+export. Actual packaged Linux handler/Sharp and scheduled worker pass; the worker
+uses an empty isolated PostgreSQL fixture and sends no provider requests. The
+web audit is clean. Native audit remains failed (20 high, two tooling roots, zero
+critical); both roots are absent from all 1,651 compiled runtime modules. The
+previous one-AAB waiver is consumed; another build needs exact renewed admission.
+
+Fresh independent normal Console reload verifies exact English/Amharic listing
+drafts, ordered assets and seven unchanged phone-image references plus shared
+icon. Only six graphics change; all six transformed Google CDN images visually
+match source. Thirteen composite AI labels persist, the original icon remains
+unlabelled, and Publishing overview still has a disabled Send app for review.
+No Google review, closed activation, opt-in, physical-device or campaign publication
+is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
+console-setup/s9910-final-two-locale-console-read.json and
+store-presentation/proximity-v1/provider-readback/verification.json.

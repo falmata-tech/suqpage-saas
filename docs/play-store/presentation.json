@@ -1,0 +1,109 @@
+{
+  "design": "SuqPage orange, charcoal and warm cream; large real app screens; short headlines only",
+  "locales": {
+    "en-US": {
+      "feature": [
+        "Products you loved",
+        "on social media.",
+        "Businesses nearby."
+      ],
+      "screens": [
+        {
+          "id": "01-map",
+          "headline": [
+            "See who’s nearby."
+          ],
+          "alt": "SuqPage map with business markers, search, category and location filters"
+        },
+        {
+          "id": "02-store",
+          "headline": [
+            "Browse their store."
+          ],
+          "alt": "A business storefront with its cover, logo, products and services"
+        },
+        {
+          "id": "03-search",
+          "headline": [
+            "Find your next pick."
+          ],
+          "alt": "Product and service search results showing the business behind each item"
+        },
+        {
+          "id": "04-product",
+          "headline": [
+            "Every detail, together."
+          ],
+          "alt": "Product photos, media thumbnails, description and inquiry actions"
+        },
+        {
+          "id": "05-language",
+          "headline": [
+            "Your language."
+          ],
+          "alt": "SuqPage Market in Amharic, one of the app’s five interface languages"
+        },
+        {
+          "id": "06-transport",
+          "headline": [
+            "Need transport?"
+          ],
+          "alt": "Live transport chat intake with pickup, destination, name and phone"
+        }
+      ]
+    },
+    "am": {
+      "feature": [
+        "በማኅበራዊ ሚዲያ",
+        "የወደዱት ምርት።",
+        "ቅርብዎ ያለ ንግድ።"
+      ],
+      "screens": [
+        {
+          "id": "01-map",
+          "headline": [
+            "ቅርብዎ ማን አለ?"
+          ],
+          "alt": "የንግዶችን ቦታ የሚያሳይ ካርታ፣ ፍለጋ እና የምድብና የአካባቢ ማጣሪያ"
+        },
+        {
+          "id": "02-store",
+          "headline": [
+            "ምርቶቹን ይመልከቱ።"
+          ],
+          "alt": "የንግዱ ገጽ፣ ሽፋን፣ አርማ፣ ምርቶችና አገልግሎቶች"
+        },
+        {
+          "id": "03-search",
+          "headline": [
+            "የወደዱትን",
+            "ይምረጡ።"
+          ],
+          "alt": "የምርትና የአገልግሎት የፍለጋ ውጤቶች ከንግዶቹ ስም ጋር"
+        },
+        {
+          "id": "04-product",
+          "headline": [
+            "ዝርዝሩን ይመልከቱ።"
+          ],
+          "alt": "የምርት ፎቶዎች፣ የሚዲያ መምረጫ፣ መግለጫ እና ጥያቄ መላኪያ"
+        },
+        {
+          "id": "05-language",
+          "headline": [
+            "በራስዎ ቋንቋ።"
+          ],
+          "alt": "የSuqPage ገበያ በአማርኛ፤ ከአምስቱ የመተግበሪያ ቋንቋዎች አንዱ"
+        },
+        {
+          "id": "06-transport",
+          "headline": [
+            "ማጓጓዣ ይፈልጋሉ?"
+          ],
+          "alt": "የማጓጓዣ ቀጥታ ውይይት መጀመሪያ፣ መነሻ፣ መድረሻ፣ ስምና ስልክ"
+        }
+      ]
+    }
+  },
+  "narrative": "See how close the businesses selling products you’ve loved on social media are to you. Browse their products, styles and services in organized online stores, then contact them directly without digging through old posts."
+}

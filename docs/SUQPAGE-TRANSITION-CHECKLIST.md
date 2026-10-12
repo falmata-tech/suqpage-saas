@@ -4183,3 +4183,170 @@ DEP-044. Master §15's distribution state and related runbooks will be reconcile
 - [ ] REMAINING ROLLOUT GATE: protected Play-installed physical-phone workflows
   and system notifications, then reviewed closed rollout and actual opt-in link.
   Recruit genuine testers; no invented identities, feedback or 12/14 clock.
+
+S99.6 — complete the professional Play listing presentation (DEP-044)
+
+Owner requests all graphics/screenshots and modern store materials. The one-time
+store presentation should be visually strong with minimal text: short headlines,
+large authentic app screens and SuqPage colors. Preserve S99.5's pending API approval and physical-phone/
+rollout gates. Definition of Ready: existing brand, exact app/account, native v3
+source, English/Amharic Console locales, Google asset rules and real feature
+claims are known. Master §15/store runbook will describe only verified outcomes.
+
+- [x] Inspect existing listing and seven saved assets, actual v3 native captures,
+  current Google image/video/copy requirements and supported listing languages.
+- [x] Prepare polished layouts from retained authentic native captures: six
+  English and five Amharic phone images, two feature graphics and the unchanged
+  icon. Record v3 sources and the unchanged visible v2 showroom fold explicitly;
+  no new native capture, fabricated UI or customer conversation is claimed.
+- [x] Verify source/brand hashes, dimensions/opacity/size, copy limits and caption
+  area; inspect phone-size compositions under delegated store-design review.
+  Protected evidence: store-presentation/collection-v2/ under .local/play-s99/.
+- [x] Prepare two portrait Google preview videos; metadata and full H.264 decode
+  pass. No official YouTube channel or eligible URL exists, so video remains
+  optional and unattached in Console.
+- [x] Preserve existing Console media/copy and save supported images and revised
+  descriptions using normal SuqPage-only controls. Independent fresh reload
+  verifies both locales; all 13 new CDN thumbnails match after Google's resize/
+  transcode. Record accurate AI-composition declarations. Authored alt text stays
+  in presentation.json: no supported alt-entry control was exposed, so provider
+  application of those descriptions is not claimed. Icon/video remain unchanged.
+- [x] Record optional-media/device limits and owner steps in the release runbook.
+  Final Publishing overview read verifies the SuqPage app, disabled review button
+  and no review action; this is saved preparation, not Google approval.
+- [ ] Commit the scoped records with the app-copy task after its approval/gates.
+
+S99.7 — TikTok/Instagram coming-soon launch kit (DEP-044)
+
+Owner extends the task to a complete professional organic launch program. The
+official accounts do not yet exist; the owner will create them. Prepare reusable
+media, native captions in the app's five languages, bios and an ordered posting
+plan; do not create accounts, publish, message others or invent a scheduled post.
+The web platform is live, Android is coming soon, and no fixed date, Play
+pre-registration, public app availability, checkout or guaranteed transport is
+advertised. No ad spend, tracking SDK, new backend/waitlist or paid campaign.
+
+- [x] Inspect current official promotional-content and media rules; use SuqPage
+  brand assets and actual app screens, with readable minimal text and no third-
+  party music or made-up testimonials/metrics.
+- [x] Prepare portrait videos/Reels/TikToks, feed/story posters, profile icon,
+  launch captions/bios and a simple visitor/business posting sequence. Keep
+  Google listing assets separate from social promotional assets.
+- [x] Verify rendering/encoding/native copy and website destination; document
+  posting instructions and account handoff, while actual publishing stays pending
+  the owner's accounts and the appropriate platform controls.
+  Five 14.3-second H.264 videos pass full decode. Twenty posters, five outros,
+  profile icon, captions/bios and an ordered posting plan cover all five languages.
+  Conservative portrait overlay margins, silent audio and separate own-brand/
+  AI-content disclosures are documented. Final 54-file ZIP passes CRC validation;
+  no credentials, tester addresses or private runtime records are included.
+
+S99.8 — collection-led narrative across clients and launch materials (FE-052,
+FE-049, DEP-044; L1 implementation with separate L3 rollout)
+
+Newest owner direction: make an organized business collection the main benefit,
+instead of leading with seller location. Preserve all discovery/transport/account
+features and earlier S99 release gates. Definition of Ready is met; no data/API
+change, checkout, automatic social import or stock guarantee is implied. Master
+sections 1/3/18/19/22 and the release-state statement in 15 are affected.
+
+- [x] Record scope, audiences, native-language contracts and ordered plan before
+  code; inspect shared copy, localization source, tests and current Play materials.
+- [x] Revise shared Market/About and aligned account entry; author all
+  four contextual locale catalogs. Merchant text remains verbatim.
+- [x] Align English/Amharic Play listing, minimal-text graphics and all five
+  social campaign locales; preserve original captures and earlier artifact hashes.
+- [x] Run focused narrative/localization/spec/type checks and capture actual web/
+  Expo-browser desktop/phone states; inspect graphics/video and retain evidence.
+  Narrative/launch-material, homepage, 10 localization tests (1,401 messages),
+  both typechecks, mobile contracts and 190-spec validation pass. All 69 local
+  browser states pass layout/action/metadata checks with no page errors. Fix Metro
+  shared-lib watching and verify its regression without watching private runtime
+  directories. This is browser evidence, not a new installed-phone check.
+- [ ] SUPERSEDED CANDIDATE: S99.8 app-copy approval is replaced by the S99.9
+  clarity correction below; preserve its implemented/tested evidence. Obtain acceptance before full
+  app/release gates. Owner-delegated store presentation review stays separate.
+- [x] Reconcile verified implementation and traceability; preserve deno.lock.
+- [ ] Run full required app/release gates and commit reviewed task files after
+  visual approval. The latest copy is local, not deployed or built into Android.
+  New Android delivery requires its own artifact admission; S99.5's protected
+  API-read approval, real-phone/alerts, Google review and closed activation remain
+  pending and are not inferred from marketing preparation.
+
+S99.9 — research-led first-glance copy clarity (FE-052 / FE-049, L1)
+
+Owner feedback: the heading and "collections behind social media posts" are too
+ambiguous. Identify businesses selling on social media immediately, describe
+organized online stores and direct inquiries, and balance brevity with clarity.
+This refines the existing authorized task; it does not replace earlier rollout
+gates or approve the rejected S99.8 app candidate. Definition of Ready is met:
+audiences, shared copy/localization contracts and unchanged data scope are known.
+Affected master sections: 3/18/19/22; 15 retains actual saved/released state.
+
+- [x] Research primary homepage/app writing guidance; compare against the actual
+  Market header. Record findings and observable clarity requirements before code.
+- [x] Revise shared Market/About copy and four contextual catalogs.
+  Preserve the existing organized-store proposition, map and all user workflows.
+- [x] Run focused narrative/localization/type checks and actual local desktop/
+  phone captures; verify the header is readable without hiding map controls.
+  Narrative/launch-material, homepage, ten localization tests (1,406 messages)
+  and both typechecks pass. All 69 local five-language browser states pass; actual
+  English/Amharic phone captures are inspected. Protected copy-clarity-s999/
+  evidence under .local/play-s99/. Tiles are test-stubbed, no new native build or
+  customer-comprehension study is claimed.
+- [ ] SUPERSEDED CANDIDATE: S99.9 is replaced by the owner-accepted S99.10 narrative;
+  explicit visual approval before full app/release checks.
+- [ ] After acceptance, align Play/social copy and graphics; preserve previous
+  saved assets and exact evidence. Verify new local/provider states separately.
+- [ ] Run applicable full gates, reconcile specs/master/traceability and commit
+  explicit task paths. New Android admission and all earlier external gates remain.
+
+S99.10 — owner-accepted proximity and organized-store narrative (FE-052,
+FE-049, DEP-044; L1 copy/media with separate L3/L4 rollout)
+
+Owner explicitly accepts: "See how close the businesses selling products you’ve
+loved on social media are to you. Browse their products, styles and services in
+organized online stores, then contact them directly without digging through old
+posts." Apply across web/mobile/About, all five languages, store and campaign
+materials. Scope is presentation only: no distance algorithm, social import,
+checkout or catalog/account/map-behavior change. Definition of Ready is met;
+accepted meaning, existing ports, source media and exact provider targets are known.
+Master sections 1/3/15/18/19/22 are affected. Earlier release gates persist.
+
+- [x] Record accepted meaning, audience-specific adaptation and ordered plan;
+  inspect shared copy, active surfaces and one-time media generators before edits.
+- [x] Update shared Market/About/map/account entry and four contextual
+  catalogs. Use accepted first sentence as heading and remaining sentence below;
+  keep business-owner copy about their store, location and direct inquiries.
+- [x] Align English/Amharic listing, five-language campaign copy and short media
+  captions; rebuild into a new protected directory, preserving previous sources.
+- [x] Run focused copy/localization/type checks; capture all affected desktop/
+  phone states, inspect the long heading and graphics, verify video/ZIP integrity.
+  Narrative/homepage contracts, ten localization tests (1,414 messages) and both
+  typechecks pass. All 69 browser states pass; long English/Amharic phone headings
+  and five-language audience sheets are inspected. New paths proximity-v1 and
+  launch-kit-proximity-v1 preserve earlier files. Fourteen store images, twenty
+  social posters, profile icon and seven H.264 full decodes pass; 54-file ZIP CRC
+  passes. No new native screenshot, phone proof or published campaign is claimed.
+- [x] Obtain explicit acceptance of the actual new layouts before full release
+  checks. Copy meaning is approved; prior app candidates are superseded.
+  Owner explicitly approves the linked web/Amharic-mobile layouts and release
+  checks on October 12. This approval precedes the new full gate invocation.
+- [x] Save/reload the aligned scoped Play drafts under existing store delegation;
+  retain before-state, accurate declarations, independent evidence and no rollout.
+- [x] Run applicable full source gates after visual approval; complete check, isolated
+  release:web, eleven acceptance workflows, operations/mobile contracts, Hermes
+  export and actual packaged Linux handler/worker pass. Reconcile durable evidence.
+- [ ] CURRENT: commit explicit task files and verify the exact web artifact/production
+  backup before web publication. Fresh Android admission, physical-phone alerts,
+  blocked API direction, genuine testers and reviewed closed/public gates remain.
+
+S99.10 deployment preparation: actual Linux archives, Android runtime privacy,
+normal two-locale Console reload/CDN/provenance and 190-spec validation pass.
+Netlify identity/runtime is independently verified. Prior local deployment
+archives were temporary and are no longer present; the exact previous provider
+deploy 6aca91cb2f49de22d3839199 is independently retained/ready, with its source
+and published files. Rollback is an owner-reviewed republish of that immutable
+snapshot, never an automatic restore or database downgrade. A fresh protected
+schema-63 backup precedes upload. Expo Free admission is 15/30 builds, zero cost;
+public targets/Firebase metadata and existing signer remain verified unchanged.

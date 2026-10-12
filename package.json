@@ -72,7 +72,7 @@
     "test:local-provider-smoke": "node scripts/test-local-provider-smoke.mjs",
     "test:featured-schedule": "node --import tsx scripts/test-clock-display.ts && tsx scripts/test-featured-schedule.ts",
     "test:identity": "node scripts/test-platform-identity.mjs",
-    "test:narrative": "node scripts/test-platform-narrative.mjs && node --import tsx scripts/test-category-illustrations.ts",
+    "test:narrative": "node scripts/test-platform-narrative.mjs && node --import tsx scripts/test-category-illustrations.ts && node scripts/test-launch-materials.mjs",
     "test:homepage": "node scripts/test-homepage-composition.mjs",
     "test:pwa": "node scripts/test-pwa-shell.mjs",
     "test:pwa-visual": "node scripts/capture-pwa-shell.mjs",

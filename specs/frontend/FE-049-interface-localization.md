@@ -2,9 +2,9 @@
 id: FE-049
 title: Five-language interface
 status: in_progress
-related: [FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062]
+related: [FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044]
 owners: [product, frontend]
-last_updated: 2026-10-07
+last_updated: 2026-10-12
 change_level: L2
 ---
 
@@ -171,3 +171,65 @@ The intake invitation also names the transport team and help getting the purchas
 to the customer, written naturally in each language. Verify shared-catalog coverage and
 legible ordered typography at 320px on web and Expo. Independent native-speaker
 approval is separate from automated coverage/layout evidence.
+
+S99.8 (FE-052/DEP-044): write the organized-collection narrative independently in
+Amharic, Afaan Oromo, Somali and Tigrinya for Market, both About audiences and
+account entry. Use ordinary local words for browsing offerings, models/styles,
+colors and direct questions; preserve familiar brand names. Keep the canonical
+TSV/generated catalogs synchronized, placeholders and merchant content unchanged.
+Coverage/layout checks do not imply independent native-speaker approval.
+
+October 11 focused evidence: canonical TSV/generated catalogs stay synchronized
+at 1,401 messages per translated catalog; ten localization safety/coverage tests
+pass. Shared narrative/marketing claim tests, both typechecks and 69 actual local
+browser states pass, including narrow-phone layouts across all five languages.
+Evidence: .local/play-s99/narrative/ and scripts/test-launch-materials.mjs.
+The new app-copy candidate awaits visual approval and full release gates; existing
+Play version 3 is unchanged. No merchant content is translated or rewritten.
+
+S99.9 (FE-052): each Market heading explicitly identifies businesses selling on
+social media and their products. About separates customers browsing those stores
+from owners creating them. Use ordinary native phrasing for shops, products and
+social media; each heading must make sense without its paragraph. The English
+word collection or a literal scrolling metaphor is not required in any locale.
+Keep generated catalogs and canonical source synchronized; this correction does
+not change merchant text or any data/action contract.
+
+S99.9 focused evidence, October 11: 1,406 messages per translated catalog,
+ten localization tests, both typechecks and 69 local five-language browser states
+pass. New headings use native business/shop/product terms; no English slogan is
+needed to establish context. Captures are under .local/play-s99/copy-clarity-s999/.
+This does not imply independent native-speaker signoff or a new installed binary.
+
+S99.10 (FE-052/DEP-044): apply the owner-accepted nearby-business/social-product,
+organized-online-store and direct-contact narrative contextually in all five
+languages. Market, separate About audiences, aligned account/map introduction
+and campaign copy keep the same meaning. English prose is explicitly accepted;
+other languages need not follow its word order or idioms. Native local terms for
+business, products, shops, social media and browsing remain understandable without
+an English slogan. Placeholder, user content and data boundaries stay unchanged.
+
+S99.10 focused evidence: 1,414 synchronized messages and ten localization tests,
+both typechecks and 69 local five-language viewport states pass. New five-language
+customer/owner campaign sheets are visually inspected. The owner accepts the
+linked app layouts and full checks on October 12; independent native-speaker and
+physical-phone signoff are not claimed. Prior assets remain separately preserved.
+
+S99.10 verified source/store evidence, October 12: owner visual approval precedes
+the complete passing check, clean isolated release:web, 11/11 production-mode
+local acceptance workflows, operations, mobile build contracts and Android Hermes
+export. Actual packaged Linux handler/Sharp and scheduled worker pass; the worker
+uses an empty isolated PostgreSQL fixture and sends no provider requests. The
+web audit is clean. Native audit remains failed (20 high, two tooling roots, zero
+critical); both roots are absent from all 1,651 compiled runtime modules. The
+previous one-AAB waiver is consumed; another build needs exact renewed admission.
+
+Fresh independent normal Console reload verifies exact English/Amharic listing
+drafts, ordered assets and seven unchanged phone-image references plus shared
+icon. Only six graphics change; all six transformed Google CDN images visually
+match source. Thirteen composite AI labels persist, the original icon remains
+unlabelled, and Publishing overview still has a disabled Send app for review.
+No Google review, closed activation, opt-in, physical-device or campaign publication
+is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
+console-setup/s9910-final-two-locale-console-read.json and
+store-presentation/proximity-v1/provider-readback/verification.json.

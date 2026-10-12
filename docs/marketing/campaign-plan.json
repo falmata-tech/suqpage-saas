@@ -1,0 +1,93 @@
+{
+  "status": "assets_prepared_not_published",
+  "audiences": [
+    "customers finding the businesses behind social media products and browsing organized stores",
+    "businesses organizing their social media offerings, location and direct inquiries"
+  ],
+  "accountSetup": [
+    "Create the official SuqPage TikTok and Instagram accounts; choose a matching available handle.",
+    "Use profile-icon-1024.png. Copy the matching language's TikTok or Instagram bio from coming-soon-copy.json.",
+    "Add https://suqpage.com in the platform's website field where available; otherwise retain it in the bio.",
+    "Use the public support email marketvision.tech@gmail.com for customer questions. Do not publish private tester or reviewer credentials."
+  ],
+  "postingSequence": [
+    {
+      "order": 1,
+      "relativeDay": "Day 1",
+      "audience": "customers",
+      "media": "visitor-story.png or coming-soon-video.mp4",
+      "caption": "visitorCaption",
+      "purpose": "Show that the business selling a product someone loved on social media could be nearby; invite browsing its organized store."
+    },
+    {
+      "order": 2,
+      "relativeDay": "Day 3",
+      "audience": "businesses",
+      "media": "business-feed.png carousel",
+      "caption": "businessCaption",
+      "purpose": "Show the storefront benefit and invite business setup; pin this beside the visitor post."
+    },
+    {
+      "order": 3,
+      "relativeDay": "Day 5",
+      "audience": "customers",
+      "media": "coming-soon-video.mp4",
+      "caption": "visitorCaption",
+      "purpose": "Show real store, product and inquiry views; reinforce browsing by named item."
+    },
+    {
+      "order": 4,
+      "relativeDay": "Day 7",
+      "audience": "customers",
+      "media": "06-transport.png from the Play presentation as a story",
+      "caption": "transportCaption",
+      "purpose": "Explain transport assistance after a purchase; no guaranteed arrival or transport quote."
+    },
+    {
+      "order": 5,
+      "relativeDay": "Day 10",
+      "audience": "businesses",
+      "media": "business-story.png",
+      "caption": "businessCaption",
+      "purpose": "Invite owners to organize their collection and share one storefront link."
+    }
+  ],
+  "languages": {
+    "order": [
+      "am",
+      "om",
+      "so",
+      "ti",
+      "en"
+    ],
+    "guidance": "Use the audience's language for each post; rotate languages across posts or stories. Do not stack all five captions into one video. Match subtitles/poster and caption. The existing real app crops may show English UI; do not label them as fully localized device captures."
+  },
+  "publishSteps": [
+    "Choose the matching language folder. Use 1080x1920 story/video assets for TikTok, Reels or Stories, and 1080x1350 feed assets for a carousel.",
+    "Check the platform's crop preview, especially right-side controls and the bottom caption. The artwork reserves margins; move the cover crop if needed.",
+    "On TikTok, enable the commercial content disclosure setting for your own brand (Promotional content). Do not choose a third-party paid partnership unless one actually exists.",
+    "These layouts are AI-assisted and include realistic illustrative demo imagery in real app views. Use TikTok’s AI-generated content label when posting these creatives; keep any automatic AI-information label on other platforms. This is separate from the own-brand promotional disclosure.",
+    "Videos are silent by design. Add your own voice or music cleared for that platform and commercial use. TikTok Commercial Music Library rights are not assumed to transfer to Instagram. Do not add unlicensed music.",
+    "Paste the matching visitorCaption, businessCaption or transportCaption. Use the website destination; do not post internal-testing links as a public download.",
+    "Preview once on a phone, then publish from the official account. No post has been scheduled or published by this preparation."
+  ],
+  "releaseBoundaries": [
+    "The website is live. Android is coming soon; no release date or public Play availability is promised.",
+    "Two more genuine testers are still needed for the current list to reach 12. The closed-test period begins only when at least 12 actual testers opt in and remain opted in for 14 continuous days.",
+    "Closed-track activation/review and physical-phone notifications are separate release gates. Preparing artwork is not approval from Google.",
+    "Google's optional preview video needs an eligible public/unlisted YouTube URL with ads off and no age restriction. The local MP4 is ready; no channel or URL is invented."
+  ],
+  "measurement": [
+    "Watch saves, profile visits and questions about storefronts using each platform's existing insights.",
+    "Keep a simple weekly record of questions and real business signups; no tracking SDK, paid campaign or guaranteed conversion is added."
+  ],
+  "sources": [
+    "https://support.google.com/googleplay/android-developer/answer/9866151?hl=en",
+    "https://support.google.com/googleplay/android-developer/answer/14151465?hl=en",
+    "https://support.tiktok.com/en/business-and-creator/creator-and-business-accounts/promoting-a-brand-product-or-service",
+    "https://support.tiktok.com/en/business-and-creator/creator-and-business-accounts/commercial-use-of-music-on-tiktok",
+    "https://support.tiktok.com/en/using-tiktok/creating-videos/ai-generated-content",
+    "https://support.google.com/googleplay/android-developer/answer/17262077?hl=en"
+  ],
+  "formatNotes": "1080x1920 at 30 fps and 1080x1350 are chosen export formats. Instagram's official help page could not be fetched (429), so exact current Instagram limits are not asserted. Inspect the actual upload preview. Portrait captions end at 1530px, above the conservative bottom overlay margin; the profile pin is centered by its artwork bounds."
+}

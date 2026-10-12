@@ -30,7 +30,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
           <span className="platform-task-eyebrow">{t("Account access")}</span>
           <h1 id="login-title">{t("Sign in to Suqpage.")}</h1>
           {p.next==='inquiries' && <p>{t("Sign in to view your business inquiries.")}</p>}
-          <p>{t("Create a professional store for your products and services, or sign in to manage your page and customer inquiries.")}</p>
+          <p>{t("Give your social media customers an organized store to browse, find on the map and contact directly. Sign in to create your page or manage inquiries.")}</p>
           <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("New business? Enter your email to create your account.")}</span></div>
         </div>
         <div className="platform-form-panel">

@@ -2,9 +2,9 @@
 id: FE-052
 title: Clear launch journeys and natural interface language
 status: in_progress
-related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053]
+related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053, DEP-044]
 owners: [product, frontend, backend]
-last_updated: 2026-10-07
+last_updated: 2026-10-12
 change_level: L3
 ---
 
@@ -216,3 +216,151 @@ S63 local evidence: both client typechecks, narrative/localization checks and 69
 copy-only browser states pass across all five languages. Details in TRACEABILITY
 and checklist S63. This is local implementation and browser review; owner visual
 approval and web/native rollout remain pending. No native-speaker signoff claimed.
+
+## S99.8 — prior candidate (superseded by S99.10)
+
+The newest owner direction supersedes S63's location-led introduction. GIVEN
+Market, About or account entry on web, mobile web or Expo WHEN the platform copy
+is read THEN it leads with organized offerings: customers browse a business's
+collection, understand models/colors/styles or service types, and ask about the
+right item instead of searching through social posts. The English lead is
+superseded by S99.9 below. Each other locale expresses the benefit naturally
+rather than reproducing an English idiom or sentence order.
+
+GIVEN About WHEN read THEN separate customer and business sections explain
+browsing the collection and creating/sharing an organized storefront respectively.
+Keep photos/videos, direct inquiries, the inquiry list and map discovery visible.
+Map behavior/prominence, merchant content, account rules, transport and all data
+contracts remain unchanged. No automatic social import, structured variant picker,
+confirmed-stock guarantee, social-account requirement or checkout is promised.
+
+GIVEN the local Expo preview WHEN shared storefront copy changes THEN Metro
+invalidates the imported module without requiring an unrelated app edit. Watch
+the shared lib directory only, excluding runtime-data/credential directories.
+This development correction changes no runtime API or package dependency.
+
+GIVEN Play or social launch material WHEN prepared THEN the same collection-led
+benefit appears in concise captions and authentic media under DEP-044. Store
+locales remain English/Amharic; app and organic campaign copy cover all five.
+No claim about another platform's regional availability is included.
+
+Readiness: audiences, scope, existing shared copy/catalog ports and release
+boundaries are known. Affected master sections: 1, 3, 18, 19 and 22; section 15
+must retain the distinction between this local candidate and released binaries.
+Verify narrative/localization/content boundaries, both typechecks and real local
+web/Expo-browser 1440/390/320 views. Actual device proof remains separate. UI-only
+rollback restores copy/catalogs; no database or provider change is needed.
+
+Focused evidence, October 11: scripts/test-platform-narrative.mjs,
+scripts/test-launch-materials.mjs, homepage/localization checks, both client
+typechecks and scripts/test-mobile-contracts.ts pass. The latter verifies shared
+copy watch coverage while excluding private runtime directories. The actual
+capture-storefront-copy.mjs run passes 69 local web/Expo-browser states; receipt
+and screenshots are retained in .local/play-s99/narrative/screens/. Map tiles are
+stubbed to avoid automated tile traffic; catalogs and action routes are real local
+reads. This is not installed-phone or independent native-speaker evidence.
+App visual acceptance, full repository/release gates, scoped commit and new web/
+Android delivery remain pending. Store/campaign outcomes are tracked in DEP-044.
+
+## S99.9 — prior candidate (superseded by S99.10)
+
+The owner-accepted S99.10 wording below supersedes this candidate.
+
+The owner rejects the S99.8 lead because collections and posts alone do not
+identify businesses selling on social media. Research informs the correction:
+homepage purpose must be immediately apparent; concise means enough familiar
+words to communicate the task, not the fewest possible words. Sources:
+[NN/g homepage guidance](https://www.nngroup.com/articles/homepage-design-principles/),
+[Apple writing guidance](https://developer.apple.com/design/human-interface-guidelines/writing)
+and [Intuit product content](https://contentdesign.intuit.com/product-and-ui/product-content-design/).
+
+GIVEN a first-time Market visitor on web or mobile WHEN reading only the heading
+THEN they can identify products from businesses selling on social media.
+The English candidate is "Browse products from businesses on social media."
+GIVEN its supporting copy WHEN read THEN organized online stores, product/service
+details and direct contact explain the benefit of avoiding scattered old posts.
+The heading must not depend on a metaphor, pronoun without an antecedent or the
+word collection to establish the business context.
+
+GIVEN About WHEN read THEN customer and owner headings identify browsing a
+business's offerings and providing an organized store for its social customers.
+GIVEN another locale WHEN selected THEN ordinary local words establish the same
+business/product context without translating English slogans literally. Merchant
+text, map prominence, filters, actions, accounts and all API/data contracts stay
+unchanged. No checkout, automatic social import or stock guarantee is introduced.
+
+Readiness: this is owner feedback on the active, uncommitted candidate; audiences,
+scope and existing shared copy/catalog ports are known. Update local app copy and
+review it before replacing already saved Play/social assets. Earlier artifacts and
+their verification remain historical evidence, not approval of this correction.
+Map to narrative/localization tests, both client typechecks and focused real
+web/Expo-browser viewport captures. Master sections 3/18/19/22 describe the new
+candidate; section 15 preserves the previous saved materials/released binary.
+Explicit visual acceptance, full gates and scoped commit precede app rollout.
+
+October 11 focused evidence: narrative/launch-material and homepage tests pass,
+ten localization tests pass with 1,406 synchronized messages, and both web/native
+typechecks pass. capture-storefront-copy.mjs --copy-only passes 69 real local
+web/Expo-browser language/viewport states. English and Amharic phone captures are
+visually inspected; map/filter controls remain visible. Protected evidence:
+.local/play-s99/copy-clarity-s999/screens/copy-verification-all.json. Tiles are
+stubbed to avoid automated provider traffic; this is neither physical-device
+proof nor a first-time-user comprehension study. Visual acceptance, full gates,
+commit/deployment and subsequent store/social alignment are still pending.
+
+## S99.10 — accepted proximity and organized-store narrative (implemented and visually accepted, L1)
+
+The owner accepts the full message: "See how close the businesses selling products
+you’ve loved on social media are to you. Browse their products, styles and services
+in organized online stores, then contact them directly without digging through old
+posts." GIVEN Market on either client WHEN read THEN the first sentence is the
+heading and the remainder is the supporting paragraph. Together they retain
+business/social-product context, location discovery, organized stores and direct
+contact without old-post searching. Do not introduce exact distance estimates,
+automatic account matching, social imports, checkout or availability guarantees.
+
+GIVEN About WHEN read THEN customer copy reflects finding/browsing those businesses;
+owner copy describes an organized store their followers can browse, map location
+and direct inquiries. Adapt related account entry and map copy where necessary,
+not operational/legal instructions or merchant content. GIVEN another locale
+WHEN selected THEN native wording preserves the accepted meaning rather than
+English syntax. Merchant identity, data, map/filter prominence and actions remain.
+
+GIVEN store/campaign material WHEN refreshed THEN concise audience-specific text
+and authentic screens communicate the same meaning under DEP-044. Preserve older
+assets/readbacks and verify each new artifact instead of claiming old receipts
+prove the new output. Readiness is met; no material product/provider choice is
+unresolved. Master sections 1/3/15/18/19/22 are affected. Existing narrative/catalog/
+type/viewport contracts prove affected acceptance criteria; phone screenshots
+must show the long heading does not obscure map/search controls. Explicit visual
+layout approval precedes full release gates; accepted prose does not establish
+installed-device, Google review or distribution evidence.
+
+October 12: the owner explicitly approves the actual web/Amharic-mobile layouts
+and full release checks after the prose acceptance. Shared Market/About/map and
+account entry, contextual catalogs and local store/campaign text are implemented.
+Focused narrative/localization (1,414 messages)/both typechecks and 69 actual local
+browser states pass. Phone headings and five-language poster sheets are inspected.
+New artifact directories preserve previous versions; image contracts, seven full
+video decodes and a 54-file ZIP CRC pass. Evidence: .local/play-s99/narrative-s9910/,
+store-presentation/proximity-v1/ and launch-kit-proximity-v1/. Full gates are now
+authorized and pass as recorded below; no binary or deployment is inferred from approval.
+
+S99.10 verified source/store evidence, October 12: owner visual approval precedes
+the complete passing check, clean isolated release:web, 11/11 production-mode
+local acceptance workflows, operations, mobile build contracts and Android Hermes
+export. Actual packaged Linux handler/Sharp and scheduled worker pass; the worker
+uses an empty isolated PostgreSQL fixture and sends no provider requests. The
+web audit is clean. Native audit remains failed (20 high, two tooling roots, zero
+critical); both roots are absent from all 1,651 compiled runtime modules. The
+previous one-AAB waiver is consumed; another build needs exact renewed admission.
+
+Fresh independent normal Console reload verifies exact English/Amharic listing
+drafts, ordered assets and seven unchanged phone-image references plus shared
+icon. Only six graphics change; all six transformed Google CDN images visually
+match source. Thirteen composite AI labels persist, the original icon remains
+unlabelled, and Publishing overview still has a disabled Send app for review.
+No Google review, closed activation, opt-in, physical-device or campaign publication
+is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
+console-setup/s9910-final-two-locale-console-read.json and
+store-presentation/proximity-v1/provider-readback/verification.json.
