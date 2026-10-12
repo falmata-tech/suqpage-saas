@@ -1491,9 +1491,13 @@ YouTube preview URL do not yet exist; no campaign or preview video is published.
 Current S99.10 app copy has explicit owner layout approval, 69 browser states,
 1,414-message localization coverage, full check, isolated web release, eleven
 acceptance workflows, operations/mobile contracts and Hermes export evidence.
-Exact packaged Linux handler/Sharp and scheduled worker checks pass. Source commit,
-artifact/privacy and production backup precede web delivery; a new Android build
-requires renewed exact tooling admission.
+Exact packaged Linux handler/Sharp and scheduled worker checks pass. Source
+3cfa577 is published as Netlify 6acd6e4203a2e50c6b9286dd after a private consistent
+schema-63 backup and archive/privacy/source binding. Twelve read-only production
+checks and fifteen live phone states (Market/About/account in five languages)
+verify health, guards, associations, accepted copy and layout. No database/provider
+configuration or customer-record write is part of this update. A new Android
+build still requires renewed exact tooling admission.
 The aligned local pack has 54 CRC-verified files and seven fully decoded silent
 H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
 ordered graphics and accurate AI labels; six new CDN transforms match source and
@@ -2287,8 +2291,9 @@ narrative, localization/content-boundary and type checks precede viewport review
 `capture-storefront-copy.mjs --copy-only` checks customer/owner copy, account entry
 and localized metadata. Browser-mobile evidence does not prove a new native APK.
 The owner approves the actual layouts; full source/release/acceptance and packaged
-Linux artifact gates pass. Web publication and fresh Android admission remain
-separate from that evidence.
+Linux artifact gates pass. Web publication is independently verified at source 3cfa577, including all five
+live-language Market/About/account phone layouts. Fresh Android admission remains
+separate; no replacement installed native binary is claimed.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the

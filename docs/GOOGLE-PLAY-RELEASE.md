@@ -632,3 +632,27 @@ zero critical. The previous one-free-AAB waiver is consumed: a fresh build needs
 a new exact review. Version 3 remains the current Play-installed build. Protected
 Play phone login/media/inquiries/chat/OS alerts, S99.5 final API direction, the two
 remaining genuine testers and reviewed closed/public gates stay outstanding.
+
+S99.10 web rollout, October 12: app source 3cfa5778e6f851d6934be421d589cd8adbcf33db
+is published as Netlify 6acd6e4203a2e50c6b9286dd. Before upload, a consistent
+owner-only schema-63 backup parses successfully and all 63 tables are represented.
+The exact previous immutable provider deploy remains ready for an owner-reviewed
+republish; cleaned temporary local archives are not claimed as available.
+The clean source binds to the tested handler/worker archives, public asset links
+and privacy scan. The single no-build upload finishes with exit zero; independent
+provider readback confirms publication. Twelve read-only health/catalog/denial/
+association checks and fifteen actual live Market/About/account phone states
+across five languages pass accepted-copy/no-overflow/no-page-error checks. OSM
+tiles are blocked only in automated layout capture. No customer inquiry/chat,
+notification, schema/config write or restoration is performed.
+
+Fresh Android admission for the same source: isolated native-only install passes,
+fresh audit remains failed (20 high, zero critical, two known tooling roots), all
+1,651 runtime modules exclude those roots, and 1,622 actual EAS archive files match
+the committed source and exclude private paths/credentials. Exact public runtime,
+Firebase file metadata and existing default signer are independently verified.
+Free quota is 15/30 builds, zero cost. The exact one-AAB review is requested and
+pending; no new cloud binary is claimed. Protected phone/OS alerts, S99.5 API
+direction and real tester/reviewed closed rollout gates remain. Evidence:
+.local/play-s99/narrative-s9910/{production-live-verified,artifact,source-binding,
+eas-archive-reviewed,aab-admission-plan}.json and its database/backup-manifest.json.

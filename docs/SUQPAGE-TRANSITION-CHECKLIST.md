@@ -4337,8 +4337,17 @@ Master sections 1/3/15/18/19/22 are affected. Earlier release gates persist.
 - [x] Run applicable full source gates after visual approval; complete check, isolated
   release:web, eleven acceptance workflows, operations/mobile contracts, Hermes
   export and actual packaged Linux handler/worker pass. Reconcile durable evidence.
-- [ ] CURRENT: commit explicit task files and verify the exact web artifact/production
-  backup before web publication. Fresh Android admission, physical-phone alerts,
+- [x] Commit the 26 explicit task files as 3cfa577; staged-scope and whitespace
+  checks pass, deno.lock stays untouched. Bind the clean publish source and exact
+  Linux archives, private-path/key scans, consistent schema-63 backup and immutable
+  rollback deploy. One production upload completes successfully. Independent
+  readback and twelve public/API/guard/link checks plus fifteen live phone states
+  pass on Netlify 6acd6e4203a2e50c6b9286dd. No configuration/schema/customer writes.
+- [ ] CURRENT: exact one-free-AAB review is prepared and requested under DEP-044;
+  native-only clean install, fresh failed audit (20 high/two roots), Hermes/runtime
+  privacy, 1,622-file actual EAS archive, public target/Firebase metadata, same
+  default certificate and Free 15/30 zero-cost quota pass admission checks.
+  Approval is pending; no new cloud build has started. Physical-phone alerts,
   blocked API direction, genuine testers and reviewed closed/public gates remain.
 
 S99.10 deployment preparation: actual Linux archives, Android runtime privacy,
