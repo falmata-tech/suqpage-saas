@@ -4343,11 +4343,34 @@ Master sections 1/3/15/18/19/22 are affected. Earlier release gates persist.
   rollback deploy. One production upload completes successfully. Independent
   readback and twelve public/API/guard/link checks plus fifteen live phone states
   pass on Netlify 6acd6e4203a2e50c6b9286dd. No configuration/schema/customer writes.
-- [ ] CURRENT: exact one-free-AAB review is prepared and requested under DEP-044;
+- [x] Exact one-free-AAB review is approved under DEP-044, digest
+  4e4b9640bb318a28f147ade33694d78b7ab1f038e3b23888fbad8167bd728383;
   native-only clean install, fresh failed audit (20 high/two roots), Hermes/runtime
   privacy, 1,622-file actual EAS archive, public target/Firebase metadata, same
   default certificate and Free 15/30 zero-cost quota pass admission checks.
-  Approval is pending; no new cloud build has started. Physical-phone alerts,
+  Owner explicitly approves this one free build. No new cloud build has started.
+- [x] Refresh exact Expo project/public-runtime/signing/advisory admission;
+  verify committed source, archive, runtime, lock and fresh advisory set against
+  the approved digest and start one frozen-credential cloud AAB attempt.
+  CLI exit 1 is an explicit Free Android quota rejection after upload/version 4
+  reservation. Independent exact-project readback proves zero new cloud jobs and
+  zero artifacts. The aggregate 15/30 metric was not Android-specific; Free is
+  15 Android plus 15 iOS. No signing/configuration or paid change occurred.
+- [x] Complete the same one approved artifact using the documented EAS
+  local production workflow on the prepared Mac, with frozen existing credentials
+  and unchanged source/lock/public runtime. Keep failed cloud evidence; no cloud
+  replay, paid upgrade, remote version rollback or automatic submission.
+- [x] Monitor the local process to terminal status; check actual output/signing/
+  privacy/API/native alignment before admission.
+- [x] Retain and inspect the actual local AAB package/version/signature/API/privacy/
+  native page alignment, then record consumed exception and scoped evidence.
+  One local version-5 AAB from 3cfa577 passes actual signature/API-36/privacy/Firebase/
+  compiled-five-language/16-KB checks; 1,499 files and fifty 64-bit libraries are
+  verified. Exception is consumed; cloud job does not exist, payment is zero and
+  signing/legacy/FCM metadata is preserved.
+- [ ] CURRENT: separately reviewed Play upload/internal activation of this exact
+  version-5 artifact; do not infer submission from the build-only approval.
+  Physical-phone alerts,
   blocked API direction, genuine testers and reviewed closed/public gates remain.
 
 S99.10 deployment preparation: actual Linux archives, Android runtime privacy,

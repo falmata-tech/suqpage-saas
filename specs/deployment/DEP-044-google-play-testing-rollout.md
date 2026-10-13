@@ -548,3 +548,30 @@ No Google review, closed activation, opt-in, physical-device or campaign publica
 is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
 console-setup/s9910-final-two-locale-console-read.json and
 store-presentation/proximity-v1/provider-readback/verification.json.
+
+S99.10 updated Android artifact — October 12 (October 13 UTC): one owner-approved
+production AAB from source 3cfa577 is completed locally with official EAS after
+independent confirmation that cloud Free quota rejection created no job/artifact.
+Actual file `.local/play-s99/narrative-s9910/suqpage-play-v5.aab` is 93,109,626 bytes,
+SHA-256 45dea3bec99e715cd652531785524838300eef902d9461aa551a06c43c745e7c,
+package com.suqpage.app/version 5, target API 36, nondebuggable. Java cryptographic
+verification retains existing certificate 0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183;
+strict self-signed-chain exit 4 is allowed only after pinned certificate, validity,
+verified signature and no unsigned entries pass. Bundletool validation, requested
+16-KB ZIP alignment and all fifty 64-bit native ELF load alignments pass. All
+1,499 archive files pass privacy/credential scans; production API/Auth bindings,
+canonical HTTPS auto-verify and actual Firebase project/sender/client resources
+match. The actual Hermes bundle contains the accepted heading in all five
+languages and the new About/supporting copy. Public EAS signing, legacy and FCM
+metadata before/after remain identical; the private working directory is cleaned
+by SDK. No payment, new key, Google submission or Play-delivered phone is claimed.
+
+The bounded exception 4e4b9640bb318a28f147ade33694d78b7ab1f038e3b23888fbad8167bd728383
+is now consumed by this one artifact. The native audit remains failed, not clean;
+future artifacts need renewed admission. Google internal/Alpha version 3 and the
+Expo-distributed APK version 2 remain unchanged. New Play upload/activation,
+protected-phone workflows/OS alerts, S99.5 API direction and genuine 12-testers/
+14-day closed distribution remain separate. Evidence:
+.local/play-s99/narrative-s9910/{local-build-exit,aab-inspection,verified-artifact,
+aab-exception-consumed}.json. There is no managed cloud build ID for this local
+artifact. Only SuqPage is managed; no other app is changed or Git history pushed.

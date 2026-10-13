@@ -1496,8 +1496,16 @@ Exact packaged Linux handler/Sharp and scheduled worker checks pass. Source
 schema-63 backup and archive/privacy/source binding. Twelve read-only production
 checks and fifteen live phone states (Market/About/account in five languages)
 verify health, guards, associations, accepted copy and layout. No database/provider
-configuration or customer-record write is part of this update. A new Android
-build still requires renewed exact tooling admission.
+configuration or customer-record write is part of this update. The owner-approved
+updated production AAB from 3cfa577 is built and inspected as version 5 using
+EAS locally after the account-wide Free Android limit rejects the cloud attempt.
+Free combines 15 Android and 15 iOS; the aggregate count is not Android capacity.
+No cloud job or payment is incurred by this local bundle. Existing signing,
+legacy and FCM bindings remain identical. Actual bundle privacy/API-36/permissions,
+canonical HTTPS, Firebase client resources, all five compiled headings and fifty
+64-bit native libraries at 16-KB alignment pass. Its one-artifact tooling exception
+is consumed; the native audit is not clean. Version 5 is ready but has not been
+uploaded to Play or validated on a physical phone.
 The aligned local pack has 54 CRC-verified files and seven fully decoded silent
 H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
 ordered graphics and accurate AI labels; six new CDN transforms match source and
@@ -2292,8 +2300,10 @@ narrative, localization/content-boundary and type checks precede viewport review
 and localized metadata. Browser-mobile evidence does not prove a new native APK.
 The owner approves the actual layouts; full source/release/acceptance and packaged
 Linux artifact gates pass. Web publication is independently verified at source 3cfa577, including all five
-live-language Market/About/account phone layouts. Fresh Android admission remains
-separate; no replacement installed native binary is claimed.
+live-language Market/About/account phone layouts. The exact approved version-5
+AAB is built and independently inspected with all five locale headings present
+in actual Hermes bytecode. Its upload, installed-device/OS alerts and closed
+Google rollout remain separate; no replacement installed app is claimed.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the
