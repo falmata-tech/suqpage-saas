@@ -1681,3 +1681,17 @@ advertising-id-declaration-verified,closed-submission-complete,
 join-links-from-console}.json plus console-setup/closed-v5-* reload/comparison
 receipts. docs/GOOGLE-PLAY-RELEASE.md records the current status and tester steps;
 DEP-044 remains draft pending actual Google/tester/phone/public gates.
+
+
+S99.11 later publication confirmation, October 12 (October 13 UTC): after the
+2bc089e review-submission record, Google publishes private Alpha release 1/version
+5. Independent reload verifies Available to selected testers; release overview
+confirms Available to testers on Google Play and internal 5 Available. Exact
+selected twelve-member access/feedback and actual joining URLs remain verified;
+Dashboard shows production Inactive and zero closed opt-ins. Earlier pending
+review receipts stay immutable. Publication does not establish phone/OS-alert
+success, completed fourteen-day enrollment, production access or general public
+policy approval. Evidence: .local/play-s99/closed-v5-start/publication-verified.json
+and console-setup/closed-v5-published-* plus publication-overview-verified.json.
+DEP-044 remains draft for those external testing/public gates; no build, credential,
+other app, invitation or extra provider mutation occurs.

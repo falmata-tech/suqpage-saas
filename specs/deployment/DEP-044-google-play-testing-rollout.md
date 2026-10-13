@@ -22,11 +22,12 @@ in five languages. Following the owner's explicit instruction to start closed
 testing, S99.11 confirms the admitted version 5 on Alpha and submits the saved
 setup/listing/release through normal controls. The missing Advertising ID form is
 completed as No with actual binary/SDK/source evidence and independent reload.
-Google accepts the review request; fresh Console readback shows In review with
-quick checks pending. Twelve-member access/178 targeted countries are preserved,
-internal version 5 remains available and production is inactive. The historical
-stopped API read is not replayed or claimed resolved. No Google approval, closed
-availability, physical-phone result or completed enrollment is claimed. Complete
+Google accepts the review request and later publishes Alpha version 5; independent
+reload verifies Available to selected testers. Twelve-member access/178 targeted
+countries are preserved, internal version 5 remains available and production is
+inactive. The historical stopped API read is not replayed or claimed resolved.
+No production policy approval, physical-phone result or completed enrollment is
+claimed. Complete
 real-phone/OS-alert checks within closed testing before production readiness. Use the
 verified store listing and Android App Bundle for internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
@@ -641,3 +642,17 @@ docs/GOOGLE-PLAY-RELEASE.md S99.11 and private
 closed-submission-complete,advertising-id-declaration-verified}.json,
 console-setup/closed-v5-* comparison/reload receipts. Genuine enrollment/fourteen
 days, Google approval and public production access remain external gates.
+
+
+S99.11 later publication confirmation, October 12 (October 13 UTC): after the
+2bc089e review-submission record, Google publishes private Alpha release 1/version
+5. Independent reload verifies Available to selected testers; release overview
+confirms Available to testers on Google Play and internal 5 Available. Exact
+selected twelve-member access/feedback and actual joining URLs remain verified;
+Dashboard shows production Inactive and zero closed opt-ins. Earlier pending
+review receipts stay immutable. Publication does not establish phone/OS-alert
+success, completed fourteen-day enrollment, production access or general public
+policy approval. Evidence: .local/play-s99/closed-v5-start/publication-verified.json
+and console-setup/closed-v5-published-* plus publication-overview-verified.json.
+DEP-044 remains draft for those external testing/public gates; no build, credential,
+other app, invitation or extra provider mutation occurs.

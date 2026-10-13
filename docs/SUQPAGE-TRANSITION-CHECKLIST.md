@@ -4447,9 +4447,14 @@ closed test becomes the real-phone verification stage; public release stays gate
   Final protected operation assertions and 190-spec/traceability validation pass;
   create the task-scoped documentation commit after staged-scope/diff review and
   retain its actual hash/status in the private handoff and final report.
-- [ ] CURRENT external: Google's quick checks/review approval and actual closed
-  availability, then real-phone/OS-alert results and twelve genuine opt-ins for
-  fourteen continuous days. No user action can substitute for Google approval.
+- [x] Final post-submission read detects Google's completed closed publication;
+  retain the earlier In review receipts rather than rewriting their history.
+  Independent Alpha reload verifies version 5 Available to selected testers.
+  Record this later publication as a separate provider outcome after the submission
+  record commit; verify preserved access/internal/production before its scoped commit.
+- [ ] CURRENT external: actual protected-phone/OS-alert results and twelve genuine
+  closed opt-ins for fourteen continuous days, then evidence-based production
+  access and separately authorized public rollout. Availability is not enrollment.
 
 S99.10 deployment preparation: actual Linux archives, Android runtime privacy,
 normal two-locale Console reload/CDN/provenance and 190-spec validation pass.

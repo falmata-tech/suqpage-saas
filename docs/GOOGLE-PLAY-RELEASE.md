@@ -3,8 +3,8 @@
 Controlling spec: [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md).
 Current stage: version 5 is available and independently verified on internal
 testing, with twelve exact owner-supplied tester accounts eligible. Alpha version 5
-is submitted and independently verified In review. Google approval/availability,
-phone results and the fourteen-day test are pending; production is inactive. Owner
+is now published and independently verified Available to selected testers.
+Phone results and fourteen continuous days are pending; production is inactive. Owner
 confirmed a personal account created after November 13, 2023, and has now provided
 the new app dashboard on October 9, 2026. Developer **5256539403314542898**, app
 **4972244998230912603**, reported Play Console login and approved public store
@@ -24,7 +24,8 @@ setup forms are saved and verified. IARC is marked Completed after the reviewed
 25-answer questionnaire and regional ratings are saved/reloaded. North America
 is Teen, most regions are 12+, and PEGI shows parental guidance. Advertising ID No
 is independently saved/reloaded after actual binary/SDK/source checks. Google
-accepts the sixteen-change review request; its quick checks are pending. Protected
+accepts the sixteen-change review request and later publishes the private closed
+release; fresh reload verifies availability. Protected
 phone/notification results are closed-test work required before production readiness.
 The existing Expo APK remains available separately.
 
@@ -182,8 +183,8 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 - Google verifies the selected developer/package/app-only Admin, Expo target,
   retained signer and exact version-5 internal release. Required setup, completed
   IARC, Advertising ID No and store text/contact/images are saved/read back.
-  The twelve-member list remains selected, Alpha version 5 is In review and
-  production is inactive. Google approval, real opt-ins/phone evidence and any
+  The twelve-member list remains selected, Alpha version 5 is Available to selected
+  testers and production is inactive. Real opt-ins/phone evidence and any
   Google-requested account/device verification remain. Submission association is complete; no
   credential/signing repeat is needed.
 - FE-064/BE-052 reusable owner-demo reviewer access is verified locally and on the
@@ -194,7 +195,7 @@ Source: [new personal-account testing](https://support.google.com/googleplay/and
 - Merchant content is inferred to be public user-generated content. FE-063/BE-051
   implement and verify reporting/blocking and private moderation. Delegated visual
   acceptance, complete local gates and production schema/API/web rollout pass;
-  version 5 is available internally and in closed review; protected-phone checks remain.
+  version 5 is available internally and in closed testing; protected-phone checks remain.
   General visitor live support stays closed.
 - BE-053 deletion fulfilment is rehearsed against real local Auth/PostgreSQL/media,
   including exact-target/shared-tenant/drift/FK rollback and other-tenant preservation.
@@ -366,16 +367,14 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
 ## Next owner actions
 
 1. Check [SuqPage Publishing overview](https://play.google.com/console/u/2/developers/5256539403314542898/app/4972244998230912603/publishing)
-   for completion of Google's queued checks/review and Alpha availability. Version
-   5 is submitted; approval is not yet verified. No new build/upload or signing
-   setup is needed. The existing twelve-member list and feedback contact are saved.
-2. Once the closed test is available, each tester uses their allowlisted Google
-   account to open [Google's actual closed-test joining link](https://play.google.com/apps/testing/com.suqpage.app).
+   to inspect the actual status. Closed version 5 is now Available to selected
+   testers; the final publication and reload are verified. No new build/upload
+   or signing setup is needed. Twelve-member access and feedback are saved.
+2. Each tester can now use their allowlisted Google account to open [Google's actual closed-test joining link](https://play.google.com/apps/testing/com.suqpage.app).
    Anyone previously enrolled internally must first leave
    [the internal test](https://play.google.com/apps/internaltest/4701297357173307496),
    then join the closed test. Install/update through the link Google provides.
-   Do not send invitations until availability is confirmed. Google may temporarily
-   display **com.suqpage.app (unreviewed)** before review completes.
+   Google may temporarily display **com.suqpage.app (unreviewed)** before review completes.
 3. Test this Play-installed version on the real Android phone, including
    sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
    read receipts and real OS notifications. The native public test splits do not
@@ -390,8 +389,8 @@ android-device/. Credentials/runtime data, raw logs and screenshots stay outside
    genuine results/bug reports privately for the production-access application.
 
 Current verified count is zero opted-in closed testers. The fourteen-day clock
-has not started. Internal version 5 remains available; Alpha version 5 is In
-review, not approved or publicly published. Real-phone/OS-alert results gate
+has not started. Internal and closed Alpha version 5 are available to their
+selected testers; public production remains inactive. Real-phone/OS-alert results gate
 production readiness; internal participation, aliases and sideloads do not meet
 the closed-test requirement. No tester invitation has been sent by the agent.
 Prepared detailed instructions: .local/play-s99/closed-v5-start/tester-instructions.txt.
@@ -818,3 +817,31 @@ and console-setup/closed-v5-* before/after/reload receipts. Source remains 3cfa5
 existing full source/release gates and actual Google artifact proofs are reused.
 Only release workflow/documentation changes; native audit stays failed under its
 consumed artifact exception. Real phone/OS alerts and Google/tester gates remain.
+
+
+## S99.11 Google closed publication confirmed — October 12, 2026
+
+After review submission was recorded in 2bc089e, the final independent status
+check observes Google's expected publication. Alpha release 1/version 5 is
+Available to selected testers and persists after reload; release overview
+independently says Available to testers on Google Play. Publishing overview
+clears its pending changes and shows Last published on October 12. The same
+version-5 artifact, twelve-member selection, feedback and Google joining links
+remain verified; internal version 5 is still Available. Production remains
+Inactive, Dashboard reports zero closed opt-ins, and no installed-phone result
+or general public-policy/production-access approval is inferred.
+
+The closed test is ready for those listed Google accounts to join at
+https://play.google.com/apps/testing/com.suqpage.app. Previously enrolled internal
+testers first leave internal testing. Link propagation can take time; check the
+correct listed account and opt-out before treating an unavailable link as an app
+failure. Twelve genuine continuous opt-ins and fourteen days, real app usage,
+phone/OS-alert feedback and the production-access application remain required.
+No tester invitation is sent and no account is enrolled by the agent.
+
+Separate later provider-outcome evidence: .local/play-s99/closed-v5-start/
+publication-verified.json and console-setup/{closed-v5-published-reloaded,
+closed-v5-published-access-verified,closed-v5-publication-overview-verified,
+closed-v5-published-dashboard}.json. Updated private tester instructions and
+handoff reflect publication; initial In review receipts are retained unchanged.
+Only this status record changes; no additional Google submission or app build.

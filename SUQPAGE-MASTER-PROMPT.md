@@ -1480,11 +1480,12 @@ addresses, selected on both existing tracks, with the approved feedback contact.
 Alpha targets all 177 offered countries/regions plus Rest of World, unsynced from
 production. Following the owner's explicit closed-test start instruction, its
 version-5 release with retained English/Amharic notes is submitted through normal
-Console controls. Independent reload shows In review/Changes in review, with
-Google quick checks pending and production inactive. Google's actual joining link
-is https://play.google.com/apps/testing/com.suqpage.app; closed availability and
-Google approval remain unverified. Zero closed opt-ins are recorded; the fourteen
-days have not begun. Protected-phone/OS-alert checks take place within closed
+Console controls. Google's later publication is independently verified: Alpha
+version 5 is Available to selected testers after reload, while internal version 5
+remains available and production is inactive. The actual closed joining link is
+https://play.google.com/apps/testing/com.suqpage.app. Twelve accounts are eligible;
+zero closed opt-ins are recorded, so the fourteen days have not begun.
+Protected-phone/OS-alert checks take place within closed
 testing and gate production readiness. The historical stopped API read is not
 replayed or claimed resolved; current submission has independent Console proof.
 Production Play protection is unchanged. Internal testing is not public
@@ -1512,11 +1513,12 @@ is consumed; the native audit is not clean. Separately owner-approved version 5
 is uploaded once via EAS Submit and available on the existing private internal
 track. Google's original bundle exactly matches the approved hash; its signed
 version-5 APK verifies the existing certificate and Google source stamp. Fresh
-Console reload verifies internal availability, Alpha version 5 In review,
+Console reload verifies internal and closed Alpha version-5 availability,
 unchanged country/access decisions and existing signing/FCM/submission bindings.
 The twelve-member list is verified after the owner's append-only request. This
 is eligibility, not twelve actual closed-test opt-ins. No tester invitations,
-public rollout, Google approval or protected physical-phone result is claimed.
+public rollout, production policy approval or protected physical-phone result is
+claimed.
 The aligned local pack has 54 CRC-verified files and seven fully decoded silent
 H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
 ordered graphics and accurate AI labels; six new CDN transforms match source and
@@ -1524,8 +1526,8 @@ previous image references remain. The listing is submitted with the closed-test
 review request; no campaign is published. The available internal Play
 version is 5; physical-phone installation remains unverified. Native screen crops
 retain authentic UI; localized marketing captions do not imply every pictured
-device screen has that language. Actual phone results, Google review approval
-and closed-test opt-ins remain required.
+device screen has that language. Actual phone results, continuous closed-test
+opt-ins and production access remain required.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
@@ -1535,8 +1537,8 @@ exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
 focused evidence, delegated visual acceptance and complete gates pass; committed
-web/schema/API rollout is verified. Closed-review approval, real testing and
-public Play rollout remain pending.
+web/schema/API and private closed Play publication are verified. Real testing,
+production access and public Play rollout remain pending.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
@@ -2321,10 +2323,11 @@ passes independent Google original-file hash, signed APK certificate/source-stam
 and fresh Console availability checks. Exact twelve-member tester eligibility is
 verified after the owner's append-only request. Under the later explicit start
 instruction, Alpha version 5 and saved setup/listings are submitted for review;
-Google reload verifies In review and zero opt-ins. Protected-phone/OS alerts
-are closed-test work required before production readiness. Google approval,
-closed availability and fourteen continuous days remain unverified; no replacement
-installed app is claimed.
+Google first verifies In review, then independently publishes closed version 5
+Available to selected testers. Twelve-member access and internal 5 are preserved;
+zero opt-ins are recorded. Protected-phone/OS alerts and fourteen continuous days
+are closed-test work required before production readiness; no actual installed
+phone result, production access or public release is claimed.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the

@@ -8,8 +8,9 @@ testers or make the app publicly available. Keep the existing name/package.
 Current connection/release state, October 12, 2026: existing credentials and signing
 remain connected; version 5 is verified Available on private internal testing.
 Twelve owner-supplied accounts are eligible after exact saved-membership checks.
-Alpha version 5 is submitted and verified In review. Google approval, actual
-closed availability/opt-ins and phone checks remain; production is inactive.
+Alpha version 5 is now published and independently verified Available to selected
+testers. Twelve accounts are eligible; actual opt-ins/phone checks remain and
+production is inactive.
 See [verified release evidence](GOOGLE-PLAY-RELEASE.md) before further operations.
 
 ## 1. Create the app entry
@@ -33,8 +34,8 @@ policy approval is claimed. Owned read edits are deleted. All required setup for
 are saved/read back; IARC is marked Completed after its 25-answer summary is saved.
 The policy is live in five languages. The discovered Advertising ID declaration
 is saved as No after actual binary/SDK/source evidence, and the sixteen-change
-closed-test review request is accepted and independently reloaded. Google checks
-and review approval, closed availability/opt-ins, protected-phone testing and any
+closed-test review request is accepted and independently reloaded. Google's later
+Alpha publication is independently verified; actual opt-ins, phone testing and any
 remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
