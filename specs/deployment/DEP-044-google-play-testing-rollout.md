@@ -18,13 +18,16 @@ developer/canonical-package Admin grant and existing Play signing identity are
 independently verified. Version 5 is available on internal testing; required Console
 setup forms, including the completed 25-answer IARC summary, are saved/reloaded.
 Actual ratings are Teen/12+ (PEGI parental guidance). S99.4 catalog policy is live
-in five languages. Google unlocks closed-track setup; Send app for review is
-disabled until the remaining track steps are complete. No Google approval is claimed.
-S99.5 subsequently saves Alpha's 178 offered country/region rows and one inactive
-version-3 draft, verified by Console reload/preview. Final independent API
-comparison awaits explicit owner direction after automatic approval review blocks
-a fresh read edit; no Google review submission or closed activation is claimed.
-Protected-phone testing and reviewed closed/public rollout are pending. Use the
+in five languages. Following the owner's explicit instruction to start closed
+testing, S99.11 confirms the admitted version 5 on Alpha and submits the saved
+setup/listing/release through normal controls. The missing Advertising ID form is
+completed as No with actual binary/SDK/source evidence and independent reload.
+Google accepts the review request; fresh Console readback shows In review with
+quick checks pending. Twelve-member access/178 targeted countries are preserved,
+internal version 5 remains available and production is inactive. The historical
+stopped API read is not replayed or claimed resolved. No Google approval, closed
+availability, physical-phone result or completed enrollment is claimed. Complete
+real-phone/OS-alert checks within closed testing before production readiness. Use the
 verified store listing and Android App Bundle for internal testing followed by the required
 closed test before applying for public access. Existing Expo APK distribution is
 not a Google Play release and does not start the closed-test clock.
@@ -68,9 +71,16 @@ not a Google Play release and does not start the closed-test clock.
   them; keep production/open availability unchanged and do not sync Alpha with
   production. Retain the exact previous availability, artifact and other-track
   state, inspect normal Console confirmation, and independently verify readback.
-  The draft must not be rolled out or sent for review until rating/setup and the
-  protected-phone workflow/notification gate pass. Preparation does not start a
-  test, enroll users, claim phone evidence or authorize public release.
+  Initial preparation did not authorize review or rollout. The owner's subsequent
+  explicit instruction to start closed testing authorizes replacing the Alpha
+  draft's version 3 with the already admitted version 5, confirming that private
+  release and submitting the saved SuqPage setup/listing/release for Google review.
+  Reuse the exact twelve-member list and retained country settings; preserve
+  internal/production/open tracks, signing, credentials and billing. Complete
+  protected-phone workflows/OS alerts during the closed test and require their
+  actual evidence before production readiness; never infer phone success from
+  Console submission. This phase change does not authorize public release,
+  invitations, fabricated enrollment, another build or replay of the stopped API read.
 - Keep Suqpage / com.suqpage.app, @falmatad/suqpage and the existing live API/Auth
   target. The production build profile produces an AAB; submission defaults to
   internal draft. A profile named production does not authorize public rollout.
@@ -170,9 +180,16 @@ existing bundle/signing identity and private tester list, and verify the saved
 countries, draft status and unchanged internal/production/open tracks. Do not
 send for review, activate the closed release or invent a physical-phone result.
 
+GIVEN the owner's explicit closed-test start instruction and the verified version-5
+artifact WHEN confirming Alpha and requesting Google review THEN preserve the
+exact artifact, twelve-member access and other-track before-state, independently
+verify Google's actual pending/available state, and record protected-phone tests
+as outstanding work within closed testing. Require those results before claiming
+production readiness. Do not invent Google approval or a test joining link.
+
 GIVEN a saved Alpha draft without protected-phone evidence WHEN preparing the
 remaining handoff THEN distinguish draft preparation from Google review and
-active distribution, and retain the real-phone gate before rollout. Missing
+active distribution, and retain the real-phone gate before production readiness. Missing
 testers do not prevent draft preparation; they do prevent claiming the minimum
 12 genuine continuous opt-ins or the 14-day requirement is satisfied.
 
@@ -205,6 +222,7 @@ halt test rollout on failure and issue a verified higher-version fix when needed
 | --- | --- |
 | App/package/profile contract | Existing mobile build/release safety tests; Console app identity readback |
 | Listing size and asset integrity | Character limits, actual screenshot provenance and official dimensions |
+| Advertising ID declaration | Actual admitted APK/AAB permission and compiled SDK/API checks plus mobile source/dependencies; normal exact-app form backup, factual answer and independent saved readback; sponsor display or push token use does not establish advertising-ID use |
 | Fresh admission | Locked audit, exact exception if necessary, archive/runtime private-key scans |
 | Actual AAB compatibility | Package/version/API/upload signature, bundle configuration and native 16-KB alignment |
 | Play-delivered application | Actual APK signer/version, verified HTTPS links and installed update |
@@ -604,3 +622,22 @@ and console-setup/v5-* / twelve-* reloads. Prior source/full release gates persi
 for unchanged 3cfa577; protected phone/OS alerts, outstanding S99.5 API direction,
 actual twelve-testers/fourteen-day closed enrollment and reviewed rollout remain.
 DEP-044 stays draft; the consumed tooling waiver does not admit another build.
+
+
+S99.11 verification, October 12 (October 13 UTC): the owner explicitly requests
+closed-test start. Normal exact-app/account controls replace only Alpha's version-3
+draft bundle with the already-inspected Google version 5, preserving name/notes,
+all 178 country rows and twelve-member access/feedback. The newly required
+Advertising ID declaration is No, grounded in actual manifests, seven DEX files
+and mobile source/dependencies, then saved and reloaded. The enabled sixteen-change
+submission/final confirmation are accepted; fresh overview/track/Dashboard reads
+show In review, internal 5 Available, production Inactive and zero opt-ins. Actual
+joining URLs come from Google's visible controls; availability/approval are not
+claimed. Real-phone/OS-alert work is within closed testing and required before
+production readiness. No other app, new artifact, credential/billing change,
+invitation or old stopped API edit is touched. Evidence and current instructions:
+docs/GOOGLE-PLAY-RELEASE.md S99.11 and private
+.local/play-s99/closed-v5-start/{review-submission-verified,
+closed-submission-complete,advertising-id-declaration-verified}.json,
+console-setup/closed-v5-* comparison/reload receipts. Genuine enrollment/fourteen
+days, Google approval and public production access remain external gates.

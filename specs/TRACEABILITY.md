@@ -1662,3 +1662,22 @@ and console-setup/v5-* / twelve-* reloads. Prior source/full release gates persi
 for unchanged 3cfa577; protected phone/OS alerts, outstanding S99.5 API direction,
 actual twelve-testers/fourteen-day closed enrollment and reviewed rollout remain.
 DEP-044 stays draft; the consumed tooling waiver does not admit another build.
+
+
+S99.11 owner-authorized closed-test start, October 12 (October 13 UTC): DEP-044
+records the explicit phase change; real-phone/OS-alert checks occur during closed
+testing and gate production readiness. Exact Google library version 5 replaces
+only Alpha's prior draft artifact through normal controls; name/two-language notes
+and all 178 country rows are retained. The missing Advertising ID declaration is
+No after actual APK/AAB/seven-DEX/source/dependency checks and normal saved reload.
+Google accepts the enabled sixteen-change review request; independent overview,
+Alpha and Dashboard readback show In review, internal 5 Available, production
+Inactive and zero closed opt-ins. Tester selection/feedback fields match; no
+other app, build/upload/signing/billing change, invitation or old API replay occurs.
+Google's actual closed joining link is recorded without claiming availability,
+Google approval, phone success or fourteen-day completion. Evidence:
+.local/play-s99/closed-v5-start/{review-submission-verified,
+advertising-id-declaration-verified,closed-submission-complete,
+join-links-from-console}.json plus console-setup/closed-v5-* reload/comparison
+receipts. docs/GOOGLE-PLAY-RELEASE.md records the current status and tester steps;
+DEP-044 remains draft pending actual Google/tester/phone/public gates.

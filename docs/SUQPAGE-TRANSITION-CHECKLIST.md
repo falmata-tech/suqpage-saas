@@ -4395,10 +4395,61 @@ Master sections 1/3/15/18/19/22 are affected. Earlier release gates persist.
   Independent reload verifies the exact twelve-member union and both existing
   internal/Alpha list selections; other lists and Alpha's version-3 inactive
   draft/178 countries remain unchanged. No emails or opt-ins are claimed.
-- [ ] CURRENT: actual protected Play-phone workflows and OS notification proof,
-  outstanding S99.5 API-read direction, then separately reviewed closed-test
-  confirmation/review. Twelve eligible addresses do not start the fourteen-day
-  clock; twelve real testers must join and remain continuously opted in.
+- [ ] Actual protected Play-phone workflows and OS notification proof remain
+  required before production readiness; complete them within the owner-requested
+  closed test below. S99.5's stopped API read is not replayed or claimed resolved.
+
+### S99.11 — Start the owner-authorized private closed test (DEP-044)
+
+The owner explicitly requests the closed test after the internal/closed
+distinction is explained. Classify as one-time operations; source remains
+3cfa577, already admitted version 5. Master sections 15/22 are affected. The
+closed test becomes the real-phone verification stage; public release stays gated.
+
+- [x] Record authorization and phase order; retain all twelve genuine addresses
+  privately. No new build, fee, public release, invitation or stopped API replay.
+- [x] Fresh exact-app/account Alpha/internal/production/open/setup/
+  tester/country readback and private before-state; verify admitted version-5
+  artifact and unchanged signer before any provider write.
+- [x] Replace only Alpha's version-3 draft bundle with admitted version 5 through
+  normal Console controls; inspect enabled preview/warnings and exact release.
+  Existing English/Amharic notes/name are unchanged; the sole warning is the same
+  optional missing deobfuscation file. Google confirms the change has been saved.
+- [x] Confirm Alpha privately and inspect Google's complete review submission.
+  Google saves version 5 and exposes sixteen scoped review changes; quick checks
+  identify one missing Advertising ID declaration, not a binary/build failure.
+- [x] Complete the discovered required Advertising ID declaration from
+  actual APK/AAB permissions, compiled SDK/API and source evidence, retain the
+  form before-state and verify the saved answer after reload. Sponsor display
+  and notification/device tokens are not advertising-ID use.
+  Actual AAB/APK manifests lack AD_ID; all seven DEX files lack Advertising ID,
+  Google Mobile Ads/Firebase Analytics APIs, and mobile source/dependencies have
+  no advertising-ID code. The factual No answer persists after independent reload.
+- [x] Submit only the verified saved SuqPage review scope when Google's own quick
+  checks enable its normal action;
+  submit only the saved SuqPage declarations/listings and that closed release.
+  The blocking issue is cleared; normal enabled submission and final confirmation
+  are accepted. Fresh reload verifies Changes in review; Google's quick checks
+  still run and no review approval or tester availability is inferred.
+- [x] Independently reload Google's review/track state, preserved internal version
+  5 and twelve-member access; obtain the actual joining link when available.
+  Alpha version 5 is In review; internal 5 remains Available. All 178 country
+  rows and tester/feedback fields match the protected before-state. The normal
+  Console exposes https://play.google.com/apps/testing/com.suqpage.app, with actual
+  availability unverified. Dashboard shows In review/production inactive/zero opt-ins.
+- [x] Record scoped evidence and tester instructions. Keep actual Google approval,
+  phone workflows/OS alerts, opt-ins and fourteen continuous days unclaimed until
+  verified; no production/public availability is inferred from review submission.
+  Private instructions include leaving internal testing before closed enrollment;
+  no invitations are sent. Provider/evidence and documentation checks are below.
+- [x] Verify final protected evidence, validate updated specs/traceability and
+  prepare only the scoped release record, preserving the pre-existing deno.lock.
+  Final protected operation assertions and 190-spec/traceability validation pass;
+  create the task-scoped documentation commit after staged-scope/diff review and
+  retain its actual hash/status in the private handoff and final report.
+- [ ] CURRENT external: Google's quick checks/review approval and actual closed
+  availability, then real-phone/OS-alert results and twelve genuine opt-ins for
+  fourteen continuous days. No user action can substitute for Google approval.
 
 S99.10 deployment preparation: actual Linux archives, Android runtime privacy,
 normal two-locale Console reload/CDN/provenance and 190-spec validation pass.

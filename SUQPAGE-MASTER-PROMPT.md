@@ -1472,17 +1472,21 @@ and reloaded: ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, PEGI parenta
 guidance. Possible minor/moderate seller language is disclosed; dedicated chat
 moderation and current-user-location broadcasting are not claimed. Saved shop
 coordinates remain separately disclosed. Google marks IARC Completed but its
-certificate ID is still unassigned. Dashboard unlocks closed-track setup;
-Send app for review remains disabled until the remaining track steps are complete.
-The SuqPage internal list now has ten verified addresses and an actual join link.
-Alpha closed-test access and feedback email are saved. Under the owner's later
-autonomous-preparation instruction, all 177 offered countries/regions plus Rest
-of World are saved on Alpha, unsynced from production, and version 3 is saved as
-an inactive draft with English/Amharic notes. Fresh Console reload and its release
-preview verify those states; independent final API verification awaits owner
-direction after automatic approval review blocked a fresh temporary read edit.
-No new build, signer, Google review submission or enrollment is claimed. Protected
-phone workflows/system notifications still gate actual closed rollout.
+certificate ID is still unassigned. Required setup is saved, including Advertising
+ID No verified against actual version-5 APK/AAB permissions, all seven compiled
+DEX files and mobile source/dependencies. Sponsor display and notification tokens
+do not imply advertising-ID use. The SuqPage list contains twelve verified
+addresses, selected on both existing tracks, with the approved feedback contact.
+Alpha targets all 177 offered countries/regions plus Rest of World, unsynced from
+production. Following the owner's explicit closed-test start instruction, its
+version-5 release with retained English/Amharic notes is submitted through normal
+Console controls. Independent reload shows In review/Changes in review, with
+Google quick checks pending and production inactive. Google's actual joining link
+is https://play.google.com/apps/testing/com.suqpage.app; closed availability and
+Google approval remain unverified. Zero closed opt-ins are recorded; the fourteen
+days have not begun. Protected-phone/OS-alert checks take place within closed
+testing and gate production readiness. The historical stopped API read is not
+replayed or claimed resolved; current submission has independent Console proof.
 Production Play protection is unchanged. Internal testing is not public
 publication or policy approval; see docs/GOOGLE-PLAY-CONNECTION.md.
 S99.10 prepares five-language social posters, short silent videos, captions,
@@ -1508,19 +1512,20 @@ is consumed; the native audit is not clean. Separately owner-approved version 5
 is uploaded once via EAS Submit and available on the existing private internal
 track. Google's original bundle exactly matches the approved hash; its signed
 version-5 APK verifies the existing certificate and Google source stamp. Fresh
-Console reload verifies availability, preserved Alpha version-3 inactive draft
-and unchanged signing/FCM/submission bindings. The owner's two subsequently
-supplied, spelling-confirmed Google accounts extend the existing list to twelve;
-exact membership and existing internal/Alpha selections are independently
-reloaded. This is eligibility, not twelve actual closed-test opt-ins. No emails,
-closed/public rollout, Google review or protected physical-phone result is claimed.
+Console reload verifies internal availability, Alpha version 5 In review,
+unchanged country/access decisions and existing signing/FCM/submission bindings.
+The twelve-member list is verified after the owner's append-only request. This
+is eligibility, not twelve actual closed-test opt-ins. No tester invitations,
+public rollout, Google approval or protected physical-phone result is claimed.
 The aligned local pack has 54 CRC-verified files and seven fully decoded silent
 H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
 ordered graphics and accurate AI labels; six new CDN transforms match source and
-previous image references remain. No Google review or campaign is submitted. The available internal Play
+previous image references remain. The listing is submitted with the closed-test
+review request; no campaign is published. The available internal Play
 version is 5; physical-phone installation remains unverified. Native screen crops
 retain authentic UI; localized marketing captions do not imply every pictured
-device screen has that language. Protected-phone and closed-test gates remain.
+device screen has that language. Actual phone results, Google review approval
+and closed-test opt-ins remain required.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
@@ -1530,7 +1535,8 @@ exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
 focused evidence, delegated visual acceptance and complete gates pass; committed
-web/schema/API rollout is verified. Reviewed closed/public Play rollout remains pending.
+web/schema/API rollout is verified. Closed-review approval, real testing and
+public Play rollout remain pending.
 
 S50 adds scoped owner support attachments, business-logo upload/removal, inquiry
 option snapshots and corrected phone/email contact actions to the local candidate.
@@ -2313,8 +2319,12 @@ AAB is built and independently inspected with all five locale headings present
 in actual Hermes bytecode. Its separately approved upload/internal activation
 passes independent Google original-file hash, signed APK certificate/source-stamp
 and fresh Console availability checks. Exact twelve-member tester eligibility is
-verified after the owner's append-only request. Installed-device/OS alerts and
-closed Google rollout remain separate; no replacement installed app is claimed.
+verified after the owner's append-only request. Under the later explicit start
+instruction, Alpha version 5 and saved setup/listings are submitted for review;
+Google reload verifies In review and zero opt-ins. Protected-phone/OS alerts
+are closed-test work required before production readiness. Google approval,
+closed availability and fourteen continuous days remain unverified; no replacement
+installed app is claimed.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the
@@ -2324,7 +2334,7 @@ isolated acceptance workflows, release stages, private backup/migration rehearsa
 and exact Linux artifact. The owner approved S62's one-artifact Expo internal-testing exception for the two
 documented tooling advisories, then renewed one additional internal APK for the
 latest approved source in S67. The audit remains failed/reportable. Signing, APK
-inspection and native-device gates remain required; Google Play is deferred. Rollout evidence and
+inspection and native-device gates remain required; public Google Play release is pending. Rollout evidence and
 current publication state: `docs/SUQPAGE-RELEASE-2026-10-06.md`.
 
 FE-054 adds `test:storefront-accent` to the full check: validation, 4,096 palette
