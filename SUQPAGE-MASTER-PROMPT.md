@@ -1504,20 +1504,28 @@ No cloud job or payment is incurred by this local bundle. Existing signing,
 legacy and FCM bindings remain identical. Actual bundle privacy/API-36/permissions,
 canonical HTTPS, Firebase client resources, all five compiled headings and fifty
 64-bit native libraries at 16-KB alignment pass. Its one-artifact tooling exception
-is consumed; the native audit is not clean. Version 5 is ready but has not been
-uploaded to Play or validated on a physical phone.
+is consumed; the native audit is not clean. Separately owner-approved version 5
+is uploaded once via EAS Submit and available on the existing private internal
+track. Google's original bundle exactly matches the approved hash; its signed
+version-5 APK verifies the existing certificate and Google source stamp. Fresh
+Console reload verifies availability, preserved Alpha version-3 inactive draft
+and unchanged signing/FCM/submission bindings. The owner's two subsequently
+supplied, spelling-confirmed Google accounts extend the existing list to twelve;
+exact membership and existing internal/Alpha selections are independently
+reloaded. This is eligibility, not twelve actual closed-test opt-ins. No emails,
+closed/public rollout, Google review or protected physical-phone result is claimed.
 The aligned local pack has 54 CRC-verified files and seven fully decoded silent
 H.264 videos. Independent normal Console reload verifies the aligned English/Amharic drafts,
 ordered graphics and accurate AI labels; six new CDN transforms match source and
-previous image references remain. No Google review or campaign is submitted. The installed Play
-version remains 3. Native screen crops
+previous image references remain. No Google review or campaign is submitted. The available internal Play
+version is 5; physical-phone installation remains unverified. Native screen crops
 retain authentic UI; localized marketing captions do not imply every pictured
 device screen has that language. Protected-phone and closed-test gates remain.
 The required 12-testers/14-day closed test and production-access application remain
 external rollout steps. Regular product authentication remains email-code based.
 FE-063/BE-051 implement deployed web/API reporting/blocking through pure commands,
-a private PostgreSQL report port and web/native adapters; native version 3 is in
-active internal testing, with actual protected-phone/closed distribution checks pending. Discovery
+a private PostgreSQL report port and web/native adapters; native version 5 is
+available in internal testing, with actual protected-phone/closed distribution checks pending. Discovery
 exclusions run before counts, fuzzy candidate
 limits and pagination and vary the public cache. Native preferences use bounded
 per-business device storage; no new SDK or managed provider is added. Local
@@ -2302,8 +2310,11 @@ The owner approves the actual layouts; full source/release/acceptance and packag
 Linux artifact gates pass. Web publication is independently verified at source 3cfa577, including all five
 live-language Market/About/account phone layouts. The exact approved version-5
 AAB is built and independently inspected with all five locale headings present
-in actual Hermes bytecode. Its upload, installed-device/OS alerts and closed
-Google rollout remain separate; no replacement installed app is claimed.
+in actual Hermes bytecode. Its separately approved upload/internal activation
+passes independent Google original-file hash, signed APK certificate/source-stamp
+and fresh Console availability checks. Exact twelve-member tester eligibility is
+verified after the owner's append-only request. Installed-device/OS alerts and
+closed Google rollout remain separate; no replacement installed app is claimed.
 
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the

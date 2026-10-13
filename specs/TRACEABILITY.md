@@ -1642,3 +1642,23 @@ protected-phone workflows/OS alerts, S99.5 API direction and genuine 12-testers/
 .local/play-s99/narrative-s9910/{local-build-exit,aab-inspection,verified-artifact,
 aab-exception-consumed}.json. There is no managed cloud build ID for this local
 artifact. Only SuqPage is managed; no other app is changed or Git history pushed.
+
+
+S99.10 internal rollout and tester expansion, October 12 (October 13 UTC): separate
+owner-approved digest 9e220cff5b4c58e780c07b3c82b6dd4254137d20d8c4d446d46a60f432ec8e46
+precedes one exact-file EAS submission 590a091f-e851-4a93-a161-68c5a24917d9,
+terminal FINISHED. Independent normal Console original-file hash matches the
+admitted AAB; actual Google-signed APK verifies com.suqpage.app/version 5,
+existing certificate and Google source stamp. Fresh reload verifies internal
+release 2 Available, original ten members and Alpha version 3 Draft. Subsequent
+owner-requested append-only expansion independently verifies the exact twelve
+members after reload and unchanged internal/Alpha list selection/178 countries.
+Expo submission/signing/FCM/legacy metadata before/after matches. No other app,
+closed/public rollout, Google app review, emails or billing changes occur.
+Operational contract/proof: docs/GOOGLE-PLAY-RELEASE.md, S99.10 internal update;
+private evidence .local/play-s99/narrative-s9910/{play-v5-internal-complete,
+google-v5-artifact-verified,google-v5-signed-apk-verified,twelve-testers-complete}.json
+and console-setup/v5-* / twelve-* reloads. Prior source/full release gates persist
+for unchanged 3cfa577; protected phone/OS alerts, outstanding S99.5 API direction,
+actual twelve-testers/fourteen-day closed enrollment and reviewed rollout remain.
+DEP-044 stays draft; the consumed tooling waiver does not admit another build.

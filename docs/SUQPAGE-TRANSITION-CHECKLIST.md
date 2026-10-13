@@ -4368,10 +4368,37 @@ Master sections 1/3/15/18/19/22 are affected. Earlier release gates persist.
   compiled-five-language/16-KB checks; 1,499 files and fifty 64-bit libraries are
   verified. Exception is consumed; cloud job does not exist, payment is zero and
   signing/legacy/FCM metadata is preserved.
-- [ ] CURRENT: separately reviewed Play upload/internal activation of this exact
-  version-5 artifact; do not infer submission from the build-only approval.
-  Physical-phone alerts,
-  blocked API direction, genuine testers and reviewed closed/public gates remain.
+- [x] Obtain separate owner approval for exact version-5 upload and private
+  internal-test activation, digest
+  9e220cff5b4c58e780c07b3c82b6dd4254137d20d8c4d446d46a60f432ec8e46.
+  DEP-044; same ten testers, no closed/public rollout, new build or paid change.
+- [x] Retain fresh exact-app internal/Alpha/tester before-state and
+  independently reverify existing Expo submission binding and artifact hash.
+- [x] Upload the exact AAB once through official EAS Submit as internal/draft;
+  terminal submission 590a091f-e851-4a93-a161-68c5a24917d9 is FINISHED. Google's
+  normal original-file download for artifact 4860240074172382563 exactly matches
+  the approved SHA-256; version 5/API 36/16-KB support are independently verified.
+- [x] Confirm only the approved private internal release through normal
+  Console controls after accepted-artifact and other-track preservation checks.
+- [x] Independently verify version 5 available to the same ten internal testers,
+  preserved Alpha draft/other tracks and signing; record scoped rollout evidence.
+  Fresh reload verifies release 2 Available; Google's signed APK is package
+  com.suqpage.app/version 5 with the existing certificate and verified Google
+  source stamp. Alpha remains version 3 Draft; Expo credential metadata matches.
+  Physical-phone alerts, blocked API direction, genuine testers and reviewed
+  closed/public gates remain separate.
+- [x] After the separately approved internal update is verified, add the owner's
+  two newly supplied, spelling-confirmed Google accounts to the existing SuqPage
+  tester list. Retain private ten-member before-state; verify twelve-member
+  membership and unchanged internal/Alpha list selection. No emails or closed
+  activation are implied; actual opt-ins and fourteen continuous days remain.
+  Independent reload verifies the exact twelve-member union and both existing
+  internal/Alpha list selections; other lists and Alpha's version-3 inactive
+  draft/178 countries remain unchanged. No emails or opt-ins are claimed.
+- [ ] CURRENT: actual protected Play-phone workflows and OS notification proof,
+  outstanding S99.5 API-read direction, then separately reviewed closed-test
+  confirmation/review. Twelve eligible addresses do not start the fourteen-day
+  clock; twelve real testers must join and remain continuously opted in.
 
 S99.10 deployment preparation: actual Linux archives, Android runtime privacy,
 normal two-locale Console reload/CDN/provenance and 190-spec validation pass.

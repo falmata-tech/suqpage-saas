@@ -5,6 +5,12 @@ release checks, Codex can run EAS Submit to upload the exact admitted AAB into a
 internal draft. Uploading a binary does not complete Google's declarations, enroll
 testers or make the app publicly available. Keep the existing name/package.
 
+Current connection/release state, October 12, 2026: existing credentials and signing
+remain connected; version 5 is verified Available on private internal testing.
+Twelve owner-supplied accounts are eligible after exact saved-membership checks.
+Alpha remains version 3 Draft. See [verified release evidence](GOOGLE-PLAY-RELEASE.md)
+before any further operation; protected-phone and reviewed closed-test gates remain.
+
 ## 1. Create the app entry
 
 **Owner completed this step and provided the dashboard on October 9, 2026.**
@@ -18,14 +24,15 @@ testers or make the app publicly available. Keep the existing name/package.
 Google's API independently verifies the selected developer, **com.suqpage.app**
 grant, actual store title **SuqPage**, default **en-US**, saved English/Amharic
 store descriptions, selected support email/website and all seven uploaded images.
-Version 3 is now independently verified on active internal testing, with the exact AAB hash,
-existing Google signing certificate and other tracks empty. Metadata remains saved
+The original version-3 admission independently verified active internal testing,
+the exact AAB hash, existing Google signing certificate and then-empty other tracks.
+The current version-5 update and Alpha draft are recorded above. Metadata remains saved
 under Google's required automatic-review behavior; no public app publication or
 policy approval is claimed. Owned read edits are deleted. All required setup forms
 are saved/read back; IARC is marked Completed after its 25-answer summary is saved.
 The policy is live in five languages, and Google unlocks closed-track setup.
 Publishing-review submission remains disabled until remaining track steps are complete.
-Protected-phone testing, country/release selection and any
+Protected-phone testing, closed-release confirmation/review and any
 remaining account/device verification remain. The `/u/2/` part
 selects a browser Google-account slot; check the account
 avatar rather than treating that number as proof of identity. The reported Google
